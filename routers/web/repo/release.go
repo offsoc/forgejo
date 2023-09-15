@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
+	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/log"
@@ -491,9 +492,44 @@ func NewReleasePost(ctx *context.Context) {
 		return
 	}
 
-	var attachmentUUIDs []string
+	attachmentChanges := make(container.Set[*releaseservice.AttachmentChange])
+	attachmentChangesByID := make(map[string]*releaseservice.AttachmentChange)
+
 	if setting.Attachment.Enabled {
-		attachmentUUIDs = form.Files
+		for _, uuid := range form.Files {
+			attachmentChanges.Add(&releaseservice.AttachmentChange{
+				Action: "add",
+				Type:   "attachment",
+				UUID:   uuid,
+			})
+		}
+
+		const namePrefix = "attachment-new-name-"
+		const exturlPrefix = "attachment-new-exturl-"
+		for k, v := range ctx.Req.Form {
+			isNewName := strings.HasPrefix(k, namePrefix)
+			isNewExturl := strings.HasPrefix(k, exturlPrefix)
+			if isNewName || isNewExturl {
+				var id string
+				if isNewName {
+					id = k[len(namePrefix):]
+				} else if isNewExturl {
+					id = k[len(exturlPrefix):]
+				}
+				if _, ok := attachmentChangesByID[id]; !ok {
+					attachmentChangesByID[id] = &releaseservice.AttachmentChange{
+						Action: "add",
+						Type:   "external",
+					}
+					attachmentChanges.Add(attachmentChangesByID[id])
+				}
+				if isNewName {
+					attachmentChangesByID[id].Name = v[0]
+				} else if isNewExturl {
+					attachmentChangesByID[id].ExternalURL = v[0]
+				}
+			}
+		}
 	}
 
 	rel, err := repo_model.GetRelease(ctx, ctx.Repo.Repository.ID, form.TagName)
@@ -553,7 +589,7 @@ func NewReleasePost(ctx *context.Context) {
 			IsTag:            false,
 		}
 
-		if err = releaseservice.CreateRelease(ctx.Repo.GitRepo, rel, attachmentUUIDs, msg); err != nil {
+		if err = releaseservice.CreateRelease(ctx.Repo.GitRepo, rel, msg, attachmentChanges.Values()); err != nil {
 			ctx.Data["Err_TagName"] = true
 			switch {
 			case repo_model.IsErrReleaseAlreadyExist(err):
@@ -562,6 +598,8 @@ func NewReleasePost(ctx *context.Context) {
 				ctx.RenderWithErr(ctx.Tr("repo.release.tag_name_invalid"), tplReleaseNew, &form)
 			case models.IsErrProtectedTagName(err):
 				ctx.RenderWithErr(ctx.Tr("repo.release.tag_name_protected"), tplReleaseNew, &form)
+			case repo_model.IsErrInvalidExternalURL(err):
+				ctx.RenderWithErr(ctx.Tr("repo.release.invalid_external_url", err.(repo_model.ErrInvalidExternalURL).ExternalURL), tplReleaseNew, &form)
 			default:
 				ctx.ServerError("CreateRelease", err)
 			}
@@ -583,9 +621,14 @@ func NewReleasePost(ctx *context.Context) {
 		rel.HideArchiveLinks = form.HideArchiveLinks
 		rel.IsTag = false
 
-		if err = releaseservice.UpdateRelease(ctx, ctx.Doer, ctx.Repo.GitRepo, rel, attachmentUUIDs, nil, nil, true); err != nil {
+		if err = releaseservice.UpdateRelease(ctx, ctx.Doer, ctx.Repo.GitRepo, rel, true, attachmentChanges.Values()); err != nil {
 			ctx.Data["Err_TagName"] = true
-			ctx.ServerError("UpdateRelease", err)
+			switch {
+			case repo_model.IsErrInvalidExternalURL(err):
+				ctx.RenderWithErr(ctx.Tr("repo.release.invalid_external_url", err.(repo_model.ErrInvalidExternalURL).ExternalURL), tplReleaseNew, &form)
+			default:
+				ctx.ServerError("UpdateRelease", err)
+			}
 			return
 		}
 	}
@@ -667,6 +710,15 @@ func EditReleasePost(ctx *context.Context) {
 	ctx.Data["prerelease"] = rel.IsPrerelease
 	ctx.Data["hide_archive_links"] = rel.HideArchiveLinks
 
+	rel.Repo = ctx.Repo.Repository
+	if err := rel.LoadAttributes(ctx); err != nil {
+		ctx.ServerError("LoadAttributes", err)
+		return
+	}
+	// TODO: If an error occurs, do not forget the attachment edits the user made
+	// when displaying the error message.
+	ctx.Data["attachments"] = rel.Attachments
+
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplReleaseNew)
 		return
@@ -674,15 +726,67 @@ func EditReleasePost(ctx *context.Context) {
 
 	const delPrefix = "attachment-del-"
 	const editPrefix = "attachment-edit-"
-	var addAttachmentUUIDs, delAttachmentUUIDs []string
-	editAttachments := make(map[string]string) // uuid -> new name
+	const newPrefix = "attachment-new-"
+	const namePrefix = "name-"
+	const exturlPrefix = "exturl-"
+	attachmentChanges := make(container.Set[*releaseservice.AttachmentChange])
+	attachmentChangesByID := make(map[string]*releaseservice.AttachmentChange)
+
 	if setting.Attachment.Enabled {
-		addAttachmentUUIDs = form.Files
+		for _, uuid := range form.Files {
+			attachmentChanges.Add(&releaseservice.AttachmentChange{
+				Action: "add",
+				Type:   "attachment",
+				UUID:   uuid,
+			})
+		}
+
 		for k, v := range ctx.Req.Form {
 			if strings.HasPrefix(k, delPrefix) && v[0] == "true" {
-				delAttachmentUUIDs = append(delAttachmentUUIDs, k[len(delPrefix):])
-			} else if strings.HasPrefix(k, editPrefix) {
-				editAttachments[k[len(editPrefix):]] = v[0]
+				attachmentChanges.Add(&releaseservice.AttachmentChange{
+					Action: "delete",
+					UUID:   k[len(delPrefix):],
+				})
+			} else {
+				isUpdatedName := strings.HasPrefix(k, editPrefix+namePrefix)
+				isUpdatedExturl := strings.HasPrefix(k, editPrefix+exturlPrefix)
+				isNewName := strings.HasPrefix(k, newPrefix+namePrefix)
+				isNewExturl := strings.HasPrefix(k, newPrefix+exturlPrefix)
+
+				if isUpdatedName || isUpdatedExturl || isNewName || isNewExturl {
+					var uuid string
+
+					if isUpdatedName {
+						uuid = k[len(editPrefix+namePrefix):]
+					} else if isUpdatedExturl {
+						uuid = k[len(editPrefix+exturlPrefix):]
+					} else if isNewName {
+						uuid = k[len(newPrefix+namePrefix):]
+					} else if isNewExturl {
+						uuid = k[len(newPrefix+exturlPrefix):]
+					}
+
+					if _, ok := attachmentChangesByID[uuid]; !ok {
+						attachmentChangesByID[uuid] = &releaseservice.AttachmentChange{
+							Type: "attachment",
+							UUID: uuid,
+						}
+						attachmentChanges.Add(attachmentChangesByID[uuid])
+					}
+
+					if isUpdatedName || isUpdatedExturl {
+						attachmentChangesByID[uuid].Action = "update"
+					} else if isNewName || isNewExturl {
+						attachmentChangesByID[uuid].Action = "add"
+					}
+
+					if isUpdatedName || isNewName {
+						attachmentChangesByID[uuid].Name = v[0]
+					} else if isUpdatedExturl || isNewExturl {
+						attachmentChangesByID[uuid].ExternalURL = v[0]
+						attachmentChangesByID[uuid].Type = "external"
+					}
+				}
 			}
 		}
 	}
@@ -692,9 +796,13 @@ func EditReleasePost(ctx *context.Context) {
 	rel.IsDraft = len(form.Draft) > 0
 	rel.IsPrerelease = form.Prerelease
 	rel.HideArchiveLinks = form.HideArchiveLinks
-	if err = releaseservice.UpdateRelease(ctx, ctx.Doer, ctx.Repo.GitRepo,
-		rel, addAttachmentUUIDs, delAttachmentUUIDs, editAttachments, false); err != nil {
-		ctx.ServerError("UpdateRelease", err)
+	if err = releaseservice.UpdateRelease(ctx, ctx.Doer, ctx.Repo.GitRepo, rel, false, attachmentChanges.Values()); err != nil {
+		switch {
+		case repo_model.IsErrInvalidExternalURL(err):
+			ctx.RenderWithErr(ctx.Tr("repo.release.invalid_external_url", err.(repo_model.ErrInvalidExternalURL).ExternalURL), tplReleaseNew, &form)
+		default:
+			ctx.ServerError("UpdateRelease", err)
+		}
 		return
 	}
 	ctx.Redirect(ctx.Repo.RepoLink + "/releases")

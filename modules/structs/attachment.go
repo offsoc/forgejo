@@ -18,10 +18,14 @@ type Attachment struct {
 	Created     time.Time `json:"created_at"`
 	UUID        string    `json:"uuid"`
 	DownloadURL string    `json:"browser_download_url"`
+	// Enum: attachment,external
+	Type string `json:"type"`
 }
 
 // EditAttachmentOptions options for editing attachments
 // swagger:model
 type EditAttachmentOptions struct {
 	Name string `json:"name"`
+	// (Can only be set if existing attachment is of external type)
+	DownloadURL string `json:"browser_download_url"`
 }

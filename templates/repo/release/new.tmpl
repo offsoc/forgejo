@@ -63,15 +63,45 @@
 				{{range .attachments}}
 					<div class="field flex-text-block" id="attachment-{{.ID}}">
 						<div class="flex-text-inline tw-flex-1">
-							<input name="attachment-edit-{{.UUID}}"  class="attachment_edit" required value="{{.Name}}">
-							<input name="attachment-del-{{.UUID}}" type="hidden" value="false">
-							<span class="ui text grey tw-whitespace-nowrap">{{ctx.Locale.TrN .DownloadCount "repo.release.download_count_one" "repo.release.download_count_few" (ctx.Locale.PrettyNumber .DownloadCount)}} · {{.Size | ctx.Locale.TrSize}}</span>
+							<div class="flex-text-inline tw-shrink-0" title="{{ctx.Locale.Tr "repo.release.type_attachment"}}">
+								{{if .ExternalURL}}
+									{{svg "octicon-link-external" 16 "tw-mr-2"}}
+								{{else}}
+									{{svg "octicon-package" 16 "tw-mr-2"}}
+								{{end}}
+							</div>
+							<input name="attachment-edit-name-{{.UUID}}" placeholder="{{ctx.Locale.Tr "repo.release.asset_name"}}" class="attachment_edit" required value="{{.Name}}">
+							<input name="attachment-del-{{.UUID}}" type="hidden"
+							value="false">
+							{{if .ExternalURL}}
+								<input name="attachment-edit-exturl-{{.UUID}}" placeholder="{{ctx.Locale.Tr "repo.release.asset_external_url"}}" class="attachment_edit" required value="{{.ExternalURL}}">
+							{{else}}
+								<span class="ui text grey tw-whitespace-nowrap tw-ml-auto tw-pl-3">{{ctx.Locale.TrN
+								.DownloadCount "repo.release.download_count_one"
+								"repo.release.download_count_few" (ctx.Locale.PrettyNumber
+								.DownloadCount)}} · {{.Size | ctx.Locale.TrSize}}</span>
+							{{end}}
 						</div>
-						<a class="ui mini compact red button remove-rel-attach" data-id="{{.ID}}" data-uuid="{{.UUID}}">
+						<a class="ui mini red button remove-rel-attach tw-ml-3" data-id="{{.ID}}" data-uuid="{{.UUID}}">
 							{{ctx.Locale.Tr "remove"}}
 						</a>
 					</div>
 				{{end}}
+				<div class="field flex-text-block tw-hidden" id="attachment-template">
+					<div class="flex-text-inline tw-flex-1">
+						<div class="flex-text-inline tw-shrink-0" title="{{ctx.Locale.Tr "repo.release.type_external_asset"}}">
+							{{svg "octicon-link-external" 16 "tw-mr-2"}}
+						</div>
+						<input name="attachment-template-new-name" placeholder="{{ctx.Locale.Tr "repo.release.asset_name"}}" class="attachment_edit">
+						<input name="attachment-template-new-exturl" placeholder="{{ctx.Locale.Tr "repo.release.asset_external_url"}}" class="attachment_edit">
+					</div>
+					<a class="ui mini red button remove-rel-attach tw-ml-3">
+						{{ctx.Locale.Tr "remove"}}
+					</a>
+				</div>
+				<a class="ui mini button tw-float-right tw-mb-4 tw-mt-2" id="add-external-link">
+					{{ctx.Locale.Tr "repo.release.add_external_asset"}}
+				</a>
 				{{if .IsAttachmentEnabled}}
 					<div class="field">
 						{{template "repo/upload" .}}

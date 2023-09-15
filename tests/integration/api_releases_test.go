@@ -347,6 +347,7 @@ func TestAPIUploadAssetRelease(t *testing.T) {
 
 		assert.EqualValues(t, "stream.bin", attachment.Name)
 		assert.EqualValues(t, 104, attachment.Size)
+		assert.EqualValues(t, "attachment", attachment.Type)
 	})
 }
 
@@ -384,4 +385,70 @@ func TestAPIGetReleaseArchiveDownloadCount(t *testing.T) {
 
 	assert.Equal(t, int64(1), release.ArchiveDownloadCount.TarGz)
 	assert.Equal(t, int64(0), release.ArchiveDownloadCount.Zip)
+}
+
+func TestAPIExternalAssetRelease(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+	session := loginUser(t, owner.LowerName)
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
+
+	r := createNewReleaseUsingAPI(t, token, owner, repo, "release-tag", "", "Release Tag", "test")
+
+	req := NewRequest(t, http.MethodPost, fmt.Sprintf("/api/v1/repos/%s/%s/releases/%d/assets?name=test-asset&external_url=https%%3A%%2F%%2Fforgejo.org%%2F", owner.Name, repo.Name, r.ID)).
+		AddTokenAuth(token)
+	resp := MakeRequest(t, req, http.StatusCreated)
+
+	var attachment *api.Attachment
+	DecodeJSON(t, resp, &attachment)
+
+	assert.EqualValues(t, "test-asset", attachment.Name)
+	assert.EqualValues(t, 0, attachment.Size)
+	assert.EqualValues(t, "https://forgejo.org/", attachment.DownloadURL)
+	assert.EqualValues(t, "external", attachment.Type)
+}
+
+func TestAPIDuplicateAssetRelease(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+	session := loginUser(t, owner.LowerName)
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
+
+	r := createNewReleaseUsingAPI(t, token, owner, repo, "release-tag", "", "Release Tag", "test")
+
+	filename := "image.png"
+	buff := generateImg()
+	body := &bytes.Buffer{}
+
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("attachment", filename)
+	assert.NoError(t, err)
+	_, err = io.Copy(part, &buff)
+	assert.NoError(t, err)
+	err = writer.Close()
+	assert.NoError(t, err)
+
+	req := NewRequestWithBody(t, http.MethodPost, fmt.Sprintf("/api/v1/repos/%s/%s/releases/%d/assets?name=test-asset&external_url=https%%3A%%2F%%2Fforgejo.org%%2F", owner.Name, repo.Name, r.ID), body).
+		AddTokenAuth(token)
+	req.Header.Add("Content-Type", writer.FormDataContentType())
+	MakeRequest(t, req, http.StatusBadRequest)
+}
+
+func TestAPIMissingAssetRelease(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+	session := loginUser(t, owner.LowerName)
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
+
+	r := createNewReleaseUsingAPI(t, token, owner, repo, "release-tag", "", "Release Tag", "test")
+
+	req := NewRequest(t, http.MethodPost, fmt.Sprintf("/api/v1/repos/%s/%s/releases/%d/assets?name=test-asset", owner.Name, repo.Name, r.ID)).
+		AddTokenAuth(token)
+	MakeRequest(t, req, http.StatusBadRequest)
 }

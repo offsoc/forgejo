@@ -122,6 +122,11 @@ func ServeAttachment(ctx *context.Context, uuid string) {
 		}
 	}
 
+	if attach.ExternalURL != "" {
+		ctx.Redirect(attach.ExternalURL)
+		return
+	}
+
 	if err := attach.IncreaseDownloadCount(ctx); err != nil {
 		ctx.ServerError("IncreaseDownloadCount", err)
 		return

@@ -111,7 +111,7 @@ func TestWebhookReleaseEvents(t *testing.T) {
 			IsDraft:      false,
 			IsPrerelease: false,
 			IsTag:        false,
-		}, nil, ""))
+		}, "", nil))
 
 		// check the newly created hooktasks
 		hookTasksLenBefore := len(hookTasks)
@@ -125,7 +125,7 @@ func TestWebhookReleaseEvents(t *testing.T) {
 
 		t.Run("UpdateRelease", func(t *testing.T) {
 			rel := unittest.AssertExistsAndLoadBean(t, &repo_model.Release{RepoID: repo.ID, TagName: "v1.1.1"})
-			assert.NoError(t, release.UpdateRelease(db.DefaultContext, user, gitRepo, rel, nil, nil, nil, false))
+			assert.NoError(t, release.UpdateRelease(db.DefaultContext, user, gitRepo, rel, false, nil))
 
 			// check the newly created hooktasks
 			hookTasksLenBefore := len(hookTasks)
@@ -157,7 +157,7 @@ func TestWebhookReleaseEvents(t *testing.T) {
 
 		t.Run("UpdateRelease", func(t *testing.T) {
 			rel := unittest.AssertExistsAndLoadBean(t, &repo_model.Release{RepoID: repo.ID, TagName: "v1.1.2"})
-			assert.NoError(t, release.UpdateRelease(db.DefaultContext, user, gitRepo, rel, nil, nil, nil, true))
+			assert.NoError(t, release.UpdateRelease(db.DefaultContext, user, gitRepo, rel, true, nil))
 
 			// check the newly created hooktasks
 			hookTasksLenBefore := len(hookTasks)

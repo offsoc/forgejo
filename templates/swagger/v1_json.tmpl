@@ -13632,8 +13632,14 @@
           },
           {
             "type": "file",
-            "description": "attachment to upload",
+            "description": "attachment to upload (this parameter is incompatible with `external_url`)",
             "name": "attachment",
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "description": "url to external asset (this parameter is incompatible with `attachment`)",
+            "name": "external_url",
             "in": "formData"
           }
         ],
@@ -19010,6 +19016,14 @@
           "format": "int64",
           "x-go-name": "Size"
         },
+        "type": {
+          "type": "string",
+          "enum": [
+            "attachment",
+            "external"
+          ],
+          "x-go-name": "Type"
+        },
         "uuid": {
           "type": "string",
           "x-go-name": "UUID"
@@ -20988,6 +21002,11 @@
       "description": "EditAttachmentOptions options for editing attachments",
       "type": "object",
       "properties": {
+        "browser_download_url": {
+          "description": "(Can only be set if existing attachment is of external type)",
+          "type": "string",
+          "x-go-name": "DownloadURL"
+        },
         "name": {
           "type": "string",
           "x-go-name": "Name"

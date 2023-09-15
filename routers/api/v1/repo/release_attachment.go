@@ -5,7 +5,10 @@ package repo
 
 import (
 	"io"
+	"mime/multipart"
 	"net/http"
+	"net/url"
+	"path"
 	"strings"
 
 	repo_model "code.gitea.io/gitea/models/repo"
@@ -179,10 +182,17 @@ func CreateReleaseAttachment(ctx *context.APIContext) {
 	//   description: name of the attachment
 	//   type: string
 	//   required: false
+	// # There is no good way to specify "either 'attachment' or 'external_url' is required" with OpenAPI
+	// # https://github.com/OAI/OpenAPI-Specification/issues/256
 	// - name: attachment
 	//   in: formData
-	//   description: attachment to upload
+	//   description: attachment to upload (this parameter is incompatible with `external_url`)
 	//   type: file
+	//   required: false
+	// - name: external_url
+	//   in: formData
+	//   description: url to external asset (this parameter is incompatible with `attachment`)
+	//   type: string
 	//   required: false
 	// responses:
 	//   "201":
@@ -205,51 +215,96 @@ func CreateReleaseAttachment(ctx *context.APIContext) {
 	}
 
 	// Get uploaded file from request
-	var content io.ReadCloser
-	var filename string
-	var size int64 = -1
+	var isForm, hasAttachmentFile, hasExternalURL bool
+	externalURL := ctx.FormString("external_url")
+	hasExternalURL = externalURL != ""
+	filename := ctx.FormString("name")
+	isForm = strings.HasPrefix(strings.ToLower(ctx.Req.Header.Get("Content-Type")), "multipart/form-data")
 
-	if strings.HasPrefix(strings.ToLower(ctx.Req.Header.Get("Content-Type")), "multipart/form-data") {
-		file, header, err := ctx.Req.FormFile("attachment")
-		if err != nil {
-			ctx.Error(http.StatusInternalServerError, "GetFile", err)
-			return
-		}
-		defer file.Close()
-
-		content = file
-		size = header.Size
-		filename = header.Filename
-		if name := ctx.FormString("name"); name != "" {
-			filename = name
-		}
+	if isForm {
+		_, _, err := ctx.Req.FormFile("attachment")
+		hasAttachmentFile = err == nil
 	} else {
-		content = ctx.Req.Body
-		filename = ctx.FormString("name")
+		hasAttachmentFile = ctx.Req.Body != nil
 	}
 
-	if filename == "" {
-		ctx.Error(http.StatusBadRequest, "CreateReleaseAttachment", "Could not determine name of attachment.")
-		return
-	}
+	if hasAttachmentFile && hasExternalURL {
+		ctx.Error(http.StatusBadRequest, "DuplicateAttachment", "'attachment' and 'external_url' are mutually exclusive")
+	} else if hasAttachmentFile {
+		var content io.ReadCloser
+		var size int64 = -1
 
-	// Create a new attachment and save the file
-	attach, err := attachment.UploadAttachment(ctx, content, setting.Repository.Release.AllowedTypes, size, &repo_model.Attachment{
-		Name:       filename,
-		UploaderID: ctx.Doer.ID,
-		RepoID:     ctx.Repo.Repository.ID,
-		ReleaseID:  releaseID,
-	})
-	if err != nil {
-		if upload.IsErrFileTypeForbidden(err) {
-			ctx.Error(http.StatusBadRequest, "DetectContentType", err)
+		if isForm {
+			var header *multipart.FileHeader
+			content, header, _ = ctx.Req.FormFile("attachment")
+			size = header.Size
+			defer content.Close()
+			if filename == "" {
+				filename = header.Filename
+			}
+		} else {
+			content = ctx.Req.Body
+			defer content.Close()
+		}
+
+		if filename == "" {
+			ctx.Error(http.StatusBadRequest, "MissingName", "Missing 'name' parameter")
 			return
 		}
-		ctx.Error(http.StatusInternalServerError, "NewAttachment", err)
-		return
-	}
 
-	ctx.JSON(http.StatusCreated, convert.ToAPIAttachment(ctx.Repo.Repository, attach))
+		// Create a new attachment and save the file
+		attach, err := attachment.UploadAttachment(ctx, content, setting.Repository.Release.AllowedTypes, size, &repo_model.Attachment{
+			Name:       filename,
+			UploaderID: ctx.Doer.ID,
+			RepoID:     ctx.Repo.Repository.ID,
+			ReleaseID:  releaseID,
+		})
+		if err != nil {
+			if upload.IsErrFileTypeForbidden(err) {
+				ctx.Error(http.StatusBadRequest, "DetectContentType", err)
+				return
+			}
+			ctx.Error(http.StatusInternalServerError, "NewAttachment", err)
+			return
+		}
+
+		ctx.JSON(http.StatusCreated, convert.ToAPIAttachment(ctx.Repo.Repository, attach))
+	} else if hasExternalURL {
+		url, err := url.Parse(externalURL)
+		if err != nil {
+			ctx.Error(http.StatusBadRequest, "InvalidExternalURL", err)
+			return
+		}
+
+		if filename == "" {
+			filename = path.Base(url.Path)
+
+			if filename == "." {
+				// Url path is empty
+				filename = url.Host
+			}
+		}
+
+		attach, err := attachment.NewExternalAttachment(ctx, &repo_model.Attachment{
+			Name:        filename,
+			UploaderID:  ctx.Doer.ID,
+			RepoID:      ctx.Repo.Repository.ID,
+			ReleaseID:   releaseID,
+			ExternalURL: url.String(),
+		})
+		if err != nil {
+			if repo_model.IsErrInvalidExternalURL(err) {
+				ctx.Error(http.StatusBadRequest, "NewExternalAttachment", err)
+			} else {
+				ctx.Error(http.StatusInternalServerError, "NewExternalAttachment", err)
+			}
+			return
+		}
+
+		ctx.JSON(http.StatusCreated, convert.ToAPIAttachment(ctx.Repo.Repository, attach))
+	} else {
+		ctx.Error(http.StatusBadRequest, "MissingAttachment", "One of 'attachment' or 'external_url' is required")
+	}
 }
 
 // EditReleaseAttachment updates the given attachment
@@ -322,8 +377,21 @@ func EditReleaseAttachment(ctx *context.APIContext) {
 		attach.Name = form.Name
 	}
 
+	if form.DownloadURL != "" {
+		if attach.ExternalURL == "" {
+			ctx.Error(http.StatusBadRequest, "EditAttachment", "existing attachment is not external")
+			return
+		}
+		attach.ExternalURL = form.DownloadURL
+	}
+
 	if err := repo_model.UpdateAttachment(ctx, attach); err != nil {
-		ctx.Error(http.StatusInternalServerError, "UpdateAttachment", attach)
+		if repo_model.IsErrInvalidExternalURL(err) {
+			ctx.Error(http.StatusBadRequest, "UpdateAttachment", err)
+		} else {
+			ctx.Error(http.StatusInternalServerError, "UpdateAttachment", err)
+		}
+		return
 	}
 	ctx.JSON(http.StatusCreated, convert.ToAPIAttachment(ctx.Repo.Repository, attach))
 }
