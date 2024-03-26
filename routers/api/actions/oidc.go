@@ -3,23 +3,44 @@ package actions
 import (
 	"crypto/ed25519"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/web"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
 type oidcRoutes struct {
-	ca ed25519.PrivateKey
+	ca                  ed25519.PrivateKey
+	jwks                []jwks
+	openIDConfiguration openIDConfiguration
 }
 
-func OIDCRoutes() *web.Route {
+type jwks struct {
+	KeyType   string `json:"kty"`
+	Algorithm string `json:"alg"`
+	Use       string `json:"use"`
+	N         string `json:"n"`
+	E         string `json:"e"`
+}
+
+type openIDConfiguration struct {
+	Issuer                           string   `json:"issuer"`
+	JwksURI                          string   `json:"jwks_uri"`
+	SubjecTypesSupported             []string `json:"subject_types_supported"`
+	ResponseTypesSupported           []string `json:"response_types_supported"`
+	ClaimsSupported                  []string `json:"claims_supported"`
+	IDTokenSigningAlgValuesSupported []string `json:"id_token_signing_alg_values_supported"`
+	ScopesSupported                  []string `json:"scopes_supported"`
+}
+
+func OIDCRoutes(prefix string) *web.Route {
 	m := web.NewRoute()
-	m.Use(ArtifactContexter())
 
 	_, caPrivateKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -28,10 +49,28 @@ func OIDCRoutes() *web.Route {
 
 	r := oidcRoutes{
 		ca: caPrivateKey,
+		jwks: []jwks{
+			{},
+		},
+		openIDConfiguration: openIDConfiguration{
+			Issuer:                 setting.AppURL + setting.AppSubURL + prefix,                       // TODO: how do i check the public domain?
+			JwksURI:                setting.AppURL + setting.AppSubURL + prefix + "/.well-known/jwks", // TODO: how do i check the public domain?
+			SubjecTypesSupported:   []string{"public", "pairwise"},
+			ResponseTypesSupported: []string{"id_token"},
+			ClaimsSupported: []string{
+				"sub", "aud", "exp", "iat", "iss", "jti", "nbf", "ref", "sha", "repository", "repository_id",
+				"repository_owner", "repository_owner_id", "enterprise", "enterprise_id", "run_id",
+				"run_number", "run_attempt", "actor", "actor_id", "workflow", "workflow_ref", "workflow_sha",
+				"head_ref", "base_ref", "event_name", "ref_type", "ref_protected", "environment",
+				"environment_node_id", "job_workflow_ref", "job_workflow_sha", "repository_visibility",
+				"runner_environment", "issuer_scope"},
+			IDTokenSigningAlgValuesSupported: []string{"RS256"},
+			ScopesSupported:                  []string{"openid"},
+		},
 	}
-
-	m.Get("/token", r.getToken)
-	m.Get("/.well-known/jwks.json", r.jwks)
+	m.Get("", ArtifactContexter(), r.getToken)
+	m.Get("/.well-known/jwks", r.getJWKS)
+	m.Get("/.well-known/openid-configuration", r.getOpenIDConfiguration)
 
 	return m
 }
@@ -71,8 +110,17 @@ func OIDCRoutes() *web.Route {
 //		"iat": 1711338435
 //	  }
 func (o oidcRoutes) getToken(ctx *ArtifactContext) {
-	task, runID, ok := validateRunID(ctx)
-	if !ok {
+	task := ctx.ActionTask
+
+	if err := task.Job.LoadRun(ctx); err != nil {
+		log.Error("Error loading run: %v", err)
+		ctx.Error(http.StatusInternalServerError, "Error loading run")
+		return
+	}
+
+	if err := task.Job.Run.LoadAttributes(ctx); err != nil {
+		log.Error("Error loading attributes: %v", err)
+		ctx.Error(http.StatusInternalServerError, "Error loading attributes")
 		return
 	}
 
@@ -83,7 +131,8 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 		repositoryVisibility = "private"
 	}
 	iat := time.Now()
-	token := jwt.NewWithClaims(jwt.SigningMethodPS256, jwt.MapClaims{
+
+	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, jwt.MapClaims{
 		"jti":                   uuid.New().String(),
 		"sub":                   fmt.Sprintf("repo:%s:ref:%s", repo, task.Job.Run.Ref),
 		"aud":                   "TODO: Allow customizing this in the query param",
@@ -92,7 +141,7 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 		"repository":            repo,
 		"repository_owner":      task.Job.Run.Repo.OwnerName,
 		"repository_owner_id":   task.Job.Run.Repo.OwnerID,
-		"run_id":                runID,
+		"run_id":                task.Job.RunID,
 		"run_number":            0, // TODO: how do i check this?
 		"run_attempt":           0, // TODO: how do i check this?
 		"repository_visibility": repositoryVisibility,
@@ -110,7 +159,7 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 		"job_workflow_ref":      fmt.Sprintf("%s/.forgejo/workflow/%s@%s", repo, task.Job.Run.WorkflowID, task.Job.Run.Ref),
 		"job_workflow_sha":      "",                                    // TODO: is this just a hash of the yaml? if so that's easy enough to calculate
 		"runner_environment":    "self-hosted",                         // not sure what this should be set to
-		"iss":                   "https://git.example.org/api/actions", // TODO: how do i check the public domain?
+		"iss":                   setting.AppURL + "/api/actions_token", // TODO: how do i check the public domain?
 		"nbf":                   iat,
 		"exp":                   iat.Add(time.Minute * 15),
 		"iat":                   iat,
@@ -129,6 +178,20 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 	})
 }
 
-func (o oidcRoutes) jwks(ctx *ArtifactContext) {
+func (o oidcRoutes) getJWKS(resp http.ResponseWriter, req *http.Request) {
+	err := json.NewEncoder(resp).Encode(o.jwks)
+	if err != nil {
+		log.Error("error encoding jwks response: ", err)
+		http.Error(resp, "error encoding jwks response", http.StatusInternalServerError)
+		return
+	}
+}
 
+func (o oidcRoutes) getOpenIDConfiguration(resp http.ResponseWriter, req *http.Request) {
+	err := json.NewEncoder(resp).Encode(o.openIDConfiguration)
+	if err != nil {
+		log.Error("error encoding jwks response: ", err)
+		http.Error(resp, "error encoding jwks response", http.StatusInternalServerError)
+		return
+	}
 }

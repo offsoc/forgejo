@@ -194,7 +194,9 @@ func NormalRoutes() *web.Route {
 	if setting.Actions.Enabled {
 		prefix := "/api/actions"
 		r.Mount(prefix, actions_router.Routes(prefix))
-		r.Mount(prefix, actions_router.OIDCRoutes()) // TODO: not sure what prefix should be used here
+
+		prefix = "/api/actions_token"
+		r.Mount(prefix, actions_router.OIDCRoutes(prefix)) // TODO: not sure what prefix should be used here
 
 		// TODO: Pipeline api used for runner internal communication with gitea server. but only artifact is used for now.
 		// In Github, it uses ACTIONS_RUNTIME_URL=https://pipelines.actions.githubusercontent.com/fLgcSHkPGySXeIFrg8W8OBSfeg3b5Fls1A1CwX566g8PayEGlg/
