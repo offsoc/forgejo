@@ -30,8 +30,8 @@ func OIDCRoutes() *web.Route {
 		ca: caPrivateKey,
 	}
 
-	m.Get("token", r.getToken)
-	m.Get(".well-known/jwks.json", r.jwks)
+	m.Get("/token", r.getToken)
+	m.Get("/.well-known/jwks.json", r.jwks)
 
 	return m
 }
@@ -112,7 +112,7 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 		"runner_environment":    "self-hosted",                         // not sure what this should be set to
 		"iss":                   "https://git.example.org/api/actions", // TODO: how do i check the public domain?
 		"nbf":                   iat,
-		"exp":                   iat.Add(time.Hour), // TODO: should this be customizable?
+		"exp":                   iat.Add(time.Minute * 15),
 		"iat":                   iat,
 	})
 
