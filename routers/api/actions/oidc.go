@@ -160,9 +160,9 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 		"job_workflow_sha":      "",                                    // TODO: is this just a hash of the yaml? if so that's easy enough to calculate
 		"runner_environment":    "self-hosted",                         // not sure what this should be set to
 		"iss":                   setting.AppURL + "/api/actions_token", // TODO: how do i check the public domain?
-		"nbf":                   iat,
-		"exp":                   iat.Add(time.Minute * 15),
-		"iat":                   iat,
+		"nbf":                   jwt.NewNumericDate(iat),
+		"exp":                   jwt.NewNumericDate(iat.Add(time.Minute * 15)),
+		"iat":                   jwt.NewNumericDate(iat),
 	})
 
 	signedJWT, err := token.SignedString(o.ca)
