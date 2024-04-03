@@ -61,6 +61,7 @@ var (
 			microcmdAuthUpdateSMTP,
 			microcmdAuthList,
 			microcmdAuthDelete,
+			microcmdAuthSyncUsers,
 		},
 	}
 
