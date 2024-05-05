@@ -154,6 +154,7 @@ type User struct {
 	DiffViewStyle       string `xorm:"NOT NULL DEFAULT ''"`
 	Theme               string `xorm:"NOT NULL DEFAULT ''"`
 	KeepActivityPrivate bool   `xorm:"NOT NULL DEFAULT false"`
+	KeepPronounsPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	EnableRepoUnitHints bool   `xorm:"NOT NULL DEFAULT true"`
 }
 
@@ -498,6 +499,16 @@ func (u *User) GetCompleteName() string {
 		return fmt.Sprintf("%s (%s)", trimmedFullName, u.Name)
 	}
 	return u.Name
+}
+
+// GetPronouns returns an empty string, if the user has set to keep his
+// pronouns private from non-logged in users, otherwise the pronouns
+// are returned.
+func (u *User) GetPronouns(signed bool) string {
+	if u.KeepPronounsPrivate && !signed {
+		return ""
+	}
+	return u.Pronouns
 }
 
 func gitSafeName(name string) string {
