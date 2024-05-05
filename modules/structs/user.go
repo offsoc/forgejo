@@ -84,6 +84,7 @@ type UserSettings struct {
 	EnableRepoUnitHints bool   `json:"enable_repo_unit_hints"`
 	// Privacy
 	HideEmail    bool `json:"hide_email"`
+	HidePronouns bool `json:"hide_pronouns"`
 	HideActivity bool `json:"hide_activity"`
 }
 
@@ -101,6 +102,7 @@ type UserSettingsOptions struct {
 	EnableRepoUnitHints *bool   `json:"enable_repo_unit_hints"`
 	// Privacy
 	HideEmail    *bool `json:"hide_email"`
+	HidePronouns *bool `json:"hide_pronouns"`
 	HideActivity *bool `json:"hide_activity"`
 }
 

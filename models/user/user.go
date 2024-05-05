@@ -152,6 +152,7 @@ type User struct {
 	DiffViewStyle       string `xorm:"NOT NULL DEFAULT ''"`
 	Theme               string `xorm:"NOT NULL DEFAULT ''"`
 	KeepActivityPrivate bool   `xorm:"NOT NULL DEFAULT false"`
+	KeepPronounsPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	EnableRepoUnitHints bool   `xorm:"NOT NULL DEFAULT true"`
 }
 

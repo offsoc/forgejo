@@ -110,6 +110,13 @@
 				</div>
 
 				<div class="field">
+					<div class="ui checkbox">
+						<label data-tooltip-content="{{ctx.Locale.Tr "settings.keep_pronouns_private_popup"}}"><strong>{{ctx.Locale.Tr "settings.keep_pronouns_private"}}</strong></label>
+						<input name="keep_pronouns_private" type="checkbox" {{if .SignedUser.KeepPronounsPrivate}}checked{{end}}>
+					</div>
+				</div>
+
+				<div class="field">
 					<div class="ui checkbox" id="keep-activity-private">
 						<label>{{ctx.Locale.Tr "settings.keep_activity_private"}}</label>
 						<input name="keep_activity_private" type="checkbox" {{if .SignedUser.KeepActivityPrivate}}checked{{end}}>
