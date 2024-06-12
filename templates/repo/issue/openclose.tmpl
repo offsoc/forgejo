@@ -2,15 +2,23 @@
 	<a class="{{if eq .State "open"}}active {{end}}item" href="{{if eq .State "open"}}{{.AllStatesLink}}{{else}}{{.OpenLink}}{{end}}">
 		{{if .PageIsMilestones}}
 			{{svg "octicon-milestone" 16 "tw-mr-2"}}
+			{{ctx.Locale.TrN .OpenCount "repo.n_open.milestones.one" "repo.n_open.milestones.few" (ctx.Locale.PrettyNumber .OpenCount)}}
 		{{else if .PageIsPullList}}
 			{{svg "octicon-git-pull-request" 16 "tw-mr-2"}}
+			{{ctx.Locale.TrN .OpenCount "repo.n_open.pulls.one" "repo.n_open.pulls.few" (ctx.Locale.PrettyNumber .OpenCount)}}
 		{{else}}
 			{{svg "octicon-issue-opened" 16 "tw-mr-2"}}
+			{{ctx.Locale.TrN .OpenCount "repo.n_open.issues.one" "repo.n_open.issues.few" (ctx.Locale.PrettyNumber .OpenCount)}}
 		{{end}}
-		{{ctx.Locale.PrettyNumber .OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
 	</a>
 	<a class="{{if eq .State "closed"}}active {{end}}item" href="{{if eq .State "closed"}}{{.AllStatesLink}}{{else}}{{.ClosedLink}}{{end}}">
 		{{svg "octicon-check" 16 "tw-mr-2"}}
-		{{ctx.Locale.PrettyNumber .ClosedCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
+		{{if .PageIsMilestones}}
+			{{ctx.Locale.TrN .ClosedCount "repo.n_closed.milestones.one" "repo.n_closed.milestones.few" (ctx.Locale.PrettyNumber .ClosedCount)}}
+		{{else if .PageIsPullList}}
+			{{ctx.Locale.TrN .ClosedCount "repo.n_closed.pulls.one" "repo.n_closed.pulls.few" (ctx.Locale.PrettyNumber .ClosedCount)}}
+		{{else}}
+			{{ctx.Locale.TrN .ClosedCount "repo.n_closed.issues.one" "repo.n_closed.issues.few" (ctx.Locale.PrettyNumber .ClosedCount)}}
+		{{end}}
 	</a>
 </div>

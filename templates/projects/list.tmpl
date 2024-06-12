@@ -3,11 +3,11 @@
 		<div class="small-menu-items ui compact tiny menu list-header-toggle">
 			<a class="item{{if not .IsShowClosed}} active{{end}}" href="?state=open&q={{$.Keyword}}">
 				{{svg "octicon-project-symlink" 16 "tw-mr-2"}}
-				{{ctx.Locale.PrettyNumber .OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
+				{{ctx.Locale.TrN .OpenCount "repo.n_open.projects.one" "repo.n_open.projects.few" (ctx.Locale.PrettyNumber .OpenCount)}}
 			</a>
 			<a class="item{{if .IsShowClosed}} active{{end}}" href="?state=closed&q={{$.Keyword}}">
 				{{svg "octicon-check" 16 "tw-mr-2"}}
-				{{ctx.Locale.PrettyNumber .ClosedCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
+				{{ctx.Locale.TrN .ClosedCount "repo.n_closed.projects.one" "repo.n_closed.projects.few" (ctx.Locale.PrettyNumber .ClosedCount)}}
 			</a>
 		</div>
 		<div class="tw-text-right">
@@ -49,11 +49,11 @@
 				<div class="group">
 					<div class="flex-text-block">
 						{{svg "octicon-issue-opened" 14}}
-						{{ctx.Locale.PrettyNumber (.NumOpenIssues ctx)}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
+						{{ctx.Locale.TrN (.NumOpenIssues ctx) "repo.n_open.issues.one" "repo.n_open.issues.few" (ctx.Locale.PrettyNumber (.NumOpenIssues ctx))}}
 					</div>
 					<div class="flex-text-block">
 						{{svg "octicon-check" 14}}
-						{{ctx.Locale.PrettyNumber (.NumClosedIssues ctx)}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
+						{{ctx.Locale.TrN (.NumClosedIssues ctx) "repo.n_closed.issues.one" "repo.n_closed.issues.few" (ctx.Locale.PrettyNumber (.NumClosedIssues ctx))}}
 					</div>
 				</div>
 				{{if and $.CanWriteProjects (not $.Repository.IsArchived)}}

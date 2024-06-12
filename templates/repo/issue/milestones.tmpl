@@ -34,11 +34,11 @@
 						<div class="group">
 							<div class="flex-text-block">
 								{{svg "octicon-issue-opened" 14}}
-								{{ctx.Locale.PrettyNumber .NumOpenIssues}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
-							</div>
-							<div class="flex-text-block">
-								{{svg "octicon-check" 14}}
-								{{ctx.Locale.PrettyNumber .NumClosedIssues}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
+								{{ctx.Locale.TrN .NumOpenIssues "repo.n_open.issues.one" "repo.n_open.issues.few" (ctx.Locale.PrettyNumber .NumOpenIssues)}}
+								</div>
+								<div class="flex-text-block">
+									{{svg "octicon-check" 14}}
+									{{ctx.Locale.TrN .NumClosedIssues "repo.n_closed.issues.one" "repo.n_closed.issues.few" (ctx.Locale.PrettyNumber .NumClosedIssues)}}
 							</div>
 							{{if .TotalTrackedTime}}
 								<div class="flex-text-block">

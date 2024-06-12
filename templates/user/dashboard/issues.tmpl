@@ -6,12 +6,22 @@
 		<div class="list-header">
 			<div class="small-menu-items ui compact tiny menu list-header-toggle">
 				<a class="item{{if not .IsShowClosed}} active{{end}}" href="?type={{$.ViewType}}&sort={{$.SortType}}&state=open&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
-					{{svg "octicon-issue-opened" 16 "tw-mr-2"}}
-					{{ctx.Locale.PrettyNumber .IssueStats.OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
+					{{if .PageIsPulls}}
+						{{svg "octicon-git-pull-request" 16 "tw-mr-2"}}
+						{{ctx.Locale.TrN .IssueStats.OpenCount "repo.n_open.pulls.one" "repo.n_open.pulls.few" (ctx.Locale.PrettyNumber .IssueStats.OpenCount)}}
+					{{else}}
+						{{svg "octicon-issue-opened" 16 "tw-mr-2"}}
+						{{ctx.Locale.TrN .IssueStats.OpenCount "repo.n_open.issues.one" "repo.n_open.issues.few" (ctx.Locale.PrettyNumber .IssueStats.OpenCount)}}
+					{{end}}
 				</a>
 				<a class="item{{if .IsShowClosed}} active{{end}}" href="?type={{$.ViewType}}&sort={{$.SortType}}&state=closed&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
-					{{svg "octicon-issue-closed" 16 "tw-mr-2"}}
-					{{ctx.Locale.PrettyNumber .IssueStats.ClosedCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
+					{{if .PageIsPulls}}
+						{{svg "octicon-check" 16 "tw-mr-2"}}
+						{{ctx.Locale.TrN .IssueStats.ClosedCount "repo.n_closed.pulls.one" "repo.n_closed.pulls.few" (ctx.Locale.PrettyNumber .IssueStats.ClosedCount)}}
+					{{else}}
+						{{svg "octicon-issue-closed" 16 "tw-mr-2"}}
+						{{ctx.Locale.TrN .IssueStats.ClosedCount "repo.n_closed.issues.one" "repo.n_closed.issues.few" (ctx.Locale.PrettyNumber .IssueStats.ClosedCount)}}
+					{{end}}
 				</a>
 			</div>
 			<form class="list-header-search ui form ignore-dirty">
