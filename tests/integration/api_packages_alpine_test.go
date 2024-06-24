@@ -19,6 +19,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	alpine_module "code.gitea.io/gitea/modules/packages/alpine"
+	alpine_service "code.gitea.io/gitea/services/packages/alpine"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -139,6 +140,49 @@ Djfa/2q5bH4699v++uMAAAAAAAAAAAAAAAAAAAAAAHbgA/eXQh8AKAAA`
 					})
 				})
 
+				readIndexContent := func(r io.Reader) (string, error) {
+					br := bufio.NewReader(r)
+
+					gzr, err := gzip.NewReader(br)
+					if err != nil {
+						return "", err
+					}
+
+					for {
+						gzr.Multistream(false)
+
+						tr := tar.NewReader(gzr)
+						for {
+							hd, err := tr.Next()
+							if err == io.EOF {
+								break
+							}
+							if err != nil {
+								return "", err
+							}
+
+							if hd.Name == alpine_service.IndexFilename {
+								buf, err := io.ReadAll(tr)
+								if err != nil {
+									return "", err
+								}
+
+								return string(buf), nil
+							}
+						}
+
+						err = gzr.Reset(br)
+						if err == io.EOF {
+							break
+						}
+						if err != nil {
+							return "", err
+						}
+					}
+
+					return "", io.EOF
+				}
+
 				t.Run("Index", func(t *testing.T) {
 					defer tests.PrintCurrentTest(t)()
 
@@ -147,55 +191,22 @@ Djfa/2q5bH4699v++uMAAAAAAAAAAAAAAAAAAAAAAHbgA/eXQh8AKAAA`
 					req := NewRequest(t, "GET", url)
 					resp := MakeRequest(t, req, http.StatusOK)
 
-					assert.Condition(t, func() bool {
-						br := bufio.NewReader(resp.Body)
+					content, err := readIndexContent(resp.Body)
+					assert.NoError(t, err)
 
-						gzr, err := gzip.NewReader(br)
-						assert.NoError(t, err)
-
-						for {
-							gzr.Multistream(false)
-
-							tr := tar.NewReader(gzr)
-							for {
-								hd, err := tr.Next()
-								if err == io.EOF {
-									break
-								}
-								assert.NoError(t, err)
-
-								if hd.Name == "APKINDEX" {
-									buf, err := io.ReadAll(tr)
-									assert.NoError(t, err)
-
-									s := string(buf)
-
-									assert.Contains(t, s, "C:Q1/se1PjO94hYXbfpNR1/61hVORIc=\n")
-									assert.Contains(t, s, "P:"+packageName+"\n")
-									assert.Contains(t, s, "V:"+packageVersion+"\n")
-									assert.Contains(t, s, "A:x86_64\n")
-									assert.Contains(t, s, "T:Gitea Test Package\n")
-									assert.Contains(t, s, "U:https://gitea.io/\n")
-									assert.Contains(t, s, "L:MIT\n")
-									assert.Contains(t, s, "S:1353\n")
-									assert.Contains(t, s, "I:4096\n")
-									assert.Contains(t, s, "o:gitea-test\n")
-									assert.Contains(t, s, "m:KN4CK3R <kn4ck3r@gitea.io>\n")
-									assert.Contains(t, s, "t:1679498030\n")
-
-									return true
-								}
-							}
-
-							err = gzr.Reset(br)
-							if err == io.EOF {
-								break
-							}
-							assert.NoError(t, err)
-						}
-
-						return false
-					})
+					assert.Contains(t, content, "C:Q1/se1PjO94hYXbfpNR1/61hVORIc=\n")
+					assert.Contains(t, content, "P:"+packageName+"\n")
+					assert.Contains(t, content, "V:"+packageVersion+"\n")
+					assert.Contains(t, content, "A:x86_64\n")
+					assert.NotContains(t, content, "A:noarch\n")
+					assert.Contains(t, content, "T:Gitea Test Package\n")
+					assert.Contains(t, content, "U:https://gitea.io/\n")
+					assert.Contains(t, content, "L:MIT\n")
+					assert.Contains(t, content, "S:1353\n")
+					assert.Contains(t, content, "I:4096\n")
+					assert.Contains(t, content, "o:gitea-test\n")
+					assert.Contains(t, content, "m:KN4CK3R <kn4ck3r@gitea.io>\n")
+					assert.Contains(t, content, "t:1679498030\n")
 				})
 
 				t.Run("Download", func(t *testing.T) {
