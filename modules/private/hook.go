@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strconv"
 	"time"
 
 	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/git/pushoptions"
 	"code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/setting"
 )
@@ -20,27 +20,7 @@ const (
 	GitAlternativeObjectDirectories = "GIT_ALTERNATE_OBJECT_DIRECTORIES"
 	GitObjectDirectory              = "GIT_OBJECT_DIRECTORY"
 	GitQuarantinePath               = "GIT_QUARANTINE_PATH"
-	GitPushOptionCount              = "GIT_PUSH_OPTION_COUNT"
 )
-
-// GitPushOptions is a wrapper around a map[string]string
-type GitPushOptions map[string]string
-
-// GitPushOptions keys
-const (
-	GitPushOptionRepoPrivate  = "repo.private"
-	GitPushOptionRepoTemplate = "repo.template"
-)
-
-// Bool checks for a key in the map and parses as a boolean
-func (g GitPushOptions) Bool(key string, def bool) bool {
-	if val, ok := g[key]; ok {
-		if b, err := strconv.ParseBool(val); err == nil {
-			return b
-		}
-	}
-	return def
-}
 
 // HookOptions represents the options for the Hook calls
 type HookOptions struct {
@@ -52,12 +32,16 @@ type HookOptions struct {
 	GitObjectDirectory              string
 	GitAlternativeObjectDirectories string
 	GitQuarantinePath               string
-	GitPushOptions                  GitPushOptions
+	GitPushOptions                  map[string]string
 	PullRequestID                   int64
 	PushTrigger                     repository.PushTrigger
 	DeployKeyID                     int64 // if the pusher is a DeployKey, then UserID is the repo's org user.
 	IsWiki                          bool
 	ActionPerm                      int
+}
+
+func (o *HookOptions) GetGitPushOptions() pushoptions.Interface {
+	return pushoptions.NewFromMap(&o.GitPushOptions)
 }
 
 // SSHLogOption ssh log options

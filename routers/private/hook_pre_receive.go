@@ -123,23 +123,7 @@ func (ctx *preReceiveContext) canChangeSettings() error {
 func (ctx *preReceiveContext) validatePushOptions() error {
 	opts := web.GetForm(ctx).(*private.HookOptions)
 
-	if len(opts.GitPushOptions) == 0 {
-		return nil
-	}
-
-	changesRepoSettings := false
-	for key := range opts.GitPushOptions {
-		switch key {
-		case private.GitPushOptionRepoPrivate, private.GitPushOptionRepoTemplate:
-			changesRepoSettings = true
-		case "topic", "force-push", "title", "description":
-			// Agit options
-		default:
-			return fmt.Errorf("unknown option %s", key)
-		}
-	}
-
-	if changesRepoSettings {
+	if opts.GetGitPushOptions().ChangeRepoSettings() {
 		return ctx.canChangeSettings()
 	}
 

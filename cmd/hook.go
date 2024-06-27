@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/git/pushoptions"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/private"
 	repo_module "code.gitea.io/gitea/modules/repository"
@@ -192,7 +193,7 @@ Forgejo or set your environment appropriately.`, "")
 		GitAlternativeObjectDirectories: os.Getenv(private.GitAlternativeObjectDirectories),
 		GitObjectDirectory:              os.Getenv(private.GitObjectDirectory),
 		GitQuarantinePath:               os.Getenv(private.GitQuarantinePath),
-		GitPushOptions:                  pushOptions(),
+		GitPushOptions:                  pushoptions.New().ReadEnv().Map(),
 		PullRequestID:                   prID,
 		DeployKeyID:                     deployKeyID,
 		ActionPerm:                      int(actionPerm),
@@ -375,7 +376,7 @@ Forgejo or set your environment appropriately.`, "")
 		GitAlternativeObjectDirectories: os.Getenv(private.GitAlternativeObjectDirectories),
 		GitObjectDirectory:              os.Getenv(private.GitObjectDirectory),
 		GitQuarantinePath:               os.Getenv(private.GitQuarantinePath),
-		GitPushOptions:                  pushOptions(),
+		GitPushOptions:                  pushoptions.New().ReadEnv().Map(),
 		PullRequestID:                   prID,
 		PushTrigger:                     repo_module.PushTrigger(os.Getenv(repo_module.EnvPushTrigger)),
 	}
@@ -486,21 +487,6 @@ func hookPrintResults(results []private.HookPostReceiveBranchResult) {
 		fmt.Fprintln(os.Stderr, "")
 		_ = os.Stderr.Sync()
 	}
-}
-
-func pushOptions() map[string]string {
-	opts := make(map[string]string)
-	if pushCount, err := strconv.Atoi(os.Getenv(private.GitPushOptionCount)); err == nil {
-		for idx := 0; idx < pushCount; idx++ {
-			opt := os.Getenv(fmt.Sprintf("GIT_PUSH_OPTION_%d", idx))
-			key, value, found := strings.Cut(opt, "=")
-			if !found {
-				value = "true"
-			}
-			opts[key] = value
-		}
-	}
-	return opts
 }
 
 func runHookProcReceive(c *cli.Context) error {
@@ -627,6 +613,7 @@ Forgejo or set your environment appropriately.`, "")
 	hookOptions.GitPushOptions = make(map[string]string)
 
 	if hasPushOptions {
+		pushOptions := pushoptions.NewFromMap(&hookOptions.GitPushOptions)
 		for {
 			rs, err = readPktLine(ctx, reader, pktLineTypeUnknown)
 			if err != nil {
@@ -636,12 +623,7 @@ Forgejo or set your environment appropriately.`, "")
 			if rs.Type == pktLineTypeFlush {
 				break
 			}
-
-			key, value, found := strings.Cut(string(rs.Data), "=")
-			if !found {
-				value = "true"
-			}
-			hookOptions.GitPushOptions[key] = value
+			pushOptions.Parse(string(rs.Data))
 		}
 	}
 

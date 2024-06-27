@@ -15,7 +15,6 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/private"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/test"
 
@@ -162,20 +161,6 @@ func TestDelayWriter(t *testing.T) {
 		require.NoError(t, err)
 		require.Empty(t, out)
 	})
-}
-
-func TestPushOptions(t *testing.T) {
-	require.NoError(t, os.Setenv(private.GitPushOptionCount, "3"))
-	require.NoError(t, os.Setenv("GIT_PUSH_OPTION_0", "force-push"))
-	require.NoError(t, os.Setenv("GIT_PUSH_OPTION_1", "option=value"))
-	require.NoError(t, os.Setenv("GIT_PUSH_OPTION_2", "option-double=another=value"))
-	require.NoError(t, os.Setenv("GIT_PUSH_OPTION_3", "not=valid"))
-
-	assert.Equal(t, map[string]string{
-		"force-push":    "true",
-		"option":        "value",
-		"option-double": "another=value",
-	}, pushOptions())
 }
 
 func TestRunHookUpdate(t *testing.T) {

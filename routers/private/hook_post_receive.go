@@ -18,6 +18,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/cache"
 	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/git/pushoptions"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/private"
@@ -170,7 +171,7 @@ func HookPostReceive(ctx *gitea_context.PrivateContext) {
 	}
 
 	// Handle Push Options
-	if len(opts.GitPushOptions) > 0 {
+	if !opts.GetGitPushOptions().Empty() {
 		// load the repository
 		if repo == nil {
 			repo = loadRepository(ctx, ownerName, repoName)
@@ -181,8 +182,8 @@ func HookPostReceive(ctx *gitea_context.PrivateContext) {
 			wasEmpty = repo.IsEmpty
 		}
 
-		repo.IsPrivate = opts.GitPushOptions.Bool(private.GitPushOptionRepoPrivate, repo.IsPrivate)
-		repo.IsTemplate = opts.GitPushOptions.Bool(private.GitPushOptionRepoTemplate, repo.IsTemplate)
+		repo.IsPrivate = opts.GetGitPushOptions().GetBool(pushoptions.RepoPrivate, repo.IsPrivate)
+		repo.IsTemplate = opts.GetGitPushOptions().GetBool(pushoptions.RepoTemplate, repo.IsTemplate)
 		if err := repo_model.UpdateRepositoryCols(ctx, repo, "is_private", "is_template"); err != nil {
 			log.Error("Failed to Update: %s/%s Error: %v", ownerName, repoName, err)
 			ctx.JSON(http.StatusInternalServerError, private.HookPostReceiveResult{

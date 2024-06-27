@@ -225,16 +225,14 @@ func testOptionsGitPush(t *testing.T, u *url.URL) {
 		u.User = url.UserPassword(user.LowerName, userPassword)
 		doGitAddRemote(gitPath, "origin", u)(t)
 
-		t.Run("Unknown push options are rejected", func(t *testing.T) {
-			logChecker, cleanup := test.NewLogChecker(log.DEFAULT, log.TRACE)
-			logChecker.Filter("unknown option").StopMark("Git push options validation")
-			defer cleanup()
+		t.Run("Unknown push options are silently ignored", func(t *testing.T) {
 			branchName := "branch0"
 			doGitCreateBranch(gitPath, branchName)(t)
-			doGitPushTestRepositoryFail(gitPath, "origin", branchName, "-o", "repo.template=false", "-o", "uknownoption=randomvalue")(t)
-			logFiltered, logStopped := logChecker.Check(5 * time.Second)
-			assert.True(t, logStopped)
-			assert.True(t, logFiltered[0])
+			doGitPushTestRepository(gitPath, "origin", branchName, "-o", "uknownoption=randomvalue", "-o", "repo.private=true")(t)
+			repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, user.Name, "repo-to-push")
+			require.NoError(t, err)
+			require.True(t, repo.IsPrivate)
+			require.False(t, repo.IsTemplate)
 		})
 
 		t.Run("Owner sets private & template to true via push options", func(t *testing.T) {
