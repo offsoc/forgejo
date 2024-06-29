@@ -41,7 +41,7 @@ func PrepareContextForProfileBigAvatar(ctx *context.Context) {
 	ctx.Data["IsBlocked"] = ctx.Doer != nil && user_model.IsBlocked(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
 	ctx.Data["IsFollowing"] = ctx.Doer != nil && user_model.IsFollowing(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
 	ctx.Data["ShowUserEmail"] = setting.UI.ShowUserEmail && ctx.ContextUser.Email != "" && ctx.IsSigned && !ctx.ContextUser.KeepEmailPrivate
-	ctx.Data["ShowPronouns"] = ctx.ContextUser.Pronouns != "" && ((ctx.IsSigned && ctx.ContextUser.KeepPronounsPrivate) || (!ctx.ContextUser.KeepPronounsPrivate))
+	ctx.Data["ShowPronouns"] = ctx.ContextUser.Pronouns != "" && (ctx.IsSigned || !ctx.ContextUser.KeepPronounsPrivate)
 	if setting.Service.UserLocationMapURL != "" {
 		ctx.Data["ContextUserLocationMapURL"] = setting.Service.UserLocationMapURL + url.QueryEscape(ctx.ContextUser.Location)
 	}
