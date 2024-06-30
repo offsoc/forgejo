@@ -83,7 +83,7 @@ var migrations = []*Migration{
 	// v22 -> v23
 	NewMigration("Add `legacy` to `web_authn_credential` table", AddLegacyToWebAuthnCredential),
 	// v23 -> v24
-	NewMigration("Add pronoun privacy settings to user", forgejo_v1_22.AddHidePronounsOptionToUser),
+	NewMigration("Add pronoun privacy settings to user", AddHidePronounsOptionToUser),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.
