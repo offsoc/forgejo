@@ -2,7 +2,7 @@ module code.gitea.io/gitea
 
 go 1.22.0
 
-toolchain go1.22.4
+toolchain go1.22.5
 
 require (
 	code.forgejo.org/f3/gof3/v3 v3.4.0
