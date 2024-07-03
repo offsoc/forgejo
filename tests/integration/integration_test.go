@@ -701,6 +701,7 @@ type DeclarativeRepoOptions struct {
 	Files         optional.Option[[]*files_service.ChangeRepoFile]
 	WikiBranch    optional.Option[string]
 	AutoInit      optional.Option[bool]
+	IsTemplate    optional.Option[bool]
 }
 
 func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts DeclarativeRepoOptions) (*repo_model.Repository, string, func()) {
@@ -731,6 +732,7 @@ func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts
 		License:       "WTFPL",
 		Readme:        "Default",
 		DefaultBranch: "main",
+		IsTemplate:    opts.IsTemplate.Value(),
 	})
 	require.NoError(t, err)
 	assert.NotEmpty(t, repo)
