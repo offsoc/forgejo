@@ -12,6 +12,36 @@ A [patch or minor release](https://semver.org/spec/v2.0.0.html) (e.g. upgrading 
 
 TBD
 
+## 7.0.5
+
+This is a security release. See the documentation for more information on the [upgrade procedure](https://forgejo.org/docs/v7.0/admin/upgrade/).
+
+In addition to the following notable bug fixes, you can browse the [full list of pull requests](https://codeberg.org/forgejo/forgejo/pulls?milestone=6654) included in this release.
+
+* **regreSSHion**
+
+  Recommended action when running Forgejo from a:
+  * binary - upgrade the OpenSSH server that was installed independently.
+  * root OCI image - upgrade to [Forgejo 7.0.5](https://codeberg.org/forgejo/-/packages/container/forgejo/7.0.5).
+  * rootless OCI image - no upgrade is necessary.
+
+  [CVE-2024-6387](https://nvd.nist.gov/vuln/detail/CVE-2024-6387) also known as [regreSSHion](https://www.qualys.com/regresshion-cve-2024-6387/) is an Unauthenticated Remote Code Execution (RCE) vulnerability in OpenSSH’s server (sshd) on glibc-based Linux systems. It is **strongly recommended** that an OpenSSH server installed independently of Forgejo is upgraded as soon as possible.
+
+  All Forgejo OCI root images, including [7.0.5](https://codeberg.org/forgejo/-/packages/container/forgejo/7.0.5) contain an OpenSSH server. They are based on https://alpinelinux.org/ which relies on https://musl.libc.org/ and not https://en.wikipedia.org/wiki/Glibc. As a precaution the [Forgejo v7.0.5 root OCI image](https://codeberg.org/forgejo/-/packages/container/forgejo/7.0.5) contains an [updated OpenSSH server](https://pkgs.alpinelinux.org/packages?name=openssh&branch=v3.19) patched for [CVE-2024-6387](https://nvd.nist.gov/vuln/detail/CVE-2024-6387).
+
+  The Forgejo OCI rootless images, including [7.0.5](https://codeberg.org/forgejo/-/packages/container/forgejo/7.0.5-rootless), do not contain an OpenSSH server, they rely on the internal Forgejo implementation of the SSH protocol.
+
+* **Security:**
+  * Compiled with Go v1.22.5. Fixed: [CVE-2024-24791](https://nvd.nist.gov/vuln/detail/CVE-2024-24791) - [GO-2024-2963](https://pkg.go.dev/vuln/GO-2024-2963): Denial of service due to improper 100-continue handling in net/http. The net/http HTTP/1.1 client mishandled the case where a server responds to a request with an "Expect: 100-continue" header with a non-informational (200 or higher) status. This mishandling could leave a client connection in an invalid state, where the next request sent on the connection will fail. An attacker sending a request to a net/http/httputil.ReverseProxy proxy can exploit this mishandling to cause a denial of service by sending "Expect: 100-continue" requests which elicit a non-informational response from the backend. Each such request leaves the proxy with an invalid connection, and causes one subsequent request using that connection to fail.
+
+* **Bug fixes:**
+  * [backport](https://codeberg.org/forgejo/forgejo/pulls/4059) - [PR](https://codeberg.org/forgejo/forgejo/pulls/4194): Fixed: authentication Source Administration page wrongfully handles the "Custom URLs Instead of Default URLs" checkbox (missing checkbox, irrelevant fields).
+  * [backport](https://codeberg.org/forgejo/forgejo/pulls/4151) - [PR](https://codeberg.org/forgejo/forgejo/pulls/4149): Fixed: git push to an adopted repository fails.
+  * [backport](https://codeberg.org/forgejo/forgejo/pulls/4215) - [PR](https://codeberg.org/forgejo/forgejo/pulls/4213) - [commit](https://codeberg.org/forgejo/forgejo/commit/4ed5044dea94872e025f585debf7a16e6bd6bbdb): Fixed: markdown doesn't render math within brackets
+  * [backport](https://codeberg.org/forgejo/forgejo/pulls/4219) - [PR](https://codeberg.org/forgejo/forgejo/pulls/4145) - [commit](https://codeberg.org/forgejo/forgejo/commit/9aa3ae955ff506d883737e576dd62f674a3ee372): Fixed: selecting the "No Project" filter in the issue/pull request list has no effect
+  * [backport](https://codeberg.org/forgejo/forgejo/pulls/4248) - [PR](https://codeberg.org/forgejo/forgejo/pulls/4241): Fixed: error 500 when processing crafted TIFF files.
+  * [backport](https://codeberg.org/forgejo/forgejo/pulls/4261) - [PR](https://codeberg.org/forgejo/forgejo/pulls/4258): Fixed: wrong placeholder text in the form for adding repository collaborator.
+
 ## 7.0.4
 
 This is a security release. See the documentation for more information on the [upgrade procedure](https://forgejo.org/docs/v7.0/admin/upgrade/).
