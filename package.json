@@ -30,7 +30,7 @@
     "htmx.org": "1.9.12",
     "idiomorph": "0.3.0",
     "jquery": "3.7.1",
-    "katex": "0.16.10",
+    "katex": "0.16.11",
     "license-checker-webpack-plugin": "0.2.1",
     "mermaid": "10.9.1",
     "mini-css-extract-plugin": "2.9.0",
