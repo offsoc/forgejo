@@ -15,6 +15,13 @@
     "docker:pinDigests",
     "helpers:pinGitHubActionDigests"
   ],
+  "baseBranches": [
+    "$default",
+    "/^v7\\.\\d+/forgejo$",
+    "/^v8\\.\\d+/forgejo$",
+    "/^v9\\.\\d+/forgejo$",
+    "/^v\\d\\d+\\.\\d+\\/forgejo$"
+  ],
   "semanticCommits": "disabled",
   "automergeStrategy": "merge-commit",
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
@@ -56,9 +63,7 @@
     },
     {
       "description": "elasticsearch CI images are published about once a month and do not use semantic versioning or short tags",
-      "matchDepNames": [
-        "elasticsearch"
-      ],
+      "matchDepNames": ["elasticsearch"],
       "extends": ["schedule:quarterly"]
     },
     {
@@ -176,6 +181,11 @@
       "description": "disallow `eslint-plugin-no-use-extend-native` v0.6.0+, requires eslint v9",
       "matchDepNames": ["eslint-plugin-no-use-extend-native"],
       "allowedVersions": "<0.6.0"
+    },
+    {
+      "description": "Require approval for stable branches (must be last rule to override all others)",
+      "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
+      "dependencyDashboardApproval": true
     }
   ],
   "customManagers": [
