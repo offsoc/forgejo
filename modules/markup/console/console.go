@@ -58,13 +58,13 @@ func (Renderer) CanRender(filename string, input io.Reader) bool {
 
 // Render renders terminal colors to HTML with all specific handling stuff.
 func (Renderer) Render(ctx *markup.RenderContext, input io.Reader, output io.Writer) error {
-	buf, err := io.ReadAll(input)
-	if err != nil {
+	screen := &trend.Screen{}
+	if _, err := io.Copy(screen, input); err != nil {
 		return err
 	}
-	buf = trend.Render(buf)
-	buf = bytes.ReplaceAll(buf, []byte("\n"), []byte(`<br>`))
-	_, err = output.Write(buf)
+	buf := screen.AsHTML()
+	buf = strings.ReplaceAll(buf, "\n", `<br>`)
+	_, err := output.Write([]byte(buf))
 	return err
 }
 
