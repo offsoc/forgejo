@@ -19,6 +19,32 @@ make clean frontend
 npx playwright install-deps
 ```
 
+## Interactive testing
+
+You can make use of Playwright's integrated UI mode to run individual tests,
+get feedback and visually trace what your browser is doing.
+
+To do so, launch the debugserver using:
+
+```
+make test-e2e-debugserver
+```
+
+Then launch the Playwright UI:
+
+```
+npx playwright test --ui
+```
+
+You can also run individual tests while the debugserver using:
+
+```
+npx playwright test actions.test.e2e.js:9
+```
+
+First, specify the complete test filename,
+and after the colon you can put the linenumber where the test is defined.
+
 
 ## Run all tests via local act_runner
 ```
