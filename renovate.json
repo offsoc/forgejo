@@ -17,10 +17,8 @@
   ],
   "baseBranches": [
     "$default",
-    "/^v7\\.\\d+/forgejo$",
-    "/^v8\\.\\d+/forgejo$",
-    "/^v9\\.\\d+/forgejo$",
-    "/^v\\d\\d+\\.\\d+\\/forgejo$"
+    "/^v[7-9]\\.\\d+/forgejo$/",
+    "/^v\\d\\d+\\.\\d+\\/forgejo$/"
   ],
   "semanticCommits": "disabled",
   "automergeStrategy": "merge-commit",
