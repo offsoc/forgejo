@@ -17529,11 +17529,20 @@
             "description": "page size of results",
             "name": "limit",
             "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "order the repositories by name (default), id, or size",
+            "name": "order_by",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
             "$ref": "#/responses/RepositoryList"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
           }
         }
       },
