@@ -95,6 +95,8 @@ func List(ctx *context.Context) {
 			allRunnerLabels.AddMultiple(r.AgentLabels...)
 		}
 
+		canRun := ctx.Repo.CanWrite(unit.TypeActions)
+
 		workflows = make([]Workflow, 0, len(entries))
 		for _, entry := range entries {
 			workflow := Workflow{Entry: *entry}
@@ -146,7 +148,7 @@ func List(ctx *context.Context) {
 			}
 			workflows = append(workflows, workflow)
 
-			if workflow.Entry.Name() == curWorkflow {
+			if canRun && workflow.Entry.Name() == curWorkflow {
 				config := wf.WorkflowDispatchConfig()
 				if config != nil {
 					keys := util.KeysOfMap(config.Inputs)
