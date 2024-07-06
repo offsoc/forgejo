@@ -1,6 +1,6 @@
 // Copyright 2015 The Gogs Authors. All rights reserved.
 // Copyright 2016 The Gitea Authors. All rights reserved.
-// Copyright 2023 The Forgejo Authors. All rights reserved.
+// Copyright 2023-2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 // Package v1 Gitea API
@@ -892,6 +892,15 @@ func Routes() *web.Route {
 		// Users (requires user scope)
 		m.Group("/user", func() {
 			m.Get("", user.GetAuthenticatedUser)
+			if setting.Quota.Enabled {
+				m.Group("/quota", func() {
+					m.Get("", user.GetQuota)
+					m.Get("/check", user.CheckQuota)
+					m.Get("/attachments", user.ListQuotaAttachments)
+					m.Get("/packages", user.ListQuotaPackages)
+					m.Get("/artifacts", user.ListQuotaArtifacts)
+				})
+			}
 			m.Group("/settings", func() {
 				m.Get("", user.GetUserSettings)
 				m.Patch("", bind(api.UserSettingsOptions{}), user.UpdateUserSettings)
@@ -1482,6 +1491,16 @@ func Routes() *web.Route {
 			}, reqToken(), reqOrgOwnership())
 			m.Get("/activities/feeds", org.ListOrgActivityFeeds)
 
+			if setting.Quota.Enabled {
+				m.Group("/quota", func() {
+					m.Get("", org.GetQuota)
+					m.Get("/check", org.CheckQuota)
+					m.Get("/attachments", org.ListQuotaAttachments)
+					m.Get("/packages", org.ListQuotaPackages)
+					m.Get("/artifacts", org.ListQuotaArtifacts)
+				}, reqToken(), reqOrgOwnership())
+			}
+
 			m.Group("", func() {
 				m.Get("/list_blocked", org.ListBlockedUsers)
 				m.Group("", func() {
@@ -1531,6 +1550,12 @@ func Routes() *web.Route {
 					m.Post("/orgs", bind(api.CreateOrgOption{}), admin.CreateOrg)
 					m.Post("/repos", bind(api.CreateRepoOption{}), admin.CreateRepo)
 					m.Post("/rename", bind(api.RenameUserOption{}), admin.RenameUser)
+					if setting.Quota.Enabled {
+						m.Group("/quota", func() {
+							m.Get("", admin.GetUserQuota)
+							m.Post("/groups", bind(api.SetUserQuotaGroupsOptions{}), admin.SetUserQuotaGroups)
+						})
+					}
 				}, context.UserAssignmentAPI())
 			})
 			m.Group("/emails", func() {
@@ -1552,6 +1577,37 @@ func Routes() *web.Route {
 			m.Group("/runners", func() {
 				m.Get("/registration-token", admin.GetRegistrationToken)
 			})
+			if setting.Quota.Enabled {
+				m.Group("/quota", func() {
+					m.Group("/rules", func() {
+						m.Combo("").Get(admin.ListQuotaRules).
+							Post(bind(api.CreateQuotaRuleOptions{}), admin.CreateQuotaRule)
+						m.Combo("/{quotarule}", context.QuotaRuleAssignmentAPI()).
+							Get(admin.GetQuotaRule).
+							Patch(bind(api.EditQuotaRuleOptions{}), admin.EditQuotaRule).
+							Delete(admin.DeleteQuotaRule)
+					})
+					m.Group("/groups", func() {
+						m.Combo("").Get(admin.ListQuotaGroups).
+							Post(bind(api.CreateQuotaGroupOptions{}), admin.CreateQuotaGroup)
+						m.Group("/{quotagroup}", func() {
+							m.Combo("").Get(admin.GetQuotaGroup).
+								Delete(admin.DeleteQuotaGroup)
+							m.Group("/rules", func() {
+								m.Combo("/{quotarule}", context.QuotaRuleAssignmentAPI()).
+									Put(admin.AddRuleToQuotaGroup).
+									Delete(admin.RemoveRuleFromQuotaGroup)
+							})
+							m.Group("/users", func() {
+								m.Get("", admin.ListUsersInQuotaGroup)
+								m.Combo("/{username}", context.UserAssignmentAPI()).
+									Put(admin.AddUserToQuotaGroup).
+									Delete(admin.RemoveUserFromQuotaGroup)
+							})
+						}, context.QuotaGroupAssignmentAPI())
+					})
+				})
+			}
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryAdmin), reqToken(), reqSiteAdmin())
 
 		m.Group("/topics", func() {

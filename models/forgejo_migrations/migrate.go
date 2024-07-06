@@ -76,6 +76,8 @@ var migrations = []*Migration{
 	NewMigration("Create the `following_repo` table", CreateFollowingRepoTable),
 	// v19 -> v20
 	NewMigration("Add external_url to attachment table", AddExternalURLColumnToAttachmentTable),
+	// v20 -> v21
+	NewMigration("Creating Quota-related tables", CreateQuotaTables),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.

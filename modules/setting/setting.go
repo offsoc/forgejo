@@ -155,6 +155,7 @@ func loadCommonSettingsFrom(cfg ConfigProvider) error {
 	loadGitFrom(cfg)
 	loadMirrorFrom(cfg)
 	loadMarkupFrom(cfg)
+	loadQuotaFrom(cfg)
 	loadOtherFrom(cfg)
 	return nil
 }
