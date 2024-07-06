@@ -6,12 +6,14 @@ package repository
 import (
 	"slices"
 	"testing"
+	"time"
 
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/json"
+	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/test"
 
 	"gitea.com/go-chi/cache"
 	"github.com/stretchr/testify/assert"
@@ -27,10 +29,14 @@ func TestRepository_ContributorsGraph(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
+	lc, cleanup := test.NewLogChecker(log.DEFAULT, log.INFO)
+	lc.StopMark(`getExtendedCommitStats[repo="user2/repo2" revision="404ref"]: object does not exist [id: 404ref, rel_path: ]`)
+	defer cleanup()
+
 	generateContributorStats(nil, mockCache, "key", repo, "404ref")
-	err, isErr := mockCache.Get("key").(error)
-	assert.True(t, isErr)
-	assert.ErrorAs(t, err, &git.ErrNotExist{})
+	assert.False(t, mockCache.IsExist("key"))
+	_, stopped := lc.Check(100 * time.Millisecond)
+	assert.True(t, stopped)
 
 	generateContributorStats(nil, mockCache, "key2", repo, "master")
 	dataString, isData := mockCache.Get("key2").(string)
