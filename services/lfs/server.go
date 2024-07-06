@@ -23,6 +23,7 @@ import (
 	git_model "code.gitea.io/gitea/models/git"
 	"code.gitea.io/gitea/models/perm"
 	access_model "code.gitea.io/gitea/models/perm/access"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
@@ -179,6 +180,18 @@ func BatchHandler(ctx *context.Context) {
 		return
 	}
 
+	if isUpload {
+		ok, err := quota_model.EvaluateForUser(ctx, ctx.Doer.ID, quota_model.LimitSubjectSizeGitLFS)
+		if err != nil {
+			log.Error("quota_model.EvaluateForUser: %v", err)
+			writeStatus(ctx, http.StatusInternalServerError)
+			return
+		}
+		if !ok {
+			writeStatusMessage(ctx, http.StatusRequestEntityTooLarge, "quota exceeded")
+		}
+	}
+
 	contentStore := lfs_module.NewContentStore()
 
 	var responseObjects []*lfs_module.ObjectResponse
@@ -295,6 +308,18 @@ func UploadHandler(ctx *context.Context) {
 		log.Error("Unable to check if LFS OID[%s] exist. Error: %v", p.Oid, err)
 		writeStatus(ctx, http.StatusInternalServerError)
 		return
+	}
+
+	if exists {
+		ok, err := quota_model.EvaluateForUser(ctx, ctx.Doer.ID, quota_model.LimitSubjectSizeGitLFS)
+		if err != nil {
+			log.Error("quota_model.EvaluateForUser: %v", err)
+			writeStatus(ctx, http.StatusInternalServerError)
+			return
+		}
+		if !ok {
+			writeStatusMessage(ctx, http.StatusRequestEntityTooLarge, "quota exceeded")
+		}
 	}
 
 	uploadOrVerify := func() error {

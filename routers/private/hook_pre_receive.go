@@ -15,11 +15,13 @@ import (
 	issues_model "code.gitea.io/gitea/models/issues"
 	perm_model "code.gitea.io/gitea/models/perm"
 	access_model "code.gitea.io/gitea/models/perm/access"
+	quota_model "code.gitea.io/gitea/models/quota"
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/private"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/web"
 	gitea_context "code.gitea.io/gitea/services/context"
 	pull_service "code.gitea.io/gitea/services/pull"
@@ -46,6 +48,8 @@ type preReceiveContext struct {
 	env []string
 
 	opts *private.HookOptions
+
+	isOverQuota bool
 
 	branchName string
 }
@@ -140,6 +144,36 @@ func (ctx *preReceiveContext) assertPushOptions() bool {
 	return true
 }
 
+func (ctx *preReceiveContext) checkQuota() error {
+	if !setting.Quota.Enabled {
+		ctx.isOverQuota = false
+		return nil
+	}
+
+	if !ctx.loadPusherAndPermission() {
+		ctx.isOverQuota = true
+		return nil
+	}
+
+	ok, err := quota_model.EvaluateForUser(ctx, ctx.PrivateContext.Repo.Repository.OwnerID, quota_model.LimitSubjectSizeReposAll)
+	if err != nil {
+		log.Error("quota_model.EvaluateForUser: %v", err)
+		ctx.JSON(http.StatusInternalServerError, private.Response{
+			UserMsg: "Error checking user quota",
+		})
+		return err
+	}
+
+	ctx.isOverQuota = !ok
+	return nil
+}
+
+func (ctx *preReceiveContext) quotaExceeded() {
+	ctx.JSON(http.StatusRequestEntityTooLarge, private.Response{
+		UserMsg: "Quota exceeded",
+	})
+}
+
 // HookPreReceive checks whether a individual commit is acceptable
 func HookPreReceive(ctx *gitea_context.PrivateContext) {
 	opts := web.GetForm(ctx).(*private.HookOptions)
@@ -156,6 +190,10 @@ func HookPreReceive(ctx *gitea_context.PrivateContext) {
 	}
 	log.Trace("Git push options validation succeeded")
 
+	if err := ourCtx.checkQuota(); err != nil {
+		return
+	}
+
 	// Iterate across the provided old commit IDs
 	for i := range opts.OldCommitIDs {
 		oldCommitID := opts.OldCommitIDs[i]
@@ -170,6 +208,10 @@ func HookPreReceive(ctx *gitea_context.PrivateContext) {
 		case git.SupportProcReceive && refFullName.IsFor():
 			preReceiveFor(ourCtx, oldCommitID, newCommitID, refFullName)
 		default:
+			if ourCtx.isOverQuota {
+				ourCtx.quotaExceeded()
+				return
+			}
 			ourCtx.AssertCanWriteCode()
 		}
 		if ctx.Written() {
@@ -211,6 +253,11 @@ func preReceiveBranch(ctx *preReceiveContext, oldCommitID, newCommitID string, r
 
 	// Allow pushes to non-protected branches
 	if protectBranch == nil {
+		// ...unless the user is over quota, and the operation is not a delete
+		if newCommitID != objectFormat.EmptyObjectID().String() && ctx.isOverQuota {
+			ctx.quotaExceeded()
+		}
+
 		return
 	}
 	protectBranch.Repo = repo
@@ -451,6 +498,15 @@ func preReceiveTag(ctx *preReceiveContext, oldCommitID, newCommitID string, refF
 			UserMsg: fmt.Sprintf("Tag %s is protected", tagName),
 		})
 		return
+	}
+
+	// If the user is over quota, and the push isn't a tag deletion, deny it
+	if ctx.isOverQuota {
+		objectFormat := ctx.Repo.GetObjectFormat()
+		if newCommitID != objectFormat.EmptyObjectID().String() {
+			ctx.quotaExceeded()
+			return
+		}
 	}
 }
 

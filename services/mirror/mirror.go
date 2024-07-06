@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/modules/graceful"
 	"code.gitea.io/gitea/modules/log"
@@ -71,6 +72,19 @@ func Update(ctx context.Context, pullLimit, pushLimit int) error {
 		case <-ctx.Done():
 			return fmt.Errorf("aborted")
 		default:
+		}
+
+		// Check if the repo's owner is over quota, for pull mirrors
+		if mirrorType == PullMirrorType {
+			ok, err := quota_model.EvaluateForUser(ctx, repo.OwnerID, quota_model.LimitSubjectSizeReposAll)
+			if err != nil {
+				log.Error("quota_model.EvaluateForUser: %v", err)
+				return err
+			}
+			if !ok {
+				log.Trace("Owner quota exceeded for %-v, not syncing", repo)
+				return nil
+			}
 		}
 
 		// Push to the Queue

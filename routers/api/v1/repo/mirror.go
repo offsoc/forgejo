@@ -50,6 +50,8 @@ func MirrorSync(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 
 	repo := ctx.Repo.Repository
 
@@ -103,6 +105,8 @@ func PushMirrorSync(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 
 	if !setting.Mirror.Enabled {
 		ctx.Error(http.StatusBadRequest, "PushMirrorSync", "Mirror feature is disabled")
@@ -279,6 +283,8 @@ func AddPushMirror(ctx *context.APIContext) {
 	//     "$ref": "#/responses/error"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 
 	if !setting.Mirror.Enabled {
 		ctx.Error(http.StatusBadRequest, "AddPushMirror", "Mirror feature is disabled")

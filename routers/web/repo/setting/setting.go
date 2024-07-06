@@ -17,6 +17,7 @@ import (
 	actions_model "code.gitea.io/gitea/models/actions"
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	unit_model "code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
@@ -518,6 +519,20 @@ func SettingsPost(ctx *context.Context) {
 			return
 		}
 
+		ok, err := quota_model.EvaluateForUser(ctx, repo.OwnerID, quota_model.LimitSubjectSizeReposAll)
+		if err != nil {
+			ctx.ServerError("quota_model.EvaluateForUser", err)
+			return
+		}
+		if !ok {
+			// This section doesn't require repo_name/RepoName to be set in the form, don't show it
+			// as an error on the UI for this action
+			ctx.Data["Err_RepoName"] = nil
+
+			ctx.RenderWithErr(ctx.Tr("repo.settings.pull_mirror_sync_quota_exceeded"), tplSettingsOptions, &form)
+			return
+		}
+
 		mirror_service.AddPullMirrorToQueue(repo.ID)
 
 		ctx.Flash.Info(ctx.Tr("repo.settings.pull_mirror_sync_in_progress", repo.OriginalURL))
@@ -826,6 +841,17 @@ func SettingsPost(ctx *context.Context) {
 				ctx.RenderWithErr(ctx.Tr("form.enterred_invalid_owner_name"), tplSettingsOptions, nil)
 				return
 			}
+		}
+
+		// Check the quota of the new owner
+		ok, err := quota_model.EvaluateForUser(ctx, newOwner.ID, quota_model.LimitSubjectSizeReposAll)
+		if err != nil {
+			ctx.ServerError("quota_model.EvaluateForUser", err)
+			return
+		}
+		if !ok {
+			ctx.RenderWithErr(ctx.Tr("repo.settings.transfer_quota_exceeded", newOwner.Name), tplSettingsOptions, &form)
+			return
 		}
 
 		// Close the GitRepo if open

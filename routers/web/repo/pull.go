@@ -24,6 +24,7 @@ import (
 	"code.gitea.io/gitea/models/organization"
 	access_model "code.gitea.io/gitea/models/perm/access"
 	pull_model "code.gitea.io/gitea/models/pull"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
@@ -249,6 +250,10 @@ func ForkPost(ctx *context.Context) {
 	}
 
 	ctx.Data["ContextUser"] = ctxUser
+
+	if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, ctxUser.ID, ctxUser.Name) {
+		return
+	}
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplFork)

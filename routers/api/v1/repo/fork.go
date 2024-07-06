@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/models/organization"
 	"code.gitea.io/gitea/models/perm"
 	access_model "code.gitea.io/gitea/models/perm/access"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	api "code.gitea.io/gitea/modules/structs"
@@ -105,6 +106,8 @@ func CreateFork(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 	//   "409":
 	//     description: The repository with the same name already exists.
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 
@@ -132,6 +135,10 @@ func CreateFork(ctx *context.APIContext) {
 			return
 		}
 		forker = org.AsUser()
+	}
+
+	if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, forker.ID, forker.Name) {
+		return
 	}
 
 	var name string
