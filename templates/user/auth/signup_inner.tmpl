@@ -57,8 +57,7 @@
 	<div class="ui attached segment header top tw-flex tw-flex-col tw-items-center">
 		{{if not .LinkAccountMode}}
 		<div class="field">
-			<span>{{ctx.Locale.Tr "auth.already_have_account"}}</span>
-			<a href="{{AppSubUrl}}/user/login">{{ctx.Locale.Tr "auth.sign_in_now"}}</a>
+			{{ctx.Locale.Tr "auth.hint_login" (printf "%s/user/login" AppSubUrl)}}
 		</div>
 		{{end}}
 	</div>
