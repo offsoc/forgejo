@@ -78,7 +78,6 @@ type RenderContext struct {
 	ShaExistCache    map[string]bool
 	cancelFn         func()
 	SidebarTocNode   ast.Node
-	RenderMetaAs     RenderMetaMode
 	InStandalonePage bool // used by external render. the router "/org/repo/render/..." will output the rendered content in a standalone page
 }
 
