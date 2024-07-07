@@ -53,8 +53,6 @@
 	{{template "user/auth/webauthn_error" .}}
 
 	<div class="ui attached segment header top tw-max-w-2xl tw-m-auto tw-flex tw-flex-col tw-items-center">
-		<a class="signin-passkey">{{ctx.Locale.Tr "auth.signin_passkey"}}</a>
-
 		{{if .ShowRegistrationButton}}
 			<div class="field">
 				{{ctx.Locale.Tr "auth.hint_register" (printf "%s/user/sign_up" AppSubUrl)}}
