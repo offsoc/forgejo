@@ -115,7 +115,7 @@
 					</div>
 				{{end}}
 			</div>
-			<div class="code-comment-buttons-buttons">
+			<div class="code-comment-buttons-buttons button-row">
 				{{if and $.CanMarkConversation $isNotPending}}
 					<button class="ui tiny basic button resolve-conversation" data-origin="timeline" data-action="{{if not $resolved}}Resolve{{else}}UnResolve{{end}}" data-comment-id="{{(index .comments 0).ID}}" data-update-url="{{$.RepoLink}}/issues/resolve_conversation">
 						{{if $resolved}}
@@ -126,7 +126,7 @@
 					</button>
 				{{end}}
 				{{if and $.SignedUserID (not $.Repository.IsArchived)}}
-					<button class="comment-form-reply ui primary tiny labeled icon button tw-ml-1 tw-mr-0">
+					<button class="comment-form-reply ui primary tiny labeled icon button">
 						{{svg "octicon-reply" 16 "reply icon tw-mr-1"}}{{ctx.Locale.Tr "repo.diff.comment.reply"}}
 					</button>
 				{{end}}

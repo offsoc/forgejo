@@ -601,7 +601,7 @@ td .commit-summary {
   align-items: center;
 }
 
-.repository.view.issue .button-row,
+.issue-title .button-row,
 .repository.releases .button-row {
   display: flex;
 }
@@ -610,7 +610,7 @@ td .commit-summary {
   .repository.view.issue .issue-title {
     flex-direction: column;
   }
-  .repository.view.issue .button-row {
+  .issue-title .button-row {
     width: 100%;
     margin-top: .5rem;
     justify-content: space-between;
@@ -1539,7 +1539,6 @@ td .commit-summary {
 .diff-detail-actions {
   display: flex;
   align-items: center;
-  gap: 0.25em;
   justify-content: end;
 }
 
@@ -1574,7 +1573,7 @@ td .commit-summary {
 }
 
 .repository .diff-detail-box .ui.button {
-  padding: 0 12px;
+  padding: 0 1.125em;
   height: 30px;
 }
 
@@ -1596,7 +1595,7 @@ td .commit-summary {
 }
 
 .repository .diff-box .header:not(.resolved-placeholder) .button {
-  padding: 0 12px;
+  padding: 0 1.125em;
   flex: 0 0 auto;
   margin-right: 0;
   height: 30px;
