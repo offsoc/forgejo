@@ -183,7 +183,8 @@
     {
       "description": "Require approval for stable branches (must be last rule to override all others)",
       "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
-      "dependencyDashboardApproval": true
+      "dependencyDashboardApproval": true,
+      "schedule": ["at any time"]
     }
   ],
   "customManagers": [
