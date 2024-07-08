@@ -290,12 +290,6 @@ export function initRepoPullRequestUpdate() {
   });
 }
 
-export function initRepoPullRequestMergeInstruction() {
-  $('.show-instruction').on('click', () => {
-    toggleElem($('.instruct-content'));
-  });
-}
-
 export function initRepoPullRequestAllowMaintainerEdit() {
   const wrapper = document.getElementById('allow-edits-from-maintainers');
   if (!wrapper) return;
