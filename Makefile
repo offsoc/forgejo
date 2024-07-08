@@ -39,7 +39,7 @@ GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasour
 DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.22.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
 GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.16.1 # renovate: datasource=go
-RENOVATE_NPM_PACKAGE ?= renovate@37.421.2 # renovate: datasource=docker packageName=ghcr.io/visualon/renovate
+RENOVATE_NPM_PACKAGE ?= renovate@37.425.2 # renovate: datasource=docker packageName=ghcr.io/visualon/renovate
 
 DOCKER_IMAGE ?= gitea/gitea
 DOCKER_TAG ?= latest
