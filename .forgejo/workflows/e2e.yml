@@ -4,8 +4,10 @@ on:
   pull_request:
     paths:
       - Makefile
+      - playwright.config.js
       - .forgejo/workflows/e2e.yml
       - tests/e2e/**
+      - web_src/js/**
 
 jobs:
   test-e2e:
