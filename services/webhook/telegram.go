@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/markup"
 	api "code.gitea.io/gitea/modules/structs"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
 	"code.gitea.io/gitea/services/forms"
@@ -213,7 +214,7 @@ func (t telegramConvertor) Package(p *api.PackagePayload) (TelegramPayload, erro
 
 func createTelegramPayload(message string) TelegramPayload {
 	return TelegramPayload{
-		Message:           strings.TrimSpace(message),
+		Message:           markup.Sanitize(strings.TrimSpace(message)),
 		ParseMode:         "HTML",
 		DisableWebPreview: true,
 	}
