@@ -102,6 +102,9 @@ jobs:
           # redict
           - image: registry.redict.io/redict:7.3.0-scratch
             port: 6379
+          # valkey
+          - image: docker.io/valkey/valkey:7.2.5-alpine3.19
+            port: 6379
           # garnet
           - image: ghcr.io/microsoft/garnet-alpine:1.0.14
             port: 6379
