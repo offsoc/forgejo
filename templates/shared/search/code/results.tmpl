@@ -26,7 +26,10 @@
 							- {{.Filename}}
 						</span>
 					{{else}}
-						<span class="file tw-flex-1 tw-ml-2">{{.Filename}}</span>
+						<span class="file tw-flex-1 tw-ml-2">
+							<a rel="nofollow" class="muted file-link" href="{{$repo.Link}}/src/commit/{{$result.CommitID | PathEscape}}/{{.Filename | PathEscapeSegments}}">{{/*
+							*/}}{{.Filename}}</a>
+						</span>
 					{{end}}
 					<a role="button" class="ui basic tiny button" rel="nofollow" href="{{$repo.Link}}/src/commit/{{$result.CommitID | PathEscape}}/{{.Filename | PathEscapeSegments}}">{{ctx.Locale.Tr "repo.diff.view_file"}}</a>
 				</h4>

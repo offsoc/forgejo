@@ -1,10 +1,21 @@
 {{/* Disabled (optional) - if dropdown has to be disabled */}}
 {{/* IsFuzzy - state of the fuzzy search toggle */}}
-<div class="ui small dropdown selection {{if .Disabled}} disabled{{end}}" data-tooltip-content="{{ctx.Locale.Tr "search.type_tooltip"}}">
+<div class="ui small dropdown selection {{if .Disabled}} disabled{{end}}" data-tooltip-content="{{ctx.Locale.Tr "search.type_tooltip"}}" data-test-tag="fuzzy-dropdown">
+	{{$fuzzyType := "fuzzy"}}
+	{{if .CodeIndexerDisabled}}
+		{{$fuzzyType = "union"}}
+	{{end}}
 	<input name="fuzzy" type="hidden"{{if .Disabled}} disabled{{end}} value="{{.IsFuzzy}}">{{svg "octicon-triangle-down" 14 "dropdown icon"}}
-	<div class="text">{{if .IsFuzzy}}{{ctx.Locale.Tr "search.fuzzy"}}{{else}}{{ctx.Locale.Tr "search.exact"}}{{end}}</div>
+	<div class="text">{{/*
+		if code indexer is disabled display fuzzy as union
+	*/}}{{if .IsFuzzy}}{{/*
+		*/}}{{ctx.Locale.Tr (printf "search.%s" $fuzzyType)}}{{/*
+	*/}}{{else}}{{/*
+		*/}}{{ctx.Locale.Tr "search.exact"}}{{/*
+	*/}}{{end}}</div>
 	<div class="menu">
-		<div class="item" data-value="true" data-tooltip-content="{{ctx.Locale.Tr "search.fuzzy_tooltip"}}">{{ctx.Locale.Tr "search.fuzzy"}}</div>
+		<div class="item" data-value="true" data-tooltip-content="{{ctx.Locale.Tr (printf "search.%s_tooltip" $fuzzyType)}}">{{/*
+		*/}}{{ctx.Locale.Tr (printf "search.%s" $fuzzyType)}}</div>
 		<div class="item" data-value="false" data-tooltip-content="{{ctx.Locale.Tr "search.exact_tooltip"}}">{{ctx.Locale.Tr "search.exact"}}</div>
 	</div>
 </div>
