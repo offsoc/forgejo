@@ -28,6 +28,7 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
+	"code.gitea.io/gitea/routers/common"
 	actions_service "code.gitea.io/gitea/services/actions"
 	context_module "code.gitea.io/gitea/services/context"
 
@@ -662,10 +663,8 @@ func ArtifactsDownloadView(ctx *context_module.Context) {
 		}
 	}
 
-	ctx.Resp.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.zip; filename*=UTF-8''%s.zip", url.PathEscape(artifactName), artifactName))
-
 	// Artifacts using the v4 backend are stored as a single combined zip file per artifact on the backend
-	// The v4 backend enshures ContentEncoding is set to "application/zip", which is not the case for the old backend
+	// The v4 backend ensures ContentEncoding is set to "application/zip", which is not the case for the old backend
 	if len(artifacts) == 1 && artifacts[0].ArtifactName+".zip" == artifacts[0].ArtifactPath && artifacts[0].ContentEncoding == "application/zip" {
 		art := artifacts[0]
 		if setting.Actions.ArtifactStorage.MinioConfig.ServeDirect {
@@ -680,12 +679,13 @@ func ArtifactsDownloadView(ctx *context_module.Context) {
 			ctx.Error(http.StatusInternalServerError, err.Error())
 			return
 		}
-		_, _ = io.Copy(ctx.Resp, f)
+		common.ServeContentByReadSeeker(ctx.Base, artifactName, util.ToPointer(art.UpdatedUnix.AsTime()), f)
 		return
 	}
 
 	// Artifacts using the v1-v3 backend are stored as multiple individual files per artifact on the backend
 	// Those need to be zipped for download
+	ctx.Resp.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.zip; filename*=UTF-8''%s.zip", url.PathEscape(artifactName), artifactName))
 	writer := zip.NewWriter(ctx.Resp)
 	defer writer.Close()
 	for _, art := range artifacts {

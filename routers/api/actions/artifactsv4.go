@@ -97,6 +97,7 @@ import (
 	"code.gitea.io/gitea/modules/storage"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
+	"code.gitea.io/gitea/routers/common"
 	"code.gitea.io/gitea/services/context"
 
 	"google.golang.org/protobuf/encoding/protojson"
@@ -473,9 +474,14 @@ func (r *artifactV4Routes) downloadArtifact(ctx *ArtifactContext) {
 		return
 	}
 
-	file, _ := r.fs.Open(artifact.StoragePath)
+	file, err := r.fs.Open(artifact.StoragePath)
+	if err != nil {
+		log.Error("Error artifact could not be opened: %v", err)
+		ctx.Error(http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	_, _ = io.Copy(ctx.Resp, file)
+	common.ServeContentByReadSeeker(ctx.Base, artifactName, util.ToPointer(artifact.UpdatedUnix.AsTime()), file)
 }
 
 func (r *artifactV4Routes) deleteArtifact(ctx *ArtifactContext) {

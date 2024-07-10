@@ -31,9 +31,7 @@ func toProtoJSON(m protoreflect.ProtoMessage) io.Reader {
 	return &buf
 }
 
-func TestActionsArtifactV4UploadSingleFile(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
-
+func uploadArtifact(t *testing.T, body string) string {
 	token, err := actions_service.CreateAuthorizationToken(48, 792, 193)
 	assert.NoError(t, err)
 
@@ -55,7 +53,6 @@ func TestActionsArtifactV4UploadSingleFile(t *testing.T) {
 	url := uploadResp.SignedUploadUrl[idx:] + "&comp=block"
 
 	// upload artifact chunk
-	body := strings.Repeat("A", 1024)
 	req = NewRequestWithBody(t, "PUT", url, strings.NewReader(body))
 	MakeRequest(t, req, http.StatusCreated)
 
@@ -76,6 +73,13 @@ func TestActionsArtifactV4UploadSingleFile(t *testing.T) {
 	var finalizeResp actions.FinalizeArtifactResponse
 	protojson.Unmarshal(resp.Body.Bytes(), &finalizeResp)
 	assert.True(t, finalizeResp.Ok)
+	return token
+}
+
+func TestActionsArtifactV4UploadSingleFile(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	body := strings.Repeat("A", 1024)
+	uploadArtifact(t, body)
 }
 
 func TestActionsArtifactV4UploadSingleFileWrongChecksum(t *testing.T) {
@@ -202,7 +206,52 @@ func TestActionsArtifactV4DownloadSingle(t *testing.T) {
 	req = NewRequest(t, "GET", finalizeResp.SignedUrl)
 	resp = MakeRequest(t, req, http.StatusOK)
 	body := strings.Repeat("A", 1024)
-	assert.Equal(t, resp.Body.String(), body)
+	assert.Equal(t, "bytes", resp.Header().Get("accept-ranges"))
+	assert.Equal(t, body, resp.Body.String())
+
+	// Download artifact via user-facing URL
+	req = NewRequest(t, "GET", "/user5/repo4/actions/runs/188/artifacts/artifact")
+	resp = MakeRequest(t, req, http.StatusOK)
+	assert.Equal(t, "bytes", resp.Header().Get("accept-ranges"))
+	assert.Equal(t, body, resp.Body.String())
+
+	// Partial artifact download
+	req = NewRequest(t, "GET", "/user5/repo4/actions/runs/188/artifacts/artifact").SetHeader("range", "bytes=0-99")
+	resp = MakeRequest(t, req, http.StatusPartialContent)
+	body = strings.Repeat("A", 100)
+	assert.Equal(t, "bytes 0-99/1024", resp.Header().Get("content-range"))
+	assert.Equal(t, body, resp.Body.String())
+}
+
+func TestActionsArtifactV4DownloadRange(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	bstr := strings.Repeat("B", 100)
+	body := strings.Repeat("A", 100) + bstr
+	token := uploadArtifact(t, body)
+
+	// Download (Actions API)
+	req := NewRequestWithBody(t, "POST", "/twirp/github.actions.results.api.v1.ArtifactService/GetSignedArtifactURL", toProtoJSON(&actions.GetSignedArtifactURLRequest{
+		Name:                    "artifact",
+		WorkflowRunBackendId:    "792",
+		WorkflowJobRunBackendId: "193",
+	})).
+		AddTokenAuth(token)
+	resp := MakeRequest(t, req, http.StatusOK)
+	var finalizeResp actions.GetSignedArtifactURLResponse
+	protojson.Unmarshal(resp.Body.Bytes(), &finalizeResp)
+	assert.NotEmpty(t, finalizeResp.SignedUrl)
+
+	req = NewRequest(t, "GET", finalizeResp.SignedUrl).SetHeader("range", "bytes=100-199")
+	resp = MakeRequest(t, req, http.StatusPartialContent)
+	assert.Equal(t, "bytes 100-199/200", resp.Header().Get("content-range"))
+	assert.Equal(t, bstr, resp.Body.String())
+
+	// Download (user-facing API)
+	req = NewRequest(t, "GET", "/user5/repo4/actions/runs/188/artifacts/artifact").SetHeader("range", "bytes=100-199")
+	resp = MakeRequest(t, req, http.StatusPartialContent)
+	assert.Equal(t, "bytes 100-199/200", resp.Header().Get("content-range"))
+	assert.Equal(t, bstr, resp.Body.String())
 }
 
 func TestActionsArtifactV4Delete(t *testing.T) {
