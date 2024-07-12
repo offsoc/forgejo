@@ -339,7 +339,7 @@ export default sfc; // activate the IDE's Vue plugin
 </script>
 <template>
   <div>
-    <div v-if="!isOrganization" class="ui secondary stackable menu">
+    <div v-if="!isOrganization" class="ui secondary stackable menu tabs-with-labels">
       <a :class="{item: true, active: tab === 'repos'}" @click="changeTab('repos')">{{ textMyRepos }} <span class="ui grey label tw-ml-2">{{ reposTotalCount }}</span></a>
       <a :class="{item: true, active: tab === 'organizations'}" @click="changeTab('organizations')">{{ textMyOrgs }} <span class="ui grey label tw-ml-2">{{ organizationsTotalCount }}</span></a>
     </div>

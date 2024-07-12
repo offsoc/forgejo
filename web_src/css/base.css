@@ -1185,7 +1185,8 @@ svg.text.purple,
   color: var(--color-label-text);
 }
 
-.ui.menu .active.item > .label {
+.ui.menu .active.item > .label,
+.ui.menu.tabs-with-labels .item:hover > .label {
   background: var(--color-label-bg-alt, var(--color-label-bg));
 }
 
