@@ -500,6 +500,15 @@ func (u *User) GetCompleteName() string {
 	return u.Name
 }
 
+// GetPronouns returns an empty string, if the user has set to keep his
+// pronouns private, otherwise the Pronouns are returned.
+func (u *User) GetPronouns(signed bool) string {
+	if u.KeepPronounsPrivate && !signed {
+		return ""
+	}
+	return u.Pronouns
+}
+
 func gitSafeName(name string) string {
 	return strings.TrimSpace(strings.NewReplacer("\n", "", "<", "", ">", "").Replace(name))
 }

@@ -12,4 +12,3 @@ func AddExternalURLColumnToAttachmentTable(x *xorm.Engine) error {
 	}
 	return x.Sync(new(Attachment))
 }
-

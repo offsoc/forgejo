@@ -700,3 +700,46 @@ func TestDisabledUserFeatures(t *testing.T) {
 		assert.True(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
 }
+
+func TestPronounsPrivacy(t *testing.T) {
+	t.Run("EmptyPronounsIfNoneSet", func(t *testing.T) {
+		assert.NoError(t, unittest.PrepareTestDatabase())
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = ""
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "", user.GetPronouns(false))
+	})
+	t.Run("EmptyPronounsIfSetButPrivateAndNotLoggedIn", func(t *testing.T) {
+		assert.NoError(t, unittest.PrepareTestDatabase())
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = true
+
+		assert.Equal(t, "", user.GetPronouns(false))
+	})
+	t.Run("ReturnPronounsIfSetAndNotPrivateAndNotLoggedIn", func(t *testing.T) {
+		assert.NoError(t, unittest.PrepareTestDatabase())
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "any", user.GetPronouns(false))
+	})
+	t.Run("ReturnPronounsIfSetAndPrivateAndLoggedIn", func(t *testing.T) {
+		assert.NoError(t, unittest.PrepareTestDatabase())
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "any", user.GetPronouns(true))
+	})
+	t.Run("ReturnPronounsIfSetAndNotPrivateAndLoggedIn", func(t *testing.T) {
+		assert.NoError(t, unittest.PrepareTestDatabase())
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = true
+
+		assert.Equal(t, "any", user.GetPronouns(true))
+	})
+}
