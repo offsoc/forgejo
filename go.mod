@@ -90,7 +90,7 @@ require (
 	github.com/quasoft/websspi v1.1.2
 	github.com/redis/go-redis/v9 v9.5.4
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1
 	github.com/sassoftware/go-rpmutils v0.2.1-0.20240124161140-277b154961dd
 	github.com/sergi/go-diff v1.3.1
 	github.com/shurcooL/vfsgen v0.0.0-20230704071429-0000e147ea92
@@ -259,7 +259,6 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/shurcooL/httpfs v0.0.0-20230704072500-f1e31cf0ba5c // indirect

@@ -12,7 +12,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"gopkg.in/yaml.v3"
 )
 
@@ -43,7 +43,7 @@ func unmarshal(bs []byte, data any, isJSON bool) error {
 
 func getSchema(filename string) (*jsonschema.Schema, error) {
 	c := jsonschema.NewCompiler()
-	c.LoadURL = openSchema
+	c.UseLoader(&SchemaLoader{})
 	return c.Compile(filename)
 }
 

@@ -56,7 +56,7 @@ import (
 	"github.com/markbates/goth/gothic"
 	goth_github "github.com/markbates/goth/providers/github"
 	goth_gitlab "github.com/markbates/goth/providers/gitlab"
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -659,7 +659,7 @@ func VerifyJSONSchema(t testing.TB, resp *httptest.ResponseRecorder, schemaFile 
 	_, schemaFileErr := os.Stat(schemaFilePath)
 	assert.Nil(t, schemaFileErr)
 
-	schema, err := jsonschema.Compile(schemaFilePath)
+	schema, err := jsonschema.NewCompiler().Compile(schemaFilePath)
 	assert.NoError(t, err)
 
 	var data any
