@@ -6,13 +6,14 @@ package base
 import (
 	"testing"
 
+	migrations_tests "code.gitea.io/gitea/models/migrations/test"
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"xorm.io/xorm/names"
 )
 
 func Test_DropTableColumns(t *testing.T) {
-	x, deferable := PrepareTestEnv(t, 0)
+	x, deferable := migrations_tests.PrepareTestEnv(t, 0)
 	if x == nil || t.Failed() {
 		defer deferable()
 		return

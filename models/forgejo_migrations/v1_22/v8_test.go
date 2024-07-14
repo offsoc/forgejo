@@ -6,7 +6,7 @@ package v1_22 //nolint
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -18,7 +18,7 @@ func Test_RemoveSSHSignaturesFromReleaseNotes(t *testing.T) {
 		Note string `xorm:"TEXT"`
 	}
 
-	x, deferable := base.PrepareTestEnv(t, 0, new(Release))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(Release))
 	defer deferable()
 
 	assert.NoError(t, RemoveSSHSignaturesFromReleaseNotes(x))

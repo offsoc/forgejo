@@ -6,7 +6,7 @@ package v1_15 //nolint
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +20,7 @@ func Test_AddIssueResourceIndexTable(t *testing.T) {
 	}
 
 	// Prepare and load the testing database
-	x, deferable := base.PrepareTestEnv(t, 0, new(Issue))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(Issue))
 	if x == nil || t.Failed() {
 		defer deferable()
 		return

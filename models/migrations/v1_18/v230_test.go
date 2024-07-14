@@ -6,7 +6,7 @@ package v1_18 //nolint
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -18,7 +18,7 @@ func Test_AddConfidentialClientColumnToOAuth2ApplicationTable(t *testing.T) {
 	}
 
 	// Prepare and load the testing database
-	x, deferable := base.PrepareTestEnv(t, 0, new(oauth2Application))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(oauth2Application))
 	defer deferable()
 	if x == nil || t.Failed() {
 		return

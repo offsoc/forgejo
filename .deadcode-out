@@ -60,13 +60,6 @@ code.gitea.io/gitea/models/issues
 	IsErrIssueWasClosed
 	ChangeMilestoneStatus
 
-code.gitea.io/gitea/models/migrations/base
-	removeAllWithRetry
-	newXORMEngine
-	deleteDB
-	PrepareTestEnv
-	MainTest
-
 code.gitea.io/gitea/models/organization
 	GetTeamNamesByID
 	UpdateTeamUnits
@@ -92,36 +85,6 @@ code.gitea.io/gitea/models/repo
 	ErrTopicNotExist.Unwrap
 	GetTopicByName
 	WatchRepoMode
-
-code.gitea.io/gitea/models/unittest
-	CheckConsistencyFor
-	checkForConsistency
-	GetXORMEngine
-	OverrideFixtures
-	InitFixtures
-	LoadFixtures
-	Copy
-	CopyDir
-	NewMockWebServer
-	NormalizedFullPath
-	FixturesDir
-	fatalTestError
-	InitSettings
-	MainTest
-	CreateTestEngine
-	PrepareTestDatabase
-	PrepareTestEnv
-	Cond
-	OrderBy
-	LoadBeanIfExists
-	BeanExists
-	AssertExistsAndLoadBean
-	GetCount
-	AssertNotExistsBean
-	AssertExistsIf
-	AssertSuccessfulInsert
-	AssertCount
-	AssertInt64InRange
 
 code.gitea.io/gitea/models/user
 	IsErrPrimaryEmailCannotDelete
@@ -272,22 +235,6 @@ code.gitea.io/gitea/modules/structs
 code.gitea.io/gitea/modules/sync
 	StatusTable.Start
 	StatusTable.IsRunning
-
-code.gitea.io/gitea/modules/testlogger
-	testLoggerWriterCloser.pushT
-	testLoggerWriterCloser.Log
-	testLoggerWriterCloser.recordError
-	testLoggerWriterCloser.printMsg
-	testLoggerWriterCloser.popT
-	testLoggerWriterCloser.Reset
-	PrintCurrentTest
-	Printf
-	NewTestLoggerWriter
-	TestLogEventWriter.Base
-	TestLogEventWriter.GetLevel
-	TestLogEventWriter.GetWriterName
-	TestLogEventWriter.GetWriterType
-	TestLogEventWriter.Run
 
 code.gitea.io/gitea/modules/timeutil
 	GetExecutableModTime

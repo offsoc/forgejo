@@ -6,14 +6,14 @@ package forgejo_migrations //nolint:revive
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
 )
 
 // TestEnsureUpToDate tests the behavior of EnsureUpToDate.
 func TestEnsureUpToDate(t *testing.T) {
-	x, deferable := base.PrepareTestEnv(t, 0, new(ForgejoVersion))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(ForgejoVersion))
 	defer deferable()
 	if x == nil || t.Failed() {
 		return

@@ -7,7 +7,7 @@ import (
 	"encoding/base32"
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -38,7 +38,7 @@ func Test_StoreWebauthnCredentialIDAsBytes(t *testing.T) {
 	}
 
 	// Prepare and load the testing database
-	x, deferable := base.PrepareTestEnv(t, 0, new(WebauthnCredential), new(ExpectedWebauthnCredential))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(WebauthnCredential), new(ExpectedWebauthnCredential))
 	defer deferable()
 	if x == nil || t.Failed() {
 		return

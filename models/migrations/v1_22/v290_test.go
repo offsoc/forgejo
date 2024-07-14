@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 	"code.gitea.io/gitea/modules/timeutil"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
 
@@ -34,7 +34,7 @@ func Test_AddPayloadVersionToHookTaskTable(t *testing.T) {
 	}
 
 	// Prepare and load the testing database
-	x, deferable := base.PrepareTestEnv(t, 0, new(HookTask), new(HookTaskMigrated))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(HookTask), new(HookTaskMigrated))
 	defer deferable()
 	if x == nil || t.Failed() {
 		return
