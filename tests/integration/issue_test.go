@@ -1126,3 +1126,32 @@ func TestIssueUnsubscription(t *testing.T) {
 		session.MakeRequest(t, req, http.StatusOK)
 	})
 }
+
+func TestIssueLabelList(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	labelListSelector := ".labels.list .labels-list"
+	hiddenClass := "tw-hidden"
+
+	t.Run("Show label list", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues/1")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		htmlDoc.AssertElement(t, labelListSelector, true)
+		htmlDoc.AssertElement(t, ".labels.list .no-select.item."+hiddenClass, true)
+	})
+
+	t.Run("Show no label list", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		session := loginUser(t, "user2")
+
+		req := NewRequest(t, "GET", "/user2/repo2/issues/1")
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		htmlDoc.AssertElement(t, labelListSelector, false)
+		htmlDoc.AssertElement(t, ".labels.list .no-select.item:not([class*='"+hiddenClass+"'])", true)
+	})
+}
