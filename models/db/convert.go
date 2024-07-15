@@ -6,6 +6,7 @@ package db
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
@@ -25,7 +26,8 @@ func ConvertDatabaseTable() error {
 		return err
 	}
 
-	_, err = x.Exec(fmt.Sprintf("ALTER DATABASE `%s` CHARACTER SET utf8mb4 COLLATE %s", setting.Database.Name, r.ExpectedCollation))
+	databaseName := strings.SplitN(setting.Database.Name, "?", 2)[0]
+	_, err = x.Exec(fmt.Sprintf("ALTER DATABASE `%s` CHARACTER SET utf8mb4 COLLATE %s", databaseName, r.ExpectedCollation))
 	if err != nil {
 		return err
 	}

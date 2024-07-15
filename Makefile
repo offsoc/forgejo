@@ -191,7 +191,7 @@ SWAGGER_NEWLINE_COMMAND := -e '$$a\'
 SWAGGER_SPEC_BRANDING := s|Gitea API|Forgejo API|g
 
 TEST_MYSQL_HOST ?= mysql:3306
-TEST_MYSQL_DBNAME ?= testgitea
+TEST_MYSQL_DBNAME ?= testgitea?multiStatements=true
 TEST_MYSQL_USERNAME ?= root
 TEST_MYSQL_PASSWORD ?=
 TEST_PGSQL_HOST ?= pgsql:5432

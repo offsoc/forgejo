@@ -12,6 +12,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -106,7 +107,7 @@ func InitTest(requireGitea bool) {
 		if err != nil {
 			log.Fatal("sql.Open: %v", err)
 		}
-		if _, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", setting.Database.Name)); err != nil {
+		if _, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", strings.SplitN(setting.Database.Name, "?", 2)[0])); err != nil {
 			log.Fatal("db.Exec: %v", err)
 		}
 	case setting.Database.Type.IsPostgreSQL():

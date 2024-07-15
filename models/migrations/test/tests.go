@@ -12,6 +12,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -198,11 +199,13 @@ func deleteDB() error {
 		}
 		defer db.Close()
 
-		if _, err = db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", setting.Database.Name)); err != nil {
+		databaseName := strings.SplitN(setting.Database.Name, "?", 2)[0]
+
+		if _, err = db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", databaseName)); err != nil {
 			return err
 		}
 
-		if _, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", setting.Database.Name)); err != nil {
+		if _, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", databaseName)); err != nil {
 			return err
 		}
 		return nil

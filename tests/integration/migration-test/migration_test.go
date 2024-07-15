@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
@@ -174,14 +175,16 @@ func restoreOldDB(t *testing.T, version string) bool {
 		assert.NoError(t, err)
 		defer db.Close()
 
-		_, err = db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", setting.Database.Name))
+		databaseName := strings.SplitN(setting.Database.Name, "?", 2)[0]
+
+		_, err = db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", databaseName))
 		assert.NoError(t, err)
 
-		_, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", setting.Database.Name))
+		_, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", databaseName))
 		assert.NoError(t, err)
 		db.Close()
 
-		db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true",
+		db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s",
 			setting.Database.User, setting.Database.Passwd, setting.Database.Host, setting.Database.Name))
 		assert.NoError(t, err)
 		defer db.Close()
