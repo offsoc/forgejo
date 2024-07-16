@@ -1,6 +1,6 @@
 name: 💡 Feature Request
 description: Got an idea for a feature that Forgejo doesn't have yet? Suggest it here!
-title: "[FEAT] "
+title: "feat: "
 labels: ["enhancement/feature"]
 body:
 - type: markdown

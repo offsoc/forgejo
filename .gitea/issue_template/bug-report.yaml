@@ -1,6 +1,6 @@
 name: 🐛 Bug Report (server / backend)
 description: Found something you weren't expecting? Report it here!
-title: "[BUG] "
+title: "bug: "
 labels: bug/new-report
 body:
 - type: markdown
