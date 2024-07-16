@@ -46,12 +46,19 @@ func TestAPIGetCommentAttachment(t *testing.T) {
 
 	session := loginUser(t, repoOwner.Name)
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadIssue)
-	req := NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/comments/%d/assets/%d", repoOwner.Name, repo.Name, comment.ID, attachment.ID).
+	req := NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/comments/%d", repoOwner.Name, repo.Name, comment.ID).
+		AddTokenAuth(token)
+	resp := session.MakeRequest(t, req, http.StatusOK)
+	var apiComment api.Comment
+	DecodeJSON(t, resp, &apiComment)
+	assert.NotEmpty(t, apiComment.Attachments)
+
+	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/comments/%d/assets/%d", repoOwner.Name, repo.Name, comment.ID, attachment.ID).
 		AddTokenAuth(token)
 	session.MakeRequest(t, req, http.StatusOK)
 	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/comments/%d/assets/%d", repoOwner.Name, repo.Name, comment.ID, attachment.ID).
 		AddTokenAuth(token)
-	resp := session.MakeRequest(t, req, http.StatusOK)
+	resp = session.MakeRequest(t, req, http.StatusOK)
 
 	var apiAttachment api.Attachment
 	DecodeJSON(t, resp, &apiAttachment)
