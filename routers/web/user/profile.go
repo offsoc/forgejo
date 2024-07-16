@@ -341,7 +341,6 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 // Action response for follow/unfollow user request
 func Action(ctx *context.Context) {
 	var err error
-	var redirectViaJSON bool
 	action := ctx.FormString("action")
 
 	if ctx.ContextUser.IsOrganization() && (action == "block" || action == "unblock") {
@@ -357,10 +356,8 @@ func Action(ctx *context.Context) {
 		err = user_model.UnfollowUser(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
 	case "block":
 		err = user_service.BlockUser(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
-		redirectViaJSON = true
 	case "unblock":
 		err = user_model.UnblockUser(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
-		redirectViaJSON = true
 	}
 
 	if err != nil {
@@ -371,21 +368,15 @@ func Action(ctx *context.Context) {
 		}
 
 		if ctx.ContextUser.IsOrganization() {
-			ctx.Flash.Error(ctx.Tr("org.follow_blocked_user"))
+			ctx.Flash.Error(ctx.Tr("org.follow_blocked_user"), true)
 		} else {
-			ctx.Flash.Error(ctx.Tr("user.follow_blocked_user"))
+			ctx.Flash.Error(ctx.Tr("user.follow_blocked_user"), true)
 		}
-	}
-
-	if redirectViaJSON {
-		ctx.JSON(http.StatusOK, map[string]any{
-			"redirect": ctx.ContextUser.HomeLink(),
-		})
-		return
 	}
 
 	if ctx.ContextUser.IsIndividual() {
 		shared_user.PrepareContextForProfileBigAvatar(ctx)
+		ctx.Data["IsHTMX"] = true
 		ctx.HTML(http.StatusOK, tplProfileBigAvatar)
 		return
 	} else if ctx.ContextUser.IsOrganization() {

@@ -34,15 +34,8 @@ func BlockUser(t *testing.T, doer, blockedUser *user_model.User) {
 		"_csrf":  GetCSRF(t, session, "/"+blockedUser.Name),
 		"action": "block",
 	})
-	resp := session.MakeRequest(t, req, http.StatusOK)
+	session.MakeRequest(t, req, http.StatusOK)
 
-	type redirect struct {
-		Redirect string `json:"redirect"`
-	}
-
-	var respBody redirect
-	DecodeJSON(t, resp, &respBody)
-	assert.EqualValues(t, "/"+blockedUser.Name, respBody.Redirect)
 	assert.True(t, unittest.BeanExists(t, &user_model.BlockedUser{BlockID: blockedUser.ID, UserID: doer.ID}))
 }
 
@@ -303,11 +296,10 @@ func TestBlockActions(t *testing.T) {
 				"_csrf":  GetCSRF(t, session, "/"+blockedUser.Name),
 				"action": "follow",
 			})
-			session.MakeRequest(t, req, http.StatusOK)
+			resp := session.MakeRequest(t, req, http.StatusOK)
 
-			flashCookie := session.GetCookie(forgejo_context.CookieNameFlash)
-			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "error%3DYou%2Bcannot%2Bfollow%2Bthis%2Buser%2Bbecause%2Byou%2Bhave%2Bblocked%2Bthis%2Buser%2Bor%2Bthis%2Buser%2Bhas%2Bblocked%2Byou.", flashCookie.Value)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+			assert.Contains(t, htmlDoc.Find("#flash-message").Text(), "You cannot follow this user because you have blocked this user or this user has blocked you.")
 
 			// Assert it still doesn't exist.
 			unittest.AssertNotExistsBean(t, &user_model.Follow{UserID: doer.ID, FollowID: blockedUser.ID})
@@ -323,11 +315,10 @@ func TestBlockActions(t *testing.T) {
 				"_csrf":  GetCSRF(t, session, "/"+doer.Name),
 				"action": "follow",
 			})
-			session.MakeRequest(t, req, http.StatusOK)
+			resp := session.MakeRequest(t, req, http.StatusOK)
 
-			flashCookie := session.GetCookie(forgejo_context.CookieNameFlash)
-			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "error%3DYou%2Bcannot%2Bfollow%2Bthis%2Buser%2Bbecause%2Byou%2Bhave%2Bblocked%2Bthis%2Buser%2Bor%2Bthis%2Buser%2Bhas%2Bblocked%2Byou.", flashCookie.Value)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+			assert.Contains(t, htmlDoc.Find("#flash-message").Text(), "You cannot follow this user because you have blocked this user or this user has blocked you.")
 
 			unittest.AssertNotExistsBean(t, &user_model.Follow{UserID: blockedUser.ID, FollowID: doer.ID})
 		})
