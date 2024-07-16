@@ -49,6 +49,7 @@ jobs:
         image: elasticsearch:7.17.22
         env:
           discovery.type: single-node
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
       minio:
         image: bitnami/minio:2024.3.30
         options: >-
