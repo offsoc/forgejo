@@ -619,10 +619,8 @@ func handleUserCreated(ctx *context.Context, u *user_model.User, gothUser *goth.
 	notify_service.NewUserSignUp(ctx, u)
 	// update external user information
 	if gothUser != nil {
-		if err := externalaccount.UpdateExternalUser(ctx, u, *gothUser); err != nil {
-			if !errors.Is(err, util.ErrNotExist) {
-				log.Error("UpdateExternalUser failed: %v", err)
-			}
+		if err := externalaccount.EnsureLinkExternalToUser(ctx, u, *gothUser); err != nil {
+			log.Error("EnsureLinkExternalToUser failed: %v", err)
 		}
 	}
 
