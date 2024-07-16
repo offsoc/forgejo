@@ -100,8 +100,20 @@ TEST_MYSQL_HOST=localhost:1433 TEST_MYSQL_DBNAME=test TEST_MYSQL_USERNAME=sa TES
 
 Although the main goal of e2e is assertion testing, we have added a framework for visual regress testing. If you are working on front-end features, please use the following:
  - Check out `main`, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1` to generate outputs. This will initially fail, as no screenshots exist. You can run the e2e tests again to assert it passes.
- - Check out your branch, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1`. You should be able to assert you front-end changes don't break any other tests unintentionally. 
+ - Check out your branch, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1`. You should be able to assert you front-end changes don't break any other tests unintentionally.
 
-VISUAL_TEST=1 will create screenshots in tests/e2e/test-snapshots. The test will fail the first time this is enabled (until we get visual test image persistence figured out), because it will be testing against an empty screenshot folder. 
+VISUAL_TEST=1 will create screenshots in tests/e2e/test-snapshots. The test will fail the first time this is enabled (until we get visual test image persistence figured out), because it will be testing against an empty screenshot folder.
 
 ACCEPT_VISUAL=1 will overwrite the snapshot images with new images.
+
+## With VSCodium or VSCode
+
+To debug a test, you can use "Playwright Test" for
+[VScodium](https://open-vsx.org/extension/ms-playwright/playwright)
+or [VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright).
+Before doing that you will need to manually start a Forgejo instance and populate it
+with data from `models/fixtures` by running:
+
+```sh
+make TAGS='sqlite sqlite_unlock_notify' 'test-e2e-debugserver'
+```
