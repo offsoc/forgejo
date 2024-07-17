@@ -1,17 +1,13 @@
+{{$pullRequestEnabled := .Repository.UnitEnabled $.Context $.UnitTypePullRequests}}
+{{$pullRequestGlobalDisabled := .UnitTypePullRequests.UnitGlobalDisabled}}
+{{$prUnit := .Repository.MustGetUnit $.Context $.UnitTypePullRequests}}
 <h4 class="ui top attached header" id="pulls">
-	{{ctx.Locale.Tr "repo.pulls"}}
+	<div class="ui checkbox{{if $pullRequestGlobalDisabled}} disabled{{end}}"{{if $pullRequestGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+		<input class="enable-system" name="enable_pulls" type="checkbox" data-target="#pull_box" {{if $pullRequestEnabled}}checked{{end}}>
+		<label>{{ctx.Locale.Tr "repo.pulls"}}</label>
+	</div>
 </h4>
 <div class="ui attached segment">
-	{{$pullRequestEnabled := .Repository.UnitEnabled $.Context $.UnitTypePullRequests}}
-	{{$pullRequestGlobalDisabled := .UnitTypePullRequests.UnitGlobalDisabled}}
-	{{$prUnit := .Repository.MustGetUnit $.Context $.UnitTypePullRequests}}
-	<div class="inline field">
-		<label>{{ctx.Locale.Tr "repo.pulls"}}</label>
-		<div class="ui checkbox{{if $pullRequestGlobalDisabled}} disabled{{end}}"{{if $pullRequestGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
-			<input class="enable-system" name="enable_pulls" type="checkbox" data-target="#pull_box" {{if $pullRequestEnabled}}checked{{end}}>
-			<label>{{ctx.Locale.Tr "repo.settings.pulls_desc"}}</label>
-		</div>
-	</div>
 	<div class="field{{if not $pullRequestEnabled}} disabled{{end}}" id="pull_box">
 		<div class="field">
 			<p>

@@ -1,18 +1,14 @@
+{{$isIssuesEnabled := or (.Repository.UnitEnabled $.Context $.UnitTypeIssues) (.Repository.UnitEnabled $.Context $.UnitTypeExternalTracker)}}
+{{$isIssuesGlobalDisabled := .UnitTypeIssues.UnitGlobalDisabled}}
+{{$isExternalTrackerGlobalDisabled := .UnitTypeExternalTracker.UnitGlobalDisabled}}
+{{$isIssuesAndExternalGlobalDisabled := and $isIssuesGlobalDisabled $isExternalTrackerGlobalDisabled}}
 <h4 class="ui top attached header" id="issues">
-	{{ctx.Locale.Tr "repo.issues"}}
+	<div class="ui checkbox{{if $isIssuesAndExternalGlobalDisabled}} disabled{{end}}"{{if $isIssuesAndExternalGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+		<input class="enable-system" name="enable_issues" type="checkbox" data-target="#issue_box" {{if $isIssuesEnabled}}checked{{end}}>
+		<label>{{ctx.Locale.Tr "repo.issues"}}</label>
+	</div>
 </h4>
 <div class="ui attached segment">
-	{{$isIssuesEnabled := or (.Repository.UnitEnabled $.Context $.UnitTypeIssues) (.Repository.UnitEnabled $.Context $.UnitTypeExternalTracker)}}
-	{{$isIssuesGlobalDisabled := .UnitTypeIssues.UnitGlobalDisabled}}
-	{{$isExternalTrackerGlobalDisabled := .UnitTypeExternalTracker.UnitGlobalDisabled}}
-	{{$isIssuesAndExternalGlobalDisabled := and $isIssuesGlobalDisabled $isExternalTrackerGlobalDisabled}}
-	<div class="inline field">
-		<label>{{ctx.Locale.Tr "repo.issues"}}</label>
-		<div class="ui checkbox{{if $isIssuesAndExternalGlobalDisabled}} disabled{{end}}"{{if $isIssuesAndExternalGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
-			<input class="enable-system" name="enable_issues" type="checkbox" data-target="#issue_box" {{if $isIssuesEnabled}}checked{{end}}>
-			<label>{{ctx.Locale.Tr "repo.settings.issues_desc"}}</label>
-		</div>
-	</div>
 	<div class="field {{if not $isIssuesEnabled}}disabled{{end}}" id="issue_box">
 		<div class="field">
 			<div class="ui radio checkbox{{if $isIssuesGlobalDisabled}} disabled{{end}}"{{if $isIssuesGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>

@@ -1,18 +1,14 @@
+{{$isWikiEnabled := or (.Repository.UnitEnabled $.Context $.UnitTypeWiki) (.Repository.UnitEnabled $.Context $.UnitTypeExternalWiki)}}
+{{$isWikiGlobalDisabled := .UnitTypeWiki.UnitGlobalDisabled}}
+{{$isExternalWikiGlobalDisabled := .UnitTypeExternalWiki.UnitGlobalDisabled}}
+{{$isBothWikiGlobalDisabled := and $isWikiGlobalDisabled $isExternalWikiGlobalDisabled}}
 <h4 class="ui top attached header" id="wiki">
-	{{ctx.Locale.Tr "repo.wiki"}}
+	<div class="ui checkbox{{if $isBothWikiGlobalDisabled}} disabled{{end}}"{{if $isBothWikiGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+		<input class="enable-system" name="enable_wiki" type="checkbox" data-target="#wiki_box" {{if $isWikiEnabled}}checked{{end}}>
+		<label>{{ctx.Locale.Tr "repo.wiki"}}</label>
+	</div>
 </h4>
 <div class="ui attached segment">
-	{{$isWikiEnabled := or (.Repository.UnitEnabled $.Context $.UnitTypeWiki) (.Repository.UnitEnabled $.Context $.UnitTypeExternalWiki)}}
-	{{$isWikiGlobalDisabled := .UnitTypeWiki.UnitGlobalDisabled}}
-	{{$isExternalWikiGlobalDisabled := .UnitTypeExternalWiki.UnitGlobalDisabled}}
-	{{$isBothWikiGlobalDisabled := and $isWikiGlobalDisabled $isExternalWikiGlobalDisabled}}
-	<div class="inline field">
-		<label>{{ctx.Locale.Tr "repo.wiki"}}</label>
-		<div class="ui checkbox{{if $isBothWikiGlobalDisabled}} disabled{{end}}"{{if $isBothWikiGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
-			<input class="enable-system" name="enable_wiki" type="checkbox" data-target="#wiki_box" {{if $isWikiEnabled}}checked{{end}}>
-			<label>{{ctx.Locale.Tr "repo.settings.wiki_desc"}}</label>
-		</div>
-	</div>
 	<div class="field{{if not $isWikiEnabled}} disabled{{end}}" id="wiki_box">
 		<div class="field">
 			<div class="ui radio checkbox{{if $isWikiGlobalDisabled}} disabled{{end}}"{{if $isWikiGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
