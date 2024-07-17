@@ -1,13 +1,11 @@
 <div class="ui labels list">
-	<span class="no-select item {{if .root.HasSelectedLabel}}tw-hidden{{end}}">{{ctx.Locale.Tr "repo.issues.new.no_label"}}</span>
-	{{if .root.HasSelectedLabel}}
-		<span class="labels-list">
-			{{range .root.Labels}}
-				{{template "repo/issue/labels/label" dict "root" $.root "label" .}}
-			{{end}}
-			{{range .root.OrgLabels}}
-				{{template "repo/issue/labels/label" dict "root" $.root "label" .}}
-			{{end}}
-		</span>
-	{{end}}
+	<span class="no-select {{if .root.HasSelectedLabel}}tw-hidden{{end}}">{{ctx.Locale.Tr "repo.issues.new.no_label"}}</span>
+	<span class="labels-list ugc-labels">
+		{{range .root.Labels}}
+			{{template "repo/issue/labels/label" dict "root" $.root "label" .}}
+		{{end}}
+		{{range .root.OrgLabels}}
+			{{template "repo/issue/labels/label" dict "root" $.root "label" .}}
+		{{end}}
+	</span>
 </div>
