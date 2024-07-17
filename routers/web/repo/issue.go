@@ -1370,6 +1370,22 @@ func getBranchData(ctx *context.Context, issue *issues_model.Issue) {
 	}
 }
 
+func prepareHiddenCommentType(ctx *context.Context) {
+	var hiddenCommentTypes *big.Int
+	if ctx.IsSigned {
+		val, err := user_model.GetUserSetting(ctx, ctx.Doer.ID, user_model.SettingsKeyHiddenCommentTypes)
+		if err != nil {
+			ctx.ServerError("GetUserSetting", err)
+			return
+		}
+		hiddenCommentTypes, _ = new(big.Int).SetString(val, 10) // we can safely ignore the failed conversion here
+	}
+
+	ctx.Data["ShouldShowCommentType"] = func(commentType issues_model.CommentType) bool {
+		return hiddenCommentTypes == nil || hiddenCommentTypes.Bit(int(commentType)) == 0
+	}
+}
+
 // ViewIssue render issue view page
 func ViewIssue(ctx *context.Context) {
 	if ctx.Params(":type") == "issues" {
@@ -2019,21 +2035,13 @@ func ViewIssue(ctx *context.Context) {
 	ctx.Data["NewPinAllowed"] = pinAllowed
 	ctx.Data["PinEnabled"] = setting.Repository.Issue.MaxPinned != 0
 
-	var hiddenCommentTypes *big.Int
-	if ctx.IsSigned {
-		val, err := user_model.GetUserSetting(ctx, ctx.Doer.ID, user_model.SettingsKeyHiddenCommentTypes)
-		if err != nil {
-			ctx.ServerError("GetUserSetting", err)
-			return
-		}
-		hiddenCommentTypes, _ = new(big.Int).SetString(val, 10) // we can safely ignore the failed conversion here
+	prepareHiddenCommentType(ctx)
+	if ctx.Written() {
+		return
 	}
-	ctx.Data["ShouldShowCommentType"] = func(commentType issues_model.CommentType) bool {
-		return hiddenCommentTypes == nil || hiddenCommentTypes.Bit(int(commentType)) == 0
-	}
+
 	// For sidebar
 	PrepareBranchList(ctx)
-
 	if ctx.Written() {
 		return
 	}
@@ -2342,7 +2350,49 @@ func UpdateIssueMilestone(ctx *context.Context) {
 		}
 	}
 
-	ctx.JSONOK()
+	if ctx.FormBool("htmx") {
+		renderMilestones(ctx)
+		if ctx.Written() {
+			return
+		}
+		prepareHiddenCommentType(ctx)
+		if ctx.Written() {
+			return
+		}
+
+		issue := issues[0]
+		var err error
+		if issue.MilestoneID > 0 {
+			issue.Milestone, err = issues_model.GetMilestoneByRepoID(ctx, ctx.Repo.Repository.ID, issue.MilestoneID)
+			if err != nil {
+				ctx.ServerError("GetMilestoneByRepoID", err)
+				return
+			}
+		} else {
+			issue.Milestone = nil
+		}
+
+		comment := &issues_model.Comment{}
+		has, err := db.GetEngine(ctx).Where("issue_id = ? AND type = ?", issue.ID, issues_model.CommentTypeMilestone).OrderBy("id DESC").Limit(1).Get(comment)
+		if !has || err != nil {
+			ctx.ServerError("GetLatestMilestoneComment", err)
+		}
+		if err := comment.LoadMilestone(ctx); err != nil {
+			ctx.ServerError("LoadMilestone", err)
+			return
+		}
+		if err := comment.LoadPoster(ctx); err != nil {
+			ctx.ServerError("LoadPoster", err)
+			return
+		}
+		issue.Comments = issues_model.CommentList{comment}
+
+		ctx.Data["Issue"] = issue
+		ctx.Data["HasIssuesOrPullsWritePermission"] = ctx.Repo.CanWriteIssuesOrPulls(issue.IsPull)
+		ctx.HTML(http.StatusOK, "htmx/milestone_sidebar")
+	} else {
+		ctx.JSONOK()
+	}
 }
 
 // UpdateIssueAssignee change issue's or pull's assignee
