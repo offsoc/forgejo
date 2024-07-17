@@ -30,10 +30,8 @@ func TestGPGGit(t *testing.T) {
 	err := os.Chmod(tmpDir, 0o700)
 	assert.NoError(t, err)
 
-	oldGNUPGHome := os.Getenv("GNUPGHOME")
-	err = os.Setenv("GNUPGHOME", tmpDir)
+	t.Setenv("GNUPGHOME", tmpDir)
 	assert.NoError(t, err)
-	defer os.Setenv("GNUPGHOME", oldGNUPGHome)
 
 	// Need to create a root key
 	rootKeyPair, err := importTestingKey()
