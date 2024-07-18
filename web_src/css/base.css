@@ -1138,10 +1138,6 @@ overflow-menu .ui.label {
   color: var(--color-primary-contrast);
 }
 
-.activity-bar-graph-alt {
-  color: var(--color-primary-contrast);
-}
-
 .archived-icon {
   color: var(--color-secondary-dark-2) !important;
 }

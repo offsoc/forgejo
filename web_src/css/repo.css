@@ -2995,3 +2995,7 @@ tbody.commit-list {
   font-size: inherit;
   line-height: inherit;
 }
+
+#repo-activity-top-authors-chart {
+  height: 150px; /* Pre-allocate the height that will be taken up by the chart, to avoid the container 'jumping'. */
+}
