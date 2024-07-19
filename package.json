@@ -21,7 +21,7 @@
     "chartjs-plugin-zoom": "2.0.1",
     "clippie": "4.1.1",
     "css-loader": "7.0.0",
-    "dayjs": "1.11.11",
+    "dayjs": "1.11.12",
     "dropzone": "6.0.0-beta.2",
     "easymde": "2.18.0",
     "esbuild-loader": "4.2.2",
