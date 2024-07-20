@@ -2068,11 +2068,6 @@ td .commit-summary {
   line-height: 1.4;
 }
 
-#cite-repo-modal #citation-panel .citation.button {
-  font-size: 13px;
-  padding: 7.5px 5px;
-}
-
 #cite-repo-modal #citation-panel #citation-copy-content {
   border-radius: 0;
   padding: 5px 10px;
@@ -2081,8 +2076,9 @@ td .commit-summary {
   flex: 1;
 }
 
-#cite-repo-modal #citation-panel #citation-copy-apa,
 #cite-repo-modal #citation-panel #citation-copy-bibtex {
+  font-size: 13px;
+  padding: 7.5px 5px;
   border-right: none;
 }
 
