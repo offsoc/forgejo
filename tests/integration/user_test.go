@@ -380,6 +380,9 @@ func TestUserHints(t *testing.T) {
 
 			_, hintChecked := htmlDoc.Find(`input[name="enable_repo_unit_hints"]`).Attr("checked")
 			assert.Equal(t, enabled, hintChecked)
+
+			link, _ := htmlDoc.Find("form[action='/user/settings/appearance/language'] a").Attr("href")
+			assert.EqualValues(t, "https://forgejo.org/docs/latest/developer/localization/", link)
 		}
 
 		t.Run("view", func(t *testing.T) {

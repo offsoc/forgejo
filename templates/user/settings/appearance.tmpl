@@ -47,6 +47,9 @@
 		</h4>
 		<div class="ui attached segment">
 			<form class="ui form" action="{{.Link}}/language" method="post">
+				<div class="tw-mb-4">
+					{{ctx.Locale.Tr "settings.language.description"}}
+				</div>
 				{{.CsrfTokenHtml}}
 				<div class="field">
 					<div class="ui language selection dropdown" id="language">
@@ -59,6 +62,9 @@
 						{{end}}
 						</div>
 					</div>
+				</div>
+				<div class="tw-mb-4">
+					{{ctx.Locale.Tr "settings.language.localization_project" "https://forgejo.org/docs/latest/developer/localization/"}}
 				</div>
 				<div class="field">
 					<button class="ui primary button">{{ctx.Locale.Tr "settings.update_language"}}</button>
