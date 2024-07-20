@@ -1342,3 +1342,17 @@ key: value
 </tbody>
 </table>`)
 }
+
+func TestCallout(t *testing.T) {
+	setting.AppURL = AppURL
+
+	test := func(input, expected string) {
+		buffer, err := markdown.RenderString(&markup.RenderContext{
+			Ctx: git.DefaultContext,
+		}, input)
+		assert.NoError(t, err)
+		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(string(buffer)))
+	}
+
+	test(">\n0", "<blockquote>\n</blockquote>\n<p>0</p>")
+}

@@ -25,6 +25,10 @@ func (g *GitHubLegacyCalloutTransformer) Transform(node *ast.Document, reader te
 
 		switch v := n.(type) {
 		case *ast.Blockquote:
+			if v.ChildCount() == 0 {
+				return ast.WalkContinue, nil
+			}
+
 			// The first paragraph contains the callout type.
 			firstParagraph := v.FirstChild()
 			if firstParagraph.ChildCount() < 1 {

@@ -36,6 +36,10 @@ func (g *GitHubCalloutTransformer) Transform(node *ast.Document, reader text.Rea
 
 		switch v := n.(type) {
 		case *ast.Blockquote:
+			if v.ChildCount() == 0 {
+				return ast.WalkContinue, nil
+			}
+
 			// We only want attention blockquotes when the AST looks like:
 			// Text: "["
 			// Text: "!TYPE"
