@@ -242,6 +242,12 @@ func FileHistory(ctx *context.Context) {
 		ctx.ServerError("CommitsByFileAndRange", err)
 		return
 	}
+
+	if len(commits) == 0 {
+		ctx.NotFound("CommitsByFileAndRange", nil)
+		return
+	}
+
 	oldestCommit := commits[len(commits)-1]
 
 	renamedFiles, err := git.GetCommitFileRenames(ctx, ctx.Repo.GitRepo.Path, oldestCommit.ID.String())
