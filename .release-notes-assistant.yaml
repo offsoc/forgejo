@@ -1,0 +1,22 @@
+categorize: './release-notes-assistant.sh'
+branch-development: 'forgejo'
+branch-pattern: 'v*/forgejo'
+branch-find-version: 'v(?P<version>\d+\.\d+)/forgejo'
+branch-to-version: '${version}.0'
+branch-from-version: 'v%[1]d.%[2]d/forgejo'
+tag-from-version: 'v%[1]d.%[2]d.%[3]d'
+branch-known:
+  - 'v7.0/forgejo'
+cleanup-line: 'sed -Ee "s/.*?:\s*//g" -e "s;\[(UI|BUG|FEAT|v.*?/forgejo)\]\s*;;g"'
+render-header: |
+
+  ## Draft release notes
+comment: |
+  <details>
+  <summary>Where does that come from?</summary>
+  The following is a preview of the release notes for this pull request, as they will appear in the upcoming release. They are derived from the content of the `%[2]s/%[3]s.md` file, if it exists, or the title of the pull request. They were also added at the bottom of the description of this pull request for easier reference.
+
+  This message and the release notes originate from a call to the [release-notes-assistant](https://code.forgejo.org/forgejo/release-notes-assistant).
+  </details>
+
+  %[1]s
