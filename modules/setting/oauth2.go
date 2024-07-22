@@ -104,7 +104,7 @@ var OAuth2 = struct {
 	Enabled:                    true,
 	AccessTokenExpirationTime:  3600,
 	RefreshTokenExpirationTime: 730,
-	InvalidateRefreshTokens:    false,
+	InvalidateRefreshTokens:    true,
 	JWTSigningAlgorithm:        "RS256",
 	JWTSigningPrivateKeyFile:   "jwt/private.pem",
 	MaxTokenLength:             math.MaxInt16,
