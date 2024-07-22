@@ -27,7 +27,7 @@ test('Follow actions', async ({browser}, workerInfo) => {
   await expect(page.locator('#block-user')).toBeVisible();
   await page.locator('#block-user .ok').click();
   await expect(page.locator('.block')).toContainText('Unblock');
-  await expect(page.locator('#block-user')).not.toBeVisible();
+  await expect(page.locator('#block-user')).toBeHidden();
 
   // Check that following the user yields in a error being shown.
   await followButton.click();

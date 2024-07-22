@@ -1,0 +1,23 @@
+plugins:
+  - eslint-plugin-playwright
+
+extends:
+  - ../../.eslintrc.yaml
+  - plugin:playwright/recommended
+
+parserOptions:
+  sourceType: module
+  ecmaVersion: latest
+
+env:
+  browser: true
+
+rules:
+  playwright/no-conditional-in-test: [0]
+  playwright/no-networkidle: [0]
+  playwright/no-skipped-test: [2, {allowConditional: true}]
+  playwright/prefer-comparison-matcher: [2]
+  playwright/prefer-equality-matcher: [2]
+  playwright/prefer-to-contain: [2]
+  playwright/prefer-to-have-length: [2]
+  playwright/require-to-throw-message: [2]

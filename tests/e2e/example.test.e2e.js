@@ -13,7 +13,7 @@ test('Load Homepage', async ({page}) => {
   await expect(page.locator('.logo')).toHaveAttribute('src', '/assets/img/logo.svg');
 });
 
-test('Test Register Form', async ({page}, workerInfo) => {
+test('Register Form', async ({page}, workerInfo) => {
   const response = await page.goto('/user/sign_up');
   await expect(response?.status()).toBe(200); // Status OK
   await page.type('input[name=user_name]', `e2e-test-${workerInfo.workerIndex}`);
@@ -29,7 +29,7 @@ test('Test Register Form', async ({page}, workerInfo) => {
   save_visual(page);
 });
 
-test('Test Login Form', async ({page}, workerInfo) => {
+test('Login Form', async ({page}, workerInfo) => {
   const response = await page.goto('/user/login');
   await expect(response?.status()).toBe(200); // Status OK
 
@@ -44,7 +44,7 @@ test('Test Login Form', async ({page}, workerInfo) => {
   save_visual(page);
 });
 
-test('Test Logged In User', async ({browser}, workerInfo) => {
+test('Logged In User', async ({browser}, workerInfo) => {
   const context = await load_logged_in_context(browser, workerInfo, 'user2');
   const page = await context.newPage();
 

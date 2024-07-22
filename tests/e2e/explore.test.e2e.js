@@ -1,6 +1,6 @@
 // @ts-check
 // document is a global in evaluate, so it's safe to ignore here
-/* eslint no-undef: 0 */
+// eslint playwright/no-conditional-in-test: 0
 import {test, expect} from '@playwright/test';
 
 test('Explore view taborder', async ({page}) => {
