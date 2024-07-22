@@ -55,10 +55,20 @@ func (n *actionsNotifier) NewIssue(ctx context.Context, issue *issues_model.Issu
 	}).Notify(withMethod(ctx, "NewIssue"))
 }
 
+func (n *actionsNotifier) IssueChangeTitle(ctx context.Context, doer *user_model.User, issue *issues_model.Issue, _ string) {
+	ctx = withMethod(ctx, "IssueChangeTitle")
+
+	n.issueChange(ctx, doer, issue)
+}
+
 // IssueChangeContent notifies change content of issue
-func (n *actionsNotifier) IssueChangeContent(ctx context.Context, doer *user_model.User, issue *issues_model.Issue, oldContent string) {
+func (n *actionsNotifier) IssueChangeContent(ctx context.Context, doer *user_model.User, issue *issues_model.Issue, _ string) {
 	ctx = withMethod(ctx, "IssueChangeContent")
 
+	n.issueChange(ctx, doer, issue)
+}
+
+func (n *actionsNotifier) issueChange(ctx context.Context, doer *user_model.User, issue *issues_model.Issue) {
 	var err error
 	if err = issue.LoadRepo(ctx); err != nil {
 		log.Error("LoadRepo: %v", err)
