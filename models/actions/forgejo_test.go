@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestActions_RegisterRunner_Token(t *testing.T) {
@@ -26,6 +27,36 @@ func TestActions_RegisterRunner_Token(t *testing.T) {
 	assert.EqualValues(t, name, runner.Name)
 
 	assert.EqualValues(t, 1, subtle.ConstantTimeCompare([]byte(runner.TokenHash), []byte(auth_model.HashToken(token, runner.TokenSalt))), "the token cannot be verified with the same method as routers/api/actions/runner/interceptor.go as of 8228751c55d6a4263f0fec2932ca16181c09c97d")
+}
+
+// TestActions_RegisterRunner_TokenUpdate tests that a token's secret is updated
+// when a runner already exists and RegisterRunner is called with a token
+// parameter whose first 16 bytes match that record but where the last 24 bytes
+// do not match.
+func TestActions_RegisterRunner_TokenUpdate(t *testing.T) {
+	const recordID = 12345678
+	oldToken := "7e577e577e577e57feedfacefeedfacefeedface"
+	newToken := "7e577e577e577e57deadbeefdeadbeefdeadbeef"
+	assert.NoError(t, unittest.PrepareTestDatabase())
+	before := unittest.AssertExistsAndLoadBean(t, &ActionRunner{ID: recordID})
+	require.Equal(t,
+		before.TokenHash, auth_model.HashToken(oldToken, before.TokenSalt),
+		"the initial token should match the runner's secret",
+	)
+
+	RegisterRunner(db.DefaultContext, before.OwnerID, before.RepoID, newToken, nil, before.Name, before.Version)
+
+	after := unittest.AssertExistsAndLoadBean(t, &ActionRunner{ID: recordID})
+
+	assert.Equal(t, before.UUID, after.UUID)
+	assert.NotEqual(t,
+		after.TokenHash, auth_model.HashToken(oldToken, after.TokenSalt),
+		"the old token can still be verified",
+	)
+	assert.Equal(t,
+		after.TokenHash, auth_model.HashToken(newToken, after.TokenSalt),
+		"the new token cannot be verified",
+	)
 }
 
 func TestActions_RegisterRunner_CreateWithLabels(t *testing.T) {

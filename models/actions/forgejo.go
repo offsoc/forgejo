@@ -4,7 +4,7 @@ package actions
 
 import (
 	"context"
-	"encoding/hex"
+	"crypto/subtle"
 	"fmt"
 
 	auth_model "code.gitea.io/gitea/models/auth"
@@ -26,23 +26,28 @@ func RegisterRunner(ctx context.Context, ownerID, repoID int64, token string, la
 	has, err := db.GetEngine(ctx).Where("uuid=?", uuidString).Get(&runner)
 	if err != nil {
 		return nil, fmt.Errorf("GetRunner %v", err)
-	} else if !has {
+	}
+
+	var mustUpdateSecret bool
+	if has {
+		//
+		// The runner exists, check if the rest of the token has changed.
+		//
+		mustUpdateSecret = subtle.ConstantTimeCompare(
+			[]byte(runner.TokenHash),
+			[]byte(auth_model.HashToken(token, runner.TokenSalt)),
+		) != 1
+	} else {
 		//
 		// The runner does not exist yet, create it
 		//
-		saltBytes, err := util.CryptoRandomBytes(16)
-		if err != nil {
-			return nil, fmt.Errorf("CryptoRandomBytes %v", err)
-		}
-		salt := hex.EncodeToString(saltBytes)
-
-		hash := auth_model.HashToken(token, salt)
-
 		runner = ActionRunner{
 			UUID:        uuidString,
-			TokenHash:   hash,
-			TokenSalt:   salt,
 			AgentLabels: []string{},
+		}
+
+		if err := runner.UpdateSecret(token); err != nil {
+			return &runner, fmt.Errorf("can't set new runner's secret: %w", err)
 		}
 
 		if err := CreateRunner(ctx, &runner); err != nil {
@@ -63,6 +68,12 @@ func RegisterRunner(ctx context.Context, ownerID, repoID int64, token string, la
 	if labels != nil {
 		runner.AgentLabels = *labels
 		cols = append(cols, "agent_labels")
+	}
+	if mustUpdateSecret {
+		if err := runner.UpdateSecret(token); err != nil {
+			return &runner, fmt.Errorf("can't change runner's secret: %w", err)
+		}
+		cols = append(cols, "token_hash", "token_salt")
 	}
 
 	if err := UpdateRunner(ctx, &runner, cols...); err != nil {

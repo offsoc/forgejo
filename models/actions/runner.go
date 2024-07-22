@@ -6,10 +6,12 @@ package actions
 import (
 	"context"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"strings"
 	"time"
 
+	auth_model "code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/shared/types"
@@ -149,6 +151,22 @@ func (r *ActionRunner) LoadAttributes(ctx context.Context) error {
 func (r *ActionRunner) GenerateToken() (err error) {
 	r.Token, r.TokenSalt, r.TokenHash, _, err = generateSaltedToken()
 	return err
+}
+
+// UpdateSecret updates the hash based on the specified token. It does not
+// ensure that the runner's UUID matches the first 16 bytes of the token.
+func (r *ActionRunner) UpdateSecret(token string) error {
+	saltBytes, err := util.CryptoRandomBytes(16)
+	if err != nil {
+		return fmt.Errorf("CryptoRandomBytes %v", err)
+	}
+
+	salt := hex.EncodeToString(saltBytes)
+
+	r.Token = token
+	r.TokenSalt = salt
+	r.TokenHash = auth_model.HashToken(token, salt)
+	return nil
 }
 
 func init() {
