@@ -14,7 +14,7 @@ import (
 	gouuid "github.com/google/uuid"
 )
 
-func RegisterRunner(ctx context.Context, ownerID, repoID int64, token string, labels []string, name, version string) (*ActionRunner, error) {
+func RegisterRunner(ctx context.Context, ownerID, repoID int64, token string, labels *[]string, name, version string) (*ActionRunner, error) {
 	uuid, err := gouuid.FromBytes([]byte(token[:16]))
 	if err != nil {
 		return nil, fmt.Errorf("gouuid.FromBytes %v", err)
@@ -39,9 +39,10 @@ func RegisterRunner(ctx context.Context, ownerID, repoID int64, token string, la
 		hash := auth_model.HashToken(token, salt)
 
 		runner = ActionRunner{
-			UUID:      uuidString,
-			TokenHash: hash,
-			TokenSalt: salt,
+			UUID:        uuidString,
+			TokenHash:   hash,
+			TokenSalt:   salt,
+			AgentLabels: []string{},
 		}
 
 		if err := CreateRunner(ctx, &runner); err != nil {
@@ -54,13 +55,17 @@ func RegisterRunner(ctx context.Context, ownerID, repoID int64, token string, la
 	//
 	name, _ = util.SplitStringAtByteN(name, 255)
 
+	cols := []string{"name", "owner_id", "repo_id", "version"}
 	runner.Name = name
 	runner.OwnerID = ownerID
 	runner.RepoID = repoID
 	runner.Version = version
-	runner.AgentLabels = labels
+	if labels != nil {
+		runner.AgentLabels = *labels
+		cols = append(cols, "agent_labels")
+	}
 
-	if err := UpdateRunner(ctx, &runner, "name", "owner_id", "repo_id", "version", "agent_labels"); err != nil {
+	if err := UpdateRunner(ctx, &runner, cols...); err != nil {
 		return &runner, fmt.Errorf("can't update the runner %+v %w", runner, err)
 	}
 
