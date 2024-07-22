@@ -625,6 +625,11 @@ func TestEmailTo(t *testing.T) {
 			assert.EqualValues(t, testCase.result, testUser.EmailTo())
 		})
 	}
+
+	t.Run("Override user's email", func(t *testing.T) {
+		testUser := &user_model.User{FullName: "Christine Jorgensen", Email: "christine@test.com"}
+		assert.EqualValues(t, `"Christine Jorgensen" <christine@example.org>`, testUser.EmailTo("christine@example.org"))
+	})
 }
 
 func TestDisabledUserFeatures(t *testing.T) {

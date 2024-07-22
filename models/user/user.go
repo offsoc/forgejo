@@ -451,17 +451,22 @@ var emailToReplacer = strings.NewReplacer(
 )
 
 // EmailTo returns a string suitable to be put into a e-mail `To:` header.
-func (u *User) EmailTo() string {
+func (u *User) EmailTo(overrideMail ...string) string {
 	sanitizedDisplayName := emailToReplacer.Replace(u.DisplayName())
 
-	// should be an edge case but nice to have
-	if sanitizedDisplayName == u.Email {
-		return u.Email
+	email := u.Email
+	if len(overrideMail) > 0 {
+		email = overrideMail[0]
 	}
 
-	address, err := mail.ParseAddress(fmt.Sprintf("%s <%s>", sanitizedDisplayName, u.Email))
+	// should be an edge case but nice to have
+	if sanitizedDisplayName == email {
+		return email
+	}
+
+	address, err := mail.ParseAddress(fmt.Sprintf("%s <%s>", sanitizedDisplayName, email))
 	if err != nil {
-		return u.Email
+		return email
 	}
 
 	return address.String()

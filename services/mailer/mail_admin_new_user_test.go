@@ -55,14 +55,14 @@ func TestAdminNotificationMail_test(t *testing.T) {
 		defer test.MockVariableValue(&setting.Admin.SendNotificationEmailOnNewUser, true)()
 
 		called := false
-		defer mockMailSettings(func(msgs ...*Message) {
+		defer MockMailSettings(func(msgs ...*Message) {
 			assert.Equal(t, len(msgs), 1, "Test provides only one admin user, so only one email must be sent")
 			assert.Equal(t, msgs[0].To, users[0].Email, "checks if the recipient is the admin of the instance")
 			manageUserURL := setting.AppURL + "admin/users/" + strconv.FormatInt(users[1].ID, 10)
 			assert.Contains(t, msgs[0].Body, manageUserURL)
 			assert.Contains(t, msgs[0].Body, users[1].HTMLURL())
 			assert.Contains(t, msgs[0].Body, users[1].Name, "user name of the newly created user")
-			assertTranslatedLocale(t, msgs[0].Body, "mail.admin", "admin.users")
+			AssertTranslatedLocale(t, msgs[0].Body, "mail.admin", "admin.users")
 			called = true
 		})()
 		MailNewUser(ctx, users[1])
@@ -71,7 +71,7 @@ func TestAdminNotificationMail_test(t *testing.T) {
 
 	t.Run("SendNotificationEmailOnNewUser_false", func(t *testing.T) {
 		defer test.MockVariableValue(&setting.Admin.SendNotificationEmailOnNewUser, false)()
-		defer mockMailSettings(func(msgs ...*Message) {
+		defer MockMailSettings(func(msgs ...*Message) {
 			assert.Equal(t, 1, 0, "this shouldn't execute. MailNewUser must exit early since SEND_NOTIFICATION_EMAIL_ON_NEW_USER is disabled")
 		})()
 		MailNewUser(ctx, users[1])

@@ -62,7 +62,7 @@ func prepareMailerTest(t *testing.T) (doer *user_model.User, repo *repo_model.Re
 }
 
 func TestComposeIssueCommentMessage(t *testing.T) {
-	defer mockMailSettings(nil)()
+	defer MockMailSettings(nil)()
 	doer, _, issue, comment := prepareMailerTest(t)
 
 	markup.Init(&markup.ProcessorHelper{
@@ -117,7 +117,7 @@ func TestComposeIssueCommentMessage(t *testing.T) {
 }
 
 func TestComposeIssueMessage(t *testing.T) {
-	defer mockMailSettings(nil)()
+	defer MockMailSettings(nil)()
 	doer, _, issue, _ := prepareMailerTest(t)
 
 	recipients := []*user_model.User{{Name: "Test", Email: "test@gitea.com"}, {Name: "Test2", Email: "test2@gitea.com"}}
@@ -146,7 +146,7 @@ func TestComposeIssueMessage(t *testing.T) {
 }
 
 func TestMailerIssueTemplate(t *testing.T) {
-	defer mockMailSettings(nil)()
+	defer MockMailSettings(nil)()
 	assert.NoError(t, unittest.PrepareTestDatabase())
 
 	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
@@ -160,7 +160,7 @@ func TestMailerIssueTemplate(t *testing.T) {
 		for _, s := range expected {
 			assert.Contains(t, wholemsg, s)
 		}
-		assertTranslatedLocale(t, wholemsg, "mail.issue")
+		AssertTranslatedLocale(t, wholemsg, "mail.issue")
 	}
 
 	testCompose := func(t *testing.T, ctx *mailCommentContext) *Message {
@@ -241,7 +241,7 @@ func TestMailerIssueTemplate(t *testing.T) {
 }
 
 func TestTemplateSelection(t *testing.T) {
-	defer mockMailSettings(nil)()
+	defer MockMailSettings(nil)()
 	doer, repo, issue, comment := prepareMailerTest(t)
 	recipients := []*user_model.User{{Name: "Test", Email: "test@gitea.com"}}
 
@@ -296,7 +296,7 @@ func TestTemplateSelection(t *testing.T) {
 }
 
 func TestTemplateServices(t *testing.T) {
-	defer mockMailSettings(nil)()
+	defer MockMailSettings(nil)()
 	doer, _, issue, comment := prepareMailerTest(t)
 	assert.NoError(t, issue.LoadRepo(db.DefaultContext))
 
@@ -349,7 +349,7 @@ func testComposeIssueCommentMessage(t *testing.T, ctx *mailCommentContext, recip
 }
 
 func TestGenerateAdditionalHeaders(t *testing.T) {
-	defer mockMailSettings(nil)()
+	defer MockMailSettings(nil)()
 	doer, _, issue, _ := prepareMailerTest(t)
 
 	ctx := &mailCommentContext{Context: context.TODO() /* TODO: use a correct context */, Issue: issue, Doer: doer}
@@ -382,7 +382,7 @@ func TestGenerateAdditionalHeaders(t *testing.T) {
 }
 
 func Test_createReference(t *testing.T) {
-	defer mockMailSettings(nil)()
+	defer MockMailSettings(nil)()
 	_, _, issue, comment := prepareMailerTest(t)
 	_, _, pullIssue, _ := prepareMailerTest(t)
 	pullIssue.IsPull = true

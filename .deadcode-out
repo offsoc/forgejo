@@ -30,7 +30,6 @@ code.gitea.io/gitea/models/asymkey
 
 code.gitea.io/gitea/models/auth
 	GetSourceByName
-	GetWebAuthnCredentialByID
 	WebAuthnCredentials
 
 code.gitea.io/gitea/models/db

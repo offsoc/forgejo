@@ -14,6 +14,7 @@ import (
 
 	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAdminAddOrSetPrimaryEmailAddress(t *testing.T) {
@@ -162,4 +163,16 @@ func TestDeleteEmailAddresses(t *testing.T) {
 	err = DeleteEmailAddresses(db.DefaultContext, user, emails)
 	assert.Error(t, err)
 	assert.True(t, user_model.IsErrPrimaryEmailCannotDelete(err))
+}
+
+func TestMakeEmailAddressPrimary(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	newPrimaryEmail := unittest.AssertExistsAndLoadBean(t, &user_model.EmailAddress{ID: 35, UID: user.ID}, "is_primary = false")
+
+	require.NoError(t, MakeEmailAddressPrimary(db.DefaultContext, user, newPrimaryEmail, false))
+
+	unittest.AssertExistsIf(t, true, &user_model.User{ID: 2, Email: newPrimaryEmail.Email})
+	unittest.AssertExistsIf(t, true, &user_model.EmailAddress{ID: 3, UID: user.ID}, "is_primary = false")
+	unittest.AssertExistsIf(t, true, &user_model.EmailAddress{ID: 35, UID: user.ID, IsPrimary: true})
 }
