@@ -586,6 +586,7 @@ var (
 		"captcha",
 		"commits",
 		"debug",
+		"devtest",
 		"error",
 		"explore",
 		"favicon.ico",
