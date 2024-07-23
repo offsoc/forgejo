@@ -110,6 +110,7 @@ func TestRenameReservedUsername(t *testing.T) {
 		"captcha",
 		"commits",
 		"debug",
+		"devtest"
 		"error",
 		"explore",
 		"favicon.ico",
