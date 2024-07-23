@@ -19,6 +19,7 @@ jobs:
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
           go-version-file: "go.mod"
+          cache: false
 
       - name: apt install jq
         run: |

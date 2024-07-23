@@ -75,6 +75,10 @@ jobs:
           apt-get -q install -qq -y git
           rm /etc/apt/sources.list.d/testing.list
           apt-get update -qq
+      - name: test release-notes-assistant.sh
+        run: |
+          apt-get -q install -qq -y jq
+          ./release-notes-assistant.sh test_main
       - run: |
           su forgejo -c 'make deps-backend'
       - run: |
