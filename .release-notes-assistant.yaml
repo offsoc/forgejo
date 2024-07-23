@@ -7,7 +7,7 @@ branch-from-version: 'v%[1]d.%[2]d/forgejo'
 tag-from-version: 'v%[1]d.%[2]d.%[3]d'
 branch-known:
   - 'v7.0/forgejo'
-cleanup-line: 'sed -Ee "s/^(feat|fix).*?:\s*//g" -e "s;\[(UI|BUG|FEAT|v.*?/forgejo)\]\s*;;g"'
+cleanup-line: 'sed -Ee "s/^(feat|fix):\s*//g" -e "s;\[(UI|BUG|FEAT|v.*?/forgejo)\]\s*;;g"'
 render-header: |
 
   ## Draft release notes
