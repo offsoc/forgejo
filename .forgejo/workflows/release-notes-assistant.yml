@@ -28,4 +28,4 @@ jobs:
 
       - name: release-notes-assistant preview
         run: |
-          go run code.forgejo.org/forgejo/release-notes-assistant@1.0.0 --config .release-notes-assistant.yaml --storage pr --storage-location ${{ github.event.pull_request.number }}  --forgejo-url $GITHUB_SERVER_URL --repository $GITHUB_REPOSITORY --token $GITHUB_TOKEN preview ${{ github.event.pull_request.number }}
+          go run code.forgejo.org/forgejo/release-notes-assistant@v1.0.0 --config .release-notes-assistant.yaml --storage pr --storage-location ${{ github.event.pull_request.number }}  --forgejo-url $GITHUB_SERVER_URL --repository $GITHUB_REPOSITORY --token ${{ secrets.RELEASE_NOTES_ASSISTANT_TOKEN }} preview ${{ github.event.pull_request.number }}
