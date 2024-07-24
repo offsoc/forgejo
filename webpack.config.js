@@ -108,6 +108,14 @@ const filterCssImport = (url, ...args) => {
 
 /** @type {import("webpack").Configuration} */
 export default {
+  externals: [
+    function ({request}, callback) {
+      if (/elkjs/.test(request)) {
+        return callback(null, `commonjs ${request}`);
+      }
+      callback();
+    },
+  ],
   mode: isProduction ? 'production' : 'development',
   entry: {
     index: [
