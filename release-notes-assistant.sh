@@ -7,6 +7,7 @@ label_bug=bug
 label_feature=feature
 label_ui=forgejo/ui
 label_breaking=breaking
+label_localization=internationalization
 
 payload=$(mktemp)
 pr=$(mktemp)
@@ -39,6 +40,9 @@ function test_main() {
 
   test_payload_labels $label_worth $label_bug
   test "$(categorize)" = 'CB Bug fixes'
+
+  test_payload_labels $label_worth $label_localization
+  test "$(categorize)" = 'DA Localization'
 
   test_payload_labels $label_worth
   test "$(categorize)" = 'ZE Other changes without a feature or bug label'
@@ -103,6 +107,7 @@ function categorize() {
   is_ui=false
   is_bug=false
   is_feature=false
+  is_localization=false
   is_breaking=false
 
   #
@@ -114,6 +119,9 @@ function categorize() {
     ;;
   *$label_feature*)
     is_feature=true
+    ;;
+  *$label_localization*)
+    is_localization=true
     ;;
   esac
 
@@ -179,6 +187,8 @@ function categorize() {
     else
       echo -n ZD User Interface changes without a feature or bug label
     fi
+  elif $is_localization; then
+    echo -n DA Localization
   else
     if $is_feature; then
       echo -n CA Features
