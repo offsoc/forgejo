@@ -36,7 +36,7 @@ if (isProduction) {
   licenseChecker.init({
     start: baseDirectory,
     production: true,
-    onlyAllow: 'Apache-2.0; 0BSD; BSD-2-Clause; BSD-3-Clause; BlueOak-1.0.0; MIT; AGPL-1.0; ISC; Unlicense; CC-BY-4.0',
+    onlyAllow: 'Apache-2.0; 0BSD; BSD-2-Clause; BSD-3-Clause; BlueOak-1.0.0; MIT; ISC; Unlicense; CC-BY-4.0',
     // argparse@2.0.1 - Python-2.0. It's used in the CLI file of markdown-it and js-yaml and not in the library code.
     // elkjs@0.9.3 - EPL-2.0. See https://github.com/mermaid-js/mermaid/pull/5654
     // idiomorph@0.3.0. See https://github.com/bigskysoftware/idiomorph/pull/37
