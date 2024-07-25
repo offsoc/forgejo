@@ -17,6 +17,11 @@ comment: |
   The following is a preview of the release notes for this pull request, as they will appear in the upcoming release. They are derived from the content of the `%[2]s/%[3]s.md` file, if it exists, or the title of the pull request. They were also added at the bottom of the description of this pull request for easier reference.
 
   This message and the release notes originate from a call to the [release-notes-assistant](https://code.forgejo.org/forgejo/release-notes-assistant).
+
+  ```diff
+  %[4]s
+  ```
+
   </details>
 
   %[1]s
