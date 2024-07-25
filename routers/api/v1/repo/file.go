@@ -45,7 +45,7 @@ func GetRawFile(ctx *context.APIContext) {
 	// ---
 	// summary: Get a file from a repository
 	// produces:
-	// - application/json
+	// - application/octet-stream
 	// parameters:
 	// - name: owner
 	//   in: path
@@ -70,6 +70,8 @@ func GetRawFile(ctx *context.APIContext) {
 	// responses:
 	//   200:
 	//     description: Returns raw file content.
+	//     schema:
+	//       type: file
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -96,6 +98,8 @@ func GetRawFileOrLFS(ctx *context.APIContext) {
 	// swagger:operation GET /repos/{owner}/{repo}/media/{filepath} repository repoGetRawFileOrLFS
 	// ---
 	// summary: Get a file or it's LFS object from a repository
+	// produces:
+	// - application/octet-stream
 	// parameters:
 	// - name: owner
 	//   in: path
@@ -120,6 +124,8 @@ func GetRawFileOrLFS(ctx *context.APIContext) {
 	// responses:
 	//   200:
 	//     description: Returns raw file content.
+	//     schema:
+	//       type: file
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
