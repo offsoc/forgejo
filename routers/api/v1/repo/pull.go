@@ -711,13 +711,16 @@ func EditPullRequest(ctx *context.APIContext) {
 			ctx.Error(http.StatusPreconditionFailed, "MergedPRState", "cannot change state of this pull request, it was already merged")
 			return
 		}
-		if err := issue_service.ChangeStatus(ctx, issue, ctx.Doer, "", api.StateClosed == api.StateType(*form.State)); err != nil {
-			if issues_model.IsErrDependenciesLeft(err) {
-				ctx.Error(http.StatusPreconditionFailed, "DependenciesLeft", "cannot close this pull request because it still has open dependencies")
+		isClosed := api.StateClosed == api.StateType(*form.State)
+		if issue.IsClosed != isClosed {
+			if err := issue_service.ChangeStatus(ctx, issue, ctx.Doer, "", isClosed); err != nil {
+				if issues_model.IsErrDependenciesLeft(err) {
+					ctx.Error(http.StatusPreconditionFailed, "DependenciesLeft", "cannot close this pull request because it still has open dependencies")
+					return
+				}
+				ctx.Error(http.StatusInternalServerError, "ChangeStatus", err)
 				return
 			}
-			ctx.Error(http.StatusInternalServerError, "ChangeStatus", err)
-			return
 		}
 	}
 

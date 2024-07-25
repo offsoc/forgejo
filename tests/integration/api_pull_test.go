@@ -236,7 +236,8 @@ func TestAPIEditPull(t *testing.T) {
 
 	newTitle := "edit a this pr"
 	newBody := "edited body"
-	req = NewRequestWithJSON(t, http.MethodPatch, fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d", owner10.Name, repo10.Name, apiPull.Index), &api.EditPullRequestOption{
+	urlStr := fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d", owner10.Name, repo10.Name, apiPull.Index)
+	req = NewRequestWithJSON(t, http.MethodPatch, urlStr, &api.EditPullRequestOption{
 		Base:  "feature/1",
 		Title: newTitle,
 		Body:  &newBody,
@@ -251,7 +252,17 @@ func TestAPIEditPull(t *testing.T) {
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{IssueID: pull.Issue.ID, OldTitle: title, NewTitle: newTitle})
 	unittest.AssertExistsAndLoadBean(t, &issues_model.ContentHistory{IssueID: pull.Issue.ID, ContentText: newBody, IsFirstCreated: false})
 
-	req = NewRequestWithJSON(t, http.MethodPatch, fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d", owner10.Name, repo10.Name, pull.Index), &api.EditPullRequestOption{
+	// verify the idempotency of a state change
+	pullState := string(apiPull.State)
+	req = NewRequestWithJSON(t, http.MethodPatch, urlStr, &api.EditPullRequestOption{
+		State: &pullState,
+	}).AddTokenAuth(token)
+	apiPullIdempotent := new(api.PullRequest)
+	resp = MakeRequest(t, req, http.StatusCreated)
+	DecodeJSON(t, resp, apiPullIdempotent)
+	assert.EqualValues(t, apiPull.State, apiPullIdempotent.State)
+
+	req = NewRequestWithJSON(t, http.MethodPatch, urlStr, &api.EditPullRequestOption{
 		Base: "not-exist",
 	}).AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusNotFound)

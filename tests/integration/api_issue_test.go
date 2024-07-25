@@ -215,6 +215,21 @@ func TestAPIEditIssue(t *testing.T) {
 	assert.Equal(t, int64(0), int64(issueAfter.DeadlineUnix))
 	assert.Equal(t, body, issueAfter.Content)
 	assert.Equal(t, title, issueAfter.Title)
+
+	// verify the idempotency of state, milestone, body and title changes
+	req = NewRequestWithJSON(t, "PATCH", urlStr, api.EditIssueOption{
+		State:     &issueState,
+		Milestone: &milestone,
+		Body:      &body,
+		Title:     title,
+	}).AddTokenAuth(token)
+	resp = MakeRequest(t, req, http.StatusCreated)
+	var apiIssueIdempotent api.Issue
+	DecodeJSON(t, resp, &apiIssueIdempotent)
+	assert.Equal(t, apiIssue.State, apiIssueIdempotent.State)
+	assert.Equal(t, apiIssue.Milestone.Title, apiIssueIdempotent.Milestone.Title)
+	assert.Equal(t, apiIssue.Body, apiIssueIdempotent.Body)
+	assert.Equal(t, apiIssue.Title, apiIssueIdempotent.Title)
 }
 
 func TestAPIEditIssueAutoDate(t *testing.T) {
