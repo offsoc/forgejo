@@ -175,7 +175,7 @@ function categorize() {
     if $is_feature; then
       echo -n AA Breaking features
     elif $is_bug; then
-      echo AB Breaking bug fixes
+      echo -n AB Breaking bug fixes
     else
       echo -n ZC Breaking changes without a feature or bug label
     fi
