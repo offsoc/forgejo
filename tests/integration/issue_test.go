@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -236,9 +237,13 @@ func testNewIssue(t *testing.T, session *TestSession, user, repo, title, content
 	htmlDoc = NewHTMLParser(t, resp.Body)
 	val := htmlDoc.doc.Find("#issue-title-display").Text()
 	assert.Contains(t, val, title)
-	val = htmlDoc.doc.Find(".comment .render-content p").First().Text()
-	assert.Equal(t, content, val)
-
+	// test for first line only and if it contains only letters and spaces
+	contentFirstLine := strings.Split(content, "\n")[0]
+	patNotLetterOrSpace, _ := regexp.Compile("[^\\p{L}\\s]")
+	if len(contentFirstLine) != 0 && !patNotLetterOrSpace.MatchString(contentFirstLine) {
+		val = htmlDoc.doc.Find(".comment .render-content p").First().Text()
+		assert.Equal(t, contentFirstLine, val)
+	}
 	return issueURL
 }
 
@@ -279,6 +284,36 @@ func TestNewIssue(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	session := loginUser(t, "user2")
 	testNewIssue(t, session, "user2", "repo1", "Title", "Description")
+}
+
+func TestIssueCheckboxes(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	session := loginUser(t, "user2")
+	issueURL := testNewIssue(t, session, "user2", "repo1", "Title", `- [x] small x
+- [X] capital X
+- [ ] empty
+  - [x]x without gap
+  - [ ]empty without gap
+- [x]
+x on new line
+- [ ]
+empty on new line
+	-	[	]	tabs instead of spaces
+Description`)
+	req := NewRequest(t, "GET", issueURL)
+	resp := session.MakeRequest(t, req, http.StatusOK)
+	issueContent := NewHTMLParser(t, resp.Body).doc.Find(".comment .render-content").First()
+	isCheckBox := func(i int, s *goquery.Selection) bool {
+		typeVal, typeExists := s.Attr("type")
+		return typeExists && typeVal == "checkbox"
+	}
+	isChecked := func(i int, s *goquery.Selection) bool {
+		_, checkedExists := s.Attr("checked")
+		return checkedExists
+	}
+	checkBoxes := issueContent.Find("input").FilterFunction(isCheckBox)
+	assert.Equal(t, 8, checkBoxes.Length())
+	assert.Equal(t, 4, checkBoxes.FilterFunction(isChecked).Length())
 }
 
 func TestIssueDependencies(t *testing.T) {
