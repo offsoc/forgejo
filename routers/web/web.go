@@ -696,6 +696,7 @@ func registerRoutes(m *web.Route) {
 		m.Group("/emails", func() {
 			m.Get("", admin.Emails)
 			m.Post("/activate", admin.ActivateEmail)
+			m.Post("/delete", admin.DeleteEmail)
 		})
 
 		m.Group("/orgs", func() {
