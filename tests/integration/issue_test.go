@@ -239,7 +239,7 @@ func testNewIssue(t *testing.T, session *TestSession, user, repo, title, content
 	assert.Contains(t, val, title)
 	// test for first line only and if it contains only letters and spaces
 	contentFirstLine := strings.Split(content, "\n")[0]
-	patNotLetterOrSpace, _ := regexp.MustCompile("[^\\p{L}\\s]")
+	patNotLetterOrSpace := regexp.MustCompile(`[^\p{L}\s]`)
 	if len(contentFirstLine) != 0 && !patNotLetterOrSpace.MatchString(contentFirstLine) {
 		val = htmlDoc.doc.Find(".comment .render-content p").First().Text()
 		assert.Equal(t, contentFirstLine, val)
