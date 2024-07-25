@@ -70,6 +70,18 @@ func TestNoLoginViewIssues(t *testing.T) {
 	MakeRequest(t, req, http.StatusOK)
 }
 
+func TestViewIssues(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	req := NewRequest(t, "GET", "/user2/repo1/issues")
+	resp := MakeRequest(t, req, http.StatusOK)
+
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	search := htmlDoc.doc.Find(".list-header-search > .search > .input > input")
+	placeholder, _ := search.Attr("placeholder")
+	assert.Equal(t, "Search issues...", placeholder)
+}
+
 func TestViewIssuesSortByType(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
