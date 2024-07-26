@@ -96,8 +96,7 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/visualon/renovate"],
       "matchUpdateTypes": ["minor", "patch", "digest"],
-      "automerge": true,
-      "groupName": "renovate"
+      "automerge": true
     },
     {
       "description": "x/tools/* are used in the CI only and upgraded together",
@@ -131,9 +130,10 @@
     {
       "description": "Update renovate with higher prio to come through rate limit",
       "matchDatasources": ["docker"],
-      "matchDepNames": ["ghcr.io/visualon/renovate"],
+      "matchPackageNames": ["ghcr.io/visualon/renovate"],
       "extends": ["schedule:weekly"],
-      "prPriority": 10
+      "prPriority": 10,
+      "groupName": "renovate"
     },
     {
       "description": "Update go patch with higher prio to come through rate limit",
