@@ -243,6 +243,11 @@ func EnrollTwoFactorPost(ctx *context.Context) {
 		log.Error("Unable to save changes to the session: %v", err)
 	}
 
+	if err := mailer.SendTOTPEnrolled(ctx, ctx.Doer); err != nil {
+		ctx.ServerError("SendTOTPEnrolled", err)
+		return
+	}
+
 	if err = auth.NewTwoFactor(ctx, t); err != nil {
 		// FIXME: We need to handle a unique constraint fail here it's entirely possible that another request has beaten us.
 		// If there is a unique constraint fail we should just tolerate the error

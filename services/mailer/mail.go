@@ -44,6 +44,7 @@ const (
 	mailAuthPrimaryMailChange  base.TplName = "auth/primary_mail_change"
 	mailAuth2faDisabled        base.TplName = "auth/2fa_disabled"
 	mailAuthRemovedSecurityKey base.TplName = "auth/removed_security_key"
+	mailAuthTOTPEnrolled       base.TplName = "auth/totp_enrolled"
 
 	mailNotifyCollaborator base.TplName = "notify/collaborator"
 
@@ -692,6 +693,39 @@ func SendRemovedSecurityKey(ctx context.Context, u *user_model.User, securityKey
 
 	msg := NewMessage(u.EmailTo(), locale.TrString("mail.removed_security_key.subject"), content.String())
 	msg.Info = fmt.Sprintf("UID: %d, security key removed notification", u.ID)
+
+	SendAsync(msg)
+	return nil
+}
+
+// SendTOTPEnrolled informs the user that they've been enrolled into TOTP.
+func SendTOTPEnrolled(ctx context.Context, u *user_model.User) error {
+	if setting.MailService == nil {
+		return nil
+	}
+	locale := translation.NewLocale(u.Language)
+
+	hasWebAuthn, err := auth_model.HasWebAuthnRegistrationsByUID(ctx, u.ID)
+	if err != nil {
+		return err
+	}
+
+	data := map[string]any{
+		"locale":      locale,
+		"HasWebAuthn": hasWebAuthn,
+		"DisplayName": u.DisplayName(),
+		"Username":    u.Name,
+		"Language":    locale.Language(),
+	}
+
+	var content bytes.Buffer
+
+	if err := bodyTemplates.ExecuteTemplate(&content, string(mailAuthTOTPEnrolled), data); err != nil {
+		return err
+	}
+
+	msg := NewMessage(u.EmailTo(), locale.TrString("mail.totp_enrolled.subject"), content.String())
+	msg.Info = fmt.Sprintf("UID: %d, enrolled into TOTP notification", u.ID)
 
 	SendAsync(msg)
 	return nil

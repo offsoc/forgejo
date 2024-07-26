@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	auth_model "code.gitea.io/gitea/models/auth"
 	issues_model "code.gitea.io/gitea/models/issues"
@@ -21,10 +22,13 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/translation"
+	gitea_context "code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/mailer"
 	"code.gitea.io/gitea/tests"
 
+	"github.com/pquerna/otp/totp"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestViewUser(t *testing.T) {
@@ -745,5 +749,73 @@ func TestUserSecurityKeyMail(t *testing.T) {
 		assert.True(t, called)
 		unittest.AssertExistsIf(t, false, &auth_model.WebAuthnCredential{UserID: user.ID, Name: "Little Bobby Tables's primary key"})
 		unittest.AssertExistsIf(t, true, &auth_model.WebAuthnCredential{UserID: user.ID, Name: "Little Bobby Tables's evil key"})
+	})
+}
+
+func TestUserTOTPEnrolled(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	session := loginUser(t, user.Name)
+
+	enrollTOTP := func(t *testing.T) {
+		t.Helper()
+
+		req := NewRequest(t, "GET", "/user/settings/security/two_factor/enroll")
+		resp := session.MakeRequest(t, req, http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		totpSecretKey, has := htmlDoc.Find(".twofa img[src^='data:image/png;base64']").Attr("alt")
+		assert.True(t, has)
+
+		currentTOTP, err := totp.GenerateCode(totpSecretKey, time.Now())
+		require.NoError(t, err)
+
+		req = NewRequestWithValues(t, "POST", "/user/settings/security/two_factor/enroll", map[string]string{
+			"_csrf":    htmlDoc.GetCSRF(),
+			"passcode": currentTOTP,
+		})
+		session.MakeRequest(t, req, http.StatusSeeOther)
+
+		flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
+		assert.NotNil(t, flashCookie)
+		assert.Contains(t, flashCookie.Value, "success%3DYour%2Baccount%2Bhas%2Bbeen%2Bsuccessfully%2Benrolled.")
+
+		unittest.AssertSuccessfulDelete(t, &auth_model.TwoFactor{UID: user.ID})
+	}
+
+	t.Run("No WebAuthn enabled", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		called := false
+		defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+			assert.Len(t, msgs, 1)
+			assert.Equal(t, user.EmailTo(), msgs[0].To)
+			assert.EqualValues(t, translation.NewLocale("en-US").Tr("mail.totp_enrolled.subject"), msgs[0].Subject)
+			assert.Contains(t, msgs[0].Body, translation.NewLocale("en-US").Tr("mail.totp_enrolled.text_1.no_webauthn"))
+			called = true
+		})()
+
+		enrollTOTP(t)
+
+		assert.True(t, called)
+	})
+
+	t.Run("With WebAuthn enabled", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		called := false
+		defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+			assert.Len(t, msgs, 1)
+			assert.Equal(t, user.EmailTo(), msgs[0].To)
+			assert.EqualValues(t, translation.NewLocale("en-US").Tr("mail.totp_enrolled.subject"), msgs[0].Subject)
+			assert.Contains(t, msgs[0].Body, translation.NewLocale("en-US").Tr("mail.totp_enrolled.text_1.has_webauthn"))
+			called = true
+		})()
+
+		unittest.AssertSuccessfulInsert(t, &auth_model.WebAuthnCredential{UserID: user.ID, Name: "Cueball's primary key"})
+		enrollTOTP(t)
+
+		assert.True(t, called)
 	})
 }

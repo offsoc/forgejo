@@ -9,6 +9,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/builder"
 )
 
@@ -128,6 +129,12 @@ func AssertExistsIf(t assert.TestingT, expected bool, bean any, conditions ...an
 func AssertSuccessfulInsert(t assert.TestingT, beans ...any) {
 	err := db.Insert(db.DefaultContext, beans...)
 	assert.NoError(t, err)
+}
+
+// AssertSuccessfulDelete assert that beans is successfully deleted
+func AssertSuccessfulDelete(t require.TestingT, beans ...any) {
+	err := db.DeleteBeans(db.DefaultContext, beans...)
+	require.NoError(t, err)
 }
 
 // AssertCount assert the count of a bean
