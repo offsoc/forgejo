@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/services/mailer"
 	user_service "code.gitea.io/gitea/services/user"
@@ -49,6 +50,7 @@ func TestPrimaryMailChange(t *testing.T) {
 		assert.Equal(t, user.EmailTo(firstEmail.Email), msgs[0].To)
 		assert.EqualValues(t, translation.NewLocale("en-US").Tr("mail.primary_mail_change.subject"), msgs[0].Subject)
 		assert.Contains(t, msgs[0].Body, secondEmail.Email)
+		assert.Contains(t, msgs[0].Body, setting.AppURL)
 		mailer.AssertTranslatedLocale(t, msgs[0].Body, "mail.primary_mail_change.text_1", "mail.primary_mail_change.text_2", "mail.primary_mail_change.text_3")
 		called = true
 	})()
