@@ -280,19 +280,17 @@ func GetPackagesByType(ctx context.Context, ownerID int64, packageType Type) ([]
 }
 
 // FindUnreferencedPackages gets all packages without associated versions
-func FindUnreferencedPackages(ctx context.Context) ([]*Package, error) {
-	in := builder.
+func FindUnreferencedPackages(ctx context.Context) ([]int64, error) {
+	var pIDs []int64
+	if err := db.GetEngine(ctx).
 		Select("package.id").
-		From("package").
-		LeftJoin("package_version", "package_version.package_id = package.id").
-		Where(builder.Expr("package_version.id IS NULL"))
-
-	ps := make([]*Package, 0, 10)
-	return ps, db.GetEngine(ctx).
-		// double select workaround for MySQL
-		// https://stackoverflow.com/questions/4471277/mysql-delete-from-with-subquery-as-condition
-		Where(builder.In("package.id", builder.Select("id").From(in, "temp"))).
-		Find(&ps)
+		Table("package").
+		Join("LEFT", "package_version", "package_version.package_id = package.id").
+		Where("package_version.id IS NULL").
+		Find(&pIDs); err != nil {
+		return nil, err
+	}
+	return pIDs, nil
 }
 
 // HasOwnerPackages tests if a user/org has accessible packages

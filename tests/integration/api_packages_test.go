@@ -479,6 +479,8 @@ func TestPackageCleanup(t *testing.T) {
 			AddBasicAuth(user.Name)
 		MakeRequest(t, req, http.StatusCreated)
 
+		unittest.AssertExistsAndLoadBean(t, &packages_model.Package{Name: "cleanup-test"})
+
 		pbs, err := packages_model.FindExpiredUnreferencedBlobs(db.DefaultContext, duration)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, pbs)
@@ -492,6 +494,8 @@ func TestPackageCleanup(t *testing.T) {
 		pbs, err = packages_model.FindExpiredUnreferencedBlobs(db.DefaultContext, duration)
 		assert.NoError(t, err)
 		assert.Empty(t, pbs)
+
+		unittest.AssertNotExistsBean(t, &packages_model.Package{Name: "cleanup-test"})
 
 		_, err = packages_model.GetInternalVersionByNameAndVersion(db.DefaultContext, user.ID, packages_model.TypeContainer, "cleanup-test", container_model.UploadVersion)
 		assert.ErrorIs(t, err, packages_model.ErrPackageNotExist)

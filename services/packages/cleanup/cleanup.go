@@ -154,15 +154,15 @@ func CleanupExpiredData(outerCtx context.Context, olderThan time.Duration) error
 		return err
 	}
 
-	ps, err := packages_model.FindUnreferencedPackages(ctx)
+	pIDs, err := packages_model.FindUnreferencedPackages(ctx)
 	if err != nil {
 		return err
 	}
-	for _, p := range ps {
-		if err := packages_model.DeleteAllProperties(ctx, packages_model.PropertyTypePackage, p.ID); err != nil {
+	for _, pID := range pIDs {
+		if err := packages_model.DeleteAllProperties(ctx, packages_model.PropertyTypePackage, pID); err != nil {
 			return err
 		}
-		if err := packages_model.DeletePackageByID(ctx, p.ID); err != nil {
+		if err := packages_model.DeletePackageByID(ctx, pID); err != nil {
 			return err
 		}
 	}
