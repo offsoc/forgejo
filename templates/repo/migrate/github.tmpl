@@ -41,10 +41,6 @@
 						<div class="inline field">
 							<label></label>
 							<div class="ui checkbox">
-								<input name="labels" type="checkbox" {{if .labels}}checked{{end}}>
-								<label>{{ctx.Locale.Tr "repo.migrate_items_labels"}}</label>
-							</div>
-							<div class="ui checkbox">
 								<input name="issues" type="checkbox" {{if .issues}}checked{{end}}>
 								<label>{{ctx.Locale.Tr "repo.migrate_items_issues"}}</label>
 							</div>
@@ -55,9 +51,12 @@
 								<input name="pull_requests" type="checkbox" {{if .pull_requests}}checked{{end}}>
 								<label>{{ctx.Locale.Tr "repo.migrate_items_pullrequests"}}</label>
 							</div>
+						</div>
+						<div class="inline field">
+							<label></label>
 							<div class="ui checkbox">
-								<input name="releases" type="checkbox" {{if .releases}}checked{{end}}>
-								<label>{{ctx.Locale.Tr "repo.migrate_items_releases"}}</label>
+								<input name="labels" type="checkbox" {{if .labels}}checked{{end}}>
+								<label>{{ctx.Locale.Tr "repo.migrate_items_labels"}}</label>
 							</div>
 						</div>
 						<div class="inline field">
@@ -65,6 +64,13 @@
 							<div class="ui checkbox">
 								<input name="milestones" type="checkbox" {{if .milestones}}checked{{end}}>
 								<label>{{ctx.Locale.Tr "repo.migrate_items_milestones"}}</label>
+							</div>
+						</div>
+						<div class="inline field">
+							<label></label>
+							<div class="ui checkbox">
+								<input name="releases" type="checkbox" {{if .releases}}checked{{end}}>
+								<label>{{ctx.Locale.Tr "repo.migrate_items_releases"}}</label>
 							</div>
 						</div>
 					</div>
