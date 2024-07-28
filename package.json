@@ -64,7 +64,7 @@
     "@stoplight/spectral-cli": "6.11.1",
     "@stylistic/eslint-plugin-js": "1.8.1",
     "@stylistic/stylelint-plugin": "2.1.2",
-    "@vitejs/plugin-vue": "5.1.0",
+    "@vitejs/plugin-vue": "5.1.1",
     "@vitest/coverage-v8": "1.6.0",
     "@vue/test-utils": "2.4.6",
     "eslint": "8.57.0",
