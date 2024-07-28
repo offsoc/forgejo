@@ -69,6 +69,15 @@
 						<a {{if gt .Issue.PullRequest.Merger.ID 0}}href="{{.Issue.PullRequest.Merger.HomeLink}}"{{end}}>{{.Issue.PullRequest.Merger.GetDisplayName}}</a>
 						<span class="pull-desc">{{ctx.Locale.TrN .NumCommits "repo.pulls.merged_title_desc_one" "repo.pulls.merged_title_desc_few" .NumCommits $headHref $baseHref $mergedStr}}</span>
 					{{end}}
+					{{if .MadeUsingAGit}}
+						{{/* TODO: Move documentation link to the instructions at the bottom of the PR, show instructions when clicking label */}}
+						{{/* Note: #agit-label is necessary for testing whether the label appears when it should in tests/integration/git_test.go */}}
+						<a target="_blank" rel="noopener" href="https://forgejo.org/docs/latest/user/agit-support/">
+							<span id="agit-label" data-tooltip-content="{{ctx.Locale.Tr "repo.pulls.agit_explanation"}}" class="ui small label">
+								{{ctx.Locale.Tr "repo.pulls.made_using_agit"}}
+							</span>
+						</a>
+					{{end}}
 				{{else}}
 					{{if .Issue.OriginalAuthor}}
 						<span id="pull-desc-display" class="pull-desc">{{.Issue.OriginalAuthor}} {{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref}}</span>
