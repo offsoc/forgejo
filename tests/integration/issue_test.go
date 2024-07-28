@@ -314,6 +314,21 @@ Description`)
 	checkBoxes := issueContent.Find("input").FilterFunction(isCheckBox)
 	assert.Equal(t, 8, checkBoxes.Length())
 	assert.Equal(t, 4, checkBoxes.FilterFunction(isChecked).Length())
+
+	// Issues list should show the correct numbers of checked and total checkboxes
+	repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, "user2", "repo1")
+	assert.NoError(t, err)
+	//repo = unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: repo.ID})
+	req = NewRequestf(t, "GET", "%s/issues", repo.Link())
+	resp = MakeRequest(t, req, http.StatusOK)
+
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	issuesSelection := htmlDoc.Find("#issue-list .flex-item")
+	assert.Equal(t, "4 / 8", strings.TrimSpace(issuesSelection.Find(".checklist").Text()))
+	value, _ := issuesSelection.Find("progress").Attr("value")
+	vmax, _ := issuesSelection.Find("progress").Attr("max")
+	assert.Equal(t, "4", value)
+	assert.Equal(t, "8", vmax)
 }
 
 func TestIssueDependencies(t *testing.T) {
