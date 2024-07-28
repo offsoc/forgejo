@@ -86,7 +86,6 @@ code.gitea.io/gitea/models/repo
 	WatchRepoMode
 
 code.gitea.io/gitea/models/user
-	IsErrPrimaryEmailCannotDelete
 	ErrUserInactive.Error
 	ErrUserInactive.Unwrap
 	IsErrExternalLoginUserAlreadyExist
