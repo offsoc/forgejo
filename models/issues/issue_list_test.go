@@ -9,9 +9,11 @@ import (
 	"code.gitea.io/gitea/models/db"
 	issues_model "code.gitea.io/gitea/models/issues"
 	"code.gitea.io/gitea/models/unittest"
+	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIssueList_LoadRepositories(t *testing.T) {
@@ -76,5 +78,52 @@ func TestIssueList_LoadAttributes(t *testing.T) {
 	assert.NoError(t, issueList.LoadIsRead(db.DefaultContext, 1))
 	for _, issue := range issueList {
 		assert.Equal(t, issue.ID == 1, issue.IsRead, "unexpected is_read value for issue[%d]", issue.ID)
+	}
+}
+
+func TestIssueListLoadUser(t *testing.T) {
+	assert.NoError(t, unittest.PrepareTestDatabase())
+
+	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{})
+	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+
+	for _, testCase := range []struct {
+		poster int64
+		user   *user_model.User
+	}{
+		{
+			poster: user_model.ActionsUserID,
+			user:   user_model.NewActionsUser(),
+		},
+		{
+			poster: user_model.GhostUserID,
+			user:   user_model.NewGhostUser(),
+		},
+		{
+			poster: doer.ID,
+			user:   doer,
+		},
+		{
+			poster: 0,
+			user:   user_model.NewGhostUser(),
+		},
+		{
+			poster: -200,
+			user:   user_model.NewGhostUser(),
+		},
+		{
+			poster: 200,
+			user:   user_model.NewGhostUser(),
+		},
+	} {
+		t.Run(testCase.user.Name, func(t *testing.T) {
+			list := issues_model.IssueList{issue}
+
+			issue.PosterID = testCase.poster
+			issue.Poster = nil
+			assert.NoError(t, list.LoadPosters(db.DefaultContext))
+			require.NotNil(t, issue.Poster)
+			assert.Equal(t, testCase.user.ID, issue.Poster.ID)
+		})
 	}
 }

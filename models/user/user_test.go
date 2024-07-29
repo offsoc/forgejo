@@ -35,6 +35,39 @@ func TestOAuth2Application_LoadUser(t *testing.T) {
 	assert.NotNil(t, user)
 }
 
+func TestIsValidUserID(t *testing.T) {
+	assert.False(t, user_model.IsValidUserID(-30))
+	assert.False(t, user_model.IsValidUserID(0))
+	assert.True(t, user_model.IsValidUserID(user_model.GhostUserID))
+	assert.True(t, user_model.IsValidUserID(user_model.ActionsUserID))
+	assert.True(t, user_model.IsValidUserID(200))
+}
+
+func TestGetUserFromMap(t *testing.T) {
+	id := int64(200)
+	idMap := map[int64]*user_model.User{
+		id: {ID: id},
+	}
+
+	ghostID := int64(user_model.GhostUserID)
+	actionsID := int64(user_model.ActionsUserID)
+	actualID, actualUser := user_model.GetUserFromMap(-20, idMap)
+	assert.Equal(t, ghostID, actualID)
+	assert.Equal(t, ghostID, actualUser.ID)
+
+	actualID, actualUser = user_model.GetUserFromMap(0, idMap)
+	assert.Equal(t, ghostID, actualID)
+	assert.Equal(t, ghostID, actualUser.ID)
+
+	actualID, actualUser = user_model.GetUserFromMap(ghostID, idMap)
+	assert.Equal(t, ghostID, actualID)
+	assert.Equal(t, ghostID, actualUser.ID)
+
+	actualID, actualUser = user_model.GetUserFromMap(actionsID, idMap)
+	assert.Equal(t, actionsID, actualID)
+	assert.Equal(t, actionsID, actualUser.ID)
+}
+
 func TestGetUserByName(t *testing.T) {
 	defer tests.AddFixtures("models/user/fixtures/")()
 	assert.NoError(t, unittest.PrepareTestDatabase())

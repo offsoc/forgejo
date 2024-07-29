@@ -939,6 +939,20 @@ func GetUserByIDs(ctx context.Context, ids []int64) ([]*User, error) {
 	return users, err
 }
 
+func IsValidUserID(id int64) bool {
+	return id > 0 || id == GhostUserID || id == ActionsUserID
+}
+
+func GetUserFromMap(id int64, idMap map[int64]*User) (int64, *User) {
+	if user, ok := idMap[id]; ok {
+		return id, user
+	}
+	if id == ActionsUserID {
+		return ActionsUserID, NewActionsUser()
+	}
+	return GhostUserID, NewGhostUser()
+}
+
 // GetPossibleUserByID returns the user if id > 0 or return system usrs if id < 0
 func GetPossibleUserByID(ctx context.Context, id int64) (*User, error) {
 	switch id {
