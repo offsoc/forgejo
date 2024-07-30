@@ -117,6 +117,7 @@
         "docker"
       ],
       "matchPackageNames": [
+        "code.forgejo.org/forgejo-contrib/renovate",
         "ghcr.io/visualon/renovate"
       ],
       "matchUpdateTypes": [
@@ -171,6 +172,7 @@
         "docker"
       ],
       "matchPackageNames": [
+        "code.forgejo.org/forgejo-contrib/renovate",
         "ghcr.io/visualon/renovate"
       ],
       "extends": [
