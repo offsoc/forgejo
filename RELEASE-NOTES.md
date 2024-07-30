@@ -19,7 +19,6 @@ A [companion blog post](https://forgejo.org/2024-07-release-v8-0/) provides addi
 <!--URL:https://codeberg.org/forgejo/forgejo-->
 - **Breaking**
   - [PR](https://codeberg.org/forgejo/forgejo/pulls/3040): <!--number 3040 --><!--number--><!--description -->remove Microsoft SQL Server support see [the discussion](https://codeberg.org/forgejo/discussions/issues/122).<!--description-->
-  - [PR](https://codeberg.org/forgejo/forgejo/pulls/4601) ([backported from](https://codeberg.org/forgejo/forgejo/pulls/4595)): <!--number 4601 --><!--number--><!--description Repository citation: Removed the ability to export citations in APA format. [Read more in the companion blog post](https://forgejo.org/2024-07-non-free-dependency-found/)-->Repository citation: Removed the ability to export citations in APA format. [Read more in the companion blog post](https://forgejo.org/2024-07-non-free-dependency-found/)<!--description-->
 - **User interface features & enhancements**
   - [PR](https://codeberg.org/forgejo/forgejo/pulls/4590) ([backported from](https://codeberg.org/forgejo/forgejo/pulls/4571)): <!--number 4590 --><!--number--><!--description -->Replace `vue-bar-graph` with `chart.js`<!--description-->
   - [PR](https://codeberg.org/forgejo/forgejo/pulls/4201): <!--number 4201 --><!--number--><!--description Make tooltip of Author label in comments more clear-->make the tooltip of the author label in comments clearer.<!--description-->
