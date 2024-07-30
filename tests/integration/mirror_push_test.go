@@ -26,6 +26,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMirrorPush(t *testing.T) {
@@ -36,7 +37,7 @@ func testMirrorPush(t *testing.T, u *url.URL) {
 	defer tests.PrepareTestEnv(t)()
 
 	setting.Migrations.AllowLocalNetworks = true
-	assert.NoError(t, migrations.Init())
+	require.NoError(t, migrations.Init())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	srcRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
@@ -44,7 +45,7 @@ func testMirrorPush(t *testing.T, u *url.URL) {
 	mirrorRepo, err := repo_service.CreateRepositoryDirectly(db.DefaultContext, user, user, repo_service.CreateRepoOptions{
 		Name: "test-push-mirror",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	ctx := NewAPITestContext(t, user.LowerName, srcRepo.Name)
 
@@ -52,25 +53,25 @@ func testMirrorPush(t *testing.T, u *url.URL) {
 	doCreatePushMirror(ctx, fmt.Sprintf("%s%s/%s", u.String(), url.PathEscape(ctx.Username), url.PathEscape("does-not-matter")), user.LowerName, userPassword)(t)
 
 	mirrors, _, err := repo_model.GetPushMirrorsByRepoID(db.DefaultContext, srcRepo.ID, db.ListOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, mirrors, 2)
 
 	ok := mirror_service.SyncPushMirror(context.Background(), mirrors[0].ID)
 	assert.True(t, ok)
 
 	srcGitRepo, err := gitrepo.OpenRepository(git.DefaultContext, srcRepo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer srcGitRepo.Close()
 
 	srcCommit, err := srcGitRepo.GetBranchCommit("master")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	mirrorGitRepo, err := gitrepo.OpenRepository(git.DefaultContext, mirrorRepo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer mirrorGitRepo.Close()
 
 	mirrorCommit, err := mirrorGitRepo.GetBranchCommit("master")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, srcCommit.ID, mirrorCommit.ID)
 
@@ -78,31 +79,31 @@ func testMirrorPush(t *testing.T, u *url.URL) {
 	// To do that, we artificially remove the remote...
 	cmd := git.NewCommand(db.DefaultContext, "remote", "rm").AddDynamicArguments(mirrors[0].RemoteName)
 	_, _, err = cmd.RunStdString(&git.RunOpts{Dir: srcRepo.RepoPath()})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// ...then ensure that trying to get its remote address fails
 	_, err = repo_model.GetPushMirrorRemoteAddress(srcRepo.OwnerName, srcRepo.Name, mirrors[0].RemoteName)
-	assert.Error(t, err)
+	require.Error(t, err)
 
 	// ...and that we can fix it.
 	err = doctor.FixPushMirrorsWithoutGitRemote(db.DefaultContext, nil, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// ...and after fixing, we only have one remote
 	mirrors, _, err = repo_model.GetPushMirrorsByRepoID(db.DefaultContext, srcRepo.ID, db.ListOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, mirrors, 1)
 
 	// ...one we can get the address of, and it's not the one we removed
 	remoteAddress, err := repo_model.GetPushMirrorRemoteAddress(srcRepo.OwnerName, srcRepo.Name, mirrors[0].RemoteName)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, remoteAddress, "does-not-matter")
 
 	// Cleanup
 	doRemovePushMirror(ctx, fmt.Sprintf("%s%s/%s", u.String(), url.PathEscape(ctx.Username), url.PathEscape(mirrorRepo.Name)), user.LowerName, userPassword, int(mirrors[0].ID))(t)
 	mirrors, _, err = repo_model.GetPushMirrorsByRepoID(db.DefaultContext, srcRepo.ID, db.ListOptions{})
-	assert.NoError(t, err)
-	assert.Len(t, mirrors, 0)
+	require.NoError(t, err)
+	assert.Empty(t, mirrors)
 }
 
 func doCreatePushMirror(ctx APITestContext, address, username, password string) func(t *testing.T) {

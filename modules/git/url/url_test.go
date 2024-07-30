@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseGitURLs(t *testing.T) {
@@ -158,7 +159,7 @@ func TestParseGitURLs(t *testing.T) {
 	for _, kase := range kases {
 		t.Run(kase.kase, func(t *testing.T) {
 			u, err := Parse(kase.kase)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, kase.expected.extraMark, u.extraMark)
 			assert.EqualValues(t, *kase.expected, *u)
 		})

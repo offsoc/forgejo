@@ -221,7 +221,7 @@ func TestMatrixJSONPayload(t *testing.T) {
 	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 	var body MatrixPayload
 	err = json.NewDecoder(req.Body).Decode(&body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "[[test/repo](http://localhost:3000/test/repo)] user1 pushed 2 commits to [test](http://localhost:3000/test/repo/src/branch/test):\n[2020558](http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778): commit message - user1\n[2020558](http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778): commit message - user1", body.Body)
 }
 

@@ -9,10 +9,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAddTaskToScheduler(t *testing.T) {
-	assert.Len(t, scheduler.Jobs(), 0)
+	assert.Empty(t, scheduler.Jobs())
 	defer scheduler.Clear()
 
 	// no seconds
@@ -22,7 +23,7 @@ func TestAddTaskToScheduler(t *testing.T) {
 			Schedule: "5 4 * * *",
 		},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	jobs := scheduler.Jobs()
 	assert.Len(t, jobs, 1)
 	assert.Equal(t, "task 1", jobs[0].Tags()[0])
@@ -35,7 +36,7 @@ func TestAddTaskToScheduler(t *testing.T) {
 			Schedule: "30 5 4 * * *",
 		},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	jobs = scheduler.Jobs() // the item order is not guaranteed, so we need to sort it before "assert"
 	sort.Slice(jobs, func(i, j int) bool {
 		return jobs[i].Tags()[0] < jobs[j].Tags()[0]

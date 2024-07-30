@@ -25,6 +25,7 @@ import (
 	"code.gitea.io/gitea/services/migrations"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 )
 
@@ -40,12 +41,12 @@ func TestDumpRestore(t *testing.T) {
 			setting.AppVer = AppVer
 		}()
 
-		assert.NoError(t, migrations.Init())
+		require.NoError(t, migrations.Init())
 
 		reponame := "repo1"
 
 		basePath, err := os.MkdirTemp("", reponame)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer util.RemoveAll(basePath)
 
 		repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: reponame})
@@ -70,7 +71,7 @@ func TestDumpRestore(t *testing.T) {
 			RepoName:       reponame,
 		}
 		err = migrations.DumpRepository(ctx, basePath, repoOwner.Name, opts)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		//
 		// Verify desired side effects of the dump
@@ -88,7 +89,7 @@ func TestDumpRestore(t *testing.T) {
 		err = migrations.RestoreRepository(ctx, d, repo.OwnerName, newreponame, []string{
 			"labels", "issues", "comments", "milestones", "pull_requests",
 		}, false)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		newrepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: newreponame})
 
@@ -98,7 +99,7 @@ func TestDumpRestore(t *testing.T) {
 		opts.RepoName = newreponame
 		opts.CloneAddr = newrepo.CloneLink().HTTPS
 		err = migrations.DumpRepository(ctx, basePath, repoOwner.Name, opts)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		//
 		// Verify the dump of restored is the same as the dump of repo1
@@ -224,11 +225,11 @@ func (c *compareDump) assertLoadYAMLFiles(beforeFilename, afterFilename string, 
 	}
 
 	beforeBytes, err := os.ReadFile(beforeFilename)
-	assert.NoError(c.t, err)
-	assert.NoError(c.t, yaml.Unmarshal(beforeBytes, before))
+	require.NoError(c.t, err)
+	require.NoError(c.t, yaml.Unmarshal(beforeBytes, before))
 	afterBytes, err := os.ReadFile(afterFilename)
-	assert.NoError(c.t, err)
-	assert.NoError(c.t, yaml.Unmarshal(afterBytes, after))
+	require.NoError(c.t, err)
+	require.NoError(c.t, yaml.Unmarshal(afterBytes, after))
 }
 
 func (c *compareDump) assertLoadFiles(beforeFilename, afterFilename string, t reflect.Type) (before, after reflect.Value) {

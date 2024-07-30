@@ -20,6 +20,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepoActivity(t *testing.T) {
@@ -83,13 +84,13 @@ func TestRepoActivityAllUnitsDisabled(t *testing.T) {
 		Name:     "empty-repo",
 		AutoInit: false,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, repo)
 
 	enabledUnits := make([]repo_model.RepoUnit, 0)
 	disabledUnits := []unit_model.Type{unit_model.TypeCode, unit_model.TypeIssues, unit_model.TypePullRequests, unit_model.TypeReleases}
 	err = repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, enabledUnits, disabledUnits)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req := NewRequest(t, "GET", fmt.Sprintf("%s/activity", repo.Link()))
 	session.MakeRequest(t, req, http.StatusNotFound)
@@ -113,14 +114,14 @@ func TestRepoActivityOnlyCodeUnitWithEmptyRepo(t *testing.T) {
 		Name:     "empty-repo",
 		AutoInit: false,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, repo)
 
 	enabledUnits := make([]repo_model.RepoUnit, 1)
 	enabledUnits[0] = repo_model.RepoUnit{RepoID: repo.ID, Type: unit_model.TypeCode}
 	disabledUnits := []unit_model.Type{unit_model.TypeIssues, unit_model.TypePullRequests, unit_model.TypeReleases}
 	err = repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, enabledUnits, disabledUnits)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req := NewRequest(t, "GET", fmt.Sprintf("%s/activity", repo.Link()))
 	session.MakeRequest(t, req, http.StatusOK)
@@ -169,14 +170,14 @@ func TestRepoActivityOnlyIssuesUnit(t *testing.T) {
 		Name:     "empty-repo",
 		AutoInit: false,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, repo)
 
 	enabledUnits := make([]repo_model.RepoUnit, 1)
 	enabledUnits[0] = repo_model.RepoUnit{RepoID: repo.ID, Type: unit_model.TypeIssues}
 	disabledUnits := []unit_model.Type{unit_model.TypeCode, unit_model.TypePullRequests, unit_model.TypeReleases}
 	err = repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, enabledUnits, disabledUnits)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req := NewRequest(t, "GET", fmt.Sprintf("%s/activity", repo.Link()))
 	session.MakeRequest(t, req, http.StatusOK)

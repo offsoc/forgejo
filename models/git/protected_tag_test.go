@@ -11,36 +11,37 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIsUserAllowed(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	pt := &git_model.ProtectedTag{}
 	allowed, err := git_model.IsUserAllowedModifyTag(db.DefaultContext, pt, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, allowed)
 
 	pt = &git_model.ProtectedTag{
 		AllowlistUserIDs: []int64{1},
 	}
 	allowed, err = git_model.IsUserAllowedModifyTag(db.DefaultContext, pt, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, allowed)
 
 	allowed, err = git_model.IsUserAllowedModifyTag(db.DefaultContext, pt, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, allowed)
 
 	pt = &git_model.ProtectedTag{
 		AllowlistTeamIDs: []int64{1},
 	}
 	allowed, err = git_model.IsUserAllowedModifyTag(db.DefaultContext, pt, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, allowed)
 
 	allowed, err = git_model.IsUserAllowedModifyTag(db.DefaultContext, pt, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, allowed)
 
 	pt = &git_model.ProtectedTag{
@@ -48,11 +49,11 @@ func TestIsUserAllowed(t *testing.T) {
 		AllowlistTeamIDs: []int64{1},
 	}
 	allowed, err = git_model.IsUserAllowedModifyTag(db.DefaultContext, pt, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, allowed)
 
 	allowed, err = git_model.IsUserAllowedModifyTag(db.DefaultContext, pt, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, allowed)
 }
 
@@ -136,7 +137,7 @@ func TestIsUserAllowedToControlTag(t *testing.T) {
 
 		for n, c := range cases {
 			isAllowed, err := git_model.IsUserAllowedToControlTag(db.DefaultContext, protectedTags, c.name, c.userid)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, c.allowed, isAllowed, "case %d: error should match", n)
 		}
 	})
@@ -158,7 +159,7 @@ func TestIsUserAllowedToControlTag(t *testing.T) {
 
 		for n, c := range cases {
 			isAllowed, err := git_model.IsUserAllowedToControlTag(db.DefaultContext, protectedTags, c.name, c.userid)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, c.allowed, isAllowed, "case %d: error should match", n)
 		}
 	})

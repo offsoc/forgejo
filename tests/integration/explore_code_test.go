@@ -21,5 +21,5 @@ func TestExploreCodeSearchIndexer(t *testing.T) {
 	doc := NewHTMLParser(t, resp.Body)
 	msg := doc.Find(".explore").Find(".ui.container").Find(".ui.message[data-test-tag=grep]")
 
-	assert.EqualValues(t, 0, len(msg.Nodes))
+	assert.Empty(t, msg.Nodes)
 }

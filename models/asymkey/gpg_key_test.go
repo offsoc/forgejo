@@ -15,6 +15,7 @@ import (
 
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCheckArmoredGPGKeyString(t *testing.T) {
@@ -50,7 +51,7 @@ MkM/fdpyc2hY7Dl/+qFmN5MG5yGmMpQcX+RNNR222ibNC1D3wg==
 -----END PGP PUBLIC KEY BLOCK-----`
 
 	key, err := checkArmoredGPGKeyString(testGPGArmor)
-	assert.NoError(t, err, "Could not parse a valid GPG public armored rsa key", key)
+	require.NoError(t, err, "Could not parse a valid GPG public armored rsa key", key)
 	// TODO verify value of key
 }
 
@@ -71,7 +72,7 @@ OyjLLnFQiVmq7kEA/0z0CQe3ZQiQIq5zrs7Nh1XRkFAo8GlU/SGC9XFFi722
 -----END PGP PUBLIC KEY BLOCK-----`
 
 	key, err := checkArmoredGPGKeyString(testGPGArmor)
-	assert.NoError(t, err, "Could not parse a valid GPG public armored brainpoolP256r1 key", key)
+	require.NoError(t, err, "Could not parse a valid GPG public armored brainpoolP256r1 key", key)
 	// TODO verify value of key
 }
 
@@ -111,11 +112,11 @@ MkM/fdpyc2hY7Dl/+qFmN5MG5yGmMpQcX+RNNR222ibNC1D3wg==
 		return
 	}
 	ekey := keys[0]
-	assert.NoError(t, err, "Could not parse a valid GPG armored key", ekey)
+	require.NoError(t, err, "Could not parse a valid GPG armored key", ekey)
 
 	pubkey := ekey.PrimaryKey
 	content, err := base64EncPubKey(pubkey)
-	assert.NoError(t, err, "Could not base64 encode a valid PublicKey content", ekey)
+	require.NoError(t, err, "Could not base64 encode a valid PublicKey content", ekey)
 
 	key := &GPGKey{
 		KeyID:             pubkey.KeyIdString(),
@@ -176,27 +177,27 @@ Unknown GPG key with good email
 `
 	// Reading Sign
 	goodSig, err := extractSignature(testGoodSigArmor)
-	assert.NoError(t, err, "Could not parse a valid GPG armored signature", testGoodSigArmor)
+	require.NoError(t, err, "Could not parse a valid GPG armored signature", testGoodSigArmor)
 	badSig, err := extractSignature(testBadSigArmor)
-	assert.NoError(t, err, "Could not parse a valid GPG armored signature", testBadSigArmor)
+	require.NoError(t, err, "Could not parse a valid GPG armored signature", testBadSigArmor)
 
 	// Generating hash of commit
 	goodHash, err := populateHash(goodSig.Hash, []byte(testGoodPayload))
-	assert.NoError(t, err, "Could not generate a valid hash of payload", testGoodPayload)
+	require.NoError(t, err, "Could not generate a valid hash of payload", testGoodPayload)
 	badHash, err := populateHash(badSig.Hash, []byte(testBadPayload))
-	assert.NoError(t, err, "Could not generate a valid hash of payload", testBadPayload)
+	require.NoError(t, err, "Could not generate a valid hash of payload", testBadPayload)
 
 	// Verify
 	err = verifySign(goodSig, goodHash, key)
-	assert.NoError(t, err, "Could not validate a good signature")
+	require.NoError(t, err, "Could not validate a good signature")
 	err = verifySign(badSig, badHash, key)
-	assert.Error(t, err, "Validate a bad signature")
+	require.Error(t, err, "Validate a bad signature")
 	err = verifySign(goodSig, goodHash, cannotsignkey)
-	assert.Error(t, err, "Validate a bad signature with a kay that can not sign")
+	require.Error(t, err, "Validate a bad signature with a kay that can not sign")
 }
 
 func TestCheckGPGUserEmail(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	_ = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -232,7 +233,7 @@ Q0KHb+QcycSgbDx0ZAvdIacuKvBBcbxrsmFUI4LR+oIup0G9gUc0roPvr014jYQL
 -----END PGP PUBLIC KEY BLOCK-----`
 
 	keys, err := AddGPGKey(db.DefaultContext, 1, testEmailWithUpperCaseLetters, "", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.NotEmpty(t, keys) {
 		key := keys[0]
 		if assert.Len(t, key.Emails, 1) {
@@ -242,10 +243,10 @@ Q0KHb+QcycSgbDx0ZAvdIacuKvBBcbxrsmFUI4LR+oIup0G9gUc0roPvr014jYQL
 }
 
 func TestCheckGPGRevokedIdentity(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
-	assert.NoError(t, db.Insert(db.DefaultContext, &user_model.EmailAddress{UID: 1, Email: "no-reply@golang.com", IsActivated: true}))
-	assert.NoError(t, db.Insert(db.DefaultContext, &user_model.EmailAddress{UID: 1, Email: "revoked@golang.com", IsActivated: true}))
+	require.NoError(t, db.Insert(db.DefaultContext, &user_model.EmailAddress{UID: 1, Email: "no-reply@golang.com", IsActivated: true}))
+	require.NoError(t, db.Insert(db.DefaultContext, &user_model.EmailAddress{UID: 1, Email: "revoked@golang.com", IsActivated: true}))
 	_ = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
 	revokedUserKey := `-----BEGIN PGP PUBLIC KEY BLOCK-----
@@ -289,7 +290,7 @@ heiQvzkApQup5c+BhH5zFDFdKJ2CBByxw9+7QjMFI/wgLixKuE0Ob2kAokXf7RlB
 `
 
 	keys, err := AddGPGKey(db.DefaultContext, 1, revokedUserKey, "", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, keys, 1)
 	assert.Len(t, keys[0].Emails, 1)
 	assert.EqualValues(t, "no-reply@golang.com", keys[0].Emails[0].Email)
@@ -446,7 +447,7 @@ epiDVQ==
 -----END PGP PUBLIC KEY BLOCK-----
 `
 	keys, err := checkArmoredGPGKeyString(testIssue6599)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.NotEmpty(t, keys) {
 		ekey := keys[0]
 		expire := getExpiryTime(ekey)

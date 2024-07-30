@@ -23,7 +23,7 @@ func TestTelegramPayload(t *testing.T) {
 		p := createTelegramPayload("testMsg ")
 
 		assert.Equal(t, "HTML", p.ParseMode)
-		assert.Equal(t, true, p.DisableWebPreview)
+		assert.True(t, p.DisableWebPreview)
 		assert.Equal(t, "testMsg", p.Message)
 	})
 
@@ -205,7 +205,7 @@ func TestTelegramJSONPayload(t *testing.T) {
 	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 	var body TelegramPayload
 	err = json.NewDecoder(req.Body).Decode(&body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `[<a href="http://localhost:3000/test/repo" rel="nofollow">test/repo</a>:<a href="http://localhost:3000/test/repo/src/test" rel="nofollow">test</a>] 2 new commits
 [<a href="http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778" rel="nofollow">2020558</a>] commit message - user1
 [<a href="http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778" rel="nofollow">2020558</a>] commit message - user1`, body.Message)

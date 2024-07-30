@@ -11,6 +11,7 @@ import (
 	webhook_module "code.gitea.io/gitea/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDetectMatched(t *testing.T) {
@@ -137,7 +138,7 @@ func TestDetectMatched(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			evts, err := GetEventsFromContent([]byte(tc.yamlOn))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, evts, 1)
 			assert.Equal(t, tc.expected, detectMatched(nil, tc.commit, tc.triggedEvent, tc.payload, evts[0]))
 		})

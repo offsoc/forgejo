@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -33,7 +34,7 @@ func TestParsePackage(t *testing.T) {
 
 		p, err := ParsePackage(data, int64(data.Len()))
 		assert.Nil(t, p)
-		assert.ErrorIs(t, err, ErrInvalidStructure)
+		require.ErrorIs(t, err, ErrInvalidStructure)
 	})
 
 	t.Run("InvalidNameOrVersionStructure", func(t *testing.T) {
@@ -43,7 +44,7 @@ func TestParsePackage(t *testing.T) {
 
 		p, err := ParsePackage(data, int64(data.Len()))
 		assert.Nil(t, p)
-		assert.ErrorIs(t, err, ErrInvalidStructure)
+		require.ErrorIs(t, err, ErrInvalidStructure)
 	})
 
 	t.Run("GoModFileInWrongDirectory", func(t *testing.T) {
@@ -53,7 +54,7 @@ func TestParsePackage(t *testing.T) {
 
 		p, err := ParsePackage(data, int64(data.Len()))
 		assert.NotNil(t, p)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, packageName, p.Name)
 		assert.Equal(t, packageVersion, p.Version)
 		assert.Equal(t, "module gitea.com/go-gitea/gitea", p.GoMod)
@@ -67,7 +68,7 @@ func TestParsePackage(t *testing.T) {
 
 		p, err := ParsePackage(data, int64(data.Len()))
 		assert.NotNil(t, p)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, packageName, p.Name)
 		assert.Equal(t, packageVersion, p.Version)
 		assert.Equal(t, "valid", p.GoMod)

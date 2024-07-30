@@ -13,17 +13,18 @@ import (
 	_ "code.gitea.io/gitea/models" // https://discourse.gitea.io/t/testfixtures-could-not-clean-table-access-no-such-table-access/4137/4
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUserSettings(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	pub, priv, err := GetKeyPair(db.DefaultContext, user1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pub1, err := GetPublicKey(db.DefaultContext, user1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, pub, pub1)
 	priv1, err := GetPrivateKey(db.DefaultContext, user1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, priv, priv1)
 }

@@ -20,6 +20,7 @@ import (
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDiffToHTML(t *testing.T) {
@@ -595,22 +596,22 @@ func setupDefaultDiff() *Diff {
 }
 
 func TestDiff_LoadCommentsNoOutdated(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 2})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	diff := setupDefaultDiff()
-	assert.NoError(t, diff.LoadComments(db.DefaultContext, issue, user, false))
+	require.NoError(t, diff.LoadComments(db.DefaultContext, issue, user, false))
 	assert.Len(t, diff.Files[0].Sections[0].Lines[0].Conversations, 2)
 }
 
 func TestDiff_LoadCommentsWithOutdated(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 2})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	diff := setupDefaultDiff()
-	assert.NoError(t, diff.LoadComments(db.DefaultContext, issue, user, true))
+	require.NoError(t, diff.LoadComments(db.DefaultContext, issue, user, true))
 	assert.Len(t, diff.Files[0].Sections[0].Lines[0].Conversations, 2)
 	assert.Len(t, diff.Files[0].Sections[0].Lines[0].Conversations[0], 2)
 	assert.Len(t, diff.Files[0].Sections[0].Lines[0].Conversations[1], 1)
@@ -631,9 +632,8 @@ func TestDiffLine_GetCommentSide(t *testing.T) {
 
 func TestGetDiffRangeWithWhitespaceBehavior(t *testing.T) {
 	gitRepo, err := git.OpenRepository(git.DefaultContext, "./testdata/academic-module")
-	if !assert.NoError(t, err) {
-		return
-	}
+	require.NoError(t, err)
+
 	defer gitRepo.Close()
 	for _, behavior := range []git.TrustedCmdArgs{{"-w"}, {"--ignore-space-at-eol"}, {"-b"}, nil} {
 		diffs, err := GetDiff(db.DefaultContext, gitRepo,
@@ -645,9 +645,9 @@ func TestGetDiffRangeWithWhitespaceBehavior(t *testing.T) {
 				MaxFiles:           setting.Git.MaxGitDiffFiles,
 				WhitespaceBehavior: behavior,
 			})
-		assert.NoError(t, err, fmt.Sprintf("Error when diff with %s", behavior))
+		require.NoError(t, err, fmt.Sprintf("Error when diff with %s", behavior))
 		for _, f := range diffs.Files {
-			assert.True(t, len(f.Sections) > 0, fmt.Sprintf("%s should have sections", f.Name))
+			assert.Positive(t, len(f.Sections), fmt.Sprintf("%s should have sections", f.Name))
 		}
 	}
 }

@@ -24,10 +24,11 @@ import (
 	"code.gitea.io/gitea/services/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMigrateLocalPath(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	adminUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user1"})
 
@@ -38,17 +39,17 @@ func TestMigrateLocalPath(t *testing.T) {
 
 	lowercasePath := filepath.Join(basePath, "lowercase")
 	err := os.Mkdir(lowercasePath, 0o700)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = migrations.IsMigrateURLAllowed(lowercasePath, adminUser)
-	assert.NoError(t, err, "case lowercase path")
+	require.NoError(t, err, "case lowercase path")
 
 	mixedcasePath := filepath.Join(basePath, "mIxeDCaSe")
 	err = os.Mkdir(mixedcasePath, 0o700)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = migrations.IsMigrateURLAllowed(mixedcasePath, adminUser)
-	assert.NoError(t, err, "case mixedcase path")
+	require.NoError(t, err, "case mixedcase path")
 
 	setting.ImportLocalPaths = old
 }
@@ -65,7 +66,7 @@ func TestMigrate(t *testing.T) {
 			setting.AppVer = AppVer
 			migrations.Init()
 		}()
-		assert.NoError(t, migrations.Init())
+		require.NoError(t, migrations.Init())
 
 		ownerName := "user2"
 		repoName := "repo1"
@@ -110,14 +111,14 @@ func TestMigrate(t *testing.T) {
 
 			// Step 7: delete the repository, so we can test with other services
 			err := repository.DeleteRepository(context.Background(), repoOwner, repo, false)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}
 	})
 }
 
 func Test_UpdateCommentsMigrationsByType(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	err := issues_model.UpdateCommentsMigrationsByType(db.DefaultContext, structs.GithubService, "1", 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

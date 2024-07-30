@@ -12,15 +12,16 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGrepSearch(t *testing.T) {
 	repo, err := openRepositoryWithDefaultContext(filepath.Join(testReposDir, "language_stats_repo"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer repo.Close()
 
 	res, err := GrepSearch(context.Background(), repo, "void", GrepOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []*GrepResult{
 		{
 			Filename:    "java-hello/main.java",
@@ -35,7 +36,7 @@ func TestGrepSearch(t *testing.T) {
 	}, res)
 
 	res, err = GrepSearch(context.Background(), repo, "void", GrepOptions{MaxResultLimit: 1})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []*GrepResult{
 		{
 			Filename:    "java-hello/main.java",
@@ -45,7 +46,7 @@ func TestGrepSearch(t *testing.T) {
 	}, res)
 
 	res, err = GrepSearch(context.Background(), repo, "world", GrepOptions{MatchesPerFile: 1})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []*GrepResult{
 		{
 			Filename:    "i-am-a-python.p",
@@ -70,34 +71,34 @@ func TestGrepSearch(t *testing.T) {
 	}, res)
 
 	res, err = GrepSearch(context.Background(), repo, "no-such-content", GrepOptions{})
-	assert.NoError(t, err)
-	assert.Len(t, res, 0)
+	require.NoError(t, err)
+	assert.Empty(t, res)
 
 	res, err = GrepSearch(context.Background(), &Repository{Path: "no-such-git-repo"}, "no-such-content", GrepOptions{})
-	assert.Error(t, err)
-	assert.Len(t, res, 0)
+	require.Error(t, err)
+	assert.Empty(t, res)
 }
 
 func TestGrepLongFiles(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	err := InitRepository(DefaultContext, tmpDir, false, Sha1ObjectFormat.Name())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	gitRepo, err := openRepositoryWithDefaultContext(tmpDir)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
-	assert.NoError(t, os.WriteFile(path.Join(tmpDir, "README.md"), bytes.Repeat([]byte{'a'}, 65*1024), 0o666))
+	require.NoError(t, os.WriteFile(path.Join(tmpDir, "README.md"), bytes.Repeat([]byte{'a'}, 65*1024), 0o666))
 
 	err = AddChanges(tmpDir, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = CommitChanges(tmpDir, CommitChangesOptions{Message: "Long file"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	res, err := GrepSearch(context.Background(), gitRepo, "a", GrepOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, res, 1)
 	assert.Len(t, res[0].LineCodes[0], 65*1024)
 }
@@ -106,28 +107,28 @@ func TestGrepRefs(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	err := InitRepository(DefaultContext, tmpDir, false, Sha1ObjectFormat.Name())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	gitRepo, err := openRepositoryWithDefaultContext(tmpDir)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
-	assert.NoError(t, os.WriteFile(path.Join(tmpDir, "README.md"), []byte{'A'}, 0o666))
-	assert.NoError(t, AddChanges(tmpDir, true))
+	require.NoError(t, os.WriteFile(path.Join(tmpDir, "README.md"), []byte{'A'}, 0o666))
+	require.NoError(t, AddChanges(tmpDir, true))
 
 	err = CommitChanges(tmpDir, CommitChangesOptions{Message: "add A"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, gitRepo.CreateTag("v1", "HEAD"))
+	require.NoError(t, gitRepo.CreateTag("v1", "HEAD"))
 
-	assert.NoError(t, os.WriteFile(path.Join(tmpDir, "README.md"), []byte{'A', 'B', 'C', 'D'}, 0o666))
-	assert.NoError(t, AddChanges(tmpDir, true))
+	require.NoError(t, os.WriteFile(path.Join(tmpDir, "README.md"), []byte{'A', 'B', 'C', 'D'}, 0o666))
+	require.NoError(t, AddChanges(tmpDir, true))
 
 	err = CommitChanges(tmpDir, CommitChangesOptions{Message: "add BCD"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	res, err := GrepSearch(context.Background(), gitRepo, "a", GrepOptions{RefName: "v1"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, res, 1)
-	assert.Equal(t, res[0].LineCodes[0], "A")
+	assert.Equal(t, "A", res[0].LineCodes[0])
 }

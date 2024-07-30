@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_discardStorage(t *testing.T) {
@@ -20,30 +21,30 @@ func Test_discardStorage(t *testing.T) {
 			{
 				got, err := tt.Open("path")
 				assert.Nil(t, got)
-				assert.Error(t, err, string(tt))
+				require.Error(t, err, string(tt))
 			}
 			{
 				got, err := tt.Save("path", bytes.NewReader([]byte{0}), 1)
 				assert.Equal(t, int64(0), got)
-				assert.Error(t, err, string(tt))
+				require.Error(t, err, string(tt))
 			}
 			{
 				got, err := tt.Stat("path")
 				assert.Nil(t, got)
-				assert.Error(t, err, string(tt))
+				require.Error(t, err, string(tt))
 			}
 			{
 				err := tt.Delete("path")
-				assert.Error(t, err, string(tt))
+				require.Error(t, err, string(tt))
 			}
 			{
 				got, err := tt.URL("path", "name")
 				assert.Nil(t, got)
-				assert.Errorf(t, err, string(tt))
+				require.Errorf(t, err, string(tt))
 			}
 			{
 				err := tt.IterateObjects("", func(_ string, _ Object) error { return nil })
-				assert.Error(t, err, string(tt))
+				require.Error(t, err, string(tt))
 			}
 		})
 	}

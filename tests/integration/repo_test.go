@@ -746,7 +746,7 @@ func TestRepoHomeViewRedirect(t *testing.T) {
 		err := repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, nil, []unit_model.Type{
 			unit_model.TypeCode,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The repo home should redirect to the built-in issue tracker
 		req := NewRequest(t, "GET", "/user2/repo1")
@@ -775,7 +775,7 @@ func TestRepoHomeViewRedirect(t *testing.T) {
 			unit_model.TypePackages,
 			unit_model.TypeActions,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The repo home should redirect to pull requests
 		req := NewRequest(t, "GET", "/user2/repo1")
@@ -808,7 +808,7 @@ func TestRepoHomeViewRedirect(t *testing.T) {
 			unit_model.TypeReleases,
 			unit_model.TypeWiki,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The repo home ends up being 404
 		req := NewRequest(t, "GET", "/user2/repo1")

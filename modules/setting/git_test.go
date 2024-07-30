@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGitConfig(t *testing.T) {
@@ -21,7 +22,7 @@ func TestGitConfig(t *testing.T) {
 [git.config]
 a.b = 1
 `)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	loadGitFrom(cfg)
 	assert.EqualValues(t, "1", GitConfig.Options["a.b"])
 	assert.EqualValues(t, "histogram", GitConfig.Options["diff.algorithm"])
@@ -30,7 +31,7 @@ a.b = 1
 [git.config]
 diff.algorithm = other
 `)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	loadGitFrom(cfg)
 	assert.EqualValues(t, "other", GitConfig.Options["diff.algorithm"])
 }
@@ -45,7 +46,7 @@ func TestGitReflog(t *testing.T) {
 
 	// default reflog config without legacy options
 	cfg, err := NewConfigProviderFromData(``)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	loadGitFrom(cfg)
 
 	assert.EqualValues(t, "true", GitConfig.GetOption("core.logAllRefUpdates"))
@@ -57,7 +58,7 @@ func TestGitReflog(t *testing.T) {
 ENABLED = false
 EXPIRATION = 123
 `)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	loadGitFrom(cfg)
 
 	assert.EqualValues(t, "false", GitConfig.GetOption("core.logAllRefUpdates"))

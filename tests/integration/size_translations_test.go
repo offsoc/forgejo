@@ -63,7 +63,7 @@ func TestDataSizeTranslation(t *testing.T) {
 
 		// Check if repo size is translated
 		repos := NewHTMLParser(t, resp.Body).Find(".user-setting-content .list .item .content")
-		assert.True(t, repos.Length() > 0)
+		assert.Positive(t, repos.Length())
 		repos.Each(func(i int, repo *goquery.Selection) {
 			repoName := repo.Find("a.name").Text()
 			if repoName == path.Join(testUser, testRepo.Name) {

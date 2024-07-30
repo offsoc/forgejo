@@ -17,12 +17,13 @@ import (
 	"code.gitea.io/gitea/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestArchivedIssues(t *testing.T) {
 	// Arrange
 	setting.UI.IssuePagingNum = 1
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	ctx, _ := contexttest.MockContext(t, "issues")
 	contexttest.LoadUser(t, ctx, 30)
@@ -53,7 +54,7 @@ func TestArchivedIssues(t *testing.T) {
 
 func TestIssues(t *testing.T) {
 	setting.UI.IssuePagingNum = 1
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	ctx, _ := contexttest.MockContext(t, "issues")
 	contexttest.LoadUser(t, ctx, 2)
@@ -67,7 +68,7 @@ func TestIssues(t *testing.T) {
 
 func TestPulls(t *testing.T) {
 	setting.UI.IssuePagingNum = 20
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	ctx, _ := contexttest.MockContext(t, "pulls")
 	contexttest.LoadUser(t, ctx, 2)
@@ -80,7 +81,7 @@ func TestPulls(t *testing.T) {
 
 func TestMilestones(t *testing.T) {
 	setting.UI.IssuePagingNum = 1
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	ctx, _ := contexttest.MockContext(t, "milestones")
 	contexttest.LoadUser(t, ctx, 2)
@@ -99,7 +100,7 @@ func TestMilestones(t *testing.T) {
 
 func TestMilestonesForSpecificRepo(t *testing.T) {
 	setting.UI.IssuePagingNum = 1
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	ctx, _ := contexttest.MockContext(t, "milestones")
 	contexttest.LoadUser(t, ctx, 2)
@@ -123,17 +124,17 @@ func TestDashboardPagination(t *testing.T) {
 
 	setting.AppSubURL = "/SubPath"
 	out, err := ctx.RenderToHTML("base/paginate", map[string]any{"Link": setting.AppSubURL, "Page": page})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, out, `<a class=" item navigation" href="/SubPath/?page=2">`)
 
 	setting.AppSubURL = ""
 	out, err = ctx.RenderToHTML("base/paginate", map[string]any{"Link": setting.AppSubURL, "Page": page})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, out, `<a class=" item navigation" href="/?page=2">`)
 }
 
 func TestOrgLabels(t *testing.T) {
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	ctx, _ := contexttest.MockContext(t, "org/org3/issues")
 	contexttest.LoadUser(t, ctx, 2)

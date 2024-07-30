@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLinguistSupport(t *testing.T) {
@@ -79,15 +80,15 @@ func TestLinguistSupport(t *testing.T) {
 			t.Helper()
 
 			err := stats.UpdateRepoIndexer(repo)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.NoError(t, queue.GetManager().FlushAll(context.Background(), 10*time.Second))
+			require.NoError(t, queue.GetManager().FlushAll(context.Background(), 10*time.Second))
 
 			status, err := repo_model.GetIndexerStatus(db.DefaultContext, repo, repo_model.RepoIndexerTypeStats)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, sha, status.CommitSha)
 			langs, err := repo_model.GetTopLanguageStats(db.DefaultContext, repo, 5)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			return langs
 		}

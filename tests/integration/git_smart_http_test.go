@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGitSmartHTTP(t *testing.T) {
@@ -55,14 +56,14 @@ func testGitSmartHTTP(t *testing.T, u *url.URL) {
 		t.Run(kase.p, func(t *testing.T) {
 			p := u.String() + kase.p
 			req, err := http.NewRequest("GET", p, nil)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			req.SetBasicAuth("user2", userPassword)
 			resp, err := http.DefaultClient.Do(req)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			defer resp.Body.Close()
 			assert.EqualValues(t, kase.code, resp.StatusCode)
 			_, err = io.ReadAll(resp.Body)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 	}
 }

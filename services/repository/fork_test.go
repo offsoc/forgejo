@@ -13,10 +13,11 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestForkRepository(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// user 13 has already forked repo10
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 13})
@@ -28,7 +29,7 @@ func TestForkRepository(t *testing.T) {
 		Description: "test",
 	})
 	assert.Nil(t, fork)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.True(t, IsErrForkAlreadyExist(err))
 
 	// user not reached maximum limit of repositories

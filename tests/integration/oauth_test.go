@@ -25,6 +25,7 @@ import (
 
 	"github.com/markbates/goth"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAuthorizeNoClientID(t *testing.T) {
@@ -49,7 +50,7 @@ func TestAuthorizeUnsupportedResponseType(t *testing.T) {
 	ctx := loginUser(t, "user1")
 	resp := ctx.MakeRequest(t, req, http.StatusSeeOther)
 	u, err := resp.Result().Location()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "unsupported_response_type", u.Query().Get("error"))
 	assert.Equal(t, "Only code response type is supported.", u.Query().Get("error_description"))
 }
@@ -60,7 +61,7 @@ func TestAuthorizeUnsupportedCodeChallengeMethod(t *testing.T) {
 	ctx := loginUser(t, "user1")
 	resp := ctx.MakeRequest(t, req, http.StatusSeeOther)
 	u, err := resp.Result().Location()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "invalid_request", u.Query().Get("error"))
 	assert.Equal(t, "unsupported code challenge method", u.Query().Get("error_description"))
 }
@@ -147,9 +148,9 @@ func TestAuthorizeRedirectWithExistingGrant(t *testing.T) {
 	ctx := loginUser(t, "user1")
 	resp := ctx.MakeRequest(t, req, http.StatusSeeOther)
 	u, err := resp.Result().Location()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "thestate", u.Query().Get("state"))
-	assert.Truef(t, len(u.Query().Get("code")) > 30, "authorization code '%s' should be longer then 30", u.Query().Get("code"))
+	assert.Greaterf(t, len(u.Query().Get("code")), 30, "authorization code '%s' should be longer then 30", u.Query().Get("code"))
 	u.RawQuery = ""
 	assert.Equal(t, "https://example.com/xyzzy", u.String())
 }
@@ -160,7 +161,7 @@ func TestAuthorizePKCERequiredForPublicClient(t *testing.T) {
 	ctx := loginUser(t, "user1")
 	resp := ctx.MakeRequest(t, req, http.StatusSeeOther)
 	u, err := resp.Result().Location()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "invalid_request", u.Query().Get("error"))
 	assert.Equal(t, "PKCE is required for public clients", u.Query().Get("error_description"))
 }
@@ -184,9 +185,9 @@ func TestAccessTokenExchange(t *testing.T) {
 	}
 	parsed := new(response)
 
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
-	assert.True(t, len(parsed.AccessToken) > 10)
-	assert.True(t, len(parsed.RefreshToken) > 10)
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
+	assert.Greater(t, len(parsed.AccessToken), 10)
+	assert.Greater(t, len(parsed.RefreshToken), 10)
 }
 
 func TestAccessTokenExchangeWithPublicClient(t *testing.T) {
@@ -207,9 +208,9 @@ func TestAccessTokenExchangeWithPublicClient(t *testing.T) {
 	}
 	parsed := new(response)
 
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
-	assert.True(t, len(parsed.AccessToken) > 10)
-	assert.True(t, len(parsed.RefreshToken) > 10)
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
+	assert.Greater(t, len(parsed.AccessToken), 10)
+	assert.Greater(t, len(parsed.RefreshToken), 10)
 }
 
 func TestAccessTokenExchangeJSON(t *testing.T) {
@@ -231,9 +232,9 @@ func TestAccessTokenExchangeJSON(t *testing.T) {
 	}
 	parsed := new(response)
 
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
-	assert.True(t, len(parsed.AccessToken) > 10)
-	assert.True(t, len(parsed.RefreshToken) > 10)
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
+	assert.Greater(t, len(parsed.AccessToken), 10)
+	assert.Greater(t, len(parsed.RefreshToken), 10)
 }
 
 func TestAccessTokenExchangeWithoutPKCE(t *testing.T) {
@@ -247,7 +248,7 @@ func TestAccessTokenExchangeWithoutPKCE(t *testing.T) {
 	})
 	resp := MakeRequest(t, req, http.StatusBadRequest)
 	parsedError := new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "failed PKCE code challenge", parsedError.ErrorDescription)
 }
@@ -265,7 +266,7 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 	})
 	resp := MakeRequest(t, req, http.StatusBadRequest)
 	parsedError := new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "cannot load client with client id: '???'", parsedError.ErrorDescription)
 
@@ -280,7 +281,7 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError = new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "invalid client secret", parsedError.ErrorDescription)
 
@@ -295,7 +296,7 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError = new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "unexpected redirect URI", parsedError.ErrorDescription)
 
@@ -310,7 +311,7 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError = new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "client is not authorized", parsedError.ErrorDescription)
 
@@ -325,7 +326,7 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError = new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unsupported_grant_type", string(parsedError.ErrorCode))
 	assert.Equal(t, "Only refresh_token or authorization_code grant type is supported", parsedError.ErrorDescription)
 }
@@ -348,9 +349,9 @@ func TestAccessTokenExchangeWithBasicAuth(t *testing.T) {
 	}
 	parsed := new(response)
 
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
-	assert.True(t, len(parsed.AccessToken) > 10)
-	assert.True(t, len(parsed.RefreshToken) > 10)
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
+	assert.Greater(t, len(parsed.AccessToken), 10)
+	assert.Greater(t, len(parsed.RefreshToken), 10)
 
 	// use wrong client_secret
 	req = NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
@@ -362,7 +363,7 @@ func TestAccessTokenExchangeWithBasicAuth(t *testing.T) {
 	req.Header.Add("Authorization", "Basic ZGE3ZGEzYmEtOWExMy00MTY3LTg1NmYtMzg5OWRlMGIwMTM4OmJsYWJsYQ==")
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError := new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "invalid client secret", parsedError.ErrorDescription)
 
@@ -375,7 +376,7 @@ func TestAccessTokenExchangeWithBasicAuth(t *testing.T) {
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError = new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "cannot load client with client id: ''", parsedError.ErrorDescription)
 
@@ -389,7 +390,7 @@ func TestAccessTokenExchangeWithBasicAuth(t *testing.T) {
 	req.Header.Add("Authorization", "Basic ZGE3ZGEzYmEtOWExMy00MTY3LTg1NmYtMzg5OWRlMGIwMTM4OjRNSzhOYTZSNTVzbWRDWTBXdUNDdW1aNmhqUlBuR1k1c2FXVlJISGpKaUE9")
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError = new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_request", string(parsedError.ErrorCode))
 	assert.Equal(t, "client_id in request body inconsistent with Authorization header", parsedError.ErrorDescription)
 
@@ -403,7 +404,7 @@ func TestAccessTokenExchangeWithBasicAuth(t *testing.T) {
 	req.Header.Add("Authorization", "Basic ZGE3ZGEzYmEtOWExMy00MTY3LTg1NmYtMzg5OWRlMGIwMTM4OjRNSzhOYTZSNTVzbWRDWTBXdUNDdW1aNmhqUlBuR1k1c2FXVlJISGpKaUE9")
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError = new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_request", string(parsedError.ErrorCode))
 	assert.Equal(t, "client_secret in request body inconsistent with Authorization header", parsedError.ErrorDescription)
 }
@@ -427,7 +428,7 @@ func TestRefreshTokenInvalidation(t *testing.T) {
 	}
 	parsed := new(response)
 
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsed))
 
 	// test without invalidation
 	setting.OAuth2.InvalidateRefreshTokens = false
@@ -441,7 +442,7 @@ func TestRefreshTokenInvalidation(t *testing.T) {
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError := new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "invalid empty client secret", parsedError.ErrorDescription)
 
@@ -454,7 +455,7 @@ func TestRefreshTokenInvalidation(t *testing.T) {
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError = new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "unable to parse refresh token", parsedError.ErrorDescription)
 
@@ -467,7 +468,7 @@ func TestRefreshTokenInvalidation(t *testing.T) {
 	})
 
 	bs, err := io.ReadAll(req.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req.Body = io.NopCloser(bytes.NewReader(bs))
 	MakeRequest(t, req, http.StatusOK)
@@ -484,7 +485,7 @@ func TestRefreshTokenInvalidation(t *testing.T) {
 	req.Body = io.NopCloser(bytes.NewReader(bs))
 	resp = MakeRequest(t, req, http.StatusBadRequest)
 	parsedError = new(auth.AccessTokenError)
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "token was already used", parsedError.ErrorDescription)
 }
@@ -527,7 +528,7 @@ func TestSignInOAuthCallbackSignIn(t *testing.T) {
 	})()
 	req := NewRequest(t, "GET", fmt.Sprintf("/user/oauth2/%s/callback?code=XYZ&state=XYZ", gitlabName))
 	resp := MakeRequest(t, req, http.StatusSeeOther)
-	assert.Equal(t, test.RedirectURL(resp), "/")
+	assert.Equal(t, "/", test.RedirectURL(resp))
 	userAfterLogin := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: userGitLab.ID})
 	assert.Greater(t, userAfterLogin.LastLoginUnix, userGitLab.LastLoginUnix)
 }
@@ -557,7 +558,7 @@ func TestSignInOAuthCallbackWithoutPKCEWhenUnsupported(t *testing.T) {
 	req := NewRequest(t, "GET", fmt.Sprintf("/user/oauth2/%s", gitlabName))
 	resp := session.MakeRequest(t, req, http.StatusTemporaryRedirect)
 	dest, err := url.Parse(resp.Header().Get("Location"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, dest.Query().Get("code_challenge_method"))
 	assert.Empty(t, dest.Query().Get("code_challenge"))
 
@@ -599,7 +600,7 @@ func TestSignInOAuthCallbackPKCE(t *testing.T) {
 		req := NewRequest(t, "GET", fmt.Sprintf("/user/oauth2/%s", sourceName))
 		resp := session.MakeRequest(t, req, http.StatusTemporaryRedirect)
 		dest, err := url.Parse(resp.Header().Get("Location"))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "S256", dest.Query().Get("code_challenge_method"))
 		codeChallenge := dest.Query().Get("code_challenge")
 		assert.NotEmpty(t, codeChallenge)
@@ -709,7 +710,7 @@ func TestSignUpViaOAuthWithMissingFields(t *testing.T) {
 	})()
 	req := NewRequest(t, "GET", fmt.Sprintf("/user/oauth2/%s/callback?code=XYZ&state=XYZ", gitlabName))
 	resp := MakeRequest(t, req, http.StatusSeeOther)
-	assert.Equal(t, test.RedirectURL(resp), "/user/link_account")
+	assert.Equal(t, "/user/link_account", test.RedirectURL(resp))
 }
 
 func TestOAuth_GrantApplicationOAuth(t *testing.T) {

@@ -14,7 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/tests"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func onGiteaRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare ...bool) {
@@ -26,7 +26,7 @@ func onGiteaRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare ...
 	}
 
 	u, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	listener, err := net.Listen("tcp", u.Host)
 	i := 0
 	for err != nil && i <= 10 {
@@ -34,7 +34,7 @@ func onGiteaRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare ...
 		listener, err = net.Listen("tcp", u.Host)
 		i++
 	}
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	u.Host = listener.Addr().String()
 
 	defer func() {

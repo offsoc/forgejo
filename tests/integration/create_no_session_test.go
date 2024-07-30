@@ -17,6 +17,7 @@ import (
 
 	"gitea.com/go-chi/session"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func getSessionID(t *testing.T, resp *httptest.ResponseRecorder) string {
@@ -45,7 +46,7 @@ func sessionFileExist(t *testing.T, tmpDir, sessionID string) bool {
 		if os.IsNotExist(err) {
 			return false
 		}
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 	return true
 }
@@ -62,7 +63,7 @@ func TestSessionFileCreation(t *testing.T) {
 	var config session.Options
 
 	err := json.Unmarshal([]byte(oldSessionConfig), &config)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	config.Provider = "file"
 
@@ -71,7 +72,7 @@ func TestSessionFileCreation(t *testing.T) {
 	config.ProviderConfig = tmpDir
 
 	newConfigBytes, err := json.Marshal(config)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	setting.SessionConfig.ProviderConfig = string(newConfigBytes)
 

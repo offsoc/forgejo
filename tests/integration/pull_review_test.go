@@ -27,6 +27,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPullView_ReviewerMissed(t *testing.T) {
@@ -45,9 +46,9 @@ func TestPullView_ReviewerMissed(t *testing.T) {
 	reviews, err := issues_model.FindReviews(db.DefaultContext, issues_model.FindReviewOptions{
 		IssueID: 2,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, r := range reviews {
-		assert.NoError(t, issues_model.DeleteReview(db.DefaultContext, r))
+		require.NoError(t, issues_model.DeleteReview(db.DefaultContext, r))
 	}
 	req = NewRequest(t, "GET", "/user2/repo1/pulls/2")
 	resp = session.MakeRequest(t, req, http.StatusOK)
@@ -57,7 +58,7 @@ func TestPullView_ReviewerMissed(t *testing.T) {
 func loadComment(t *testing.T, commentID string) *issues_model.Comment {
 	t.Helper()
 	id, err := strconv.ParseInt(commentID, 10, 64)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: id})
 }
 
@@ -107,7 +108,7 @@ func TestPullView_ResolveInvalidatedReviewComment(t *testing.T) {
 		// (to invalidate it properly, one should push a commit which should trigger this logic,
 		// in the meantime, use this quick-and-dirty trick)
 		comment := loadComment(t, commentID)
-		assert.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
+		require.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
 			ID:          comment.ID,
 			Invalidated: true,
 		}))
@@ -169,7 +170,7 @@ func TestPullView_ResolveInvalidatedReviewComment(t *testing.T) {
 			// (to invalidate it properly, one should push a commit which should trigger this logic,
 			// in the meantime, use this quick-and-dirty trick)
 			comment := loadComment(t, commentID)
-			assert.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
+			require.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
 				ID:          comment.ID,
 				Invalidated: true,
 			}))
@@ -289,7 +290,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 			ObjectFormatName: git.Sha1ObjectFormat.Name(),
 			DefaultBranch:    "master",
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// add CODEOWNERS to default branch
 		_, err = files_service.ChangeRepoFiles(db.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
@@ -302,7 +303,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 				},
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		t.Run("First Pull Request", func(t *testing.T) {
 			// create a new branch to prepare for pull request
@@ -316,7 +317,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 					},
 				},
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// Create a pull request.
 			session := loginUser(t, "user2")
@@ -324,18 +325,18 @@ func TestPullView_CodeOwner(t *testing.T) {
 
 			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadRepoID: repo.ID, HeadBranch: "codeowner-basebranch"})
 			unittest.AssertExistsIf(t, true, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 5})
-			assert.NoError(t, pr.LoadIssue(db.DefaultContext))
+			require.NoError(t, pr.LoadIssue(db.DefaultContext))
 
 			err := issue_service.ChangeTitle(db.DefaultContext, pr.Issue, user2, "[WIP] Test Pull Request")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			prUpdated1 := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: pr.ID})
-			assert.NoError(t, prUpdated1.LoadIssue(db.DefaultContext))
+			require.NoError(t, prUpdated1.LoadIssue(db.DefaultContext))
 			assert.EqualValues(t, "[WIP] Test Pull Request", prUpdated1.Issue.Title)
 
 			err = issue_service.ChangeTitle(db.DefaultContext, prUpdated1.Issue, user2, "Test Pull Request2")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			prUpdated2 := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: pr.ID})
-			assert.NoError(t, prUpdated2.LoadIssue(db.DefaultContext))
+			require.NoError(t, prUpdated2.LoadIssue(db.DefaultContext))
 			assert.EqualValues(t, "Test Pull Request2", prUpdated2.Issue.Title)
 		})
 
@@ -349,7 +350,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 				},
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		t.Run("Second Pull Request", func(t *testing.T) {
 			// create a new branch to prepare for pull request
@@ -363,7 +364,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 					},
 				},
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// Create a pull request.
 			session := loginUser(t, "user2")
@@ -379,7 +380,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 				BaseRepo: repo,
 				Name:     "test_codeowner_fork",
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// create a new branch to prepare for pull request
 			_, err = files_service.ChangeRepoFiles(db.DefaultContext, forkedRepo, user5, &files_service.ChangeRepoFilesOptions{
@@ -392,7 +393,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 					},
 				},
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			session := loginUser(t, "user5")
 			testPullCreate(t, session, "user5", "test_codeowner_fork", false, forkedRepo.DefaultBranch, "codeowner-basebranch-forked", "Test Pull Request2")

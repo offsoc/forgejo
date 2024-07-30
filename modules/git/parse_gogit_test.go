@@ -13,6 +13,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/filemode"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseTreeEntries(t *testing.T) {
@@ -68,7 +69,7 @@ func TestParseTreeEntries(t *testing.T) {
 
 	for _, testCase := range testCases {
 		entries, err := ParseTreeEntries([]byte(testCase.Input))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		if len(entries) > 1 {
 			fmt.Println(testCase.Expected[0].ID)
 			fmt.Println(entries[0].ID)

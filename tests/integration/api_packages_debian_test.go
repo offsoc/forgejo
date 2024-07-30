@@ -23,6 +23,7 @@ import (
 
 	"github.com/blakesmith/ar"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageDebian(t *testing.T) {
@@ -102,17 +103,17 @@ func TestPackageDebian(t *testing.T) {
 							MakeRequest(t, req, http.StatusCreated)
 
 							pv, err := packages.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages.TypeDebian, packageName, packageVersion)
-							assert.NoError(t, err)
+							require.NoError(t, err)
 
 							pd, err := packages.GetPackageDescriptor(db.DefaultContext, pv)
-							assert.NoError(t, err)
+							require.NoError(t, err)
 							assert.Nil(t, pd.SemVer)
 							assert.IsType(t, &debian_module.Metadata{}, pd.Metadata)
 							assert.Equal(t, packageName, pd.Package.Name)
 							assert.Equal(t, packageVersion, pd.Version.Version)
 
 							pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pv.ID)
-							assert.NoError(t, err)
+							require.NoError(t, err)
 							assert.NotEmpty(t, pfs)
 							assert.Condition(t, func() bool {
 								seen := false
@@ -128,7 +129,7 @@ func TestPackageDebian(t *testing.T) {
 										assert.True(t, pf.IsLead)
 
 										pfps, err := packages.GetProperties(db.DefaultContext, packages.PropertyTypeFile, pf.ID)
-										assert.NoError(t, err)
+										require.NoError(t, err)
 
 										for _, pfp := range pfps {
 											switch pfp.Name {

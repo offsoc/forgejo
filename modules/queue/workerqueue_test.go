@@ -57,9 +57,9 @@ func TestWorkerPoolQueueUnhandled(t *testing.T) {
 		stop := runWorkerPoolQueue(q)
 		for i := 0; i < queueSetting.Length; i++ {
 			testRecorder.Record("push:%v", i)
-			assert.NoError(t, q.Push(i))
+			require.NoError(t, q.Push(i))
 		}
-		assert.NoError(t, q.FlushWithContext(context.Background(), 0))
+		require.NoError(t, q.FlushWithContext(context.Background(), 0))
 		stop()
 
 		ok := true
@@ -167,7 +167,7 @@ func testWorkerPoolQueuePersistence(t *testing.T, queueSetting setting.QueueSett
 
 		q, _ := newWorkerPoolQueueForTest("pr_patch_checker_test", queueSetting, testHandler, true)
 		stop := runWorkerPoolQueue(q)
-		assert.NoError(t, q.FlushWithContext(context.Background(), 0))
+		require.NoError(t, q.FlushWithContext(context.Background(), 0))
 		stop()
 	}
 
@@ -189,7 +189,7 @@ func TestWorkerPoolQueueActiveWorkers(t *testing.T) {
 	q, _ := newWorkerPoolQueueForTest("test-workpoolqueue", setting.QueueSettings{Type: "channel", BatchLength: 1, MaxWorkers: 1, Length: 100}, handler, false)
 	stop := runWorkerPoolQueue(q)
 	for i := 0; i < 5; i++ {
-		assert.NoError(t, q.Push(i))
+		require.NoError(t, q.Push(i))
 	}
 
 	time.Sleep(50 * time.Millisecond)
@@ -205,7 +205,7 @@ func TestWorkerPoolQueueActiveWorkers(t *testing.T) {
 	q, _ = newWorkerPoolQueueForTest("test-workpoolqueue", setting.QueueSettings{Type: "channel", BatchLength: 1, MaxWorkers: 3, Length: 100}, handler, false)
 	stop = runWorkerPoolQueue(q)
 	for i := 0; i < 15; i++ {
-		assert.NoError(t, q.Push(i))
+		require.NoError(t, q.Push(i))
 	}
 
 	time.Sleep(50 * time.Millisecond)
@@ -238,7 +238,7 @@ func TestWorkerPoolQueueShutdown(t *testing.T) {
 	q, _ := newWorkerPoolQueueForTest("test-workpoolqueue", qs, handler, false)
 	stop := runWorkerPoolQueue(q)
 	for i := 0; i < qs.Length; i++ {
-		assert.NoError(t, q.Push(i))
+		require.NoError(t, q.Push(i))
 	}
 	<-handlerCalled
 	time.Sleep(200 * time.Millisecond) // wait for a while to make sure all workers are active
@@ -266,7 +266,7 @@ func TestWorkerPoolQueueWorkerIdleReset(t *testing.T) {
 
 	const workloadSize = 12
 	for i := 0; i < workloadSize; i++ {
-		assert.NoError(t, q.Push(i))
+		require.NoError(t, q.Push(i))
 	}
 
 	workerIDs := make(map[string]struct{})

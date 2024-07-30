@@ -27,6 +27,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testPullCreate(t *testing.T, session *TestSession, user, repo string, toSelf bool, targetBranch, sourceBranch, title string) *httptest.ResponseRecorder {
@@ -167,7 +168,7 @@ func TestPullCreateWithPullTemplate(t *testing.T) {
 
 				// Apply a change to the fork
 				err := createOrReplaceFileInBranch(forkUser, forkedRepo, "README.md", forkedRepo.DefaultBranch, fmt.Sprintf("Hello, World (%d)\n", i))
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				testPullPreview(t, session, forkUser.Name, forkedRepo.Name, message+" "+template)
 			})
@@ -188,7 +189,7 @@ func TestPullCreateWithPullTemplate(t *testing.T) {
 
 			// Apply a change to the fork
 			err := createOrReplaceFileInBranch(forkUser, forkedRepo, "README.md", forkedRepo.DefaultBranch, "Hello, World (%d)\n")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// Unlike issues, where all candidates are considered and shown, for
 			// pull request, there's a priority: if there are multiple
@@ -226,10 +227,10 @@ func TestPullCreate_TitleEscape(t *testing.T) {
 		resp = session.MakeRequest(t, req, http.StatusOK)
 		htmlDoc = NewHTMLParser(t, resp.Body)
 		titleHTML, err := htmlDoc.doc.Find(".comment-list .timeline-item.event .text b").First().Html()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "<strike>&lt;i&gt;XSS PR&lt;/i&gt;</strike>", titleHTML)
 		titleHTML, err = htmlDoc.doc.Find(".comment-list .timeline-item.event .text b").Next().Html()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "&lt;u&gt;XSS PR&lt;/u&gt;", titleHTML)
 	})
 }
@@ -300,9 +301,9 @@ func TestRecentlyPushed(t *testing.T) {
 		testEditFile(t, session, "user2", "repo1", "recent-push-base", "README.md", "Hello, recently, from base!\n")
 
 		baseRepo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, "user2", "repo1")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, "user1", "repo1")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		enablePRs := func(t *testing.T, repo *repo_model.Repository) {
 			t.Helper()
@@ -313,7 +314,7 @@ func TestRecentlyPushed(t *testing.T) {
 					Type:   unit_model.TypePullRequests,
 				}},
 				nil)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}
 
 		disablePRs := func(t *testing.T, repo *repo_model.Repository) {
@@ -321,7 +322,7 @@ func TestRecentlyPushed(t *testing.T) {
 
 			err := repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, nil,
 				[]unit_model.Type{unit_model.TypePullRequests})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}
 
 		testBanner := func(t *testing.T) {
@@ -459,20 +460,20 @@ func TestRecentlyPushed(t *testing.T) {
 			// 1. Create a new Tree object
 			cmd := git.NewCommand(db.DefaultContext, "write-tree")
 			treeID, _, gitErr := cmd.RunStdString(&git.RunOpts{Dir: repo.RepoPath()})
-			assert.NoError(t, gitErr)
+			require.NoError(t, gitErr)
 			treeID = strings.TrimSpace(treeID)
 			// 2. Create a new (empty) commit
 			cmd = git.NewCommand(db.DefaultContext, "commit-tree", "-m", "Initial orphan commit").AddDynamicArguments(treeID)
 			commitID, _, gitErr := cmd.RunStdString(&git.RunOpts{Dir: repo.RepoPath()})
-			assert.NoError(t, gitErr)
+			require.NoError(t, gitErr)
 			commitID = strings.TrimSpace(commitID)
 			// 3. Create a new ref pointing to the orphaned commit
 			cmd = git.NewCommand(db.DefaultContext, "update-ref", "refs/heads/orphan1").AddDynamicArguments(commitID)
 			_, _, gitErr = cmd.RunStdString(&git.RunOpts{Dir: repo.RepoPath()})
-			assert.NoError(t, gitErr)
+			require.NoError(t, gitErr)
 			// 4. Sync the git repo to the database
 			syncErr := repo_service.AddAllRepoBranchesToSyncQueue(graceful.GetManager().ShutdownContext())
-			assert.NoError(t, syncErr)
+			require.NoError(t, syncErr)
 			// 5. Add a fresh commit, so that FindRecentlyPushedBranches has
 			// something to find.
 			owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user1"})
@@ -489,7 +490,7 @@ func TestRecentlyPushed(t *testing.T) {
 					OldBranch: "orphan1",
 					NewBranch: "orphan1",
 				})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotEmpty(t, changeResp)
 
 			// Check that we only have 1 message on the main repo, the orphaned

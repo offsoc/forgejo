@@ -92,7 +92,7 @@ func TestLFSRender(t *testing.T) {
 		filesTable := NewHTMLParser(t, resp.Body).doc.Find("#lfs-files-table")
 		assert.Contains(t, filesTable.Text(), "Find commits")
 		lfsFind := filesTable.Find(`.primary.button[href^="/user2"]`)
-		assert.Greater(t, lfsFind.Length(), 0)
+		assert.Positive(t, lfsFind.Length())
 		lfsFindPath, exists := lfsFind.First().Attr("href")
 		assert.True(t, exists)
 

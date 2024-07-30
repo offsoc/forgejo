@@ -38,7 +38,7 @@ func testRepoStarringOrWatching(t *testing.T, action, listURI string) {
 	// Verify that the star/watch button is now the opposite
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	actionButton := htmlDoc.Find(fmt.Sprintf("form[action='/user2/repo1/action/%s']", oppositeAction))
-	assert.True(t, actionButton.Length() == 1)
+	assert.Equal(t, 1, actionButton.Length())
 	text := strings.ToLower(actionButton.Find("button span.text").Text())
 	assert.Equal(t, oppositeAction, text)
 
@@ -63,7 +63,7 @@ func testRepoStarringOrWatching(t *testing.T, action, listURI string) {
 	// Verify that the star/watch button is now back to its default
 	htmlDoc = NewHTMLParser(t, resp.Body)
 	actionButton = htmlDoc.Find(fmt.Sprintf("form[action='/user2/repo1/action/%s']", action))
-	assert.True(t, actionButton.Length() == 1)
+	assert.Equal(t, 1, actionButton.Length())
 	text = strings.ToLower(actionButton.Find("button span.text").Text())
 	assert.Equal(t, action, text)
 

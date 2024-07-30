@@ -13,10 +13,11 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetEmailAddresses(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	emails, _ := user_model.GetEmailAddresses(db.DefaultContext, int64(1))
 	if assert.Len(t, emails, 3) {
@@ -33,7 +34,7 @@ func TestGetEmailAddresses(t *testing.T) {
 }
 
 func TestIsEmailUsed(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	isExist, _ := user_model.IsEmailUsed(db.DefaultContext, "")
 	assert.True(t, isExist)
@@ -44,14 +45,14 @@ func TestIsEmailUsed(t *testing.T) {
 }
 
 func TestActivate(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	email := &user_model.EmailAddress{
 		ID:    int64(1),
 		UID:   int64(1),
 		Email: "user11@example.com",
 	}
-	assert.NoError(t, user_model.ActivateEmail(db.DefaultContext, email))
+	require.NoError(t, user_model.ActivateEmail(db.DefaultContext, email))
 
 	emails, _ := user_model.GetEmailAddresses(db.DefaultContext, int64(1))
 	assert.Len(t, emails, 3)
@@ -63,7 +64,7 @@ func TestActivate(t *testing.T) {
 }
 
 func TestListEmails(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// Must find all users and their emails
 	opts := &user_model.SearchEmailOptions{
@@ -72,9 +73,8 @@ func TestListEmails(t *testing.T) {
 		},
 	}
 	emails, count, err := user_model.SearchEmails(db.DefaultContext, opts)
-	assert.NoError(t, err)
-	assert.NotEqual(t, int64(0), count)
-	assert.True(t, count > 5)
+	require.NoError(t, err)
+	assert.Greater(t, count, int64(5))
 
 	contains := func(match func(s *user_model.SearchEmailResult) bool) bool {
 		for _, v := range emails {
@@ -92,13 +92,13 @@ func TestListEmails(t *testing.T) {
 	// Must find no records
 	opts = &user_model.SearchEmailOptions{Keyword: "NOTFOUND"}
 	emails, count, err = user_model.SearchEmails(db.DefaultContext, opts)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(0), count)
 
 	// Must find users 'user2', 'user28', etc.
 	opts = &user_model.SearchEmailOptions{Keyword: "user2"}
 	emails, count, err = user_model.SearchEmails(db.DefaultContext, opts)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, int64(0), count)
 	assert.True(t, contains(func(s *user_model.SearchEmailResult) bool { return s.UID == 2 }))
 	assert.True(t, contains(func(s *user_model.SearchEmailResult) bool { return s.UID == 27 }))
@@ -106,14 +106,14 @@ func TestListEmails(t *testing.T) {
 	// Must find only primary addresses (i.e. from the `user` table)
 	opts = &user_model.SearchEmailOptions{IsPrimary: optional.Some(true)}
 	emails, _, err = user_model.SearchEmails(db.DefaultContext, opts)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, contains(func(s *user_model.SearchEmailResult) bool { return s.IsPrimary }))
 	assert.False(t, contains(func(s *user_model.SearchEmailResult) bool { return !s.IsPrimary }))
 
 	// Must find only inactive addresses (i.e. not validated)
 	opts = &user_model.SearchEmailOptions{IsActivated: optional.Some(false)}
 	emails, _, err = user_model.SearchEmails(db.DefaultContext, opts)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, contains(func(s *user_model.SearchEmailResult) bool { return !s.IsActivated }))
 	assert.False(t, contains(func(s *user_model.SearchEmailResult) bool { return s.IsActivated }))
 
@@ -125,7 +125,7 @@ func TestListEmails(t *testing.T) {
 		},
 	}
 	emails, count, err = user_model.SearchEmails(db.DefaultContext, opts)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, emails, 5)
 	assert.Greater(t, count, int64(len(emails)))
 }
@@ -188,7 +188,7 @@ func TestEmailAddressValidate(t *testing.T) {
 }
 
 func TestGetActivatedEmailAddresses(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testCases := []struct {
 		UID      int64
@@ -215,7 +215,7 @@ func TestGetActivatedEmailAddresses(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(fmt.Sprintf("User %d", testCase.UID), func(t *testing.T) {
 			emails, err := user_model.GetActivatedEmailAddresses(db.DefaultContext, testCase.UID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, testCase.expected, emails)
 		})
 	}

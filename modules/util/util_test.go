@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestURLJoin(t *testing.T) {
@@ -122,36 +123,36 @@ func Test_NormalizeEOL(t *testing.T) {
 
 func Test_RandomInt(t *testing.T) {
 	randInt, err := CryptoRandomInt(255)
-	assert.True(t, randInt >= 0)
-	assert.True(t, randInt <= 255)
-	assert.NoError(t, err)
+	assert.GreaterOrEqual(t, randInt, int64(0))
+	assert.LessOrEqual(t, randInt, int64(255))
+	require.NoError(t, err)
 }
 
 func Test_RandomString(t *testing.T) {
 	str1, err := CryptoRandomString(32)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	matches, err := regexp.MatchString(`^[a-zA-Z0-9]{32}$`, str1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, matches)
 
 	str2, err := CryptoRandomString(32)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	matches, err = regexp.MatchString(`^[a-zA-Z0-9]{32}$`, str1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, matches)
 
 	assert.NotEqual(t, str1, str2)
 
 	str3, err := CryptoRandomString(256)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	matches, err = regexp.MatchString(`^[a-zA-Z0-9]{256}$`, str3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, matches)
 
 	str4, err := CryptoRandomString(256)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	matches, err = regexp.MatchString(`^[a-zA-Z0-9]{256}$`, str4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, matches)
 
 	assert.NotEqual(t, str3, str4)
@@ -159,18 +160,18 @@ func Test_RandomString(t *testing.T) {
 
 func Test_RandomBytes(t *testing.T) {
 	bytes1, err := CryptoRandomBytes(32)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bytes2, err := CryptoRandomBytes(32)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.NotEqual(t, bytes1, bytes2)
 
 	bytes3, err := CryptoRandomBytes(256)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bytes4, err := CryptoRandomBytes(256)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.NotEqual(t, bytes3, bytes4)
 }
@@ -223,20 +224,20 @@ func BenchmarkToUpper(b *testing.B) {
 }
 
 func TestToTitleCase(t *testing.T) {
-	assert.Equal(t, ToTitleCase(`foo bar baz`), `Foo Bar Baz`)
-	assert.Equal(t, ToTitleCase(`FOO BAR BAZ`), `Foo Bar Baz`)
+	assert.Equal(t, `Foo Bar Baz`, ToTitleCase(`foo bar baz`))
+	assert.Equal(t, `Foo Bar Baz`, ToTitleCase(`FOO BAR BAZ`))
 }
 
 func TestToPointer(t *testing.T) {
 	assert.Equal(t, "abc", *ToPointer("abc"))
 	assert.Equal(t, 123, *ToPointer(123))
 	abc := "abc"
-	assert.False(t, &abc == ToPointer(abc))
+	assert.NotSame(t, &abc, ToPointer(abc))
 	val123 := 123
-	assert.False(t, &val123 == ToPointer(val123))
+	assert.NotSame(t, &val123, ToPointer(val123))
 }
 
 func TestReserveLineBreakForTextarea(t *testing.T) {
-	assert.Equal(t, ReserveLineBreakForTextarea("test\r\ndata"), "test\ndata")
-	assert.Equal(t, ReserveLineBreakForTextarea("test\r\ndata\r\n"), "test\ndata\n")
+	assert.Equal(t, "test\ndata", ReserveLineBreakForTextarea("test\r\ndata"))
+	assert.Equal(t, "test\ndata\n", ReserveLineBreakForTextarea("test\r\ndata\r\n"))
 }

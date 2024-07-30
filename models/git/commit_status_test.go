@@ -17,10 +17,11 @@ import (
 	"code.gitea.io/gitea/modules/structs"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetCommitStatuses(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 
@@ -31,8 +32,8 @@ func TestGetCommitStatuses(t *testing.T) {
 		RepoID:      repo1.ID,
 		SHA:         sha1,
 	})
-	assert.NoError(t, err)
-	assert.Equal(t, int(maxResults), 5)
+	require.NoError(t, err)
+	assert.Equal(t, 5, int(maxResults))
 	assert.Len(t, statuses, 5)
 
 	assert.Equal(t, "ci/awesomeness", statuses[0].Context)
@@ -60,8 +61,8 @@ func TestGetCommitStatuses(t *testing.T) {
 		RepoID:      repo1.ID,
 		SHA:         sha1,
 	})
-	assert.NoError(t, err)
-	assert.Equal(t, int(maxResults), 5)
+	require.NoError(t, err)
+	assert.Equal(t, 5, int(maxResults))
 	assert.Empty(t, statuses)
 }
 
@@ -189,16 +190,16 @@ func Test_CalcCommitStatus(t *testing.T) {
 }
 
 func TestFindRepoRecentCommitStatusContexts(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	repo2 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 2})
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	commit, err := gitRepo.GetBranchCommit(repo2.DefaultBranch)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	defer func() {
 		_, err := db.DeleteByBean(db.DefaultContext, &git_model.CommitStatus{
@@ -206,7 +207,7 @@ func TestFindRepoRecentCommitStatusContexts(t *testing.T) {
 			CreatorID: user2.ID,
 			SHA:       commit.ID.String(),
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}()
 
 	err = git_model.NewCommitStatus(db.DefaultContext, git_model.NewCommitStatusOptions{
@@ -219,7 +220,7 @@ func TestFindRepoRecentCommitStatusContexts(t *testing.T) {
 			Context:   "compliance/lint-backend",
 		},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = git_model.NewCommitStatus(db.DefaultContext, git_model.NewCommitStatusOptions{
 		Repo:    repo2,
@@ -231,10 +232,10 @@ func TestFindRepoRecentCommitStatusContexts(t *testing.T) {
 			Context:   "compliance/lint-backend",
 		},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	contexts, err := git_model.FindRepoRecentCommitStatusContexts(db.DefaultContext, repo2.ID, time.Hour)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.Len(t, contexts, 1) {
 		assert.Equal(t, "compliance/lint-backend", contexts[0])
 	}

@@ -21,6 +21,7 @@ import (
 	files_service "code.gitea.io/gitea/services/repository/files"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIPullUpdate(t *testing.T) {
@@ -32,11 +33,11 @@ func TestAPIPullUpdate(t *testing.T) {
 
 		// Test GetDiverging
 		diffCount, err := pull_service.GetDiverging(git.DefaultContext, pr)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, 1, diffCount.Behind)
 		assert.EqualValues(t, 1, diffCount.Ahead)
-		assert.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
-		assert.NoError(t, pr.LoadIssue(db.DefaultContext))
+		require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
+		require.NoError(t, pr.LoadIssue(db.DefaultContext))
 
 		session := loginUser(t, "user2")
 		token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
@@ -46,7 +47,7 @@ func TestAPIPullUpdate(t *testing.T) {
 
 		// Test GetDiverging after update
 		diffCount, err = pull_service.GetDiverging(git.DefaultContext, pr)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, 0, diffCount.Behind)
 		assert.EqualValues(t, 2, diffCount.Ahead)
 	})
@@ -61,11 +62,11 @@ func TestAPIPullUpdateByRebase(t *testing.T) {
 
 		// Test GetDiverging
 		diffCount, err := pull_service.GetDiverging(git.DefaultContext, pr)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, 1, diffCount.Behind)
 		assert.EqualValues(t, 1, diffCount.Ahead)
-		assert.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
-		assert.NoError(t, pr.LoadIssue(db.DefaultContext))
+		require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
+		require.NoError(t, pr.LoadIssue(db.DefaultContext))
 
 		session := loginUser(t, "user2")
 		token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
@@ -75,7 +76,7 @@ func TestAPIPullUpdateByRebase(t *testing.T) {
 
 		// Test GetDiverging after update
 		diffCount, err = pull_service.GetDiverging(git.DefaultContext, pr)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, 0, diffCount.Behind)
 		assert.EqualValues(t, 1, diffCount.Ahead)
 	})
@@ -89,7 +90,7 @@ func createOutdatedPR(t *testing.T, actor, forkOrg *user_model.User) *issues_mod
 		Name:        "repo-pr-update",
 		Description: "desc",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, headRepo)
 
 	// create a commit on base Repo
@@ -117,7 +118,7 @@ func createOutdatedPR(t *testing.T, actor, forkOrg *user_model.User) *issues_mod
 			Committer: time.Now(),
 		},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// create a commit on head Repo
 	_, err = files_service.ChangeRepoFiles(git.DefaultContext, headRepo, actor, &files_service.ChangeRepoFilesOptions{
@@ -144,7 +145,7 @@ func createOutdatedPR(t *testing.T, actor, forkOrg *user_model.User) *issues_mod
 			Committer: time.Now(),
 		},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// create Pull
 	pullIssue := &issues_model.Issue{
@@ -164,10 +165,10 @@ func createOutdatedPR(t *testing.T, actor, forkOrg *user_model.User) *issues_mod
 		Type:       issues_model.PullRequestGitea,
 	}
 	err = pull_service.NewPullRequest(git.DefaultContext, baseRepo, pullIssue, nil, nil, pullRequest, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{Title: "Test Pull -to-update-"})
-	assert.NoError(t, issue.LoadPullRequest(db.DefaultContext))
+	require.NoError(t, issue.LoadPullRequest(db.DefaultContext))
 
 	return issue.PullRequest
 }

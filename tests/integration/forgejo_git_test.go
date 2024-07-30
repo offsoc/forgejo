@@ -21,7 +21,7 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/tests"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestActionsUserGit(t *testing.T) {
@@ -90,12 +90,10 @@ func doActionsUserPopulateBranch(dstPath string, ctx *APITestContext, baseBranch
 
 		t.Run("AddCommit", func(t *testing.T) {
 			err := os.WriteFile(path.Join(dstPath, "test_file"), []byte("## test content"), 0o666)
-			if !assert.NoError(t, err) {
-				return
-			}
+			require.NoError(t, err)
 
 			err = git.AddChanges(dstPath, true)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			err = git.CommitChanges(dstPath, git.CommitChangesOptions{
 				Committer: &git.Signature{
@@ -110,12 +108,12 @@ func doActionsUserPopulateBranch(dstPath string, ctx *APITestContext, baseBranch
 				},
 				Message: "Testing commit 1",
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 
 		t.Run("Push", func(t *testing.T) {
 			err := git.NewCommand(git.DefaultContext, "push", "origin").AddDynamicArguments("HEAD:refs/heads/" + headBranch).Run(&git.RunOpts{Dir: dstPath})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 	}
 }
@@ -129,7 +127,7 @@ func doActionsUserPR(ctx, doerCtx APITestContext, baseBranch, headBranch string)
 		// Create a test pullrequest
 		t.Run("CreatePullRequest", func(t *testing.T) {
 			pr, err = doAPICreatePullRequest(doerCtx, ctx.Username, ctx.Reponame, baseBranch, headBranch)(t)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 		doerCtx.ExpectedCode = http.StatusCreated
 		t.Run("AutoMergePR", doAPIAutoMergePullRequest(doerCtx, ctx.Username, ctx.Reponame, pr.Index))

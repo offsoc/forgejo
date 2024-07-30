@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCommitsCountSha256(t *testing.T) {
@@ -24,7 +25,7 @@ func TestCommitsCountSha256(t *testing.T) {
 			Revision: []string{"f004f41359117d319dedd0eaab8c5259ee2263da839dcba33637997458627fdc"},
 		})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(3), commitsCount)
 }
 
@@ -40,7 +41,7 @@ func TestCommitsCountWithoutBaseSha256(t *testing.T) {
 			Revision: []string{"branch1"},
 		})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(2), commitsCount)
 }
 
@@ -50,7 +51,7 @@ func TestGetFullCommitIDSha256(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare_sha256")
 
 	id, err := GetFullCommitID(DefaultContext, bareRepo1Path, "f004f4")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "f004f41359117d319dedd0eaab8c5259ee2263da839dcba33637997458627fdc", id)
 }
 
@@ -98,12 +99,12 @@ signed commit`
 		0x5d, 0x3e, 0x69, 0xd3, 0x1b, 0x78, 0x60, 0x87, 0x77, 0x5e, 0x28, 0xc6, 0xb6, 0x39, 0x9d, 0xf0,
 	}
 	gitRepo, err := openRepositoryWithDefaultContext(filepath.Join(testReposDir, "repo1_bare_sha256"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, gitRepo)
 	defer gitRepo.Close()
 
 	commitFromReader, err := CommitFromReader(gitRepo, sha, strings.NewReader(commitString))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if !assert.NotNil(t, commitFromReader) {
 		return
 	}
@@ -134,7 +135,7 @@ signed commit`, commitFromReader.Signature.Payload)
 	assert.EqualValues(t, "Adam Majer <amajer@suse.de>", commitFromReader.Author.String())
 
 	commitFromReader2, err := CommitFromReader(gitRepo, sha, strings.NewReader(commitString+"\n\n"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	commitFromReader.CommitMessage += "\n\n"
 	commitFromReader.Signature.Payload += "\n\n"
 	assert.EqualValues(t, commitFromReader, commitFromReader2)
@@ -146,30 +147,30 @@ func TestHasPreviousCommitSha256(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare_sha256")
 
 	repo, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer repo.Close()
 
 	commit, err := repo.GetCommit("f004f41359117d319dedd0eaab8c5259ee2263da839dcba33637997458627fdc")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	objectFormat, err := repo.GetObjectFormat()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	parentSHA := MustIDFromString("b0ec7af4547047f12d5093e37ef8f1b3b5415ed8ee17894d43a34d7d34212e9c")
 	notParentSHA := MustIDFromString("42e334efd04cd36eea6da0599913333c26116e1a537ca76e5b6e4af4dda00236")
-	assert.Equal(t, objectFormat, parentSHA.Type())
-	assert.Equal(t, objectFormat.Name(), "sha256")
+	assert.Equal(t, parentSHA.Type(), objectFormat)
+	assert.Equal(t, "sha256", objectFormat.Name())
 
 	haz, err := commit.HasPreviousCommit(parentSHA)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, haz)
 
 	hazNot, err := commit.HasPreviousCommit(notParentSHA)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, hazNot)
 
 	selfNot, err := commit.HasPreviousCommit(commit.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, selfNot)
 }
 
@@ -179,7 +180,7 @@ func TestGetCommitFileStatusMergesSha256(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo6_merge_sha256")
 
 	commitFileStatus, err := GetCommitFileStatus(DefaultContext, bareRepo1Path, "d2e5609f630dd8db500f5298d05d16def282412e3e66ed68cc7d0833b29129a1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expected := CommitFileStatus{
 		[]string{
@@ -204,7 +205,7 @@ func TestGetCommitFileStatusMergesSha256(t *testing.T) {
 	}
 
 	commitFileStatus, err = GetCommitFileStatus(DefaultContext, bareRepo1Path, "da1ded40dc8e5b7c564171f4bf2fc8370487decfb1cb6a99ef28f3ed73d09172")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, expected.Added, commitFileStatus.Added)
 	assert.Equal(t, expected.Removed, commitFileStatus.Removed)

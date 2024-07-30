@@ -35,6 +35,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func getIssuesSelection(t testing.TB, htmlDoc *HTMLDoc) *goquery.Selection {
@@ -48,7 +49,7 @@ func getIssue(t *testing.T, repoID int64, issueSelection *goquery.Selection) *is
 	assert.True(t, exists)
 	indexStr := href[strings.LastIndexByte(href, '/')+1:]
 	index, err := strconv.Atoi(indexStr)
-	assert.NoError(t, err, "Invalid issue href: %s", href)
+	require.NoError(t, err, "Invalid issue href: %s", href)
 	return unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repoID, Index: int64(index)})
 }
 
@@ -203,7 +204,7 @@ func TestViewIssuesSearchOptions(t *testing.T) {
 			issue := getIssue(t, repo.ID, selection)
 			found[issue.ID] = true
 		})
-		assert.EqualValues(t, 2, len(found))
+		assert.Len(t, found, 2)
 		assert.True(t, found[1])
 		assert.True(t, found[5])
 	})
@@ -276,7 +277,7 @@ func testIssueAddComment(t *testing.T, session *TestSession, issueURL, content, 
 	idStr := idAttr[strings.LastIndexByte(idAttr, '-')+1:]
 	assert.True(t, has)
 	id, err := strconv.Atoi(idStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return int64(id)
 }
 
@@ -317,7 +318,7 @@ Description`)
 
 	// Issues list should show the correct numbers of checked and total checkboxes
 	repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, "user2", "repo1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	req = NewRequestf(t, "GET", "%s/issues", repo.Link())
 	resp = MakeRequest(t, req, http.StatusOK)
 
@@ -521,7 +522,7 @@ func TestIssueCommentAttachment(t *testing.T) {
 	idStr := idAttr[strings.LastIndexByte(idAttr, '-')+1:]
 	assert.True(t, has)
 	id, err := strconv.Atoi(idStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, 0, id)
 
 	req = NewRequest(t, "GET", fmt.Sprintf("/%s/%s/comments/%d/attachments", "user2", "repo1", id))
@@ -716,7 +717,7 @@ func testIssueWithBean(t *testing.T, user string, repoID int64, title, content s
 	issueURL := testNewIssue(t, session, user, fmt.Sprintf("repo%d", repoID), title, content)
 	indexStr := issueURL[strings.LastIndexByte(issueURL, '/')+1:]
 	index, err := strconv.Atoi(indexStr)
-	assert.NoError(t, err, "Invalid issue href: %s", issueURL)
+	require.NoError(t, err, "Invalid issue href: %s", issueURL)
 	issue := &issues_model.Issue{RepoID: repoID, Index: int64(index)}
 	unittest.AssertExistsAndLoadBean(t, issue)
 	return issueURL, issue
@@ -918,7 +919,7 @@ func TestGetIssueInfo(t *testing.T) {
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 10})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: issue.RepoID})
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
-	assert.NoError(t, issue.LoadAttributes(db.DefaultContext))
+	require.NoError(t, issue.LoadAttributes(db.DefaultContext))
 	assert.Equal(t, int64(1019307200), int64(issue.DeadlineUnix))
 	assert.Equal(t, api.StateOpen, issue.State())
 
@@ -981,7 +982,7 @@ func TestUpdateIssueDeadline(t *testing.T) {
 	issueBefore := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 10})
 	repoBefore := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: issueBefore.RepoID})
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repoBefore.OwnerID})
-	assert.NoError(t, issueBefore.LoadAttributes(db.DefaultContext))
+	require.NoError(t, issueBefore.LoadAttributes(db.DefaultContext))
 	assert.Equal(t, int64(1019307200), int64(issueBefore.DeadlineUnix))
 	assert.Equal(t, api.StateOpen, issueBefore.State())
 
@@ -1111,7 +1112,7 @@ func TestIssueFilterNoFollow(t *testing.T) {
 
 	// Check that every link in the filter list has rel="nofollow".
 	filterLinks := htmlDoc.Find(".issue-list-toolbar-right a[href*=\"?q=\"]")
-	assert.True(t, filterLinks.Length() > 0)
+	assert.Positive(t, filterLinks.Length())
 	filterLinks.Each(func(i int, link *goquery.Selection) {
 		rel, has := link.Attr("rel")
 		assert.True(t, has)

@@ -8,7 +8,7 @@ import (
 
 	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_AddCombinedIndexToIssueUser(t *testing.T) {
@@ -24,5 +24,5 @@ func Test_AddCombinedIndexToIssueUser(t *testing.T) {
 	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(IssueUser))
 	defer deferable()
 
-	assert.NoError(t, AddCombinedIndexToIssueUser(x))
+	require.NoError(t, AddCombinedIndexToIssueUser(x))
 }

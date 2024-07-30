@@ -10,12 +10,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepository_GetBlob_Found(t *testing.T) {
 	repoPath := filepath.Join(testReposDir, "repo1_bare")
 	r, err := openRepositoryWithDefaultContext(repoPath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer r.Close()
 
 	testCases := []struct {
@@ -28,14 +29,14 @@ func TestRepository_GetBlob_Found(t *testing.T) {
 
 	for _, testCase := range testCases {
 		blob, err := r.GetBlob(testCase.OID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		dataReader, err := blob.DataAsync()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		data, err := io.ReadAll(dataReader)
-		assert.NoError(t, dataReader.Close())
-		assert.NoError(t, err)
+		require.NoError(t, dataReader.Close())
+		require.NoError(t, err)
 		assert.Equal(t, testCase.Data, data)
 	}
 }
@@ -43,7 +44,7 @@ func TestRepository_GetBlob_Found(t *testing.T) {
 func TestRepository_GetBlob_NotExist(t *testing.T) {
 	repoPath := filepath.Join(testReposDir, "repo1_bare")
 	r, err := openRepositoryWithDefaultContext(repoPath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer r.Close()
 
 	testCase := "0000000000000000000000000000000000000000"
@@ -57,7 +58,7 @@ func TestRepository_GetBlob_NotExist(t *testing.T) {
 func TestRepository_GetBlob_NoId(t *testing.T) {
 	repoPath := filepath.Join(testReposDir, "repo1_bare")
 	r, err := openRepositoryWithDefaultContext(repoPath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer r.Close()
 
 	testCase := ""

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestScopedTemplateSetFuncMap(t *testing.T) {
@@ -22,7 +23,7 @@ func TestScopedTemplateSetFuncMap(t *testing.T) {
 	}})
 
 	_, err := all.New("base").Parse(`{{CtxFunc "base"}}`)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = all.New("test").Parse(strings.TrimSpace(`
 {{template "base"}}
@@ -30,10 +31,10 @@ func TestScopedTemplateSetFuncMap(t *testing.T) {
 {{template "base"}}
 {{CtxFunc "test"}}
 `))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	ts, err := newScopedTemplateSet(all, "test")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// try to use different CtxFunc to render concurrently
 
@@ -57,12 +58,12 @@ func TestScopedTemplateSetFuncMap(t *testing.T) {
 	wg.Add(2)
 	go func() {
 		err := ts.newExecutor(funcMap1).Execute(&out1, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		wg.Done()
 	}()
 	go func() {
 		err := ts.newExecutor(funcMap2).Execute(&out2, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		wg.Done()
 	}()
 	wg.Wait()
@@ -73,17 +74,17 @@ func TestScopedTemplateSetFuncMap(t *testing.T) {
 func TestScopedTemplateSetEscape(t *testing.T) {
 	all := template.New("")
 	_, err := all.New("base").Parse(`<a href="?q={{.param}}">{{.text}}</a>`)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = all.New("test").Parse(`{{template "base" .}}<form action="?q={{.param}}">{{.text}}</form>`)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	ts, err := newScopedTemplateSet(all, "test")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	out := bytes.Buffer{}
 	err = ts.newExecutor(nil).Execute(&out, map[string]string{"param": "/", "text": "<"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, `<a href="?q=%2f">&lt;</a><form action="?q=%2f">&lt;</form>`, out.String())
 }
@@ -91,8 +92,8 @@ func TestScopedTemplateSetEscape(t *testing.T) {
 func TestScopedTemplateSetUnsafe(t *testing.T) {
 	all := template.New("")
 	_, err := all.New("test").Parse(`<a href="{{if true}}?{{end}}a={{.param}}"></a>`)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = newScopedTemplateSet(all, "test")
-	assert.ErrorContains(t, err, "appears in an ambiguous context within a URL")
+	require.ErrorContains(t, err, "appears in an ambiguous context within a URL")
 }

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFileURLToPath(t *testing.T) {
@@ -48,9 +49,9 @@ func TestFileURLToPath(t *testing.T) {
 		u, _ := url.Parse(c.url)
 		p, err := FileURLToPath(u)
 		if c.haserror {
-			assert.Error(t, err, "case %d: should return error", n)
+			require.Error(t, err, "case %d: should return error", n)
 		} else {
-			assert.NoError(t, err, "case %d: should not return error", n)
+			require.NoError(t, err, "case %d: should not return error", n)
 			assert.Equal(t, c.expected, p, "case %d: should be equal", n)
 		}
 	}

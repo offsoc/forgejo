@@ -17,11 +17,11 @@ import (
 	_ "code.gitea.io/gitea/services/f3/driver/tests"
 
 	tests_f3 "code.forgejo.org/f3/gof3/v3/tree/tests/f3"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestF3(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	tests_f3.ForgeCompliance(t, driver_options.Name)
 }
 

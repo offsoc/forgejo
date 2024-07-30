@@ -26,6 +26,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageAPI(t *testing.T) {
@@ -87,7 +88,7 @@ func TestPackageAPI(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			p, err := packages_model.GetPackageByName(db.DefaultContext, user.ID, packages_model.TypeGeneric, packageName)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// no repository link
 			req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
@@ -99,7 +100,7 @@ func TestPackageAPI(t *testing.T) {
 			assert.Nil(t, ap1.Repository)
 
 			// link to public repository
-			assert.NoError(t, packages_model.SetRepositoryLink(db.DefaultContext, p.ID, 1))
+			require.NoError(t, packages_model.SetRepositoryLink(db.DefaultContext, p.ID, 1))
 
 			req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
 				AddTokenAuth(tokenReadPackage)
@@ -111,7 +112,7 @@ func TestPackageAPI(t *testing.T) {
 			assert.EqualValues(t, 1, ap2.Repository.ID)
 
 			// link to private repository
-			assert.NoError(t, packages_model.SetRepositoryLink(db.DefaultContext, p.ID, 2))
+			require.NoError(t, packages_model.SetRepositoryLink(db.DefaultContext, p.ID, 2))
 
 			req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
 				AddTokenAuth(tokenReadPackage)
@@ -121,7 +122,7 @@ func TestPackageAPI(t *testing.T) {
 			DecodeJSON(t, resp, &ap3)
 			assert.Nil(t, ap3.Repository)
 
-			assert.NoError(t, packages_model.UnlinkRepositoryFromAllPackages(db.DefaultContext, 2))
+			require.NoError(t, packages_model.UnlinkRepositoryFromAllPackages(db.DefaultContext, 2))
 		})
 	})
 
@@ -482,23 +483,23 @@ func TestPackageCleanup(t *testing.T) {
 		unittest.AssertExistsAndLoadBean(t, &packages_model.Package{Name: "cleanup-test"})
 
 		pbs, err := packages_model.FindExpiredUnreferencedBlobs(db.DefaultContext, duration)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, pbs)
 
 		_, err = packages_model.GetInternalVersionByNameAndVersion(db.DefaultContext, user.ID, packages_model.TypeContainer, "cleanup-test", container_model.UploadVersion)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		err = packages_cleanup_service.CleanupTask(db.DefaultContext, duration)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pbs, err = packages_model.FindExpiredUnreferencedBlobs(db.DefaultContext, duration)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Empty(t, pbs)
 
 		unittest.AssertNotExistsBean(t, &packages_model.Package{Name: "cleanup-test"})
 
 		_, err = packages_model.GetInternalVersionByNameAndVersion(db.DefaultContext, user.ID, packages_model.TypeContainer, "cleanup-test", container_model.UploadVersion)
-		assert.ErrorIs(t, err, packages_model.ErrPackageNotExist)
+		require.ErrorIs(t, err, packages_model.ErrPackageNotExist)
 	})
 
 	t.Run("CleanupRules", func(t *testing.T) {
@@ -613,9 +614,9 @@ func TestPackageCleanup(t *testing.T) {
 
 					if v.Created != 0 {
 						pv, err := packages_model.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages_model.TypeGeneric, "package", v.Version)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 						_, err = db.GetEngine(db.DefaultContext).Exec("UPDATE package_version SET created_unix = ? WHERE id = ?", v.Created, pv.ID)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 					}
 				}
 
@@ -623,23 +624,23 @@ func TestPackageCleanup(t *testing.T) {
 				c.Rule.Type = packages_model.TypeGeneric
 
 				pcr, err := packages_model.InsertCleanupRule(db.DefaultContext, c.Rule)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				err = packages_cleanup_service.CleanupTask(db.DefaultContext, duration)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				for _, v := range c.Versions {
 					pv, err := packages_model.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages_model.TypeGeneric, "package", v.Version)
 					if v.ShouldExist {
-						assert.NoError(t, err)
+						require.NoError(t, err)
 						err = packages_service.DeletePackageVersionAndReferences(db.DefaultContext, pv)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 					} else {
-						assert.ErrorIs(t, err, packages_model.ErrPackageNotExist)
+						require.ErrorIs(t, err, packages_model.ErrPackageNotExist)
 					}
 				}
 
-				assert.NoError(t, packages_model.DeleteCleanupRuleByID(db.DefaultContext, pcr.ID))
+				require.NoError(t, packages_model.DeleteCleanupRuleByID(db.DefaultContext, pcr.ID))
 			})
 		}
 	})

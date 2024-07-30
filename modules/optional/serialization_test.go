@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 )
 
@@ -50,11 +51,11 @@ func TestOptionalToJson(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			b, err := json.Marshal(tc.obj)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, tc.want, string(b), "gitea json module returned unexpected")
 
 			b, err = std_json.Marshal(tc.obj)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, tc.want, string(b), "std json module returned unexpected")
 		})
 	}
@@ -88,12 +89,12 @@ func TestOptionalFromJson(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var obj1 testSerializationStruct
 			err := json.Unmarshal([]byte(tc.data), &obj1)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, tc.want, obj1, "gitea json module returned unexpected")
 
 			var obj2 testSerializationStruct
 			err = std_json.Unmarshal([]byte(tc.data), &obj2)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, tc.want, obj2, "std json module returned unexpected")
 		})
 	}
@@ -134,7 +135,7 @@ optional_two_string: null
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			b, err := yaml.Marshal(tc.obj)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, tc.want, string(b), "yaml module returned unexpected")
 		})
 	}
@@ -183,7 +184,7 @@ optional_twostring: null
 		t.Run(tc.name, func(t *testing.T) {
 			var obj testSerializationStruct
 			err := yaml.Unmarshal([]byte(tc.data), &obj)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, tc.want, obj, "yaml module returned unexpected")
 		})
 	}

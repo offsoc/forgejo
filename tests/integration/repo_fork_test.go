@@ -23,6 +23,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testRepoFork(t *testing.T, session *TestSession, ownerName, repoName, forkOwnerName, forkRepoName string) *httptest.ResponseRecorder {
@@ -150,7 +151,7 @@ func TestRepoFork(t *testing.T) {
 				defer func() {
 					repo_service.DeleteRepository(db.DefaultContext, user5, repo, false)
 				}()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotEmpty(t, repo)
 
 				// Load the repository home view

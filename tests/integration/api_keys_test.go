@@ -19,6 +19,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestViewDeployKeysNoLogin(t *testing.T) {
@@ -133,7 +134,7 @@ func TestCreateUserKey(t *testing.T) {
 	var newPublicKey api.PublicKey
 	DecodeJSON(t, resp, &newPublicKey)
 	fingerprint, err := asymkey_model.CalcFingerprint(rawKeyBody.Key)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	unittest.AssertExistsAndLoadBean(t, &asymkey_model.PublicKey{
 		ID:          newPublicKey.ID,
 		OwnerID:     user.ID,
@@ -168,7 +169,7 @@ func TestCreateUserKey(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 
 	DecodeJSON(t, resp, &fingerprintPublicKeys)
-	assert.Len(t, fingerprintPublicKeys, 0)
+	assert.Empty(t, fingerprintPublicKeys)
 
 	// Fail searching for wrong users key
 	req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/users/%s/keys?fingerprint=%s", "user2", newPublicKey.Fingerprint)).
@@ -176,7 +177,7 @@ func TestCreateUserKey(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 
 	DecodeJSON(t, resp, &fingerprintPublicKeys)
-	assert.Len(t, fingerprintPublicKeys, 0)
+	assert.Empty(t, fingerprintPublicKeys)
 
 	// Now login as user 2
 	session2 := loginUser(t, "user2")
@@ -208,5 +209,5 @@ func TestCreateUserKey(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 
 	DecodeJSON(t, resp, &fingerprintPublicKeys)
-	assert.Len(t, fingerprintPublicKeys, 0)
+	assert.Empty(t, fingerprintPublicKeys)
 }

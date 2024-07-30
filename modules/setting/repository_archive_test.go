@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_getStorageInheritNameSectionTypeForRepoArchive(t *testing.T) {
@@ -16,8 +17,8 @@ func Test_getStorageInheritNameSectionTypeForRepoArchive(t *testing.T) {
 STORAGE_TYPE = minio
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 
 	assert.EqualValues(t, "minio", RepoArchive.Storage.Type)
 	assert.EqualValues(t, "repo-archive/", RepoArchive.Storage.MinioConfig.BasePath)
@@ -28,8 +29,8 @@ STORAGE_TYPE = minio
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 
 	assert.EqualValues(t, "minio", RepoArchive.Storage.Type)
 	assert.EqualValues(t, "repo-archive/", RepoArchive.Storage.MinioConfig.BasePath)
@@ -43,8 +44,8 @@ STORAGE_TYPE = my_minio
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 
 	assert.EqualValues(t, "minio", RepoArchive.Storage.Type)
 	assert.EqualValues(t, "repo-archive/", RepoArchive.Storage.MinioConfig.BasePath)
@@ -59,8 +60,8 @@ MINIO_BASE_PATH = my_archive/
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 
 	assert.EqualValues(t, "minio", RepoArchive.Storage.Type)
 	assert.EqualValues(t, "my_archive/", RepoArchive.Storage.MinioConfig.BasePath)
@@ -79,9 +80,9 @@ MINIO_ACCESS_KEY_ID     = correct_key
 MINIO_SECRET_ACCESS_KEY = correct_key
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 	storage := RepoArchive.Storage
 
 	assert.EqualValues(t, "minio", storage.Type)
@@ -101,9 +102,9 @@ MINIO_ACCESS_KEY_ID     = correct_key
 MINIO_SECRET_ACCESS_KEY = correct_key
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 	storage = RepoArchive.Storage
 
 	assert.EqualValues(t, "minio", storage.Type)

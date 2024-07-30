@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func lines(s string) (out []template.HTML) {
@@ -113,7 +114,7 @@ c=2
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out, lexerName, err := File(tt.name, "", []byte(tt.code))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, tt.want, out)
 			assert.Equal(t, tt.lexerName, lexerName)
 		})

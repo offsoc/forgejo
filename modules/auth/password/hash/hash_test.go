@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testSaltHasher string
@@ -29,7 +30,7 @@ func Test_registerHasher(t *testing.T) {
 		})
 	})
 
-	assert.Error(t, Register("Test_registerHasher", func(config string) testSaltHasher {
+	require.Error(t, Register("Test_registerHasher", func(config string) testSaltHasher {
 		return testSaltHasher(config)
 	}))
 
@@ -76,10 +77,10 @@ func TestHashing(t *testing.T) {
 			t.Run(algorithmName, func(t *testing.T) {
 				output, err := Parse(algorithmName).Hash(password, salt)
 				if shouldPass {
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.NotEmpty(t, output, "output for %s was empty", algorithmName)
 				} else {
-					assert.Error(t, err)
+					require.Error(t, err)
 				}
 
 				assert.Equal(t, Parse(algorithmName).VerifyPassword(password, output, salt), shouldPass)

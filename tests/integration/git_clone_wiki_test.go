@@ -16,17 +16,18 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func assertFileExist(t *testing.T, p string) {
 	exist, err := util.IsExist(p)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, exist)
 }
 
 func assertFileEqual(t *testing.T, p string, content []byte) {
 	bs, err := os.ReadFile(p)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, content, bs)
 }
 
@@ -40,7 +41,7 @@ func TestRepoCloneWiki(t *testing.T) {
 		u, _ = url.Parse(r)
 		u.User = url.UserPassword("user2", userPassword)
 		t.Run("Clone", func(t *testing.T) {
-			assert.NoError(t, git.CloneWithArgs(context.Background(), git.AllowLFSFiltersArgs(), u.String(), dstPath, git.CloneRepoOptions{}))
+			require.NoError(t, git.CloneWithArgs(context.Background(), git.AllowLFSFiltersArgs(), u.String(), dstPath, git.CloneRepoOptions{}))
 			assertFileEqual(t, filepath.Join(dstPath, "Home.md"), []byte("# Home page\n\nThis is the home page!\n"))
 			assertFileExist(t, filepath.Join(dstPath, "Page-With-Image.md"))
 			assertFileExist(t, filepath.Join(dstPath, "Page-With-Spaced-Name.md"))

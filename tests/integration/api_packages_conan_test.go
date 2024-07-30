@@ -22,6 +22,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -253,11 +254,11 @@ func TestPackageConan(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeConan)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Len(t, pvs, 1)
 
 				pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Nil(t, pd.SemVer)
 				assert.Equal(t, name, pd.Package.Name)
 				assert.Equal(t, version1, pd.Version.Version)
@@ -271,12 +272,12 @@ func TestPackageConan(t *testing.T) {
 				assert.Equal(t, []string{conanTopic}, metadata.Keywords)
 
 				pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Len(t, pfs, 2)
 
 				for _, pf := range pfs {
 					pb, err := packages.GetBlobByID(db.DefaultContext, pf.BlobID)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					if pf.Name == conanfileName {
 						assert.True(t, pf.IsLead)
@@ -426,7 +427,7 @@ func TestPackageConan(t *testing.T) {
 				for i, c := range cases {
 					rref, _ := conan_module.NewRecipeReference(name, version1, user1, c.Channel, conan_module.DefaultRevision)
 					references, err := conan_model.GetPackageReferences(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.NotEmpty(t, references)
 
 					req := NewRequestWithJSON(t, "POST", fmt.Sprintf("%s/v1/conans/%s/%s/%s/%s/packages/delete", url, name, version1, user1, c.Channel), map[string][]string{
@@ -435,7 +436,7 @@ func TestPackageConan(t *testing.T) {
 					MakeRequest(t, req, http.StatusOK)
 
 					references, err = conan_model.GetPackageReferences(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Empty(t, references, "case %d: should be empty", i)
 				}
 			})
@@ -453,7 +454,7 @@ func TestPackageConan(t *testing.T) {
 				for i, c := range cases {
 					rref, _ := conan_module.NewRecipeReference(name, version1, user1, c.Channel, conan_module.DefaultRevision)
 					revisions, err := conan_model.GetRecipeRevisions(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.NotEmpty(t, revisions)
 
 					req := NewRequest(t, "DELETE", fmt.Sprintf("%s/v1/conans/%s/%s/%s/%s", url, name, version1, user1, c.Channel)).
@@ -461,7 +462,7 @@ func TestPackageConan(t *testing.T) {
 					MakeRequest(t, req, http.StatusOK)
 
 					revisions, err = conan_model.GetRecipeRevisions(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Empty(t, revisions, "case %d: should be empty", i)
 				}
 			})
@@ -510,7 +511,7 @@ func TestPackageConan(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeConan)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Len(t, pvs, 2)
 			})
 		})
@@ -651,12 +652,12 @@ func TestPackageConan(t *testing.T) {
 
 				checkPackageRevisionCount := func(count int) {
 					revisions, err := conan_model.GetPackageRevisions(db.DefaultContext, user.ID, pref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Len(t, revisions, count)
 				}
 				checkPackageReferenceCount := func(count int) {
 					references, err := conan_model.GetPackageReferences(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Len(t, references, count)
 				}
 
@@ -692,7 +693,7 @@ func TestPackageConan(t *testing.T) {
 
 				checkRecipeRevisionCount := func(count int) {
 					revisions, err := conan_model.GetRecipeRevisions(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Len(t, revisions, count)
 				}
 

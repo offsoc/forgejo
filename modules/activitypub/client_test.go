@@ -20,6 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -27,8 +28,8 @@ import (
 func TestCurrentTime(t *testing.T) {
 	date := CurrentTime()
 	_, err := time.Parse(http.TimeFormat, date)
-	assert.NoError(t, err)
-	assert.Equal(t, date[len(date)-3:], "GMT")
+	require.NoError(t, err)
+	assert.Equal(t, "GMT", date[len(date)-3:])
 }
 
 /* ToDo: Set Up tests for http get requests
@@ -64,22 +65,22 @@ Set up a user called "me" for all tests
 */
 
 func TestNewClientReturnsClient(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	pubID := "myGpgId"
 	c, err := NewClient(db.DefaultContext, user, pubID)
 
 	log.Debug("Client: %v\nError: %v", c, err)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 /* TODO: bring this test to work or delete
 func TestActivityPubSignedGet(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1, Name: "me"})
 	pubID := "myGpgId"
 	c, err := NewClient(db.DefaultContext, user, pubID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expected := "TestActivityPubSignedGet"
 
@@ -88,45 +89,45 @@ func TestActivityPubSignedGet(t *testing.T) {
 		assert.Contains(t, r.Header.Get("Signature"), pubID)
 		assert.Equal(t, r.Header.Get("Content-Type"), ActivityStreamsContentType)
 		body, err := io.ReadAll(r.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, expected, string(body))
 		fmt.Fprint(w, expected)
 	}))
 	defer srv.Close()
 
 	r, err := c.Get(srv.URL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer r.Body.Close()
 	body, err := io.ReadAll(r.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, string(body))
 
 }
 */
 
 func TestActivityPubSignedPost(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	pubID := "https://example.com/pubID"
 	c, err := NewClient(db.DefaultContext, user, pubID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expected := "BODY"
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Regexp(t, regexp.MustCompile("^"+setting.Federation.DigestAlgorithm), r.Header.Get("Digest"))
 		assert.Contains(t, r.Header.Get("Signature"), pubID)
-		assert.Equal(t, r.Header.Get("Content-Type"), ActivityStreamsContentType)
+		assert.Equal(t, ActivityStreamsContentType, r.Header.Get("Content-Type"))
 		body, err := io.ReadAll(r.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, expected, string(body))
 		fmt.Fprint(w, expected)
 	}))
 	defer srv.Close()
 
 	r, err := c.Post([]byte(expected), srv.URL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer r.Body.Close()
 	body, err := io.ReadAll(r.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, string(body))
 }

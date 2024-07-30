@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDecodeEnvSectionKey(t *testing.T) {
@@ -92,7 +93,7 @@ func TestEnvironmentToConfig(t *testing.T) {
 [sec]
 key = old
 `)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	changed = EnvironmentToConfig(cfg, []string{"GITEA__sec__key=new"})
 	assert.True(t, changed)
@@ -130,7 +131,7 @@ func TestEnvironmentToConfigSubSecKey(t *testing.T) {
 [sec]
 key = some
 `)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	changed := EnvironmentToConfig(cfg, []string{"GITEA__sec_0X2E_sub__key=some"})
 	assert.True(t, changed)
@@ -138,9 +139,9 @@ key = some
 	tmpFile := t.TempDir() + "/test-sub-sec-key.ini"
 	defer os.Remove(tmpFile)
 	err = cfg.SaveTo(tmpFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	bs, err := os.ReadFile(tmpFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `[sec]
 key = some
 

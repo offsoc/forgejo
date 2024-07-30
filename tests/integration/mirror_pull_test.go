@@ -20,6 +20,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMirrorPull(t *testing.T) {
@@ -46,16 +47,16 @@ func TestMirrorPull(t *testing.T) {
 		IsMirror:    opts.Mirror,
 		Status:      repo_model.RepositoryBeingMigrated,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, mirrorRepo.IsMirror, "expected pull-mirror repo to be marked as a mirror immediately after its creation")
 
 	ctx := context.Background()
 
 	mirror, err := repo_service.MigrateRepositoryGitData(ctx, user, mirrorRepo, opts, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	findOptions := repo_model.FindReleasesOptions{
@@ -64,9 +65,9 @@ func TestMirrorPull(t *testing.T) {
 		RepoID:        mirror.ID,
 	}
 	initCount, err := db.Count[repo_model.Release](db.DefaultContext, findOptions)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, release_service.CreateRelease(gitRepo, &repo_model.Release{
+	require.NoError(t, release_service.CreateRelease(gitRepo, &repo_model.Release{
 		RepoID:       repo.ID,
 		Repo:         repo,
 		PublisherID:  user.ID,
@@ -81,23 +82,23 @@ func TestMirrorPull(t *testing.T) {
 	}, "", []*release_service.AttachmentChange{}))
 
 	_, err = repo_model.GetMirrorByRepoID(ctx, mirror.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	ok := mirror_service.SyncPullMirror(ctx, mirror.ID)
 	assert.True(t, ok)
 
 	count, err := db.Count[repo_model.Release](db.DefaultContext, findOptions)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, initCount+1, count)
 
 	release, err := repo_model.GetRelease(db.DefaultContext, repo.ID, "v0.2")
-	assert.NoError(t, err)
-	assert.NoError(t, release_service.DeleteReleaseByID(ctx, repo, release, user, true))
+	require.NoError(t, err)
+	require.NoError(t, release_service.DeleteReleaseByID(ctx, repo, release, user, true))
 
 	ok = mirror_service.SyncPullMirror(ctx, mirror.ID)
 	assert.True(t, ok)
 
 	count, err = db.Count[repo_model.Release](db.DefaultContext, findOptions)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, initCount, count)
 }

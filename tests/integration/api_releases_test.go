@@ -23,6 +23,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIListReleases(t *testing.T) {
@@ -52,7 +53,7 @@ func TestAPIListReleases(t *testing.T) {
 				assert.True(t, release.IsPrerelease)
 				assert.True(t, strings.HasSuffix(release.UploadURL, "/api/v1/repos/user2/repo1/releases/5/assets"), release.UploadURL)
 			default:
-				assert.NoError(t, fmt.Errorf("unexpected release: %v", release))
+				require.NoError(t, fmt.Errorf("unexpected release: %v", release))
 			}
 		}
 	}
@@ -111,14 +112,14 @@ func TestAPICreateAndUpdateRelease(t *testing.T) {
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
 
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	err = gitRepo.CreateTag("v0.0.1", "master")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	target, err := gitRepo.GetTagCommitID("v0.0.1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	newRelease := createNewReleaseUsingAPI(t, token, owner, repo, "v0.0.1", target, "v0.0.1", "test")
 
@@ -168,11 +169,11 @@ func TestAPICreateProtectedTagRelease(t *testing.T) {
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
 
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	commit, err := gitRepo.GetBranchCommit("master")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/releases", repo.OwnerName, repo.Name), &api.CreateReleaseOption{
 		TagName:      "v0.0.1",
@@ -204,11 +205,11 @@ func TestAPICreateReleaseToDefaultBranchOnExistingTag(t *testing.T) {
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
 
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	err = gitRepo.CreateTag("v0.0.1", "master")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	createNewReleaseUsingAPI(t, token, owner, repo, "v0.0.1", "", "v0.0.1", "test")
 }
@@ -302,11 +303,11 @@ func TestAPIUploadAssetRelease(t *testing.T) {
 
 		writer := multipart.NewWriter(body)
 		part, err := writer.CreateFormFile("attachment", filename)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		_, err = io.Copy(part, bytes.NewReader(buff.Bytes()))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		err = writer.Close()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		req := NewRequestWithBody(t, http.MethodPost, assetURL, bytes.NewReader(body.Bytes())).
 			AddTokenAuth(token).
@@ -426,11 +427,11 @@ func TestAPIDuplicateAssetRelease(t *testing.T) {
 
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile("attachment", filename)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	_, err = io.Copy(part, &buff)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = writer.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req := NewRequestWithBody(t, http.MethodPost, fmt.Sprintf("/api/v1/repos/%s/%s/releases/%d/assets?name=test-asset&external_url=https%%3A%%2F%%2Fforgejo.org%%2F", owner.Name, repo.Name, r.ID), body).
 		AddTokenAuth(token)

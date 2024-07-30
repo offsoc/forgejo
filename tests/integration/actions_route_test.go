@@ -20,6 +20,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func GetWorkflowRunRedirectURI(t *testing.T, repoURL, workflow string) string {
@@ -71,12 +72,12 @@ func TestActionsWebRouteLatestWorkflowRun(t *testing.T) {
 			// Verify that each points to the correct workflow.
 			workflowOne := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID, Index: 1})
 			err := workflowOne.LoadAttributes(context.Background())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, workflowOneURI, workflowOne.HTMLURL())
 
 			workflowTwo := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID, Index: 2})
 			err = workflowTwo.LoadAttributes(context.Background())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, workflowTwoURI, workflowTwo.HTMLURL())
 		})
 
@@ -141,7 +142,7 @@ func TestActionsWebRouteLatestRun(t *testing.T) {
 		// Verify that it redirects to the run we just created
 		workflow := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID})
 		err := workflow.LoadAttributes(context.Background())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, workflow.HTMLURL(), resp.Header().Get("Location"))
 	})
@@ -170,7 +171,7 @@ func TestActionsArtifactDeletion(t *testing.T) {
 		// Load the run we just created
 		run := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID})
 		err := run.LoadAttributes(context.Background())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Visit it's web view
 		req := NewRequest(t, "GET", run.HTMLURL())

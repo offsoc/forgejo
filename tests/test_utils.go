@@ -31,7 +31,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/routers"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func exitf(format string, args ...any) {
@@ -173,13 +173,13 @@ func InitTest(requireGitea bool) {
 
 func PrepareAttachmentsStorage(t testing.TB) {
 	// prepare attachments directory and files
-	assert.NoError(t, storage.Clean(storage.Attachments))
+	require.NoError(t, storage.Clean(storage.Attachments))
 
 	s, err := storage.NewStorage(setting.LocalStorageType, &setting.Storage{
 		Path: filepath.Join(filepath.Dir(setting.AppPath), "tests", "testdata", "data", "attachments"),
 	})
-	assert.NoError(t, err)
-	assert.NoError(t, s.IterateObjects("", func(p string, obj storage.Object) error {
+	require.NoError(t, err)
+	require.NoError(t, s.IterateObjects("", func(p string, obj storage.Object) error {
 		_, err = storage.Copy(storage.Attachments, p, s, p)
 		return err
 	}))
@@ -229,14 +229,14 @@ func PrepareTestEnv(t testing.TB, skip ...int) func() {
 	t.Cleanup(func() { cancelProcesses(t, 0) }) // cancel remaining processes in a non-blocking way
 
 	// load database fixtures
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	// load git repo fixtures
-	assert.NoError(t, util.RemoveAll(setting.RepoRootPath))
-	assert.NoError(t, unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/gitea-repositories-meta"), setting.RepoRootPath))
+	require.NoError(t, util.RemoveAll(setting.RepoRootPath))
+	require.NoError(t, unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/gitea-repositories-meta"), setting.RepoRootPath))
 	ownerDirs, err := os.ReadDir(setting.RepoRootPath)
 	if err != nil {
-		assert.NoError(t, err, "unable to read the new repo root: %v\n", err)
+		require.NoError(t, err, "unable to read the new repo root: %v\n", err)
 	}
 	for _, ownerDir := range ownerDirs {
 		if !ownerDir.Type().IsDir() {
@@ -244,7 +244,7 @@ func PrepareTestEnv(t testing.TB, skip ...int) func() {
 		}
 		repoDirs, err := os.ReadDir(filepath.Join(setting.RepoRootPath, ownerDir.Name()))
 		if err != nil {
-			assert.NoError(t, err, "unable to read the new repo root: %v\n", err)
+			require.NoError(t, err, "unable to read the new repo root: %v\n", err)
 		}
 		for _, repoDir := range repoDirs {
 			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "objects", "pack"), 0o755)
@@ -259,15 +259,15 @@ func PrepareTestEnv(t testing.TB, skip ...int) func() {
 	lfsFixtures, err := storage.NewStorage(setting.LocalStorageType, &setting.Storage{
 		Path: filepath.Join(filepath.Dir(setting.AppPath), "tests/gitea-lfs-meta"),
 	})
-	assert.NoError(t, err)
-	assert.NoError(t, storage.Clean(storage.LFS))
-	assert.NoError(t, lfsFixtures.IterateObjects("", func(path string, _ storage.Object) error {
+	require.NoError(t, err)
+	require.NoError(t, storage.Clean(storage.LFS))
+	require.NoError(t, lfsFixtures.IterateObjects("", func(path string, _ storage.Object) error {
 		_, err := storage.Copy(storage.LFS, path, lfsFixtures, path)
 		return err
 	}))
 
 	// clear all package data
-	assert.NoError(t, db.TruncateBeans(db.DefaultContext,
+	require.NoError(t, db.TruncateBeans(db.DefaultContext,
 		&packages_model.Package{},
 		&packages_model.PackageVersion{},
 		&packages_model.PackageFile{},
@@ -276,7 +276,7 @@ func PrepareTestEnv(t testing.TB, skip ...int) func() {
 		&packages_model.PackageBlobUpload{},
 		&packages_model.PackageCleanupRule{},
 	))
-	assert.NoError(t, storage.Clean(storage.Packages))
+	require.NoError(t, storage.Clean(storage.Packages))
 
 	return deferFn
 }

@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCleanUploadFileName(t *testing.T) {
@@ -115,6 +116,6 @@ func TestGetFileResponseFromCommit(t *testing.T) {
 	expectedFileResponse := getExpectedFileResponse()
 
 	fileResponse, err := GetFileResponseFromCommit(ctx, repo, commit, branch, treePath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, expectedFileResponse, fileResponse)
 }

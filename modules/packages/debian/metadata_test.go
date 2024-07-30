@@ -13,6 +13,7 @@ import (
 	"github.com/blakesmith/ar"
 	"github.com/klauspost/compress/zstd"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/ulikunitz/xz"
 )
 
@@ -47,7 +48,7 @@ func TestParsePackage(t *testing.T) {
 
 		p, err := ParsePackage(data)
 		assert.Nil(t, p)
-		assert.ErrorIs(t, err, ErrMissingControlFile)
+		require.ErrorIs(t, err, ErrMissingControlFile)
 	})
 
 	t.Run("Compression", func(t *testing.T) {
@@ -56,7 +57,7 @@ func TestParsePackage(t *testing.T) {
 
 			p, err := ParsePackage(data)
 			assert.Nil(t, p)
-			assert.ErrorIs(t, err, ErrUnsupportedCompression)
+			require.ErrorIs(t, err, ErrUnsupportedCompression)
 		})
 
 		var buf bytes.Buffer
@@ -112,7 +113,7 @@ func TestParsePackage(t *testing.T) {
 
 				p, err := ParsePackage(data)
 				assert.NotNil(t, p)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, "gitea", p.Name)
 
 				t.Run("TrailingSlash", func(t *testing.T) {
@@ -120,7 +121,7 @@ func TestParsePackage(t *testing.T) {
 
 					p, err := ParsePackage(data)
 					assert.NotNil(t, p)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Equal(t, "gitea", p.Name)
 				})
 			})
@@ -147,7 +148,7 @@ func TestParseControlFile(t *testing.T) {
 		for _, name := range []string{"", "-cd"} {
 			p, err := ParseControlFile(buildContent(name, packageVersion, packageArchitecture))
 			assert.Nil(t, p)
-			assert.ErrorIs(t, err, ErrInvalidName)
+			require.ErrorIs(t, err, ErrInvalidName)
 		}
 	})
 
@@ -155,14 +156,14 @@ func TestParseControlFile(t *testing.T) {
 		for _, version := range []string{"", "1-", ":1.0", "1_0"} {
 			p, err := ParseControlFile(buildContent(packageName, version, packageArchitecture))
 			assert.Nil(t, p)
-			assert.ErrorIs(t, err, ErrInvalidVersion)
+			require.ErrorIs(t, err, ErrInvalidVersion)
 		}
 	})
 
 	t.Run("InvalidArchitecture", func(t *testing.T) {
 		p, err := ParseControlFile(buildContent(packageName, packageVersion, ""))
 		assert.Nil(t, p)
-		assert.ErrorIs(t, err, ErrInvalidArchitecture)
+		require.ErrorIs(t, err, ErrInvalidArchitecture)
 	})
 
 	t.Run("Valid", func(t *testing.T) {
@@ -170,7 +171,7 @@ func TestParseControlFile(t *testing.T) {
 		full := content.String()
 
 		p, err := ParseControlFile(content)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, p)
 
 		assert.Equal(t, packageName, p.Name)

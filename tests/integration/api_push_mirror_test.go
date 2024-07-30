@@ -23,6 +23,7 @@ import (
 	repo_service "code.gitea.io/gitea/services/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIPushMirror(t *testing.T) {
@@ -35,7 +36,7 @@ func testAPIPushMirror(t *testing.T, u *url.URL) {
 	defer test.MockProtect(&mirror_service.AddPushMirrorRemote)()
 	defer test.MockProtect(&repo_model.DeletePushMirrors)()
 
-	assert.NoError(t, migrations.Init())
+	require.NoError(t, migrations.Init())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	srcRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
@@ -47,7 +48,7 @@ func testAPIPushMirror(t *testing.T, u *url.URL) {
 	mirrorRepo, err := repo_service.CreateRepositoryDirectly(db.DefaultContext, user, user, repo_service.CreateRepoOptions{
 		Name: "test-push-mirror",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	remoteAddress := fmt.Sprintf("%s%s/%s", u.String(), url.PathEscape(user.Name), url.PathEscape(mirrorRepo.Name))
 
 	deletePushMirrors := repo_model.DeletePushMirrors

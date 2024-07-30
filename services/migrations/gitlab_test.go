@@ -18,6 +18,7 @@ import (
 	base "code.gitea.io/gitea/modules/migration"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -35,7 +36,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 		t.Fatalf("NewGitlabDownloader is nil: %v", err)
 	}
 	repo, err := downloader.GetRepoInfo()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	// Repo Owner is blank in Gitlab Group repos
 	assertRepositoryEqual(t, &base.Repository{
 		Name:          "test_repo",
@@ -47,12 +48,12 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	}, repo)
 
 	topics, err := downloader.GetTopics()
-	assert.NoError(t, err)
-	assert.True(t, len(topics) == 2)
+	require.NoError(t, err)
+	assert.Len(t, topics, 2)
 	assert.EqualValues(t, []string{"migration", "test"}, topics)
 
 	milestones, err := downloader.GetMilestones()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertMilestonesEqual(t, []*base.Milestone{
 		{
 			Title:   "1.1.0",
@@ -70,7 +71,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	}, milestones)
 
 	labels, err := downloader.GetLabels()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertLabelsEqual(t, []*base.Label{
 		{
 			Name:  "bug",
@@ -111,7 +112,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	}, labels)
 
 	releases, err := downloader.GetReleases()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReleasesEqual(t, []*base.Release{
 		{
 			TagName:         "v0.9.99",
@@ -125,7 +126,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	}, releases)
 
 	issues, isEnd, err := downloader.GetIssues(1, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isEnd)
 
 	assertIssuesEqual(t, []*base.Issue{
@@ -217,7 +218,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 		ForeignIndex: 2,
 		Context:      gitlabIssueContext{IsMergeRequest: false},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertCommentsEqual(t, []*base.Comment{
 		{
 			IssueIndex: 2,
@@ -254,7 +255,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	}, comments)
 
 	prs, _, err := downloader.GetPullRequests(1, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertPullRequestsEqual(t, []*base.PullRequest{
 		{
 			Number:     4,
@@ -303,7 +304,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	}, prs)
 
 	rvs, err := downloader.GetReviews(&base.PullRequest{Number: 1, ForeignIndex: 1})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReviewsEqual(t, []*base.Review{
 		{
 			IssueIndex:   1,
@@ -322,7 +323,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	}, rvs)
 
 	rvs, err = downloader.GetReviews(&base.PullRequest{Number: 2, ForeignIndex: 2})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReviewsEqual(t, []*base.Review{
 		{
 			IssueIndex:   2,
@@ -348,7 +349,7 @@ func TestGitlabSkippedIssueNumber(t *testing.T) {
 		t.Fatalf("NewGitlabDownloader is nil: %v", err)
 	}
 	repo, err := downloader.GetRepoInfo()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertRepositoryEqual(t, &base.Repository{
 		Name:          "archbuild",
 		Owner:         "troyengel",
@@ -359,20 +360,20 @@ func TestGitlabSkippedIssueNumber(t *testing.T) {
 	}, repo)
 
 	issues, isEnd, err := downloader.GetIssues(1, 10)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isEnd)
 
 	// the only issue in this repository has number 2
-	assert.EqualValues(t, 1, len(issues))
+	assert.Len(t, issues, 1)
 	assert.EqualValues(t, 2, issues[0].Number)
 	assert.EqualValues(t, "vpn unlimited errors", issues[0].Title)
 
 	prs, _, err := downloader.GetPullRequests(1, 10)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	// the only merge request in this repository has number 1,
 	// but we offset it by the maximum issue number so it becomes
 	// pull request 3 in Forgejo
-	assert.EqualValues(t, 1, len(prs))
+	assert.Len(t, prs, 1)
 	assert.EqualValues(t, 3, prs[0].Number)
 	assert.EqualValues(t, "Review", prs[0].Title)
 }
@@ -507,7 +508,7 @@ func TestGitlabGetReviews(t *testing.T) {
 
 		id := int64(testCase.prID)
 		rvs, err := downloader.GetReviews(&base.Issue{Number: id, ForeignIndex: id})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assertReviewsEqual(t, []*base.Review{&review}, rvs)
 	}
 }
@@ -541,7 +542,7 @@ func TestAwardsToReactions(t *testing.T) {
 ]
 `
 	var awards []*gitlab.AwardEmoji
-	assert.NoError(t, json.Unmarshal([]byte(testResponse), &awards))
+	require.NoError(t, json.Unmarshal([]byte(testResponse), &awards))
 
 	reactions := downloader.awardsToReactions(awards)
 	assert.EqualValues(t, []*base.Reaction{

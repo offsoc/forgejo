@@ -10,6 +10,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // HTMLDoc struct
@@ -21,7 +22,7 @@ type HTMLDoc struct {
 func NewHTMLParser(t testing.TB, body *bytes.Buffer) *HTMLDoc {
 	t.Helper()
 	doc, err := goquery.NewDocumentFromReader(body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return &HTMLDoc{doc: doc}
 }
 
@@ -41,7 +42,7 @@ func (doc *HTMLDoc) AssertDropdown(t testing.TB, name string) *goquery.Selection
 	t.Helper()
 
 	dropdownGroup := doc.Find(fmt.Sprintf(".dropdown:has(input[name='%s'])", name))
-	assert.Equal(t, dropdownGroup.Length(), 1, fmt.Sprintf("%s dropdown does not exist", name))
+	assert.Equal(t, 1, dropdownGroup.Length(), fmt.Sprintf("%s dropdown does not exist", name))
 	return dropdownGroup
 }
 
@@ -50,7 +51,7 @@ func (doc *HTMLDoc) AssertDropdownHasOptions(t testing.TB, dropdownName string) 
 	t.Helper()
 
 	options := doc.AssertDropdown(t, dropdownName).Find(".menu [data-value]:not([data-value=''])")
-	assert.Greater(t, options.Length(), 0, fmt.Sprintf("%s dropdown has no options", dropdownName))
+	assert.Positive(t, options.Length(), 0, fmt.Sprintf("%s dropdown has no options", dropdownName))
 }
 
 func (doc *HTMLDoc) AssertDropdownHasSelectedOption(t testing.TB, dropdownName, expectedValue string) {

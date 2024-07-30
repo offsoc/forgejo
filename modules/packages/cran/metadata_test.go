@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -62,7 +63,7 @@ func TestParsePackage(t *testing.T) {
 
 			p, err := ParsePackage(buf, buf.Size())
 			assert.Nil(t, p)
-			assert.ErrorIs(t, err, ErrMissingDescriptionFile)
+			require.ErrorIs(t, err, ErrMissingDescriptionFile)
 		})
 
 		t.Run("Valid", func(t *testing.T) {
@@ -74,7 +75,7 @@ func TestParsePackage(t *testing.T) {
 			p, err := ParsePackage(buf, buf.Size())
 
 			assert.NotNil(t, p)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, packageName, p.Name)
 			assert.Equal(t, packageVersion, p.Version)
@@ -99,7 +100,7 @@ func TestParsePackage(t *testing.T) {
 
 			p, err := ParsePackage(buf, buf.Size())
 			assert.Nil(t, p)
-			assert.ErrorIs(t, err, ErrMissingDescriptionFile)
+			require.ErrorIs(t, err, ErrMissingDescriptionFile)
 		})
 
 		t.Run("Valid", func(t *testing.T) {
@@ -110,7 +111,7 @@ func TestParsePackage(t *testing.T) {
 
 			p, err := ParsePackage(buf, buf.Size())
 			assert.NotNil(t, p)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, packageName, p.Name)
 			assert.Equal(t, packageVersion, p.Version)
@@ -123,7 +124,7 @@ func TestParseDescription(t *testing.T) {
 		for _, name := range []string{"123abc", "ab-cd", "ab cd", "ab/cd"} {
 			p, err := ParseDescription(createDescription(name, packageVersion))
 			assert.Nil(t, p)
-			assert.ErrorIs(t, err, ErrInvalidName)
+			require.ErrorIs(t, err, ErrInvalidName)
 		}
 	})
 
@@ -131,13 +132,13 @@ func TestParseDescription(t *testing.T) {
 		for _, version := range []string{"1", "1 0", "1.2.3.4.5", "1-2-3-4-5", "1.", "1.0.", "1-", "1-0-"} {
 			p, err := ParseDescription(createDescription(packageName, version))
 			assert.Nil(t, p)
-			assert.ErrorIs(t, err, ErrInvalidVersion)
+			require.ErrorIs(t, err, ErrInvalidVersion)
 		}
 	})
 
 	t.Run("Valid", func(t *testing.T) {
 		p, err := ParseDescription(createDescription(packageName, packageVersion))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, p)
 
 		assert.Equal(t, packageName, p.Name)

@@ -9,6 +9,7 @@ import (
 	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_AddRepoIDForAttachment(t *testing.T) {
@@ -39,7 +40,7 @@ func Test_AddRepoIDForAttachment(t *testing.T) {
 
 	// Run the migration
 	if err := AddRepoIDForAttachment(x); err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return
 	}
 
@@ -54,26 +55,26 @@ func Test_AddRepoIDForAttachment(t *testing.T) {
 
 	var issueAttachments []*NewAttachment
 	err := x.Table("attachment").Where("issue_id > 0").Find(&issueAttachments)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, attach := range issueAttachments {
 		assert.Greater(t, attach.RepoID, int64(0))
 		assert.Greater(t, attach.IssueID, int64(0))
 		var issue Issue
 		has, err := x.ID(attach.IssueID).Get(&issue)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, has)
 		assert.EqualValues(t, attach.RepoID, issue.RepoID)
 	}
 
 	var releaseAttachments []*NewAttachment
 	err = x.Table("attachment").Where("release_id > 0").Find(&releaseAttachments)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, attach := range releaseAttachments {
 		assert.Greater(t, attach.RepoID, int64(0))
 		assert.Greater(t, attach.ReleaseID, int64(0))
 		var release Release
 		has, err := x.ID(attach.ReleaseID).Get(&release)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, has)
 		assert.EqualValues(t, attach.RepoID, release.RepoID)
 	}

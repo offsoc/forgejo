@@ -25,13 +25,14 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOAuth2Application_LoadUser(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	app := unittest.AssertExistsAndLoadBean(t, &auth.OAuth2Application{ID: 1})
 	user, err := user_model.GetUserByID(db.DefaultContext, app.UID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, user)
 }
 
@@ -70,7 +71,7 @@ func TestGetUserFromMap(t *testing.T) {
 
 func TestGetUserByName(t *testing.T) {
 	defer tests.AddFixtures("models/user/fixtures/")()
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	{
 		_, err := user_model.GetUserByName(db.DefaultContext, "")
@@ -82,23 +83,23 @@ func TestGetUserByName(t *testing.T) {
 	}
 	{
 		user, err := user_model.GetUserByName(db.DefaultContext, "USER2")
-		assert.NoError(t, err)
-		assert.Equal(t, user.Name, "user2")
+		require.NoError(t, err)
+		assert.Equal(t, "user2", user.Name)
 	}
 	{
 		user, err := user_model.GetUserByName(db.DefaultContext, "org3")
-		assert.NoError(t, err)
-		assert.Equal(t, user.Name, "org3")
+		require.NoError(t, err)
+		assert.Equal(t, "org3", user.Name)
 	}
 	{
 		user, err := user_model.GetUserByName(db.DefaultContext, "remote01")
-		assert.NoError(t, err)
-		assert.Equal(t, user.Name, "remote01")
+		require.NoError(t, err)
+		assert.Equal(t, "remote01", user.Name)
 	}
 }
 
 func TestGetUserEmailsByNames(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// ignore none active user email
 	assert.ElementsMatch(t, []string{"user8@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "user9"}))
@@ -108,7 +109,7 @@ func TestGetUserEmailsByNames(t *testing.T) {
 }
 
 func TestCanCreateOrganization(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	admin := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	assert.True(t, admin.CanCreateOrganization())
@@ -127,10 +128,10 @@ func TestCanCreateOrganization(t *testing.T) {
 
 func TestGetAllUsers(t *testing.T) {
 	defer tests.AddFixtures("models/user/fixtures/")()
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	users, err := user_model.GetAllUsers(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	found := make(map[user_model.UserType]bool, 0)
 	for _, user := range users {
@@ -152,10 +153,10 @@ func TestAPActorID(t *testing.T) {
 
 func TestSearchUsers(t *testing.T) {
 	defer tests.AddFixtures("models/user/fixtures/")()
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	testSuccess := func(opts *user_model.SearchUserOptions, expectedUserOrOrgIDs []int64) {
 		users, _, err := user_model.SearchUsers(db.DefaultContext, opts)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		cassText := fmt.Sprintf("ids: %v, opts: %v", expectedUserOrOrgIDs, opts)
 		if assert.Len(t, users, len(expectedUserOrOrgIDs), "case: %s", cassText) {
 			for i, expectedID := range expectedUserOrOrgIDs {
@@ -221,7 +222,7 @@ func TestSearchUsers(t *testing.T) {
 }
 
 func TestEmailNotificationPreferences(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	for _, test := range []struct {
 		expected string
@@ -281,21 +282,21 @@ func BenchmarkHashPassword(b *testing.B) {
 func TestNewGitSig(t *testing.T) {
 	users := make([]*user_model.User, 0, 20)
 	err := db.GetEngine(db.DefaultContext).Find(&users)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	for _, user := range users {
 		sig := user.NewGitSig()
 		assert.NotContains(t, sig.Name, "<")
 		assert.NotContains(t, sig.Name, ">")
 		assert.NotContains(t, sig.Name, "\n")
-		assert.NotEqual(t, len(strings.TrimSpace(sig.Name)), 0)
+		assert.NotEmpty(t, strings.TrimSpace(sig.Name))
 	}
 }
 
 func TestDisplayName(t *testing.T) {
 	users := make([]*user_model.User, 0, 20)
 	err := db.GetEngine(db.DefaultContext).Find(&users)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	for _, user := range users {
 		displayName := user.DisplayName()
@@ -303,7 +304,7 @@ func TestDisplayName(t *testing.T) {
 		if len(strings.TrimSpace(user.FullName)) == 0 {
 			assert.Equal(t, user.Name, displayName)
 		}
-		assert.NotEqual(t, len(strings.TrimSpace(displayName)), 0)
+		assert.NotEmpty(t, strings.TrimSpace(displayName))
 	}
 }
 
@@ -318,12 +319,12 @@ func TestCreateUserInvalidEmail(t *testing.T) {
 	}
 
 	err := user_model.CreateUser(db.DefaultContext, user)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.True(t, user_model.IsErrEmailCharIsNotSupported(err))
 }
 
 func TestCreateUserEmailAlreadyUsed(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
@@ -332,12 +333,12 @@ func TestCreateUserEmailAlreadyUsed(t *testing.T) {
 	user.LowerName = strings.ToLower(user.Name)
 	user.ID = 0
 	err := user_model.CreateUser(db.DefaultContext, user)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.True(t, user_model.IsErrEmailAlreadyUsed(err))
 }
 
 func TestCreateUserCustomTimestamps(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
@@ -349,16 +350,16 @@ func TestCreateUserCustomTimestamps(t *testing.T) {
 	user.Email = "unique@example.com"
 	user.CreatedUnix = creationTimestamp
 	err := user_model.CreateUser(db.DefaultContext, user)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	fetched, err := user_model.GetUserByID(context.Background(), user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, creationTimestamp, fetched.CreatedUnix)
 	assert.Equal(t, creationTimestamp, fetched.UpdatedUnix)
 }
 
 func TestCreateUserWithoutCustomTimestamps(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
@@ -374,12 +375,12 @@ func TestCreateUserWithoutCustomTimestamps(t *testing.T) {
 	user.CreatedUnix = 0
 	user.UpdatedUnix = 0
 	err := user_model.CreateUser(db.DefaultContext, user)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	timestampEnd := time.Now().Unix()
 
 	fetched, err := user_model.GetUserByID(context.Background(), user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.LessOrEqual(t, timestampStart, fetched.CreatedUnix)
 	assert.LessOrEqual(t, fetched.CreatedUnix, timestampEnd)
@@ -389,44 +390,44 @@ func TestCreateUserWithoutCustomTimestamps(t *testing.T) {
 }
 
 func TestGetUserIDsByNames(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// ignore non existing
 	IDs, err := user_model.GetUserIDsByNames(db.DefaultContext, []string{"user1", "user2", "none_existing_user"}, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []int64{1, 2}, IDs)
 
 	// ignore non existing
 	IDs, err = user_model.GetUserIDsByNames(db.DefaultContext, []string{"user1", "do_not_exist"}, false)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Equal(t, []int64(nil), IDs)
 }
 
 func TestGetMaileableUsersByIDs(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	results, err := user_model.GetMaileableUsersByIDs(db.DefaultContext, []int64{1, 4}, false)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, results, 1)
 	if len(results) > 1 {
-		assert.Equal(t, results[0].ID, 1)
+		assert.Equal(t, 1, results[0].ID)
 	}
 
 	results, err = user_model.GetMaileableUsersByIDs(db.DefaultContext, []int64{1, 4}, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, results, 2)
 	if len(results) > 2 {
-		assert.Equal(t, results[0].ID, 1)
-		assert.Equal(t, results[1].ID, 4)
+		assert.Equal(t, 1, results[0].ID)
+		assert.Equal(t, 4, results[1].ID)
 	}
 }
 
 func TestNewUserRedirect(t *testing.T) {
 	// redirect to a completely new name
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-	assert.NoError(t, user_model.NewUserRedirect(db.DefaultContext, user.ID, user.Name, "newusername"))
+	require.NoError(t, user_model.NewUserRedirect(db.DefaultContext, user.ID, user.Name, "newusername"))
 
 	unittest.AssertExistsAndLoadBean(t, &user_model.Redirect{
 		LowerName:      user.LowerName,
@@ -440,10 +441,10 @@ func TestNewUserRedirect(t *testing.T) {
 
 func TestNewUserRedirect2(t *testing.T) {
 	// redirect to previously used name
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-	assert.NoError(t, user_model.NewUserRedirect(db.DefaultContext, user.ID, user.Name, "olduser1"))
+	require.NoError(t, user_model.NewUserRedirect(db.DefaultContext, user.ID, user.Name, "olduser1"))
 
 	unittest.AssertExistsAndLoadBean(t, &user_model.Redirect{
 		LowerName:      user.LowerName,
@@ -457,10 +458,10 @@ func TestNewUserRedirect2(t *testing.T) {
 
 func TestNewUserRedirect3(t *testing.T) {
 	// redirect for a previously-unredirected user
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
-	assert.NoError(t, user_model.NewUserRedirect(db.DefaultContext, user.ID, user.Name, "newusername"))
+	require.NoError(t, user_model.NewUserRedirect(db.DefaultContext, user.ID, user.Name, "newusername"))
 
 	unittest.AssertExistsAndLoadBean(t, &user_model.Redirect{
 		LowerName:      user.LowerName,
@@ -469,7 +470,7 @@ func TestNewUserRedirect3(t *testing.T) {
 }
 
 func TestGetUserByOpenID(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	_, err := user_model.GetUserByOpenID(db.DefaultContext, "https://unknown")
 	if assert.Error(t, err) {
@@ -477,31 +478,31 @@ func TestGetUserByOpenID(t *testing.T) {
 	}
 
 	user, err := user_model.GetUserByOpenID(db.DefaultContext, "https://user1.domain1.tld")
-	if assert.NoError(t, err) {
-		assert.Equal(t, int64(1), user.ID)
-	}
+	require.NoError(t, err)
+
+	assert.Equal(t, int64(1), user.ID)
 
 	user, err = user_model.GetUserByOpenID(db.DefaultContext, "https://domain1.tld/user2/")
-	if assert.NoError(t, err) {
-		assert.Equal(t, int64(2), user.ID)
-	}
+	require.NoError(t, err)
+
+	assert.Equal(t, int64(2), user.ID)
 }
 
 func TestFollowUser(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testSuccess := func(followerID, followedID int64) {
-		assert.NoError(t, user_model.FollowUser(db.DefaultContext, followerID, followedID))
+		require.NoError(t, user_model.FollowUser(db.DefaultContext, followerID, followedID))
 		unittest.AssertExistsAndLoadBean(t, &user_model.Follow{UserID: followerID, FollowID: followedID})
 	}
 	testSuccess(4, 2)
 	testSuccess(5, 2)
 
-	assert.NoError(t, user_model.FollowUser(db.DefaultContext, 2, 2))
+	require.NoError(t, user_model.FollowUser(db.DefaultContext, 2, 2))
 
 	// Blocked user.
-	assert.ErrorIs(t, user_model.ErrBlockedByUser, user_model.FollowUser(db.DefaultContext, 1, 4))
-	assert.ErrorIs(t, user_model.ErrBlockedByUser, user_model.FollowUser(db.DefaultContext, 4, 1))
+	require.ErrorIs(t, user_model.ErrBlockedByUser, user_model.FollowUser(db.DefaultContext, 1, 4))
+	require.ErrorIs(t, user_model.ErrBlockedByUser, user_model.FollowUser(db.DefaultContext, 4, 1))
 	unittest.AssertNotExistsBean(t, &user_model.Follow{UserID: 1, FollowID: 4})
 	unittest.AssertNotExistsBean(t, &user_model.Follow{UserID: 4, FollowID: 1})
 
@@ -509,10 +510,10 @@ func TestFollowUser(t *testing.T) {
 }
 
 func TestUnfollowUser(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testSuccess := func(followerID, followedID int64) {
-		assert.NoError(t, user_model.UnfollowUser(db.DefaultContext, followerID, followedID))
+		require.NoError(t, user_model.UnfollowUser(db.DefaultContext, followerID, followedID))
 		unittest.AssertNotExistsBean(t, &user_model.Follow{UserID: followerID, FollowID: followedID})
 	}
 	testSuccess(4, 2)
@@ -523,7 +524,7 @@ func TestUnfollowUser(t *testing.T) {
 }
 
 func TestIsUserVisibleToViewer(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})   // admin, public
 	user4 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 4})   // normal, public
@@ -576,10 +577,10 @@ func TestIsUserVisibleToViewer(t *testing.T) {
 }
 
 func TestGetAllAdmins(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	admins, err := user_model.GetAllAdmins(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Len(t, admins, 1)
 	assert.Equal(t, int64(1), admins[0].ID)
@@ -624,12 +625,12 @@ func Test_NormalizeUserFromEmail(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		normalizedName, err := user_model.NormalizeUserName(testCase.Input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, testCase.Expected, normalizedName)
 		if testCase.IsNormalizedValid {
-			assert.NoError(t, user_model.IsUsableUsername(normalizedName))
+			require.NoError(t, user_model.IsUsableUsername(normalizedName))
 		} else {
-			assert.Error(t, user_model.IsUsableUsername(normalizedName))
+			require.Error(t, user_model.IsUsableUsername(normalizedName))
 		}
 	}
 }
@@ -666,7 +667,7 @@ func TestEmailTo(t *testing.T) {
 }
 
 func TestDisabledUserFeatures(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testValues := container.SetOf(setting.UserFeatureDeletion,
 		setting.UserFeatureManageSSHKeys,
@@ -680,11 +681,11 @@ func TestDisabledUserFeatures(t *testing.T) {
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
-	assert.Len(t, setting.Admin.UserDisabledFeatures.Values(), 0)
+	assert.Empty(t, setting.Admin.UserDisabledFeatures.Values())
 
 	// no features should be disabled with a plain login type
 	assert.LessOrEqual(t, user.LoginType, auth.Plain)
-	assert.Len(t, user_model.DisabledFeaturesWithLoginType(user).Values(), 0)
+	assert.Empty(t, user_model.DisabledFeaturesWithLoginType(user).Values())
 	for _, f := range testValues.Values() {
 		assert.False(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}

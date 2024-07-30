@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackagePyPI(t *testing.T) {
@@ -67,24 +68,24 @@ func TestPackagePyPI(t *testing.T) {
 		uploadFile(t, filename, content, http.StatusCreated)
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypePyPI)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 
 		pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Nil(t, pd.SemVer)
 		assert.IsType(t, &pypi.Metadata{}, pd.Metadata)
 		assert.Equal(t, packageName, pd.Package.Name)
 		assert.Equal(t, packageVersion, pd.Version.Version)
 
 		pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pfs, 1)
 		assert.Equal(t, filename, pfs[0].Name)
 		assert.True(t, pfs[0].IsLead)
 
 		pb, err := packages.GetBlobByID(db.DefaultContext, pfs[0].BlobID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, int64(4), pb.Size)
 	})
 
@@ -95,27 +96,27 @@ func TestPackagePyPI(t *testing.T) {
 		uploadFile(t, filename, content, http.StatusCreated)
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypePyPI)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 
 		pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Nil(t, pd.SemVer)
 		assert.IsType(t, &pypi.Metadata{}, pd.Metadata)
 		assert.Equal(t, packageName, pd.Package.Name)
 		assert.Equal(t, packageVersion, pd.Version.Version)
 
 		pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pfs, 2)
 
 		pf, err := packages.GetFileForVersionByName(db.DefaultContext, pvs[0].ID, filename, packages.EmptyFileKey)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, filename, pf.Name)
 		assert.True(t, pf.IsLead)
 
 		pb, err := packages.GetBlobByID(db.DefaultContext, pf.BlobID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, int64(4), pb.Size)
 	})
 
@@ -148,7 +149,7 @@ func TestPackagePyPI(t *testing.T) {
 		downloadFile("test.tar.gz")
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypePyPI)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 		assert.Equal(t, int64(2), pvs[0].DownloadCount)
 	})

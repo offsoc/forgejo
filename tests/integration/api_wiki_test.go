@@ -22,6 +22,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIRenameWikiBranch(t *testing.T) {
@@ -282,7 +283,7 @@ func TestAPIEditOtherWikiPage(t *testing.T) {
 		DefaultPermissions: repo_model.UnitAccessModeWrite,
 	})
 	err := repo_service.UpdateRepositoryUnits(ctx, repo, units, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Creating a new Wiki page on user2's repo works now
 	testCreateWiki(http.StatusCreated)

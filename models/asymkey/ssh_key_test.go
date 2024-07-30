@@ -16,6 +16,7 @@ import (
 
 	"github.com/42wim/sshsig"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_SSHParsePublicKey(t *testing.T) {
@@ -39,7 +40,7 @@ func Test_SSHParsePublicKey(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Run("Native", func(t *testing.T) {
 				keyTypeN, lengthN, err := SSHNativeParsePublicKey(tc.content)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tc.keyType, keyTypeN)
 				assert.EqualValues(t, tc.length, lengthN)
 			})
@@ -146,7 +147,7 @@ AAAAC3NzaC1lZDI1NTE5AAAAICV0MGX/W9IvLA4FXpIuUcdDcbj5KX4syHgsTy7soVgf
 `},
 	} {
 		_, err := CheckPublicKeyString(test.content)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 	setting.SSH.MinimumKeySizeCheck = oldValue
 	for _, invalidKeys := range []struct {
@@ -159,7 +160,7 @@ AAAAC3NzaC1lZDI1NTE5AAAAICV0MGX/W9IvLA4FXpIuUcdDcbj5KX4syHgsTy7soVgf
 		{"\r\ntest \r\ngitea\r\n\r\n"},
 	} {
 		_, err := CheckPublicKeyString(invalidKeys.content)
-		assert.Error(t, err)
+		require.Error(t, err)
 	}
 }
 
@@ -183,7 +184,7 @@ func Test_calcFingerprint(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Run("Native", func(t *testing.T) {
 				fpN, err := calcFingerprintNative(tc.content)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tc.fp, fpN)
 			})
 			if tc.skipSSHKeygen {
@@ -191,7 +192,7 @@ func Test_calcFingerprint(t *testing.T) {
 			}
 			t.Run("SSHKeygen", func(t *testing.T) {
 				fpK, err := calcFingerprintSSHKeygen(tc.content)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tc.fp, fpK)
 			})
 		})

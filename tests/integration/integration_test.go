@@ -58,6 +58,7 @@ import (
 	goth_gitlab "github.com/markbates/goth/providers/gitlab"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testWebRoutes *web.Route
@@ -235,7 +236,7 @@ func (s *TestSession) MakeRequest(t testing.TB, rw *RequestWrapper, expectedStat
 	t.Helper()
 	req := rw.Request
 	baseURL, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, c := range s.jar.Cookies(baseURL) {
 		req.AddCookie(c)
 	}
@@ -253,7 +254,7 @@ func (s *TestSession) MakeRequestNilResponseRecorder(t testing.TB, rw *RequestWr
 	t.Helper()
 	req := rw.Request
 	baseURL, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, c := range s.jar.Cookies(baseURL) {
 		req.AddCookie(c)
 	}
@@ -271,7 +272,7 @@ func (s *TestSession) MakeRequestNilResponseHashSumRecorder(t testing.TB, rw *Re
 	t.Helper()
 	req := rw.Request
 	baseURL, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, c := range s.jar.Cookies(baseURL) {
 		req.AddCookie(c)
 	}
@@ -290,7 +291,7 @@ const userPassword = "password"
 func emptyTestSession(t testing.TB) *TestSession {
 	t.Helper()
 	jar, err := cookiejar.New(nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	return &TestSession{jar: jar}
 }
@@ -313,7 +314,7 @@ func addAuthSource(t *testing.T, payload map[string]string) *auth.Source {
 	req := NewRequestWithValues(t, "POST", "/admin/auths/new", payload)
 	session.MakeRequest(t, req, http.StatusSeeOther)
 	source, err := auth.GetSourceByName(context.Background(), payload["name"])
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return source
 }
 
@@ -363,7 +364,7 @@ func authSourcePayloadGitHubCustom(name string) map[string]string {
 }
 
 func createRemoteAuthSource(t *testing.T, name, url, matchingSource string) *auth.Source {
-	assert.NoError(t, auth.CreateSource(context.Background(), &auth.Source{
+	require.NoError(t, auth.CreateSource(context.Background(), &auth.Source{
 		Type:     auth.Remote,
 		Name:     name,
 		IsActive: true,
@@ -373,7 +374,7 @@ func createRemoteAuthSource(t *testing.T, name, url, matchingSource string) *aut
 		},
 	}))
 	source, err := auth.GetSourceByName(context.Background(), name)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return source
 }
 
@@ -381,14 +382,14 @@ func createUser(ctx context.Context, t testing.TB, user *user_model.User) func()
 	user.MustChangePassword = false
 	user.LowerName = strings.ToLower(user.Name)
 
-	assert.NoError(t, db.Insert(ctx, user))
+	require.NoError(t, db.Insert(ctx, user))
 
 	if len(user.Email) > 0 {
-		assert.NoError(t, user_service.ReplacePrimaryEmailAddress(ctx, user, user.Email))
+		require.NoError(t, user_service.ReplacePrimaryEmailAddress(ctx, user, user.Email))
 	}
 
 	return func() {
-		assert.NoError(t, user_service.DeleteUser(ctx, user, true))
+		require.NoError(t, user_service.DeleteUser(ctx, user, true))
 	}
 }
 
@@ -425,7 +426,7 @@ func loginUserWithPasswordRemember(t testing.TB, userName, password string, reme
 	session := emptyTestSession(t)
 
 	baseURL, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	session.jar.SetCookies(baseURL, cr.Cookies())
 
 	return session
@@ -465,7 +466,7 @@ func getTokenForLoggedInUser(t testing.TB, session *TestSession, scopes ...auth.
 	resp = session.MakeRequest(t, req, http.StatusSeeOther)
 
 	// Log the flash values on failure
-	if !assert.Equal(t, resp.Result().Header["Location"], []string{"/user/settings/applications"}) {
+	if !assert.Equal(t, []string{"/user/settings/applications"}, resp.Result().Header["Location"]) {
 		for _, cookie := range resp.Result().Cookies() {
 			if cookie.Name != gitea_context.CookieNameFlash {
 				continue
@@ -539,7 +540,7 @@ func NewRequestWithJSON(t testing.TB, method, urlStr string, v any) *RequestWrap
 	t.Helper()
 
 	jsonBytes, err := json.Marshal(v)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return NewRequestWithBody(t, method, urlStr, bytes.NewBuffer(jsonBytes)).
 		SetHeader("Content-Type", "application/json")
 }
@@ -550,7 +551,7 @@ func NewRequestWithBody(t testing.TB, method, urlStr string, body io.Reader) *Re
 		urlStr = "/" + urlStr
 	}
 	req, err := http.NewRequest(method, urlStr, body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	req.RequestURI = urlStr
 
 	return &RequestWrapper{req}
@@ -649,7 +650,7 @@ func DecodeJSON(t testing.TB, resp *httptest.ResponseRecorder, v any) {
 	t.Helper()
 
 	decoder := json.NewDecoder(resp.Body)
-	assert.NoError(t, decoder.Decode(v))
+	require.NoError(t, decoder.Decode(v))
 }
 
 func VerifyJSONSchema(t testing.TB, resp *httptest.ResponseRecorder, schemaFile string) {
@@ -657,17 +658,17 @@ func VerifyJSONSchema(t testing.TB, resp *httptest.ResponseRecorder, schemaFile 
 
 	schemaFilePath := filepath.Join(filepath.Dir(setting.AppPath), "tests", "integration", "schemas", schemaFile)
 	_, schemaFileErr := os.Stat(schemaFilePath)
-	assert.Nil(t, schemaFileErr)
+	require.NoError(t, schemaFileErr)
 
 	schema, err := jsonschema.NewCompiler().Compile(schemaFilePath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var data any
 	err = json.Unmarshal(resp.Body.Bytes(), &data)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	schemaValidation := schema.Validate(data)
-	assert.Nil(t, schemaValidation)
+	require.NoError(t, schemaValidation)
 }
 
 func GetCSRF(t testing.TB, session *TestSession, urlStr string) string {
@@ -731,7 +732,7 @@ func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts
 		Readme:        "Default",
 		DefaultBranch: "main",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, repo)
 
 	// Populate `enabledUnits` if we have any enabled.
@@ -751,7 +752,7 @@ func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts
 	// Adjust the repo units according to our parameters.
 	if opts.EnabledUnits.Has() || opts.DisabledUnits.Has() {
 		err := repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, enabledUnits, opts.DisabledUnits.ValueOrDefault(nil))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	// Add files, if any.
@@ -778,7 +779,7 @@ func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts
 				Committer: time.Now(),
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, resp)
 
 		sha = resp.Commit.SHA
@@ -789,15 +790,15 @@ func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts
 		// Set the wiki branch in the database first
 		repo.WikiBranch = opts.WikiBranch.Value()
 		err := repo_model.UpdateRepositoryCols(db.DefaultContext, repo, "wiki_branch")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Initialize the wiki
 		err = wiki_service.InitWiki(db.DefaultContext, repo)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Add a new wiki page
 		err = wiki_service.AddWikiPage(db.DefaultContext, owner, repo, "Home", "Welcome to the wiki!", "Add a Home page")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	// Return the repo, the top commit, and a defer-able function to delete the

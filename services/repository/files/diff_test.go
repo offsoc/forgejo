@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/services/gitdiff"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetDiffPreview(t *testing.T) {
@@ -118,21 +119,21 @@ func TestGetDiffPreview(t *testing.T) {
 
 	t.Run("with given branch", func(t *testing.T) {
 		diff, err := GetDiffPreview(ctx, ctx.Repo.Repository, branch, treePath, content)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		expectedBs, err := json.Marshal(expectedDiff)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		bs, err := json.Marshal(diff)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, string(expectedBs), string(bs))
 	})
 
 	t.Run("empty branch, same results", func(t *testing.T) {
 		diff, err := GetDiffPreview(ctx, ctx.Repo.Repository, "", treePath, content)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		expectedBs, err := json.Marshal(expectedDiff)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		bs, err := json.Marshal(diff)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, expectedBs, bs)
 	})
 }

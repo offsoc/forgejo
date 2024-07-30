@@ -8,17 +8,18 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepository_GetRefs(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer bareRepo1.Close()
 
 	refs, err := bareRepo1.GetRefs()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, refs, 6)
 
 	expectedRefs := []string{
@@ -38,12 +39,12 @@ func TestRepository_GetRefs(t *testing.T) {
 func TestRepository_GetRefsFiltered(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer bareRepo1.Close()
 
 	refs, err := bareRepo1.GetRefsFiltered(TagPrefix)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.Len(t, refs, 2) {
 		assert.Equal(t, TagPrefix+"signed-tag", refs[0].Name)
 		assert.Equal(t, "tag", refs[0].Type)

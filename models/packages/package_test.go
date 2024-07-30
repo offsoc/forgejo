@@ -16,6 +16,7 @@ import (
 	_ "code.gitea.io/gitea/models/activities"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -23,7 +24,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestHasOwnerPackages(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -32,12 +33,12 @@ func TestHasOwnerPackages(t *testing.T) {
 		LowerName: "package",
 	})
 	assert.NotNil(t, p)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// A package without package versions gets automatically cleaned up and should return false
 	has, err := packages_model.HasOwnerPackages(db.DefaultContext, owner.ID)
 	assert.False(t, has)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pv, err := packages_model.GetOrInsertVersion(db.DefaultContext, &packages_model.PackageVersion{
 		PackageID:    p.ID,
@@ -45,12 +46,12 @@ func TestHasOwnerPackages(t *testing.T) {
 		IsInternal:   true,
 	})
 	assert.NotNil(t, pv)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// A package with an internal package version gets automatically cleaned up and should return false
 	has, err = packages_model.HasOwnerPackages(db.DefaultContext, owner.ID)
 	assert.False(t, has)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pv, err = packages_model.GetOrInsertVersion(db.DefaultContext, &packages_model.PackageVersion{
 		PackageID:    p.ID,
@@ -58,10 +59,10 @@ func TestHasOwnerPackages(t *testing.T) {
 		IsInternal:   false,
 	})
 	assert.NotNil(t, pv)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// A package with a normal package version should return true
 	has, err = packages_model.HasOwnerPackages(db.DefaultContext, owner.ID)
 	assert.True(t, has)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

@@ -12,10 +12,11 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSource(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	source := &Source{
 		Provider: "fake",
@@ -37,7 +38,7 @@ func TestSource(t *testing.T) {
 	}
 
 	err := user_model.CreateUser(context.Background(), user, &user_model.CreateUserOverwriteOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	e := &user_model.ExternalLoginUser{
 		ExternalID:    "external",
@@ -46,15 +47,15 @@ func TestSource(t *testing.T) {
 		RefreshToken:  "valid",
 	}
 	err = user_model.LinkExternalToUser(context.Background(), user, e)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	provider, err := createProvider(source.authSource.Name, source)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	t.Run("refresh", func(t *testing.T) {
 		t.Run("valid", func(t *testing.T) {
 			err := source.refresh(context.Background(), provider, e)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			e := &user_model.ExternalLoginUser{
 				ExternalID:    e.ExternalID,
@@ -62,13 +63,13 @@ func TestSource(t *testing.T) {
 			}
 
 			ok, err := user_model.GetExternalLogin(context.Background(), e)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.True(t, ok)
-			assert.Equal(t, e.RefreshToken, "refresh")
-			assert.Equal(t, e.AccessToken, "token")
+			assert.Equal(t, "refresh", e.RefreshToken)
+			assert.Equal(t, "token", e.AccessToken)
 
 			u, err := user_model.GetUserByID(context.Background(), user.ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.True(t, u.IsActive)
 		})
 
@@ -79,7 +80,7 @@ func TestSource(t *testing.T) {
 				LoginSourceID: user.LoginSource,
 				RefreshToken:  "expired",
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			e := &user_model.ExternalLoginUser{
 				ExternalID:    e.ExternalID,
@@ -87,13 +88,13 @@ func TestSource(t *testing.T) {
 			}
 
 			ok, err := user_model.GetExternalLogin(context.Background(), e)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.True(t, ok)
-			assert.Equal(t, e.RefreshToken, "")
-			assert.Equal(t, e.AccessToken, "")
+			assert.Equal(t, "", e.RefreshToken)
+			assert.Equal(t, "", e.AccessToken)
 
 			u, err := user_model.GetUserByID(context.Background(), user.ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.False(t, u.IsActive)
 		})
 	})

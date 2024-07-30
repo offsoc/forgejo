@@ -15,10 +15,11 @@ import (
 	"code.gitea.io/gitea/modules/structs"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateComment(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: issue.RepoID})
@@ -32,7 +33,7 @@ func TestCreateComment(t *testing.T) {
 		Issue:   issue,
 		Content: "Hello",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	then := time.Now().Unix()
 
 	assert.EqualValues(t, issues_model.CommentTypeComment, comment.Type)
@@ -47,12 +48,12 @@ func TestCreateComment(t *testing.T) {
 }
 
 func TestFetchCodeConversations(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 2})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	res, err := issues_model.FetchCodeConversations(db.DefaultContext, issue, user, false)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, res, "README.md")
 	assert.Contains(t, res["README.md"], int64(4))
 	assert.Len(t, res["README.md"][4], 1)
@@ -60,12 +61,12 @@ func TestFetchCodeConversations(t *testing.T) {
 
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	res, err = issues_model.FetchCodeConversations(db.DefaultContext, issue, user2, false)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, res, 1)
 }
 
 func TestAsCommentType(t *testing.T) {
-	assert.Equal(t, issues_model.CommentType(0), issues_model.CommentTypeComment)
+	assert.Equal(t, issues_model.CommentTypeComment, issues_model.CommentType(0))
 	assert.Equal(t, issues_model.CommentTypeUndefined, issues_model.AsCommentType(""))
 	assert.Equal(t, issues_model.CommentTypeUndefined, issues_model.AsCommentType("nonsense"))
 	assert.Equal(t, issues_model.CommentTypeComment, issues_model.AsCommentType("comment"))
@@ -73,7 +74,7 @@ func TestAsCommentType(t *testing.T) {
 }
 
 func TestMigrate_InsertIssueComments(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1})
 	_ = issue.LoadRepo(db.DefaultContext)
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: issue.Repo.OwnerID})
@@ -91,7 +92,7 @@ func TestMigrate_InsertIssueComments(t *testing.T) {
 	}
 
 	err := issues_model.InsertIssueComments(db.DefaultContext, []*issues_model.Comment{comment})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	issueModified := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1})
 	assert.EqualValues(t, issue.NumComments+1, issueModified.NumComments)
@@ -100,7 +101,7 @@ func TestMigrate_InsertIssueComments(t *testing.T) {
 }
 
 func TestUpdateCommentsMigrationsByType(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: issue.RepoID})
@@ -115,9 +116,9 @@ func TestUpdateCommentsMigrationsByType(t *testing.T) {
 	comment.OriginalAuthorID = 1
 	comment.PosterID = 0
 	_, err := db.GetEngine(db.DefaultContext).ID(comment.ID).Cols("original_author", "original_author_id", "poster_id").Update(comment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, issues_model.UpdateCommentsMigrationsByType(db.DefaultContext, structs.GiteaService, "1", 513))
+	require.NoError(t, issues_model.UpdateCommentsMigrationsByType(db.DefaultContext, structs.GiteaService, "1", 513))
 
 	comment = unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: 1, IssueID: issue.ID})
 	assert.Empty(t, comment.OriginalAuthor)

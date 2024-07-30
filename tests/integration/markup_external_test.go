@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExternalMarkupRenderer(t *testing.T) {
@@ -29,11 +30,11 @@ func TestExternalMarkupRenderer(t *testing.T) {
 	assert.EqualValues(t, "text/html; charset=utf-8", resp.Header()["Content-Type"][0])
 
 	bs, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	doc := NewHTMLParser(t, bytes.NewBuffer(bs))
 	div := doc.Find("div.file-view")
 	data, err := div.Html()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, "<div>\n\ttest external renderer\n</div>", strings.TrimSpace(data))
 }
