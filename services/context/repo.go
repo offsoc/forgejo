@@ -1,6 +1,6 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package context
@@ -19,6 +19,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	git_model "code.gitea.io/gitea/models/git"
 	issues_model "code.gitea.io/gitea/models/issues"
+	packages_model "code.gitea.io/gitea/models/packages"
 	access_model "code.gitea.io/gitea/models/perm/access"
 	repo_model "code.gitea.io/gitea/models/repo"
 	unit_model "code.gitea.io/gitea/models/unit"
@@ -577,6 +578,11 @@ func RepoAssignment(ctx *Context) context.CancelFunc {
 	})
 	if err != nil {
 		ctx.ServerError("GetReleaseCountByRepoID", err)
+		return nil
+	}
+	ctx.Data["NumPackages"], err = packages_model.CountRepositoryPackages(ctx, ctx.Repo.Repository.ID)
+	if err != nil {
+		ctx.ServerError("GetPackageCountByRepoID", err)
 		return nil
 	}
 

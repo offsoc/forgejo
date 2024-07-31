@@ -1,4 +1,5 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package packages
@@ -12,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 
 	"xorm.io/builder"
+	"xorm.io/xorm"
 )
 
 func init() {
@@ -212,13 +214,19 @@ func TryInsertPackage(ctx context.Context, p *Package) (*Package, error) {
 
 // DeletePackageByID deletes a package by id
 func DeletePackageByID(ctx context.Context, packageID int64) error {
-	_, err := db.GetEngine(ctx).ID(packageID).Delete(&Package{})
+	n, err := db.GetEngine(ctx).ID(packageID).Delete(&Package{})
+	if n == 0 && err == nil {
+		return ErrPackageNotExist
+	}
 	return err
 }
 
 // SetRepositoryLink sets the linked repository
 func SetRepositoryLink(ctx context.Context, packageID, repoID int64) error {
-	_, err := db.GetEngine(ctx).ID(packageID).Cols("repo_id").Update(&Package{RepoID: repoID})
+	n, err := db.GetEngine(ctx).ID(packageID).Cols("repo_id").Update(&Package{RepoID: repoID})
+	if n == 0 && err == nil {
+		return ErrPackageNotExist
+	}
 	return err
 }
 
@@ -293,19 +301,45 @@ func FindUnreferencedPackages(ctx context.Context) ([]int64, error) {
 	return pIDs, nil
 }
 
-// HasOwnerPackages tests if a user/org has accessible packages
-func HasOwnerPackages(ctx context.Context, ownerID int64) (bool, error) {
+func getPackages(ctx context.Context) *xorm.Session {
 	return db.GetEngine(ctx).
 		Table("package_version").
 		Join("INNER", "package", "package.id = package_version.package_id").
-		Where(builder.Eq{
-			"package_version.is_internal": false,
-			"package.owner_id":            ownerID,
-		}).
-		Exist(&PackageVersion{})
+		Where("package_version.is_internal = ?", false)
+}
+
+func getOwnerPackages(ctx context.Context, ownerID int64) *xorm.Session {
+	return getPackages(ctx).
+		Where("package.owner_id = ?", ownerID)
+}
+
+// HasOwnerPackages tests if a user/org has accessible packages
+func HasOwnerPackages(ctx context.Context, ownerID int64) (bool, error) {
+	return getOwnerPackages(ctx, ownerID).
+		Exist(&Package{})
+}
+
+// CountOwnerPackages counts user/org accessible packages
+func CountOwnerPackages(ctx context.Context, ownerID int64) (int64, error) {
+	return getOwnerPackages(ctx, ownerID).
+		Distinct("package.id").
+		Count(&Package{})
+}
+
+func getRepositoryPackages(ctx context.Context, repositoryID int64) *xorm.Session {
+	return getPackages(ctx).
+		Where("package.repo_id = ?", repositoryID)
 }
 
 // HasRepositoryPackages tests if a repository has packages
 func HasRepositoryPackages(ctx context.Context, repositoryID int64) (bool, error) {
-	return db.GetEngine(ctx).Where("repo_id = ?", repositoryID).Exist(&Package{})
+	return getRepositoryPackages(ctx, repositoryID).
+		Exist(&PackageVersion{})
+}
+
+// CountRepositoryPackages counts packages of a repository
+func CountRepositoryPackages(ctx context.Context, repositoryID int64) (int64, error) {
+	return getRepositoryPackages(ctx, repositoryID).
+		Distinct("package.id").
+		Count(&Package{})
 }

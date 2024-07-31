@@ -11,6 +11,7 @@ import (
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
+	packages_model "code.gitea.io/gitea/models/packages"
 	project_model "code.gitea.io/gitea/models/project"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
@@ -29,6 +30,7 @@ type userCountTest struct {
 	session      *TestSession
 	repoCount    int64
 	projectCount int64
+	packageCount int64
 	memberCount  int64
 	teamCount    int64
 }
@@ -54,11 +56,13 @@ func (countTest *userCountTest) Init(t *testing.T, doerID, userID int64) {
 	} else {
 		projectType = project_model.TypeIndividual
 	}
-	countTest.projectCount, err = db.Count[project_model.Project](db.DefaultContext, project_model.SearchOptions{
+	countTest.projectCount, err = db.Count[project_model.Project](db.DefaultContext, &project_model.SearchOptions{
 		OwnerID:  countTest.user.ID,
 		IsClosed: optional.Some(false),
 		Type:     projectType,
 	})
+	require.NoError(t, err)
+	countTest.packageCount, err = packages_model.CountOwnerPackages(db.DefaultContext, countTest.user.ID)
 	require.NoError(t, err)
 
 	if !countTest.user.IsOrganization() {
@@ -113,6 +117,10 @@ func (countTest *userCountTest) TestPage(t *testing.T, page string, orgLink bool
 		projectCount, err := countTest.getCount(htmlDoc.doc, "project-count")
 		require.NoError(t, err)
 		assert.Equal(t, countTest.projectCount, projectCount)
+
+		packageCount, err := countTest.getCount(htmlDoc.doc, "package-count")
+		require.NoError(t, err)
+		assert.Equal(t, countTest.packageCount, packageCount)
 
 		if !countTest.user.IsOrganization() {
 			return
