@@ -47,9 +47,10 @@ func TestPullRequest_GetDefaultMergeMessage_InternalTracker(t *testing.T) {
 	require.NoError(t, err)
 	defer gitRepo.Close()
 
-	mergeMessage, _, err := GetDefaultMergeMessage(db.DefaultContext, gitRepo, pr, "")
+	mergeMessage, body, err := GetDefaultMergeMessage(db.DefaultContext, gitRepo, pr, "")
 	require.NoError(t, err)
 	assert.Equal(t, "Merge pull request 'issue3' (#3) from branch2 into master", mergeMessage)
+	assert.Equal(t, "Reviewed-on: https://try.gitea.io/user2/repo1/pulls/3\n", body)
 
 	pr.BaseRepoID = 1
 	pr.HeadRepoID = 2

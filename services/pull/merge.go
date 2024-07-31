@@ -7,6 +7,7 @@ package pull
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -56,7 +57,11 @@ func getMergeMessage(ctx context.Context, baseGitRepo *git.Repository, pr *issue
 		issueReference = "!"
 	}
 
-	reviewedOn := fmt.Sprintf("Reviewed-on: %s/%s", setting.AppURL, pr.Issue.Link())
+	issueURL, err := url.JoinPath(setting.AppURL, pr.Issue.Link())
+	if err != nil {
+		return "", "", err
+	}
+	reviewedOn := fmt.Sprintf("Reviewed-on: %s", issueURL)
 	reviewedBy := pr.GetApprovers(ctx)
 
 	if mergeStyle != "" {
