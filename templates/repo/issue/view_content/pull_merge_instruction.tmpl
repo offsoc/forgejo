@@ -22,6 +22,8 @@
 			<div>git merge --no-ff {{$localBranch}}</div>
 		</div>
 		<div class="tw-hidden" data-pull-merge-style="rebase">
+			<div>git checkout {{$localBranch}}</div>
+			<div>git rebase {{.PullRequest.BaseBranch}}</div>
 			<div>git checkout {{.PullRequest.BaseBranch}}</div>
 			<div>git merge --ff-only {{$localBranch}}</div>
 		</div>
