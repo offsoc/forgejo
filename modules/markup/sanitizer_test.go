@@ -47,8 +47,10 @@ func Test_Sanitizer(t *testing.T) {
 
 		// Color property
 		`<span style="color: red">Hello World</span>`, `<span style="color: red">Hello World</span>`,
-		`<p style="color: red">Hello World</p>`, `<p style="color: red">Hello World</p>`,
+		`<p style="color: red; background-color: red">Hello World</p>`, `<p style="color: red; background-color: red">Hello World</p>`,
+		`<table><tr><th style="color: red">TH1</th><th style="background-color: red">TH2</th><th style="color: red; background-color: red">TH3</th></tr><tr><td style="color: red">TD1</td><td style="background-color: red">TD2</td><td style="color: red; background-color: red">TD3</td></tr></table>`, `<table><tr><th style="color: red">TH1</th><th style="background-color: red">TH2</th><th style="color: red; background-color: red">TH3</th></tr><tr><td style="color: red">TD1</td><td style="background-color: red">TD2</td><td style="color: red; background-color: red">TD3</td></tr></table>`,
 		`<code style="color: red">Hello World</code>`, `<code>Hello World</code>`,
+		`<code style="background-color: red">Hello World</code>`, `<code>Hello World</code>`,
 		`<span style="bad-color: red">Hello World</span>`, `<span>Hello World</span>`,
 		`<p style="bad-color: red">Hello World</p>`, `<p>Hello World</p>`,
 		`<code style="bad-color: red">Hello World</code>`, `<code>Hello World</code>`,
