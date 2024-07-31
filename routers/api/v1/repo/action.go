@@ -621,10 +621,10 @@ func DispatchWorkflow(ctx *context.APIContext) {
 	name := ctx.Params("workflowname")
 
 	if len(opt.Ref) == 0 {
-		ctx.Error(http.StatusBadRequest, "ref", nil)
+		ctx.Error(http.StatusBadRequest, "ref", "ref is empty")
 		return
 	} else if len(name) == 0 {
-		ctx.Error(http.StatusBadRequest, "workflowname", nil)
+		ctx.Error(http.StatusBadRequest, "workflowname", "workflow name is empty")
 		return
 	}
 
