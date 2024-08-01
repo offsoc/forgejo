@@ -181,11 +181,11 @@ func TestViewRepoWithSymlinks(t *testing.T) {
 		return fmt.Sprintf("%s: %s", file, cls)
 	})
 	assert.Len(t, items, 5)
-	assert.Equal(t, "a: svg octicon-file-directory-fill", items[0])
-	assert.Equal(t, "link_b: svg octicon-file-directory-symlink", items[1])
-	assert.Equal(t, "link_d: svg octicon-file-symlink-file", items[2])
-	assert.Equal(t, "link_hi: svg octicon-file-symlink-file", items[3])
-	assert.Equal(t, "link_link: svg octicon-file-symlink-file", items[4])
+	assert.Equal(t, "a: tw-mr-2 svg octicon-file-directory-fill", items[0])
+	assert.Equal(t, "link_b: tw-mr-2 svg octicon-file-directory-symlink", items[1])
+	assert.Equal(t, "link_d: tw-mr-2 svg octicon-file-symlink-file", items[2])
+	assert.Equal(t, "link_hi: tw-mr-2 svg octicon-file-symlink-file", items[3])
+	assert.Equal(t, "link_link: tw-mr-2 svg octicon-file-symlink-file", items[4])
 }
 
 // TestViewAsRepoAdmin tests PR #2167
