@@ -606,7 +606,7 @@ func (g *GiteaDownloader) GetPullRequests(page, perPage int) ([]*base.PullReques
 			},
 			Base: base.PullRequestBranch{
 				Ref:       pr.Base.Ref,
-				SHA:       pr.Base.Sha,
+				SHA:       pr.MergeBase,
 				RepoName:  g.repoName,
 				OwnerName: g.repoOwner,
 			},
