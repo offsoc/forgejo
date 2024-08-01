@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 	"testing"
 
+	auth_model "code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
 	unit_model "code.gitea.io/gitea/models/unit"
@@ -19,6 +21,7 @@ import (
 	repo_service "code.gitea.io/gitea/services/repository"
 	"code.gitea.io/gitea/tests"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -46,29 +49,50 @@ func TestRepoActivity(t *testing.T) {
 		testNewIssue(t, session, "user2", "repo1", "Issue 2", "Description 2")
 		testNewIssue(t, session, "user2", "repo1", "Issue 3", "Description 3")
 
-		// Create releases (1 new release)
-		createNewRelease(t, session, "/user2/repo1", "v1.0.0", "v1.0.0", false, false)
+		// Create releases (1 release, 1 pre-release, 1 release-draft, 1 tag)
+		createNewRelease(t, session, "/user2/repo1", "v1.0.0", "v1 Release", false, false)
+		createNewRelease(t, session, "/user2/repo1", "v0.1.0", "v0.1 Pre-release", true, false)
+		createNewRelease(t, session, "/user2/repo1", "v2.0.0", "v2 Release-Draft", false, true)
+		token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
+		createNewTagUsingAPI(t, token, "user2", "repo1", "v3.0.0", "master", "Tag message")
 
 		// Open Activity page and check stats
 		req := NewRequest(t, "GET", "/user2/repo1/activity")
 		resp = session.MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
-		// Should be 1 published release
+		// Should be 3 published releases
 		list := htmlDoc.doc.Find("#published-releases").Next().Find("p.desc")
-		assert.Len(t, list.Nodes, 1)
+		assert.Len(t, list.Nodes, 3)
+		var labels []string
+		var titles []string
+		list.Each(func(i int, s *goquery.Selection) {
+			labels = append(labels, s.Find(".label").Text())
+			titles = append(titles, s.Find(".title").Text())
+		})
+		sort.Strings(labels)
+		sort.Strings(titles)
+		assert.Equal(t, []string{"Pre-release", "Release", "Tag"}, labels)
+		assert.Equal(t, []string{"", "v0.1 Pre-release", "v1 Release"}, titles)
 
 		// Should be 1 merged pull request
 		list = htmlDoc.doc.Find("#merged-pull-requests").Next().Find("p.desc")
 		assert.Len(t, list.Nodes, 1)
+		assert.Equal(t, "Merged", list.Find(".label").Text())
 
 		// Should be 2 proposed pull requests
 		list = htmlDoc.doc.Find("#proposed-pull-requests").Next().Find("p.desc")
 		assert.Len(t, list.Nodes, 2)
+		assert.Equal(t, "Proposed", list.Find(".label").First().Text())
+
+		// Should be 0 closed issues
+		list = htmlDoc.doc.Find("#closed-issues").Next().Find("p.desc")
+		assert.Empty(t, list.Nodes)
 
 		// Should be 3 new issues
 		list = htmlDoc.doc.Find("#new-issues").Next().Find("p.desc")
 		assert.Len(t, list.Nodes, 3)
+		assert.Equal(t, "Opened", list.Find(".label").First().Text())
 	})
 }
 
