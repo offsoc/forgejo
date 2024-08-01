@@ -1,0 +1,33 @@
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: '@daily'
+
+jobs:
+  release-notes:
+    if: ${{ !startsWith(vars.ROLE, 'forgejo-')
+    runs-on: docker
+    container:
+      image: 'docker.io/node:20-bookworm'
+    steps:
+      - uses: https://code.forgejo.org/actions/checkout@v3
+
+      - uses: https://code.forgejo.org/actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+          cache: false
+
+      - name: apt install jq
+        run: |
+         export DEBIAN_FRONTEND=noninteractive
+         apt-get update -qq
+         apt-get -q install -y -qq jq
+
+      - name: update open milestones
+        run: |
+          set -x
+          curl -sS $GITHUB_SERVER_URL/api/v1/repos/$GITHUB_REPOSITORY/milestones?state=open | jq -r '.[] | .title' | while read forgejo version ; do
+            milestone="$forgejo $version"
+            go run code.forgejo.org/forgejo/release-notes-assistant@v1.1.1 --config .release-notes-assistant.yaml --storage milestone --storage-location "$milestone"  --forgejo-url $GITHUB_SERVER_URL --repository $GITHUB_REPOSITORY --token ${{ secrets.RELEASE_NOTES_ASSISTANT_TOKEN }} release $version
+          done
