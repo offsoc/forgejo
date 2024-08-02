@@ -21,29 +21,30 @@ var (
 		ChunkedUploadPath string
 		RegistryHost      string
 
-		LimitTotalOwnerCount int64
-		LimitTotalOwnerSize  int64
-		LimitSizeAlpine      int64
-		LimitSizeCargo       int64
-		LimitSizeChef        int64
-		LimitSizeComposer    int64
-		LimitSizeConan       int64
-		LimitSizeConda       int64
-		LimitSizeContainer   int64
-		LimitSizeCran        int64
-		LimitSizeDebian      int64
-		LimitSizeGeneric     int64
-		LimitSizeGo          int64
-		LimitSizeHelm        int64
-		LimitSizeMaven       int64
-		LimitSizeNpm         int64
-		LimitSizeNuGet       int64
-		LimitSizePub         int64
-		LimitSizePyPI        int64
-		LimitSizeRpm         int64
-		LimitSizeRubyGems    int64
-		LimitSizeSwift       int64
-		LimitSizeVagrant     int64
+		LimitTotalOwnerCount  int64
+		LimitTotalOwnerSize   int64
+		LimitSizeAlpine       int64
+		LimitSizeCargo        int64
+		LimitSizeChef         int64
+		LimitSizeComposer     int64
+		LimitSizeConan        int64
+		LimitSizeConda        int64
+		LimitSizeContainer    int64
+		LimitSizeCran         int64
+		LimitSizeDebian       int64
+		LimitSizeGeneric      int64
+		LimitSizeGo           int64
+		LimitSizeHelm         int64
+		LimitSizeMaven        int64
+		LimitSizeNpm          int64
+		LimitSizeNuGet        int64
+		LimitSizePub          int64
+		LimitSizePyPI         int64
+		LimitSizeRpm          int64
+		LimitSizeRubyGems     int64
+		LimitSizeSwift        int64
+		LimitSizeVagrant      int64
+		DefaultRPMSignEnabled bool
 	}{
 		Enabled:              true,
 		LimitTotalOwnerCount: -1,
@@ -102,6 +103,7 @@ func loadPackagesFrom(rootCfg ConfigProvider) (err error) {
 	Packages.LimitSizeRubyGems = mustBytes(sec, "LIMIT_SIZE_RUBYGEMS")
 	Packages.LimitSizeSwift = mustBytes(sec, "LIMIT_SIZE_SWIFT")
 	Packages.LimitSizeVagrant = mustBytes(sec, "LIMIT_SIZE_VAGRANT")
+	Packages.DefaultRPMSignEnabled = sec.Key("DEFAULT_RPM_SIGN_ENABLED").MustBool(false)
 	return nil
 }
 
