@@ -22,8 +22,7 @@ jobs:
       - uses: https://code.forgejo.org/actions/checkout@v3
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
-          go-version: "1.22"
-          check-latest: true
+          go-version-file: "go.mod"
       - run: make deps-backend deps-tools
       - run: make --always-make -j$(nproc) lint-backend tidy-check swagger-check fmt-check swagger-validate # ensure the "go-licenses" make target runs
   frontend-checks:
@@ -62,7 +61,7 @@ jobs:
       - uses: https://code.forgejo.org/actions/checkout@v3
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
-          go-version: "1.22"
+          go-version-file: "go.mod"
       - run: |
           git config --add safe.directory '*'
           adduser --quiet --comment forgejo --disabled-password forgejo
@@ -121,7 +120,7 @@ jobs:
       - uses: https://code.forgejo.org/actions/checkout@v3
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
-          go-version: "1.22"
+          go-version-file: "go.mod"
       - run: |
           git config --add safe.directory '*'
           adduser --quiet --comment forgejo --disabled-password forgejo
@@ -167,7 +166,7 @@ jobs:
       - uses: https://code.forgejo.org/actions/checkout@v3
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
-          go-version: "1.22"
+          go-version-file: "go.mod"
       - name: install dependencies & git >= 2.42
         run: |
           export DEBIAN_FRONTEND=noninteractive
@@ -216,7 +215,7 @@ jobs:
       - uses: https://code.forgejo.org/actions/checkout@v3
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
-          go-version: "1.22"
+          go-version-file: "go.mod"
       - name: install dependencies & git >= 2.42
         run: |
           export DEBIAN_FRONTEND=noninteractive
@@ -254,7 +253,7 @@ jobs:
       - uses: https://code.forgejo.org/actions/checkout@v3
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
-          go-version: "1.22"
+          go-version-file: "go.mod"
       - name: install dependencies & git >= 2.42
         run: |
           export DEBIAN_FRONTEND=noninteractive
@@ -297,7 +296,6 @@ jobs:
       - uses: https://code.forgejo.org/actions/checkout@v3
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
-          go-version: "1.22"
-          check-latest: true
+          go-version-file: "go.mod"
       - run: make deps-backend deps-tools
       - run: make security-check

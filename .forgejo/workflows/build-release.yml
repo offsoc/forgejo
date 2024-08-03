@@ -43,8 +43,7 @@ jobs:
 
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
-          go-version: "1.22"
-          check-latest: true
+          go-version-file: "go.mod"
 
       - name: version from ref
         id: release-info
