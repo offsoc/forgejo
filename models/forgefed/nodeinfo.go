@@ -17,12 +17,14 @@ type (
 )
 
 const (
-	ForgejoSourceType SoftwareNameType = "forgejo"
-	GiteaSourceType   SoftwareNameType = "gitea"
+	ForgejoSourceType    SoftwareNameType = "forgejo"
+	GiteaSourceType      SoftwareNameType = "gitea"
+	MastodonSourceType   SoftwareNameType = "mastodon"
+	GoToSocialSourceType SoftwareNameType = "gotosocial"
 )
 
 var KnownSourceTypes = []any{
-	ForgejoSourceType, GiteaSourceType,
+	ForgejoSourceType, GiteaSourceType, MastodonSourceType, GoToSocialSourceType,
 }
 
 // ------------------------------------------------ NodeInfoWellKnown ------------------------------------------------

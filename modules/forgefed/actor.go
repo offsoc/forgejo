@@ -103,7 +103,7 @@ func (id PersonID) HostSuffix() string {
 func (id PersonID) Validate() []string {
 	result := id.ActorID.Validate()
 	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
-	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea"}, "Source")...)
+	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea", "mastodon", "gotosocial"}, "Source")...)
 	switch id.Source {
 	case "forgejo", "gitea":
 		if strings.ToLower(id.Path) != "api/v1/activitypub/user-id" && strings.ToLower(id.Path) != "api/activitypub/user-id" {

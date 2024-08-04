@@ -106,7 +106,7 @@ func TestPersonIdValidation(t *testing.T) {
 	sut.Host = "an.other.host"
 	sut.Port = ""
 	sut.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1"
-	if sut.Validate()[0] != "Value forgejox is not contained in allowed values [forgejo gitea]" {
+	if sut.Validate()[0] != "Value forgejox is not contained in allowed values [forgejo gitea mastodon gotosocial]" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
 	}
 }
