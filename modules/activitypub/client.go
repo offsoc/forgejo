@@ -36,16 +36,19 @@ func CurrentTime() string {
 }
 
 func containsRequiredHTTPHeaders(method string, headers []string) error {
-	var hasRequestTarget, hasDate, hasDigest bool
+	var hasRequestTarget, hasDate, hasDigest, hasHost bool
 	for _, header := range headers {
 		hasRequestTarget = hasRequestTarget || header == httpsig.RequestTarget
 		hasDate = hasDate || header == "Date"
 		hasDigest = hasDigest || header == "Digest"
+		hasHost = hasHost || header == "Host"
 	}
 	if !hasRequestTarget {
 		return fmt.Errorf("missing http header for %s: %s", method, httpsig.RequestTarget)
 	} else if !hasDate {
 		return fmt.Errorf("missing http header for %s: Date", method)
+	} else if !hasHost {
+		return fmt.Errorf("missing http header for %s: Host", method)
 	} else if !hasDigest && method != http.MethodGet {
 		return fmt.Errorf("missing http header for %s: Digest", method)
 	}
@@ -99,29 +102,36 @@ func NewClient(ctx context.Context, user *user_model.User, pubID string) (c *Cli
 }
 
 // NewRequest function
-func (c *Client) NewRequest(method string, b []byte, to string) (req *http.Request, err error) {
+func (c *Client) newRequest(method string, b []byte, to string) (req *http.Request, err error) {
 	buf := bytes.NewBuffer(b)
 	req, err = http.NewRequest(method, to, buf)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", ActivityStreamsContentType)
+	req.Header.Add("Accept", "application/json, "+ActivityStreamsContentType)
 	req.Header.Add("Date", CurrentTime())
+	req.Header.Add("Host", req.URL.Host)
 	req.Header.Add("User-Agent", "Gitea/"+setting.AppVer)
-	signer, _, err := httpsig.NewSigner(c.algs, c.digestAlg, c.postHeaders, httpsig.Signature, httpsigExpirationTime)
-	if err != nil {
-		return nil, err
-	}
-	err = signer.SignRequest(c.priv, c.pubID, req, b)
+	req.Header.Add("Content-Type", ActivityStreamsContentType)
+
 	return req, err
 }
 
 // Post function
 func (c *Client) Post(b []byte, to string) (resp *http.Response, err error) {
 	var req *http.Request
-	if req, err = c.NewRequest(http.MethodPost, b, to); err != nil {
+	if req, err = c.newRequest(http.MethodPost, b, to); err != nil {
 		return nil, err
 	}
+
+	signer, _, err := httpsig.NewSigner(c.algs, c.digestAlg, c.postHeaders, httpsig.Signature, httpsigExpirationTime)
+	if err != nil {
+		return nil, err
+	}
+	if err := signer.SignRequest(c.priv, c.pubID, req, b); err != nil {
+		return nil, err
+	}
+
 	resp, err = c.client.Do(req)
 	return resp, err
 }
@@ -129,10 +139,17 @@ func (c *Client) Post(b []byte, to string) (resp *http.Response, err error) {
 // Create an http GET request with forgejo/gitea specific headers
 func (c *Client) Get(to string) (resp *http.Response, err error) {
 	var req *http.Request
-	emptyBody := []byte{0}
-	if req, err = c.NewRequest(http.MethodGet, emptyBody, to); err != nil {
+	if req, err = c.newRequest(http.MethodGet, nil, to); err != nil {
 		return nil, err
 	}
+	signer, _, err := httpsig.NewSigner(c.algs, c.digestAlg, c.getHeaders, httpsig.Signature, httpsigExpirationTime)
+	if err != nil {
+		return nil, err
+	}
+	if err := signer.SignRequest(c.priv, c.pubID, req, nil); err != nil {
+		return nil, err
+	}
+
 	resp, err = c.client.Do(req)
 	return resp, err
 }
