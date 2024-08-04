@@ -142,6 +142,101 @@
         }
       }
     },
+    "/activitypub/user-id/{user-id}/activities/{activity-id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "activitypub"
+        ],
+        "summary": "Get a specific activity object of the user",
+        "operationId": "activitypubPersonActivityNote",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "user ID of the user",
+            "name": "user-id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "activity ID of the sought activity",
+            "name": "activity-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ActivityPub"
+          }
+        }
+      }
+    },
+    "/activitypub/user-id/{user-id}/activities/{activity-id}/activity": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "activitypub"
+        ],
+        "summary": "Get a specific activity of the user",
+        "operationId": "activitypubPersonActivity",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "user ID of the user",
+            "name": "user-id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "activity ID of the sought activity",
+            "name": "activity-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ActivityPub"
+          }
+        }
+      }
+    },
+    "/activitypub/user-id/{user-id}/feed": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "activitypub"
+        ],
+        "summary": "List the user's recorded activity",
+        "operationId": "activitypubPersonFeed",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "user ID of the user",
+            "name": "user-id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/PersonFeed"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          }
+        }
+      }
+    },
     "/activitypub/user-id/{user-id}/inbox": {
       "post": {
         "produces": [
@@ -17507,6 +17602,35 @@
         }
       }
     },
+    "/user/activitypub/follow": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Follow a remote activitypub account",
+        "operationId": "userCurrentActivityPubFollow",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/APRemoteFollowOption"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
     "/user/applications/oauth2": {
       "get": {
         "produces": [
@@ -19830,6 +19954,38 @@
         }
       },
       "x-go-package": "code.gitea.io/gitea/services/context"
+    },
+    "APPersonFollowItem": {
+      "type": "object",
+      "properties": {
+        "actor_id": {
+          "type": "string",
+          "x-go-name": "ActorID"
+        },
+        "note": {
+          "type": "string",
+          "x-go-name": "Note"
+        },
+        "original_item": {
+          "type": "string",
+          "x-go-name": "OriginalItem"
+        },
+        "original_url": {
+          "type": "string",
+          "x-go-name": "OriginalURL"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "APRemoteFollowOption": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string",
+          "x-go-name": "Target"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
     "AccessToken": {
       "type": "object",
@@ -27886,6 +28042,15 @@
         "type": "array",
         "items": {
           "$ref": "#/definitions/Package"
+        }
+      }
+    },
+    "PersonFeed": {
+      "description": "Personfeed",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/APPersonFollowItem"
         }
       }
     },

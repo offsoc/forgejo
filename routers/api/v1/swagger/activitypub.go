@@ -13,3 +13,10 @@ type swaggerResponseActivityPub struct {
 	// in:body
 	Body api.ActivityPub `json:"body"`
 }
+
+// Personfeed
+// swagger:response PersonFeed
+type swaggerResponsePersonFeed struct {
+	// in:body
+	Body []api.APPersonFollowItem `json:"body"`
+}

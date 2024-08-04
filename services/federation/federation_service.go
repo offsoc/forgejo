@@ -20,30 +20,77 @@ import (
 	"code.gitea.io/gitea/modules/validation"
 	context_service "code.gitea.io/gitea/services/context"
 
+	ap "github.com/go-ap/activitypub"
+	"github.com/go-ap/jsonld"
 	"github.com/google/uuid"
 )
 
-func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
+func Init() error {
+	if err := initDeliveryQueue(); err != nil {
+		return err
+	}
+	if err := initRefreshQueue(); err != nil {
+		return err
+	}
+	return initPendingQueue()
+}
+
+func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, actorURI string) error {
+	_, federatedUser, _, err := findOrCreateFederatedUser(ctx, actorURI)
+	if err != nil {
+		return err
+	}
+
+	followReq := ap.FollowNew(
+		ap.IRI(localUser.APActorID()+"/follows/"+uuid.New().String()),
+		ap.IRI(actorURI),
+	)
+	followReq.Actor = ap.IRI(localUser.APActorID())
+	followReq.Target = ap.IRI(actorURI)
+	payload, err := jsonld.WithContext(jsonld.IRI(ap.ActivityBaseURI)).
+		Marshal(followReq)
+	if err != nil {
+		return err
+	}
+
+	return pendingQueue.Push(pendingQueueItem{
+		FederatedUserID: federatedUser.ID,
+		Doer:            localUser,
+		Payload:         payload,
+	})
+}
+
+func findFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, *fm.PersonID, error) {
 	federationHost, err := getFederationHostForURI(ctx, actorURI)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "Wrong FederationHost", err)
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	actorID, err := fm.NewPersonID(actorURI, string(federationHost.NodeInfo.SoftwareName))
 	if err != nil {
 		ctx.Error(http.StatusNotAcceptable, "Invalid PersonID", err)
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	user, federatedUser, err := user.FindFederatedUser(ctx, actorID.ID, federationHost.ID)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "Searching for user failed", err)
+		return nil, nil, nil, nil, err
+	}
+
+	return user, federatedUser, federationHost, &actorID, nil
+}
+
+func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
+	user, federatedUser, federationHost, actorID, err := findFederatedUser(ctx, actorURI)
+	if err != nil {
 		return nil, nil, nil, err
 	}
+
 	if user != nil {
 		log.Info("Found local federatedUser: %v", user)
 	} else {
-		user, federatedUser, err = createUserFromAP(ctx, &actorURI, actorID, federationHost.ID)
+		user, federatedUser, err = createUserFromAP(ctx, &actorURI, *actorID, federationHost.ID)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, "Error creating federatedUser", err)
 			return nil, nil, nil, err
@@ -61,7 +108,7 @@ func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 	if err != nil {
 		return nil, err
 	}
-	client, err := clientFactory.WithKeys(ctx, actionsUser, "no idea where to get key material.")
+	client, err := clientFactory.WithKeys(ctx, user.NewAPActorUser(), user.APActorUserAPActorID()+"#main-key")
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +166,7 @@ func createUserFromAP(ctx context.Context, actorURL *string, personID fm.PersonI
 	if err != nil {
 		return nil, nil, err
 	}
-	client, err := clientFactory.WithKeys(ctx, actionsUser, "no idea where to get key material.")
+	client, err := clientFactory.WithKeys(ctx, user.NewAPActorUser(), user.APActorUserAPActorID()+"#main-key")
 	if err != nil {
 		return nil, nil, err
 	}

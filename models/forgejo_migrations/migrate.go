@@ -84,6 +84,8 @@ var migrations = []*Migration{
 	NewMigration("Add `legacy` to `web_authn_credential` table", AddLegacyToWebAuthnCredential),
 	// v23 -> v24
 	NewMigration("Add `delete_branch_after_merge` to `auto_merge` table", AddDeleteBranchAfterMergeToAutoMerge),
+	// v24 -> v25
+	NewMigration("Add federated user activity tables & update the `federated_user` table", AddFederatedUserActivityTables),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.

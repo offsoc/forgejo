@@ -38,6 +38,7 @@ import (
 	"code.gitea.io/gitea/services/auth/source/oauth2"
 	"code.gitea.io/gitea/services/automerge"
 	"code.gitea.io/gitea/services/cron"
+	federation_service "code.gitea.io/gitea/services/federation"
 	feed_service "code.gitea.io/gitea/services/feed"
 	indexer_service "code.gitea.io/gitea/services/indexer"
 	"code.gitea.io/gitea/services/mailer"
@@ -122,6 +123,7 @@ func InitWebInstalled(ctx context.Context) {
 	mailer.NewContext(ctx)
 	mustInit(cache.Init)
 	mustInit(feed_service.Init)
+	mustInit(federation_service.Init)
 	mustInit(uinotification.Init)
 	mustInitCtx(ctx, archiver.Init)
 

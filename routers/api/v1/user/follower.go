@@ -10,9 +10,11 @@ import (
 
 	user_model "code.gitea.io/gitea/models/user"
 	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/routers/api/v1/utils"
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/convert"
+	"code.gitea.io/gitea/services/federation"
 )
 
 func responseAPIUsers(ctx *context.APIContext, users []*user_model.User) {
@@ -259,5 +261,33 @@ func Unfollow(ctx *context.APIContext) {
 		ctx.Error(http.StatusInternalServerError, "UnfollowUser", err)
 		return
 	}
+	ctx.Status(http.StatusNoContent)
+}
+
+// Follow follow a remote activitypub account
+func ActivityPubFollow(ctx *context.APIContext) {
+	// swagger:operation POST /user/activitypub/follow user userCurrentActivityPubFollow
+	// ---
+	// summary: Follow a remote activitypub account
+	// parameters:
+	// - name: body
+	//   in: body
+	//   schema:
+	//     "$ref": "#/definitions/APRemoteFollowOption"
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/empty"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+
+	form := web.GetForm(ctx).(*api.APRemoteFollowOption)
+
+	if err := federation.FollowRemoteActor(ctx, ctx.Doer, form.Target); err != nil {
+		ctx.Error(http.StatusInternalServerError, "federation.FollowRemoteActor", err)
+		return
+	}
+
 	ctx.Status(http.StatusNoContent)
 }

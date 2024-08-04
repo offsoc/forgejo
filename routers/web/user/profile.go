@@ -13,6 +13,7 @@ import (
 
 	activities_model "code.gitea.io/gitea/models/activities"
 	"code.gitea.io/gitea/models/db"
+	forgefed_model "code.gitea.io/gitea/models/forgefed"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
@@ -168,6 +169,21 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 		ctx.Data["Cards"] = following
 		total = int(numFollowing)
 		ctx.Data["CardsTitle"] = ctx.TrN(total, "user.following.title.one", "user.following.title.few")
+	case "feed":
+		pagingNum = setting.UI.FeedPagingNum
+		items, count, err := forgefed_model.GetFollowingFeeds(ctx, forgefed_model.GetFollowingFeedsOptions{
+			Actor: ctx.Doer,
+			ListOptions: db.ListOptions{
+				PageSize: pagingNum,
+				Page:     page,
+			},
+		})
+		if err != nil {
+			ctx.ServerError("GetFollowingFeeds", err)
+			return
+		}
+		ctx.Data["FollowingFeeds"] = items
+		total = int(count)
 	case "activity":
 		date := ctx.FormString("date")
 		pagingNum = setting.UI.FeedPagingNum

@@ -1,0 +1,19 @@
+<div id="activity-feed" class="flex-list">
+	{{range .FollowingFeeds}}
+		<div class="ap-feed-item">
+			{{if not (eq .Actor.ID 0)}}
+				<p>
+					<a href="{{.ExternalID}}">{{.Actor.Name}}</a>
+					{{if .OriginalURL}}
+						<a href="{{.OriginalURL}}">wrote</a>
+					{{else}}
+						wrote
+					{{end}}:
+				</p>
+			{{end}}
+			{{.Note | SanitizeHTML}}
+		</div>
+		<hr>
+	{{end}}
+	{{template "base/paginate" .}}
+</div>

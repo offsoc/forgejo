@@ -45,7 +45,7 @@ func fetch(ctx *gitea_context.APIContext, iri *url.URL) (b []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := clientFactory.WithKeys(ctx, user_model.NewAPActorUser(), user_model.APActorUserAPActorID() + "#main-key")
+	client, err := clientFactory.WithKeys(ctx, user_model.NewAPActorUser(), user_model.APActorUserAPActorID()+"#main-key")
 	if err != nil {
 		return nil, err
 	}

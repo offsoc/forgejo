@@ -104,6 +104,7 @@ import (
 	_ "code.gitea.io/gitea/routers/api/v1/swagger" // for swagger generation
 
 	"code.forgejo.org/go-chi/binding"
+	ap "github.com/go-ap/activitypub"
 )
 
 func sudo() func(ctx *context.APIContext) {
@@ -839,7 +840,15 @@ func Routes() *web.Route {
 			m.Group("/activitypub", func() {
 				m.Group("/user-id/{user-id}", func() {
 					m.Get("", activitypub.Person)
-					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.PersonInbox)
+					m.Post("/inbox",
+						bind(ap.Activity{}),
+						// TODO: activitypub.ReqHTTPSignature(),
+						activitypub.PersonInbox)
+					m.Group("/activities/{activity-id}", func() {
+						m.Get("", activitypub.PersonActivityNote)
+						m.Get("/activity", activitypub.PersonActivity)
+					})
+					m.Get("/feed", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryUser), reqToken(), reqSelfOrAdmin(), activitypub.PersonFeed)
 				}, context.UserIDAssignmentAPI(), checkTokenPublicOnly())
 				m.Group("/actor", func() {
 					m.Get("", activitypub.Actor)
@@ -982,6 +991,11 @@ func Routes() *web.Route {
 					m.Delete("", user.Unfollow)
 				}, context.UserAssignmentAPI())
 			})
+			if setting.Federation.Enabled {
+				m.Group("/activitypub", func() {
+					m.Post("/follow", bind(api.APRemoteFollowOption{}), user.ActivityPubFollow)
+				})
+			}
 
 			// (admin:public_key scope)
 			m.Group("/keys", func() {

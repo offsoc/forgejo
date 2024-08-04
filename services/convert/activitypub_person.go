@@ -6,11 +6,22 @@ package convert
 import (
 	"context"
 
+	"code.gitea.io/gitea/models/forgefed"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/activitypub"
+	api "code.gitea.io/gitea/modules/structs"
 
 	ap "github.com/go-ap/activitypub"
 )
+
+func ToActivityPubPersonFeedItem(item *forgefed.FederatedUserActivity) api.APPersonFollowItem {
+	return api.APPersonFollowItem{
+		ActorID:      item.ExternalID,
+		Note:         item.Note,
+		OriginalURL:  item.OriginalURL,
+		OriginalItem: item.Original,
+	}
+}
 
 func ToActivityPubPerson(ctx context.Context, user *user_model.User) (*ap.Person, error) {
 	link := user.APActorID()

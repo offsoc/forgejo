@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/util"
+	federation_service "code.gitea.io/gitea/services/federation"
 	notify_service "code.gitea.io/gitea/services/notify"
 )
 
@@ -39,13 +40,19 @@ func NewNotifier() notify_service.Notifier {
 }
 
 func notifyAll(ctx context.Context, action *activities_model.Action) error {
-	_, err := activities_model.NotifyWatchers(ctx, action)
-	return err
+	out, err := activities_model.NotifyWatchers(ctx, action)
+	if err != nil {
+		return err
+	}
+	return federation_service.NotifyActivityPubFollowers(ctx, out)
 }
 
 func notifyAllActions(ctx context.Context, acts []*activities_model.Action) error {
-	_, err := activities_model.NotifyWatchersActions(ctx, acts)
-	return err
+	out, err := activities_model.NotifyWatchersActions(ctx, acts)
+	if err != nil {
+		return err
+	}
+	return federation_service.NotifyActivityPubFollowers(ctx, out)
 }
 
 func (a *actionNotifier) NewIssue(ctx context.Context, issue *issues_model.Issue, mentions []*user_model.User) {
