@@ -74,10 +74,6 @@ code.gitea.io/gitea/models/project
 
 code.gitea.io/gitea/models/repo
 	DeleteAttachmentsByIssue
-	releaseSorter.Len
-	releaseSorter.Less
-	releaseSorter.Swap
-	SortReleases
 	FindReposMapByIDs
 	IsErrTopicNotExist
 	ErrTopicNotExist.Error
