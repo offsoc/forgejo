@@ -244,11 +244,11 @@ func TestFindRepoRecentCommitStatusContexts(t *testing.T) {
 }
 
 func TestCommitStatusesHideActionsURL(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 4})
 	run := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: 791, RepoID: repo.ID})
-	assert.NoError(t, run.LoadAttributes(db.DefaultContext))
+	require.NoError(t, run.LoadAttributes(db.DefaultContext))
 
 	statuses := []*git_model.CommitStatus{
 		{
