@@ -1784,6 +1784,9 @@ func ViewIssue(ctx *context.Context) {
 			}
 			if !ctx.Repo.CanRead(unit.TypeActions) {
 				for _, commit := range comment.Commits {
+					if commit.Status == nil {
+						continue
+					}
 					commit.Status.HideActionsURL(ctx)
 					git_model.CommitStatusesHideActionsURL(ctx, commit.Statuses)
 				}
