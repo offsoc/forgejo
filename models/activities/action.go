@@ -428,6 +428,12 @@ func (a *Action) GetIssueContent(ctx context.Context) string {
 	return a.Issue.Content
 }
 
+func GetActivityByID(ctx context.Context, id int64) (*Action, error) {
+	var act Action
+	_, err := db.GetEngine(ctx).ID(id).Get(&act)
+	return &act, err
+}
+
 // GetFeedsOptions options for retrieving feeds
 type GetFeedsOptions struct {
 	db.ListOptions
