@@ -9,10 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"code.gitea.io/gitea/models/forgefed"
-	"code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/activitypub"
 	"code.gitea.io/gitea/modules/auth/password"
@@ -20,84 +18,44 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/validation"
+	context_service "code.gitea.io/gitea/services/context"
 
 	"github.com/google/uuid"
 )
 
-// ProcessLikeActivity receives a ForgeLike activity and does the following:
-// Validation of the activity
-// Creation of a (remote) federationHost if not existing
-// Creation of a forgefed Person if not existing
-// Validation of incoming RepositoryID against Local RepositoryID
-// Star the repo if it wasn't already stared
-// Do some mitigation against out of order attacks
-func ProcessLikeActivity(ctx context.Context, form any, repositoryID int64) (int, string, error) {
-	activity := form.(*fm.ForgeLike)
-	if res, err := validation.IsValid(activity); !res {
-		return http.StatusNotAcceptable, "Invalid activity", err
-	}
-	log.Info("Activity validated:%v", activity)
-
-	// parse actorID (person)
-	actorURI := activity.Actor.GetID().String()
-	log.Info("actorURI was: %v", actorURI)
-	federationHost, err := GetFederationHostForURI(ctx, actorURI)
+func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
+	federationHost, err := getFederationHostForURI(ctx, actorURI)
 	if err != nil {
-		return http.StatusInternalServerError, "Wrong FederationHost", err
-	}
-	if !activity.IsNewer(federationHost.LatestActivity) {
-		return http.StatusNotAcceptable, "Activity out of order.", fmt.Errorf("Activity already processed")
+		ctx.Error(http.StatusInternalServerError, "Wrong FederationHost", err)
+		return nil, nil, nil, err
 	}
 	actorID, err := fm.NewPersonID(actorURI, string(federationHost.NodeInfo.SoftwareName))
 	if err != nil {
-		return http.StatusNotAcceptable, "Invalid PersonID", err
+		ctx.Error(http.StatusNotAcceptable, "Invalid PersonID", err)
+		return nil, nil, nil, err
 	}
-	log.Info("Actor accepted:%v", actorID)
 
-	// parse objectID (repository)
-	objectID, err := fm.NewRepositoryID(activity.Object.GetID().String(), string(forgefed.ForgejoSourceType))
+	user, federatedUser, err := user.FindFederatedUser(ctx, actorID.ID, federationHost.ID)
 	if err != nil {
-		return http.StatusNotAcceptable, "Invalid objectId", err
-	}
-	if objectID.ID != fmt.Sprint(repositoryID) {
-		return http.StatusNotAcceptable, "Invalid objectId", err
-	}
-	log.Info("Object accepted:%v", objectID)
-
-	// Check if user already exists
-	user, _, err := user.FindFederatedUser(ctx, actorID.ID, federationHost.ID)
-	if err != nil {
-		return http.StatusInternalServerError, "Searching for user failed", err
+		ctx.Error(http.StatusInternalServerError, "Searching for user failed", err)
+		return nil, nil, nil, err
 	}
 	if user != nil {
 		log.Info("Found local federatedUser: %v", user)
 	} else {
-		user, _, err = CreateUserFromAP(ctx, actorID, federationHost.ID)
+		user, federatedUser, err = createUserFromAP(ctx, &actorURI, actorID, federationHost.ID)
 		if err != nil {
-			return http.StatusInternalServerError, "Error creating federatedUser", err
+			ctx.Error(http.StatusInternalServerError, "Error creating federatedUser", err)
+			return nil, nil, nil, err
 		}
 		log.Info("Created federatedUser from ap: %v", user)
 	}
 	log.Info("Got user:%v", user.Name)
 
-	// execute the activity if the repo was not stared already
-	alreadyStared := repo.IsStaring(ctx, user.ID, repositoryID)
-	if !alreadyStared {
-		err = repo.StarRepo(ctx, user.ID, repositoryID, true)
-		if err != nil {
-			return http.StatusNotAcceptable, "Error staring", err
-		}
-	}
-	federationHost.LatestActivity = activity.StartTime
-	err = forgefed.UpdateFederationHost(ctx, federationHost)
-	if err != nil {
-		return http.StatusNotAcceptable, "Error updating federatedHost", err
-	}
-
-	return 0, "", nil
+	return user, federatedUser, federationHost, nil
 }
 
-func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forgefed.FederationHost, error) {
+func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forgefed.FederationHost, error) {
 	actionsUser := user.NewActionsUser()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
@@ -107,6 +65,7 @@ func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 	if err != nil {
 		return nil, err
 	}
+
 	body, err := client.GetBody(actorID.AsWellKnownNodeInfoURI())
 	if err != nil {
 		return nil, err
@@ -134,8 +93,7 @@ func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 	return &result, nil
 }
 
-func GetFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.FederationHost, error) {
-	log.Info("Input was: %v", actorURI)
+func getFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.FederationHost, error) {
 	rawActorID, err := fm.NewActorID(actorURI)
 	if err != nil {
 		return nil, err
@@ -145,7 +103,7 @@ func GetFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.Fe
 		return nil, err
 	}
 	if federationHost == nil {
-		result, err := CreateFederationHostFromAP(ctx, rawActorID)
+		result, err := createFederationHostFromAP(ctx, rawActorID)
 		if err != nil {
 			return nil, err
 		}
@@ -154,7 +112,7 @@ func GetFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.Fe
 	return federationHost, nil
 }
 
-func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
+func createUserFromAP(ctx context.Context, actorURL *string, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
 	// ToDo: Do we get a publicKeyId from server, repo or owner or repo?
 	actionsUser := user.NewActionsUser()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
@@ -166,6 +124,8 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		return nil, nil, err
 	}
 
+	// TODO: grab the stuff from Signature's keyID. This works by accident, but
+	// we should not rely on it, really.
 	body, err := client.GetBody(personID.AsURI())
 	if err != nil {
 		return nil, nil, err
@@ -213,6 +173,9 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		ExternalID:       personID.ID,
 		FederationHostID: federationHostID,
 	}
+	if actorURL != nil {
+		federatedUser.ActorURL = actorURL
+	}
 	err = user.CreateFederatedUser(ctx, &newUser, &federatedUser)
 	if err != nil {
 		return nil, nil, err
@@ -220,76 +183,4 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 	log.Info("Created federatedUser:%q", federatedUser)
 
 	return &newUser, &federatedUser, nil
-}
-
-// Create or update a list of FollowingRepo structs
-func StoreFollowingRepoList(ctx context.Context, localRepoID int64, followingRepoList []string) (int, string, error) {
-	followingRepos := make([]*repo.FollowingRepo, 0, len(followingRepoList))
-	for _, uri := range followingRepoList {
-		federationHost, err := GetFederationHostForURI(ctx, uri)
-		if err != nil {
-			return http.StatusInternalServerError, "Wrong FederationHost", err
-		}
-		followingRepoID, err := fm.NewRepositoryID(uri, string(federationHost.NodeInfo.SoftwareName))
-		if err != nil {
-			return http.StatusNotAcceptable, "Invalid federated repo", err
-		}
-		followingRepo, err := repo.NewFollowingRepo(localRepoID, followingRepoID.ID, federationHost.ID, uri)
-		if err != nil {
-			return http.StatusNotAcceptable, "Invalid federated repo", err
-		}
-		followingRepos = append(followingRepos, &followingRepo)
-	}
-
-	if err := repo.StoreFollowingRepos(ctx, localRepoID, followingRepos); err != nil {
-		return 0, "", err
-	}
-
-	return 0, "", nil
-}
-
-func DeleteFollowingRepos(ctx context.Context, localRepoID int64) error {
-	return repo.StoreFollowingRepos(ctx, localRepoID, []*repo.FollowingRepo{})
-}
-
-func SendLikeActivities(ctx context.Context, doer user.User, repoID int64) error {
-	followingRepos, err := repo.FindFollowingReposByRepoID(ctx, repoID)
-	log.Info("Federated Repos is: %v", followingRepos)
-	if err != nil {
-		return err
-	}
-
-	likeActivityList := make([]fm.ForgeLike, 0)
-	for _, followingRepo := range followingRepos {
-		log.Info("Found following repo: %v", followingRepo)
-		target := followingRepo.URI
-		likeActivity, err := fm.NewForgeLike(doer.APActorID(), target, time.Now())
-		if err != nil {
-			return err
-		}
-		likeActivityList = append(likeActivityList, likeActivity)
-	}
-
-	apclientFactory, err := activitypub.GetClientFactory(ctx)
-	if err != nil {
-		return err
-	}
-	apclient, err := apclientFactory.WithKeys(ctx, &doer, doer.APActorID())
-	if err != nil {
-		return err
-	}
-	for i, activity := range likeActivityList {
-		activity.StartTime = activity.StartTime.Add(time.Duration(i) * time.Second)
-		json, err := activity.MarshalJSON()
-		if err != nil {
-			return err
-		}
-
-		_, err = apclient.Post(json, fmt.Sprintf("%v/inbox/", activity.Object))
-		if err != nil {
-			log.Error("error %v while sending activity: %q", err, activity)
-		}
-	}
-
-	return nil
 }
