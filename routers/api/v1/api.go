@@ -805,6 +805,10 @@ func Routes() *web.Route {
 					m.Get("", activitypub.Person)
 					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.PersonInbox)
 				}, context.UserIDAssignmentAPI())
+				m.Group("/actor", func() {
+					m.Get("", activitypub.Actor)
+					m.Post("/inbox", activitypub.ActorInbox)
+				})
 				m.Group("/repository-id/{repository-id}", func() {
 					m.Get("", activitypub.Repository)
 					m.Post("/inbox",
