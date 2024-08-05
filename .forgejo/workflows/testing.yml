@@ -57,6 +57,10 @@ jobs:
           MINIO_DOMAIN: minio
           MINIO_ROOT_USER: 123456
           MINIO_ROOT_PASSWORD: 12345678
+      jaeger:
+        image: docker.io/jaegertracing/all-in-one:1.58
+        env:
+          COLLECTOR_OTLP_ENABLED: true
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v3
       - uses: https://code.forgejo.org/actions/setup-go@v4
@@ -91,6 +95,7 @@ jobs:
           RACE_ENABLED: 'true'
           TAGS: bindata
           TEST_ELASTICSEARCH_URL: http://elasticsearch:9200
+          TEST_OTEL_URL: http://jaeger:4317
   test-remote-cacher:
     if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
     runs-on: docker

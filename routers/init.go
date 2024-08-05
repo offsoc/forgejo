@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/markup"
 	"code.gitea.io/gitea/modules/markup/external"
+	"code.gitea.io/gitea/modules/opentelemetry"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/ssh"
 	"code.gitea.io/gitea/modules/storage"
@@ -110,6 +111,7 @@ func InitWebInstallPage(ctx context.Context) {
 
 // InitWebInstalled is for global installed configuration.
 func InitWebInstalled(ctx context.Context) {
+	mustInitCtx(ctx, opentelemetry.Init)
 	mustInitCtx(ctx, git.InitFull)
 	log.Info("Git version: %s (home: %s)", git.VersionInfo(), git.HomeDir())
 
