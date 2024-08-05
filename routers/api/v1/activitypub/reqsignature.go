@@ -8,12 +8,11 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 
+	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/activitypub"
-	"code.gitea.io/gitea/modules/httplib"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	gitea_context "code.gitea.io/gitea/services/context"
@@ -41,21 +40,17 @@ func getPublicKeyFromResponse(b []byte, keyID *url.URL) (p crypto.PublicKey, err
 	return p, err
 }
 
-func fetch(iri *url.URL) (b []byte, err error) {
-	req := httplib.NewRequest(iri.String(), http.MethodGet)
-	req.Header("Accept", activitypub.ActivityStreamsContentType)
-	req.Header("User-Agent", "Gitea/"+setting.AppVer)
-	resp, err := req.Response()
+func fetch(ctx *gitea_context.APIContext, iri *url.URL) (b []byte, err error) {
+	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("url IRI fetch [%s] failed with status (%d): %s", iri, resp.StatusCode, resp.Status)
+	client, err := clientFactory.WithKeys(ctx, user_model.NewAPActorUser(), user_model.APActorUserAPActorID() + "#main-key")
+	if err != nil {
+		return nil, err
 	}
-	b, err = io.ReadAll(io.LimitReader(resp.Body, setting.Federation.MaxSize))
-	return b, err
+
+	return client.GetBody(iri.String())
 }
 
 func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, err error) {
@@ -72,7 +67,7 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 		return false, err
 	}
 	// 2. Fetch the public key of the other actor
-	b, err := fetch(idIRI)
+	b, err := fetch(ctx, idIRI)
 	if err != nil {
 		return false, err
 	}
