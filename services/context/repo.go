@@ -903,7 +903,7 @@ func getRefName(ctx *Base, repo *Repository, pathType RepoRefType) string {
 	case RepoRefCommit:
 		parts := strings.Split(path, "/")
 
-		if len(parts) > 0 && len(parts[0]) >= 7 && len(parts[0]) <= repo.GetObjectFormat().FullLength() {
+		if len(parts) > 0 && len(parts[0]) >= 4 && len(parts[0]) <= repo.GetObjectFormat().FullLength() {
 			repo.TreePath = strings.Join(parts[1:], "/")
 			return parts[0]
 		}
@@ -1027,7 +1027,7 @@ func RepoRefByType(refType RepoRefType, ignoreNotExistErr ...bool) func(*Context
 					return cancel
 				}
 				ctx.Repo.CommitID = ctx.Repo.Commit.ID.String()
-			} else if len(refName) >= 7 && len(refName) <= ctx.Repo.GetObjectFormat().FullLength() {
+			} else if len(refName) >= 4 && len(refName) <= ctx.Repo.GetObjectFormat().FullLength() {
 				ctx.Repo.IsViewCommit = true
 				ctx.Repo.CommitID = refName
 

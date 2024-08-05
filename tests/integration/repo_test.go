@@ -710,6 +710,13 @@ func TestCommitView(t *testing.T) {
 		doc := NewHTMLParser(t, resp.Body)
 		commitTitle := doc.Find(".commit-summary").Text()
 		assert.Contains(t, commitTitle, "Initial commit")
+
+		req = NewRequest(t, "GET", "/user2/repo1/src/commit/65f1")
+		resp = MakeRequest(t, req, http.StatusOK)
+
+		doc = NewHTMLParser(t, resp.Body)
+		commitTitle = doc.Find(".shortsha").Text()
+		assert.Contains(t, commitTitle, "65f1bf27bc")
 	})
 
 	t.Run("Full commit ID", func(t *testing.T) {
