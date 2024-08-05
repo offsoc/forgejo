@@ -49,7 +49,7 @@ func TestLinguistSupport(t *testing.T) {
 					{
 						Operation:     "create",
 						TreePath:      "foo.c",
-						ContentReader: strings.NewReader(`#include <stdio.h>\nint main() {\n  printf("Hello world!\n");\n  return 0;\n}\n`),
+						ContentReader: strings.NewReader("#include <stdio.h>\nint main() {\n  printf(\"Hello world!\n\");\n  return 0;\n}\n"),
 					},
 					{
 						Operation:     "create",
@@ -64,12 +64,12 @@ func TestLinguistSupport(t *testing.T) {
 					{
 						Operation:     "create",
 						TreePath:      "cpplint.py",
-						ContentReader: strings.NewReader(`#! /usr/bin/env python\n\nprint("Hello world!")\n`),
+						ContentReader: strings.NewReader("#! /usr/bin/env python\n\nprint(\"Hello world!\")\n"),
 					},
 					{
 						Operation:     "create",
 						TreePath:      "some-file.xml",
-						ContentReader: strings.NewReader(`<?xml version="1.0"?>\n<foo>\n <bar>Hello</bar>\n</foo>\n`),
+						ContentReader: strings.NewReader("<?xml version=\"1.0\"?>\n<foo>\n <bar>Hello</bar>\n</foo>\n"),
 					},
 				})
 

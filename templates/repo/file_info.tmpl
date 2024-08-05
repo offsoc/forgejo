@@ -9,6 +9,11 @@
 			{{.NumLines}} {{ctx.Locale.TrN .NumLines "repo.line" "repo.lines"}}
 		</div>
 	{{end}}
+	{{if and .HasTrailingEOLSet (not .HasTrailingEOL)}}
+		<div class="file-info-entry" data-tooltip-content="{{ctx.Locale.Tr "repo.no_eol.tooltip"}}">
+			{{ctx.Locale.Tr "repo.no_eol.text"}}
+		</div>
+	{{end}}
 	{{if .FileSize}}
 		<div class="file-info-entry">
 			{{ctx.Locale.TrSize .FileSize}}{{if .IsLFSFile}} ({{ctx.Locale.Tr "repo.stored_lfs"}}){{end}}

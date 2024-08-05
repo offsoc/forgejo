@@ -560,14 +560,21 @@ func renderFile(ctx *context.Context, entry *git.TreeEntry) {
 			// The Open Group Base Specification: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html
 			//   empty: 0 lines; "a": 1 incomplete-line; "a\n": 1 line; "a\nb": 1 line, 1 incomplete-line;
 			// Forgejo uses the definition (like most modern editors):
-			//   empty: 0 lines; "a": 1 line; "a\n": 2 lines; "a\nb": 2 lines;
-			//   When rendering, the last empty line is not rendered in UI, while the line-number is still counted, to tell users that the file contains a trailing EOL.
-			//   To make the UI more consistent, it could use an icon mark to indicate that there is no trailing EOL, and show line-number as the rendered lines.
+			//   empty: 0 lines; "a": 1 line; "a\n": 1 line; "a\nb": 2 lines;
+			//   When rendering, the last empty line is not rendered in U and isn't counted towards the number of lines.
+			//   To tell users that the file not contains a trailing EOL, text with a tooltip is displayed in the file header.
 			// This NumLines is only used for the display on the UI: "xxx lines"
+			hasTrailingEOL := bytes.HasSuffix(buf, []byte{'\n'})
+			ctx.Data["HasTrailingEOL"] = hasTrailingEOL
+			ctx.Data["HasTrailingEOLSet"] = true
 			if len(buf) == 0 {
 				ctx.Data["NumLines"] = 0
 			} else {
-				ctx.Data["NumLines"] = bytes.Count(buf, []byte{'\n'}) + 1
+				numLines := bytes.Count(buf, []byte{'\n'})
+				if !hasTrailingEOL {
+					numLines++
+				}
+				ctx.Data["NumLines"] = numLines
 			}
 			ctx.Data["NumLinesSet"] = true
 
