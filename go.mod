@@ -110,7 +110,7 @@ require (
 	golang.org/x/crypto v0.25.0
 	golang.org/x/image v0.18.0
 	golang.org/x/net v0.27.0
-	golang.org/x/oauth2 v0.21.0
+	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sys v0.23.0
 	golang.org/x/text v0.16.0
 	golang.org/x/tools v0.23.0
