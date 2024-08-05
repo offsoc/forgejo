@@ -4,7 +4,6 @@
 package federation
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -22,6 +21,7 @@ import (
 
 	ap "github.com/go-ap/activitypub"
 	"github.com/go-ap/jsonld"
+	"github.com/go-fed/httpsig"
 	"github.com/google/uuid"
 )
 
@@ -61,7 +61,7 @@ func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, ac
 }
 
 func findFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, *fm.PersonID, error) {
-	federationHost, err := getFederationHostForURI(ctx, actorURI)
+	federationHost, err := getFederationHostForURI(ctx.Base, actorURI)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "Wrong FederationHost", err)
 		return nil, nil, nil, nil, err
@@ -90,7 +90,7 @@ func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	if user != nil {
 		log.Info("Found local federatedUser: %v", user)
 	} else {
-		user, federatedUser, err = createUserFromAP(ctx, &actorURI, *actorID, federationHost.ID)
+		user, federatedUser, err = createUserFromAP(ctx.Base, &actorURI, *actorID, federationHost.ID)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, "Error creating federatedUser", err)
 			return nil, nil, nil, err
@@ -102,8 +102,7 @@ func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	return user, federatedUser, federationHost, nil
 }
 
-func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forgefed.FederationHost, error) {
-	actionsUser := user.NewActionsUser()
+func createFederationHostFromAP(ctx *context_service.Base, actorID fm.ActorID) (*forgefed.FederationHost, error) {
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return nil, err
@@ -140,7 +139,7 @@ func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 	return &result, nil
 }
 
-func getFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.FederationHost, error) {
+func getFederationHostForURI(ctx *context_service.Base, actorURI string) (*forgefed.FederationHost, error) {
 	rawActorID, err := fm.NewActorID(actorURI)
 	if err != nil {
 		return nil, err
@@ -159,9 +158,7 @@ func getFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.Fe
 	return federationHost, nil
 }
 
-func createUserFromAP(ctx context.Context, actorURL *string, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
-	// ToDo: Do we get a publicKeyId from server, repo or owner or repo?
-	actionsUser := user.NewActionsUser()
+func createUserFromAP(ctx *context_service.Base, actorURL *string, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return nil, nil, err
@@ -171,9 +168,17 @@ func createUserFromAP(ctx context.Context, actorURL *string, personID fm.PersonI
 		return nil, nil, err
 	}
 
-	// TODO: grab the stuff from Signature's keyID. This works by accident, but
-	// we should not rely on it, really.
-	body, err := client.GetBody(personID.AsURI())
+	// Grab the keyID from the signature
+	v, err := httpsig.NewVerifier(ctx.Req)
+	if err != nil {
+		return nil, nil, err
+	}
+	idIRI, err := url.Parse(v.KeyId())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	body, err := client.GetBody(idIRI.String())
 	if err != nil {
 		return nil, nil, err
 	}
