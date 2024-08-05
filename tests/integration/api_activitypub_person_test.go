@@ -80,10 +80,10 @@ func TestActivityPubPersonInbox(t *testing.T) {
 		require.NoError(t, err)
 		user2inboxurl := u.JoinPath("/api/v1/activitypub/user-id/2/inbox").String()
 
-		// Signed request succeeds
+		// Signed request "succeeds"
 		resp, err := c.Post([]byte{}, user2inboxurl)
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+		assert.Equal(t, http.StatusNotAcceptable, resp.StatusCode)
 
 		// Unsigned request fails
 		req := NewRequest(t, "POST", user2inboxurl)

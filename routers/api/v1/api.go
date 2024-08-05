@@ -841,8 +841,8 @@ func Routes() *web.Route {
 				m.Group("/user-id/{user-id}", func() {
 					m.Get("", activitypub.Person)
 					m.Post("/inbox",
+						activitypub.ReqHTTPSignature(),
 						bind(ap.Activity{}),
-						// TODO: activitypub.ReqHTTPSignature(),
 						activitypub.PersonInbox)
 					m.Group("/activities/{activity-id}", func() {
 						m.Get("", activitypub.PersonActivityNote)
@@ -852,7 +852,7 @@ func Routes() *web.Route {
 				}, context.UserIDAssignmentAPI(), checkTokenPublicOnly())
 				m.Group("/actor", func() {
 					m.Get("", activitypub.Actor)
-					m.Post("/inbox", activitypub.ActorInbox)
+					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.ActorInbox)
 				})
 				m.Group("/repository-id/{repository-id}", func() {
 					m.Get("", activitypub.Repository)
