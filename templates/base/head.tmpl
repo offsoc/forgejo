@@ -19,6 +19,9 @@
 {{end}}
 	<link rel="icon" href="{{AssetUrlPrefix}}/img/favicon.svg" type="image/svg+xml">
 	<link rel="alternate icon" href="{{AssetUrlPrefix}}/img/favicon.png" type="image/png">
+{{if and FederationEnabled .ContextUser.IsIndividual .PageIsUserProfile}}
+	<link rel="alternate" type="application/activity+json" href="{{.ContextUser.APActorID}}">
+{{end}}
 	{{template "base/head_script" .}}
 	<noscript>
 		<style>
