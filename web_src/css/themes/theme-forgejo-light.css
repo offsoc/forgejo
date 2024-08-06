@@ -244,6 +244,7 @@
   /* should ideally be --color-text-dark, see #15651 */
   --color-reaction-bg: #0000000a;
   --color-reaction-active-bg: var(--color-primary-alpha-20);
+  --color-reaction-hover-bg: var(--color-primary-alpha-30);
   --color-tooltip-text: #ffffff;
   --color-tooltip-bg: #000000f0;
   --color-nav-bg: var(--zinc-100);
