@@ -1,6 +1,8 @@
 name: mirror
 
 on:
+  workflow_dispatch:
+
   schedule:
     - cron: '@daily'
 
