@@ -31,17 +31,17 @@ func extractHTMLToken(s string) (before, token, after string, valid bool) {
 	return "", "", s, true
 }
 
-// highlightCodeDiff is used to do diff with highlighted HTML code.
+// HighlightCodeDiff is used to do diff with highlighted HTML code.
 // It totally depends on Chroma's valid HTML output and its structure, do not use these functions for other purposes.
 // The HTML tags and entities will be replaced by Unicode placeholders: "<span>{TEXT}</span>" => "\uE000{TEXT}\uE001"
 // These Unicode placeholders are friendly to the diff.
 // Then after diff, the placeholders in diff result will be recovered to the HTML tags and entities.
 // It's guaranteed that the tags in final diff result are paired correctly.
-type highlightCodeDiff struct {
+type HighlightCodeDiff struct {
 	placeholderBegin    rune
 	placeholderMaxCount int
 	placeholderIndex    int
-	placeholderTokenMap map[rune]string
+	PlaceholderTokenMap map[rune]string
 	tokenPlaceholderMap map[string]rune
 
 	placeholderOverflowCount int
@@ -49,52 +49,52 @@ type highlightCodeDiff struct {
 	lineWrapperTags []string
 }
 
-func newHighlightCodeDiff() *highlightCodeDiff {
-	return &highlightCodeDiff{
+func NewHighlightCodeDiff() *HighlightCodeDiff {
+	return &HighlightCodeDiff{
 		placeholderBegin:    rune(0x100000), // Plane 16: Supplementary Private Use Area B (U+100000..U+10FFFD)
 		placeholderMaxCount: 64000,
-		placeholderTokenMap: map[rune]string{},
+		PlaceholderTokenMap: map[rune]string{},
 		tokenPlaceholderMap: map[string]rune{},
 	}
 }
 
-// nextPlaceholder returns 0 if no more placeholder can be used
+// NextPlaceholder returns 0 if no more placeholder can be used
 // the diff is done line by line, usually there are only a few (no more than 10) placeholders in one line
 // so the placeholderMaxCount is impossible to be exhausted in real cases.
-func (hcd *highlightCodeDiff) nextPlaceholder() rune {
+func (hcd *HighlightCodeDiff) NextPlaceholder() rune {
 	for hcd.placeholderIndex < hcd.placeholderMaxCount {
 		r := hcd.placeholderBegin + rune(hcd.placeholderIndex)
 		hcd.placeholderIndex++
 		// only use non-existing (not used by code) rune as placeholders
-		if _, ok := hcd.placeholderTokenMap[r]; !ok {
+		if _, ok := hcd.PlaceholderTokenMap[r]; !ok {
 			return r
 		}
 	}
 	return 0 // no more available placeholder
 }
 
-func (hcd *highlightCodeDiff) isInPlaceholderRange(r rune) bool {
+func (hcd *HighlightCodeDiff) isInPlaceholderRange(r rune) bool {
 	return hcd.placeholderBegin <= r && r < hcd.placeholderBegin+rune(hcd.placeholderMaxCount)
 }
 
-func (hcd *highlightCodeDiff) collectUsedRunes(code string) {
+func (hcd *HighlightCodeDiff) CollectUsedRunes(code string) {
 	for _, r := range code {
 		if hcd.isInPlaceholderRange(r) {
 			// put the existing rune (used by code) in map, then this rune won't be used a placeholder anymore.
-			hcd.placeholderTokenMap[r] = ""
+			hcd.PlaceholderTokenMap[r] = ""
 		}
 	}
 }
 
-func (hcd *highlightCodeDiff) diffWithHighlight(filename, language, codeA, codeB string) []diffmatchpatch.Diff {
-	hcd.collectUsedRunes(codeA)
-	hcd.collectUsedRunes(codeB)
+func (hcd *HighlightCodeDiff) diffWithHighlight(filename, language, codeA, codeB string) []diffmatchpatch.Diff {
+	hcd.CollectUsedRunes(codeA)
+	hcd.CollectUsedRunes(codeB)
 
 	highlightCodeA, _ := highlight.Code(filename, language, codeA)
 	highlightCodeB, _ := highlight.Code(filename, language, codeB)
 
-	convertedCodeA := hcd.convertToPlaceholders(string(highlightCodeA))
-	convertedCodeB := hcd.convertToPlaceholders(string(highlightCodeB))
+	convertedCodeA := hcd.ConvertToPlaceholders(string(highlightCodeA))
+	convertedCodeB := hcd.ConvertToPlaceholders(string(highlightCodeB))
 
 	diffs := diffMatchPatch.DiffMain(convertedCodeA, convertedCodeB, true)
 	diffs = diffMatchPatch.DiffCleanupEfficiency(diffs)
@@ -106,7 +106,7 @@ func (hcd *highlightCodeDiff) diffWithHighlight(filename, language, codeA, codeB
 }
 
 // convertToPlaceholders totally depends on Chroma's valid HTML output and its structure, do not use these functions for other purposes.
-func (hcd *highlightCodeDiff) convertToPlaceholders(htmlCode string) string {
+func (hcd *HighlightCodeDiff) ConvertToPlaceholders(htmlCode string) string {
 	var tagStack []string
 	res := strings.Builder{}
 
@@ -153,10 +153,10 @@ func (hcd *highlightCodeDiff) convertToPlaceholders(htmlCode string) string {
 		// remember the placeholder and token in the map
 		placeholder, ok := hcd.tokenPlaceholderMap[tokenInMap]
 		if !ok {
-			placeholder = hcd.nextPlaceholder()
+			placeholder = hcd.NextPlaceholder()
 			if placeholder != 0 {
 				hcd.tokenPlaceholderMap[tokenInMap] = placeholder
-				hcd.placeholderTokenMap[placeholder] = tokenInMap
+				hcd.PlaceholderTokenMap[placeholder] = tokenInMap
 			}
 		}
 
@@ -179,12 +179,16 @@ func (hcd *highlightCodeDiff) convertToPlaceholders(htmlCode string) string {
 	return res.String()
 }
 
-func (hcd *highlightCodeDiff) recoverOneDiff(diff *diffmatchpatch.Diff) {
+func (hcd *HighlightCodeDiff) recoverOneDiff(diff *diffmatchpatch.Diff) {
+	diff.Text = hcd.Recover(diff.Text)
+}
+
+func (hcd *HighlightCodeDiff) Recover(src string) string {
 	sb := strings.Builder{}
 	var tagStack []string
 
-	for _, r := range diff.Text {
-		token, ok := hcd.placeholderTokenMap[r]
+	for _, r := range src {
+		token, ok := hcd.PlaceholderTokenMap[r]
 		if !ok || token == "" {
 			sb.WriteRune(r) // if the rune is not a placeholder, write it as it is
 			continue
@@ -218,5 +222,5 @@ func (hcd *highlightCodeDiff) recoverOneDiff(diff *diffmatchpatch.Diff) {
 		}
 	}
 
-	diff.Text = sb.String()
+	return sb.String()
 }

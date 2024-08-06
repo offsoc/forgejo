@@ -1,4 +1,5 @@
 // Copyright 2024 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package git
@@ -19,9 +20,10 @@ import (
 )
 
 type GrepResult struct {
-	Filename    string
-	LineNumbers []int
-	LineCodes   []string
+	Filename          string
+	LineNumbers       []int
+	LineCodes         []string
+	HighlightedRanges [][3]int
 }
 
 type GrepOptions struct {
@@ -31,6 +33,13 @@ type GrepOptions struct {
 	ContextLineNumber int
 	IsFuzzy           bool
 	PathSpec          []setting.Glob
+}
+
+func hasPrefixFold(s, t string) bool {
+	if len(s) < len(t) {
+		return false
+	}
+	return strings.EqualFold(s[:len(t)], t)
 }
 
 func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepOptions) ([]*GrepResult, error) {
@@ -53,18 +62,19 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 	 2^@repo: go-gitea/gitea
 	*/
 	var results []*GrepResult
-	cmd := NewCommand(ctx, "grep", "--null", "--break", "--heading", "--fixed-strings", "--line-number", "--ignore-case", "--full-name")
+	cmd := NewCommand(ctx, "grep",
+		"--null", "--break", "--heading", "--column",
+		"--fixed-strings", "--line-number", "--ignore-case", "--full-name")
 	cmd.AddOptionValues("--context", fmt.Sprint(opts.ContextLineNumber))
 	if opts.MatchesPerFile > 0 {
 		cmd.AddOptionValues("--max-count", fmt.Sprint(opts.MatchesPerFile))
 	}
+	words := []string{search}
 	if opts.IsFuzzy {
-		words := strings.Fields(search)
-		for _, word := range words {
-			cmd.AddOptionValues("-e", strings.TrimLeft(word, "-"))
-		}
-	} else {
-		cmd.AddOptionValues("-e", strings.TrimLeft(search, "-"))
+		words = strings.Fields(search)
+	}
+	for _, word := range words {
+		cmd.AddOptionValues("-e", strings.TrimLeft(word, "-"))
 	}
 
 	// pathspec
@@ -128,6 +138,24 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 				if lineNum, lineCode, ok := strings.Cut(line, "\x00"); ok {
 					lineNumInt, _ := strconv.Atoi(lineNum)
 					res.LineNumbers = append(res.LineNumbers, lineNumInt)
+					if lineCol, lineCode2, ok := strings.Cut(lineCode, "\x00"); ok {
+						lineColInt, _ := strconv.Atoi(lineCol)
+						start := lineColInt - 1
+						matchLen := len(lineCode2)
+						for _, word := range words {
+							if hasPrefixFold(lineCode2[start:], word) {
+								matchLen = len(word)
+								break
+							}
+						}
+						res.HighlightedRanges = append(res.HighlightedRanges, [3]int{
+							len(res.LineCodes),
+							start,
+							start + matchLen,
+						})
+						res.LineCodes = append(res.LineCodes, lineCode2)
+						continue
+					}
 					res.LineCodes = append(res.LineCodes, lineCode)
 				}
 			}

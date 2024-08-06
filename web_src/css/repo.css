@@ -1752,6 +1752,10 @@ td .commit-summary {
   color: inherit;
 }
 
+.search-highlight {
+  background: var(--color-primary-alpha-40);
+}
+
 .repository.quickstart .guide .item {
   padding: 1em;
 }

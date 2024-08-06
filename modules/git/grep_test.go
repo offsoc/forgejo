@@ -20,28 +20,43 @@ func TestGrepSearch(t *testing.T) {
 	require.NoError(t, err)
 	defer repo.Close()
 
-	res, err := GrepSearch(context.Background(), repo, "void", GrepOptions{})
+	res, err := GrepSearch(context.Background(), repo, "public", GrepOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, []*GrepResult{
 		{
 			Filename:    "java-hello/main.java",
-			LineNumbers: []int{3},
-			LineCodes:   []string{" public static void main(String[] args)"},
+			LineNumbers: []int{1, 3},
+			LineCodes: []string{
+				"public class HelloWorld",
+				" public static void main(String[] args)",
+			},
+			HighlightedRanges: [][3]int{{0, 0, 6}, {1, 1, 7}},
 		},
 		{
 			Filename:    "main.vendor.java",
-			LineNumbers: []int{3},
-			LineCodes:   []string{" public static void main(String[] args)"},
+			LineNumbers: []int{1, 3},
+			LineCodes: []string{
+				"public class HelloWorld",
+				" public static void main(String[] args)",
+			},
+			HighlightedRanges: [][3]int{{0, 0, 6}, {1, 1, 7}},
 		},
 	}, res)
 
-	res, err = GrepSearch(context.Background(), repo, "void", GrepOptions{MaxResultLimit: 1})
+	res, err = GrepSearch(context.Background(), repo, "void", GrepOptions{MaxResultLimit: 1, ContextLineNumber: 2})
 	require.NoError(t, err)
 	assert.Equal(t, []*GrepResult{
 		{
 			Filename:    "java-hello/main.java",
-			LineNumbers: []int{3},
-			LineCodes:   []string{" public static void main(String[] args)"},
+			LineNumbers: []int{1, 2, 3, 4, 5},
+			LineCodes: []string{
+				"public class HelloWorld",
+				"{",
+				" public static void main(String[] args)",
+				" {",
+				"  System.out.println(\"Hello world!\");",
+			},
+			HighlightedRanges: [][3]int{{2, 15, 19}},
 		},
 	}, res)
 
@@ -49,24 +64,28 @@ func TestGrepSearch(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []*GrepResult{
 		{
-			Filename:    "i-am-a-python.p",
-			LineNumbers: []int{1},
-			LineCodes:   []string{"## This is a simple file to do a hello world"},
+			Filename:          "i-am-a-python.p",
+			LineNumbers:       []int{1},
+			LineCodes:         []string{"## This is a simple file to do a hello world"},
+			HighlightedRanges: [][3]int{{0, 39, 44}},
 		},
 		{
-			Filename:    "java-hello/main.java",
-			LineNumbers: []int{1},
-			LineCodes:   []string{"public class HelloWorld"},
+			Filename:          "java-hello/main.java",
+			LineNumbers:       []int{1},
+			LineCodes:         []string{"public class HelloWorld"},
+			HighlightedRanges: [][3]int{{0, 18, 23}},
 		},
 		{
-			Filename:    "main.vendor.java",
-			LineNumbers: []int{1},
-			LineCodes:   []string{"public class HelloWorld"},
+			Filename:          "main.vendor.java",
+			LineNumbers:       []int{1},
+			LineCodes:         []string{"public class HelloWorld"},
+			HighlightedRanges: [][3]int{{0, 18, 23}},
 		},
 		{
-			Filename:    "python-hello/hello.py",
-			LineNumbers: []int{1},
-			LineCodes:   []string{"## This is a simple file to do a hello world"},
+			Filename:          "python-hello/hello.py",
+			LineNumbers:       []int{1},
+			LineCodes:         []string{"## This is a simple file to do a hello world"},
+			HighlightedRanges: [][3]int{{0, 39, 44}},
 		},
 	}, res)
 
