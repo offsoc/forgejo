@@ -35,7 +35,7 @@
     "monaco-editor": "0.50.0",
     "monaco-editor-webpack-plugin": "7.1.0",
     "pdfobject": "2.3.0",
-    "postcss": "8.4.40",
+    "postcss": "8.4.41",
     "postcss-loader": "8.1.1",
     "postcss-nesting": "12.1.5",
     "pretty-ms": "9.0.0",
