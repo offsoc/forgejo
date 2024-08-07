@@ -253,7 +253,7 @@ func MigratePost(ctx *context.Context) {
 }
 
 func setMigrationContextData(ctx *context.Context, serviceType structs.GitServiceType) {
-	ctx.Data["Title"] = ctx.Tr("new_migrate")
+	ctx.Data["Title"] = ctx.Tr("new_migrate.title")
 
 	ctx.Data["LFSActive"] = setting.LFS.StartServer
 	ctx.Data["IsForcedPrivate"] = setting.Repository.ForcePrivate

@@ -152,7 +152,7 @@ func getRepoPrivate(ctx *context.Context) bool {
 
 // Create render creating repository page
 func Create(ctx *context.Context) {
-	ctx.Data["Title"] = ctx.Tr("new_repo")
+	ctx.Data["Title"] = ctx.Tr("new_repo.title")
 
 	// Give default value for template to render.
 	ctx.Data["Gitignores"] = repo_module.Gitignores
@@ -223,7 +223,7 @@ func handleCreateError(ctx *context.Context, owner *user_model.User, err error, 
 // CreatePost response for creating repository
 func CreatePost(ctx *context.Context) {
 	form := web.GetForm(ctx).(*forms.CreateRepoForm)
-	ctx.Data["Title"] = ctx.Tr("new_repo")
+	ctx.Data["Title"] = ctx.Tr("new_repo.title")
 
 	ctx.Data["Gitignores"] = repo_module.Gitignores
 	ctx.Data["LabelTemplateFiles"] = repo_module.LabelTemplateFiles

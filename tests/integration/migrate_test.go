@@ -1,4 +1,5 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -20,6 +21,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/services/migrations"
 	"code.gitea.io/gitea/services/repository"
 
@@ -88,6 +90,10 @@ func TestMigrate(t *testing.T) {
 			resp := session.MakeRequest(t, req, http.StatusOK)
 			// Step 2: load the form
 			htmlDoc := NewHTMLParser(t, resp.Body)
+			// Check form title
+			title := htmlDoc.doc.Find("title").Text()
+			assert.Contains(t, title, translation.NewLocale("en-US").TrString("new_migrate.title"))
+			// Get the link of migration button
 			link, exists := htmlDoc.doc.Find(`form.ui.form[action^="/repo/migrate"]`).Attr("action")
 			assert.True(t, exists, "The template has changed")
 			// Step 4: submit the migration to only migrate issues
