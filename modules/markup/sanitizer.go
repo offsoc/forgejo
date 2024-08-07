@@ -179,6 +179,7 @@ func createDefaultPolicy() *bluemonday.Policy {
 // repository descriptions.
 func createRepoDescriptionPolicy() *bluemonday.Policy {
 	policy := bluemonday.NewPolicy()
+	policy.AllowStandardURLs()
 
 	// Allow italics and bold.
 	policy.AllowElements("i", "b", "em", "strong")
