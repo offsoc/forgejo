@@ -867,7 +867,7 @@ func issueIndexPatternProcessor(ctx *RenderContext, node *html.Node) {
 
 		var link *html.Node
 		reftext := node.Data[ref.RefLocation.Start:ref.RefLocation.End]
-		if hasExtTrackFormat && !ref.IsPull {
+		if hasExtTrackFormat && !ref.IsPull && ref.Owner == "" {
 			ctx.Metas["index"] = ref.Issue
 
 			res, err := vars.Expand(ctx.Metas["format"], ctx.Metas)

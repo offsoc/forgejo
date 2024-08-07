@@ -342,6 +342,22 @@ func TestRender_AutoLink(t *testing.T) {
 	test(tmp, "<a href=\""+tmp+"\" class=\"commit\"><code class=\"nohighlight\">d8a994ef24 (diff-2)</code></a>")
 }
 
+func TestRender_IssueIndexPatternRef(t *testing.T) {
+	setting.AppURL = TestAppURL
+
+	test := func(input, expected string) {
+		var buf strings.Builder
+		err := postProcess(&RenderContext{
+			Ctx:   git.DefaultContext,
+			Metas: numericMetas,
+		}, []processor{issueIndexPatternProcessor}, strings.NewReader(input), &buf)
+		require.NoError(t, err)
+		assert.Equal(t, expected, buf.String(), "input=%q", input)
+	}
+
+	test("alan-turin/Enigma-cryptanalysis#1", `<a href="/alan-turin/enigma-cryptanalysis/issues/1" class="ref-issue">alan-turin/Enigma-cryptanalysis#1</a>`)
+}
+
 func TestRender_FullIssueURLs(t *testing.T) {
 	setting.AppURL = TestAppURL
 
