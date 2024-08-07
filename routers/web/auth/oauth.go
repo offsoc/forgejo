@@ -244,7 +244,9 @@ func newAccessTokenResponse(ctx go_context.Context, grant *auth.OAuth2Grant, ser
 			idToken.EmailVerified = user.IsActive
 		}
 		if grant.ScopeContains("groups") {
-			groups, err := getOAuthGroupsForUser(ctx, user)
+			onlyPublicGroups := ifOnlyPublicGroups(grant.Scope)
+
+			groups, err := getOAuthGroupsForUser(ctx, user, onlyPublicGroups)
 			if err != nil {
 				log.Error("Error getting groups: %v", err)
 				return nil, &AccessTokenError{
@@ -279,7 +281,18 @@ type userInfoResponse struct {
 	Username string   `json:"preferred_username"`
 	Email    string   `json:"email"`
 	Picture  string   `json:"picture"`
-	Groups   []string `json:"groups"`
+	Groups   []string `json:"groups,omitempty"`
+}
+
+func ifOnlyPublicGroups(scopes string) bool {
+	scopes = strings.ReplaceAll(scopes, ",", " ")
+	scopesList := strings.Fields(scopes)
+	for _, scope := range scopesList {
+		if scope == "all" || scope == "read:organization" || scope == "read:admin" {
+			return false
+		}
+	}
+	return true
 }
 
 // InfoOAuth manages request for userinfo endpoint
@@ -298,7 +311,18 @@ func InfoOAuth(ctx *context.Context) {
 		Picture:  ctx.Doer.AvatarLink(ctx),
 	}
 
-	groups, err := getOAuthGroupsForUser(ctx, ctx.Doer)
+	var token string
+	if auHead := ctx.Req.Header.Get("Authorization"); auHead != "" {
+		auths := strings.Fields(auHead)
+		if len(auths) == 2 && (auths[0] == "token" || strings.ToLower(auths[0]) == "bearer") {
+			token = auths[1]
+		}
+	}
+
+	_, grantScopes := auth_service.CheckOAuthAccessToken(ctx, token)
+	onlyPublicGroups := ifOnlyPublicGroups(grantScopes)
+
+	groups, err := getOAuthGroupsForUser(ctx, ctx.Doer, onlyPublicGroups)
 	if err != nil {
 		ctx.ServerError("Oauth groups for user", err)
 		return
@@ -310,7 +334,7 @@ func InfoOAuth(ctx *context.Context) {
 
 // returns a list of "org" and "org:team" strings,
 // that the given user is a part of.
-func getOAuthGroupsForUser(ctx go_context.Context, user *user_model.User) ([]string, error) {
+func getOAuthGroupsForUser(ctx go_context.Context, user *user_model.User, onlyPublicGroups bool) ([]string, error) {
 	orgs, err := org_model.GetUserOrgsList(ctx, user)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserOrgList: %w", err)
@@ -318,6 +342,15 @@ func getOAuthGroupsForUser(ctx go_context.Context, user *user_model.User) ([]str
 
 	var groups []string
 	for _, org := range orgs {
+		if setting.OAuth2.EnableAdditionalGrantScopes {
+			if onlyPublicGroups {
+				public, err := org_model.IsPublicMembership(ctx, org.ID, user.ID)
+				if !public && err == nil {
+					continue
+				}
+			}
+		}
+
 		groups = append(groups, org.Name)
 		teams, err := org.LoadTeams(ctx)
 		if err != nil {
