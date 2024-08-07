@@ -98,7 +98,9 @@ func TestActivityPubPersonInbox(t *testing.T) {
 		user1, err := user_model.GetUserByName(ctx, username1)
 		require.NoError(t, err)
 		user1url := fmt.Sprintf("%s/api/v1/activitypub/user-id/1#main-key", srv.URL)
-		c, err := activitypub.NewClient(db.DefaultContext, user1, user1url)
+		cf, err := activitypub.GetClientFactory(ctx)
+		require.NoError(t, err)
+		c, err := cf.WithKeys(db.DefaultContext, user1, user1url)
 		require.NoError(t, err)
 		user2inboxurl := fmt.Sprintf("%s/api/v1/activitypub/user-id/2/inbox", srv.URL)
 

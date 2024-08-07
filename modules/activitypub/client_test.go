@@ -64,14 +64,19 @@ Set up a user called "me" for all tests
 
 */
 
-func TestNewClientReturnsClient(t *testing.T) {
+func TestClientCtx(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	pubID := "myGpgId"
-	c, err := NewClient(db.DefaultContext, user, pubID)
+	cf, err := NewClientFactory()
+	log.Debug("ClientFactory: %v\nError: %v", cf, err)
+	require.NoError(t, err)
+
+	c, err := cf.WithKeys(db.DefaultContext, user, pubID)
 
 	log.Debug("Client: %v\nError: %v", c, err)
 	require.NoError(t, err)
+	_ = NewContext(db.DefaultContext, cf)
 }
 
 /* TODO: bring this test to work or delete
@@ -109,7 +114,9 @@ func TestActivityPubSignedPost(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	pubID := "https://example.com/pubID"
-	c, err := NewClient(db.DefaultContext, user, pubID)
+	cf, err := NewClientFactory()
+	require.NoError(t, err)
+	c, err := cf.WithKeys(db.DefaultContext, user, pubID)
 	require.NoError(t, err)
 
 	expected := "BODY"

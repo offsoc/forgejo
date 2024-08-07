@@ -140,7 +140,9 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 		}()
 		actionsUser := user.NewActionsUser()
 		repositoryID := 2
-		c, err := activitypub.NewClient(db.DefaultContext, actionsUser, "not used")
+		cf, err := activitypub.GetClientFactory(db.DefaultContext)
+		require.NoError(t, err)
+		c, err := cf.WithKeys(db.DefaultContext, actionsUser, "not used")
 		require.NoError(t, err)
 		repoInboxURL := fmt.Sprintf(
 			"%s/api/v1/activitypub/repository-id/%v/inbox",
@@ -232,7 +234,9 @@ func TestActivityPubRepositoryInboxInvalid(t *testing.T) {
 		}()
 		actionsUser := user.NewActionsUser()
 		repositoryID := 2
-		c, err := activitypub.NewClient(db.DefaultContext, actionsUser, "not used")
+		cf, err := activitypub.GetClientFactory(db.DefaultContext)
+		require.NoError(t, err)
+		c, err := cf.WithKeys(db.DefaultContext, actionsUser, "not used")
 		require.NoError(t, err)
 		repoInboxURL := fmt.Sprintf("%s/api/v1/activitypub/repository-id/%v/inbox",
 			srv.URL, repositoryID)

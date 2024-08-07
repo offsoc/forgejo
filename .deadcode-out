@@ -93,6 +93,10 @@ code.gitea.io/gitea/models/user
 	GetUserEmailsByNames
 	GetUserNamesByIDs
 
+code.gitea.io/gitea/modules/activitypub
+	NewContext
+	Context.APClientFactory
+
 code.gitea.io/gitea/modules/assetfs
 	Bindata
 

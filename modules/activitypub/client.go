@@ -56,35 +56,23 @@ func containsRequiredHTTPHeaders(method string, headers []string) error {
 }
 
 // Client struct
-type Client struct {
+type ClientFactory struct {
 	client      *http.Client
 	algs        []httpsig.Algorithm
 	digestAlg   httpsig.DigestAlgorithm
 	getHeaders  []string
 	postHeaders []string
-	priv        *rsa.PrivateKey
-	pubID       string
 }
 
 // NewClient function
-func NewClient(ctx context.Context, user *user_model.User, pubID string) (c *Client, err error) {
+func NewClientFactory() (c *ClientFactory, err error) {
 	if err = containsRequiredHTTPHeaders(http.MethodGet, setting.Federation.GetHeaders); err != nil {
 		return nil, err
 	} else if err = containsRequiredHTTPHeaders(http.MethodPost, setting.Federation.PostHeaders); err != nil {
 		return nil, err
 	}
 
-	priv, err := GetPrivateKey(ctx, user)
-	if err != nil {
-		return nil, err
-	}
-	privPem, _ := pem.Decode([]byte(priv))
-	privParsed, err := x509.ParsePKCS1PrivateKey(privPem.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	c = &Client{
+	c = &ClientFactory{
 		client: &http.Client{
 			Transport: &http.Transport{
 				Proxy: proxy.Proxy(),
@@ -95,10 +83,47 @@ func NewClient(ctx context.Context, user *user_model.User, pubID string) (c *Cli
 		digestAlg:   httpsig.DigestAlgorithm(setting.Federation.DigestAlgorithm),
 		getHeaders:  setting.Federation.GetHeaders,
 		postHeaders: setting.Federation.PostHeaders,
+	}
+	return c, err
+}
+
+type APClientFactory interface {
+	WithKeys(ctx context.Context, user *user_model.User, pubID string) (APClient, error)
+}
+
+// Client struct
+type Client struct {
+	client      *http.Client
+	algs        []httpsig.Algorithm
+	digestAlg   httpsig.DigestAlgorithm
+	getHeaders  []string
+	postHeaders []string
+	priv        *rsa.PrivateKey
+	pubID       string
+}
+
+// NewRequest function
+func (cf *ClientFactory) WithKeys(ctx context.Context, user *user_model.User, pubID string) (APClient, error) {
+	priv, err := GetPrivateKey(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	privPem, _ := pem.Decode([]byte(priv))
+	privParsed, err := x509.ParsePKCS1PrivateKey(privPem.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	c := Client{
+		client:      cf.client,
+		algs:        cf.algs,
+		digestAlg:   cf.digestAlg,
+		getHeaders:  cf.getHeaders,
+		postHeaders: cf.postHeaders,
 		priv:        privParsed,
 		pubID:       pubID,
 	}
-	return c, err
+	return &c, nil
 }
 
 // NewRequest function
@@ -184,4 +209,65 @@ func charLimiter(s string, limit int) string {
 		return fmt.Sprint(string(buff), "...")
 	}
 	return s
+}
+
+type APClient interface {
+	newRequest(method string, b []byte, to string) (req *http.Request, err error)
+	Post(b []byte, to string) (resp *http.Response, err error)
+	Get(to string) (resp *http.Response, err error)
+	GetBody(uri string) ([]byte, error)
+}
+
+// contextKey is a value for use with context.WithValue.
+type contextKey struct {
+	name string
+}
+
+// clientFactoryContextKey is a context key. It is used with context.Value() to get the current Food for the context
+var (
+	clientFactoryContextKey                 = &contextKey{"clientFactory"}
+	_                       APClientFactory = &ClientFactory{}
+)
+
+// Context represents an activitypub client factory context
+type Context struct {
+	context.Context
+	e APClientFactory
+}
+
+func NewContext(ctx context.Context, e APClientFactory) *Context {
+	return &Context{
+		Context: ctx,
+		e:       e,
+	}
+}
+
+// APClientFactory represents an activitypub client factory
+func (ctx *Context) APClientFactory() APClientFactory {
+	return ctx.e
+}
+
+// provides APClientFactory
+type GetAPClient interface {
+	GetClientFactory() APClientFactory
+}
+
+// GetClientFactory will get an APClientFactory from this context or returns the default implementation
+func GetClientFactory(ctx context.Context) (APClientFactory, error) {
+	if e := getClientFactory(ctx); e != nil {
+		return e, nil
+	}
+	return NewClientFactory()
+}
+
+// getClientFactory will get an APClientFactory from this context or return nil
+func getClientFactory(ctx context.Context) APClientFactory {
+	if clientFactory, ok := ctx.(APClientFactory); ok {
+		return clientFactory
+	}
+	clientFactoryInterface := ctx.Value(clientFactoryContextKey)
+	if clientFactoryInterface != nil {
+		return clientFactoryInterface.(GetAPClient).GetClientFactory()
+	}
+	return nil
 }
