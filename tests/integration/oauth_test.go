@@ -733,3 +733,69 @@ func TestOAuth_GrantApplicationOAuth(t *testing.T) {
 	resp = ctx.MakeRequest(t, req, http.StatusSeeOther)
 	assert.Contains(t, test.RedirectURL(resp), "error=access_denied&error_description=the+request+is+denied")
 }
+
+func TestOAuthIntrospection(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	req := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
+		"grant_type":    "authorization_code",
+		"client_id":     "da7da3ba-9a13-4167-856f-3899de0b0138",
+		"client_secret": "4MK8Na6R55smdCY0WuCCumZ6hjRPnGY5saWVRHHjJiA=",
+		"redirect_uri":  "a",
+		"code":          "authcode",
+		"code_verifier": "N1Zo9-8Rfwhkt68r1r29ty8YwIraXR8eh_1Qwxg7yQXsonBt",
+	})
+	resp := MakeRequest(t, req, http.StatusOK)
+	type response struct {
+		AccessToken  string `json:"access_token"`
+		TokenType    string `json:"token_type"`
+		ExpiresIn    int64  `json:"expires_in"`
+		RefreshToken string `json:"refresh_token"`
+	}
+	parsed := new(response)
+
+	DecodeJSON(t, resp, parsed)
+	assert.Greater(t, len(parsed.AccessToken), 10)
+	assert.Greater(t, len(parsed.RefreshToken), 10)
+
+	type introspectResponse struct {
+		Active   bool   `json:"active"`
+		Scope    string `json:"scope,omitempty"`
+		Username string `json:"username"`
+	}
+
+	// successful request with a valid client_id/client_secret and a valid token
+	t.Run("successful request with valid token", func(t *testing.T) {
+		req := NewRequestWithValues(t, "POST", "/login/oauth/introspect", map[string]string{
+			"token": parsed.AccessToken,
+		})
+		req.Header.Add("Authorization", "Basic ZGE3ZGEzYmEtOWExMy00MTY3LTg1NmYtMzg5OWRlMGIwMTM4OjRNSzhOYTZSNTVzbWRDWTBXdUNDdW1aNmhqUlBuR1k1c2FXVlJISGpKaUE9")
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		introspectParsed := new(introspectResponse)
+		DecodeJSON(t, resp, introspectParsed)
+		assert.True(t, introspectParsed.Active)
+		assert.Equal(t, "user1", introspectParsed.Username)
+	})
+
+	// successful request with a valid client_id/client_secret, but an invalid token
+	t.Run("successful request with invalid token", func(t *testing.T) {
+		req := NewRequestWithValues(t, "POST", "/login/oauth/introspect", map[string]string{
+			"token": "xyzzy",
+		})
+		req.Header.Add("Authorization", "Basic ZGE3ZGEzYmEtOWExMy00MTY3LTg1NmYtMzg5OWRlMGIwMTM4OjRNSzhOYTZSNTVzbWRDWTBXdUNDdW1aNmhqUlBuR1k1c2FXVlJISGpKaUE9")
+		resp := MakeRequest(t, req, http.StatusOK)
+		introspectParsed := new(introspectResponse)
+		DecodeJSON(t, resp, introspectParsed)
+		assert.False(t, introspectParsed.Active)
+	})
+
+	// unsuccessful request with an invalid client_id/client_secret
+	t.Run("unsuccessful request due to invalid basic auth", func(t *testing.T) {
+		req := NewRequestWithValues(t, "POST", "/login/oauth/introspect", map[string]string{
+			"token": parsed.AccessToken,
+		})
+		req.Header.Add("Authorization", "Basic ZGE3ZGEzYmEtOWExMy00MTY3LTg1NmYtMzg5OWRlMGIwMTM4OjRNSzhOYTZSNTVzbWRDWTBXdUNDdW1aNmhqUlBuR1k1c2FXVlJISGpK")
+		resp := MakeRequest(t, req, http.StatusUnauthorized)
+		assert.Contains(t, resp.Body.String(), "no valid authorization")
+	})
+}
