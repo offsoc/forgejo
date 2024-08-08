@@ -86,8 +86,8 @@
       ],
       "automerge": true,
       "matchPackageNames": [
-        "ghcr.io/devcontainers/features/{/,}**",
-        "ghcr.io/devcontainers-contrib/features/{/,}**"
+        "ghcr.io/devcontainers/features/**",
+        "ghcr.io/devcontainers-contrib/features/**"
       ]
     },
     {
@@ -110,22 +110,6 @@
       "groupName": "nodejs packages",
       "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
       "versioning": "node"
-    },
-    {
-      "description": "Automerge renovate updates",
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchPackageNames": [
-        "code.forgejo.org/forgejo-contrib/renovate",
-        "ghcr.io/visualon/renovate"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest"
-      ],
-      "automerge": true
     },
     {
       "description": "x/tools/* are used in the CI only and upgraded together",
@@ -167,6 +151,34 @@
       "automerge": true
     },
     {
+      "description": "Automerge renovate updates",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "code.forgejo.org/forgejo-contrib/renovate",
+        "ghcr.io/visualon/renovate"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Add reviewer and additional labels to renovate PRs",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "code.forgejo.org/forgejo-contrib/renovate",
+        "ghcr.io/visualon/renovate"
+      ],
+      "reviewers": ["viceice"],
+      "addLabels": ["forgejo/ci", "test/not-needed"]
+    },
+    {
       "description": "Update renovate with higher prio to come through rate limit",
       "matchDatasources": [
         "docker"
@@ -179,6 +191,8 @@
         "schedule:weekly"
       ],
       "prPriority": 10,
+      "reviewers": ["viceice"],
+      "addLabels": ["forgejo/ci", "test/not-needed"],
       "groupName": "renovate"
     },
     {
@@ -227,11 +241,11 @@
       ],
       "automerge": true,
       "matchPackageNames": [
-        "@eslint-community/{/,}**",
-        "@playwright/{/,}**",
-        "@stoplight/spectral-cli{/,}**",
-        "@stylistic/{/,}**",
-        "mcr.microsoft.com/devcontainers/{/,}**"
+        "@eslint-community/**",
+        "@playwright/**",
+        "@stoplight/spectral-cli",
+        "@stylistic/**",
+        "mcr.microsoft.com/devcontainers/**"
       ]
     },
     {
