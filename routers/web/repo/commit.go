@@ -416,12 +416,6 @@ func Diff(ctx *context.Context) {
 		}
 	}
 
-	ctx.Data["BranchName"], err = commit.GetBranchName()
-	if err != nil {
-		ctx.ServerError("commit.GetBranchName", err)
-		return
-	}
-
 	ctx.HTML(http.StatusOK, tplCommitPage)
 }
 
