@@ -119,7 +119,7 @@ func TestBleveIndexAndSearch(t *testing.T) {
 	}
 	defer idx.Close()
 
-	testIndexer("beleve", t, idx)
+	testIndexer("bleve", t, idx)
 }
 
 func TestESIndexAndSearch(t *testing.T) {

@@ -428,8 +428,8 @@ func (ar artifactRoutes) getDownloadArtifactURL(ctx *ArtifactContext) {
 	}
 
 	if itemPath != artifacts[0].ArtifactName {
-		log.Error("Error dismatch artifact name, itemPath: %v, artifact: %v", itemPath, artifacts[0].ArtifactName)
-		ctx.Error(http.StatusBadRequest, "Error dismatch artifact name")
+		log.Error("Error mismatch artifact name, itemPath: %v, artifact: %v", itemPath, artifacts[0].ArtifactName)
+		ctx.Error(http.StatusBadRequest, "Error mismatch artifact name")
 		return
 	}
 

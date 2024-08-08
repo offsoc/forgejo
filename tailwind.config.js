@@ -99,7 +99,7 @@ export default {
   },
   plugins: [
     plugin(({addUtilities}) => {
-      // base veriables required for tranform utilities
+      // base variables required for transform utilities
       // added as utilities since base is not imported
       // note: required when using tailwind's transform classes
       addUtilities({

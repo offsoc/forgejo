@@ -12,7 +12,7 @@ test('Follow actions', async ({browser}, workerInfo) => {
 
   // Check if following and then unfollowing works.
   // This checks that the event listeners of
-  // the buttons aren't dissapearing.
+  // the buttons aren't disappearing.
   const followButton = page.locator('.follow');
   await expect(followButton).toContainText('Follow');
   await followButton.click();

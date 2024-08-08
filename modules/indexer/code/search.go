@@ -105,7 +105,7 @@ func HighlightSearchResultCode(filename string, lineNums []int, highlightRanges 
 			!ok ||
 				// token was marked as used
 				token == "" ||
-				// the token is not an valid html tag emited by chroma
+				// the token is not an valid html tag emitted by chroma
 				!(len(token) > 6 && (token[0:5] == "<span" || token[0:6] == "</span")) {
 				count++
 			} else if !isOpen {

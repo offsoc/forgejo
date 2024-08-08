@@ -451,7 +451,7 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 			packageName,
 			"almost.similar.dependency",
 			"almost.similar",
-			"almost.similar.dependant",
+			"almost.similar.dependent",
 		}
 
 		for _, fakePackageName := range fakePackages {

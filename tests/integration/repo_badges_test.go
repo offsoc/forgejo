@@ -133,7 +133,7 @@ func TestBadges(t *testing.T) {
 				err := release.CreateNewTag(git.DefaultContext, owner, repo, "main", "v1", "message")
 				require.NoError(t, err)
 
-				// Now the workflow is wating
+				// Now the workflow is waiting
 				req = NewRequestf(t, "GET", "/user2/%s/actions/workflows/tag-test.yaml/badge.svg", repo.Name)
 				resp = MakeRequest(t, req, http.StatusSeeOther)
 				assertBadge(t, resp, "tag--test.yaml-waiting-lightgrey")

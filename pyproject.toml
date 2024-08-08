@@ -18,10 +18,10 @@ skip = '.git,*.pdf,*.svg,package-lock.json,go.mod,locale,license,*.git,objects,*
 # precise hits for CamelCased words,various other curious cases which require regex to ignore
 # entire line or some portion of it
 # TODO: Resolve Treshold typo in API and remove from here
-ignore-regex = '(\b(Treshold|mx claus|commitT|ReadBy|#afile|respOne|commitI|[cC]rossReference)\b|shouldbe\.|women’s.*womens|"emoji":.*|,bu,|assert\.Equal.*"fo\b|github\.com/unknwon|Copyright 2014 Unknwon|allowed\.noone|[hH]eadErr|atLeast|{"\\U.*)|Iif|FilterIn|.*codespell-ignore.*'
+ignore-regex = '(\b(Treshold|mx claus|commitT|ReadBy|#afile|respOne|commitI|[cC]rossReference|SMove|reVer|CheckIn|NotIn)\b|shouldbe\.|women’s.*womens|"emoji":.*|,bu,|assert\.Equal.*"fo\b|github\.com/unknwon|Copyright 2014 Unknwon|allowed\.noone|[hH]eadErr|atLeast|{"\\U.*)|Iif|FilterIn|.*codespell-ignore.*'
 #|.*(Maskenpflicht|Geimpft),.*)'
 # te - TreeEntry variable
 # commiter - wrong spelling but seems used in API
 # ALLWAYS - is a config var
 # infact - other variable(s)
-ignore-words-list = 'crate,te,commiter,befores,allways,infact,startd,unknow'
+ignore-words-list = 'bleve,crate,te,commiter,befores,allways,infact,startd,unknow'
