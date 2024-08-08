@@ -139,12 +139,14 @@ func UploadPackageFile(ctx *context.Context) {
 			apiError(ctx, http.StatusInternalServerError, err)
 			return
 		}
-		buf, err = rpm_service.NewSignedRPMBuffer(buf, pri)
+		signedBuf, err := rpm_service.NewSignedRPMBuffer(buf, pri)
 		if err != nil {
 			// Not in rpm format, parsing failed.
 			apiError(ctx, http.StatusBadRequest, err)
 			return
 		}
+		defer signedBuf.Close()
+		buf = signedBuf
 	}
 
 	pck, err := rpm_module.ParsePackage(buf)
