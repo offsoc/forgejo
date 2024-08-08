@@ -8,15 +8,15 @@ forgejo=$3
 forgejo_ref=$4
 
 cd $end_to_end
-date > last-upgrade
+date >last-upgrade
 organizations=lib/ORGANIZATIONS
-if ! test -f $organizations ; then
-    echo "$organizations file not found"
-    false
+if ! test -f $organizations; then
+  echo "$organizations file not found"
+  false
 fi
 #
-# do not include forgejo-experimental so that 7.0-test is found
-# in forgejo-integration where it was just built instead of
-# forgejo-experimental which was published by the previous build
+# Inverse the order of lookup because the goal in the release built
+# pipeline is to test the latest build, if available, instead of the
+# stable version by the same version.
 #
-echo forgejo forgejo-integration > $organizations
+echo forgejo-integration forgejo-experimental forgejo >$organizations
