@@ -97,6 +97,12 @@
 					<label for="location">{{ctx.Locale.Tr "settings.location"}}</label>
 					<input id="location" name="location" value="{{.User.Location}}" maxlength="50">
 				</div>
+				{{if .User.NormalizedFederatedURI}}
+					<div class="field">
+						<label for="federateduri">{{ctx.Locale.Tr "settings.federated_uri"}}</label>
+						<a href="{{.User.NormalizedFederatedURI}}" rel="me noreferrer nofollow" target="_blank">{{.User.NormalizedFederatedURI}}</a>
+					</div>
+				{{end}}
 
 				<div class="divider"></div>
 
