@@ -16,6 +16,7 @@ import (
 	"code.gitea.io/gitea/modules/git/pushoptions"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/private"
+	issue_service "code.gitea.io/gitea/services/issue"
 	notify_service "code.gitea.io/gitea/services/notify"
 	pull_service "code.gitea.io/gitea/services/pull"
 )
@@ -178,13 +179,29 @@ func ProcReceive(ctx context.Context, repo *repo_model.Repository, gitRepo *git.
 			return nil, fmt.Errorf("unable to get commit id of reference[%s] in base repository for PR[%d]: %w", pr.GetGitRefName(), pr.ID, err)
 		}
 
-		// Do not process this change if nothing was changed.
+		issue, err := issues_model.GetIssueByIndex(ctx, repo.ID, pr.Index)
+		if err != nil {
+			return nil, fmt.Errorf("unable to load issue data for PR[%d]: %w", pr.ID, err)
+		}
+
+		if len(title) > 0 && title != issue.Title {
+			if err := issue_service.ChangeTitle(ctx, issue, pusher, title); err != nil {
+				return nil, fmt.Errorf("unable to change title of PR[%d]: %w", pr.ID, err)
+			}
+		}
+		if hasDesc && description != issue.Content {
+			if err := issue_service.ChangeContent(ctx, issue, pusher, description, issue.ContentVersion); err != nil {
+				return nil, fmt.Errorf("unable to change content of PR[%d]: %w", pr.ID, err)
+			}
+		}
+
+		// Do not process commits if nothing was changed.
 		if oldCommitID == opts.NewCommitIDs[i] {
 			results = append(results, private.HookProcReceiveRefResult{
 				OriginalRef: opts.RefFullNames[i],
+				Ref:         pr.GetGitRefName(),
 				OldOID:      opts.OldCommitIDs[i],
 				NewOID:      opts.NewCommitIDs[i],
-				Err:         "The new commit is the same as the old commit",
 			})
 			continue
 		}

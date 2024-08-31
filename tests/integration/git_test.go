@@ -955,50 +955,81 @@ func doCreateAgitFlowPull(dstPath string, ctx *APITestContext, headBranch string
 				assert.Equal(t, "Testing commit 2", pr3.Issue.Title)
 				assert.Contains(t, pr3.Issue.Content, "Longer description.")
 			})
+
+			type fieldChangeTestCase struct {
+				Value       string
+				ChangeCount int
+			}
+
 			t.Run("TitleOverride", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
-				_, _, gitErr := git.NewCommand(git.DefaultContext, "push", "origin", "-o", "title=my-shiny-title").AddDynamicArguments("HEAD:refs/for/master/" + headBranch + "-implicit-2").RunStdString(&git.RunOpts{Dir: dstPath})
-				require.NoError(t, gitErr)
+				// ChangeCount is the expected number of title change events
+				for _, change := range []fieldChangeTestCase{
+					{Value: "my-shiny-title", ChangeCount: 0},
+					{Value: "my-shinier-title", ChangeCount: 1},
+					{Value: "my-shinier-title", ChangeCount: 1},
+				} {
+					_, _, gitErr := git.NewCommand(git.DefaultContext, "push", "origin", "-o").AddDynamicArguments("title="+change.Value, "HEAD:refs/for/master/"+headBranch+"-implicit-2").RunStdString(&git.RunOpts{Dir: dstPath})
+					require.NoError(t, gitErr)
 
-				unittest.AssertCount(t, &issues_model.PullRequest{}, pullNum+4)
-				pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{
-					HeadRepoID: repo.ID,
-					Flow:       issues_model.PullRequestFlowAGit,
-					Index:      pr1.Index + 3,
-				})
-				assert.NotEmpty(t, pr)
-				err := pr.LoadIssue(db.DefaultContext)
-				require.NoError(t, err)
+					unittest.AssertCount(t, &issues_model.PullRequest{}, pullNum+4)
 
-				_, err = doAPIGetPullRequest(*ctx, ctx.Username, ctx.Reponame, pr.Index)(t)
-				require.NoError(t, err)
+					pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{
+						HeadRepoID: repo.ID,
+						Flow:       issues_model.PullRequestFlowAGit,
+						Index:      pr1.Index + 3,
+					})
+					assert.NotEmpty(t, pr)
+					err := pr.LoadIssue(db.DefaultContext)
+					require.NoError(t, err)
 
-				assert.Equal(t, "my-shiny-title", pr.Issue.Title)
-				assert.Contains(t, pr.Issue.Content, "Longer description.")
+					_, err = doAPIGetPullRequest(*ctx, ctx.Username, ctx.Reponame, pr.Index)(t)
+					require.NoError(t, err)
+
+					assert.Equal(t, change.Value, pr.Issue.Title)
+					assert.Contains(t, pr.Issue.Content, "Longer description.")
+
+					titleChanges, err := issues_model.FindComments(db.DefaultContext, &issues_model.FindCommentsOptions{
+						IssueID: pr.Issue.ID,
+						Type:    issues_model.CommentTypeChangeTitle,
+					})
+					require.NoError(t, err)
+					assert.Len(t, titleChanges, change.ChangeCount)
+				}
 			})
-
 			t.Run("DescriptionOverride", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
-				_, _, gitErr := git.NewCommand(git.DefaultContext, "push", "origin", "-o", "description=custom").AddDynamicArguments("HEAD:refs/for/master/" + headBranch + "-implicit-3").RunStdString(&git.RunOpts{Dir: dstPath})
-				require.NoError(t, gitErr)
+				// ChangeCount is the expected comment history count (zero when unedited, then total revisions)
+				for _, change := range []fieldChangeTestCase{
+					{Value: "custom", ChangeCount: 0},
+					{Value: "edited", ChangeCount: 2},
+					{Value: "edited", ChangeCount: 2},
+				} {
+					_, _, gitErr := git.NewCommand(git.DefaultContext, "push", "origin", "-o").AddDynamicArguments("description="+change.Value, "HEAD:refs/for/master/"+headBranch+"-implicit-3").RunStdString(&git.RunOpts{Dir: dstPath})
+					require.NoError(t, gitErr)
 
-				unittest.AssertCount(t, &issues_model.PullRequest{}, pullNum+5)
-				pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{
-					HeadRepoID: repo.ID,
-					Flow:       issues_model.PullRequestFlowAGit,
-					Index:      pr1.Index + 4,
-				})
-				assert.NotEmpty(t, pr)
-				err := pr.LoadIssue(db.DefaultContext)
-				require.NoError(t, err)
+					unittest.AssertCount(t, &issues_model.PullRequest{}, pullNum+5)
+					pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{
+						HeadRepoID: repo.ID,
+						Flow:       issues_model.PullRequestFlowAGit,
+						Index:      pr1.Index + 4,
+					})
+					assert.NotEmpty(t, pr)
+					err := pr.LoadIssue(db.DefaultContext)
+					require.NoError(t, err)
 
-				_, err = doAPIGetPullRequest(*ctx, ctx.Username, ctx.Reponame, pr.Index)(t)
-				require.NoError(t, err)
+					_, err = doAPIGetPullRequest(*ctx, ctx.Username, ctx.Reponame, pr.Index)(t)
+					require.NoError(t, err)
 
-				assert.Equal(t, "Testing commit 2", pr.Issue.Title)
-				assert.Contains(t, pr.Issue.Content, "custom")
+					assert.Equal(t, "Testing commit 2", pr.Issue.Title)
+					assert.Contains(t, pr.Issue.Content, change.Value)
+
+					contentHistory, err := issues_model.FetchIssueContentHistoryList(db.DefaultContext, pr.Issue.ID, 0)
+					require.NoError(t, err)
+					assert.Len(t, contentHistory, change.ChangeCount)
+				}
 			})
 		})
 
