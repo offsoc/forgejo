@@ -3,6 +3,7 @@ import {svg} from '../svg.js';
 const addPrefix = (str) => `user-content-${str}`;
 const removePrefix = (str) => str.replace(/^user-content-/, '');
 const hasPrefix = (str) => str.startsWith('user-content-');
+const removeHyphen = (str) => str.replaceAll('-', '');
 
 // scroll to anchor while respecting the `user-content` prefix that exists on the target
 function scrollToAnchor(encodedId) {
@@ -21,7 +22,24 @@ function scrollToAnchor(encodedId) {
 
   // compat for links with old 'user-content-' prefixed hashes
   if (!el && hasPrefix(id)) {
-    return document.getElementById(id)?.scrollIntoView();
+    el = document.getElementById(id);
+  }
+
+  // Compat for github/gohugo links
+  // They remove some characters while we change them to hyphen
+  // eg. Title:'dots.title' => them:'dottitle', us:'dot-title'
+  // They keep a hyphen per changed character, while we keep a single one
+  // eg. Title: 'space  title' => them:'space--title', us:'space-title'
+  //
+  // So, if there isn't any matching element right now, we use the first
+  // element with the same id if we ignore hyphens.
+  //
+  // We could use a regexp using the user input hash:
+  // let reg = new RegExp('^user-content-' + id.replaceAll('-','-*') +'$')
+  // It would be more accurate, but it could be used as a client-side REDOS
+  if (!el) {
+    nohypen_id = removeHyphen(id)
+    el = Array.from(document.querySelectorAll("[id^=user-content]")).filter(e => removeHyphen(e.id) == nohyphen_id)[0]
   }
 
   el?.scrollIntoView();
