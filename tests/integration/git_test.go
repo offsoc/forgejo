@@ -15,6 +15,7 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -1029,6 +1030,18 @@ func doCreateAgitFlowPull(dstPath string, ctx *APITestContext, headBranch string
 					contentHistory, err := issues_model.FetchIssueContentHistoryList(db.DefaultContext, pr.Issue.ID, 0)
 					require.NoError(t, err)
 					assert.Len(t, contentHistory, change.ChangeCount)
+				}
+			})
+			t.Run("Invalid", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
+				longString := strings.Repeat(".", 500)
+				for _, option := range []string{"topic=", "title="} {
+					_, stdErr, gitErr := git.NewCommand(git.DefaultContext, "push", "origin", "-o").AddDynamicArguments(option+longString, "HEAD:refs/for/master/"+headBranch+"-invalid").RunStdString(&git.RunOpts{Dir: dstPath})
+					assert.Contains(t, stdErr, "must contain at most", option)
+					require.Error(t, gitErr)
+
+					unittest.AssertCount(t, &issues_model.PullRequest{}, pullNum+5)
 				}
 			})
 		})

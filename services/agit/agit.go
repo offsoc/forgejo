@@ -16,19 +16,44 @@ import (
 	"code.gitea.io/gitea/modules/git/pushoptions"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/private"
+	"code.gitea.io/gitea/modules/web/middleware"
+	gitea_context "code.gitea.io/gitea/services/context"
 	issue_service "code.gitea.io/gitea/services/issue"
 	notify_service "code.gitea.io/gitea/services/notify"
 	pull_service "code.gitea.io/gitea/services/pull"
+
+	"gitea.com/go-chi/binding"
 )
 
-// ProcReceive handle proc receive work
-func ProcReceive(ctx context.Context, repo *repo_model.Repository, gitRepo *git.Repository, opts *private.HookOptions) ([]private.HookProcReceiveRefResult, error) {
-	results := make([]private.HookProcReceiveRefResult, 0, len(opts.OldCommitIDs))
+type pushOptions struct {
+	TopicBranch string `binding:"MaxSize(100);GitRefName"`
+	Title       string `binding:"MaxSize(255)"`
+	Description string
+}
 
+// ProcReceive handle proc receive work
+func ProcReceive(ctx *gitea_context.PrivateContext, repo *repo_model.Repository, gitRepo *git.Repository, opts *private.HookOptions) ([]private.HookProcReceiveRefResult, error) {
 	topicBranch, _ := opts.GetGitPushOptions().GetString(pushoptions.AgitTopic)
 	_, forcePush := opts.GetGitPushOptions().GetString(pushoptions.AgitForcePush)
 	title, hasTitle := opts.GetGitPushOptions().GetString(pushoptions.AgitTitle)
 	description, hasDesc := opts.GetGitPushOptions().GetString(pushoptions.AgitDescription)
+
+	f := pushOptions{
+		TopicBranch: topicBranch,
+		Title:       title,
+		Description: description,
+	}
+	validationOutput := make(map[string]any)
+	middleware.Validate(binding.RawValidate(f), validationOutput, f, ctx.Locale)
+
+	if validationOutput["HasError"] == true {
+		return []private.HookProcReceiveRefResult{
+			{
+				OriginalRef: opts.RefFullNames[0],
+				Err:         validationOutput["ErrorMsg"].(string),
+			},
+		}, nil
+	}
 
 	objectFormat := git.ObjectFormatFromName(repo.ObjectFormatName)
 
@@ -37,6 +62,7 @@ func ProcReceive(ctx context.Context, repo *repo_model.Repository, gitRepo *git.
 		return nil, fmt.Errorf("failed to get user[%d]: %w", opts.UserID, err)
 	}
 
+	results := make([]private.HookProcReceiveRefResult, 0, len(opts.OldCommitIDs))
 	for i := range opts.OldCommitIDs {
 		// Avoid processing this change if the new commit is empty.
 		if opts.NewCommitIDs[i] == objectFormat.EmptyObjectID().String() {
