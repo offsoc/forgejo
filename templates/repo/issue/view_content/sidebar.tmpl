@@ -43,6 +43,11 @@
 		{{template "repo/issue/view_content/sidebar/dependencies" .}}
 	{{end}}
 
+	{{if .Issue.IsPull}}
+		<div class="divider"></div>
+		{{template "repo/issue/view_content/sidebar/download" .}}
+	{{end}}
+
 	<div class="divider"></div>
 	{{template "repo/issue/view_content/sidebar/reference" .}}
 

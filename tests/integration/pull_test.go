@@ -65,3 +65,37 @@ func TestPullManuallyMergeWarning(t *testing.T) {
 		assert.NotContains(t, mergeInstructions, warningMessage)
 	})
 }
+
+func TestViewPullRequest(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	req := NewRequest(t, "GET", "/user2/repo1/pulls/3")
+	resp := MakeRequest(t, req, http.StatusOK)
+
+	htmlDoc := NewHTMLParser(t, resp.Body)
+
+	t.Run("DownloadLinks", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		downloadLinks := htmlDoc.doc.Find(".ui.download > div.tw-mt-2 > a")
+		assert.Equal(t, 3, downloadLinks.Length())
+
+		patchDownloadLink := downloadLinks.First()
+		patchHref, patchExists := patchDownloadLink.Attr("href")
+		assert.Equal(t, "/user2/repo1/pulls/3.patch", patchHref)
+		assert.True(t, patchExists)
+		MakeRequest(t, NewRequest(t, "GET", patchHref), http.StatusOK)
+
+		diffDownloadLink := patchDownloadLink.Next()
+		diffHref, diffExists := diffDownloadLink.Attr("href")
+		assert.Equal(t, "/user2/repo1/pulls/3.diff", diffHref)
+		assert.True(t, diffExists)
+		MakeRequest(t, NewRequest(t, "GET", diffHref), http.StatusOK)
+
+		binaryDiffDownloadLink := diffDownloadLink.Next()
+		binaryDiffHref, binaryDiffExists := binaryDiffDownloadLink.Attr("href")
+		assert.Equal(t, "/user2/repo1/pulls/3.diff?binary=1", binaryDiffHref)
+		assert.True(t, binaryDiffExists)
+		MakeRequest(t, NewRequest(t, "GET", binaryDiffHref), http.StatusOK)
+	})
+}

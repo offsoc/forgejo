@@ -1,0 +1,17 @@
+<div class="ui download">
+	<span class="text"><strong>{{ctx.Locale.Tr "repo.pulls.download.title"}}</strong></span>
+	<div class="tw-mt-2">
+        <a href="{{.Issue.Link}}.patch" class="fluid ui button" download>
+            {{svg "octicon-git-compare" 16 "tw-mr-2"}} 
+            {{ctx.Locale.Tr "repo.pulls.download.patch"}}
+        </a>
+        <a href="{{.Issue.Link}}.diff" class="fluid ui button tw-mt-1" download>
+            {{svg "octicon-file-diff" 16 "tw-mr-2"}} 
+            {{ctx.Locale.Tr "repo.pulls.download.diff"}}
+        </a>
+        <a href="{{.Issue.Link}}.diff?binary=1" class="fluid ui button tw-mt-1" download>
+            {{svg "octicon-file-binary" 16 "tw-mr-2"}} 
+            {{ctx.Locale.Tr "repo.pulls.download.binary_diff"}}
+        </a>
+	</div>
+</div>
