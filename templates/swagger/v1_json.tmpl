@@ -28891,7 +28891,22 @@
     "parameterBodies": {
       "description": "parameterBodies",
       "schema": {
-        "$ref": "#/definitions/DispatchWorkflowOption"
+        "$ref": "#/definitions/CreateEditStarListOptions"
+      }
+    },
+    "quotaExceeded": {
+      "description": "QuotaExceeded",
+      "headers": {
+        "message": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        }
       }
     },
     "redirect": {
