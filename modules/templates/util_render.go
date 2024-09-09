@@ -245,7 +245,7 @@ func RenderLabels(ctx context.Context, locale translation.Locale, labels []*issu
 		if isPull {
 			issuesOrPull = "pulls"
 		}
-		htmlCode += fmt.Sprintf("<a href='%s/%s?labels=%d'>%s</a> ",
+		htmlCode += fmt.Sprintf("<a href='%s/%s?labels=%d' rel='nofollow'>%s</a> ",
 			repoLink, issuesOrPull, label.ID, RenderLabel(ctx, locale, label))
 	}
 	htmlCode += "</span>"

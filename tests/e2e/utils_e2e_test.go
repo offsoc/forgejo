@@ -14,10 +14,10 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/tests"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func onGiteaRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare ...bool) {
+func onForgejoRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare ...bool) {
 	if len(prepare) == 0 || prepare[0] {
 		defer tests.PrepareTestEnv(t, 1)()
 	}
@@ -26,7 +26,7 @@ func onGiteaRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare ...
 	}
 
 	u, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	listener, err := net.Listen("tcp", u.Host)
 	i := 0
 	for err != nil && i <= 10 {
@@ -34,7 +34,7 @@ func onGiteaRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare ...
 		listener, err = net.Listen("tcp", u.Host)
 		i++
 	}
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	u.Host = listener.Addr().String()
 
 	defer func() {
@@ -49,8 +49,8 @@ func onGiteaRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare ...
 	callback(t, u)
 }
 
-func onGiteaRun(t *testing.T, callback func(*testing.T, *url.URL), prepare ...bool) {
-	onGiteaRunTB(t, func(t testing.TB, u *url.URL) {
+func onForgejoRun(t *testing.T, callback func(*testing.T, *url.URL), prepare ...bool) {
+	onForgejoRunTB(t, func(t testing.TB, u *url.URL) {
 		callback(t.(*testing.T), u)
 	}, prepare...)
 }

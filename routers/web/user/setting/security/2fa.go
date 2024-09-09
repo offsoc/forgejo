@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/forms"
+	"code.gitea.io/gitea/services/mailer"
 
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
@@ -75,6 +76,11 @@ func DisableTwoFactor(ctx *context.Context) {
 			ctx.Redirect(setting.AppSubURL + "/user/settings/security")
 		}
 		ctx.ServerError("SettingsTwoFactor: Failed to DeleteTwoFactorByID", err)
+		return
+	}
+
+	if err := mailer.SendDisabledTOTP(ctx, ctx.Doer); err != nil {
+		ctx.ServerError("SendDisabledTOTP", err)
 		return
 	}
 
@@ -235,6 +241,11 @@ func EnrollTwoFactorPost(ctx *context.Context) {
 	if err := ctx.Session.Release(); err != nil {
 		// tolerate this failure - it's more important to continue
 		log.Error("Unable to save changes to the session: %v", err)
+	}
+
+	if err := mailer.SendTOTPEnrolled(ctx, ctx.Doer); err != nil {
+		ctx.ServerError("SendTOTPEnrolled", err)
+		return
 	}
 
 	if err = auth.NewTwoFactor(ctx, t); err != nil {

@@ -1,15 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    ":approveMajorUpdates",
-    ":maintainLockFilesWeekly",
-    "group:postcss",
-    "group:linters",
-    "schedule:daily",
-    "schedule:automergeDaily",
-    "local>forgejo-contrib/forgejo-renovate//go.json"
-  ],
+  "extends": ["local>forgejo/renovate-config"],
   "ignorePresets": [
     ":semanticPrefixFixDepsChoreOthers",
     "docker:pinDigests",
@@ -20,31 +11,21 @@
     "/^v[7-9]\\.\\d+/forgejo$/",
     "/^v\\d\\d+\\.\\d+\\/forgejo$/"
   ],
-  "semanticCommits": "disabled",
-  "automergeStrategy": "merge-commit",
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
   "prConcurrentLimit": 10,
-  "internalChecksFilter": "strict",
   "osvVulnerabilityAlerts": true,
   "labels": ["dependency-upgrade"],
   "packageRules": [
     {
-      "description": "Require approval for go and python minor version",
-      "matchDepNames": [
-        "go",
-        "python",
-        "golang",
-        "docker.io/golang",
-        "docker.io/library/golang",
-        "mcr.microsoft.com/devcontainers/go"
-      ],
+      "description": "Require approval for python minor version",
+      "matchPackageNames": ["containerbase/python-prebuild", "python"],
       "matchUpdateTypes": ["minor"],
       "dependencyDashboardApproval": true
     },
     {
       "description": "Require dashboard approval for some deps",
-      "matchDepNames": [
-        "bitnami/minio",
+      "matchPackageNames": [
+        "docker.io/bitnami/minio",
         "github.com/go-ap/activitypub",
         "github.com/nektos/act",
         "gitea.com/gitea/act"
@@ -53,7 +34,8 @@
     },
     {
       "description": "Schedule some deps less frequently",
-      "matchDepNames": [
+      "matchPackageNames": [
+        "code.forgejo.org/f3/gof3/v3",
         "github.com/google/pprof",
         "github.com/golangci/misspell/cmd/misspell"
       ],
@@ -61,61 +43,49 @@
     },
     {
       "description": "elasticsearch CI images are published about once a month and do not use semantic versioning or short tags",
-      "matchDepNames": ["elasticsearch"],
+      "matchPackageNames": ["elasticsearch"],
       "extends": ["schedule:quarterly"]
     },
     {
       "description": "devcontainer is an optional tool used by some Forgejo contributors when working on the codebase",
-      "matchPackagePrefixes": [
-        "ghcr.io/devcontainers/features/",
-        "ghcr.io/devcontainers-contrib/features/"
-      ],
       "groupName": "devcontainer packages",
       "extends": ["schedule:quarterly"],
-      "automerge": true
-    },
-    {
-      "description": "Group golang packages",
-      "matchDepNames": [
-        "go",
-        "golang",
-        "docker.io/golang",
-        "docker.io/library/golang"
-      ],
-      "groupName": "golang packages"
+      "automerge": true,
+      "matchPackageNames": [
+        "ghcr.io/devcontainers/features/**",
+        "ghcr.io/devcontainers-contrib/features/**"
+      ]
     },
     {
       "description": "Group nodejs packages",
-      "matchDepNames": ["node", "docker.io/node", "docker.io/library/node"],
+      "matchPackageNames": [
+        "code.forgejo.org/oci/node",
+        "docker.io/library/node",
+        "docker.io/node",
+        "node"
+      ],
       "groupName": "nodejs packages",
       "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
       "versioning": "node"
     },
     {
-      "description": "Automerge renovate updates",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["ghcr.io/visualon/renovate"],
+      "description": "x/tools/* are used in the CI only and upgraded together",
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true,
-      "groupName": "renovate"
+      "groupName": "x/tools",
+      "matchPackageNames": ["golang.org/x/tools{/,}**"]
     },
     {
-      "description": "x/tools/* are used in the CI only and upgraded together",
-      "matchPackagePrefixes": [
-        "golang.org/x/tools"
-      ],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
-      "automerge": true,
-      "groupName": "x/tools"
+      "description": "Group postcss minor and patch updates",
+      "extends": ["packages:postcss"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "postcss"
     },
     {
       "description": "Split minor and patch updates",
-      "matchDepNames": [
-        "docker.io/golang",
-        "docker.io/library/golang",
+      "matchPackageNames": [
+        "containerbase/python-prebuild",
         "github.com/urfave/cli/v2",
-        "go",
-        "golang",
         "python",
         "swagger-ui-dist",
         "vue"
@@ -124,67 +94,76 @@
     },
     {
       "description": "Automerge patch updates",
-      "matchDepNames": ["vue", "github.com/urfave/cli/v2", "swagger-ui-dist"],
+      "matchPackageNames": [
+        "vue",
+        "github.com/urfave/cli/v2",
+        "swagger-ui-dist"
+      ],
       "matchUpdateTypes": ["patch"],
       "automerge": true
     },
     {
+      "description": "Automerge renovate updates",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "code.forgejo.org/forgejo-contrib/renovate",
+        "ghcr.io/visualon/renovate"
+      ],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true
+    },
+    {
+      "description": "Add reviewer and additional labels to renovate PRs",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "code.forgejo.org/forgejo-contrib/renovate",
+        "ghcr.io/visualon/renovate"
+      ],
+      "reviewers": ["viceice"],
+      "addLabels": ["forgejo/ci", "test/not-needed"]
+    },
+    {
       "description": "Update renovate with higher prio to come through rate limit",
       "matchDatasources": ["docker"],
-      "matchDepNames": ["ghcr.io/visualon/renovate"],
-      "extends": ["schedule:weekly"],
-      "prPriority": 10
-    },
-    {
-      "description": "Update go patch with higher prio to come through rate limit",
-      "matchDepNames": [
-        "go",
-        "golang",
-        "docker.io/golang",
-        "docker.io/library/golang"
+      "matchPackageNames": [
+        "code.forgejo.org/forgejo-contrib/renovate",
+        "ghcr.io/visualon/renovate"
       ],
-      "matchUpdateTypes": ["patch"],
+      "extends": ["schedule:weekly"],
       "prPriority": 10,
-      "schedule": ["at any time"]
-    },
-    {
-      "description": "Disable actions/cascading-pr for now <https://github.com/renovatebot/renovate/issues/28120>",
-      "matchDepNames": ["actions/cascading-pr"],
-      "matchManagers": ["github-actions"],
-      "enabled": false
+      "groupName": "renovate"
     },
     {
       "description": "Automerge some packages when CI succeeds",
       "extends": ["packages:linters", "packages:test"],
-      "matchDepNames": [
+      "matchPackageNames": [
+        "@eslint-community/**",
+        "@playwright/**",
+        "@stoplight/spectral-cli",
+        "@stylistic/**",
+        "djlint",
         "github.com/editorconfig-checker/editorconfig-checker/v2/cmd/editorconfig-checker",
         "github.com/golangci/golangci-lint/cmd/golangci-lint",
         "github.com/go-testfixtures/testfixtures",
         "github.com/PuerkitoBio/goquery",
         "happy-dom",
         "markdownlint-cli",
+        "mcr.microsoft.com/devcontainers/**",
         "mvdan.cc/gofumpt",
         "updates",
         "vite-string-plugin",
         "@vue/test-utils"
       ],
-      "matchPackagePrefixes": [
-        "@eslint-community/",
-        "@playwright/",
-        "@stoplight/spectral-cli",
-        "@stylistic/",
-        "mcr.microsoft.com/devcontainers/"
-      ],
       "automerge": true
     },
     {
       "description": "Hold back on some package updates for a few days",
-      "matchDepNames": ["monaco-editor"],
+      "matchPackageNames": ["monaco-editor"],
       "minimumReleaseAge": "30 days"
     },
     {
       "description": "disallow `eslint-plugin-no-use-extend-native` v0.6.0+, requires eslint v9",
-      "matchDepNames": ["eslint-plugin-no-use-extend-native"],
+      "matchPackageNames": ["eslint-plugin-no-use-extend-native"],
       "allowedVersions": "<0.6.0"
     },
     {
@@ -195,15 +174,6 @@
     }
   ],
   "customManagers": [
-    {
-      "description": "Update go-version in forgejo workflows",
-      "customType": "regex",
-      "fileMatch": ["^.forgejo/workflows/.+\\.yml$"],
-      "matchStrings": ["\\s+go-version: ['\"]?(?<currentValue>.+?)['\"]?\\s"],
-      "depNameTemplate": "go",
-      "datasourceTemplate": "golang-version",
-      "versioningTemplate": "go-mod-directive"
-    },
     {
       "description": "Update node-version in forgejo workflows",
       "customType": "regex",

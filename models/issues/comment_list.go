@@ -23,7 +23,7 @@ func (comments CommentList) LoadPosters(ctx context.Context) error {
 	}
 
 	posterIDs := container.FilterSlice(comments, func(c *Comment) (int64, bool) {
-		return c.PosterID, c.Poster == nil && c.PosterID > 0
+		return c.PosterID, c.Poster == nil && user_model.IsValidUserID(c.PosterID)
 	})
 
 	posterMaps, err := getPostersByIDs(ctx, posterIDs)
@@ -33,7 +33,7 @@ func (comments CommentList) LoadPosters(ctx context.Context) error {
 
 	for _, comment := range comments {
 		if comment.Poster == nil {
-			comment.Poster = getPoster(comment.PosterID, posterMaps)
+			comment.PosterID, comment.Poster = user_model.GetUserFromMap(comment.PosterID, posterMaps)
 		}
 	}
 	return nil
@@ -165,7 +165,7 @@ func (comments CommentList) loadOldMilestones(ctx context.Context) error {
 
 func (comments CommentList) getAssigneeIDs() []int64 {
 	return container.FilterSlice(comments, func(comment *Comment) (int64, bool) {
-		return comment.AssigneeID, comment.AssigneeID > 0
+		return comment.AssigneeID, user_model.IsValidUserID(comment.AssigneeID)
 	})
 }
 
@@ -206,11 +206,7 @@ func (comments CommentList) loadAssignees(ctx context.Context) error {
 	}
 
 	for _, comment := range comments {
-		comment.Assignee = assignees[comment.AssigneeID]
-		if comment.Assignee == nil {
-			comment.AssigneeID = user_model.GhostUserID
-			comment.Assignee = user_model.NewGhostUser()
-		}
+		comment.AssigneeID, comment.Assignee = user_model.GetUserFromMap(comment.AssigneeID, assignees)
 	}
 	return nil
 }

@@ -24,7 +24,10 @@ import (
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/tests"
 
+	"github.com/ProtonMail/go-crypto/openpgp"
+	"github.com/sassoftware/go-rpmutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageRpm(t *testing.T) {
@@ -65,13 +68,13 @@ Mu0UFYgZ/bYnuvn/vz4wtCz8qMwsHUvP0PX3tbYFUctAPdrY6tiiDtcCddDECahx7SuVNP5dpmb5
 7tpp/pEjDS7cGPZ6BY430+7danDq6f42Nw49b9F7zp6BiKpJb9s5P0AYN2+L159cnrur636rx+v1
 7ae1K28QbMMcqI8CqwIrgwg9nTOp8Oj9q81plUY7ZuwXN8Vvs8wbAAA=`
 	rpmPackageContent, err := base64.StdEncoding.DecodeString(base64RpmPackageContent)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	zr, err := gzip.NewReader(bytes.NewReader(rpmPackageContent))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	content, err := io.ReadAll(zr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	rootURL := fmt.Sprintf("/api/packages/%s/rpm", user.Name)
 
@@ -126,24 +129,24 @@ gpgkey=%sapi/packages/%s/rpm/repository.key`,
 				MakeRequest(t, req, http.StatusCreated)
 
 				pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeRpm)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Len(t, pvs, 1)
 
 				pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Nil(t, pd.SemVer)
 				assert.IsType(t, &rpm_module.VersionMetadata{}, pd.Metadata)
 				assert.Equal(t, packageName, pd.Package.Name)
 				assert.Equal(t, packageVersion, pd.Version.Version)
 
 				pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Len(t, pfs, 1)
 				assert.Equal(t, fmt.Sprintf("%s-%s.%s.rpm", packageName, packageVersion, packageArchitecture), pfs[0].Name)
 				assert.True(t, pfs[0].IsLead)
 
 				pb, err := packages.GetBlobByID(db.DefaultContext, pfs[0].BlobID)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, int64(len(content)), pb.Size)
 
 				req = NewRequestWithBody(t, "PUT", url, bytes.NewReader(content)).
@@ -245,9 +248,9 @@ gpgkey=%sapi/packages/%s/rpm/repository.key`,
 					t.Helper()
 
 					zr, err := gzip.NewReader(resp.Body)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
-					assert.NoError(t, xml.NewDecoder(zr).Decode(v))
+					require.NoError(t, xml.NewDecoder(zr).Decode(v))
 				}
 
 				t.Run("primary.xml.gz", func(t *testing.T) {
@@ -425,11 +428,34 @@ gpgkey=%sapi/packages/%s/rpm/repository.key`,
 				MakeRequest(t, req, http.StatusNoContent)
 
 				pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeRpm)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Empty(t, pvs)
 				req = NewRequest(t, "DELETE", fmt.Sprintf("%s/package/%s/%s/%s", groupURL, packageName, packageVersion, packageArchitecture)).
 					AddBasicAuth(user.Name)
 				MakeRequest(t, req, http.StatusNotFound)
+			})
+
+			t.Run("UploadSign", func(t *testing.T) {
+				url := groupURL + "/upload?sign=true"
+				req := NewRequestWithBody(t, "PUT", url, bytes.NewReader(content)).
+					AddBasicAuth(user.Name)
+				MakeRequest(t, req, http.StatusCreated)
+
+				gpgReq := NewRequest(t, "GET", rootURL+"/repository.key")
+				gpgResp := MakeRequest(t, gpgReq, http.StatusOK)
+				pub, err := openpgp.ReadArmoredKeyRing(gpgResp.Body)
+				require.NoError(t, err)
+
+				req = NewRequest(t, "GET", fmt.Sprintf("%s/package/%s/%s/%s", groupURL, packageName, packageVersion, packageArchitecture))
+				resp := MakeRequest(t, req, http.StatusOK)
+
+				_, sigs, err := rpmutils.Verify(resp.Body, pub)
+				require.NoError(t, err)
+				require.NotEmpty(t, sigs)
+
+				req = NewRequest(t, "DELETE", fmt.Sprintf("%s/package/%s/%s/%s", groupURL, packageName, packageVersion, packageArchitecture)).
+					AddBasicAuth(user.Name)
+				MakeRequest(t, req, http.StatusNoContent)
 			})
 		})
 	}

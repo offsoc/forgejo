@@ -20,6 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -57,7 +58,7 @@ func TestRender_StandardLinks(t *testing.T) {
 				Base: FullURL,
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(string(buffer)))
 
 		buffer, err = markdown.RenderString(&markup.RenderContext{
@@ -67,7 +68,7 @@ func TestRender_StandardLinks(t *testing.T) {
 			},
 			IsWiki: true,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expectedWiki), strings.TrimSpace(string(buffer)))
 	}
 
@@ -91,7 +92,7 @@ func TestRender_Images(t *testing.T) {
 				Base: FullURL,
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(string(buffer)))
 	}
 
@@ -300,7 +301,7 @@ func TestTotal_RenderWiki(t *testing.T) {
 			Metas:  localMetas,
 			IsWiki: true,
 		}, sameCases[i])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, template.HTML(answers[i]), line)
 	}
 
@@ -325,7 +326,7 @@ func TestTotal_RenderWiki(t *testing.T) {
 			},
 			IsWiki: true,
 		}, testCases[i])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, template.HTML(testCases[i+1]), line)
 	}
 }
@@ -344,7 +345,7 @@ func TestTotal_RenderString(t *testing.T) {
 			},
 			Metas: localMetas,
 		}, sameCases[i])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, template.HTML(answers[i]), line)
 	}
 
@@ -357,7 +358,7 @@ func TestTotal_RenderString(t *testing.T) {
 				Base: FullURL,
 			},
 		}, testCases[i])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, template.HTML(testCases[i+1]), line)
 	}
 }
@@ -365,17 +366,17 @@ func TestTotal_RenderString(t *testing.T) {
 func TestRender_RenderParagraphs(t *testing.T) {
 	test := func(t *testing.T, str string, cnt int) {
 		res, err := markdown.RenderRawString(&markup.RenderContext{Ctx: git.DefaultContext}, str)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, cnt, strings.Count(res, "<p"), "Rendered result for unix should have %d paragraph(s) but has %d:\n%s\n", cnt, strings.Count(res, "<p"), res)
 
 		mac := strings.ReplaceAll(str, "\n", "\r")
 		res, err = markdown.RenderRawString(&markup.RenderContext{Ctx: git.DefaultContext}, mac)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, cnt, strings.Count(res, "<p"), "Rendered result for mac should have %d paragraph(s) but has %d:\n%s\n", cnt, strings.Count(res, "<p"), res)
 
 		dos := strings.ReplaceAll(str, "\n", "\r\n")
 		res, err = markdown.RenderRawString(&markup.RenderContext{Ctx: git.DefaultContext}, dos)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, cnt, strings.Count(res, "<p"), "Rendered result for windows should have %d paragraph(s) but has %d:\n%s\n", cnt, strings.Count(res, "<p"), res)
 	}
 
@@ -403,7 +404,7 @@ func TestMarkdownRenderRaw(t *testing.T) {
 	for _, testcase := range testcases {
 		log.Info("Test markdown render error with fuzzy data: %x, the following errors can be recovered", testcase)
 		_, err := markdown.RenderRawString(&markup.RenderContext{Ctx: git.DefaultContext}, string(testcase))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 }
 
@@ -415,7 +416,7 @@ func TestRenderSiblingImages_Issue12925(t *testing.T) {
 <a href="/image2" target="_blank" rel="nofollow noopener"><img src="/image2" alt="image2"></a></p>
 `
 	res, err := markdown.RenderRawString(&markup.RenderContext{Ctx: git.DefaultContext}, testcase)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, res)
 }
 
@@ -424,7 +425,7 @@ func TestRenderEmojiInLinks_Issue12331(t *testing.T) {
 	expected := `<p><a href="https://gitea.io" rel="nofollow">Link with emoji <span class="emoji" aria-label="waxing gibbous moon">🌔</span> in text</a></p>
 `
 	res, err := markdown.RenderString(&markup.RenderContext{Ctx: git.DefaultContext}, testcase)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, template.HTML(expected), res)
 }
 
@@ -458,7 +459,7 @@ func TestColorPreview(t *testing.T) {
 
 	for _, test := range positiveTests {
 		res, err := markdown.RenderString(&markup.RenderContext{Ctx: git.DefaultContext}, test.testcase)
-		assert.NoError(t, err, "Unexpected error in testcase: %q", test.testcase)
+		require.NoError(t, err, "Unexpected error in testcase: %q", test.testcase)
 		assert.Equal(t, template.HTML(test.expected), res, "Unexpected result in testcase %q", test.testcase)
 	}
 
@@ -477,7 +478,7 @@ func TestColorPreview(t *testing.T) {
 
 	for _, test := range negativeTests {
 		res, err := markdown.RenderString(&markup.RenderContext{Ctx: git.DefaultContext}, test)
-		assert.NoError(t, err, "Unexpected error in testcase: %q", test)
+		require.NoError(t, err, "Unexpected error in testcase: %q", test)
 		assert.NotContains(t, res, `<span class="color-preview" style="background-color: `, "Unexpected result in testcase %q", test)
 	}
 }
@@ -564,7 +565,7 @@ func TestMathBlock(t *testing.T) {
 
 	for _, test := range testcases {
 		res, err := markdown.RenderString(&markup.RenderContext{Ctx: git.DefaultContext}, test.testcase)
-		assert.NoError(t, err, "Unexpected error in testcase: %q", test.testcase)
+		require.NoError(t, err, "Unexpected error in testcase: %q", test.testcase)
 		assert.Equal(t, template.HTML(test.expected), res, "Unexpected result in testcase %q", test.testcase)
 	}
 }
@@ -762,7 +763,7 @@ Citation needed[^0].`,
 	}
 	for _, test := range testcases {
 		res, err := markdown.RenderString(&markup.RenderContext{Ctx: git.DefaultContext}, test.testcase)
-		assert.NoError(t, err, "Unexpected error in testcase: %q", test.testcase)
+		require.NoError(t, err, "Unexpected error in testcase: %q", test.testcase)
 		assert.Equal(t, test.expected, string(res), "Unexpected result in testcase %q", test.testcase)
 	}
 }
@@ -799,7 +800,7 @@ foo: bar
 
 	for _, test := range testcases {
 		res, err := markdown.RenderString(&markup.RenderContext{Ctx: git.DefaultContext}, test.testcase)
-		assert.NoError(t, err, "Unexpected error in testcase: %q", test.testcase)
+		require.NoError(t, err, "Unexpected error in testcase: %q", test.testcase)
 		assert.Equal(t, template.HTML(test.expected), res, "Unexpected result in testcase %q", test.testcase)
 	}
 }
@@ -1190,7 +1191,7 @@ space</p>
 
 	for i, c := range cases {
 		result, err := markdown.RenderString(&markup.RenderContext{Ctx: context.Background(), Links: c.Links, IsWiki: c.IsWiki}, input)
-		assert.NoError(t, err, "Unexpected error in testcase: %v", i)
+		require.NoError(t, err, "Unexpected error in testcase: %v", i)
 		assert.Equal(t, template.HTML(c.Expected), result, "Unexpected result in testcase %v", i)
 	}
 }
@@ -1207,7 +1208,7 @@ func TestCustomMarkdownURL(t *testing.T) {
 				BranchPath: "branch/main",
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(string(buffer)))
 	}
 
@@ -1226,7 +1227,7 @@ func TestYAMLMeta(t *testing.T) {
 		buffer, err := markdown.RenderString(&markup.RenderContext{
 			Ctx: git.DefaultContext,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(string(buffer)))
 	}
 
@@ -1350,7 +1351,7 @@ func TestCallout(t *testing.T) {
 		buffer, err := markdown.RenderString(&markup.RenderContext{
 			Ctx: git.DefaultContext,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(string(buffer)))
 	}
 

@@ -451,17 +451,22 @@ var emailToReplacer = strings.NewReplacer(
 )
 
 // EmailTo returns a string suitable to be put into a e-mail `To:` header.
-func (u *User) EmailTo() string {
+func (u *User) EmailTo(overrideMail ...string) string {
 	sanitizedDisplayName := emailToReplacer.Replace(u.DisplayName())
 
-	// should be an edge case but nice to have
-	if sanitizedDisplayName == u.Email {
-		return u.Email
+	email := u.Email
+	if len(overrideMail) > 0 {
+		email = overrideMail[0]
 	}
 
-	address, err := mail.ParseAddress(fmt.Sprintf("%s <%s>", sanitizedDisplayName, u.Email))
+	// should be an edge case but nice to have
+	if sanitizedDisplayName == email {
+		return email
+	}
+
+	address, err := mail.ParseAddress(fmt.Sprintf("%s <%s>", sanitizedDisplayName, email))
 	if err != nil {
-		return u.Email
+		return email
 	}
 
 	return address.String()
@@ -595,6 +600,7 @@ var (
 		"captcha",
 		"commits",
 		"debug",
+		"devtest",
 		"error",
 		"explore",
 		"favicon.ico",
@@ -940,6 +946,20 @@ func GetUserByIDs(ctx context.Context, ids []int64) ([]*User, error) {
 		Table("user").
 		Find(&users)
 	return users, err
+}
+
+func IsValidUserID(id int64) bool {
+	return id > 0 || id == GhostUserID || id == ActionsUserID
+}
+
+func GetUserFromMap(id int64, idMap map[int64]*User) (int64, *User) {
+	if user, ok := idMap[id]; ok {
+		return id, user
+	}
+	if id == ActionsUserID {
+		return ActionsUserID, NewActionsUser()
+	}
+	return GhostUserID, NewGhostUser()
 }
 
 // GetPossibleUserByID returns the user if id > 0 or return system usrs if id < 0

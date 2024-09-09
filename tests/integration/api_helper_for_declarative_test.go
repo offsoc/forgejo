@@ -23,6 +23,7 @@ import (
 	"code.gitea.io/gitea/services/forms"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type APITestContext struct {
@@ -168,7 +169,7 @@ func doAPIDeleteRepository(ctx APITestContext) func(*testing.T) {
 func doAPICreateUserKey(ctx APITestContext, keyname, keyFile string, callback ...func(*testing.T, api.PublicKey)) func(*testing.T) {
 	return func(t *testing.T) {
 		dataPubKey, err := os.ReadFile(keyFile + ".pub")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		req := NewRequestWithJSON(t, "POST", "/api/v1/user/keys", &api.CreateKeyOption{
 			Title: keyname,
 			Key:   string(dataPubKey),
@@ -201,7 +202,7 @@ func doAPIDeleteUserKey(ctx APITestContext, keyID int64) func(*testing.T) {
 func doAPICreateDeployKey(ctx APITestContext, keyname, keyFile string, readOnly bool) func(*testing.T) {
 	return func(t *testing.T) {
 		dataPubKey, err := os.ReadFile(keyFile + ".pub")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/keys", ctx.Username, ctx.Reponame), api.CreateKeyOption{
 			Title:    keyname,
 			Key:      string(dataPubKey),

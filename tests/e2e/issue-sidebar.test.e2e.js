@@ -1,15 +1,10 @@
 // @ts-check
-import {test, expect} from '@playwright/test';
-import {login_user, load_logged_in_context} from './utils_e2e.js';
+import {expect} from '@playwright/test';
+import {test, login_user, login} from './utils_e2e.js';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
 });
-
-async function login({browser}, workerInfo) {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  return await context.newPage();
-}
 
 // belongs to test: Pull: Toggle WIP
 const prTitle = 'pull5';
@@ -56,6 +51,22 @@ test('Pull: Toggle WIP', async ({browser}, workerInfo) => {
   // remove again
   await click_toggle_wip({page});
   await check_wip({page}, false);
+  // check maximum title length is handled gracefully
+  const maxLenStr = prTitle + 'a'.repeat(240);
+  await page.locator('#issue-title-edit-show').click();
+  await page.locator('#issue-title-editor input').fill(maxLenStr);
+  await page.getByText('Save').click();
+  await page.waitForLoadState('networkidle');
+  await click_toggle_wip({page});
+  await check_wip({page}, true);
+  await click_toggle_wip({page});
+  await check_wip({page}, false);
+  await expect(page.locator('h1')).toContainText(maxLenStr);
+  // restore original title
+  await page.locator('#issue-title-edit-show').click();
+  await page.locator('#issue-title-editor input').fill(prTitle);
+  await page.getByText('Save').click();
+  await check_wip({page}, false);
 });
 
 test('Issue: Labels', async ({browser}, workerInfo) => {
@@ -67,7 +78,7 @@ test('Issue: Labels', async ({browser}, workerInfo) => {
   await expect(response?.status()).toBe(200);
   // preconditions
   await expect(labelList.filter({hasText: 'label1'})).toBeVisible();
-  await expect(labelList.filter({hasText: 'label2'})).not.toBeVisible();
+  await expect(labelList.filter({hasText: 'label2'})).toBeHidden();
   // add label2
   await page.locator('.select-label').click();
   // label search could be tested this way:
@@ -81,7 +92,7 @@ test('Issue: Labels', async ({browser}, workerInfo) => {
   await page.locator('.select-label .item').filter({hasText: 'label2'}).click();
   await page.locator('.select-label').click();
   await page.waitForLoadState('networkidle');
-  await expect(labelList.filter({hasText: 'label2'})).not.toBeVisible();
+  await expect(labelList.filter({hasText: 'label2'})).toBeHidden();
   await expect(labelList.filter({hasText: 'label1'})).toBeVisible();
 });
 

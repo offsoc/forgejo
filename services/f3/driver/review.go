@@ -111,7 +111,7 @@ func (o *review) Get(ctx context.Context) bool {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	review, err := issues_model.GetReviewByID(ctx, id)
 	if issues_model.IsErrReviewNotExist(err) {
@@ -153,7 +153,7 @@ func (o *review) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("review created %d", o.forgejoReview.ID)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoReview.ID))
+	return generic.NewNodeID(o.forgejoReview.ID)
 }
 
 func (o *review) Delete(ctx context.Context) {

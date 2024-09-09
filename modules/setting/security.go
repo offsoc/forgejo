@@ -10,6 +10,7 @@ import (
 
 	"code.gitea.io/gitea/modules/auth/password/hash"
 	"code.gitea.io/gitea/modules/generate"
+	"code.gitea.io/gitea/modules/keying"
 	"code.gitea.io/gitea/modules/log"
 )
 
@@ -110,6 +111,7 @@ func loadSecurityFrom(rootCfg ConfigProvider) {
 		// Until it supports rotating an existing secret key, we shouldn't move users off of the widely used default value
 		SecretKey = "!#@FDEWREWR&*(" //nolint:gosec
 	}
+	keying.Init([]byte(SecretKey))
 
 	CookieRememberName = sec.Key("COOKIE_REMEMBER_NAME").MustString("gitea_incredible")
 

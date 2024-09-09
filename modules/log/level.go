@@ -39,6 +39,22 @@ var toString = map[Level]string{
 	NONE:  "none",
 }
 
+// Machine-readable log level prefixes as defined in sd-daemon(3).
+//
+// "If a systemd service definition file is configured with StandardError=journal
+// or StandardError=kmsg (and similar with StandardOutput=), these prefixes can
+// be used to encode a log level in lines printed. <...> To use these prefixes
+// simply prefix every line with one of these strings. A line that is not prefixed
+// will be logged at the default log level SD_INFO."
+var toJournalPrefix = map[Level]string{
+	TRACE: "<7>", // SD_DEBUG
+	DEBUG: "<6>", // SD_INFO
+	INFO:  "<5>", // SD_NOTICE
+	WARN:  "<4>", // SD_WARNING
+	ERROR: "<3>", // SD_ERR
+	FATAL: "<2>", // SD_CRIT
+}
+
 var toLevel = map[string]Level{
 	"undefined": UNDEFINED,
 
@@ -69,6 +85,10 @@ func (l Level) String() string {
 		return s
 	}
 	return "info"
+}
+
+func (l Level) JournalPrefix() string {
+	return toJournalPrefix[l]
 }
 
 func (l Level) ColorAttributes() []ColorAttribute {

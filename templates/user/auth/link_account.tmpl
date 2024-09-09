@@ -16,7 +16,7 @@
 		</div>
 	</overflow-menu>
 	<div class="ui middle very relaxed page grid">
-		<div class="column">
+		<div class="column tw-flex tw-flex-col tw-gap-4 tw-max-w-2xl tw-m-auto">
 			<div class="ui tab {{if not .user_exists}}active{{end}}"
 				data-tab="auth-link-signup-tab">
 				{{template "user/auth/signup_inner" .}}

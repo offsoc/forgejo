@@ -10,16 +10,17 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestApplyUmask(t *testing.T) {
 	f, err := os.CreateTemp(t.TempDir(), "test-filemode-")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = os.Chmod(f.Name(), 0o777)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	st, err := os.Stat(f.Name())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 0o777, st.Mode().Perm()&0o777)
 
 	oldDefaultUmask := defaultUmask
@@ -28,8 +29,8 @@ func TestApplyUmask(t *testing.T) {
 		defaultUmask = oldDefaultUmask
 	}()
 	err = ApplyUmask(f.Name(), os.ModePerm)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	st, err = os.Stat(f.Name())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 0o740, st.Mode().Perm()&0o777)
 }

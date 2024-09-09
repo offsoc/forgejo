@@ -25,6 +25,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testCreateBranch(t testing.TB, session *TestSession, user, repo, oldRefSubURL, newBranchName string, expectedStatus int) string {
@@ -177,13 +178,13 @@ func TestDatabaseMissingABranch(t *testing.T) {
 
 		// Run the repo branch sync, to ensure the db and git agree.
 		err2 := repo_service.AddAllRepoBranchesToSyncQueue(graceful.GetManager().ShutdownContext())
-		assert.NoError(t, err2)
+		require.NoError(t, err2)
 
 		// Delete one branch from git only, leaving it in the database
 		repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 		cmd := git.NewCommand(db.DefaultContext, "branch", "-D").AddDynamicArguments("will-be-missing")
 		_, _, err := cmd.RunStdString(&git.RunOpts{Dir: repo.RepoPath()})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Verify that loading the repo's branches page works still, and that it
 		// reports at least three branches (master, will-be-present, and
@@ -196,7 +197,7 @@ func TestDatabaseMissingABranch(t *testing.T) {
 
 		// Run the repo branch sync again
 		err2 = repo_service.AddAllRepoBranchesToSyncQueue(graceful.GetManager().ShutdownContext())
-		assert.NoError(t, err2)
+		require.NoError(t, err2)
 
 		// Verify that loading the repo's branches page works still, and that it
 		// reports one branch less than the first time.

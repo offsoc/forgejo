@@ -19,6 +19,7 @@ import (
 	"code.gitea.io/gitea/modules/avatar"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUserAvatar(t *testing.T) {
@@ -32,7 +33,7 @@ func TestUserAvatar(t *testing.T) {
 
 		img, err := avatar.RandomImage([]byte(seed))
 		if err != nil {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			return
 		}
 
@@ -48,22 +49,22 @@ func TestUserAvatar(t *testing.T) {
 		writer.WriteField("source", "local")
 		part, err := writer.CreateFormFile("avatar", "avatar-for-testuseravatar.png")
 		if err != nil {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			return
 		}
 
 		if err := png.Encode(imgData, img); err != nil {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			return
 		}
 
 		if _, err := io.Copy(part, imgData); err != nil {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			return
 		}
 
 		if err := writer.Close(); err != nil {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			return
 		}
 

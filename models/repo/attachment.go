@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/storage"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/modules/validation"
 )
 
 // Attachment represent a attachment of issue/comment/release.
@@ -31,6 +32,7 @@ type Attachment struct {
 	NoAutoTime        bool               `xorm:"-"`
 	CreatedUnix       timeutil.TimeStamp `xorm:"created"`
 	CustomDownloadURL string             `xorm:"-"`
+	ExternalURL       string
 }
 
 func init() {
@@ -59,6 +61,10 @@ func (a *Attachment) RelativePath() string {
 
 // DownloadURL returns the download url of the attached file
 func (a *Attachment) DownloadURL() string {
+	if a.ExternalURL != "" {
+		return a.ExternalURL
+	}
+
 	if a.CustomDownloadURL != "" {
 		return a.CustomDownloadURL
 	}
@@ -84,6 +90,23 @@ func (err ErrAttachmentNotExist) Error() string {
 
 func (err ErrAttachmentNotExist) Unwrap() error {
 	return util.ErrNotExist
+}
+
+type ErrInvalidExternalURL struct {
+	ExternalURL string
+}
+
+func IsErrInvalidExternalURL(err error) bool {
+	_, ok := err.(ErrInvalidExternalURL)
+	return ok
+}
+
+func (err ErrInvalidExternalURL) Error() string {
+	return fmt.Sprintf("invalid external URL: '%s'", err.ExternalURL)
+}
+
+func (err ErrInvalidExternalURL) Unwrap() error {
+	return util.ErrPermissionDenied
 }
 
 // GetAttachmentByID returns attachment by given id
@@ -221,12 +244,18 @@ func UpdateAttachmentByUUID(ctx context.Context, attach *Attachment, cols ...str
 	if attach.UUID == "" {
 		return fmt.Errorf("attachment uuid should be not blank")
 	}
+	if attach.ExternalURL != "" && !validation.IsValidExternalURL(attach.ExternalURL) {
+		return ErrInvalidExternalURL{ExternalURL: attach.ExternalURL}
+	}
 	_, err := db.GetEngine(ctx).Where("uuid=?", attach.UUID).Cols(cols...).Update(attach)
 	return err
 }
 
 // UpdateAttachment updates the given attachment in database
 func UpdateAttachment(ctx context.Context, atta *Attachment) error {
+	if atta.ExternalURL != "" && !validation.IsValidExternalURL(atta.ExternalURL) {
+		return ErrInvalidExternalURL{ExternalURL: atta.ExternalURL}
+	}
 	sess := db.GetEngine(ctx).Cols("name", "issue_id", "release_id", "comment_id", "download_count")
 	if atta.ID != 0 && atta.UUID == "" {
 		sess = sess.ID(atta.ID)

@@ -24,7 +24,6 @@ import (
 	f3_generic "code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_tests "code.forgejo.org/f3/gof3/v3/tree/tests/f3"
 	f3_tests_forge "code.forgejo.org/f3/gof3/v3/tree/tests/f3/forge"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"
 )
@@ -129,7 +128,7 @@ func TestF3_CmdMirror_LocalForgejo(t *testing.T) {
 		"--to-type", options.Name,
 		"--to-path", toPath,
 	)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	log.Trace("======= assert")
 	require.Contains(t, output, fmt.Sprintf("mirror %s", fromPath))
 	projects.List(ctx)

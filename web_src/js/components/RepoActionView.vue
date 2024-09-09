@@ -464,20 +464,20 @@ export function initRepositoryActionView() {
             </p>
           </div>
           <div class="job-info-header-right">
-            <div class="ui top right pointing dropdown custom jump item" @click.stop="menuVisible = !menuVisible" @keyup.enter="menuVisible = !menuVisible">
+            <div class="ui top right pointing dropdown custom jump item" @click.stop="menuVisible = !menuVisible">
               <button class="btn gt-interact-bg tw-p-2">
                 <SvgIcon name="octicon-gear" :size="18"/>
               </button>
               <div class="menu transition action-job-menu" :class="{visible: menuVisible}" v-if="menuVisible" v-cloak>
-                <a class="item" @click="toggleTimeDisplay('seconds')">
+                <a class="item" tabindex="0" @click="toggleTimeDisplay('seconds')" @keyup.space="toggleTimeDisplay('seconds')" @keyup.enter="toggleTimeDisplay('seconds')">
                   <i class="icon"><SvgIcon :name="timeVisible['log-time-seconds'] ? 'octicon-check' : 'gitea-empty-checkbox'"/></i>
                   {{ locale.showLogSeconds }}
                 </a>
-                <a class="item" @click="toggleTimeDisplay('stamp')">
+                <a class="item" tabindex="0" @click="toggleTimeDisplay('stamp')" @keyup.space="toggleTimeDisplay('stamp')" @keyup.enter="toggleTimeDisplay('stamp')">
                   <i class="icon"><SvgIcon :name="timeVisible['log-time-stamp'] ? 'octicon-check' : 'gitea-empty-checkbox'"/></i>
                   {{ locale.showTimeStamps }}
                 </a>
-                <a class="item" @click="toggleFullScreen()">
+                <a class="item" tabindex="0" @click="toggleFullScreen()" @keyup.space="toggleFullScreen()" @keyup.enter="toggleFullScreen()">
                   <i class="icon"><SvgIcon :name="isFullScreen ? 'octicon-check' : 'gitea-empty-checkbox'"/></i>
                   {{ locale.showFullScreen }}
                 </a>
@@ -492,7 +492,7 @@ export function initRepositoryActionView() {
         </div>
         <div class="job-step-container" ref="steps" v-if="currentJob.steps.length">
           <div class="job-step-section" v-for="(jobStep, i) in currentJob.steps" :key="i">
-            <div class="job-step-summary" @click.stop="isExpandable(jobStep.status) && toggleStepLogs(i)" :class="[currentJobStepsStates[i].expanded ? 'selected' : '', isExpandable(jobStep.status) && 'step-expandable']">
+            <div class="job-step-summary" tabindex="0" @click.stop="isExpandable(jobStep.status) && toggleStepLogs(i)" @keyup.enter.stop="isExpandable(jobStep.status) && toggleStepLogs(i)" @keyup.space.stop="isExpandable(jobStep.status) && toggleStepLogs(i)" :class="[currentJobStepsStates[i].expanded ? 'selected' : '', isExpandable(jobStep.status) && 'step-expandable']">
               <!-- If the job is done and the job step log is loaded for the first time, show the loading icon
                 currentJobStepsStates[i].cursor === null means the log is loaded for the first time
               -->
@@ -878,6 +878,7 @@ export function initRepositoryActionView() {
   word-break: break-all;
   white-space: break-spaces;
   margin-left: 10px;
+  overflow-wrap: anywhere;
 }
 
 /* selectors here are intentionally exact to only match fullscreen */

@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/modules/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -27,58 +28,58 @@ var (
 )
 
 func TestGetRepositoryCount(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	ctx := db.DefaultContext
 	count, err1 := repo_model.CountRepositories(ctx, countRepospts)
 	privateCount, err2 := repo_model.CountRepositories(ctx, countReposptsPrivate)
 	publicCount, err3 := repo_model.CountRepositories(ctx, countReposptsPublic)
-	assert.NoError(t, err1)
-	assert.NoError(t, err2)
-	assert.NoError(t, err3)
+	require.NoError(t, err1)
+	require.NoError(t, err2)
+	require.NoError(t, err3)
 	assert.Equal(t, int64(3), count)
 	assert.Equal(t, privateCount+publicCount, count)
 }
 
 func TestGetPublicRepositoryCount(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	count, err := repo_model.CountRepositories(db.DefaultContext, countReposptsPublic)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(1), count)
 }
 
 func TestGetPrivateRepositoryCount(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	count, err := repo_model.CountRepositories(db.DefaultContext, countReposptsPrivate)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(2), count)
 }
 
 func TestRepoAPIURL(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 10})
 
 	assert.Equal(t, "https://try.gitea.io/api/v1/repos/user12/repo10", repo.APIURL())
 }
 
 func TestWatchRepo(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	const repoID = 3
 	const userID = 2
 
-	assert.NoError(t, repo_model.WatchRepo(db.DefaultContext, userID, repoID, true))
+	require.NoError(t, repo_model.WatchRepo(db.DefaultContext, userID, repoID, true))
 	unittest.AssertExistsAndLoadBean(t, &repo_model.Watch{RepoID: repoID, UserID: userID})
 	unittest.CheckConsistencyFor(t, &repo_model.Repository{ID: repoID})
 
-	assert.NoError(t, repo_model.WatchRepo(db.DefaultContext, userID, repoID, false))
+	require.NoError(t, repo_model.WatchRepo(db.DefaultContext, userID, repoID, false))
 	unittest.AssertNotExistsBean(t, &repo_model.Watch{RepoID: repoID, UserID: userID})
 	unittest.CheckConsistencyFor(t, &repo_model.Repository{ID: repoID})
 }
 
 func TestMetas(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	repo := &repo_model.Repository{Name: "testRepo"}
 	repo.Owner = &user_model.User{Name: "testOwner"}
@@ -119,7 +120,7 @@ func TestMetas(t *testing.T) {
 	testSuccess(markup.IssueNameStyleRegexp)
 
 	repo, err := repo_model.GetRepositoryByID(db.DefaultContext, 3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	metas = repo.ComposeMetas(db.DefaultContext)
 	assert.Contains(t, metas, "org")
@@ -129,13 +130,13 @@ func TestMetas(t *testing.T) {
 }
 
 func TestGetRepositoryByURL(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	t.Run("InvalidPath", func(t *testing.T) {
 		repo, err := repo_model.GetRepositoryByURL(db.DefaultContext, "something")
 
 		assert.Nil(t, repo)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("ValidHttpURL", func(t *testing.T) {
@@ -143,10 +144,10 @@ func TestGetRepositoryByURL(t *testing.T) {
 			repo, err := repo_model.GetRepositoryByURL(db.DefaultContext, url)
 
 			assert.NotNil(t, repo)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.Equal(t, repo.ID, int64(2))
-			assert.Equal(t, repo.OwnerID, int64(2))
+			assert.Equal(t, int64(2), repo.ID)
+			assert.Equal(t, int64(2), repo.OwnerID)
 		}
 
 		test(t, "https://try.gitea.io/user2/repo2")
@@ -158,10 +159,10 @@ func TestGetRepositoryByURL(t *testing.T) {
 			repo, err := repo_model.GetRepositoryByURL(db.DefaultContext, url)
 
 			assert.NotNil(t, repo)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.Equal(t, repo.ID, int64(2))
-			assert.Equal(t, repo.OwnerID, int64(2))
+			assert.Equal(t, int64(2), repo.ID)
+			assert.Equal(t, int64(2), repo.OwnerID)
 		}
 
 		test(t, "git+ssh://sshuser@try.gitea.io/user2/repo2")
@@ -176,10 +177,10 @@ func TestGetRepositoryByURL(t *testing.T) {
 			repo, err := repo_model.GetRepositoryByURL(db.DefaultContext, url)
 
 			assert.NotNil(t, repo)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.Equal(t, repo.ID, int64(2))
-			assert.Equal(t, repo.OwnerID, int64(2))
+			assert.Equal(t, int64(2), repo.ID)
+			assert.Equal(t, int64(2), repo.OwnerID)
 		}
 
 		test(t, "sshuser@try.gitea.io:user2/repo2")

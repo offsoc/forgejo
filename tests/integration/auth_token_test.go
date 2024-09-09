@@ -19,6 +19,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // GetSessionForLTACookie returns a new session with only the LTA cookie being set.
@@ -31,7 +32,7 @@ func GetSessionForLTACookie(t *testing.T, ltaCookie *http.Cookie) *TestSession {
 
 	session := emptyTestSession(t)
 	baseURL, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	session.jar.SetCookies(baseURL, cr.Cookies())
 
 	return session
@@ -45,7 +46,7 @@ func GetLTACookieValue(t *testing.T, sess *TestSession) string {
 	assert.NotNil(t, rememberCookie)
 
 	cookieValue, err := url.QueryUnescape(rememberCookie.Value)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	return cookieValue
 }
@@ -82,7 +83,7 @@ func TestLTACookie(t *testing.T) {
 	lookupKey, validator, found := strings.Cut(ltaCookieValue, ":")
 	assert.True(t, found)
 	rawValidator, err := hex.DecodeString(validator)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	unittest.AssertExistsAndLoadBean(t, &auth.AuthorizationToken{LookupKey: lookupKey, HashedValidator: auth.HashValidator(rawValidator), UID: user.ID})
 
 	// Check if the LTA cookie it provides authentication.
@@ -147,7 +148,7 @@ func TestLTAExpiry(t *testing.T) {
 
 	// Manually stub LTA's expiry.
 	_, err := db.GetEngine(db.DefaultContext).ID(lta.ID).Table("forgejo_auth_token").Cols("expiry").Update(&auth.AuthorizationToken{Expiry: timeutil.TimeStampNow()})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Ensure it's expired.
 	lta = unittest.AssertExistsAndLoadBean(t, &auth.AuthorizationToken{UID: user.ID, LookupKey: lookupKey})

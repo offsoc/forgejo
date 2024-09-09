@@ -1,7 +1,8 @@
 // @ts-check
 // document is a global in evaluate, so it's safe to ignore here
-/* eslint no-undef: 0 */
-import {test, expect} from '@playwright/test';
+// eslint playwright/no-conditional-in-test: 0
+import {expect} from '@playwright/test';
+import {test} from './utils_e2e.js';
 
 test('Explore view taborder', async ({page}) => {
   await page.goto('/explore/repos');

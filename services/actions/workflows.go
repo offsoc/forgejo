@@ -83,12 +83,9 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 					}
 					continue
 				}
-			} else {
-				switch input.Type {
-				case "boolean":
-					// Since "boolean" inputs are rendered as a checkbox in html, the value inside the form is "on"
-					val = strconv.FormatBool(val == "on")
-				}
+			} else if input.Type == "boolean" {
+				// Since "boolean" inputs are rendered as a checkbox in html, the value inside the form is "on"
+				val = strconv.FormatBool(val == "on")
 			}
 			inputs[key] = val
 		}

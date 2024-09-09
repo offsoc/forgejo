@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/modules/avatar"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUploadAvatar(t *testing.T) {
@@ -23,11 +24,11 @@ func TestUploadAvatar(t *testing.T) {
 	var buff bytes.Buffer
 	png.Encode(&buff, myImage)
 
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 10})
 
 	err := UploadAvatar(db.DefaultContext, repo, buff.Bytes())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, avatar.HashAvatar(10, buff.Bytes()), repo.Avatar)
 }
 
@@ -37,11 +38,11 @@ func TestUploadBigAvatar(t *testing.T) {
 	var buff bytes.Buffer
 	png.Encode(&buff, myImage)
 
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 10})
 
 	err := UploadAvatar(db.DefaultContext, repo, buff.Bytes())
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestDeleteAvatar(t *testing.T) {
@@ -50,14 +51,14 @@ func TestDeleteAvatar(t *testing.T) {
 	var buff bytes.Buffer
 	png.Encode(&buff, myImage)
 
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 10})
 
 	err := UploadAvatar(db.DefaultContext, repo, buff.Bytes())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = DeleteAvatar(db.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "", repo.Avatar)
 }

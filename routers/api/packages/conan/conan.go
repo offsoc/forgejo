@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	auth_model "code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	packages_model "code.gitea.io/gitea/models/packages"
 	conan_model "code.gitea.io/gitea/models/packages/conan"
@@ -117,7 +118,10 @@ func Authenticate(ctx *context.Context) {
 		return
 	}
 
-	token, err := packages_service.CreateAuthorizationToken(ctx.Doer)
+	// If there's an API scope, ensure it propagates.
+	scope, _ := ctx.Data.GetData()["ApiTokenScope"].(auth_model.AccessTokenScope)
+
+	token, err := packages_service.CreateAuthorizationToken(ctx.Doer, scope)
 	if err != nil {
 		apiError(ctx, http.StatusInternalServerError, err)
 		return

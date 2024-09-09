@@ -61,7 +61,7 @@ func (o *topic) Get(ctx context.Context) bool {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	if has, err := db.GetEngine(ctx).Where("ID = ?", id).Get(o.forgejoTopic); err != nil {
 		panic(fmt.Errorf("topic %v %w", id, err))
@@ -86,7 +86,7 @@ func (o *topic) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("topic created %d", o.forgejoTopic.ID)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoTopic.ID))
+	return generic.NewNodeID(o.forgejoTopic.ID)
 }
 
 func (o *topic) Delete(ctx context.Context) {

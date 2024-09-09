@@ -41,13 +41,13 @@ func createLocalStorage(t *testing.T) (storage.ObjectStorage, string) {
 }
 
 func TestMigratePackages(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	creator := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
 	content := "package main\n\nfunc main() {\nfmt.Println(\"hi\")\n}\n"
 	buf, err := packages_module.CreateHashedBufferFromReaderWithSize(strings.NewReader(content), 1024)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer buf.Close()
 
 	v, f, err := packages_service.CreatePackageAndAddFile(db.DefaultContext, &packages_service.PackageCreationInfo{
@@ -68,7 +68,7 @@ func TestMigratePackages(t *testing.T) {
 		Data:    buf,
 		IsLead:  true,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, v)
 	assert.NotNil(t, f)
 
@@ -77,17 +77,17 @@ func TestMigratePackages(t *testing.T) {
 	dstStorage, p := createLocalStorage(t)
 
 	err = migratePackages(ctx, dstStorage)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	entries, err := os.ReadDir(p)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, entries, 2)
 	assert.EqualValues(t, "01", entries[0].Name())
 	assert.EqualValues(t, "tmp", entries[1].Name())
 }
 
 func TestMigrateActionsArtifacts(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	srcStorage, _ := createLocalStorage(t)
 	defer test.MockVariableValue(&storage.ActionsArtifacts, srcStorage)()
@@ -118,17 +118,17 @@ func TestMigrateActionsArtifacts(t *testing.T) {
 
 	dstStorage, _ := createLocalStorage(t)
 
-	assert.NoError(t, migrateActionsArtifacts(db.DefaultContext, dstStorage))
+	require.NoError(t, migrateActionsArtifacts(db.DefaultContext, dstStorage))
 
 	object, err := dstStorage.Open(exists)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	buf, err := io.ReadAll(object)
 	require.NoError(t, err)
 	assert.Equal(t, exists, string(buf))
 
 	_, err = dstStorage.Stat(expired)
-	assert.Error(t, err)
+	require.Error(t, err)
 
 	_, err = dstStorage.Stat(notFound)
-	assert.Error(t, err)
+	require.Error(t, err)
 }

@@ -68,7 +68,7 @@ func (o *UpdateFileOptions) Branch() string {
 type ChangeFileOperation struct {
 	// indicates what to do with the file
 	// required: true
-	// enum: create,update,delete
+	// enum: ["create", "update", "delete"]
 	Operation string `json:"operation" binding:"Required"`
 	// path to the existing or new file
 	// required: true

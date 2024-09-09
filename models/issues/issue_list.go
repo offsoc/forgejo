@@ -79,7 +79,7 @@ func (issues IssueList) LoadPosters(ctx context.Context) error {
 	}
 
 	posterIDs := container.FilterSlice(issues, func(issue *Issue) (int64, bool) {
-		return issue.PosterID, issue.Poster == nil && issue.PosterID > 0
+		return issue.PosterID, issue.Poster == nil && user_model.IsValidUserID(issue.PosterID)
 	})
 
 	posterMaps, err := getPostersByIDs(ctx, posterIDs)
@@ -89,7 +89,7 @@ func (issues IssueList) LoadPosters(ctx context.Context) error {
 
 	for _, issue := range issues {
 		if issue.Poster == nil {
-			issue.Poster = getPoster(issue.PosterID, posterMaps)
+			issue.PosterID, issue.Poster = user_model.GetUserFromMap(issue.PosterID, posterMaps)
 		}
 	}
 	return nil
@@ -113,20 +113,6 @@ func getPostersByIDs(ctx context.Context, posterIDs []int64) (map[int64]*user_mo
 		posterIDs = posterIDs[limit:]
 	}
 	return posterMaps, nil
-}
-
-func getPoster(posterID int64, posterMaps map[int64]*user_model.User) *user_model.User {
-	if posterID == user_model.ActionsUserID {
-		return user_model.NewActionsUser()
-	}
-	if posterID <= 0 {
-		return nil
-	}
-	poster, ok := posterMaps[posterID]
-	if !ok {
-		return user_model.NewGhostUser()
-	}
-	return poster
 }
 
 func (issues IssueList) getIssueIDs() []int64 {

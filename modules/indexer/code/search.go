@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/modules/highlight"
 	"code.gitea.io/gitea/modules/indexer/code/internal"
 	"code.gitea.io/gitea/modules/timeutil"
+	"code.gitea.io/gitea/services/gitdiff"
 )
 
 // Result a search result to display
@@ -70,11 +71,85 @@ func writeStrings(buf *bytes.Buffer, strs ...string) error {
 	return nil
 }
 
-func HighlightSearchResultCode(filename string, lineNums []int, code string) []ResultLine {
+const (
+	highlightTagStart = "<span class=\"search-highlight\">"
+	highlightTagEnd   = "</span>"
+)
+
+func HighlightSearchResultCode(filename string, lineNums []int, highlightRanges [][3]int, code string) []ResultLine {
+	hcd := gitdiff.NewHighlightCodeDiff()
+	hcd.CollectUsedRunes(code)
+	startTag, endTag := hcd.NextPlaceholder(), hcd.NextPlaceholder()
+	hcd.PlaceholderTokenMap[startTag] = highlightTagStart
+	hcd.PlaceholderTokenMap[endTag] = highlightTagEnd
+
 	// we should highlight the whole code block first, otherwise it doesn't work well with multiple line highlighting
 	hl, _ := highlight.Code(filename, "", code)
-	highlightedLines := strings.Split(string(hl), "\n")
+	conv := hcd.ConvertToPlaceholders(string(hl))
+	convLines := strings.Split(conv, "\n")
 
+	// each highlightRange is of the form [line number, start pos, end pos]
+	for _, highlightRange := range highlightRanges {
+		ln, start, end := highlightRange[0], highlightRange[1], highlightRange[2]
+		line := convLines[ln]
+		if line == "" || len(line) <= start || len(line) < end {
+			continue
+		}
+
+		sb := strings.Builder{}
+		count := -1
+		isOpen := false
+		for _, r := range line {
+			if token, ok := hcd.PlaceholderTokenMap[r];
+			// token was not found
+			!ok ||
+				// token was marked as used
+				token == "" ||
+				// the token is not an valid html tag emitted by chroma
+				!(len(token) > 6 && (token[0:5] == "<span" || token[0:6] == "</span")) {
+				count++
+			} else if !isOpen {
+				// open the tag only after all other placeholders
+				sb.WriteRune(r)
+				continue
+			} else if isOpen && count < end {
+				// if the tag is open, but a placeholder exists in between
+				// close the tag
+				sb.WriteRune(endTag)
+				// write the placeholder
+				sb.WriteRune(r)
+				// reopen the tag
+				sb.WriteRune(startTag)
+				continue
+			}
+
+			switch count {
+			case end:
+				// if tag is not open, no need to close
+				if !isOpen {
+					break
+				}
+				sb.WriteRune(endTag)
+				isOpen = false
+			case start:
+				// if tag is open, do not open again
+				if isOpen {
+					break
+				}
+				isOpen = true
+				sb.WriteRune(startTag)
+			}
+
+			sb.WriteRune(r)
+		}
+		if isOpen {
+			sb.WriteRune(endTag)
+		}
+		convLines[ln] = sb.String()
+	}
+	conv = strings.Join(convLines, "\n")
+
+	highlightedLines := strings.Split(hcd.Recover(conv), "\n")
 	// The lineNums outputted by highlight.Code might not match the original lineNums, because "highlight" removes the last `\n`
 	lines := make([]ResultLine, min(len(highlightedLines), len(lineNums)))
 	for i := 0; i < len(lines); i++ {
@@ -92,6 +167,7 @@ func searchResult(result *internal.SearchResult, startIndex, endIndex int) (*Res
 	contentLines := strings.SplitAfter(result.Content[startIndex:endIndex], "\n")
 	lineNums := make([]int, 0, len(contentLines))
 	index := startIndex
+	var highlightRanges [][3]int
 	for i, line := range contentLines {
 		var err error
 		if index < result.EndIndex &&
@@ -99,6 +175,7 @@ func searchResult(result *internal.SearchResult, startIndex, endIndex int) (*Res
 			result.StartIndex < result.EndIndex {
 			openActiveIndex := max(result.StartIndex-index, 0)
 			closeActiveIndex := min(result.EndIndex-index, len(line))
+			highlightRanges = append(highlightRanges, [3]int{i, openActiveIndex, closeActiveIndex})
 			err = writeStrings(&formattedLinesBuffer,
 				line[:openActiveIndex],
 				line[openActiveIndex:closeActiveIndex],
@@ -122,7 +199,7 @@ func searchResult(result *internal.SearchResult, startIndex, endIndex int) (*Res
 		UpdatedUnix: result.UpdatedUnix,
 		Language:    result.Language,
 		Color:       result.Color,
-		Lines:       HighlightSearchResultCode(result.Filename, lineNums, formattedLinesBuffer.String()),
+		Lines:       HighlightSearchResultCode(result.Filename, lineNums, highlightRanges, formattedLinesBuffer.String()),
 	}, nil
 }
 

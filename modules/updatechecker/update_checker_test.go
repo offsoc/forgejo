@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDNSUpdate(t *testing.T) {
 	version, err := getVersionDNS("release.forgejo.org")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, version)
 }

@@ -40,7 +40,7 @@ func IsErrWebAuthnCredentialNotExist(err error) bool {
 }
 
 // WebAuthnCredential represents the WebAuthn credential data for a public-key
-// credential conformant to WebAuthn Level 1
+// credential conformant to WebAuthn Level 3
 type WebAuthnCredential struct {
 	ID              int64 `xorm:"pk autoincr"`
 	Name            string
@@ -52,8 +52,12 @@ type WebAuthnCredential struct {
 	AAGUID          []byte
 	SignCount       uint32 `xorm:"BIGINT"`
 	CloneWarning    bool
-	CreatedUnix     timeutil.TimeStamp `xorm:"INDEX created"`
-	UpdatedUnix     timeutil.TimeStamp `xorm:"INDEX updated"`
+	BackupEligible  bool `XORM:"NOT NULL DEFAULT false"`
+	BackupState     bool `XORM:"NOT NULL DEFAULT false"`
+	// If legacy is set to true, backup_eligible and backup_state isn't set.
+	Legacy      bool               `XORM:"NOT NULL DEFAULT true"`
+	CreatedUnix timeutil.TimeStamp `xorm:"INDEX created"`
+	UpdatedUnix timeutil.TimeStamp `xorm:"INDEX updated"`
 }
 
 func init() {
@@ -68,6 +72,12 @@ func (cred WebAuthnCredential) TableName() string {
 // UpdateSignCount will update the database value of SignCount
 func (cred *WebAuthnCredential) UpdateSignCount(ctx context.Context) error {
 	_, err := db.GetEngine(ctx).ID(cred.ID).Cols("sign_count").Update(cred)
+	return err
+}
+
+// UpdateFromLegacy update the values that aren't present on legacy credentials.
+func (cred *WebAuthnCredential) UpdateFromLegacy(ctx context.Context) error {
+	_, err := db.GetEngine(ctx).ID(cred.ID).Cols("legacy", "backup_eligible", "backup_state").Update(cred)
 	return err
 }
 
@@ -97,6 +107,10 @@ func (list WebAuthnCredentialList) ToCredentials() []webauthn.Credential {
 			ID:              cred.CredentialID,
 			PublicKey:       cred.PublicKey,
 			AttestationType: cred.AttestationType,
+			Flags: webauthn.CredentialFlags{
+				BackupEligible: cred.BackupEligible,
+				BackupState:    cred.BackupState,
+			},
 			Authenticator: webauthn.Authenticator{
 				AAGUID:       cred.AAGUID,
 				SignCount:    cred.SignCount,
@@ -167,6 +181,9 @@ func CreateCredential(ctx context.Context, userID int64, name string, cred *weba
 		AAGUID:          cred.Authenticator.AAGUID,
 		SignCount:       cred.Authenticator.SignCount,
 		CloneWarning:    false,
+		BackupEligible:  cred.Flags.BackupEligible,
+		BackupState:     cred.Flags.BackupState,
+		Legacy:          false,
 	}
 
 	if err := db.Insert(ctx, c); err != nil {

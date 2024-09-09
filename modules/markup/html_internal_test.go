@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -294,7 +295,7 @@ func testRenderIssueIndexPattern(t *testing.T, input, expected string, ctx *Rend
 
 	var buf strings.Builder
 	err := postProcess(ctx, []processor{issueIndexPatternProcessor}, strings.NewReader(input), &buf)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, buf.String(), "input=%q", input)
 }
 
@@ -310,7 +311,7 @@ func TestRender_AutoLink(t *testing.T) {
 			},
 			Metas: localMetas,
 		}, strings.NewReader(input), &buffer)
-		assert.Equal(t, err, nil)
+		require.NoError(t, err, nil)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer.String()))
 
 		buffer.Reset()
@@ -322,7 +323,7 @@ func TestRender_AutoLink(t *testing.T) {
 			Metas:  localMetas,
 			IsWiki: true,
 		}, strings.NewReader(input), &buffer)
-		assert.Equal(t, err, nil)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer.String()))
 	}
 
@@ -341,6 +342,22 @@ func TestRender_AutoLink(t *testing.T) {
 	test(tmp, "<a href=\""+tmp+"\" class=\"commit\"><code class=\"nohighlight\">d8a994ef24 (diff-2)</code></a>")
 }
 
+func TestRender_IssueIndexPatternRef(t *testing.T) {
+	setting.AppURL = TestAppURL
+
+	test := func(input, expected string) {
+		var buf strings.Builder
+		err := postProcess(&RenderContext{
+			Ctx:   git.DefaultContext,
+			Metas: numericMetas,
+		}, []processor{issueIndexPatternProcessor}, strings.NewReader(input), &buf)
+		require.NoError(t, err)
+		assert.Equal(t, expected, buf.String(), "input=%q", input)
+	}
+
+	test("alan-turin/Enigma-cryptanalysis#1", `<a href="/alan-turin/enigma-cryptanalysis/issues/1" class="ref-issue">alan-turin/Enigma-cryptanalysis#1</a>`)
+}
+
 func TestRender_FullIssueURLs(t *testing.T) {
 	setting.AppURL = TestAppURL
 
@@ -353,7 +370,7 @@ func TestRender_FullIssueURLs(t *testing.T) {
 			},
 			Metas: localMetas,
 		}, []processor{fullIssuePatternProcessor}, strings.NewReader(input), &result)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, expected, result.String())
 	}
 	test("Here is a link https://git.osgeo.org/gogs/postgis/postgis/pulls/6",
@@ -366,12 +383,12 @@ func TestRender_FullIssueURLs(t *testing.T) {
 		`<a href="http://localhost:3000/gogits/gogs/issues/4" class="ref-issue">#4</a>`)
 	test("http://localhost:3000/gogits/gogs/issues/4 test",
 		`<a href="http://localhost:3000/gogits/gogs/issues/4" class="ref-issue">#4</a> test`)
-	test("http://localhost:3000/gogits/gogs/issues/4?a=1&b=2#comment-123 test",
-		`<a href="http://localhost:3000/gogits/gogs/issues/4?a=1&amp;b=2#comment-123" class="ref-issue">#4 (comment)</a> test`)
+	test("http://localhost:3000/gogits/gogs/issues/4?a=1&b=2#comment-form test",
+		`<a href="http://localhost:3000/gogits/gogs/issues/4?a=1&amp;b=2#comment-form" class="ref-issue">#4</a> test`)
 	test("http://localhost:3000/testOrg/testOrgRepo/pulls/2/files#issuecomment-24",
-		"http://localhost:3000/testOrg/testOrgRepo/pulls/2/files#issuecomment-24")
-	test("http://localhost:3000/testOrg/testOrgRepo/pulls/2/files",
-		"http://localhost:3000/testOrg/testOrgRepo/pulls/2/files")
+		`<a href="http://localhost:3000/testOrg/testOrgRepo/pulls/2/files#issuecomment-24" class="ref-issue">testOrg/testOrgRepo#2/files (comment)</a>`)
+	test("http://localhost:3000/testOrg/testOrgRepo/pulls/2/commits",
+		`<a href="http://localhost:3000/testOrg/testOrgRepo/pulls/2/commits" class="ref-issue">testOrg/testOrgRepo#2/commits</a>`)
 }
 
 func TestRegExp_sha1CurrentPattern(t *testing.T) {

@@ -15,10 +15,11 @@ import (
 	"code.gitea.io/gitea/modules/references"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestXRef_AddCrossReferences(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// Issue #1 to test against
 	itarget := testCreateIssue(t, 1, 2, "title1", "content1", false)
@@ -69,7 +70,7 @@ func TestXRef_AddCrossReferences(t *testing.T) {
 }
 
 func TestXRef_NeuterCrossReferences(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// Issue #1 to test against
 	itarget := testCreateIssue(t, 1, 2, "title1", "content1", false)
@@ -83,7 +84,7 @@ func TestXRef_NeuterCrossReferences(t *testing.T) {
 
 	d := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	i.Title = "title2, no mentions"
-	assert.NoError(t, issues_model.ChangeIssueTitle(db.DefaultContext, i, d, title))
+	require.NoError(t, issues_model.ChangeIssueTitle(db.DefaultContext, i, d, title))
 
 	ref = unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{IssueID: itarget.ID, RefIssueID: i.ID, RefCommentID: 0})
 	assert.Equal(t, issues_model.CommentTypeIssueRef, ref.Type)
@@ -91,7 +92,7 @@ func TestXRef_NeuterCrossReferences(t *testing.T) {
 }
 
 func TestXRef_ResolveCrossReferences(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	d := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
@@ -99,7 +100,7 @@ func TestXRef_ResolveCrossReferences(t *testing.T) {
 	i2 := testCreateIssue(t, 1, 2, "title2", "content2", false)
 	i3 := testCreateIssue(t, 1, 2, "title3", "content3", false)
 	_, err := issues_model.ChangeIssueStatus(db.DefaultContext, i3, d, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pr := testCreatePR(t, 1, 2, "titlepr", fmt.Sprintf("closes #%d", i1.Index))
 	rp := unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{IssueID: i1.ID, RefIssueID: pr.Issue.ID, RefCommentID: 0})
@@ -119,7 +120,7 @@ func TestXRef_ResolveCrossReferences(t *testing.T) {
 	r4 := unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{IssueID: i3.ID, RefIssueID: pr.Issue.ID, RefCommentID: c4.ID})
 
 	refs, err := pr.ResolveCrossReferences(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, refs, 3)
 	assert.Equal(t, rp.ID, refs[0].ID, "bad ref rp: %+v", refs[0])
 	assert.Equal(t, r1.ID, refs[1].ID, "bad ref r1: %+v", refs[1])
@@ -131,11 +132,11 @@ func testCreateIssue(t *testing.T, repo, doer int64, title, content string, ispu
 	d := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: doer})
 
 	ctx, committer, err := db.TxContext(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer committer.Close()
 
 	idx, err := db.GetNextResourceIndex(ctx, "issue_index", r.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	i := &issues_model.Issue{
 		RepoID:   r.ID,
 		PosterID: d.ID,
@@ -150,11 +151,11 @@ func testCreateIssue(t *testing.T, repo, doer int64, title, content string, ispu
 		Repo:  r,
 		Issue: i,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	i, err = issues_model.GetIssueByID(ctx, i.ID)
-	assert.NoError(t, err)
-	assert.NoError(t, i.AddCrossReferences(ctx, d, false))
-	assert.NoError(t, committer.Commit())
+	require.NoError(t, err)
+	require.NoError(t, i.AddCrossReferences(ctx, d, false))
+	require.NoError(t, committer.Commit())
 	return i
 }
 
@@ -163,7 +164,7 @@ func testCreatePR(t *testing.T, repo, doer int64, title, content string) *issues
 	d := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: doer})
 	i := &issues_model.Issue{RepoID: r.ID, PosterID: d.ID, Poster: d, Title: title, Content: content, IsPull: true}
 	pr := &issues_model.PullRequest{HeadRepoID: repo, BaseRepoID: repo, HeadBranch: "head", BaseBranch: "base", Status: issues_model.PullRequestStatusMergeable}
-	assert.NoError(t, issues_model.NewPullRequest(db.DefaultContext, r, i, nil, nil, pr))
+	require.NoError(t, issues_model.NewPullRequest(db.DefaultContext, r, i, nil, nil, pr))
 	pr.Issue = i
 	return pr
 }
@@ -174,11 +175,11 @@ func testCreateComment(t *testing.T, doer, issue int64, content string) *issues_
 	c := &issues_model.Comment{Type: issues_model.CommentTypeComment, PosterID: doer, Poster: d, IssueID: issue, Issue: i, Content: content}
 
 	ctx, committer, err := db.TxContext(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer committer.Close()
 	err = db.Insert(ctx, c)
-	assert.NoError(t, err)
-	assert.NoError(t, c.AddCrossReferences(ctx, d, false))
-	assert.NoError(t, committer.Commit())
+	require.NoError(t, err)
+	require.NoError(t, c.AddCrossReferences(ctx, d, false))
+	require.NoError(t, committer.Commit())
 	return c
 }

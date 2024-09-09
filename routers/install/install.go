@@ -36,7 +36,7 @@ import (
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/forms"
 
-	"gitea.com/go-chi/session"
+	"code.forgejo.org/go-chi/session"
 )
 
 const (

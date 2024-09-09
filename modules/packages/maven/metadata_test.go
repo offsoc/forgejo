@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -50,12 +51,12 @@ func TestParsePackageMetaData(t *testing.T) {
 	t.Run("InvalidFile", func(t *testing.T) {
 		m, err := ParsePackageMetaData(strings.NewReader(""))
 		assert.Nil(t, m)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("Valid", func(t *testing.T) {
 		m, err := ParsePackageMetaData(strings.NewReader(pomContent))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, m)
 
 		assert.Equal(t, groupID, m.GroupID)
@@ -80,10 +81,10 @@ func TestParsePackageMetaData(t *testing.T) {
 				`<?xml version="1.0" encoding="ISO-8859-1"?>`,
 			),
 		)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		m, err := ParsePackageMetaData(strings.NewReader(pomContent8859_1))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, m)
 	})
 }

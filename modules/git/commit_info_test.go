@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -57,7 +58,7 @@ func testGetCommitsInfo(t *testing.T, repo1 *Repository) {
 	for _, testCase := range testCases {
 		commit, err := repo1.GetCommit(testCase.CommitID)
 		if err != nil {
-			assert.NoError(t, err, "Unable to get commit: %s from testcase due to error: %v", testCase.CommitID, err)
+			require.NoError(t, err, "Unable to get commit: %s from testcase due to error: %v", testCase.CommitID, err)
 			// no point trying to do anything else for this test.
 			continue
 		}
@@ -67,7 +68,7 @@ func testGetCommitsInfo(t *testing.T, repo1 *Repository) {
 
 		tree, err := commit.Tree.SubTree(testCase.Path)
 		if err != nil {
-			assert.NoError(t, err, "Unable to get subtree: %s of commit: %s from testcase due to error: %v", testCase.Path, testCase.CommitID, err)
+			require.NoError(t, err, "Unable to get subtree: %s of commit: %s from testcase due to error: %v", testCase.Path, testCase.CommitID, err)
 			// no point trying to do anything else for this test.
 			continue
 		}
@@ -77,14 +78,14 @@ func testGetCommitsInfo(t *testing.T, repo1 *Repository) {
 
 		entries, err := tree.ListEntries()
 		if err != nil {
-			assert.NoError(t, err, "Unable to get entries of subtree: %s in commit: %s from testcase due to error: %v", testCase.Path, testCase.CommitID, err)
+			require.NoError(t, err, "Unable to get entries of subtree: %s in commit: %s from testcase due to error: %v", testCase.Path, testCase.CommitID, err)
 			// no point trying to do anything else for this test.
 			continue
 		}
 
 		// FIXME: Context.TODO() - if graceful has started we should use its Shutdown context otherwise use install signals in TestMain.
 		commitsInfo, treeCommit, err := entries.GetCommitsInfo(context.TODO(), commit, testCase.Path)
-		assert.NoError(t, err, "Unable to get commit information for entries of subtree: %s in commit: %s from testcase due to error: %v", testCase.Path, testCase.CommitID, err)
+		require.NoError(t, err, "Unable to get commit information for entries of subtree: %s in commit: %s from testcase due to error: %v", testCase.Path, testCase.CommitID, err)
 		if err != nil {
 			t.FailNow()
 		}
@@ -105,18 +106,18 @@ func testGetCommitsInfo(t *testing.T, repo1 *Repository) {
 func TestEntries_GetCommitsInfo(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer bareRepo1.Close()
 
 	testGetCommitsInfo(t, bareRepo1)
 
 	clonedPath, err := cloneRepo(t, bareRepo1Path)
 	if err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 	clonedRepo1, err := openRepositoryWithDefaultContext(clonedPath)
 	if err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 	defer clonedRepo1.Close()
 

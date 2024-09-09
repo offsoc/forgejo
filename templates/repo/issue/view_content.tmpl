@@ -72,7 +72,7 @@
 				</div>
 			</div>
 
-		    {{template "repo/issue/view_content/comments" .}}
+			{{template "repo/issue/view_content/comments" .}}
 			<div id="insert-timeline"></div>
 
 			{{if and .Issue.IsPull (not $.Repository.IsArchived)}}

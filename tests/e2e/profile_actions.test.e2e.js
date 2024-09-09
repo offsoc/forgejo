@@ -1,6 +1,6 @@
 // @ts-check
-import {test, expect} from '@playwright/test';
-import {login_user, load_logged_in_context} from './utils_e2e.js';
+import {expect} from '@playwright/test';
+import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 
 test('Follow actions', async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -12,7 +12,7 @@ test('Follow actions', async ({browser}, workerInfo) => {
 
   // Check if following and then unfollowing works.
   // This checks that the event listeners of
-  // the buttons aren't dissapearing.
+  // the buttons aren't disappearing.
   const followButton = page.locator('.follow');
   await expect(followButton).toContainText('Follow');
   await followButton.click();
@@ -27,7 +27,7 @@ test('Follow actions', async ({browser}, workerInfo) => {
   await expect(page.locator('#block-user')).toBeVisible();
   await page.locator('#block-user .ok').click();
   await expect(page.locator('.block')).toContainText('Unblock');
-  await expect(page.locator('#block-user')).not.toBeVisible();
+  await expect(page.locator('#block-user')).toBeHidden();
 
   // Check that following the user yields in a error being shown.
   await followButton.click();

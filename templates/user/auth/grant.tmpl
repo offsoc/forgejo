@@ -11,6 +11,7 @@
 					<b>{{ctx.Locale.Tr "auth.authorize_application_description"}}</b><br>
 					{{ctx.Locale.Tr "auth.authorize_application_created_by" .ApplicationCreatorLinkHTML}}
 				</p>
+				<p>With scopes: {{.Scope}}.</p>
 			</div>
 			<div class="ui attached segment">
 				<p>{{ctx.Locale.Tr "auth.authorize_redirect_notice" .ApplicationRedirectDomainHTML}}</p>

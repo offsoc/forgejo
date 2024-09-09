@@ -10,7 +10,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/modules/git"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testReposDir = "tests/repos/"
@@ -20,10 +20,10 @@ func TestVerifyCommits(t *testing.T) {
 
 	gitRepo, err := git.OpenRepository(context.Background(), testReposDir+"repo1_hook_verification")
 	defer gitRepo.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	objectFormat, err := gitRepo.GetObjectFormat()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	testCases := []struct {
 		base, head string
@@ -38,9 +38,9 @@ func TestVerifyCommits(t *testing.T) {
 	for _, tc := range testCases {
 		err = verifyCommits(tc.base, tc.head, gitRepo, nil)
 		if tc.verified {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		} else {
-			assert.Error(t, err)
+			require.Error(t, err)
 		}
 	}
 }

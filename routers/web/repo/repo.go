@@ -17,6 +17,7 @@ import (
 	git_model "code.gitea.io/gitea/models/git"
 	"code.gitea.io/gitea/models/organization"
 	access_model "code.gitea.io/gitea/models/perm/access"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
@@ -151,7 +152,7 @@ func getRepoPrivate(ctx *context.Context) bool {
 
 // Create render creating repository page
 func Create(ctx *context.Context) {
-	ctx.Data["Title"] = ctx.Tr("new_repo")
+	ctx.Data["Title"] = ctx.Tr("new_repo.title")
 
 	// Give default value for template to render.
 	ctx.Data["Gitignores"] = repo_module.Gitignores
@@ -222,7 +223,7 @@ func handleCreateError(ctx *context.Context, owner *user_model.User, err error, 
 // CreatePost response for creating repository
 func CreatePost(ctx *context.Context) {
 	form := web.GetForm(ctx).(*forms.CreateRepoForm)
-	ctx.Data["Title"] = ctx.Tr("new_repo")
+	ctx.Data["Title"] = ctx.Tr("new_repo.title")
 
 	ctx.Data["Gitignores"] = repo_module.Gitignores
 	ctx.Data["LabelTemplateFiles"] = repo_module.LabelTemplateFiles
@@ -239,6 +240,10 @@ func CreatePost(ctx *context.Context) {
 		return
 	}
 	ctx.Data["ContextUser"] = ctxUser
+
+	if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, ctxUser.ID, ctxUser.Name) {
+		return
+	}
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplCreate)
@@ -363,9 +368,12 @@ func ActionTransfer(accept bool) func(ctx *context.Context) {
 			action = "reject_transfer"
 		}
 
-		err := acceptOrRejectRepoTransfer(ctx, accept)
+		ok, err := acceptOrRejectRepoTransfer(ctx, accept)
 		if err != nil {
 			ctx.ServerError(fmt.Sprintf("Action (%s)", action), err)
+			return
+		}
+		if !ok {
 			return
 		}
 
@@ -373,39 +381,43 @@ func ActionTransfer(accept bool) func(ctx *context.Context) {
 	}
 }
 
-func acceptOrRejectRepoTransfer(ctx *context.Context, accept bool) error {
+func acceptOrRejectRepoTransfer(ctx *context.Context, accept bool) (bool, error) {
 	repoTransfer, err := models.GetPendingRepositoryTransfer(ctx, ctx.Repo.Repository)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if err := repoTransfer.LoadAttributes(ctx); err != nil {
-		return err
+		return false, err
 	}
 
 	if !repoTransfer.CanUserAcceptTransfer(ctx, ctx.Doer) {
-		return errors.New("user does not have enough permissions")
+		return false, errors.New("user does not have enough permissions")
 	}
 
 	if accept {
+		if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, ctx.Doer.ID, ctx.Doer.Name) {
+			return false, nil
+		}
+
 		if ctx.Repo.GitRepo != nil {
 			ctx.Repo.GitRepo.Close()
 			ctx.Repo.GitRepo = nil
 		}
 
 		if err := repo_service.TransferOwnership(ctx, repoTransfer.Doer, repoTransfer.Recipient, ctx.Repo.Repository, repoTransfer.Teams); err != nil {
-			return err
+			return false, err
 		}
 		ctx.Flash.Success(ctx.Tr("repo.settings.transfer.success"))
 	} else {
 		if err := repo_service.CancelRepositoryTransfer(ctx, ctx.Repo.Repository); err != nil {
-			return err
+			return false, err
 		}
 		ctx.Flash.Success(ctx.Tr("repo.settings.transfer.rejected"))
 	}
 
 	ctx.Redirect(ctx.Repo.Repository.Link())
-	return nil
+	return true, nil
 }
 
 // RedirectDownload return a file based on the following infos:
@@ -670,6 +682,9 @@ func SearchRepo(ctx *context.Context) {
 		log.Error("FindReposLastestCommitStatuses: %v", err)
 		ctx.JSON(http.StatusInternalServerError, nil)
 		return
+	}
+	if !ctx.Repo.CanRead(unit.TypeActions) {
+		git_model.CommitStatusesHideActionsURL(ctx, latestCommitStatuses)
 	}
 
 	results := make([]*repo_service.WebSearchRepository, len(repos))

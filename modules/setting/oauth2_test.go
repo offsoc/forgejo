@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetGeneralSigningSecret(t *testing.T) {
@@ -55,6 +56,6 @@ func TestGetGeneralSigningSecretSave(t *testing.T) {
 	assert.Equal(t, generated, again)
 
 	iniContent, err := os.ReadFile(tmpFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, string(iniContent), "JWT_SECRET = ")
 }

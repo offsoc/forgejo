@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSharedWorker(t *testing.T) {
@@ -16,7 +17,7 @@ func TestSharedWorker(t *testing.T) {
 
 	m := NewManager()
 	_, err := m.NewSharedWriter("dummy-1", "dummy", WriterMode{Level: DEBUG, Flags: FlagsFromBits(0)})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	w := m.GetSharedWriter("dummy-1")
 	assert.NotNil(t, w)

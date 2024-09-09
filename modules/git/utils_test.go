@@ -13,7 +13,7 @@ import (
 // but not in production code.
 
 func skipIfSHA256NotSupported(t *testing.T) {
-	if isGogit || CheckGitVersionAtLeast("2.42") != nil {
+	if CheckGitVersionAtLeast("2.42") != nil {
 		t.Skip("skipping because installed Git version doesn't support SHA256")
 	}
 }

@@ -75,6 +75,14 @@ var migrations = []*Migration{
 	// v18 -> v19
 	NewMigration("Create the `following_repo` table", CreateFollowingRepoTable),
 	// v19 -> v20
+	NewMigration("Add external_url to attachment table", AddExternalURLColumnToAttachmentTable),
+	// v20 -> v21
+	NewMigration("Creating Quota-related tables", CreateQuotaTables),
+	// v21 -> v22
+	NewMigration("Add SSH keypair to `pull_mirror` table", AddSSHKeypairToPushMirror),
+	// v22 -> v23
+	NewMigration("Add `legacy` to `web_authn_credential` table", AddLegacyToWebAuthnCredential),
+	// v13 -> v24
 	NewMigration("Add star lists", AddStarLists),
 }
 

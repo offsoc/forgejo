@@ -23,21 +23,20 @@ import (
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/ProtonMail/go-crypto/openpgp/armor"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGPGGit(t *testing.T) {
 	tmpDir := t.TempDir() // use a temp dir to avoid messing with the user's GPG keyring
 	err := os.Chmod(tmpDir, 0o700)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	t.Setenv("GNUPGHOME", tmpDir)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Need to create a root key
 	rootKeyPair, err := importTestingKey()
-	if !assert.NoError(t, err, "importTestingKey") {
-		return
-	}
+	require.NoError(t, err, "importTestingKey")
 
 	defer test.MockVariableValue(&setting.Repository.Signing.SigningKey, rootKeyPair.PrimaryKey.KeyIdShortString())()
 	defer test.MockVariableValue(&setting.Repository.Signing.SigningName, "gitea")()
@@ -215,7 +214,7 @@ func TestGPGGit(t *testing.T) {
 			testCtx := NewAPITestContext(t, username, "initial-unsigned", auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteUser)
 			t.Run("CreatePullRequest", func(t *testing.T) {
 				pr, err := doAPICreatePullRequest(testCtx, testCtx.Username, testCtx.Reponame, "master", "never2")(t)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				t.Run("MergePR", doAPIMergePullRequest(testCtx, testCtx.Username, testCtx.Reponame, pr.Index))
 			})
 			t.Run("CheckMasterBranchUnsigned", doAPIGetBranch(testCtx, "master", func(t *testing.T, branch api.Branch) {
@@ -232,7 +231,7 @@ func TestGPGGit(t *testing.T) {
 			testCtx := NewAPITestContext(t, username, "initial-unsigned", auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteUser)
 			t.Run("CreatePullRequest", func(t *testing.T) {
 				pr, err := doAPICreatePullRequest(testCtx, testCtx.Username, testCtx.Reponame, "master", "parentsigned2")(t)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				t.Run("MergePR", doAPIMergePullRequest(testCtx, testCtx.Username, testCtx.Reponame, pr.Index))
 			})
 			t.Run("CheckMasterBranchUnsigned", doAPIGetBranch(testCtx, "master", func(t *testing.T, branch api.Branch) {
@@ -249,7 +248,7 @@ func TestGPGGit(t *testing.T) {
 			testCtx := NewAPITestContext(t, username, "initial-unsigned", auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteUser)
 			t.Run("CreatePullRequest", func(t *testing.T) {
 				pr, err := doAPICreatePullRequest(testCtx, testCtx.Username, testCtx.Reponame, "master", "always-parentsigned")(t)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				t.Run("MergePR", doAPIMergePullRequest(testCtx, testCtx.Username, testCtx.Reponame, pr.Index))
 			})
 			t.Run("CheckMasterBranchUnsigned", doAPIGetBranch(testCtx, "master", func(t *testing.T, branch api.Branch) {

@@ -215,8 +215,7 @@ func (d discordConvertor) PullRequest(p *api.PullRequestPayload) (DiscordPayload
 func (d discordConvertor) Review(p *api.PullRequestPayload, event webhook_module.HookEventType) (DiscordPayload, error) {
 	var text, title string
 	var color int
-	switch p.Action {
-	case api.HookIssueReviewed:
+	if p.Action == api.HookIssueReviewed {
 		action, err := parseHookPullRequestEventType(event)
 		if err != nil {
 			return DiscordPayload{}, err

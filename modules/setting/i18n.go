@@ -34,7 +34,6 @@ var defaultI18nLangNames = []string{
 	"fa-IR", "فارسی",
 	"hu-HU", "Magyar nyelv",
 	"id-ID", "Bahasa Indonesia",
-	"ml-IN", "മലയാളം",
 }
 
 func defaultI18nLangs() (res []string) {

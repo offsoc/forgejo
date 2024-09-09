@@ -1,5 +1,5 @@
 #
-# See also https://forgejo.org/docs/next/developer/RELEASE/#release-process
+# See also https://forgejo.org/docs/next/contributor/release/#stable-release-process
 #
 # https://codeberg.org/forgejo-integration/forgejo
 #
@@ -43,8 +43,7 @@ jobs:
 
       - uses: https://code.forgejo.org/actions/setup-go@v4
         with:
-          go-version: "1.22"
-          check-latest: true
+          go-version-file: "go.mod"
 
       - name: version from ref
         id: release-info
@@ -171,7 +170,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v6
           release-notes: "${{ steps.release-notes.outputs.value }}"
           binary-name: forgejo
-          binary-path: /app/gitea/gitea
+          binary-path: /app/gitea/forgejo-cli
           override: "${{ steps.release-info.outputs.override }}"
           verify-labels: "maintainer=contact@forgejo.org,org.opencontainers.image.version=${{ steps.release-info.outputs.version }}"
           verbose: ${{ vars.VERBOSE || secrets.VERBOSE || 'false' }}

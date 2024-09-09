@@ -1,42 +1,93 @@
 # End to end tests
 
-E2e tests largely follow the same syntax as [integration tests](../integration).
-Whereas integration tests are intended to mock and stress the back-end, server-side code, e2e tests the interface between front-end and back-end, as well as visual regressions with both assertions and visual comparisons.
-They can be run with make commands for the appropriate backends, namely:
-```shell
-make test-sqlite
-make test-pgsql
-make test-mysql
-```
+Thank you for your effort to provide good software tests for Forgejo.
+Please also read the general testing instructions in the
+[Forgejo contributor documentation](https://forgejo.org/docs/next/contributor/testing/)
+and make sure to also check the
+[Playwright documentation](https://playwright.dev/docs/intro)
+for further information.
 
-Make sure to perform a clean front-end build before running tests:
+This file is meant to provide specific information for the integration tests
+as well as some tips and tricks you should know.
+
+Feel free to extend this file with more instructions if you feel like you have something to share!
+
+
+## How to run the tests?
+
+Before running any tests, please ensure you perform a clean frontend build:
+
 ```
 make clean frontend
 ```
 
-## Install playwright system dependencies
+Whenever you modify frontend code (i.e. JavaScript and CSS files),
+you need to create a new frontend build.
+
+For tests that require interactive Git repos,
+you also need to ensure a Forgejo binary is ready to be used by Git hooks.
+For this, you additionally need to run
+
+~~~
+make TAGS="sqlite sqlite_unlock_notify" backend
+~~~
+
+### Install dependencies
+
+Browsertesting is performed by playwright.
+You need certain system libraries and playwright will download required browsers.
+Playwright takes care of this when you run:
+
 ```
 npx playwright install-deps
 ```
 
-## Interactive testing
+> **Note**
+> On some operating systems, the installation of missing libraries can complicate testing certain browsers.
+> It is often not necessary to test with all browsers locally.
+> Choosing either Firefox or Chromium is fine.
 
-You can make use of Playwright's integrated UI mode to run individual tests,
-get feedback and visually trace what your browser is doing.
 
-To do so, launch the debugserver using:
+### Run all tests
+
+If you want to run the full test suite, you can use
+
+```
+make test-e2e-sqlite
+```
+
+### Interactive testing
+
+We recommend that you use interactive testing for the development.
+After you performed the required builds,
+you should use one shell to start the debugserver (and leave it running):
 
 ```
 make test-e2e-debugserver
 ```
 
-Then launch the Playwright UI:
+It allows you to explore the test data in your local browser,
+and playwright to perform tests on it.
+
+> **Note**
+> The modifications persist while the debugserver is running.
+> If you modified things, it might be useful to restart it to get back to a fresh state.
+> While writing playwright tests, you either
+> need to ensure they are resilient against repeated runs
+> (e.g. when only creating new content),
+> or that they restore the initial state for the next browser run.
+
+#### With the playwright UI: 
+
+Playwright ships with an integrated UI mode which allows you to
+run individual tests and to debug them by seeing detailed traces of what playwright does.
+Launch it with:
 
 ```
 npx playwright test --ui
 ```
 
-You can also run individual tests while the debugserver using:
+#### Running individual tests
 
 ```
 npx playwright test actions.test.e2e.js:9
@@ -46,18 +97,29 @@ First, specify the complete test filename,
 and after the colon you can put the linenumber where the test is defined.
 
 
-## Run all tests via local act_runner
+#### With VSCodium or VSCode
+
+To debug a test, you can also use "Playwright Test" for
+[VScodium](https://open-vsx.org/extension/ms-playwright/playwright)
+or [VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright).
+
+
+### Run all tests via local act_runner
+
+If you have a [forgejo runner](https://code.forgejo.org/forgejo/runner/),
+you can use it to run the test jobs:
+
 ```
-act_runner exec -W ./.github/workflows/pull-e2e-tests.yml --event=pull_request --default-actions-url="https://github.com" -i catthehacker/ubuntu:runner-latest
+forgejo-runner exec -W .forgejo/workflows/e2e.yml --event=pull_request
 ```
 
-## Run sqlite e2e tests
-Start tests
-```
-make test-e2e-sqlite
-```
+### Run e2e tests with another database
 
-## Run MySQL e2e tests
+This approach is not currently used,
+neither in the CI/CD nor by core contributors on their lcoal machines.
+It is still documented for the sake of completeness:
+You can also perform e2e tests using MariaDB/MySQL or PostgreSQL if you want.
+
 Setup a MySQL database inside docker
 ```
 docker run -e "MYSQL_DATABASE=test" -e "MYSQL_ALLOW_EMPTY_PASSWORD=yes" -p 3306:3306 --rm --name mysql mysql:latest #(just ctrl-c to stop db and clean the container)
@@ -68,7 +130,6 @@ Start tests based on the database container
 TEST_MYSQL_HOST=localhost:3306 TEST_MYSQL_DBNAME=test TEST_MYSQL_USERNAME=root TEST_MYSQL_PASSWORD='' make test-e2e-mysql
 ```
 
-## Run pgsql e2e tests
 Setup a pgsql database inside docker
 ```
 docker run -e "POSTGRES_DB=test" -p 5432:5432 --rm --name pgsql postgres:latest #(just ctrl-c to stop db and clean the container)
@@ -78,11 +139,12 @@ Start tests based on the database container
 TEST_PGSQL_HOST=localhost:5432 TEST_PGSQL_DBNAME=test TEST_PGSQL_USERNAME=postgres TEST_PGSQL_PASSWORD=postgres make test-e2e-pgsql
 ```
 
-## Running individual tests
+### Running individual tests
 
 Example command to run `example.test.e2e.js` test file:
 
-_Note: unlike integration tests, this filtering is at the file level, not function_
+> **Note**
+> Unlike integration tests, this filtering is at the file level, not function
 
 For SQLite:
 
@@ -90,13 +152,11 @@ For SQLite:
 make test-e2e-sqlite#example
 ```
 
-For PostgreSQL databases(replace `mysql` to `pgsql`):
+### Visual testing
 
-```
-TEST_MYSQL_HOST=localhost:1433 TEST_MYSQL_DBNAME=test TEST_MYSQL_USERNAME=sa TEST_MYSQL_PASSWORD=MwantsaSecurePassword1 make test-e2e-mysql#example
-```
-
-## Visual testing
+> **Warning**
+> This is not currently used by most Forgejo contributors.
+> Your help to improve the situation and allow for visual testing is appreciated.
 
 Although the main goal of e2e is assertion testing, we have added a framework for visual regress testing. If you are working on front-end features, please use the following:
  - Check out `main`, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1` to generate outputs. This will initially fail, as no screenshots exist. You can run the e2e tests again to assert it passes.
@@ -106,14 +166,55 @@ VISUAL_TEST=1 will create screenshots in tests/e2e/test-snapshots. The test will
 
 ACCEPT_VISUAL=1 will overwrite the snapshot images with new images.
 
-## With VSCodium or VSCode
 
-To debug a test, you can use "Playwright Test" for
-[VScodium](https://open-vsx.org/extension/ms-playwright/playwright)
-or [VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright).
-Before doing that you will need to manually start a Forgejo instance and populate it
-with data from `models/fixtures` by running:
+## Tips and tricks
 
-```sh
-make TAGS='sqlite sqlite_unlock_notify' 'test-e2e-debugserver'
-```
+If you know noteworthy tests that can act as an inspiration for new tests,
+please add some details here.
+
+### Run tests very selectively
+
+Browser testing can take some time.
+If you want to iterate fast,
+save your time and only run very selected tests.
+Use only one browser.
+
+### Skip Safari if it doesn't work
+
+Many contributors have issues getting Safari (webkit)
+and especially Safari Mobile to work.
+
+At the top of your test function, you can use:
+
+~~~javascript
+test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile.');
+~~~
+
+### Don't forget the formatting.
+
+When writing tests without modifying other frontend code,
+it is easy to forget that the JavaScript test files also need formatting.
+
+Run `make lint-frontend-fix`.
+
+### Define new repos
+
+Take a look at `declare_repos_test.go` to see how to add your repositories.
+Feel free to improve the logic used there if you need more advanced functionality
+(it is a simplified version of the code used in the integration tests).
+
+### Accessibility testing
+
+If you can, perform automated accessibility testing using
+[AxeCore](https://github.com/dequelabs/axe-core-npm/blob/develop/packages/playwright/README.md).
+
+Take a look at `shared/forms.js` and some other places for inspiration.
+
+### List related files coverage
+
+If you think your playwright tests covers an important aspect of some template, CSS or backend files,
+consider adding the paths to `.forgejo/workflows/e2e.yml` in the path filter.
+
+It ensures that future modifications to this file will be tested as well.
+
+Currently, we do not run the e2e tests on all changes.

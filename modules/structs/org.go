@@ -38,7 +38,7 @@ type CreateOrgOption struct {
 	Website     string `json:"website" binding:"ValidUrl;MaxSize(255)"`
 	Location    string `json:"location" binding:"MaxSize(50)"`
 	// possible values are `public` (default), `limited` or `private`
-	// enum: public,limited,private
+	// enum: ["public", "limited", "private"]
 	Visibility                string `json:"visibility" binding:"In(,public,limited,private)"`
 	RepoAdminChangeTeamAccess bool   `json:"repo_admin_change_team_access"`
 }
@@ -53,7 +53,7 @@ type EditOrgOption struct {
 	Website     string `json:"website" binding:"ValidUrl;MaxSize(255)"`
 	Location    string `json:"location" binding:"MaxSize(50)"`
 	// possible values are `public`, `limited` or `private`
-	// enum: public,limited,private
+	// enum: ["public", "limited", "private"]
 	Visibility                string `json:"visibility" binding:"In(,public,limited,private)"`
 	RepoAdminChangeTeamAccess *bool  `json:"repo_admin_change_team_access"`
 }

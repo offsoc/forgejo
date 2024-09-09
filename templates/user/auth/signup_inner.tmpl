@@ -53,12 +53,12 @@
 	</div>
 </div>
 
+{{if not .LinkAccountMode}}
 <div class="ui container fluid">
 	<div class="ui attached segment header top tw-flex tw-flex-col tw-items-center">
-		{{if not .LinkAccountMode}}
 		<div class="field">
 			{{ctx.Locale.Tr "auth.hint_login" (printf "%s/user/login" AppSubUrl)}}
 		</div>
-		{{end}}
 	</div>
 </div>
+{{end}}

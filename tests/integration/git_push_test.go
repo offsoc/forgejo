@@ -79,7 +79,7 @@ func testGitPush(t *testing.T, u *url.URL) {
 				}
 				pushed = append(pushed, "master")
 
-				// push all, so that master are not chagned
+				// push all, so that master are not changed
 				doGitPushTestRepository(gitPath, "origin", "--all")(t)
 
 				return pushed, deleted

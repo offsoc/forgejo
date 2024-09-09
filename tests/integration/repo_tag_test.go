@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTagViewWithoutRelease(t *testing.T) {
@@ -35,16 +36,16 @@ func TestTagViewWithoutRelease(t *testing.T) {
 			TagNames:    []string{"no-release"},
 			RepoID:      repo.ID,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		for _, release := range releases {
 			_, err = db.DeleteByID[repo_model.Release](db.DefaultContext, release.ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}
 	}()
 
 	err := release.CreateNewTag(git.DefaultContext, owner, repo, "master", "no-release", "release-less tag")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Test that the page loads
 	req := NewRequestf(t, "GET", "/%s/releases/tag/no-release", repo.FullName())
@@ -77,14 +78,14 @@ func TestCreateNewTagProtected(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		err := release.CreateNewTag(git.DefaultContext, owner, repo, "master", "t-first", "first tag")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		err = release.CreateNewTag(git.DefaultContext, owner, repo, "master", "v-2", "second tag")
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.True(t, models.IsErrProtectedTagName(err))
 
 		err = release.CreateNewTag(git.DefaultContext, owner, repo, "master", "v-1.1", "third tag")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("Git", func(t *testing.T) {
@@ -99,10 +100,10 @@ func TestCreateNewTagProtected(t *testing.T) {
 			doGitClone(dstPath, u)(t)
 
 			_, _, err := git.NewCommand(git.DefaultContext, "tag", "v-2").RunStdString(&git.RunOpts{Dir: dstPath})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			_, _, err = git.NewCommand(git.DefaultContext, "push", "--tags").RunStdString(&git.RunOpts{Dir: dstPath})
-			assert.Error(t, err)
+			require.Error(t, err)
 			assert.Contains(t, err.Error(), "Tag v-2 is protected")
 		})
 	})
@@ -113,18 +114,18 @@ func TestCreateNewTagProtected(t *testing.T) {
 		TagNames:    []string{"v-1", "v-1.1"},
 		RepoID:      repo.ID,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	for _, release := range releases {
 		_, err = db.DeleteByID[repo_model.Release](db.DefaultContext, release.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	protectedTags, err := git_model.GetProtectedTags(db.DefaultContext, repo.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	for _, protectedTag := range protectedTags {
 		err = git_model.DeleteProtectedTag(db.DefaultContext, protectedTag)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 }

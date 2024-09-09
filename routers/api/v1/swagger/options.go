@@ -221,5 +221,17 @@ type swaggerParameterBodies struct {
 	DispatchWorkflowOption api.DispatchWorkflowOption
 
 	// in:body
+	CreateQuotaGroupOptions api.CreateQuotaGroupOptions
+
+	// in:body
+	CreateQuotaRuleOptions api.CreateQuotaRuleOptions
+
+	// in:body
+	EditQuotaRuleOptions api.EditQuotaRuleOptions
+
+	// in:body
+	SetUserQuotaGroupsOptions api.SetUserQuotaGroupsOptions
+
+	// in:body
 	CreateEditStarListOptions api.CreateEditStarListOptions
 }

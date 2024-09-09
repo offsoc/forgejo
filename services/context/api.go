@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	issues_model "code.gitea.io/gitea/models/issues"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
@@ -24,7 +25,7 @@ import (
 	"code.gitea.io/gitea/modules/web"
 	web_types "code.gitea.io/gitea/modules/web/types"
 
-	"gitea.com/go-chi/cache"
+	"code.forgejo.org/go-chi/cache"
 )
 
 // APIContext is a specific context for API service
@@ -39,11 +40,13 @@ type APIContext struct {
 
 	ContextUser *user_model.User // the user which is being visited, in most cases it differs from Doer
 
-	Repo     *Repository
-	Comment  *issues_model.Comment
-	Org      *APIOrganization
-	Package  *Package
-	Starlist *repo_model.StarList
+	Repo       *Repository
+	Comment    *issues_model.Comment
+	Org        *APIOrganization
+	Package    *Package
+	QuotaGroup *quota_model.Group
+	QuotaRule  *quota_model.Rule
+	Starlist   *repo_model.StarList
 }
 
 func init() {

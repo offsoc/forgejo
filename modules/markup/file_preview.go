@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"bytes"
 	"html/template"
+	"io"
 	"regexp"
 	"slices"
 	"strconv"
@@ -184,10 +185,12 @@ func newFilePreview(ctx *RenderContext, node *html.Node, locale translation.Loca
 	lineBuffer := new(bytes.Buffer)
 	for i := 0; i < lineCount; i++ {
 		buf, err := reader.ReadBytes('\n')
+		if err == nil || err == io.EOF {
+			lineBuffer.Write(buf)
+		}
 		if err != nil {
 			break
 		}
-		lineBuffer.Write(buf)
 	}
 
 	// highlight the file...

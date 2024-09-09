@@ -37,7 +37,7 @@ func TestMain(m *testing.M) {
 	graceful.InitManager(managerCtx)
 	defer cancel()
 
-	tests.InitTest(false)
+	tests.InitTest(true)
 	testE2eWebRoutes = routers.NormalRoutes()
 
 	os.Unsetenv("GIT_AUTHOR_NAME")
@@ -102,7 +102,8 @@ func TestE2e(t *testing.T) {
 
 		t.Run(testname, func(t *testing.T) {
 			// Default 2 minute timeout
-			onGiteaRun(t, func(*testing.T, *url.URL) {
+			onForgejoRun(t, func(*testing.T, *url.URL) {
+				defer DeclareGitRepos(t)()
 				thisTest := runArgs
 				thisTest = append(thisTest, path)
 				cmd := exec.Command(runArgs[0], thisTest...)

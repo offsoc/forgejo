@@ -68,7 +68,16 @@ const sfc = {
               display: false,
             },
             ticks: {
-              color: 'transparent', // Disable drawing of labels on the x-axis.
+              // Disable the drawing of the labels on the x-asis and force them all
+              // of them to be 'shown', this avoids them being internally skipped
+              // for some data points. We rely on the internally generated ticks
+              // to know where to draw our own ticks. Set rotation to 90 degree
+              // and disable autoSkip. autoSkip is disabled to ensure no ticks are
+              // skipped and rotation is set to avoid messing with the width of the chart.
+              color: 'transparent',
+              minRotation: 90,
+              maxRotation: 90,
+              autoSkip: false,
             },
           },
           y: {

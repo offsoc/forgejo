@@ -10,6 +10,7 @@ import (
 
 	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLoadServices(t *testing.T) {
@@ -24,7 +25,7 @@ EMAIL_DOMAIN_WHITELIST = d1, *.w
 EMAIL_DOMAIN_ALLOWLIST = d2, *.a
 EMAIL_DOMAIN_BLOCKLIST = d3, *.b
 `)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	loadServiceFrom(cfg)
 
 	match := func(globs []glob.Glob, s string) bool {
@@ -119,7 +120,7 @@ ALLOWED_USER_VISIBILITY_MODES = public, limit, privated
 	for kase, fun := range kases {
 		t.Run(kase, func(t *testing.T) {
 			cfg, err := NewConfigProviderFromData(kase)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			loadServiceFrom(cfg)
 			fun()
 			// reset

@@ -11,6 +11,7 @@ import (
 
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/cache"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/translation"
@@ -166,4 +167,43 @@ func TestSignupEmailChangeForActiveUser(t *testing.T) {
 	// Verify that the email remained unchanged
 	user = unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "exampleUserY"})
 	assert.Equal(t, "wrong-email-2@example.com", user.Email)
+}
+
+func TestSignupImageCaptcha(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.Service.RegisterEmailConfirm, false)()
+	defer test.MockVariableValue(&setting.Service.EnableCaptcha, true)()
+	defer test.MockVariableValue(&setting.Service.CaptchaType, "image")()
+	c := cache.GetCache()
+
+	req := NewRequest(t, "GET", "/user/sign_up")
+	resp := MakeRequest(t, req, http.StatusOK)
+	htmlDoc := NewHTMLParser(t, resp.Body)
+
+	idCaptcha, ok := htmlDoc.Find("input[name='img-captcha-id']").Attr("value")
+	assert.True(t, ok)
+
+	digits, ok := c.Get("captcha:" + idCaptcha).(string)
+	assert.True(t, ok)
+	assert.Len(t, digits, 6)
+
+	digitStr := ""
+	// Convert digits to ASCII digits.
+	for _, digit := range digits {
+		digitStr += string(digit + '0')
+	}
+
+	req = NewRequestWithValues(t, "POST", "/user/sign_up", map[string]string{
+		"user_name":            "captcha-test",
+		"email":                "captcha-test@example.com",
+		"password":             "examplePassword!1",
+		"retype":               "examplePassword!1",
+		"img-captcha-id":       idCaptcha,
+		"img-captcha-response": digitStr,
+	})
+	MakeRequest(t, req, http.StatusSeeOther)
+
+	loginUserWithPassword(t, "captcha-test", "examplePassword!1")
+
+	unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "captcha-test", IsActive: true})
 }

@@ -22,6 +22,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/gomail.v2"
 )
 
@@ -37,23 +38,23 @@ func TestIncomingEmail(t *testing.T) {
 		comment := unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: 1})
 
 		_, err := incoming_payload.CreateReferencePayload(user)
-		assert.Error(t, err)
+		require.Error(t, err)
 
 		issuePayload, err := incoming_payload.CreateReferencePayload(issue)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		commentPayload, err := incoming_payload.CreateReferencePayload(comment)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		_, err = incoming_payload.GetReferenceFromPayload(db.DefaultContext, []byte{1, 2, 3})
-		assert.Error(t, err)
+		require.Error(t, err)
 
 		ref, err := incoming_payload.GetReferenceFromPayload(db.DefaultContext, issuePayload)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.IsType(t, ref, new(issues_model.Issue))
 		assert.EqualValues(t, issue.ID, ref.(*issues_model.Issue).ID)
 
 		ref, err = incoming_payload.GetReferenceFromPayload(db.DefaultContext, commentPayload)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.IsType(t, ref, new(issues_model.Comment))
 		assert.EqualValues(t, comment.ID, ref.(*issues_model.Comment).ID)
 	})
@@ -64,11 +65,11 @@ func TestIncomingEmail(t *testing.T) {
 		payload := []byte{1, 2, 3, 4, 5}
 
 		token, err := token_service.CreateToken(token_service.ReplyHandlerType, user, payload)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, token)
 
 		ht, u, p, err := token_service.ExtractToken(db.DefaultContext, token)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, token_service.ReplyHandlerType, ht)
 		assert.Equal(t, user.ID, u.ID)
 		assert.Equal(t, payload, p)
@@ -81,8 +82,8 @@ func TestIncomingEmail(t *testing.T) {
 
 				handler := &incoming.ReplyHandler{}
 
-				assert.Error(t, handler.Handle(db.DefaultContext, &incoming.MailContent{}, nil, payload))
-				assert.NoError(t, handler.Handle(db.DefaultContext, &incoming.MailContent{}, user, payload))
+				require.Error(t, handler.Handle(db.DefaultContext, &incoming.MailContent{}, nil, payload))
+				require.NoError(t, handler.Handle(db.DefaultContext, &incoming.MailContent{}, user, payload))
 
 				content := &incoming.MailContent{
 					Content: "reply by mail",
@@ -94,18 +95,18 @@ func TestIncomingEmail(t *testing.T) {
 					},
 				}
 
-				assert.NoError(t, handler.Handle(db.DefaultContext, content, user, payload))
+				require.NoError(t, handler.Handle(db.DefaultContext, content, user, payload))
 
 				comments, err := issues_model.FindComments(db.DefaultContext, &issues_model.FindCommentsOptions{
 					IssueID: issue.ID,
 					Type:    commentType,
 				})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotEmpty(t, comments)
 				comment := comments[len(comments)-1]
 				assert.Equal(t, user.ID, comment.PosterID)
 				assert.Equal(t, content.Content, comment.Content)
-				assert.NoError(t, comment.LoadAttachments(db.DefaultContext))
+				require.NoError(t, comment.LoadAttachments(db.DefaultContext))
 				assert.Len(t, comment.Attachments, 1)
 				attachment := comment.Attachments[0]
 				assert.Equal(t, content.Attachments[0].Name, attachment.Name)
@@ -115,7 +116,7 @@ func TestIncomingEmail(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				payload, err := incoming_payload.CreateReferencePayload(issue)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				checkReply(t, payload, issue, issues_model.CommentTypeComment)
 			})
@@ -127,7 +128,7 @@ func TestIncomingEmail(t *testing.T) {
 				issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: comment.IssueID})
 
 				payload, err := incoming_payload.CreateReferencePayload(comment)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				checkReply(t, payload, issue, issues_model.CommentTypeCode)
 			})
@@ -139,7 +140,7 @@ func TestIncomingEmail(t *testing.T) {
 				issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: comment.IssueID})
 
 				payload, err := incoming_payload.CreateReferencePayload(comment)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				checkReply(t, payload, issue, issues_model.CommentTypeComment)
 			})
@@ -149,7 +150,7 @@ func TestIncomingEmail(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			watching, err := issues_model.CheckIssueWatch(db.DefaultContext, user, issue)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.True(t, watching)
 
 			handler := &incoming.UnsubscribeHandler{}
@@ -159,12 +160,12 @@ func TestIncomingEmail(t *testing.T) {
 			}
 
 			payload, err := incoming_payload.CreateReferencePayload(issue)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.NoError(t, handler.Handle(db.DefaultContext, content, user, payload))
+			require.NoError(t, handler.Handle(db.DefaultContext, content, user, payload))
 
 			watching, err = issues_model.CheckIssueWatch(db.DefaultContext, user, issue)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.False(t, watching)
 		})
 	})
@@ -176,23 +177,23 @@ func TestIncomingEmail(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			payload, err := incoming_payload.CreateReferencePayload(issue)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			token, err := token_service.CreateToken(token_service.ReplyHandlerType, user, payload)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			msg := gomail.NewMessage()
 			msg.SetHeader("To", strings.Replace(setting.IncomingEmail.ReplyToAddress, setting.IncomingEmail.TokenPlaceholder, token, 1))
 			msg.SetHeader("From", user.Email)
 			msg.SetBody("text/plain", token)
 			err = gomail.Send(&smtpTestSender{}, msg)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Eventually(t, func() bool {
 				comments, err := issues_model.FindComments(db.DefaultContext, &issues_model.FindCommentsOptions{
 					IssueID: issue.ID,
 					Type:    issues_model.CommentTypeComment,
 				})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotEmpty(t, comments)
 
 				comment := comments[len(comments)-1]

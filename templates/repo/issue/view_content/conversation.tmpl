@@ -77,7 +77,7 @@
 								</span>
 							</div>
 							<div class="comment-header-right actions tw-flex tw-items-center">
-								{{template "repo/issue/view_content/show_role" dict "ShowRole" .ShowRole "IsPull" .Issue.IsPull}}
+								{{template "repo/issue/view_content/show_role" dict "ShowRole" .ShowRole "IsPull" $.Issue.IsPull}}
 								{{if not $.Repository.IsArchived}}
 									{{template "repo/issue/view_content/add_reaction" dict "ctxData" $ "ActionURL" (printf "%s/comments/%d/reactions" $.RepoLink .ID)}}
 									{{template "repo/issue/view_content/context_menu" dict "ctxData" $ "item" . "delete" true "issue" true "diff" true "IsCommentPoster" (and $.IsSigned (eq $.SignedUserID .PosterID))}}

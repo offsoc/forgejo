@@ -92,6 +92,7 @@ import (
 
 	"code.gitea.io/gitea/models/actions"
 	"code.gitea.io/gitea/models/db"
+	quota_model "code.gitea.io/gitea/models/quota"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/storage"
@@ -287,6 +288,18 @@ func (r *artifactV4Routes) createArtifact(ctx *ArtifactContext) {
 func (r *artifactV4Routes) uploadArtifact(ctx *ArtifactContext) {
 	task, artifactName, ok := r.verifySignature(ctx, "UploadArtifact")
 	if !ok {
+		return
+	}
+
+	// check the owner's quota
+	ok, err := quota_model.EvaluateForUser(ctx, task.OwnerID, quota_model.LimitSubjectSizeAssetsArtifacts)
+	if err != nil {
+		log.Error("quota_model.EvaluateForUser: %v", err)
+		ctx.Error(http.StatusInternalServerError, "Error checking quota")
+		return
+	}
+	if !ok {
+		ctx.Error(http.StatusRequestEntityTooLarge, "Quota exceeded")
 		return
 	}
 

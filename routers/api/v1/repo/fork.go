@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/models/organization"
 	"code.gitea.io/gitea/models/perm"
 	access_model "code.gitea.io/gitea/models/perm/access"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	api "code.gitea.io/gitea/modules/structs"
@@ -105,6 +106,8 @@ func CreateFork(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 	//   "409":
 	//     description: The repository with the same name already exists.
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 
@@ -134,6 +137,10 @@ func CreateFork(ctx *context.APIContext) {
 		forker = org.AsUser()
 	}
 
+	if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, forker.ID, forker.Name) {
+		return
+	}
+
 	var name string
 	if form.Name == nil {
 		name = repo.Name
@@ -141,16 +148,16 @@ func CreateFork(ctx *context.APIContext) {
 		name = *form.Name
 	}
 
-	fork, err := repo_service.ForkRepository(ctx, ctx.Doer, forker, repo_service.ForkRepoOptions{
+	fork, err := repo_service.ForkRepositoryAndUpdates(ctx, ctx.Doer, forker, repo_service.ForkRepoOptions{
 		BaseRepo:    repo,
 		Name:        name,
 		Description: repo.Description,
 	})
 	if err != nil {
 		if errors.Is(err, util.ErrAlreadyExist) || repo_model.IsErrReachLimitOfRepo(err) {
-			ctx.Error(http.StatusConflict, "ForkRepository", err)
+			ctx.Error(http.StatusConflict, "ForkRepositoryAndUpdates", err)
 		} else {
-			ctx.Error(http.StatusInternalServerError, "ForkRepository", err)
+			ctx.Error(http.StatusInternalServerError, "ForkRepositoryAndUpdates", err)
 		}
 		return
 	}

@@ -23,7 +23,7 @@ func (a *Auth) Name() string {
 // Verify extracts the user from the Bearer token
 // If it's an anonymous session a ghost user is returned
 func (a *Auth) Verify(req *http.Request, w http.ResponseWriter, store auth.DataStore, sess auth.SessionStore) (*user_model.User, error) {
-	uid, err := packages.ParseAuthorizationToken(req)
+	uid, scope, err := packages.ParseAuthorizationToken(req)
 	if err != nil {
 		log.Trace("ParseAuthorizationToken: %v", err)
 		return nil, err
@@ -31,6 +31,12 @@ func (a *Auth) Verify(req *http.Request, w http.ResponseWriter, store auth.DataS
 
 	if uid == 0 {
 		return nil, nil
+	}
+
+	// Propagate scope of the authorization token.
+	if scope != "" {
+		store.GetData()["IsApiToken"] = true
+		store.GetData()["ApiTokenScope"] = scope
 	}
 
 	u, err := user_model.GetPossibleUserByID(req.Context(), uid)

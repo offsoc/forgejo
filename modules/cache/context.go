@@ -73,7 +73,9 @@ func (cc *cacheContext) Expired() bool {
 	return timeNow().Sub(cc.created) > cacheContextLifetime
 }
 
-var cacheContextKey = struct{}{}
+type cacheContextType = struct{ useless struct{} }
+
+var cacheContextKey = cacheContextType{useless: struct{}{}}
 
 /*
 Since there are both WithCacheContext and WithNoCacheContext,

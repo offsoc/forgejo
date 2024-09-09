@@ -14,6 +14,7 @@ import (
 	base "code.gitea.io/gitea/modules/migration"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGiteaDownloadRepo(t *testing.T) {
@@ -32,12 +33,10 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	if downloader == nil {
 		t.Fatal("NewGitlabDownloader is nil")
 	}
-	if !assert.NoError(t, err) {
-		t.Fatal("NewGitlabDownloader error occur")
-	}
+	require.NoError(t, err, "NewGitlabDownloader error occur")
 
 	repo, err := downloader.GetRepoInfo()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertRepositoryEqual(t, &base.Repository{
 		Name:          "test_repo",
 		Owner:         "gitea",
@@ -49,12 +48,12 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	}, repo)
 
 	topics, err := downloader.GetTopics()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	sort.Strings(topics)
 	assert.EqualValues(t, []string{"ci", "gitea", "migration", "test"}, topics)
 
 	labels, err := downloader.GetLabels()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertLabelsEqual(t, []*base.Label{
 		{
 			Name:  "Bug",
@@ -84,7 +83,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	}, labels)
 
 	milestones, err := downloader.GetMilestones()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertMilestonesEqual(t, []*base.Milestone{
 		{
 			Title:    "V2 Finalize",
@@ -104,7 +103,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	}, milestones)
 
 	releases, err := downloader.GetReleases()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReleasesEqual(t, []*base.Release{
 		{
 			Name:            "Second Release",
@@ -135,13 +134,13 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	}, releases)
 
 	issues, isEnd, err := downloader.GetIssues(1, 50)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isEnd)
 	assert.Len(t, issues, 7)
 	assert.EqualValues(t, "open", issues[0].State)
 
 	issues, isEnd, err = downloader.GetIssues(3, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isEnd)
 
 	assertIssuesEqual(t, []*base.Issue{
@@ -198,7 +197,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	}, issues)
 
 	comments, _, err := downloader.GetComments(&base.Issue{Number: 4, ForeignIndex: 4})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertCommentsEqual(t, []*base.Comment{
 		{
 			IssueIndex:  4,
@@ -221,11 +220,11 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	}, comments)
 
 	prs, isEnd, err := downloader.GetPullRequests(1, 50)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isEnd)
 	assert.Len(t, prs, 6)
 	prs, isEnd, err = downloader.GetPullRequests(1, 3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isEnd)
 	assert.Len(t, prs, 3)
 	assertPullRequestEqual(t, &base.PullRequest{
@@ -263,7 +262,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	}, prs[1])
 
 	reviews, err := downloader.GetReviews(&base.Issue{Number: 7, ForeignIndex: 7})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReviewsEqual(t, []*base.Review{
 		{
 			ID:           1770,

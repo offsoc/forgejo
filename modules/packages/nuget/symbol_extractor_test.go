@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const pdbContent = `QlNKQgEAAQAAAAAADAAAAFBEQiB2MS4wAAAAAAAABgB8AAAAWAAAACNQZGIAAAAA1AAAAAgBAAAj
@@ -31,7 +32,7 @@ func TestExtractPortablePdb(t *testing.T) {
 		zip.NewWriter(&buf).Close()
 
 		pdbs, err := ExtractPortablePdb(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
-		assert.ErrorIs(t, err, ErrMissingPdbFiles)
+		require.ErrorIs(t, err, ErrMissingPdbFiles)
 		assert.Empty(t, pdbs)
 	})
 
@@ -39,7 +40,7 @@ func TestExtractPortablePdb(t *testing.T) {
 		data := createArchive("sub/test.bin", []byte{})
 
 		pdbs, err := ExtractPortablePdb(bytes.NewReader(data), int64(len(data)))
-		assert.ErrorIs(t, err, ErrInvalidFiles)
+		require.ErrorIs(t, err, ErrInvalidFiles)
 		assert.Empty(t, pdbs)
 	})
 
@@ -48,7 +49,7 @@ func TestExtractPortablePdb(t *testing.T) {
 		data := createArchive("test.pdb", b)
 
 		pdbs, err := ExtractPortablePdb(bytes.NewReader(data), int64(len(data)))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pdbs, 1)
 		assert.Equal(t, "test.pdb", pdbs[0].Name)
 		assert.Equal(t, "d910bb6948bd4c6cb40155bcf52c3c94", pdbs[0].ID)
@@ -59,7 +60,7 @@ func TestExtractPortablePdb(t *testing.T) {
 func TestParseDebugHeaderID(t *testing.T) {
 	t.Run("InvalidPdbMagicNumber", func(t *testing.T) {
 		id, err := ParseDebugHeaderID(bytes.NewReader([]byte{0, 0, 0, 0}))
-		assert.ErrorIs(t, err, ErrInvalidPdbMagicNumber)
+		require.ErrorIs(t, err, ErrInvalidPdbMagicNumber)
 		assert.Empty(t, id)
 	})
 
@@ -67,7 +68,7 @@ func TestParseDebugHeaderID(t *testing.T) {
 		b, _ := base64.StdEncoding.DecodeString(`QlNKQgEAAQAAAAAADAAAAFBEQiB2MS4wAAAAAAAAAQB8AAAAWAAAACNVUwA=`)
 
 		id, err := ParseDebugHeaderID(bytes.NewReader(b))
-		assert.ErrorIs(t, err, ErrMissingPdbStream)
+		require.ErrorIs(t, err, ErrMissingPdbStream)
 		assert.Empty(t, id)
 	})
 
@@ -75,7 +76,7 @@ func TestParseDebugHeaderID(t *testing.T) {
 		b, _ := base64.StdEncoding.DecodeString(pdbContent)
 
 		id, err := ParseDebugHeaderID(bytes.NewReader(b))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "d910bb6948bd4c6cb40155bcf52c3c94", id)
 	})
 }

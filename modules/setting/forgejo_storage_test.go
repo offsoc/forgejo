@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestForgejoDocs_StorageTypes(t *testing.T) {
@@ -256,8 +257,8 @@ STORAGE_TYPE = %s
 
 func testStoragePathMatch(t *testing.T, iniStr string, storageType StorageType, testSectionToPath testSectionToPathFun, section string, storage **Storage) {
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err, iniStr)
-	assert.NoError(t, loadCommonSettingsFrom(cfg), iniStr)
+	require.NoError(t, err, iniStr)
+	require.NoError(t, loadCommonSettingsFrom(cfg), iniStr)
 	assert.EqualValues(t, testSectionToPath(storageType, section), testStorageGetPath(*storage), iniStr)
 	assert.EqualValues(t, storageType, (*storage).Type, iniStr)
 }

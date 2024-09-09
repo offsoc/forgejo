@@ -1,4 +1,5 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -20,14 +21,16 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/services/migrations"
 	"code.gitea.io/gitea/services/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMigrateLocalPath(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	adminUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user1"})
 
@@ -38,17 +41,17 @@ func TestMigrateLocalPath(t *testing.T) {
 
 	lowercasePath := filepath.Join(basePath, "lowercase")
 	err := os.Mkdir(lowercasePath, 0o700)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = migrations.IsMigrateURLAllowed(lowercasePath, adminUser)
-	assert.NoError(t, err, "case lowercase path")
+	require.NoError(t, err, "case lowercase path")
 
 	mixedcasePath := filepath.Join(basePath, "mIxeDCaSe")
 	err = os.Mkdir(mixedcasePath, 0o700)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = migrations.IsMigrateURLAllowed(mixedcasePath, adminUser)
-	assert.NoError(t, err, "case mixedcase path")
+	require.NoError(t, err, "case mixedcase path")
 
 	setting.ImportLocalPaths = old
 }
@@ -65,7 +68,7 @@ func TestMigrate(t *testing.T) {
 			setting.AppVer = AppVer
 			migrations.Init()
 		}()
-		assert.NoError(t, migrations.Init())
+		require.NoError(t, migrations.Init())
 
 		ownerName := "user2"
 		repoName := "repo1"
@@ -80,13 +83,17 @@ func TestMigrate(t *testing.T) {
 			{svc: structs.ForgejoService},
 		} {
 			// Step 0: verify the repo is available
-			req := NewRequestf(t, "GET", fmt.Sprintf("/%s/%s", ownerName, repoName))
+			req := NewRequestf(t, "GET", "/%s/%s", ownerName, repoName)
 			_ = session.MakeRequest(t, req, http.StatusOK)
 			// Step 1: get the Gitea migration form
 			req = NewRequestf(t, "GET", "/repo/migrate/?service_type=%d", s.svc)
 			resp := session.MakeRequest(t, req, http.StatusOK)
 			// Step 2: load the form
 			htmlDoc := NewHTMLParser(t, resp.Body)
+			// Check form title
+			title := htmlDoc.doc.Find("title").Text()
+			assert.Contains(t, title, translation.NewLocale("en-US").TrString("new_migrate.title"))
+			// Get the link of migration button
 			link, exists := htmlDoc.doc.Find(`form.ui.form[action^="/repo/migrate"]`).Attr("action")
 			assert.True(t, exists, "The template has changed")
 			// Step 4: submit the migration to only migrate issues
@@ -110,14 +117,14 @@ func TestMigrate(t *testing.T) {
 
 			// Step 7: delete the repository, so we can test with other services
 			err := repository.DeleteRepository(context.Background(), repoOwner, repo, false)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}
 	})
 }
 
 func Test_UpdateCommentsMigrationsByType(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	err := issues_model.UpdateCommentsMigrationsByType(db.DefaultContext, structs.GithubService, "1", 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

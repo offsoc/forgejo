@@ -41,6 +41,11 @@ If you like any of the following, Forgejo is literally meant for you:
 
 Dive into the [documentation](https://forgejo.org/docs/latest/), subscribe to releases and blog post on [our website](https://forgejo.org), <a href="https://floss.social/@forgejo" rel="me">find us on the Fediverse</a> or hop into [our Matrix room](https://matrix.to/#/#forgejo-chat:matrix.org) if you have any questions or want to get involved.
 
+## License
+
+Forgejo is distributed under the terms of the [GPL version 3.0](LICENSE) or any later version.
+
+The agreement for this license [was documented in June 2023](https://codeberg.org/forgejo/governance/pulls/24) and implemented during the development of Forgejo v9.0. All Forgejo versions before v9.0 are distributed under the MIT license.
 
 ## Get involved
 

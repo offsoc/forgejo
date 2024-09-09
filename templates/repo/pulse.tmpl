@@ -122,10 +122,18 @@
 	<div class="list">
 		{{range .Activity.PublishedReleases}}
 			<p class="desc">
-				<span class="ui green label">{{ctx.Locale.Tr "repo.activity.published_release_label"}}</span>
-				{{.TagName}}
-				{{if not .IsTag}}
-					<a class="title" href="{{$.RepoLink}}/src/{{.TagName | PathEscapeSegments}}">{{.Title | RenderEmoji $.Context | RenderCodeBlock}}</a>
+				{{if .IsTag}}
+					<span class="ui yellow label">{{ctx.Locale.Tr "repo.activity.published_tag_label"}}</span>
+				{{else if .IsPrerelease}}
+					<span class="ui orange label">{{ctx.Locale.Tr "repo.activity.published_prerelease_label"}}</span>
+				{{else}}
+					<span class="ui green label">{{ctx.Locale.Tr "repo.activity.published_release_label"}}</span>
+				{{end}}
+				{{if .IsTag}}
+					<a href="{{$.RepoLink}}/src/{{.TagName | PathEscapeSegments}}">{{.TagName}}</a>
+				{{else}}
+					{{.TagName}}
+					<a class="title" href="{{$.RepoLink}}/releases/tag/{{.TagName | PathEscapeSegments}}">{{.Title | RenderEmoji $.Context | RenderCodeBlock}}</a>
 				{{end}}
 				{{TimeSinceUnix .CreatedUnix ctx.Locale}}
 			</p>

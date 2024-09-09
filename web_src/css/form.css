@@ -1,3 +1,51 @@
+fieldset {
+  margin: 0.5em 0 1em;
+  padding: 0;
+}
+
+fieldset legend {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: 0.75em;
+}
+
+fieldset label {
+  display: block;
+}
+
+fieldset label:has(input[type="text"]),
+fieldset label:has(input[type="number"]) {
+  font-weight: var(--font-weight-medium);
+}
+
+fieldset .help {
+  font-weight: var(--font-weight-normal);
+  display: block !important; /* overrides another rule in this file, remove when obsolete */
+}
+
+fieldset input[type="checkbox"],
+fieldset input[type="radio"] {
+  margin-right: 0.75em;
+  vertical-align: initial !important; /* overrides a semantic.css rule, remove when obsolete */
+}
+
+@media (min-width: 768px) {
+  .optionmatrix input[type="radio"] {
+    margin: 0;
+  }
+
+  /* center columns except first */
+  .optionmatrix td + td, .optionmatrix th + th {
+    min-width: 10em;
+    text-align: center !important; /* overrides table.css "inherit" rule */
+  }
+}
+
+/* if an element with class "hide-unless-checked" follows a label
+ * that has no checked input, it will be hidden.*/
+label:not(:has(input:checked)) + .hide-unless-checked {
+  display: none;
+}
+
 .ui.input textarea,
 .ui.form textarea,
 .ui.form input:not([type]),
@@ -98,8 +146,7 @@ textarea:focus,
   color: var(--color-text);
 }
 
-.ui.form .required.fields:not(.grouped) > .field > label::after,
-.ui.form .required.fields.grouped > label::after,
+.ui.form .required.fields > .field > label::after,
 .ui.form .required.field > label::after,
 .ui.form label.required::after {
   color: var(--color-red);
@@ -464,14 +511,6 @@ textarea:focus,
 
 .ui.form .field > .selection.dropdown {
   min-width: 14em; /* matches the default min width */
-}
-
-.new.webhook form .help {
-  margin-left: 25px;
-}
-
-.new.webhook .events.fields .column {
-  padding-left: 40px;
 }
 
 .githook textarea {

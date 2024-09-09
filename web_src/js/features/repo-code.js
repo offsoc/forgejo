@@ -158,7 +158,8 @@ export function initRepoCodeView() {
       if (m) {
         $first = $linesEls.filter(`[rel=${m[1]}]`);
         if ($first.length) {
-          selectRange($linesEls, $first, $linesEls.filter(`[rel=${m[2]}]`));
+          const $last = $linesEls.filter(`[rel=${m[2]}]`);
+          selectRange($linesEls, $first, $last.length ? $last : $linesEls.last());
 
           // show code view menu marker (don't show in blame page)
           if (!isBlame()) {

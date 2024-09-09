@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type readerWithError struct {
@@ -27,40 +28,40 @@ func TestReadWithLimit(t *testing.T) {
 
 	// normal test
 	buf, err := readWithLimit(bytes.NewBuffer(bs), 5, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte("01"), buf)
 
 	buf, err = readWithLimit(bytes.NewBuffer(bs), 5, 5)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte("01234"), buf)
 
 	buf, err = readWithLimit(bytes.NewBuffer(bs), 5, 6)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte("012345"), buf)
 
 	buf, err = readWithLimit(bytes.NewBuffer(bs), 5, len(bs))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte("0123456789abcdef"), buf)
 
 	buf, err = readWithLimit(bytes.NewBuffer(bs), 5, 100)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte("0123456789abcdef"), buf)
 
 	// test with error
 	buf, err = readWithLimit(&readerWithError{bytes.NewBuffer(bs)}, 5, 10)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte("0123456789"), buf)
 
 	buf, err = readWithLimit(&readerWithError{bytes.NewBuffer(bs)}, 5, 100)
-	assert.ErrorContains(t, err, "test error")
+	require.ErrorContains(t, err, "test error")
 	assert.Empty(t, buf)
 
 	// test public function
 	buf, err = ReadWithLimit(bytes.NewBuffer(bs), 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte("01"), buf)
 
 	buf, err = ReadWithLimit(bytes.NewBuffer(bs), 9999999)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte("0123456789abcdef"), buf)
 }

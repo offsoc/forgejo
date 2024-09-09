@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/services/auth/source/ldap"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"
 )
 
@@ -234,7 +235,7 @@ func TestAddLdapBindDn(t *testing.T) {
 		if c.errMsg != "" {
 			assert.EqualError(t, err, c.errMsg, "case %d: error should match", n)
 		} else {
-			assert.NoError(t, err, "case %d: should have no errors", n)
+			require.NoError(t, err, "case %d: should have no errors", n)
 			assert.Equal(t, c.source, createdAuthSource, "case %d: wrong authSource", n)
 		}
 	}
@@ -465,7 +466,7 @@ func TestAddLdapSimpleAuth(t *testing.T) {
 		if c.errMsg != "" {
 			assert.EqualError(t, err, c.errMsg, "case %d: error should match", n)
 		} else {
-			assert.NoError(t, err, "case %d: should have no errors", n)
+			require.NoError(t, err, "case %d: should have no errors", n)
 			assert.Equal(t, c.authSource, createdAuthSource, "case %d: wrong authSource", n)
 		}
 	}
@@ -928,7 +929,7 @@ func TestUpdateLdapBindDn(t *testing.T) {
 		if c.errMsg != "" {
 			assert.EqualError(t, err, c.errMsg, "case %d: error should match", n)
 		} else {
-			assert.NoError(t, err, "case %d: should have no errors", n)
+			require.NoError(t, err, "case %d: should have no errors", n)
 			assert.Equal(t, c.authSource, updatedAuthSource, "case %d: wrong authSource", n)
 		}
 	}
@@ -1318,7 +1319,7 @@ func TestUpdateLdapSimpleAuth(t *testing.T) {
 		if c.errMsg != "" {
 			assert.EqualError(t, err, c.errMsg, "case %d: error should match", n)
 		} else {
-			assert.NoError(t, err, "case %d: should have no errors", n)
+			require.NoError(t, err, "case %d: should have no errors", n)
 			assert.Equal(t, c.authSource, updatedAuthSource, "case %d: wrong authSource", n)
 		}
 	}

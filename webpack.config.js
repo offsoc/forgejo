@@ -1,6 +1,6 @@
 import fastGlob from 'fast-glob';
 import wrapAnsi from 'wrap-ansi';
-import licenseChecker from 'license-checker-rseidelsohn';
+import {init as licenseChecker} from 'license-checker-rseidelsohn';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 import {VueLoaderPlugin} from 'vue-loader';
@@ -33,14 +33,13 @@ for (const path of glob('web_src/css/themes/*.css')) {
 const isProduction = env.NODE_ENV !== 'development';
 
 if (isProduction) {
-  licenseChecker.init({
+  licenseChecker({
     start: baseDirectory,
     production: true,
-    onlyAllow: 'Apache-2.0; 0BSD; BSD-2-Clause; BSD-3-Clause; BlueOak-1.0.0; MIT; AGPL-1.0; ISC; Unlicense; CC-BY-4.0',
+    onlyAllow: 'Apache-2.0; 0BSD; BSD-2-Clause; BSD-3-Clause; BlueOak-1.0.0; MIT; ISC; Unlicense; CC-BY-4.0',
     // argparse@2.0.1 - Python-2.0. It's used in the CLI file of markdown-it and js-yaml and not in the library code.
-    // elkjs@0.9.3 - EPL-2.0. See https://github.com/mermaid-js/mermaid/pull/5654
     // idiomorph@0.3.0. See https://github.com/bigskysoftware/idiomorph/pull/37
-    excludePackages: 'argparse@2.0.1;elkjs@0.9.3;idiomorph@0.3.0',
+    excludePackages: 'argparse@2.0.1;idiomorph@0.3.0',
   }, (err, dependencies) => {
     if (err) {
       throw err;
@@ -56,7 +55,7 @@ if (isProduction) {
       const licenseText = (licenseFile && !licenseFile.toLowerCase().includes('readme')) ? readFileSync(licenseFile) : '[no license file]';
       return {name: packageName, licenseName: licenses, body: formatLicenseText(licenseText)};
     });
-    const modules = [...goModules, ...jsModules].sort((a, b) => a.name.localeCompare(b.name));
+    const modules = [...goModules, ...jsModules];
     const licenseTxt = modules.map(({name, licenseName, body}) => {
       const title = licenseName ? `${name} - ${licenseName}` : name;
       return `${line}\n${title}\n${line}\n${body}`;

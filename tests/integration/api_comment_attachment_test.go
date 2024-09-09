@@ -23,14 +23,15 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIGetCommentAttachment(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
 	comment := unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: 2})
-	assert.NoError(t, comment.LoadIssue(db.DefaultContext))
-	assert.NoError(t, comment.LoadAttachments(db.DefaultContext))
+	require.NoError(t, comment.LoadIssue(db.DefaultContext))
+	require.NoError(t, comment.LoadAttachments(db.DefaultContext))
 	attachment := unittest.AssertExistsAndLoadBean(t, &repo_model.Attachment{ID: comment.Attachments[0].ID})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: comment.Issue.RepoID})
 	repoOwner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
@@ -111,11 +112,11 @@ func TestAPICreateCommentAttachment(t *testing.T) {
 	// Setup multi-part
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile("attachment", filename)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	_, err = io.Copy(part, &buff)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = writer.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req := NewRequestWithBody(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/issues/comments/%d/assets", repoOwner.Name, repo.Name, comment.ID), body).
 		AddTokenAuth(token).
@@ -151,11 +152,11 @@ func TestAPICreateCommentAttachmentAutoDate(t *testing.T) {
 		// Setup multi-part
 		writer := multipart.NewWriter(body)
 		part, err := writer.CreateFormFile("attachment", filename)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		_, err = io.Copy(part, &buff)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		err = writer.Close()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		req := NewRequestWithBody(t, "POST", urlStr, body).AddTokenAuth(token)
 		req.Header.Add("Content-Type", writer.FormDataContentType())
@@ -182,11 +183,11 @@ func TestAPICreateCommentAttachmentAutoDate(t *testing.T) {
 		// Setup multi-part
 		writer := multipart.NewWriter(body)
 		part, err := writer.CreateFormFile("attachment", filename)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		_, err = io.Copy(part, &buff)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		err = writer.Close()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		req := NewRequestWithBody(t, "POST", urlStr, body).AddTokenAuth(token)
 		req.Header.Add("Content-Type", writer.FormDataContentType())
@@ -265,9 +266,9 @@ func TestAPICreateCommentAttachmentWithUnallowedFile(t *testing.T) {
 	// Setup multi-part.
 	writer := multipart.NewWriter(body)
 	_, err := writer.CreateFormFile("attachment", filename)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = writer.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req := NewRequestWithBody(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/issues/comments/%d/assets", repoOwner.Name, repo.Name, comment.ID), body).
 		AddTokenAuth(token).

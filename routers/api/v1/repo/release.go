@@ -247,7 +247,7 @@ func CreateRelease(ctx *context.APIContext) {
 			IsTag:            false,
 			Repo:             ctx.Repo.Repository,
 		}
-		if err := release_service.CreateRelease(ctx.Repo.GitRepo, rel, nil, ""); err != nil {
+		if err := release_service.CreateRelease(ctx.Repo.GitRepo, rel, "", nil); err != nil {
 			if repo_model.IsErrReleaseAlreadyExist(err) {
 				ctx.Error(http.StatusConflict, "ReleaseAlreadyExist", err)
 			} else if models.IsErrProtectedTagName(err) {
@@ -274,7 +274,7 @@ func CreateRelease(ctx *context.APIContext) {
 		rel.Publisher = ctx.Doer
 		rel.Target = form.Target
 
-		if err = release_service.UpdateRelease(ctx, ctx.Doer, ctx.Repo.GitRepo, rel, nil, nil, nil, true); err != nil {
+		if err = release_service.UpdateRelease(ctx, ctx.Doer, ctx.Repo.GitRepo, rel, true, nil); err != nil {
 			ctx.Error(http.StatusInternalServerError, "UpdateRelease", err)
 			return
 		}
@@ -351,7 +351,7 @@ func EditRelease(ctx *context.APIContext) {
 	if form.HideArchiveLinks != nil {
 		rel.HideArchiveLinks = *form.HideArchiveLinks
 	}
-	if err := release_service.UpdateRelease(ctx, ctx.Doer, ctx.Repo.GitRepo, rel, nil, nil, nil, false); err != nil {
+	if err := release_service.UpdateRelease(ctx, ctx.Doer, ctx.Repo.GitRepo, rel, false, nil); err != nil {
 		ctx.Error(http.StatusInternalServerError, "UpdateRelease", err)
 		return
 	}

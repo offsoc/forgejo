@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_getStorageCustomType(t *testing.T) {
@@ -20,9 +21,9 @@ STORAGE_TYPE = minio
 MINIO_ENDPOINT = my_minio:9000
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadAttachmentFrom(cfg))
+	require.NoError(t, loadAttachmentFrom(cfg))
 
 	assert.EqualValues(t, "minio", Attachment.Storage.Type)
 	assert.EqualValues(t, "my_minio:9000", Attachment.Storage.MinioConfig.Endpoint)
@@ -42,9 +43,9 @@ MINIO_BUCKET = gitea-minio
 MINIO_BUCKET = gitea
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadAttachmentFrom(cfg))
+	require.NoError(t, loadAttachmentFrom(cfg))
 
 	assert.EqualValues(t, "minio", Attachment.Storage.Type)
 	assert.EqualValues(t, "gitea-minio", Attachment.Storage.MinioConfig.Bucket)
@@ -64,9 +65,9 @@ MINIO_BUCKET = gitea
 STORAGE_TYPE = local
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadAttachmentFrom(cfg))
+	require.NoError(t, loadAttachmentFrom(cfg))
 
 	assert.EqualValues(t, "minio", Attachment.Storage.Type)
 	assert.EqualValues(t, "gitea-attachment", Attachment.Storage.MinioConfig.Bucket)
@@ -75,9 +76,9 @@ STORAGE_TYPE = local
 
 func Test_getStorageGetDefaults(t *testing.T) {
 	cfg, err := NewConfigProviderFromData("")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadAttachmentFrom(cfg))
+	require.NoError(t, loadAttachmentFrom(cfg))
 
 	// default storage is local, so bucket is empty
 	assert.EqualValues(t, "", Attachment.Storage.MinioConfig.Bucket)
@@ -89,9 +90,9 @@ func Test_getStorageInheritNameSectionType(t *testing.T) {
 STORAGE_TYPE = minio
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadAttachmentFrom(cfg))
+	require.NoError(t, loadAttachmentFrom(cfg))
 
 	assert.EqualValues(t, "minio", Attachment.Storage.Type)
 }
@@ -109,9 +110,9 @@ MINIO_ACCESS_KEY_ID     = correct_key
 MINIO_SECRET_ACCESS_KEY = correct_key
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadAttachmentFrom(cfg))
+	require.NoError(t, loadAttachmentFrom(cfg))
 	storage := Attachment.Storage
 
 	assert.EqualValues(t, "minio", storage.Type)
@@ -124,9 +125,9 @@ func Test_AttachmentStorage1(t *testing.T) {
 STORAGE_TYPE = minio
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadAttachmentFrom(cfg))
+	require.NoError(t, loadAttachmentFrom(cfg))
 	assert.EqualValues(t, "minio", Attachment.Storage.Type)
 	assert.EqualValues(t, "gitea", Attachment.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)

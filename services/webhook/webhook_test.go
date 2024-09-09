@@ -15,17 +15,18 @@ import (
 	webhook_module "code.gitea.io/gitea/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func activateWebhook(t *testing.T, hookID int64) {
 	t.Helper()
 	updated, err := db.GetEngine(db.DefaultContext).ID(hookID).Cols("is_active").Update(webhook_model.Webhook{IsActive: true})
 	assert.Equal(t, int64(1), updated)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestPrepareWebhooks(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	activateWebhook(t, 1)
@@ -36,7 +37,7 @@ func TestPrepareWebhooks(t *testing.T) {
 	for _, hookTask := range hookTasks {
 		unittest.AssertNotExistsBean(t, hookTask)
 	}
-	assert.NoError(t, PrepareWebhooks(db.DefaultContext, EventSource{Repository: repo}, webhook_module.HookEventPush, &api.PushPayload{Commits: []*api.PayloadCommit{{}}}))
+	require.NoError(t, PrepareWebhooks(db.DefaultContext, EventSource{Repository: repo}, webhook_module.HookEventPush, &api.PushPayload{Commits: []*api.PayloadCommit{{}}}))
 	for _, hookTask := range hookTasks {
 		unittest.AssertExistsAndLoadBean(t, hookTask)
 	}
@@ -55,7 +56,7 @@ func eventType(p api.Payloader) webhook_module.HookEventType {
 }
 
 func TestPrepareWebhooksBranchFilterMatch(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// branch_filter: {master,feature*}
 	w := unittest.AssertExistsAndLoadBean(t, &webhook_model.Webhook{ID: 4})
@@ -69,7 +70,7 @@ func TestPrepareWebhooksBranchFilterMatch(t *testing.T) {
 		t.Run(fmt.Sprintf("%T", p), func(t *testing.T) {
 			db.DeleteBeans(db.DefaultContext, webhook_model.HookTask{HookID: w.ID})
 			typ := eventType(p)
-			assert.NoError(t, PrepareWebhook(db.DefaultContext, w, typ, p))
+			require.NoError(t, PrepareWebhook(db.DefaultContext, w, typ, p))
 			unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{
 				HookID:    w.ID,
 				EventType: typ,
@@ -79,7 +80,7 @@ func TestPrepareWebhooksBranchFilterMatch(t *testing.T) {
 }
 
 func TestPrepareWebhooksBranchFilterNoMatch(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// branch_filter: {master,feature*}
 	w := unittest.AssertExistsAndLoadBean(t, &webhook_model.Webhook{ID: 4})
@@ -92,7 +93,7 @@ func TestPrepareWebhooksBranchFilterNoMatch(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("%T", p), func(t *testing.T) {
 			db.DeleteBeans(db.DefaultContext, webhook_model.HookTask{HookID: w.ID})
-			assert.NoError(t, PrepareWebhook(db.DefaultContext, w, eventType(p), p))
+			require.NoError(t, PrepareWebhook(db.DefaultContext, w, eventType(p), p))
 			unittest.AssertNotExistsBean(t, &webhook_model.HookTask{HookID: w.ID})
 		})
 	}

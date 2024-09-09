@@ -20,6 +20,7 @@ import (
 	repo_service "code.gitea.io/gitea/services/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func getExpectedContentsResponseForContents(ref, refType, lastCommitSHA string) *api.ContentsResponse {
@@ -75,20 +76,20 @@ func testAPIGetContents(t *testing.T, u *url.URL) {
 
 	// Get the commit ID of the default branch
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	// Make a new branch in repo1
 	newBranch := "test_branch"
 	err = repo_service.CreateNewBranch(git.DefaultContext, user2, repo1, gitRepo, repo1.DefaultBranch, newBranch)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	commitID, err := gitRepo.GetBranchCommitID(repo1.DefaultBranch)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	// Make a new tag in repo1
 	newTag := "test_tag"
 	err = gitRepo.CreateTag(newTag, commitID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	/*** END SETUP ***/
 
 	// ref is default ref
@@ -179,17 +180,17 @@ func TestAPIGetContentsRefFormats(t *testing.T) {
 
 		resp := MakeRequest(t, NewRequest(t, http.MethodGet, noRef), http.StatusOK)
 		raw, err := io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, content, string(raw))
 
 		resp = MakeRequest(t, NewRequest(t, http.MethodGet, refInPath), http.StatusOK)
 		raw, err = io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, content, string(raw))
 
 		resp = MakeRequest(t, NewRequest(t, http.MethodGet, refInQuery), http.StatusOK)
 		raw, err = io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, content, string(raw))
 	})
 }

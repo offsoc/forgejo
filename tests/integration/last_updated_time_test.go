@@ -30,7 +30,7 @@ func TestRepoLastUpdatedTime(t *testing.T) {
 		// Relative time should be present as a descendent
 		{
 			relativeTime := node.Find("relative-time").Text()
-			assert.Equal(t, true, strings.HasPrefix(relativeTime, "19")) // ~1970, might underflow with timezone
+			assert.True(t, strings.HasPrefix(relativeTime, "19")) // ~1970, might underflow with timezone
 		}
 	})
 }
@@ -49,12 +49,12 @@ func TestBranchLastUpdatedTime(t *testing.T) {
 		{
 			buf := ""
 			findTextNonNested(t, node, &buf)
-			assert.Equal(t, true, strings.Contains(buf, "Updated"))
+			assert.True(t, strings.Contains(buf, "Updated"))
 		}
 
 		{
 			relativeTime := node.Find("relative-time").Text()
-			assert.Equal(t, true, strings.HasPrefix(relativeTime, "2017"))
+			assert.True(t, strings.HasPrefix(relativeTime, "2017"))
 		}
 	})
 }

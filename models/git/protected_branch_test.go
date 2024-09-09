@@ -4,7 +4,6 @@
 package git
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -65,14 +64,6 @@ func TestBranchRuleMatch(t *testing.T) {
 
 	for _, kase := range kases {
 		pb := ProtectedBranch{RuleName: kase.Rule}
-		var should, infact string
-		if !kase.ExpectedMatch {
-			should = " not"
-		} else {
-			infact = " not"
-		}
-		assert.EqualValues(t, kase.ExpectedMatch, pb.Match(kase.BranchName),
-			fmt.Sprintf("%s should%s match %s but it is%s", kase.BranchName, should, kase.Rule, infact),
-		)
+		assert.EqualValues(t, kase.ExpectedMatch, pb.Match(kase.BranchName), "%s - %s", kase.BranchName, kase.Rule)
 	}
 }

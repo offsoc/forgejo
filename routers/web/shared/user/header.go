@@ -1,4 +1,5 @@
 // Copyright 2022 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package user
@@ -8,6 +9,7 @@ import (
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
+	packages_model "code.gitea.io/gitea/models/packages"
 	access_model "code.gitea.io/gitea/models/perm/access"
 	project_model "code.gitea.io/gitea/models/project"
 	repo_model "code.gitea.io/gitea/models/repo"
@@ -125,7 +127,9 @@ func RenderUserHeader(ctx *context.Context) {
 func LoadHeaderCount(ctx *context.Context) error {
 	prepareContextForCommonProfile(ctx)
 
-	repoCount, err := repo_model.CountRepository(ctx, &repo_model.SearchRepoOptions{
+	var err error
+
+	ctx.Data["RepoCount"], err = repo_model.CountRepository(ctx, &repo_model.SearchRepoOptions{
 		Actor:              ctx.Doer,
 		OwnerID:            ctx.ContextUser.ID,
 		Private:            ctx.IsSigned,
@@ -135,7 +139,6 @@ func LoadHeaderCount(ctx *context.Context) error {
 	if err != nil {
 		return err
 	}
-	ctx.Data["RepoCount"] = repoCount
 
 	var projectType project_model.Type
 	if ctx.ContextUser.IsOrganization() {
@@ -143,7 +146,7 @@ func LoadHeaderCount(ctx *context.Context) error {
 	} else {
 		projectType = project_model.TypeIndividual
 	}
-	projectCount, err := db.Count[project_model.Project](ctx, project_model.SearchOptions{
+	ctx.Data["ProjectCount"], err = db.Count[project_model.Project](ctx, project_model.SearchOptions{
 		OwnerID:  ctx.ContextUser.ID,
 		IsClosed: optional.Some(false),
 		Type:     projectType,
@@ -151,7 +154,10 @@ func LoadHeaderCount(ctx *context.Context) error {
 	if err != nil {
 		return err
 	}
-	ctx.Data["ProjectCount"] = projectCount
+	ctx.Data["PackageCount"], err = packages_model.CountOwnerPackages(ctx, ctx.ContextUser.ID)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

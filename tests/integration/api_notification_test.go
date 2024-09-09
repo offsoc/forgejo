@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPINotification(t *testing.T) {
@@ -26,7 +27,7 @@ func TestAPINotification(t *testing.T) {
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	thread5 := unittest.AssertExistsAndLoadBean(t, &activities_model.Notification{ID: 5})
-	assert.NoError(t, thread5.LoadAttributes(db.DefaultContext))
+	require.NoError(t, thread5.LoadAttributes(db.DefaultContext))
 	session := loginUser(t, user2.Name)
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteNotification, auth_model.AccessTokenScopeWriteRepository)
 
@@ -120,7 +121,7 @@ func TestAPINotification(t *testing.T) {
 		AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &newStruct)
-	assert.True(t, newStruct.New > 0)
+	assert.Positive(t, newStruct.New)
 
 	// -- mark notifications as read --
 	req = NewRequest(t, "GET", "/api/v1/notifications?status-types=unread").
@@ -154,7 +155,7 @@ func TestAPINotification(t *testing.T) {
 		AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &newStruct)
-	assert.True(t, newStruct.New == 0)
+	assert.Equal(t, int64(0), newStruct.New)
 }
 
 func TestAPINotificationPUT(t *testing.T) {
@@ -162,7 +163,7 @@ func TestAPINotificationPUT(t *testing.T) {
 
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	thread5 := unittest.AssertExistsAndLoadBean(t, &activities_model.Notification{ID: 5})
-	assert.NoError(t, thread5.LoadAttributes(db.DefaultContext))
+	require.NoError(t, thread5.LoadAttributes(db.DefaultContext))
 	session := loginUser(t, user2.Name)
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteNotification)
 

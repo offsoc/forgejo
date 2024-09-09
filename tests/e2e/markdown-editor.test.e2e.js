@@ -1,12 +1,12 @@
 // @ts-check
-import {expect, test} from '@playwright/test';
-import {load_logged_in_context, login_user} from './utils_e2e.js';
+import {expect} from '@playwright/test';
+import {test, load_logged_in_context, login_user} from './utils_e2e.js';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
 });
 
-test('Test markdown indentation', async ({browser}, workerInfo) => {
+test('markdown indentation', async ({browser}, workerInfo) => {
   const context = await load_logged_in_context(browser, workerInfo, 'user2');
 
   const initText = `* first\n* second\n* third\n* last`;
@@ -79,7 +79,7 @@ test('Test markdown indentation', async ({browser}, workerInfo) => {
   await expect(textarea).toHaveValue(initText);
 });
 
-test('Test markdown list continuation', async ({browser}, workerInfo) => {
+test('markdown list continuation', async ({browser}, workerInfo) => {
   const context = await load_logged_in_context(browser, workerInfo, 'user2');
 
   const initText = `* first\n* second\n* third\n* last`;

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_getStorageInheritNameSectionTypeForLFS(t *testing.T) {
@@ -15,8 +16,8 @@ func Test_getStorageInheritNameSectionTypeForLFS(t *testing.T) {
 	STORAGE_TYPE = minio
 	`
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadLFSFrom(cfg))
 
 	assert.EqualValues(t, "minio", LFS.Storage.Type)
 	assert.EqualValues(t, "lfs/", LFS.Storage.MinioConfig.BasePath)
@@ -28,8 +29,8 @@ LFS_CONTENT_PATH = path_ignored
 PATH = path_used
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadLFSFrom(cfg))
 
 	assert.EqualValues(t, "local", LFS.Storage.Type)
 	assert.Contains(t, LFS.Storage.Path, "path_used")
@@ -39,8 +40,8 @@ PATH = path_used
 LFS_CONTENT_PATH = deprecatedpath
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadLFSFrom(cfg))
 
 	assert.EqualValues(t, "local", LFS.Storage.Type)
 	assert.Contains(t, LFS.Storage.Path, "deprecatedpath")
@@ -50,8 +51,8 @@ LFS_CONTENT_PATH = deprecatedpath
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadLFSFrom(cfg))
 
 	assert.EqualValues(t, "minio", LFS.Storage.Type)
 	assert.EqualValues(t, "lfs/", LFS.Storage.MinioConfig.BasePath)
@@ -64,8 +65,8 @@ STORAGE_TYPE = my_minio
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadLFSFrom(cfg))
 
 	assert.EqualValues(t, "minio", LFS.Storage.Type)
 	assert.EqualValues(t, "lfs/", LFS.Storage.MinioConfig.BasePath)
@@ -79,8 +80,8 @@ MINIO_BASE_PATH = my_lfs/
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadLFSFrom(cfg))
 
 	assert.EqualValues(t, "minio", LFS.Storage.Type)
 	assert.EqualValues(t, "my_lfs/", LFS.Storage.MinioConfig.BasePath)
@@ -92,9 +93,9 @@ func Test_LFSStorage1(t *testing.T) {
 STORAGE_TYPE = minio
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, loadLFSFrom(cfg))
 	assert.EqualValues(t, "minio", LFS.Storage.Type)
 	assert.EqualValues(t, "gitea", LFS.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "lfs/", LFS.Storage.MinioConfig.BasePath)

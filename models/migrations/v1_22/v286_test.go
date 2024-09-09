@@ -9,6 +9,7 @@ import (
 	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
 )
 
@@ -81,7 +82,7 @@ func Test_RepositoryFormat(t *testing.T) {
 	x, deferable := PrepareOldRepository(t)
 	defer deferable()
 
-	assert.NoError(t, AdjustDBForSha256(x))
+	require.NoError(t, AdjustDBForSha256(x))
 
 	type Repository struct {
 		ID               int64  `xorm:"pk autoincr"`
@@ -92,27 +93,27 @@ func Test_RepositoryFormat(t *testing.T) {
 
 	// check we have some records to migrate
 	count, err := x.Count(new(Repository))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 4, count)
 
 	repo.ObjectFormatName = "sha256"
 	_, err = x.Insert(repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	id := repo.ID
 
 	count, err = x.Count(new(Repository))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 5, count)
 
 	repo = new(Repository)
 	ok, err := x.ID(2).Get(repo)
-	assert.NoError(t, err)
-	assert.EqualValues(t, true, ok)
+	require.NoError(t, err)
+	assert.True(t, ok)
 	assert.EqualValues(t, "sha1", repo.ObjectFormatName)
 
 	repo = new(Repository)
 	ok, err = x.ID(id).Get(repo)
-	assert.NoError(t, err)
-	assert.EqualValues(t, true, ok)
+	require.NoError(t, err)
+	assert.True(t, ok)
 	assert.EqualValues(t, "sha256", repo.ObjectFormatName)
 }

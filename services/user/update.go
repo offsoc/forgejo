@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/services/mailer"
 )
 
 type UpdateOptions struct {
@@ -220,5 +221,13 @@ func UpdateAuth(ctx context.Context, u *user_model.User, opts *UpdateAuthOptions
 		u.ProhibitLogin = opts.ProhibitLogin.Value()
 	}
 
-	return user_model.UpdateUserCols(ctx, u, "login_type", "login_source", "login_name", "passwd", "passwd_hash_algo", "salt", "must_change_password", "prohibit_login")
+	if err := user_model.UpdateUserCols(ctx, u, "login_type", "login_source", "login_name", "passwd", "passwd_hash_algo", "salt", "must_change_password", "prohibit_login"); err != nil {
+		return err
+	}
+
+	if opts.Password.Has() {
+		return mailer.SendPasswordChange(u)
+	}
+
+	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFormatImportsSimple(t *testing.T) {
@@ -29,7 +30,7 @@ import (
 )
 `
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, string(formatted))
 }
 
@@ -92,7 +93,7 @@ import (
 )
 `
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, string(formatted))
 }
 
@@ -120,5 +121,5 @@ import (
 	"image/gif"
 )
 `))
-	assert.ErrorIs(t, err, errInvalidCommentBetweenImports)
+	require.ErrorIs(t, err, errInvalidCommentBetweenImports)
 }

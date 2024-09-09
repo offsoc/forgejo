@@ -11,7 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	session_module "code.gitea.io/gitea/modules/session"
 
-	chiSession "gitea.com/go-chi/session"
+	chiSession "code.forgejo.org/go-chi/session"
 	"github.com/gorilla/sessions"
 )
 

@@ -17,18 +17,19 @@ import (
 	"code.gitea.io/gitea/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHandlePullRequestMerging(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	pr, err := issues_model.GetUnmergedPullRequest(db.DefaultContext, 1, 1, "branch2", "master", issues_model.PullRequestFlowGithub)
-	assert.NoError(t, err)
-	assert.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
+	require.NoError(t, err)
+	require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
 	err = pull_model.ScheduleAutoMerge(db.DefaultContext, user1, pr.ID, repo_model.MergeStyleSquash, "squash merge a pr")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	autoMerge := unittest.AssertExistsAndLoadBean(t, &pull_model.AutoMerge{PullID: pr.ID})
 
@@ -39,9 +40,9 @@ func TestHandlePullRequestMerging(t *testing.T) {
 	}, pr.BaseRepo.OwnerName, pr.BaseRepo.Name, []*repo_module.PushUpdateOptions{
 		{NewCommitID: "01234567"},
 	})
-	assert.Equal(t, 0, len(resp.Body.String()))
+	assert.Empty(t, resp.Body.String())
 	pr, err = issues_model.GetPullRequestByID(db.DefaultContext, pr.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, pr.HasMerged)
 	assert.EqualValues(t, "01234567", pr.MergedCommitID)
 

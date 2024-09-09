@@ -5,12 +5,30 @@
 package git
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/util"
 )
+
+// Signature represents the Author, Committer or Tagger information.
+type Signature struct {
+	Name  string    // the committer name, it can be anything
+	Email string    // the committer email, it can be anything
+	When  time.Time // the timestamp of the signature
+}
+
+func (s *Signature) String() string {
+	return fmt.Sprintf("%s <%s>", s.Name, s.Email)
+}
+
+// Decode decodes a byte array representing a signature to signature
+func (s *Signature) Decode(b []byte) {
+	*s = *parseSignatureFromCommitLine(util.UnsafeBytesToString(b))
+}
 
 // Helper to get a signature from the commit line, which looks like:
 //

@@ -1,4 +1,5 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -13,6 +14,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +23,15 @@ import (
 func assertRepoCreateForm(t *testing.T, htmlDoc *HTMLDoc, owner *user_model.User, templateID string) {
 	_, exists := htmlDoc.doc.Find("form.ui.form[action^='/repo/create']").Attr("action")
 	assert.True(t, exists, "Expected the repo creation form")
+	locale := translation.NewLocale("en-US")
+
+	// Verify page title
+	title := htmlDoc.doc.Find("title").Text()
+	assert.Contains(t, title, locale.TrString("new_repo.title"))
+
+	// Verify form header
+	header := strings.TrimSpace(htmlDoc.doc.Find(".form[action='/repo/create'] .header").Text())
+	assert.EqualValues(t, locale.TrString("new_repo.title"), header)
 
 	htmlDoc.AssertDropdownHasSelectedOption(t, "uid", strconv.FormatInt(owner.ID, 10))
 

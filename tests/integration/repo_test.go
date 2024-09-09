@@ -181,11 +181,11 @@ func TestViewRepoWithSymlinks(t *testing.T) {
 		return fmt.Sprintf("%s: %s", file, cls)
 	})
 	assert.Len(t, items, 5)
-	assert.Equal(t, "a: svg octicon-file-directory-fill", items[0])
-	assert.Equal(t, "link_b: svg octicon-file-directory-symlink", items[1])
-	assert.Equal(t, "link_d: svg octicon-file-symlink-file", items[2])
-	assert.Equal(t, "link_hi: svg octicon-file-symlink-file", items[3])
-	assert.Equal(t, "link_link: svg octicon-file-symlink-file", items[4])
+	assert.Equal(t, "a: tw-mr-2 svg octicon-file-directory-fill", items[0])
+	assert.Equal(t, "link_b: tw-mr-2 svg octicon-file-directory-symlink", items[1])
+	assert.Equal(t, "link_d: tw-mr-2 svg octicon-file-symlink-file", items[2])
+	assert.Equal(t, "link_hi: tw-mr-2 svg octicon-file-symlink-file", items[3])
+	assert.Equal(t, "link_link: tw-mr-2 svg octicon-file-symlink-file", items[4])
 }
 
 // TestViewAsRepoAdmin tests PR #2167
@@ -444,7 +444,7 @@ func TestViewRepoDirectory(t *testing.T) {
 	repoSummary := htmlDoc.doc.Find(".repository-summary")
 
 	repoFilesTable := htmlDoc.doc.Find("#repo-files-table")
-	assert.NotZero(t, len(repoFilesTable.Nodes))
+	assert.NotEmpty(t, repoFilesTable.Nodes)
 
 	assert.Zero(t, description.Length())
 	assert.Zero(t, repoTopics.Length())
@@ -710,6 +710,13 @@ func TestCommitView(t *testing.T) {
 		doc := NewHTMLParser(t, resp.Body)
 		commitTitle := doc.Find(".commit-summary").Text()
 		assert.Contains(t, commitTitle, "Initial commit")
+
+		req = NewRequest(t, "GET", "/user2/repo1/src/commit/65f1")
+		resp = MakeRequest(t, req, http.StatusOK)
+
+		doc = NewHTMLParser(t, resp.Body)
+		commitTitle = doc.Find(".shortsha").Text()
+		assert.Contains(t, commitTitle, "65f1bf27bc")
 	})
 
 	t.Run("Full commit ID", func(t *testing.T) {
@@ -746,7 +753,7 @@ func TestRepoHomeViewRedirect(t *testing.T) {
 		err := repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, nil, []unit_model.Type{
 			unit_model.TypeCode,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The repo home should redirect to the built-in issue tracker
 		req := NewRequest(t, "GET", "/user2/repo1")
@@ -775,7 +782,7 @@ func TestRepoHomeViewRedirect(t *testing.T) {
 			unit_model.TypePackages,
 			unit_model.TypeActions,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The repo home should redirect to pull requests
 		req := NewRequest(t, "GET", "/user2/repo1")
@@ -808,7 +815,7 @@ func TestRepoHomeViewRedirect(t *testing.T) {
 			unit_model.TypeReleases,
 			unit_model.TypeWiki,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The repo home ends up being 404
 		req := NewRequest(t, "GET", "/user2/repo1")
@@ -827,7 +834,7 @@ func TestRepoFilesList(t *testing.T) {
 		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
 		// create the repo
-		repo, _, f := CreateDeclarativeRepo(t, user2, "",
+		repo, _, f := tests.CreateDeclarativeRepo(t, user2, "",
 			[]unit_model.Type{unit_model.TypeCode}, nil,
 			[]*files_service.ChangeRepoFile{
 				{
@@ -1038,5 +1045,335 @@ func TestFileHistoryPager(t *testing.T) {
 
 		req := NewRequest(t, "GET", "/user2/repo1/commits/branch/master/README.md?page=9999")
 		MakeRequest(t, req, http.StatusNotFound)
+	})
+}
+
+func TestRepoIssueFilterLinks(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	t.Run("No filters", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Keyword", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?q=search-on-this")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=search-on-this")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Fuzzy", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?fuzzy=true")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=true")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Sort", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?sort=oldest")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']:not(.list-header-sort a)").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=oldest")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Type", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?type=assigned")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']:not(.list-header-type a)").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=assigned")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("State", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?state=closed")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']:not(.issue-list-toolbar-left a)").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=closed")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Miilestone", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?milestone=1")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']:not(.list-header-milestone a)").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=1")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Milestone", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?milestone=1")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']:not(.list-header-milestone a)").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=1")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Project", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?project=1")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']:not(.list-header-project a)").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=1")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Assignee", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?assignee=1")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']:not(.list-header-assignee a)").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=1")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Poster", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?poster=1")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']:not(.list-header-poster a)").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=1")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Labels", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?labels=1")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']:not(.label-filter a)").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=1")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+		})
+		assert.True(t, called)
+	})
+
+	t.Run("Archived labels", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues?archived=true")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		called := false
+		htmlDoc.Find("#issue-filters a[href^='?']").Each(func(_ int, s *goquery.Selection) {
+			called = true
+			href, _ := s.Attr("href")
+			assert.Contains(t, href, "?q=&")
+			assert.Contains(t, href, "&type=")
+			assert.Contains(t, href, "&sort=")
+			assert.Contains(t, href, "&state=")
+			assert.Contains(t, href, "&labels=")
+			assert.Contains(t, href, "&milestone=")
+			assert.Contains(t, href, "&project=")
+			assert.Contains(t, href, "&assignee=")
+			assert.Contains(t, href, "&poster=")
+			assert.Contains(t, href, "&fuzzy=")
+			assert.Contains(t, href, "&archived=true")
+		})
+		assert.True(t, called)
 	})
 }

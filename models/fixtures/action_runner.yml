@@ -14,7 +14,7 @@
   token_salt: "832f8529db6151a1c3c605dd7570b58f"
   last_online: 0
   last_active: 0
-  agent_labels: '[""]'
+  agent_labels: '["woop", "doop"]'
   created: 1716104432
   updated: 1716104432
   deleted: ~

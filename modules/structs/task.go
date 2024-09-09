@@ -13,8 +13,9 @@ func (taskType TaskType) Name() string {
 	switch taskType {
 	case TaskTypeMigrateRepo:
 		return "Migrate Repository"
+	default:
+		return ""
 	}
-	return ""
 }
 
 // TaskStatus defines task status

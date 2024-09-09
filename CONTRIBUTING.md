@@ -4,4 +4,4 @@ The Forgejo project is run by a community of people who are expected to follow t
 
 Sensitive security-related issues should be reported to [security@forgejo.org](mailto:security@forgejo.org) using [encryption](https://keyoxide.org/security@forgejo.org).
 
-You can find links to the different aspects of Developer documentation on this page: [Forgejo developer guide](https://forgejo.org/docs/next/developer/).
+You can find links to the different aspects of Developer documentation on this page: [Forgejo Contributor Guide](https://forgejo.org/docs/next/contributor/).

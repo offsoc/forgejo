@@ -21,6 +21,9 @@ func Cleanup(ctx context.Context, olderThan time.Duration) error {
 	if err := cleanupExpiredBlobUploads(ctx, olderThan); err != nil {
 		return err
 	}
+	if err := CleanupSHA256(ctx, olderThan); err != nil {
+		return err
+	}
 	return cleanupExpiredUploadedBlobs(ctx, olderThan)
 }
 

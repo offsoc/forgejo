@@ -58,6 +58,7 @@ func Cell2Int64(val xorm.Cell) int64 {
 
 		v, _ := strconv.ParseInt(string((*val).([]uint8)), 10, 64)
 		return v
+	default:
+		return (*val).(int64)
 	}
-	return (*val).(int64)
 }

@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageNpm(t *testing.T) {
@@ -92,11 +93,11 @@ func TestPackageNpm(t *testing.T) {
 		MakeRequest(t, req, http.StatusCreated)
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNpm)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 
 		pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, pd.SemVer)
 		assert.IsType(t, &npm.Metadata{}, pd.Metadata)
 		assert.Equal(t, packageName, pd.Package.Name)
@@ -106,13 +107,13 @@ func TestPackageNpm(t *testing.T) {
 		assert.Equal(t, packageTag, pd.VersionProperties[0].Value)
 
 		pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pfs, 1)
 		assert.Equal(t, filename, pfs[0].Name)
 		assert.True(t, pfs[0].IsLead)
 
 		pb, err := packages.GetBlobByID(db.DefaultContext, pfs[0].BlobID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, int64(192), pb.Size)
 	})
 
@@ -141,7 +142,7 @@ func TestPackageNpm(t *testing.T) {
 		assert.Equal(t, b, resp.Body.Bytes())
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNpm)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 		assert.Equal(t, int64(2), pvs[0].DownloadCount)
 	})
@@ -294,7 +295,7 @@ func TestPackageNpm(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNpm)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 2)
 
 			req := NewRequest(t, "DELETE", fmt.Sprintf("%s/-/%s/%s/-rev/dummy", root, packageVersion, filename))
@@ -305,7 +306,7 @@ func TestPackageNpm(t *testing.T) {
 			MakeRequest(t, req, http.StatusOK)
 
 			pvs, err = packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNpm)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1)
 		})
 
@@ -313,7 +314,7 @@ func TestPackageNpm(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNpm)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1)
 
 			req := NewRequest(t, "DELETE", root+"/-rev/dummy")
@@ -324,8 +325,8 @@ func TestPackageNpm(t *testing.T) {
 			MakeRequest(t, req, http.StatusOK)
 
 			pvs, err = packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNpm)
-			assert.NoError(t, err)
-			assert.Len(t, pvs, 0)
+			require.NoError(t, err)
+			assert.Empty(t, pvs)
 		})
 	})
 }

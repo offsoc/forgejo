@@ -23,8 +23,17 @@ import (
 	"code.gitea.io/gitea/modules/storage"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/services/attachment"
 	notify_service "code.gitea.io/gitea/services/notify"
 )
+
+type AttachmentChange struct {
+	Action      string // "add", "delete", "update
+	Type        string // "attachment", "external"
+	UUID        string
+	Name        string
+	ExternalURL string
+}
 
 func createTag(ctx context.Context, gitRepo *git.Repository, rel *repo_model.Release, msg string) (bool, error) {
 	err := rel.LoadAttributes(ctx)
@@ -128,7 +137,7 @@ func createTag(ctx context.Context, gitRepo *git.Repository, rel *repo_model.Rel
 }
 
 // CreateRelease creates a new release of repository.
-func CreateRelease(gitRepo *git.Repository, rel *repo_model.Release, attachmentUUIDs []string, msg string) error {
+func CreateRelease(gitRepo *git.Repository, rel *repo_model.Release, msg string, attachmentChanges []*AttachmentChange) error {
 	has, err := repo_model.IsReleaseExist(gitRepo.Ctx, rel.RepoID, rel.TagName)
 	if err != nil {
 		return err
@@ -147,7 +156,42 @@ func CreateRelease(gitRepo *git.Repository, rel *repo_model.Release, attachmentU
 		return err
 	}
 
-	if err = repo_model.AddReleaseAttachments(gitRepo.Ctx, rel.ID, attachmentUUIDs); err != nil {
+	addAttachmentUUIDs := make(container.Set[string])
+
+	for _, attachmentChange := range attachmentChanges {
+		if attachmentChange.Action != "add" {
+			return fmt.Errorf("can only create new attachments when creating release")
+		}
+		switch attachmentChange.Type {
+		case "attachment":
+			if attachmentChange.UUID == "" {
+				return fmt.Errorf("new attachment should have a uuid")
+			}
+			addAttachmentUUIDs.Add(attachmentChange.UUID)
+		case "external":
+			if attachmentChange.Name == "" || attachmentChange.ExternalURL == "" {
+				return fmt.Errorf("new external attachment should have a name and external url")
+			}
+
+			_, err = attachment.NewExternalAttachment(gitRepo.Ctx, &repo_model.Attachment{
+				Name:        attachmentChange.Name,
+				UploaderID:  rel.PublisherID,
+				RepoID:      rel.RepoID,
+				ReleaseID:   rel.ID,
+				ExternalURL: attachmentChange.ExternalURL,
+			})
+			if err != nil {
+				return err
+			}
+		default:
+			if attachmentChange.Type == "" {
+				return fmt.Errorf("missing attachment type")
+			}
+			return fmt.Errorf("unknown attachment type: '%q'", attachmentChange.Type)
+		}
+	}
+
+	if err = repo_model.AddReleaseAttachments(gitRepo.Ctx, rel.ID, addAttachmentUUIDs.Values()); err != nil {
 		return err
 	}
 
@@ -198,8 +242,7 @@ func CreateNewTag(ctx context.Context, doer *user_model.User, repo *repo_model.R
 // addAttachmentUUIDs accept a slice of new created attachments' uuids which will be reassigned release_id as the created release
 // delAttachmentUUIDs accept a slice of attachments' uuids which will be deleted from the release
 // editAttachments accept a map of attachment uuid to new attachment name which will be updated with attachments.
-func UpdateRelease(ctx context.Context, doer *user_model.User, gitRepo *git.Repository, rel *repo_model.Release,
-	addAttachmentUUIDs, delAttachmentUUIDs []string, editAttachments map[string]string, createdFromTag bool,
+func UpdateRelease(ctx context.Context, doer *user_model.User, gitRepo *git.Repository, rel *repo_model.Release, createdFromTag bool, attachmentChanges []*AttachmentChange,
 ) error {
 	if rel.ID == 0 {
 		return errors.New("UpdateRelease only accepts an exist release")
@@ -220,14 +263,64 @@ func UpdateRelease(ctx context.Context, doer *user_model.User, gitRepo *git.Repo
 		return err
 	}
 
-	if err = repo_model.AddReleaseAttachments(ctx, rel.ID, addAttachmentUUIDs); err != nil {
+	addAttachmentUUIDs := make(container.Set[string])
+	delAttachmentUUIDs := make(container.Set[string])
+	updateAttachmentUUIDs := make(container.Set[string])
+	updateAttachments := make(container.Set[*AttachmentChange])
+
+	for _, attachmentChange := range attachmentChanges {
+		switch attachmentChange.Action {
+		case "add":
+			switch attachmentChange.Type {
+			case "attachment":
+				if attachmentChange.UUID == "" {
+					return fmt.Errorf("new attachment should have a uuid (%s)}", attachmentChange.Name)
+				}
+				addAttachmentUUIDs.Add(attachmentChange.UUID)
+			case "external":
+				if attachmentChange.Name == "" || attachmentChange.ExternalURL == "" {
+					return fmt.Errorf("new external attachment should have a name and external url")
+				}
+				_, err := attachment.NewExternalAttachment(ctx, &repo_model.Attachment{
+					Name:        attachmentChange.Name,
+					UploaderID:  doer.ID,
+					RepoID:      rel.RepoID,
+					ReleaseID:   rel.ID,
+					ExternalURL: attachmentChange.ExternalURL,
+				})
+				if err != nil {
+					return err
+				}
+			default:
+				if attachmentChange.Type == "" {
+					return fmt.Errorf("missing attachment type")
+				}
+				return fmt.Errorf("unknown attachment type: %q", attachmentChange.Type)
+			}
+		case "delete":
+			if attachmentChange.UUID == "" {
+				return fmt.Errorf("attachment deletion should have a uuid")
+			}
+			delAttachmentUUIDs.Add(attachmentChange.UUID)
+		case "update":
+			updateAttachmentUUIDs.Add(attachmentChange.UUID)
+			updateAttachments.Add(attachmentChange)
+		default:
+			if attachmentChange.Action == "" {
+				return fmt.Errorf("missing attachment action")
+			}
+			return fmt.Errorf("unknown attachment action: %q", attachmentChange.Action)
+		}
+	}
+
+	if err = repo_model.AddReleaseAttachments(ctx, rel.ID, addAttachmentUUIDs.Values()); err != nil {
 		return fmt.Errorf("AddReleaseAttachments: %w", err)
 	}
 
 	deletedUUIDs := make(container.Set[string])
 	if len(delAttachmentUUIDs) > 0 {
 		// Check attachments
-		attachments, err := repo_model.GetAttachmentsByUUIDs(ctx, delAttachmentUUIDs)
+		attachments, err := repo_model.GetAttachmentsByUUIDs(ctx, delAttachmentUUIDs.Values())
 		if err != nil {
 			return fmt.Errorf("GetAttachmentsByUUIDs [uuids: %v]: %w", delAttachmentUUIDs, err)
 		}
@@ -246,15 +339,11 @@ func UpdateRelease(ctx context.Context, doer *user_model.User, gitRepo *git.Repo
 		}
 	}
 
-	if len(editAttachments) > 0 {
-		updateAttachmentsList := make([]string, 0, len(editAttachments))
-		for k := range editAttachments {
-			updateAttachmentsList = append(updateAttachmentsList, k)
-		}
+	if len(updateAttachmentUUIDs) > 0 {
 		// Check attachments
-		attachments, err := repo_model.GetAttachmentsByUUIDs(ctx, updateAttachmentsList)
+		attachments, err := repo_model.GetAttachmentsByUUIDs(ctx, updateAttachmentUUIDs.Values())
 		if err != nil {
-			return fmt.Errorf("GetAttachmentsByUUIDs [uuids: %v]: %w", updateAttachmentsList, err)
+			return fmt.Errorf("GetAttachmentsByUUIDs [uuids: %v]: %w", updateAttachmentUUIDs, err)
 		}
 		for _, attach := range attachments {
 			if attach.ReleaseID != rel.ID {
@@ -264,15 +353,16 @@ func UpdateRelease(ctx context.Context, doer *user_model.User, gitRepo *git.Repo
 				}
 			}
 		}
+	}
 
-		for uuid, newName := range editAttachments {
-			if !deletedUUIDs.Contains(uuid) {
-				if err = repo_model.UpdateAttachmentByUUID(ctx, &repo_model.Attachment{
-					UUID: uuid,
-					Name: newName,
-				}, "name"); err != nil {
-					return err
-				}
+	for attachmentChange := range updateAttachments {
+		if !deletedUUIDs.Contains(attachmentChange.UUID) {
+			if err = repo_model.UpdateAttachmentByUUID(ctx, &repo_model.Attachment{
+				UUID:        attachmentChange.UUID,
+				Name:        attachmentChange.Name,
+				ExternalURL: attachmentChange.ExternalURL,
+			}, "name", "external_url"); err != nil {
+				return err
 			}
 		}
 	}
@@ -281,7 +371,7 @@ func UpdateRelease(ctx context.Context, doer *user_model.User, gitRepo *git.Repo
 		return err
 	}
 
-	for _, uuid := range delAttachmentUUIDs {
+	for _, uuid := range delAttachmentUUIDs.Values() {
 		if err := storage.Attachments.Delete(repo_model.AttachmentRelativePath(uuid)); err != nil {
 			// Even delete files failed, but the attachments has been removed from database, so we
 			// should not return error but only record the error on logs.

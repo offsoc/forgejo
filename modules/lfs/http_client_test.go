@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type RoundTripFunc func(req *http.Request) *http.Response
@@ -170,7 +171,7 @@ func TestHTTPClientDownload(t *testing.T) {
 
 		var batchRequest BatchRequest
 		err := json.NewDecoder(req.Body).Decode(&batchRequest)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, "download", batchRequest.Operation)
 		assert.Len(t, batchRequest.Objects, 1)
@@ -261,14 +262,14 @@ func TestHTTPClientDownload(t *testing.T) {
 				return objectError
 			}
 			b, err := io.ReadAll(content)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, []byte("dummy"), b)
 			return nil
 		})
 		if len(c.expectederror) > 0 {
 			assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 		} else {
-			assert.NoError(t, err, "case %d", n)
+			require.NoError(t, err, "case %d", n)
 		}
 	}
 }
@@ -283,7 +284,7 @@ func TestHTTPClientUpload(t *testing.T) {
 
 		var batchRequest BatchRequest
 		err := json.NewDecoder(req.Body).Decode(&batchRequest)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, "upload", batchRequest.Operation)
 		assert.Len(t, batchRequest.Objects, 1)
@@ -370,7 +371,7 @@ func TestHTTPClientUpload(t *testing.T) {
 		if len(c.expectederror) > 0 {
 			assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 		} else {
-			assert.NoError(t, err, "case %d", n)
+			require.NoError(t, err, "case %d", n)
 		}
 	}
 }

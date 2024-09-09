@@ -1577,11 +1577,6 @@ td .commit-summary {
   height: 30px;
 }
 
-.repository .diff-box .header:not(.resolved-placeholder) {
-  display: flex;
-  align-items: center;
-}
-
 .repository .diff-box .header:not(.resolved-placeholder) .file {
   min-width: 0;
 }
@@ -1752,6 +1747,10 @@ td .commit-summary {
   color: inherit;
 }
 
+.search-highlight {
+  background: var(--color-primary-alpha-40);
+}
+
 .repository.quickstart .guide .item {
   padding: 1em;
 }
@@ -1799,16 +1798,6 @@ td .commit-summary {
 .repository.settings.branches .branch-protection .status-check-matched-mark {
   font-weight: var(--font-weight-semibold);
   font-style: italic;
-}
-
-.repository.settings.webhook .events .column {
-  padding-bottom: 0;
-}
-
-.repository.settings.webhook .events .help {
-  font-size: 13px;
-  margin-left: 26px;
-  padding-top: 0;
 }
 
 .repository .ui.attached.isSigned.isWarning {
@@ -2099,35 +2088,49 @@ td .commit-summary {
 }
 
 .user-cards .list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 0 0 10px;
   padding: 0;
+}
+
+@media (max-width: 767.98px) {
+  .user-cards .list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .user.profile .user-cards .list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.user-cards .list .card {
   display: flex;
-  flex-wrap: wrap;
-  margin: 10px 0;
-}
-
-.user-cards .list .item {
-  list-style: none;
-  width: 31%;
-  margin: 15px 15px 0 0;
+  flex-direction: row;
+  width: 100%;
+  margin: 0;
   padding: 14px;
-  float: left;
+  border-radius: 0.28571429rem;
+  border: 1px solid var(--color-secondary);
+  background: var(--color-box-body);
 }
 
-.user-cards .list .item .avatar {
+.user-cards .list .card .avatar {
   width: 48px;
   height: 48px;
-  float: left;
-  display: block;
-  margin-right: 10px;
+  margin-right: 14px;
 }
 
-.user-cards .list .item .name {
+.user-cards .list .card .name {
   margin-top: 0;
   margin-bottom: 0;
   font-weight: var(--font-weight-normal);
 }
 
-.user-cards .list .item .meta {
+.user-cards .list .card .meta {
   margin-top: 5px;
 }
 
@@ -2635,7 +2638,7 @@ tbody.commit-list {
 .sidebar-item-link {
   display: inline-flex;
   align-items: center;
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .diff-file-header {

@@ -51,7 +51,7 @@ func TestRender_Commits(t *testing.T) {
 			},
 			Metas: localMetas,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 
@@ -105,7 +105,7 @@ func TestRender_CrossReferences(t *testing.T) {
 			},
 			Metas: localMetas,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 
@@ -146,7 +146,7 @@ func TestRender_links(t *testing.T) {
 				Base: markup.TestRepoURL,
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 	// Text that should be turned into URL
@@ -248,7 +248,7 @@ func TestRender_email(t *testing.T) {
 				Base: markup.TestRepoURL,
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(res))
 	}
 	// Text that should be turned into email link
@@ -321,7 +321,7 @@ func TestRender_emoji(t *testing.T) {
 				Base: markup.TestRepoURL,
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 
@@ -387,7 +387,7 @@ func TestRender_ShortLinks(t *testing.T) {
 				BranchPath: "master",
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(string(buffer)))
 		buffer, err = markdown.RenderString(&markup.RenderContext{
 			Ctx: git.DefaultContext,
@@ -397,7 +397,7 @@ func TestRender_ShortLinks(t *testing.T) {
 			Metas:  localMetas,
 			IsWiki: true,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expectedWiki), strings.TrimSpace(string(buffer)))
 	}
 
@@ -500,7 +500,7 @@ func TestRender_RelativeImages(t *testing.T) {
 			},
 			Metas: localMetas,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(string(buffer)))
 		buffer, err = markdown.RenderString(&markup.RenderContext{
 			Ctx: git.DefaultContext,
@@ -510,7 +510,7 @@ func TestRender_RelativeImages(t *testing.T) {
 			Metas:  localMetas,
 			IsWiki: true,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expectedWiki), strings.TrimSpace(string(buffer)))
 	}
 
@@ -546,7 +546,7 @@ func Test_ParseClusterFuzz(t *testing.T) {
 		},
 		Metas: localMetas,
 	}, strings.NewReader(data), &res)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotContains(t, res.String(), "<html")
 
 	data = "<!DOCTYPE html>\n<A><maTH><tr><MN><bodY ÿ><temPlate></template><tH><tr></A><tH><d<bodY "
@@ -560,7 +560,7 @@ func Test_ParseClusterFuzz(t *testing.T) {
 		Metas: localMetas,
 	}, strings.NewReader(data), &res)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotContains(t, res.String(), "<html")
 }
 
@@ -584,7 +584,7 @@ func TestPostProcess_RenderDocument(t *testing.T) {
 			},
 			Metas: localMetas,
 		}, strings.NewReader(input), &res)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(res.String()))
 	}
 
@@ -624,7 +624,7 @@ func TestIssue16020(t *testing.T) {
 		Ctx:   git.DefaultContext,
 		Metas: localMetas,
 	}, strings.NewReader(data), &res)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, data, res.String())
 }
 
@@ -640,7 +640,7 @@ func BenchmarkEmojiPostprocess(b *testing.B) {
 			Ctx:   git.DefaultContext,
 			Metas: localMetas,
 		}, strings.NewReader(data), &res)
-		assert.NoError(b, err)
+		require.NoError(b, err)
 	}
 }
 
@@ -659,7 +659,7 @@ func TestFuzz(t *testing.T) {
 
 	err := markup.PostProcess(&renderContext, strings.NewReader(s), io.Discard)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestIssue18471(t *testing.T) {
@@ -671,7 +671,7 @@ func TestIssue18471(t *testing.T) {
 		Metas: localMetas,
 	}, strings.NewReader(data), &res)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "<a href=\"http://domain/org/repo/compare/783b039...da951ce\" class=\"compare\"><code class=\"nohighlight\">783b039...da951ce</code></a>", res.String())
 }
 
@@ -688,10 +688,10 @@ func TestRender_FilePreview(t *testing.T) {
 			require.NoError(t, err)
 			defer gitRepo.Close()
 
-			commit, err := gitRepo.GetCommit("HEAD")
+			commit, err := gitRepo.GetCommit(commitSha)
 			require.NoError(t, err)
 
-			blob, err := commit.GetBlobByPath("path/to/file.go")
+			blob, err := commit.GetBlobByPath(filePath)
 			require.NoError(t, err)
 
 			return blob, nil
@@ -707,7 +707,7 @@ func TestRender_FilePreview(t *testing.T) {
 			RelativePath: ".md",
 			Metas:        metas,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 
@@ -768,6 +768,38 @@ func TestRender_FilePreview(t *testing.T) {
 				`<tr>`+
 				`<td class="lines-num"><span data-line-number="3"></span></td>`+
 				`<td class="lines-code chroma"><code class="code-inner"><span class="nx">C</span>`+"\n"+`</code></td>`+
+				`</tr>`+
+				`</tbody>`+
+				`</table>`+
+				`</div>`+
+				`</div>`+
+				`<p></p>`,
+			map[string]string{
+				"user": "gogits",
+				"repo": "gogs2",
+			},
+		)
+	})
+	t.Run("single-line", func(t *testing.T) {
+		testRender(
+			util.URLJoin(markup.TestRepoURL, "src", "commit", "4c1aaf56bcb9f39dcf65f3f250726850aed13cd6", "single-line.txt")+"#L1",
+			`<p></p>`+
+				`<div class="file-preview-box">`+
+				`<div class="header">`+
+				`<div>`+
+				`<a href="http://localhost:3000/gogits/gogs/" rel="nofollow">gogits/gogs</a> – `+
+				`<a href="http://localhost:3000/gogits/gogs/src/commit/4c1aaf56bcb9f39dcf65f3f250726850aed13cd6/single-line.txt#L1" class="muted" rel="nofollow">single-line.txt</a>`+
+				`</div>`+
+				`<span class="text small grey">`+
+				`Line 1 in <a href="http://localhost:3000/gogits/gogs/src/commit/4c1aaf56bcb9f39dcf65f3f250726850aed13cd6" class="text black" rel="nofollow">gogits/gogs@4c1aaf5</a>`+
+				`</span>`+
+				`</div>`+
+				`<div class="ui table">`+
+				`<table class="file-preview">`+
+				`<tbody>`+
+				`<tr>`+
+				`<td class="lines-num"><span data-line-number="1"></span></td>`+
+				`<td class="lines-code chroma"><code class="code-inner">A`+`</code></td>`+
 				`</tr>`+
 				`</tbody>`+
 				`</table>`+

@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func resetDefaultCharsetsOrder() {
@@ -48,12 +49,12 @@ func TestToUTF8(t *testing.T) {
 	// depend on particular conversions but in expected behaviors.
 
 	res, err = ToUTF8([]byte{0x41, 0x42, 0x43}, ConvertOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "ABC", res)
 
 	// "áéíóú"
 	res, err = ToUTF8([]byte{0xc3, 0xa1, 0xc3, 0xa9, 0xc3, 0xad, 0xc3, 0xb3, 0xc3, 0xba}, ConvertOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte{0xc3, 0xa1, 0xc3, 0xa9, 0xc3, 0xad, 0xc3, 0xb3, 0xc3, 0xba}, []byte(res))
 
 	// "áéíóú"
@@ -61,14 +62,14 @@ func TestToUTF8(t *testing.T) {
 		0xef, 0xbb, 0xbf, 0xc3, 0xa1, 0xc3, 0xa9, 0xc3, 0xad, 0xc3, 0xb3,
 		0xc3, 0xba,
 	}, ConvertOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte{0xc3, 0xa1, 0xc3, 0xa9, 0xc3, 0xad, 0xc3, 0xb3, 0xc3, 0xba}, []byte(res))
 
 	res, err = ToUTF8([]byte{
 		0x48, 0x6F, 0x6C, 0x61, 0x2C, 0x20, 0x61, 0x73, 0xED, 0x20, 0x63,
 		0xF3, 0x6D, 0x6F, 0x20, 0xF1, 0x6F, 0x73, 0x41, 0x41, 0x41, 0x2e,
 	}, ConvertOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	stringMustStartWith(t, "Hola,", res)
 	stringMustEndWith(t, "AAA.", res)
 
@@ -76,7 +77,7 @@ func TestToUTF8(t *testing.T) {
 		0x48, 0x6F, 0x6C, 0x61, 0x2C, 0x20, 0x61, 0x73, 0xED, 0x20, 0x63,
 		0xF3, 0x6D, 0x6F, 0x20, 0x07, 0xA4, 0x6F, 0x73, 0x41, 0x41, 0x41, 0x2e,
 	}, ConvertOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	stringMustStartWith(t, "Hola,", res)
 	stringMustEndWith(t, "AAA.", res)
 
@@ -84,7 +85,7 @@ func TestToUTF8(t *testing.T) {
 		0x48, 0x6F, 0x6C, 0x61, 0x2C, 0x20, 0x61, 0x73, 0xED, 0x20, 0x63,
 		0xF3, 0x6D, 0x6F, 0x20, 0x81, 0xA4, 0x6F, 0x73, 0x41, 0x41, 0x41, 0x2e,
 	}, ConvertOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	stringMustStartWith(t, "Hola,", res)
 	stringMustEndWith(t, "AAA.", res)
 
@@ -94,7 +95,7 @@ func TestToUTF8(t *testing.T) {
 		0x93, 0xFA, 0x91, 0xAE, 0x94, 0xE9, 0x82, 0xBC, 0x82, 0xB5, 0x82,
 		0xBF, 0x82, 0xE3, 0x81, 0x42,
 	}, ConvertOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte{
 		0xE6, 0x97, 0xA5, 0xE5, 0xB1, 0x9E, 0xE7, 0xA7, 0x98, 0xE3,
 		0x81, 0x9E, 0xE3, 0x81, 0x97, 0xE3, 0x81, 0xA1, 0xE3, 0x82, 0x85, 0xE3, 0x80, 0x82,
@@ -102,7 +103,7 @@ func TestToUTF8(t *testing.T) {
 		[]byte(res))
 
 	res, err = ToUTF8([]byte{0x00, 0x00, 0x00, 0x00}, ConvertOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte{0x00, 0x00, 0x00, 0x00}, []byte(res))
 }
 
@@ -199,7 +200,7 @@ func TestDetectEncoding(t *testing.T) {
 	resetDefaultCharsetsOrder()
 	testSuccess := func(b []byte, expected string) {
 		encoding, err := DetectEncoding(b)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, expected, encoding)
 	}
 	// utf-8
@@ -217,7 +218,7 @@ func TestDetectEncoding(t *testing.T) {
 	// iso-8859-1: d<accented e>cor<newline>
 	b = []byte{0x44, 0xe9, 0x63, 0x6f, 0x72, 0x0a}
 	encoding, err := DetectEncoding(b)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, encoding, "ISO-8859-1")
 
 	old := setting.Repository.AnsiCharset
@@ -230,7 +231,7 @@ func TestDetectEncoding(t *testing.T) {
 	// invalid bytes
 	b = []byte{0xfa}
 	_, err = DetectEncoding(b)
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func stringMustStartWith(t *testing.T, expected, value string) {

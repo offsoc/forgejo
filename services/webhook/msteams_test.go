@@ -450,6 +450,6 @@ func TestMSTeamsJSONPayload(t *testing.T) {
 	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 	var body MSTeamsPayload
 	err = json.NewDecoder(req.Body).Decode(&body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "[test/repo:test] 2 new commits", body.Summary)
 }

@@ -85,7 +85,7 @@ func Search(ctx *context.Context) {
 				// UpdatedUnix: not supported yet
 				// Language:    not supported yet
 				// Color:       not supported yet
-				Lines: code_indexer.HighlightSearchResultCode(r.Filename, r.LineNumbers, strings.Join(r.LineCodes, "\n")),
+				Lines: code_indexer.HighlightSearchResultCode(r.Filename, r.LineNumbers, r.HighlightedRanges, strings.Join(r.LineCodes, "\n")),
 			})
 		}
 	}

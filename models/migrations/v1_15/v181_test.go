@@ -10,6 +10,7 @@ import (
 	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_AddPrimaryEmail2EmailAddress(t *testing.T) {
@@ -28,7 +29,7 @@ func Test_AddPrimaryEmail2EmailAddress(t *testing.T) {
 	defer deferable()
 
 	err := AddPrimaryEmail2EmailAddress(x)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	type EmailAddress struct {
 		ID          int64  `xorm:"pk autoincr"`
@@ -41,12 +42,12 @@ func Test_AddPrimaryEmail2EmailAddress(t *testing.T) {
 
 	users := make([]User, 0, 20)
 	err = x.Find(&users)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	for _, user := range users {
 		var emailAddress EmailAddress
 		has, err := x.Where("lower_email=?", strings.ToLower(user.Email)).Get(&emailAddress)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, has)
 		assert.True(t, emailAddress.IsPrimary)
 		assert.EqualValues(t, user.IsActive, emailAddress.IsActivated)

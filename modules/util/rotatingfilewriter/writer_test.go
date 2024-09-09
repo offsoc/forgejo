@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCompressOldFile(t *testing.T) {
@@ -19,9 +20,9 @@ func TestCompressOldFile(t *testing.T) {
 	nonGzip := filepath.Join(tmpDir, "test-nonGzip")
 
 	f, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY, 0o660)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	ng, err := os.OpenFile(nonGzip, os.O_CREATE|os.O_WRONLY, 0o660)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	for i := 0; i < 999; i++ {
 		f.WriteString("This is a test file\n")
@@ -31,18 +32,18 @@ func TestCompressOldFile(t *testing.T) {
 	ng.Close()
 
 	err = compressOldFile(fname, gzip.DefaultCompression)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = os.Lstat(fname + ".gz")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	f, err = os.Open(fname + ".gz")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	zr, err := gzip.NewReader(f)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	data, err := io.ReadAll(zr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	original, err := os.ReadFile(nonGzip)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, original, data)
 }

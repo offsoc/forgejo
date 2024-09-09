@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testLevel struct {
@@ -20,34 +21,34 @@ func TestLevelMarshalUnmarshalJSON(t *testing.T) {
 	levelBytes, err := json.Marshal(testLevel{
 		Level: INFO,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, string(makeTestLevelBytes(INFO.String())), string(levelBytes))
 
 	var testLevel testLevel
 	err = json.Unmarshal(levelBytes, &testLevel)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, INFO, testLevel.Level)
 
 	err = json.Unmarshal(makeTestLevelBytes(`FOFOO`), &testLevel)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, INFO, testLevel.Level)
 
 	err = json.Unmarshal([]byte(fmt.Sprintf(`{"level":%d}`, 2)), &testLevel)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, INFO, testLevel.Level)
 
 	err = json.Unmarshal([]byte(fmt.Sprintf(`{"level":%d}`, 10012)), &testLevel)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, INFO, testLevel.Level)
 
 	err = json.Unmarshal([]byte(`{"level":{}}`), &testLevel)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, INFO, testLevel.Level)
 
 	assert.Equal(t, INFO.String(), Level(1001).String())
 
 	err = json.Unmarshal([]byte(`{"level":{}`), &testLevel.Level)
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func makeTestLevelBytes(level string) []byte {
