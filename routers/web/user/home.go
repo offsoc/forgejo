@@ -448,7 +448,7 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 		User:       ctx.Doer,
 	}
 
-	isFuzzy := ctx.FormBool("fuzzy")
+	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
 
 	// Search all repositories which
 	//
