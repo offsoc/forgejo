@@ -1284,3 +1284,20 @@ func TestIssueLabelList(t *testing.T) {
 		htmlDoc.AssertElement(t, ".labels.list .no-select."+hiddenClass, true)
 	})
 }
+
+func TestIssueUserDashboard(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+	session := loginUser(t, user.Name)
+
+	// assert 'created_by' is the default filter
+	const sel = ".dashboard .ui.list-header.dropdown .ui.menu a.active.item[href^='?type=created_by']"
+
+	for _, path := range []string{"/issues", "/pulls"} {
+		req := NewRequest(t, "GET", path)
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, sel, true)
+	}
+}
