@@ -135,6 +135,7 @@ func GetSecretsOfTask(ctx context.Context, task *actions_model.ActionTask) (map[
 
 	secrets["GITHUB_TOKEN"] = task.Token
 	secrets["GITEA_TOKEN"] = task.Token
+	secrets["ACTIONS_ID_TOKEN_REQUEST_TOKEN"] = task.Token
 
 	if task.Job.Run.IsForkPullRequest && task.Job.Run.TriggerEvent != actions_module.GithubEventPullRequestTarget {
 		// ignore secrets for fork pull request, except GITHUB_TOKEN and GITEA_TOKEN which are automatically generated.

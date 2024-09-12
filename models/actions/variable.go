@@ -9,6 +9,7 @@ import (
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"xorm.io/builder"
@@ -102,7 +103,9 @@ func DeleteVariable(ctx context.Context, id int64) error {
 }
 
 func GetVariablesOfRun(ctx context.Context, run *ActionRun) (map[string]string, error) {
-	variables := map[string]string{}
+	variables := map[string]string{
+		"ACTIONS_ID_TOKEN_REQUEST_URL": setting.AppURL + "/api/actions_token?api-version=2.0",
+	}
 
 	if err := run.LoadRepo(ctx); err != nil {
 		log.Error("LoadRepo: %v", err)

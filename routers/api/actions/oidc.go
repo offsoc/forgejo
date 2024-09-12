@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"code.gitea.io/gitea/modules/log"
@@ -41,6 +42,8 @@ type openIDConfiguration struct {
 
 func OIDCRoutes(prefix string) *web.Route {
 	m := web.NewRoute()
+
+	prefix = strings.TrimPrefix(prefix, "/")
 
 	// TODO: generate this once and store it across restarts. In the database I assume?
 	_, caPrivateKey, err := ed25519.GenerateKey(rand.Reader)
@@ -180,6 +183,7 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 }
 
 func (o oidcRoutes) getJWKS(resp http.ResponseWriter, req *http.Request) {
+	resp.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(resp).Encode(o.jwks)
 	if err != nil {
 		log.Error("error encoding jwks response: ", err)
@@ -189,6 +193,7 @@ func (o oidcRoutes) getJWKS(resp http.ResponseWriter, req *http.Request) {
 }
 
 func (o oidcRoutes) getOpenIDConfiguration(resp http.ResponseWriter, req *http.Request) {
+	resp.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(resp).Encode(o.openIDConfiguration)
 	if err != nil {
 		log.Error("error encoding jwks response: ", err)

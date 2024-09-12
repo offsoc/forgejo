@@ -135,7 +135,7 @@ func ArtifactContexter() func(next http.Handler) http.Handler {
 			// action task call server api with Bearer ACTIONS_RUNTIME_TOKEN
 			// we should verify the ACTIONS_RUNTIME_TOKEN
 			authHeader := req.Header.Get("Authorization")
-			if len(authHeader) == 0 || !strings.HasPrefix(authHeader, "Bearer ") {
+			if len(authHeader) == 0 || !strings.HasPrefix(strings.ToLower(authHeader), "bearer ") {
 				ctx.Error(http.StatusUnauthorized, "Bad authorization header")
 				return
 			}

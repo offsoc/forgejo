@@ -195,7 +195,7 @@ func NormalRoutes() *web.Route {
 		prefix := "/api/actions"
 		r.Mount(prefix, actions_router.Routes(prefix))
 
-		prefix = "/api/actions_token"
+		prefix = "/api/actions_idtoken"
 		r.Mount(prefix, actions_router.OIDCRoutes(prefix)) // TODO: not sure what prefix should be used here
 
 		// TODO: Pipeline api used for runner internal communication with gitea server. but only artifact is used for now.
