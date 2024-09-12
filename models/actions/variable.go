@@ -104,7 +104,7 @@ func DeleteVariable(ctx context.Context, id int64) error {
 
 func GetVariablesOfRun(ctx context.Context, run *ActionRun) (map[string]string, error) {
 	variables := map[string]string{
-		"ACTIONS_ID_TOKEN_REQUEST_URL": setting.AppURL + "/api/actions_token?api-version=2.0",
+		"ACTIONS_ID_TOKEN_REQUEST_URL": setting.AppURL + "api/actions_idtoken?api-version=2.0",
 	}
 
 	if err := run.LoadRepo(ctx); err != nil {
