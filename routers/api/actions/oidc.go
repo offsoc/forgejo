@@ -42,6 +42,7 @@ type openIDConfiguration struct {
 func OIDCRoutes(prefix string) *web.Route {
 	m := web.NewRoute()
 
+	// TODO: generate this once and store it across restarts. In the database I assume?
 	_, caPrivateKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		panic(err)
@@ -135,7 +136,7 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, jwt.MapClaims{
 		"jti":                   uuid.New().String(),
 		"sub":                   fmt.Sprintf("repo:%s:ref:%s", repo, task.Job.Run.Ref),
-		"aud":                   "TODO: Allow customizing this in the query param",
+		"aud":                   "", // TODO: Allow customizing this in the query param
 		"ref":                   task.Job.Run.Ref,
 		"sha":                   task.Job.Run.CommitSHA,
 		"repository":            repo,
@@ -158,7 +159,7 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 		"workflow_sha":          "", // TODO: is this just a hash of the yaml? if so that's easy enough to calculate
 		"job_workflow_ref":      fmt.Sprintf("%s/.forgejo/workflow/%s@%s", repo, task.Job.Run.WorkflowID, task.Job.Run.Ref),
 		"job_workflow_sha":      "",                                    // TODO: is this just a hash of the yaml? if so that's easy enough to calculate
-		"runner_environment":    "self-hosted",                         // not sure what this should be set to
+		"runner_environment":    "self-hosted",                         // not sure what this should be set to, github will have either "github-hosted" or "self-hosted"
 		"iss":                   setting.AppURL + "/api/actions_token", // TODO: how do i check the public domain?
 		"nbf":                   jwt.NewNumericDate(iat),
 		"exp":                   jwt.NewNumericDate(iat.Add(time.Minute * 15)),
