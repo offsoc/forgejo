@@ -1,8 +1,8 @@
 package actions
 
 import (
-	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/rsa"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,7 +17,7 @@ import (
 )
 
 type oidcRoutes struct {
-	ca                  ed25519.PrivateKey
+	ca                  *rsa.PrivateKey
 	jwks                []jwks
 	openIDConfiguration openIDConfiguration
 }
@@ -27,7 +27,7 @@ type jwks struct {
 	Algorithm string `json:"alg"`
 	Use       string `json:"use"`
 	N         string `json:"n"`
-	E         string `json:"e"`
+	E         int    `json:"e"`
 }
 
 type openIDConfiguration struct {
@@ -46,15 +46,22 @@ func OIDCRoutes(prefix string) *web.Route {
 	prefix = strings.TrimPrefix(prefix, "/")
 
 	// TODO: generate this once and store it across restarts. In the database I assume?
-	_, caPrivateKey, err := ed25519.GenerateKey(rand.Reader)
+	caPrivateKey, err := rsa.GenerateKey(rand.Reader, 4096)
+	// _, caPrivateKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		panic(err)
 	}
 
 	r := oidcRoutes{
 		ca: caPrivateKey,
-		jwks: []jwks{
-			{},
+		jwks: []jwks{ // https://token.actions.githubusercontent.com/.well-known/jwks
+			{
+				KeyType:   "RSA",
+				Algorithm: "RS256",
+				Use:       "sig",
+				N:         caPrivateKey.PublicKey.N.String(),
+				E:         caPrivateKey.PublicKey.E, // Github: AQAB
+			},
 		},
 		openIDConfiguration: openIDConfiguration{
 			Issuer:                 setting.AppURL + setting.AppSubURL + prefix,                       // TODO: how do i check the public domain?
@@ -136,7 +143,7 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 	}
 	iat := time.Now()
 
-	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"jti":                   uuid.New().String(),
 		"sub":                   fmt.Sprintf("repo:%s:ref:%s", repo, task.Job.Run.Ref),
 		"aud":                   "", // TODO: Allow customizing this in the query param
@@ -178,7 +185,7 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 
 	ctx.JSON(http.StatusOK, map[string]any{
 		"count": 0, // TODO: unclear what this is, github gave me a value of 1857
-		"token": signedJWT,
+		"value": signedJWT,
 	})
 }
 
