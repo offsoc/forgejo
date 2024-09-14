@@ -309,8 +309,9 @@ func pushUpdateAddTags(ctx context.Context, repo *repo_model.Repository, gitRepo
 	}
 
 	releases, err := db.Find[repo_model.Release](ctx, repo_model.FindReleasesOptions{
-		RepoID:   repo.ID,
-		TagNames: tags,
+		RepoID:      repo.ID,
+		TagNames:    tags,
+		IncludeTags: true,
 	})
 	if err != nil {
 		return fmt.Errorf("db.Find[repo_model.Release]: %w", err)
