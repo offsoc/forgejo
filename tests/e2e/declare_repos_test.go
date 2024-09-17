@@ -5,6 +5,7 @@ package e2e
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -46,6 +47,13 @@ func DeclareGitRepos(t *testing.T) func() {
 				Filename:  "history2.md",
 				Versions:  []string{""},
 				CommitMsg: "Another commit which mentions @user1 in the title\nand @user2 in the text",
+			},
+		}),
+		newRepo(t, 2, "markdown", []FileChanges{
+			{
+				Filename:  "headings.md",
+				Versions:  []string{readFile(t, "repo-markdown.headings.md")},
+				CommitMsg: "Markdown test",
 			},
 		}),
 		// add your repo declarations here
@@ -106,4 +114,11 @@ func newRepo(t *testing.T, userID int64, repoName string, fileChanges []FileChan
 	}
 
 	return cleanupFunc
+}
+
+// reads file and strips prefix
+func readFile(t *testing.T, filename string) string {
+	data, err := os.ReadFile("tests/e2e/" + filename)
+	require.NoError(t, err)
+	return string(data)
 }
