@@ -5,13 +5,19 @@ import {test} from './utils_e2e.js';
 test.describe('Headers permalinks', () => {
   for (const {target, title} of [
     {title: 'Top level heading 1.20.6-', target: 'top-level-heading-1-20-6-1'},
+    {title: 'Top level heading 1.20.6-', target: 'top-level-heading-1206-1'},
     {title: 'level 2 heading', target: 'level-2-heading'},
+    {title: 'level 2 heading', target: 'level-2-heading-'},
     {title: 'level 3 heading face with', target: 'level-3-heading'},
+    {title: 'level 3 heading face with', target: 'level-3-heading-'},
     {title: 'level 4 heading …', target: 'level-4-heading'},
-    {title: 'level 5 heading!!!', target: 'level-5-heading'},
+    {title: 'level 4 heading …', target: 'level-4-heading-'},
+    {title: 'level 5 heading!!!', target: 'level-5-heading'}, // similar
     {title: 'level 6 höadüng with---', target: 'level-6-höadüng-with'},
-    {title: '油山', target: '油山'},
+    {title: 'level 6 höadüng with---', target: 'level-6-höadüng-with---'},
+    {title: '油山', target: '油山'}, // similar
     {title: '-1..2...5-14 → 42', target: '1-1-2-5-14-42'},
+    {title: '-1..2...5-14 → 42', target: '1-125-14--42'},
   ]) {
     test(`check that #${target} focuses "${title}"`, async ({page}, workerInfo) => {
       const viewport = page.viewportSize();
