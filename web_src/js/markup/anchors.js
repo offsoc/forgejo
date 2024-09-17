@@ -38,8 +38,8 @@ function scrollToAnchor(encodedId) {
   // let reg = new RegExp('^user-content-' + id.replaceAll('-','-*') +'$')
   // It would be more accurate, but it could be used as a client-side REDOS
   if (!el) {
-    nohypen_id = removeHyphen(id)
-    el = Array.from(document.querySelectorAll("[id^=user-content]")).filter(e => removeHyphen(e.id) == nohyphen_id)[0]
+    const nohyphen_id = removeHyphen(id);
+    el = Array.from(document.querySelectorAll('[id^=user-content]')).find((e) => removeHyphen(e.id) === nohyphen_id);
   }
 
   el?.scrollIntoView();
