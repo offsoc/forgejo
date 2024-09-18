@@ -77,3 +77,10 @@ test('Readable diff', async ({page}, workerInfo) => {
     }
   }
 });
+
+test('Commit graph overflow', async ({page}) => {
+  await page.goto('/user2/diff-test/graph');
+  await expect(page.getByRole('button', {name: 'Mono'})).toBeInViewport({ratio: 1});
+  await expect(page.getByRole('button', {name: 'Color'})).toBeInViewport({ratio: 1});
+  await expect(page.locator('.selection.search.dropdown')).toBeInViewport({ratio: 1});
+});
