@@ -370,13 +370,14 @@ func pushUpdateAddTags(ctx context.Context, repo *repo_model.Repository, gitRepo
 			return fmt.Errorf("CommitsCount: %w", err)
 		}
 
-		rel, has := relMap[lowerTag]
-
 		parts := strings.SplitN(tag.Message, "\n", 2)
 		note := ""
 		if len(parts) > 1 {
 			note = parts[1]
 		}
+
+		rel, has := relMap[lowerTag]
+
 		if !has {
 			rel = &repo_model.Release{
 				RepoID:       repo.ID,
