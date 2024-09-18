@@ -1,8 +1,8 @@
 package actions
 
 import (
+	"crypto/ed25519"
 	"crypto/rand"
-	"crypto/rsa"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,20 +14,14 @@ import (
 	"code.gitea.io/gitea/modules/web"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/rakutentech/jwk-go/jwk"
+	"github.com/rakutentech/jwk-go/okp"
 )
 
 type oidcRoutes struct {
-	ca                  *rsa.PrivateKey
-	jwks                []jwks
+	ca                  ed25519.PrivateKey
+	jwks                []*jwk.KeySpec
 	openIDConfiguration openIDConfiguration
-}
-
-type jwks struct {
-	KeyType   string `json:"kty"`
-	Algorithm string `json:"alg"`
-	Use       string `json:"use"`
-	N         string `json:"n"`
-	E         int    `json:"e"`
 }
 
 type openIDConfiguration struct {
@@ -46,22 +40,15 @@ func OIDCRoutes(prefix string) *web.Route {
 	prefix = strings.TrimPrefix(prefix, "/")
 
 	// TODO: generate this once and store it across restarts. In the database I assume?
-	caPrivateKey, err := rsa.GenerateKey(rand.Reader, 4096)
-	// _, caPrivateKey, err := ed25519.GenerateKey(rand.Reader)
+	caPublicKey, caPrivateKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		panic(err)
 	}
 
 	r := oidcRoutes{
 		ca: caPrivateKey,
-		jwks: []jwks{ // https://token.actions.githubusercontent.com/.well-known/jwks
-			{
-				KeyType:   "RSA",
-				Algorithm: "RS256",
-				Use:       "sig",
-				N:         caPrivateKey.PublicKey.N.String(),
-				E:         caPrivateKey.PublicKey.E, // Github: AQAB
-			},
+		jwks: []*jwk.KeySpec{ // https://token.actions.githubusercontent.com/.well-known/jwks
+			jwk.NewSpec(okp.NewCurve25519(caPublicKey, caPrivateKey)),
 		},
 		openIDConfiguration: openIDConfiguration{
 			Issuer:                 setting.AppURL + setting.AppSubURL + prefix,                       // TODO: how do i check the public domain?
