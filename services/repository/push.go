@@ -376,9 +376,7 @@ func pushUpdateAddTags(ctx context.Context, repo *repo_model.Repository, gitRepo
 			note = parts[1]
 		}
 
-		rel, has := relMap[lowerTag]
-
-		if !has {
+		if rel, has := relMap[lowerTag]; !has {
 			rel = &repo_model.Release{
 				RepoID:       repo.ID,
 				Title:        parts[0],
@@ -396,7 +394,6 @@ func pushUpdateAddTags(ctx context.Context, repo *repo_model.Repository, gitRepo
 			if author != nil {
 				rel.PublisherID = author.ID
 			}
-
 			newReleases = append(newReleases, rel)
 		} else {
 			rel.Title = parts[0]
