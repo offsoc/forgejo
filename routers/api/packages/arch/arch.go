@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -207,9 +208,10 @@ func GetPackageOrDB(ctx *context.Context) {
 
 func RemovePackage(ctx *context.Context) {
 	var (
-		group = ctx.Params("group")
-		pkg   = ctx.Params("package")
-		ver   = ctx.Params("version")
+		group   = ctx.Params("group")
+		pkg     = ctx.Params("package")
+		ver     = ctx.Params("version")
+		pkgArch = ctx.Params("arch")
 	)
 	pv, err := packages_model.GetVersionByNameAndVersion(
 		ctx, ctx.Package.Owner.ID, packages_model.TypeArch, pkg, ver,
@@ -229,7 +231,13 @@ func RemovePackage(ctx *context.Context) {
 	}
 	deleted := false
 	for _, file := range files {
-		if file.CompositeKey == group {
+		extName := fmt.Sprintf("-%s.pkg.tar%s", pkgArch, filepath.Ext(file.LowerName))
+		if strings.HasSuffix(file.LowerName, ".sig") {
+			extName = fmt.Sprintf("-%s.pkg.tar%s.sig", pkgArch,
+				filepath.Ext(strings.TrimSuffix(file.LowerName, filepath.Ext(file.LowerName))))
+		}
+		if file.CompositeKey == group &&
+			strings.HasSuffix(file.LowerName, extName) {
 			deleted = true
 			err := packages_service.RemovePackageFileAndVersionIfUnreferenced(ctx, ctx.ContextUser, file)
 			if err != nil {
