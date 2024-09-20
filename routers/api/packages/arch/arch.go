@@ -170,7 +170,7 @@ func GetPackageOrDB(ctx *context.Context) {
 		arch  = ctx.Params("arch")
 	)
 	if archPkgOrSig.MatchString(file) {
-		pkg, err := arch_service.GetPackageFile(ctx, group, file, ctx.Package.Owner.ID)
+		pkg, u, pf, err := arch_service.GetPackageFile(ctx, group, file, ctx.Package.Owner.ID)
 		if err != nil {
 			if errors.Is(err, util.ErrNotExist) {
 				apiError(ctx, http.StatusNotFound, err)
@@ -179,8 +179,7 @@ func GetPackageOrDB(ctx *context.Context) {
 			}
 			return
 		}
-
-		ctx.ServeContent(pkg, &context.ServeHeaderOptions{
+		helper.ServePackageFile(ctx, pkg, u, pf, &context.ServeHeaderOptions{
 			Filename: file,
 		})
 		return
@@ -200,6 +199,7 @@ func GetPackageOrDB(ctx *context.Context) {
 		helper.ServePackageFile(ctx, pkg, u, pf, &context.ServeHeaderOptions{
 			Filename: file,
 		})
+		return
 	}
 
 	ctx.Status(http.StatusNotFound)
