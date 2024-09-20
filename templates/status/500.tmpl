@@ -46,7 +46,7 @@
 				{{end}}
 				<div class="center tw-mt-8">
 					{{if or .SignedUser.IsAdmin .ShowFooterVersion}}<p>{{ctx.Locale.Tr "admin.config.app_ver"}}: {{AppVer}}</p>{{end}}
-					{{if .SignedUser.IsAdmin}}<p>{{ctx.Locale.Tr "error.report_message"}}</p>{{end}}
+					{{if .SignedUser.IsAdmin}}<p>{{ctx.Locale.Tr "error.report_message_prev9"}}</p>{{end}}
 				</div>
 			</div>
 		</div>
