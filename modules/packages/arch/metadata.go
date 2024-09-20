@@ -125,7 +125,7 @@ func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
 	defer tarball.Close()
 
 	var pkg *Package
-	var mtree bool
+	var mTree bool
 
 	for {
 		f, err := tarball.Read()
@@ -135,8 +135,6 @@ func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
 		if err != nil {
 			return nil, err
 		}
-		defer f.Close()
-
 		switch f.Name() {
 		case ".PKGINFO":
 			pkg, err = ParsePackageInfo(tarballType, f)
@@ -144,15 +142,16 @@ func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
 				return nil, err
 			}
 		case ".MTREE":
-			mtree = true
+			mTree = true
 		}
+		_ = f.Close()
 	}
 
 	if pkg == nil {
 		return nil, util.NewInvalidArgumentErrorf(".PKGINFO file not found")
 	}
 
-	if !mtree {
+	if !mTree {
 		return nil, util.NewInvalidArgumentErrorf(".MTREE file not found")
 	}
 
