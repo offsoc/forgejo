@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -273,10 +274,10 @@ func getPackageFile(ctx context.Context, group, file string, ownerID int64) (*pa
 	return pkgfile, nil
 }
 
-func GetPackageDBFile(ctx context.Context, group, arch string, ownerID int64, signFile bool) (io.ReadSeekCloser, error) {
+func GetPackageDBFile(ctx context.Context, group, arch string, ownerID int64, signFile bool) (io.ReadSeekCloser, *url.URL, *packages_model.PackageFile, error) {
 	pv, err := GetOrCreateRepositoryVersion(ctx, ownerID)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	fileName := fmt.Sprintf("%s.db", arch)
 	if signFile {
@@ -284,10 +285,10 @@ func GetPackageDBFile(ctx context.Context, group, arch string, ownerID int64, si
 	}
 	file, err := packages_model.GetFileForVersionByName(ctx, pv.ID, fileName, group)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
-	filestream, _, _, err := packages_service.GetPackageFileStream(ctx, file)
-	return filestream, err
+	filestream, u, pf, err := packages_service.GetPackageFileStream(ctx, file)
+	return filestream, u, pf, err
 }
 
 // GetOrCreateKeyPair gets or creates the PGP keys used to sign repository metadata files
