@@ -179,9 +179,7 @@ func GetPackageOrDB(ctx *context.Context) {
 			}
 			return
 		}
-		helper.ServePackageFile(ctx, pkg, u, pf, &context.ServeHeaderOptions{
-			Filename: file,
-		})
+		helper.ServePackageFile(ctx, pkg, u, pf)
 		return
 	}
 
@@ -196,9 +194,7 @@ func GetPackageOrDB(ctx *context.Context) {
 			}
 			return
 		}
-		helper.ServePackageFile(ctx, pkg, u, pf, &context.ServeHeaderOptions{
-			Filename: file,
-		})
+		helper.ServePackageFile(ctx, pkg, u, pf)
 		return
 	}
 
