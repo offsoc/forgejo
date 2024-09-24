@@ -105,7 +105,7 @@ func NewFileSign(ctx context.Context, ownerID int64, input io.Reader) (*packages
 
 // BuildPacmanDB Create db signature cache
 func BuildPacmanDB(ctx context.Context, ownerID int64, group, arch string) error {
-	key := fmt.Sprintf("pkg_arch_db_%s", group)
+	key := fmt.Sprintf("pkg_%d_arch_db_%s", ownerID, group)
 	locker.CheckIn(key)
 	defer locker.CheckOut(key)
 	pv, err := GetOrCreateRepositoryVersion(ctx, ownerID)

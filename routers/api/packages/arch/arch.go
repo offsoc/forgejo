@@ -37,8 +37,8 @@ func apiError(ctx *context.Context, status int, obj any) {
 	})
 }
 
-func refreshLocker(group string) func() {
-	key := fmt.Sprintf("pkg_arch_pkg_%s", group)
+func refreshLocker(ctx *context.Context, group string) func() {
+	key := fmt.Sprintf("pkg_%d_arch_pkg_%s", ctx.Package.Owner.ID, group)
 	locker.CheckIn(key)
 	return func() {
 		locker.CheckOut(key)
@@ -60,7 +60,7 @@ func GetRepositoryKey(ctx *context.Context) {
 
 func PushPackage(ctx *context.Context) {
 	group := ctx.Params("group")
-	releaser := refreshLocker(group)
+	releaser := refreshLocker(ctx, group)
 	defer releaser()
 	upload, needToClose, err := ctx.UploadStream()
 	if err != nil {
@@ -221,7 +221,7 @@ func RemovePackage(ctx *context.Context) {
 		ver     = ctx.Params("version")
 		pkgArch = ctx.Params("arch")
 	)
-	releaser := refreshLocker(group)
+	releaser := refreshLocker(ctx, group)
 	defer releaser()
 	pv, err := packages_model.GetVersionByNameAndVersion(
 		ctx, ctx.Package.Owner.ID, packages_model.TypeArch, pkg, ver,

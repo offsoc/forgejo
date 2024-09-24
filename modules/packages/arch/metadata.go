@@ -39,8 +39,8 @@ const (
 var (
 	reName   = regexp.MustCompile(`^[a-zA-Z0-9@._+-]+$`)
 	reVer    = regexp.MustCompile(`^[a-zA-Z0-9:_.+]+-+[0-9]+$`)
-	reOptDep = regexp.MustCompile(`^[a-zA-Z0-9@._+-]+([<>]?=?[a-zA-Z0-9@._+-]+)?(:.*)?$`)
-	rePkgVer = regexp.MustCompile(`^[a-zA-Z0-9@._+-]+([<>]?=?[a-zA-Z0-9@._+-]+)?$`)
+	reOptDep = regexp.MustCompile(`^[a-zA-Z0-9@._+-]+([<>]?=?([0-9]+:)?[a-zA-Z0-9@._+-]+)?(:.*)?$`)
+	rePkgVer = regexp.MustCompile(`^[a-zA-Z0-9@._+-]+([<>]?=?([0-9]+:)?[a-zA-Z0-9@._+-]+)?$`)
 
 	magicZSTD = []byte{0x28, 0xB5, 0x2F, 0xFD}
 	magicXZ   = []byte{0xFD, 0x37, 0x7A, 0x58, 0x5A}
@@ -71,7 +71,7 @@ type VersionMetadata struct {
 	Conflicts    []string `json:"conflicts,omitempty"`
 	Replaces     []string `json:"replaces,omitempty"`
 	Backup       []string `json:"backup,omitempty"`
-	Xdata        []string `json:"xdata,omitempty"`
+	XData        []string `json:"xdata,omitempty"`
 }
 
 // FileMetadata Metadata related to specific package file.
@@ -220,7 +220,7 @@ func ParsePackageInfo(compressType string, r io.Reader) (*Package, error) {
 		case "replaces":
 			p.VersionMetadata.Replaces = append(p.VersionMetadata.Replaces, value)
 		case "xdata":
-			p.VersionMetadata.Xdata = append(p.VersionMetadata.Xdata, value)
+			p.VersionMetadata.XData = append(p.VersionMetadata.XData, value)
 		case "builddate":
 			bd, err := strconv.ParseInt(value, 10, 64)
 			if err != nil {
@@ -260,48 +260,43 @@ func ValidatePackageSpec(p *Package) error {
 			return util.NewInvalidArgumentErrorf("invalid project URL")
 		}
 	}
-	for _, cd := range p.VersionMetadata.CheckDepends {
-		if !rePkgVer.MatchString(cd) {
-			return util.NewInvalidArgumentErrorf("invalid check dependency: %s", cd)
+	for _, checkDepend := range p.VersionMetadata.CheckDepends {
+		if !rePkgVer.MatchString(checkDepend) {
+			return util.NewInvalidArgumentErrorf("invalid check dependency: %s", checkDepend)
 		}
 	}
-	for _, d := range p.VersionMetadata.Depends {
-		if !rePkgVer.MatchString(d) {
-			return util.NewInvalidArgumentErrorf("invalid dependency: %s", d)
+	for _, depend := range p.VersionMetadata.Depends {
+		if !rePkgVer.MatchString(depend) {
+			return util.NewInvalidArgumentErrorf("invalid dependency: %s", depend)
 		}
 	}
-	for _, md := range p.VersionMetadata.MakeDepends {
-		if !rePkgVer.MatchString(md) {
-			return util.NewInvalidArgumentErrorf("invalid make dependency: %s", md)
+	for _, makeDepend := range p.VersionMetadata.MakeDepends {
+		if !rePkgVer.MatchString(makeDepend) {
+			return util.NewInvalidArgumentErrorf("invalid make dependency: %s", makeDepend)
 		}
 	}
-	for _, p := range p.VersionMetadata.Provides {
-		if !rePkgVer.MatchString(p) {
-			return util.NewInvalidArgumentErrorf("invalid provides: %s", p)
+	for _, provide := range p.VersionMetadata.Provides {
+		if !rePkgVer.MatchString(provide) {
+			return util.NewInvalidArgumentErrorf("invalid provides: %s", provide)
 		}
 	}
-	for _, p := range p.VersionMetadata.Conflicts {
-		if !rePkgVer.MatchString(p) {
-			return util.NewInvalidArgumentErrorf("invalid conflicts: %s", p)
+	for _, conflict := range p.VersionMetadata.Conflicts {
+		if !rePkgVer.MatchString(conflict) {
+			return util.NewInvalidArgumentErrorf("invalid conflicts: %s", conflict)
 		}
 	}
-	for _, p := range p.VersionMetadata.Replaces {
-		if !rePkgVer.MatchString(p) {
-			return util.NewInvalidArgumentErrorf("invalid replaces: %s", p)
+	for _, replace := range p.VersionMetadata.Replaces {
+		if !rePkgVer.MatchString(replace) {
+			return util.NewInvalidArgumentErrorf("invalid replaces: %s", replace)
 		}
 	}
-	for _, p := range p.VersionMetadata.Replaces {
-		if !rePkgVer.MatchString(p) {
-			return util.NewInvalidArgumentErrorf("invalid xdata: %s", p)
+	for _, optDepend := range p.VersionMetadata.OptDepends {
+		if !reOptDep.MatchString(optDepend) {
+			return util.NewInvalidArgumentErrorf("invalid optional dependency: %s", optDepend)
 		}
 	}
-	for _, od := range p.VersionMetadata.OptDepends {
-		if !reOptDep.MatchString(od) {
-			return util.NewInvalidArgumentErrorf("invalid optional dependency: %s", od)
-		}
-	}
-	for _, bf := range p.VersionMetadata.Backup {
-		if strings.HasPrefix(bf, "/") {
+	for _, b := range p.VersionMetadata.Backup {
+		if strings.HasPrefix(b, "/") {
 			return util.NewInvalidArgumentErrorf("backup file contains leading forward slash")
 		}
 	}
