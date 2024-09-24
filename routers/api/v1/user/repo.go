@@ -80,6 +80,9 @@ func ListUserRepos(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 
 	private := ctx.IsSigned
+	if utils.PublicOnlyToken(ctx, "ApiTokenScopePublicRepoOnly") {
+		private = false
+	}
 	listUserRepos(ctx, ctx.ContextUser, private)
 }
 
@@ -128,6 +131,10 @@ func ListMyRepos(ctx *context.APIContext) {
 	default:
 		ctx.Error(http.StatusUnprocessableEntity, "", "invalid order_by")
 		return
+	}
+
+	if utils.PublicOnlyToken(ctx, "ApiTokenScopePublicRepoOnly") {
+		opts.Private = false
 	}
 
 	var err error
@@ -181,6 +188,9 @@ func ListOrgRepos(ctx *context.APIContext) {
 	//     "$ref": "#/responses/RepositoryList"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
-
-	listUserRepos(ctx, ctx.Org.Organization.AsUser(), ctx.IsSigned)
+	private := ctx.IsSigned
+	if utils.PublicOnlyToken(ctx, "ApiTokenScopePublicRepoOnly") {
+		private = false
+	}
+	listUserRepos(ctx, ctx.Org.Organization.AsUser(), private)
 }

@@ -96,6 +96,7 @@ import (
 	"code.gitea.io/gitea/routers/api/v1/repo"
 	"code.gitea.io/gitea/routers/api/v1/settings"
 	"code.gitea.io/gitea/routers/api/v1/user"
+	"code.gitea.io/gitea/routers/api/v1/utils"
 	"code.gitea.io/gitea/services/actions"
 	"code.gitea.io/gitea/services/auth"
 	"code.gitea.io/gitea/services/context"
@@ -184,6 +185,10 @@ func repoAssignment() func(ctx *context.APIContext) {
 			} else {
 				ctx.Error(http.StatusInternalServerError, "GetRepositoryByName", err)
 			}
+			return
+		}
+		if repo.IsPrivate && utils.PublicOnlyToken(ctx, "ApiTokenScopePublicRepoOnly") {
+			ctx.NotFound()
 			return
 		}
 
