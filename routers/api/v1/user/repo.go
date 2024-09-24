@@ -15,6 +15,16 @@ import (
 	"code.gitea.io/gitea/services/convert"
 )
 
+// check if api token is public-only
+func publicOnlyToken(ctx *context.APIContext) bool {
+	publicOnly := false
+	publicRepo, pubRepoExists := ctx.Data["ApiTokenScopePublicRepoOnly"]
+	if pubRepoExists && publicRepo.(bool) {
+		publicOnly = true
+	}
+	return publicOnly
+}
+
 // listUserRepos - List the repositories owned by the given user.
 func listUserRepos(ctx *context.APIContext, u *user_model.User, private bool) {
 	opts := utils.GetListOptions(ctx)
@@ -80,6 +90,9 @@ func ListUserRepos(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 
 	private := ctx.IsSigned
+	if publicOnlyToken(ctx) {
+		private = false
+	}
 	listUserRepos(ctx, ctx.ContextUser, private)
 }
 
@@ -128,6 +141,10 @@ func ListMyRepos(ctx *context.APIContext) {
 	default:
 		ctx.Error(http.StatusUnprocessableEntity, "", "invalid order_by")
 		return
+	}
+
+	if publicOnlyToken(ctx) {
+		opts.Private = false
 	}
 
 	var err error
@@ -181,6 +198,9 @@ func ListOrgRepos(ctx *context.APIContext) {
 	//     "$ref": "#/responses/RepositoryList"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
-
-	listUserRepos(ctx, ctx.Org.Organization.AsUser(), ctx.IsSigned)
+	private := ctx.IsSigned
+	if publicOnlyToken(ctx) {
+		private = false
+	}
+	listUserRepos(ctx, ctx.Org.Organization.AsUser(), private)
 }

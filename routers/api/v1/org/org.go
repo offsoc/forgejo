@@ -24,9 +24,23 @@ import (
 	user_service "code.gitea.io/gitea/services/user"
 )
 
+// check if api token is public-only
+func publicOnlyToken(ctx *context.APIContext) bool {
+	publicOnly := false
+	publicOrg, pubOrgExists := ctx.Data["ApiTokenScopePublicOrgOnly"]
+	if pubOrgExists && publicOrg.(bool) {
+		publicOnly = true
+	}
+	return publicOnly
+}
+
 func listUserOrgs(ctx *context.APIContext, u *user_model.User) {
 	listOptions := utils.GetListOptions(ctx)
 	showPrivate := ctx.IsSigned && (ctx.Doer.IsAdmin || ctx.Doer.ID == u.ID)
+
+	if publicOnlyToken(ctx) {
+		showPrivate = false
+	}
 
 	opts := organization.FindOrgOptions{
 		ListOptions:    listOptions,
