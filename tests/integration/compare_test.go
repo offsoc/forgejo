@@ -23,6 +23,7 @@ import (
 	files_service "code.gitea.io/gitea/services/repository/files"
 	"code.gitea.io/gitea/tests"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -65,6 +66,32 @@ func inspectCompare(t *testing.T, htmlDoc *HTMLDoc, diffCount int, diffChanges [
 		selection = htmlDoc.doc.Find(fmt.Sprintf("[data-new-filename=\"%s\"]", diffChange))
 		assert.Lenf(t, selection.Nodes, 1, "Expected 1 match for [data-new-filename=\"%s\"], found: %v", diffChange, len(selection.Nodes))
 	}
+}
+
+func TestComparePatchAndDiffMenuEntries(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	session := loginUser(t, "user2")
+	req := NewRequest(t, "GET", "/user2/repo-release/compare/v1.0...v2.0")
+	resp := session.MakeRequest(t, req, http.StatusOK)
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	diffOptions := htmlDoc.doc.Find("[data-tooltip-content=\"Diff options\"]")
+
+	var patchDownloadEntryPresent bool
+	var diffDownloadEntryPresent bool
+	diffOptions.Children().Each(func (idx int, c *goquery.Selection) {
+		value, exists := c.Attr("download")
+		if exists && strings.HasSuffix(value, ".patch") {
+			patchDownloadEntryPresent = true
+		}
+
+		if exists && strings.HasSuffix(value, ".diff") {
+			diffDownloadEntryPresent = true
+		}
+	})
+
+	assert.True(t, patchDownloadEntryPresent, "Patch file download entry should be present")
+	assert.True(t, diffDownloadEntryPresent, "Diff file download entry should be present")
 }
 
 // Git commit graph for repo20
