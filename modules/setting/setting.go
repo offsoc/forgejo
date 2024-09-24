@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors.
 // SPDX-License-Identifier: MIT
 
 package setting
@@ -118,6 +119,7 @@ func loadCommonSettingsFrom(cfg ConfigProvider) error {
 	// WARNING: don't change the sequence except you know what you are doing.
 	loadRunModeFrom(cfg)
 	loadLogGlobalFrom(cfg)
+	loadPWAFrom(cfg)
 	loadServerFrom(cfg)
 	loadSSHFrom(cfg)
 

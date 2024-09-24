@@ -1,4 +1,5 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors.
 // SPDX-License-Identifier: MIT
 
 package setting
@@ -109,49 +110,7 @@ var (
 	PerWritePerKbTimeout       = 10 * time.Second
 	StaticURLPrefix            string
 	AbsoluteAssetURL           string
-
-	ManifestData string
 )
-
-// MakeManifestData generates web app manifest JSON
-func MakeManifestData(appName, appURL, absoluteAssetURL string) []byte {
-	type manifestIcon struct {
-		Src   string `json:"src"`
-		Type  string `json:"type"`
-		Sizes string `json:"sizes"`
-	}
-
-	type manifestJSON struct {
-		Name      string         `json:"name"`
-		ShortName string         `json:"short_name"`
-		StartURL  string         `json:"start_url"`
-		Icons     []manifestIcon `json:"icons"`
-	}
-
-	bytes, err := json.Marshal(&manifestJSON{
-		Name:      appName,
-		ShortName: appName,
-		StartURL:  appURL,
-		Icons: []manifestIcon{
-			{
-				Src:   absoluteAssetURL + "/assets/img/logo.png",
-				Type:  "image/png",
-				Sizes: "512x512",
-			},
-			{
-				Src:   absoluteAssetURL + "/assets/img/logo.svg",
-				Type:  "image/svg+xml",
-				Sizes: "512x512",
-			},
-		},
-	})
-	if err != nil {
-		log.Error("unable to marshal manifest JSON. Error: %v", err)
-		return make([]byte, 0)
-	}
-
-	return bytes
-}
 
 // MakeAbsoluteAssetURL returns the absolute asset url prefix without a trailing slash
 func MakeAbsoluteAssetURL(appURL, staticURLPrefix string) string {
@@ -308,9 +267,6 @@ func loadServerFrom(rootCfg ConfigProvider) {
 
 	AbsoluteAssetURL = MakeAbsoluteAssetURL(AppURL, StaticURLPrefix)
 	AssetVersion = strings.ReplaceAll(AppVer, "+", "~") // make sure the version string is clear (no real escaping is needed)
-
-	manifestBytes := MakeManifestData(AppName, AppURL, AbsoluteAssetURL)
-	ManifestData = `application/json;base64,` + base64.StdEncoding.EncodeToString(manifestBytes)
 
 	var defaultLocalURL string
 	switch Protocol {

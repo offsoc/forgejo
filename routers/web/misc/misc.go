@@ -1,4 +1,5 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors.
 // SPDX-License-Identifier: MIT
 
 package misc
@@ -40,6 +41,27 @@ func RobotsTxt(w http.ResponseWriter, req *http.Request) {
 	}
 	httpcache.SetCacheControlInHeader(w.Header(), setting.StaticCacheTime)
 	http.ServeFile(w, req, robotsTxt)
+}
+
+func ManifestJson(w http.ResponseWriter, req *http.Request) {
+	httpcache.SetCacheControlInHeader(w.Header(), setting.StaticCacheTime)
+	w.Header().Add("content-type", "application/manifest+json;charset=UTF-8")
+
+	manifestJson := util.FilePathJoinAbs(setting.CustomPath, "public/manifest.json")
+	if ok, _ := util.IsExist(manifestJson); ok {
+		http.ServeFile(w, req, manifestJson)
+		return
+	}
+
+	bytes, err := setting.GetManifestJson()
+	if err != nil {
+		log.Error("unable to marshal manifest JSON. Error: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes)
 }
 
 func StaticRedirect(target string) func(w http.ResponseWriter, req *http.Request) {
