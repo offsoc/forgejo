@@ -16,6 +16,7 @@ import (
 	packages_model "code.gitea.io/gitea/models/packages"
 	packages_module "code.gitea.io/gitea/modules/packages"
 	arch_module "code.gitea.io/gitea/modules/packages/arch"
+	"code.gitea.io/gitea/modules/sync"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/routers/api/packages/helper"
 	"code.gitea.io/gitea/services/context"
@@ -26,12 +27,22 @@ import (
 var (
 	archPkgOrSig = regexp.MustCompile(`^.*\.pkg\.tar\.\w+(\.sig)*$`)
 	archDBOrSig  = regexp.MustCompile(`^.*.db(\.tar\.gz)*(\.sig)*$`)
+
+	locker = sync.NewExclusivePool()
 )
 
 func apiError(ctx *context.Context, status int, obj any) {
 	helper.LogAndProcessError(ctx, status, obj, func(message string) {
 		ctx.PlainText(status, message)
 	})
+}
+
+func refreshLocker(group string) func() {
+	key := fmt.Sprintf("pkg_arch_pkg_%s", group)
+	locker.CheckIn(key)
+	return func() {
+		locker.CheckOut(key)
+	}
 }
 
 func GetRepositoryKey(ctx *context.Context) {
@@ -49,7 +60,8 @@ func GetRepositoryKey(ctx *context.Context) {
 
 func PushPackage(ctx *context.Context) {
 	group := ctx.Params("group")
-
+	releaser := refreshLocker(group)
+	defer releaser()
 	upload, needToClose, err := ctx.UploadStream()
 	if err != nil {
 		apiError(ctx, http.StatusInternalServerError, err)
@@ -209,6 +221,8 @@ func RemovePackage(ctx *context.Context) {
 		ver     = ctx.Params("version")
 		pkgArch = ctx.Params("arch")
 	)
+	releaser := refreshLocker(group)
+	defer releaser()
 	pv, err := packages_model.GetVersionByNameAndVersion(
 		ctx, ctx.Package.Owner.ID, packages_model.TypeArch, pkg, ver,
 	)
