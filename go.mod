@@ -294,6 +294,6 @@ replace github.com/hashicorp/go-version => github.com/6543/go-version v1.3.1
 
 replace github.com/shurcooL/vfsgen => github.com/lunny/vfsgen v0.0.0-20220105142115-2c99e1ffdfa0
 
-replace github.com/nektos/act => code.forgejo.org/thefinn93/act v1.21.3-0.20240916205117-e599cc69dc5e
+replace github.com/nektos/act => code.forgejo.org/thefinn93/act v1.21.3-0.20240925071357-29f81a81e146
 
 replace github.com/mholt/archiver/v3 => code.forgejo.org/forgejo/archiver/v3 v3.5.1

@@ -14,8 +14,8 @@ code.forgejo.org/go-chi/captcha v0.0.0-20240905153133-df43b9250ed5 h1:A7P1liXCpJ
 code.forgejo.org/go-chi/captcha v0.0.0-20240905153133-df43b9250ed5/go.mod h1:YLOsiln/arX3egGtxG4QNp49G2CIqP9pqD2VL56obLc=
 code.forgejo.org/go-chi/session v0.0.0-20240905153124-557e3de77cd2 h1:Ht2myT1qf4YbLcO/W3pQaWTn6PPdKz0tM5tnqMOz/Cg=
 code.forgejo.org/go-chi/session v0.0.0-20240905153124-557e3de77cd2/go.mod h1:oJs2Q5P5I7bzJGsgHt6fVzh2jlIr/9SLAvz/ZXb87BI=
-code.forgejo.org/thefinn93/act v1.21.3-0.20240916205117-e599cc69dc5e h1:3zms7edYa3uqTRSJj+TenW3bjCBRLD3eHlWtWSO3W3E=
-code.forgejo.org/thefinn93/act v1.21.3-0.20240916205117-e599cc69dc5e/go.mod h1:+PcvJ9iv+NTFeJSh79ra9Jbk9l0vvyA9D9me5/dbxYM=
+code.forgejo.org/thefinn93/act v1.21.3-0.20240925071357-29f81a81e146 h1:ErD4NRf1R4c+cy60ax804OxMOz/G6rcUK26JzHdNk34=
+code.forgejo.org/thefinn93/act v1.21.3-0.20240925071357-29f81a81e146/go.mod h1:+PcvJ9iv+NTFeJSh79ra9Jbk9l0vvyA9D9me5/dbxYM=
 code.gitea.io/actions-proto-go v0.4.0 h1:OsPBPhodXuQnsspG1sQ4eRE1PeoZyofd7+i73zCwnsU=
 code.gitea.io/actions-proto-go v0.4.0/go.mod h1:mn7Wkqz6JbnTOHQpot3yDeHx+O5C9EGhMEE+htvHBas=
 code.gitea.io/gitea-vet v0.2.3 h1:gdFmm6WOTM65rE8FUBTRzeQZYzXePKSSB1+r574hWwI=
