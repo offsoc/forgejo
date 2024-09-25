@@ -11,10 +11,23 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
+	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
 
+	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestEmailDomainAllowList(t *testing.T) {
+	res := user_model.IsEmailDomainAllowed("someuser@localhost.localdomain")
+	assert.True(t, res)
+
+	domain, _ := glob.Compile("domain.de", ',')
+	defer test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{domain})
+	res = user_model.IsEmailDomainAllowed("someuser@repo.domain.de")
+	assert.False(t, res)
+}
 
 func TestGetEmailAddresses(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())

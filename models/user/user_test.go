@@ -320,6 +320,7 @@ func TestCreateUserInvalidEmail(t *testing.T) {
 
 	err := user_model.CreateUser(db.DefaultContext, user)
 	require.Error(t, err)
+
 	assert.True(t, user_model.IsErrEmailCharIsNotSupported(err))
 }
 
