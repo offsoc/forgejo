@@ -31,6 +31,8 @@ func pickTask(ctx context.Context, runner *actions_model.ActionRunner) (*runnerv
 		return nil, false, nil
 	}
 
+	log.Debug("job permissions: %+v", t.Permissions)
+
 	secrets, err := secret_model.GetSecretsOfTask(ctx, t)
 	if err != nil {
 		return nil, false, fmt.Errorf("GetSecretsOfTask: %w", err)
@@ -39,6 +41,10 @@ func pickTask(ctx context.Context, runner *actions_model.ActionRunner) (*runnerv
 	vars, err := actions_model.GetVariablesOfRun(ctx, t.Job.Run)
 	if err != nil {
 		return nil, false, fmt.Errorf("GetVariablesOfRun: %w", err)
+	}
+
+	if t.Permissions.IDToken == "write" {
+		vars["ACTIONS_ID_TOKEN_REQUEST_URL"] = setting.AppURL + "api/actions_idtoken?api-version=2.0"
 	}
 
 	actions.CreateCommitStatus(ctx, t.Job)

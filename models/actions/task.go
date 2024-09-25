@@ -21,6 +21,7 @@ import (
 	runnerv1 "code.gitea.io/actions-proto-go/runner/v1"
 	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/nektos/act/pkg/jobparser"
+	"github.com/nektos/act/pkg/model"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"xorm.io/builder"
 )
@@ -56,6 +57,8 @@ type ActionTask struct {
 
 	Created timeutil.TimeStamp `xorm:"created"`
 	Updated timeutil.TimeStamp `xorm:"updated index"`
+
+	Permissions model.Permissions `xorm:"json"`
 }
 
 var successfulTokenTaskCache *lru.Cache[string, any]
@@ -285,6 +288,8 @@ func CreateTaskForRunner(ctx context.Context, runner *ActionRunner) (*ActionTask
 	} else { //nolint:revive
 		_, workflowJob = gots[0].Job()
 	}
+
+	task.Permissions = workflowJob.Permissions
 
 	if _, err := e.Insert(task); err != nil {
 		return nil, false, err
