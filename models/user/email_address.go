@@ -498,5 +498,5 @@ func IsEmailDomainAllowed(email string) bool {
 		return !validation.IsEmailDomainListed(setting.Service.EmailDomainBlockList, email)
 	}
 
-	return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email)
+	return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email) || validation.IsLocalEmailDomain(email)
 }

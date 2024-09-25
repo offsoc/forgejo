@@ -73,6 +73,17 @@ func IsEmailDomainListed(globs []glob.Glob, email string) bool {
 	return false
 }
 
+func IsLocalEmailDomain(email string) bool {
+	localFqdn, err := url.ParseRequestURI(setting.AppURL)
+	if err != nil {
+		return false
+	}
+
+	mailDomain := strings.Split(email, "@")[1]
+
+	return mailDomain == localFqdn.Hostname()
+}
+
 // IsAPIURL checks if URL is current Gitea instance API URL
 func IsAPIURL(uri string) bool {
 	return strings.HasPrefix(strings.ToLower(uri), strings.ToLower(setting.AppURL+"api"))
