@@ -4,13 +4,12 @@
 package setting
 
 import (
-	"encoding/json"
-
+	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 )
 
 type PwaConfig struct {
-	Standalone        bool
+	Standalone bool
 }
 
 var PWA = PwaConfig{
@@ -38,7 +37,7 @@ type manifestJSON struct {
 	Display   string         `json:"display,omitempty"`
 }
 
-func GetManifestJson() ([]byte, error) {
+func GetManifestJSON() ([]byte, error) {
 	manifest := manifestJSON{
 		Name:      AppName,
 		ShortName: AppName,

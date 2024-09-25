@@ -5,7 +5,6 @@
 package setting
 
 import (
-	"encoding/base64"
 	"net"
 	"net/url"
 	"path"
@@ -14,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/util"
 )

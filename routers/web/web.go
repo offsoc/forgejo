@@ -264,7 +264,7 @@ func Routes() *web.Route {
 	}
 
 	routes.Methods("GET,HEAD", "/robots.txt", append(mid, misc.RobotsTxt)...)
-	routes.Methods("GET,HEAD", "/manifest.json", append(mid, misc.ManifestJson)...)
+	routes.Methods("GET,HEAD", "/manifest.json", append(mid, misc.ManifestJSON)...)
 	routes.Get("/ssh_info", misc.SSHInfo)
 	routes.Get("/api/healthz", healthcheck.Check)
 

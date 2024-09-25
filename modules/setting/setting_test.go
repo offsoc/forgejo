@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMakeAbsoluteAssetURL(t *testing.T) {
@@ -28,7 +29,7 @@ func TestMakeAbsoluteAssetURL(t *testing.T) {
 }
 
 func TestMakeManifestData(t *testing.T) {
-	jsonBytes, err := GetManifestJson()
-	assert.NoError(t, err)
+	jsonBytes, err := GetManifestJSON()
+	require.NoError(t, err)
 	assert.True(t, json.Valid(jsonBytes))
 }

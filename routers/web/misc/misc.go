@@ -43,25 +43,29 @@ func RobotsTxt(w http.ResponseWriter, req *http.Request) {
 	http.ServeFile(w, req, robotsTxt)
 }
 
-func ManifestJson(w http.ResponseWriter, req *http.Request) {
+func ManifestJSON(w http.ResponseWriter, req *http.Request) {
 	httpcache.SetCacheControlInHeader(w.Header(), setting.StaticCacheTime)
 	w.Header().Add("content-type", "application/manifest+json;charset=UTF-8")
 
-	manifestJson := util.FilePathJoinAbs(setting.CustomPath, "public/manifest.json")
-	if ok, _ := util.IsExist(manifestJson); ok {
-		http.ServeFile(w, req, manifestJson)
+	manifestJSON := util.FilePathJoinAbs(setting.CustomPath, "public/manifest.json")
+	if ok, _ := util.IsExist(manifestJSON); ok {
+		http.ServeFile(w, req, manifestJSON)
 		return
 	}
 
-	bytes, err := setting.GetManifestJson()
+	bytes, err := setting.GetManifestJSON()
 	if err != nil {
 		log.Error("unable to marshal manifest JSON. Error: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	if _, err := w.Write(bytes); err != nil {
+		log.Error("unable to write manifest JSON. Error: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
-	w.Write(bytes)
 }
 
 func StaticRedirect(target string) func(w http.ResponseWriter, req *http.Request) {
