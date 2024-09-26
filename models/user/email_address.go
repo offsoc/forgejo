@@ -497,6 +497,8 @@ func IsEmailDomainAllowed(email string) bool {
 	if len(setting.Service.EmailDomainAllowList) == 0 {
 		return !validation.IsEmailDomainListed(setting.Service.EmailDomainBlockList, email)
 	}
-
-	return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email) || validation.IsLocalEmailDomain(email)
+	if setting.Federation.Enabled {
+		return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email) || validation.IsLocalEmailDomain(email)
+	}
+	return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email)
 }
