@@ -815,8 +815,8 @@ func Routes() *web.Route {
 					m.Post("/inbox", activitypub.ActorInbox)
 				})
 				m.Group("/repository-id/{repository-id}", func() {
-					m.Get("", activitypub.Repository)
-					m.Post("/inbox",
+					m.Get("", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), activitypub.Repository)
+					m.Post("/inbox", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository),
 						bind(forgefed.ForgeLike{}),
 						// TODO: activitypub.ReqHTTPSignature(),
 						activitypub.RepositoryInbox)
@@ -892,10 +892,10 @@ func Routes() *web.Route {
 				})
 
 				if !setting.Repository.DisableStars {
-					m.Get("/starred", user.GetStarredRepos)
+					m.Get("/starred", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), user.GetStarredRepos)
 				}
 
-				m.Get("/subscriptions", user.GetWatchedRepos)
+				m.Get("/subscriptions", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), user.GetWatchedRepos)
 			}, context.UserAssignmentAPI())
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryUser), reqToken())
 
@@ -1453,13 +1453,13 @@ func Routes() *web.Route {
 			m.Get("/{org}/permissions", reqToken(), org.GetUserOrgsPermissions)
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryUser, auth_model.AccessTokenScopeCategoryOrganization), context.UserAssignmentAPI())
 		m.Post("/orgs", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryOrganization), reqToken(), bind(api.CreateOrgOption{}), org.Create)
-		m.Get("/orgs", org.GetAll, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryOrganization))
+		m.Get("/orgs", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryOrganization), org.GetAll)
 		m.Group("/orgs/{org}", func() {
 			m.Combo("").Get(org.Get).
 				Patch(reqToken(), reqOrgOwnership(), bind(api.EditOrgOption{}), org.Edit).
 				Delete(reqToken(), reqOrgOwnership(), org.Delete)
-			m.Combo("/repos").Get(user.ListOrgRepos).
-				Post(reqToken(), bind(api.CreateRepoOption{}), context.EnforceQuotaAPI(quota_model.LimitSubjectSizeReposAll, context.QuotaTargetOrg), repo.CreateOrgRepo)
+			m.Combo("/repos").Get(tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), user.ListOrgRepos).
+				Post(reqToken(), tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), bind(api.CreateRepoOption{}), context.EnforceQuotaAPI(quota_model.LimitSubjectSizeReposAll, context.QuotaTargetOrg), repo.CreateOrgRepo)
 			m.Group("/members", func() {
 				m.Get("", reqToken(), org.ListMembers)
 				m.Combo("/{username}").Get(reqToken(), org.IsMember).
@@ -1536,7 +1536,7 @@ func Routes() *web.Route {
 					Put(reqToken(), org.AddTeamRepository).
 					Delete(reqToken(), org.RemoveTeamRepository).
 					Get(reqToken(), org.GetTeamRepo)
-			})
+			}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository, auth_model.AccessTokenScopeCategoryRepository))
 			m.Get("/activities/feeds", org.ListTeamActivityFeeds)
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryOrganization), orgAssignment(false, true), reqToken(), reqTeamMembership())
 
@@ -1556,9 +1556,9 @@ func Routes() *web.Route {
 						m.Post("", bind(api.CreateKeyOption{}), admin.CreatePublicKey)
 						m.Delete("/{id}", admin.DeleteUserPublicKey)
 					})
-					m.Get("/orgs", org.ListUserOrgs)
-					m.Post("/orgs", bind(api.CreateOrgOption{}), admin.CreateOrg)
-					m.Post("/repos", bind(api.CreateRepoOption{}), admin.CreateRepo)
+					m.Get("/orgs", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryOrganization), org.ListUserOrgs)
+					m.Post("/orgs", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryOrganization), bind(api.CreateOrgOption{}), admin.CreateOrg)
+					m.Post("/repos", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), bind(api.CreateRepoOption{}), admin.CreateRepo)
 					m.Post("/rename", bind(api.RenameUserOption{}), admin.RenameUser)
 					if setting.Quota.Enabled {
 						m.Group("/quota", func() {
@@ -1567,15 +1567,15 @@ func Routes() *web.Route {
 						})
 					}
 				}, context.UserAssignmentAPI())
-			})
+			}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryUser))
 			m.Group("/emails", func() {
 				m.Get("", admin.GetAllEmails)
 				m.Get("/search", admin.SearchEmail)
 			})
 			m.Group("/unadopted", func() {
 				m.Get("", admin.ListUnadoptedRepositories)
-				m.Post("/{username}/{reponame}", admin.AdoptRepository)
-				m.Delete("/{username}/{reponame}", admin.DeleteUnadoptedRepository)
+				m.Post("/{username}/{reponame}", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), admin.AdoptRepository)
+				m.Delete("/{username}/{reponame}", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), admin.DeleteUnadoptedRepository)
 			})
 			m.Group("/hooks", func() {
 				m.Combo("").Get(admin.ListHooks).
