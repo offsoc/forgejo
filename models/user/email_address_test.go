@@ -41,6 +41,22 @@ func TestEmailDomainAllowListInternal(t *testing.T) {
 		emailDomainAllowList,
 		emailDomainBlockList,
 		true,
+		"xttps://repo")
+	assert.False(t, res)
+
+	res = user_model.IsEmailDomainAllowedInternal(
+		"user@repo.Domain.de",
+		emailDomainAllowList,
+		emailDomainBlockList,
+		true,
+		"https://repo.domain.de")
+	assert.True(t, res)
+
+	res = user_model.IsEmailDomainAllowedInternal(
+		"user@repo.domain.de",
+		emailDomainAllowList,
+		emailDomainBlockList,
+		true,
 		"https://repo.domain.de")
 	assert.True(t, res)
 }
