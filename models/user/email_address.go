@@ -19,6 +19,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
+	"github.com/gobwas/glob"
 
 	"xorm.io/builder"
 )
@@ -494,11 +495,16 @@ func validateEmailDomain(email string) error {
 }
 
 func IsEmailDomainAllowed(email string) bool {
-	if len(setting.Service.EmailDomainAllowList) == 0 {
-		return !validation.IsEmailDomainListed(setting.Service.EmailDomainBlockList, email)
+	return IsEmailDomainAllowedInternal(email, setting.Service.EmailDomainAllowList, setting.Service.EmailDomainBlockList, setting.Federation.Enabled)
+}
+
+func IsEmailDomainAllowedInternal(email string, emailDomainAllowList []glob.Glob,
+	emailDomainBlockList []glob.Glob, isFederation bool) bool {
+	if len(emailDomainAllowList) == 0 {
+		return !validation.IsEmailDomainListed(emailDomainBlockList, email)
 	}
-	if setting.Federation.Enabled {
-		return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email) || validation.IsLocalEmailDomain(email)
+	if isFederation {
+		return validation.IsEmailDomainListed(emailDomainAllowList, email) || validation.IsLocalEmailDomain(email)
 	}
-	return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email)
+	return validation.IsEmailDomainListed(emailDomainAllowList, email)
 }
