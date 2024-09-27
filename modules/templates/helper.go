@@ -172,11 +172,12 @@ func NewFuncMap() template.FuncMap {
 		"RenderCommitMessage":            RenderCommitMessage,
 		"RenderCommitMessageLinkSubject": RenderCommitMessageLinkSubject,
 
-		"RenderCommitBody": RenderCommitBody,
-		"RenderCodeBlock":  RenderCodeBlock,
-		"RenderIssueTitle": RenderIssueTitle,
-		"RenderEmoji":      RenderEmoji,
-		"ReactionToEmoji":  ReactionToEmoji,
+		"RenderCommitBody":    RenderCommitBody,
+		"RenderCodeBlock":     RenderCodeBlock,
+		"RenderIssueTitle":    RenderIssueTitle,
+		"RenderRefIssueTitle": RenderRefIssueTitle,
+		"RenderEmoji":         RenderEmoji,
+		"ReactionToEmoji":     ReactionToEmoji,
 
 		"RenderMarkdownToHtml": RenderMarkdownToHtml,
 		"RenderLabel":          RenderLabel,

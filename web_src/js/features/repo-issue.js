@@ -8,6 +8,7 @@ import {toAbsoluteUrl} from '../utils.js';
 import {initDropzone} from './common-global.js';
 import {POST, GET} from '../modules/fetch.js';
 import {showErrorToast} from '../modules/toast.js';
+import {emojiHTML} from './emoji.js';
 
 const {appSubUrl} = window.config;
 
@@ -124,7 +125,7 @@ export function initRepoIssueSidebarList() {
               return;
             }
             filteredResponse.results.push({
-              name: `#${issue.number} ${htmlEscape(issue.title)
+              name: `#${issue.number} ${issueTitleHTML(htmlEscape(issue.title))
               }<div class="text small tw-break-anywhere">${htmlEscape(issue.repository.full_name)}</div>`,
               value: issue.id,
             });
@@ -730,4 +731,10 @@ export function initArchivedLabelHandler() {
   for (const label of document.querySelectorAll('[data-is-archived]')) {
     toggleElem(label, label.classList.contains('checked'));
   }
+}
+
+// Render the issue's title. It converts emojis and code blocks syntax into their respective HTML equivalent.
+export function issueTitleHTML(title) {
+  return title.replaceAll(/:[-+\w]+:/g, (emoji) => emojiHTML(emoji.substring(1, emoji.length - 1)))
+    .replaceAll(/`[^`]+`/g, (code) => `<code class="inline-code-block">${code.substring(1, code.length - 1)}</code>`);
 }
