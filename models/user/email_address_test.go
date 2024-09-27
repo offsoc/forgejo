@@ -5,14 +5,12 @@ package user_test
 
 import (
 	"fmt"
-	"net/url"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
@@ -26,21 +24,25 @@ func TestEmailDomainAllowList(t *testing.T) {
 
 func TestEmailDomainAllowListInternal(t *testing.T) {
 
-	localFQDN, _ := url.ParseRequestURI(setting.AppURL)
-	localDomain := localFQDN.Hostname()
-	email := "someuser@" + localDomain
-
 	domain, _ := glob.Compile("domain.de", ',')
 	emailDomainAllowList := []glob.Glob{domain}
 	emailDomainBlockList := []glob.Glob{}
 
-	res := user_model.IsEmailDomainAllowedInternal(email, emailDomainAllowList,
-		emailDomainBlockList, false)
+	res := user_model.IsEmailDomainAllowedInternal(
+		"user@repo.domain.de",
+		emailDomainAllowList,
+		emailDomainBlockList,
+		false,
+		"https://repo.domain.de")
 	assert.False(t, res)
 
-	res = user_model.IsEmailDomainAllowedInternal(email, emailDomainAllowList,
-		emailDomainBlockList, true)
-	assert.False(t, res)
+	res = user_model.IsEmailDomainAllowedInternal(
+		"user@repo.domain.de",
+		emailDomainAllowList,
+		emailDomainBlockList,
+		true,
+		"https://repo.domain.de")
+	assert.True(t, res)
 }
 
 func TestGetEmailAddresses(t *testing.T) {

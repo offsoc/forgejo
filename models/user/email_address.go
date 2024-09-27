@@ -496,21 +496,38 @@ func validateEmailDomain(email string) error {
 }
 
 func IsEmailDomainAllowed(email string) bool {
-	localFqdn, _ := url.ParseRequestURI(setting.AppURL)
-	return IsEmailDomainAllowedInternal(email, setting.Service.EmailDomainAllowList,
-		setting.Service.EmailDomainBlockList, setting.Federation.Enabled, localFqdn.Hostname())
+	return IsEmailDomainAllowedInternal(
+		email,
+		setting.Service.EmailDomainAllowList,
+		setting.Service.EmailDomainBlockList,
+		setting.Federation.Enabled,
+		setting.AppURL)
 }
 
-func IsEmailDomainAllowedInternal(email string, emailDomainAllowList []glob.Glob,
-	emailDomainBlockList []glob.Glob, isFederation bool, fqdn string) bool {
+func IsEmailDomainAllowedInternal(
+	email string,
+	emailDomainAllowList []glob.Glob,
+	emailDomainBlockList []glob.Glob,
+	isFederation bool,
+	fqdn string) bool {
+
+	result := false
 
 	if len(emailDomainAllowList) == 0 {
-		return !validation.IsEmailDomainListed(emailDomainBlockList, email)
-	}
-	if isFederation {
-		globber, _ := glob.Compile(fqdn, ',')
+		result = !validation.IsEmailDomainListed(emailDomainBlockList, email)
+	} else if isFederation {
+		localFqdn, err := url.ParseRequestURI(fqdn)
+		if err != nil {
+			return false
+		}
+		globber, err := glob.Compile(localFqdn.Hostname(), ',')
+		if err != nil {
+			return false
+		}
 		federatedAllowlist := append(emailDomainAllowList, globber)
-		return validation.IsEmailDomainListed(federatedAllowlist, email)
+		result = validation.IsEmailDomainListed(federatedAllowlist, email)
+	} else {
+		result = validation.IsEmailDomainListed(emailDomainAllowList, email)
 	}
-	return validation.IsEmailDomainListed(emailDomainAllowList, email)
+	return result
 }
