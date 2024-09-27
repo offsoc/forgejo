@@ -32,6 +32,7 @@ func TestEmailDomainAllowList(t *testing.T) {
 }
 
 func TestLocalFQDNIsValidEmailDomain(t *testing.T) {
+	setting.Federation.Enabled = true
 	remoteDomain, _ := glob.Compile("domain.de", ',')
 	setting.Service.EmailDomainAllowList = []glob.Glob{remoteDomain}
 
@@ -42,6 +43,7 @@ func TestLocalFQDNIsValidEmailDomain(t *testing.T) {
 	assert.True(t, res)
 
 	setting.Service.EmailDomainAllowList = []glob.Glob{}
+	setting.Federation.Enabled = false
 }
 
 func TestGetEmailAddresses(t *testing.T) {
