@@ -13,6 +13,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
 
 	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
@@ -24,26 +25,28 @@ func TestEmailDomainAllowList(t *testing.T) {
 	assert.True(t, res)
 
 	domain, _ := glob.Compile("domain.de", ',')
-	setting.Service.EmailDomainAllowList = []glob.Glob{domain}
+	test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{domain})
+	defer func() {
+		test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{})
+	}()
+
 	res = user_model.IsEmailDomainAllowed("someuser@repo.domain.de")
 	assert.False(t, res)
-
-	setting.Service.EmailDomainAllowList = []glob.Glob{}
 }
 
 func TestLocalFQDNIsValidEmailDomain(t *testing.T) {
 	setting.Federation.Enabled = true
 	remoteDomain, _ := glob.Compile("domain.de", ',')
-	setting.Service.EmailDomainAllowList = []glob.Glob{remoteDomain}
-
+	test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{remoteDomain})
+	defer func() {
+		test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{})
+		setting.Federation.Enabled = false
+	}()
 	localFQDN, _ := url.ParseRequestURI(setting.AppURL)
 	localDomain := localFQDN.Hostname()
 
 	res := user_model.IsEmailDomainAllowed("someuser@" + localDomain)
 	assert.True(t, res)
-
-	setting.Service.EmailDomainAllowList = []glob.Glob{}
-	setting.Federation.Enabled = false
 }
 
 func TestGetEmailAddresses(t *testing.T) {
