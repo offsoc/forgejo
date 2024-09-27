@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"net/mail"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -495,16 +496,21 @@ func validateEmailDomain(email string) error {
 }
 
 func IsEmailDomainAllowed(email string) bool {
-	return IsEmailDomainAllowedInternal(email, setting.Service.EmailDomainAllowList, setting.Service.EmailDomainBlockList, setting.Federation.Enabled)
+	localFqdn, _ := url.ParseRequestURI(setting.AppURL)
+	return IsEmailDomainAllowedInternal(email, setting.Service.EmailDomainAllowList,
+		setting.Service.EmailDomainBlockList, setting.Federation.Enabled, localFqdn.Hostname())
 }
 
 func IsEmailDomainAllowedInternal(email string, emailDomainAllowList []glob.Glob,
-	emailDomainBlockList []glob.Glob, isFederation bool) bool {
+	emailDomainBlockList []glob.Glob, isFederation bool, fqdn string) bool {
+
 	if len(emailDomainAllowList) == 0 {
 		return !validation.IsEmailDomainListed(emailDomainBlockList, email)
 	}
 	if isFederation {
-		return validation.IsEmailDomainListed(emailDomainAllowList, email) || validation.IsLocalEmailDomain(email)
+		globber, _ := glob.Compile(fqdn, ',')
+		federatedAllowlist := append(emailDomainAllowList, globber)
+		return validation.IsEmailDomainListed(federatedAllowlist, email)
 	}
 	return validation.IsEmailDomainListed(emailDomainAllowList, email)
 }
