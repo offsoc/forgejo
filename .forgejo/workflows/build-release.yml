@@ -27,7 +27,7 @@ jobs:
     # root is used for testing, allow it
     if: vars.ROLE == 'forgejo-integration' || github.repository_owner == 'root'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 

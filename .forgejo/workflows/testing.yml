@@ -19,7 +19,7 @@ jobs:
           cat <<'EOF'
           ${{ toJSON(github) }}
           EOF
-      - uses: https://code.forgejo.org/actions/checkout@v3
+      - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows/composite/setup-env
       - run: su forgejo -c 'make deps-backend deps-tools'
       - run: su forgejo -c 'make --always-make -j$(nproc) lint-backend tidy-check swagger-check fmt-check swagger-validate' # ensure the "go-licenses" make target runs
@@ -30,7 +30,7 @@ jobs:
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
+      - uses: https://code.forgejo.org/actions/checkout@v4
       - run: make deps-frontend
       - run: make lint-frontend
       - run: make checks-frontend
@@ -57,7 +57,7 @@ jobs:
           MINIO_ROOT_USER: 123456
           MINIO_ROOT_PASSWORD: 12345678
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
+      - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows/composite/setup-env
       - name: install git >= 2.42
         uses: ./.forgejo/workflows/composite/apt-install-from
@@ -101,7 +101,7 @@ jobs:
         image: ${{ matrix.cacher.image }}
         options: ${{ matrix.cacher.options }}
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
+      - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows/composite/setup-env
       - name: install git >= 2.42
         uses: ./.forgejo/workflows/composite/apt-install-from
@@ -132,7 +132,7 @@ jobs:
           #
           MYSQL_EXTRA_FLAGS: --innodb-adaptive-flushing=OFF --innodb-buffer-pool-size=4G --innodb-log-buffer-size=128M --innodb-flush-log-at-trx-commit=0 --innodb-flush-log-at-timeout=30 --innodb-flush-method=nosync --innodb-fsync-threshold=1000000000
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
+      - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows/composite/setup-env
       - name: install dependencies & git >= 2.42
         uses: ./.forgejo/workflows/composite/apt-install-from
@@ -164,7 +164,7 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: postgres
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
+      - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows/composite/setup-env
       - name: install dependencies & git >= 2.42
         uses: ./.forgejo/workflows/composite/apt-install-from
@@ -185,7 +185,7 @@ jobs:
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
+      - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows/composite/setup-env
       - name: install dependencies & git >= 2.42
         uses: ./.forgejo/workflows/composite/apt-install-from
@@ -212,7 +212,7 @@ jobs:
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
+      - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows/composite/setup-env
       - run: su forgejo -c 'make deps-backend deps-tools'
       - run: su forgejo -c 'make security-check'
