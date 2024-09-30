@@ -287,7 +287,7 @@ func CreateJWTSigningKey(algorithm string, key any) (JWTSigningKey, error) {
 
 // LoadOrCreateAsymmetricKey checks if the configured private key exists.
 // If it does not exist a new random key gets generated and saved on the configured path.
-func LoadOrCreateAsymmetricKey(keyPath string, algo string) (any, error) {
+func LoadOrCreateAsymmetricKey(keyPath, algo string) (any, error) {
 	isExist, err := util.IsExist(keyPath)
 	if err != nil {
 		log.Fatal("Unable to check if %s exists. Error: %v", keyPath, err)
