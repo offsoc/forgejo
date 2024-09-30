@@ -40,6 +40,7 @@ type JWTSigningKey interface {
 	SignKey() any
 	VerifyKey() any
 	ToJWK() (map[string]string, error)
+	KID() string
 	PreProcessToken(*jwt.Token)
 }
 
@@ -69,6 +70,10 @@ func (key hmacSigningKey) ToJWK() (map[string]string, error) {
 		"kty": "oct",
 		"alg": key.SigningMethod().Alg(),
 	}, nil
+}
+
+func (key hmacSigningKey) KID() string {
+	return ""
 }
 
 func (key hmacSigningKey) PreProcessToken(*jwt.Token) {}
@@ -118,6 +123,10 @@ func (key rsaSingingKey) ToJWK() (map[string]string, error) {
 		"e":   base64.RawURLEncoding.EncodeToString(big.NewInt(int64(pubKey.E)).Bytes()),
 		"n":   base64.RawURLEncoding.EncodeToString(pubKey.N.Bytes()),
 	}, nil
+}
+
+func (key rsaSingingKey) KID() string {
+	return key.id
 }
 
 func (key rsaSingingKey) PreProcessToken(token *jwt.Token) {
@@ -171,6 +180,10 @@ func (key eddsaSigningKey) ToJWK() (map[string]string, error) {
 	}, nil
 }
 
+func (key eddsaSigningKey) KID() string {
+	return key.id
+}
+
 func (key eddsaSigningKey) PreProcessToken(token *jwt.Token) {
 	token.Header["kid"] = key.id
 }
@@ -221,6 +234,10 @@ func (key ecdsaSingingKey) ToJWK() (map[string]string, error) {
 		"x":   base64.RawURLEncoding.EncodeToString(pubKey.X.Bytes()),
 		"y":   base64.RawURLEncoding.EncodeToString(pubKey.Y.Bytes()),
 	}, nil
+}
+
+func (key ecdsaSingingKey) KID() string {
+	return key.id
 }
 
 func (key ecdsaSingingKey) PreProcessToken(token *jwt.Token) {
