@@ -85,7 +85,6 @@ require (
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/quasoft/websspi v1.1.2
-	github.com/rakutentech/jwk-go v1.1.3
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1

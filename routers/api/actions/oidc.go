@@ -1,27 +1,23 @@
 package actions
 
 import (
-	"crypto/ed25519"
-	"crypto/rand"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"code.gitea.io/gitea/modules/json"
+	"code.gitea.io/gitea/modules/jwtx"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/web"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/rakutentech/jwk-go/jwk"
-	"github.com/rakutentech/jwk-go/okp"
 )
 
 type oidcRoutes struct {
-	ca                  ed25519.PrivateKey
-	jwks                []*jwk.KeySpec
+	signingKey          jwtx.JWTSigningKey
 	openIDConfiguration openIDConfiguration
 }
 
@@ -40,17 +36,18 @@ func OIDCRoutes(prefix string) *web.Route {
 
 	prefix = strings.TrimPrefix(prefix, "/")
 
-	// TODO: generate this once and store it across restarts. In the database I assume?
-	caPublicKey, caPrivateKey, err := ed25519.GenerateKey(rand.Reader)
+	rawKey, err := jwtx.LoadOrCreateAsymmetricKey(setting.Actions.JWTSigningPrivateKeyFile, setting.Actions.JWTSigningAlgorithm)
 	if err != nil {
-		panic(err)
+		log.Fatal("error loading jwt: %v", err)
+	}
+
+	key, err := jwtx.CreateJWTSigningKey(setting.Actions.JWTSigningAlgorithm, rawKey)
+	if err != nil {
+		log.Fatal("error parsing jwt: %v", err)
 	}
 
 	r := oidcRoutes{
-		ca: caPrivateKey,
-		jwks: []*jwk.KeySpec{ // https://token.actions.githubusercontent.com/.well-known/jwks
-			jwk.NewSpec(okp.NewCurve25519(caPublicKey, caPrivateKey)),
-		},
+		signingKey: key,
 		openIDConfiguration: openIDConfiguration{
 			Issuer:                 setting.AppURL + setting.AppSubURL + prefix,                       // TODO: how do i check the public domain?
 			JwksURI:                setting.AppURL + setting.AppSubURL + prefix + "/.well-known/jwks", // TODO: how do i check the public domain?
@@ -112,6 +109,8 @@ func OIDCRoutes(prefix string) *web.Route {
 func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 	task := ctx.ActionTask
 
+	aud := ctx.Req.URL.Query().Get("aud")
+
 	if err := task.Job.LoadRun(ctx); err != nil {
 		log.Error("Error loading run: %v", err)
 		ctx.Error(http.StatusInternalServerError, "Error loading run")
@@ -132,17 +131,17 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 	}
 	iat := time.Now()
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.GetSigningMethod(setting.Actions.JWTSigningAlgorithm), jwt.MapClaims{
 		"jti":                   uuid.New().String(),
 		"sub":                   fmt.Sprintf("repo:%s:ref:%s", repo, task.Job.Run.Ref),
-		"aud":                   "", // TODO: Allow customizing this in the query param
+		"aud":                   aud,
 		"ref":                   task.Job.Run.Ref,
 		"sha":                   task.Job.Run.CommitSHA,
 		"repository":            repo,
 		"repository_owner":      task.Job.Run.Repo.OwnerName,
 		"repository_owner_id":   task.Job.Run.Repo.OwnerID,
 		"run_id":                task.Job.RunID,
-		"run_number":            0, // TODO: how do i check this?
+		"run_number":            task.Job.Run.Index,
 		"run_attempt":           0, // TODO: how do i check this?
 		"repository_visibility": repositoryVisibility,
 		"repository_id":         task.Job.Run.Repo.ID,
@@ -155,17 +154,17 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 		"ref_protected":         false,    // TODO: how do i check this?
 		"ref_type":              "branch", // TODO: how do i check this?
 		"workflow_ref":          fmt.Sprintf("%s/.forgejo/workflow/%s@%s", repo, task.Job.Run.WorkflowID, task.Job.Run.Ref),
-		"workflow_sha":          "", // TODO: is this just a hash of the yaml? if so that's easy enough to calculate
+		"workflow_sha":          task.Job.Run.CommitSHA,
 		"job_workflow_ref":      fmt.Sprintf("%s/.forgejo/workflow/%s@%s", repo, task.Job.Run.WorkflowID, task.Job.Run.Ref),
-		"job_workflow_sha":      "",                                    // TODO: is this just a hash of the yaml? if so that's easy enough to calculate
-		"runner_environment":    "self-hosted",                         // not sure what this should be set to, github will have either "github-hosted" or "self-hosted"
-		"iss":                   setting.AppURL + "/api/actions_token", // TODO: how do i check the public domain?
+		"job_workflow_sha":      task.Job.Run.CommitSHA,
+		"runner_environment":    "self-hosted", // not sure what this should be set to, github will have either "github-hosted" or "self-hosted"
+		"iss":                   setting.AppURL + setting.AppSubURL + "/api/actions_token",
 		"nbf":                   jwt.NewNumericDate(iat),
 		"exp":                   jwt.NewNumericDate(iat.Add(time.Minute * 15)),
 		"iat":                   jwt.NewNumericDate(iat),
 	})
 
-	signedJWT, err := token.SignedString(o.ca)
+	signedJWT, err := token.SignedString(o.signingKey.SignKey())
 	if err != nil {
 		log.Error("Error signing JWT: %v", err)
 		ctx.Error(http.StatusInternalServerError, "Error signing JWT")
@@ -180,7 +179,23 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 
 func (o oidcRoutes) getJWKS(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(resp).Encode(o.jwks)
+
+	jwk, err := o.signingKey.ToJWK()
+	if err != nil {
+		log.Error("Error converting signing key to JWK: %v", err)
+		http.Error(resp, "error converting signing key to JWT", http.StatusInternalServerError)
+		return
+	}
+
+	jwk["use"] = "sig"
+
+	jwks := map[string][]map[string]string{
+		"keys": {
+			jwk,
+		},
+	}
+
+	err = json.NewEncoder(resp).Encode(jwks)
 	if err != nil {
 		log.Error("error encoding jwks response: ", err)
 		http.Error(resp, "error encoding jwks response", http.StatusInternalServerError)

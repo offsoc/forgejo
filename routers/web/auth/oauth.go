@@ -24,6 +24,7 @@ import (
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/json"
+	"code.gitea.io/gitea/modules/jwtx"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
@@ -152,7 +153,7 @@ type AccessTokenResponse struct {
 	IDToken      string    `json:"id_token,omitempty"`
 }
 
-func newAccessTokenResponse(ctx go_context.Context, grant *auth.OAuth2Grant, serverKey, clientKey oauth2.JWTSigningKey) (*AccessTokenResponse, *AccessTokenError) {
+func newAccessTokenResponse(ctx go_context.Context, grant *auth.OAuth2Grant, serverKey, clientKey jwtx.JWTSigningKey) (*AccessTokenResponse, *AccessTokenError) {
 	if setting.OAuth2.InvalidateRefreshTokens {
 		if err := grant.IncreaseCounter(ctx); err != nil {
 			return nil, &AccessTokenError{
@@ -734,7 +735,7 @@ func AccessTokenOAuth(ctx *context.Context) {
 	clientKey := serverKey
 	if serverKey.IsSymmetric() {
 		var err error
-		clientKey, err = oauth2.CreateJWTSigningKey(serverKey.SigningMethod().Alg(), []byte(form.ClientSecret))
+		clientKey, err = jwtx.CreateJWTSigningKey(serverKey.SigningMethod().Alg(), []byte(form.ClientSecret))
 		if err != nil {
 			handleAccessTokenError(ctx, AccessTokenError{
 				ErrorCode:        AccessTokenErrorCodeInvalidRequest,
@@ -757,7 +758,7 @@ func AccessTokenOAuth(ctx *context.Context) {
 	}
 }
 
-func handleRefreshToken(ctx *context.Context, form forms.AccessTokenForm, serverKey, clientKey oauth2.JWTSigningKey) {
+func handleRefreshToken(ctx *context.Context, form forms.AccessTokenForm, serverKey, clientKey jwtx.JWTSigningKey) {
 	app, err := auth.GetOAuth2ApplicationByClientID(ctx, form.ClientID)
 	if err != nil {
 		handleAccessTokenError(ctx, AccessTokenError{
@@ -817,7 +818,7 @@ func handleRefreshToken(ctx *context.Context, form forms.AccessTokenForm, server
 	ctx.JSON(http.StatusOK, accessToken)
 }
 
-func handleAuthorizationCode(ctx *context.Context, form forms.AccessTokenForm, serverKey, clientKey oauth2.JWTSigningKey) {
+func handleAuthorizationCode(ctx *context.Context, form forms.AccessTokenForm, serverKey, clientKey jwtx.JWTSigningKey) {
 	app, err := auth.GetOAuth2ApplicationByClientID(ctx, form.ClientID)
 	if err != nil {
 		handleAccessTokenError(ctx, AccessTokenError{

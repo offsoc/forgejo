@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/jwtx"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/services/auth/source/oauth2"
 
@@ -19,7 +20,7 @@ import (
 )
 
 func createAndParseToken(t *testing.T, grant *auth.OAuth2Grant) *oauth2.OIDCToken {
-	signingKey, err := oauth2.CreateJWTSigningKey("HS256", make([]byte, 32))
+	signingKey, err := jwtx.CreateJWTSigningKey("HS256", make([]byte, 32))
 	require.NoError(t, err)
 	assert.NotNil(t, signingKey)
 
