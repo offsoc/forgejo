@@ -109,7 +109,7 @@ func OIDCRoutes(prefix string) *web.Route {
 func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 	task := ctx.ActionTask
 
-	aud := ctx.Req.URL.Query().Get("aud")
+	aud := ctx.Req.URL.Query().Get("audience")
 
 	if err := task.Job.LoadRun(ctx); err != nil {
 		log.Error("Error loading run: %v", err)
