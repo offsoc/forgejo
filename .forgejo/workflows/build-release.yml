@@ -37,7 +37,7 @@ jobs:
           repository="${{ github.repository }}"
           echo "value=${repository##*/}" >> "$GITHUB_OUTPUT"
 
-      - uses: https://code.forgejo.org/actions/setup-node@v3
+      - uses: https://code.forgejo.org/actions/setup-node@v4
         with:
           node-version: 20
 
