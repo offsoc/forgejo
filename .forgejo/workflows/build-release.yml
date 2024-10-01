@@ -87,7 +87,7 @@ jobs:
 
       - name: cache node_modules
         id: node
-        uses: https://code.forgejo.org/actions/cache@v3
+        uses: https://code.forgejo.org/actions/cache@v4
         with:
           path: |
             node_modules
