@@ -511,7 +511,7 @@ func IsEmailDomainAllowedInternal(
 	isFederation bool,
 	fqdn string,
 ) bool {
-	result := false
+	var result bool
 
 	if len(emailDomainAllowList) == 0 {
 		result = !validation.IsEmailDomainListed(emailDomainBlockList, email)
