@@ -158,7 +158,7 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 		"job_workflow_ref":      fmt.Sprintf("%s/.forgejo/workflow/%s@%s", repo, task.Job.Run.WorkflowID, task.Job.Run.Ref),
 		"job_workflow_sha":      task.Job.Run.CommitSHA,
 		"runner_environment":    "self-hosted", // not sure what this should be set to, github will have either "github-hosted" or "self-hosted"
-		"iss":                   setting.AppURL + setting.AppSubURL + "/api/actions_token",
+		"iss":                   setting.AppURL + setting.AppSubURL + "/api/actions_idtoken",
 		"nbf":                   jwt.NewNumericDate(iat),
 		"exp":                   jwt.NewNumericDate(iat.Add(time.Minute * 15)),
 		"iat":                   jwt.NewNumericDate(iat),

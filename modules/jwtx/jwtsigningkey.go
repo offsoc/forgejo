@@ -78,42 +78,42 @@ func (key hmacSigningKey) KID() string {
 
 func (key hmacSigningKey) PreProcessToken(*jwt.Token) {}
 
-type rsaSingingKey struct {
+type rsaSigningKey struct {
 	signingMethod jwt.SigningMethod
 	key           *rsa.PrivateKey
 	id            string
 }
 
-func newRSASingingKey(signingMethod jwt.SigningMethod, key *rsa.PrivateKey) (rsaSingingKey, error) {
+func newRSASigningKey(signingMethod jwt.SigningMethod, key *rsa.PrivateKey) (rsaSigningKey, error) {
 	kid, err := util.CreatePublicKeyFingerprint(key.Public().(*rsa.PublicKey))
 	if err != nil {
-		return rsaSingingKey{}, err
+		return rsaSigningKey{}, err
 	}
 
-	return rsaSingingKey{
+	return rsaSigningKey{
 		signingMethod,
 		key,
 		base64.RawURLEncoding.EncodeToString(kid),
 	}, nil
 }
 
-func (key rsaSingingKey) IsSymmetric() bool {
+func (key rsaSigningKey) IsSymmetric() bool {
 	return false
 }
 
-func (key rsaSingingKey) SigningMethod() jwt.SigningMethod {
+func (key rsaSigningKey) SigningMethod() jwt.SigningMethod {
 	return key.signingMethod
 }
 
-func (key rsaSingingKey) SignKey() any {
+func (key rsaSigningKey) SignKey() any {
 	return key.key
 }
 
-func (key rsaSingingKey) VerifyKey() any {
+func (key rsaSigningKey) VerifyKey() any {
 	return key.key.Public()
 }
 
-func (key rsaSingingKey) ToJWK() (map[string]string, error) {
+func (key rsaSigningKey) ToJWK() (map[string]string, error) {
 	pubKey := key.key.Public().(*rsa.PublicKey)
 
 	return map[string]string{
@@ -125,11 +125,11 @@ func (key rsaSingingKey) ToJWK() (map[string]string, error) {
 	}, nil
 }
 
-func (key rsaSingingKey) KID() string {
+func (key rsaSigningKey) KID() string {
 	return key.id
 }
 
-func (key rsaSingingKey) PreProcessToken(token *jwt.Token) {
+func (key rsaSigningKey) PreProcessToken(token *jwt.Token) {
 	token.Header["kid"] = key.id
 }
 
@@ -139,7 +139,7 @@ type eddsaSigningKey struct {
 	id            string
 }
 
-func newEdDSASingingKey(signingMethod jwt.SigningMethod, key ed25519.PrivateKey) (eddsaSigningKey, error) {
+func newEdDSASigningKey(signingMethod jwt.SigningMethod, key ed25519.PrivateKey) (eddsaSigningKey, error) {
 	kid, err := util.CreatePublicKeyFingerprint(key.Public().(ed25519.PublicKey))
 	if err != nil {
 		return eddsaSigningKey{}, err
@@ -188,42 +188,42 @@ func (key eddsaSigningKey) PreProcessToken(token *jwt.Token) {
 	token.Header["kid"] = key.id
 }
 
-type ecdsaSingingKey struct {
+type ecdsaSigningKey struct {
 	signingMethod jwt.SigningMethod
 	key           *ecdsa.PrivateKey
 	id            string
 }
 
-func newECDSASingingKey(signingMethod jwt.SigningMethod, key *ecdsa.PrivateKey) (ecdsaSingingKey, error) {
+func newECDSASigningKey(signingMethod jwt.SigningMethod, key *ecdsa.PrivateKey) (ecdsaSigningKey, error) {
 	kid, err := util.CreatePublicKeyFingerprint(key.Public().(*ecdsa.PublicKey))
 	if err != nil {
-		return ecdsaSingingKey{}, err
+		return ecdsaSigningKey{}, err
 	}
 
-	return ecdsaSingingKey{
+	return ecdsaSigningKey{
 		signingMethod,
 		key,
 		base64.RawURLEncoding.EncodeToString(kid),
 	}, nil
 }
 
-func (key ecdsaSingingKey) IsSymmetric() bool {
+func (key ecdsaSigningKey) IsSymmetric() bool {
 	return false
 }
 
-func (key ecdsaSingingKey) SigningMethod() jwt.SigningMethod {
+func (key ecdsaSigningKey) SigningMethod() jwt.SigningMethod {
 	return key.signingMethod
 }
 
-func (key ecdsaSingingKey) SignKey() any {
+func (key ecdsaSigningKey) SignKey() any {
 	return key.key
 }
 
-func (key ecdsaSingingKey) VerifyKey() any {
+func (key ecdsaSigningKey) VerifyKey() any {
 	return key.key.Public()
 }
 
-func (key ecdsaSingingKey) ToJWK() (map[string]string, error) {
+func (key ecdsaSigningKey) ToJWK() (map[string]string, error) {
 	pubKey := key.key.Public().(*ecdsa.PublicKey)
 
 	return map[string]string{
@@ -236,11 +236,11 @@ func (key ecdsaSingingKey) ToJWK() (map[string]string, error) {
 	}, nil
 }
 
-func (key ecdsaSingingKey) KID() string {
+func (key ecdsaSigningKey) KID() string {
 	return key.id
 }
 
-func (key ecdsaSingingKey) PreProcessToken(token *jwt.Token) {
+func (key ecdsaSigningKey) PreProcessToken(token *jwt.Token) {
 	token.Header["kid"] = key.id
 }
 
@@ -280,19 +280,19 @@ func CreateJWTSigningKey(algorithm string, key any) (JWTSigningKey, error) {
 		if !ok {
 			return nil, jwt.ErrInvalidKeyType
 		}
-		return newEdDSASingingKey(signingMethod, privateKey)
+		return newEdDSASigningKey(signingMethod, privateKey)
 	case *jwt.SigningMethodECDSA:
 		privateKey, ok := key.(*ecdsa.PrivateKey)
 		if !ok {
 			return nil, jwt.ErrInvalidKeyType
 		}
-		return newECDSASingingKey(signingMethod, privateKey)
+		return newECDSASigningKey(signingMethod, privateKey)
 	case *jwt.SigningMethodRSA:
 		privateKey, ok := key.(*rsa.PrivateKey)
 		if !ok {
 			return nil, jwt.ErrInvalidKeyType
 		}
-		return newRSASingingKey(signingMethod, privateKey)
+		return newRSASigningKey(signingMethod, privateKey)
 	default:
 		secret, ok := key.([]byte)
 		if !ok {
