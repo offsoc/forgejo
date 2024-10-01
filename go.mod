@@ -3,7 +3,7 @@ module code.gitea.io/gitea
 go 1.23.1
 
 require (
-	code.forgejo.org/f3/gof3/v3 v3.7.0
+	code.forgejo.org/f3/gof3/v3 v3.10.1
 	code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251
 	code.forgejo.org/forgejo/reply v1.0.2
 	code.forgejo.org/go-chi/cache v0.0.0-20240912103640-dcb08fba860d
@@ -123,6 +123,7 @@ require (
 	dario.cat/mergo v1.0.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	git.sr.ht/~mariusor/go-xsd-duration v0.0.0-20220703122237-02e73435a078 // indirect
+	github.com/42wim/httpsig v1.2.2 // indirect
 	github.com/ClickHouse/ch-go v0.61.5 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.26.0 // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
