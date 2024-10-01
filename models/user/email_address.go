@@ -20,8 +20,8 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
-	"github.com/gobwas/glob"
 
+	"github.com/gobwas/glob"
 	"xorm.io/builder"
 )
 
@@ -509,8 +509,8 @@ func IsEmailDomainAllowedInternal(
 	emailDomainAllowList []glob.Glob,
 	emailDomainBlockList []glob.Glob,
 	isFederation bool,
-	fqdn string) bool {
-
+	fqdn string,
+) bool {
 	result := false
 
 	if len(emailDomainAllowList) == 0 {

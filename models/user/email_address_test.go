@@ -23,7 +23,6 @@ func TestEmailDomainAllowList(t *testing.T) {
 }
 
 func TestEmailDomainAllowListInternal(t *testing.T) {
-
 	domain, _ := glob.Compile("domain.de", ',')
 	emailDomainAllowList := []glob.Glob{domain}
 	emailDomainBlockList := []glob.Glob{}
