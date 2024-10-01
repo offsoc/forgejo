@@ -27,6 +27,7 @@ var (
 		LimitDispatchInputs      int64             `ini:"LIMIT_DISPATCH_INPUTS"`
 		JWTSigningAlgorithm      string            `ini:"JWT_SIGNING_ALGORITHM"`
 		JWTSigningPrivateKeyFile string            `ini:"JWT_SIGNING_PRIVATE_KEY_FILE"`
+		JWTExpirationTime        time.Duration     `ini:"JWT_EXPIRATION_TIME"`
 	}{
 		Enabled:                  true,
 		DefaultActionsURL:        defaultActionsURLForgejo,
@@ -34,6 +35,7 @@ var (
 		LimitDispatchInputs:      10,
 		JWTSigningAlgorithm:      "EdDSA",
 		JWTSigningPrivateKeyFile: "actions_oidc/private.pem",
+		JWTExpirationTime:        time.Hour,
 	}
 )
 

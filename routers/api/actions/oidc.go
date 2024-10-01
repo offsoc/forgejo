@@ -160,9 +160,9 @@ func (o oidcRoutes) getToken(ctx *ArtifactContext) {
 		"runner_environment":    "self-hosted", // not sure what this should be set to, github will have either "github-hosted" or "self-hosted"
 		"iss":                   setting.AppURL + setting.AppSubURL + "/api/actions_idtoken",
 		"nbf":                   jwt.NewNumericDate(iat),
-		"exp":                   jwt.NewNumericDate(iat.Add(time.Minute * 15)),
+		"exp":                   jwt.NewNumericDate(iat.Add(setting.Actions.JWTExpirationTime)),
 		"iat":                   jwt.NewNumericDate(iat),
-	}, addTokenHeaders(o.signingKey))
+	})
 
 	signedJWT, err := token.SignedString(o.signingKey.SignKey())
 	if err != nil {
@@ -210,14 +210,5 @@ func (o oidcRoutes) getOpenIDConfiguration(resp http.ResponseWriter, req *http.R
 		log.Error("error encoding jwks response: ", err)
 		http.Error(resp, "error encoding jwks response", http.StatusInternalServerError)
 		return
-	}
-}
-
-func addTokenHeaders(key jwtx.JWTSigningKey) jwt.TokenOption {
-	return func(t *jwt.Token) {
-		kid := key.KID()
-		if kid != "" {
-			t.Header["kid"] = kid
-		}
 	}
 }
