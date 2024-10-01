@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"net/mail"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
+	"github.com/gobwas/glob"
 
 	"xorm.io/builder"
 )
@@ -494,11 +496,38 @@ func validateEmailDomain(email string) error {
 }
 
 func IsEmailDomainAllowed(email string) bool {
-	if len(setting.Service.EmailDomainAllowList) == 0 {
-		return !validation.IsEmailDomainListed(setting.Service.EmailDomainBlockList, email)
+	return IsEmailDomainAllowedInternal(
+		email,
+		setting.Service.EmailDomainAllowList,
+		setting.Service.EmailDomainBlockList,
+		setting.Federation.Enabled,
+		setting.AppURL)
+}
+
+func IsEmailDomainAllowedInternal(
+	email string,
+	emailDomainAllowList []glob.Glob,
+	emailDomainBlockList []glob.Glob,
+	isFederation bool,
+	fqdn string) bool {
+
+	result := false
+
+	if len(emailDomainAllowList) == 0 {
+		result = !validation.IsEmailDomainListed(emailDomainBlockList, email)
+	} else if isFederation {
+		localFqdn, err := url.ParseRequestURI(fqdn)
+		if err != nil {
+			return false
+		}
+		globber, err := glob.Compile(localFqdn.Hostname(), ',')
+		if err != nil {
+			return false
+		}
+		federatedAllowlist := append(emailDomainAllowList, globber)
+		result = validation.IsEmailDomainListed(federatedAllowlist, email)
+	} else {
+		result = validation.IsEmailDomainListed(emailDomainAllowList, email)
 	}
-	if setting.Federation.Enabled {
-		return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email) || validation.IsLocalEmailDomain(email)
-	}
-	return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email)
+	return result
 }

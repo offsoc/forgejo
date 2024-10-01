@@ -5,15 +5,12 @@ package user_test
 
 import (
 	"fmt"
-	"net/url"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
 
 	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
@@ -23,29 +20,44 @@ import (
 func TestEmailDomainAllowList(t *testing.T) {
 	res := user_model.IsEmailDomainAllowed("someuser@localhost.localdomain")
 	assert.True(t, res)
-
-	domain, _ := glob.Compile("domain.de", ',')
-	test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{domain})
-	defer func() {
-		test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{})
-	}()
-
-	res = user_model.IsEmailDomainAllowed("someuser@repo.domain.de")
-	assert.False(t, res)
 }
 
-func TestLocalFQDNIsValidEmailDomain(t *testing.T) {
-	setting.Federation.Enabled = true
-	remoteDomain, _ := glob.Compile("domain.de", ',')
-	test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{remoteDomain})
-	defer func() {
-		test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{})
-		setting.Federation.Enabled = false
-	}()
-	localFQDN, _ := url.ParseRequestURI(setting.AppURL)
-	localDomain := localFQDN.Hostname()
+func TestEmailDomainAllowListInternal(t *testing.T) {
 
-	res := user_model.IsEmailDomainAllowed("someuser@" + localDomain)
+	domain, _ := glob.Compile("domain.de", ',')
+	emailDomainAllowList := []glob.Glob{domain}
+	emailDomainBlockList := []glob.Glob{}
+
+	res := user_model.IsEmailDomainAllowedInternal(
+		"user@repo.domain.de",
+		emailDomainAllowList,
+		emailDomainBlockList,
+		false,
+		"https://repo.domain.de")
+	assert.False(t, res)
+
+	res = user_model.IsEmailDomainAllowedInternal(
+		"user@repo.domain.de",
+		emailDomainAllowList,
+		emailDomainBlockList,
+		true,
+		"xttps://repo")
+	assert.False(t, res)
+
+	res = user_model.IsEmailDomainAllowedInternal(
+		"user@repo.Domain.de",
+		emailDomainAllowList,
+		emailDomainBlockList,
+		true,
+		"https://repo.domain.de")
+	assert.True(t, res)
+
+	res = user_model.IsEmailDomainAllowedInternal(
+		"user@repo.domain.de",
+		emailDomainAllowList,
+		emailDomainBlockList,
+		true,
+		"https://repo.domain.de")
 	assert.True(t, res)
 }
 
