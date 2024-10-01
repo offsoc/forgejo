@@ -524,8 +524,8 @@ func IsEmailDomainAllowedInternal(
 		if err != nil {
 			return false
 		}
-		federatedAllowlist := append(emailDomainAllowList, globber)
-		result = validation.IsEmailDomainListed(federatedAllowlist, email)
+		emailDomainAllowList = append(emailDomainAllowList, globber)
+		result = validation.IsEmailDomainListed(emailDomainAllowList, email)
 	} else {
 		result = validation.IsEmailDomainListed(emailDomainAllowList, email)
 	}
