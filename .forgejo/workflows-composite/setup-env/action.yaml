@@ -6,6 +6,6 @@ runs:
         git config --add safe.directory '*'
         adduser --quiet --comment forgejo --disabled-password forgejo
         chown -R forgejo:forgejo .
-    - uses: https://codeberg.org/fnetx/setup-cache-go@b2214eaf6fb44c7e8512c0f462a2c3ec31f86a73
+    - uses: https://codeberg.org/fnetx/setup-cache-go@4b50dd28b1068fa06d433c5fabed3f6f4d4ccddf
       with:
         username: forgejo
