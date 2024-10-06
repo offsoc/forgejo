@@ -73,22 +73,22 @@ func TestClearRepoStars(t *testing.T) {
 }
 
 func TestUnstarRepo(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 2})
 
 	assert.True(t, repo_model.IsStaring(db.DefaultContext, user.ID, repo.ID))
 
-	assert.NoError(t, repo_model.StarRepo(db.DefaultContext, user.ID, repo.ID, false))
+	require.NoError(t, repo_model.StarRepo(db.DefaultContext, user.ID, repo.ID, false))
 
 	assert.False(t, repo_model.IsStaring(db.DefaultContext, user.ID, repo.ID))
 
 	// Check if the repo is removed from the star list
 	starList, err := repo_model.GetStarListByID(db.DefaultContext, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, starList.LoadRepoIDs(db.DefaultContext))
+	require.NoError(t, starList.LoadRepoIDs(db.DefaultContext))
 
 	assert.False(t, starList.ContainsRepoID(repo.ID))
 }

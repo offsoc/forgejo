@@ -28,7 +28,7 @@ func ShowStarList(ctx *context.Context) {
 	}
 
 	if !user_model.IsUserVisibleToViewer(ctx, ctx.ContextUser, ctx.Doer) {
-		ctx.NotFound("user", fmt.Errorf(ctx.ContextUser.Name))
+		ctx.NotFound("user", fmt.Errorf("%s", ctx.ContextUser.Name))
 		return
 	}
 

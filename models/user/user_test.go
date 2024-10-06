@@ -667,7 +667,7 @@ func TestEmailTo(t *testing.T) {
 }
 
 func TestIsSameUser(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	user4 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 4})

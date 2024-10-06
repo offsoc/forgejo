@@ -17,12 +17,13 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIGetStarLists(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -66,7 +67,7 @@ func TestAPIGetStarLists(t *testing.T) {
 func TestAPIGetStarListRepoInfo(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
@@ -93,7 +94,7 @@ func TestAPIGetStarListRepoInfo(t *testing.T) {
 func TestAPICreateStarList(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -129,7 +130,7 @@ func TestAPICreateStarList(t *testing.T) {
 func TestAPIGetStarListByName(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -180,7 +181,7 @@ func TestAPIGetStarListByName(t *testing.T) {
 func TestAPIEditStarList(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -205,7 +206,7 @@ func TestAPIEditStarList(t *testing.T) {
 func TestAPIDeleteStarList(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -218,7 +219,7 @@ func TestAPIDeleteStarList(t *testing.T) {
 func TestAPIStarListGetRepos(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -253,7 +254,7 @@ func TestAPIStarListGetRepos(t *testing.T) {
 func TestAPIStarListAddRepo(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 4})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
@@ -268,7 +269,7 @@ func TestAPIStarListAddRepo(t *testing.T) {
 func TestAPIStarListRemoveRepo(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
@@ -283,7 +284,7 @@ func TestAPIStarListRemoveRepo(t *testing.T) {
 func TestAPIGetStarListByID(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	t.Run("PublicList", func(t *testing.T) {
 		resp := MakeRequest(t, NewRequest(t, "GET", "/api/v1/starlist/1"), http.StatusOK)

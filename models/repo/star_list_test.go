@@ -12,13 +12,14 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetStarListByID(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	starList, err := repo_model.GetStarListByID(db.DefaultContext, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "First List", starList.Name)
 	assert.Equal(t, "Description for first List", starList.Description)
@@ -31,10 +32,10 @@ func TestGetStarListByID(t *testing.T) {
 }
 
 func TestGetStarListByName(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	starList, err := repo_model.GetStarListByName(db.DefaultContext, 1, "First List")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), starList.ID)
 	assert.Equal(t, "Description for first List", starList.Description)
@@ -47,11 +48,11 @@ func TestGetStarListByName(t *testing.T) {
 }
 
 func TestGetStarListByUserID(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// Get only public lists
 	starLists, err := repo_model.GetStarListsByUserID(db.DefaultContext, 1, false)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Len(t, starLists, 1)
 
@@ -62,7 +63,7 @@ func TestGetStarListByUserID(t *testing.T) {
 
 	// Get also private lists
 	starLists, err = repo_model.GetStarListsByUserID(db.DefaultContext, 1, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Len(t, starLists, 2)
 
@@ -78,7 +79,7 @@ func TestGetStarListByUserID(t *testing.T) {
 }
 
 func TestCreateStarList(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// Check that you can't create two list with the same name for the same user
 	starList, err := repo_model.CreateStarList(db.DefaultContext, 1, "First List", "Test", false)
@@ -87,7 +88,7 @@ func TestCreateStarList(t *testing.T) {
 
 	// Now create the star list for real
 	starList, err = repo_model.CreateStarList(db.DefaultContext, 1, "My new List", "Test", false)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "My new List", starList.Name)
 	assert.Equal(t, "Test", starList.Description)
@@ -95,52 +96,52 @@ func TestCreateStarList(t *testing.T) {
 }
 
 func TestStarListRepositoryCount(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	starList := unittest.AssertExistsAndLoadBean(t, &repo_model.StarList{ID: 1})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
-	assert.NoError(t, starList.LoadRepositoryCount(db.DefaultContext, user))
+	require.NoError(t, starList.LoadRepositoryCount(db.DefaultContext, user))
 
 	assert.Equal(t, int64(1), starList.RepositoryCount)
 }
 
 func TestStarListAddRepo(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	const repoID = 4
 
 	starList := unittest.AssertExistsAndLoadBean(t, &repo_model.StarList{ID: 1})
 
-	assert.NoError(t, starList.AddRepo(db.DefaultContext, repoID))
+	require.NoError(t, starList.AddRepo(db.DefaultContext, repoID))
 
-	assert.NoError(t, starList.LoadRepoIDs(db.DefaultContext))
+	require.NoError(t, starList.LoadRepoIDs(db.DefaultContext))
 
 	assert.True(t, starList.ContainsRepoID(repoID))
 }
 
 func TestStarListRemoveRepo(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	const repoID = 1
 
 	starList := unittest.AssertExistsAndLoadBean(t, &repo_model.StarList{ID: 1})
 
-	assert.NoError(t, starList.RemoveRepo(db.DefaultContext, repoID))
+	require.NoError(t, starList.RemoveRepo(db.DefaultContext, repoID))
 
-	assert.NoError(t, starList.LoadRepoIDs(db.DefaultContext))
+	require.NoError(t, starList.LoadRepoIDs(db.DefaultContext))
 
 	assert.False(t, starList.ContainsRepoID(repoID))
 }
 
 func TestStarListEditData(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	starList := unittest.AssertExistsAndLoadBean(t, &repo_model.StarList{ID: 1})
 
 	assert.True(t, repo_model.IsErrStarListExists(starList.EditData(db.DefaultContext, "Second List", "New Description", false)))
 
-	assert.NoError(t, starList.EditData(db.DefaultContext, "First List", "New Description", false))
+	require.NoError(t, starList.EditData(db.DefaultContext, "First List", "New Description", false))
 
 	assert.Equal(t, "First List", starList.Name)
 	assert.Equal(t, "New Description", starList.Description)
@@ -148,7 +149,7 @@ func TestStarListEditData(t *testing.T) {
 }
 
 func TestStarListHasAccess(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	starList := unittest.AssertExistsAndLoadBean(t, &repo_model.StarList{ID: 2})
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
@@ -157,6 +158,6 @@ func TestStarListHasAccess(t *testing.T) {
 	assert.True(t, starList.HasAccess(user1))
 	assert.False(t, starList.HasAccess(user2))
 
-	assert.NoError(t, starList.MustHaveAccess(user1))
+	require.NoError(t, starList.MustHaveAccess(user1))
 	assert.True(t, repo_model.IsErrStarListNotFound(starList.MustHaveAccess(user2)))
 }
