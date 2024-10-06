@@ -122,7 +122,7 @@ func webAuth(authMethod auth_service.Method) func(*context.Context) {
 		ar, err := common.AuthShared(ctx.Base, ctx.Session, authMethod)
 		if err != nil {
 			log.Error("Failed to verify user: %v", err)
-			ctx.Error(http.StatusUnauthorized, "Verify")
+			ctx.Error(http.StatusUnauthorized, ctx.Locale.TrString("auth.verify"))
 			return
 		}
 		ctx.Doer = ar.Doer
