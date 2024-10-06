@@ -1,4 +1,11 @@
 // @ts-check
+
+// @watch start
+// web_src/js/features/repo-code.js
+// web_src/css/repo.css
+// services/gitdiff/**
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 

@@ -2,16 +2,22 @@
 // SPDX-License-Identifier: MIT
 // @ts-check
 
+// @watch start
+// templates/user/auth/**
+// templates/user/settings/**
+// web_src/js/features/user-**
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 
 test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
+  await login_user(browser, workerInfo, 'user40');
 });
 
 test('WebAuthn register & login flow', async ({browser}, workerInfo) => {
   test.skip(workerInfo.project.name !== 'chromium', 'Uses Chrome protocol');
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
+  const context = await load_logged_in_context(browser, workerInfo, 'user40');
   const page = await context.newPage();
 
   // Register a security key.
@@ -45,7 +51,7 @@ test('WebAuthn register & login flow', async ({browser}, workerInfo) => {
   response = await page.goto('/user/login');
   await expect(response?.status()).toBe(200);
 
-  await page.getByLabel('Username or email address').fill('user2');
+  await page.getByLabel('Username or email address').fill('user40');
   await page.getByLabel('Password').fill('password');
   await page.getByRole('button', {name: 'Sign in'}).click();
   await page.waitForURL(`${workerInfo.project.use.baseURL}/user/webauthn`);

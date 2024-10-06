@@ -19,32 +19,34 @@ jobs:
           cat <<'EOF'
           ${{ toJSON(github) }}
           EOF
-      - uses: https://code.forgejo.org/actions/checkout@v3
-      - uses: https://code.forgejo.org/actions/setup-go@v4
-        with:
-          go-version-file: "go.mod"
-      - run: make deps-backend deps-tools
-      - run: make --always-make -j$(nproc) lint-backend tidy-check swagger-check fmt-check swagger-validate # ensure the "go-licenses" make target runs
-      - run: |
-          make backend
-        env:
-          TAGS: bindata
-      - uses: actions/cache@v4
-        with:
-          path: '/workspace/forgejo/forgejo/gitea'
-          key: backend-build-${{ github.sha }}
+      - uses: https://code.forgejo.org/actions/checkout@v4
+      - uses: ./.forgejo/workflows-composite/setup-env
+      - run: su forgejo -c 'make deps-backend deps-tools'
+      - run: su forgejo -c 'make --always-make -j$(nproc) lint-backend tidy-check swagger-check fmt-check swagger-validate' # ensure the "go-licenses" make target runs
+      - uses: ./.forgejo/workflows-composite/build-backend
   frontend-checks:
     if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
     runs-on: docker
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
+      - uses: https://code.forgejo.org/actions/checkout@v4
       - run: make deps-frontend
       - run: make lint-frontend
       - run: make checks-frontend
       - run: make test-frontend-coverage
       - run: make frontend
+      - name: Install zstd for cache saving
+        # works around https://github.com/actions/cache/issues/1169, because the
+        # consuming job has zstd and doesn't restore the cache otherwise
+        run: |
+          apt-get update -qq
+          apt-get -q install -qq -y zstd
+      - name: "Cache frontend build for playwright testing"
+        uses: actions/cache/save@v4
+        with:
+          path: ${{github.workspace}}/public/assets
+          key: frontend-build-${{ github.sha }}
   test-unit:
     if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
     runs-on: docker
@@ -66,38 +68,17 @@ jobs:
           MINIO_ROOT_USER: 123456
           MINIO_ROOT_PASSWORD: 12345678
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
-      - uses: https://code.forgejo.org/actions/setup-go@v4
-        with:
-          go-version-file: "go.mod"
-      - run: |
-          git config --add safe.directory '*'
-          adduser --quiet --comment forgejo --disabled-password forgejo
-          chown -R forgejo:forgejo .
+      - uses: https://code.forgejo.org/actions/checkout@v4
+      - uses: ./.forgejo/workflows-composite/setup-env
       - name: install git >= 2.42
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          echo deb http://deb.debian.org/debian/ testing  main > /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
-          apt-get -q install -qq -y git
-          rm /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
+        uses: ./.forgejo/workflows-composite/apt-install-from
+        with:
+          packages: git
       - name: test release-notes-assistant.sh
         run: |
           apt-get -q install -qq -y jq
           ./release-notes-assistant.sh test_main
-      - run: |
-          su forgejo -c 'make deps-backend'
-      - uses: actions/cache/restore@v4
-        id: cache-backend
-        with:
-          path: '/workspace/forgejo/forgejo/gitea'
-          key: backend-build-${{ github.sha }}
-      - if: steps.cache-backend.outputs.cache-hit != 'true'
-        run: |
-          su forgejo -c 'make backend'
-        env:
-          TAGS: bindata
+      - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-backend test-check'
         timeout-minutes: 50
@@ -105,10 +86,43 @@ jobs:
           RACE_ENABLED: 'true'
           TAGS: bindata
           TEST_ELASTICSEARCH_URL: http://elasticsearch:9200
-  test-remote-cacher:
+  test-e2e:
     if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
     runs-on: docker
     needs: [backend-checks, frontend-checks]
+    container:
+      image: 'code.forgejo.org/oci/playwright:latest'
+    steps:
+      - uses: https://code.forgejo.org/actions/checkout@v4
+        with:
+          fetch-depth: 20
+      - uses: ./.forgejo/workflows-composite/setup-env
+      - name: "Restore frontend build"
+        uses: actions/cache/restore@v4
+        id: cache-frontend
+        with:
+          path: ${{github.workspace}}/public/assets
+          key: frontend-build-${{ github.sha }}
+      - name: "Build frontend (if not cached)"
+        if: steps.cache-frontend.outputs.cache-hit != 'true'
+        run: |
+          su forgejo -c 'make deps-frontend frontend'
+      - uses: ./.forgejo/workflows-composite/build-backend
+      - name: Get changed files
+        id: changed-files
+        uses: https://code.forgejo.org/fossdd/changed-files@v45
+        with:
+          separator: '\n'
+      - run: |
+          su forgejo -c 'make generate test-e2e-sqlite'
+        timeout-minutes: 40
+        env:
+          USE_REPO_TEST_DIR: 1
+          CHANGED_FILES: ${{steps.changed-files.outputs.all_changed_files}}
+  test-remote-cacher:
+    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    runs-on: docker
+    needs: [backend-checks, frontend-checks, test-unit]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     strategy:
@@ -131,34 +145,13 @@ jobs:
         image: ${{ matrix.cacher.image }}
         options: ${{ matrix.cacher.options }}
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
-      - uses: https://code.forgejo.org/actions/setup-go@v4
-        with:
-          go-version-file: "go.mod"
-      - run: |
-          git config --add safe.directory '*'
-          adduser --quiet --comment forgejo --disabled-password forgejo
-          chown -R forgejo:forgejo .
+      - uses: https://code.forgejo.org/actions/checkout@v4
+      - uses: ./.forgejo/workflows-composite/setup-env
       - name: install git >= 2.42
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          echo deb http://deb.debian.org/debian/ testing  main > /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
-          apt-get -q install -qq -y git
-          rm /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
-      - run: |
-          su forgejo -c 'make deps-backend'
-      - uses: actions/cache/restore@v4
-        id: cache-backend
+        uses: ./.forgejo/workflows-composite/apt-install-from
         with:
-          path: '/workspace/forgejo/forgejo/gitea'
-          key: backend-build-${{ github.sha }}
-      - if: steps.cache-backend.outputs.cache-hit != 'true'
-        run: |
-          su forgejo -c 'make backend'
-        env:
-          TAGS: bindata
+          packages: git
+      - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-remote-cacher test-check'
         timeout-minutes: 50
@@ -183,35 +176,13 @@ jobs:
           #
           MYSQL_EXTRA_FLAGS: --innodb-adaptive-flushing=OFF --innodb-buffer-pool-size=4G --innodb-log-buffer-size=128M --innodb-flush-log-at-trx-commit=0 --innodb-flush-log-at-timeout=30 --innodb-flush-method=nosync --innodb-fsync-threshold=1000000000
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
-      - uses: https://code.forgejo.org/actions/setup-go@v4
-        with:
-          go-version-file: "go.mod"
+      - uses: https://code.forgejo.org/actions/checkout@v4
+      - uses: ./.forgejo/workflows-composite/setup-env
       - name: install dependencies & git >= 2.42
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          echo deb http://deb.debian.org/debian/ testing  main > /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
-          apt-get install --no-install-recommends -qq -y git git-lfs
-          rm /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
-      - name: setup user and permissions
-        run: |
-          git config --add safe.directory '*'
-          adduser --quiet --comment forgejo --disabled-password forgejo
-          chown -R forgejo:forgejo .
-      - run: |
-          su forgejo -c 'make deps-backend'
-      - uses: actions/cache/restore@v4
-        id: cache-backend
+        uses: ./.forgejo/workflows-composite/apt-install-from
         with:
-          path: '/workspace/forgejo/forgejo/gitea'
-          key: backend-build-${{ github.sha }}
-      - if: steps.cache-backend.outputs.cache-hit != 'true'
-        run: |
-          su forgejo -c 'make backend'
-        env:
-          TAGS: bindata
+          packages: git git-lfs
+      - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-mysql-migration test-mysql'
         timeout-minutes: 50
@@ -237,35 +208,13 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: postgres
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
-      - uses: https://code.forgejo.org/actions/setup-go@v4
-        with:
-          go-version-file: "go.mod"
+      - uses: https://code.forgejo.org/actions/checkout@v4
+      - uses: ./.forgejo/workflows-composite/setup-env
       - name: install dependencies & git >= 2.42
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          echo deb http://deb.debian.org/debian/ testing  main > /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
-          apt-get install --no-install-recommends -qq -y git git-lfs
-          rm /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
-      - name: setup user and permissions
-        run: |
-          git config --add safe.directory '*'
-          adduser --quiet --comment forgejo --disabled-password forgejo
-          chown -R forgejo:forgejo .
-      - run: |
-          su forgejo -c 'make deps-backend'
-      - uses: actions/cache/restore@v4
-        id: cache-backend
+        uses: ./.forgejo/workflows-composite/apt-install-from
         with:
-          path: '/workspace/forgejo/forgejo/gitea'
-          key: backend-build-${{ github.sha }}
-      - if: steps.cache-backend.outputs.cache-hit != 'true'
-        run: |
-          su forgejo -c 'make backend'
-        env:
-          TAGS: bindata
+          packages: git git-lfs
+      - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-pgsql-migration test-pgsql'
         timeout-minutes: 50
@@ -280,35 +229,13 @@ jobs:
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
-      - uses: https://code.forgejo.org/actions/setup-go@v4
-        with:
-          go-version-file: "go.mod"
+      - uses: https://code.forgejo.org/actions/checkout@v4
+      - uses: ./.forgejo/workflows-composite/setup-env
       - name: install dependencies & git >= 2.42
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          echo deb http://deb.debian.org/debian/ testing  main > /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
-          apt-get install --no-install-recommends -qq -y git git-lfs
-          rm /etc/apt/sources.list.d/testing.list
-          apt-get update -qq
-      - name: setup user and permissions
-        run: |
-          git config --add safe.directory '*'
-          adduser --quiet --comment forgejo --disabled-password forgejo
-          chown -R forgejo:forgejo .
-      - run: |
-          su forgejo -c 'make deps-backend'
-      - uses: actions/cache/restore@v4
-        id: cache-backend
+        uses: ./.forgejo/workflows-composite/apt-install-from
         with:
-          path: '/workspace/forgejo/forgejo/gitea'
-          key: backend-build-${{ github.sha }}
-      - if: steps.cache-backend.outputs.cache-hit != 'true'
-        run: |
-          su forgejo -c 'make backend'
-        env:
-          TAGS: bindata sqlite sqlite_unlock_notify
+          packages: git git-lfs
+      - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-sqlite-migration test-sqlite'
         timeout-minutes: 50
@@ -329,9 +256,7 @@ jobs:
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v3
-      - uses: https://code.forgejo.org/actions/setup-go@v4
-        with:
-          go-version-file: "go.mod"
-      - run: make deps-backend deps-tools
-      - run: make security-check
+      - uses: https://code.forgejo.org/actions/checkout@v4
+      - uses: ./.forgejo/workflows-composite/setup-env
+      - run: su forgejo -c 'make deps-backend deps-tools'
+      - run: su forgejo -c 'make security-check'

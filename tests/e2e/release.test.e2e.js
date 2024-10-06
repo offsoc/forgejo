@@ -1,6 +1,18 @@
 // @ts-check
+
+// @watch start
+// models/repo/attachment.go
+// modules/structs/attachment.go
+// routers/web/repo/**
+// services/attachment/**
+// services/release/**
+// templates/repo/release/**
+// web_src/js/features/repo-release.js
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, save_visual, load_logged_in_context} from './utils_e2e.js';
+import {validate_form} from './shared/forms.js';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -23,6 +35,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
 
   // Fill out form and create new release
   await expect(page).toHaveURL('/user2/repo2/releases/new');
+  await validate_form({page}, 'fieldset');
   await page.fill('input[name=tag_name]', '2.0');
   await page.fill('input[name=title]', '2.0');
   await page.click('#add-external-link');
@@ -43,6 +56,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
 
   // Validate edit page and edit the release
   await expect(page).toHaveURL('/user2/repo2/releases/edit/2.0');
+  await validate_form({page}, 'fieldset');
   await expect(page.locator('.attachment_edit:visible')).toHaveCount(2);
   await expect(page.locator('.attachment_edit:visible').nth(0)).toHaveValue('Test');
   await expect(page.locator('.attachment_edit:visible').nth(1)).toHaveValue('https://forgejo.org/');

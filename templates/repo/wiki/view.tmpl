@@ -28,16 +28,16 @@
 					</div>
 				</div>
 			</div>
-			<div class="clone-panel ui action small input">
+			<div class="clone-panel ui action small input tw-ml-auto">
 				{{template "repo/clone_buttons" .}}
 				{{template "repo/clone_script" .}}
 			</div>
-			<div class="ui floating dropdown jump">
+			<div class="ui floating dropdown jump tw-ml-auto">
 				<div class="ui icon search input">
 					<i class="icon">{{svg "octicon-search"}}</i>
 					<input type="search" name="q" hx-get="{{$.RepoLink}}/wiki/search" hx-target="#wiki-search" hx-swap="innerHTML" hx-trigger="keyup changed delay:.5s" placeholder="{{ctx.Locale.Tr "repo.wiki.search"}}..." />
 				</div>
-				<div id="wiki-search" class="menu tw-absolute tw-mt-3 tw-rounded right">
+				<div id="wiki-search" class="menu tw-absolute tw-max-h-[65dvh] tw-overflow-y-auto tw-mt-3 tw-rounded left">
 					<div class="item muted">{{ctx.Locale.Tr "repo.wiki.no_search_results"}}</div>
 				</div>
 			</div>

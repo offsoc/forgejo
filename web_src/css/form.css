@@ -10,6 +10,7 @@ fieldset legend {
 
 fieldset label {
   display: block;
+  margin-bottom: 0.6em;
 }
 
 fieldset label:has(input[type="text"]),
@@ -19,7 +20,11 @@ fieldset label:has(input[type="number"]) {
 
 fieldset .help {
   font-weight: var(--font-weight-normal);
-  display: block !important; /* overrides another rule in this file, remove when obsolete */
+}
+
+.form fieldset .help { /* overrides other .form .help rules in this file, remove when obsolete */
+  display: block !important;
+  padding-bottom: 0;
 }
 
 fieldset input[type="checkbox"],

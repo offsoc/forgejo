@@ -1,4 +1,13 @@
 // @ts-check
+
+// @watch start
+// templates/webhook/shared-settings.tmpl
+// templates/repo/settings/**
+// web_src/css/{form,repo}.css
+// web_src/css/modules/grid.css
+// web_src/js/features/comp/WebHookEditor.js
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, login} from './utils_e2e.js';
 import {validate_form} from './shared/forms.js';

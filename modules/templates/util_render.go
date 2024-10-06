@@ -130,6 +130,17 @@ func RenderIssueTitle(ctx context.Context, text string, metas map[string]string)
 	return template.HTML(renderedText)
 }
 
+// RenderRefIssueTitle renders referenced issue/pull title with defined post processors
+func RenderRefIssueTitle(ctx context.Context, text string) template.HTML {
+	renderedText, err := markup.RenderRefIssueTitle(&markup.RenderContext{Ctx: ctx}, template.HTMLEscapeString(text))
+	if err != nil {
+		log.Error("RenderRefIssueTitle: %v", err)
+		return ""
+	}
+
+	return template.HTML(renderedText)
+}
+
 // RenderLabel renders a label
 // locale is needed due to an import cycle with our context providing the `Tr` function
 func RenderLabel(ctx context.Context, locale translation.Locale, label *issues_model.Label) template.HTML {

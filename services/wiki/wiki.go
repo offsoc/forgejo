@@ -417,7 +417,7 @@ func SearchWikiContents(ctx context.Context, repo *repo_model.Repository, keywor
 
 	return git.GrepSearch(ctx, gitRepo, keyword, git.GrepOptions{
 		ContextLineNumber: 0,
-		IsFuzzy:           true,
+		Mode:              git.FixedAnyGrepMode,
 		RefName:           repo.GetWikiBranchName(),
 		MaxResultLimit:    10,
 		MatchesPerFile:    3,

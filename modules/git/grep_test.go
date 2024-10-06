@@ -201,3 +201,34 @@ func TestGrepRefs(t *testing.T) {
 	assert.Len(t, res, 1)
 	assert.Equal(t, "A", res[0].LineCodes[0])
 }
+
+func TestGrepCanHazRegexOnDemand(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	err := InitRepository(DefaultContext, tmpDir, false, Sha1ObjectFormat.Name())
+	require.NoError(t, err)
+
+	gitRepo, err := openRepositoryWithDefaultContext(tmpDir)
+	require.NoError(t, err)
+	defer gitRepo.Close()
+
+	require.NoError(t, os.WriteFile(path.Join(tmpDir, "matching"), []byte("It's a match!"), 0o666))
+	require.NoError(t, os.WriteFile(path.Join(tmpDir, "not-matching"), []byte("Orisitamatch?"), 0o666))
+
+	err = AddChanges(tmpDir, true)
+	require.NoError(t, err)
+
+	err = CommitChanges(tmpDir, CommitChangesOptions{Message: "Add fixtures for regexp test"})
+	require.NoError(t, err)
+
+	// should find nothing by default...
+	res, err := GrepSearch(context.Background(), gitRepo, "\\bmatch\\b", GrepOptions{})
+	require.NoError(t, err)
+	assert.Empty(t, res)
+
+	// ... unless configured explicitly
+	res, err = GrepSearch(context.Background(), gitRepo, "\\bmatch\\b", GrepOptions{Mode: RegExpGrepMode})
+	require.NoError(t, err)
+	assert.Len(t, res, 1)
+	assert.Equal(t, "matching", res[0].Filename)
+}

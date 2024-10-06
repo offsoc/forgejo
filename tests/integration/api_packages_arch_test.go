@@ -14,6 +14,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"testing"
 	"testing/fstest"
 
@@ -258,11 +259,15 @@ HMhNSS1IzUsBcpJAPFAwwUXSM0u4BjoaR8EoGAWjgGQAAILFeyQADAAA
 				AddBasicAuth(user.Name)
 			MakeRequest(t, req, http.StatusCreated)
 
-			req = NewRequestWithBody(t, "DELETE", rootURL+"/base/notfound/1.0.0-1", nil).
+			req = NewRequestWithBody(t, "DELETE", rootURL+"/base/notfound/1.0.0-1/any", nil).
 				AddBasicAuth(user.Name)
 			MakeRequest(t, req, http.StatusNotFound)
 
-			req = NewRequestWithBody(t, "DELETE", groupURL+"/test/1.0.0-1", nil).
+			req = NewRequestWithBody(t, "DELETE", groupURL+"/test/1.0.0-1/x86_64", nil).
+				AddBasicAuth(user.Name)
+			MakeRequest(t, req, http.StatusNoContent)
+
+			req = NewRequestWithBody(t, "DELETE", groupURL+"/test/1.0.0-1/any", nil).
 				AddBasicAuth(user.Name)
 			MakeRequest(t, req, http.StatusNoContent)
 
@@ -270,12 +275,22 @@ HMhNSS1IzUsBcpJAPFAwwUXSM0u4BjoaR8EoGAWjgGQAAILFeyQADAAA
 			respPkg := MakeRequest(t, req, http.StatusOK)
 			files, err := listTarGzFiles(respPkg.Body.Bytes())
 			require.NoError(t, err)
-			require.Len(t, files, 1) // other pkg in L225
+			require.Len(t, files, 1)
 
-			req = NewRequestWithBody(t, "DELETE", groupURL+"/test2/1.0.0-1", nil).
+			req = NewRequestWithBody(t, "DELETE", groupURL+"/test2/1.0.0-1/any", nil).
 				AddBasicAuth(user.Name)
 			MakeRequest(t, req, http.StatusNoContent)
-			req = NewRequest(t, "GET", groupURL+"/x86_64/base.db")
+
+			req = NewRequest(t, "GET", groupURL+"/x86_64/base.db").
+				AddBasicAuth(user.Name)
+			MakeRequest(t, req, http.StatusNotFound)
+
+			req = NewRequestWithBody(t, "DELETE", groupURL+"/test/1.0.0-1/aarch64", nil).
+				AddBasicAuth(user.Name)
+			MakeRequest(t, req, http.StatusNoContent)
+
+			req = NewRequest(t, "GET", groupURL+"/aarch64/base.db").
+				AddBasicAuth(user.Name)
 			MakeRequest(t, req, http.StatusNotFound)
 		})
 
@@ -294,12 +309,33 @@ HMhNSS1IzUsBcpJAPFAwwUXSM0u4BjoaR8EoGAWjgGQAAILFeyQADAAA
 				resp := MakeRequest(t, req, http.StatusOK)
 				require.Equal(t, pkgs[key], resp.Body.Bytes())
 
-				req = NewRequestWithBody(t, "DELETE", groupURL+"/test2/1.0.0-1", nil).
+				req = NewRequestWithBody(t, "DELETE", groupURL+"/test2/1.0.0-1/any", nil).
 					AddBasicAuth(user.Name)
 				MakeRequest(t, req, http.StatusNoContent)
 			})
 		}
 	}
+	t.Run("Concurrent Upload", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		var wg sync.WaitGroup
+
+		targets := []string{"any", "aarch64", "x86_64"}
+		for _, tag := range targets {
+			wg.Add(1)
+			go func(i string) {
+				defer wg.Done()
+				req := NewRequestWithBody(t, "PUT", rootURL, bytes.NewReader(pkgs[i])).
+					AddBasicAuth(user.Name)
+				MakeRequest(t, req, http.StatusCreated)
+			}(tag)
+		}
+		wg.Wait()
+		for _, target := range targets {
+			req := NewRequestWithBody(t, "DELETE", rootURL+"/test/1.0.0-1/"+target, nil).
+				AddBasicAuth(user.Name)
+			MakeRequest(t, req, http.StatusNoContent)
+		}
+	})
 }
 
 func getProperty(data, key string) string {
@@ -318,10 +354,10 @@ func getProperty(data, key string) string {
 
 func listTarGzFiles(data []byte) (fstest.MapFS, error) {
 	reader, err := gzip.NewReader(bytes.NewBuffer(data))
-	defer reader.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer reader.Close()
 	tarRead := tar.NewReader(reader)
 	files := make(fstest.MapFS)
 	for {

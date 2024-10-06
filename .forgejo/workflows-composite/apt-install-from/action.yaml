@@ -1,0 +1,29 @@
+inputs:
+  packages:
+    description: 'Packages to install'
+    required: true
+  release:
+    description: 'Release to install from'
+    default: testing
+
+runs:
+  using: "composite"
+  steps:
+    - name: setup apt package source
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        echo "deb http://deb.debian.org/debian/ ${RELEASE} main" > "/etc/apt/sources.list.d/${RELEASE}.list"
+      env:
+        RELEASE: ${{inputs.release}}
+    - name: install packages
+      run: |
+        apt-get update -qq
+        apt-get -q install -qq -y ${PACKAGES}
+      env:
+        PACKAGES: ${{inputs.packages}}
+    - name: remove temporary package list to prevent using it in other steps
+      run: |
+        rm "/etc/apt/sources.list.d/${RELEASE}.list"
+        apt-get update -qq
+      env:
+        RELEASE: ${{inputs.release}}

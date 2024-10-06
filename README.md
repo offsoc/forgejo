@@ -1,4 +1,3 @@
-
 <div align="center">
     <img src="./assets/logo.svg" alt="" width="192" align="center" />
     <h1 align="center">Welcome to Forgejo</h1>

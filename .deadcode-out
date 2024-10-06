@@ -163,6 +163,9 @@ code.gitea.io/gitea/modules/graceful
 code.gitea.io/gitea/modules/hcaptcha
 	WithHTTP
 
+code.gitea.io/gitea/modules/hostmatcher
+	HostMatchList.AppendPattern
+
 code.gitea.io/gitea/modules/json
 	StdJSON.Marshal
 	StdJSON.Unmarshal

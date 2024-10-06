@@ -1,4 +1,9 @@
 // @ts-check
+
+// @watch start
+// web_src/js/components/DashboardRepoList.vue
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 
@@ -16,6 +21,6 @@ test('Correct link and tooltip', async ({browser}, workerInfo) => {
 
   const repoStatus = page.locator('.dashboard-repos .repo-owner-name-list > li:nth-child(1) > a:nth-child(2)');
 
-  await expect(repoStatus).toHaveAttribute('href', '/user2/test_workflows/actions');
+  await expect(repoStatus).toHaveAttribute('href', '/user2/test_workflows/actions', {timeout: 10000});
   await expect(repoStatus).toHaveAttribute('data-tooltip-content', 'Failure');
 });

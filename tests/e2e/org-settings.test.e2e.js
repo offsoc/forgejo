@@ -1,4 +1,11 @@
 // @ts-check
+
+// @watch start
+// templates/org/team/new.tmpl
+// web_src/css/form.css
+// web_src/js/features/org-team.js
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, login} from './utils_e2e.js';
 import {validate_form} from './shared/forms.js';

@@ -105,33 +105,34 @@
     {
       "description": "Automerge renovate updates",
       "matchDatasources": ["docker"],
-      "matchPackageNames": [
-        "code.forgejo.org/forgejo-contrib/renovate",
-        "ghcr.io/visualon/renovate"
-      ],
+      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true
     },
     {
       "description": "Add reviewer and additional labels to renovate PRs",
       "matchDatasources": ["docker"],
-      "matchPackageNames": [
-        "code.forgejo.org/forgejo-contrib/renovate",
-        "ghcr.io/visualon/renovate"
-      ],
+      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
       "reviewers": ["viceice"],
       "addLabels": ["forgejo/ci", "test/not-needed"]
     },
     {
       "description": "Update renovate with higher prio to come through rate limit",
       "matchDatasources": ["docker"],
+      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
+      "extends": ["schedule:weekly"],
+      "prPriority": 10,
+      "groupName": "renovate"
+    },
+    {
+      "description": "Disable renovate self-updates for release branches",
+      "matchBaseBranches": ["^v\\d+\\.\\d+\\/forgejo$"],
+      "matchDatasources": ["docker"],
       "matchPackageNames": [
         "code.forgejo.org/forgejo-contrib/renovate",
         "ghcr.io/visualon/renovate"
       ],
-      "extends": ["schedule:weekly"],
-      "prPriority": 10,
-      "groupName": "renovate"
+      "enabled": false
     },
     {
       "description": "Automerge some packages when CI succeeds",

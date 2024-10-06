@@ -110,8 +110,12 @@ If you have a [forgejo runner](https://code.forgejo.org/forgejo/runner/),
 you can use it to run the test jobs:
 
 ```
-forgejo-runner exec -W .forgejo/workflows/e2e.yml --event=pull_request
+forgejo-runner exec -W .forgejo/workflows/testing.yml -j test-e2e
 ```
+
+Note that the CI workflow has some logic to run tests based on changed files only.
+This might conflict with your local setup and not run all the desired tests
+because it might only look at file changes in your latest commit.
 
 ### Run e2e tests with another database
 
@@ -212,9 +216,52 @@ Take a look at `shared/forms.js` and some other places for inspiration.
 
 ### List related files coverage
 
-If you think your playwright tests covers an important aspect of some template, CSS or backend files,
-consider adding the paths to `.forgejo/workflows/e2e.yml` in the path filter.
+To speed up the CI pipelines and avoid running expensive tests too often,
+only a selection of tests is run by default,
+based on the changed files.
 
-It ensures that future modifications to this file will be tested as well.
+At the top of each playwright test file,
+list the files or file patterns that are covered by your test.
+Often, these are files that you modified for your feature or bugfix,
+or that you looked at (and might still have open in your IDE),
+because your fix depends on their behaviour.
 
-Currently, we do not run the e2e tests on all changes.
+#### Which files to watch?
+
+The set of files your test "watches" depends on the kind of test you write.
+If you only test for the presence of an element and do no accessibility or placement checks,
+you won't detect broken visual appearance and there is little reason to watch CSS files.
+
+However, if your test also checks that an element is correctly positioned
+(e.g. that it does not overflow the page),
+or has accessibiltiy properties (includes colour contrast),
+also list stylesheets that define the behaviour your test depends on.
+
+Watching the place that generate the selectors you use
+(typically templates, but can also be JavaScript)
+is a must, to ensure that someone modifying the markup notices that your selectors fail
+(e.g. because an id or class was renamed).
+
+If you are unsure about the exact set of files,
+feel free to ask other contributors.
+
+#### How to specify the patterns?
+
+You put filenames and patterns as blocks between two `// @watch` comments.
+An example that watches changes on (in order)
+a single file,
+a full recursive subfolder,
+two files with a shorthand pattern,
+and a set of files with a certain ending:
+
+~~~
+// @watch start
+// templates/webhook/shared-settings.tmpl
+// templates/repo/settings/**
+// web_src/css/{form,repo}.css
+// web_src/css/modules/*.css
+// @watch end
+~~~
+
+The patterns are evaluated on a "first-match" basis.
+Under the hood, [gobwas/glob](https://github.com/gobwas/glob) is used.

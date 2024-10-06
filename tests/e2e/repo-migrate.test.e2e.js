@@ -1,4 +1,9 @@
 // @ts-check
+
+// @watch start
+// web_src/js/features/repo-migrate.js
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 

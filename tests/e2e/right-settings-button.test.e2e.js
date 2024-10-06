@@ -1,4 +1,11 @@
 // @ts-check
+
+// @watch start
+// templates/org/**
+// templates/repo/**
+// web_src/js/webcomponents/overflow-menu.js
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 

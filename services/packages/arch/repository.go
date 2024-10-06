@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -20,6 +21,7 @@ import (
 	packages_module "code.gitea.io/gitea/modules/packages"
 	arch_module "code.gitea.io/gitea/modules/packages/arch"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/sync"
 	"code.gitea.io/gitea/modules/util"
 	packages_service "code.gitea.io/gitea/services/packages"
 
@@ -27,6 +29,8 @@ import (
 	"github.com/ProtonMail/go-crypto/openpgp/armor"
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
 )
+
+var locker = sync.NewExclusivePool()
 
 func GetOrCreateRepositoryVersion(ctx context.Context, ownerID int64) (*packages_model.PackageVersion, error) {
 	return packages_service.GetOrCreateInternalPackageVersion(ctx, ownerID, packages_model.TypeArch, arch_module.RepositoryPackage, arch_module.RepositoryVersion)
@@ -101,6 +105,9 @@ func NewFileSign(ctx context.Context, ownerID int64, input io.Reader) (*packages
 
 // BuildPacmanDB Create db signature cache
 func BuildPacmanDB(ctx context.Context, ownerID int64, group, arch string) error {
+	key := fmt.Sprintf("pkg_%d_arch_db_%s", ownerID, group)
+	locker.CheckIn(key)
+	defer locker.CheckOut(key)
 	pv, err := GetOrCreateRepositoryVersion(ctx, ownerID)
 	if err != nil {
 		return err
@@ -173,15 +180,18 @@ func createDB(ctx context.Context, ownerID int64, group, arch string) (*packages
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 	gw := gzip.NewWriter(db)
+	defer gw.Close()
 	tw := tar.NewWriter(gw)
+	defer tw.Close()
 	count := 0
 	for _, pkg := range pkgs {
 		versions, err := packages_model.GetVersionsByPackageName(
 			ctx, ownerID, packages_model.TypeArch, pkg.Name,
 		)
 		if err != nil {
-			return nil, errors.Join(tw.Close(), gw.Close(), db.Close(), err)
+			return nil, err
 		}
 		sort.Slice(versions, func(i, j int) bool {
 			return versions[i].CreatedUnix > versions[j].CreatedUnix
@@ -190,7 +200,7 @@ func createDB(ctx context.Context, ownerID int64, group, arch string) (*packages
 		for _, ver := range versions {
 			files, err := packages_model.GetFilesByVersionID(ctx, ver.ID)
 			if err != nil {
-				return nil, errors.Join(tw.Close(), gw.Close(), db.Close(), err)
+				return nil, err
 			}
 			var pf *packages_model.PackageFile
 			for _, file := range files {
@@ -213,7 +223,7 @@ func createDB(ctx context.Context, ownerID int64, group, arch string) (*packages
 				ctx, packages_model.PropertyTypeFile, pf.ID, arch_module.PropertyDescription,
 			)
 			if err != nil {
-				return nil, errors.Join(tw.Close(), gw.Close(), db.Close(), err)
+				return nil, err
 			}
 			if len(pps) >= 1 {
 				meta := []byte(pps[0].Value)
@@ -223,60 +233,50 @@ func createDB(ctx context.Context, ownerID int64, group, arch string) (*packages
 					Mode: int64(os.ModePerm),
 				}
 				if err = tw.WriteHeader(header); err != nil {
-					return nil, errors.Join(tw.Close(), gw.Close(), db.Close(), err)
+					return nil, err
 				}
 				if _, err := tw.Write(meta); err != nil {
-					return nil, errors.Join(tw.Close(), gw.Close(), db.Close(), err)
+					return nil, err
 				}
 				count++
 				break
 			}
 		}
 	}
-	defer gw.Close()
-	defer tw.Close()
 	if count == 0 {
-		return nil, errors.Join(db.Close(), io.EOF)
+		return nil, io.EOF
 	}
 	return db, nil
 }
 
 // GetPackageFile Get data related to provided filename and distribution, for package files
 // update download counter.
-func GetPackageFile(ctx context.Context, group, file string, ownerID int64) (io.ReadSeekCloser, error) {
-	pf, err := getPackageFile(ctx, group, file, ownerID)
-	if err != nil {
-		return nil, err
+func GetPackageFile(ctx context.Context, group, file string, ownerID int64) (io.ReadSeekCloser, *url.URL, *packages_model.PackageFile, error) {
+	fileSplit := strings.Split(file, "-")
+	if len(fileSplit) <= 3 {
+		return nil, nil, nil, errors.New("invalid file format, need <name>-<version>-<release>-<arch>.pkg.<archive>")
 	}
-
-	filestream, _, _, err := packages_service.GetPackageFileStream(ctx, pf)
-	return filestream, err
-}
-
-// Ejects parameters required to get package file property from file name.
-func getPackageFile(ctx context.Context, group, file string, ownerID int64) (*packages_model.PackageFile, error) {
 	var (
-		splt    = strings.Split(file, "-")
-		pkgname = strings.Join(splt[0:len(splt)-3], "-")
-		vername = splt[len(splt)-3] + "-" + splt[len(splt)-2]
+		pkgName = strings.Join(fileSplit[0:len(fileSplit)-3], "-")
+		pkgVer  = fileSplit[len(fileSplit)-3] + "-" + fileSplit[len(fileSplit)-2]
 	)
-
-	version, err := packages_model.GetVersionByNameAndVersion(ctx, ownerID, packages_model.TypeArch, pkgname, vername)
+	version, err := packages_model.GetVersionByNameAndVersion(ctx, ownerID, packages_model.TypeArch, pkgName, pkgVer)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
-	pkgfile, err := packages_model.GetFileForVersionByName(ctx, version.ID, file, group)
+	pkgFile, err := packages_model.GetFileForVersionByName(ctx, version.ID, file, group)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
-	return pkgfile, nil
+
+	return packages_service.GetPackageFileStream(ctx, pkgFile)
 }
 
-func GetPackageDBFile(ctx context.Context, group, arch string, ownerID int64, signFile bool) (io.ReadSeekCloser, error) {
+func GetPackageDBFile(ctx context.Context, group, arch string, ownerID int64, signFile bool) (io.ReadSeekCloser, *url.URL, *packages_model.PackageFile, error) {
 	pv, err := GetOrCreateRepositoryVersion(ctx, ownerID)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	fileName := fmt.Sprintf("%s.db", arch)
 	if signFile {
@@ -284,10 +284,9 @@ func GetPackageDBFile(ctx context.Context, group, arch string, ownerID int64, si
 	}
 	file, err := packages_model.GetFileForVersionByName(ctx, pv.ID, fileName, group)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
-	filestream, _, _, err := packages_service.GetPackageFileStream(ctx, file)
-	return filestream, err
+	return packages_service.GetPackageFileStream(ctx, file)
 }
 
 // GetOrCreateKeyPair gets or creates the PGP keys used to sign repository metadata files

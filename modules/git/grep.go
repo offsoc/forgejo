@@ -27,12 +27,20 @@ type GrepResult struct {
 	HighlightedRanges [][3]int
 }
 
+type grepMode int
+
+const (
+	FixedGrepMode grepMode = iota
+	FixedAnyGrepMode
+	RegExpGrepMode
+)
+
 type GrepOptions struct {
 	RefName           string
 	MaxResultLimit    int
 	MatchesPerFile    int
 	ContextLineNumber int
-	IsFuzzy           bool
+	Mode              grepMode
 	PathSpec          []setting.Glob
 }
 
@@ -74,12 +82,20 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 	var results []*GrepResult
 	// -I skips binary files
 	cmd := NewCommand(ctx, "grep",
-		"-I", "--null", "--break", "--heading", "--column",
-		"--fixed-strings", "--line-number", "--ignore-case", "--full-name")
+		"-I", "--null", "--break", "--heading",
+		"--line-number", "--ignore-case", "--full-name")
+	if opts.Mode == RegExpGrepMode {
+		// No `--column` -- regexp mode does not support highlighting in the
+		// current implementation as the length of the match is unknown from
+		// `grep` but required for highlighting.
+		cmd.AddArguments("--perl-regexp")
+	} else {
+		cmd.AddArguments("--fixed-strings", "--column")
+	}
 	cmd.AddOptionValues("--context", fmt.Sprint(opts.ContextLineNumber))
 	cmd.AddOptionValues("--max-count", fmt.Sprint(opts.MatchesPerFile))
 	words := []string{search}
-	if opts.IsFuzzy {
+	if opts.Mode == FixedAnyGrepMode {
 		words = strings.Fields(search)
 	}
 	for _, word := range words {
@@ -148,6 +164,7 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 				if lineNum, lineCode, ok := strings.Cut(line, "\x00"); ok {
 					lineNumInt, _ := strconv.Atoi(lineNum)
 					res.LineNumbers = append(res.LineNumbers, lineNumInt)
+					// We support highlighting only when `--column` parameter is used.
 					if lineCol, lineCode2, ok := strings.Cut(lineCode, "\x00"); ok {
 						lineColInt, _ := strconv.Atoi(lineCol)
 						start := lineColInt - 1

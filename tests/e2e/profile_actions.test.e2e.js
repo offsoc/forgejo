@@ -1,4 +1,11 @@
 // @ts-check
+
+// @watch start
+// routers/web/user/**
+// templates/shared/user/**
+// web_src/js/features/common-global.js
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 

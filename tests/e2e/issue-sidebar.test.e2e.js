@@ -1,4 +1,11 @@
 // @ts-check
+
+// @watch start
+// templates/repo/issue/view_content/**
+// web_src/css/repo/issue-**
+// web_src/js/features/repo-issue**
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, login} from './utils_e2e.js';
 
@@ -118,4 +125,26 @@ test('Issue: Milestone', async ({browser}, workerInfo) => {
   await page.getByText('Clear milestone', {exact: true}).click();
   await expect(selectedMilestone).toContainText('No milestone');
   await expect(page.locator('.timeline-item.event').last()).toContainText('user2 removed this from the milestone1 milestone');
+});
+
+test('New Issue: Milestone', async ({browser}, workerInfo) => {
+  test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
+  const page = await login({browser}, workerInfo);
+
+  const response = await page.goto('/user2/repo1/issues/new');
+  await expect(response?.status()).toBe(200);
+
+  const selectedMilestone = page.locator('.issue-content-right .select-milestone.list');
+  const milestoneDropdown = page.locator('.issue-content-right .select-milestone.dropdown');
+  await expect(selectedMilestone).toContainText('No milestone');
+
+  // Add milestone.
+  await milestoneDropdown.click();
+  await page.getByRole('option', {name: 'milestone1'}).click();
+  await expect(selectedMilestone).toContainText('milestone1');
+
+  // Clear milestone.
+  await milestoneDropdown.click();
+  await page.getByText('Clear milestone', {exact: true}).click();
+  await expect(selectedMilestone).toContainText('No milestone');
 });

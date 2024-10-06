@@ -31,7 +31,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	server := unittest.NewMockWebServer(t, "https://gitlab.com", fixturePath, gitlabPersonalAccessToken != "")
 	defer server.Close()
 
-	downloader, err := NewGitlabDownloader(context.Background(), server.URL, "gitea/test_repo", "", "", gitlabPersonalAccessToken)
+	downloader, err := NewGitlabDownloader(context.Background(), server.URL, "forgejo/test_repo", "", "", gitlabPersonalAccessToken)
 	if err != nil {
 		t.Fatalf("NewGitlabDownloader is nil: %v", err)
 	}
@@ -41,9 +41,9 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	assertRepositoryEqual(t, &base.Repository{
 		Name:          "test_repo",
 		Owner:         "",
-		Description:   "Test repository for testing migration from gitlab to gitea",
-		CloneURL:      server.URL + "/gitea/test_repo.git",
-		OriginalURL:   server.URL + "/gitea/test_repo",
+		Description:   "Test repository for testing migration from gitlab to forgejo",
+		CloneURL:      server.URL + "/forgejo/test_repo.git",
+		OriginalURL:   server.URL + "/forgejo/test_repo",
 		DefaultBranch: "master",
 	}, repo)
 
@@ -56,17 +56,17 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	require.NoError(t, err)
 	assertMilestonesEqual(t, []*base.Milestone{
 		{
-			Title:   "1.1.0",
-			Created: time.Date(2019, 11, 28, 8, 42, 44, 575000000, time.UTC),
-			Updated: timePtr(time.Date(2019, 11, 28, 8, 42, 44, 575000000, time.UTC)),
-			State:   "active",
+			Title:   "1.0.0",
+			Created: time.Date(2024, 9, 3, 13, 53, 8, 516000000, time.UTC),
+			Updated: timePtr(time.Date(2024, 9, 3, 20, 3, 57, 786000000, time.UTC)),
+			Closed:  timePtr(time.Date(2024, 9, 3, 20, 3, 57, 786000000, time.UTC)),
+			State:   "closed",
 		},
 		{
-			Title:   "1.0.0",
-			Created: time.Date(2019, 11, 28, 8, 42, 30, 301000000, time.UTC),
-			Updated: timePtr(time.Date(2019, 11, 28, 15, 57, 52, 401000000, time.UTC)),
-			Closed:  timePtr(time.Date(2019, 11, 28, 15, 57, 52, 401000000, time.UTC)),
-			State:   "closed",
+			Title:   "1.1.0",
+			Created: time.Date(2024, 9, 3, 13, 52, 48, 414000000, time.UTC),
+			Updated: timePtr(time.Date(2024, 9, 3, 14, 52, 14, 93000000, time.UTC)),
+			State:   "active",
 		},
 	}, milestones)
 
@@ -109,6 +109,17 @@ func TestGitlabDownloadRepo(t *testing.T) {
 			Name:  "support",
 			Color: "f0ad4e",
 		},
+		{
+			Name:        "test-scope/label0",
+			Color:       "6699cc",
+			Description: "scoped label",
+			Exclusive:   true,
+		},
+		{
+			Name:      "test-scope/label1",
+			Color:     "dc143c",
+			Exclusive: true,
+		},
 	}, labels)
 
 	releases, err := downloader.GetReleases()
@@ -119,27 +130,26 @@ func TestGitlabDownloadRepo(t *testing.T) {
 			TargetCommitish: "0720a3ec57c1f843568298117b874319e7deee75",
 			Name:            "First Release",
 			Body:            "A test release",
-			Created:         time.Date(2019, 11, 28, 9, 9, 48, 840000000, time.UTC),
-			PublisherID:     1241334,
-			PublisherName:   "lafriks",
+			Created:         time.Date(2024, 9, 3, 15, 1, 1, 513000000, time.UTC),
+			PublisherID:     548513,
+			PublisherName:   "mkobel",
 		},
 	}, releases)
 
 	issues, isEnd, err := downloader.GetIssues(1, 2)
 	require.NoError(t, err)
 	assert.False(t, isEnd)
-
 	assertIssuesEqual(t, []*base.Issue{
 		{
 			Number:     1,
 			Title:      "Please add an animated gif icon to the merge button",
 			Content:    "I just want the merge button to hurt my eyes a little. :stuck_out_tongue_closed_eyes:",
 			Milestone:  "1.0.0",
-			PosterID:   1241334,
-			PosterName: "lafriks",
+			PosterID:   548513,
+			PosterName: "mkobel",
 			State:      "closed",
-			Created:    time.Date(2019, 11, 28, 8, 43, 35, 459000000, time.UTC),
-			Updated:    time.Date(2019, 11, 28, 8, 46, 23, 304000000, time.UTC),
+			Created:    time.Date(2024, 9, 3, 14, 42, 34, 924000000, time.UTC),
+			Updated:    time.Date(2024, 9, 3, 14, 48, 43, 756000000, time.UTC),
 			Labels: []*base.Label{
 				{
 					Name: "bug",
@@ -150,28 +160,28 @@ func TestGitlabDownloadRepo(t *testing.T) {
 			},
 			Reactions: []*base.Reaction{
 				{
-					UserID:   1241334,
-					UserName: "lafriks",
+					UserID:   548513,
+					UserName: "mkobel",
 					Content:  "thumbsup",
 				},
 				{
-					UserID:   1241334,
-					UserName: "lafriks",
+					UserID:   548513,
+					UserName: "mkobel",
 					Content:  "open_mouth",
 				},
 			},
-			Closed: timePtr(time.Date(2019, 11, 28, 8, 46, 23, 275000000, time.UTC)),
+			Closed: timePtr(time.Date(2024, 9, 3, 14, 43, 10, 708000000, time.UTC)),
 		},
 		{
 			Number:     2,
 			Title:      "Test issue",
 			Content:    "This is test issue 2, do not touch!",
-			Milestone:  "1.1.0",
-			PosterID:   1241334,
-			PosterName: "lafriks",
+			Milestone:  "1.0.0",
+			PosterID:   548513,
+			PosterName: "mkobel",
 			State:      "closed",
-			Created:    time.Date(2019, 11, 28, 8, 44, 46, 277000000, time.UTC),
-			Updated:    time.Date(2019, 11, 28, 8, 45, 44, 987000000, time.UTC),
+			Created:    time.Date(2024, 9, 3, 14, 42, 35, 371000000, time.UTC),
+			Updated:    time.Date(2024, 9, 3, 20, 3, 43, 536000000, time.UTC),
 			Labels: []*base.Label{
 				{
 					Name: "duplicate",
@@ -179,37 +189,37 @@ func TestGitlabDownloadRepo(t *testing.T) {
 			},
 			Reactions: []*base.Reaction{
 				{
-					UserID:   1241334,
-					UserName: "lafriks",
+					UserID:   548513,
+					UserName: "mkobel",
 					Content:  "thumbsup",
 				},
 				{
-					UserID:   1241334,
-					UserName: "lafriks",
+					UserID:   548513,
+					UserName: "mkobel",
 					Content:  "thumbsdown",
 				},
 				{
-					UserID:   1241334,
-					UserName: "lafriks",
+					UserID:   548513,
+					UserName: "mkobel",
 					Content:  "laughing",
 				},
 				{
-					UserID:   1241334,
-					UserName: "lafriks",
+					UserID:   548513,
+					UserName: "mkobel",
 					Content:  "tada",
 				},
 				{
-					UserID:   1241334,
-					UserName: "lafriks",
+					UserID:   548513,
+					UserName: "mkobel",
 					Content:  "confused",
 				},
 				{
-					UserID:   1241334,
-					UserName: "lafriks",
+					UserID:   548513,
+					UserName: "mkobel",
 					Content:  "hearts",
 				},
 			},
-			Closed: timePtr(time.Date(2019, 11, 28, 8, 45, 44, 959000000, time.UTC)),
+			Closed: timePtr(time.Date(2024, 9, 3, 14, 43, 10, 906000000, time.UTC)),
 		},
 	}, issues)
 
@@ -222,35 +232,28 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	assertCommentsEqual(t, []*base.Comment{
 		{
 			IssueIndex: 2,
-			PosterID:   1241334,
-			PosterName: "lafriks",
-			Created:    time.Date(2019, 11, 28, 8, 44, 52, 501000000, time.UTC),
+			PosterID:   548513,
+			PosterName: "mkobel",
+			Created:    time.Date(2024, 9, 3, 14, 45, 20, 848000000, time.UTC),
 			Content:    "This is a comment",
 			Reactions:  nil,
 		},
 		{
 			IssueIndex: 2,
-			PosterID:   1241334,
-			PosterName: "lafriks",
-			Created:    time.Date(2019, 11, 28, 8, 45, 2, 329000000, time.UTC),
-			Content:    "changed milestone to %2",
-			Reactions:  nil,
-		},
-		{
-			IssueIndex: 2,
-			PosterID:   1241334,
-			PosterName: "lafriks",
-			Created:    time.Date(2019, 11, 28, 8, 45, 45, 7000000, time.UTC),
-			Content:    "closed",
-			Reactions:  nil,
-		},
-		{
-			IssueIndex: 2,
-			PosterID:   1241334,
-			PosterName: "lafriks",
-			Created:    time.Date(2019, 11, 28, 8, 45, 53, 501000000, time.UTC),
+			PosterID:   548513,
+			PosterName: "mkobel",
+			Created:    time.Date(2024, 9, 3, 14, 45, 30, 59000000, time.UTC),
 			Content:    "A second comment",
 			Reactions:  nil,
+		},
+		{
+			IssueIndex:  2,
+			PosterID:    548513,
+			PosterName:  "mkobel",
+			Created:     time.Date(2024, 9, 3, 14, 43, 10, 947000000, time.UTC),
+			Content:     "",
+			Reactions:   nil,
+			CommentType: "close",
 		},
 	}, comments)
 
@@ -258,40 +261,43 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	require.NoError(t, err)
 	assertPullRequestsEqual(t, []*base.PullRequest{
 		{
-			Number:     4,
+			Number:     3,
 			Title:      "Test branch",
 			Content:    "do not merge this PR",
-			Milestone:  "1.0.0",
-			PosterID:   1241334,
-			PosterName: "lafriks",
+			Milestone:  "1.1.0",
+			PosterID:   2005797,
+			PosterName: "oliverpool",
 			State:      "opened",
-			Created:    time.Date(2019, 11, 28, 15, 56, 54, 104000000, time.UTC),
+			Created:    time.Date(2024, 9, 3, 7, 57, 19, 866000000, time.UTC),
 			Labels: []*base.Label{
 				{
-					Name: "bug",
+					Name: "test-scope/label0",
+				},
+				{
+					Name: "test-scope/label1",
 				},
 			},
 			Reactions: []*base.Reaction{{
-				UserID:   4575606,
-				UserName: "real6543",
+				UserID:   548513,
+				UserName: "mkobel",
 				Content:  "thumbsup",
 			}, {
-				UserID:   4575606,
-				UserName: "real6543",
+				UserID:   548513,
+				UserName: "mkobel",
 				Content:  "tada",
 			}},
-			PatchURL: server.URL + "/gitea/test_repo/-/merge_requests/2.patch",
+			PatchURL: server.URL + "/forgejo/test_repo/-/merge_requests/1.patch",
 			Head: base.PullRequestBranch{
 				Ref:       "feat/test",
-				CloneURL:  server.URL + "/gitea/test_repo/-/merge_requests/2",
+				CloneURL:  server.URL + "/forgejo/test_repo/-/merge_requests/1",
 				SHA:       "9f733b96b98a4175276edf6a2e1231489c3bdd23",
 				RepoName:  "test_repo",
-				OwnerName: "lafriks",
+				OwnerName: "oliverpool",
 			},
 			Base: base.PullRequestBranch{
 				Ref:       "master",
 				SHA:       "c59c9b451acca9d106cc19d61d87afe3fbbb8b83",
-				OwnerName: "lafriks",
+				OwnerName: "oliverpool",
 				RepoName:  "test_repo",
 			},
 			Closed:         nil,
@@ -308,28 +314,9 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	assertReviewsEqual(t, []*base.Review{
 		{
 			IssueIndex:   1,
-			ReviewerID:   527793,
-			ReviewerName: "axifive",
-			CreatedAt:    time.Date(2019, 11, 28, 8, 54, 41, 34000000, time.UTC),
-			State:        "APPROVED",
-		},
-		{
-			IssueIndex:   1,
-			ReviewerID:   4102996,
-			ReviewerName: "zeripath",
-			CreatedAt:    time.Date(2019, 11, 28, 8, 54, 41, 34000000, time.UTC),
-			State:        "APPROVED",
-		},
-	}, rvs)
-
-	rvs, err = downloader.GetReviews(&base.PullRequest{Number: 2, ForeignIndex: 2})
-	require.NoError(t, err)
-	assertReviewsEqual(t, []*base.Review{
-		{
-			IssueIndex:   2,
-			ReviewerID:   4575606,
-			ReviewerName: "real6543",
-			CreatedAt:    time.Date(2019, 11, 28, 15, 56, 54, 108000000, time.UTC),
+			ReviewerID:   548513,
+			ReviewerName: "mkobel",
+			CreatedAt:    time.Date(2024, 9, 3, 7, 57, 19, 86600000, time.UTC),
 			State:        "APPROVED",
 		},
 	}, rvs)

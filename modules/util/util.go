@@ -225,6 +225,15 @@ func Iif[T any](condition bool, trueVal, falseVal T) T {
 	return falseVal
 }
 
+// IfZero returns "def" if "v" is a zero value, otherwise "v"
+func IfZero[T comparable](v, def T) T {
+	var zero T
+	if v == zero {
+		return def
+	}
+	return v
+}
+
 func ReserveLineBreakForTextarea(input string) string {
 	// Since the content is from a form which is a textarea, the line endings are \r\n.
 	// It's a standard behavior of HTML.

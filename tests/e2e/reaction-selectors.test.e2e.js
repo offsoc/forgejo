@@ -1,4 +1,10 @@
 // @ts-check
+
+// @watch start
+// web_src/js/features/comp/ReactionSelector.js
+// routers/web/repo/issue.go
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 

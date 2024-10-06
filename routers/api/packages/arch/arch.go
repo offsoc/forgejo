@@ -9,12 +9,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	packages_model "code.gitea.io/gitea/models/packages"
 	packages_module "code.gitea.io/gitea/modules/packages"
 	arch_module "code.gitea.io/gitea/modules/packages/arch"
+	"code.gitea.io/gitea/modules/sync"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/routers/api/packages/helper"
 	"code.gitea.io/gitea/services/context"
@@ -25,12 +27,22 @@ import (
 var (
 	archPkgOrSig = regexp.MustCompile(`^.*\.pkg\.tar\.\w+(\.sig)*$`)
 	archDBOrSig  = regexp.MustCompile(`^.*.db(\.tar\.gz)*(\.sig)*$`)
+
+	locker = sync.NewExclusivePool()
 )
 
 func apiError(ctx *context.Context, status int, obj any) {
 	helper.LogAndProcessError(ctx, status, obj, func(message string) {
 		ctx.PlainText(status, message)
 	})
+}
+
+func refreshLocker(ctx *context.Context, group string) func() {
+	key := fmt.Sprintf("pkg_%d_arch_pkg_%s", ctx.Package.Owner.ID, group)
+	locker.CheckIn(key)
+	return func() {
+		locker.CheckOut(key)
+	}
 }
 
 func GetRepositoryKey(ctx *context.Context) {
@@ -48,7 +60,8 @@ func GetRepositoryKey(ctx *context.Context) {
 
 func PushPackage(ctx *context.Context) {
 	group := ctx.Params("group")
-
+	releaser := refreshLocker(ctx, group)
+	defer releaser()
 	upload, needToClose, err := ctx.UploadStream()
 	if err != nil {
 		apiError(ctx, http.StatusInternalServerError, err)
@@ -154,6 +167,7 @@ func PushPackage(ctx *context.Context) {
 	})
 	if err != nil {
 		apiError(ctx, http.StatusInternalServerError, err)
+		return
 	}
 	if err = arch_service.BuildPacmanDB(ctx, ctx.Package.Owner.ID, group, p.FileMetadata.Arch); err != nil {
 		apiError(ctx, http.StatusInternalServerError, err)
@@ -169,7 +183,7 @@ func GetPackageOrDB(ctx *context.Context) {
 		arch  = ctx.Params("arch")
 	)
 	if archPkgOrSig.MatchString(file) {
-		pkg, err := arch_service.GetPackageFile(ctx, group, file, ctx.Package.Owner.ID)
+		pkg, u, pf, err := arch_service.GetPackageFile(ctx, group, file, ctx.Package.Owner.ID)
 		if err != nil {
 			if errors.Is(err, util.ErrNotExist) {
 				apiError(ctx, http.StatusNotFound, err)
@@ -178,15 +192,12 @@ func GetPackageOrDB(ctx *context.Context) {
 			}
 			return
 		}
-
-		ctx.ServeContent(pkg, &context.ServeHeaderOptions{
-			Filename: file,
-		})
+		helper.ServePackageFile(ctx, pkg, u, pf)
 		return
 	}
 
 	if archDBOrSig.MatchString(file) {
-		pkg, err := arch_service.GetPackageDBFile(ctx, group, arch, ctx.Package.Owner.ID,
+		pkg, u, pf, err := arch_service.GetPackageDBFile(ctx, group, arch, ctx.Package.Owner.ID,
 			strings.HasSuffix(file, ".sig"))
 		if err != nil {
 			if errors.Is(err, util.ErrNotExist) {
@@ -196,9 +207,7 @@ func GetPackageOrDB(ctx *context.Context) {
 			}
 			return
 		}
-		ctx.ServeContent(pkg, &context.ServeHeaderOptions{
-			Filename: file,
-		})
+		helper.ServePackageFile(ctx, pkg, u, pf)
 		return
 	}
 
@@ -207,10 +216,13 @@ func GetPackageOrDB(ctx *context.Context) {
 
 func RemovePackage(ctx *context.Context) {
 	var (
-		group = ctx.Params("group")
-		pkg   = ctx.Params("package")
-		ver   = ctx.Params("version")
+		group   = ctx.Params("group")
+		pkg     = ctx.Params("package")
+		ver     = ctx.Params("version")
+		pkgArch = ctx.Params("arch")
 	)
+	releaser := refreshLocker(ctx, group)
+	defer releaser()
 	pv, err := packages_model.GetVersionByNameAndVersion(
 		ctx, ctx.Package.Owner.ID, packages_model.TypeArch, pkg, ver,
 	)
@@ -229,7 +241,13 @@ func RemovePackage(ctx *context.Context) {
 	}
 	deleted := false
 	for _, file := range files {
-		if file.CompositeKey == group {
+		extName := fmt.Sprintf("-%s.pkg.tar%s", pkgArch, filepath.Ext(file.LowerName))
+		if strings.HasSuffix(file.LowerName, ".sig") {
+			extName = fmt.Sprintf("-%s.pkg.tar%s.sig", pkgArch,
+				filepath.Ext(strings.TrimSuffix(file.LowerName, filepath.Ext(file.LowerName))))
+		}
+		if file.CompositeKey == group &&
+			strings.HasSuffix(file.LowerName, extName) {
 			deleted = true
 			err := packages_service.RemovePackageFileAndVersionIfUnreferenced(ctx, ctx.ContextUser, file)
 			if err != nil {
@@ -242,6 +260,7 @@ func RemovePackage(ctx *context.Context) {
 		err = arch_service.BuildCustomRepositoryFiles(ctx, ctx.Package.Owner.ID, group)
 		if err != nil {
 			apiError(ctx, http.StatusInternalServerError, err)
+			return
 		}
 		ctx.Status(http.StatusNoContent)
 	} else {

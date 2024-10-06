@@ -1,4 +1,9 @@
 // @ts-check
+
+// @watch start
+// web_src/css/markup/**
+// @watch end
+
 import {expect} from '@playwright/test';
 import {test} from './utils_e2e.js';
 
