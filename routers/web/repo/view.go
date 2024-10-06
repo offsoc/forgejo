@@ -8,6 +8,7 @@ import (
 	"bytes"
 	gocontext "context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"html/template"
 	"image"
@@ -75,12 +76,13 @@ const (
 //	entries == ctx.Repo.Commit.SubTree(ctx.Repo.TreePath).ListEntries()
 //
 // FIXME: There has to be a more efficient way of doing this
-func findReadmeFileInEntries(ctx *context.Context, entries []*git.TreeEntry, tryWellKnownDirs bool) (string, *git.TreeEntry, error) {
+func FindReadmeFileInEntries(ctx *context.Context, entries []*git.TreeEntry, tryWellKnownDirs bool) (string, *git.TreeEntry, error) {
 	// Create a list of extensions in priority order
 	// 1. Markdown files - with and without localisation - e.g. README.en-us.md or README.md
-	// 2. Txt files - e.g. README.txt
-	// 3. No extension - e.g. README
-	exts := append(localizedExtensions(".md", ctx.Locale.Language()), ".txt", "") // sorted by priority
+	// 2. Org-Mode files - with and without localisation - e.g. README.en-us.org or README.org
+	// 3. Txt files - e.g. README.txt
+	// 4. No extension - e.g. README
+	exts := append(append(localizedExtensions(".md", ctx.Locale.Language()), localizedExtensions(".org", ctx.Locale.Language())...), ".txt", "") // sorted by priority
 	extCount := len(exts)
 	readmeFiles := make([]*git.TreeEntry, extCount+1)
 
@@ -151,7 +153,7 @@ func findReadmeFileInEntries(ctx *context.Context, entries []*git.TreeEntry, try
 				return "", nil, err
 			}
 
-			subfolder, readmeFile, err := findReadmeFileInEntries(ctx, childEntries, false)
+			subfolder, readmeFile, err := FindReadmeFileInEntries(ctx, childEntries, false)
 			if err != nil && !git.IsErrNotExist(err) {
 				return "", nil, err
 			}
@@ -175,7 +177,7 @@ func renderDirectory(ctx *context.Context) {
 		ctx.Data["Title"] = ctx.Tr("repo.file.title", ctx.Repo.Repository.Name+"/"+ctx.Repo.TreePath, ctx.Repo.RefName)
 	}
 
-	subfolder, readmeFile, err := findReadmeFileInEntries(ctx, entries, true)
+	subfolder, readmeFile, err := FindReadmeFileInEntries(ctx, entries, true)
 	if err != nil {
 		ctx.ServerError("findReadmeFileInEntries", err)
 		return
@@ -238,14 +240,12 @@ func getFileReader(ctx gocontext.Context, repoID int64, blob *git.Blob) ([]byte,
 	}
 
 	meta, err := git_model.GetLFSMetaObjectByOid(ctx, repoID, pointer.Oid)
-	if err != nil && err != git_model.ErrLFSObjectNotExist { // fallback to plain file
+	if err != nil { // fallback to plain file
+		log.Warn("Unable to access LFS pointer %s in repo %d: %v", pointer.Oid, repoID, err)
 		return buf, dataRc, &fileInfo{isTextFile, false, blob.Size(), nil, st}, nil
 	}
 
 	dataRc.Close()
-	if err != nil {
-		return nil, nil, nil, err
-	}
 
 	dataRc, err = lfs.ReadMetaObject(pointer)
 	if err != nil {
@@ -366,6 +366,9 @@ func loadLatestCommitData(ctx *context.Context, latestCommit *git.Commit) bool {
 		statuses, _, err := git_model.GetLatestCommitStatus(ctx, ctx.Repo.Repository.ID, latestCommit.ID.String(), db.ListOptionsAll)
 		if err != nil {
 			log.Error("GetLatestCommitStatus: %v", err)
+		}
+		if !ctx.Repo.CanRead(unit_model.TypeActions) {
+			git_model.CommitStatusesHideActionsURL(ctx, statuses)
 		}
 
 		ctx.Data["LatestCommitStatus"] = git_model.CalcCommitStatus(statuses)
@@ -556,14 +559,22 @@ func renderFile(ctx *context.Context, entry *git.TreeEntry) {
 			// The Open Group Base Specification: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html
 			//   empty: 0 lines; "a": 1 incomplete-line; "a\n": 1 line; "a\nb": 1 line, 1 incomplete-line;
 			// Forgejo uses the definition (like most modern editors):
-			//   empty: 0 lines; "a": 1 line; "a\n": 2 lines; "a\nb": 2 lines;
-			//   When rendering, the last empty line is not rendered in UI, while the line-number is still counted, to tell users that the file contains a trailing EOL.
-			//   To make the UI more consistent, it could use an icon mark to indicate that there is no trailing EOL, and show line-number as the rendered lines.
+			//   empty: 0 lines; "a": 1 line; "a\n": 1 line; "a\nb": 2 lines;
+			//   When rendering, the last empty line is not rendered in U and isn't counted towards the number of lines.
+			//   To tell users that the file not contains a trailing EOL, text with a tooltip is displayed in the file header.
+			//   Trailing EOL is only considered if the file has content.
 			// This NumLines is only used for the display on the UI: "xxx lines"
 			if len(buf) == 0 {
 				ctx.Data["NumLines"] = 0
 			} else {
-				ctx.Data["NumLines"] = bytes.Count(buf, []byte{'\n'}) + 1
+				hasNoTrailingEOL := !bytes.HasSuffix(buf, []byte{'\n'})
+				ctx.Data["HasNoTrailingEOL"] = hasNoTrailingEOL
+
+				numLines := bytes.Count(buf, []byte{'\n'})
+				if hasNoTrailingEOL {
+					numLines++
+				}
+				ctx.Data["NumLines"] = numLines
 			}
 			ctx.Data["NumLinesSet"] = true
 
@@ -742,12 +753,12 @@ func checkHomeCodeViewable(ctx *context.Context) {
 		}
 
 		if firstUnit != nil {
-			ctx.Redirect(fmt.Sprintf("%s%s", ctx.Repo.Repository.Link(), firstUnit.URI))
+			ctx.Redirect(ctx.Repo.Repository.Link() + firstUnit.URI)
 			return
 		}
 	}
 
-	ctx.NotFound("Home", fmt.Errorf(ctx.Locale.TrString("units.error.no_unit_allowed_repo")))
+	ctx.NotFound("Home", errors.New(ctx.Locale.TrString("units.error.no_unit_allowed_repo")))
 }
 
 func checkCitationFile(ctx *context.Context, entry *git.TreeEntry) {
@@ -770,7 +781,8 @@ func checkCitationFile(ctx *context.Context, entry *git.TreeEntry) {
 			if content, err := entry.Blob().GetBlobContent(setting.UI.MaxDisplayFileSize); err != nil {
 				log.Error("checkCitationFile: GetBlobContent: %v", err)
 			} else {
-				ctx.Data["CitiationExist"] = true
+				ctx.Data["CitationExist"] = true
+				ctx.Data["CitationFile"] = entry.Name()
 				ctx.PageData["citationFileContent"] = content
 				break
 			}

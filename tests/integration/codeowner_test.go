@@ -22,7 +22,7 @@ import (
 	files_service "code.gitea.io/gitea/services/repository/files"
 	"code.gitea.io/gitea/tests"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCodeOwner(t *testing.T) {
@@ -30,7 +30,7 @@ func TestCodeOwner(t *testing.T) {
 		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
 		// Create the repo.
-		repo, _, f := CreateDeclarativeRepo(t, user2, "",
+		repo, _, f := tests.CreateDeclarativeRepo(t, user2, "",
 			[]unit_model.Type{unit_model.TypePullRequests}, nil,
 			[]*files_service.ChangeRepoFile{
 				{
@@ -46,16 +46,16 @@ func TestCodeOwner(t *testing.T) {
 		r := fmt.Sprintf("%suser2/%s.git", u.String(), repo.Name)
 		cloneURL, _ := url.Parse(r)
 		cloneURL.User = url.UserPassword("user2", userPassword)
-		assert.NoError(t, git.CloneWithArgs(context.Background(), nil, cloneURL.String(), dstPath, git.CloneRepoOptions{}))
+		require.NoError(t, git.CloneWithArgs(context.Background(), nil, cloneURL.String(), dstPath, git.CloneRepoOptions{}))
 
 		t.Run("Normal", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			err := os.WriteFile(path.Join(dstPath, "README.md"), []byte("## test content"), 0o666)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			err = git.AddChanges(dstPath, true)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			err = git.CommitChanges(dstPath, git.CommitChangesOptions{
 				Committer: &git.Signature{
@@ -70,10 +70,10 @@ func TestCodeOwner(t *testing.T) {
 				},
 				Message: "Add README.",
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			err = git.NewCommand(git.DefaultContext, "push", "origin", "HEAD:refs/for/main", "-o", "topic=codeowner-normal").Run(&git.RunOpts{Dir: dstPath})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadBranch: "user2/codeowner-normal"})
 			unittest.AssertExistsIf(t, true, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 5})
@@ -93,7 +93,7 @@ func TestCodeOwner(t *testing.T) {
 			doGitAddRemote(dstPath, "forked", remoteURL)(t)
 
 			err := git.NewCommand(git.DefaultContext, "push", "forked", "HEAD:refs/for/main", "-o", "topic=codeowner-forked").Run(&git.RunOpts{Dir: dstPath})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadBranch: "user2/codeowner-forked"})
 			unittest.AssertExistsIf(t, false, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 5})
@@ -103,16 +103,16 @@ func TestCodeOwner(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			// Push the changes made from the previous subtest.
-			assert.NoError(t, git.NewCommand(git.DefaultContext, "push", "origin").Run(&git.RunOpts{Dir: dstPath}))
+			require.NoError(t, git.NewCommand(git.DefaultContext, "push", "origin").Run(&git.RunOpts{Dir: dstPath}))
 
 			// Reset the tree to the previous commit.
-			assert.NoError(t, git.NewCommand(git.DefaultContext, "reset", "--hard", "HEAD~1").Run(&git.RunOpts{Dir: dstPath}))
+			require.NoError(t, git.NewCommand(git.DefaultContext, "reset", "--hard", "HEAD~1").Run(&git.RunOpts{Dir: dstPath}))
 
 			err := os.WriteFile(path.Join(dstPath, "test-file"), []byte("## test content"), 0o666)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			err = git.AddChanges(dstPath, true)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			err = git.CommitChanges(dstPath, git.CommitChangesOptions{
 				Committer: &git.Signature{
@@ -127,10 +127,10 @@ func TestCodeOwner(t *testing.T) {
 				},
 				Message: "Add test-file.",
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			err = git.NewCommand(git.DefaultContext, "push", "origin", "HEAD:refs/for/main", "-o", "topic=codeowner-out-of-date").Run(&git.RunOpts{Dir: dstPath})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadBranch: "user2/codeowner-out-of-date"})
 			unittest.AssertExistsIf(t, true, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 4})

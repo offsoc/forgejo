@@ -64,7 +64,7 @@ export function initRepoCommentForm() {
   function initBranchSelector() {
     const $selectBranch = $('.ui.select-branch');
     const $branchMenu = $selectBranch.find('.reference-list-menu');
-    const $isNewIssue = $branchMenu.hasClass('new-issue');
+    const $isNewIssue = $branchMenu[0]?.classList.contains('new-issue');
     $branchMenu.find('.item:not(.no-select)').on('click', async function () {
       const selectedValue = $(this).data('id');
       const editMode = $('#editing_mode').val();
@@ -132,7 +132,7 @@ export function initRepoCommentForm() {
 
     $listMenu.find('.item:not(.no-select)').on('click', function (e) {
       e.preventDefault();
-      if ($(this).hasClass('ban-change')) {
+      if (this.classList.contains('ban-change')) {
         return false;
       }
 
@@ -147,7 +147,7 @@ export function initRepoCommentForm() {
           if (this.getAttribute('data-scope') !== scope) {
             return true;
           }
-          if (this !== clickedItem && !$(this).hasClass('checked')) {
+          if (this !== clickedItem && !this.classList.contains('checked')) {
             return true;
           }
         } else if (this !== clickedItem) {
@@ -155,7 +155,7 @@ export function initRepoCommentForm() {
           return true;
         }
 
-        if ($(this).hasClass('checked')) {
+        if (this.classList.contains('checked')) {
           $(this).removeClass('checked');
           $(this).find('.octicon-check').addClass('tw-invisible');
           if (hasUpdateAction) {
@@ -194,7 +194,7 @@ export function initRepoCommentForm() {
 
       const listIds = [];
       $(this).parent().find('.item').each(function () {
-        if ($(this).hasClass('checked')) {
+        if (this.classList.contains('checked')) {
           listIds.push($(this).data('id'));
           $($(this).data('id-selector')).removeClass('tw-hidden');
         } else {
@@ -479,6 +479,9 @@ async function onEditContent(event) {
     editContentZone.addEventListener('ce-quick-submit', saveAndRefresh);
     editContentZone.querySelector('.cancel.button').addEventListener('click', cancelAndReset);
     editContentZone.querySelector('.save.button').addEventListener('click', saveAndRefresh);
+  } else {
+    const tabEditor = editContentZone.querySelector('.combo-markdown-editor').querySelector('.tabular.menu > a[data-tab-for=markdown-writer]');
+    tabEditor?.click();
   }
 
   // Show write/preview tab and copy raw content as needed
@@ -605,7 +608,7 @@ function initRepoIssueCommentEdit() {
     const quote = $(`#${target}`).text().replace(/\n/g, '\n> ');
     const content = `> ${quote}\n\n`;
     let editor;
-    if ($(this).hasClass('quote-reply-diff')) {
+    if (this.classList.contains('quote-reply-diff')) {
       const $replyBtn = $(this).closest('.comment-code-cloud').find('button.comment-form-reply');
       editor = await handleReply($replyBtn);
     } else {

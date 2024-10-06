@@ -6,9 +6,9 @@ package forgejo_migrations //nolint:revive
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 )
 
 func TestMain(m *testing.M) {
-	base.MainTest(m)
+	migration_tests.MainTest(m)
 }

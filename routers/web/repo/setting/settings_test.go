@@ -22,6 +22,7 @@ import (
 	repo_service "code.gitea.io/gitea/services/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func createSSHAuthorizedKeysTmpPath(t *testing.T) func() {
@@ -126,7 +127,7 @@ func TestCollaborationPost(t *testing.T) {
 	assert.EqualValues(t, http.StatusSeeOther, ctx.Resp.Status())
 
 	exists, err := repo_model.IsCollaborator(ctx, re.ID, 4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, exists)
 }
 
@@ -186,7 +187,7 @@ func TestCollaborationPost_AddCollaboratorTwice(t *testing.T) {
 	assert.EqualValues(t, http.StatusSeeOther, ctx.Resp.Status())
 
 	exists, err := repo_model.IsCollaborator(ctx, re.ID, 4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, exists)
 
 	// Try adding the same collaborator again

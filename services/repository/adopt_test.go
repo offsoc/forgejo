@@ -10,9 +10,12 @@ import (
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
+	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCheckUnadoptedRepositories_Add(t *testing.T) {
@@ -34,13 +37,13 @@ func TestCheckUnadoptedRepositories_Add(t *testing.T) {
 }
 
 func TestCheckUnadoptedRepositories(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	//
 	// Non existent user
 	//
 	unadopted := &unadoptedRepositories{start: 0, end: 100}
 	err := checkUnadoptedRepositories(db.DefaultContext, "notauser", []string{"repo"}, unadopted)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, unadopted.repositories)
 	//
 	// Unadopted repository is returned
@@ -51,20 +54,20 @@ func TestCheckUnadoptedRepositories(t *testing.T) {
 	unadoptedRepoName := "unadopted"
 	unadopted = &unadoptedRepositories{start: 0, end: 100}
 	err = checkUnadoptedRepositories(db.DefaultContext, userName, []string{repoName, unadoptedRepoName}, unadopted)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []string{path.Join(userName, unadoptedRepoName)}, unadopted.repositories)
 	//
 	// Existing (adopted) repository is not returned
 	//
 	unadopted = &unadoptedRepositories{start: 0, end: 100}
 	err = checkUnadoptedRepositories(db.DefaultContext, userName, []string{repoName}, unadopted)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, unadopted.repositories)
 	assert.Equal(t, 0, unadopted.index)
 }
 
 func TestListUnadoptedRepositories_ListOptions(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	username := "user2"
 	unadoptedList := []string{path.Join(username, "unadopted1"), path.Join(username, "unadopted2")}
 	for _, unadopted := range unadoptedList {
@@ -73,13 +76,40 @@ func TestListUnadoptedRepositories_ListOptions(t *testing.T) {
 
 	opts := db.ListOptions{Page: 1, PageSize: 1}
 	repoNames, count, err := ListUnadoptedRepositories(db.DefaultContext, "", &opts)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 2, count)
 	assert.Equal(t, unadoptedList[0], repoNames[0])
 
 	opts = db.ListOptions{Page: 2, PageSize: 1}
 	repoNames, count, err = ListUnadoptedRepositories(db.DefaultContext, "", &opts)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 2, count)
 	assert.Equal(t, unadoptedList[1], repoNames[0])
+}
+
+func TestAdoptRepository(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	username := "user2"
+
+	unadopted := "unadopted"
+	require.NoError(t, unittest.CopyDir(
+		"../../modules/git/tests/repos/repo1_bare",
+		path.Join(setting.RepoRootPath, username, unadopted+".git"),
+	))
+
+	opts := db.ListOptions{Page: 1, PageSize: 1}
+	repoNames, _, err := ListUnadoptedRepositories(db.DefaultContext, "", &opts)
+	require.NoError(t, err)
+	require.Contains(t, repoNames, path.Join(username, unadopted))
+
+	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	repo, err := AdoptRepository(db.DefaultContext, doer, owner, CreateRepoOptions{
+		Name:        unadopted,
+		Description: "description",
+		IsPrivate:   false,
+		AutoInit:    true,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, git.Sha1ObjectFormat.Name(), repo.ObjectFormatName)
 }

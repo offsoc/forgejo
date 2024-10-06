@@ -19,6 +19,7 @@ import (
 	_ "code.gitea.io/gitea/models/actions"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -26,16 +27,16 @@ func TestMain(m *testing.M) {
 }
 
 func TestRelease_Create(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
-	assert.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
+	require.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
 		RepoID:       repo.ID,
 		Repo:         repo,
 		PublisherID:  user.ID,
@@ -47,9 +48,9 @@ func TestRelease_Create(t *testing.T) {
 		IsDraft:      false,
 		IsPrerelease: false,
 		IsTag:        false,
-	}, nil, ""))
+	}, "", []*AttachmentChange{}))
 
-	assert.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
+	require.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
 		RepoID:       repo.ID,
 		Repo:         repo,
 		PublisherID:  user.ID,
@@ -61,9 +62,9 @@ func TestRelease_Create(t *testing.T) {
 		IsDraft:      false,
 		IsPrerelease: false,
 		IsTag:        false,
-	}, nil, ""))
+	}, "", []*AttachmentChange{}))
 
-	assert.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
+	require.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
 		RepoID:       repo.ID,
 		Repo:         repo,
 		PublisherID:  user.ID,
@@ -75,9 +76,9 @@ func TestRelease_Create(t *testing.T) {
 		IsDraft:      false,
 		IsPrerelease: false,
 		IsTag:        false,
-	}, nil, ""))
+	}, "", []*AttachmentChange{}))
 
-	assert.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
+	require.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
 		RepoID:       repo.ID,
 		Repo:         repo,
 		PublisherID:  user.ID,
@@ -89,9 +90,9 @@ func TestRelease_Create(t *testing.T) {
 		IsDraft:      true,
 		IsPrerelease: false,
 		IsTag:        false,
-	}, nil, ""))
+	}, "", []*AttachmentChange{}))
 
-	assert.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
+	require.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
 		RepoID:       repo.ID,
 		Repo:         repo,
 		PublisherID:  user.ID,
@@ -103,7 +104,7 @@ func TestRelease_Create(t *testing.T) {
 		IsDraft:      false,
 		IsPrerelease: true,
 		IsTag:        false,
-	}, nil, ""))
+	}, "", []*AttachmentChange{}))
 
 	testPlayload := "testtest"
 
@@ -112,7 +113,7 @@ func TestRelease_Create(t *testing.T) {
 		UploaderID: user.ID,
 		Name:       "test.txt",
 	}, strings.NewReader(testPlayload), int64(len([]byte(testPlayload))))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	release := repo_model.Release{
 		RepoID:       repo.ID,
@@ -127,21 +128,81 @@ func TestRelease_Create(t *testing.T) {
 		IsPrerelease: false,
 		IsTag:        true,
 	}
-	assert.NoError(t, CreateRelease(gitRepo, &release, []string{attach.UUID}, "test"))
+	require.NoError(t, CreateRelease(gitRepo, &release, "test", []*AttachmentChange{
+		{
+			Action: "add",
+			Type:   "attachment",
+			UUID:   attach.UUID,
+		},
+	}))
+	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, &release))
+	assert.Len(t, release.Attachments, 1)
+	assert.EqualValues(t, attach.UUID, release.Attachments[0].UUID)
+	assert.EqualValues(t, attach.Name, release.Attachments[0].Name)
+	assert.EqualValues(t, attach.ExternalURL, release.Attachments[0].ExternalURL)
+
+	release = repo_model.Release{
+		RepoID:       repo.ID,
+		Repo:         repo,
+		PublisherID:  user.ID,
+		Publisher:    user,
+		TagName:      "v0.1.6",
+		Target:       "65f1bf2",
+		Title:        "v0.1.6 is released",
+		Note:         "v0.1.6 is released",
+		IsDraft:      false,
+		IsPrerelease: false,
+		IsTag:        true,
+	}
+	assert.NoError(t, CreateRelease(gitRepo, &release, "", []*AttachmentChange{
+		{
+			Action:      "add",
+			Type:        "external",
+			Name:        "test",
+			ExternalURL: "https://forgejo.org/",
+		},
+	}))
+	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, &release))
+	assert.Len(t, release.Attachments, 1)
+	assert.EqualValues(t, "test", release.Attachments[0].Name)
+	assert.EqualValues(t, "https://forgejo.org/", release.Attachments[0].ExternalURL)
+
+	release = repo_model.Release{
+		RepoID:       repo.ID,
+		Repo:         repo,
+		PublisherID:  user.ID,
+		Publisher:    user,
+		TagName:      "v0.1.7",
+		Target:       "65f1bf2",
+		Title:        "v0.1.7 is released",
+		Note:         "v0.1.7 is released",
+		IsDraft:      false,
+		IsPrerelease: false,
+		IsTag:        true,
+	}
+	assert.Error(t, CreateRelease(gitRepo, &repo_model.Release{}, "", []*AttachmentChange{
+		{
+			Action: "add",
+			Type:   "external",
+			Name:   "Click me",
+			// Invalid URL (API URL of current instance), this should result in an error
+			ExternalURL: "https://try.gitea.io/api/v1/user/follow",
+		},
+	}))
 }
 
 func TestRelease_Update(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	// Test a changed release
-	assert.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
+	require.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
 		RepoID:       repo.ID,
 		Repo:         repo,
 		PublisherID:  user.ID,
@@ -153,19 +214,19 @@ func TestRelease_Update(t *testing.T) {
 		IsDraft:      false,
 		IsPrerelease: false,
 		IsTag:        false,
-	}, nil, ""))
+	}, "", []*AttachmentChange{}))
 	release, err := repo_model.GetRelease(db.DefaultContext, repo.ID, "v1.1.1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	releaseCreatedUnix := release.CreatedUnix
 	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
 	release.Note = "Changed note"
-	assert.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, nil, nil, nil, false))
+	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{}))
 	release, err = repo_model.GetReleaseByID(db.DefaultContext, release.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(releaseCreatedUnix), int64(release.CreatedUnix))
 
 	// Test a changed draft
-	assert.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
+	require.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
 		RepoID:       repo.ID,
 		Repo:         repo,
 		PublisherID:  user.ID,
@@ -177,19 +238,19 @@ func TestRelease_Update(t *testing.T) {
 		IsDraft:      true,
 		IsPrerelease: false,
 		IsTag:        false,
-	}, nil, ""))
+	}, "", []*AttachmentChange{}))
 	release, err = repo_model.GetRelease(db.DefaultContext, repo.ID, "v1.2.1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	releaseCreatedUnix = release.CreatedUnix
 	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
 	release.Title = "Changed title"
-	assert.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, nil, nil, nil, false))
+	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{}))
 	release, err = repo_model.GetReleaseByID(db.DefaultContext, release.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Less(t, int64(releaseCreatedUnix), int64(release.CreatedUnix))
 
 	// Test a changed pre-release
-	assert.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
+	require.NoError(t, CreateRelease(gitRepo, &repo_model.Release{
 		RepoID:       repo.ID,
 		Repo:         repo,
 		PublisherID:  user.ID,
@@ -201,16 +262,16 @@ func TestRelease_Update(t *testing.T) {
 		IsDraft:      false,
 		IsPrerelease: true,
 		IsTag:        false,
-	}, nil, ""))
+	}, "", []*AttachmentChange{}))
 	release, err = repo_model.GetRelease(db.DefaultContext, repo.ID, "v1.3.1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	releaseCreatedUnix = release.CreatedUnix
 	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
 	release.Title = "Changed title"
 	release.Note = "Changed note"
-	assert.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, nil, nil, nil, false))
+	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{}))
 	release, err = repo_model.GetReleaseByID(db.DefaultContext, release.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(releaseCreatedUnix), int64(release.CreatedUnix))
 
 	// Test create release
@@ -227,15 +288,15 @@ func TestRelease_Update(t *testing.T) {
 		IsPrerelease: false,
 		IsTag:        false,
 	}
-	assert.NoError(t, CreateRelease(gitRepo, release, nil, ""))
-	assert.Greater(t, release.ID, int64(0))
+	require.NoError(t, CreateRelease(gitRepo, release, "", []*AttachmentChange{}))
+	assert.Positive(t, release.ID)
 
 	release.IsDraft = false
 	tagName := release.TagName
 
-	assert.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, nil, nil, nil, false))
+	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{}))
 	release, err = repo_model.GetReleaseByID(db.DefaultContext, release.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, tagName, release.TagName)
 
 	// Add new attachments
@@ -245,41 +306,91 @@ func TestRelease_Update(t *testing.T) {
 		UploaderID: user.ID,
 		Name:       "test.txt",
 	}, strings.NewReader(samplePayload), int64(len([]byte(samplePayload))))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, []string{attach.UUID}, nil, nil, false))
-	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
+	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{
+		{
+			Action: "add",
+			Type:   "attachment",
+			UUID:   attach.UUID,
+		},
+	}))
+	require.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
 	assert.Len(t, release.Attachments, 1)
 	assert.EqualValues(t, attach.UUID, release.Attachments[0].UUID)
 	assert.EqualValues(t, release.ID, release.Attachments[0].ReleaseID)
 	assert.EqualValues(t, attach.Name, release.Attachments[0].Name)
+	assert.EqualValues(t, attach.ExternalURL, release.Attachments[0].ExternalURL)
 
 	// update the attachment name
-	assert.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, nil, nil, map[string]string{
-		attach.UUID: "test2.txt",
-	}, false))
+	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{
+		{
+			Action: "update",
+			Name:   "test2.txt",
+			UUID:   attach.UUID,
+		},
+	}))
 	release.Attachments = nil
-	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
+	require.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
 	assert.Len(t, release.Attachments, 1)
 	assert.EqualValues(t, attach.UUID, release.Attachments[0].UUID)
 	assert.EqualValues(t, release.ID, release.Attachments[0].ReleaseID)
 	assert.EqualValues(t, "test2.txt", release.Attachments[0].Name)
+	assert.EqualValues(t, attach.ExternalURL, release.Attachments[0].ExternalURL)
 
 	// delete the attachment
-	assert.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, nil, []string{attach.UUID}, nil, false))
+	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{
+		{
+			Action: "delete",
+			UUID:   attach.UUID,
+		},
+	}))
 	release.Attachments = nil
 	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
 	assert.Empty(t, release.Attachments)
+
+	// Add new external attachment
+	assert.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{
+		{
+			Action:      "add",
+			Type:        "external",
+			Name:        "test",
+			ExternalURL: "https://forgejo.org/",
+		},
+	}))
+	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
+	assert.Len(t, release.Attachments, 1)
+	assert.EqualValues(t, release.ID, release.Attachments[0].ReleaseID)
+	assert.EqualValues(t, "test", release.Attachments[0].Name)
+	assert.EqualValues(t, "https://forgejo.org/", release.Attachments[0].ExternalURL)
+	externalAttachmentUUID := release.Attachments[0].UUID
+
+	// update the attachment name
+	assert.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{
+		{
+			Action:      "update",
+			Name:        "test2",
+			UUID:        externalAttachmentUUID,
+			ExternalURL: "https://about.gitea.com/",
+		},
+	}))
+	release.Attachments = nil
+	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
+	assert.Len(t, release.Attachments, 1)
+	assert.EqualValues(t, externalAttachmentUUID, release.Attachments[0].UUID)
+	assert.EqualValues(t, release.ID, release.Attachments[0].ReleaseID)
+	assert.EqualValues(t, "test2", release.Attachments[0].Name)
+	assert.EqualValues(t, "https://about.gitea.com/", release.Attachments[0].ExternalURL)
 }
 
 func TestRelease_createTag(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	// Test a changed release
@@ -297,13 +408,13 @@ func TestRelease_createTag(t *testing.T) {
 		IsTag:        false,
 	}
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, release.CreatedUnix)
 	releaseCreatedUnix := release.CreatedUnix
 	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
 	release.Note = "Changed note"
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(releaseCreatedUnix), int64(release.CreatedUnix))
 
 	// Test a changed draft
@@ -321,12 +432,12 @@ func TestRelease_createTag(t *testing.T) {
 		IsTag:        false,
 	}
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	releaseCreatedUnix = release.CreatedUnix
 	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
 	release.Title = "Changed title"
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Less(t, int64(releaseCreatedUnix), int64(release.CreatedUnix))
 
 	// Test a changed pre-release
@@ -344,21 +455,21 @@ func TestRelease_createTag(t *testing.T) {
 		IsTag:        false,
 	}
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	releaseCreatedUnix = release.CreatedUnix
 	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
 	release.Title = "Changed title"
 	release.Note = "Changed note"
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(releaseCreatedUnix), int64(release.CreatedUnix))
 }
 
 func TestCreateNewTag(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 
-	assert.NoError(t, CreateNewTag(git.DefaultContext, user, repo, "master", "v2.0",
+	require.NoError(t, CreateNewTag(git.DefaultContext, user, repo, "master", "v2.0",
 		"v2.0 is released \n\n BUGFIX: .... \n\n 123"))
 }

@@ -13,6 +13,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetRefEndNamesAndURLs(t *testing.T) {
@@ -33,10 +34,10 @@ func TestGetRefEndNamesAndURLs(t *testing.T) {
 }
 
 func TestIssue_DeleteIssue(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	issueIDs, err := issues_model.GetIssueIDsByRepoID(db.DefaultContext, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, issueIDs, 5)
 
 	issue := &issues_model.Issue{
@@ -45,42 +46,42 @@ func TestIssue_DeleteIssue(t *testing.T) {
 	}
 
 	err = deleteIssue(db.DefaultContext, issue)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	issueIDs, err = issues_model.GetIssueIDsByRepoID(db.DefaultContext, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, issueIDs, 4)
 
 	// check attachment removal
 	attachments, err := repo_model.GetAttachmentsByIssueID(db.DefaultContext, 4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	issue, err = issues_model.GetIssueByID(db.DefaultContext, 4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = deleteIssue(db.DefaultContext, issue)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, attachments, 2)
 	for i := range attachments {
 		attachment, err := repo_model.GetAttachmentByUUID(db.DefaultContext, attachments[i].UUID)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.True(t, repo_model.IsErrAttachmentNotExist(err))
 		assert.Nil(t, attachment)
 	}
 
 	// check issue dependencies
 	user, err := user_model.GetUserByID(db.DefaultContext, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	issue1, err := issues_model.GetIssueByID(db.DefaultContext, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	issue2, err := issues_model.GetIssueByID(db.DefaultContext, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = issues_model.CreateIssueDependency(db.DefaultContext, user, issue1, issue2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	left, err := issues_model.IssueNoDependenciesLeft(db.DefaultContext, issue1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, left)
 
 	err = deleteIssue(db.DefaultContext, issue2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	left, err = issues_model.IssueNoDependenciesLeft(db.DefaultContext, issue1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, left)
 }

@@ -19,6 +19,7 @@ import (
 	_ "code.gitea.io/gitea/models/activities"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -26,26 +27,26 @@ func TestMain(m *testing.M) {
 }
 
 func TestRepoStatsIndex(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	setting.CfgProvider, _ = setting.NewConfigProviderFromData("")
 
 	setting.LoadQueueSettings()
 
 	err := Init()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repo, err := repo_model.GetRepositoryByID(db.DefaultContext, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = UpdateRepoIndexer(repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, queue.GetManager().FlushAll(context.Background(), 5*time.Second))
+	require.NoError(t, queue.GetManager().FlushAll(context.Background(), 5*time.Second))
 
 	status, err := repo_model.GetIndexerStatus(db.DefaultContext, repo, repo_model.RepoIndexerTypeStats)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "65f1bf27bc3bf70f64657658635e66094edbcb4d", status.CommitSha)
 	langs, err := repo_model.GetTopLanguageStats(db.DefaultContext, repo, 5)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, langs)
 }

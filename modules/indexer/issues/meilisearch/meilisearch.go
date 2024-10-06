@@ -238,7 +238,7 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 		Limit:            int64(limit),
 		Offset:           int64(skip),
 		Sort:             sortBy,
-		MatchingStrategy: "all",
+		MatchingStrategy: meilisearch.All,
 	})
 	if err != nil {
 		return nil, err

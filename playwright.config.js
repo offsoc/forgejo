@@ -11,18 +11,14 @@ export default {
   testDir: './tests/e2e/',
   testMatch: /.*\.test\.e2e\.js/, // Match any .test.e2e.js files
 
-  /**
-   * Only run one test at a time, running multiple could lead to a inconsistent
-   * database state.
-   */
-  fullyParallel: false,
-  workers: 1,
+  // you can adjust this value locally to match your machine's power,
+  // or pass `--workers x` to playwright
+  workers: process.env.CI ? 1 : 2,
 
   /* Maximum time one test can run for. */
   timeout: 30 * 1000,
 
   expect: {
-
     /**
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
@@ -34,7 +30,7 @@ export default {
   forbidOnly: Boolean(process.env.CI),
 
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 1 : 0,
 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? 'list' : [['list'], ['html', {outputFolder: 'tests/e2e/reports/', open: 'never'}]],
@@ -46,10 +42,10 @@ export default {
     locale: 'en-US',
 
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
-    actionTimeout: 1000,
+    actionTimeout: 2000,
 
     /* Maximum time allowed for navigation, such as `page.goto()`. */
-    navigationTimeout: 5 * 1000,
+    navigationTimeout: 10 * 1000,
 
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: BASE_URL,

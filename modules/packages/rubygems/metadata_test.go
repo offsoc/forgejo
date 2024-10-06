@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParsePackageMetaData(t *testing.T) {
@@ -32,7 +33,7 @@ func TestParsePackageMetaData(t *testing.T) {
 		data := createArchive("dummy.txt", []byte{0})
 
 		rp, err := ParsePackageMetaData(data)
-		assert.ErrorIs(t, err, ErrMissingMetadataFile)
+		require.ErrorIs(t, err, ErrMissingMetadataFile)
 		assert.Nil(t, rp)
 	})
 
@@ -41,7 +42,7 @@ func TestParsePackageMetaData(t *testing.T) {
 		data := createArchive("metadata.gz", content)
 
 		rp, err := ParsePackageMetaData(data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, rp)
 	})
 }
@@ -58,7 +59,7 @@ dVoR6hj07u0HZgAl3SRS8G/fmXcRK20jyq6rDMSYQFgidamqkXbbuspLXE/0k7GphtKqe67GuRC/
 yjAbmt9LsOMp8xMamFkSQ38fP5EFjdz8LA4do2C69VvqWXAJgrPbKZb58/xZXrKoW6ttW13Bhvzi
 4ftn7/yUxd4YGcglvTmmY8aGY3ZwRn4CqcWcidUGAAA=`)
 	rp, err := parseMetadataFile(bytes.NewReader(content))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, rp)
 
 	assert.Equal(t, "gitea", rp.Name)

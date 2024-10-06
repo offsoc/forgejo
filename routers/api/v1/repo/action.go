@@ -117,12 +117,11 @@ func (Action) CreateOrUpdateSecret(ctx *context.APIContext) {
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
-	owner := ctx.Repo.Owner
 	repo := ctx.Repo.Repository
 
 	opt := web.GetForm(ctx).(*api.CreateOrUpdateSecretOption)
 
-	_, created, err := secret_service.CreateOrUpdateSecret(ctx, owner.ID, repo.ID, ctx.Params("secretname"), opt.Data)
+	_, created, err := secret_service.CreateOrUpdateSecret(ctx, 0, repo.ID, ctx.Params("secretname"), opt.Data)
 	if err != nil {
 		if errors.Is(err, util.ErrInvalidArgument) {
 			ctx.Error(http.StatusBadRequest, "CreateOrUpdateSecret", err)
@@ -174,10 +173,9 @@ func (Action) DeleteSecret(ctx *context.APIContext) {
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
-	owner := ctx.Repo.Owner
 	repo := ctx.Repo.Repository
 
-	err := secret_service.DeleteSecretByName(ctx, owner.ID, repo.ID, ctx.Params("secretname"))
+	err := secret_service.DeleteSecretByName(ctx, 0, repo.ID, ctx.Params("secretname"))
 	if err != nil {
 		if errors.Is(err, util.ErrInvalidArgument) {
 			ctx.Error(http.StatusBadRequest, "DeleteSecret", err)
@@ -486,7 +484,7 @@ func (Action) ListVariables(ctx *context.APIContext) {
 
 // GetRegistrationToken returns the token to register repo runners
 func (Action) GetRegistrationToken(ctx *context.APIContext) {
-	// swagger:operation GET /repos/{owner}/{repo}/runners/registration-token repository repoGetRunnerRegistrationToken
+	// swagger:operation GET /repos/{owner}/{repo}/actions/runners/registration-token repository repoGetRunnerRegistrationToken
 	// ---
 	// summary: Get a repository's actions runner registration token
 	// produces:
@@ -506,7 +504,7 @@ func (Action) GetRegistrationToken(ctx *context.APIContext) {
 	//   "200":
 	//     "$ref": "#/responses/RegistrationToken"
 
-	shared.GetRegistrationToken(ctx, ctx.Repo.Repository.OwnerID, ctx.Repo.Repository.ID)
+	shared.GetRegistrationToken(ctx, 0, ctx.Repo.Repository.ID)
 }
 
 var _ actions_service.API = new(Action)
@@ -582,4 +580,74 @@ func ListActionTasks(ctx *context.APIContext) {
 	}
 
 	ctx.JSON(http.StatusOK, &res)
+}
+
+// DispatchWorkflow dispatches a workflow
+func DispatchWorkflow(ctx *context.APIContext) {
+	// swagger:operation POST /repos/{owner}/{repo}/actions/workflows/{workflowname}/dispatches repository DispatchWorkflow
+	// ---
+	// summary: Dispatches a workflow
+	// consumes:
+	// - application/json
+	// parameters:
+	// - name: owner
+	//   in: path
+	//   description: owner of the repo
+	//   type: string
+	//   required: true
+	// - name: repo
+	//   in: path
+	//   description: name of the repo
+	//   type: string
+	//   required: true
+	// - name: workflowname
+	//   in: path
+	//   description: name of the workflow
+	//   type: string
+	//   required: true
+	// - name: body
+	//   in: body
+	//   schema:
+	//     "$ref": "#/definitions/DispatchWorkflowOption"
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/empty"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	opt := web.GetForm(ctx).(*api.DispatchWorkflowOption)
+	name := ctx.Params("workflowname")
+
+	if len(opt.Ref) == 0 {
+		ctx.Error(http.StatusBadRequest, "ref", "ref is empty")
+		return
+	} else if len(name) == 0 {
+		ctx.Error(http.StatusBadRequest, "workflowname", "workflow name is empty")
+		return
+	}
+
+	workflow, err := actions_service.GetWorkflowFromCommit(ctx.Repo.GitRepo, opt.Ref, name)
+	if err != nil {
+		if errors.Is(err, util.ErrNotExist) {
+			ctx.Error(http.StatusNotFound, "GetWorkflowFromCommit", err)
+		} else {
+			ctx.Error(http.StatusInternalServerError, "GetWorkflowFromCommit", err)
+		}
+		return
+	}
+
+	inputGetter := func(key string) string {
+		return opt.Inputs[key]
+	}
+
+	if err := workflow.Dispatch(ctx, inputGetter, ctx.Repo.Repository, ctx.Doer); err != nil {
+		if actions_service.IsInputRequiredErr(err) {
+			ctx.Error(http.StatusBadRequest, "workflow.Dispatch", err)
+		} else {
+			ctx.Error(http.StatusInternalServerError, "workflow.Dispatch", err)
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
 }

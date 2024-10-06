@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBranchRuleMatchPriority(t *testing.T) {
@@ -67,7 +68,7 @@ func TestBranchRuleMatchPriority(t *testing.T) {
 		matchedPB := pbs.GetFirstMatched(kase.BranchName)
 		if matchedPB == nil {
 			if kase.ExpectedMatchIdx >= 0 {
-				assert.Error(t, fmt.Errorf("no matched rules but expected %s[%d]", kase.Rules[kase.ExpectedMatchIdx], kase.ExpectedMatchIdx))
+				require.Error(t, fmt.Errorf("no matched rules but expected %s[%d]", kase.Rules[kase.ExpectedMatchIdx], kase.ExpectedMatchIdx))
 			}
 		} else {
 			assert.EqualValues(t, kase.Rules[kase.ExpectedMatchIdx], matchedPB.RuleName)

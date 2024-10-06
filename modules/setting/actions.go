@@ -12,19 +12,23 @@ import (
 // Actions settings
 var (
 	Actions = struct {
-		LogStorage            *Storage // how the created logs should be stored
-		ArtifactStorage       *Storage // how the created artifacts should be stored
-		ArtifactRetentionDays int64    `ini:"ARTIFACT_RETENTION_DAYS"`
 		Enabled               bool
+		LogStorage            *Storage          // how the created logs should be stored
+		LogRetentionDays      int64             `ini:"LOG_RETENTION_DAYS"`
+		LogCompression        logCompression    `ini:"LOG_COMPRESSION"`
+		ArtifactStorage       *Storage          // how the created artifacts should be stored
+		ArtifactRetentionDays int64             `ini:"ARTIFACT_RETENTION_DAYS"`
 		DefaultActionsURL     defaultActionsURL `ini:"DEFAULT_ACTIONS_URL"`
 		ZombieTaskTimeout     time.Duration     `ini:"ZOMBIE_TASK_TIMEOUT"`
 		EndlessTaskTimeout    time.Duration     `ini:"ENDLESS_TASK_TIMEOUT"`
 		AbandonedJobTimeout   time.Duration     `ini:"ABANDONED_JOB_TIMEOUT"`
 		SkipWorkflowStrings   []string          `ìni:"SKIP_WORKFLOW_STRINGS"`
+		LimitDispatchInputs   int64             `ini:"LIMIT_DISPATCH_INPUTS"`
 	}{
 		Enabled:             true,
 		DefaultActionsURL:   defaultActionsURLForgejo,
 		SkipWorkflowStrings: []string{"[skip ci]", "[ci skip]", "[no ci]", "[skip actions]", "[actions skip]"},
+		LimitDispatchInputs: 10,
 	}
 )
 
@@ -47,6 +51,20 @@ const (
 	defaultActionsURLSelf    = "self"   // the root URL of the self-hosted instance
 )
 
+type logCompression string
+
+func (c logCompression) IsValid() bool {
+	return c.IsNone() || c.IsZstd()
+}
+
+func (c logCompression) IsNone() bool {
+	return strings.ToLower(string(c)) == "none"
+}
+
+func (c logCompression) IsZstd() bool {
+	return c == "" || strings.ToLower(string(c)) == "zstd"
+}
+
 func loadActionsFrom(rootCfg ConfigProvider) error {
 	sec := rootCfg.Section("actions")
 	err := sec.MapTo(&Actions)
@@ -59,10 +77,17 @@ func loadActionsFrom(rootCfg ConfigProvider) error {
 	if err != nil {
 		return err
 	}
+	// default to 1 year
+	if Actions.LogRetentionDays <= 0 {
+		Actions.LogRetentionDays = 365
+	}
 
 	actionsSec, _ := rootCfg.GetSection("actions.artifacts")
 
 	Actions.ArtifactStorage, err = getStorage(rootCfg, "actions_artifacts", "", actionsSec)
+	if err != nil {
+		return err
+	}
 
 	// default to 90 days in Github Actions
 	if Actions.ArtifactRetentionDays <= 0 {
@@ -73,5 +98,9 @@ func loadActionsFrom(rootCfg ConfigProvider) error {
 	Actions.EndlessTaskTimeout = sec.Key("ENDLESS_TASK_TIMEOUT").MustDuration(3 * time.Hour)
 	Actions.AbandonedJobTimeout = sec.Key("ABANDONED_JOB_TIMEOUT").MustDuration(24 * time.Hour)
 
-	return err
+	if !Actions.LogCompression.IsValid() {
+		return fmt.Errorf("invalid [actions] LOG_COMPRESSION: %q", Actions.LogCompression)
+	}
+
+	return nil
 }

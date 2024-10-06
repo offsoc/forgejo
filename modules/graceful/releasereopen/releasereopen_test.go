@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testReleaseReopener struct {
@@ -29,14 +30,14 @@ func TestManager(t *testing.T) {
 	c2 := m.Register(t2)
 	_ = m.Register(t3)
 
-	assert.NoError(t, m.ReleaseReopen())
+	require.NoError(t, m.ReleaseReopen())
 	assert.EqualValues(t, 1, t1.count)
 	assert.EqualValues(t, 1, t2.count)
 	assert.EqualValues(t, 1, t3.count)
 
 	c2()
 
-	assert.NoError(t, m.ReleaseReopen())
+	require.NoError(t, m.ReleaseReopen())
 	assert.EqualValues(t, 2, t1.count)
 	assert.EqualValues(t, 1, t2.count)
 	assert.EqualValues(t, 2, t3.count)

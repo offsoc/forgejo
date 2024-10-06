@@ -136,6 +136,7 @@
 								<th class="tw-w-2/5">{{ctx.Locale.Tr "repo.settings.mirror_settings.mirrored_repository"}}</th>
 								<th>{{ctx.Locale.Tr "repo.settings.mirror_settings.direction"}}</th>
 								<th>{{ctx.Locale.Tr "repo.settings.mirror_settings.last_update"}}</th>
+								<th>{{ctx.Locale.Tr "repo.mirror_public_key"}}</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -233,6 +234,7 @@
 								<th class="tw-w-2/5">{{ctx.Locale.Tr "repo.settings.mirror_settings.pushed_repository"}}</th>
 								<th>{{ctx.Locale.Tr "repo.settings.mirror_settings.direction"}}</th>
 								<th>{{ctx.Locale.Tr "repo.settings.mirror_settings.last_update"}}</th>
+								<th>{{ctx.Locale.Tr "repo.mirror_public_key"}}</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -242,7 +244,8 @@
 								<td class="tw-break-anywhere">{{.RemoteAddress}}</td>
 								<td>{{ctx.Locale.Tr "repo.settings.mirror_settings.direction.push"}}</td>
 								<td>{{if .LastUpdateUnix}}{{DateTime "full" .LastUpdateUnix}}{{else}}{{ctx.Locale.Tr "never"}}{{end}} {{if .LastError}}<div class="ui red label" data-tooltip-content="{{.LastError}}">{{ctx.Locale.Tr "error"}}</div>{{end}}</td>
-								<td class="right aligned">
+								<td>{{if not (eq (len .GetPublicKey) 0)}}<a data-clipboard-text="{{.GetPublicKey}}">{{ctx.Locale.Tr "repo.settings.mirror_settings.push_mirror.copy_public_key"}}</a>{{else}}{{ctx.Locale.Tr "repo.settings.mirror_settings.push_mirror.none_ssh"}}{{end}}</td>
+								<td class="right aligned df">
 									<button
 										class="ui tiny button show-modal"
 										data-modal="#push-mirror-edit-modal"
@@ -274,7 +277,7 @@
 							{{end}}
 							{{if (not .DisableNewPushMirrors)}}
 								<tr>
-									<td colspan="4">
+									<td colspan="5">
 										<form class="ui form" method="post">
 											{{template "base/disable_form_autofill"}}
 											{{.CsrfTokenHtml}}
@@ -297,6 +300,15 @@
 														<label for="push_mirror_password">{{ctx.Locale.Tr "password"}}</label>
 														<input id="push_mirror_password" name="push_mirror_password" type="password" value="{{.push_mirror_password}}" autocomplete="off">
 													</div>
+													{{if .CanUseSSHMirroring}}
+													<div class="inline field {{if .Err_PushMirrorUseSSH}}error{{end}}">
+														<div class="ui checkbox df ac">
+															<input id="push_mirror_use_ssh" name="push_mirror_use_ssh" type="checkbox" {{if .push_mirror_use_ssh}}checked{{end}}>
+															<label for="push_mirror_use_ssh" class="inline">{{ctx.Locale.Tr "repo.mirror_use_ssh.text"}}</label>
+															<span class="help tw-block">{{ctx.Locale.Tr "repo.mirror_use_ssh.helper"}}
+														</div>
+													</div>
+													{{end}}
 												</div>
 											</details>
 											<div class="field">

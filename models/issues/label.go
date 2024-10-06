@@ -7,6 +7,7 @@ package issues
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -142,28 +143,38 @@ func (l *Label) CalOpenOrgIssues(ctx context.Context, repoID, labelID int64) {
 
 // LoadSelectedLabelsAfterClick calculates the set of selected labels when a label is clicked
 func (l *Label) LoadSelectedLabelsAfterClick(currentSelectedLabels []int64, currentSelectedExclusiveScopes []string) {
-	var labelQuerySlice []string
+	labelQuerySlice := []int64{}
 	labelSelected := false
-	labelID := strconv.FormatInt(l.ID, 10)
-	labelScope := l.ExclusiveScope()
-	for i, s := range currentSelectedLabels {
-		if s == l.ID {
+	exclusiveScope := l.ExclusiveScope()
+	for i, curSel := range currentSelectedLabels {
+		if curSel == l.ID {
 			labelSelected = true
-		} else if -s == l.ID {
+		} else if -curSel == l.ID {
 			labelSelected = true
 			l.IsExcluded = true
-		} else if s != 0 {
+		} else if curSel != 0 {
 			// Exclude other labels in the same scope from selection
-			if s < 0 || labelScope == "" || labelScope != currentSelectedExclusiveScopes[i] {
-				labelQuerySlice = append(labelQuerySlice, strconv.FormatInt(s, 10))
+			if curSel < 0 || exclusiveScope == "" || exclusiveScope != currentSelectedExclusiveScopes[i] {
+				labelQuerySlice = append(labelQuerySlice, curSel)
 			}
 		}
 	}
+
 	if !labelSelected {
-		labelQuerySlice = append(labelQuerySlice, labelID)
+		labelQuerySlice = append(labelQuerySlice, l.ID)
 	}
 	l.IsSelected = labelSelected
-	l.QueryString = strings.Join(labelQuerySlice, ",")
+
+	// Sort and deduplicate the ids to avoid the crawlers asking for the
+	// same thing with simply a different order of parameters
+	slices.Sort(labelQuerySlice)
+	labelQuerySlice = slices.Compact(labelQuerySlice)
+	// Quick conversion (strings.Join() doesn't accept slices of Int64)
+	labelQuerySliceStrings := make([]string, len(labelQuerySlice))
+	for i, x := range labelQuerySlice {
+		labelQuerySliceStrings[i] = strconv.FormatInt(x, 10)
+	}
+	l.QueryString = strings.Join(labelQuerySliceStrings, ",")
 }
 
 // BelongsToOrg returns true if label is an organization label
@@ -176,7 +187,7 @@ func (l *Label) BelongsToRepo() bool {
 	return l.RepoID > 0
 }
 
-// Return scope substring of label name, or empty string if none exists
+// ExclusiveScope returns scope substring of label name, or empty string if none exists
 func (l *Label) ExclusiveScope() string {
 	if !l.Exclusive {
 		return ""

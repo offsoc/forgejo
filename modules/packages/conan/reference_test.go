@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewRecipeReference(t *testing.T) {
@@ -40,53 +41,53 @@ func TestNewRecipeReference(t *testing.T) {
 	for i, c := range cases {
 		rref, err := NewRecipeReference(c.Name, c.Version, c.User, c.Channel, c.Revision)
 		if c.IsValid {
-			assert.NoError(t, err, "case %d, should be invalid", i)
+			require.NoError(t, err, "case %d, should be invalid", i)
 			assert.NotNil(t, rref, "case %d, should not be nil", i)
 		} else {
-			assert.Error(t, err, "case %d, should be valid", i)
+			require.Error(t, err, "case %d, should be valid", i)
 		}
 	}
 }
 
 func TestRecipeReferenceRevisionOrDefault(t *testing.T) {
 	rref, err := NewRecipeReference("name", "1.0", "", "", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, DefaultRevision, rref.RevisionOrDefault())
 
 	rref, err = NewRecipeReference("name", "1.0", "", "", DefaultRevision)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, DefaultRevision, rref.RevisionOrDefault())
 
 	rref, err = NewRecipeReference("name", "1.0", "", "", "Az09")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "Az09", rref.RevisionOrDefault())
 }
 
 func TestRecipeReferenceString(t *testing.T) {
 	rref, err := NewRecipeReference("name", "1.0", "", "", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "name/1.0", rref.String())
 
 	rref, err = NewRecipeReference("name", "1.0", "user", "channel", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "name/1.0@user/channel", rref.String())
 
 	rref, err = NewRecipeReference("name", "1.0", "user", "channel", "Az09")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "name/1.0@user/channel#Az09", rref.String())
 }
 
 func TestRecipeReferenceLinkName(t *testing.T) {
 	rref, err := NewRecipeReference("name", "1.0", "", "", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "name/1.0/_/_/0", rref.LinkName())
 
 	rref, err = NewRecipeReference("name", "1.0", "user", "channel", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "name/1.0/user/channel/0", rref.LinkName())
 
 	rref, err = NewRecipeReference("name", "1.0", "user", "channel", "Az09")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "name/1.0/user/channel/Az09", rref.LinkName())
 }
 
@@ -110,10 +111,10 @@ func TestNewPackageReference(t *testing.T) {
 	for i, c := range cases {
 		pref, err := NewPackageReference(c.Recipe, c.Reference, c.Revision)
 		if c.IsValid {
-			assert.NoError(t, err, "case %d, should be invalid", i)
+			require.NoError(t, err, "case %d, should be invalid", i)
 			assert.NotNil(t, pref, "case %d, should not be nil", i)
 		} else {
-			assert.Error(t, err, "case %d, should be valid", i)
+			require.Error(t, err, "case %d, should be valid", i)
 		}
 	}
 }
@@ -122,15 +123,15 @@ func TestPackageReferenceRevisionOrDefault(t *testing.T) {
 	rref, _ := NewRecipeReference("name", "1.0", "", "", "")
 
 	pref, err := NewPackageReference(rref, "ref", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, DefaultRevision, pref.RevisionOrDefault())
 
 	pref, err = NewPackageReference(rref, "ref", DefaultRevision)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, DefaultRevision, pref.RevisionOrDefault())
 
 	pref, err = NewPackageReference(rref, "ref", "Az09")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "Az09", pref.RevisionOrDefault())
 }
 
@@ -138,10 +139,10 @@ func TestPackageReferenceLinkName(t *testing.T) {
 	rref, _ := NewRecipeReference("name", "1.0", "", "", "")
 
 	pref, err := NewPackageReference(rref, "ref", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "ref/0", pref.LinkName())
 
 	pref, err = NewPackageReference(rref, "ref", "Az09")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "ref/Az09", pref.LinkName())
 }

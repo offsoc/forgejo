@@ -24,6 +24,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPILFSNotStarted(t *testing.T) {
@@ -65,7 +66,7 @@ func createLFSTestRepository(t *testing.T, name string) *repo_model.Repository {
 	t.Run("CreateRepo", doAPICreateRepository(ctx, false, git.Sha1ObjectFormat)) // FIXME: use forEachObjectFormat
 
 	repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, "user2", "lfs-"+name+"-repo")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	return repo
 }
@@ -85,13 +86,13 @@ func TestAPILFSBatch(t *testing.T) {
 
 	newRequest := func(t testing.TB, br *lfs.BatchRequest) *RequestWrapper {
 		return NewRequestWithJSON(t, "POST", "/user2/lfs-batch-repo.git/info/lfs/objects/batch", br).
-			SetHeader("Accept", lfs.MediaType).
+			SetHeader("Accept", lfs.AcceptHeader).
 			SetHeader("Content-Type", lfs.MediaType)
 	}
 	decodeResponse := func(t *testing.T, b *bytes.Buffer) *lfs.BatchResponse {
 		var br lfs.BatchResponse
 
-		assert.NoError(t, json.Unmarshal(b.Bytes(), &br))
+		require.NoError(t, json.Unmarshal(b.Bytes(), &br))
 		return &br
 	}
 
@@ -184,10 +185,10 @@ func TestAPILFSBatch(t *testing.T) {
 
 			contentStore := lfs.NewContentStore()
 			exist, err := contentStore.Exists(p)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.False(t, exist)
 			err = contentStore.Put(p, bytes.NewReader([]byte("dummy0")))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			req := newRequest(t, &lfs.BatchRequest{
 				Operation: "download",
@@ -255,7 +256,7 @@ func TestAPILFSBatch(t *testing.T) {
 
 			contentStore := lfs.NewContentStore()
 			exist, err := contentStore.Exists(p)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.True(t, exist)
 
 			repo2 := createLFSTestRepository(t, "batch2")
@@ -278,12 +279,12 @@ func TestAPILFSBatch(t *testing.T) {
 			assert.Empty(t, br.Objects[0].Actions)
 
 			meta, err = git_model.GetLFSMetaObjectByOid(db.DefaultContext, repo.ID, p.Oid)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, meta)
 
 			// Cleanup
 			err = contentStore.Delete(p.RelativePath())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 
 		t.Run("AlreadyExists", func(t *testing.T) {
@@ -361,10 +362,10 @@ func TestAPILFSUpload(t *testing.T) {
 
 		contentStore := lfs.NewContentStore()
 		exist, err := contentStore.Exists(p)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, exist)
 		err = contentStore.Put(p, bytes.NewReader([]byte("dummy5")))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		meta, err := git_model.GetLFSMetaObjectByOid(db.DefaultContext, repo.ID, p.Oid)
 		assert.Nil(t, meta)
@@ -380,13 +381,13 @@ func TestAPILFSUpload(t *testing.T) {
 
 			session.MakeRequest(t, req, http.StatusOK)
 			meta, err = git_model.GetLFSMetaObjectByOid(db.DefaultContext, repo.ID, p.Oid)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, meta)
 		})
 
 		// Cleanup
 		err = contentStore.Delete(p.RelativePath())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("MetaAlreadyExists", func(t *testing.T) {
@@ -424,11 +425,11 @@ func TestAPILFSUpload(t *testing.T) {
 
 		contentStore := lfs.NewContentStore()
 		exist, err := contentStore.Exists(p)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, exist)
 
 		meta, err := git_model.GetLFSMetaObjectByOid(db.DefaultContext, repo.ID, p.Oid)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, meta)
 	})
 }
@@ -448,7 +449,7 @@ func TestAPILFSVerify(t *testing.T) {
 
 	newRequest := func(t testing.TB, p *lfs.Pointer) *RequestWrapper {
 		return NewRequestWithJSON(t, "POST", "/user2/lfs-verify-repo.git/info/lfs/verify", p).
-			SetHeader("Accept", lfs.MediaType).
+			SetHeader("Accept", lfs.AcceptHeader).
 			SetHeader("Content-Type", lfs.MediaType)
 	}
 

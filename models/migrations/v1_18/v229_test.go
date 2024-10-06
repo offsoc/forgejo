@@ -7,35 +7,34 @@ import (
 	"testing"
 
 	"code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_UpdateOpenMilestoneCounts(t *testing.T) {
 	type ExpectedMilestone issues.Milestone
 
 	// Prepare and load the testing database
-	x, deferable := base.PrepareTestEnv(t, 0, new(issues.Milestone), new(ExpectedMilestone), new(issues.Issue))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(issues.Milestone), new(ExpectedMilestone), new(issues.Issue))
 	defer deferable()
 	if x == nil || t.Failed() {
 		return
 	}
 
 	if err := UpdateOpenMilestoneCounts(x); err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return
 	}
 
 	expected := []ExpectedMilestone{}
-	if err := x.Table("expected_milestone").Asc("id").Find(&expected); !assert.NoError(t, err) {
-		return
-	}
+	err := x.Table("expected_milestone").Asc("id").Find(&expected)
+	require.NoError(t, err)
 
 	got := []issues.Milestone{}
-	if err := x.Table("milestone").Asc("id").Find(&got); !assert.NoError(t, err) {
-		return
-	}
+	err = x.Table("milestone").Asc("id").Find(&got)
+	require.NoError(t, err)
 
 	for i, e := range expected {
 		got := got[i]

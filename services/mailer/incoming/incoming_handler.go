@@ -181,7 +181,7 @@ func (h *UnsubscribeHandler) Handle(ctx context.Context, _ *MailContent, doer *u
 		}
 
 		return issues_model.CreateOrUpdateIssueWatch(ctx, doer.ID, issue.ID, false)
+	default:
+		return fmt.Errorf("unsupported unsubscribe reference: %v", ref)
 	}
-
-	return fmt.Errorf("unsupported unsubscribe reference: %v", ref)
 }

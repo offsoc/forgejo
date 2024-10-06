@@ -195,7 +195,7 @@ func GetAllCommits(ctx *context.APIContext) {
 			// get commit specified by sha
 			baseCommit, err = ctx.Repo.GitRepo.GetCommit(sha)
 			if err != nil {
-				ctx.Error(http.StatusInternalServerError, "GetCommit", err)
+				ctx.NotFoundOrServerError("GetCommit", git.IsErrNotExist, err)
 				return
 			}
 		}
@@ -354,7 +354,7 @@ func GetCommitPullRequest(ctx *context.APIContext) {
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
-	pr, err := issues_model.GetPullRequestByMergedCommit(ctx, ctx.Repo.Repository.ID, ctx.Params(":sha"))
+	pr, err := issues_model.GetPullRequestByMergedCommit(ctx, ctx.Repo.Repository.ID, ctx.Params("ref"))
 	if err != nil {
 		if issues_model.IsErrPullRequestNotExist(err) {
 			ctx.Error(http.StatusNotFound, "GetPullRequestByMergedCommit", err)

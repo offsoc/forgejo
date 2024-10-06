@@ -301,9 +301,10 @@ func (g *GitlabDownloader) GetLabels() ([]*base.Label, error) {
 		}
 		for _, label := range ls {
 			baseLabel := &base.Label{
-				Name:        label.Name,
+				Name:        strings.Replace(label.Name, "::", "/", 1),
 				Color:       g.normalizeColor(label.Color),
 				Description: label.Description,
+				Exclusive:   strings.Contains(label.Name, "::"),
 			}
 			labels = append(labels, baseLabel)
 		}
@@ -424,7 +425,7 @@ func (g *GitlabDownloader) GetIssues(page, perPage int) ([]*base.Issue, bool, er
 		labels := make([]*base.Label, 0, len(issue.Labels))
 		for _, l := range issue.Labels {
 			labels = append(labels, &base.Label{
-				Name: l,
+				Name: strings.Replace(l, "::", "/", 1),
 			})
 		}
 
@@ -635,7 +636,7 @@ func (g *GitlabDownloader) GetPullRequests(page, perPage int) ([]*base.PullReque
 		labels := make([]*base.Label, 0, len(pr.Labels))
 		for _, l := range pr.Labels {
 			labels = append(labels, &base.Label{
-				Name: l,
+				Name: strings.Replace(l, "::", "/", 1),
 			})
 		}
 

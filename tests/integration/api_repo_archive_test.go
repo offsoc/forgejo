@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIDownloadArchive(t *testing.T) {
@@ -31,14 +32,14 @@ func TestAPIDownloadArchive(t *testing.T) {
 	link, _ := url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/archive/master.zip", user2.Name, repo.Name))
 	resp := MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusOK)
 	bs, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, bs, 320)
 	assert.EqualValues(t, "application/zip", resp.Header().Get("Content-Type"))
 
 	link, _ = url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/archive/master.tar.gz", user2.Name, repo.Name))
 	resp = MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusOK)
 	bs, err = io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, bs, 266)
 	assert.EqualValues(t, "application/gzip", resp.Header().Get("Content-Type"))
 
@@ -48,14 +49,14 @@ func TestAPIDownloadArchive(t *testing.T) {
 	assert.NotEmpty(t, m[1])
 	resp = MakeRequest(t, NewRequest(t, "GET", m[1]).AddTokenAuth(token), http.StatusOK)
 	bs2, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	// The locked URL should give the same bytes as the non-locked one
 	assert.EqualValues(t, bs, bs2)
 
 	link, _ = url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/archive/master.bundle", user2.Name, repo.Name))
 	resp = MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusOK)
 	bs, err = io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, bs, 382)
 	assert.EqualValues(t, "application/octet-stream", resp.Header().Get("Content-Type"))
 

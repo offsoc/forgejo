@@ -1,0 +1,24 @@
+X-Total: 2
+Set-Cookie: _cfuvid=uwwcVHMnVqsf5dOVdmePMl8w9SEvmr1muvo7QttWeKI-1725394794295-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+Content-Security-Policy: default-src 'none'
+Etag: W/"a42f286b703ec341ad7f117b273a51ad"
+Link: <https://gitlab.com/api/v4/projects/61363672/milestones?id=61363672&include_ancestors=false&page=1&per_page=100&state=all>; rel="first", <https://gitlab.com/api/v4/projects/61363672/milestones?id=61363672&include_ancestors=false&page=1&per_page=100&state=all>; rel="last"
+Vary: Origin, Accept-Encoding
+X-Content-Type-Options: nosniff
+X-Gitlab-Meta: {"correlation_id":"ed978cae0ea2bf9ac4b1f46fddfdf982","version":"1"}
+X-Per-Page: 100
+Cache-Control: max-age=0, private, must-revalidate
+Cf-Cache-Status: MISS
+Content-Type: application/json
+X-Next-Page: 
+X-Page: 1
+Strict-Transport-Security: max-age=31536000
+Gitlab-Sv: api-gke-us-east1-c
+X-Frame-Options: SAMEORIGIN
+X-Prev-Page: 
+Referrer-Policy: strict-origin-when-cross-origin
+Gitlab-Lb: haproxy-main-34-lb-gprd
+X-Runtime: 0.069266
+X-Total-Pages: 1
+
+[{"id":4711993,"iid":2,"project_id":61363672,"title":"1.0.0","description":"","state":"closed","created_at":"2024-09-03T13:53:08.516Z","updated_at":"2024-09-03T20:03:57.786Z","due_date":null,"start_date":null,"expired":false,"web_url":"https://gitlab.com/forgejo/test_repo/-/milestones/2"},{"id":4711991,"iid":1,"project_id":61363672,"title":"1.1.0","description":"","state":"active","created_at":"2024-09-03T13:52:48.414Z","updated_at":"2024-09-03T14:52:14.093Z","due_date":null,"start_date":null,"expired":false,"web_url":"https://gitlab.com/forgejo/test_repo/-/milestones/1"}]

@@ -295,11 +295,11 @@ async function linkAction(e) {
 export function initGlobalLinkActions() {
   function showDeletePopup(e) {
     e.preventDefault();
-    const $this = $(this);
+    const $this = $(this || e.target);
     const dataArray = $this.data();
     let filter = '';
-    if (this.getAttribute('data-modal-id')) {
-      filter += `#${this.getAttribute('data-modal-id')}`;
+    if ($this[0].getAttribute('data-modal-id')) {
+      filter += `#${$this[0].getAttribute('data-modal-id')}`;
     }
 
     const $dialog = $(`.delete.modal${filter}`);
@@ -315,6 +315,10 @@ export function initGlobalLinkActions() {
       onApprove: async () => {
         if ($this.data('type') === 'form') {
           $($this.data('form')).trigger('submit');
+          return;
+        }
+        if ($this[0].getAttribute('hx-confirm')) {
+          e.detail.issueRequest(true);
           return;
         }
         const postData = new FormData();
@@ -338,6 +342,19 @@ export function initGlobalLinkActions() {
 
   // Helpers.
   $('.delete-button').on('click', showDeletePopup);
+
+  document.addEventListener('htmx:confirm', (e) => {
+    e.preventDefault();
+    // htmx:confirm is triggered for every HTMX request, even those that don't
+    // have the `hx-confirm` attribute specified. To avoid opening modals for
+    // those elements, check if 'e.detail.question' is empty, which contains the
+    // value of the `hx-confirm` attribute.
+    if (!e.detail.question) {
+      e.detail.issueRequest(true);
+    } else {
+      showDeletePopup(e);
+    }
+  });
 }
 
 function initGlobalShowModal() {

@@ -9,11 +9,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPamAuth(t *testing.T) {
 	result, err := Auth("gitea", "user1", "false-pwd")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.EqualError(t, err, "Authentication failure")
 	assert.Len(t, result, 0)
 }

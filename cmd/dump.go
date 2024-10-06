@@ -20,7 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/storage"
 	"code.gitea.io/gitea/modules/util"
 
-	"gitea.com/go-chi/session"
+	"code.forgejo.org/go-chi/session"
 	"github.com/mholt/archiver/v3"
 	"github.com/urfave/cli/v2"
 )

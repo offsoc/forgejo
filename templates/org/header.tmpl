@@ -9,7 +9,7 @@
 					{{if .Org.Visibility.IsPrivate}}<span class="ui large basic horizontal label">{{ctx.Locale.Tr "org.settings.visibility.private_shortname"}}</span>{{end}}
 				</span>
 			</div>
-			<span class="tw-flex tw-items-center top-right-buttons tw-ml-auto tw-text-16 tw-whitespace-nowrap">
+			<span class="tw-flex tw-items-center button-row tw-ml-auto tw-text-16 tw-whitespace-nowrap">
 				{{if .EnableFeed}}
 					<a class="ui basic label button tw-mr-0" href="{{.Org.HomeLink}}.rss" data-tooltip-content="{{ctx.Locale.Tr "rss_feed"}}">
 						{{svg "octicon-rss" 24}}

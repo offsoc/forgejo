@@ -19,6 +19,7 @@ import (
 
 	ap "github.com/go-ap/activitypub"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestActivityPubPerson(t *testing.T) {
@@ -39,7 +40,7 @@ func TestActivityPubPerson(t *testing.T) {
 
 		var person ap.Person
 		err := person.UnmarshalJSON(body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, ap.PersonType, person.Type)
 		assert.Equal(t, username, person.PreferredUsername.String())
@@ -95,15 +96,17 @@ func TestActivityPubPersonInbox(t *testing.T) {
 		username1 := "user1"
 		ctx := context.Background()
 		user1, err := user_model.GetUserByName(ctx, username1)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		user1url := fmt.Sprintf("%s/api/v1/activitypub/user-id/1#main-key", srv.URL)
-		c, err := activitypub.NewClient(db.DefaultContext, user1, user1url)
-		assert.NoError(t, err)
+		cf, err := activitypub.GetClientFactory(ctx)
+		require.NoError(t, err)
+		c, err := cf.WithKeys(db.DefaultContext, user1, user1url)
+		require.NoError(t, err)
 		user2inboxurl := fmt.Sprintf("%s/api/v1/activitypub/user-id/2/inbox", srv.URL)
 
 		// Signed request succeeds
 		resp, err := c.Post([]byte{}, user2inboxurl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 
 		// Unsigned request fails

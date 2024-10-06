@@ -39,7 +39,7 @@ func redirectToBadge(ctx *context_module.Context, label, text, color string) {
 	ctx.Redirect(getBadgeURL(ctx, label, text, color))
 }
 
-func errorBadge(ctx *context_module.Context, label, text string) {
+func errorBadge(ctx *context_module.Context, label, text string) { //nolint:unparam
 	ctx.Redirect(getBadgeURL(ctx, label, text, "crimson"))
 }
 

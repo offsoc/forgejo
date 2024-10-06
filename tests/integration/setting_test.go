@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSettingShowUserEmailExplore(t *testing.T) {
@@ -133,7 +134,7 @@ func TestSettingSecurityAuthSource(t *testing.T) {
 		LoginSourceID: active.ID,
 	}
 	err := user_model.LinkExternalToUser(db.DefaultContext, user, activeExternalLoginUser)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	inactive := addAuthSource(t, authSourcePayloadGitLabCustom("gitlab-inactive"))
 	inactiveExternalLoginUser := &user_model.ExternalLoginUser{
@@ -142,12 +143,12 @@ func TestSettingSecurityAuthSource(t *testing.T) {
 		LoginSourceID: inactive.ID,
 	}
 	err = user_model.LinkExternalToUser(db.DefaultContext, user, inactiveExternalLoginUser)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// mark the authSource as inactive
 	inactive.IsActive = false
 	err = auth_model.UpdateSource(db.DefaultContext, inactive)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	session := loginUser(t, "user1")
 	req := NewRequest(t, "GET", "user/settings/security")

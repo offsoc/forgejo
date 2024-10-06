@@ -72,7 +72,7 @@ func AccountPost(ctx *context.Context) {
 			case errors.Is(err, password.ErrComplexity):
 				ctx.Flash.Error(password.BuildComplexityError(ctx.Locale))
 			case errors.Is(err, password.ErrIsPwned):
-				ctx.Flash.Error(ctx.Tr("auth.password_pwned"))
+				ctx.Flash.Error(ctx.Tr("auth.password_pwned", "https://haveibeenpwned.com/Passwords"))
 			case password.IsErrIsPwnedRequest(err):
 				ctx.Flash.Error(ctx.Tr("auth.password_pwned_err"))
 			default:
@@ -104,7 +104,15 @@ func EmailPost(ctx *context.Context) {
 
 	// Make emailaddress primary.
 	if ctx.FormString("_method") == "PRIMARY" {
-		if err := user_model.MakeEmailPrimary(ctx, &user_model.EmailAddress{ID: ctx.FormInt64("id")}); err != nil {
+		id := ctx.FormInt64("id")
+		email, err := user_model.GetEmailAddressByID(ctx, ctx.Doer.ID, id)
+		if err != nil {
+			log.Error("GetEmailAddressByID(%d,%d) error: %v", ctx.Doer.ID, id, err)
+			ctx.Redirect(setting.AppSubURL + "/user/settings/account")
+			return
+		}
+
+		if err := user.MakeEmailAddressPrimary(ctx, ctx.Doer, email, true); err != nil {
 			ctx.ServerError("MakeEmailPrimary", err)
 			return
 		}

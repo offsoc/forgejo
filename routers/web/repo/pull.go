@@ -24,6 +24,7 @@ import (
 	"code.gitea.io/gitea/models/organization"
 	access_model "code.gitea.io/gitea/models/perm/access"
 	pull_model "code.gitea.io/gitea/models/pull"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
@@ -250,6 +251,10 @@ func ForkPost(ctx *context.Context) {
 
 	ctx.Data["ContextUser"] = ctxUser
 
+	if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, ctxUser.ID, ctxUser.Name) {
+		return
+	}
+
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplFork)
 		return
@@ -289,7 +294,7 @@ func ForkPost(ctx *context.Context) {
 		}
 	}
 
-	repo, err := repo_service.ForkRepository(ctx, ctx.Doer, ctxUser, repo_service.ForkRepoOptions{
+	repo, err := repo_service.ForkRepositoryAndUpdates(ctx, ctx.Doer, ctxUser, repo_service.ForkRepoOptions{
 		BaseRepo:     forkRepo,
 		Name:         form.RepoName,
 		Description:  form.Description,
@@ -510,6 +515,10 @@ func PrepareMergedViewPullInfo(ctx *context.Context, issue *issues_model.Issue) 
 			ctx.ServerError("GetLatestCommitStatus", err)
 			return nil
 		}
+		if !ctx.Repo.CanRead(unit.TypeActions) {
+			git_model.CommitStatusesHideActionsURL(ctx, commitStatuses)
+		}
+
 		if len(commitStatuses) != 0 {
 			ctx.Data["LatestCommitStatuses"] = commitStatuses
 			ctx.Data["LatestCommitStatus"] = git_model.CalcCommitStatus(commitStatuses)
@@ -572,6 +581,10 @@ func PrepareViewPullInfo(ctx *context.Context, issue *issues_model.Issue) *git.C
 			ctx.ServerError("GetLatestCommitStatus", err)
 			return nil
 		}
+		if !ctx.Repo.CanRead(unit.TypeActions) {
+			git_model.CommitStatusesHideActionsURL(ctx, commitStatuses)
+		}
+
 		if len(commitStatuses) > 0 {
 			ctx.Data["LatestCommitStatuses"] = commitStatuses
 			ctx.Data["LatestCommitStatus"] = git_model.CalcCommitStatus(commitStatuses)
@@ -664,6 +677,10 @@ func PrepareViewPullInfo(ctx *context.Context, issue *issues_model.Issue) *git.C
 		ctx.ServerError("GetLatestCommitStatus", err)
 		return nil
 	}
+	if !ctx.Repo.CanRead(unit.TypeActions) {
+		git_model.CommitStatusesHideActionsURL(ctx, commitStatuses)
+	}
+
 	if len(commitStatuses) > 0 {
 		ctx.Data["LatestCommitStatuses"] = commitStatuses
 		ctx.Data["LatestCommitStatus"] = git_model.CalcCommitStatus(commitStatuses)
@@ -830,7 +847,7 @@ func ViewPullCommits(ctx *context.Context) {
 	ctx.Data["Username"] = ctx.Repo.Owner.Name
 	ctx.Data["Reponame"] = ctx.Repo.Repository.Name
 
-	commits := git_model.ConvertFromGitCommit(ctx, prInfo.Commits, ctx.Repo.Repository)
+	commits := processGitCommits(ctx, prInfo.Commits)
 	ctx.Data["Commits"] = commits
 	ctx.Data["CommitCount"] = len(commits)
 
@@ -1507,14 +1524,12 @@ func CompareAndPullRequestPost(ctx *context.Context) {
 	// instead of 500.
 
 	if err := pull_service.NewPullRequest(ctx, repo, pullIssue, labelIDs, attachments, pullRequest, assigneeIDs); err != nil {
-		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.Flash.Error(ctx.Tr("repo.pulls.blocked_by_user"))
-			ctx.Redirect(ctx.Link)
-			return
-		} else if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) {
+		switch {
+		case errors.Is(err, user_model.ErrBlockedByUser):
+			ctx.JSONError(ctx.Tr("repo.pulls.blocked_by_user"))
+		case repo_model.IsErrUserDoesNotHaveAccessToRepo(err):
 			ctx.Error(http.StatusBadRequest, "UserDoesNotHaveAccessToRepo", err.Error())
-			return
-		} else if git.IsErrPushRejected(err) {
+		case git.IsErrPushRejected(err):
 			pushrejErr := err.(*git.ErrPushRejected)
 			message := pushrejErr.Message
 			if len(message) == 0 {
@@ -1531,7 +1546,11 @@ func CompareAndPullRequestPost(ctx *context.Context) {
 				return
 			}
 			ctx.JSONError(flashError)
-			return
+		default:
+			// It's an unexpected error.
+			// If it happens, we should add another case to handle it.
+			log.Error("Unexpected error of NewPullRequest: %T %s", err, err)
+			ctx.ServerError("CompareAndPullRequest", err)
 		}
 		ctx.ServerError("NewPullRequest", err)
 		return
@@ -1805,7 +1824,7 @@ func SetAllowEdits(ctx *context.Context) {
 	}
 
 	if err := pull_service.SetAllowEdits(ctx, ctx.Doer, pr, form.AllowMaintainerEdit); err != nil {
-		if errors.Is(pull_service.ErrUserHasNoPermissionForAction, err) {
+		if errors.Is(err, pull_service.ErrUserHasNoPermissionForAction) {
 			ctx.Error(http.StatusForbidden)
 			return
 		}

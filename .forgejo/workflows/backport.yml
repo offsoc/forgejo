@@ -38,7 +38,7 @@ jobs:
       )
     runs-on: docker
     container:
-      image: 'docker.io/node:20-bookworm'
+      image: 'code.forgejo.org/oci/node:20-bookworm'
     steps:
       - name: event info
         run: |
@@ -55,3 +55,5 @@ jobs:
           pull-request: ${{ github.event.pull_request.url }}
           auto-no-squash: true
           enable-err-notification: true
+          git-user: forgejo-backport-action
+          git-email: forgejo-backport-action@noreply.codeberg.org

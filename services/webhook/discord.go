@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	webhook_model "code.gitea.io/gitea/models/webhook"
 	"code.gitea.io/gitea/modules/git"
@@ -179,8 +180,14 @@ func (d discordConvertor) Push(p *api.PushPayload) (DiscordPayload, error) {
 	var text string
 	// for each commit, generate attachment text
 	for i, commit := range p.Commits {
-		text += fmt.Sprintf("[%s](%s) %s - %s", commit.ID[:7], commit.URL,
-			strings.TrimRight(commit.Message, "\r\n"), commit.Author.Name)
+		// limit the commit message display to just the summary, otherwise it would be hard to read
+		message := strings.TrimRight(strings.SplitN(commit.Message, "\n", 1)[0], "\r")
+
+		// a limit of 50 is set because GitHub does the same
+		if utf8.RuneCountInString(message) > 50 {
+			message = fmt.Sprintf("%.47s...", message)
+		}
+		text += fmt.Sprintf("[%s](%s) %s - %s", commit.ID[:7], commit.URL, message, commit.Author.Name)
 		// add linebreak to each commit but the last
 		if i < len(p.Commits)-1 {
 			text += "\n"
@@ -215,8 +222,7 @@ func (d discordConvertor) PullRequest(p *api.PullRequestPayload) (DiscordPayload
 func (d discordConvertor) Review(p *api.PullRequestPayload, event webhook_module.HookEventType) (DiscordPayload, error) {
 	var text, title string
 	var color int
-	switch p.Action {
-	case api.HookIssueReviewed:
+	if p.Action == api.HookIssueReviewed {
 		action, err := parseHookPullRequestEventType(event)
 		if err != nil {
 			return DiscordPayload{}, err

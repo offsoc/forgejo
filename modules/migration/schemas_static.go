@@ -6,10 +6,18 @@
 package migration
 
 import (
-	"io"
 	"path"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
-func openSchema(filename string) (io.ReadCloser, error) {
-	return Assets.Open(path.Base(filename))
+type SchemaLoader struct{}
+
+func (*SchemaLoader) Load(filename string) (any, error) {
+	f, err := Assets.Open(path.Base(filename))
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return jsonschema.UnmarshalJSON(f)
 }

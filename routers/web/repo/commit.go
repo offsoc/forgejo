@@ -16,6 +16,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	git_model "code.gitea.io/gitea/models/git"
 	repo_model "code.gitea.io/gitea/models/repo"
+	unit_model "code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/charset"
@@ -81,7 +82,7 @@ func Commits(ctx *context.Context) {
 		ctx.ServerError("CommitsByRange", err)
 		return
 	}
-	ctx.Data["Commits"] = git_model.ConvertFromGitCommit(ctx, commits, ctx.Repo.Repository)
+	ctx.Data["Commits"] = processGitCommits(ctx, commits)
 
 	ctx.Data["Username"] = ctx.Repo.Owner.Name
 	ctx.Data["Reponame"] = ctx.Repo.Repository.Name
@@ -199,7 +200,7 @@ func SearchCommits(ctx *context.Context) {
 		return
 	}
 	ctx.Data["CommitCount"] = len(commits)
-	ctx.Data["Commits"] = git_model.ConvertFromGitCommit(ctx, commits, ctx.Repo.Repository)
+	ctx.Data["Commits"] = processGitCommits(ctx, commits)
 
 	ctx.Data["Keyword"] = query
 	if all {
@@ -242,6 +243,12 @@ func FileHistory(ctx *context.Context) {
 		ctx.ServerError("CommitsByFileAndRange", err)
 		return
 	}
+
+	if len(commits) == 0 {
+		ctx.NotFound("CommitsByFileAndRange", nil)
+		return
+	}
+
 	oldestCommit := commits[len(commits)-1]
 
 	renamedFiles, err := git.GetCommitFileRenames(ctx, ctx.Repo.GitRepo.Path, oldestCommit.ID.String())
@@ -258,7 +265,7 @@ func FileHistory(ctx *context.Context) {
 		}
 	}
 
-	ctx.Data["Commits"] = git_model.ConvertFromGitCommit(ctx, commits, ctx.Repo.Repository)
+	ctx.Data["Commits"] = processGitCommits(ctx, commits)
 
 	ctx.Data["Username"] = ctx.Repo.Owner.Name
 	ctx.Data["Reponame"] = ctx.Repo.Repository.Name
@@ -369,6 +376,9 @@ func Diff(ctx *context.Context) {
 	if err != nil {
 		log.Error("GetLatestCommitStatus: %v", err)
 	}
+	if !ctx.Repo.CanRead(unit_model.TypeActions) {
+		git_model.CommitStatusesHideActionsURL(ctx, statuses)
+	}
 
 	ctx.Data["CommitStatus"] = git_model.CalcCommitStatus(statuses)
 	ctx.Data["CommitStatuses"] = statuses
@@ -406,12 +416,6 @@ func Diff(ctx *context.Context) {
 		}
 	}
 
-	ctx.Data["BranchName"], err = commit.GetBranchName()
-	if err != nil {
-		ctx.ServerError("commit.GetBranchName", err)
-		return
-	}
-
 	ctx.HTML(http.StatusOK, tplCommitPage)
 }
 
@@ -447,4 +451,18 @@ func RawDiff(ctx *context.Context) {
 		ctx.ServerError("GetRawDiff", err)
 		return
 	}
+}
+
+func processGitCommits(ctx *context.Context, gitCommits []*git.Commit) []*git_model.SignCommitWithStatuses {
+	commits := git_model.ConvertFromGitCommit(ctx, gitCommits, ctx.Repo.Repository)
+	if !ctx.Repo.CanRead(unit_model.TypeActions) {
+		for _, commit := range commits {
+			if commit.Status == nil {
+				continue
+			}
+			commit.Status.HideActionsURL(ctx)
+			git_model.CommitStatusesHideActionsURL(ctx, commit.Statuses)
+		}
+	}
+	return commits
 }

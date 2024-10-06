@@ -99,9 +99,15 @@ func ListMyRepos(ctx *context.APIContext) {
 	//   in: query
 	//   description: page size of results
 	//   type: integer
+	// - name: order_by
+	//   in: query
+	//   description: order the repositories by name (default), id, or size
+	//   type: string
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/RepositoryList"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
 
 	opts := &repo_model.SearchRepoOptions{
 		ListOptions:        utils.GetListOptions(ctx),
@@ -109,6 +115,19 @@ func ListMyRepos(ctx *context.APIContext) {
 		OwnerID:            ctx.Doer.ID,
 		Private:            ctx.IsSigned,
 		IncludeDescription: true,
+	}
+	orderBy := ctx.FormTrim("order_by")
+	switch orderBy {
+	case "name":
+		opts.OrderBy = "name ASC"
+	case "size":
+		opts.OrderBy = "size DESC"
+	case "id":
+		opts.OrderBy = "id ASC"
+	case "":
+	default:
+		ctx.Error(http.StatusUnprocessableEntity, "", "invalid order_by")
+		return
 	}
 
 	var err error

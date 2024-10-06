@@ -11,7 +11,7 @@
 					{{ctx.Locale.Tr "notification.read"}}
 				</a>
 			</div>
-			<div class="tw-flex top-right-buttons">
+			<div class="tw-flex button-row">
 				<a class="ui tiny button" href="{{AppSubUrl}}/notifications/subscriptions">
 					{{ctx.Locale.Tr "notification.subscriptions"}}
 				</a>
@@ -58,7 +58,7 @@
 								<div class="notifications-bottom-row tw-text-16 tw-py-0.5">
 									<span class="issue-title tw-break-anywhere">
 										{{if .Issue}}
-											{{.Issue.Title | RenderEmoji $.Context | RenderCodeBlock}}
+											{{RenderRefIssueTitle $.Context .Issue.Title}}
 										{{else}}
 											{{.Repository.FullName}}
 										{{end}}

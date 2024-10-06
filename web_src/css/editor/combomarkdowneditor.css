@@ -27,6 +27,7 @@
   padding: 5px;
   cursor: pointer;
   color: var(--color-text);
+  line-height: 20px;
 }
 
 .combo-markdown-editor .markdown-toolbar-button:hover {

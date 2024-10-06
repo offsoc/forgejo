@@ -16,13 +16,47 @@
     "description": "This documentation describes the Forgejo API.",
     "title": "Forgejo API",
     "license": {
-      "name": "MIT",
+      "name": "This file is distributed under the MIT license for the purpose of interoperability",
       "url": "http://opensource.org/licenses/MIT"
     },
     "version": "{{AppVer | JSEscape}}"
   },
   "basePath": "{{AppSubUrl | JSEscape}}/api/v1",
   "paths": {
+    "/activitypub/actor": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "activitypub"
+        ],
+        "summary": "Returns the instance's Actor",
+        "operationId": "activitypubInstanceActor",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ActivityPub"
+          }
+        }
+      }
+    },
+    "/activitypub/actor/inbox": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "activitypub"
+        ],
+        "summary": "Send to the inbox",
+        "operationId": "activitypubInstanceActorInbox",
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          }
+        }
+      }
+    },
     "/activitypub/repository-id/{repository-id}": {
       "get": {
         "produces": [
@@ -451,6 +485,513 @@
         }
       }
     },
+    "/admin/quota/groups": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "List the available quota groups",
+        "operationId": "adminListQuotaGroups",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaGroupList"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          }
+        }
+      },
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Create a new quota group",
+        "operationId": "adminCreateQuotaGroup",
+        "parameters": [
+          {
+            "description": "Definition of the quota group",
+            "name": "group",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateQuotaGroupOptions"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/QuotaGroup"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "409": {
+            "$ref": "#/responses/error"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          }
+        }
+      }
+    },
+    "/admin/quota/groups/{quotagroup}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get information about the quota group",
+        "operationId": "adminGetQuotaGroup",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "quota group to query",
+            "name": "quotagroup",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaGroup"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Delete a quota group",
+        "operationId": "adminDeleteQuotaGroup",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "quota group to delete",
+            "name": "quotagroup",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
+    "/admin/quota/groups/{quotagroup}/rules/{quotarule}": {
+      "put": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Adds a rule to a quota group",
+        "operationId": "adminAddRuleToQuotaGroup",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "quota group to add a rule to",
+            "name": "quotagroup",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "the name of the quota rule to add to the group",
+            "name": "quotarule",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          },
+          "409": {
+            "$ref": "#/responses/error"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Removes a rule from a quota group",
+        "operationId": "adminRemoveRuleFromQuotaGroup",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "quota group to remove a rule from",
+            "name": "quotagroup",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "the name of the quota rule to remove from the group",
+            "name": "quotarule",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/empty"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
+    "/admin/quota/groups/{quotagroup}/users": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "List users in a quota group",
+        "operationId": "adminListUsersInQuotaGroup",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "quota group to list members of",
+            "name": "quotagroup",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/UserList"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
+    "/admin/quota/groups/{quotagroup}/users/{username}": {
+      "put": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Add a user to a quota group",
+        "operationId": "adminAddUserToQuotaGroup",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "quota group to add the user to",
+            "name": "quotagroup",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "username of the user to add to the quota group",
+            "name": "username",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          },
+          "409": {
+            "$ref": "#/responses/error"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Remove a user from a quota group",
+        "operationId": "adminRemoveUserFromQuotaGroup",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "quota group to remove a user from",
+            "name": "quotagroup",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "username of the user to remove from the quota group",
+            "name": "username",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
+    "/admin/quota/rules": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "List the available quota rules",
+        "operationId": "adminListQuotaRules",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaRuleInfoList"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          }
+        }
+      },
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Create a new quota rule",
+        "operationId": "adminCreateQuotaRule",
+        "parameters": [
+          {
+            "description": "Definition of the quota rule",
+            "name": "rule",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateQuotaRuleOptions"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/QuotaRuleInfo"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "409": {
+            "$ref": "#/responses/error"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          }
+        }
+      }
+    },
+    "/admin/quota/rules/{quotarule}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get information about a quota rule",
+        "operationId": "adminGetQuotaRule",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "quota rule to query",
+            "name": "quotarule",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaRuleInfo"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Deletes a quota rule",
+        "operationId": "adminDEleteQuotaRule",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "quota rule to delete",
+            "name": "quotarule",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      },
+      "patch": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Change an existing quota rule",
+        "operationId": "adminEditQuotaRule",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Quota rule to change",
+            "name": "quotarule",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "rule",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EditQuotaRuleOptions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaRuleInfo"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          }
+        }
+      }
+    },
     "/admin/runners/registration-token": {
       "get": {
         "produces": [
@@ -866,6 +1407,91 @@
           },
           "403": {
             "$ref": "#/responses/forbidden"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          }
+        }
+      }
+    },
+    "/admin/users/{username}/quota": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Get the user's quota info",
+        "operationId": "adminGetUserQuota",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "username of user to query",
+            "name": "username",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaInfo"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          }
+        }
+      }
+    },
+    "/admin/users/{username}/quota/groups": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Set the user's quota groups to a given list.",
+        "operationId": "adminSetUserQuotaGroups",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "username of the user to modify the quota groups from",
+            "name": "username",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "list of groups that the user should be a member of",
+            "name": "groups",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SetUserQuotaGroupsOptions"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          },
+          "400": {
+            "$ref": "#/responses/error"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
           },
           "422": {
             "$ref": "#/responses/validationError"
@@ -2867,6 +3493,205 @@
         }
       }
     },
+    "/orgs/{org}/quota": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "organization"
+        ],
+        "summary": "Get quota information for an organization",
+        "operationId": "orgGetQuota",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "name of the organization",
+            "name": "org",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaInfo"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
+    "/orgs/{org}/quota/artifacts": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "organization"
+        ],
+        "summary": "List the artifacts affecting the organization's quota",
+        "operationId": "orgListQuotaArtifacts",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "name of the organization",
+            "name": "org",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "page number of results to return (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "page size of results",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaUsedArtifactList"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
+    "/orgs/{org}/quota/attachments": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "organization"
+        ],
+        "summary": "List the attachments affecting the organization's quota",
+        "operationId": "orgListQuotaAttachments",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "name of the organization",
+            "name": "org",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "page number of results to return (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "page size of results",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaUsedAttachmentList"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
+    "/orgs/{org}/quota/check": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "organization"
+        ],
+        "summary": "Check if the organization is over quota for a given subject",
+        "operationId": "orgCheckQuota",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "name of the organization",
+            "name": "org",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/boolean"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          }
+        }
+      }
+    },
+    "/orgs/{org}/quota/packages": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "organization"
+        ],
+        "summary": "List the packages affecting the organization's quota",
+        "operationId": "orgListQuotaPackages",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "name of the organization",
+            "name": "org",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "page number of results to return (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "page size of results",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaUsedPackageList"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
     "/orgs/{org}/repos": {
       "get": {
         "produces": [
@@ -3515,6 +4340,9 @@
           "409": {
             "description": "The repository with the same name already exists."
           },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
+          },
           "422": {
             "$ref": "#/responses/validationError"
           }
@@ -3616,7 +4444,7 @@
           },
           {
             "type": "string",
-            "description": "sort repos by attribute. Supported values are \"alpha\", \"created\", \"updated\", \"size\", and \"id\". Default is \"alpha\"",
+            "description": "sort repos by attribute. Supported values are \"alpha\", \"created\", \"updated\", \"size\", \"git_size\", \"lfs_size\", \"stars\", \"forks\" and \"id\". Default is \"alpha\"",
             "name": "sort",
             "in": "query"
           },
@@ -3766,6 +4594,39 @@
           },
           "422": {
             "$ref": "#/responses/validationError"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/actions/runners/registration-token": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Get a repository's actions runner registration token",
+        "operationId": "repoGetRunnerRegistrationToken",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/RegistrationToken"
           }
         }
       }
@@ -4232,6 +5093,56 @@
           },
           "400": {
             "$ref": "#/responses/error"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/actions/workflows/{workflowname}/dispatches": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Dispatches a workflow",
+        "operationId": "DispatchWorkflow",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the workflow",
+            "name": "workflowname",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/DispatchWorkflowOption"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
           },
           "404": {
             "$ref": "#/responses/notFound"
@@ -4770,6 +5681,9 @@
           },
           "409": {
             "description": "The branch with the same name already exists."
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
@@ -5507,6 +6421,9 @@
           "404": {
             "$ref": "#/responses/notFound"
           },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
+          },
           "422": {
             "$ref": "#/responses/error"
           },
@@ -5617,6 +6534,9 @@
           "404": {
             "$ref": "#/responses/notFound"
           },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
+          },
           "422": {
             "$ref": "#/responses/error"
           },
@@ -5677,6 +6597,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "422": {
             "$ref": "#/responses/error"
@@ -5742,6 +6665,9 @@
           "404": {
             "$ref": "#/responses/error"
           },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
+          },
           "423": {
             "$ref": "#/responses/repoArchivedError"
           }
@@ -5791,6 +6717,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
@@ -6192,6 +7121,9 @@
           },
           "409": {
             "description": "The repository with the same name already exists."
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "422": {
             "$ref": "#/responses/validationError"
@@ -7665,6 +8597,9 @@
           "404": {
             "$ref": "#/responses/error"
           },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
+          },
           "422": {
             "$ref": "#/responses/validationError"
           },
@@ -7835,6 +8770,9 @@
           },
           "404": {
             "$ref": "#/responses/error"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
@@ -8294,6 +9232,9 @@
           "404": {
             "$ref": "#/responses/error"
           },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
+          },
           "422": {
             "$ref": "#/responses/validationError"
           },
@@ -8464,6 +9405,9 @@
           },
           "404": {
             "$ref": "#/responses/error"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
@@ -10817,6 +11761,9 @@
     },
     "/repos/{owner}/{repo}/media/{filepath}": {
       "get": {
+        "produces": [
+          "application/octet-stream"
+        ],
         "tags": [
           "repository"
         ],
@@ -10853,7 +11800,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns raw file content."
+            "description": "Returns raw file content.",
+            "schema": {
+              "type": "file"
+            }
           },
           "404": {
             "$ref": "#/responses/notFound"
@@ -11132,6 +12082,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           }
         }
       }
@@ -11463,6 +12416,9 @@
           },
           "409": {
             "$ref": "#/responses/error"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "422": {
             "$ref": "#/responses/validationError"
@@ -11965,6 +12921,9 @@
           },
           "409": {
             "$ref": "#/responses/error"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
@@ -12824,6 +13783,9 @@
           "409": {
             "$ref": "#/responses/error"
           },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
+          },
           "422": {
             "$ref": "#/responses/validationError"
           }
@@ -12930,6 +13892,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           }
         }
       }
@@ -12972,6 +13937,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           }
         }
       }
@@ -13072,7 +14040,7 @@
     "/repos/{owner}/{repo}/raw/{filepath}": {
       "get": {
         "produces": [
-          "application/json"
+          "application/octet-stream"
         ],
         "tags": [
           "repository"
@@ -13110,7 +14078,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns raw file content."
+            "description": "Returns raw file content.",
+            "schema": {
+              "type": "file"
+            }
           },
           "404": {
             "$ref": "#/responses/notFound"
@@ -13573,8 +14544,14 @@
           },
           {
             "type": "file",
-            "description": "attachment to upload",
+            "description": "attachment to upload (this parameter is incompatible with `external_url`)",
             "name": "attachment",
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "description": "url to external asset (this parameter is incompatible with `attachment`)",
+            "name": "external_url",
             "in": "formData"
           }
         ],
@@ -13587,6 +14564,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           }
         }
       }
@@ -13749,6 +14729,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           }
         }
       }
@@ -13785,39 +14768,6 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
-          }
-        }
-      }
-    },
-    "/repos/{owner}/{repo}/runners/registration-token": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "repository"
-        ],
-        "summary": "Get a repository's actions runner registration token",
-        "operationId": "repoGetRunnerRegistrationToken",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "owner of the repo",
-            "name": "owner",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "name of the repo",
-            "name": "repo",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/RegistrationToken"
           }
         }
       }
@@ -14184,6 +15134,233 @@
         }
       }
     },
+    "/repos/{owner}/{repo}/tag_protections": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "List tag protections for a repository",
+        "operationId": "repoListTagProtection",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TagProtectionList"
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Create a tag protections for a repository",
+        "operationId": "repoCreateTagProtection",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateTagProtectionOption"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/TagProtection"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          },
+          "423": {
+            "$ref": "#/responses/repoArchivedError"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/tag_protections/{id}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Get a specific tag protection for the repository",
+        "operationId": "repoGetTagProtection",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "id of the tag protect to get",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TagProtection"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Delete a specific tag protection for the repository",
+        "operationId": "repoDeleteTagProtection",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "id of protected tag",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      },
+      "patch": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Edit a tag protections for a repository. Only fields that are set will be changed",
+        "operationId": "repoEditTagProtection",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "id of protected tag",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/EditTagProtectionOption"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/TagProtection"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          },
+          "423": {
+            "$ref": "#/responses/repoArchivedError"
+          }
+        }
+      }
+    },
     "/repos/{owner}/{repo}/tags": {
       "get": {
         "produces": [
@@ -14275,6 +15452,9 @@
           },
           "409": {
             "$ref": "#/responses/conflict"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "422": {
             "$ref": "#/responses/validationError"
@@ -14908,6 +16088,9 @@
           "404": {
             "$ref": "#/responses/notFound"
           },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
+          },
           "422": {
             "$ref": "#/responses/validationError"
           }
@@ -14949,6 +16132,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           }
         }
       }
@@ -15037,6 +16223,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
@@ -15181,6 +16370,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
@@ -15333,6 +16525,9 @@
           },
           "409": {
             "description": "The repository with the same name already exists."
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "422": {
             "$ref": "#/responses/validationError"
@@ -17215,6 +18410,151 @@
         }
       }
     },
+    "/user/quota": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Get quota information for the authenticated user",
+        "operationId": "userGetQuota",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaInfo"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          }
+        }
+      }
+    },
+    "/user/quota/artifacts": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "List the artifacts affecting the authenticated user's quota",
+        "operationId": "userListQuotaArtifacts",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "page number of results to return (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "page size of results",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaUsedArtifactList"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          }
+        }
+      }
+    },
+    "/user/quota/attachments": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "List the attachments affecting the authenticated user's quota",
+        "operationId": "userListQuotaAttachments",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "page number of results to return (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "page size of results",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaUsedAttachmentList"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          }
+        }
+      }
+    },
+    "/user/quota/check": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Check if the authenticated user is over quota for a given subject",
+        "operationId": "userCheckQuota",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/boolean"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          }
+        }
+      }
+    },
+    "/user/quota/packages": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "List the packages affecting the authenticated user's quota",
+        "operationId": "userListQuotaPackages",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "page number of results to return (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "page size of results",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/QuotaUsedPackageList"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
+          }
+        }
+      }
+    },
     "/user/repos": {
       "get": {
         "produces": [
@@ -17237,11 +18577,20 @@
             "description": "page size of results",
             "name": "limit",
             "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "order the repositories by name (default), id, or size",
+            "name": "order_by",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
             "$ref": "#/responses/RepositoryList"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
           }
         }
       },
@@ -17276,6 +18625,9 @@
           },
           "409": {
             "description": "The repository with the same name already exists."
+          },
+          "413": {
+            "$ref": "#/responses/quotaExceeded"
           },
           "422": {
             "$ref": "#/responses/validationError"
@@ -18607,6 +19959,11 @@
       "properties": {
         "permission": {
           "type": "string",
+          "enum": [
+            "read",
+            "write",
+            "admin"
+          ],
           "x-go-name": "Permission"
         }
       },
@@ -18723,6 +20080,14 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "Size"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "attachment",
+            "external"
+          ],
+          "x-go-name": "Type"
         },
         "uuid": {
           "type": "string",
@@ -20164,6 +21529,56 @@
         "sync_on_commit": {
           "type": "boolean",
           "x-go-name": "SyncOnCommit"
+        },
+        "use_ssh": {
+          "type": "boolean",
+          "x-go-name": "UseSSH"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "CreateQuotaGroupOptions": {
+      "description": "CreateQutaGroupOptions represents the options for creating a quota group",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the quota group to create",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "rules": {
+          "description": "Rules to add to the newly created group.\nIf a rule does not exist, it will be created.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CreateQuotaRuleOptions"
+          },
+          "x-go-name": "Rules"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "CreateQuotaRuleOptions": {
+      "description": "CreateQuotaRuleOptions represents the options for creating a quota rule",
+      "type": "object",
+      "properties": {
+        "limit": {
+          "description": "The limit set by the rule",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Limit"
+        },
+        "name": {
+          "description": "Name of the rule to create",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "subjects": {
+          "description": "The subjects affected by the rule",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Subjects"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -20327,6 +21742,31 @@
         "target": {
           "type": "string",
           "x-go-name": "Target"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "CreateTagProtectionOption": {
+      "description": "CreateTagProtectionOption options for creating a tag protection",
+      "type": "object",
+      "properties": {
+        "name_pattern": {
+          "type": "string",
+          "x-go-name": "NamePattern"
+        },
+        "whitelist_teams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "WhitelistTeams"
+        },
+        "whitelist_usernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "WhitelistUsernames"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -20650,10 +22090,38 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "DispatchWorkflowOption": {
+      "description": "DispatchWorkflowOption options when dispatching a workflow",
+      "type": "object",
+      "required": [
+        "ref"
+      ],
+      "properties": {
+        "inputs": {
+          "description": "Input keys and values configured in the workflow file.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-name": "Inputs"
+        },
+        "ref": {
+          "description": "Git reference for the workflow",
+          "type": "string",
+          "x-go-name": "Ref"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "EditAttachmentOptions": {
       "description": "EditAttachmentOptions options for editing attachments",
       "type": "object",
       "properties": {
+        "browser_download_url": {
+          "description": "(Can only be set if existing attachment is of external type)",
+          "type": "string",
+          "x-go-name": "DownloadURL"
+        },
         "name": {
           "type": "string",
           "x-go-name": "Name"
@@ -21069,6 +22537,27 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "EditQuotaRuleOptions": {
+      "description": "EditQuotaRuleOptions represents the options for editing a quota rule",
+      "type": "object",
+      "properties": {
+        "limit": {
+          "description": "The limit set by the rule",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Limit"
+        },
+        "subjects": {
+          "description": "The subjects affected by the rule",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Subjects"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "EditReactionOption": {
       "description": "EditReactionOption contain the reaction type",
       "type": "object",
@@ -21278,6 +22767,31 @@
           "description": "sets the branch used for this repository's wiki.",
           "type": "string",
           "x-go-name": "WikiBranch"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "EditTagProtectionOption": {
+      "description": "EditTagProtectionOption options for editing a tag protection",
+      "type": "object",
+      "properties": {
+        "name_pattern": {
+          "type": "string",
+          "x-go-name": "NamePattern"
+        },
+        "whitelist_teams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "WhitelistTeams"
+        },
+        "whitelist_usernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "WhitelistUsernames"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -23578,6 +25092,13 @@
           },
           "x-go-name": "RequestedReviewers"
         },
+        "requested_reviewers_teams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Team"
+          },
+          "x-go-name": "RequestedReviewersTeams"
+        },
         "review_comments": {
           "description": "number of review comments made on the diff of a PR review (not including comments on commits or issues in a PR)",
           "type": "integer",
@@ -23808,6 +25329,10 @@
           "format": "date-time",
           "x-go-name": "LastUpdateUnix"
         },
+        "public_key": {
+          "type": "string",
+          "x-go-name": "PublicKey"
+        },
         "remote_address": {
           "type": "string",
           "x-go-name": "RemoteAddress"
@@ -23823,6 +25348,301 @@
         "sync_on_commit": {
           "type": "boolean",
           "x-go-name": "SyncOnCommit"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaGroup": {
+      "description": "QuotaGroup represents a quota group",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the group",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "rules": {
+          "description": "Rules associated with the group",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QuotaRuleInfo"
+          },
+          "x-go-name": "Rules"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaGroupList": {
+      "description": "QuotaGroupList represents a list of quota groups",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QuotaGroup"
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaInfo": {
+      "description": "QuotaInfo represents information about a user's quota",
+      "type": "object",
+      "properties": {
+        "groups": {
+          "$ref": "#/definitions/QuotaGroupList"
+        },
+        "used": {
+          "$ref": "#/definitions/QuotaUsed"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaRuleInfo": {
+      "description": "QuotaRuleInfo contains information about a quota rule",
+      "type": "object",
+      "properties": {
+        "limit": {
+          "description": "The limit set by the rule",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Limit"
+        },
+        "name": {
+          "description": "Name of the rule (only shown to admins)",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "subjects": {
+          "description": "Subjects the rule affects",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Subjects"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsed": {
+      "description": "QuotaUsed represents the quota usage of a user",
+      "type": "object",
+      "properties": {
+        "size": {
+          "$ref": "#/definitions/QuotaUsedSize"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedArtifact": {
+      "description": "QuotaUsedArtifact represents an artifact counting towards a user's quota",
+      "type": "object",
+      "properties": {
+        "html_url": {
+          "description": "HTML URL to the action run containing the artifact",
+          "type": "string",
+          "x-go-name": "HTMLURL"
+        },
+        "name": {
+          "description": "Name of the artifact",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "size": {
+          "description": "Size of the artifact (compressed)",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Size"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedArtifactList": {
+      "description": "QuotaUsedArtifactList represents a list of artifacts counting towards a user's quota",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QuotaUsedArtifact"
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedAttachment": {
+      "description": "QuotaUsedAttachment represents an attachment counting towards a user's quota",
+      "type": "object",
+      "properties": {
+        "api_url": {
+          "description": "API URL for the attachment",
+          "type": "string",
+          "x-go-name": "APIURL"
+        },
+        "contained_in": {
+          "description": "Context for the attachment: URLs to the containing object",
+          "type": "object",
+          "properties": {
+            "api_url": {
+              "description": "API URL for the object that contains this attachment",
+              "type": "string",
+              "x-go-name": "APIURL"
+            },
+            "html_url": {
+              "description": "HTML URL for the object that contains this attachment",
+              "type": "string",
+              "x-go-name": "HTMLURL"
+            }
+          },
+          "x-go-name": "ContainedIn"
+        },
+        "name": {
+          "description": "Filename of the attachment",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "size": {
+          "description": "Size of the attachment (in bytes)",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Size"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedAttachmentList": {
+      "description": "QuotaUsedAttachmentList represents a list of attachment counting towards a user's quota",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QuotaUsedAttachment"
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedPackage": {
+      "description": "QuotaUsedPackage represents a package counting towards a user's quota",
+      "type": "object",
+      "properties": {
+        "html_url": {
+          "description": "HTML URL to the package version",
+          "type": "string",
+          "x-go-name": "HTMLURL"
+        },
+        "name": {
+          "description": "Name of the package",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "size": {
+          "description": "Size of the package version",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Size"
+        },
+        "type": {
+          "description": "Type of the package",
+          "type": "string",
+          "x-go-name": "Type"
+        },
+        "version": {
+          "description": "Version of the package",
+          "type": "string",
+          "x-go-name": "Version"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedPackageList": {
+      "description": "QuotaUsedPackageList represents a list of packages counting towards a user's quota",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/QuotaUsedPackage"
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedSize": {
+      "description": "QuotaUsedSize represents the size-based quota usage of a user",
+      "type": "object",
+      "properties": {
+        "assets": {
+          "$ref": "#/definitions/QuotaUsedSizeAssets"
+        },
+        "git": {
+          "$ref": "#/definitions/QuotaUsedSizeGit"
+        },
+        "repos": {
+          "$ref": "#/definitions/QuotaUsedSizeRepos"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedSizeAssets": {
+      "description": "QuotaUsedSizeAssets represents the size-based asset usage of a user",
+      "type": "object",
+      "properties": {
+        "artifacts": {
+          "description": "Storage size used for the user's artifacts",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Artifacts"
+        },
+        "attachments": {
+          "$ref": "#/definitions/QuotaUsedSizeAssetsAttachments"
+        },
+        "packages": {
+          "$ref": "#/definitions/QuotaUsedSizeAssetsPackages"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedSizeAssetsAttachments": {
+      "description": "QuotaUsedSizeAssetsAttachments represents the size-based attachment quota usage of a user",
+      "type": "object",
+      "properties": {
+        "issues": {
+          "description": "Storage size used for the user's issue \u0026 comment attachments",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Issues"
+        },
+        "releases": {
+          "description": "Storage size used for the user's release attachments",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Releases"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedSizeAssetsPackages": {
+      "description": "QuotaUsedSizeAssetsPackages represents the size-based package quota usage of a user",
+      "type": "object",
+      "properties": {
+        "all": {
+          "description": "Storage suze used for the user's packages",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "All"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedSizeGit": {
+      "description": "QuotaUsedSizeGit represents the size-based git (lfs) quota usage of a user",
+      "type": "object",
+      "properties": {
+        "LFS": {
+          "description": "Storage size of the user's Git LFS objects",
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "QuotaUsedSizeRepos": {
+      "description": "QuotaUsedSizeRepos represents the size-based repository quota usage of a user",
+      "type": "object",
+      "properties": {
+        "private": {
+          "description": "Storage size of the user's private repositories",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Private"
+        },
+        "public": {
+          "description": "Storage size of the user's public repositories",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Public"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -24400,6 +26220,24 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "SetUserQuotaGroupsOptions": {
+      "description": "SetUserQuotaGroupsOptions represents the quota groups of a user",
+      "type": "object",
+      "required": [
+        "groups"
+      ],
+      "properties": {
+        "groups": {
+          "description": "Quota groups the user shall have",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Groups"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "StateType": {
       "description": "StateType issue state type",
       "type": "string",
@@ -24503,6 +26341,46 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "Zip"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "TagProtection": {
+      "description": "TagProtection represents a tag protection",
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Created"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "name_pattern": {
+          "type": "string",
+          "x-go-name": "NamePattern"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Updated"
+        },
+        "whitelist_teams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "WhitelistTeams"
+        },
+        "whitelist_usernames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "WhitelistUsernames"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -25963,6 +27841,57 @@
         }
       }
     },
+    "QuotaGroup": {
+      "description": "QuotaGroup",
+      "schema": {
+        "$ref": "#/definitions/QuotaGroup"
+      }
+    },
+    "QuotaGroupList": {
+      "description": "QuotaGroupList",
+      "schema": {
+        "$ref": "#/definitions/QuotaGroupList"
+      }
+    },
+    "QuotaInfo": {
+      "description": "QuotaInfo",
+      "schema": {
+        "$ref": "#/definitions/QuotaInfo"
+      }
+    },
+    "QuotaRuleInfo": {
+      "description": "QuotaRuleInfo",
+      "schema": {
+        "$ref": "#/definitions/QuotaRuleInfo"
+      }
+    },
+    "QuotaRuleInfoList": {
+      "description": "QuotaRuleInfoList",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/QuotaRuleInfo"
+        }
+      }
+    },
+    "QuotaUsedArtifactList": {
+      "description": "QuotaUsedArtifactList",
+      "schema": {
+        "$ref": "#/definitions/QuotaUsedArtifactList"
+      }
+    },
+    "QuotaUsedAttachmentList": {
+      "description": "QuotaUsedAttachmentList",
+      "schema": {
+        "$ref": "#/definitions/QuotaUsedAttachmentList"
+      }
+    },
+    "QuotaUsedPackageList": {
+      "description": "QuotaUsedPackageList",
+      "schema": {
+        "$ref": "#/definitions/QuotaUsedPackageList"
+      }
+    },
     "Reaction": {
       "description": "Reaction",
       "schema": {
@@ -26121,6 +28050,21 @@
         }
       }
     },
+    "TagProtection": {
+      "description": "TagProtection",
+      "schema": {
+        "$ref": "#/definitions/TagProtection"
+      }
+    },
+    "TagProtectionList": {
+      "description": "TagProtectionList",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/TagProtection"
+        }
+      }
+    },
     "TasksList": {
       "description": "TasksList",
       "schema": {
@@ -26208,10 +28152,7 @@
     "UserSettings": {
       "description": "UserSettings",
       "schema": {
-        "type": "array",
-        "items": {
-          "$ref": "#/definitions/UserSettings"
-        }
+        "$ref": "#/definitions/UserSettings"
       }
     },
     "VariableList": {
@@ -26249,6 +28190,9 @@
           "$ref": "#/definitions/WikiPageMetaData"
         }
       }
+    },
+    "boolean": {
+      "description": "Boolean"
     },
     "conflict": {
       "description": "APIConflict is a conflict empty response"
@@ -26298,7 +28242,22 @@
     "parameterBodies": {
       "description": "parameterBodies",
       "schema": {
-        "$ref": "#/definitions/UpdateVariableOption"
+        "$ref": "#/definitions/SetUserQuotaGroupsOptions"
+      }
+    },
+    "quotaExceeded": {
+      "description": "QuotaExceeded",
+      "headers": {
+        "message": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        }
       }
     },
     "redirect": {

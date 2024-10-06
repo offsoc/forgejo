@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -32,7 +33,7 @@ func TestRender_StandardLinks(t *testing.T) {
 				Base: setting.AppSubURL,
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 
@@ -60,7 +61,7 @@ func TestRender_BaseLinks(t *testing.T) {
 				BranchPath: "branch/main",
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 
@@ -73,7 +74,7 @@ func TestRender_BaseLinks(t *testing.T) {
 				TreePath:   "deep/nested/folder",
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 
@@ -99,7 +100,7 @@ func TestRender_Media(t *testing.T) {
 				Base: setting.AppSubURL,
 			},
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 
@@ -140,7 +141,7 @@ func TestRender_Source(t *testing.T) {
 		buffer, err := RenderString(&markup.RenderContext{
 			Ctx: git.DefaultContext,
 		}, input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))
 	}
 

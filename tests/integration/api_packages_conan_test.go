@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	auth_model "code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/packages"
 	conan_model "code.gitea.io/gitea/models/packages/conan"
@@ -22,6 +23,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -223,6 +225,45 @@ func TestPackageConan(t *testing.T) {
 			assert.Equal(t, "revisions", resp.Header().Get("X-Conan-Server-Capabilities"))
 		})
 
+		t.Run("Token Scope Authentication", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			session := loginUser(t, user.Name)
+
+			testCase := func(t *testing.T, scope auth_model.AccessTokenScope, expectedStatusCode int) {
+				t.Helper()
+
+				token := getTokenForLoggedInUser(t, session, scope)
+
+				req := NewRequest(t, "GET", fmt.Sprintf("%s/v1/users/authenticate", url)).
+					AddTokenAuth(token)
+				resp := MakeRequest(t, req, http.StatusOK)
+
+				body := resp.Body.String()
+				assert.NotEmpty(t, body)
+
+				recipeURL := fmt.Sprintf("%s/v1/conans/%s/%s/%s/%s", url, "TestScope", version1, "testing", channel1)
+
+				req = NewRequestWithJSON(t, "POST", fmt.Sprintf("%s/upload_urls", recipeURL), map[string]int64{
+					conanfileName: 64,
+					"removed.txt": 0,
+				}).AddTokenAuth(token)
+				MakeRequest(t, req, expectedStatusCode)
+			}
+
+			t.Run("Read permission", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
+				testCase(t, auth_model.AccessTokenScopeReadPackage, http.StatusUnauthorized)
+			})
+
+			t.Run("Write permission", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
+				testCase(t, auth_model.AccessTokenScopeWritePackage, http.StatusOK)
+			})
+		})
+
 		token := ""
 
 		t.Run("Authenticate", func(t *testing.T) {
@@ -253,11 +294,11 @@ func TestPackageConan(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeConan)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Len(t, pvs, 1)
 
 				pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Nil(t, pd.SemVer)
 				assert.Equal(t, name, pd.Package.Name)
 				assert.Equal(t, version1, pd.Version.Version)
@@ -271,12 +312,12 @@ func TestPackageConan(t *testing.T) {
 				assert.Equal(t, []string{conanTopic}, metadata.Keywords)
 
 				pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Len(t, pfs, 2)
 
 				for _, pf := range pfs {
 					pb, err := packages.GetBlobByID(db.DefaultContext, pf.BlobID)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					if pf.Name == conanfileName {
 						assert.True(t, pf.IsLead)
@@ -426,7 +467,7 @@ func TestPackageConan(t *testing.T) {
 				for i, c := range cases {
 					rref, _ := conan_module.NewRecipeReference(name, version1, user1, c.Channel, conan_module.DefaultRevision)
 					references, err := conan_model.GetPackageReferences(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.NotEmpty(t, references)
 
 					req := NewRequestWithJSON(t, "POST", fmt.Sprintf("%s/v1/conans/%s/%s/%s/%s/packages/delete", url, name, version1, user1, c.Channel), map[string][]string{
@@ -435,7 +476,7 @@ func TestPackageConan(t *testing.T) {
 					MakeRequest(t, req, http.StatusOK)
 
 					references, err = conan_model.GetPackageReferences(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Empty(t, references, "case %d: should be empty", i)
 				}
 			})
@@ -453,7 +494,7 @@ func TestPackageConan(t *testing.T) {
 				for i, c := range cases {
 					rref, _ := conan_module.NewRecipeReference(name, version1, user1, c.Channel, conan_module.DefaultRevision)
 					revisions, err := conan_model.GetRecipeRevisions(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.NotEmpty(t, revisions)
 
 					req := NewRequest(t, "DELETE", fmt.Sprintf("%s/v1/conans/%s/%s/%s/%s", url, name, version1, user1, c.Channel)).
@@ -461,7 +502,7 @@ func TestPackageConan(t *testing.T) {
 					MakeRequest(t, req, http.StatusOK)
 
 					revisions, err = conan_model.GetRecipeRevisions(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Empty(t, revisions, "case %d: should be empty", i)
 				}
 			})
@@ -479,6 +520,43 @@ func TestPackageConan(t *testing.T) {
 		})
 
 		token := ""
+
+		t.Run("Token Scope Authentication", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			session := loginUser(t, user.Name)
+
+			testCase := func(t *testing.T, scope auth_model.AccessTokenScope, expectedStatusCode int) {
+				t.Helper()
+
+				token := getTokenForLoggedInUser(t, session, scope)
+
+				req := NewRequest(t, "GET", fmt.Sprintf("%s/v2/users/authenticate", url)).
+					AddTokenAuth(token)
+				resp := MakeRequest(t, req, http.StatusOK)
+
+				body := resp.Body.String()
+				assert.NotEmpty(t, body)
+
+				recipeURL := fmt.Sprintf("%s/v2/conans/%s/%s/%s/%s/revisions/%s", url, "TestScope", version1, "testing", channel1, revision1)
+
+				req = NewRequestWithBody(t, "PUT", fmt.Sprintf("%s/files/%s", recipeURL, conanfileName), strings.NewReader("Doesn't need to be valid")).
+					AddTokenAuth("Bearer " + body)
+				MakeRequest(t, req, expectedStatusCode)
+			}
+
+			t.Run("Read permission", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
+				testCase(t, auth_model.AccessTokenScopeReadPackage, http.StatusUnauthorized)
+			})
+
+			t.Run("Write permission", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
+				testCase(t, auth_model.AccessTokenScopeWritePackage, http.StatusCreated)
+			})
+		})
 
 		t.Run("Authenticate", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
@@ -510,8 +588,8 @@ func TestPackageConan(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeConan)
-				assert.NoError(t, err)
-				assert.Len(t, pvs, 2)
+				require.NoError(t, err)
+				assert.Len(t, pvs, 3)
 			})
 		})
 
@@ -651,12 +729,12 @@ func TestPackageConan(t *testing.T) {
 
 				checkPackageRevisionCount := func(count int) {
 					revisions, err := conan_model.GetPackageRevisions(db.DefaultContext, user.ID, pref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Len(t, revisions, count)
 				}
 				checkPackageReferenceCount := func(count int) {
 					references, err := conan_model.GetPackageReferences(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Len(t, references, count)
 				}
 
@@ -692,7 +770,7 @@ func TestPackageConan(t *testing.T) {
 
 				checkRecipeRevisionCount := func(count int) {
 					revisions, err := conan_model.GetRecipeRevisions(db.DefaultContext, user.ID, rref)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Len(t, revisions, count)
 				}
 

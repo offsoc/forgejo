@@ -37,20 +37,20 @@
 							{{if eq $refGroup "pull"}}
 								{{if or (not $.HidePRRefs) (SliceUtils.Contains $.SelectedBranches .Name)}}
 									<!-- it's intended to use issues not pulls, if it's a pull you will get redirected -->
-									<a class="ui basic tiny button" href="{{$.RepoLink}}/{{if $.Repository.UnitEnabled $.Context $.UnitTypePullRequests}}pulls{{else}}issues{{end}}/{{.ShortName|PathEscape}}">
+									<a class="ui basic button" href="{{$.RepoLink}}/{{if $.Repository.UnitEnabled $.Context $.UnitTypePullRequests}}pulls{{else}}issues{{end}}/{{.ShortName|PathEscape}}">
 										{{svg "octicon-git-pull-request"}} #{{.ShortName}}
 									</a>
 								{{end}}
 							{{else if eq $refGroup "tags"}}
-								<a class="ui basic tiny button" href="{{$.RepoLink}}/src/tag/{{.ShortName|PathEscape}}">
+								<a class="ui basic button" href="{{$.RepoLink}}/src/tag/{{.ShortName|PathEscape}}">
 									{{svg "octicon-tag"}} {{.ShortName}}
 								</a>
 							{{else if eq $refGroup "remotes"}}
-								<a class="ui basic tiny button" href="{{$.RepoLink}}/src/commit/{{$commit.Rev|PathEscape}}">
+								<a class="ui basic button" href="{{$.RepoLink}}/src/commit/{{$commit.Rev|PathEscape}}">
 									{{svg "octicon-cross-reference"}} {{.ShortName}}
 								</a>
 							{{else if eq $refGroup "heads"}}
-								<a class="ui basic tiny button" href="{{$.RepoLink}}/src/branch/{{.ShortName|PathEscape}}">
+								<a class="ui basic button" href="{{$.RepoLink}}/src/branch/{{.ShortName|PathEscape}}">
 									{{svg "octicon-git-branch"}} {{.ShortName}}
 								</a>
 							{{else}}

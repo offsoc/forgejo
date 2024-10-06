@@ -24,6 +24,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCompareTag(t *testing.T) {
@@ -139,7 +140,7 @@ func TestCompareWithPRsDisabled(t *testing.T) {
 		testEditFile(t, session, "user1", "repo1", "recent-push", "README.md", "Hello recently!\n")
 
 		repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, "user1", "repo1")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		defer func() {
 			// Re-enable PRs on the repo
@@ -149,13 +150,13 @@ func TestCompareWithPRsDisabled(t *testing.T) {
 					Type:   unit_model.TypePullRequests,
 				}},
 				nil)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}()
 
 		// Disable PRs on the repo
 		err = repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, nil,
 			[]unit_model.Type{unit_model.TypePullRequests})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		t.Run("branch view doesn't offer creating PRs", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
@@ -199,11 +200,11 @@ func TestCompareCrossRepo(t *testing.T) {
 		repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerName: "user1", Name: "repo1-copy"})
 
 		gitRepo, err := gitrepo.OpenRepository(db.DefaultContext, repo)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer gitRepo.Close()
 
 		lastCommit, err := gitRepo.GetBranchCommitID("recent-push")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, lastCommit)
 
 		t.Run("view file button links to correct file in fork", func(t *testing.T) {
@@ -223,7 +224,7 @@ func TestCompareCodeExpand(t *testing.T) {
 		owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
 		// Create a new repository, with a file that has many lines
-		repo, _, f := CreateDeclarativeRepoWithOptions(t, owner, DeclarativeRepoOptions{
+		repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, owner, tests.DeclarativeRepoOptions{
 			Files: optional.Some([]*files_service.ChangeRepoFile{
 				{
 					Operation:     "create",

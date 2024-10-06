@@ -77,14 +77,12 @@
 					<p class="activity meta">
 						<p>{{ctx.Locale.Tr "settings.access_token_desc" (HTMLFormat `href="%s/api/swagger" target="_blank"` AppSubUrl) (`href="https://forgejo.org/docs/latest/user/token-scope/" target="_blank"`|SafeHTML)}}</p>
 					</p>
-					<div class="scoped-access-token-mount">
-						<scoped-access-token-selector
-							:is-admin="{{if .IsAdmin}}true{{else}}false{{end}}"
-							no-access-label="{{ctx.Locale.Tr "settings.permission_no_access"}}"
-							read-label="{{ctx.Locale.Tr "settings.permission_read"}}"
-							write-label="{{ctx.Locale.Tr "settings.permission_write"}}"
-						></scoped-access-token-selector>
-					</div>
+					<div class="scoped-access-token"
+						data-is-admin="{{if .IsAdmin}}true{{else}}false{{end}}"
+						data-no-access-label="{{ctx.Locale.Tr "settings.permission_no_access"}}"
+						data-read-label="{{ctx.Locale.Tr "settings.permission_read"}}"
+						data-write-label="{{ctx.Locale.Tr "settings.permission_write"}}"
+					></div>
 				</details>
 				<button id="scoped-access-submit" class="ui primary button">
 					{{ctx.Locale.Tr "settings.generate_token"}}

@@ -84,7 +84,7 @@ func MaybePromoteRemoteUser(ctx context.Context, source *auth_model.Source, logi
 	return true, reason, nil
 }
 
-func getRemoteUserToPromote(ctx context.Context, source *auth_model.Source, loginName, email string) (*user_model.User, Reason, error) {
+func getRemoteUserToPromote(ctx context.Context, source *auth_model.Source, loginName, email string) (*user_model.User, Reason, error) { //nolint:unparam
 	if !source.IsOAuth2() {
 		return nil, NewReason(log.DEBUG, ReasonNotAuth2, "source %v is not OAuth2", source), nil
 	}

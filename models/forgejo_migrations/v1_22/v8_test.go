@@ -6,9 +6,10 @@ package v1_22 //nolint
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_RemoveSSHSignaturesFromReleaseNotes(t *testing.T) {
@@ -18,14 +19,14 @@ func Test_RemoveSSHSignaturesFromReleaseNotes(t *testing.T) {
 		Note string `xorm:"TEXT"`
 	}
 
-	x, deferable := base.PrepareTestEnv(t, 0, new(Release))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(Release))
 	defer deferable()
 
-	assert.NoError(t, RemoveSSHSignaturesFromReleaseNotes(x))
+	require.NoError(t, RemoveSSHSignaturesFromReleaseNotes(x))
 
 	var releases []Release
 	err := x.Table("release").OrderBy("id ASC").Find(&releases)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, releases, 3)
 
 	assert.Equal(t, "", releases[0].Note)

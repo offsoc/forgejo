@@ -11,13 +11,13 @@ import (
 	"code.gitea.io/gitea/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetTreeBySHA(t *testing.T) {
 	unittest.PrepareTestEnv(t)
 	ctx, _ := contexttest.MockContext(t, "user2/repo1")
 	contexttest.LoadRepo(t, ctx, 1)
-	contexttest.LoadRepoCommit(t, ctx)
 	contexttest.LoadUser(t, ctx, 2)
 	contexttest.LoadGitRepo(t, ctx)
 	defer ctx.Repo.GitRepo.Close()
@@ -29,7 +29,7 @@ func TestGetTreeBySHA(t *testing.T) {
 	ctx.SetParams(":sha", sha)
 
 	tree, err := GetTreeBySHA(ctx, ctx.Repo.Repository, ctx.Repo.GitRepo, ctx.Params(":sha"), page, perPage, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expectedTree := &api.GitTreeResponse{
 		SHA: "65f1bf27bc3bf70f64657658635e66094edbcb4d",
 		URL: "https://try.gitea.io/api/v1/repos/user2/repo1/git/trees/65f1bf27bc3bf70f64657658635e66094edbcb4d",

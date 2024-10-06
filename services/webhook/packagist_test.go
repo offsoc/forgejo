@@ -63,7 +63,7 @@ func TestPackagistPayload(t *testing.T) {
 			assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 			var body PackagistPayload
 			err = json.NewDecoder(req.Body).Decode(&body)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, "https://packagist.org/packages/example", body.PackagistRepository.URL)
 		})
 	}

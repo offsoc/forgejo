@@ -22,15 +22,13 @@ import (
 	"code.gitea.io/gitea/modules/graceful"
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
 
-	"gitea.com/go-chi/cache"
+	"code.forgejo.org/go-chi/cache"
 )
 
-const (
-	contributorStatsCacheKey           = "GetContributorStats/%s/%s"
-	contributorStatsCacheTimeout int64 = 60 * 10
-)
+const contributorStatsCacheKey = "GetContributorStats/%s/%s"
 
 var (
 	ErrAwaitGeneration  = errors.New("generation took longer than ")
@@ -211,8 +209,7 @@ func generateContributorStats(genDone chan struct{}, cache cache.Cache, cacheKey
 
 	gitRepo, closer, err := gitrepo.RepositoryFromContextOrOpen(ctx, repo)
 	if err != nil {
-		err := fmt.Errorf("OpenRepository: %w", err)
-		_ = cache.Put(cacheKey, err, contributorStatsCacheTimeout)
+		log.Error("OpenRepository[repo=%q]: %v", repo.FullName(), err)
 		return
 	}
 	defer closer.Close()
@@ -222,13 +219,11 @@ func generateContributorStats(genDone chan struct{}, cache cache.Cache, cacheKey
 	}
 	extendedCommitStats, err := getExtendedCommitStats(gitRepo, revision)
 	if err != nil {
-		err := fmt.Errorf("ExtendedCommitStats: %w", err)
-		_ = cache.Put(cacheKey, err, contributorStatsCacheTimeout)
+		log.Error("getExtendedCommitStats[repo=%q revision=%q]: %v", repo.FullName(), revision, err)
 		return
 	}
 	if len(extendedCommitStats) == 0 {
-		err := fmt.Errorf("no commit stats returned for revision '%s'", revision)
-		_ = cache.Put(cacheKey, err, contributorStatsCacheTimeout)
+		log.Error("No commit stats were returned [repo=%q revision=%q]", repo.FullName(), revision)
 		return
 	}
 
@@ -312,14 +307,13 @@ func generateContributorStats(genDone chan struct{}, cache cache.Cache, cacheKey
 
 	data, err := json.Marshal(contributorsCommitStats)
 	if err != nil {
-		err := fmt.Errorf("couldn't marshal the data: %w", err)
-		_ = cache.Put(cacheKey, err, contributorStatsCacheTimeout)
+		log.Error("json.Marshal[repo=%q revision=%q]: %v", repo.FullName(), revision, err)
 		return
 	}
 
 	// Store the data as an string, to make it uniform what data type is returned
 	// from caches.
-	_ = cache.Put(cacheKey, string(data), contributorStatsCacheTimeout)
+	_ = cache.Put(cacheKey, string(data), setting.CacheService.TTLSeconds())
 	generateLock.Delete(cacheKey)
 	if genDone != nil {
 		genDone <- struct{}{}

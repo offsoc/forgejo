@@ -237,8 +237,7 @@ func (m matrixConvertor) Review(p *api.PullRequestPayload, event webhook_module.
 	repoLink := htmlLinkFormatter(p.Repository.HTMLURL, p.Repository.FullName)
 	var text string
 
-	switch p.Action {
-	case api.HookIssueReviewed:
+	if p.Action == api.HookIssueReviewed {
 		action, err := parseHookPullRequestEventType(event)
 		if err != nil {
 			return MatrixPayload{}, err

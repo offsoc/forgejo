@@ -34,13 +34,13 @@ type ObjectFormat interface {
 	ComputeHash(t ObjectType, content []byte) ObjectID
 }
 
-func computeHash(dst []byte, hasher hash.Hash, t ObjectType, content []byte) []byte {
+func computeHash(dst []byte, hasher hash.Hash, t ObjectType, content []byte) {
 	_, _ = hasher.Write(t.Bytes())
 	_, _ = hasher.Write([]byte(" "))
 	_, _ = hasher.Write([]byte(strconv.Itoa(len(content))))
 	_, _ = hasher.Write([]byte{0})
 	_, _ = hasher.Write(content)
-	return hasher.Sum(dst)
+	hasher.Sum(dst)
 }
 
 /* SHA1 Type */

@@ -189,7 +189,7 @@ func TestSlackJSONPayload(t *testing.T) {
 	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 	var body SlackPayload
 	err = json.NewDecoder(req.Body).Decode(&body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "[<http://localhost:3000/test/repo|test/repo>:<http://localhost:3000/test/repo/src/branch/test|test>] 2 new commits pushed by user1", body.Text)
 }
 
@@ -217,11 +217,12 @@ func TestSlackMetadata(t *testing.T) {
 		Meta: `{"channel": "foo", "username": "username", "color": "blue"}`,
 	}
 	slackHook := slackHandler{}.Metadata(w)
-	assert.Equal(t, *slackHook.(*SlackMeta), SlackMeta{
+	assert.Equal(t, SlackMeta{
 		Channel:  "foo",
 		Username: "username",
 		Color:    "blue",
-	})
+	},
+		*slackHook.(*SlackMeta))
 }
 
 func TestSlackToHook(t *testing.T) {
@@ -242,9 +243,9 @@ func TestSlackToHook(t *testing.T) {
 		},
 	}
 	h, err := ToHook("repoLink", w)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.Equal(t, h.Config, map[string]string{
+	assert.Equal(t, map[string]string{
 		"url":          "https://slack.example.com",
 		"content_type": "json",
 
@@ -252,13 +253,13 @@ func TestSlackToHook(t *testing.T) {
 		"color":    "blue",
 		"icon_url": "",
 		"username": "username",
-	})
-	assert.Equal(t, h.URL, "https://slack.example.com")
-	assert.Equal(t, h.ContentType, "json")
-	assert.Equal(t, h.Metadata, &SlackMeta{
+	}, h.Config)
+	assert.Equal(t, "https://slack.example.com", h.URL)
+	assert.Equal(t, "json", h.ContentType)
+	assert.Equal(t, &SlackMeta{
 		Channel:  "foo",
 		Username: "username",
 		IconURL:  "",
 		Color:    "blue",
-	})
+	}, h.Metadata)
 }

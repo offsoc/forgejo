@@ -81,3 +81,16 @@
     max-width: 110px;
   }
 }
+
+#workflow_dispatch_dropdown {
+  min-width: min-content;
+}
+#workflow_dispatch_dropdown > button {
+  white-space: nowrap;
+}
+@media (max-width: 640px) or (767.98px < width < 854px) {
+  #workflow_dispatch_dropdown .menu {
+    left: auto;
+    right: 0;
+  }
+}

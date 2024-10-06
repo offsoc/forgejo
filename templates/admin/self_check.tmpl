@@ -28,6 +28,13 @@
 		{{else}}
 			<div class="tw-p-2">{{ctx.Locale.Tr "admin.self_check.no_problem_found"}}</div>
 		{{end}}
+
+		{{if .CacheError}}
+			<div class="ui red message">{{ctx.Locale.Tr "admin.config.cache_test_failed" .CacheError}}</div>
+		{{end}}
+		{{if .CacheSlow}}
+			<div class="ui warning message">{{ctx.Locale.Tr "admin.config.cache_test_slow" .CacheSlow}}</div>
+		{{end}}
 	</div>
 </div>
 

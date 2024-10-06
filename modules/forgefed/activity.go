@@ -21,8 +21,8 @@ type ForgeLike struct {
 func NewForgeLike(actorIRI, objectIRI string, startTime time.Time) (ForgeLike, error) {
 	result := ForgeLike{}
 	result.Type = ap.LikeType
-	result.Actor = ap.IRI(actorIRI)   // Thats us, a User
-	result.Object = ap.IRI(objectIRI) // Thats them, a Repository
+	result.Actor = ap.IRI(actorIRI)   // That's us, a User
+	result.Object = ap.IRI(objectIRI) // That's them, a Repository
 	result.StartTime = startTime
 	if valid, err := validation.IsValid(result); !valid {
 		return ForgeLike{}, err

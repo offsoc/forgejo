@@ -1,7 +1,6 @@
 import fastGlob from 'fast-glob';
 import wrapAnsi from 'wrap-ansi';
-import AddAssetPlugin from 'add-asset-webpack-plugin';
-import LicenseCheckerWebpackPlugin from 'license-checker-webpack-plugin';
+import {init as licenseChecker} from 'license-checker-rseidelsohn';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 import {VueLoaderPlugin} from 'vue-loader';
@@ -9,7 +8,7 @@ import EsBuildLoader from 'esbuild-loader';
 import {parse, dirname} from 'node:path';
 import webpack from 'webpack';
 import {fileURLToPath} from 'node:url';
-import {readFileSync} from 'node:fs';
+import {readFileSync, writeFileSync} from 'node:fs';
 import {env} from 'node:process';
 import tailwindcss from 'tailwindcss';
 import tailwindConfig from './tailwind.config.js';
@@ -20,8 +19,9 @@ const {EsbuildPlugin} = EsBuildLoader;
 const {SourceMapDevToolPlugin, DefinePlugin} = webpack;
 const formatLicenseText = (licenseText) => wrapAnsi(licenseText || '', 80).trim();
 
+const baseDirectory = dirname(fileURLToPath(new URL(import.meta.url)));
 const glob = (pattern) => fastGlob.sync(pattern, {
-  cwd: dirname(fileURLToPath(new URL(import.meta.url))),
+  cwd: baseDirectory,
   absolute: true,
 });
 
@@ -31,6 +31,40 @@ for (const path of glob('web_src/css/themes/*.css')) {
 }
 
 const isProduction = env.NODE_ENV !== 'development';
+
+if (isProduction) {
+  licenseChecker({
+    start: baseDirectory,
+    production: true,
+    onlyAllow: 'Apache-2.0; 0BSD; BSD-2-Clause; BSD-3-Clause; BlueOak-1.0.0; MIT; ISC; Unlicense; CC-BY-4.0',
+    // argparse@2.0.1 - Python-2.0. It's used in the CLI file of markdown-it and js-yaml and not in the library code.
+    // idiomorph@0.3.0. See https://github.com/bigskysoftware/idiomorph/pull/37
+    excludePackages: 'argparse@2.0.1;idiomorph@0.3.0',
+  }, (err, dependencies) => {
+    if (err) {
+      throw err;
+    }
+
+    const line = '-'.repeat(80);
+    const goJson = readFileSync('assets/go-licenses.json', 'utf8');
+    const goModules = JSON.parse(goJson).map(({name, licenseText}) => {
+      return {name, body: formatLicenseText(licenseText)};
+    });
+    const jsModules = Object.keys(dependencies).map((packageName) => {
+      const {licenses, licenseFile} = dependencies[packageName];
+      const licenseText = (licenseFile && !licenseFile.toLowerCase().includes('readme')) ? readFileSync(licenseFile) : '[no license file]';
+      return {name: packageName, licenseName: licenses, body: formatLicenseText(licenseText)};
+    });
+    const modules = [...goModules, ...jsModules];
+    const licenseTxt = modules.map(({name, licenseName, body}) => {
+      const title = licenseName ? `${name} - ${licenseName}` : name;
+      return `${line}\n${title}\n${line}\n${body}`;
+    }).join('\n');
+    writeFileSync('public/assets/licenses.txt', licenseTxt);
+  });
+} else {
+  writeFileSync('public/assets/licenses.txt', 'Licenses are disabled during development');
+}
 
 // ENABLE_SOURCEMAP accepts the following values:
 // true - all enabled, the default in development
@@ -219,31 +253,6 @@ export default {
     new MonacoWebpackPlugin({
       filename: 'js/monaco-[name].[contenthash:8].worker.js',
     }),
-    isProduction ? new LicenseCheckerWebpackPlugin({
-      outputFilename: 'licenses.txt',
-      outputWriter: ({dependencies}) => {
-        const line = '-'.repeat(80);
-        const goJson = readFileSync('assets/go-licenses.json', 'utf8');
-        const goModules = JSON.parse(goJson).map(({name, licenseText}) => {
-          return {name, body: formatLicenseText(licenseText)};
-        });
-        const jsModules = dependencies.map(({name, version, licenseName, licenseText}) => {
-          return {name, version, licenseName, body: formatLicenseText(licenseText)};
-        });
-
-        const modules = [...goModules, ...jsModules].sort((a, b) => a.name.localeCompare(b.name));
-        return modules.map(({name, version, licenseName, body}) => {
-          const title = licenseName ? `${name}@${version} - ${licenseName}` : name;
-          return `${line}\n${title}\n${line}\n${body}`;
-        }).join('\n');
-      },
-      override: {
-        'khroma@*': {licenseName: 'MIT'}, // https://github.com/fabiospampinato/khroma/pull/33
-        'idiomorph@0.3.0': {licenseName: 'BSD-2-Clause'}, // https://github.com/bigskysoftware/idiomorph/pull/37
-      },
-      emitError: true,
-      allow: '(Apache-2.0 OR 0BSD OR BSD-2-Clause OR BSD-3-Clause OR MIT OR ISC OR CPAL-1.0 OR Unlicense OR EPL-1.0 OR EPL-2.0)',
-    }) : new AddAssetPlugin('licenses.txt', `Licenses are disabled during development`),
   ],
   performance: {
     hints: false,

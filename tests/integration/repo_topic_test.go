@@ -77,5 +77,5 @@ func TestTopicSearchPaging(t *testing.T) {
 
 	res = MakeRequest(t, NewRequest(t, "GET", "/explore/topics/search?page=2"), http.StatusOK)
 	DecodeJSON(t, res, &topics)
-	assert.Greater(t, len(topics.TopicNames), 0)
+	assert.NotEmpty(t, topics.TopicNames)
 }

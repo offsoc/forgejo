@@ -7,12 +7,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMustBytes(t *testing.T) {
 	test := func(value string) int64 {
 		cfg, err := NewConfigProviderFromData("[test]")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sec := cfg.Section("test")
 		sec.NewKey("VALUE", value)
 
@@ -37,8 +38,8 @@ func Test_getStorageInheritNameSectionTypeForPackages(t *testing.T) {
 STORAGE_TYPE = minio
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadPackagesFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadPackagesFrom(cfg))
 
 	assert.EqualValues(t, "minio", Packages.Storage.Type)
 	assert.EqualValues(t, "packages/", Packages.Storage.MinioConfig.BasePath)
@@ -49,8 +50,8 @@ STORAGE_TYPE = minio
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadPackagesFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadPackagesFrom(cfg))
 
 	assert.EqualValues(t, "minio", Packages.Storage.Type)
 	assert.EqualValues(t, "packages/", Packages.Storage.MinioConfig.BasePath)
@@ -64,8 +65,8 @@ STORAGE_TYPE = my_minio
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadPackagesFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadPackagesFrom(cfg))
 
 	assert.EqualValues(t, "minio", Packages.Storage.Type)
 	assert.EqualValues(t, "packages/", Packages.Storage.MinioConfig.BasePath)
@@ -80,8 +81,8 @@ MINIO_BASE_PATH = my_packages/
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadPackagesFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadPackagesFrom(cfg))
 
 	assert.EqualValues(t, "minio", Packages.Storage.Type)
 	assert.EqualValues(t, "my_packages/", Packages.Storage.MinioConfig.BasePath)
@@ -103,9 +104,9 @@ MINIO_ACCESS_KEY_ID     = correct_key
 MINIO_SECRET_ACCESS_KEY = correct_key
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadPackagesFrom(cfg))
+	require.NoError(t, loadPackagesFrom(cfg))
 	storage := Packages.Storage
 
 	assert.EqualValues(t, "minio", storage.Type)
@@ -130,9 +131,9 @@ MINIO_ACCESS_KEY_ID     = correct_key
 MINIO_SECRET_ACCESS_KEY = correct_key
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadPackagesFrom(cfg))
+	require.NoError(t, loadPackagesFrom(cfg))
 	storage := Packages.Storage
 
 	assert.EqualValues(t, "minio", storage.Type)
@@ -158,9 +159,9 @@ MINIO_ACCESS_KEY_ID     = correct_key
 MINIO_SECRET_ACCESS_KEY = correct_key
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadPackagesFrom(cfg))
+	require.NoError(t, loadPackagesFrom(cfg))
 	storage := Packages.Storage
 
 	assert.EqualValues(t, "minio", storage.Type)
@@ -186,9 +187,9 @@ MINIO_ACCESS_KEY_ID     = correct_key
 MINIO_SECRET_ACCESS_KEY = correct_key
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadPackagesFrom(cfg))
+	require.NoError(t, loadPackagesFrom(cfg))
 	storage := Packages.Storage
 
 	assert.EqualValues(t, "minio", storage.Type)

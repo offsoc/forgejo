@@ -79,6 +79,11 @@
   white-space: nowrap;
 }
 
+.repository .issue-content-right .filter.menu {
+  max-height: 500px;
+  overflow-x: auto;
+}
+
 .repository .filter.menu.labels .label-filter .menu .info {
   display: inline-block;
   padding: 0.5rem 0;
@@ -581,11 +586,6 @@ td .commit-summary {
   font-size: 14px;
 }
 
-.repository.new.issue .comment.form .issue-content-right .filter.menu {
-  max-height: 500px;
-  overflow-x: auto;
-}
-
 .repository.view.issue .instruct-toggle {
   display: inline-block;
 }
@@ -601,7 +601,8 @@ td .commit-summary {
   align-items: center;
 }
 
-.repository.view.issue .top-right-buttons {
+.issue-title .button-row,
+.repository.releases .button-row {
   display: flex;
 }
 
@@ -609,7 +610,7 @@ td .commit-summary {
   .repository.view.issue .issue-title {
     flex-direction: column;
   }
-  .repository.view.issue .top-right-buttons {
+  .issue-title .button-row {
     width: 100%;
     margin-top: .5rem;
     justify-content: space-between;
@@ -1538,7 +1539,6 @@ td .commit-summary {
 .diff-detail-actions {
   display: flex;
   align-items: center;
-  gap: 0.25em;
   justify-content: end;
 }
 
@@ -1573,13 +1573,8 @@ td .commit-summary {
 }
 
 .repository .diff-detail-box .ui.button {
-  padding: 0 12px;
+  padding: 0 1.125em;
   height: 30px;
-}
-
-.repository .diff-box .header:not(.resolved-placeholder) {
-  display: flex;
-  align-items: center;
 }
 
 .repository .diff-box .header:not(.resolved-placeholder) .file {
@@ -1595,7 +1590,7 @@ td .commit-summary {
 }
 
 .repository .diff-box .header:not(.resolved-placeholder) .button {
-  padding: 0 12px;
+  padding: 0 1.125em;
   flex: 0 0 auto;
   margin-right: 0;
   height: 30px;
@@ -1752,6 +1747,17 @@ td .commit-summary {
   color: inherit;
 }
 
+/* workaround for safari as it does not support 'display: list-item' for summary tags yet
+** see https://codeberg.org/forgejo/forgejo/issues/5259 */
+details.repo-search-result summary::-webkit-details-marker,
+details.repo-search-result summary::marker {
+  display: none;
+}
+
+.search-highlight {
+  background: var(--color-primary-alpha-40);
+}
+
 .repository.quickstart .guide .item {
   padding: 1em;
 }
@@ -1799,16 +1805,6 @@ td .commit-summary {
 .repository.settings.branches .branch-protection .status-check-matched-mark {
   font-weight: var(--font-weight-semibold);
   font-style: italic;
-}
-
-.repository.settings.webhook .events .column {
-  padding-bottom: 0;
-}
-
-.repository.settings.webhook .events .help {
-  font-size: 13px;
-  margin-left: 26px;
-  padding-top: 0;
 }
 
 .repository .ui.attached.isSigned.isWarning {
@@ -2068,11 +2064,6 @@ td .commit-summary {
   line-height: 1.4;
 }
 
-#cite-repo-modal #citation-panel .citation.button {
-  font-size: 13px;
-  padding: 7.5px 5px;
-}
-
 #cite-repo-modal #citation-panel #citation-copy-content {
   border-radius: 0;
   padding: 5px 10px;
@@ -2081,8 +2072,9 @@ td .commit-summary {
   flex: 1;
 }
 
-#cite-repo-modal #citation-panel #citation-copy-apa,
 #cite-repo-modal #citation-panel #citation-copy-bibtex {
+  font-size: 13px;
+  padding: 7.5px 5px;
   border-right: none;
 }
 
@@ -2103,35 +2095,49 @@ td .commit-summary {
 }
 
 .user-cards .list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 0 0 10px;
   padding: 0;
+}
+
+@media (max-width: 767.98px) {
+  .user-cards .list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .user.profile .user-cards .list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.user-cards .list .card {
   display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.user-cards .list .item {
-  list-style: none;
-  width: 31%;
-  margin: 15px 15px 0 0;
+  flex-direction: row;
+  width: 100%;
+  margin: 0;
   padding: 14px;
-  float: left;
+  border-radius: 0.28571429rem;
+  border: 1px solid var(--color-secondary);
+  background: var(--color-box-body);
 }
 
-.user-cards .list .item .avatar {
+.user-cards .list .card .avatar {
   width: 48px;
   height: 48px;
-  float: left;
-  display: block;
-  margin-right: 10px;
+  margin-right: 14px;
 }
 
-.user-cards .list .item .name {
+.user-cards .list .card .name {
   margin-top: 0;
   margin-bottom: 0;
   font-weight: var(--font-weight-normal);
 }
 
-.user-cards .list .item .meta {
+.user-cards .list .card .meta {
   margin-top: 5px;
 }
 
@@ -2639,7 +2645,7 @@ tbody.commit-list {
 .sidebar-item-link {
   display: inline-flex;
   align-items: center;
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .diff-file-header {
@@ -2994,4 +3000,8 @@ tbody.commit-list {
 #issue-info-popup .emoji {
   font-size: inherit;
   line-height: inherit;
+}
+
+#repo-activity-top-authors-chart {
+  height: 150px; /* Pre-allocate the height that will be taken up by the chart, to avoid the container 'jumping'. */
 }

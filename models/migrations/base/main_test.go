@@ -5,8 +5,10 @@ package base
 
 import (
 	"testing"
+
+	migrations_tests "code.gitea.io/gitea/models/migrations/test"
 )
 
 func TestMain(m *testing.M) {
-	MainTest(m)
+	migrations_tests.MainTest(m)
 }

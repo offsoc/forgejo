@@ -7,13 +7,14 @@ export function initRepoMigrationStatusChecker() {
   const repoMigrating = document.getElementById('repo_migrating');
   if (!repoMigrating) return;
 
-  document.getElementById('repo_migrating_retry').addEventListener('click', doMigrationRetry);
+  document.getElementById('repo_migrating_retry')?.addEventListener('click', doMigrationRetry);
 
   const task = repoMigrating.getAttribute('data-migrating-task-id');
 
   // returns true if the refresh still needs to be called after a while
   const refresh = async () => {
     const res = await GET(`${appSubUrl}/user/task/${task}`);
+    if (res.url.endsWith('/login')) return false; // stop refreshing if redirected to login
     if (res.status !== 200) return true; // continue to refresh if network error occurs
 
     const data = await res.json();

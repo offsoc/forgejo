@@ -1,14 +1,25 @@
 <div class="file-body file-code code-view">
-	<table>
-		<tbody>
-			{{range .SearchResult.Lines}}
-				<tr>
-					<td class="lines-num">
-						<a href="{{$.RepoLink}}/src/commit/{{PathEscape $.SearchResult.CommitID}}/{{PathEscapeSegments $.SearchResult.Filename}}#L{{.Num}}"><span>{{.Num}}</span></a>
-					</td>
-					<td class="lines-code chroma"><code class="code-inner">{{.FormattedContent}}</code></td>
-				</tr>
-			{{end}}
-		</tbody>
-	</table>
+	<div>
+		<ol class="tw-p-0 tw-m-0">
+		{{/* 	if the expected line number does not match
+				the actual line number end the ordered list
+				and begin a new one */}}
+		{{$expNum := 0}}
+		{{range .SearchResult.Lines}}
+		{{if and (gt $expNum 0) (ne .Num $expNum)}}
+		</ol>
+		<ol class="tw-p-0 tw-m-0 tw-pt-2 tw-mt-2 tw-border-t-4 tw-border-secondary">
+		{{end}}
+			<li value="{{.Num}}" class="tw-grid tw-grid-cols-[minmax(50px,_1%)_auto] tw-list-none">
+				<div class="lines-num">
+					<a href="{{$.RepoLink}}/src/commit/{{PathEscape $.SearchResult.CommitID}}/{{PathEscapeSegments $.SearchResult.Filename}}#L{{.Num}}">
+						{{.Num}}
+					</a>
+				</div>
+				<div class="lines-code chroma"><code class="code-inner">{{.FormattedContent}}</code></div>
+			</li>
+			{{$expNum = Eval .Num "+" 1}}
+		{{end}}
+		</ol>
+	</div>
 </div>

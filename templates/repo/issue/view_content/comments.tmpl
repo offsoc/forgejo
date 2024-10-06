@@ -51,7 +51,7 @@
 							{{end}}
 						</div>
 						<div class="comment-header-right actions tw-flex tw-items-center">
-							{{template "repo/issue/view_content/show_role" dict "ShowRole" .ShowRole}}
+							{{template "repo/issue/view_content/show_role" dict "ShowRole" .ShowRole "IsPull" .Issue.IsPull}}
 							{{if not $.Repository.IsArchived}}
 								{{template "repo/issue/view_content/add_reaction" dict "ctxData" $ "ActionURL" (printf "%s/comments/%d/reactions" $.RepoLink .ID)}}
 							{{end}}
@@ -149,7 +149,7 @@
 				{{if eq .RefAction 3}}</del>{{end}}
 
 				<div class="detail flex-text-block">
-					<span class="text grey muted-links"><a href="{{.RefIssueLink ctx}}"><b>{{.RefIssueTitle ctx}}</b> {{.RefIssueIdent ctx}}</a></span>
+					<span class="text grey muted-links"><a href="{{.RefIssueLink ctx}}"><b>{{.RefIssueTitle ctx | RenderEmoji $.Context | RenderCodeBlock}}</b> {{.RefIssueIdent ctx}}</a></span>
 				</div>
 			</div>
 		{{else if eq .Type 4}}
@@ -226,7 +226,7 @@
 				{{template "shared/user/avatarlink" dict "user" .Poster}}
 				<span class="text grey muted-links">
 					{{template "shared/user/authorlink" .Poster}}
-					{{ctx.Locale.Tr "repo.issues.change_title_at" (.OldTitle|RenderEmoji $.Context) (.NewTitle|RenderEmoji $.Context) $createdStr}}
+					{{ctx.Locale.Tr "repo.issues.change_title_at" (RenderRefIssueTitle $.Context .OldTitle) (RenderRefIssueTitle $.Context .NewTitle) $createdStr}}
 				</span>
 			</div>
 		{{else if eq .Type 11}}
@@ -339,10 +339,11 @@
 						{{svg "octicon-plus"}}
 						<span class="text grey muted-links">
 							<a href="{{.DependentIssue.Link}}">
+								{{$strTitle := RenderRefIssueTitle $.Context .DependentIssue.Title}}
 								{{if eq .DependentIssue.RepoID .Issue.RepoID}}
-									#{{.DependentIssue.Index}} {{.DependentIssue.Title}}
+									#{{.DependentIssue.Index}} {{$strTitle}}
 								{{else}}
-									{{.DependentIssue.Repo.FullName}}#{{.DependentIssue.Index}} - {{.DependentIssue.Title}}
+									{{.DependentIssue.Repo.FullName}}#{{.DependentIssue.Index}} - {{$strTitle}}
 								{{end}}
 							</a>
 						</span>
@@ -362,10 +363,11 @@
 						{{svg "octicon-trash"}}
 						<span class="text grey muted-links">
 							<a href="{{.DependentIssue.Link}}">
+								{{$strTitle := RenderRefIssueTitle $.Context .DependentIssue.Title}}
 								{{if eq .DependentIssue.RepoID .Issue.RepoID}}
-									#{{.DependentIssue.Index}} {{.DependentIssue.Title}}
+									#{{.DependentIssue.Index}} {{$strTitle}}
 								{{else}}
-									{{.DependentIssue.Repo.FullName}}#{{.DependentIssue.Index}} - {{.DependentIssue.Title}}
+									{{.DependentIssue.Repo.FullName}}#{{.DependentIssue.Index}} - {{$strTitle}}
 								{{end}}
 							</a>
 						</span>
@@ -425,7 +427,7 @@
 								</span>
 							</div>
 							<div class="comment-header-right actions tw-flex tw-items-center">
-								{{template "repo/issue/view_content/show_role" dict "ShowRole" .ShowRole}}
+								{{template "repo/issue/view_content/show_role" dict "ShowRole" .ShowRole "IsPull" .Issue.IsPull}}
 								{{if not $.Repository.IsArchived}}
 									{{template "repo/issue/view_content/add_reaction" dict "ctxData" $ "ActionURL" (printf "%s/comments/%d/reactions" $.RepoLink .ID)}}
 									{{template "repo/issue/view_content/context_menu" dict "ctxData" $ "item" . "delete" false "issue" true "diff" false "IsCommentPoster" (and $.IsSigned (eq $.SignedUserID .PosterID))}}
@@ -582,13 +584,19 @@
 					{{template "shared/user/authorlink" .Poster}}
 					{{$oldProjectDisplayHtml := "Unknown Project"}}
 					{{if .OldProject}}
-						{{$trKey := printf "projects.type-%d.display_name" .OldProject.Type}}
-						{{$oldProjectDisplayHtml = HTMLFormat `<span data-tooltip-content="%s">%s</span>` (ctx.Locale.Tr $trKey) .OldProject.Title}}
+						{{$tooltip := ctx.Locale.Tr "projects.deleted.display_name"}}
+						{{if not .OldProject.IsGhost}}
+							{{$tooltip = ctx.Locale.Tr (printf "projects.type-%d.display_name" .OldProject.Type)}}
+						{{end}}
+						{{$oldProjectDisplayHtml = HTMLFormat `<span data-tooltip-content="%s">%s</span>` $tooltip .OldProject.Title}}
 					{{end}}
 					{{$newProjectDisplayHtml := "Unknown Project"}}
 					{{if .Project}}
-						{{$trKey := printf "projects.type-%d.display_name" .Project.Type}}
-						{{$newProjectDisplayHtml = HTMLFormat `<span data-tooltip-content="%s">%s</span>` (ctx.Locale.Tr $trKey) .Project.Title}}
+						{{$tooltip := ctx.Locale.Tr "projects.deleted.display_name"}}
+						{{if not .Project.IsGhost}}
+							{{$tooltip = ctx.Locale.Tr (printf "projects.type-%d.display_name" .Project.Type)}}
+						{{end}}
+						{{$newProjectDisplayHtml = HTMLFormat `<span data-tooltip-content="%s">%s</span>` $tooltip .Project.Title}}
 					{{end}}
 					{{if and (gt .OldProjectID 0) (gt .ProjectID 0)}}
 						{{ctx.Locale.Tr "repo.issues.change_project_at" $oldProjectDisplayHtml $newProjectDisplayHtml $createdStr}}

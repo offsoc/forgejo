@@ -205,31 +205,6 @@ type SearchRepoOptions struct {
 	OnlyShowRelevant bool
 }
 
-// SearchOrderBy is used to sort the result
-type SearchOrderBy string
-
-func (s SearchOrderBy) String() string {
-	return string(s)
-}
-
-// Strings for sorting result
-const (
-	SearchOrderByAlphabetically        SearchOrderBy = "name ASC"
-	SearchOrderByAlphabeticallyReverse SearchOrderBy = "name DESC"
-	SearchOrderByLeastUpdated          SearchOrderBy = "updated_unix ASC"
-	SearchOrderByRecentUpdated         SearchOrderBy = "updated_unix DESC"
-	SearchOrderByOldest                SearchOrderBy = "created_unix ASC"
-	SearchOrderByNewest                SearchOrderBy = "created_unix DESC"
-	SearchOrderBySize                  SearchOrderBy = "size ASC"
-	SearchOrderBySizeReverse           SearchOrderBy = "size DESC"
-	SearchOrderByID                    SearchOrderBy = "id ASC"
-	SearchOrderByIDReverse             SearchOrderBy = "id DESC"
-	SearchOrderByStars                 SearchOrderBy = "num_stars ASC"
-	SearchOrderByStarsReverse          SearchOrderBy = "num_stars DESC"
-	SearchOrderByForks                 SearchOrderBy = "num_forks ASC"
-	SearchOrderByForksReverse          SearchOrderBy = "num_forks DESC"
-)
-
 // UserOwnedRepoCond returns user ownered repositories
 func UserOwnedRepoCond(userID int64) builder.Cond {
 	return builder.Eq{
@@ -768,7 +743,7 @@ func GetUserRepositories(ctx context.Context, opts *SearchRepoOptions) (Reposito
 		cond = cond.And(builder.Eq{"is_private": false})
 	}
 
-	if opts.LowerNames != nil && len(opts.LowerNames) > 0 {
+	if len(opts.LowerNames) > 0 {
 		cond = cond.And(builder.In("lower_name", opts.LowerNames))
 	}
 

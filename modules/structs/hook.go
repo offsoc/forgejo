@@ -45,7 +45,7 @@ type CreateHookOptionConfig map[string]string
 // CreateHookOption options when create a hook
 type CreateHookOption struct {
 	// required: true
-	// enum: forgejo,dingtalk,discord,gitea,gogs,msteams,slack,telegram,feishu,wechatwork,packagist
+	// enum: ["forgejo", "dingtalk", "discord", "gitea", "gogs", "msteams", "slack", "telegram", "feishu", "wechatwork", "packagist"]
 	Type string `json:"type" binding:"Required"`
 	// required: true
 	Config              CreateHookOptionConfig `json:"config" binding:"Required"`
@@ -414,6 +414,14 @@ const (
 
 type SchedulePayload struct {
 	Action HookScheduleAction `json:"action"`
+}
+
+type WorkflowDispatchPayload struct {
+	Inputs     map[string]string `json:"inputs"`
+	Ref        string            `json:"ref"`
+	Repository *Repository       `json:"repository"`
+	Sender     *User             `json:"sender"`
+	Workflow   string            `json:"workflow"`
 }
 
 // ReviewPayload FIXME

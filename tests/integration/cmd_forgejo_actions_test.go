@@ -4,7 +4,6 @@ package integration
 
 import (
 	gocontext "context"
-	"errors"
 	"io"
 	"net/url"
 	"os"
@@ -18,21 +17,22 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_CmdForgejo_Actions(t *testing.T) {
 	onGiteaRun(t, func(*testing.T, *url.URL) {
 		token, err := runMainApp("forgejo-cli", "actions", "generate-runner-token")
-		assert.NoError(t, err)
-		assert.EqualValues(t, 40, len(token))
+		require.NoError(t, err)
+		assert.Len(t, token, 40)
 
 		secret, err := runMainApp("forgejo-cli", "actions", "generate-secret")
-		assert.NoError(t, err)
-		assert.EqualValues(t, 40, len(secret))
+		require.NoError(t, err)
+		assert.Len(t, secret, 40)
 
 		_, err = runMainApp("forgejo-cli", "actions", "register")
 		var exitErr *exec.ExitError
-		assert.True(t, errors.As(err, &exitErr))
+		require.ErrorAs(t, err, &exitErr)
 		assert.Contains(t, string(exitErr.Stderr), "at least one of the --secret")
 
 		for _, testCase := range []struct {
@@ -71,7 +71,7 @@ func Test_CmdForgejo_Actions(t *testing.T) {
 				assert.EqualValues(t, "", output)
 
 				var exitErr *exec.ExitError
-				assert.True(t, errors.As(err, &exitErr))
+				require.ErrorAs(t, err, &exitErr)
 				assert.Contains(t, string(exitErr.Stderr), testCase.errorMessage)
 			})
 		}
@@ -101,14 +101,14 @@ func Test_CmdForgejo_Actions(t *testing.T) {
 				testName: "secret from file",
 				secretOption: func() string {
 					secretFile := t.TempDir() + "/secret"
-					assert.NoError(t, os.WriteFile(secretFile, []byte(secret), 0o644))
+					require.NoError(t, os.WriteFile(secretFile, []byte(secret), 0o644))
 					return "--secret-file=" + secretFile
 				},
 			},
 		} {
 			t.Run(testCase.testName, func(t *testing.T) {
 				uuid, err := runMainAppWithStdin(testCase.stdin, "forgejo-cli", "actions", "register", testCase.secretOption(), "--scope=org26")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.EqualValues(t, expecteduuid, uuid)
 			})
 		}
@@ -184,11 +184,11 @@ func Test_CmdForgejo_Actions(t *testing.T) {
 				//
 				for i := 0; i < 2; i++ {
 					uuid, err := runMainApp("forgejo-cli", cmd...)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					if assert.EqualValues(t, testCase.uuid, uuid) {
 						ownerName, repoName, found := strings.Cut(testCase.scope, "/")
 						action, err := actions_model.GetRunnerByUUID(gocontext.Background(), uuid)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 
 						user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: action.OwnerID})
 						assert.Equal(t, ownerName, user.Name, action.OwnerID)

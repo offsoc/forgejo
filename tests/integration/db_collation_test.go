@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
 )
 
@@ -52,12 +53,12 @@ func TestDatabaseCollation(t *testing.T) {
 	// all created tables should use case-sensitive collation by default
 	_, _ = x.Exec("DROP TABLE IF EXISTS test_collation_tbl")
 	err := x.Sync(&TestCollationTbl{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	_, _ = x.Exec("INSERT INTO test_collation_tbl (txt) VALUES ('main')")
 	_, _ = x.Exec("INSERT INTO test_collation_tbl (txt) VALUES ('Main')") // case-sensitive, so it inserts a new row
 	_, _ = x.Exec("INSERT INTO test_collation_tbl (txt) VALUES ('main')") // duplicate, so it doesn't insert
 	cnt, err := x.Count(&TestCollationTbl{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 2, cnt)
 	_, _ = x.Exec("DROP TABLE IF EXISTS test_collation_tbl")
 
@@ -71,7 +72,7 @@ func TestDatabaseCollation(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		r, err := db.CheckCollations(x)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, r.IsCollationCaseSensitive(r.DatabaseCollation))
 		assert.True(t, r.CollationEquals(r.ExpectedCollation, r.DatabaseCollation))
 		assert.NotEmpty(t, r.AvailableCollation)
@@ -94,20 +95,20 @@ func TestDatabaseCollation(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		defer test.MockVariableValue(&setting.Database.CharsetCollation, "utf8mb4_bin")()
-		assert.NoError(t, db.ConvertDatabaseTable())
+		require.NoError(t, db.ConvertDatabaseTable())
 		time.Sleep(5 * time.Second)
 
 		r, err := db.CheckCollations(x)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "utf8mb4_bin", r.DatabaseCollation)
 		assert.True(t, r.CollationEquals(r.ExpectedCollation, r.DatabaseCollation))
 		assert.Empty(t, r.InconsistentCollationColumns)
 
 		_, _ = x.Exec("DROP TABLE IF EXISTS test_tbl")
 		_, err = x.Exec("CREATE TABLE test_tbl (txt varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL)")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		r, err = db.CheckCollations(x)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, r.InconsistentCollationColumns, "test_tbl.txt")
 	})
 
@@ -115,20 +116,20 @@ func TestDatabaseCollation(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		defer test.MockVariableValue(&setting.Database.CharsetCollation, "utf8mb4_general_ci")()
-		assert.NoError(t, db.ConvertDatabaseTable())
+		require.NoError(t, db.ConvertDatabaseTable())
 		time.Sleep(5 * time.Second)
 
 		r, err := db.CheckCollations(x)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "utf8mb4_general_ci", r.DatabaseCollation)
 		assert.True(t, r.CollationEquals(r.ExpectedCollation, r.DatabaseCollation))
 		assert.Empty(t, r.InconsistentCollationColumns)
 
 		_, _ = x.Exec("DROP TABLE IF EXISTS test_tbl")
 		_, err = x.Exec("CREATE TABLE test_tbl (txt varchar(10) COLLATE utf8mb4_bin NOT NULL)")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		r, err = db.CheckCollations(x)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, r.InconsistentCollationColumns, "test_tbl.txt")
 	})
 
@@ -136,11 +137,11 @@ func TestDatabaseCollation(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		defer test.MockVariableValue(&setting.Database.CharsetCollation, "")()
-		assert.NoError(t, db.ConvertDatabaseTable())
+		require.NoError(t, db.ConvertDatabaseTable())
 		time.Sleep(5 * time.Second)
 
 		r, err := db.CheckCollations(x)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, r.IsCollationCaseSensitive(r.DatabaseCollation))
 		assert.True(t, r.CollationEquals(r.ExpectedCollation, r.DatabaseCollation))
 		assert.Empty(t, r.InconsistentCollationColumns)

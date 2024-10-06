@@ -23,6 +23,7 @@ const (
 	GithubEventPullRequestComment       = "pull_request_comment"
 	GithubEventGollum                   = "gollum"
 	GithubEventSchedule                 = "schedule"
+	GithubEventWorkflowDispatch         = "workflow_dispatch"
 )
 
 // IsDefaultBranchWorkflow returns true if the event only triggers workflows on the default branch
@@ -52,6 +53,10 @@ func IsDefaultBranchWorkflow(triggedEvent webhook_module.HookEventType) bool {
 		// GitHub "schedule" event
 		// https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
 		return true
+	case webhook_module.HookEventWorkflowDispatch:
+		// GitHub "workflow_dispatch" event
+		// https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch
+		return true
 	case webhook_module.HookEventIssues,
 		webhook_module.HookEventIssueAssign,
 		webhook_module.HookEventIssueLabel,
@@ -73,6 +78,9 @@ func canGithubEventMatch(eventName string, triggedEvent webhook_module.HookEvent
 	// See https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#gollum
 	case GithubEventGollum:
 		return triggedEvent == webhook_module.HookEventWiki
+
+	case GithubEventWorkflowDispatch:
+		return triggedEvent == webhook_module.HookEventWorkflowDispatch
 
 	case GithubEventIssues:
 		switch triggedEvent {

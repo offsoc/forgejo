@@ -307,60 +307,6 @@ func updateActivation(ctx context.Context, email *EmailAddress, activate bool) e
 	return UpdateUserCols(ctx, user, "rands")
 }
 
-func MakeEmailPrimaryWithUser(ctx context.Context, user *User, email *EmailAddress) error {
-	ctx, committer, err := db.TxContext(ctx)
-	if err != nil {
-		return err
-	}
-	defer committer.Close()
-	sess := db.GetEngine(ctx)
-
-	// 1. Update user table
-	user.Email = email.Email
-	if _, err = sess.ID(user.ID).Cols("email").Update(user); err != nil {
-		return err
-	}
-
-	// 2. Update old primary email
-	if _, err = sess.Where("uid=? AND is_primary=?", email.UID, true).Cols("is_primary").Update(&EmailAddress{
-		IsPrimary: false,
-	}); err != nil {
-		return err
-	}
-
-	// 3. update new primary email
-	email.IsPrimary = true
-	if _, err = sess.ID(email.ID).Cols("is_primary").Update(email); err != nil {
-		return err
-	}
-
-	return committer.Commit()
-}
-
-// MakeEmailPrimary sets primary email address of given user.
-func MakeEmailPrimary(ctx context.Context, email *EmailAddress) error {
-	has, err := db.GetEngine(ctx).Get(email)
-	if err != nil {
-		return err
-	} else if !has {
-		return ErrEmailAddressNotExist{Email: email.Email}
-	}
-
-	if !email.IsActivated {
-		return ErrEmailNotActivated
-	}
-
-	user := &User{}
-	has, err = db.GetEngine(ctx).ID(email.UID).Get(user)
-	if err != nil {
-		return err
-	} else if !has {
-		return ErrUserNotExist{UID: email.UID}
-	}
-
-	return MakeEmailPrimaryWithUser(ctx, user, email)
-}
-
 // VerifyActiveEmailCode verifies active email code when active account
 func VerifyActiveEmailCode(ctx context.Context, code, email string) *EmailAddress {
 	if user := GetVerifyUser(ctx, code); user != nil {
@@ -404,6 +350,7 @@ type SearchEmailOptions struct {
 
 // SearchEmailResult is an e-mail address found in the user or email_address table
 type SearchEmailResult struct {
+	ID          int64
 	UID         int64
 	Email       string
 	IsActivated bool

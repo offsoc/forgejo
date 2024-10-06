@@ -60,7 +60,7 @@ func checkConfigurationFile(logger log.Logger, autofix bool, fileOpts configurat
 func checkConfigurationFiles(ctx context.Context, logger log.Logger, autofix bool) error {
 	if fi, err := os.Stat(setting.CustomConf); err != nil || !fi.Mode().IsRegular() {
 		logger.Error("Failed to find configuration file at '%s'.", setting.CustomConf)
-		logger.Error("If you've never ran Gitea yet, this is normal and '%s' will be created for you on first run.", setting.CustomConf)
+		logger.Error("If you've never ran Forgejo yet, this is normal and '%s' will be created for you on first run.", setting.CustomConf)
 		logger.Error("Otherwise check that you are running this command from the correct path and/or provide a `--config` parameter.")
 		logger.Critical("Cannot proceed without a configuration file")
 		return err

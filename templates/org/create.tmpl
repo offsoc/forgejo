@@ -5,7 +5,7 @@
 			<form class="ui form" action="{{.Link}}" method="post">
 				{{.CsrfTokenHtml}}
 				<h3 class="ui top attached header">
-					{{ctx.Locale.Tr "new_org"}}
+					{{ctx.Locale.Tr "new_org.title"}}
 				</h3>
 				<div class="ui attached segment">
 					{{template "base/alert" .}}
@@ -34,7 +34,7 @@
 					</div>
 
 					<div class="inline field" id="permission_box">
-						<label>{{ctx.Locale.Tr "org.settings.permission"}}</label>
+						<span class="inline field"><label>{{ctx.Locale.Tr "org.settings.permission"}}</label></span>
 						<div class="inline-grouped-list">
 							<div class="ui checkbox">
 								<input type="checkbox" name="repo_admin_change_team_access" checked>

@@ -98,6 +98,15 @@ a.ui.label:hover {
   display: inline-block !important;
 }
 
+.ugc-labels .item {
+  text-overflow: unset !important;
+}
+
+.ugc-labels .item .ui.label {
+  text-wrap: auto;
+  overflow-wrap: anywhere;
+}
+
 .ui.basic.label {
   background: var(--color-button);
   border: 1px solid var(--color-light-border);

@@ -106,7 +106,7 @@ func TestCreateFileOnProtectedBranch(t *testing.T) {
 		resp = session.MakeRequest(t, req, http.StatusOK)
 
 		res := make(map[string]string)
-		assert.NoError(t, json.NewDecoder(resp.Body).Decode(&res))
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&res))
 		assert.EqualValues(t, "/user2/repo1/settings/branches", res["redirect"])
 
 		// Check if master branch has been locked successfully
@@ -309,7 +309,7 @@ func TestCommitMail(t *testing.T) {
 				}
 
 				commit, err := gitRepo.GetCommitByPath(case1.fileName)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.EqualValues(t, "user2", commit.Author.Name)
 				assert.EqualValues(t, "user2@noreply.example.org", commit.Author.Email)
@@ -334,7 +334,7 @@ func TestCommitMail(t *testing.T) {
 				}
 
 				commit, err := gitRepo.GetCommitByPath(case2.fileName)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.EqualValues(t, "user2", commit.Author.Name)
 				assert.EqualValues(t, primaryEmail.Email, commit.Author.Email)
@@ -495,9 +495,9 @@ index 0000000000..4475433e27
 			defer tests.PrintCurrentTest(t)()
 
 			commitID1, err := gitRepo.GetCommitByPath("diff-file-1.txt")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			commitID2, err := gitRepo.GetCommitByPath("diff-file-2.txt")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assertCase(t, caseOpts{
 				fileName: "diff-file-1.txt",

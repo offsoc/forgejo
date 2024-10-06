@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConfigProviderBehaviors(t *testing.T) {
@@ -78,38 +79,38 @@ key = 123
 
 func TestNewConfigProviderFromFile(t *testing.T) {
 	cfg, err := NewConfigProviderFromFile("no-such.ini")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, cfg.IsLoadedFromEmpty())
 
 	// load non-existing file and save
 	testFile := t.TempDir() + "/test.ini"
 	testFile1 := t.TempDir() + "/test1.ini"
 	cfg, err = NewConfigProviderFromFile(testFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	sec, _ := cfg.NewSection("foo")
 	_, _ = sec.NewKey("k1", "a")
-	assert.NoError(t, cfg.Save())
+	require.NoError(t, cfg.Save())
 	_, _ = sec.NewKey("k2", "b")
-	assert.NoError(t, cfg.SaveTo(testFile1))
+	require.NoError(t, cfg.SaveTo(testFile1))
 
 	bs, err := os.ReadFile(testFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "[foo]\nk1 = a\n", string(bs))
 
 	bs, err = os.ReadFile(testFile1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "[foo]\nk1 = a\nk2 = b\n", string(bs))
 
 	// load existing file and save
 	cfg, err = NewConfigProviderFromFile(testFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "a", cfg.Section("foo").Key("k1").String())
 	sec, _ = cfg.NewSection("bar")
 	_, _ = sec.NewKey("k1", "b")
-	assert.NoError(t, cfg.Save())
+	require.NoError(t, cfg.Save())
 	bs, err = os.ReadFile(testFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "[foo]\nk1 = a\n\n[bar]\nk1 = b\n", string(bs))
 }
 
@@ -118,15 +119,15 @@ func TestNewConfigProviderForLocale(t *testing.T) {
 	localeFile := t.TempDir() + "/locale.ini"
 	_ = os.WriteFile(localeFile, []byte(`k1=a`), 0o644)
 	cfg, err := NewConfigProviderForLocale(localeFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "a", cfg.Section("").Key("k1").String())
 
 	// load locale from bytes
 	cfg, err = NewConfigProviderForLocale([]byte("k1=foo\nk2=bar"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "foo", cfg.Section("").Key("k1").String())
 	cfg, err = NewConfigProviderForLocale([]byte("k1=foo\nk2=bar"), []byte("k2=xxx"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "foo", cfg.Section("").Key("k1").String())
 	assert.Equal(t, "xxx", cfg.Section("").Key("k2").String())
 }
@@ -135,22 +136,22 @@ func TestDisableSaving(t *testing.T) {
 	testFile := t.TempDir() + "/test.ini"
 	_ = os.WriteFile(testFile, []byte("k1=a\nk2=b"), 0o644)
 	cfg, err := NewConfigProviderFromFile(testFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	cfg.DisableSaving()
 	err = cfg.Save()
-	assert.ErrorIs(t, err, errDisableSaving)
+	require.ErrorIs(t, err, errDisableSaving)
 
 	saveCfg, err := cfg.PrepareSaving()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	saveCfg.Section("").Key("k1").MustString("x")
 	saveCfg.Section("").Key("k2").SetValue("y")
 	saveCfg.Section("").Key("k3").SetValue("z")
 	err = saveCfg.Save()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bs, err := os.ReadFile(testFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "k1 = a\nk2 = y\nk3 = z\n", string(bs))
 }

@@ -52,3 +52,14 @@
   description: My awesome deploy service
   context: deploy/awesomeness
   creator_id: 2
+
+-
+  id: 6
+  index: 6
+  repo_id: 62
+  state: "failure"
+  sha: "774f93df12d14931ea93259ae93418da4482fcc1"
+  target_url: "/user2/test_workflows/actions"
+  description: My awesome deploy service
+  context: deploy/awesomeness
+  creator_id: 2

@@ -1,0 +1,99 @@
+<div class="ui info message tw-flex tw-items-center">
+	<span>
+		{{ctx.Locale.Tr "actions.workflow.dispatch.trigger_found"}}
+	</span>
+	<div class="ui dropdown custom tw-ml-4" id="workflow_dispatch_dropdown">
+		<button class="ui compact small basic button tw-flex">
+			<span class="text">{{ctx.Locale.Tr "actions.workflow.dispatch.run"}}</span>
+			{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+		</button>
+		<div class="menu">
+			<div class="message ui form">
+				<div class="field">
+					<label>{{ctx.Locale.Tr "actions.workflow.dispatch.use_from"}}</label>
+					{{template "repo/branch_dropdown" dict
+						"root" (dict
+							"IsViewBranch" true
+							"BranchName" .Repo.BranchName
+							"CommitID" .Repo.CommitID
+							"RepoLink" .Repo.RepoLink
+							"Repository" .Repo.Repository
+						)
+						"disableCreateBranch" true
+						"branchForm" "branch-dropdown-form"
+						"setAction" false
+						"submitForm" false
+					}}
+				</div>
+
+				<form method="post" action="{{.Repo.RepoLink}}/actions/manual" id="branch-dropdown-form">
+					{{range $i, $key := .CurWorkflowDispatchInputKeys}}
+						{{$val := index $.CurWorkflowDispatch.Inputs $key}}
+						<div class="{{if $val.Required}}required {{end}}field">
+							{{if eq $val.Type "boolean"}}
+								<div class="ui checkbox">
+									<label><strong>{{if $val.Description}}{{$val.Description}}{{else}}{{$key}}{{end}}</strong></label>
+									<input {{if $val.Required}}required{{end}} type="checkbox" name="inputs[{{$key}}]" {{if eq $val.Default "true"}}checked{{end}}>
+								</div>
+							{{else}}
+								<label>{{if $val.Description}}{{$val.Description}}{{else}}{{$key}}{{end}}</label>
+								{{if eq $val.Type "number"}}
+									<input {{if $val.Required}}required{{end}} type="number" name="inputs[{{$key}}]" {{if $val.Default}}value="{{$val.Default}}"{{end}}>
+								{{else if eq $val.Type "string"}}
+									<input {{if $val.Required}}required{{end}} type="text" name="inputs[{{$key}}]" {{if $val.Default}}value="{{$val.Default}}"{{end}}>
+								{{else if eq $val.Type "choice"}}
+									<div class="ui selection dropdown">
+										<input name="inputs[{{$key}}]" type="hidden" value="{{$val.Default}}">
+										{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+										<div class="text"></div>
+										<div class="menu">
+											{{range $opt := $val.Options}}
+												<div data-value="{{$opt}}" class="{{if eq $val.Default $opt}}active selected {{end}}item">{{$opt}}</div>
+											{{end}}
+										</div>
+									</div>
+								{{else}}
+									<strong>{{ctx.Locale.Tr "actions.workflow.dispatch.invalid_input_type" $val.Type}}</strong>
+								{{end}}
+							{{end}}
+						</div>
+					{{end}}
+
+					{{if .WarnDispatchInputsLimit}}
+						<div class="text yellow tw-mb-4">
+							{{svg "octicon-alert"}} {{ctx.Locale.Tr "actions.workflow.dispatch.warn_input_limit" .DispatchInputsLimit}}
+						</div>
+					{{end}}
+
+					{{.CsrfTokenHtml}}
+					<input type="hidden" name="ref" value="{{if $.Repo.BranchName}}{{$.Repo.BranchName}}{{else}}{{$.Repo.Repository.DefaultBranch}}{{end}}">
+					<input type="hidden" name="workflow" value="{{$.CurWorkflow}}">
+					<input type="hidden" name="actor" value="{{$.CurActor}}">
+					<input type="hidden" name="status" value="{{$.CurStatus}}">
+					<button type="submit" id="workflow-dispatch-submit" class="ui primary small compact button">{{ctx.Locale.Tr "actions.workflow.dispatch.run"}}</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script>
+		window.addEventListener('load', () => {
+			const dropdown = $('#workflow_dispatch_dropdown');
+			const menu = dropdown.find('> .menu');
+			$(document.body).on('click', (ev) => {
+				if (!dropdown[0].contains(ev.target) && menu.hasClass('visible')) {
+					menu.transition({ animation: 'slide down out', duration: 200, queue: false });
+				}
+			});
+			dropdown.on('click', (ev) => {
+				const inMenu = $(ev.target).closest(menu).length !== 0;
+				if (inMenu) return;
+				ev.stopPropagation();
+				if (menu.hasClass('visible')) {
+					menu.transition({ animation: 'slide down out', duration: 200, queue: false });
+				} else {
+					menu.transition({ animation: 'slide down in', duration: 200, queue: true });
+				}
+			});
+		});
+	</script>
+</div>

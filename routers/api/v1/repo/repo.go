@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/models/organization"
 	"code.gitea.io/gitea/models/perm"
 	access_model "code.gitea.io/gitea/models/perm/access"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	unit_model "code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
@@ -107,7 +108,7 @@ func Search(ctx *context.APIContext) {
 	// - name: sort
 	//   in: query
 	//   description: sort repos by attribute. Supported values are
-	//                "alpha", "created", "updated", "size", and "id".
+	//                "alpha", "created", "updated", "size", "git_size", "lfs_size", "stars", "forks" and "id".
 	//                Default is "alpha"
 	//   type: string
 	// - name: order
@@ -184,7 +185,7 @@ func Search(ctx *context.APIContext) {
 		if len(sortOrder) == 0 {
 			sortOrder = "asc"
 		}
-		if searchModeMap, ok := repo_model.SearchOrderByMap[sortOrder]; ok {
+		if searchModeMap, ok := repo_model.OrderByMap[sortOrder]; ok {
 			if orderBy, ok := searchModeMap[sortMode]; ok {
 				opts.OrderBy = orderBy
 			} else {
@@ -302,6 +303,8 @@ func Create(ctx *context.APIContext) {
 	//     "$ref": "#/responses/error"
 	//   "409":
 	//     description: The repository with the same name already exists.
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 	opt := web.GetForm(ctx).(*api.CreateRepoOption)
@@ -346,6 +349,8 @@ func Generate(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 	//   "409":
 	//     description: The repository with the same name already exists.
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 	form := web.GetForm(ctx).(*api.GenerateRepoOption)
@@ -410,6 +415,10 @@ func Generate(ctx *context.APIContext) {
 				return
 			}
 		}
+	}
+
+	if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, ctxUser.ID, ctxUser.Name) {
+		return
 	}
 
 	repo, err := repo_service.GenerateRepository(ctx, ctx.Doer, ctxUser, ctx.Repo.Repository, opts)

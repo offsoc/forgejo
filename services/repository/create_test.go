@@ -16,14 +16,15 @@ import (
 	"code.gitea.io/gitea/modules/structs"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIncludesAllRepositoriesTeams(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testTeamRepositories := func(teamID int64, repoIds []int64) {
 		team := unittest.AssertExistsAndLoadBean(t, &organization.Team{ID: teamID})
-		assert.NoError(t, team.LoadRepositories(db.DefaultContext), "%s: GetRepositories", team.Name)
+		require.NoError(t, team.LoadRepositories(db.DefaultContext), "%s: GetRepositories", team.Name)
 		assert.Len(t, team.Repos, team.NumRepos, "%s: len repo", team.Name)
 		assert.Len(t, team.Repos, len(repoIds), "%s: repo count", team.Name)
 		for i, rid := range repoIds {
@@ -35,7 +36,7 @@ func TestIncludesAllRepositoriesTeams(t *testing.T) {
 
 	// Get an admin user.
 	user, err := user_model.GetUserByID(db.DefaultContext, 1)
-	assert.NoError(t, err, "GetUserByID")
+	require.NoError(t, err, "GetUserByID")
 
 	// Create org.
 	org := &organization.Organization{
@@ -44,25 +45,25 @@ func TestIncludesAllRepositoriesTeams(t *testing.T) {
 		Type:       user_model.UserTypeOrganization,
 		Visibility: structs.VisibleTypePublic,
 	}
-	assert.NoError(t, organization.CreateOrganization(db.DefaultContext, org, user), "CreateOrganization")
+	require.NoError(t, organization.CreateOrganization(db.DefaultContext, org, user), "CreateOrganization")
 
 	// Check Owner team.
 	ownerTeam, err := org.GetOwnerTeam(db.DefaultContext)
-	assert.NoError(t, err, "GetOwnerTeam")
+	require.NoError(t, err, "GetOwnerTeam")
 	assert.True(t, ownerTeam.IncludesAllRepositories, "Owner team includes all repositories")
 
 	// Create repos.
 	repoIDs := make([]int64, 0)
 	for i := 0; i < 3; i++ {
 		r, err := CreateRepositoryDirectly(db.DefaultContext, user, org.AsUser(), CreateRepoOptions{Name: fmt.Sprintf("repo-%d", i)})
-		assert.NoError(t, err, "CreateRepository %d", i)
+		require.NoError(t, err, "CreateRepository %d", i)
 		if r != nil {
 			repoIDs = append(repoIDs, r.ID)
 		}
 	}
 	// Get fresh copy of Owner team after creating repos.
 	ownerTeam, err = org.GetOwnerTeam(db.DefaultContext)
-	assert.NoError(t, err, "GetOwnerTeam")
+	require.NoError(t, err, "GetOwnerTeam")
 
 	// Create teams and check repositories.
 	teams := []*organization.Team{
@@ -101,7 +102,7 @@ func TestIncludesAllRepositoriesTeams(t *testing.T) {
 	}
 	for i, team := range teams {
 		if i > 0 { // first team is Owner.
-			assert.NoError(t, models.NewTeam(db.DefaultContext, team), "%s: NewTeam", team.Name)
+			require.NoError(t, models.NewTeam(db.DefaultContext, team), "%s: NewTeam", team.Name)
 		}
 		testTeamRepositories(team.ID, teamRepos[i])
 	}
@@ -111,13 +112,13 @@ func TestIncludesAllRepositoriesTeams(t *testing.T) {
 	teams[4].IncludesAllRepositories = true
 	teamRepos[4] = repoIDs
 	for i, team := range teams {
-		assert.NoError(t, models.UpdateTeam(db.DefaultContext, team, false, true), "%s: UpdateTeam", team.Name)
+		require.NoError(t, models.UpdateTeam(db.DefaultContext, team, false, true), "%s: UpdateTeam", team.Name)
 		testTeamRepositories(team.ID, teamRepos[i])
 	}
 
 	// Create repo and check teams repositories.
 	r, err := CreateRepositoryDirectly(db.DefaultContext, user, org.AsUser(), CreateRepoOptions{Name: "repo-last"})
-	assert.NoError(t, err, "CreateRepository last")
+	require.NoError(t, err, "CreateRepository last")
 	if r != nil {
 		repoIDs = append(repoIDs, r.ID)
 	}
@@ -129,7 +130,7 @@ func TestIncludesAllRepositoriesTeams(t *testing.T) {
 	}
 
 	// Remove repo and check teams repositories.
-	assert.NoError(t, DeleteRepositoryDirectly(db.DefaultContext, user, repoIDs[0]), "DeleteRepository")
+	require.NoError(t, DeleteRepositoryDirectly(db.DefaultContext, user, repoIDs[0]), "DeleteRepository")
 	teamRepos[0] = repoIDs[1:]
 	teamRepos[1] = repoIDs[1:]
 	teamRepos[3] = repoIDs[1:3]
@@ -141,8 +142,8 @@ func TestIncludesAllRepositoriesTeams(t *testing.T) {
 	// Wipe created items.
 	for i, rid := range repoIDs {
 		if i > 0 { // first repo already deleted.
-			assert.NoError(t, DeleteRepositoryDirectly(db.DefaultContext, user, rid), "DeleteRepository %d", i)
+			require.NoError(t, DeleteRepositoryDirectly(db.DefaultContext, user, rid), "DeleteRepository %d", i)
 		}
 	}
-	assert.NoError(t, organization.DeleteOrganization(db.DefaultContext, org), "DeleteOrganization")
+	require.NoError(t, organization.DeleteOrganization(db.DefaultContext, org), "DeleteOrganization")
 }

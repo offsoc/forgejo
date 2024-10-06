@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_getStorageMultipleName(t *testing.T) {
@@ -23,17 +24,17 @@ STORAGE_TYPE = minio
 MINIO_BUCKET = gitea-storage
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadAttachmentFrom(cfg))
+	require.NoError(t, loadAttachmentFrom(cfg))
 	assert.EqualValues(t, "gitea-attachment", Attachment.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
 
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, loadLFSFrom(cfg))
 	assert.EqualValues(t, "gitea-lfs", LFS.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "lfs/", LFS.Storage.MinioConfig.BasePath)
 
-	assert.NoError(t, loadAvatarsFrom(cfg))
+	require.NoError(t, loadAvatarsFrom(cfg))
 	assert.EqualValues(t, "gitea-storage", Avatar.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "avatars/", Avatar.Storage.MinioConfig.BasePath)
 }
@@ -48,13 +49,13 @@ STORAGE_TYPE = minio
 MINIO_BUCKET = gitea-storage
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadAttachmentFrom(cfg))
+	require.NoError(t, loadAttachmentFrom(cfg))
 	assert.EqualValues(t, "gitea-storage", Attachment.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
 
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, loadLFSFrom(cfg))
 	assert.EqualValues(t, "gitea-storage", LFS.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "lfs/", LFS.Storage.MinioConfig.BasePath)
 }
@@ -65,19 +66,19 @@ func Test_getStorageInheritStorageType(t *testing.T) {
 STORAGE_TYPE = minio
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, loadPackagesFrom(cfg))
+	require.NoError(t, loadPackagesFrom(cfg))
 	assert.EqualValues(t, "minio", Packages.Storage.Type)
 	assert.EqualValues(t, "gitea", Packages.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "packages/", Packages.Storage.MinioConfig.BasePath)
 
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 	assert.EqualValues(t, "minio", RepoArchive.Storage.Type)
 	assert.EqualValues(t, "gitea", RepoArchive.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "repo-archive/", RepoArchive.Storage.MinioConfig.BasePath)
 
-	assert.NoError(t, loadActionsFrom(cfg))
+	require.NoError(t, loadActionsFrom(cfg))
 	assert.EqualValues(t, "minio", Actions.LogStorage.Type)
 	assert.EqualValues(t, "gitea", Actions.LogStorage.MinioConfig.Bucket)
 	assert.EqualValues(t, "actions_log/", Actions.LogStorage.MinioConfig.BasePath)
@@ -86,12 +87,12 @@ STORAGE_TYPE = minio
 	assert.EqualValues(t, "gitea", Actions.ArtifactStorage.MinioConfig.Bucket)
 	assert.EqualValues(t, "actions_artifacts/", Actions.ArtifactStorage.MinioConfig.BasePath)
 
-	assert.NoError(t, loadAvatarsFrom(cfg))
+	require.NoError(t, loadAvatarsFrom(cfg))
 	assert.EqualValues(t, "minio", Avatar.Storage.Type)
 	assert.EqualValues(t, "gitea", Avatar.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "avatars/", Avatar.Storage.MinioConfig.BasePath)
 
-	assert.NoError(t, loadRepoAvatarFrom(cfg))
+	require.NoError(t, loadRepoAvatarFrom(cfg))
 	assert.EqualValues(t, "minio", RepoAvatar.Storage.Type)
 	assert.EqualValues(t, "gitea", RepoAvatar.Storage.MinioConfig.Bucket)
 	assert.EqualValues(t, "repo-avatars/", RepoAvatar.Storage.MinioConfig.BasePath)
@@ -105,10 +106,10 @@ type testLocalStoragePathCase struct {
 
 func testLocalStoragePath(t *testing.T, appDataPath, iniStr string, cases []testLocalStoragePathCase) {
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	AppDataPath = appDataPath
 	for _, c := range cases {
-		assert.NoError(t, c.loader(cfg))
+		require.NoError(t, c.loader(cfg))
 		storage := *c.storagePtr
 
 		assert.EqualValues(t, "local", storage.Type)
@@ -315,9 +316,9 @@ func Test_getStorageConfiguration20(t *testing.T) {
 STORAGE_TYPE = my_storage
 PATH = archives
 `)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.Error(t, loadRepoArchiveFrom(cfg))
+	require.Error(t, loadRepoArchiveFrom(cfg))
 }
 
 func Test_getStorageConfiguration21(t *testing.T) {
@@ -344,12 +345,12 @@ STORAGE_TYPE = minio
 MINIO_ACCESS_KEY_ID = my_access_key
 MINIO_SECRET_ACCESS_KEY = my_secret_key
 `)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = getStorage(cfg, "", "", nil)
-	assert.Error(t, err)
+	require.Error(t, err)
 
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 	cp := RepoArchive.Storage.ToShadowCopy()
 	assert.EqualValues(t, "******", cp.MinioConfig.AccessKeyID)
 	assert.EqualValues(t, "******", cp.MinioConfig.SecretAccessKey)
@@ -364,8 +365,8 @@ STORAGE_TYPE = my_archive
 ; unsupported, storage type should be defined explicitly
 PATH = archives
 `)
-	assert.NoError(t, err)
-	assert.Error(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, err)
+	require.Error(t, loadRepoArchiveFrom(cfg))
 }
 
 func Test_getStorageConfiguration25(t *testing.T) {
@@ -378,8 +379,8 @@ STORAGE_TYPE = my_archive
 STORAGE_TYPE = unknown // should be local or minio
 PATH = archives
 `)
-	assert.NoError(t, err)
-	assert.Error(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, err)
+	require.Error(t, loadRepoArchiveFrom(cfg))
 }
 
 func Test_getStorageConfiguration26(t *testing.T) {
@@ -391,10 +392,10 @@ MINIO_SECRET_ACCESS_KEY = my_secret_key
 ; wrong configuration
 MINIO_USE_SSL = abc
 `)
-	assert.NoError(t, err)
-	// assert.Error(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, err)
+	// require.Error(t, loadRepoArchiveFrom(cfg))
 	// FIXME: this should return error but now ini package's MapTo() doesn't check type
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 }
 
 func Test_getStorageConfiguration27(t *testing.T) {
@@ -405,11 +406,11 @@ MINIO_ACCESS_KEY_ID = my_access_key
 MINIO_SECRET_ACCESS_KEY = my_secret_key
 MINIO_USE_SSL = true
 `)
-	assert.NoError(t, err)
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 	assert.EqualValues(t, "my_access_key", RepoArchive.Storage.MinioConfig.AccessKeyID)
 	assert.EqualValues(t, "my_secret_key", RepoArchive.Storage.MinioConfig.SecretAccessKey)
-	assert.EqualValues(t, true, RepoArchive.Storage.MinioConfig.UseSSL)
+	assert.True(t, RepoArchive.Storage.MinioConfig.UseSSL)
 	assert.EqualValues(t, "repo-archive/", RepoArchive.Storage.MinioConfig.BasePath)
 }
 
@@ -422,11 +423,11 @@ MINIO_SECRET_ACCESS_KEY = my_secret_key
 MINIO_USE_SSL = true
 MINIO_BASE_PATH = /prefix
 `)
-	assert.NoError(t, err)
-	assert.NoError(t, loadRepoArchiveFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadRepoArchiveFrom(cfg))
 	assert.EqualValues(t, "my_access_key", RepoArchive.Storage.MinioConfig.AccessKeyID)
 	assert.EqualValues(t, "my_secret_key", RepoArchive.Storage.MinioConfig.SecretAccessKey)
-	assert.EqualValues(t, true, RepoArchive.Storage.MinioConfig.UseSSL)
+	assert.True(t, RepoArchive.Storage.MinioConfig.UseSSL)
 	assert.EqualValues(t, "/prefix/repo-archive/", RepoArchive.Storage.MinioConfig.BasePath)
 
 	cfg, err = NewConfigProviderFromData(`
@@ -440,11 +441,11 @@ MINIO_BASE_PATH = /prefix
 [lfs]
 MINIO_BASE_PATH = /lfs
 `)
-	assert.NoError(t, err)
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadLFSFrom(cfg))
 	assert.EqualValues(t, "my_access_key", LFS.Storage.MinioConfig.AccessKeyID)
 	assert.EqualValues(t, "my_secret_key", LFS.Storage.MinioConfig.SecretAccessKey)
-	assert.EqualValues(t, true, LFS.Storage.MinioConfig.UseSSL)
+	assert.True(t, true, LFS.Storage.MinioConfig.UseSSL)
 	assert.EqualValues(t, "/lfs", LFS.Storage.MinioConfig.BasePath)
 
 	cfg, err = NewConfigProviderFromData(`
@@ -458,10 +459,10 @@ MINIO_BASE_PATH = /prefix
 [storage.lfs]
 MINIO_BASE_PATH = /lfs
 `)
-	assert.NoError(t, err)
-	assert.NoError(t, loadLFSFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadLFSFrom(cfg))
 	assert.EqualValues(t, "my_access_key", LFS.Storage.MinioConfig.AccessKeyID)
 	assert.EqualValues(t, "my_secret_key", LFS.Storage.MinioConfig.SecretAccessKey)
-	assert.EqualValues(t, true, LFS.Storage.MinioConfig.UseSSL)
+	assert.True(t, LFS.Storage.MinioConfig.UseSSL)
 	assert.EqualValues(t, "/lfs", LFS.Storage.MinioConfig.BasePath)
 }

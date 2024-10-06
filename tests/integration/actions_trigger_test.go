@@ -29,8 +29,10 @@ import (
 	release_service "code.gitea.io/gitea/services/release"
 	repo_service "code.gitea.io/gitea/services/repository"
 	files_service "code.gitea.io/gitea/services/repository/files"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPullRequestTargetEvent(t *testing.T) {
@@ -39,18 +41,18 @@ func TestPullRequestTargetEvent(t *testing.T) {
 		org3 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 3})  // owner of the forked repo
 
 		// create the base repo
-		baseRepo, _, f := CreateDeclarativeRepo(t, user2, "repo-pull-request-target",
+		baseRepo, _, f := tests.CreateDeclarativeRepo(t, user2, "repo-pull-request-target",
 			[]unit_model.Type{unit_model.TypeActions}, nil, nil,
 		)
 		defer f()
 
 		// create the forked repo
-		forkedRepo, err := repo_service.ForkRepository(git.DefaultContext, user2, org3, repo_service.ForkRepoOptions{
+		forkedRepo, err := repo_service.ForkRepositoryAndUpdates(git.DefaultContext, user2, org3, repo_service.ForkRepoOptions{
 			BaseRepo:    baseRepo,
 			Name:        "forked-repo-pull-request-target",
 			Description: "test pull-request-target event",
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, forkedRepo)
 
 		// add workflow file to the base repo
@@ -78,7 +80,7 @@ func TestPullRequestTargetEvent(t *testing.T) {
 				Committer: time.Now(),
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, addWorkflowToBaseResp)
 
 		// add a new file to the forked repo
@@ -106,7 +108,7 @@ func TestPullRequestTargetEvent(t *testing.T) {
 				Committer: time.Now(),
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, addFileToForkedResp)
 
 		// create Pull
@@ -127,7 +129,7 @@ func TestPullRequestTargetEvent(t *testing.T) {
 			Type:       issues_model.PullRequestGitea,
 		}
 		err = pull_service.NewPullRequest(git.DefaultContext, baseRepo, pullIssue, nil, nil, pullRequest, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		// if a PR "synchronized" event races the "opened" event by having the same SHA, it must be skipped. See https://codeberg.org/forgejo/forgejo/issues/2009.
 		assert.True(t, actions_service.SkipPullRequestEvent(git.DefaultContext, webhook_module.HookEventPullRequestSync, baseRepo.ID, addFileToForkedResp.Commit.SHA))
 
@@ -162,7 +164,7 @@ func TestPullRequestTargetEvent(t *testing.T) {
 				Committer: time.Now(),
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, addFileToForkedResp)
 
 		// create Pull
@@ -183,7 +185,7 @@ func TestPullRequestTargetEvent(t *testing.T) {
 			Type:       issues_model.PullRequestGitea,
 		}
 		err = pull_service.NewPullRequest(git.DefaultContext, baseRepo, pullIssue, nil, nil, pullRequest, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// the new pull request cannot trigger actions, so there is still only 1 record
 		assert.Equal(t, 1, unittest.GetCount(t, &actions_model.ActionRun{RepoID: baseRepo.ID}))
@@ -196,7 +198,7 @@ func TestSkipCI(t *testing.T) {
 		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
 		// create the repo
-		repo, _, f := CreateDeclarativeRepo(t, user2, "skip-ci",
+		repo, _, f := tests.CreateDeclarativeRepo(t, user2, "skip-ci",
 			[]unit_model.Type{unit_model.TypeActions}, nil,
 			[]*files_service.ChangeRepoFile{
 				{
@@ -236,7 +238,7 @@ func TestSkipCI(t *testing.T) {
 				Committer: time.Now(),
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, addFileResp)
 
 		// the commit message contains a configured skip-ci string, so there is still only 1 record
@@ -267,7 +269,7 @@ func TestSkipCI(t *testing.T) {
 				Committer: time.Now(),
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, addFileToBranchResp)
 
 		resp := testPullCreate(t, session, "user2", "skip-ci", true, "main", "test-skip-ci", "[skip ci] test-skip-ci")
@@ -296,7 +298,7 @@ func TestCreateDeleteRefEvent(t *testing.T) {
 			DefaultBranch: "main",
 			IsPrivate:     false,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, repo)
 
 		// enable actions
@@ -304,7 +306,7 @@ func TestCreateDeleteRefEvent(t *testing.T) {
 			RepoID: repo.ID,
 			Type:   unit_model.TypeActions,
 		}}, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// add workflow file to the repo
 		addWorkflowToBaseResp, err := files_service.ChangeRepoFiles(git.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
@@ -331,19 +333,19 @@ func TestCreateDeleteRefEvent(t *testing.T) {
 				Committer: time.Now(),
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, addWorkflowToBaseResp)
 
 		// Get the commit ID of the default branch
 		gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer gitRepo.Close()
 		branch, err := git_model.GetBranch(db.DefaultContext, repo.ID, repo.DefaultBranch)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// create a branch
 		err = repo_service.CreateNewBranchFromCommit(db.DefaultContext, user2, repo, gitRepo, branch.CommitID, "test-create-branch")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		run := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{
 			Title:      "add workflow",
 			RepoID:     repo.ID,
@@ -356,7 +358,7 @@ func TestCreateDeleteRefEvent(t *testing.T) {
 
 		// create a tag
 		err = release_service.CreateNewTag(db.DefaultContext, user2, repo, branch.CommitID, "test-create-tag", "test create tag event")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		run = unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{
 			Title:      "add workflow",
 			RepoID:     repo.ID,
@@ -369,12 +371,12 @@ func TestCreateDeleteRefEvent(t *testing.T) {
 
 		// delete the branch
 		err = repo_service.DeleteBranch(db.DefaultContext, user2, repo, gitRepo, "test-create-branch")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		run = unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{
 			Title:      "add workflow",
 			RepoID:     repo.ID,
 			Event:      "delete",
-			Ref:        "main",
+			Ref:        "refs/heads/main",
 			WorkflowID: "createdelete.yml",
 			CommitSHA:  branch.CommitID,
 		})
@@ -382,17 +384,62 @@ func TestCreateDeleteRefEvent(t *testing.T) {
 
 		// delete the tag
 		tag, err := repo_model.GetRelease(db.DefaultContext, repo.ID, "test-create-tag")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		err = release_service.DeleteReleaseByID(db.DefaultContext, repo, tag, user2, true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		run = unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{
 			Title:      "add workflow",
 			RepoID:     repo.ID,
 			Event:      "delete",
-			Ref:        "main",
+			Ref:        "refs/heads/main",
 			WorkflowID: "createdelete.yml",
 			CommitSHA:  branch.CommitID,
 		})
 		assert.NotNil(t, run)
+	})
+}
+
+func TestWorkflowDispatchEvent(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+		// create the repo
+		repo, sha, f := tests.CreateDeclarativeRepo(t, user2, "repo-workflow-dispatch",
+			[]unit_model.Type{unit_model.TypeActions}, nil,
+			[]*files_service.ChangeRepoFile{
+				{
+					Operation: "create",
+					TreePath:  ".gitea/workflows/dispatch.yml",
+					ContentReader: strings.NewReader(
+						"name: test\n" +
+							"on: [workflow_dispatch]\n" +
+							"jobs:\n" +
+							"  test:\n" +
+							"    runs-on: ubuntu-latest\n" +
+							"    steps:\n" +
+							"      - run: echo helloworld\n",
+					),
+				},
+			},
+		)
+		defer f()
+
+		gitRepo, err := gitrepo.OpenRepository(db.DefaultContext, repo)
+		require.NoError(t, err)
+		defer gitRepo.Close()
+
+		workflow, err := actions_service.GetWorkflowFromCommit(gitRepo, "main", "dispatch.yml")
+		require.NoError(t, err)
+		assert.Equal(t, "refs/heads/main", workflow.Ref)
+		assert.Equal(t, sha, workflow.Commit.ID.String())
+
+		inputGetter := func(key string) string {
+			return ""
+		}
+
+		err = workflow.Dispatch(db.DefaultContext, inputGetter, repo, user2)
+		require.NoError(t, err)
+
+		assert.Equal(t, 1, unittest.GetCount(t, &actions_model.ActionRun{RepoID: repo.ID}))
 	})
 }

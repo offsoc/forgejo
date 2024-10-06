@@ -1,4 +1,5 @@
 // Copyright 2024 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package git
@@ -14,23 +15,46 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"code.gitea.io/gitea/modules/setting"
 )
 
 type GrepResult struct {
-	Filename    string
-	LineNumbers []int
-	LineCodes   []string
+	Filename          string
+	LineNumbers       []int
+	LineCodes         []string
+	HighlightedRanges [][3]int
 }
+
+type grepMode int
+
+const (
+	FixedGrepMode grepMode = iota
+	FixedAnyGrepMode
+	RegExpGrepMode
+)
 
 type GrepOptions struct {
 	RefName           string
 	MaxResultLimit    int
 	MatchesPerFile    int
 	ContextLineNumber int
-	IsFuzzy           bool
+	Mode              grepMode
 	PathSpec          []setting.Glob
+}
+
+func (opts *GrepOptions) ensureDefaults() {
+	opts.RefName = cmp.Or(opts.RefName, "HEAD")
+	opts.MaxResultLimit = cmp.Or(opts.MaxResultLimit, 50)
+	opts.MatchesPerFile = cmp.Or(opts.MatchesPerFile, 20)
+}
+
+func hasPrefixFold(s, t string) bool {
+	if len(s) < len(t) {
+		return false
+	}
+	return strings.EqualFold(s[:len(t)], t)
 }
 
 func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepOptions) ([]*GrepResult, error) {
@@ -43,28 +67,39 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 		_ = stdoutWriter.Close()
 	}()
 
+	opts.ensureDefaults()
+
 	/*
-	 The output is like this ( "^@" means \x00):
+	 The output is like this ("^@" means \x00; the first number denotes the line,
+	 the second number denotes the column of the first match in line):
 
 	 HEAD:.air.toml
-	 6^@bin = "gitea"
+	 6^@8^@bin = "gitea"
 
 	 HEAD:.changelog.yml
-	 2^@repo: go-gitea/gitea
+	 2^@10^@repo: go-gitea/gitea
 	*/
 	var results []*GrepResult
-	cmd := NewCommand(ctx, "grep", "--null", "--break", "--heading", "--fixed-strings", "--line-number", "--ignore-case", "--full-name")
-	cmd.AddOptionValues("--context", fmt.Sprint(opts.ContextLineNumber))
-	if opts.MatchesPerFile > 0 {
-		cmd.AddOptionValues("--max-count", fmt.Sprint(opts.MatchesPerFile))
-	}
-	if opts.IsFuzzy {
-		words := strings.Fields(search)
-		for _, word := range words {
-			cmd.AddOptionValues("-e", strings.TrimLeft(word, "-"))
-		}
+	// -I skips binary files
+	cmd := NewCommand(ctx, "grep",
+		"-I", "--null", "--break", "--heading",
+		"--line-number", "--ignore-case", "--full-name")
+	if opts.Mode == RegExpGrepMode {
+		// No `--column` -- regexp mode does not support highlighting in the
+		// current implementation as the length of the match is unknown from
+		// `grep` but required for highlighting.
+		cmd.AddArguments("--perl-regexp")
 	} else {
-		cmd.AddOptionValues("-e", strings.TrimLeft(search, "-"))
+		cmd.AddArguments("--fixed-strings", "--column")
+	}
+	cmd.AddOptionValues("--context", fmt.Sprint(opts.ContextLineNumber))
+	cmd.AddOptionValues("--max-count", fmt.Sprint(opts.MatchesPerFile))
+	words := []string{search}
+	if opts.Mode == FixedAnyGrepMode {
+		words = strings.Fields(search)
+	}
+	for _, word := range words {
+		cmd.AddGitGrepExpression(word)
 	}
 
 	// pathspec
@@ -78,11 +113,12 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 	for _, expr := range setting.Indexer.ExcludePatterns {
 		files = append(files, ":^"+expr.Pattern())
 	}
-	cmd.AddDynamicArguments(cmp.Or(opts.RefName, "HEAD")).AddDashesAndList(files...)
+	cmd.AddDynamicArguments(opts.RefName).AddDashesAndList(files...)
 
-	opts.MaxResultLimit = cmp.Or(opts.MaxResultLimit, 50)
 	stderr := bytes.Buffer{}
 	err = cmd.Run(&RunOpts{
+		Timeout: time.Duration(setting.Git.Timeout.Grep) * time.Second,
+
 		Dir:    repo.Path,
 		Stdout: stdoutWriter,
 		Stderr: &stderr,
@@ -128,6 +164,25 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 				if lineNum, lineCode, ok := strings.Cut(line, "\x00"); ok {
 					lineNumInt, _ := strconv.Atoi(lineNum)
 					res.LineNumbers = append(res.LineNumbers, lineNumInt)
+					// We support highlighting only when `--column` parameter is used.
+					if lineCol, lineCode2, ok := strings.Cut(lineCode, "\x00"); ok {
+						lineColInt, _ := strconv.Atoi(lineCol)
+						start := lineColInt - 1
+						matchLen := len(lineCode2)
+						for _, word := range words {
+							if hasPrefixFold(lineCode2[start:], word) {
+								matchLen = len(word)
+								break
+							}
+						}
+						res.HighlightedRanges = append(res.HighlightedRanges, [3]int{
+							len(res.LineCodes),
+							start,
+							start + matchLen,
+						})
+						res.LineCodes = append(res.LineCodes, lineCode2)
+						continue
+					}
 					res.LineCodes = append(res.LineCodes, lineCode)
 				}
 			}

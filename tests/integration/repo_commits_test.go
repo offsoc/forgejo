@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepoCommits(t *testing.T) {
@@ -91,9 +92,9 @@ func doTestRepoCommitWithStatus(t *testing.T, state string, classes ...string) {
 
 func testRepoCommitsWithStatus(t *testing.T, resp, respOne *httptest.ResponseRecorder, state string) {
 	var statuses []*api.CommitStatus
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), &statuses))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &statuses))
 	var status api.CombinedStatus
-	assert.NoError(t, json.Unmarshal(respOne.Body.Bytes(), &status))
+	require.NoError(t, json.Unmarshal(respOne.Body.Bytes(), &status))
 	assert.NotNil(t, status)
 
 	if assert.Len(t, statuses, 1) {

@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func addReaction(t *testing.T, doerID, issueID, commentID int64, content string) {
@@ -27,12 +28,12 @@ func addReaction(t *testing.T, doerID, issueID, commentID int64, content string)
 		Type:      content,
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, reaction)
 }
 
 func TestIssueAddReaction(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -44,7 +45,7 @@ func TestIssueAddReaction(t *testing.T) {
 }
 
 func TestIssueAddDuplicateReaction(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -57,7 +58,7 @@ func TestIssueAddDuplicateReaction(t *testing.T) {
 		IssueID: issue1ID,
 		Type:    "heart",
 	})
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Equal(t, issues_model.ErrReactionAlreadyExist{Reaction: "heart"}, err)
 
 	existingR := unittest.AssertExistsAndLoadBean(t, &issues_model.Reaction{Type: "heart", UserID: user1.ID, IssueID: issue1ID})
@@ -65,7 +66,7 @@ func TestIssueAddDuplicateReaction(t *testing.T) {
 }
 
 func TestIssueDeleteReaction(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -74,13 +75,13 @@ func TestIssueDeleteReaction(t *testing.T) {
 	addReaction(t, user1.ID, issue1ID, 0, "heart")
 
 	err := issues_model.DeleteIssueReaction(db.DefaultContext, user1.ID, issue1ID, "heart")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	unittest.AssertNotExistsBean(t, &issues_model.Reaction{Type: "heart", UserID: user1.ID, IssueID: issue1ID})
 }
 
 func TestIssueReactionCount(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	setting.UI.ReactionMaxUserNum = 2
 
@@ -104,10 +105,10 @@ func TestIssueReactionCount(t *testing.T) {
 	reactionsList, _, err := issues_model.FindReactions(db.DefaultContext, issues_model.FindReactionsOptions{
 		IssueID: issueID,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, reactionsList, 7)
 	_, err = reactionsList.LoadUsers(db.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	reactions := reactionsList.GroupByType()
 	assert.Len(t, reactions["heart"], 4)
@@ -122,7 +123,7 @@ func TestIssueReactionCount(t *testing.T) {
 }
 
 func TestIssueCommentAddReaction(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -135,7 +136,7 @@ func TestIssueCommentAddReaction(t *testing.T) {
 }
 
 func TestIssueCommentDeleteReaction(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
@@ -154,7 +155,7 @@ func TestIssueCommentDeleteReaction(t *testing.T) {
 		IssueID:   issue1ID,
 		CommentID: comment1ID,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, reactionsList, 4)
 
 	reactions := reactionsList.GroupByType()
@@ -163,7 +164,7 @@ func TestIssueCommentDeleteReaction(t *testing.T) {
 }
 
 func TestIssueCommentReactionCount(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -171,7 +172,7 @@ func TestIssueCommentReactionCount(t *testing.T) {
 	var comment1ID int64 = 1
 
 	addReaction(t, user1.ID, issue1ID, comment1ID, "heart")
-	assert.NoError(t, issues_model.DeleteCommentReaction(db.DefaultContext, user1.ID, issue1ID, comment1ID, "heart"))
+	require.NoError(t, issues_model.DeleteCommentReaction(db.DefaultContext, user1.ID, issue1ID, comment1ID, "heart"))
 
 	unittest.AssertNotExistsBean(t, &issues_model.Reaction{Type: "heart", UserID: user1.ID, IssueID: issue1ID, CommentID: comment1ID})
 }

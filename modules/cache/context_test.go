@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestWithCacheContext(t *testing.T) {
@@ -34,7 +35,7 @@ func TestWithCacheContext(t *testing.T) {
 	vInt, err := GetWithContextCache(ctx, field, "my_config1", func() (int, error) {
 		return 1, nil
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 1, vInt)
 
 	v = GetContextData(ctx, field, "my_config1")
@@ -45,7 +46,7 @@ func TestWithCacheContext(t *testing.T) {
 		timeNow = now
 	}()
 	timeNow = func() time.Time {
-		return now().Add(10 * time.Second)
+		return now().Add(5 * time.Minute)
 	}
 	v = GetContextData(ctx, field, "my_config1")
 	assert.Nil(t, v)

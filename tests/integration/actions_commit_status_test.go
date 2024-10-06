@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/services/automerge"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestActionsAutomerge(t *testing.T) {
@@ -35,7 +36,7 @@ func TestActionsAutomerge(t *testing.T) {
 
 		scheduled, err := automerge.ScheduleAutoMerge(ctx, user, pr, repo_model.MergeStyleMerge, "Dummy")
 
-		assert.NoError(t, err, "PR should be scheduled for automerge")
+		require.NoError(t, err, "PR should be scheduled for automerge")
 		assert.True(t, scheduled, "PR should be scheduled for automerge")
 
 		actions.CreateCommitStatus(ctx, job)

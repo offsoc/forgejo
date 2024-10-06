@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
@@ -30,6 +31,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
 )
 
@@ -62,12 +64,12 @@ func initMigrationTest(t *testing.T) func() {
 
 	unittest.InitSettings()
 
-	assert.True(t, len(setting.RepoRootPath) != 0)
-	assert.NoError(t, util.RemoveAll(setting.RepoRootPath))
-	assert.NoError(t, unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/gitea-repositories-meta"), setting.RepoRootPath))
+	assert.NotEmpty(t, setting.RepoRootPath)
+	require.NoError(t, util.RemoveAll(setting.RepoRootPath))
+	require.NoError(t, unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/gitea-repositories-meta"), setting.RepoRootPath))
 	ownerDirs, err := os.ReadDir(setting.RepoRootPath)
 	if err != nil {
-		assert.NoError(t, err, "unable to read the new repo root: %v\n", err)
+		require.NoError(t, err, "unable to read the new repo root: %v\n", err)
 	}
 	for _, ownerDir := range ownerDirs {
 		if !ownerDir.Type().IsDir() {
@@ -75,7 +77,7 @@ func initMigrationTest(t *testing.T) func() {
 		}
 		repoDirs, err := os.ReadDir(filepath.Join(setting.RepoRootPath, ownerDir.Name()))
 		if err != nil {
-			assert.NoError(t, err, "unable to read the new repo root: %v\n", err)
+			require.NoError(t, err, "unable to read the new repo root: %v\n", err)
 		}
 		for _, repoDir := range repoDirs {
 			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "objects", "pack"), 0o755)
@@ -85,7 +87,7 @@ func initMigrationTest(t *testing.T) func() {
 		}
 	}
 
-	assert.NoError(t, git.InitFull(context.Background()))
+	require.NoError(t, git.InitFull(context.Background()))
 	setting.LoadDBSetting()
 	setting.InitLoggersForTest()
 	return deferFn
@@ -148,7 +150,7 @@ func readSQLFromFile(version string) (string, error) {
 
 func restoreOldDB(t *testing.T, version string) bool {
 	data, err := readSQLFromFile(version)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if len(data) == 0 {
 		tests.Printf("No db found to restore for %s version: %s\n", setting.Database.Type, version)
 		return false
@@ -158,36 +160,38 @@ func restoreOldDB(t *testing.T, version string) bool {
 	case setting.Database.Type.IsSQLite3():
 		util.Remove(setting.Database.Path)
 		err := os.MkdirAll(path.Dir(setting.Database.Path), os.ModePerm)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		db, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&mode=rwc&_busy_timeout=%d&_txlock=immediate", setting.Database.Path, setting.Database.Timeout))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer db.Close()
 
 		_, err = db.Exec(data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		db.Close()
 
 	case setting.Database.Type.IsMySQL():
 		db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/",
 			setting.Database.User, setting.Database.Passwd, setting.Database.Host))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer db.Close()
 
-		_, err = db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", setting.Database.Name))
-		assert.NoError(t, err)
+		databaseName := strings.SplitN(setting.Database.Name, "?", 2)[0]
 
-		_, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", setting.Database.Name))
-		assert.NoError(t, err)
+		_, err = db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", databaseName))
+		require.NoError(t, err)
+
+		_, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", databaseName))
+		require.NoError(t, err)
 		db.Close()
 
-		db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?multiStatements=true",
+		db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s",
 			setting.Database.User, setting.Database.Passwd, setting.Database.Host, setting.Database.Name))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer db.Close()
 
 		_, err = db.Exec(data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		db.Close()
 
 	case setting.Database.Type.IsPostgreSQL():
@@ -196,19 +200,19 @@ func restoreOldDB(t *testing.T, version string) bool {
 		if setting.Database.Host[0] == '/' {
 			db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@/?sslmode=%s&host=%s",
 				setting.Database.User, setting.Database.Passwd, setting.Database.SSLMode, setting.Database.Host))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		} else {
 			db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/?sslmode=%s",
 				setting.Database.User, setting.Database.Passwd, setting.Database.Host, setting.Database.SSLMode))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}
 		defer db.Close()
 
 		_, err = db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", setting.Database.Name))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		_, err = db.Exec(fmt.Sprintf("CREATE DATABASE %s", setting.Database.Name))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		db.Close()
 
 		// Check if we need to setup a specific schema
@@ -220,26 +224,26 @@ func restoreOldDB(t *testing.T, version string) bool {
 				db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
 					setting.Database.User, setting.Database.Passwd, setting.Database.Host, setting.Database.Name, setting.Database.SSLMode))
 			}
-			if !assert.NoError(t, err) {
-				return false
-			}
+			require.NoError(t, err)
+
 			defer db.Close()
 
 			schrows, err := db.Query(fmt.Sprintf("SELECT 1 FROM information_schema.schemata WHERE schema_name = '%s'", setting.Database.Schema))
-			if !assert.NoError(t, err) || !assert.NotEmpty(t, schrows) {
+			require.NoError(t, err)
+			if !assert.NotEmpty(t, schrows) {
 				return false
 			}
 
 			if !schrows.Next() {
 				// Create and setup a DB schema
 				_, err = db.Exec(fmt.Sprintf("CREATE SCHEMA %s", setting.Database.Schema))
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 			schrows.Close()
 
 			// Make the user's default search path the created schema; this will affect new connections
 			_, err = db.Exec(fmt.Sprintf(`ALTER USER "%s" SET search_path = %s`, setting.Database.User, setting.Database.Schema))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			db.Close()
 		}
@@ -251,11 +255,11 @@ func restoreOldDB(t *testing.T, version string) bool {
 			db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
 				setting.Database.User, setting.Database.Passwd, setting.Database.Host, setting.Database.Name, setting.Database.SSLMode))
 		}
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer db.Close()
 
 		_, err = db.Exec(data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		db.Close()
 	}
 	return true
@@ -276,7 +280,7 @@ func doMigrationTest(t *testing.T, version string) {
 	setting.InitSQLLoggersForCli(log.INFO)
 
 	err := db.InitEngineWithMigration(context.Background(), wrappedMigrate)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	currentEngine.Close()
 
 	beans, _ := db.NamesToBean()
@@ -285,7 +289,7 @@ func doMigrationTest(t *testing.T, version string) {
 		currentEngine = x
 		return migrate_base.RecreateTables(beans...)(x)
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	currentEngine.Close()
 
 	// We do this a second time to ensure that there is not a problem with retained indices
@@ -293,7 +297,7 @@ func doMigrationTest(t *testing.T, version string) {
 		currentEngine = x
 		return migrate_base.RecreateTables(beans...)(x)
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	currentEngine.Close()
 }
@@ -303,7 +307,7 @@ func TestMigrations(t *testing.T) {
 
 	dialect := setting.Database.Type
 	versions, err := availableVersions()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	if len(versions) == 0 {
 		tests.Printf("No old database versions available to migration test for %s\n", dialect)

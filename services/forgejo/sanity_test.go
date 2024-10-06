@@ -11,21 +11,21 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/modules/setting"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestForgejo_PreMigrationSanityChecks(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	ctx := db.DefaultContext
 	e := db.GetEngine(ctx)
 
-	assert.NoError(t, PreMigrationSanityChecks(e, ForgejoV4DatabaseVersion, configFixture(t, "")))
+	require.NoError(t, PreMigrationSanityChecks(e, ForgejoV4DatabaseVersion, configFixture(t, "")))
 }
 
 func configFixture(t *testing.T, content string) setting.ConfigProvider {
 	config := filepath.Join(t.TempDir(), "app.ini")
-	assert.NoError(t, os.WriteFile(config, []byte(content), 0o777))
+	require.NoError(t, os.WriteFile(config, []byte(content), 0o777))
 	cfg, err := setting.NewConfigProviderFromFile(config)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return cfg
 }

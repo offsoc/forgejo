@@ -13,6 +13,7 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/git/pushoptions"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/private"
 	notify_service "code.gitea.io/gitea/services/notify"
@@ -23,10 +24,10 @@ import (
 func ProcReceive(ctx context.Context, repo *repo_model.Repository, gitRepo *git.Repository, opts *private.HookOptions) ([]private.HookProcReceiveRefResult, error) {
 	results := make([]private.HookProcReceiveRefResult, 0, len(opts.OldCommitIDs))
 
-	topicBranch := opts.GitPushOptions["topic"]
-	_, forcePush := opts.GitPushOptions["force-push"]
-	title, hasTitle := opts.GitPushOptions["title"]
-	description, hasDesc := opts.GitPushOptions["description"]
+	topicBranch, _ := opts.GetGitPushOptions().GetString(pushoptions.AgitTopic)
+	_, forcePush := opts.GetGitPushOptions().GetString(pushoptions.AgitForcePush)
+	title, hasTitle := opts.GetGitPushOptions().GetString(pushoptions.AgitTitle)
+	description, hasDesc := opts.GetGitPushOptions().GetString(pushoptions.AgitDescription)
 
 	objectFormat := git.ObjectFormatFromName(repo.ObjectFormatName)
 
@@ -210,6 +211,8 @@ func ProcReceive(ctx context.Context, repo *repo_model.Repository, gitRepo *git.
 			return nil, fmt.Errorf("failed to update the reference of the pull request: %w", err)
 		}
 
+		// TODO: refactor to unify with `pull_service.AddTestPullRequestTask`
+
 		// Add the pull request to the merge conflicting checker queue.
 		pull_service.AddToTaskQueue(ctx, pr)
 
@@ -217,12 +220,19 @@ func ProcReceive(ctx context.Context, repo *repo_model.Repository, gitRepo *git.
 			return nil, fmt.Errorf("failed to load the issue of the pull request: %w", err)
 		}
 
+		// Validate pull request.
+		pull_service.ValidatePullRequest(ctx, pr, oldCommitID, opts.NewCommitIDs[i], pusher)
+
+		// TODO: call `InvalidateCodeComments`
+
 		// Create and notify about the new commits.
 		comment, err := pull_service.CreatePushPullComment(ctx, pusher, pr, oldCommitID, opts.NewCommitIDs[i])
 		if err == nil && comment != nil {
 			notify_service.PullRequestPushCommits(ctx, pusher, pr, comment)
 		}
 		notify_service.PullRequestSynchronized(ctx, pusher, pr)
+
+		// this always seems to be false
 		isForcePush := comment != nil && comment.IsForcePush
 
 		results = append(results, private.HookProcReceiveRefResult{

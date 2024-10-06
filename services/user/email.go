@@ -12,6 +12,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/services/mailer"
 )
 
 // AdminAddOrSetPrimaryEmailAddress is used by admins to add or set a user's primary email address
@@ -163,7 +164,7 @@ func ReplaceInactivePrimaryEmail(ctx context.Context, oldEmail string, email *us
 		return err
 	}
 
-	err = user_model.MakeEmailPrimaryWithUser(ctx, user, email)
+	err = MakeEmailAddressPrimary(ctx, user, email, false)
 	if err != nil {
 		return err
 	}
@@ -188,5 +189,44 @@ func DeleteEmailAddresses(ctx context.Context, u *user_model.User, emails []stri
 		}
 	}
 
+	return nil
+}
+
+func MakeEmailAddressPrimary(ctx context.Context, u *user_model.User, newPrimaryEmail *user_model.EmailAddress, notify bool) error {
+	ctx, committer, err := db.TxContext(ctx)
+	if err != nil {
+		return err
+	}
+	defer committer.Close()
+	sess := db.GetEngine(ctx)
+
+	oldPrimaryEmail := u.Email
+
+	// 1. Update user table
+	u.Email = newPrimaryEmail.Email
+	if _, err = sess.ID(u.ID).Cols("email").Update(u); err != nil {
+		return err
+	}
+
+	// 2. Update old primary email
+	if _, err = sess.Where("uid=? AND is_primary=?", u.ID, true).Cols("is_primary").Update(&user_model.EmailAddress{
+		IsPrimary: false,
+	}); err != nil {
+		return err
+	}
+
+	// 3. update new primary email
+	newPrimaryEmail.IsPrimary = true
+	if _, err = sess.ID(newPrimaryEmail.ID).Cols("is_primary").Update(newPrimaryEmail); err != nil {
+		return err
+	}
+
+	if err := committer.Commit(); err != nil {
+		return err
+	}
+
+	if notify {
+		return mailer.SendPrimaryMailChange(u, oldPrimaryEmail)
+	}
 	return nil
 }

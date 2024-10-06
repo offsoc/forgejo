@@ -387,6 +387,8 @@ func CreatePullRequest(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 	//   "409":
 	//     "$ref": "#/responses/error"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 	//   "423":
@@ -406,7 +408,7 @@ func CreatePullRequest(ctx *context.APIContext) {
 	)
 
 	// Get repo/branch information
-	_, headRepo, headGitRepo, compareInfo, baseBranch, headBranch := parseCompareInfo(ctx, form)
+	headRepo, headGitRepo, compareInfo, baseBranch, headBranch := parseCompareInfo(ctx, form)
 	if ctx.Written() {
 		return
 	}
@@ -711,13 +713,16 @@ func EditPullRequest(ctx *context.APIContext) {
 			ctx.Error(http.StatusPreconditionFailed, "MergedPRState", "cannot change state of this pull request, it was already merged")
 			return
 		}
-		if err := issue_service.ChangeStatus(ctx, issue, ctx.Doer, "", api.StateClosed == api.StateType(*form.State)); err != nil {
-			if issues_model.IsErrDependenciesLeft(err) {
-				ctx.Error(http.StatusPreconditionFailed, "DependenciesLeft", "cannot close this pull request because it still has open dependencies")
+		isClosed := api.StateClosed == api.StateType(*form.State)
+		if issue.IsClosed != isClosed {
+			if err := issue_service.ChangeStatus(ctx, issue, ctx.Doer, "", isClosed); err != nil {
+				if issues_model.IsErrDependenciesLeft(err) {
+					ctx.Error(http.StatusPreconditionFailed, "DependenciesLeft", "cannot close this pull request because it still has open dependencies")
+					return
+				}
+				ctx.Error(http.StatusInternalServerError, "ChangeStatus", err)
 				return
 			}
-			ctx.Error(http.StatusInternalServerError, "ChangeStatus", err)
-			return
 		}
 	}
 
@@ -747,7 +752,7 @@ func EditPullRequest(ctx *context.APIContext) {
 	// update allow edits
 	if form.AllowMaintainerEdit != nil {
 		if err := pull_service.SetAllowEdits(ctx, ctx.Doer, pr, *form.AllowMaintainerEdit); err != nil {
-			if errors.Is(pull_service.ErrUserHasNoPermissionForAction, err) {
+			if errors.Is(err, pull_service.ErrUserHasNoPermissionForAction) {
 				ctx.Error(http.StatusForbidden, "SetAllowEdits", fmt.Sprintf("SetAllowEdits: %s", err))
 				return
 			}
@@ -854,6 +859,8 @@ func MergePullRequest(ctx *context.APIContext) {
 	//     "$ref": "#/responses/empty"
 	//   "409":
 	//     "$ref": "#/responses/error"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "423":
 	//     "$ref": "#/responses/repoArchivedError"
 
@@ -1051,7 +1058,7 @@ func MergePullRequest(ctx *context.APIContext) {
 	ctx.Status(http.StatusOK)
 }
 
-func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption) (*user_model.User, *repo_model.Repository, *git.Repository, *git.CompareInfo, string, string) {
+func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption) (*repo_model.Repository, *git.Repository, *git.CompareInfo, string, string) {
 	baseRepo := ctx.Repo.Repository
 
 	// Get compared branches information
@@ -1084,14 +1091,14 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 			} else {
 				ctx.Error(http.StatusInternalServerError, "GetUserByName", err)
 			}
-			return nil, nil, nil, nil, "", ""
+			return nil, nil, nil, "", ""
 		}
 		headBranch = headInfos[1]
 		// The head repository can also point to the same repo
 		isSameRepo = ctx.Repo.Owner.ID == headUser.ID
 	} else {
 		ctx.NotFound()
-		return nil, nil, nil, nil, "", ""
+		return nil, nil, nil, "", ""
 	}
 
 	ctx.Repo.PullRequest.SameRepo = isSameRepo
@@ -1099,7 +1106,7 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 	// Check if base branch is valid.
 	if !ctx.Repo.GitRepo.IsBranchExist(baseBranch) && !ctx.Repo.GitRepo.IsTagExist(baseBranch) {
 		ctx.NotFound("BaseNotExist")
-		return nil, nil, nil, nil, "", ""
+		return nil, nil, nil, "", ""
 	}
 
 	// Check if current user has fork of repository or in the same repository.
@@ -1107,7 +1114,7 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 	if headRepo == nil && !isSameRepo {
 		log.Trace("parseCompareInfo[%d]: does not have fork or in same repository", baseRepo.ID)
 		ctx.NotFound("GetForkedRepo")
-		return nil, nil, nil, nil, "", ""
+		return nil, nil, nil, "", ""
 	}
 
 	var headGitRepo *git.Repository
@@ -1118,7 +1125,7 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 		headGitRepo, err = gitrepo.OpenRepository(ctx, headRepo)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, "OpenRepository", err)
-			return nil, nil, nil, nil, "", ""
+			return nil, nil, nil, "", ""
 		}
 	}
 
@@ -1127,7 +1134,7 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 	if err != nil {
 		headGitRepo.Close()
 		ctx.Error(http.StatusInternalServerError, "GetUserRepoPermission", err)
-		return nil, nil, nil, nil, "", ""
+		return nil, nil, nil, "", ""
 	}
 	if !permBase.CanReadIssuesOrPulls(true) || !permBase.CanRead(unit.TypeCode) {
 		if log.IsTrace() {
@@ -1138,7 +1145,7 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 		}
 		headGitRepo.Close()
 		ctx.NotFound("Can't read pulls or can't read UnitTypeCode")
-		return nil, nil, nil, nil, "", ""
+		return nil, nil, nil, "", ""
 	}
 
 	// user should have permission to read headrepo's codes
@@ -1146,7 +1153,7 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 	if err != nil {
 		headGitRepo.Close()
 		ctx.Error(http.StatusInternalServerError, "GetUserRepoPermission", err)
-		return nil, nil, nil, nil, "", ""
+		return nil, nil, nil, "", ""
 	}
 	if !permHead.CanRead(unit.TypeCode) {
 		if log.IsTrace() {
@@ -1157,24 +1164,24 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 		}
 		headGitRepo.Close()
 		ctx.NotFound("Can't read headRepo UnitTypeCode")
-		return nil, nil, nil, nil, "", ""
+		return nil, nil, nil, "", ""
 	}
 
 	// Check if head branch is valid.
 	if !headGitRepo.IsBranchExist(headBranch) && !headGitRepo.IsTagExist(headBranch) {
 		headGitRepo.Close()
 		ctx.NotFound()
-		return nil, nil, nil, nil, "", ""
+		return nil, nil, nil, "", ""
 	}
 
 	compareInfo, err := headGitRepo.GetCompareInfo(repo_model.RepoPath(baseRepo.Owner.Name, baseRepo.Name), baseBranch, headBranch, false, false)
 	if err != nil {
 		headGitRepo.Close()
 		ctx.Error(http.StatusInternalServerError, "GetCompareInfo", err)
-		return nil, nil, nil, nil, "", ""
+		return nil, nil, nil, "", ""
 	}
 
-	return headUser, headRepo, headGitRepo, compareInfo, baseBranch, headBranch
+	return headRepo, headGitRepo, compareInfo, baseBranch, headBranch
 }
 
 // UpdatePullRequest merge PR's baseBranch into headBranch
@@ -1215,6 +1222,8 @@ func UpdatePullRequest(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 	//   "409":
 	//     "$ref": "#/responses/error"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 

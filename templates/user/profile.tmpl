@@ -9,13 +9,33 @@
 			<div class="ui twelve wide column tw-mb-4">
 				{{template "user/overview/header" .}}
 				{{if eq .TabName "activity"}}
-					{{if .ContextUser.KeepActivityPrivate}}
-						<div class="ui info message">
-							<p>{{ctx.Locale.Tr "user.disabled_public_activity"}}</p>
+					{{if eq .SignedUserID .ContextUser.ID}}
+					<p id="visibility-hint">
+						{{if .ContextUser.KeepActivityPrivate}}
+							{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_private" "/user/settings#keep-activity-private"}}
+						{{else}}
+							{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_public" "/user/settings#keep-activity-private"}}
+						{{end}}
+					</p>
+					{{else}}
+						{{if .IsAdmin}}
+						<div id="visibility-hint" class="ui info message">
+							{{if .ContextUser.KeepActivityPrivate}}
+								{{ctx.Locale.Tr "user.public_activity.visibility_hint.admin_private"}}
+							{{else}}
+								{{ctx.Locale.Tr "user.public_activity.visibility_hint.admin_public"}}
+							{{end}}
 						</div>
+						{{else}}
+							{{if .ContextUser.KeepActivityPrivate}}
+								<p id="visibility-hint">{{ctx.Locale.Tr "user.disabled_public_activity"}}</p>
+							{{end}}
+						{{end}}
 					{{end}}
-					{{template "user/heatmap" .}}
-					{{template "user/dashboard/feeds" .}}
+					{{if or .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate)}}
+						{{template "user/heatmap" .}}
+						{{template "user/dashboard/feeds" .}}
+					{{end}}
 				{{else if eq .TabName "stars"}}
 					<div class="stars">
 						{{template "shared/repo_search" .}}

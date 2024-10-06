@@ -1,0 +1,17 @@
+Gitlab-Sv: api-gke-us-east1-d
+Set-Cookie: _cfuvid=c8dYhAX7c7Kj.9kgrISTCaOoMKuKV0amVHZbY28k_vc-1725394800394-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+Content-Security-Policy: default-src 'none'
+X-Frame-Options: SAMEORIGIN
+X-Gitlab-Meta: {"correlation_id":"1bfdf6ff862f2719b5ff0fa43d4b1f68","version":"1"}
+Referrer-Policy: strict-origin-when-cross-origin
+Cf-Cache-Status: MISS
+Cache-Control: max-age=0, private, must-revalidate
+X-Runtime: 0.141568
+Strict-Transport-Security: max-age=31536000
+Gitlab-Lb: haproxy-main-26-lb-gprd
+Content-Type: application/json
+Etag: W/"90fb650b1668940dd7ccac3869a3a2bd"
+Vary: Origin, Accept-Encoding
+X-Content-Type-Options: nosniff
+
+{"id":324657888,"iid":1,"project_id":61363672,"title":"Test branch","description":"do not merge this PR","state":"opened","created_at":"2024-09-03T07:57:19.866Z","updated_at":"2024-09-03T18:50:21.065Z","merge_status":"can_be_merged","approved":true,"approvals_required":0,"approvals_left":0,"require_password_to_approve":false,"approved_by":[{"user":{"id":548513,"username":"mkobel","name":"Moritz Kobel","state":"active","locked":false,"avatar_url":"https://secure.gravatar.com/avatar/eae1be6324682816aedc885acbf5858719b40956e0278edabe5c0db7cbc95f3b?s=80\u0026d=identicon","web_url":"https://gitlab.com/mkobel"}}],"suggested_approvers":[],"approvers":[],"approver_groups":[],"user_has_approved":true,"user_can_approve":false,"approval_rules_left":[],"has_approval_rules":false,"merge_request_approvers_available":false,"multiple_approval_rules_available":false,"invalid_approvers_rules":[]}

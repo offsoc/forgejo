@@ -52,21 +52,21 @@ func GarbageCollectLFSMetaObjects(ctx context.Context, opts GarbageCollectLFSMet
 
 // GarbageCollectLFSMetaObjectsForRepo garbage collects LFS objects for a specific repository
 func GarbageCollectLFSMetaObjectsForRepo(ctx context.Context, repo *repo_model.Repository, opts GarbageCollectLFSMetaObjectsOptions) error {
-	opts.LogDetail("Checking %-v", repo)
+	opts.LogDetail("Checking %s", repo.FullName())
 	total, orphaned, collected, deleted := int64(0), 0, 0, 0
 	defer func() {
 		if orphaned == 0 {
-			opts.LogDetail("Found %d total LFSMetaObjects in %-v", total, repo)
+			opts.LogDetail("Found %d total LFSMetaObjects in %s", total, repo.FullName())
 		} else if !opts.AutoFix {
-			opts.LogDetail("Found %d/%d orphaned LFSMetaObjects in %-v", orphaned, total, repo)
+			opts.LogDetail("Found %d/%d orphaned LFSMetaObjects in %s", orphaned, total, repo.FullName())
 		} else {
-			opts.LogDetail("Collected %d/%d orphaned/%d total LFSMetaObjects in %-v. %d removed from storage.", collected, orphaned, total, repo, deleted)
+			opts.LogDetail("Collected %d/%d orphaned/%d total LFSMetaObjects in %s. %d removed from storage.", collected, orphaned, total, repo.FullName(), deleted)
 		}
 	}()
 
 	gitRepo, err := gitrepo.OpenRepository(ctx, repo)
 	if err != nil {
-		log.Error("Unable to open git repository %-v: %v", repo, err)
+		log.Error("Unable to open git repository %s: %v", repo.FullName(), err)
 		return err
 	}
 	defer gitRepo.Close()

@@ -5,7 +5,7 @@
 			<form class="ui form" action="{{.Link}}" method="post">
 				{{.CsrfTokenHtml}}
 				<h3 class="ui top attached header">
-					{{ctx.Locale.Tr "new_repo"}}
+					{{ctx.Locale.Tr "new_repo.title"}}
 				</h3>
 				<div class="ui attached segment">
 					{{template "base/alert" .}}
@@ -69,7 +69,7 @@
 					<div class="inline field">
 						<label>{{ctx.Locale.Tr "repo.template"}}</label>
 						<div id="repo_template_search" class="ui search selection dropdown">
-							<input type="hidden" id="repo_template" name="repo_template" value="{{.repo_template}}">
+							<input type="hidden" id="repo_template" name="repo_template" value="{{if ne .repo_template 0}}{{.repo_template}}{{end}}">
 							<div class="default text">{{.repo_template_name}}</div>
 							<div class="menu">
 							</div>

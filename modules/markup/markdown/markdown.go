@@ -22,7 +22,6 @@ import (
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
-	meta "github.com/yuin/goldmark-meta"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer"
@@ -121,7 +120,6 @@ func SpecializedMarkdown() goldmark.Markdown {
 				math.NewExtension(
 					math.Enabled(setting.Markdown.EnableMath),
 				),
-				meta.Meta,
 			),
 			goldmark.WithParserOptions(
 				parser.WithAttribute(),
@@ -182,7 +180,7 @@ func actualRender(ctx *markup.RenderContext, input io.Reader, output io.Writer) 
 	bufWithMetadataLength := len(buf)
 
 	rc := &RenderConfig{
-		Meta: renderMetaModeFromString(string(ctx.RenderMetaAs)),
+		Meta: markup.RenderMetaAsDetails,
 		Icon: "table",
 		Lang: "",
 	}

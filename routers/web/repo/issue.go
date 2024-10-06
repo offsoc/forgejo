@@ -57,6 +57,8 @@ import (
 	issue_service "code.gitea.io/gitea/services/issue"
 	pull_service "code.gitea.io/gitea/services/pull"
 	repo_service "code.gitea.io/gitea/services/repository"
+
+	"gitea.com/go-chi/binding"
 )
 
 const (
@@ -201,6 +203,8 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		keyword = ""
 	}
 
+	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
+
 	var mileIDs []int64
 	if milestoneID > 0 || milestoneID == db.NoConditionID { // -1 to get those issues which have no any milestone assigned
 		mileIDs = []int64{milestoneID}
@@ -221,7 +225,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		IssueIDs:          nil,
 	}
 	if keyword != "" {
-		allIssueIDs, err := issueIDsFromSearch(ctx, keyword, statsOpts)
+		allIssueIDs, err := issueIDsFromSearch(ctx, keyword, isFuzzy, statsOpts)
 		if err != nil {
 			if issue_indexer.IsAvailable(ctx) {
 				ctx.ServerError("issueIDsFromSearch", err)
@@ -289,7 +293,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 
 	var issues issues_model.IssueList
 	{
-		ids, err := issueIDsFromSearch(ctx, keyword, &issues_model.IssuesOptions{
+		ids, err := issueIDsFromSearch(ctx, keyword, isFuzzy, &issues_model.IssuesOptions{
 			Paginator: &db.ListOptions{
 				Page:     pager.Paginater.Current(),
 				PageSize: setting.UI.IssuePagingNum,
@@ -343,6 +347,11 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	if err != nil {
 		ctx.ServerError("GetIssuesAllCommitStatus", err)
 		return
+	}
+	if !ctx.Repo.CanRead(unit.TypeActions) {
+		for key := range commitStatuses {
+			git_model.CommitStatusesHideActionsURL(ctx, commitStatuses[key])
+		}
 	}
 
 	if err := issues.LoadAttributes(ctx); err != nil {
@@ -466,7 +475,9 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	ctx.Data["ProjectID"] = projectID
 	ctx.Data["AssigneeID"] = assigneeID
 	ctx.Data["PosterID"] = posterID
+	ctx.Data["IsFuzzy"] = isFuzzy
 	ctx.Data["Keyword"] = keyword
+	ctx.Data["IsShowClosed"] = isShowClosed
 	switch {
 	case isShowClosed.Value():
 		ctx.Data["State"] = "closed"
@@ -487,12 +498,17 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	pager.AddParam(ctx, "assignee", "AssigneeID")
 	pager.AddParam(ctx, "poster", "PosterID")
 	pager.AddParam(ctx, "archived", "ShowArchivedLabels")
+	pager.AddParam(ctx, "fuzzy", "IsFuzzy")
 
 	ctx.Data["Page"] = pager
 }
 
-func issueIDsFromSearch(ctx *context.Context, keyword string, opts *issues_model.IssuesOptions) ([]int64, error) {
-	ids, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts))
+func issueIDsFromSearch(ctx *context.Context, keyword string, fuzzy bool, opts *issues_model.IssuesOptions) ([]int64, error) {
+	ids, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts).Copy(
+		func(o *issue_indexer.SearchOptions) {
+			o.IsFuzzyKeyword = fuzzy
+		},
+	))
 	if err != nil {
 		return nil, fmt.Errorf("SearchIssues: %w", err)
 	}
@@ -1251,7 +1267,7 @@ func NewIssuePost(ctx *context.Context) {
 
 	if err := issue_service.NewIssue(ctx, repo, issue, labelIDs, attachments, assigneeIDs); err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.RenderWithErr(ctx.Tr("repo.issues.blocked_by_user"), tplIssueNew, form)
+			ctx.JSONError(ctx.Tr("repo.issues.blocked_by_user"))
 			return
 		} else if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) {
 			ctx.Error(http.StatusBadRequest, "UserDoesNotHaveAccessToRepo", err.Error())
@@ -1360,6 +1376,22 @@ func getBranchData(ctx *context.Context, issue *issues_model.Issue) {
 		ctx.Data["BaseBranch"] = pull.BaseBranch
 		ctx.Data["HeadBranch"] = pull.HeadBranch
 		ctx.Data["HeadUserName"] = pull.MustHeadUserName(ctx)
+	}
+}
+
+func prepareHiddenCommentType(ctx *context.Context) {
+	var hiddenCommentTypes *big.Int
+	if ctx.IsSigned {
+		val, err := user_model.GetUserSetting(ctx, ctx.Doer.ID, user_model.SettingsKeyHiddenCommentTypes)
+		if err != nil {
+			ctx.ServerError("GetUserSetting", err)
+			return
+		}
+		hiddenCommentTypes, _ = new(big.Int).SetString(val, 10) // we can safely ignore the failed conversion here
+	}
+
+	ctx.Data["ShouldShowCommentType"] = func(commentType issues_model.CommentType) bool {
+		return hiddenCommentTypes == nil || hiddenCommentTypes.Bit(int(commentType)) == 0
 	}
 }
 
@@ -1669,7 +1701,7 @@ func ViewIssue(ctx *context.Context) {
 			}
 
 			ghostProject := &project_model.Project{
-				ID:    -1,
+				ID:    project_model.GhostProjectID,
 				Title: ctx.Locale.TrString("repo.issues.deleted_project"),
 			}
 
@@ -1753,6 +1785,15 @@ func ViewIssue(ctx *context.Context) {
 			if err = comment.LoadPushCommits(ctx); err != nil {
 				ctx.ServerError("LoadPushCommits", err)
 				return
+			}
+			if !ctx.Repo.CanRead(unit.TypeActions) {
+				for _, commit := range comment.Commits {
+					if commit.Status == nil {
+						continue
+					}
+					commit.Status.HideActionsURL(ctx)
+					git_model.CommitStatusesHideActionsURL(ctx, commit.Statuses)
+				}
 			}
 		} else if comment.Type == issues_model.CommentTypeAddTimeManual ||
 			comment.Type == issues_model.CommentTypeStopTracking ||
@@ -1843,6 +1884,8 @@ func ViewIssue(ctx *context.Context) {
 			return
 		}
 		prConfig := prUnit.PullRequestsConfig()
+
+		ctx.Data["AutodetectManualMerge"] = prConfig.AutodetectManualMerge
 
 		var mergeStyle repo_model.MergeStyle
 		// Check correct values and select default
@@ -2012,21 +2055,13 @@ func ViewIssue(ctx *context.Context) {
 	ctx.Data["NewPinAllowed"] = pinAllowed
 	ctx.Data["PinEnabled"] = setting.Repository.Issue.MaxPinned != 0
 
-	var hiddenCommentTypes *big.Int
-	if ctx.IsSigned {
-		val, err := user_model.GetUserSetting(ctx, ctx.Doer.ID, user_model.SettingsKeyHiddenCommentTypes)
-		if err != nil {
-			ctx.ServerError("GetUserSetting", err)
-			return
-		}
-		hiddenCommentTypes, _ = new(big.Int).SetString(val, 10) // we can safely ignore the failed conversion here
+	prepareHiddenCommentType(ctx)
+	if ctx.Written() {
+		return
 	}
-	ctx.Data["ShouldShowCommentType"] = func(commentType issues_model.CommentType) bool {
-		return hiddenCommentTypes == nil || hiddenCommentTypes.Bit(int(commentType)) == 0
-	}
+
 	// For sidebar
 	PrepareBranchList(ctx)
-
 	if ctx.Written() {
 		return
 	}
@@ -2187,10 +2222,20 @@ func UpdateIssueTitle(ctx *context.Context) {
 		ctx.Error(http.StatusForbidden)
 		return
 	}
-
 	title := ctx.FormTrim("title")
-	if len(title) == 0 {
-		ctx.Error(http.StatusNoContent)
+	if util.IsEmptyString(title) {
+		ctx.Error(http.StatusBadRequest, "Title cannot be empty or spaces")
+		return
+	}
+
+	// Creating a CreateIssueForm with the title so that we can validate the max title length
+	i := forms.CreateIssueForm{
+		Title: title,
+	}
+
+	bindingErr := binding.RawValidate(i)
+	if bindingErr.Has(binding.ERR_MAX_SIZE) {
+		ctx.Error(http.StatusBadRequest, "Title cannot be longer than 255 characters")
 		return
 	}
 
@@ -2335,7 +2380,49 @@ func UpdateIssueMilestone(ctx *context.Context) {
 		}
 	}
 
-	ctx.JSONOK()
+	if ctx.FormBool("htmx") {
+		renderMilestones(ctx)
+		if ctx.Written() {
+			return
+		}
+		prepareHiddenCommentType(ctx)
+		if ctx.Written() {
+			return
+		}
+
+		issue := issues[0]
+		var err error
+		if issue.MilestoneID > 0 {
+			issue.Milestone, err = issues_model.GetMilestoneByRepoID(ctx, ctx.Repo.Repository.ID, issue.MilestoneID)
+			if err != nil {
+				ctx.ServerError("GetMilestoneByRepoID", err)
+				return
+			}
+		} else {
+			issue.Milestone = nil
+		}
+
+		comment := &issues_model.Comment{}
+		has, err := db.GetEngine(ctx).Where("issue_id = ? AND type = ?", issue.ID, issues_model.CommentTypeMilestone).OrderBy("id DESC").Limit(1).Get(comment)
+		if !has || err != nil {
+			ctx.ServerError("GetLatestMilestoneComment", err)
+		}
+		if err := comment.LoadMilestone(ctx); err != nil {
+			ctx.ServerError("LoadMilestone", err)
+			return
+		}
+		if err := comment.LoadPoster(ctx); err != nil {
+			ctx.ServerError("LoadPoster", err)
+			return
+		}
+		issue.Comments = issues_model.CommentList{comment}
+
+		ctx.Data["Issue"] = issue
+		ctx.Data["HasIssuesOrPullsWritePermission"] = ctx.Repo.CanWriteIssuesOrPulls(issue.IsPull)
+		ctx.HTML(http.StatusOK, "htmx/milestone_sidebar")
+	} else {
+		ctx.JSONOK()
+	}
 }
 
 // UpdateIssueAssignee change issue's or pull's assignee
@@ -3126,7 +3213,7 @@ func NewComment(ctx *context.Context) {
 	comment, err := issue_service.CreateIssueComment(ctx, ctx.Doer, ctx.Repo.Repository, issue, form.Content, attachments)
 	if err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.Flash.Error(ctx.Tr("repo.issues.comment.blocked_by_user"))
+			ctx.JSONError(ctx.Tr("repo.issues.comment.blocked_by_user"))
 		} else {
 			ctx.ServerError("CreateIssueComment", err)
 		}
@@ -3292,12 +3379,6 @@ func ChangeIssueReaction(ctx *context.Context) {
 			log.Info("CreateIssueReaction: %s", err)
 			break
 		}
-		// Reload new reactions
-		issue.Reactions = nil
-		if err = issue.LoadAttributes(ctx); err != nil {
-			log.Info("issue.LoadAttributes: %s", err)
-			break
-		}
 
 		log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
 	case "unreact":
@@ -3306,16 +3387,16 @@ func ChangeIssueReaction(ctx *context.Context) {
 			return
 		}
 
-		// Reload new reactions
-		issue.Reactions = nil
-		if err := issue.LoadAttributes(ctx); err != nil {
-			log.Info("issue.LoadAttributes: %s", err)
-			break
-		}
-
 		log.Trace("Reaction for issue removed: %d/%d", ctx.Repo.Repository.ID, issue.ID)
 	default:
 		ctx.NotFound(fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
+		return
+	}
+
+	// Reload new reactions
+	issue.Reactions = nil
+	if err := issue.LoadAttributes(ctx); err != nil {
+		ctx.ServerError("ChangeIssueReaction.LoadAttributes", err)
 		return
 	}
 
@@ -3399,12 +3480,6 @@ func ChangeCommentReaction(ctx *context.Context) {
 			log.Info("CreateCommentReaction: %s", err)
 			break
 		}
-		// Reload new reactions
-		comment.Reactions = nil
-		if err = comment.LoadReactions(ctx, ctx.Repo.Repository); err != nil {
-			log.Info("comment.LoadReactions: %s", err)
-			break
-		}
 
 		log.Trace("Reaction for comment created: %d/%d/%d/%d", ctx.Repo.Repository.ID, comment.Issue.ID, comment.ID, reaction.ID)
 	case "unreact":
@@ -3413,16 +3488,16 @@ func ChangeCommentReaction(ctx *context.Context) {
 			return
 		}
 
-		// Reload new reactions
-		comment.Reactions = nil
-		if err = comment.LoadReactions(ctx, ctx.Repo.Repository); err != nil {
-			log.Info("comment.LoadReactions: %s", err)
-			break
-		}
-
 		log.Trace("Reaction for comment removed: %d/%d/%d", ctx.Repo.Repository.ID, comment.Issue.ID, comment.ID)
 	default:
 		ctx.NotFound(fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
+		return
+	}
+
+	// Reload new reactions
+	comment.Reactions = nil
+	if err = comment.LoadReactions(ctx, ctx.Repo.Repository); err != nil {
+		ctx.ServerError("ChangeCommentReaction.LoadReactions", err)
 		return
 	}
 

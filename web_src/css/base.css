@@ -246,11 +246,11 @@ h1.error-code {
   user-select: none;
 }
 
-.top-right-buttons {
+.button-row {
   gap: 0.5rem;
 }
 
-.top-right-buttons .ui.button {
+.button-row .ui.button {
   margin-right: 0;
 }
 
@@ -1138,10 +1138,6 @@ overflow-menu .ui.label {
   color: var(--color-primary-contrast);
 }
 
-.activity-bar-graph-alt {
-  color: var(--color-primary-contrast);
-}
-
 .archived-icon {
   color: var(--color-secondary-dark-2) !important;
 }
@@ -1185,7 +1181,8 @@ svg.text.purple,
   color: var(--color-label-text);
 }
 
-.ui.menu .active.item > .label {
+.ui.menu .active.item > .label,
+.ui.menu.tabs-with-labels .item:hover > .label {
   background: var(--color-label-bg-alt, var(--color-label-bg));
 }
 

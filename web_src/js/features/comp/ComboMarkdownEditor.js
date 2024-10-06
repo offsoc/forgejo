@@ -83,10 +83,21 @@ class ComboMarkdownEditor {
       // the editor usually is in a form, so the buttons should have "type=button", avoiding conflicting with the form's submit.
       if (el.nodeName === 'BUTTON' && !el.getAttribute('type')) el.setAttribute('type', 'button');
     }
+    this.textareaMarkdownToolbar.querySelector('button[data-md-action="indent"]')?.addEventListener('click', () => {
+      this.indentSelection(false);
+    });
+    this.textareaMarkdownToolbar.querySelector('button[data-md-action="unindent"]')?.addEventListener('click', () => {
+      this.indentSelection(true);
+    });
 
     this.textarea.addEventListener('keydown', (e) => {
       if (e.shiftKey) {
         e.target._shiftDown = true;
+      }
+      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        if (!this.breakLine()) return; // Nothing changed, let the default handler work.
+        this.options?.onContentChanged?.(this, e);
+        e.preventDefault();
       }
     });
     this.textarea.addEventListener('keyup', (e) => {
@@ -286,6 +297,91 @@ class ComboMarkdownEditor {
       this.easyMDE.codemirror.focus();
       this.easyMDE.codemirror.setCursor(this.easyMDE.codemirror.lineCount(), 0);
     }
+  }
+
+  indentSelection(unindent) {
+    // Indent with 4 spaces, unindent 4 spaces or fewer or a lost tab.
+    const indentPrefix = '    ';
+    const unindentRegex = /^( {1,4}|\t)/;
+
+    // Indent all lines that are included in the selection, partially or whole, while preserving the original selection at the end.
+    const lines = this.textarea.value.split('\n');
+    const changedLines = [];
+    // The current selection or cursor position.
+    const [start, end] = [this.textarea.selectionStart, this.textarea.selectionEnd];
+    // The range containing whole lines that will effectively be replaced.
+    let [editStart, editEnd] = [start, end];
+    // The range that needs to be re-selected to match previous selection.
+    let [newStart, newEnd] = [start, end];
+    // The start and end position of the current line (where end points to the newline or EOF)
+    let [lineStart, lineEnd] = [0, 0];
+
+    for (const line of lines) {
+      lineEnd = lineStart + line.length + 1;
+      if (lineEnd <= start) {
+        lineStart = lineEnd;
+        continue;
+      }
+
+      const updated = unindent ? line.replace(unindentRegex, '') : indentPrefix + line;
+      changedLines.push(updated);
+      const move = updated.length - line.length;
+
+      if (start >= lineStart && start < lineEnd) {
+        editStart = lineStart;
+        newStart = Math.max(start + move, lineStart);
+      }
+
+      newEnd += move;
+      editEnd = lineEnd - 1;
+      lineStart = lineEnd;
+      if (lineStart > end) break;
+    }
+
+    // Update changed lines whole.
+    const text = changedLines.join('\n');
+    this.textarea.focus();
+    this.textarea.setSelectionRange(editStart, editEnd);
+    if (!document.execCommand('insertText', false, text)) {
+      // execCommand is deprecated, but setRangeText (and any other direct value modifications) erases the native undo history.
+      // So only fall back to it if execCommand fails.
+      this.textarea.setRangeText(text);
+    }
+
+    // Set selection to (effectively) be the same as before.
+    this.textarea.setSelectionRange(newStart, Math.max(newStart, newEnd));
+  }
+
+  breakLine() {
+    const [start, end] = [this.textarea.selectionStart, this.textarea.selectionEnd];
+
+    // Do nothing if a range is selected
+    if (start !== end) return false;
+
+    const value = this.textarea.value;
+    // Find the beginning of the current line.
+    const lineStart = Math.max(0, value.lastIndexOf('\n', start - 1) + 1);
+    // Find the end and extract the line.
+    const lineEnd = value.indexOf('\n', start);
+    const line = value.slice(lineStart, lineEnd < 0 ? value.length : lineEnd);
+    // Match any whitespace at the start + any repeatable prefix + exactly one space after.
+    const prefix = line.match(/^\s*((\d+)[.)]\s|[-*+]\s+(\[[ x]\]\s?)?|(>\s+)+)?/);
+
+    // Defer to browser if we can't do anything more useful, or if the cursor is inside the prefix.
+    if (!prefix || !prefix[0].length || lineStart + prefix[0].length > start) return false;
+
+    // Insert newline + prefix.
+    let text = `\n${prefix[0]}`;
+    // Increment a number if present. (perhaps detecting repeating 1. and not doing that then would be a good idea)
+    const num = text.match(/\d+/);
+    if (num) text = text.replace(num[0], Number(num[0]) + 1);
+    text = text.replace('[x]', '[ ]');
+
+    if (!document.execCommand('insertText', false, text)) {
+      this.textarea.setRangeText(text);
+    }
+
+    return true;
   }
 
   get userPreferredEditor() {

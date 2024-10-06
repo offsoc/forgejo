@@ -32,11 +32,14 @@ export default {
     isProduction && '!./web_src/js/standalone/devtest.js',
     '!./templates/swagger/v1_json.tmpl',
     '!./templates/user/auth/oidc_wellknown.tmpl',
-    '!**/*_test.go',
-    '!./modules/{public,options,templates}/bindata.go',
-    './{build,models,modules,routers,services}/**/*.go',
     './templates/**/*.tmpl',
     './web_src/js/**/*.{js,vue}',
+    // explicitly list Go files that contain tailwind classes
+    'models/avatars/avatar.go',
+    'modules/markup/file_preview.go',
+    'modules/markup/sanitizer.go',
+    'services/auth/source/oauth2/*.go',
+    'routers/web/repo/{view,blame,issue_content_history}.go',
   ].filter(Boolean),
   blocklist: [
     // classes that don't work without CSS variables from "@tailwind base" which we don't use
@@ -44,8 +47,6 @@ export default {
     'backdrop-filter',
     // we use double-class tw-hidden defined in web_src/css/helpers.css for increased specificity
     'hidden',
-    // unneeded classes
-    '[-a-zA-Z:0-9_.]',
   ],
   theme: {
     colors: {
@@ -100,6 +101,22 @@ export default {
     },
   },
   plugins: [
+    plugin(({addUtilities}) => {
+      // base variables required for transform utilities
+      // added as utilities since base is not imported
+      // note: required when using tailwind's transform classes
+      addUtilities({
+        '.transform-reset': {
+          '--tw-translate-x': 0,
+          '--tw-translate-y': 0,
+          '--tw-rotate': 0,
+          '--tw-skew-x': 0,
+          '--tw-skew-y': 0,
+          '--tw-scale-x': '1',
+          '--tw-scale-y': '1',
+        },
+      });
+    }),
     plugin(({addUtilities}) => {
       addUtilities({
         // tw-hidden must win all other "display: xxx !important" classes to get the chance to "hide" an element.

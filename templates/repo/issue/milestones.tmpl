@@ -8,7 +8,7 @@
 			{{template "repo/issue/navbar" .}}
 			{{template "repo/issue/search" .}}
 			{{if and (or .CanWriteIssues .CanWritePulls) (not .Repository.IsArchived)}}
-				<div class="top-right-buttons">
+				<div class="button-row">
 					<a class="ui small primary button" href="{{$.Link}}/new">{{ctx.Locale.Tr "repo.milestones.new"}}</a>
 				</div>
 			{{end}}

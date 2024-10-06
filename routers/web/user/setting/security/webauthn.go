@@ -16,6 +16,7 @@ import (
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/forms"
+	"code.gitea.io/gitea/services/mailer"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -112,9 +113,25 @@ func WebauthnRegisterPost(ctx *context.Context) {
 // WebauthnDelete deletes an security key by id
 func WebauthnDelete(ctx *context.Context) {
 	form := web.GetForm(ctx).(*forms.WebauthnDeleteForm)
+	cred, err := auth.GetWebAuthnCredentialByID(ctx, form.ID)
+	if err != nil || cred.UserID != ctx.Doer.ID {
+		if err != nil && !auth.IsErrWebAuthnCredentialNotExist(err) {
+			log.Error("GetWebAuthnCredentialByID: %v", err)
+		}
+
+		ctx.JSONRedirect(setting.AppSubURL + "/user/settings/security")
+		return
+	}
+
 	if _, err := auth.DeleteCredential(ctx, form.ID, ctx.Doer.ID); err != nil {
 		ctx.ServerError("GetWebAuthnCredentialByID", err)
 		return
 	}
+
+	if err := mailer.SendRemovedSecurityKey(ctx, ctx.Doer, cred.Name); err != nil {
+		ctx.ServerError("SendRemovedSecurityKey", err)
+		return
+	}
+
 	ctx.JSONRedirect(setting.AppSubURL + "/user/settings/security")
 }

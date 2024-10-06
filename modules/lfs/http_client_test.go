@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type RoundTripFunc func(req *http.Request) *http.Response
@@ -54,6 +55,17 @@ func lfsTestRoundtripHandler(req *http.Request) *http.Response {
 			Objects: []*ObjectResponse{
 				{
 					Actions: map[string]*Link{
+						"download": {},
+					},
+				},
+			},
+		}
+	} else if strings.Contains(url, "legacy-batch-request-download") {
+		batchResponse = &BatchResponse{
+			Transfer: "dummy",
+			Objects: []*ObjectResponse{
+				{
+					Links: map[string]*Link{
 						"download": {},
 					},
 				},
@@ -155,11 +167,11 @@ func TestHTTPClientDownload(t *testing.T) {
 	hc := &http.Client{Transport: RoundTripFunc(func(req *http.Request) *http.Response {
 		assert.Equal(t, "POST", req.Method)
 		assert.Equal(t, MediaType, req.Header.Get("Content-type"))
-		assert.Equal(t, MediaType, req.Header.Get("Accept"))
+		assert.Equal(t, AcceptHeader, req.Header.Get("Accept"))
 
 		var batchRequest BatchRequest
 		err := json.NewDecoder(req.Body).Decode(&batchRequest)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, "download", batchRequest.Operation)
 		assert.Len(t, batchRequest.Objects, 1)
@@ -229,6 +241,11 @@ func TestHTTPClientDownload(t *testing.T) {
 			endpoint:      "https://unknown-actions-map.io",
 			expectederror: "missing action 'download'",
 		},
+		// case 11
+		{
+			endpoint:      "https://legacy-batch-request-download.io",
+			expectederror: "",
+		},
 	}
 
 	for n, c := range cases {
@@ -245,14 +262,14 @@ func TestHTTPClientDownload(t *testing.T) {
 				return objectError
 			}
 			b, err := io.ReadAll(content)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, []byte("dummy"), b)
 			return nil
 		})
 		if len(c.expectederror) > 0 {
 			assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 		} else {
-			assert.NoError(t, err, "case %d", n)
+			require.NoError(t, err, "case %d", n)
 		}
 	}
 }
@@ -263,11 +280,11 @@ func TestHTTPClientUpload(t *testing.T) {
 	hc := &http.Client{Transport: RoundTripFunc(func(req *http.Request) *http.Response {
 		assert.Equal(t, "POST", req.Method)
 		assert.Equal(t, MediaType, req.Header.Get("Content-type"))
-		assert.Equal(t, MediaType, req.Header.Get("Accept"))
+		assert.Equal(t, AcceptHeader, req.Header.Get("Accept"))
 
 		var batchRequest BatchRequest
 		err := json.NewDecoder(req.Body).Decode(&batchRequest)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, "upload", batchRequest.Operation)
 		assert.Len(t, batchRequest.Objects, 1)
@@ -354,7 +371,7 @@ func TestHTTPClientUpload(t *testing.T) {
 		if len(c.expectederror) > 0 {
 			assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 		} else {
-			assert.NoError(t, err, "case %d", n)
+			require.NoError(t, err, "case %d", n)
 		}
 	}
 }

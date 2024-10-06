@@ -71,6 +71,7 @@ import (
 
 	"code.gitea.io/gitea/models/actions"
 	"code.gitea.io/gitea/models/db"
+	quota_model "code.gitea.io/gitea/models/quota"
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
@@ -240,17 +241,25 @@ func (ar artifactRoutes) uploadArtifact(ctx *ArtifactContext) {
 		return
 	}
 
-	// get upload file size
-	fileRealTotalSize, contentLength, err := getUploadFileSize(ctx)
+	// check the owner's quota
+	ok, err := quota_model.EvaluateForUser(ctx, ctx.ActionTask.OwnerID, quota_model.LimitSubjectSizeAssetsArtifacts)
 	if err != nil {
-		log.Error("Error get upload file size: %v", err)
-		ctx.Error(http.StatusInternalServerError, "Error get upload file size")
+		log.Error("quota_model.EvaluateForUser: %v", err)
+		ctx.Error(http.StatusInternalServerError, "Error checking quota")
 		return
 	}
+	if !ok {
+		ctx.Error(http.StatusRequestEntityTooLarge, "Quota exceeded")
+		return
+	}
+
+	// get upload file size
+	fileRealTotalSize, contentLength := getUploadFileSize(ctx)
 
 	// get artifact retention days
 	expiredDays := setting.Actions.ArtifactRetentionDays
 	if queryRetentionDays := ctx.Req.URL.Query().Get("retentionDays"); queryRetentionDays != "" {
+		var err error
 		expiredDays, err = strconv.ParseInt(queryRetentionDays, 10, 64)
 		if err != nil {
 			log.Error("Error parse retention days: %v", err)
@@ -419,8 +428,8 @@ func (ar artifactRoutes) getDownloadArtifactURL(ctx *ArtifactContext) {
 	}
 
 	if itemPath != artifacts[0].ArtifactName {
-		log.Error("Error dismatch artifact name, itemPath: %v, artifact: %v", itemPath, artifacts[0].ArtifactName)
-		ctx.Error(http.StatusBadRequest, "Error dismatch artifact name")
+		log.Error("Error mismatch artifact name, itemPath: %v, artifact: %v", itemPath, artifacts[0].ArtifactName)
+		ctx.Error(http.StatusBadRequest, "Error mismatch artifact name")
 		return
 	}
 

@@ -1,39 +1,54 @@
-#git-graph-container {
+#git-graph-content {
   overflow-x: auto;
   width: 100%;
-  min-height: 350px;
+  min-height: 250px;
 }
 
-#git-graph-container h2 {
+#git-graph-heading {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  padding-bottom: 20px;
 }
 
-#git-graph-container .ui.header.dividing {
-  padding-bottom: 10px;
+#git-graph-heading-left {
+  display: flex;
+  gap: 1rem;
+}
+
+#git-graph-heading h2 {
+  margin: 0;
+}
+
+@media (min-width: 767.98px) {
+  #git-graph-heading {
+    align-items: center;
+  }
+}
+
+@media (max-width: 767.98px) {
+  #git-graph-heading,
+  #git-graph-heading-left {
+    flex-direction: column;
+  }
+
+  #git-graph-heading-left {
+    margin-bottom: 1rem;
+  }
+
+  h2,
+  #flow-select-refs-dropdown {
+    max-width: 100%;
+  }
 }
 
 #git-graph-container #flow-select-refs-dropdown {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
   min-width: 250px;
-  border-right: none;
 }
 
 #git-graph-container #flow-select-refs-dropdown .ui.label {
   max-width: 180px;
   display: inline-flex !important;
   align-items: center;
-}
-
-#git-graph-container #flow-select-refs-dropdown .ui.label .truncate {
-  display: inline-block;
-  max-width: 140px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: top;
-  white-space: nowrap;
 }
 
 #git-graph-container #flow-select-refs-dropdown .default.text {

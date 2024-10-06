@@ -32,6 +32,7 @@ const (
 	HookEventRelease                   HookEventType = "release"
 	HookEventPackage                   HookEventType = "package"
 	HookEventSchedule                  HookEventType = "schedule"
+	HookEventWorkflowDispatch          HookEventType = "workflow_dispatch"
 )
 
 // Event returns the HookEventType as an event string

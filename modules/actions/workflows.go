@@ -191,6 +191,7 @@ func detectMatched(gitRepo *git.Repository, commit *git.Commit, triggedEvent web
 
 	switch triggedEvent {
 	case // events with no activity types
+		webhook_module.HookEventWorkflowDispatch,
 		webhook_module.HookEventCreate,
 		webhook_module.HookEventDelete,
 		webhook_module.HookEventFork,
@@ -648,8 +649,7 @@ func matchReleaseEvent(payload *api.ReleasePayload, evt *jobparser.Event) bool {
 			// unpublished, created, deleted, prereleased, released
 
 			action := payload.Action
-			switch action {
-			case api.HookReleaseUpdated:
+			if action == api.HookReleaseUpdated {
 				action = "edited"
 			}
 			for _, val := range vals {
@@ -685,8 +685,7 @@ func matchPackageEvent(payload *api.PackagePayload, evt *jobparser.Event) bool {
 			// updated
 
 			action := payload.Action
-			switch action {
-			case api.HookPackageCreated:
+			if action == api.HookPackageCreated {
 				action = "published"
 			}
 			for _, val := range vals {

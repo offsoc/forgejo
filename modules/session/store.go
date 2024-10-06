@@ -6,7 +6,7 @@ package session
 import (
 	"net/http"
 
-	"gitea.com/go-chi/session"
+	"code.forgejo.org/go-chi/session"
 )
 
 // Store represents a session store

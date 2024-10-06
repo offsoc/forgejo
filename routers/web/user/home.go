@@ -17,6 +17,7 @@ import (
 	activities_model "code.gitea.io/gitea/models/activities"
 	asymkey_model "code.gitea.io/gitea/models/asymkey"
 	"code.gitea.io/gitea/models/db"
+	git_model "code.gitea.io/gitea/models/git"
 	issues_model "code.gitea.io/gitea/models/issues"
 	"code.gitea.io/gitea/models/organization"
 	repo_model "code.gitea.io/gitea/models/repo"
@@ -35,8 +36,8 @@ import (
 	issue_service "code.gitea.io/gitea/services/issue"
 	pull_service "code.gitea.io/gitea/services/pull"
 
-	"github.com/keybase/go-crypto/openpgp"
-	"github.com/keybase/go-crypto/openpgp/armor"
+	"github.com/ProtonMail/go-crypto/openpgp"
+	"github.com/ProtonMail/go-crypto/openpgp/armor"
 	"xorm.io/builder"
 )
 
@@ -406,8 +407,6 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	switch viewType {
 	case "assigned":
 		filterMode = issues_model.FilterModeAssign
-	case "created_by":
-		filterMode = issues_model.FilterModeCreate
 	case "mentioned":
 		filterMode = issues_model.FilterModeMention
 	case "review_requested":
@@ -415,10 +414,12 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	case "reviewed_by":
 		filterMode = issues_model.FilterModeReviewed
 	case "your_repositories":
+		filterMode = issues_model.FilterModeYourRepositories
+	case "created_by":
 		fallthrough
 	default:
-		filterMode = issues_model.FilterModeYourRepositories
-		viewType = "your_repositories"
+		filterMode = issues_model.FilterModeCreate
+		viewType = "created_by"
 	}
 
 	// --------------------------------------------------------------------------
@@ -446,6 +447,8 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 		Team:       team,
 		User:       ctx.Doer,
 	}
+
+	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
 
 	// Search all repositories which
 	//
@@ -576,7 +579,9 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	// USING FINAL STATE OF opts FOR A QUERY.
 	var issues issues_model.IssueList
 	{
-		issueIDs, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts))
+		issueIDs, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts).Copy(
+			func(o *issue_indexer.SearchOptions) { o.IsFuzzyKeyword = isFuzzy },
+		))
 		if err != nil {
 			ctx.ServerError("issueIDsFromSearch", err)
 			return
@@ -593,11 +598,18 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 		ctx.ServerError("GetIssuesLastCommitStatus", err)
 		return
 	}
+	if !ctx.Repo.CanRead(unit.TypeActions) {
+		for key := range commitStatuses {
+			git_model.CommitStatusesHideActionsURL(ctx, commitStatuses[key])
+		}
+	}
 
 	// -------------------------------
 	// Fill stats to post to ctx.Data.
 	// -------------------------------
-	issueStats, err := getUserIssueStats(ctx, ctxUser, filterMode, issue_indexer.ToSearchOptions(keyword, opts))
+	issueStats, err := getUserIssueStats(ctx, ctxUser, filterMode, issue_indexer.ToSearchOptions(keyword, opts).Copy(
+		func(o *issue_indexer.SearchOptions) { o.IsFuzzyKeyword = isFuzzy },
+	))
 	if err != nil {
 		ctx.ServerError("getUserIssueStats", err)
 		return
@@ -652,6 +664,7 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	ctx.Data["IsShowClosed"] = isShowClosed
 	ctx.Data["SelectLabels"] = selectedLabels
 	ctx.Data["PageIsOrgIssues"] = org != nil
+	ctx.Data["IsFuzzy"] = isFuzzy
 
 	if isShowClosed {
 		ctx.Data["State"] = "closed"
@@ -667,6 +680,7 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	pager.AddParam(ctx, "labels", "SelectLabels")
 	pager.AddParam(ctx, "milestone", "MilestoneID")
 	pager.AddParam(ctx, "assignee", "AssigneeID")
+	pager.AddParam(ctx, "fuzzy", "IsFuzzy")
 	ctx.Data["Page"] = pager
 
 	ctx.HTML(http.StatusOK, tplIssues)
@@ -747,7 +761,7 @@ func UsernameSubRoute(ctx *context.Context) {
 		}
 		// check view permissions
 		if !user_model.IsUserVisibleToViewer(ctx, ctx.ContextUser, ctx.Doer) {
-			ctx.NotFound("user", fmt.Errorf(ctx.ContextUser.Name))
+			ctx.NotFound("User not visible", nil)
 			return false
 		}
 		return true

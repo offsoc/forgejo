@@ -7,16 +7,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/santhosh-tekuri/jsonschema/v5"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMigrationJSON_IssueOK(t *testing.T) {
 	issues := make([]*Issue, 0, 10)
 	err := Load("file_format_testdata/issue_a.json", &issues, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = Load("file_format_testdata/issue_a.yml", &issues, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestMigrationJSON_IssueFail(t *testing.T) {
@@ -34,5 +35,5 @@ func TestMigrationJSON_IssueFail(t *testing.T) {
 func TestMigrationJSON_MilestoneOK(t *testing.T) {
 	milestones := make([]*Milestone, 0, 10)
 	err := Load("file_format_testdata/milestones.json", &milestones, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

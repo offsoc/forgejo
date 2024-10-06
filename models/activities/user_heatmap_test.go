@@ -4,7 +4,6 @@
 package activities_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetUserHeatmapDataByUser(t *testing.T) {
@@ -56,7 +56,7 @@ func TestGetUserHeatmapDataByUser(t *testing.T) {
 		},
 	}
 	// Prepare
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// Mock time
 	timeutil.MockSet(time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC))
@@ -67,7 +67,7 @@ func TestGetUserHeatmapDataByUser(t *testing.T) {
 
 		doer := &user_model.User{ID: tc.doerID}
 		_, err := unittest.LoadBeanIfExists(doer)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		if tc.doerID == 0 {
 			doer = nil
 		}
@@ -80,7 +80,7 @@ func TestGetUserHeatmapDataByUser(t *testing.T) {
 			OnlyPerformedBy: true,
 			IncludeDeleted:  true,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Get the heatmap and compare
 		heatmap, err := activities_model.GetUserHeatmapDataByUser(db.DefaultContext, user, doer)
@@ -88,14 +88,14 @@ func TestGetUserHeatmapDataByUser(t *testing.T) {
 		for _, hm := range heatmap {
 			contributions += int(hm.Contributions)
 		}
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, actions, contributions, "invalid action count: did the test data became too old?")
 		assert.Equal(t, count, int64(contributions))
-		assert.Equal(t, tc.CountResult, contributions, fmt.Sprintf("testcase '%s'", tc.desc))
+		assert.Equal(t, tc.CountResult, contributions, tc.desc)
 
 		// Test JSON rendering
 		jsonData, err := json.Marshal(heatmap)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.JSONResult, string(jsonData))
 	}
 }

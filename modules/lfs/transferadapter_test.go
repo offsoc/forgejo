@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBasicTransferAdapterName(t *testing.T) {
@@ -26,7 +27,7 @@ func TestBasicTransferAdapter(t *testing.T) {
 	p := Pointer{Oid: "b5a2c96250612366ea272ffac6d9744aaf4b45aacd96aa7cfcb931ee3b558259", Size: 5}
 
 	roundTripHandler := func(req *http.Request) *http.Response {
-		assert.Equal(t, MediaType, req.Header.Get("Accept"))
+		assert.Equal(t, AcceptHeader, req.Header.Get("Accept"))
 		assert.Equal(t, "test-value", req.Header.Get("test-header"))
 
 		url := req.URL.String()
@@ -39,7 +40,7 @@ func TestBasicTransferAdapter(t *testing.T) {
 			assert.Equal(t, "application/octet-stream", req.Header.Get("Content-Type"))
 
 			b, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, "dummy", string(b))
 
 			return &http.Response{StatusCode: http.StatusOK}
@@ -49,7 +50,7 @@ func TestBasicTransferAdapter(t *testing.T) {
 
 			var vp Pointer
 			err := json.NewDecoder(req.Body).Decode(&vp)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, p.Oid, vp.Oid)
 			assert.Equal(t, p.Size, vp.Size)
 
@@ -98,7 +99,7 @@ func TestBasicTransferAdapter(t *testing.T) {
 			if len(c.expectederror) > 0 {
 				assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 			} else {
-				assert.NoError(t, err, "case %d", n)
+				require.NoError(t, err, "case %d", n)
 			}
 		}
 	})
@@ -131,7 +132,7 @@ func TestBasicTransferAdapter(t *testing.T) {
 			if len(c.expectederror) > 0 {
 				assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 			} else {
-				assert.NoError(t, err, "case %d", n)
+				require.NoError(t, err, "case %d", n)
 			}
 		}
 	})
@@ -164,7 +165,7 @@ func TestBasicTransferAdapter(t *testing.T) {
 			if len(c.expectederror) > 0 {
 				assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 			} else {
-				assert.NoError(t, err, "case %d", n)
+				require.NoError(t, err, "case %d", n)
 			}
 		}
 	})

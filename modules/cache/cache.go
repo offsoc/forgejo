@@ -6,12 +6,13 @@ package cache
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"code.gitea.io/gitea/modules/setting"
 
-	mc "gitea.com/go-chi/cache"
+	mc "code.forgejo.org/go-chi/cache"
 
-	_ "gitea.com/go-chi/cache/memcache" // memcache plugin for cache
+	_ "code.forgejo.org/go-chi/cache/memcache" // memcache plugin for cache
 )
 
 var conn mc.Cache
@@ -38,6 +39,37 @@ func Init() error {
 	}
 
 	return err
+}
+
+const (
+	testCacheKey       = "DefaultCache.TestKey"
+	SlowCacheThreshold = 100 * time.Microsecond
+)
+
+func Test() (time.Duration, error) {
+	if conn == nil {
+		return 0, fmt.Errorf("default cache not initialized")
+	}
+
+	testData := fmt.Sprintf("%x", make([]byte, 500))
+
+	start := time.Now()
+
+	if err := conn.Delete(testCacheKey); err != nil {
+		return 0, fmt.Errorf("expect cache to delete data based on key if exist but got: %w", err)
+	}
+	if err := conn.Put(testCacheKey, testData, 10); err != nil {
+		return 0, fmt.Errorf("expect cache to store data but got: %w", err)
+	}
+	testVal := conn.Get(testCacheKey)
+	if testVal == nil {
+		return 0, fmt.Errorf("expect cache hit but got none")
+	}
+	if testVal != testData {
+		return 0, fmt.Errorf("expect cache to return same value as stored but got other")
+	}
+
+	return time.Since(start), nil
 }
 
 // GetCache returns the currently configured cache

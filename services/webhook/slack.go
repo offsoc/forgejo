@@ -289,8 +289,7 @@ func (s slackConvertor) Review(p *api.PullRequestPayload, event webhook_module.H
 	repoLink := SlackLinkFormatter(p.Repository.HTMLURL, p.Repository.FullName)
 	var text string
 
-	switch p.Action {
-	case api.HookIssueReviewed:
+	if p.Action == api.HookIssueReviewed {
 		action, err := parseHookPullRequestEventType(event)
 		if err != nil {
 			return SlackPayload{}, err

@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/models/organization"
 	"code.gitea.io/gitea/models/perm"
 	access_model "code.gitea.io/gitea/models/perm/access"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/graceful"
@@ -54,6 +55,8 @@ func Migrate(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "409":
 	//     description: The repository with the same name already exists.
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 
@@ -82,6 +85,10 @@ func Migrate(ctx *context.APIContext) {
 
 	if ctx.HasAPIError() {
 		ctx.Error(http.StatusUnprocessableEntity, "", ctx.GetErrMsg())
+		return
+	}
+
+	if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, repoOwner.ID, repoOwner.Name) {
 		return
 	}
 

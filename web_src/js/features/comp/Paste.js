@@ -1,6 +1,4 @@
-import {htmlEscape} from 'escape-goat';
 import {POST} from '../../modules/fetch.js';
-import {imageInfo} from '../../utils/image.js';
 import {getPastedContent, replaceTextareaSelection} from '../../utils/dom.js';
 import {isUrl} from '../../utils/url.js';
 
@@ -98,17 +96,9 @@ async function handleClipboardImages(editor, dropzone, images, e) {
     editor.insertPlaceholder(placeholder);
 
     const {uuid} = await uploadFile(img, uploadUrl);
-    const {width, dppx} = await imageInfo(img);
 
     const url = `/attachments/${uuid}`;
-    let text;
-    if (width > 0 && dppx > 1) {
-      // Scale down images from HiDPI monitors. This uses the <img> tag because it's the only
-      // method to change image size in Markdown that is supported by all implementations.
-      text = `<img width="${Math.round(width / dppx)}" alt="${htmlEscape(name)}" src="${htmlEscape(url)}">`;
-    } else {
-      text = `![${name}](${url})`;
-    }
+    const text = `![${name}](${url})`;
     editor.replacePlaceholder(placeholder, text);
 
     const input = document.createElement('input');
@@ -126,7 +116,7 @@ function handleClipboardText(textarea, text, e) {
   if (_shiftDown) return;
   const selectedText = value.substring(selectionStart, selectionEnd);
   const trimmedText = text.trim();
-  if (selectedText && isUrl(trimmedText)) {
+  if (selectedText && isUrl(trimmedText) && !isUrl(selectedText)) {
     e.stopPropagation();
     e.preventDefault();
     replaceTextareaSelection(textarea, `[${selectedText}](${trimmedText})`);

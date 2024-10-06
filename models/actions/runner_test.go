@@ -7,23 +7,39 @@ import (
 	"fmt"
 	"testing"
 
+	auth_model "code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+// TestUpdateSecret checks that ActionRunner.UpdateSecret() sets the Token,
+// TokenSalt and TokenHash fields based on the specified token.
+func TestUpdateSecret(t *testing.T) {
+	runner := ActionRunner{}
+	token := "0123456789012345678901234567890123456789"
+
+	err := runner.UpdateSecret(token)
+
+	require.NoError(t, err)
+	assert.Equal(t, token, runner.Token)
+	assert.Regexp(t, "^[0-9a-f]{32}$", runner.TokenSalt)
+	assert.Equal(t, runner.TokenHash, auth_model.HashToken(token, runner.TokenSalt))
+}
 
 func TestDeleteRunner(t *testing.T) {
 	const recordID = 12345678
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	before := unittest.AssertExistsAndLoadBean(t, &ActionRunner{ID: recordID})
 
 	err := DeleteRunner(db.DefaultContext, recordID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var after ActionRunner
 	found, err := db.GetEngine(db.DefaultContext).ID(recordID).Unscoped().Get(&after)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, found)
 
 	// Most fields (namely Name, Version, OwnerID, RepoID, Description, Base, RepoRange,

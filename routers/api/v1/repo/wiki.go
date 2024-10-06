@@ -53,6 +53,8 @@ func NewWikiPage(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "423":
 	//     "$ref": "#/responses/repoArchivedError"
 
@@ -131,6 +133,8 @@ func EditWikiPage(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "423":
 	//     "$ref": "#/responses/repoArchivedError"
 

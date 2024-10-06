@@ -66,12 +66,3 @@ func (m *Messenger) SendMessage(message *Event) {
 		}
 	}
 }
-
-// SendMessageBlocking sends the message to all registered channels and ensures it gets sent
-func (m *Messenger) SendMessageBlocking(message *Event) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	for i := range m.channels {
-		m.channels[i] <- message
-	}
-}

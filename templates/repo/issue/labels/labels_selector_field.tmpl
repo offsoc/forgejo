@@ -5,11 +5,11 @@
 			{{svg "octicon-gear" 16 "tw-ml-1"}}
 		{{end}}
 	</span>
-	<div class="filter menu" {{if .Issue}}data-action="update" data-issue-id="{{$.Issue.ID}}" data-update-url="{{$.RepoLink}}/issues/labels"{{else}}data-id="#label_ids"{{end}}>
+	<div class="filter menu ugc-labels" {{if .Issue}}data-action="update" data-issue-id="{{$.Issue.ID}}" data-update-url="{{$.RepoLink}}/issues/labels"{{else}}data-id="#label_ids"{{end}}>
 		{{if or .Labels .OrgLabels}}
 			<div class="ui icon search input">
 				<i class="icon">{{svg "octicon-search" 16}}</i>
-				<input type="text" placeholder="{{ctx.Locale.Tr "repo.issues.filter_labels"}}">
+				<input class="tw-w-auto" type="text" placeholder="{{ctx.Locale.Tr "repo.issues.filter_labels"}}">
 			</div>
 		{{end}}
 		<a class="no-select item" href="#">{{ctx.Locale.Tr "repo.issues.new.clear_labels"}}</a>

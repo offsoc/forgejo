@@ -411,6 +411,32 @@ func ToAnnotatedTagObject(repo *repo_model.Repository, commit *git.Commit) *api.
 	}
 }
 
+// ToTagProtection convert a git.ProtectedTag to an api.TagProtection
+func ToTagProtection(ctx context.Context, pt *git_model.ProtectedTag, repo *repo_model.Repository) *api.TagProtection {
+	readers, err := access_model.GetRepoReaders(ctx, repo)
+	if err != nil {
+		log.Error("GetRepoReaders: %v", err)
+	}
+
+	whitelistUsernames := getWhitelistEntities(readers, pt.AllowlistUserIDs)
+
+	teamReaders, err := organization.OrgFromUser(repo.Owner).TeamsWithAccessToRepo(ctx, repo.ID, perm.AccessModeRead)
+	if err != nil {
+		log.Error("Repo.Owner.TeamsWithAccessToRepo: %v", err)
+	}
+
+	whitelistTeams := getWhitelistEntities(teamReaders, pt.AllowlistTeamIDs)
+
+	return &api.TagProtection{
+		ID:                 pt.ID,
+		NamePattern:        pt.NamePattern,
+		WhitelistUsernames: whitelistUsernames,
+		WhitelistTeams:     whitelistTeams,
+		Created:            pt.CreatedUnix.AsTime(),
+		Updated:            pt.UpdatedUnix.AsTime(),
+	}
+}
+
 // ToTopicResponse convert from models.Topic to api.TopicResponse
 func ToTopicResponse(topic *repo_model.Topic) *api.TopicResponse {
 	return &api.TopicResponse{
@@ -454,6 +480,7 @@ func ToLFSLock(ctx context.Context, l *git_model.LFSLock) *api.LFSLock {
 // ToChangedFile convert a gitdiff.DiffFile to api.ChangedFile
 func ToChangedFile(f *gitdiff.DiffFile, repo *repo_model.Repository, commit string) *api.ChangedFile {
 	status := "changed"
+	previousFilename := ""
 	if f.IsDeleted {
 		status = "deleted"
 	} else if f.IsCreated {
@@ -462,23 +489,21 @@ func ToChangedFile(f *gitdiff.DiffFile, repo *repo_model.Repository, commit stri
 		status = "copied"
 	} else if f.IsRenamed && f.Type == gitdiff.DiffFileRename {
 		status = "renamed"
+		previousFilename = f.OldName
 	} else if f.Addition == 0 && f.Deletion == 0 {
 		status = "unchanged"
 	}
 
 	file := &api.ChangedFile{
-		Filename:    f.GetDiffFileName(),
-		Status:      status,
-		Additions:   f.Addition,
-		Deletions:   f.Deletion,
-		Changes:     f.Addition + f.Deletion,
-		HTMLURL:     fmt.Sprint(repo.HTMLURL(), "/src/commit/", commit, "/", util.PathEscapeSegments(f.GetDiffFileName())),
-		ContentsURL: fmt.Sprint(repo.APIURL(), "/contents/", util.PathEscapeSegments(f.GetDiffFileName()), "?ref=", commit),
-		RawURL:      fmt.Sprint(repo.HTMLURL(), "/raw/commit/", commit, "/", util.PathEscapeSegments(f.GetDiffFileName())),
-	}
-
-	if status == "rename" {
-		file.PreviousFilename = f.OldName
+		Filename:         f.GetDiffFileName(),
+		Status:           status,
+		Additions:        f.Addition,
+		Deletions:        f.Deletion,
+		Changes:          f.Addition + f.Deletion,
+		PreviousFilename: previousFilename,
+		HTMLURL:          fmt.Sprint(repo.HTMLURL(), "/src/commit/", commit, "/", util.PathEscapeSegments(f.GetDiffFileName())),
+		ContentsURL:      fmt.Sprint(repo.APIURL(), "/contents/", util.PathEscapeSegments(f.GetDiffFileName()), "?ref=", commit),
+		RawURL:           fmt.Sprint(repo.HTMLURL(), "/raw/commit/", commit, "/", util.PathEscapeSegments(f.GetDiffFileName())),
 	}
 
 	return file

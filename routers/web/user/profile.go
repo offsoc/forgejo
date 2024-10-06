@@ -56,7 +56,7 @@ func OwnerProfile(ctx *context.Context) {
 func userProfile(ctx *context.Context) {
 	// check view permissions
 	if !user_model.IsUserVisibleToViewer(ctx, ctx.ContextUser, ctx.Doer) {
-		ctx.NotFound("user", fmt.Errorf(ctx.ContextUser.Name))
+		ctx.NotFound("User not visible", nil)
 		return
 	}
 
@@ -112,32 +112,12 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 		orderBy db.SearchOrderBy
 	)
 
-	ctx.Data["SortType"] = ctx.FormString("sort")
-	switch ctx.FormString("sort") {
-	case "newest":
-		orderBy = db.SearchOrderByNewest
-	case "oldest":
-		orderBy = db.SearchOrderByOldest
-	case "recentupdate":
-		orderBy = db.SearchOrderByRecentUpdated
-	case "leastupdate":
-		orderBy = db.SearchOrderByLeastUpdated
-	case "reversealphabetically":
-		orderBy = db.SearchOrderByAlphabeticallyReverse
-	case "alphabetically":
-		orderBy = db.SearchOrderByAlphabetically
-	case "moststars":
-		orderBy = db.SearchOrderByStarsReverse
-	case "feweststars":
-		orderBy = db.SearchOrderByStars
-	case "mostforks":
-		orderBy = db.SearchOrderByForksReverse
-	case "fewestforks":
-		orderBy = db.SearchOrderByForks
-	default:
-		ctx.Data["SortType"] = "recentupdate"
-		orderBy = db.SearchOrderByRecentUpdated
+	sortOrder := ctx.FormString("sort")
+	if _, ok := repo_model.OrderByFlatMap[sortOrder]; !ok {
+		sortOrder = setting.UI.ExploreDefaultSort // TODO: add new default sort order for user home?
 	}
+	ctx.Data["SortType"] = sortOrder
+	orderBy = repo_model.OrderByFlatMap[sortOrder]
 
 	keyword := ctx.FormTrim("q")
 	ctx.Data["Keyword"] = keyword
@@ -183,9 +163,11 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 	case "followers":
 		ctx.Data["Cards"] = followers
 		total = int(numFollowers)
+		ctx.Data["CardsTitle"] = ctx.TrN(total, "user.followers.title.one", "user.followers.title.few")
 	case "following":
 		ctx.Data["Cards"] = following
 		total = int(numFollowing)
+		ctx.Data["CardsTitle"] = ctx.TrN(total, "user.following.title.one", "user.following.title.few")
 	case "activity":
 		date := ctx.FormString("date")
 		pagingNum = setting.UI.FeedPagingNum
@@ -333,13 +315,27 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 	if tab == "activity" {
 		pager.AddParam(ctx, "date", "Date")
 	}
+	if archived.Has() {
+		pager.AddParamString("archived", fmt.Sprint(archived.Value()))
+	}
+	if fork.Has() {
+		pager.AddParamString("fork", fmt.Sprint(fork.Value()))
+	}
+	if mirror.Has() {
+		pager.AddParamString("mirror", fmt.Sprint(mirror.Value()))
+	}
+	if template.Has() {
+		pager.AddParamString("template", fmt.Sprint(template.Value()))
+	}
+	if private.Has() {
+		pager.AddParamString("private", fmt.Sprint(private.Value()))
+	}
 	ctx.Data["Page"] = pager
 }
 
 // Action response for follow/unfollow user request
 func Action(ctx *context.Context) {
 	var err error
-	var redirectViaJSON bool
 	action := ctx.FormString("action")
 
 	if ctx.ContextUser.IsOrganization() && (action == "block" || action == "unblock") {
@@ -355,10 +351,8 @@ func Action(ctx *context.Context) {
 		err = user_model.UnfollowUser(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
 	case "block":
 		err = user_service.BlockUser(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
-		redirectViaJSON = true
 	case "unblock":
 		err = user_model.UnblockUser(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
-		redirectViaJSON = true
 	}
 
 	if err != nil {
@@ -369,21 +363,15 @@ func Action(ctx *context.Context) {
 		}
 
 		if ctx.ContextUser.IsOrganization() {
-			ctx.Flash.Error(ctx.Tr("org.follow_blocked_user"))
+			ctx.Flash.Error(ctx.Tr("org.follow_blocked_user"), true)
 		} else {
-			ctx.Flash.Error(ctx.Tr("user.follow_blocked_user"))
+			ctx.Flash.Error(ctx.Tr("user.follow_blocked_user"), true)
 		}
-	}
-
-	if redirectViaJSON {
-		ctx.JSON(http.StatusOK, map[string]any{
-			"redirect": ctx.ContextUser.HomeLink(),
-		})
-		return
 	}
 
 	if ctx.ContextUser.IsIndividual() {
 		shared_user.PrepareContextForProfileBigAvatar(ctx)
+		ctx.Data["IsHTMX"] = true
 		ctx.HTML(http.StatusOK, tplProfileBigAvatar)
 		return
 	} else if ctx.ContextUser.IsOrganization() {

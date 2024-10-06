@@ -6,7 +6,7 @@ package v1_14 //nolint
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -47,7 +47,7 @@ func Test_RemoveInvalidLabels(t *testing.T) {
 	}
 
 	// load and prepare the test database
-	x, deferable := base.PrepareTestEnv(t, 0, new(Comment), new(Issue), new(Repository), new(IssueLabel), new(Label))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(Comment), new(Issue), new(Repository), new(IssueLabel), new(Label))
 	if x == nil || t.Failed() {
 		defer deferable()
 		return

@@ -28,6 +28,7 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
+	"code.gitea.io/gitea/routers/common"
 	actions_service "code.gitea.io/gitea/services/actions"
 	context_module "code.gitea.io/gitea/services/context"
 
@@ -269,6 +270,27 @@ func ViewPost(ctx *context_module.Context) {
 			}
 
 			step := steps[cursor.Step]
+
+			// if task log is expired, return a consistent log line
+			if task.LogExpired {
+				if cursor.Cursor == 0 {
+					resp.Logs.StepsLog = append(resp.Logs.StepsLog, &ViewStepLog{
+						Step:   cursor.Step,
+						Cursor: 1,
+						Lines: []*ViewStepLogLine{
+							{
+								Index:   1,
+								Message: ctx.Locale.TrString("actions.runs.expire_log_message"),
+								// Timestamp doesn't mean anything when the log is expired.
+								// Set it to the task's updated time since it's probably the time when the log has expired.
+								Timestamp: float64(task.Updated.AsTime().UnixNano()) / float64(time.Second),
+							},
+						},
+						Started: int64(step.Started),
+					})
+				}
+				continue
+			}
 
 			logLines := make([]*ViewStepLogLine, 0) // marshal to '[]' instead of 'null' in json
 
@@ -662,10 +684,8 @@ func ArtifactsDownloadView(ctx *context_module.Context) {
 		}
 	}
 
-	ctx.Resp.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.zip; filename*=UTF-8''%s.zip", url.PathEscape(artifactName), artifactName))
-
 	// Artifacts using the v4 backend are stored as a single combined zip file per artifact on the backend
-	// The v4 backend enshures ContentEncoding is set to "application/zip", which is not the case for the old backend
+	// The v4 backend ensures ContentEncoding is set to "application/zip", which is not the case for the old backend
 	if len(artifacts) == 1 && artifacts[0].ArtifactName+".zip" == artifacts[0].ArtifactPath && artifacts[0].ContentEncoding == "application/zip" {
 		art := artifacts[0]
 		if setting.Actions.ArtifactStorage.MinioConfig.ServeDirect {
@@ -680,12 +700,13 @@ func ArtifactsDownloadView(ctx *context_module.Context) {
 			ctx.Error(http.StatusInternalServerError, err.Error())
 			return
 		}
-		_, _ = io.Copy(ctx.Resp, f)
+		common.ServeContentByReadSeeker(ctx.Base, artifactName, util.ToPointer(art.UpdatedUnix.AsTime()), f)
 		return
 	}
 
 	// Artifacts using the v1-v3 backend are stored as multiple individual files per artifact on the backend
 	// Those need to be zipped for download
+	ctx.Resp.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.zip; filename*=UTF-8''%s.zip", url.PathEscape(artifactName), artifactName))
 	writer := zip.NewWriter(ctx.Resp)
 	defer writer.Close()
 	for _, art := range artifacts {

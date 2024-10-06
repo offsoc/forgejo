@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func getTestCases() []struct {
@@ -138,27 +139,27 @@ func getTestCases() []struct {
 		{
 			name:  "AllPublic/PublicRepositoriesOfUserIncludingCollaborative",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 15, AllPublic: true, Template: optional.Some(false)},
-			count: 34,
+			count: 35,
 		},
 		{
 			name:  "AllPublic/PublicAndPrivateRepositoriesOfUserIncludingCollaborative",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 15, Private: true, AllPublic: true, AllLimited: true, Template: optional.Some(false)},
-			count: 39,
+			count: 40,
 		},
 		{
 			name:  "AllPublic/PublicAndPrivateRepositoriesOfUserIncludingCollaborativeByName",
 			opts:  &repo_model.SearchRepoOptions{Keyword: "test", ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 15, Private: true, AllPublic: true},
-			count: 15,
+			count: 16,
 		},
 		{
 			name:  "AllPublic/PublicAndPrivateRepositoriesOfUser2IncludingCollaborativeByName",
 			opts:  &repo_model.SearchRepoOptions{Keyword: "test", ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 18, Private: true, AllPublic: true},
-			count: 13,
+			count: 14,
 		},
 		{
 			name:  "AllPublic/PublicRepositoriesOfOrganization",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 17, AllPublic: true, Collaborate: optional.Some(false), Template: optional.Some(false)},
-			count: 34,
+			count: 35,
 		},
 		{
 			name:  "AllTemplates",
@@ -181,7 +182,7 @@ func getTestCases() []struct {
 }
 
 func TestSearchRepository(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// test search public repository on explore page
 	repos, count, err := repo_model.SearchRepositoryByName(db.DefaultContext, &repo_model.SearchRepoOptions{
@@ -193,7 +194,7 @@ func TestSearchRepository(t *testing.T) {
 		Collaborate: optional.Some(false),
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.Len(t, repos, 1) {
 		assert.Equal(t, "test_repo_12", repos[0].Name)
 	}
@@ -208,7 +209,7 @@ func TestSearchRepository(t *testing.T) {
 		Collaborate: optional.Some(false),
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(2), count)
 	assert.Len(t, repos, 2)
 
@@ -223,7 +224,7 @@ func TestSearchRepository(t *testing.T) {
 		Collaborate: optional.Some(false),
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.Len(t, repos, 1) {
 		assert.Equal(t, "test_repo_13", repos[0].Name)
 	}
@@ -239,14 +240,14 @@ func TestSearchRepository(t *testing.T) {
 		Collaborate: optional.Some(false),
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(3), count)
 	assert.Len(t, repos, 3)
 
 	// Test non existing owner
 	repos, count, err = repo_model.SearchRepositoryByName(db.DefaultContext, &repo_model.SearchRepoOptions{OwnerID: unittest.NonexistentID})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, repos)
 	assert.Equal(t, int64(0), count)
 
@@ -261,7 +262,7 @@ func TestSearchRepository(t *testing.T) {
 		IncludeDescription: true,
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.Len(t, repos, 1) {
 		assert.Equal(t, "test_repo_14", repos[0].Name)
 	}
@@ -278,7 +279,7 @@ func TestSearchRepository(t *testing.T) {
 		IncludeDescription: false,
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, repos)
 	assert.Equal(t, int64(0), count)
 
@@ -288,7 +289,7 @@ func TestSearchRepository(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			repos, count, err := repo_model.SearchRepositoryByName(db.DefaultContext, testCase.opts)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, int64(testCase.count), count)
 
 			page := testCase.opts.Page
@@ -355,7 +356,7 @@ func TestSearchRepository(t *testing.T) {
 }
 
 func TestCountRepository(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testCases := getTestCases()
 
@@ -363,14 +364,14 @@ func TestCountRepository(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			count, err := repo_model.CountRepository(db.DefaultContext, testCase.opts)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, int64(testCase.count), count)
 		})
 	}
 }
 
 func TestSearchRepositoryByTopicName(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testCases := []struct {
 		name  string
@@ -397,7 +398,7 @@ func TestSearchRepositoryByTopicName(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			_, count, err := repo_model.SearchRepositoryByName(db.DefaultContext, testCase.opts)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, int64(testCase.count), count)
 		})
 	}

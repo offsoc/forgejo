@@ -6,9 +6,10 @@ package v1_16 //nolint
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_AddTableCommitStatusIndex(t *testing.T) {
@@ -21,7 +22,7 @@ func Test_AddTableCommitStatusIndex(t *testing.T) {
 	}
 
 	// Prepare and load the testing database
-	x, deferable := base.PrepareTestEnv(t, 0, new(CommitStatus))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(CommitStatus))
 	if x == nil || t.Failed() {
 		defer deferable()
 		return
@@ -30,7 +31,7 @@ func Test_AddTableCommitStatusIndex(t *testing.T) {
 
 	// Run the migration
 	if err := AddTableCommitStatusIndex(x); err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return
 	}
 
@@ -46,12 +47,12 @@ func Test_AddTableCommitStatusIndex(t *testing.T) {
 	for {
 		indexes := make([]CommitStatusIndex, 0, batchSize)
 		err := x.Table("commit_status_index").Limit(batchSize, start).Find(&indexes)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		for _, idx := range indexes {
 			var maxIndex int
 			has, err := x.SQL("SELECT max(`index`) FROM commit_status WHERE repo_id = ? AND sha = ?", idx.RepoID, idx.SHA).Get(&maxIndex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.True(t, has)
 			assert.EqualValues(t, maxIndex, idx.MaxIndex)
 		}

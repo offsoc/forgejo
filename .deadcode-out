@@ -30,7 +30,6 @@ code.gitea.io/gitea/models/asymkey
 
 code.gitea.io/gitea/models/auth
 	GetSourceByName
-	GetWebAuthnCredentialByID
 	WebAuthnCredentials
 
 code.gitea.io/gitea/models/db
@@ -60,13 +59,6 @@ code.gitea.io/gitea/models/issues
 	IsErrIssueWasClosed
 	ChangeMilestoneStatus
 
-code.gitea.io/gitea/models/migrations/base
-	removeAllWithRetry
-	newXORMEngine
-	deleteDB
-	PrepareTestEnv
-	MainTest
-
 code.gitea.io/gitea/models/organization
 	GetTeamNamesByID
 	UpdateTeamUnits
@@ -82,50 +74,14 @@ code.gitea.io/gitea/models/project
 
 code.gitea.io/gitea/models/repo
 	DeleteAttachmentsByIssue
-	releaseSorter.Len
-	releaseSorter.Less
-	releaseSorter.Swap
-	SortReleases
 	FindReposMapByIDs
-	SearchOrderBy.String
 	IsErrTopicNotExist
 	ErrTopicNotExist.Error
 	ErrTopicNotExist.Unwrap
 	GetTopicByName
 	WatchRepoMode
 
-code.gitea.io/gitea/models/unittest
-	CheckConsistencyFor
-	checkForConsistency
-	GetXORMEngine
-	OverrideFixtures
-	InitFixtures
-	LoadFixtures
-	Copy
-	CopyDir
-	NewMockWebServer
-	NormalizedFullPath
-	FixturesDir
-	fatalTestError
-	InitSettings
-	MainTest
-	CreateTestEngine
-	PrepareTestDatabase
-	PrepareTestEnv
-	Cond
-	OrderBy
-	LoadBeanIfExists
-	BeanExists
-	AssertExistsAndLoadBean
-	GetCount
-	AssertNotExistsBean
-	AssertExistsIf
-	AssertSuccessfulInsert
-	AssertCount
-	AssertInt64InRange
-
 code.gitea.io/gitea/models/user
-	IsErrPrimaryEmailCannotDelete
 	ErrUserInactive.Error
 	ErrUserInactive.Unwrap
 	IsErrExternalLoginUserAlreadyExist
@@ -136,6 +92,10 @@ code.gitea.io/gitea/models/user
 	DeleteUserSetting
 	GetUserEmailsByNames
 	GetUserNamesByIDs
+
+code.gitea.io/gitea/modules/activitypub
+	NewContext
+	Context.APClientFactory
 
 code.gitea.io/gitea/modules/assetfs
 	Bindata
@@ -203,6 +163,9 @@ code.gitea.io/gitea/modules/graceful
 code.gitea.io/gitea/modules/hcaptcha
 	WithHTTP
 
+code.gitea.io/gitea/modules/hostmatcher
+	HostMatchList.AppendPattern
+
 code.gitea.io/gitea/modules/json
 	StdJSON.Marshal
 	StdJSON.Unmarshal
@@ -211,7 +174,6 @@ code.gitea.io/gitea/modules/json
 	StdJSON.Indent
 
 code.gitea.io/gitea/modules/markup
-	IsSameDomain
 	GetRendererByType
 	RenderString
 	IsMarkupFile
@@ -275,22 +237,6 @@ code.gitea.io/gitea/modules/sync
 	StatusTable.Start
 	StatusTable.IsRunning
 
-code.gitea.io/gitea/modules/testlogger
-	testLoggerWriterCloser.pushT
-	testLoggerWriterCloser.Log
-	testLoggerWriterCloser.recordError
-	testLoggerWriterCloser.printMsg
-	testLoggerWriterCloser.popT
-	testLoggerWriterCloser.Reset
-	PrintCurrentTest
-	Printf
-	NewTestLoggerWriter
-	TestLogEventWriter.Base
-	TestLogEventWriter.GetLevel
-	TestLogEventWriter.GetWriterName
-	TestLogEventWriter.GetWriterType
-	TestLogEventWriter.Run
-
 code.gitea.io/gitea/modules/timeutil
 	GetExecutableModTime
 	MockSet
@@ -316,6 +262,11 @@ code.gitea.io/gitea/modules/web
 
 code.gitea.io/gitea/modules/web/middleware
 	DeleteLocaleCookie
+
+code.gitea.io/gitea/modules/zstd
+	NewWriter
+	Writer.Write
+	Writer.Close
 
 code.gitea.io/gitea/routers/web
 	NotFound

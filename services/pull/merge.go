@@ -7,6 +7,7 @@ package pull
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -56,7 +57,11 @@ func getMergeMessage(ctx context.Context, baseGitRepo *git.Repository, pr *issue
 		issueReference = "!"
 	}
 
-	reviewedOn := fmt.Sprintf("Reviewed-on: %s/%s", setting.AppURL, pr.Issue.Link())
+	issueURL, err := url.JoinPath(setting.AppURL, pr.Issue.Link())
+	if err != nil {
+		return "", "", err
+	}
+	reviewedOn := fmt.Sprintf("Reviewed-on: %s", issueURL)
 	reviewedBy := pr.GetApprovers(ctx)
 
 	if mergeStyle != "" {
@@ -224,6 +229,10 @@ func Merge(ctx context.Context, pr *issues_model.PullRequest, doer *user_model.U
 	// Reset cached commit count
 	cache.Remove(pr.Issue.Repo.GetCommitsCountCacheKey(pr.BaseBranch, true))
 
+	return handleCloseCrossReferences(ctx, pr, doer)
+}
+
+func handleCloseCrossReferences(ctx context.Context, pr *issues_model.PullRequest, doer *user_model.User) error {
 	// Resolve cross references
 	refs, err := pr.ResolveCrossReferences(ctx)
 	if err != nil {
@@ -252,7 +261,7 @@ func Merge(ctx context.Context, pr *issues_model.PullRequest, doer *user_model.U
 }
 
 // doMergeAndPush performs the merge operation without changing any pull information in database and pushes it up to the base repository
-func doMergeAndPush(ctx context.Context, pr *issues_model.PullRequest, doer *user_model.User, mergeStyle repo_model.MergeStyle, expectedHeadCommitID, message string, pushTrigger repo_module.PushTrigger) (string, error) {
+func doMergeAndPush(ctx context.Context, pr *issues_model.PullRequest, doer *user_model.User, mergeStyle repo_model.MergeStyle, expectedHeadCommitID, message string, pushTrigger repo_module.PushTrigger) (string, error) { //nolint:unparam
 	// Clone base repo.
 	mergeCtx, cancel, err := createTemporaryRepoForMerge(ctx, pr, doer, expectedHeadCommitID)
 	if err != nil {
@@ -548,5 +557,6 @@ func MergedManually(ctx context.Context, pr *issues_model.PullRequest, doer *use
 
 	notify_service.MergePullRequest(baseGitRepo.Ctx, doer, pr)
 	log.Info("manuallyMerged[%d]: Marked as manually merged into %s/%s by commit id: %s", pr.ID, pr.BaseRepo.Name, pr.BaseBranch, commitID)
-	return nil
+
+	return handleCloseCrossReferences(ctx, pr, doer)
 }

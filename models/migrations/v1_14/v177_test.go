@@ -6,10 +6,11 @@ package v1_14 //nolint
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_DeleteOrphanedIssueLabels(t *testing.T) {
@@ -34,7 +35,7 @@ func Test_DeleteOrphanedIssueLabels(t *testing.T) {
 	}
 
 	// Prepare and load the testing database
-	x, deferable := base.PrepareTestEnv(t, 0, new(IssueLabel), new(Label))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(IssueLabel), new(Label))
 	if x == nil || t.Failed() {
 		defer deferable()
 		return
@@ -47,7 +48,7 @@ func Test_DeleteOrphanedIssueLabels(t *testing.T) {
 
 	// Load issue labels that exist in the database pre-migration
 	if err := x.Find(&issueLabels); err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return
 	}
 	for _, issueLabel := range issueLabels {
@@ -56,14 +57,14 @@ func Test_DeleteOrphanedIssueLabels(t *testing.T) {
 
 	// Run the migration
 	if err := DeleteOrphanedIssueLabels(x); err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return
 	}
 
 	// Load the remaining issue-labels
 	issueLabels = issueLabels[:0]
 	if err := x.Find(&issueLabels); err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return
 	}
 	for _, issueLabel := range issueLabels {

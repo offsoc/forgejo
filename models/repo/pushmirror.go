@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/modules/git"
 	giturl "code.gitea.io/gitea/modules/git/url"
+	"code.gitea.io/gitea/modules/keying"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
@@ -31,6 +32,10 @@ type PushMirror struct {
 	Repo          *Repository `xorm:"-"`
 	RemoteName    string
 	RemoteAddress string `xorm:"VARCHAR(2048)"`
+
+	// A keypair formatted in OpenSSH format.
+	PublicKey  string `xorm:"VARCHAR(100)"`
+	PrivateKey []byte `xorm:"BLOB"`
 
 	SyncOnCommit   bool `xorm:"NOT NULL DEFAULT true"`
 	Interval       time.Duration
@@ -80,6 +85,29 @@ func (m *PushMirror) GetRepository(ctx context.Context) *Repository {
 // GetRemoteName returns the name of the remote.
 func (m *PushMirror) GetRemoteName() string {
 	return m.RemoteName
+}
+
+// GetPublicKey returns a sanitized version of the public key.
+// This should only be used when displaying the public key to the user, not for actual code.
+func (m *PushMirror) GetPublicKey() string {
+	return strings.TrimSuffix(m.PublicKey, "\n")
+}
+
+// SetPrivatekey encrypts the given private key and store it in the database.
+// The ID of the push mirror must be known, so this should be done after the
+// push mirror is inserted.
+func (m *PushMirror) SetPrivatekey(ctx context.Context, privateKey []byte) error {
+	key := keying.DeriveKey(keying.ContextPushMirror)
+	m.PrivateKey = key.Encrypt(privateKey, keying.ColumnAndID("private_key", m.ID))
+
+	_, err := db.GetEngine(ctx).ID(m.ID).Cols("private_key").Update(m)
+	return err
+}
+
+// Privatekey retrieves the encrypted private key and decrypts it.
+func (m *PushMirror) Privatekey() ([]byte, error) {
+	key := keying.DeriveKey(keying.ContextPushMirror)
+	return key.Decrypt(m.PrivateKey, keying.ColumnAndID("private_key", m.ID))
 }
 
 // UpdatePushMirror updates the push-mirror

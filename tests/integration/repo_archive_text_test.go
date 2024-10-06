@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/translation"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +29,7 @@ func TestArchiveText(t *testing.T) {
 		link := path.Join(testUser, testRepoName, "settings")
 
 		// Create test repo
-		_, _, f := CreateDeclarativeRepo(t, user2, testRepoName, nil, nil, nil)
+		_, _, f := tests.CreateDeclarativeRepo(t, user2, testRepoName, nil, nil, nil)
 		defer f()
 
 		// Test settings page

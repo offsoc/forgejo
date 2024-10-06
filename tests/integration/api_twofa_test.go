@@ -15,7 +15,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/pquerna/otp/totp"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPITwoFactor(t *testing.T) {
@@ -32,21 +32,21 @@ func TestAPITwoFactor(t *testing.T) {
 		Issuer:      "gitea-test",
 		AccountName: user.Name,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tfa := &auth_model.TwoFactor{
 		UID: user.ID,
 	}
-	assert.NoError(t, tfa.SetSecret(otpKey.Secret()))
+	require.NoError(t, tfa.SetSecret(otpKey.Secret()))
 
-	assert.NoError(t, auth_model.NewTwoFactor(db.DefaultContext, tfa))
+	require.NoError(t, auth_model.NewTwoFactor(db.DefaultContext, tfa))
 
 	req = NewRequest(t, "GET", "/api/v1/user").
 		AddBasicAuth(user.Name)
 	MakeRequest(t, req, http.StatusUnauthorized)
 
 	passcode, err := totp.GenerateCode(otpKey.Secret(), time.Now())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req = NewRequest(t, "GET", "/api/v1/user").
 		AddBasicAuth(user.Name)

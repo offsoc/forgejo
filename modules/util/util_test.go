@@ -1,16 +1,22 @@
 // Copyright 2018 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-package util
+package util_test
 
 import (
+	"bytes"
+	"crypto/rand"
 	"regexp"
 	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/modules/optional"
+	"code.gitea.io/gitea/modules/test"
+	"code.gitea.io/gitea/modules/util"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestURLJoin(t *testing.T) {
@@ -42,7 +48,7 @@ func TestURLJoin(t *testing.T) {
 		newTest("/a/b/c#hash",
 			"/a", "b/c#hash"),
 	} {
-		assert.Equal(t, test.Expected, URLJoin(test.Base, test.Elements...))
+		assert.Equal(t, test.Expected, util.URLJoin(test.Base, test.Elements...))
 	}
 }
 
@@ -58,7 +64,7 @@ func TestIsEmptyString(t *testing.T) {
 	}
 
 	for _, v := range cases {
-		assert.Equal(t, v.expected, IsEmptyString(v.s))
+		assert.Equal(t, v.expected, util.IsEmptyString(v.s))
 	}
 }
 
@@ -99,93 +105,93 @@ func Test_NormalizeEOL(t *testing.T) {
 	unix := buildEOLData(data1, "\n")
 	mac := buildEOLData(data1, "\r")
 
-	assert.Equal(t, unix, NormalizeEOL(dos))
-	assert.Equal(t, unix, NormalizeEOL(mac))
-	assert.Equal(t, unix, NormalizeEOL(unix))
+	assert.Equal(t, unix, util.NormalizeEOL(dos))
+	assert.Equal(t, unix, util.NormalizeEOL(mac))
+	assert.Equal(t, unix, util.NormalizeEOL(unix))
 
 	dos = buildEOLData(data2, "\r\n")
 	unix = buildEOLData(data2, "\n")
 	mac = buildEOLData(data2, "\r")
 
-	assert.Equal(t, unix, NormalizeEOL(dos))
-	assert.Equal(t, unix, NormalizeEOL(mac))
-	assert.Equal(t, unix, NormalizeEOL(unix))
+	assert.Equal(t, unix, util.NormalizeEOL(dos))
+	assert.Equal(t, unix, util.NormalizeEOL(mac))
+	assert.Equal(t, unix, util.NormalizeEOL(unix))
 
-	assert.Equal(t, []byte("one liner"), NormalizeEOL([]byte("one liner")))
-	assert.Equal(t, []byte("\n"), NormalizeEOL([]byte("\n")))
-	assert.Equal(t, []byte("\ntwo liner"), NormalizeEOL([]byte("\ntwo liner")))
-	assert.Equal(t, []byte("two liner\n"), NormalizeEOL([]byte("two liner\n")))
-	assert.Equal(t, []byte{}, NormalizeEOL([]byte{}))
+	assert.Equal(t, []byte("one liner"), util.NormalizeEOL([]byte("one liner")))
+	assert.Equal(t, []byte("\n"), util.NormalizeEOL([]byte("\n")))
+	assert.Equal(t, []byte("\ntwo liner"), util.NormalizeEOL([]byte("\ntwo liner")))
+	assert.Equal(t, []byte("two liner\n"), util.NormalizeEOL([]byte("two liner\n")))
+	assert.Equal(t, []byte{}, util.NormalizeEOL([]byte{}))
 
-	assert.Equal(t, []byte("mix\nand\nmatch\n."), NormalizeEOL([]byte("mix\r\nand\rmatch\n.")))
+	assert.Equal(t, []byte("mix\nand\nmatch\n."), util.NormalizeEOL([]byte("mix\r\nand\rmatch\n.")))
 }
 
 func Test_RandomInt(t *testing.T) {
-	randInt, err := CryptoRandomInt(255)
-	assert.True(t, randInt >= 0)
-	assert.True(t, randInt <= 255)
-	assert.NoError(t, err)
+	randInt, err := util.CryptoRandomInt(255)
+	assert.GreaterOrEqual(t, randInt, int64(0))
+	assert.LessOrEqual(t, randInt, int64(255))
+	require.NoError(t, err)
 }
 
 func Test_RandomString(t *testing.T) {
-	str1, err := CryptoRandomString(32)
-	assert.NoError(t, err)
+	str1, err := util.CryptoRandomString(32)
+	require.NoError(t, err)
 	matches, err := regexp.MatchString(`^[a-zA-Z0-9]{32}$`, str1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, matches)
 
-	str2, err := CryptoRandomString(32)
-	assert.NoError(t, err)
+	str2, err := util.CryptoRandomString(32)
+	require.NoError(t, err)
 	matches, err = regexp.MatchString(`^[a-zA-Z0-9]{32}$`, str1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, matches)
 
 	assert.NotEqual(t, str1, str2)
 
-	str3, err := CryptoRandomString(256)
-	assert.NoError(t, err)
+	str3, err := util.CryptoRandomString(256)
+	require.NoError(t, err)
 	matches, err = regexp.MatchString(`^[a-zA-Z0-9]{256}$`, str3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, matches)
 
-	str4, err := CryptoRandomString(256)
-	assert.NoError(t, err)
+	str4, err := util.CryptoRandomString(256)
+	require.NoError(t, err)
 	matches, err = regexp.MatchString(`^[a-zA-Z0-9]{256}$`, str4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, matches)
 
 	assert.NotEqual(t, str3, str4)
 }
 
 func Test_RandomBytes(t *testing.T) {
-	bytes1, err := CryptoRandomBytes(32)
-	assert.NoError(t, err)
+	bytes1, err := util.CryptoRandomBytes(32)
+	require.NoError(t, err)
 
-	bytes2, err := CryptoRandomBytes(32)
-	assert.NoError(t, err)
+	bytes2, err := util.CryptoRandomBytes(32)
+	require.NoError(t, err)
 
 	assert.NotEqual(t, bytes1, bytes2)
 
-	bytes3, err := CryptoRandomBytes(256)
-	assert.NoError(t, err)
+	bytes3, err := util.CryptoRandomBytes(256)
+	require.NoError(t, err)
 
-	bytes4, err := CryptoRandomBytes(256)
-	assert.NoError(t, err)
+	bytes4, err := util.CryptoRandomBytes(256)
+	require.NoError(t, err)
 
 	assert.NotEqual(t, bytes3, bytes4)
 }
 
 func TestOptionalBoolParse(t *testing.T) {
-	assert.Equal(t, optional.None[bool](), OptionalBoolParse(""))
-	assert.Equal(t, optional.None[bool](), OptionalBoolParse("x"))
+	assert.Equal(t, optional.None[bool](), util.OptionalBoolParse(""))
+	assert.Equal(t, optional.None[bool](), util.OptionalBoolParse("x"))
 
-	assert.Equal(t, optional.Some(false), OptionalBoolParse("0"))
-	assert.Equal(t, optional.Some(false), OptionalBoolParse("f"))
-	assert.Equal(t, optional.Some(false), OptionalBoolParse("False"))
+	assert.Equal(t, optional.Some(false), util.OptionalBoolParse("0"))
+	assert.Equal(t, optional.Some(false), util.OptionalBoolParse("f"))
+	assert.Equal(t, optional.Some(false), util.OptionalBoolParse("False"))
 
-	assert.Equal(t, optional.Some(true), OptionalBoolParse("1"))
-	assert.Equal(t, optional.Some(true), OptionalBoolParse("t"))
-	assert.Equal(t, optional.Some(true), OptionalBoolParse("True"))
+	assert.Equal(t, optional.Some(true), util.OptionalBoolParse("1"))
+	assert.Equal(t, optional.Some(true), util.OptionalBoolParse("t"))
+	assert.Equal(t, optional.Some(true), util.OptionalBoolParse("True"))
 }
 
 // Test case for any function which accepts and returns a single string.
@@ -208,7 +214,7 @@ var upperTests = []StringTest{
 
 func TestToUpperASCII(t *testing.T) {
 	for _, tc := range upperTests {
-		assert.Equal(t, ToUpperASCII(tc.in), tc.out)
+		assert.Equal(t, util.ToUpperASCII(tc.in), tc.out)
 	}
 }
 
@@ -216,27 +222,56 @@ func BenchmarkToUpper(b *testing.B) {
 	for _, tc := range upperTests {
 		b.Run(tc.in, func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				ToUpperASCII(tc.in)
+				util.ToUpperASCII(tc.in)
 			}
 		})
 	}
 }
 
 func TestToTitleCase(t *testing.T) {
-	assert.Equal(t, ToTitleCase(`foo bar baz`), `Foo Bar Baz`)
-	assert.Equal(t, ToTitleCase(`FOO BAR BAZ`), `Foo Bar Baz`)
+	assert.Equal(t, `Foo Bar Baz`, util.ToTitleCase(`foo bar baz`))
+	assert.Equal(t, `Foo Bar Baz`, util.ToTitleCase(`FOO BAR BAZ`))
 }
 
 func TestToPointer(t *testing.T) {
-	assert.Equal(t, "abc", *ToPointer("abc"))
-	assert.Equal(t, 123, *ToPointer(123))
+	assert.Equal(t, "abc", *util.ToPointer("abc"))
+	assert.Equal(t, 123, *util.ToPointer(123))
 	abc := "abc"
-	assert.False(t, &abc == ToPointer(abc))
+	assert.NotSame(t, &abc, util.ToPointer(abc))
 	val123 := 123
-	assert.False(t, &val123 == ToPointer(val123))
+	assert.NotSame(t, &val123, util.ToPointer(val123))
 }
 
 func TestReserveLineBreakForTextarea(t *testing.T) {
-	assert.Equal(t, ReserveLineBreakForTextarea("test\r\ndata"), "test\ndata")
-	assert.Equal(t, ReserveLineBreakForTextarea("test\r\ndata\r\n"), "test\ndata\n")
+	assert.Equal(t, "test\ndata", util.ReserveLineBreakForTextarea("test\r\ndata"))
+	assert.Equal(t, "test\ndata\n", util.ReserveLineBreakForTextarea("test\r\ndata\r\n"))
+}
+
+const (
+	testPublicKey  = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAOhB7/zzhC+HXDdGOdLwJln5NYwm6UNXx3chmQSVTG4\n"
+	testPrivateKey = `-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtz
+c2gtZWQyNTUxOQAAACADoQe/884Qvh1w3RjnS8CZZ+TWMJulDV8d3IZkElUxuAAA
+AIggISIjICEiIwAAAAtzc2gtZWQyNTUxOQAAACADoQe/884Qvh1w3RjnS8CZZ+TW
+MJulDV8d3IZkElUxuAAAAEAAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0e
+HwOhB7/zzhC+HXDdGOdLwJln5NYwm6UNXx3chmQSVTG4AAAAAAECAwQF
+-----END OPENSSH PRIVATE KEY-----` + "\n"
+)
+
+func TestGeneratingEd25519Keypair(t *testing.T) {
+	defer test.MockProtect(&rand.Reader)()
+
+	// Only 32 bytes needs to be provided to generate a ed25519 keypair.
+	// And another 32 bytes are required, which is included as random value
+	// in the OpenSSH format.
+	b := make([]byte, 64)
+	for i := 0; i < 64; i++ {
+		b[i] = byte(i)
+	}
+	rand.Reader = bytes.NewReader(b)
+
+	publicKey, privateKey, err := util.GenerateSSHKeypair()
+	require.NoError(t, err)
+	assert.EqualValues(t, testPublicKey, string(publicKey))
+	assert.EqualValues(t, testPrivateKey, string(privateKey))
 }

@@ -9,7 +9,7 @@ export function initCompReactionSelector($parent) {
 
     const actionUrl = this.closest('[data-action-url]')?.getAttribute('data-action-url');
     const reactionContent = this.getAttribute('data-reaction-content');
-    const hasReacted = this.closest('.ui.segment.reactions')?.querySelector(`a[data-reaction-content="${reactionContent}"]`)?.getAttribute('data-has-reacted') === 'true';
+    const hasReacted = this.closest('.comment')?.querySelector(`.ui.segment.reactions a[data-reaction-content="${reactionContent}"]`)?.getAttribute('data-has-reacted') === 'true';
 
     const res = await POST(`${actionUrl}/${hasReacted ? 'unreact' : 'react'}`, {
       data: new URLSearchParams({content: reactionContent}),

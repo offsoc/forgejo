@@ -30,7 +30,10 @@ import (
 	packages_service "code.gitea.io/gitea/services/packages"
 )
 
-const IndexFilename = "APKINDEX.tar.gz"
+const (
+	IndexFilename        = "APKINDEX"
+	IndexArchiveFilename = IndexFilename + ".tar.gz"
+)
 
 // GetOrCreateRepositoryVersion gets or creates the internal repository package
 // The Alpine registry needs multiple index files which are stored in this package.
@@ -151,7 +154,7 @@ func buildPackagesIndex(ctx context.Context, ownerID int64, repoVersion *package
 
 	// Delete the package indices if there are no packages
 	if len(pfs) == 0 {
-		pf, err := packages_model.GetFileForVersionByName(ctx, repoVersion.ID, IndexFilename, fmt.Sprintf("%s|%s|%s", branch, repository, architecture))
+		pf, err := packages_model.GetFileForVersionByName(ctx, repoVersion.ID, IndexArchiveFilename, fmt.Sprintf("%s|%s|%s", branch, repository, architecture))
 		if err != nil && !errors.Is(err, util.ErrNotExist) {
 			return err
 		} else if pf == nil {
@@ -244,7 +247,7 @@ func buildPackagesIndex(ctx context.Context, ownerID int64, repoVersion *package
 
 	h := sha1.New()
 
-	if err := writeGzipStream(io.MultiWriter(unsignedIndexContent, h), "APKINDEX", buf.Bytes(), true); err != nil {
+	if err := writeGzipStream(io.MultiWriter(unsignedIndexContent, h), IndexFilename, buf.Bytes(), true); err != nil {
 		return err
 	}
 
@@ -299,7 +302,7 @@ func buildPackagesIndex(ctx context.Context, ownerID int64, repoVersion *package
 		repoVersion,
 		&packages_service.PackageFileCreationInfo{
 			PackageFileInfo: packages_service.PackageFileInfo{
-				Filename:     IndexFilename,
+				Filename:     IndexArchiveFilename,
 				CompositeKey: fmt.Sprintf("%s|%s|%s", branch, repository, architecture),
 			},
 			Creator:           user_model.NewGhostUser(),

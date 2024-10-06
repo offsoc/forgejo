@@ -47,8 +47,10 @@ func Test_Sanitizer(t *testing.T) {
 
 		// Color property
 		`<span style="color: red">Hello World</span>`, `<span style="color: red">Hello World</span>`,
-		`<p style="color: red">Hello World</p>`, `<p style="color: red">Hello World</p>`,
+		`<p style="color: red; background-color: red">Hello World</p>`, `<p style="color: red; background-color: red">Hello World</p>`,
+		`<table><tr><th style="color: red">TH1</th><th style="background-color: red">TH2</th><th style="color: red; background-color: red">TH3</th></tr><tr><td style="color: red">TD1</td><td style="background-color: red">TD2</td><td style="color: red; background-color: red">TD3</td></tr></table>`, `<table><tr><th style="color: red">TH1</th><th style="background-color: red">TH2</th><th style="color: red; background-color: red">TH3</th></tr><tr><td style="color: red">TD1</td><td style="background-color: red">TD2</td><td style="color: red; background-color: red">TD3</td></tr></table>`,
 		`<code style="color: red">Hello World</code>`, `<code>Hello World</code>`,
+		`<code style="background-color: red">Hello World</code>`, `<code>Hello World</code>`,
 		`<span style="bad-color: red">Hello World</span>`, `<span>Hello World</span>`,
 		`<p style="bad-color: red">Hello World</p>`, `<p>Hello World</p>`,
 		`<code style="bad-color: red">Hello World</code>`, `<code>Hello World</code>`,
@@ -82,12 +84,15 @@ func TestDescriptionSanitizer(t *testing.T) {
 		`<span class="emoji" aria-label="thumbs up">THUMBS UP</span>`, `<span class="emoji" aria-label="thumbs up">THUMBS UP</span>`,
 		`<span style="color: red">Hello World</span>`, `<span>Hello World</span>`,
 		`<br>`, ``,
-		`<a href="https://example.com" target="_blank" rel="noopener noreferrer">https://example.com</a>`, `<a href="https://example.com" target="_blank" rel="noopener noreferrer">https://example.com</a>`,
+		`<a href="https://example.com" target="_blank" rel="noopener noreferrer">https://example.com</a>`, `<a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">https://example.com</a>`,
 		`<mark>Important!</mark>`, `Important!`,
 		`<details>Click me! <summary>Nothing to see here.</summary></details>`, `Click me! Nothing to see here.`,
 		`<input type="hidden">`, ``,
 		`<b>I</b> have a <i>strong</i> <strong>opinion</strong> about <em>this</em>.`, `<b>I</b> have a <i>strong</i> <strong>opinion</strong> about <em>this</em>.`,
 		`Provides alternative <code>wg(8)</code> tool`, `Provides alternative <code>wg(8)</code> tool`,
+		`<a href="javascript:alert('xss')">Click me</a>.`, `Click me.`,
+		`<a href="data:text/html,<script>alert('xss')</script>">Click me</a>.`, `Click me.`,
+		`<a href="vbscript:msgbox("xss")">Click me</a>.`, `Click me.`,
 	}
 
 	for i := 0; i < len(testCases); i += 2 {

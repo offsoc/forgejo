@@ -45,7 +45,7 @@ func MailNewUser(ctx context.Context, u *user_model.User) {
 	}
 }
 
-func mailNewUser(ctx context.Context, u *user_model.User, lang string, tos []string) {
+func mailNewUser(_ context.Context, u *user_model.User, lang string, tos []string) {
 	locale := translation.NewLocale(lang)
 
 	manageUserURL := setting.AppURL + "admin/users/" + strconv.FormatInt(u.ID, 10)

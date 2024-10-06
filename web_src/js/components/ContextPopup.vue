@@ -30,33 +30,44 @@ export default {
 
     icon() {
       if (this.issue.pull_request !== null) {
-        if (this.issue.state === 'open') {
-          if (this.issue.pull_request.draft === true) {
-            return 'octicon-git-pull-request-draft'; // WIP PR
-          }
-          return 'octicon-git-pull-request'; // Open PR
-        } else if (this.issue.pull_request.merged === true) {
+        if (this.issue.pull_request.merged === true) {
           return 'octicon-git-merge'; // Merged PR
         }
-        return 'octicon-git-pull-request'; // Closed PR
-      } else if (this.issue.state === 'open') {
-        return 'octicon-issue-opened'; // Open Issue
+
+        if (this.issue.state === 'closed') {
+          return 'octicon-git-pull-request-closed'; // Closed PR
+        }
+
+        if (this.issue.pull_request.draft === true) {
+          return 'octicon-git-pull-request-draft'; // WIP PR
+        }
+
+        return 'octicon-git-pull-request'; // Open PR
       }
-      return 'octicon-issue-closed'; // Closed Issue
+
+      if (this.issue.state === 'closed') {
+        return 'octicon-issue-closed'; // Closed issue
+      }
+
+      return 'octicon-issue-opened'; // Open issue
     },
 
     color() {
       if (this.issue.pull_request !== null) {
-        if (this.issue.pull_request.draft === true) {
-          return 'grey'; // WIP PR
-        } else if (this.issue.pull_request.merged === true) {
+        if (this.issue.pull_request.merged === true) {
           return 'purple'; // Merged PR
         }
+
+        if (this.issue.pull_request.draft === true && this.issue.state === 'open') {
+          return 'grey'; // WIP PR
+        }
       }
-      if (this.issue.state === 'open') {
-        return 'green'; // Open Issue
+
+      if (this.issue.state === 'closed') {
+        return 'red'; // Closed issue
       }
-      return 'red'; // Closed Issue
+
+      return 'green'; // Open issue
     },
 
     labels() {

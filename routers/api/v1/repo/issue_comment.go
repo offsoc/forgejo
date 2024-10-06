@@ -462,6 +462,11 @@ func GetIssueComment(ctx *context.APIContext) {
 		return
 	}
 
+	if err := comment.LoadAttachments(ctx); err != nil {
+		ctx.Error(http.StatusInternalServerError, "LoadAttachments", err)
+		return
+	}
+
 	ctx.JSON(http.StatusOK, convert.ToAPIComment(ctx, ctx.Repo.Repository, comment))
 }
 

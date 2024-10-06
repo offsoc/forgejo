@@ -14,11 +14,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestKeygen(t *testing.T) {
 	priv, pub, err := GenerateKeyPair(2048)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.NotEmpty(t, priv)
 	assert.NotEmpty(t, pub)
@@ -29,7 +30,7 @@ func TestKeygen(t *testing.T) {
 
 func TestSignUsingKeys(t *testing.T) {
 	priv, pub, err := GenerateKeyPair(2048)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	privPem, _ := pem.Decode([]byte(priv))
 	if privPem == nil || privPem.Type != "RSA PRIVATE KEY" {
@@ -37,7 +38,7 @@ func TestSignUsingKeys(t *testing.T) {
 	}
 
 	privParsed, err := x509.ParsePKCS1PrivateKey(privPem.Bytes)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pubPem, _ := pem.Decode([]byte(pub))
 	if pubPem == nil || pubPem.Type != "PUBLIC KEY" {
@@ -45,7 +46,7 @@ func TestSignUsingKeys(t *testing.T) {
 	}
 
 	pubParsed, err := x509.ParsePKIXPublicKey(pubPem.Bytes)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Sign
 	msg := "activity pub is great!"
@@ -53,9 +54,9 @@ func TestSignUsingKeys(t *testing.T) {
 	h.Write([]byte(msg))
 	d := h.Sum(nil)
 	sig, err := rsa.SignPKCS1v15(rand.Reader, privParsed, crypto.SHA256, d)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Verify
 	err = rsa.VerifyPKCS1v15(pubParsed.(*rsa.PublicKey), crypto.SHA256, d, sig)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

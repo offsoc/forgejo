@@ -6,9 +6,10 @@ package v1_18 //nolint
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_AddConfidentialClientColumnToOAuth2ApplicationTable(t *testing.T) {
@@ -18,14 +19,14 @@ func Test_AddConfidentialClientColumnToOAuth2ApplicationTable(t *testing.T) {
 	}
 
 	// Prepare and load the testing database
-	x, deferable := base.PrepareTestEnv(t, 0, new(oauth2Application))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(oauth2Application))
 	defer deferable()
 	if x == nil || t.Failed() {
 		return
 	}
 
 	if err := AddConfidentialClientColumnToOAuth2ApplicationTable(x); err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return
 	}
 
@@ -36,9 +37,8 @@ func Test_AddConfidentialClientColumnToOAuth2ApplicationTable(t *testing.T) {
 	}
 
 	got := []ExpectedOAuth2Application{}
-	if err := x.Table("oauth2_application").Select("id, confidential_client").Find(&got); !assert.NoError(t, err) {
-		return
-	}
+	err := x.Table("oauth2_application").Select("id, confidential_client").Find(&got)
+	require.NoError(t, err)
 
 	assert.NotEmpty(t, got)
 	for _, e := range got {

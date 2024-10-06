@@ -6,7 +6,7 @@
 		<div class="tw-flex tw-items-center tw-justify-between">
 			<h1 class="tw-mb-2">{{.Milestone.Name}}</h1>
 			{{if not .Repository.IsArchived}}
-				<div class="tw-flex top-right-buttons">
+				<div class="tw-flex button-row">
 					{{if or .CanWriteIssues .CanWritePulls}}
 						{{if .Milestone.IsClosed}}
 							<a class="ui primary button link-action" href data-url="{{$.RepoLink}}/milestones/{{.MilestoneID}}/open">{{ctx.Locale.Tr "repo.milestones.open"}}

@@ -46,7 +46,7 @@ func TestAPITopicSearchPaging(t *testing.T) {
 
 	res = MakeRequest(t, NewRequest(t, "GET", "/api/v1/topics/search?page=2"), http.StatusOK)
 	DecodeJSON(t, res, &topics)
-	assert.Greater(t, len(topics.TopicNames), 0)
+	assert.NotEmpty(t, topics.TopicNames)
 }
 
 func TestAPITopicSearch(t *testing.T) {

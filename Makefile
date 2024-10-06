@@ -24,25 +24,32 @@ HAS_GO := $(shell hash $(GO) > /dev/null 2>&1 && echo yes)
 COMMA := ,
 DIFF ?= diff --unified
 
+ifeq ($(USE_GOTESTSUM), yes)
+	GOTEST ?= gotestsum --
+	GOTESTCOMPILEDRUNPREFIX ?= gotestsum --raw-command -- go tool test2json -t
+	GOTESTCOMPILEDRUNSUFFIX ?= -test.v=test2json
+else
+	GOTEST ?= $(GO) test
+	GOTESTCOMPILEDRUNPREFIX ?=
+	GOTESTCOMPILEDRUNSUFFIX ?=
+endif
+
 XGO_VERSION := go-1.21.x
 
 AIR_PACKAGE ?= github.com/air-verse/air@v1 # renovate: datasource=go
-EDITORCONFIG_CHECKER_PACKAGE ?= github.com/editorconfig-checker/editorconfig-checker/v2/cmd/editorconfig-checker@2.8.0 # renovate: datasource=go
-GOFUMPT_PACKAGE ?= mvdan.cc/gofumpt@v0.6.0 # renovate: datasource=go
-GOLANGCI_LINT_PACKAGE ?= github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1 # renovate: datasource=go
+EDITORCONFIG_CHECKER_PACKAGE ?= github.com/editorconfig-checker/editorconfig-checker/v3/cmd/editorconfig-checker@v3.0.3 # renovate: datasource=go
+GOFUMPT_PACKAGE ?= mvdan.cc/gofumpt@v0.7.0 # renovate: datasource=go
+GOLANGCI_LINT_PACKAGE ?= github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 # renovate: datasource=go
 GXZ_PACKAGE ?= github.com/ulikunitz/xz/cmd/gxz@v0.5.11 # renovate: datasource=go
 MISSPELL_PACKAGE ?= github.com/golangci/misspell/cmd/misspell@v0.6.0 # renovate: datasource=go
 SWAGGER_PACKAGE ?= github.com/go-swagger/go-swagger/cmd/swagger@v0.31.0 # renovate: datasource=go
 XGO_PACKAGE ?= src.techknowlogick.com/xgo@latest
 GO_LICENSES_PACKAGE ?= github.com/google/go-licenses@v1.6.0 # renovate: datasource=go
 GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasource=go
-DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.22.0 # renovate: datasource=go
+DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.25.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
-GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.15.3 # renovate: datasource=go
-
-DOCKER_IMAGE ?= gitea/gitea
-DOCKER_TAG ?= latest
-DOCKER_REF := $(DOCKER_IMAGE):$(DOCKER_TAG)
+GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.16.2 # renovate: datasource=go
+RENOVATE_NPM_PACKAGE ?= renovate@38.101.1 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
 
 ifeq ($(HAS_GO), yes)
 	CGO_EXTRA_CFLAGS := -DSQLITE_MAX_VARIABLE_NUMBER=32766
@@ -122,8 +129,10 @@ LDFLAGS := $(LDFLAGS) -X "main.ReleaseVersion=$(RELEASE_VERSION)" -X "main.MakeV
 LINUX_ARCHS ?= linux/amd64,linux/386,linux/arm-5,linux/arm-6,linux/arm64
 
 ifeq ($(HAS_GO), yes)
-	GO_TEST_PACKAGES ?= $(filter-out $(shell $(GO) list code.gitea.io/gitea/models/migrations/...) $(shell $(GO) list code.gitea.io/gitea/models/forgejo_migrations/...) code.gitea.io/gitea/tests/integration/migration-test code.gitea.io/gitea/tests code.gitea.io/gitea/tests/integration code.gitea.io/gitea/tests/e2e,$(shell $(GO) list ./... | grep -v /vendor/))
+	GO_TEST_PACKAGES ?= $(filter-out $(shell $(GO) list code.gitea.io/gitea/models/migrations/...) $(shell $(GO) list code.gitea.io/gitea/models/forgejo_migrations/...) code.gitea.io/gitea/tests/integration/migration-test code.gitea.io/gitea/tests code.gitea.io/gitea/tests/integration code.gitea.io/gitea/tests/e2e,$(shell $(GO) list ./...))
 endif
+REMOTE_CACHER_MODULES ?= cache nosql session queue
+GO_TEST_REMOTE_CACHER_PACKAGES ?= $(addprefix code.gitea.io/gitea/modules/,$(REMOTE_CACHER_MODULES))
 
 FOMANTIC_WORK_DIR := web_src/fomantic
 
@@ -155,7 +164,7 @@ TAR_EXCLUDES := .git data indexers queues log node_modules $(EXECUTABLE) $(FOMAN
 GO_DIRS := build cmd models modules routers services tests
 WEB_DIRS := web_src/js web_src/css
 
-ESLINT_FILES := web_src/js tools *.js tests/e2e
+ESLINT_FILES := web_src/js tools *.js tests/e2e/*.js tests/e2e/shared/*.js
 STYLELINT_FILES := web_src/css web_src/js/components/*.vue
 SPELLCHECK_FILES := $(GO_DIRS) $(WEB_DIRS) docs/content templates options/locale/locale_en-US.ini .github $(wildcard *.go *.js *.md *.yml *.yaml *.toml)
 
@@ -186,9 +195,10 @@ SWAGGER_SPEC_S_JSON := s|"basePath": *"{{AppSubUrl \| JSEscape}}/api/v1"|"basePa
 SWAGGER_EXCLUDE := code.gitea.io/sdk
 SWAGGER_NEWLINE_COMMAND := -e '$$a\'
 SWAGGER_SPEC_BRANDING := s|Gitea API|Forgejo API|g
+SWAGGER_SPEC_LICENSE := s|"name": "MIT"|"name": "This file is distributed under the MIT license for the purpose of interoperability"|
 
 TEST_MYSQL_HOST ?= mysql:3306
-TEST_MYSQL_DBNAME ?= testgitea
+TEST_MYSQL_DBNAME ?= testgitea?multiStatements=true
 TEST_MYSQL_USERNAME ?= root
 TEST_MYSQL_PASSWORD ?=
 TEST_PGSQL_HOST ?= pgsql:5432
@@ -203,7 +213,7 @@ all: build
 .PHONY: help
 help:
 	@echo "Make Routines:"
-	@echo " - \"\"                               equivalent to \"build\""
+	@echo " - \"\"                             equivalent to \"build\""
 	@echo " - build                            build everything"
 	@echo " - frontend                         build frontend files"
 	@echo " - backend                          build backend files"
@@ -237,6 +247,7 @@ help:
 	@echo " - lint-md                          lint markdown files"
 	@echo " - lint-swagger                     lint swagger files"
 	@echo " - lint-templates                   lint template files"
+	@echo " - lint-renovate                    lint renovate files"
 	@echo " - lint-yaml                        lint yaml files"
 	@echo " - lint-spell                       lint spelling"
 	@echo " - lint-spell-fix                   lint spelling and fix issues"
@@ -247,7 +258,9 @@ help:
 	@echo " - show-version-full                show the same version as the API endpoint"
 	@echo " - show-version-major               show major release number only"
 	@echo " - test-frontend                    test frontend files"
+	@echo " - test-frontend-coverage           test frontend files and display code coverage"
 	@echo " - test-backend                     test backend files"
+	@echo " - test-remote-cacher               test backend files that use a remote cache"
 	@echo " - test-e2e-sqlite[\#name.test.e2e] test end to end using playwright and sqlite"
 	@echo " - webpack                          build webpack files"
 	@echo " - svg                              build svg files"
@@ -264,8 +277,13 @@ help:
 	@echo " - swagger-validate                 check if the swagger spec is valid"
 	@echo " - go-licenses                      regenerate go licenses"
 	@echo " - tidy                             run go mod tidy"
-	@echo " - test[\#TestSpecificName]    	    run unit test"
+	@echo " - test[\#TestSpecificName]         run unit test"
 	@echo " - test-sqlite[\#TestSpecificName]  run integration test for sqlite"
+	@echo " - reproduce-build\#version         build a reproducible binary for the specified release version"
+
+###
+# Check system and environment requirements
+###
 
 .PHONY: go-check
 go-check:
@@ -273,14 +291,14 @@ go-check:
 	$(eval MIN_GO_VERSION := $(shell printf "%03d%03d" $(shell echo '$(MIN_GO_VERSION_STR)' | tr '.' ' ')))
 	$(eval GO_VERSION := $(shell printf "%03d%03d" $(shell $(GO) version | grep -Eo '[0-9]+\.[0-9]+' | tr '.' ' ');))
 	@if [ "$(GO_VERSION)" -lt "$(MIN_GO_VERSION)" ]; then \
-		echo "Gitea requires Go $(MIN_GO_VERSION_STR) or greater to build. You can get it at https://go.dev/dl/"; \
+		echo "Forgejo requires Go $(MIN_GO_VERSION_STR) or greater to build. You can get it at https://go.dev/dl/"; \
 		exit 1; \
 	fi
 
 .PHONY: git-check
 git-check:
 	@if git lfs >/dev/null 2>&1 ; then : ; else \
-		echo "Gitea requires git with lfs support to run tests." ; \
+		echo "Forgejo requires git with lfs support to run tests." ; \
 		exit 1; \
 	fi
 
@@ -291,9 +309,13 @@ node-check:
 	$(eval NODE_VERSION := $(shell printf "%03d%03d%03d" $(shell node -v | cut -c2- | tr '.' ' ');))
 	$(eval NPM_MISSING := $(shell hash npm > /dev/null 2>&1 || echo 1))
 	@if [ "$(NODE_VERSION)" -lt "$(MIN_NODE_VERSION)" -o "$(NPM_MISSING)" = "1" ]; then \
-		echo "Gitea requires Node.js $(MIN_NODE_VERSION_STR) or greater and npm to build. You can get it at https://nodejs.org/en/download/"; \
+		echo "Forgejo requires Node.js $(MIN_NODE_VERSION_STR) or greater and npm to build. You can get it at https://nodejs.org/en/download/"; \
 		exit 1; \
 	fi
+
+###
+# Basic maintenance, check and lint targets
+###
 
 .PHONY: clean-all
 clean-all: clean
@@ -361,6 +383,7 @@ $(SWAGGER_SPEC): $(GO_SOURCES_NO_BINDATA)
 	$(SED_INPLACE) '$(SWAGGER_SPEC_S_TMPL)' './$(SWAGGER_SPEC)'
 	$(SED_INPLACE) $(SWAGGER_NEWLINE_COMMAND) './$(SWAGGER_SPEC)'
 	$(SED_INPLACE) '$(SWAGGER_SPEC_BRANDING)' './$(SWAGGER_SPEC)'
+	$(SED_INPLACE) '$(SWAGGER_SPEC_LICENSE)' './$(SWAGGER_SPEC)'
 
 .PHONY: swagger-check
 swagger-check: generate-swagger
@@ -395,7 +418,7 @@ lint-frontend: lint-js lint-css
 lint-frontend-fix: lint-js-fix lint-css-fix
 
 .PHONY: lint-backend
-lint-backend: lint-go lint-go-vet lint-editorconfig
+lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate
 
 .PHONY: lint-backend-fix
 lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig
@@ -431,6 +454,12 @@ lint-css-fix: node_modules
 .PHONY: lint-swagger
 lint-swagger: node_modules
 	npx spectral lint -q -F hint $(SWAGGER_SPEC)
+
+.PHONY: lint-renovate
+lint-renovate: node_modules
+	npx --yes --package $(RENOVATE_NPM_PACKAGE) -- renovate-config-validator --strict > .lint-renovate 2>&1 || true
+	@if grep --quiet --extended-regexp -e '^( WARN:|ERROR:)' .lint-renovate ; then cat .lint-renovate ; rm .lint-renovate ; exit 1 ; fi
+	@rm .lint-renovate
 
 .PHONY: lint-md
 lint-md: node_modules
@@ -488,6 +517,14 @@ lint-templates: .venv node_modules
 lint-yaml: .venv
 	@poetry run yamllint .
 
+.PHONY: security-check
+security-check:
+	go run $(GOVULNCHECK_PACKAGE) ./...
+
+###
+# Development and testing targets
+###
+
 .PHONY: watch
 watch:
 	@bash tools/watch.sh
@@ -507,11 +544,20 @@ test: test-frontend test-backend
 .PHONY: test-backend
 test-backend:
 	@echo "Running go test with $(GOTESTFLAGS) -tags '$(TEST_TAGS)'..."
-	@$(GO) test $(GOTESTFLAGS) -tags='$(TEST_TAGS)' $(GO_TEST_PACKAGES)
+	@$(GOTEST) $(GOTESTFLAGS) -tags='$(TEST_TAGS)' $(GO_TEST_PACKAGES)
+
+.PHONY: test-remote-cacher
+test-remote-cacher:
+	@echo "Running go test with $(GOTESTFLAGS) -tags '$(TEST_TAGS)'..."
+	@$(GOTEST) $(GOTESTFLAGS) -tags='$(TEST_TAGS)' $(GO_TEST_REMOTE_CACHER_PACKAGES)
 
 .PHONY: test-frontend
 test-frontend: node_modules
 	npx vitest
+
+.PHONY: test-frontend-coverage
+test-frontend-coverage: node_modules
+	npx vitest --coverage --coverage.include 'web_src/**'
 
 .PHONY: test-check
 test-check:
@@ -528,7 +574,7 @@ test-check:
 .PHONY: test\#%
 test\#%:
 	@echo "Running go test with -tags '$(TEST_TAGS)'..."
-	@$(GO) test $(GOTESTFLAGS) -tags='$(TEST_TAGS)' -run $(subst .,/,$*) $(GO_TEST_PACKAGES)
+	@$(GOTEST) $(GOTESTFLAGS) -tags='$(TEST_TAGS)' -run $(subst .,/,$*) $(GO_TEST_PACKAGES)
 
 .PHONY: coverage
 coverage:
@@ -539,7 +585,7 @@ coverage:
 .PHONY: unit-test-coverage
 unit-test-coverage:
 	@echo "Running unit-test-coverage $(GOTESTFLAGS) -tags '$(TEST_TAGS)'..."
-	@$(GO) test $(GOTESTFLAGS) -timeout=20m -tags='$(TEST_TAGS)' -cover -coverprofile coverage.out $(GO_TEST_PACKAGES) && echo "\n==>\033[32m Ok\033[m\n" || exit 1
+	@$(GOTEST) $(GOTESTFLAGS) -timeout=20m -tags='$(TEST_TAGS)' -cover -coverprofile coverage.out $(GO_TEST_PACKAGES) && echo "\n==>\033[32m Ok\033[m\n" || exit 1
 
 .PHONY: tidy
 tidy:
@@ -560,7 +606,7 @@ tidy-check: tidy
 go-licenses: $(GO_LICENSE_FILE)
 
 $(GO_LICENSE_FILE): go.mod go.sum
-	-$(GO) run $(GO_LICENSES_PACKAGE) save . --force --save_path=$(GO_LICENSE_TMP_DIR) 2>/dev/null
+	-$(shell $(GO) env GOROOT)/bin/go run $(GO_LICENSES_PACKAGE) save . --force --ignore code.gitea.io/gitea --save_path=$(GO_LICENSE_TMP_DIR) 2>/dev/null
 	$(GO) run build/generate-go-licenses.go $(GO_LICENSE_TMP_DIR) $(GO_LICENSE_FILE)
 	@rm -rf $(GO_LICENSE_TMP_DIR)
 
@@ -572,11 +618,11 @@ generate-ini-sqlite:
 
 .PHONY: test-sqlite
 test-sqlite: integrations.sqlite.test generate-ini-sqlite
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini ./integrations.sqlite.test
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTESTCOMPILEDRUNPREFIX) ./integrations.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX)
 
 .PHONY: test-sqlite\#%
 test-sqlite\#%: integrations.sqlite.test generate-ini-sqlite
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini ./integrations.sqlite.test -test.run $(subst .,/,$*)
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTESTCOMPILEDRUNPREFIX) ./integrations.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run $(subst .,/,$*)
 
 .PHONY: test-sqlite-migration
 test-sqlite-migration:  migrations.sqlite.test migrations.individual.sqlite.test
@@ -593,11 +639,11 @@ generate-ini-mysql:
 
 .PHONY: test-mysql
 test-mysql: integrations.mysql.test generate-ini-mysql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini ./integrations.mysql.test
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini $(GOTESTCOMPILEDRUNPREFIX) ./integrations.mysql.test $(GOTESTCOMPILEDRUNSUFFIX)
 
 .PHONY: test-mysql\#%
 test-mysql\#%: integrations.mysql.test generate-ini-mysql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini ./integrations.mysql.test -test.run $(subst .,/,$*)
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini $(GOTESTCOMPILEDRUNPREFIX) ./integrations.mysql.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run $(subst .,/,$*)
 
 .PHONY: test-mysql-migration
 test-mysql-migration: migrations.mysql.test migrations.individual.mysql.test
@@ -615,11 +661,11 @@ generate-ini-pgsql:
 
 .PHONY: test-pgsql
 test-pgsql: integrations.pgsql.test generate-ini-pgsql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini ./integrations.pgsql.test
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTESTCOMPILEDRUNPREFIX) ./integrations.pgsql.test $(GOTESTCOMPILEDRUNSUFFIX)
 
 .PHONY: test-pgsql\#%
 test-pgsql\#%: integrations.pgsql.test generate-ini-pgsql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini ./integrations.pgsql.test -test.run $(subst .,/,$*)
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTESTCOMPILEDRUNPREFIX) ./integrations.pgsql.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run $(subst .,/,$*)
 
 .PHONY: test-pgsql-migration
 test-pgsql-migration: migrations.pgsql.test migrations.individual.pgsql.test
@@ -638,31 +684,31 @@ test-e2e: test-e2e-sqlite
 
 .PHONY: test-e2e-sqlite
 test-e2e-sqlite: playwright e2e.sqlite.test generate-ini-sqlite
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini ./e2e.sqlite.test -test.run TestE2e
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTESTCOMPILEDRUNPREFIX) ./e2e.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e
 
 .PHONY: test-e2e-sqlite\#%
 test-e2e-sqlite\#%: playwright e2e.sqlite.test generate-ini-sqlite
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini ./e2e.sqlite.test -test.run TestE2e/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTESTCOMPILEDRUNPREFIX) ./e2e.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e/$*
 
 .PHONY: test-e2e-sqlite-firefox\#%
 test-e2e-sqlite-firefox\#%: playwright e2e.sqlite.test generate-ini-sqlite
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini PLAYWRIGHT_PROJECT=firefox ./e2e.sqlite.test -test.run TestE2e/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini PLAYWRIGHT_PROJECT=firefox $(GOTESTCOMPILEDRUNPREFIX) ./e2e.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e/$*
 
 .PHONY: test-e2e-mysql
 test-e2e-mysql: playwright e2e.mysql.test generate-ini-mysql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini ./e2e.mysql.test -test.run TestE2e
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini $(GOTESTCOMPILEDRUNPREFIX) ./e2e.mysql.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e
 
 .PHONY: test-e2e-mysql\#%
 test-e2e-mysql\#%: playwright e2e.mysql.test generate-ini-mysql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini ./e2e.mysql.test -test.run TestE2e/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini $(GOTESTCOMPILEDRUNPREFIX) ./e2e.mysql.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e/$*
 
 .PHONY: test-e2e-pgsql
 test-e2e-pgsql: playwright e2e.pgsql.test generate-ini-pgsql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini ./e2e.pgsql.test -test.run TestE2e
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTESTCOMPILEDRUNPREFIX) ./e2e.pgsql.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e
 
 .PHONY: test-e2e-pgsql\#%
 test-e2e-pgsql\#%: playwright e2e.pgsql.test generate-ini-pgsql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini ./e2e.pgsql.test -test.run TestE2e/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTESTCOMPILEDRUNPREFIX) ./e2e.pgsql.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e/$*
 
 .PHONY: test-e2e-debugserver
 test-e2e-debugserver: e2e.sqlite.test generate-ini-sqlite
@@ -690,76 +736,80 @@ integration-test-coverage-sqlite: integrations.cover.sqlite.test generate-ini-sq
 	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini ./integrations.cover.sqlite.test -test.coverprofile=integration.coverage.out
 
 integrations.mysql.test: git-check $(GO_SOURCES)
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -o integrations.mysql.test
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -o integrations.mysql.test
 
 integrations.pgsql.test: git-check $(GO_SOURCES)
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -o integrations.pgsql.test
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -o integrations.pgsql.test
 
 integrations.sqlite.test: git-check $(GO_SOURCES)
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -o integrations.sqlite.test -tags '$(TEST_TAGS)'
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -o integrations.sqlite.test -tags '$(TEST_TAGS)'
 
 integrations.cover.test: git-check $(GO_SOURCES)
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -coverpkg $(shell echo $(GO_TEST_PACKAGES) | tr ' ' ',') -o integrations.cover.test
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -coverpkg $(shell echo $(GO_TEST_PACKAGES) | tr ' ' ',') -o integrations.cover.test
 
 integrations.cover.sqlite.test: git-check $(GO_SOURCES)
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -coverpkg $(shell echo $(GO_TEST_PACKAGES) | tr ' ' ',') -o integrations.cover.sqlite.test -tags '$(TEST_TAGS)'
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -coverpkg $(shell echo $(GO_TEST_PACKAGES) | tr ' ' ',') -o integrations.cover.sqlite.test -tags '$(TEST_TAGS)'
 
 .PHONY: migrations.mysql.test
 migrations.mysql.test: $(GO_SOURCES) generate-ini-mysql
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration/migration-test -o migrations.mysql.test
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini ./migrations.mysql.test
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration/migration-test -o migrations.mysql.test
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini $(GOTESTCOMPILEDRUNPREFIX) ./migrations.mysql.test $(GOTESTCOMPILEDRUNSUFFIX)
 
 .PHONY: migrations.pgsql.test
 migrations.pgsql.test: $(GO_SOURCES) generate-ini-pgsql
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration/migration-test -o migrations.pgsql.test
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini ./migrations.pgsql.test
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration/migration-test -o migrations.pgsql.test
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTESTCOMPILEDRUNPREFIX) ./migrations.pgsql.test $(GOTESTCOMPILEDRUNSUFFIX)
 
 .PHONY: migrations.sqlite.test
 migrations.sqlite.test: $(GO_SOURCES) generate-ini-sqlite
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration/migration-test -o migrations.sqlite.test -tags '$(TEST_TAGS)'
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini ./migrations.sqlite.test
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration/migration-test -o migrations.sqlite.test -tags '$(TEST_TAGS)'
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTESTCOMPILEDRUNPREFIX) ./migrations.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX)
 
 .PHONY: migrations.individual.mysql.test
 migrations.individual.mysql.test: $(GO_SOURCES)
 	for pkg in $(MIGRATION_PACKAGES); do \
-		GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini $(GO) test $(GOTESTFLAGS) -tags '$(TEST_TAGS)' $$pkg || exit 1; \
+		GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' $$pkg || exit 1; \
 	done
 
 .PHONY: migrations.individual.sqlite.test\#%
 migrations.individual.sqlite.test\#%: $(GO_SOURCES) generate-ini-sqlite
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GO) test $(GOTESTFLAGS) -tags '$(TEST_TAGS)' code.gitea.io/gitea/models/migrations/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' code.gitea.io/gitea/models/migrations/$*
 
 .PHONY: migrations.individual.pgsql.test
 migrations.individual.pgsql.test: $(GO_SOURCES)
 	for pkg in $(MIGRATION_PACKAGES); do \
-		GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GO) test $(GOTESTFLAGS) -tags '$(TEST_TAGS)' $$pkg || exit 1;\
+		GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' $$pkg || exit 1;\
 	done
 
 .PHONY: migrations.individual.pgsql.test\#%
 migrations.individual.pgsql.test\#%: $(GO_SOURCES) generate-ini-pgsql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GO) test $(GOTESTFLAGS) -tags '$(TEST_TAGS)' code.gitea.io/gitea/models/migrations/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' code.gitea.io/gitea/models/migrations/$*
 
 .PHONY: migrations.individual.sqlite.test
 migrations.individual.sqlite.test: $(GO_SOURCES) generate-ini-sqlite
 	for pkg in $(MIGRATION_PACKAGES); do \
-		GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GO) test $(GOTESTFLAGS) -tags '$(TEST_TAGS)' $$pkg || exit 1; \
+		GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' $$pkg || exit 1; \
 	done
 
 .PHONY: migrations.individual.sqlite.test\#%
 migrations.individual.sqlite.test\#%: $(GO_SOURCES) generate-ini-sqlite
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GO) test $(GOTESTFLAGS) -tags '$(TEST_TAGS)' code.gitea.io/gitea/models/migrations/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' code.gitea.io/gitea/models/migrations/$*
 
 e2e.mysql.test: $(GO_SOURCES)
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/e2e -o e2e.mysql.test
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/e2e -o e2e.mysql.test
 
 e2e.pgsql.test: $(GO_SOURCES)
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/e2e -o e2e.pgsql.test
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/e2e -o e2e.pgsql.test
 
 e2e.sqlite.test: $(GO_SOURCES)
-	$(GO) test $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/e2e -o e2e.sqlite.test -tags '$(TEST_TAGS)'
+	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/e2e -o e2e.sqlite.test -tags '$(TEST_TAGS)'
 
 .PHONY: check
 check: test
+
+###
+# Production / build targets
+###
 
 .PHONY: install $(TAGS_PREREQ)
 install: $(wildcard *.go)
@@ -790,10 +840,6 @@ generate-go: $(TAGS_PREREQ)
 merge-locales:
 	@echo "NOT NEEDED: THIS IS A NOOP AS OF Forgejo 7.0 BUT KEPT FOR BACKWARD COMPATIBILITY"
 
-.PHONY: security-check
-security-check:
-	go run $(GOVULNCHECK_PACKAGE) ./...
-
 $(EXECUTABLE): $(GO_SOURCES) $(TAGS_PREREQ)
 	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS)' -o $@
 
@@ -815,9 +861,6 @@ $(DIST_DIRS):
 .PHONY: release-windows
 release-windows: | $(DIST_DIRS)
 	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) run $(XGO_PACKAGE) -go $(XGO_VERSION) -buildmode exe -dest $(DIST)/binaries -tags 'osusergo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'windows/*' -out gitea-$(VERSION) .
-ifeq (,$(findstring gogit,$(TAGS)))
-	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) run $(XGO_PACKAGE) -go $(XGO_VERSION) -buildmode exe -dest $(DIST)/binaries -tags 'osusergo gogit $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'windows/*' -out gitea-$(VERSION)-gogit .
-endif
 
 .PHONY: release-linux
 release-linux: | $(DIST_DIRS)
@@ -859,6 +902,30 @@ release-sources: | $(DIST_DIRS)
 .PHONY: release-docs
 release-docs: | $(DIST_DIRS) docs
 	tar -czf $(DIST)/release/gitea-docs-$(VERSION).tar.gz -C ./docs .
+
+.PHONY: reproduce-build
+reproduce-build:
+# Start building the Dockerfile with the RELEASE_VERSION tag set. GOPROXY is set
+# for convience, because the default of the Dockerfile is `direct` which can be
+# quite slow.
+	@docker build --build-arg="RELEASE_VERSION=$(RELEASE_VERSION)" --build-arg="GOPROXY=$(shell $(GO) env GOPROXY)" --tag "forgejo-reproducibility" .
+	@id=$$(docker create forgejo-reproducibility); \
+	docker cp $$id:/app/gitea/gitea ./forgejo; \
+	docker rm -v $$id; \
+	docker image rm forgejo-reproducibility:latest
+
+.PHONY: reproduce-build\#%
+reproduce-build\#%:
+	@git switch -d "$*"
+# All the current variables are based on information before the git checkout happened.
+# Call the makefile again, so these variables are correct and can be used for building
+# a reproducible binary. Always execute git switch -, to go back to the previous branch.
+	@make reproduce-build; \
+	(code=$$?; git switch -; exit $${code})
+
+###
+# Dependency management
+###
 
 .PHONY: deps
 deps: deps-frontend deps-backend deps-tools deps-py
@@ -936,16 +1003,6 @@ lockfile-check:
 	@git diff --exit-code --color=always package-lock.json \
 	|| (code=$$?; echo "Please run 'npm install --package-lock-only' and commit the result"; exit $${code})
 
-.PHONY: update-translations
-update-translations:
-	mkdir -p ./translations
-	cd ./translations && curl -L https://crowdin.com/download/project/gitea.zip > gitea.zip && unzip gitea.zip
-	rm ./translations/gitea.zip
-	$(SED_INPLACE) -e 's/="/=/g' -e 's/"$$//g' ./translations/*.ini
-	$(SED_INPLACE) -e 's/\\"/"/g' ./translations/*.ini
-	mv ./translations/*.ini ./options/locale/
-	rmdir ./translations
-
 .PHONY: generate-license
 generate-license:
 	$(GO) run build/generate-licenses.go
@@ -956,11 +1013,11 @@ generate-gitignore:
 
 .PHONY: generate-gomock
 generate-gomock:
-	$(GO) run $(GOMOCK_PACKAGE) -package mock -destination ./modules/queue/mock/redisuniversalclient.go  github.com/redis/go-redis/v9 UniversalClient
+	$(GO) run $(GOMOCK_PACKAGE) -package mock -destination ./modules/queue/mock/redisuniversalclient.go code.gitea.io/gitea/modules/nosql RedisClient
 
 .PHONY: generate-images
 generate-images: | node_modules
-	npm install --no-save fabric@6.0.0-beta20 imagemin-zopfli@7
+	npm install --no-save fabric@6 imagemin-zopfli@7
 	node tools/generate-images.js $(TAGS)
 
 .PHONY: generate-manpage
@@ -970,11 +1027,6 @@ generate-manpage:
 	@./gitea docs --man > man/man1/gitea.1
 	@gzip -9 man/man1/gitea.1 && echo man/man1/gitea.1.gz created
 	@#TODO A small script that formats config-cheat-sheet.en-us.md nicely for use as a config man page
-
-.PHONY: docker
-docker:
-	docker build --disable-content-trust=false -t $(DOCKER_REF) .
-# support also build args docker build --build-arg GITEA_VERSION=v1.2.3 --build-arg TAGS="bindata sqlite sqlite_unlock_notify"  .
 
 # This endif closes the if at the top of the file
 endif

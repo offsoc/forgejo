@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"net/mail"
 	"net/url"
 	"path/filepath"
 	"regexp"
@@ -439,6 +440,38 @@ func (u *User) DisplayName() string {
 	return u.Name
 }
 
+var emailToReplacer = strings.NewReplacer(
+	"\n", "",
+	"\r", "",
+	"<", "",
+	">", "",
+	",", "",
+	":", "",
+	";", "",
+)
+
+// EmailTo returns a string suitable to be put into a e-mail `To:` header.
+func (u *User) EmailTo(overrideMail ...string) string {
+	sanitizedDisplayName := emailToReplacer.Replace(u.DisplayName())
+
+	email := u.Email
+	if len(overrideMail) > 0 {
+		email = overrideMail[0]
+	}
+
+	// should be an edge case but nice to have
+	if sanitizedDisplayName == email {
+		return email
+	}
+
+	address, err := mail.ParseAddress(fmt.Sprintf("%s <%s>", sanitizedDisplayName, email))
+	if err != nil {
+		return email
+	}
+
+	return address.String()
+}
+
 // GetDisplayName returns full name if it's not empty and DEFAULT_SHOW_FULL_NAME is set,
 // returns username otherwise.
 func (u *User) GetDisplayName() string {
@@ -558,6 +591,7 @@ var (
 		"captcha",
 		"commits",
 		"debug",
+		"devtest",
 		"error",
 		"explore",
 		"favicon.ico",
@@ -903,6 +937,20 @@ func GetUserByIDs(ctx context.Context, ids []int64) ([]*User, error) {
 		Table("user").
 		Find(&users)
 	return users, err
+}
+
+func IsValidUserID(id int64) bool {
+	return id > 0 || id == GhostUserID || id == ActionsUserID
+}
+
+func GetUserFromMap(id int64, idMap map[int64]*User) (int64, *User) {
+	if user, ok := idMap[id]; ok {
+		return id, user
+	}
+	if id == ActionsUserID {
+		return ActionsUserID, NewActionsUser()
+	}
+	return GhostUserID, NewGhostUser()
 }
 
 // GetPossibleUserByID returns the user if id > 0 or return system usrs if id < 0

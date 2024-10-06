@@ -37,7 +37,8 @@ func TestMain(m *testing.M) {
 	graceful.InitManager(managerCtx)
 	defer cancel()
 
-	tests.InitTest(false)
+	tests.InitTest(true)
+	initChangedFiles()
 	testE2eWebRoutes = routers.NormalRoutes()
 
 	os.Unsetenv("GIT_AUTHOR_NAME")
@@ -100,10 +101,18 @@ func TestE2e(t *testing.T) {
 		_, filename := filepath.Split(path)
 		testname := filename[:len(filename)-len(filepath.Ext(path))]
 
+		if canSkipTest(path) {
+			fmt.Printf("No related changes for test, skipping: %s\n", filename)
+			continue
+		}
+
 		t.Run(testname, func(t *testing.T) {
 			// Default 2 minute timeout
-			onGiteaRun(t, func(*testing.T, *url.URL) {
-				cmd := exec.Command(runArgs[0], runArgs...)
+			onForgejoRun(t, func(*testing.T, *url.URL) {
+				defer DeclareGitRepos(t)()
+				thisTest := runArgs
+				thisTest = append(thisTest, path)
+				cmd := exec.Command(runArgs[0], thisTest...)
 				cmd.Env = os.Environ()
 				cmd.Env = append(cmd.Env, fmt.Sprintf("GITEA_URL=%s", setting.AppURL))
 

@@ -22,6 +22,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIListRepoComments(t *testing.T) {
@@ -266,7 +267,7 @@ func TestAPIGetComment(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
 	comment := unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: 2})
-	assert.NoError(t, comment.LoadIssue(db.DefaultContext))
+	require.NoError(t, comment.LoadIssue(db.DefaultContext))
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: comment.Issue.RepoID})
 	repoOwner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
 
@@ -280,7 +281,7 @@ func TestAPIGetComment(t *testing.T) {
 	var apiComment api.Comment
 	DecodeJSON(t, resp, &apiComment)
 
-	assert.NoError(t, comment.LoadPoster(db.DefaultContext))
+	require.NoError(t, comment.LoadPoster(db.DefaultContext))
 	expect := convert.ToAPIComment(db.DefaultContext, repo, comment)
 
 	assert.Equal(t, expect.ID, apiComment.ID)
@@ -308,7 +309,7 @@ func TestAPIGetSystemUserComment(t *testing.T) {
 			Issue:   issue,
 			Content: body,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		req := NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/comments/%d", repoOwner.Name, repo.Name, comment.ID)
 		resp := MakeRequest(t, req, http.StatusOK)
@@ -318,7 +319,7 @@ func TestAPIGetSystemUserComment(t *testing.T) {
 
 		if assert.NotNil(t, apiComment.Poster) {
 			if assert.Equal(t, systemUser.ID, apiComment.Poster.ID) {
-				assert.NoError(t, comment.LoadPoster(db.DefaultContext))
+				require.NoError(t, comment.LoadPoster(db.DefaultContext))
 				assert.Equal(t, systemUser.Name, apiComment.Poster.UserName)
 			}
 		}

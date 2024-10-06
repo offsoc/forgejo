@@ -6,10 +6,11 @@ package v1_16 //nolint
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	migration_tests "code.gitea.io/gitea/models/migrations/test"
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // LoginSource represents an external way for authorizing users.
@@ -27,7 +28,7 @@ func (ls *LoginSourceOriginalV189) TableName() string {
 
 func Test_UnwrapLDAPSourceCfg(t *testing.T) {
 	// Prepare and load the testing database
-	x, deferable := base.PrepareTestEnv(t, 0, new(LoginSourceOriginalV189))
+	x, deferable := migration_tests.PrepareTestEnv(t, 0, new(LoginSourceOriginalV189))
 	if x == nil || t.Failed() {
 		defer deferable()
 		return
@@ -45,7 +46,7 @@ func Test_UnwrapLDAPSourceCfg(t *testing.T) {
 
 	// Run the migration
 	if err := UnwrapLDAPSourceCfg(x); err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return
 	}
 
@@ -53,7 +54,7 @@ func Test_UnwrapLDAPSourceCfg(t *testing.T) {
 	for start := 0; ; start += batchSize {
 		sources := make([]*LoginSource, 0, batchSize)
 		if err := x.Table("login_source").Limit(batchSize, start).Find(&sources); err != nil {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			return
 		}
 
@@ -66,12 +67,12 @@ func Test_UnwrapLDAPSourceCfg(t *testing.T) {
 			expected := map[string]any{}
 
 			if err := json.Unmarshal([]byte(source.Cfg), &converted); err != nil {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return
 			}
 
 			if err := json.Unmarshal([]byte(source.Expected), &expected); err != nil {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return
 			}
 

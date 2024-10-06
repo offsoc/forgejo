@@ -24,6 +24,10 @@
 		{{if and .IsPackageEnabled (or .ContextUser.IsIndividual .CanReadPackages)}}
 			<a href="{{.ContextUser.HomeLink}}/-/packages" class="{{if .IsPackagesPage}}active {{end}}item">
 				{{svg "octicon-package"}} {{ctx.Locale.Tr "packages.title"}}
+				{{if .PackageCount}}
+					<div class="ui small label">{{.PackageCount}}</div>
+				{{end}}
+				<span hidden test-name="package-count">{{.PackageCount}}</span>
 			</a>
 		{{end}}
 		{{if and .IsRepoIndexerEnabled (or .ContextUser.IsIndividual .CanReadCode)}}
@@ -32,9 +36,11 @@
 			</a>
 		{{end}}
 		{{if .ContextUser.IsIndividual}}
-			<a class="{{if eq .TabName "activity"}}active {{end}}item" href="{{.ContextUser.HomeLink}}?tab=activity">
-				{{svg "octicon-rss"}} {{ctx.Locale.Tr "user.activity"}}
-			</a>
+			{{if or (eq .TabName "activity") .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate)}}
+				<a class="{{if eq .TabName "activity"}}active {{end}}item" href="{{.ContextUser.HomeLink}}?tab=activity">
+					{{svg "octicon-rss"}} {{ctx.Locale.Tr "user.activity"}}
+				</a>
+			{{end}}
 			{{if not .DisableStars}}
 			<a class="{{if eq .TabName "stars"}}active {{end}}item" href="{{.ContextUser.HomeLink}}?tab=stars">
 				{{svg "octicon-star"}} {{ctx.Locale.Tr "user.starred"}}

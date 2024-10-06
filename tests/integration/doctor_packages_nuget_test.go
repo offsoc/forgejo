@@ -24,6 +24,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDoctorPackagesNuget(t *testing.T) {
@@ -65,11 +66,11 @@ func TestDoctorPackagesNuget(t *testing.T) {
 	pkg := createPackage(packageName, packageVersion)
 
 	pkgBuf, err := packages_module.CreateHashedBufferFromReader(pkg)
-	assert.NoError(t, err, "Error creating hashed buffer from nupkg")
+	require.NoError(t, err, "Error creating hashed buffer from nupkg")
 	defer pkgBuf.Close()
 
 	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
-	assert.NoError(t, err, "Error getting user by ID 2")
+	require.NoError(t, err, "Error getting user by ID 2")
 
 	t.Run("PackagesNugetNuspecCheck", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
@@ -96,9 +97,9 @@ func TestDoctorPackagesNuget(t *testing.T) {
 				IsLead:  true,
 			},
 		)
-		assert.NoError(t, err, "Error creating package and adding file")
+		require.NoError(t, err, "Error creating package and adding file")
 
-		assert.NoError(t, doctor.PackagesNugetNuspecCheck(ctx, logger, true), "Doctor check failed")
+		require.NoError(t, doctor.PackagesNugetNuspecCheck(ctx, logger, true), "Doctor check failed")
 
 		s, _, pf, err := packages_service.GetFileStreamByPackageNameAndVersion(
 			ctx,
@@ -113,7 +114,7 @@ func TestDoctorPackagesNuget(t *testing.T) {
 			},
 		)
 
-		assert.NoError(t, err, "Error getting nuspec file stream by package name and version")
+		require.NoError(t, err, "Error getting nuspec file stream by package name and version")
 		defer s.Close()
 
 		assert.Equal(t, fmt.Sprintf("%s.nuspec", packageName), pf.Name, "Not a nuspec")

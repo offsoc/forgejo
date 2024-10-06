@@ -8,9 +8,9 @@
 			<div class="ui attached segment">
 				{{template "base/alert" .}}
 
-				<p>{{ctx.Locale.Tr "install.docker_helper" "https://forgejo.org/docs/latest/admin/installation-docker/"}}</p>
-
 				<form class="ui form" action="{{AppSubUrl}}/" method="post">
+					<p class="tw-mt-0">{{ctx.Locale.Tr "install.docker_helper" "https://forgejo.org/docs/latest/admin/installation-docker/"}}</p>
+
 					<!-- Database Settings -->
 					<h4 class="ui dividing header">{{ctx.Locale.Tr "install.db_title"}}</h4>
 					<p>{{ctx.Locale.Tr "install.require_db_desc"}}</p>

@@ -1,20 +1,23 @@
 {{if .Flash.ErrorMsg}}
-	<div class="ui negative message flash-message flash-error">
+	<div id="flash-message" class="ui negative message flash-message flash-error" hx-swap-oob="true">
 		<p>{{.Flash.ErrorMsg | SanitizeHTML}}</p>
 	</div>
 {{end}}
 {{if .Flash.SuccessMsg}}
-	<div class="ui positive message flash-message flash-success">
+	<div id="flash-message" class="ui positive message flash-message flash-success" hx-swap-oob="true">
 		<p>{{.Flash.SuccessMsg | SanitizeHTML}}</p>
 	</div>
 {{end}}
 {{if .Flash.InfoMsg}}
-	<div class="ui info message flash-message flash-info">
+	<div id="flash-message" class="ui info message flash-message flash-info" hx-swap-oob="true">
 		<p>{{.Flash.InfoMsg | SanitizeHTML}}</p>
 	</div>
 {{end}}
 {{if .Flash.WarningMsg}}
-	<div class="ui warning message flash-message flash-warning">
+	<div id="flash-message" class="ui warning message flash-message flash-warning" hx-swap-oob="true">
 		<p>{{.Flash.WarningMsg | SanitizeHTML}}</p>
 	</div>
+{{end}}
+{{if and (not .Flash.ErrorMsg) (not .Flash.SuccessMsg) (not .Flash.InfoMsg) (not .Flash.WarningMsg) (not .IsHTMX)}}
+	<div id="flash-message" hx-swap-oob="true"></div>
 {{end}}

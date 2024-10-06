@@ -22,6 +22,10 @@ func (specs SpecList) GetScheduleIDs() []int64 {
 }
 
 func (specs SpecList) LoadSchedules(ctx context.Context) error {
+	if len(specs) == 0 {
+		return nil
+	}
+
 	scheduleIDs := specs.GetScheduleIDs()
 	schedules, err := GetSchedulesMapByIDs(ctx, scheduleIDs)
 	if err != nil {
@@ -50,6 +54,10 @@ func (specs SpecList) GetRepoIDs() []int64 {
 }
 
 func (specs SpecList) LoadRepos(ctx context.Context) error {
+	if len(specs) == 0 {
+		return nil
+	}
+
 	repoIDs := specs.GetRepoIDs()
 	repos, err := repo_model.GetRepositoriesMapByIDs(ctx, repoIDs)
 	if err != nil {

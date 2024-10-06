@@ -185,6 +185,12 @@ type swaggerParameterBodies struct {
 	CreateTagOption api.CreateTagOption
 
 	// in:body
+	CreateTagProtectionOption api.CreateTagProtectionOption
+
+	// in:body
+	EditTagProtectionOption api.EditTagProtectionOption
+
+	// in:body
 	CreateAccessTokenOption api.CreateAccessTokenOption
 
 	// in:body
@@ -210,4 +216,19 @@ type swaggerParameterBodies struct {
 
 	// in:body
 	UpdateVariableOption api.UpdateVariableOption
+
+	// in:body
+	DispatchWorkflowOption api.DispatchWorkflowOption
+
+	// in:body
+	CreateQuotaGroupOptions api.CreateQuotaGroupOptions
+
+	// in:body
+	CreateQuotaRuleOptions api.CreateQuotaRuleOptions
+
+	// in:body
+	EditQuotaRuleOptions api.EditQuotaRuleOptions
+
+	// in:body
+	SetUserQuotaGroupsOptions api.SetUserQuotaGroupsOptions
 }

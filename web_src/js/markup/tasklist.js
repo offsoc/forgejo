@@ -32,11 +32,11 @@ export function initMarkupTasklist() {
         const buffer = encoder.encode(oldContent);
         // Indexes may fall off the ends and return undefined.
         if (buffer[position - 1] !== '['.codePointAt(0) ||
-          buffer[position] !== ' '.codePointAt(0) && buffer[position] !== 'x'.codePointAt(0) ||
+          buffer[position] !== ' '.codePointAt(0) && buffer[position] !== 'x'.codePointAt(0) && buffer[position] !== 'X'.codePointAt(0) ||
           buffer[position + 1] !== ']'.codePointAt(0)) {
           // Position is probably wrong.  Revert and don't allow change.
           checkbox.checked = !checkbox.checked;
-          throw new Error(`Expected position to be space or x and surrounded by brackets, but it's not: position=${position}`);
+          throw new Error(`Expected position to be space, x or X and surrounded by brackets, but it's not: position=${position}`);
         }
         buffer.set(encoder.encode(checkboxCharacter), position);
         const newContent = new TextDecoder().decode(buffer);

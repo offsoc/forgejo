@@ -1,12 +1,12 @@
 {{if .Results}}
-    {{range .Results}}
-        <a class="item" href="{{$.RepoLink}}/wiki/{{.Filename}}">
-            <b class="tw-block tw-mb-2">{{.Filename}}</b>
-            {{range .LineCodes}}
-                <p class="tw-my-0">{{.}}</p>
-            {{end}}
-        </a>
-    {{end}}
+	{{range .Results}}
+		<a class="item tw-max-w-[80vw]" href="{{$.RepoLink}}/wiki/{{.Filename}}">
+			<b class="tw-block tw-mb-2 tw-whitespace-break-spaces">{{.Filename}}</b>
+			{{range .LineCodes}}
+				<p class="tw-my-0 tw-whitespace-break-spaces">{{.}}</p>
+			{{end}}
+		</a>
+	{{end}}
 {{else}}
-    <div class="item muted">{{ctx.Locale.Tr "repo.wiki.no_search_results"}}</div>
+	<div class="item muted">{{ctx.Locale.Tr "repo.wiki.no_search_results"}}</div>
 {{end}}

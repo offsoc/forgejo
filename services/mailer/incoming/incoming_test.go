@@ -10,6 +10,7 @@ import (
 	"github.com/emersion/go-imap"
 	"github.com/jhillyerd/enmime"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNotHandleTwice(t *testing.T) {
@@ -17,12 +18,12 @@ func TestNotHandleTwice(t *testing.T) {
 	msg := imap.NewMessage(90, []imap.FetchItem{imap.FetchBody})
 
 	handled := isAlreadyHandled(handledSet, msg)
-	assert.Equal(t, false, handled)
+	assert.False(t, handled)
 
 	handledSet.AddNum(msg.SeqNum)
 
 	handled = isAlreadyHandled(handledSet, msg)
-	assert.Equal(t, true, handled)
+	assert.True(t, handled)
 }
 
 func TestIsAutomaticReply(t *testing.T) {
@@ -74,9 +75,9 @@ func TestIsAutomaticReply(t *testing.T) {
 			b = b.Header(k, v)
 		}
 		root, err := b.Build()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		env, err := enmime.EnvelopeFromPart(root)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, c.Expected, isAutomaticReply(env))
 	}
@@ -102,7 +103,7 @@ func TestGetContentFromMailReader(t *testing.T) {
 		"--message-boundary--\r\n"
 
 	env, err := enmime.ReadEnvelope(strings.NewReader(mailString))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	content := getContentFromMailReader(env)
 	assert.Equal(t, "mail content", content.Content)
 	assert.Len(t, content.Attachments, 1)
@@ -139,7 +140,7 @@ func TestGetContentFromMailReader(t *testing.T) {
 		"--message-boundary--\r\n"
 
 	env, err = enmime.ReadEnvelope(strings.NewReader(mailString))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	content = getContentFromMailReader(env)
 	assert.Equal(t, "mail content\n--\nattachment content", content.Content)
 	assert.Len(t, content.Attachments, 2)
@@ -161,7 +162,7 @@ func TestGetContentFromMailReader(t *testing.T) {
 		"--message-boundary--\r\n"
 
 	env, err = enmime.ReadEnvelope(strings.NewReader(mailString))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	content = getContentFromMailReader(env)
 	assert.Equal(t, "mail content", content.Content)
 	assert.Empty(t, content.Attachments)
@@ -182,9 +183,9 @@ func TestGetContentFromMailReader(t *testing.T) {
 		"--message-boundary--\r\n"
 
 	env, err = enmime.ReadEnvelope(strings.NewReader(mailString))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	content = getContentFromMailReader(env)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "mail content without signature", content.Content)
 	assert.Empty(t, content.Attachments)
 }

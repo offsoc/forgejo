@@ -13,6 +13,7 @@ import (
 	base "code.gitea.io/gitea/modules/migration"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGitHubDownloadRepo(t *testing.T) {
@@ -23,10 +24,10 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}
 	downloader := NewGithubDownloaderV3(context.Background(), "https://github.com", "", "", token, "go-gitea", "test_repo")
 	err := downloader.RefreshRate()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repo, err := downloader.GetRepoInfo()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertRepositoryEqual(t, &base.Repository{
 		Name:          "test_repo",
 		Owner:         "go-gitea",
@@ -37,11 +38,11 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}, repo)
 
 	topics, err := downloader.GetTopics()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, topics, "gitea")
 
 	milestones, err := downloader.GetMilestones()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertMilestonesEqual(t, []*base.Milestone{
 		{
 			Title:       "1.0.0",
@@ -64,7 +65,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}, milestones)
 
 	labels, err := downloader.GetLabels()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertLabelsEqual(t, []*base.Label{
 		{
 			Name:        "bug",
@@ -114,7 +115,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}, labels)
 
 	releases, err := downloader.GetReleases()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReleasesEqual(t, []*base.Release{
 		{
 			TagName:         "v0.9.99",
@@ -130,7 +131,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 
 	// downloader.GetIssues()
 	issues, isEnd, err := downloader.GetIssues(1, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isEnd)
 	assertIssuesEqual(t, []*base.Issue{
 		{
@@ -219,7 +220,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 
 	// downloader.GetComments()
 	comments, _, err := downloader.GetComments(&base.Issue{Number: 2, ForeignIndex: 2})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertCommentsEqual(t, []*base.Comment{
 		{
 			IssueIndex: 2,
@@ -249,7 +250,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 
 	// downloader.GetPullRequests()
 	prs, _, err := downloader.GetPullRequests(1, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertPullRequestsEqual(t, []*base.PullRequest{
 		{
 			Number:     3,
@@ -339,7 +340,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}, prs)
 
 	reviews, err := downloader.GetReviews(&base.PullRequest{Number: 3, ForeignIndex: 3})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReviewsEqual(t, []*base.Review{
 		{
 			ID:           315859956,
@@ -371,7 +372,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}, reviews)
 
 	reviews, err = downloader.GetReviews(&base.PullRequest{Number: 4, ForeignIndex: 4})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReviewsEqual(t, []*base.Review{
 		{
 			ID:           338338740,

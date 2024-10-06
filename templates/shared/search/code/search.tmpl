@@ -1,5 +1,11 @@
 <form class="ui form ignore-dirty">
-	{{template "shared/search/combo_fuzzy" dict "Value" .Keyword "Disabled" .CodeIndexerUnavailable "IsFuzzy" .IsFuzzy "Placeholder" (ctx.Locale.Tr "search.code_kind")}}
+	{{template "shared/search/combo_multi"
+		dict
+			"Value" .Keyword
+			"Disabled" .CodeIndexerUnavailable
+			"Placeholder" (ctx.Locale.Tr "search.code_kind")
+			"Selected" $.CodeSearchMode
+			"Options" $.CodeSearchOptions}}
 </form>
 <div class="divider"></div>
 <div class="ui user list">

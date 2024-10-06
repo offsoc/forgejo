@@ -8,12 +8,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepository_GetCommitBranches(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer bareRepo1.Close()
 
 	// these test case are specific to the repo1_bare test repo
@@ -30,9 +31,9 @@ func TestRepository_GetCommitBranches(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		commit, err := bareRepo1.GetCommit(testCase.CommitID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		branches, err := bareRepo1.getBranches(commit, 2)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, testCase.ExpectedBranches, branches)
 	}
 }
@@ -40,12 +41,12 @@ func TestRepository_GetCommitBranches(t *testing.T) {
 func TestGetTagCommitWithSignature(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer bareRepo1.Close()
 
 	// both the tag and the commit are signed here, this validates only the commit signature
 	commit, err := bareRepo1.GetCommit("28b55526e7100924d864dd89e35c1ea62e7a5a32")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, commit)
 	assert.NotNil(t, commit.Signature)
 	// test that signature is not in message
@@ -55,34 +56,34 @@ func TestGetTagCommitWithSignature(t *testing.T) {
 func TestGetCommitWithBadCommitID(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer bareRepo1.Close()
 
 	commit, err := bareRepo1.GetCommit("bad_branch")
 	assert.Nil(t, commit)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.True(t, IsErrNotExist(err))
 }
 
 func TestIsCommitInBranch(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer bareRepo1.Close()
 
 	result, err := bareRepo1.IsCommitInBranch("2839944139e0de9737a044f78b0e4b40d989a9e3", "branch1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, result)
 
 	result, err = bareRepo1.IsCommitInBranch("2839944139e0de9737a044f78b0e4b40d989a9e3", "branch2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, result)
 }
 
 func TestRepository_CommitsBetweenIDs(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo4_commitsbetween")
 	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer bareRepo1.Close()
 
 	cases := []struct {
@@ -96,7 +97,7 @@ func TestRepository_CommitsBetweenIDs(t *testing.T) {
 	}
 	for i, c := range cases {
 		commits, err := bareRepo1.CommitsBetweenIDs(c.NewID, c.OldID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, commits, c.ExpectedCommits, "case %d", i)
 	}
 }

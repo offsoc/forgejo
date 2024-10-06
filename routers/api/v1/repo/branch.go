@@ -210,6 +210,8 @@ func CreateBranch(ctx *context.APIContext) {
 	//     description: The old branch does not exist.
 	//   "409":
 	//     description: The branch with the same name already exists.
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "423":
 	//     "$ref": "#/responses/repoArchivedError"
 

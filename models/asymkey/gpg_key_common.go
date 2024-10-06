@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/keybase/go-crypto/openpgp"
-	"github.com/keybase/go-crypto/openpgp/armor"
-	"github.com/keybase/go-crypto/openpgp/packet"
+	"github.com/ProtonMail/go-crypto/openpgp"
+	"github.com/ProtonMail/go-crypto/openpgp/armor"
+	"github.com/ProtonMail/go-crypto/openpgp/packet"
 )
 
 //   __________________  ________   ____  __.
@@ -88,7 +88,7 @@ func getExpiryTime(e *openpgp.Entity) time.Time {
 	for _, ident := range e.Identities {
 		if selfSig == nil {
 			selfSig = ident.SelfSignature
-		} else if ident.SelfSignature.IsPrimaryId != nil && *ident.SelfSignature.IsPrimaryId {
+		} else if ident.SelfSignature != nil && ident.SelfSignature.IsPrimaryId != nil && *ident.SelfSignature.IsPrimaryId {
 			selfSig = ident.SelfSignature
 			break
 		}
@@ -114,7 +114,7 @@ func readArmoredSign(r io.Reader) (body io.Reader, err error) {
 		return nil, err
 	}
 	if block.Type != openpgp.SignatureType {
-		return nil, fmt.Errorf("expected '" + openpgp.SignatureType + "', got: " + block.Type)
+		return nil, fmt.Errorf("expected %q, got: %s", openpgp.SignatureType, block.Type)
 	}
 	return block.Body, nil
 }
@@ -139,7 +139,7 @@ func tryGetKeyIDFromSignature(sig *packet.Signature) string {
 	if sig.IssuerKeyId != nil && (*sig.IssuerKeyId) != 0 {
 		return fmt.Sprintf("%016X", *sig.IssuerKeyId)
 	}
-	if sig.IssuerFingerprint != nil && len(sig.IssuerFingerprint) > 0 {
+	if len(sig.IssuerFingerprint) > 0 {
 		return fmt.Sprintf("%016X", sig.IssuerFingerprint[12:20])
 	}
 	return ""

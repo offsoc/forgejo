@@ -91,7 +91,7 @@ func TestAPIUserSearchSystemUsers(t *testing.T) {
 			var results SearchResults
 			DecodeJSON(t, resp, &results)
 			assert.NotEmpty(t, results.Data)
-			if assert.EqualValues(t, 1, len(results.Data)) {
+			if assert.Len(t, results.Data, 1) {
 				user := results.Data[0]
 				assert.EqualValues(t, user.UserName, systemUser.Name)
 				assert.EqualValues(t, user.ID, systemUser.ID)

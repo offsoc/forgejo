@@ -33,7 +33,6 @@
   display: flex;
   flex-flow: row wrap;
   word-break: keep-all;
-  gap: 0.25em;
 }
 
 .repo-buttons .ui.labeled.button > .label:hover {
