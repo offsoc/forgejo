@@ -338,3 +338,6 @@ strong.attention-caution, svg.attention-caution {
   background-color: var(--color-red-dark-2);
   color: var(--color-white);
 }
+.ui.tabular.menu, .active.item {
+  border-color: var(--color-grey);
+}
