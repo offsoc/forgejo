@@ -200,8 +200,8 @@
   --color-input-text: var(--steel-100);
   --color-input-background: var(--steel-650);
   --color-input-toggle-background: var(--steel-650);
-  --color-input-border: var(--steel-550);
-  --color-input-border-hover: var(--steel-450);
+  --color-input-border: var(--steel-400);
+  --color-input-border-hover: var(--steel-300);
   --color-header-wrapper: var(--steel-850);
   --color-header-wrapper-transparent: #242d3800;
   --color-light: #00000028;
