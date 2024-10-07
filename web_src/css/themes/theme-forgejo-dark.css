@@ -48,7 +48,7 @@
   --color-primary-alpha-90: #ea580ce1;
   --color-primary-hover: var(--color-primary-light-1);
   --color-primary-active: var(--color-primary-light-2);
-  --color-secondary: var(--steel-700);
+  --color-secondary: var(--steel-400);
   --color-secondary-dark-1: var(--steel-550);
   --color-secondary-dark-2: var(--steel-500);
   --color-secondary-dark-3: var(--steel-450);
@@ -337,7 +337,4 @@ strong.attention-caution, svg.attention-caution {
 .ui.basic.red.button:active {
   background-color: var(--color-red-dark-2);
   color: var(--color-white);
-}
-.ui.tabular.menu, .active.item {
-  border-color: var(--color-grey);
 }
