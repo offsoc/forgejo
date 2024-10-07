@@ -49,7 +49,7 @@ GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasour
 DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.25.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
 GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.16.2 # renovate: datasource=go
-RENOVATE_NPM_PACKAGE ?= renovate@38.101.1 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
+RENOVATE_NPM_PACKAGE ?= renovate@38.110.2 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
 
 ifeq ($(HAS_GO), yes)
 	CGO_EXTRA_CFLAGS := -DSQLITE_MAX_VARIABLE_NUMBER=32766
