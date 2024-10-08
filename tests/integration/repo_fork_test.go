@@ -23,6 +23,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testRepoFork(t *testing.T, session *TestSession, ownerName, repoName, forkOwnerName, forkRepoName string) *httptest.ResponseRecorder {
@@ -44,7 +45,7 @@ func testRepoFork(t *testing.T, session *TestSession, ownerName, repoName, forkO
 	link, exists := htmlDoc.doc.Find(fmt.Sprintf("form.ui.form[action=\"%s\"]", forkURL)).Attr("action")
 	assert.True(t, exists, "The template has changed")
 	_, exists = htmlDoc.doc.Find(fmt.Sprintf(".owner.dropdown .item[data-value=\"%d\"]", forkOwner.ID)).Attr("data-value")
-	assert.True(t, exists, fmt.Sprintf("Fork owner '%s' is not present in select box", forkOwnerName))
+	assert.True(t, exists, "Fork owner %q is not present in select box", forkOwnerName)
 	req = NewRequestWithValues(t, "POST", link, map[string]string{
 		"_csrf":     htmlDoc.GetCSRF(),
 		"uid":       fmt.Sprintf("%d", forkOwner.ID),
@@ -150,7 +151,7 @@ func TestRepoFork(t *testing.T) {
 				defer func() {
 					repo_service.DeleteRepository(db.DefaultContext, user5, repo, false)
 				}()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotEmpty(t, repo)
 
 				// Load the repository home view

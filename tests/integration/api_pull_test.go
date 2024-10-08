@@ -22,6 +22,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIViewPulls(t *testing.T) {
@@ -44,7 +45,7 @@ func TestAPIViewPulls(t *testing.T) {
 	if assert.EqualValues(t, 5, pull.ID) {
 		resp = ctx.Session.MakeRequest(t, NewRequest(t, "GET", pull.DiffURL), http.StatusOK)
 		_, err := io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		// TODO: use diff to generate stats to test against
 
 		t.Run(fmt.Sprintf("APIGetPullFiles_%d", pull.ID),
@@ -248,7 +249,7 @@ func TestAPIEditPull(t *testing.T) {
 	// check comment history
 	pull := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: apiPull.ID})
 	err := pull.LoadIssue(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{IssueID: pull.Issue.ID, OldTitle: title, NewTitle: newTitle})
 	unittest.AssertExistsAndLoadBean(t, &issues_model.ContentHistory{IssueID: pull.Issue.ID, ContentText: newBody, IsFirstCreated: false})
 

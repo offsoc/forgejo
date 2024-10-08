@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/models/organization"
 	"code.gitea.io/gitea/models/perm"
 	access_model "code.gitea.io/gitea/models/perm/access"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/log"
@@ -53,6 +54,8 @@ func Transfer(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 
@@ -74,6 +77,10 @@ func Transfer(ctx *context.APIContext) {
 			ctx.Error(http.StatusNotFound, "", "The new owner does not exist or cannot be found")
 			return
 		}
+	}
+
+	if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, newOwner.ID, newOwner.Name) {
+		return
 	}
 
 	var teams []*organization.Team
@@ -162,6 +169,8 @@ func AcceptTransfer(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 
 	err := acceptOrRejectRepoTransfer(ctx, true)
 	if ctx.Written() {
@@ -233,6 +242,11 @@ func acceptOrRejectRepoTransfer(ctx *context.APIContext, accept bool) error {
 	}
 
 	if accept {
+		recipient := repoTransfer.Recipient
+		if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, recipient.ID, recipient.Name) {
+			return nil
+		}
+
 		return repo_service.TransferOwnership(ctx, repoTransfer.Doer, repoTransfer.Recipient, ctx.Repo.Repository, repoTransfer.Teams)
 	}
 

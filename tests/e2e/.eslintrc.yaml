@@ -14,6 +14,7 @@ env:
 
 rules:
   playwright/no-conditional-in-test: [0]
+  playwright/no-conditional-expect: [0]
   playwright/no-networkidle: [0]
   playwright/no-skipped-test: [2, {allowConditional: true}]
   playwright/prefer-comparison-matcher: [2]

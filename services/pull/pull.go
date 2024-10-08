@@ -356,43 +356,7 @@ func TestPullRequest(ctx context.Context, doer *user_model.User, repoID, olderTh
 		}
 		if err == nil {
 			for _, pr := range prs {
-				objectFormat := git.ObjectFormatFromName(pr.BaseRepo.ObjectFormatName)
-				if newCommitID != "" && newCommitID != objectFormat.EmptyObjectID().String() {
-					changed, err := checkIfPRContentChanged(ctx, pr, oldCommitID, newCommitID)
-					if err != nil {
-						log.Error("checkIfPRContentChanged: %v", err)
-					}
-					if changed {
-						// Mark old reviews as stale if diff to mergebase has changed
-						if err := issues_model.MarkReviewsAsStale(ctx, pr.IssueID); err != nil {
-							log.Error("MarkReviewsAsStale: %v", err)
-						}
-
-						// dismiss all approval reviews if protected branch rule item enabled.
-						pb, err := git_model.GetFirstMatchProtectedBranchRule(ctx, pr.BaseRepoID, pr.BaseBranch)
-						if err != nil {
-							log.Error("GetFirstMatchProtectedBranchRule: %v", err)
-						}
-						if pb != nil && pb.DismissStaleApprovals {
-							if err := DismissApprovalReviews(ctx, doer, pr); err != nil {
-								log.Error("DismissApprovalReviews: %v", err)
-							}
-						}
-					}
-					if err := issues_model.MarkReviewsAsNotStale(ctx, pr.IssueID, newCommitID); err != nil {
-						log.Error("MarkReviewsAsNotStale: %v", err)
-					}
-					divergence, err := GetDiverging(ctx, pr)
-					if err != nil {
-						log.Error("GetDiverging: %v", err)
-					} else {
-						err = pr.UpdateCommitDivergence(ctx, divergence.Ahead, divergence.Behind)
-						if err != nil {
-							log.Error("UpdateCommitDivergence: %v", err)
-						}
-					}
-				}
-
+				ValidatePullRequest(ctx, pr, newCommitID, oldCommitID, doer)
 				notify_service.PullRequestSynchronized(ctx, doer, pr)
 			}
 		}
@@ -419,6 +383,46 @@ func TestPullRequest(ctx context.Context, doer *user_model.User, repoID, olderTh
 			}
 		}
 		AddToTaskQueue(ctx, pr)
+	}
+}
+
+// Mark old reviews as stale if diff to mergebase has changed.
+// Dismiss all approval reviews if protected branch rule item enabled.
+// Update commit divergence.
+func ValidatePullRequest(ctx context.Context, pr *issues_model.PullRequest, newCommitID, oldCommitID string, doer *user_model.User) {
+	objectFormat := git.ObjectFormatFromName(pr.BaseRepo.ObjectFormatName)
+	if newCommitID != "" && newCommitID != objectFormat.EmptyObjectID().String() {
+		changed, err := checkIfPRContentChanged(ctx, pr, oldCommitID, newCommitID)
+		if err != nil {
+			log.Error("checkIfPRContentChanged: %v", err)
+		}
+		if changed {
+			if err := issues_model.MarkReviewsAsStale(ctx, pr.IssueID); err != nil {
+				log.Error("MarkReviewsAsStale: %v", err)
+			}
+
+			pb, err := git_model.GetFirstMatchProtectedBranchRule(ctx, pr.BaseRepoID, pr.BaseBranch)
+			if err != nil {
+				log.Error("GetFirstMatchProtectedBranchRule: %v", err)
+			}
+			if pb != nil && pb.DismissStaleApprovals {
+				if err := DismissApprovalReviews(ctx, doer, pr); err != nil {
+					log.Error("DismissApprovalReviews: %v", err)
+				}
+			}
+		}
+		if err := issues_model.MarkReviewsAsNotStale(ctx, pr.IssueID, newCommitID); err != nil {
+			log.Error("MarkReviewsAsNotStale: %v", err)
+		}
+		divergence, err := GetDiverging(ctx, pr)
+		if err != nil {
+			log.Error("GetDiverging: %v", err)
+		} else {
+			err = pr.UpdateCommitDivergence(ctx, divergence.Ahead, divergence.Behind)
+			if err != nil {
+				log.Error("UpdateCommitDivergence: %v", err)
+			}
+		}
 	}
 }
 

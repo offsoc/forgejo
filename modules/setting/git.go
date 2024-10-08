@@ -37,6 +37,7 @@ var Git = struct {
 		Clone   int
 		Pull    int
 		GC      int `ini:"GC"`
+		Grep    int
 	} `ini:"git.timeout"`
 }{
 	DisableDiffHighlight:      false,
@@ -59,6 +60,7 @@ var Git = struct {
 		Clone   int
 		Pull    int
 		GC      int `ini:"GC"`
+		Grep    int
 	}{
 		Default: 360,
 		Migrate: 600,
@@ -66,6 +68,7 @@ var Git = struct {
 		Clone:   300,
 		Pull:    300,
 		GC:      60,
+		Grep:    2,
 	},
 }
 

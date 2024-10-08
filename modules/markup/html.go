@@ -73,6 +73,8 @@ var (
 
 	// EmojiShortCodeRegex find emoji by alias like :smile:
 	EmojiShortCodeRegex = regexp.MustCompile(`:[-+\w]+:`)
+
+	InlineCodeBlockRegex = regexp.MustCompile("`[^`]+`")
 )
 
 // CSS class for action keywords (e.g. "closes: #1")
@@ -93,28 +95,13 @@ var issueFullPattern *regexp.Regexp
 // Once for to prevent races
 var issueFullPatternOnce sync.Once
 
-// regexp for full links to hash comment in pull request files changed tab
-var filesChangedFullPattern *regexp.Regexp
-
-// Once for to prevent races
-var filesChangedFullPatternOnce sync.Once
-
 func getIssueFullPattern() *regexp.Regexp {
 	issueFullPatternOnce.Do(func() {
 		// example: https://domain/org/repo/pulls/27#hash
 		issueFullPattern = regexp.MustCompile(regexp.QuoteMeta(setting.AppURL) +
-			`[\w_.-]+/[\w_.-]+/(?:issues|pulls)/((?:\w{1,10}-)?[1-9][0-9]*)([\?|#](\S+)?)?\b`)
+			`(?P<user>[\w_.-]+)\/(?P<repo>[\w_.-]+)\/(?:issues|pulls)\/(?P<num>(?:\w{1,10}-)?[1-9][0-9]*)(?P<subpath>\/[\w_.-]+)?(?:(?P<comment>#(?:issue|issuecomment)-\d+)|(?:[\?#](?:\S+)?))?\b`)
 	})
 	return issueFullPattern
-}
-
-func getFilesChangedFullPattern() *regexp.Regexp {
-	filesChangedFullPatternOnce.Do(func() {
-		// example: https://domain/org/repo/pulls/27/files#hash
-		filesChangedFullPattern = regexp.MustCompile(regexp.QuoteMeta(setting.AppURL) +
-			`[\w_.-]+/[\w_.-]+/pulls/((?:\w{1,10}-)?[1-9][0-9]*)/files([\?|#](\S+)?)?\b`)
-	})
-	return filesChangedFullPattern
 }
 
 // CustomLinkURLSchemes allows for additional schemes to be detected when parsing links within text
@@ -258,9 +245,23 @@ func RenderIssueTitle(
 	title string,
 ) (string, error) {
 	return renderProcessString(ctx, []processor{
+		inlineCodeBlockProcessor,
 		issueIndexPatternProcessor,
 		commitCrossReferencePatternProcessor,
 		hashCurrentPatternProcessor,
+		emojiShortCodeProcessor,
+		emojiProcessor,
+	}, title)
+}
+
+// RenderRefIssueTitle to process title on places where an issue is referenced
+func RenderRefIssueTitle(
+	ctx *RenderContext,
+	title string,
+) (string, error) {
+	return renderProcessString(ctx, []processor{
+		inlineCodeBlockProcessor,
+		issueIndexPatternProcessor,
 		emojiShortCodeProcessor,
 		emojiProcessor,
 	}, title)
@@ -451,6 +452,24 @@ func createKeyword(content string) *html.Node {
 	span.AppendChild(text)
 
 	return span
+}
+
+func createInlineCode(content string) *html.Node {
+	code := &html.Node{
+		Type: html.ElementNode,
+		Data: atom.Code.String(),
+		Attr: []html.Attribute{},
+	}
+
+	code.Attr = append(code.Attr, html.Attribute{Key: "class", Val: "inline-code-block"})
+
+	text := &html.Node{
+		Type: html.TextNode,
+		Data: content,
+	}
+
+	code.AppendChild(text)
+	return code
 }
 
 func createEmoji(content, class, name string) *html.Node {
@@ -775,22 +794,16 @@ func fullIssuePatternProcessor(ctx *RenderContext, node *html.Node) {
 	}
 	next := node.NextSibling
 	for node != nil && node != next {
-		m := getIssueFullPattern().FindStringSubmatchIndex(node.Data)
-		if m == nil {
+		re := getIssueFullPattern()
+		linkIndex, m := re.FindStringIndex(node.Data), re.FindStringSubmatch(node.Data)
+		if linkIndex == nil || m == nil {
 			return
 		}
 
-		mDiffView := getFilesChangedFullPattern().FindStringSubmatchIndex(node.Data)
-		// leave it as it is if the link is from "Files Changed" tab in PR Diff View https://domain/org/repo/pulls/27/files
-		if mDiffView != nil {
-			return
-		}
+		link := node.Data[linkIndex[0]:linkIndex[1]]
+		text := "#" + m[re.SubexpIndex("num")] + m[re.SubexpIndex("subpath")]
 
-		link := node.Data[m[0]:m[1]]
-		text := "#" + node.Data[m[2]:m[3]]
-		// if m[4] and m[5] is not -1, then link is to a comment
-		// indicate that in the text by appending (comment)
-		if m[4] != -1 && m[5] != -1 {
+		if len(m[re.SubexpIndex("comment")]) > 0 {
 			if locale, ok := ctx.Ctx.Value(translation.ContextKey).(translation.Locale); ok {
 				text += " " + locale.TrString("repo.from_comment")
 			} else {
@@ -798,17 +811,14 @@ func fullIssuePatternProcessor(ctx *RenderContext, node *html.Node) {
 			}
 		}
 
-		// extract repo and org name from matched link like
-		// http://localhost:3000/gituser/myrepo/issues/1
-		linkParts := strings.Split(link, "/")
-		matchOrg := linkParts[len(linkParts)-4]
-		matchRepo := linkParts[len(linkParts)-3]
+		matchUser := m[re.SubexpIndex("user")]
+		matchRepo := m[re.SubexpIndex("repo")]
 
-		if matchOrg == ctx.Metas["user"] && matchRepo == ctx.Metas["repo"] {
-			replaceContent(node, m[0], m[1], createLink(link, text, "ref-issue"))
+		if matchUser == ctx.Metas["user"] && matchRepo == ctx.Metas["repo"] {
+			replaceContent(node, linkIndex[0], linkIndex[1], createLink(link, text, "ref-issue"))
 		} else {
-			text = matchOrg + "/" + matchRepo + text
-			replaceContent(node, m[0], m[1], createLink(link, text, "ref-issue"))
+			text = matchUser + "/" + matchRepo + text
+			replaceContent(node, linkIndex[0], linkIndex[1], createLink(link, text, "ref-issue"))
 		}
 		node = node.NextSibling.NextSibling
 	}
@@ -867,7 +877,7 @@ func issueIndexPatternProcessor(ctx *RenderContext, node *html.Node) {
 
 		var link *html.Node
 		reftext := node.Data[ref.RefLocation.Start:ref.RefLocation.End]
-		if hasExtTrackFormat && !ref.IsPull {
+		if hasExtTrackFormat && !ref.IsPull && ref.Owner == "" {
 			ctx.Metas["index"] = ref.Issue
 
 			res, err := vars.Expand(ctx.Metas["format"], ctx.Metas)
@@ -1094,6 +1104,21 @@ func filePreviewPatternProcessor(ctx *RenderContext, node *html.Node) {
 	}
 }
 
+func inlineCodeBlockProcessor(ctx *RenderContext, node *html.Node) {
+	start := 0
+	next := node.NextSibling
+	for node != nil && node != next && start < len(node.Data) {
+		m := InlineCodeBlockRegex.FindStringSubmatchIndex(node.Data[start:])
+		if m == nil {
+			return
+		}
+
+		code := node.Data[m[0]+1 : m[1]-1]
+		replaceContent(node, m[0], m[1], createInlineCode(code))
+		node = node.NextSibling.NextSibling
+	}
+}
+
 // emojiShortCodeProcessor for rendering text like :smile: into emoji
 func emojiShortCodeProcessor(ctx *RenderContext, node *html.Node) {
 	start := 0
@@ -1197,7 +1222,7 @@ func hashCurrentPatternProcessor(ctx *RenderContext, node *html.Node) {
 				})
 			}
 
-			exist = ctx.GitRepo.IsObjectExist(hash)
+			exist = ctx.GitRepo.IsReferenceExist(hash)
 			ctx.ShaExistCache[hash] = exist
 		}
 

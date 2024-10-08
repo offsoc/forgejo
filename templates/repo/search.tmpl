@@ -5,7 +5,7 @@
 		{{if $.CodeIndexerDisabled}}
 			{{$branchURLPrefix := printf "%s/search/branch/" $.RepoLink}}
 			{{$tagURLPrefix := printf "%s/search/tag/" $.RepoLink}}
-			{{$suffix := printf "?q=%s&fuzzy=%t" (.Keyword|QueryEscape) .IsFuzzy}}
+			{{$suffix := printf "?q=%s&mode=%s" (.Keyword|QueryEscape) .CodeSearchMode}}
 			{{template "repo/branch_dropdown" dict "root" . "ContainerClasses" "tw-mb-3" "branchURLPrefix" $branchURLPrefix "branchURLSuffix" $suffix "tagURLPrefix" $tagURLPrefix "tagURLSuffix" $suffix}}
 		{{end}}
 		{{template "shared/search/code/search" .}}

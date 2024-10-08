@@ -1,9 +1,9 @@
 <div class="file-body file-code code-view">
 	<div>
 		<ol class="tw-p-0 tw-m-0">
-		{{/* if the expected line number does not match
-		     the actual line number end the ordered list
-		     and begin a new one */}}
+		{{/* 	if the expected line number does not match
+				the actual line number end the ordered list
+				and begin a new one */}}
 		{{$expNum := 0}}
 		{{range .SearchResult.Lines}}
 		{{if and (gt $expNum 0) (ne .Num $expNum)}}

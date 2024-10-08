@@ -291,7 +291,7 @@ func TestListStopWatches(t *testing.T) {
 		assert.EqualValues(t, issue.Title, apiWatches[0].IssueTitle)
 		assert.EqualValues(t, repo.Name, apiWatches[0].RepoName)
 		assert.EqualValues(t, repo.OwnerName, apiWatches[0].RepoOwnerName)
-		assert.Greater(t, apiWatches[0].Seconds, int64(0))
+		assert.Positive(t, apiWatches[0].Seconds)
 	}
 }
 
@@ -323,7 +323,7 @@ func TestUserHints(t *testing.T) {
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteUser)
 
 	// Create a known-good repo, with only one unit enabled
-	repo, _, f := CreateDeclarativeRepo(t, user, "", []unit_model.Type{
+	repo, _, f := tests.CreateDeclarativeRepo(t, user, "", []unit_model.Type{
 		unit_model.TypeCode,
 	}, []unit_model.Type{
 		unit_model.TypePullRequests,
@@ -389,7 +389,7 @@ func TestUserHints(t *testing.T) {
 			assert.Equal(t, enabled, hintChecked)
 
 			link, _ := htmlDoc.Find("form[action='/user/settings/appearance/language'] a").Attr("href")
-			assert.EqualValues(t, "https://forgejo.org/docs/latest/developer/localization/", link)
+			assert.EqualValues(t, "https://forgejo.org/docs/next/contributor/localization/", link)
 		}
 
 		t.Run("view", func(t *testing.T) {
@@ -611,7 +611,7 @@ func TestUserPronouns(t *testing.T) {
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
 		userName := strings.TrimSpace(htmlDoc.Find(".profile-avatar-name .username").Text())
-		assert.EqualValues(t, userName, "user2")
+		assert.EqualValues(t, "user2", userName)
 	})
 }
 

@@ -62,7 +62,7 @@ func (o *organization) FromFormat(content f3.Interface) {
 func (o *organization) Get(ctx context.Context) bool {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 	organization, err := org_model.GetOrgByID(ctx, id)
 	if user_model.IsErrUserNotExist(err) {
 		return false
@@ -94,7 +94,7 @@ func (o *organization) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoOrganization.ID))
+	return generic.NewNodeID(o.forgejoOrganization.ID)
 }
 
 func (o *organization) Delete(ctx context.Context) {

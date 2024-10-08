@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExpandVars(t *testing.T) {
@@ -62,9 +63,9 @@ func TestExpandVars(t *testing.T) {
 			res, err := Expand(kase.tmpl, kase.data)
 			assert.EqualValues(t, kase.out, res)
 			if kase.error {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}

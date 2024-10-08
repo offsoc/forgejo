@@ -1,3 +1,14 @@
+.simple-grid {
+  display: grid;
+  gap: 1em 2em;
+}
+
+@media (min-width: 30em) {
+  .simple-grid.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* based on Fomantic UI grid module, with just the parts extracted that we use. If you find any
    unused rules here after refactoring, please remove them. */
 

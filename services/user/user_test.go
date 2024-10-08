@@ -20,6 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -28,27 +29,27 @@ func TestMain(m *testing.M) {
 
 func TestDeleteUser(t *testing.T) {
 	test := func(userID int64) {
-		assert.NoError(t, unittest.PrepareTestDatabase())
+		require.NoError(t, unittest.PrepareTestDatabase())
 		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: userID})
 
 		ownedRepos := make([]*repo_model.Repository, 0, 10)
-		assert.NoError(t, db.GetEngine(db.DefaultContext).Find(&ownedRepos, &repo_model.Repository{OwnerID: userID}))
+		require.NoError(t, db.GetEngine(db.DefaultContext).Find(&ownedRepos, &repo_model.Repository{OwnerID: userID}))
 		if len(ownedRepos) > 0 {
 			err := DeleteUser(db.DefaultContext, user, false)
-			assert.Error(t, err)
+			require.Error(t, err)
 			assert.True(t, models.IsErrUserOwnRepos(err))
 			return
 		}
 
 		orgUsers := make([]*organization.OrgUser, 0, 10)
-		assert.NoError(t, db.GetEngine(db.DefaultContext).Find(&orgUsers, &organization.OrgUser{UID: userID}))
+		require.NoError(t, db.GetEngine(db.DefaultContext).Find(&orgUsers, &organization.OrgUser{UID: userID}))
 		for _, orgUser := range orgUsers {
 			if err := models.RemoveOrgUser(db.DefaultContext, orgUser.OrgID, orgUser.UID); err != nil {
 				assert.True(t, organization.IsErrLastOrgOwner(err))
 				return
 			}
 		}
-		assert.NoError(t, DeleteUser(db.DefaultContext, user, false))
+		require.NoError(t, DeleteUser(db.DefaultContext, user, false))
 		unittest.AssertNotExistsBean(t, &user_model.User{ID: userID})
 		unittest.CheckConsistencyFor(t, &user_model.User{}, &repo_model.Repository{})
 	}
@@ -58,16 +59,16 @@ func TestDeleteUser(t *testing.T) {
 	test(11)
 
 	org := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 3})
-	assert.Error(t, DeleteUser(db.DefaultContext, org, false))
+	require.Error(t, DeleteUser(db.DefaultContext, org, false))
 }
 
 func TestPurgeUser(t *testing.T) {
 	test := func(userID int64) {
-		assert.NoError(t, unittest.PrepareTestDatabase())
+		require.NoError(t, unittest.PrepareTestDatabase())
 		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: userID})
 
 		err := DeleteUser(db.DefaultContext, user, true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		unittest.AssertNotExistsBean(t, &user_model.User{ID: userID})
 		unittest.CheckConsistencyFor(t, &user_model.User{}, &repo_model.Repository{})
@@ -78,7 +79,7 @@ func TestPurgeUser(t *testing.T) {
 	test(11)
 
 	org := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 3})
-	assert.Error(t, DeleteUser(db.DefaultContext, org, false))
+	require.Error(t, DeleteUser(db.DefaultContext, org, false))
 }
 
 func TestCreateUser(t *testing.T) {
@@ -91,13 +92,13 @@ func TestCreateUser(t *testing.T) {
 		MustChangePassword: false,
 	}
 
-	assert.NoError(t, user_model.CreateUser(db.DefaultContext, user))
+	require.NoError(t, user_model.CreateUser(db.DefaultContext, user))
 
-	assert.NoError(t, DeleteUser(db.DefaultContext, user, false))
+	require.NoError(t, DeleteUser(db.DefaultContext, user, false))
 }
 
 func TestRenameUser(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 21})
 
 	t.Run("Non-Local", func(t *testing.T) {
@@ -105,19 +106,19 @@ func TestRenameUser(t *testing.T) {
 			Type:      user_model.UserTypeIndividual,
 			LoginType: auth.OAuth2,
 		}
-		assert.ErrorIs(t, RenameUser(db.DefaultContext, u, "user_rename"), user_model.ErrUserIsNotLocal{})
+		require.ErrorIs(t, RenameUser(db.DefaultContext, u, "user_rename"), user_model.ErrUserIsNotLocal{})
 	})
 
 	t.Run("Same username", func(t *testing.T) {
-		assert.NoError(t, RenameUser(db.DefaultContext, user, user.Name))
+		require.NoError(t, RenameUser(db.DefaultContext, user, user.Name))
 	})
 
 	t.Run("Non usable username", func(t *testing.T) {
 		usernames := []string{"--diff", "aa.png", ".well-known", "search", "aaa.atom"}
 		for _, username := range usernames {
 			t.Run(username, func(t *testing.T) {
-				assert.Error(t, user_model.IsUsableUsername(username))
-				assert.Error(t, RenameUser(db.DefaultContext, user, username))
+				require.Error(t, user_model.IsUsableUsername(username))
+				require.Error(t, RenameUser(db.DefaultContext, user, username))
 			})
 		}
 	})
@@ -127,7 +128,7 @@ func TestRenameUser(t *testing.T) {
 		unittest.AssertNotExistsBean(t, &user_model.User{ID: user.ID, Name: caps})
 		unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, OwnerName: user.Name})
 
-		assert.NoError(t, RenameUser(db.DefaultContext, user, caps))
+		require.NoError(t, RenameUser(db.DefaultContext, user, caps))
 
 		unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: user.ID, Name: caps})
 		unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, OwnerName: caps})
@@ -136,21 +137,21 @@ func TestRenameUser(t *testing.T) {
 	t.Run("Already exists", func(t *testing.T) {
 		existUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
-		assert.ErrorIs(t, RenameUser(db.DefaultContext, user, existUser.Name), user_model.ErrUserAlreadyExist{Name: existUser.Name})
-		assert.ErrorIs(t, RenameUser(db.DefaultContext, user, existUser.LowerName), user_model.ErrUserAlreadyExist{Name: existUser.LowerName})
+		require.ErrorIs(t, RenameUser(db.DefaultContext, user, existUser.Name), user_model.ErrUserAlreadyExist{Name: existUser.Name})
+		require.ErrorIs(t, RenameUser(db.DefaultContext, user, existUser.LowerName), user_model.ErrUserAlreadyExist{Name: existUser.LowerName})
 		newUsername := fmt.Sprintf("uSEr%d", existUser.ID)
-		assert.ErrorIs(t, RenameUser(db.DefaultContext, user, newUsername), user_model.ErrUserAlreadyExist{Name: newUsername})
+		require.ErrorIs(t, RenameUser(db.DefaultContext, user, newUsername), user_model.ErrUserAlreadyExist{Name: newUsername})
 	})
 
 	t.Run("Normal", func(t *testing.T) {
 		oldUsername := user.Name
 		newUsername := "User_Rename"
 
-		assert.NoError(t, RenameUser(db.DefaultContext, user, newUsername))
+		require.NoError(t, RenameUser(db.DefaultContext, user, newUsername))
 		unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: user.ID, Name: newUsername, LowerName: strings.ToLower(newUsername)})
 
 		redirectUID, err := user_model.LookupUserRedirect(db.DefaultContext, oldUsername)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, user.ID, redirectUID)
 
 		unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, OwnerName: user.Name})
@@ -176,37 +177,37 @@ func TestCreateUser_Issue5882(t *testing.T) {
 	for _, v := range tt {
 		setting.Admin.DisableRegularOrgCreation = v.disableOrgCreation
 
-		assert.NoError(t, user_model.CreateUser(db.DefaultContext, v.user))
+		require.NoError(t, user_model.CreateUser(db.DefaultContext, v.user))
 
 		u, err := user_model.GetUserByEmail(db.DefaultContext, v.user.Email)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, !u.AllowCreateOrganization, v.disableOrgCreation)
 
-		assert.NoError(t, DeleteUser(db.DefaultContext, v.user, false))
+		require.NoError(t, DeleteUser(db.DefaultContext, v.user, false))
 	}
 }
 
 func TestDeleteInactiveUsers(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	// Add an inactive user older than a minute, with an associated email_address record.
 	oldUser := &user_model.User{Name: "OldInactive", LowerName: "oldinactive", Email: "old@example.com", CreatedUnix: timeutil.TimeStampNow().Add(-120)}
 	_, err := db.GetEngine(db.DefaultContext).NoAutoTime().Insert(oldUser)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	oldEmail := &user_model.EmailAddress{UID: oldUser.ID, IsPrimary: true, Email: "old@example.com", LowerEmail: "old@example.com"}
 	err = db.Insert(db.DefaultContext, oldEmail)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Add an inactive user that's not older than a minute, with an associated email_address record.
 	newUser := &user_model.User{Name: "NewInactive", LowerName: "newinactive", Email: "new@example.com"}
 	err = db.Insert(db.DefaultContext, newUser)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	newEmail := &user_model.EmailAddress{UID: newUser.ID, IsPrimary: true, Email: "new@example.com", LowerEmail: "new@example.com"}
 	err = db.Insert(db.DefaultContext, newEmail)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = DeleteInactiveUsers(db.DefaultContext, time.Minute)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// User older than a minute should be deleted along with their email address.
 	unittest.AssertExistsIf(t, false, oldUser)

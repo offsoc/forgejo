@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenerate(t *testing.T) {
@@ -24,17 +24,16 @@ func TestGenerate(t *testing.T) {
 
 	backColor := color.White
 	imgMaker, err := New(64, backColor, DarkColors...)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for i := 0; i < 100; i++ {
 		s := strconv.Itoa(i)
 		img := imgMaker.Make([]byte(s))
 
 		f, err := os.Create(dir + "/" + s + ".png")
-		if !assert.NoError(t, err) {
-			continue
-		}
+		require.NoError(t, err)
+
 		defer f.Close()
 		err = png.Encode(f, img)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 }

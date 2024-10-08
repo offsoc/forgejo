@@ -17,6 +17,7 @@ import (
 	activities_model "code.gitea.io/gitea/models/activities"
 	asymkey_model "code.gitea.io/gitea/models/asymkey"
 	"code.gitea.io/gitea/models/db"
+	git_model "code.gitea.io/gitea/models/git"
 	issues_model "code.gitea.io/gitea/models/issues"
 	"code.gitea.io/gitea/models/organization"
 	repo_model "code.gitea.io/gitea/models/repo"
@@ -406,8 +407,6 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	switch viewType {
 	case "assigned":
 		filterMode = issues_model.FilterModeAssign
-	case "created_by":
-		filterMode = issues_model.FilterModeCreate
 	case "mentioned":
 		filterMode = issues_model.FilterModeMention
 	case "review_requested":
@@ -415,10 +414,12 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	case "reviewed_by":
 		filterMode = issues_model.FilterModeReviewed
 	case "your_repositories":
+		filterMode = issues_model.FilterModeYourRepositories
+	case "created_by":
 		fallthrough
 	default:
-		filterMode = issues_model.FilterModeYourRepositories
-		viewType = "your_repositories"
+		filterMode = issues_model.FilterModeCreate
+		viewType = "created_by"
 	}
 
 	// --------------------------------------------------------------------------
@@ -447,7 +448,7 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 		User:       ctx.Doer,
 	}
 
-	isFuzzy := ctx.FormBool("fuzzy")
+	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
 
 	// Search all repositories which
 	//
@@ -596,6 +597,11 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	if err != nil {
 		ctx.ServerError("GetIssuesLastCommitStatus", err)
 		return
+	}
+	if !ctx.Repo.CanRead(unit.TypeActions) {
+		for key := range commitStatuses {
+			git_model.CommitStatusesHideActionsURL(ctx, commitStatuses[key])
+		}
 	}
 
 	// -------------------------------
@@ -755,7 +761,7 @@ func UsernameSubRoute(ctx *context.Context) {
 		}
 		// check view permissions
 		if !user_model.IsUserVisibleToViewer(ctx, ctx.ContextUser, ctx.Doer) {
-			ctx.NotFound("user", fmt.Errorf(ctx.ContextUser.Name))
+			ctx.NotFound("User not visible", nil)
 			return false
 		}
 		return true

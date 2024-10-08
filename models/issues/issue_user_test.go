@@ -11,11 +11,11 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_NewIssueUsers(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	newIssue := &issues_model.Issue{
@@ -29,7 +29,7 @@ func Test_NewIssueUsers(t *testing.T) {
 	// artificially insert new issue
 	unittest.AssertSuccessfulInsert(t, newIssue)
 
-	assert.NoError(t, issues_model.NewIssueUsers(db.DefaultContext, repo, newIssue))
+	require.NoError(t, issues_model.NewIssueUsers(db.DefaultContext, repo, newIssue))
 
 	// issue_user table should now have entries for new issue
 	unittest.AssertExistsAndLoadBean(t, &issues_model.IssueUser{IssueID: newIssue.ID, UID: newIssue.PosterID})
@@ -37,24 +37,24 @@ func Test_NewIssueUsers(t *testing.T) {
 }
 
 func TestUpdateIssueUserByRead(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1})
 
-	assert.NoError(t, issues_model.UpdateIssueUserByRead(db.DefaultContext, 4, issue.ID))
+	require.NoError(t, issues_model.UpdateIssueUserByRead(db.DefaultContext, 4, issue.ID))
 	unittest.AssertExistsAndLoadBean(t, &issues_model.IssueUser{IssueID: issue.ID, UID: 4}, "is_read=1")
 
-	assert.NoError(t, issues_model.UpdateIssueUserByRead(db.DefaultContext, 4, issue.ID))
+	require.NoError(t, issues_model.UpdateIssueUserByRead(db.DefaultContext, 4, issue.ID))
 	unittest.AssertExistsAndLoadBean(t, &issues_model.IssueUser{IssueID: issue.ID, UID: 4}, "is_read=1")
 
-	assert.NoError(t, issues_model.UpdateIssueUserByRead(db.DefaultContext, unittest.NonexistentID, unittest.NonexistentID))
+	require.NoError(t, issues_model.UpdateIssueUserByRead(db.DefaultContext, unittest.NonexistentID, unittest.NonexistentID))
 }
 
 func TestUpdateIssueUsersByMentions(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1})
 
 	uids := []int64{2, 5}
-	assert.NoError(t, issues_model.UpdateIssueUsersByMentions(db.DefaultContext, issue.ID, uids))
+	require.NoError(t, issues_model.UpdateIssueUsersByMentions(db.DefaultContext, issue.ID, uids))
 	for _, uid := range uids {
 		unittest.AssertExistsAndLoadBean(t, &issues_model.IssueUser{IssueID: issue.ID, UID: uid}, "is_mentioned=1")
 	}

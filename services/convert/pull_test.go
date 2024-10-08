@@ -17,15 +17,16 @@ import (
 	"code.gitea.io/gitea/modules/structs"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPullRequest_APIFormat(t *testing.T) {
 	// with HeadRepo
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	headRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: 1})
-	assert.NoError(t, pr.LoadAttributes(db.DefaultContext))
-	assert.NoError(t, pr.LoadIssue(db.DefaultContext))
+	require.NoError(t, pr.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pr.LoadIssue(db.DefaultContext))
 	apiPullRequest := ToAPIPullRequest(git.DefaultContext, pr, nil)
 	assert.NotNil(t, apiPullRequest)
 	assert.EqualValues(t, &structs.PRBranchInfo{
@@ -38,8 +39,8 @@ func TestPullRequest_APIFormat(t *testing.T) {
 
 	// withOut HeadRepo
 	pr = unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: 1})
-	assert.NoError(t, pr.LoadIssue(db.DefaultContext))
-	assert.NoError(t, pr.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pr.LoadIssue(db.DefaultContext))
+	require.NoError(t, pr.LoadAttributes(db.DefaultContext))
 	// simulate fork deletion
 	pr.HeadRepo = nil
 	pr.HeadRepoID = 100000
@@ -50,7 +51,7 @@ func TestPullRequest_APIFormat(t *testing.T) {
 }
 
 func TestPullReviewList(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	t.Run("Pending review", func(t *testing.T) {
 		reviewer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
@@ -59,18 +60,18 @@ func TestPullReviewList(t *testing.T) {
 
 		t.Run("Anonymous", func(t *testing.T) {
 			prList, err := ToPullReviewList(db.DefaultContext, rl, nil)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Empty(t, prList)
 		})
 		t.Run("Reviewer", func(t *testing.T) {
 			prList, err := ToPullReviewList(db.DefaultContext, rl, reviewer)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, prList, 1)
 		})
 		t.Run("Admin", func(t *testing.T) {
 			adminUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{IsAdmin: true}, unittest.Cond("id != ?", reviewer.ID))
 			prList, err := ToPullReviewList(db.DefaultContext, rl, adminUser)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, prList, 1)
 		})
 	})

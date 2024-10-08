@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	auth_model "code.gitea.io/gitea/models/auth"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
@@ -19,9 +20,10 @@ import (
 type packageClaims struct {
 	jwt.RegisteredClaims
 	UserID int64
+	Scope  auth_model.AccessTokenScope
 }
 
-func CreateAuthorizationToken(u *user_model.User) (string, error) {
+func CreateAuthorizationToken(u *user_model.User, scope auth_model.AccessTokenScope) (string, error) {
 	now := time.Now()
 
 	claims := packageClaims{
@@ -30,6 +32,7 @@ func CreateAuthorizationToken(u *user_model.User) (string, error) {
 			NotBefore: jwt.NewNumericDate(now),
 		},
 		UserID: u.ID,
+		Scope:  scope,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
@@ -41,16 +44,16 @@ func CreateAuthorizationToken(u *user_model.User) (string, error) {
 	return tokenString, nil
 }
 
-func ParseAuthorizationToken(req *http.Request) (int64, error) {
+func ParseAuthorizationToken(req *http.Request) (int64, auth_model.AccessTokenScope, error) {
 	h := req.Header.Get("Authorization")
 	if h == "" {
-		return 0, nil
+		return 0, "", nil
 	}
 
 	parts := strings.SplitN(h, " ", 2)
 	if len(parts) != 2 {
 		log.Error("split token failed: %s", h)
-		return 0, fmt.Errorf("split token failed")
+		return 0, "", fmt.Errorf("split token failed")
 	}
 
 	token, err := jwt.ParseWithClaims(parts[1], &packageClaims{}, func(t *jwt.Token) (any, error) {
@@ -60,13 +63,13 @@ func ParseAuthorizationToken(req *http.Request) (int64, error) {
 		return setting.GetGeneralTokenSigningSecret(), nil
 	})
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 
 	c, ok := token.Claims.(*packageClaims)
 	if !token.Valid || !ok {
-		return 0, fmt.Errorf("invalid token claim")
+		return 0, "", fmt.Errorf("invalid token claim")
 	}
 
-	return c.UserID, nil
+	return c.UserID, c.Scope, nil
 }

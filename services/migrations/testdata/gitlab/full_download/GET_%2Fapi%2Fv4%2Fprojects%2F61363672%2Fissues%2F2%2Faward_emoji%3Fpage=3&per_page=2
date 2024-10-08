@@ -1,0 +1,24 @@
+X-Per-Page: 2
+X-Runtime: 0.064070
+X-Content-Type-Options: nosniff
+X-Prev-Page: 2
+X-Page: 3
+Vary: Origin, Accept-Encoding
+X-Total: 6
+Link: <https://gitlab.com/api/v4/projects/61363672/issues/2/award_emoji?id=61363672&issue_iid=2&page=2&per_page=2>; rel="prev", <https://gitlab.com/api/v4/projects/61363672/issues/2/award_emoji?id=61363672&issue_iid=2&page=1&per_page=2>; rel="first", <https://gitlab.com/api/v4/projects/61363672/issues/2/award_emoji?id=61363672&issue_iid=2&page=3&per_page=2>; rel="last"
+X-Frame-Options: SAMEORIGIN
+X-Gitlab-Meta: {"correlation_id":"db9cabb4c4399ec8680e56916a5f9ca2","version":"1"}
+X-Next-Page: 
+X-Total-Pages: 3
+Strict-Transport-Security: max-age=31536000
+Content-Security-Policy: default-src 'none'
+Content-Type: application/json
+Etag: W/"578a2e92e9d4f9fb1c21c89b9e13eb0e"
+Gitlab-Lb: haproxy-main-17-lb-gprd
+Cf-Cache-Status: MISS
+Referrer-Policy: strict-origin-when-cross-origin
+Gitlab-Sv: api-gke-us-east1-d
+Set-Cookie: _cfuvid=Upv78tZEcC_Ry_GNFdw5Ms5eMI9FkehWT5RF0a2i7d0-1725394797546-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+Cache-Control: max-age=0, private, must-revalidate
+
+[{"id":28092953,"name":"confused","user":{"id":548513,"username":"mkobel","name":"Moritz Kobel","state":"active","locked":false,"avatar_url":"https://secure.gravatar.com/avatar/eae1be6324682816aedc885acbf5858719b40956e0278edabe5c0db7cbc95f3b?s=80\u0026d=identicon","web_url":"https://gitlab.com/mkobel"},"created_at":"2024-09-03T14:46:18.191Z","updated_at":"2024-09-03T14:46:18.191Z","awardable_id":152568900,"awardable_type":"Issue","url":null},{"id":28092962,"name":"hearts","user":{"id":548513,"username":"mkobel","name":"Moritz Kobel","state":"active","locked":false,"avatar_url":"https://secure.gravatar.com/avatar/eae1be6324682816aedc885acbf5858719b40956e0278edabe5c0db7cbc95f3b?s=80\u0026d=identicon","web_url":"https://gitlab.com/mkobel"},"created_at":"2024-09-03T14:46:35.367Z","updated_at":"2024-09-03T14:46:35.367Z","awardable_id":152568900,"awardable_type":"Issue","url":null}]

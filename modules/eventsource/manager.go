@@ -77,13 +77,3 @@ func (m *Manager) SendMessage(uid int64, message *Event) {
 		messenger.SendMessage(message)
 	}
 }
-
-// SendMessageBlocking sends a message to a particular user
-func (m *Manager) SendMessageBlocking(uid int64, message *Event) {
-	m.mutex.Lock()
-	messenger, ok := m.messengers[uid]
-	m.mutex.Unlock()
-	if ok {
-		messenger.SendMessageBlocking(message)
-	}
-}

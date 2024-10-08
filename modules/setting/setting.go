@@ -155,6 +155,7 @@ func loadCommonSettingsFrom(cfg ConfigProvider) error {
 	loadGitFrom(cfg)
 	loadMirrorFrom(cfg)
 	loadMarkupFrom(cfg)
+	loadQuotaFrom(cfg)
 	loadOtherFrom(cfg)
 	return nil
 }
@@ -229,6 +230,8 @@ func LoadSettings() {
 
 // LoadSettingsForInstall initializes the settings for install
 func LoadSettingsForInstall() {
+	initAllLoggers()
+
 	loadDBSetting(CfgProvider)
 	loadServiceFrom(CfgProvider)
 	loadMailerFrom(CfgProvider)

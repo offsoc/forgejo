@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCopyFile(t *testing.T) {
@@ -28,10 +29,10 @@ func TestCopyFile(t *testing.T) {
 	}()
 
 	err := os.WriteFile(srcFile, testContent, 0o777)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = CopyFile(srcFile, dstFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	dstContent, err := os.ReadFile(dstFile)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, testContent, dstContent)
 }

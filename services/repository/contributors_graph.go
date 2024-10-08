@@ -25,7 +25,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
 
-	"gitea.com/go-chi/cache"
+	"code.forgejo.org/go-chi/cache"
 )
 
 const contributorStatsCacheKey = "GetContributorStats/%s/%s"

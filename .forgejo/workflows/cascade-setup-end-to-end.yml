@@ -27,7 +27,7 @@ jobs:
     if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
     runs-on: docker
     container:
-      image: node:20-bookworm
+      image: code.forgejo.org/oci/node:20-bookworm
     steps:
       - name: event
         run: |
@@ -52,7 +52,7 @@ jobs:
       )
     runs-on: docker
     container:
-      image: node:20-bookworm
+      image: code.forgejo.org/oci/node:20-bookworm
     steps:
       - uses: actions/checkout@v4
         with:

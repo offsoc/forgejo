@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/routers"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestActivityPubRepository(t *testing.T) {
@@ -40,7 +41,7 @@ func TestActivityPubRepository(t *testing.T) {
 
 		var repository forgefed_modules.Repository
 		err := repository.UnmarshalJSON(body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Regexp(t, fmt.Sprintf("activitypub/repository-id/%v$", repositoryID), repository.GetID().String())
 	})
@@ -139,8 +140,10 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 		}()
 		actionsUser := user.NewActionsUser()
 		repositoryID := 2
-		c, err := activitypub.NewClient(db.DefaultContext, actionsUser, "not used")
-		assert.NoError(t, err)
+		cf, err := activitypub.GetClientFactory(db.DefaultContext)
+		require.NoError(t, err)
+		c, err := cf.WithKeys(db.DefaultContext, actionsUser, "not used")
+		require.NoError(t, err)
 		repoInboxURL := fmt.Sprintf(
 			"%s/api/v1/activitypub/repository-id/%v/inbox",
 			srv.URL, repositoryID)
@@ -157,7 +160,7 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 		t.Logf("activity: %s", activity1)
 		resp, err := c.Post(activity1, repoInboxURL)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 
 		federationHost := unittest.AssertExistsAndLoadBean(t, &forgefed.FederationHost{HostFqdn: "127.0.0.1"})
@@ -176,7 +179,7 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 		t.Logf("activity: %s", activity2)
 		resp, err = c.Post(activity2, repoInboxURL)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 
 		federatedUser = unittest.AssertExistsAndLoadBean(t, &user.FederatedUser{ExternalID: "30", FederationHostID: federationHost.ID})
@@ -198,7 +201,7 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 		t.Logf("activity: %s", activity3)
 		resp, err = c.Post(activity3, otherRepoInboxURL)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 
 		federatedUser = unittest.AssertExistsAndLoadBean(t, &user.FederatedUser{ExternalID: "30", FederationHostID: federationHost.ID})
@@ -206,7 +209,7 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 
 		// Replay activity2.
 		resp, err = c.Post(activity2, repoInboxURL)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, http.StatusNotAcceptable, resp.StatusCode)
 	})
 }
@@ -231,14 +234,16 @@ func TestActivityPubRepositoryInboxInvalid(t *testing.T) {
 		}()
 		actionsUser := user.NewActionsUser()
 		repositoryID := 2
-		c, err := activitypub.NewClient(db.DefaultContext, actionsUser, "not used")
-		assert.NoError(t, err)
+		cf, err := activitypub.GetClientFactory(db.DefaultContext)
+		require.NoError(t, err)
+		c, err := cf.WithKeys(db.DefaultContext, actionsUser, "not used")
+		require.NoError(t, err)
 		repoInboxURL := fmt.Sprintf("%s/api/v1/activitypub/repository-id/%v/inbox",
 			srv.URL, repositoryID)
 
 		activity := []byte(`{"type":"Wrong"}`)
 		resp, err := c.Post(activity, repoInboxURL)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, http.StatusNotAcceptable, resp.StatusCode)
 	})
 }

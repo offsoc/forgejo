@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	auth_model "code.gitea.io/gitea/models/auth"
 	packages_model "code.gitea.io/gitea/models/packages"
 	container_model "code.gitea.io/gitea/models/packages/container"
 	user_model "code.gitea.io/gitea/models/user"
@@ -154,7 +155,10 @@ func Authenticate(ctx *context.Context) {
 		u = user_model.NewGhostUser()
 	}
 
-	token, err := packages_service.CreateAuthorizationToken(u)
+	// If there's an API scope, ensure it propagates.
+	scope, _ := ctx.Data["ApiTokenScope"].(auth_model.AccessTokenScope)
+
+	token, err := packages_service.CreateAuthorizationToken(u, scope)
 	if err != nil {
 		apiError(ctx, http.StatusInternalServerError, err)
 		return

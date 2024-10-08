@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM docker.io/tonistiigi/xx AS xx
 
-FROM --platform=$BUILDPLATFORM code.forgejo.org/oci/golang:1.22-alpine3.20 as build-env
+FROM --platform=$BUILDPLATFORM code.forgejo.org/oci/golang:1.23-alpine3.20 as build-env
 
 ARG GOPROXY
 ENV GOPROXY=${GOPROXY:-direct}
@@ -49,7 +49,7 @@ RUN chmod 755 /tmp/local/usr/local/bin/docker-entrypoint.sh \
               /go/src/code.gitea.io/gitea/environment-to-ini
 RUN chmod 644 /go/src/code.gitea.io/gitea/contrib/autocompletion/bash_autocomplete
 
-FROM code.forgejo.org/oci/golang:1.22-alpine3.20
+FROM code.forgejo.org/oci/golang:1.23-alpine3.20
 LABEL maintainer="contact@forgejo.org" \
       org.opencontainers.image.authors="Forgejo" \
       org.opencontainers.image.url="https://forgejo.org" \
@@ -57,7 +57,7 @@ LABEL maintainer="contact@forgejo.org" \
       org.opencontainers.image.source="https://codeberg.org/forgejo/forgejo" \
       org.opencontainers.image.version="${RELEASE_VERSION}" \
       org.opencontainers.image.vendor="Forgejo" \
-      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.licenses="GPL-3.0-or-later" \
       org.opencontainers.image.title="Forgejo. Beyond coding. We forge." \
       org.opencontainers.image.description="Forgejo is a self-hosted lightweight software forge. Easy to install and low maintenance, it just does the job."
 
@@ -90,6 +90,7 @@ RUN chown git:git /var/lib/gitea /etc/gitea
 COPY --from=build-env /tmp/local /
 RUN cd /usr/local/bin ; ln -s gitea forgejo
 COPY --from=build-env --chown=root:root /go/src/code.gitea.io/gitea/gitea /app/gitea/gitea
+RUN ln /app/gitea/gitea /app/gitea/forgejo-cli
 COPY --from=build-env --chown=root:root /go/src/code.gitea.io/gitea/environment-to-ini /usr/local/bin/environment-to-ini
 COPY --from=build-env /go/src/code.gitea.io/gitea/contrib/autocompletion/bash_autocomplete /etc/profile.d/gitea_bash_autocomplete.sh
 
@@ -111,4 +112,3 @@ WORKDIR /var/lib/gitea
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--", "/usr/local/bin/docker-entrypoint.sh"]
 CMD []
-

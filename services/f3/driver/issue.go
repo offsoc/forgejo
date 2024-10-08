@@ -96,7 +96,7 @@ func (o *issue) FromFormat(content f3.Interface) {
 		},
 		Content:     issue.Content,
 		Milestone:   milestone,
-		IsClosed:    issue.State == "closed",
+		IsClosed:    issue.State == f3.IssueStateClosed,
 		CreatedUnix: timeutil.TimeStamp(issue.Created.Unix()),
 		UpdatedUnix: timeutil.TimeStamp(issue.Updated.Unix()),
 		IsLocked:    issue.IsLocked,
@@ -124,7 +124,7 @@ func (o *issue) Get(ctx context.Context) bool {
 	o.Trace("%s", node.GetID())
 
 	project := f3_tree.GetProjectID(o.GetNode())
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	issue, err := issues_model.GetIssueByIndex(ctx, project, id)
 	if issues_model.IsErrIssueNotExist(err) {
@@ -144,9 +144,9 @@ func (o *issue) Get(ctx context.Context) bool {
 func (o *issue) Patch(ctx context.Context) {
 	node := o.GetNode()
 	project := f3_tree.GetProjectID(o.GetNode())
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 	o.Trace("repo_id = %d, index = %d", project, id)
-	if _, err := db.GetEngine(ctx).Where("`repo_id` = ? AND `index` = ?", project, id).Cols("name", "content").Update(o.forgejoIssue); err != nil {
+	if _, err := db.GetEngine(ctx).Where("`repo_id` = ? AND `index` = ?", project, id).Cols("name", "content", "is_closed").Update(o.forgejoIssue); err != nil {
 		panic(fmt.Errorf("%v %v", o.forgejoIssue, err))
 	}
 }
@@ -207,7 +207,7 @@ func (o *issue) Put(ctx context.Context) generic.NodeID {
 	}
 
 	o.Trace("issue created %d/%d", o.forgejoIssue.ID, o.forgejoIssue.Index)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoIssue.Index))
+	return generic.NewNodeID(o.forgejoIssue.Index)
 }
 
 func (o *issue) Delete(ctx context.Context) {

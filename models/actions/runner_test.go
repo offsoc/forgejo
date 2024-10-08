@@ -31,15 +31,15 @@ func TestUpdateSecret(t *testing.T) {
 
 func TestDeleteRunner(t *testing.T) {
 	const recordID = 12345678
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	before := unittest.AssertExistsAndLoadBean(t, &ActionRunner{ID: recordID})
 
 	err := DeleteRunner(db.DefaultContext, recordID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var after ActionRunner
 	found, err := db.GetEngine(db.DefaultContext).ID(recordID).Unscoped().Get(&after)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, found)
 
 	// Most fields (namely Name, Version, OwnerID, RepoID, Description, Base, RepoRange,

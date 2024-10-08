@@ -1,6 +1,13 @@
 // @ts-check
-import {test, expect} from '@playwright/test';
-import {login_user, load_logged_in_context} from './utils_e2e.js';
+
+// @watch start
+// templates/org/**
+// templates/repo/**
+// web_src/js/webcomponents/overflow-menu.js
+// @watch end
+
+import {expect} from '@playwright/test';
+import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');

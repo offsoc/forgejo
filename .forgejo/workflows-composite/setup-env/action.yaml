@@ -1,0 +1,12 @@
+runs:
+  using: "composite"
+  steps:
+    - name: setup user and permissions
+      run: |
+        git config --add safe.directory '*'
+        # ignore if the user already exists (like with the playwright image)
+        adduser --quiet --comment forgejo --disabled-password forgejo || true
+        chown -R forgejo:forgejo .
+    - uses: https://codeberg.org/fnetx/setup-cache-go@b2214eaf6fb44c7e8512c0f462a2c3ec31f86a73
+      with:
+        username: forgejo

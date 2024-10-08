@@ -7,8 +7,7 @@
 	{{$canEditIssueTitle := and (or .HasIssuesOrPullsWritePermission .IsIssuePoster) (not .Repository.IsArchived)}}
 	<div class="issue-title" id="issue-title-display">
 		<h1 class="tw-break-anywhere">
-			{{RenderIssueTitle $.Context .Issue.Title ($.Repository.ComposeMetas ctx) | RenderCodeBlock}}
-			<span class="index">#{{.Issue.Index}}</span>
+			{{RenderIssueTitle $.Context .Issue.Title ($.Repository.ComposeMetas ctx)}}				<span class="index">#{{.Issue.Index}}</span>
 		</h1>
 		<div class="button-row">
 			{{if $canEditIssueTitle}}
@@ -22,7 +21,7 @@
 	{{if $canEditIssueTitle}}
 	<div class="ui form issue-title tw-hidden" id="issue-title-editor">
 		<div class="ui input tw-flex-1">
-			<input value="{{.Issue.Title}}" data-old-title="{{.Issue.Title}}" maxlength="255" autocomplete="off" class="js-quick-submit">
+			<input value="{{.Issue.Title}}" data-old-title="{{.Issue.Title}}" maxlength="245" autocomplete="off" class="js-quick-submit">
 		</div>
 		<div class="button-row">
 			<button class="ui small basic cancel button">{{ctx.Locale.Tr "repo.issues.cancel"}}</button>

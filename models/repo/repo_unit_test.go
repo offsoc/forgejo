@@ -32,8 +32,8 @@ func TestActionsConfig(t *testing.T) {
 }
 
 func TestRepoUnitAccessMode(t *testing.T) {
-	assert.Equal(t, UnitAccessModeNone.ToAccessMode(perm.AccessModeAdmin), perm.AccessModeNone)
-	assert.Equal(t, UnitAccessModeRead.ToAccessMode(perm.AccessModeAdmin), perm.AccessModeRead)
-	assert.Equal(t, UnitAccessModeWrite.ToAccessMode(perm.AccessModeAdmin), perm.AccessModeWrite)
-	assert.Equal(t, UnitAccessModeUnset.ToAccessMode(perm.AccessModeRead), perm.AccessModeRead)
+	assert.Equal(t, perm.AccessModeNone, UnitAccessModeNone.ToAccessMode(perm.AccessModeAdmin))
+	assert.Equal(t, perm.AccessModeRead, UnitAccessModeRead.ToAccessMode(perm.AccessModeAdmin))
+	assert.Equal(t, perm.AccessModeWrite, UnitAccessModeWrite.ToAccessMode(perm.AccessModeAdmin))
+	assert.Equal(t, perm.AccessModeRead, UnitAccessModeUnset.ToAccessMode(perm.AccessModeRead))
 }

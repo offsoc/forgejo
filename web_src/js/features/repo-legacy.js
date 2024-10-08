@@ -64,7 +64,7 @@ export function initRepoCommentForm() {
   function initBranchSelector() {
     const $selectBranch = $('.ui.select-branch');
     const $branchMenu = $selectBranch.find('.reference-list-menu');
-    const $isNewIssue = $branchMenu.hasClass('new-issue');
+    const $isNewIssue = $branchMenu[0]?.classList.contains('new-issue');
     $branchMenu.find('.item:not(.no-select)').on('click', async function () {
       const selectedValue = $(this).data('id');
       const editMode = $('#editing_mode').val();
@@ -132,7 +132,7 @@ export function initRepoCommentForm() {
 
     $listMenu.find('.item:not(.no-select)').on('click', function (e) {
       e.preventDefault();
-      if ($(this).hasClass('ban-change')) {
+      if (this.classList.contains('ban-change')) {
         return false;
       }
 
@@ -147,7 +147,7 @@ export function initRepoCommentForm() {
           if (this.getAttribute('data-scope') !== scope) {
             return true;
           }
-          if (this !== clickedItem && !$(this).hasClass('checked')) {
+          if (this !== clickedItem && !this.classList.contains('checked')) {
             return true;
           }
         } else if (this !== clickedItem) {
@@ -155,7 +155,7 @@ export function initRepoCommentForm() {
           return true;
         }
 
-        if ($(this).hasClass('checked')) {
+        if (this.classList.contains('checked')) {
           $(this).removeClass('checked');
           $(this).find('.octicon-check').addClass('tw-invisible');
           if (hasUpdateAction) {
@@ -194,7 +194,7 @@ export function initRepoCommentForm() {
 
       const listIds = [];
       $(this).parent().find('.item').each(function () {
-        if ($(this).hasClass('checked')) {
+        if (this.classList.contains('checked')) {
           listIds.push($(this).data('id'));
           $($(this).data('id-selector')).removeClass('tw-hidden');
         } else {
@@ -270,7 +270,9 @@ export function initRepoCommentForm() {
       }
 
       let icon = '';
-      if (input_id === '#project_id') {
+      if (input_id === '#milestone_id') {
+        icon = svg('octicon-milestone', 18, 'tw-mr-2');
+      } else if (input_id === '#project_id') {
         icon = svg('octicon-project', 18, 'tw-mr-2');
       } else if (input_id === '#assignee_id') {
         icon = `<img class="ui avatar image tw-mr-2" alt="avatar" src=${$(this).data('avatar')}>`;
@@ -311,6 +313,7 @@ export function initRepoCommentForm() {
 
   // Milestone, Assignee, Project
   selectItem('.select-project', '#project_id');
+  selectItem('.select-milestone', '#milestone_id');
   selectItem('.select-assignee', '#assignee_id');
 }
 
@@ -605,7 +608,7 @@ function initRepoIssueCommentEdit() {
     const quote = $(`#${target}`).text().replace(/\n/g, '\n> ');
     const content = `> ${quote}\n\n`;
     let editor;
-    if ($(this).hasClass('quote-reply-diff')) {
+    if (this.classList.contains('quote-reply-diff')) {
       const $replyBtn = $(this).closest('.comment-code-cloud').find('button.comment-form-reply');
       editor = await handleReply($replyBtn);
     } else {

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -50,7 +51,7 @@ const (
 func TestParseConaninfo(t *testing.T) {
 	info, err := ParseConaninfo(strings.NewReader(contentConaninfo))
 	assert.NotNil(t, info)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(
 		t,
 		map[string]string{

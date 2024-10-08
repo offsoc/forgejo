@@ -15,12 +15,13 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIPullCommits(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: 2})
-	assert.NoError(t, pr.LoadIssue(db.DefaultContext))
+	require.NoError(t, pr.LoadIssue(db.DefaultContext))
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: pr.HeadRepoID})
 
 	req := NewRequestf(t, http.MethodGet, "/api/v1/repos/%s/%s/pulls/%d/commits", repo.OwnerName, repo.Name, pr.Index)

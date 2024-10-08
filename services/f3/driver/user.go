@@ -81,7 +81,7 @@ func (o *user) FromFormat(content f3.Interface) {
 func (o *user) Get(ctx context.Context) bool {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 	u, err := user_model.GetPossibleUserByID(ctx, id)
 	if user_model.IsErrUserNotExist(err) {
 		return false
@@ -98,7 +98,7 @@ func (o *user) Patch(context.Context) {
 
 func (o *user) Put(ctx context.Context) generic.NodeID {
 	if user := getSystemUserByName(o.forgejoUser.Name); user != nil {
-		return generic.NodeID(fmt.Sprintf("%d", user.ID))
+		return generic.NewNodeID(user.ID)
 	}
 
 	o.forgejoUser.LowerName = strings.ToLower(o.forgejoUser.Name)
@@ -111,7 +111,7 @@ func (o *user) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoUser.ID))
+	return generic.NewNodeID(o.forgejoUser.ID)
 }
 
 func (o *user) Delete(ctx context.Context) {

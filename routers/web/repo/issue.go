@@ -57,6 +57,8 @@ import (
 	issue_service "code.gitea.io/gitea/services/issue"
 	pull_service "code.gitea.io/gitea/services/pull"
 	repo_service "code.gitea.io/gitea/services/repository"
+
+	"gitea.com/go-chi/binding"
 )
 
 const (
@@ -201,7 +203,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		keyword = ""
 	}
 
-	isFuzzy := ctx.FormBool("fuzzy")
+	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
 
 	var mileIDs []int64
 	if milestoneID > 0 || milestoneID == db.NoConditionID { // -1 to get those issues which have no any milestone assigned
@@ -346,6 +348,11 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		ctx.ServerError("GetIssuesAllCommitStatus", err)
 		return
 	}
+	if !ctx.Repo.CanRead(unit.TypeActions) {
+		for key := range commitStatuses {
+			git_model.CommitStatusesHideActionsURL(ctx, commitStatuses[key])
+		}
+	}
 
 	if err := issues.LoadAttributes(ctx); err != nil {
 		ctx.ServerError("issues.LoadAttributes", err)
@@ -469,6 +476,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	ctx.Data["PosterID"] = posterID
 	ctx.Data["IsFuzzy"] = isFuzzy
 	ctx.Data["Keyword"] = keyword
+	ctx.Data["IsShowClosed"] = isShowClosed
 	switch {
 	case isShowClosed.Value():
 		ctx.Data["State"] = "closed"
@@ -1258,7 +1266,7 @@ func NewIssuePost(ctx *context.Context) {
 
 	if err := issue_service.NewIssue(ctx, repo, issue, labelIDs, attachments, assigneeIDs); err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.RenderWithErr(ctx.Tr("repo.issues.blocked_by_user"), tplIssueNew, form)
+			ctx.JSONError(ctx.Tr("repo.issues.blocked_by_user"))
 			return
 		} else if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) {
 			ctx.Error(http.StatusBadRequest, "UserDoesNotHaveAccessToRepo", err.Error())
@@ -1692,7 +1700,7 @@ func ViewIssue(ctx *context.Context) {
 			}
 
 			ghostProject := &project_model.Project{
-				ID:    -1,
+				ID:    project_model.GhostProjectID,
 				Title: ctx.Locale.TrString("repo.issues.deleted_project"),
 			}
 
@@ -1776,6 +1784,15 @@ func ViewIssue(ctx *context.Context) {
 			if err = comment.LoadPushCommits(ctx); err != nil {
 				ctx.ServerError("LoadPushCommits", err)
 				return
+			}
+			if !ctx.Repo.CanRead(unit.TypeActions) {
+				for _, commit := range comment.Commits {
+					if commit.Status == nil {
+						continue
+					}
+					commit.Status.HideActionsURL(ctx)
+					git_model.CommitStatusesHideActionsURL(ctx, commit.Statuses)
+				}
 			}
 		} else if comment.Type == issues_model.CommentTypeAddTimeManual ||
 			comment.Type == issues_model.CommentTypeStopTracking ||
@@ -1866,6 +1883,8 @@ func ViewIssue(ctx *context.Context) {
 			return
 		}
 		prConfig := prUnit.PullRequestsConfig()
+
+		ctx.Data["AutodetectManualMerge"] = prConfig.AutodetectManualMerge
 
 		var mergeStyle repo_model.MergeStyle
 		// Check correct values and select default
@@ -2202,10 +2221,20 @@ func UpdateIssueTitle(ctx *context.Context) {
 		ctx.Error(http.StatusForbidden)
 		return
 	}
-
 	title := ctx.FormTrim("title")
-	if len(title) == 0 {
-		ctx.Error(http.StatusNoContent)
+	if util.IsEmptyString(title) {
+		ctx.Error(http.StatusBadRequest, "Title cannot be empty or spaces")
+		return
+	}
+
+	// Creating a CreateIssueForm with the title so that we can validate the max title length
+	i := forms.CreateIssueForm{
+		Title: title,
+	}
+
+	bindingErr := binding.RawValidate(i)
+	if bindingErr.Has(binding.ERR_MAX_SIZE) {
+		ctx.Error(http.StatusBadRequest, "Title cannot be longer than 255 characters")
 		return
 	}
 
@@ -3183,7 +3212,7 @@ func NewComment(ctx *context.Context) {
 	comment, err := issue_service.CreateIssueComment(ctx, ctx.Doer, ctx.Repo.Repository, issue, form.Content, attachments)
 	if err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.Flash.Error(ctx.Tr("repo.issues.comment.blocked_by_user"))
+			ctx.JSONError(ctx.Tr("repo.issues.comment.blocked_by_user"))
 		} else {
 			ctx.ServerError("CreateIssueComment", err)
 		}
@@ -3349,12 +3378,6 @@ func ChangeIssueReaction(ctx *context.Context) {
 			log.Info("CreateIssueReaction: %s", err)
 			break
 		}
-		// Reload new reactions
-		issue.Reactions = nil
-		if err = issue.LoadAttributes(ctx); err != nil {
-			log.Info("issue.LoadAttributes: %s", err)
-			break
-		}
 
 		log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
 	case "unreact":
@@ -3363,16 +3386,16 @@ func ChangeIssueReaction(ctx *context.Context) {
 			return
 		}
 
-		// Reload new reactions
-		issue.Reactions = nil
-		if err := issue.LoadAttributes(ctx); err != nil {
-			log.Info("issue.LoadAttributes: %s", err)
-			break
-		}
-
 		log.Trace("Reaction for issue removed: %d/%d", ctx.Repo.Repository.ID, issue.ID)
 	default:
 		ctx.NotFound(fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
+		return
+	}
+
+	// Reload new reactions
+	issue.Reactions = nil
+	if err := issue.LoadAttributes(ctx); err != nil {
+		ctx.ServerError("ChangeIssueReaction.LoadAttributes", err)
 		return
 	}
 
@@ -3456,12 +3479,6 @@ func ChangeCommentReaction(ctx *context.Context) {
 			log.Info("CreateCommentReaction: %s", err)
 			break
 		}
-		// Reload new reactions
-		comment.Reactions = nil
-		if err = comment.LoadReactions(ctx, ctx.Repo.Repository); err != nil {
-			log.Info("comment.LoadReactions: %s", err)
-			break
-		}
 
 		log.Trace("Reaction for comment created: %d/%d/%d/%d", ctx.Repo.Repository.ID, comment.Issue.ID, comment.ID, reaction.ID)
 	case "unreact":
@@ -3470,16 +3487,16 @@ func ChangeCommentReaction(ctx *context.Context) {
 			return
 		}
 
-		// Reload new reactions
-		comment.Reactions = nil
-		if err = comment.LoadReactions(ctx, ctx.Repo.Repository); err != nil {
-			log.Info("comment.LoadReactions: %s", err)
-			break
-		}
-
 		log.Trace("Reaction for comment removed: %d/%d/%d", ctx.Repo.Repository.ID, comment.Issue.ID, comment.ID)
 	default:
 		ctx.NotFound(fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
+		return
+	}
+
+	// Reload new reactions
+	comment.Reactions = nil
+	if err = comment.LoadReactions(ctx, ctx.Repo.Repository); err != nil {
+		ctx.ServerError("ChangeCommentReaction.LoadReactions", err)
 		return
 	}
 

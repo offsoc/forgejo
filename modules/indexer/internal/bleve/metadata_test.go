@@ -9,19 +9,20 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMetadata(t *testing.T) {
 	dir := t.TempDir()
 
 	meta, err := readIndexMetadata(dir)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, &IndexMetadata{}, meta)
 
 	meta.Version = 24
-	assert.NoError(t, writeIndexMetadata(dir, meta))
+	require.NoError(t, writeIndexMetadata(dir, meta))
 
 	meta, err = readIndexMetadata(dir)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 24, meta.Version)
 }

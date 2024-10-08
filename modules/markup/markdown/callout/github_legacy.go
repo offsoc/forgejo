@@ -23,8 +23,7 @@ func (g *GitHubLegacyCalloutTransformer) Transform(node *ast.Document, reader te
 			return ast.WalkContinue, nil
 		}
 
-		switch v := n.(type) {
-		case *ast.Blockquote:
+		if v, ok := n.(*ast.Blockquote); ok {
 			if v.ChildCount() == 0 {
 				return ast.WalkContinue, nil
 			}

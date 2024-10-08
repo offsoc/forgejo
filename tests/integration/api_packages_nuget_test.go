@@ -29,6 +29,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func addNuGetAPIKeyHeader(req *RequestWrapper, token string) {
@@ -38,7 +39,7 @@ func addNuGetAPIKeyHeader(req *RequestWrapper, token string) {
 func decodeXML(t testing.TB, resp *httptest.ResponseRecorder, v any) {
 	t.Helper()
 
-	assert.NoError(t, xml.NewDecoder(resp.Body).Decode(v))
+	require.NoError(t, xml.NewDecoder(resp.Body).Decode(v))
 }
 
 func TestPackageNuGet(t *testing.T) {
@@ -237,24 +238,24 @@ func TestPackageNuGet(t *testing.T) {
 			MakeRequest(t, req, http.StatusCreated)
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNuGet)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1, "Should have one version")
 
 			pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, pd.SemVer)
 			assert.IsType(t, &nuget_module.Metadata{}, pd.Metadata)
 			assert.Equal(t, packageName, pd.Package.Name)
 			assert.Equal(t, packageVersion, pd.Version.Version)
 
 			pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pfs, 2, "Should have 2 files: nuget and nuspec")
 			assert.Equal(t, fmt.Sprintf("%s.%s.nupkg", packageName, packageVersion), pfs[0].Name)
 			assert.True(t, pfs[0].IsLead)
 
 			pb, err := packages.GetBlobByID(db.DefaultContext, pfs[0].BlobID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, int64(len(content)), pb.Size)
 
 			req = NewRequestWithBody(t, "PUT", url, bytes.NewReader(content)).
@@ -304,18 +305,18 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 			MakeRequest(t, req, http.StatusCreated)
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNuGet)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1)
 
 			pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, pd.SemVer)
 			assert.IsType(t, &nuget_module.Metadata{}, pd.Metadata)
 			assert.Equal(t, packageName, pd.Package.Name)
 			assert.Equal(t, packageVersion, pd.Version.Version)
 
 			pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pfs, 4, "Should have 4 files: nupkg, snupkg, nuspec and pdb")
 			for _, pf := range pfs {
 				switch pf.Name {
@@ -323,29 +324,29 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 					assert.True(t, pf.IsLead)
 
 					pb, err := packages.GetBlobByID(db.DefaultContext, pf.BlobID)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Equal(t, int64(414), pb.Size)
 				case fmt.Sprintf("%s.%s.snupkg", packageName, packageVersion):
 					assert.False(t, pf.IsLead)
 
 					pb, err := packages.GetBlobByID(db.DefaultContext, pf.BlobID)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Equal(t, int64(616), pb.Size)
 				case fmt.Sprintf("%s.nuspec", packageName):
 					assert.False(t, pf.IsLead)
 
 					pb, err := packages.GetBlobByID(db.DefaultContext, pf.BlobID)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Equal(t, int64(453), pb.Size)
 				case symbolFilename:
 					assert.False(t, pf.IsLead)
 
 					pb, err := packages.GetBlobByID(db.DefaultContext, pf.BlobID)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Equal(t, int64(160), pb.Size)
 
 					pps, err := packages.GetProperties(db.DefaultContext, packages.PropertyTypeFile, pf.ID)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Len(t, pps, 1)
 					assert.Equal(t, nuget_module.PropertySymbolID, pps[0].Name)
 					assert.Equal(t, symbolID, pps[0].Value)
@@ -365,7 +366,7 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 
 		checkDownloadCount := func(count int64) {
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNuGet)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1)
 			assert.Equal(t, count, pvs[0].DownloadCount)
 		}
@@ -417,7 +418,7 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 				if l.Rel == "next" {
 					found++
 					u, err := neturl.Parse(l.Href)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					q := u.Query()
 					assert.Contains(t, q, "$skip")
 					assert.Contains(t, q, "$top")
@@ -450,7 +451,7 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 			packageName,
 			"almost.similar.dependency",
 			"almost.similar",
-			"almost.similar.dependant",
+			"almost.similar.dependent",
 		}
 
 		for _, fakePackageName := range fakePackages {
@@ -736,7 +737,7 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 		MakeRequest(t, req, http.StatusNoContent)
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeNuGet)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Empty(t, pvs)
 	})
 

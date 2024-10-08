@@ -2,14 +2,12 @@
 {{/* Disabled (optional) - if search field/button has to be disabled */}}
 {{/* Placeholder (optional) - placeholder text to be used */}}
 {{/* IsFuzzy - state of the fuzzy/union search toggle */}}
-{{/* CodeIndexerDisabled (optional) - if the performed search is done using git-grep */}}
 {{/* Tooltip (optional) - a tooltip to be displayed on button hover */}}
 <div class="ui small fluid action input">
 	{{template "shared/search/input" dict "Value" .Value "Disabled" .Disabled "Placeholder" .Placeholder}}
 	{{template "shared/search/fuzzy"
 		dict
 			"Disabled" .Disabled
-			"IsFuzzy" .IsFuzzy
-			"CodeIndexerDisabled" .CodeIndexerDisabled}}
+			"IsFuzzy" .IsFuzzy}}
 	{{template "shared/search/button" dict "Disabled" .Disabled "Tooltip" .Tooltip}}
 </div>

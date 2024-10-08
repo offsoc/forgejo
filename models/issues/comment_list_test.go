@@ -16,7 +16,7 @@ import (
 )
 
 func TestCommentListLoadUser(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	issue := unittest.AssertExistsAndLoadBean(t, &Issue{})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: issue.RepoID})
@@ -78,7 +78,7 @@ func TestCommentListLoadUser(t *testing.T) {
 
 			comment.AssigneeID = testCase.assignee
 			comment.Assignee = nil
-			assert.NoError(t, list.loadAssignees(db.DefaultContext))
+			require.NoError(t, list.loadAssignees(db.DefaultContext))
 			require.NotNil(t, comment.Assignee)
 			assert.Equal(t, testCase.user.ID, comment.Assignee.ID)
 		})

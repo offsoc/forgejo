@@ -19,6 +19,7 @@ import (
 	wiki_service "code.gitea.io/gitea/services/wiki"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -28,12 +29,12 @@ const (
 
 func wikiEntry(t *testing.T, repo *repo_model.Repository, wikiName wiki_service.WebPath) *git.TreeEntry {
 	wikiRepo, err := gitrepo.OpenWikiRepository(git.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer wikiRepo.Close()
 	commit, err := wikiRepo.GetBranchCommit("master")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	entries, err := commit.ListEntries()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, entry := range entries {
 		if entry.Name() == wiki_service.WebPathToGitPath(wikiName) {
 			return entry
@@ -48,10 +49,10 @@ func wikiContent(t *testing.T, repo *repo_model.Repository, wikiName wiki_servic
 		return ""
 	}
 	reader, err := entry.Blob().DataAsync()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer reader.Close()
 	bytes, err := io.ReadAll(reader)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return string(bytes)
 }
 
@@ -127,7 +128,7 @@ func TestNewWikiPost(t *testing.T) {
 		NewWikiPost(ctx)
 		assert.EqualValues(t, http.StatusSeeOther, ctx.Resp.Status())
 		assertWikiExists(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title))
-		assert.Equal(t, wikiContent(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title)), content)
+		assert.Equal(t, content, wikiContent(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title)))
 	}
 }
 
@@ -179,7 +180,7 @@ func TestEditWikiPost(t *testing.T) {
 		EditWikiPost(ctx)
 		assert.EqualValues(t, http.StatusSeeOther, ctx.Resp.Status())
 		assertWikiExists(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title))
-		assert.Equal(t, wikiContent(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title)), content)
+		assert.Equal(t, content, wikiContent(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title)))
 		if title != "Home" {
 			assertWikiNotExists(t, ctx.Repo.Repository, "Home")
 		}

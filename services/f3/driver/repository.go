@@ -68,7 +68,7 @@ func (o *repository) Patch(ctx context.Context) {
 func (o *repository) upsert(ctx context.Context) generic.NodeID {
 	o.Trace("%s", o.GetNativeID())
 	o.h.Upsert(ctx, o.f)
-	return generic.NodeID(o.f.Name)
+	return generic.NewNodeID(o.f.Name)
 }
 
 func (o *repository) SetFetchFunc(fetchFunc func(ctx context.Context, destination string)) {

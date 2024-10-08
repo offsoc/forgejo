@@ -6,6 +6,7 @@ package repo
 import (
 	"testing"
 
+	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
@@ -45,7 +46,6 @@ func TestGetUniquePatchBranchName(t *testing.T) {
 	ctx, _ := contexttest.MockContext(t, "user2/repo1")
 	ctx.SetParams(":id", "1")
 	contexttest.LoadRepo(t, ctx, 1)
-	contexttest.LoadRepoCommit(t, ctx)
 	contexttest.LoadUser(t, ctx, 2)
 	contexttest.LoadGitRepo(t, ctx)
 	defer ctx.Repo.GitRepo.Close()
@@ -57,15 +57,7 @@ func TestGetUniquePatchBranchName(t *testing.T) {
 
 func TestGetClosestParentWithFiles(t *testing.T) {
 	unittest.PrepareTestEnv(t)
-	ctx, _ := contexttest.MockContext(t, "user2/repo1")
-	ctx.SetParams(":id", "1")
-	contexttest.LoadRepo(t, ctx, 1)
-	contexttest.LoadRepoCommit(t, ctx)
-	contexttest.LoadUser(t, ctx, 2)
-	contexttest.LoadGitRepo(t, ctx)
-	defer ctx.Repo.GitRepo.Close()
-
-	repo := ctx.Repo.Repository
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	branch := repo.DefaultBranch
 	gitRepo, _ := gitrepo.OpenRepository(git.DefaultContext, repo)
 	defer gitRepo.Close()

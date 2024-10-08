@@ -23,6 +23,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageSwift(t *testing.T) {
@@ -131,11 +132,11 @@ func TestPackageSwift(t *testing.T) {
 		)
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeSwift)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 
 		pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, pd.SemVer)
 		assert.Equal(t, packageID, pd.Package.Name)
 		assert.Equal(t, packageVersion, pd.Version.Version)
@@ -149,7 +150,7 @@ func TestPackageSwift(t *testing.T) {
 		assert.Equal(t, packageRepositoryURL, pd.VersionProperties.GetByName(swift_module.PropertyRepositoryURL))
 
 		pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pfs, 1)
 		assert.Equal(t, fmt.Sprintf("%s-%s.zip", packageName, packageVersion), pfs[0].Name)
 		assert.True(t, pfs[0].IsLead)
@@ -178,10 +179,10 @@ func TestPackageSwift(t *testing.T) {
 
 		pv, err := packages.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages.TypeSwift, packageID, packageVersion)
 		assert.NotNil(t, pv)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pd, err := packages.GetPackageDescriptor(db.DefaultContext, pv)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "sha256="+pd.Files[0].Blob.HashSHA256, resp.Header().Get("Digest"))
 	})
 
@@ -231,10 +232,10 @@ func TestPackageSwift(t *testing.T) {
 
 		pv, err := packages.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages.TypeSwift, packageID, packageVersion)
 		assert.NotNil(t, pv)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pd, err := packages.GetPackageDescriptor(db.DefaultContext, pv)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, packageID, result.ID)
 		assert.Equal(t, packageVersion, result.Version)

@@ -11,7 +11,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIssue_AddLabels(t *testing.T) {
@@ -26,14 +26,14 @@ func TestIssue_AddLabels(t *testing.T) {
 		{2, []int64{}, 1},     // pull-request, empty
 	}
 	for _, test := range tests {
-		assert.NoError(t, unittest.PrepareTestDatabase())
+		require.NoError(t, unittest.PrepareTestDatabase())
 		issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: test.issueID})
 		labels := make([]*issues_model.Label, len(test.labelIDs))
 		for i, labelID := range test.labelIDs {
 			labels[i] = unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: labelID})
 		}
 		doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: test.doerID})
-		assert.NoError(t, AddLabels(db.DefaultContext, issue, doer, labels))
+		require.NoError(t, AddLabels(db.DefaultContext, issue, doer, labels))
 		for _, labelID := range test.labelIDs {
 			unittest.AssertExistsAndLoadBean(t, &issues_model.IssueLabel{IssueID: test.issueID, LabelID: labelID})
 		}
@@ -52,11 +52,11 @@ func TestIssue_AddLabel(t *testing.T) {
 		{2, 1, 2}, // pull-request, already-added label
 	}
 	for _, test := range tests {
-		assert.NoError(t, unittest.PrepareTestDatabase())
+		require.NoError(t, unittest.PrepareTestDatabase())
 		issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: test.issueID})
 		label := unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: test.labelID})
 		doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: test.doerID})
-		assert.NoError(t, AddLabel(db.DefaultContext, issue, doer, label))
+		require.NoError(t, AddLabel(db.DefaultContext, issue, doer, label))
 		unittest.AssertExistsAndLoadBean(t, &issues_model.IssueLabel{IssueID: test.issueID, LabelID: test.labelID})
 	}
 }

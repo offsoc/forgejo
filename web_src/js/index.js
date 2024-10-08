@@ -60,7 +60,7 @@ import {
   initRepoSettingSearchTeamBox,
 } from './features/repo-settings.js';
 import {initRepoDiffView} from './features/repo-diff.js';
-import {initOrgTeamSearchRepoBox, initOrgTeamSettings} from './features/org-team.js';
+import {initOrgTeamSearchRepoBox} from './features/org-team.js';
 import {initUserAuthWebAuthn, initUserAuthWebAuthnRegister} from './features/user-auth-webauthn.js';
 import {initRepoRelease, initRepoReleaseNew} from './features/repo-release.js';
 import {initRepoEditor} from './features/repo-editor.js';
@@ -138,7 +138,6 @@ onDomReady(() => {
   initNotificationsTable();
 
   initOrgTeamSearchRepoBox();
-  initOrgTeamSettings();
 
   initRepoActivityTopAuthorsChart();
   initRepoArchiveLinks();

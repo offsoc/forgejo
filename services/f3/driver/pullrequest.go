@@ -51,7 +51,7 @@ func (o *pullRequest) repositoryToReference(ctx context.Context, repository *rep
 	if repository == nil {
 		panic("unexpected nil repository")
 	}
-	forge := o.getTree().GetRoot().GetChild(f3_tree.KindForge).GetDriver().(*forge)
+	forge := o.getTree().GetRoot().GetChild(generic.NewNodeID(f3_tree.KindForge)).GetDriver().(*forge)
 	owners := forge.getOwnersPath(ctx, fmt.Sprintf("%d", repository.OwnerID))
 	return f3_tree.NewRepositoryReference(owners.String(), repository.OwnerID, repository.ID)
 }
@@ -172,7 +172,7 @@ func (o *pullRequest) FromFormat(content f3.Interface) {
 		Title:       pullRequest.Title,
 		Content:     pullRequest.Content,
 		Milestone:   milestone,
-		IsClosed:    pullRequest.State == "closed",
+		IsClosed:    pullRequest.State == f3.PullRequestStateClosed,
 		CreatedUnix: timeutil.TimeStamp(pullRequest.Created.Unix()),
 		UpdatedUnix: timeutil.TimeStamp(pullRequest.Updated.Unix()),
 		IsLocked:    pullRequest.IsLocked,
@@ -190,7 +190,7 @@ func (o *pullRequest) Get(ctx context.Context) bool {
 	o.Trace("%s", node.GetID())
 
 	project := f3_tree.GetProjectID(o.GetNode())
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	issue, err := issues_model.GetIssueByIndex(ctx, project, id)
 	if issues_model.IsErrIssueNotExist(err) {
@@ -219,7 +219,7 @@ func (o *pullRequest) Get(ctx context.Context) bool {
 func (o *pullRequest) Patch(ctx context.Context) {
 	node := o.GetNode()
 	project := f3_tree.GetProjectID(o.GetNode())
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 	o.Trace("repo_id = %d, index = %d", project, id)
 	if _, err := db.GetEngine(ctx).Where("`repo_id` = ? AND `index` = ?", project, id).Cols("name", "content").Update(o.forgejoPullRequest); err != nil {
 		panic(fmt.Errorf("%v %v", o.forgejoPullRequest, err))
@@ -289,7 +289,7 @@ func (o *pullRequest) Put(ctx context.Context) generic.NodeID {
 	}
 
 	o.Trace("pullRequest created %d/%d", o.forgejoPullRequest.ID, o.forgejoPullRequest.Index)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoPullRequest.Index))
+	return generic.NewNodeID(o.forgejoPullRequest.Index)
 }
 
 func (o *pullRequest) Delete(ctx context.Context) {

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHashedBuffer(t *testing.T) {
@@ -27,12 +28,12 @@ func TestHashedBuffer(t *testing.T) {
 
 	for _, c := range cases {
 		buf, err := CreateHashedBufferFromReaderWithSize(strings.NewReader(c.Data), c.MaxMemorySize)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.EqualValues(t, len(c.Data), buf.Size())
 
 		data, err := io.ReadAll(buf)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, c.Data, string(data))
 
 		hashMD5, hashSHA1, hashSHA256, hashSHA512 := buf.Sums()
@@ -41,6 +42,6 @@ func TestHashedBuffer(t *testing.T) {
 		assert.Equal(t, c.HashSHA256, hex.EncodeToString(hashSHA256))
 		assert.Equal(t, c.HashSHA512, hex.EncodeToString(hashSHA512))
 
-		assert.NoError(t, buf.Close())
+		require.NoError(t, buf.Close())
 	}
 }

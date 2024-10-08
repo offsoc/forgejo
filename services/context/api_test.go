@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenAPILinks(t *testing.T) {
@@ -38,7 +39,7 @@ func TestGenAPILinks(t *testing.T) {
 
 	for req, response := range kases {
 		u, err := url.Parse(setting.AppURL + req)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		p := u.Query().Get("page")
 		curPage, _ := strconv.Atoi(p)

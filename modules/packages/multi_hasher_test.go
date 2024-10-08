@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -35,11 +36,11 @@ func TestMultiHasherSums(t *testing.T) {
 		h.Write([]byte("git"))
 
 		state, err := h.MarshalBinary()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		h2 := NewMultiHasher()
 		err = h2.UnmarshalBinary(state)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		h2.Write([]byte("ea"))
 

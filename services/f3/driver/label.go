@@ -65,7 +65,7 @@ func (o *label) Get(ctx context.Context) bool {
 	o.Trace("%s", node.GetID())
 
 	project := f3_tree.GetProjectID(o.GetNode())
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	label, err := issues_model.GetLabelInRepoByID(ctx, project, id)
 	if issues_model.IsErrRepoLabelNotExist(err) {
@@ -80,7 +80,7 @@ func (o *label) Get(ctx context.Context) bool {
 
 func (o *label) Patch(ctx context.Context) {
 	o.Trace("%d", o.forgejoLabel.ID)
-	if _, err := db.GetEngine(ctx).ID(o.forgejoLabel.ID).Cols("name", "description").Update(o.forgejoLabel); err != nil {
+	if _, err := db.GetEngine(ctx).ID(o.forgejoLabel.ID).Cols("name", "description", "color").Update(o.forgejoLabel); err != nil {
 		panic(fmt.Errorf("UpdateLabelCols: %v %v", o.forgejoLabel, err))
 	}
 }
@@ -94,7 +94,7 @@ func (o *label) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("label created %d", o.forgejoLabel.ID)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoLabel.ID))
+	return generic.NewNodeID(o.forgejoLabel.ID)
 }
 
 func (o *label) Delete(ctx context.Context) {

@@ -244,7 +244,9 @@ func newAccessTokenResponse(ctx go_context.Context, grant *auth.OAuth2Grant, ser
 			idToken.EmailVerified = user.IsActive
 		}
 		if grant.ScopeContains("groups") {
-			groups, err := getOAuthGroupsForUser(ctx, user)
+			onlyPublicGroups := ifOnlyPublicGroups(grant.Scope)
+
+			groups, err := getOAuthGroupsForUser(ctx, user, onlyPublicGroups)
 			if err != nil {
 				log.Error("Error getting groups: %v", err)
 				return nil, &AccessTokenError{
@@ -279,7 +281,18 @@ type userInfoResponse struct {
 	Username string   `json:"preferred_username"`
 	Email    string   `json:"email"`
 	Picture  string   `json:"picture"`
-	Groups   []string `json:"groups"`
+	Groups   []string `json:"groups,omitempty"`
+}
+
+func ifOnlyPublicGroups(scopes string) bool {
+	scopes = strings.ReplaceAll(scopes, ",", " ")
+	scopesList := strings.Fields(scopes)
+	for _, scope := range scopesList {
+		if scope == "all" || scope == "read:organization" || scope == "read:admin" {
+			return false
+		}
+	}
+	return true
 }
 
 // InfoOAuth manages request for userinfo endpoint
@@ -298,7 +311,18 @@ func InfoOAuth(ctx *context.Context) {
 		Picture:  ctx.Doer.AvatarLink(ctx),
 	}
 
-	groups, err := getOAuthGroupsForUser(ctx, ctx.Doer)
+	var token string
+	if auHead := ctx.Req.Header.Get("Authorization"); auHead != "" {
+		auths := strings.Fields(auHead)
+		if len(auths) == 2 && (auths[0] == "token" || strings.ToLower(auths[0]) == "bearer") {
+			token = auths[1]
+		}
+	}
+
+	_, grantScopes := auth_service.CheckOAuthAccessToken(ctx, token)
+	onlyPublicGroups := ifOnlyPublicGroups(grantScopes)
+
+	groups, err := getOAuthGroupsForUser(ctx, ctx.Doer, onlyPublicGroups)
 	if err != nil {
 		ctx.ServerError("Oauth groups for user", err)
 		return
@@ -310,7 +334,7 @@ func InfoOAuth(ctx *context.Context) {
 
 // returns a list of "org" and "org:team" strings,
 // that the given user is a part of.
-func getOAuthGroupsForUser(ctx go_context.Context, user *user_model.User) ([]string, error) {
+func getOAuthGroupsForUser(ctx go_context.Context, user *user_model.User, onlyPublicGroups bool) ([]string, error) {
 	orgs, err := org_model.GetUserOrgsList(ctx, user)
 	if err != nil {
 		return nil, fmt.Errorf("GetUserOrgList: %w", err)
@@ -318,6 +342,15 @@ func getOAuthGroupsForUser(ctx go_context.Context, user *user_model.User) ([]str
 
 	var groups []string
 	for _, org := range orgs {
+		if setting.OAuth2.EnableAdditionalGrantScopes {
+			if onlyPublicGroups {
+				public, err := org_model.IsPublicMembership(ctx, org.ID, user.ID)
+				if !public && err == nil {
+					continue
+				}
+			}
+		}
+
 		groups = append(groups, org.Name)
 		teams, err := org.LoadTeams(ctx)
 		if err != nil {
@@ -332,17 +365,37 @@ func getOAuthGroupsForUser(ctx go_context.Context, user *user_model.User) ([]str
 	return groups, nil
 }
 
+func parseBasicAuth(ctx *context.Context) (username, password string, err error) {
+	authHeader := ctx.Req.Header.Get("Authorization")
+	if authType, authData, ok := strings.Cut(authHeader, " "); ok && strings.EqualFold(authType, "Basic") {
+		return base.BasicAuthDecode(authData)
+	}
+	return "", "", errors.New("invalid basic authentication")
+}
+
 // IntrospectOAuth introspects an oauth token
 func IntrospectOAuth(ctx *context.Context) {
-	if ctx.Doer == nil {
-		ctx.Resp.Header().Set("WWW-Authenticate", `Bearer realm=""`)
+	clientIDValid := false
+	if clientID, clientSecret, err := parseBasicAuth(ctx); err == nil {
+		app, err := auth.GetOAuth2ApplicationByClientID(ctx, clientID)
+		if err != nil && !auth.IsErrOauthClientIDInvalid(err) {
+			// this is likely a database error; log it and respond without details
+			log.Error("Error retrieving client_id: %v", err)
+			ctx.Error(http.StatusInternalServerError)
+			return
+		}
+		clientIDValid = err == nil && app.ValidateClientSecret([]byte(clientSecret))
+	}
+	if !clientIDValid {
+		ctx.Resp.Header().Set("WWW-Authenticate", `Basic realm=""`)
 		ctx.PlainText(http.StatusUnauthorized, "no valid authorization")
 		return
 	}
 
 	var response struct {
-		Active bool   `json:"active"`
-		Scope  string `json:"scope,omitempty"`
+		Active   bool   `json:"active"`
+		Scope    string `json:"scope,omitempty"`
+		Username string `json:"username,omitempty"`
 		jwt.RegisteredClaims
 	}
 
@@ -358,6 +411,9 @@ func IntrospectOAuth(ctx *context.Context) {
 				response.Issuer = setting.AppURL
 				response.Audience = []string{app.ClientID}
 				response.Subject = fmt.Sprint(grant.UserID)
+			}
+			if user, err := user_model.GetUserByID(ctx, grant.UserID); err == nil {
+				response.Username = user.Name
 			}
 		}
 	}
@@ -645,9 +701,8 @@ func AccessTokenOAuth(ctx *context.Context) {
 	// if there is no ClientID or ClientSecret in the request body, fill these fields by the Authorization header and ensure the provided field matches the Authorization header
 	if form.ClientID == "" || form.ClientSecret == "" {
 		authHeader := ctx.Req.Header.Get("Authorization")
-		authContent := strings.SplitN(authHeader, " ", 2)
-		if len(authContent) == 2 && authContent[0] == "Basic" {
-			payload, err := base64.StdEncoding.DecodeString(authContent[1])
+		if authType, authData, ok := strings.Cut(authHeader, " "); ok && strings.EqualFold(authType, "Basic") {
+			clientID, clientSecret, err := base.BasicAuthDecode(authData)
 			if err != nil {
 				handleAccessTokenError(ctx, AccessTokenError{
 					ErrorCode:        AccessTokenErrorCodeInvalidRequest,
@@ -655,30 +710,23 @@ func AccessTokenOAuth(ctx *context.Context) {
 				})
 				return
 			}
-			pair := strings.SplitN(string(payload), ":", 2)
-			if len(pair) != 2 {
-				handleAccessTokenError(ctx, AccessTokenError{
-					ErrorCode:        AccessTokenErrorCodeInvalidRequest,
-					ErrorDescription: "cannot parse basic auth header",
-				})
-				return
-			}
-			if form.ClientID != "" && form.ClientID != pair[0] {
+			// validate that any fields present in the form match the Basic auth header
+			if form.ClientID != "" && form.ClientID != clientID {
 				handleAccessTokenError(ctx, AccessTokenError{
 					ErrorCode:        AccessTokenErrorCodeInvalidRequest,
 					ErrorDescription: "client_id in request body inconsistent with Authorization header",
 				})
 				return
 			}
-			form.ClientID = pair[0]
-			if form.ClientSecret != "" && form.ClientSecret != pair[1] {
+			form.ClientID = clientID
+			if form.ClientSecret != "" && form.ClientSecret != clientSecret {
 				handleAccessTokenError(ctx, AccessTokenError{
 					ErrorCode:        AccessTokenErrorCodeInvalidRequest,
 					ErrorDescription: "client_secret in request body inconsistent with Authorization header",
 				})
 				return
 			}
-			form.ClientSecret = pair[1]
+			form.ClientSecret = clientSecret
 		}
 	}
 

@@ -1,6 +1,13 @@
 // @ts-check
-import {test, expect} from '@playwright/test';
-import {login_user, save_visual, load_logged_in_context} from './utils_e2e.js';
+
+// @watch start
+// templates/user/auth/**
+// web_src/js/features/user-**
+// modules/{user,auth}/**
+// @watch end
+
+import {expect} from '@playwright/test';
+import {test, login_user, save_visual} from './utils_e2e.js';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -29,29 +36,22 @@ test('Register Form', async ({page}, workerInfo) => {
   save_visual(page);
 });
 
-test('Login Form', async ({page}, workerInfo) => {
-  const response = await page.goto('/user/login');
-  await expect(response?.status()).toBe(200); // Status OK
-
-  await page.type('input[name=user_name]', `user2`);
-  await page.type('input[name=password]', `password`);
-  await page.click('form button.ui.primary.button:visible');
-
-  await page.waitForLoadState('networkidle');
-
-  await expect(page.url()).toBe(`${workerInfo.project.use.baseURL}/`);
-
-  save_visual(page);
-});
-
-test('Logged In User', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  const page = await context.newPage();
-
-  await page.goto('/');
-
-  // Make sure we routed to the home page. Else login failed.
-  await expect(page.url()).toBe(`${workerInfo.project.use.baseURL}/`);
-
-  save_visual(page);
+// eslint-disable-next-line playwright/no-skipped-test
+test.describe.skip('example with different viewports (not actually run)', () => {
+  // only necessary when the default web / mobile devices are not enough.
+  // If you need to use a single fixed viewport, you can also use:
+  // test.use({viewport: {width: 400, height: 800}});
+  // also see https://playwright.dev/docs/test-parameterize
+  for (const width of [400, 1000]) {
+    // do not actually run (skip) this test
+    test(`Do x on width: ${width}px`, async ({page}) => {
+      await page.setViewportSize({
+        width,
+        height: 800,
+      });
+      // do something, then check that an element is fully in viewport
+      // (i.e. not overflowing)
+      await expect(page.locator('#my-element')).toBeInViewport({ratio: 1});
+    });
+  }
 });

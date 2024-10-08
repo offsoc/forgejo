@@ -1,25 +1,9 @@
 import {POST} from '../../modules/fetch.js';
-import {hideElem, showElem, toggleElem} from '../../utils/dom.js';
+import {toggleElem} from '../../utils/dom.js';
 
 export function initCompWebHookEditor() {
   if (!document.querySelectorAll('.new.webhook').length) {
     return;
-  }
-
-  for (const input of document.querySelectorAll('.events.checkbox input')) {
-    input.addEventListener('change', function () {
-      if (this.checked) {
-        showElem('.events.fields');
-      }
-    });
-  }
-
-  for (const input of document.querySelectorAll('.non-events.checkbox input')) {
-    input.addEventListener('change', function () {
-      if (this.checked) {
-        hideElem('.events.fields');
-      }
-    });
   }
 
   // some webhooks (like Gitea) allow to set the request method (GET/POST), and it would toggle the "Content Type" field

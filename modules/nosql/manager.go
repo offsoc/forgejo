@@ -27,8 +27,46 @@ type Manager struct {
 	LevelDBConnections map[string]*levelDBHolder
 }
 
+// RedisClient is a subset of redis.UniversalClient, it exposes less methods
+// to avoid generating machine code for unused methods. New method definitions
+// should be copied from the definitions in the Redis library github.com/redis/go-redis.
+type RedisClient interface {
+	// redis.GenericCmdable
+	Del(ctx context.Context, keys ...string) *redis.IntCmd
+	Exists(ctx context.Context, keys ...string) *redis.IntCmd
+
+	// redis.ListCmdable
+	RPush(ctx context.Context, key string, values ...any) *redis.IntCmd
+	LPop(ctx context.Context, key string) *redis.StringCmd
+	LLen(ctx context.Context, key string) *redis.IntCmd
+
+	// redis.StringCmdable
+	Decr(ctx context.Context, key string) *redis.IntCmd
+	Incr(ctx context.Context, key string) *redis.IntCmd
+	Set(ctx context.Context, key string, value any, expiration time.Duration) *redis.StatusCmd
+	Get(ctx context.Context, key string) *redis.StringCmd
+
+	// redis.HashCmdable
+	HSet(ctx context.Context, key string, values ...any) *redis.IntCmd
+	HDel(ctx context.Context, key string, fields ...string) *redis.IntCmd
+	HKeys(ctx context.Context, key string) *redis.StringSliceCmd
+
+	// redis.SetCmdable
+	SAdd(ctx context.Context, key string, members ...any) *redis.IntCmd
+	SRem(ctx context.Context, key string, members ...any) *redis.IntCmd
+	SIsMember(ctx context.Context, key string, member any) *redis.BoolCmd
+
+	// redis.Cmdable
+	DBSize(ctx context.Context) *redis.IntCmd
+	FlushDB(ctx context.Context) *redis.StatusCmd
+	Ping(ctx context.Context) *redis.StatusCmd
+
+	// redis.UniversalClient
+	Close() error
+}
+
 type redisClientHolder struct {
-	redis.UniversalClient
+	RedisClient
 	name  []string
 	count int64
 }

@@ -1,5 +1,23 @@
 # Integration tests
 
+Thank you for your effort to provide good software tests for Forgejo.
+Please also read the general testing instructions in the
+[Forgejo contributor documentation](https://forgejo.org/docs/next/contributor/testing/).
+
+This file is meant to provide specific information for the integration tests
+as well as some tips and tricks you should know.
+
+Feel free to extend this file with more instructions if you feel like you have something to share!
+
+
+## How to run the tests?
+
+Before running any tests, please ensure you perform a clean build:
+
+```
+make clean build
+```
+
 Integration tests can be run with make commands for the
 appropriate backends, namely:
 ```shell
@@ -8,40 +26,39 @@ make test-pgsql
 make test-mysql
 ```
 
-Make sure to perform a clean build before running tests:
-```
-make clean build
-```
 
-## Run tests via local act_runner
+### Run tests via local forgejo runner
 
-### Run all jobs
+If you have a [forgejo runner](https://code.forgejo.org/forgejo/runner/),
+you can use it to run the test jobs:
+
+#### Run all jobs
 
 ```
-act_runner exec -W ./.github/workflows/pull-db-tests.yml --event=pull_request --default-actions-url="https://github.com" -i catthehacker/ubuntu:runner-latest
+forgejo-runner exec -W .forgejo/workflows/testing.yml --event=pull_request
 ```
 
 Warning: This file defines many jobs, so it will be resource-intensive and therefore not recommended.
 
-### Run single job
+#### Run single job
 
 ```SHELL
-act_runner exec -W ./.github/workflows/pull-db-tests.yml --event=pull_request --default-actions-url="https://github.com" -i catthehacker/ubuntu:runner-latest -j <job_name>
+forgejo-runner exec -W .forgejo/workflows/testing.yml --event=pull_request -j <job_name>
 ```
 
 You can list all job names via:
 
 ```SHELL
-act_runner exec -W ./.github/workflows/pull-db-tests.yml --event=pull_request --default-actions-url="https://github.com" -i catthehacker/ubuntu:runner-latest -l
+forgejo-runner exec -W .forgejo/workflows/testing.yml --event=pull_request -l
 ```
 
-## Run sqlite integration tests
+### Run sqlite integration tests
 Start tests
 ```
 make test-sqlite
 ```
 
-## Run MySQL integration tests
+### Run MySQL integration tests
 Setup a MySQL database inside docker
 ```
 docker run -e "MYSQL_DATABASE=test" -e "MYSQL_ALLOW_EMPTY_PASSWORD=yes" -p 3306:3306 --rm --name mysql mysql:latest #(just ctrl-c to stop db and clean the container)
@@ -52,7 +69,7 @@ Start tests based on the database container
 TEST_MYSQL_HOST=localhost:3306 TEST_MYSQL_DBNAME=test TEST_MYSQL_USERNAME=root TEST_MYSQL_PASSWORD='' make test-mysql
 ```
 
-## Run pgsql integration tests
+### Run pgsql integration tests
 Setup a pgsql database inside docker
 ```
 docker run -e "POSTGRES_DB=test" -p 5432:5432 --rm --name pgsql postgres:latest #(just ctrl-c to stop db and clean the container)
@@ -62,7 +79,7 @@ Start tests based on the database container
 TEST_PGSQL_HOST=localhost:5432 TEST_PGSQL_DBNAME=test TEST_PGSQL_USERNAME=postgres TEST_PGSQL_PASSWORD=postgres make test-pgsql
 ```
 
-## Running individual tests
+### Running individual tests
 
 Example command to run GPG test:
 
@@ -99,3 +116,8 @@ SLOW_FLUSH = 5S ; 5s is the default value
 ```bash
 GITEA_SLOW_TEST_TIME="10s" GITEA_SLOW_FLUSH_TIME="5s" make test-sqlite
 ```
+
+## Tips and tricks
+
+If you know noteworthy tests that can act as an inspiration for new tests,
+please add some details here.

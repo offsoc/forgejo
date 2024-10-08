@@ -357,7 +357,7 @@ func TestActionsArtifactOverwrite(t *testing.T) {
 				break
 			}
 		}
-		assert.Equal(t, uploadedItem.Name, "artifact")
+		assert.Equal(t, "artifact", uploadedItem.Name)
 
 		idx := strings.Index(uploadedItem.FileContainerResourceURL, "/api/actions_pipeline/_apis/pipelines/")
 		url := uploadedItem.FileContainerResourceURL[idx+1:] + "?itemPath=artifact"

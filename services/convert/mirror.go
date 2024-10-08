@@ -22,5 +22,6 @@ func ToPushMirror(ctx context.Context, pm *repo_model.PushMirror) (*api.PushMirr
 		LastError:      pm.LastError,
 		Interval:       pm.Interval.String(),
 		SyncOnCommit:   pm.SyncOnCommit,
+		PublicKey:      pm.GetPublicKey(),
 	}, nil
 }

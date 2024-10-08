@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_parseTagData(t *testing.T) {
@@ -85,7 +86,7 @@ v0
 
 	for _, test := range testData {
 		tag, err := parseTagData(Sha1ObjectFormat, test.data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, test.tag.ID, tag.ID)
 		assert.EqualValues(t, test.tag.Object, tag.Object)
 		assert.EqualValues(t, test.tag.Name, tag.Name)

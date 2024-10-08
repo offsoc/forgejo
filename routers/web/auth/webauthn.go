@@ -116,6 +116,25 @@ func WebAuthnLoginAssertionPost(ctx *context.Context) {
 		return
 	}
 
+	dbCred, err := auth.GetWebAuthnCredentialByCredID(ctx, user.ID, parsedResponse.RawID)
+	if err != nil {
+		ctx.ServerError("GetWebAuthnCredentialByCredID", err)
+		return
+	}
+
+	// If the credential is legacy, assume the values are correct. The
+	// specification mandates these flags don't change.
+	if dbCred.Legacy {
+		dbCred.BackupEligible = parsedResponse.Response.AuthenticatorData.Flags.HasBackupEligible()
+		dbCred.BackupState = parsedResponse.Response.AuthenticatorData.Flags.HasBackupState()
+		dbCred.Legacy = false
+
+		if err := dbCred.UpdateFromLegacy(ctx); err != nil {
+			ctx.ServerError("UpdateFromLegacy", err)
+			return
+		}
+	}
+
 	// Validate the parsed response.
 	cred, err := wa.WebAuthn.ValidateLogin((*wa.User)(user), *sessionData, parsedResponse)
 	if err != nil {
@@ -130,13 +149,6 @@ func WebAuthnLoginAssertionPost(ctx *context.Context) {
 	if cred.Authenticator.CloneWarning {
 		log.Info("Failed authentication attempt for %s from %s: cloned credential", user.Name, ctx.RemoteAddr())
 		ctx.Status(http.StatusForbidden)
-		return
-	}
-
-	// Success! Get the credential and update the sign count with the new value we received.
-	dbCred, err := auth.GetWebAuthnCredentialByCredID(ctx, user.ID, cred.ID)
-	if err != nil {
-		ctx.ServerError("GetWebAuthnCredentialByCredID", err)
 		return
 	}
 

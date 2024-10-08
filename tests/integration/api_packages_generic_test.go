@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageGeneric(t *testing.T) {
@@ -40,23 +41,23 @@ func TestPackageGeneric(t *testing.T) {
 		MakeRequest(t, req, http.StatusCreated)
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeGeneric)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 
 		pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Nil(t, pd.Metadata)
 		assert.Equal(t, packageName, pd.Package.Name)
 		assert.Equal(t, packageVersion, pd.Version.Version)
 
 		pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pfs, 1)
 		assert.Equal(t, filename, pfs[0].Name)
 		assert.True(t, pfs[0].IsLead)
 
 		pb, err := packages.GetBlobByID(db.DefaultContext, pfs[0].BlobID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, int64(len(content)), pb.Size)
 
 		t.Run("Exists", func(t *testing.T) {
@@ -76,7 +77,7 @@ func TestPackageGeneric(t *testing.T) {
 
 			// Check deduplication
 			pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pfs, 2)
 			assert.Equal(t, pfs[0].BlobID, pfs[1].BlobID)
 		})
@@ -103,7 +104,7 @@ func TestPackageGeneric(t *testing.T) {
 
 		checkDownloadCount := func(count int64) {
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeGeneric)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1)
 			assert.Equal(t, count, pvs[0].DownloadCount)
 		}
@@ -167,11 +168,11 @@ func TestPackageGeneric(t *testing.T) {
 			assert.NotEmpty(t, location)
 
 			resp2, err := (&http.Client{}).Get(location)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, http.StatusOK, resp2.StatusCode)
 
 			body, err := io.ReadAll(resp2.Body)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, content, body)
 
 			checkDownloadCount(3)
@@ -199,7 +200,7 @@ func TestPackageGeneric(t *testing.T) {
 			MakeRequest(t, req, http.StatusNotFound)
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeGeneric)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1)
 
 			t.Run("RemovesVersion", func(t *testing.T) {
@@ -210,7 +211,7 @@ func TestPackageGeneric(t *testing.T) {
 				MakeRequest(t, req, http.StatusNoContent)
 
 				pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeGeneric)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Empty(t, pvs)
 			})
 		})
@@ -230,7 +231,7 @@ func TestPackageGeneric(t *testing.T) {
 			MakeRequest(t, req, http.StatusNoContent)
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeGeneric)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Empty(t, pvs)
 
 			req = NewRequest(t, "GET", url+"/"+filename)

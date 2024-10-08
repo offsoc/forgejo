@@ -5,6 +5,7 @@ package integration
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"testing"
@@ -16,6 +17,7 @@ import (
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/contexttest"
 	files_service "code.gitea.io/gitea/services/repository/files"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -45,13 +47,18 @@ func createRepoAndGetContext(t *testing.T, files []string, deleteMdReadme bool) 
 	}
 
 	// README.md is already added by auto init
-	repo, _, f := CreateDeclarativeRepo(t, user, "readmetest", []unit_model.Type{unit_model.TypeCode}, nil, changeFiles)
+	repo, _, f := tests.CreateDeclarativeRepo(t, user, "readmetest", []unit_model.Type{unit_model.TypeCode}, nil, changeFiles)
 
 	ctx, _ := contexttest.MockContext(t, "user1/readmetest")
 	ctx.SetParams(":id", fmt.Sprint(repo.ID))
 	contexttest.LoadRepo(t, ctx, repo.ID)
+	contexttest.LoadGitRepo(t, ctx)
 	contexttest.LoadRepoCommit(t, ctx)
-	return ctx, f
+
+	return ctx, func() {
+		f()
+		ctx.Repo.GitRepo.Close()
+	}
 }
 
 func TestRepoView_FindReadme(t *testing.T) {
@@ -149,6 +156,75 @@ func TestRepoView_FindReadme(t *testing.T) {
 			_, file, _ := repo.FindReadmeFileInEntries(ctx, entries, false)
 
 			assert.Nil(t, file)
+		})
+	})
+}
+
+func TestRepoViewFileLines(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, _ *url.URL) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+		repo, _, f := tests.CreateDeclarativeRepo(t, user, "file-lines", []unit_model.Type{unit_model.TypeCode}, nil, []*files_service.ChangeRepoFile{
+			{
+				Operation:     "create",
+				TreePath:      "test-1",
+				ContentReader: strings.NewReader("No newline"),
+			},
+			{
+				Operation:     "create",
+				TreePath:      "test-2",
+				ContentReader: strings.NewReader("No newline\n"),
+			},
+			{
+				Operation:     "create",
+				TreePath:      "test-3",
+				ContentReader: strings.NewReader("Two\nlines"),
+			},
+			{
+				Operation:     "create",
+				TreePath:      "test-4",
+				ContentReader: strings.NewReader("Really two\nlines\n"),
+			},
+			{
+				Operation:     "create",
+				TreePath:      "empty",
+				ContentReader: strings.NewReader(""),
+			},
+			{
+				Operation:     "create",
+				TreePath:      "seemingly-empty",
+				ContentReader: strings.NewReader("\n"),
+			},
+		})
+		defer f()
+
+		testEOL := func(t *testing.T, filename string, hasEOL bool) {
+			t.Helper()
+			req := NewRequestf(t, "GET", "%s/src/branch/main/%s", repo.Link(), filename)
+			resp := MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+
+			fileInfo := htmlDoc.Find(".file-info").Text()
+			if hasEOL {
+				assert.NotContains(t, fileInfo, "No EOL")
+			} else {
+				assert.Contains(t, fileInfo, "No EOL")
+			}
+		}
+
+		t.Run("No EOL", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			testEOL(t, "test-1", false)
+			testEOL(t, "test-3", false)
+		})
+
+		t.Run("With EOL", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			testEOL(t, "test-2", true)
+			testEOL(t, "test-4", true)
+			testEOL(t, "empty", true)
+			testEOL(t, "seemingly-empty", true)
 		})
 	})
 }

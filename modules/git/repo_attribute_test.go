@@ -30,14 +30,14 @@ func TestNewCheckAttrStdoutReader(t *testing.T) {
 
 		// first read
 		attr, err := read()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, map[string]GitAttribute{
 			"linguist-vendored": GitAttribute("unspecified"),
 		}, attr)
 
 		// second read
 		attr, err = read()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, map[string]GitAttribute{
 			"linguist-vendored": GitAttribute("specified"),
 		}, attr)
@@ -59,21 +59,21 @@ func TestNewCheckAttrStdoutReader(t *testing.T) {
 
 		// first read
 		attr, err := read()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, map[string]GitAttribute{
 			"linguist-vendored": GitAttribute("set"),
 		}, attr)
 
 		// second read
 		attr, err = read()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, map[string]GitAttribute{
 			"linguist-generated": GitAttribute("unspecified"),
 		}, attr)
 
 		// third read
 		attr, err = read()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, map[string]GitAttribute{
 			"linguist-language": GitAttribute("unspecified"),
 		}, attr)
@@ -95,32 +95,32 @@ func TestGitAttributeBareNonBare(t *testing.T) {
 		"341fca5b5ea3de596dc483e54c2db28633cd2f97",
 	} {
 		bareStats, err := gitRepo.GitAttributes(commitID, "i-am-a-python.p", LinguistAttributes...)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		defer test.MockVariableValue(&SupportCheckAttrOnBare, false)()
 		cloneStats, err := gitRepo.GitAttributes(commitID, "i-am-a-python.p", LinguistAttributes...)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.EqualValues(t, cloneStats, bareStats)
 		refStats := cloneStats
 
 		t.Run("GitAttributeChecker/"+commitID+"/SupportBare", func(t *testing.T) {
 			bareChecker, err := gitRepo.GitAttributeChecker(commitID, LinguistAttributes...)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			defer bareChecker.Close()
 
 			bareStats, err := bareChecker.CheckPath("i-am-a-python.p")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, refStats, bareStats)
 		})
 		t.Run("GitAttributeChecker/"+commitID+"/NoBareSupport", func(t *testing.T) {
 			defer test.MockVariableValue(&SupportCheckAttrOnBare, false)()
 			cloneChecker, err := gitRepo.GitAttributeChecker(commitID, LinguistAttributes...)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			defer cloneChecker.Close()
 
 			cloneStats, err := cloneChecker.CheckPath("i-am-a-python.p")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.EqualValues(t, refStats, cloneStats)
 		})
@@ -134,7 +134,7 @@ func TestGitAttributes(t *testing.T) {
 	defer gitRepo.Close()
 
 	attr, err := gitRepo.GitAttributes("8fee858da5796dfb37704761701bb8e800ad9ef3", "i-am-a-python.p", LinguistAttributes...)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, map[string]GitAttribute{
 		"gitlab-language":        "unspecified",
 		"linguist-detectable":    "unspecified",
@@ -145,7 +145,7 @@ func TestGitAttributes(t *testing.T) {
 	}, attr)
 
 	attr, err = gitRepo.GitAttributes("341fca5b5ea3de596dc483e54c2db28633cd2f97", "i-am-a-python.p", LinguistAttributes...)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, map[string]GitAttribute{
 		"gitlab-language":        "unspecified",
 		"linguist-detectable":    "unspecified",
@@ -164,19 +164,19 @@ func TestGitAttributeFirst(t *testing.T) {
 
 	t.Run("first is specified", func(t *testing.T) {
 		language, err := gitRepo.GitAttributeFirst("8fee858da5796dfb37704761701bb8e800ad9ef3", "i-am-a-python.p", "linguist-language", "gitlab-language")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "Python", language.String())
 	})
 
 	t.Run("second is specified", func(t *testing.T) {
 		language, err := gitRepo.GitAttributeFirst("8fee858da5796dfb37704761701bb8e800ad9ef3", "i-am-a-python.p", "gitlab-language", "linguist-language")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "Python", language.String())
 	})
 
 	t.Run("none is specified", func(t *testing.T) {
 		language, err := gitRepo.GitAttributeFirst("8fee858da5796dfb37704761701bb8e800ad9ef3", "i-am-a-python.p", "linguist-detectable", "gitlab-language", "non-existing")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "", language.String())
 	})
 }
@@ -208,13 +208,13 @@ func TestGitAttributeCheckerError(t *testing.T) {
 		gitRepo := prepareRepo(t)
 		defer gitRepo.Close()
 
-		assert.NoError(t, os.RemoveAll(gitRepo.Path))
+		require.NoError(t, os.RemoveAll(gitRepo.Path))
 
 		ac, err := gitRepo.GitAttributeChecker("", "linguist-language")
 		require.NoError(t, err)
 
 		_, err = ac.CheckPath("i-am-a-python.p")
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), `git check-attr (stderr: ""):`)
 	})
 
@@ -226,7 +226,7 @@ func TestGitAttributeCheckerError(t *testing.T) {
 		require.NoError(t, err)
 
 		// calling CheckPath before would allow git to cache part of it and successfully return later
-		assert.NoError(t, os.RemoveAll(gitRepo.Path))
+		require.NoError(t, os.RemoveAll(gitRepo.Path))
 
 		_, err = ac.CheckPath("i-am-a-python.p")
 		if err == nil {
@@ -254,7 +254,7 @@ func TestGitAttributeCheckerError(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = ac.CheckPath("i-am-a-python.p")
-		assert.ErrorIs(t, err, context.Canceled)
+		require.ErrorIs(t, err, context.Canceled)
 	})
 
 	t.Run("Cancelled/DuringRun", func(t *testing.T) {
@@ -268,7 +268,7 @@ func TestGitAttributeCheckerError(t *testing.T) {
 		require.NoError(t, err)
 
 		attr, err := ac.CheckPath("i-am-a-python.p")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "Python", attr["linguist-language"].String())
 
 		errCh := make(chan error)
@@ -286,7 +286,7 @@ func TestGitAttributeCheckerError(t *testing.T) {
 		case <-time.After(time.Second):
 			t.Error("CheckPath did not complete within 1s")
 		case err = <-errCh:
-			assert.ErrorIs(t, err, context.Canceled)
+			require.ErrorIs(t, err, context.Canceled)
 		}
 	})
 
@@ -297,10 +297,10 @@ func TestGitAttributeCheckerError(t *testing.T) {
 		ac, err := gitRepo.GitAttributeChecker("8fee858da5796dfb37704761701bb8e800ad9ef3", "linguist-language")
 		require.NoError(t, err)
 
-		assert.NoError(t, ac.Close())
+		require.NoError(t, ac.Close())
 
 		_, err = ac.CheckPath("i-am-a-python.p")
-		assert.ErrorIs(t, err, fs.ErrClosed)
+		require.ErrorIs(t, err, fs.ErrClosed)
 	})
 
 	t.Run("Closed/DuringRun", func(t *testing.T) {
@@ -311,13 +311,13 @@ func TestGitAttributeCheckerError(t *testing.T) {
 		require.NoError(t, err)
 
 		attr, err := ac.CheckPath("i-am-a-python.p")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "Python", attr["linguist-language"].String())
 
-		assert.NoError(t, ac.Close())
+		require.NoError(t, ac.Close())
 
 		_, err = ac.CheckPath("i-am-a-python.p")
-		assert.ErrorIs(t, err, fs.ErrClosed)
+		require.ErrorIs(t, err, fs.ErrClosed)
 	})
 }
 

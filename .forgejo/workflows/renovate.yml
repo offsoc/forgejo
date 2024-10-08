@@ -11,6 +11,7 @@ on:
       - 'renovate/**' # self-test updates
   schedule:
     - cron: '0 0/2 * * *'
+  workflow_dispatch:
 
 env:
   RENOVATE_DRY_RUN: ${{ (github.event_name != 'schedule' && github.ref_name != github.event.repository.default_branch) && 'full' || '' }}
@@ -22,11 +23,11 @@ jobs:
 
     runs-on: docker
     container:
-      image: ghcr.io/visualon/renovate:38.9.0
+      image: code.forgejo.org/forgejo-contrib/renovate:38.110.2
 
     steps:
       - name: Load renovate repo cache
-        uses: https://code.forgejo.org/actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        uses: https://code.forgejo.org/actions/cache/restore@2cdf405574d6ef1f33a1d12acccd3ae82f47b3f2 # v4.1.0
         with:
           path: |
             .tmp/cache/renovate/repository
@@ -59,7 +60,7 @@ jobs:
 
       - name: Save renovate repo cache
         if: always() && env.RENOVATE_DRY_RUN != 'full'
-        uses: https://code.forgejo.org/actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        uses: https://code.forgejo.org/actions/cache/save@2cdf405574d6ef1f33a1d12acccd3ae82f47b3f2 # v4.1.0
         with:
           path: |
             .tmp/cache/renovate/repository

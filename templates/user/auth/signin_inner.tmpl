@@ -52,11 +52,11 @@
 <div class="ui container fluid">
 	{{template "user/auth/webauthn_error" .}}
 
-	<div class="ui attached segment header top tw-max-w-2xl tw-m-auto tw-flex tw-flex-col tw-items-center">
-		{{if .ShowRegistrationButton}}
+	{{if .ShowRegistrationButton}}
+		<div class="ui attached segment header top tw-max-w-2xl tw-m-auto tw-flex tw-flex-col tw-items-center">
 			<div class="field">
 				{{ctx.Locale.Tr "auth.hint_register" (printf "%s/user/sign_up" AppSubUrl)}}
 			</div>
-		{{end}}
-	</div>
+		</div>
+	{{end}}
 </div>

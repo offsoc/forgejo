@@ -1,11 +1,14 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package util
 
 import (
 	"bytes"
+	"crypto/ed25519"
 	"crypto/rand"
+	"encoding/pem"
 	"fmt"
 	"math/big"
 	"strconv"
@@ -13,6 +16,7 @@ import (
 
 	"code.gitea.io/gitea/modules/optional"
 
+	"golang.org/x/crypto/ssh"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -221,6 +225,15 @@ func Iif[T any](condition bool, trueVal, falseVal T) T {
 	return falseVal
 }
 
+// IfZero returns "def" if "v" is a zero value, otherwise "v"
+func IfZero[T comparable](v, def T) T {
+	var zero T
+	if v == zero {
+		return def
+	}
+	return v
+}
+
 func ReserveLineBreakForTextarea(input string) string {
 	// Since the content is from a form which is a textarea, the line endings are \r\n.
 	// It's a standard behavior of HTML.
@@ -228,4 +241,24 @@ func ReserveLineBreakForTextarea(input string) string {
 	// And users are unlikely to really need to keep the \r.
 	// Other than this, we should respect the original content, even leading or trailing spaces.
 	return strings.ReplaceAll(input, "\r\n", "\n")
+}
+
+// GenerateSSHKeypair generates a ed25519 SSH-compatible keypair.
+func GenerateSSHKeypair() (publicKey, privateKey []byte, err error) {
+	public, private, err := ed25519.GenerateKey(nil)
+	if err != nil {
+		return nil, nil, fmt.Errorf("ed25519.GenerateKey: %w", err)
+	}
+
+	privPEM, err := ssh.MarshalPrivateKey(private, "")
+	if err != nil {
+		return nil, nil, fmt.Errorf("ssh.MarshalPrivateKey: %w", err)
+	}
+
+	sshPublicKey, err := ssh.NewPublicKey(public)
+	if err != nil {
+		return nil, nil, fmt.Errorf("ssh.NewPublicKey: %w", err)
+	}
+
+	return ssh.MarshalAuthorizedKey(sshPublicKey), pem.EncodeToMemory(privPEM), nil
 }

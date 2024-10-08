@@ -19,7 +19,7 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 
-	"strk.kbt.io/projects/go/libravatar"
+	"code.forgejo.org/forgejo-contrib/go-libravatar"
 )
 
 const (

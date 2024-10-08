@@ -16,6 +16,7 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOrgCounts(t *testing.T) {
@@ -122,7 +123,7 @@ func doCheckOrgCounts(username string, orgCounts map[string]int, strict bool, ca
 			UserID:         user.ID,
 			IncludePrivate: true,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		calcOrgCounts := map[string]int{}
 
@@ -130,7 +131,7 @@ func doCheckOrgCounts(username string, orgCounts map[string]int, strict bool, ca
 			calcOrgCounts[org.LowerName] = org.NumRepos
 			count, ok := canonicalCounts[org.LowerName]
 			if ok {
-				assert.True(t, count == org.NumRepos, "Number of Repos in %s is %d when we expected %d", org.Name, org.NumRepos, count)
+				assert.Equal(t, count, org.NumRepos, "Number of Repos in %s is %d when we expected %d", org.Name, org.NumRepos, count)
 			} else {
 				assert.False(t, strict, "Did not expect to see %s with count %d", org.Name, org.NumRepos)
 			}

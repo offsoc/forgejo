@@ -15,6 +15,7 @@ import (
 
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMeilisearchIndexer(t *testing.T) {
@@ -58,7 +59,7 @@ func TestConvertHits(t *testing.T) {
 	_, err := convertHits(&meilisearch.SearchResponse{
 		Hits: []any{"aa", "bb", "cc", "dd"},
 	})
-	assert.ErrorIs(t, err, ErrMalformedResponse)
+	require.ErrorIs(t, err, ErrMalformedResponse)
 
 	validResponse := &meilisearch.SearchResponse{
 		Hits: []any{
@@ -83,7 +84,7 @@ func TestConvertHits(t *testing.T) {
 		},
 	}
 	hits, err := convertHits(validResponse)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, []internal.Match{{ID: 11}, {ID: 22}, {ID: 33}}, hits)
 }
 

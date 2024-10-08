@@ -48,7 +48,7 @@ function test_main() {
   test "$(categorize)" = 'ZE Other changes without a feature or bug label'
 
   test_payload_labels
-  test "$(categorize)" = 'ZF Included for completness but not worth a release note'
+  test "$(categorize)" = 'ZF Included for completeness but not worth a release note'
 
   test_payload_draft "feat!: breaking feature"
   test "$(categorize)" = 'AA Breaking features'
@@ -99,7 +99,7 @@ function categorize() {
   #
   if test -z "$(jq --raw-output .Draft <$payload)"; then
     if ! $worth; then
-      echo -n ZF Included for completness but not worth a release note
+      echo -n ZF Included for completeness but not worth a release note
       exit 0
     fi
   fi

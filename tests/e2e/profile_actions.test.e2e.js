@@ -1,6 +1,13 @@
 // @ts-check
-import {test, expect} from '@playwright/test';
-import {login_user, load_logged_in_context} from './utils_e2e.js';
+
+// @watch start
+// routers/web/user/**
+// templates/shared/user/**
+// web_src/js/features/common-global.js
+// @watch end
+
+import {expect} from '@playwright/test';
+import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 
 test('Follow actions', async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -12,7 +19,7 @@ test('Follow actions', async ({browser}, workerInfo) => {
 
   // Check if following and then unfollowing works.
   // This checks that the event listeners of
-  // the buttons aren't dissapearing.
+  // the buttons aren't disappearing.
   const followButton = page.locator('.follow');
   await expect(followButton).toContainText('Follow');
   await followButton.click();

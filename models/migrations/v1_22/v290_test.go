@@ -12,6 +12,7 @@ import (
 	webhook_module "code.gitea.io/gitea/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_AddPayloadVersionToHookTaskTable(t *testing.T) {
@@ -40,14 +41,14 @@ func Test_AddPayloadVersionToHookTaskTable(t *testing.T) {
 		return
 	}
 
-	assert.NoError(t, AddPayloadVersionToHookTaskTable(x))
+	require.NoError(t, AddPayloadVersionToHookTaskTable(x))
 
 	expected := []HookTaskMigrated{}
-	assert.NoError(t, x.Table("hook_task_migrated").Asc("id").Find(&expected))
+	require.NoError(t, x.Table("hook_task_migrated").Asc("id").Find(&expected))
 	assert.Len(t, expected, 2)
 
 	got := []HookTaskMigrated{}
-	assert.NoError(t, x.Table("hook_task").Asc("id").Find(&got))
+	require.NoError(t, x.Table("hook_task").Asc("id").Find(&got))
 
 	for i, expected := range expected {
 		expected, got := expected, got[i]

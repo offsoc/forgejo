@@ -17,8 +17,8 @@ func Test_getStorageInheritNameSectionTypeForActions(t *testing.T) {
 	STORAGE_TYPE = minio
 	`
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadActionsFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadActionsFrom(cfg))
 
 	assert.EqualValues(t, "minio", Actions.LogStorage.Type)
 	assert.EqualValues(t, "actions_log/", Actions.LogStorage.MinioConfig.BasePath)
@@ -30,8 +30,8 @@ func Test_getStorageInheritNameSectionTypeForActions(t *testing.T) {
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadActionsFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadActionsFrom(cfg))
 
 	assert.EqualValues(t, "minio", Actions.LogStorage.Type)
 	assert.EqualValues(t, "actions_log/", Actions.LogStorage.MinioConfig.BasePath)
@@ -46,8 +46,8 @@ STORAGE_TYPE = my_storage
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadActionsFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadActionsFrom(cfg))
 
 	assert.EqualValues(t, "minio", Actions.LogStorage.Type)
 	assert.EqualValues(t, "actions_log/", Actions.LogStorage.MinioConfig.BasePath)
@@ -62,8 +62,8 @@ STORAGE_TYPE = my_storage
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadActionsFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadActionsFrom(cfg))
 
 	assert.EqualValues(t, "local", Actions.LogStorage.Type)
 	assert.EqualValues(t, "actions_log", filepath.Base(Actions.LogStorage.Path))
@@ -78,8 +78,8 @@ STORAGE_TYPE = my_storage
 STORAGE_TYPE = minio
 `
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadActionsFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadActionsFrom(cfg))
 
 	assert.EqualValues(t, "local", Actions.LogStorage.Type)
 	assert.EqualValues(t, "actions_log", filepath.Base(Actions.LogStorage.Path))
@@ -88,8 +88,8 @@ STORAGE_TYPE = minio
 
 	iniStr = ``
 	cfg, err = NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
-	assert.NoError(t, loadActionsFrom(cfg))
+	require.NoError(t, err)
+	require.NoError(t, loadActionsFrom(cfg))
 
 	assert.EqualValues(t, "local", Actions.LogStorage.Type)
 	assert.EqualValues(t, "actions_log", filepath.Base(Actions.LogStorage.Path))
@@ -149,9 +149,8 @@ DEFAULT_ACTIONS_URL = https://example.com
 		t.Run(tt.name, func(t *testing.T) {
 			cfg, err := NewConfigProviderFromData(tt.iniStr)
 			require.NoError(t, err)
-			if !assert.NoError(t, loadActionsFrom(cfg)) {
-				return
-			}
+			require.NoError(t, loadActionsFrom(cfg))
+
 			assert.EqualValues(t, tt.wantURL, Actions.DefaultActionsURL.URL())
 		})
 	}

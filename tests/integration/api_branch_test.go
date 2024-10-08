@@ -16,6 +16,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testAPIGetBranch(t *testing.T, branchName string, exists bool) {
@@ -213,7 +214,7 @@ func TestAPIBranchProtection(t *testing.T) {
 		StatusCheckContexts: []string{"test1"},
 	}, http.StatusOK)
 	bp := testAPIGetBranchProtection(t, "master", http.StatusOK)
-	assert.Equal(t, true, bp.EnableStatusCheck)
+	assert.True(t, bp.EnableStatusCheck)
 	assert.Equal(t, []string{"test1"}, bp.StatusCheckContexts)
 
 	// disable status checks, clear the list of required checks
@@ -222,7 +223,7 @@ func TestAPIBranchProtection(t *testing.T) {
 		StatusCheckContexts: []string{},
 	}, http.StatusOK)
 	bp = testAPIGetBranchProtection(t, "master", http.StatusOK)
-	assert.Equal(t, false, bp.EnableStatusCheck)
+	assert.False(t, bp.EnableStatusCheck)
 	assert.Equal(t, []string{}, bp.StatusCheckContexts)
 
 	testAPIDeleteBranchProtection(t, "master", http.StatusNoContent)
@@ -238,12 +239,12 @@ func TestAPICreateBranchWithSyncBranches(t *testing.T) {
 	branches, err := db.Find[git_model.Branch](db.DefaultContext, git_model.FindBranchOptions{
 		RepoID: 1,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, branches, 4)
 
 	// make a broke repository with no branch on database
 	_, err = db.DeleteByBean(db.DefaultContext, git_model.Branch{RepoID: 1})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
 		ctx := NewAPITestContext(t, "user2", "repo1", auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteUser)
@@ -255,13 +256,13 @@ func TestAPICreateBranchWithSyncBranches(t *testing.T) {
 	branches, err = db.Find[git_model.Branch](db.DefaultContext, git_model.FindBranchOptions{
 		RepoID: 1,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, branches, 5)
 
 	branches, err = db.Find[git_model.Branch](db.DefaultContext, git_model.FindBranchOptions{
 		RepoID:  1,
 		Keyword: "new_branch",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, branches, 1)
 }

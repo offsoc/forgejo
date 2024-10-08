@@ -4,11 +4,14 @@
 
 package log
 
-// CanColorStdout reports if we can color the Stdout
-// Although we could do terminal sniffing and the like - in reality
-// most tools on *nix are happy to display ansi colors.
-// We will terminal sniff on Windows in console_windows.go
+// CanColorStdout reports if we can use ANSI escape sequences on stdout
 var CanColorStdout = true
 
-// CanColorStderr reports if we can color the Stderr
+// CanColorStderr reports if we can use ANSI escape sequences on stderr
 var CanColorStderr = true
+
+// JournaldOnStdout reports whether stdout is attached to journald
+var JournaldOnStdout = false
+
+// JournaldOnStderr reports whether stderr is attached to journald
+var JournaldOnStderr = false

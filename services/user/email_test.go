@@ -18,28 +18,28 @@ import (
 )
 
 func TestAdminAddOrSetPrimaryEmailAddress(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 27})
 
 	emails, err := user_model.GetEmailAddresses(db.DefaultContext, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, emails, 1)
 
 	primary, err := user_model.GetPrimaryEmailAddressOfUser(db.DefaultContext, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, "new-primary@example.com", primary.Email)
 	assert.Equal(t, user.Email, primary.Email)
 
-	assert.NoError(t, AdminAddOrSetPrimaryEmailAddress(db.DefaultContext, user, "new-primary@example.com"))
+	require.NoError(t, AdminAddOrSetPrimaryEmailAddress(db.DefaultContext, user, "new-primary@example.com"))
 
 	primary, err = user_model.GetPrimaryEmailAddressOfUser(db.DefaultContext, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "new-primary@example.com", primary.Email)
 	assert.Equal(t, user.Email, primary.Email)
 
 	emails, err = user_model.GetEmailAddresses(db.DefaultContext, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, emails, 2)
 
 	setting.Service.EmailDomainAllowList = []glob.Glob{glob.MustCompile("example.org")}
@@ -47,52 +47,52 @@ func TestAdminAddOrSetPrimaryEmailAddress(t *testing.T) {
 		setting.Service.EmailDomainAllowList = []glob.Glob{}
 	}()
 
-	assert.NoError(t, AdminAddOrSetPrimaryEmailAddress(db.DefaultContext, user, "new-primary2@example2.com"))
+	require.NoError(t, AdminAddOrSetPrimaryEmailAddress(db.DefaultContext, user, "new-primary2@example2.com"))
 
 	primary, err = user_model.GetPrimaryEmailAddressOfUser(db.DefaultContext, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "new-primary2@example2.com", primary.Email)
 	assert.Equal(t, user.Email, primary.Email)
 
-	assert.NoError(t, AdminAddOrSetPrimaryEmailAddress(db.DefaultContext, user, "user27@example.com"))
+	require.NoError(t, AdminAddOrSetPrimaryEmailAddress(db.DefaultContext, user, "user27@example.com"))
 
 	primary, err = user_model.GetPrimaryEmailAddressOfUser(db.DefaultContext, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "user27@example.com", primary.Email)
 	assert.Equal(t, user.Email, primary.Email)
 
 	emails, err = user_model.GetEmailAddresses(db.DefaultContext, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, emails, 3)
 }
 
 func TestReplacePrimaryEmailAddress(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	t.Run("User", func(t *testing.T) {
 		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 13})
 
 		emails, err := user_model.GetEmailAddresses(db.DefaultContext, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, emails, 1)
 
 		primary, err := user_model.GetPrimaryEmailAddressOfUser(db.DefaultContext, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEqual(t, "primary-13@example.com", primary.Email)
 		assert.Equal(t, user.Email, primary.Email)
 
-		assert.NoError(t, ReplacePrimaryEmailAddress(db.DefaultContext, user, "primary-13@example.com"))
+		require.NoError(t, ReplacePrimaryEmailAddress(db.DefaultContext, user, "primary-13@example.com"))
 
 		primary, err = user_model.GetPrimaryEmailAddressOfUser(db.DefaultContext, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "primary-13@example.com", primary.Email)
 		assert.Equal(t, user.Email, primary.Email)
 
 		emails, err = user_model.GetEmailAddresses(db.DefaultContext, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, emails, 1)
 
-		assert.NoError(t, ReplacePrimaryEmailAddress(db.DefaultContext, user, "primary-13@example.com"))
+		require.NoError(t, ReplacePrimaryEmailAddress(db.DefaultContext, user, "primary-13@example.com"))
 	})
 
 	t.Run("Organization", func(t *testing.T) {
@@ -100,37 +100,37 @@ func TestReplacePrimaryEmailAddress(t *testing.T) {
 
 		assert.Equal(t, "org3@example.com", org.Email)
 
-		assert.NoError(t, ReplacePrimaryEmailAddress(db.DefaultContext, org.AsUser(), "primary-org@example.com"))
+		require.NoError(t, ReplacePrimaryEmailAddress(db.DefaultContext, org.AsUser(), "primary-org@example.com"))
 
 		assert.Equal(t, "primary-org@example.com", org.Email)
 	})
 }
 
 func TestAddEmailAddresses(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
-	assert.Error(t, AddEmailAddresses(db.DefaultContext, user, []string{" invalid email "}))
+	require.Error(t, AddEmailAddresses(db.DefaultContext, user, []string{" invalid email "}))
 
 	emails := []string{"user1234@example.com", "user5678@example.com"}
 
-	assert.NoError(t, AddEmailAddresses(db.DefaultContext, user, emails))
+	require.NoError(t, AddEmailAddresses(db.DefaultContext, user, emails))
 
 	err := AddEmailAddresses(db.DefaultContext, user, emails)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.True(t, user_model.IsErrEmailAlreadyUsed(err))
 }
 
 func TestReplaceInactivePrimaryEmail(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	email := &user_model.EmailAddress{
 		Email: "user9999999@example.com",
 		UID:   9999999,
 	}
 	err := ReplaceInactivePrimaryEmail(db.DefaultContext, "user10@example.com", email)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.True(t, user_model.IsErrUserNotExist(err))
 
 	email = &user_model.EmailAddress{
@@ -138,30 +138,30 @@ func TestReplaceInactivePrimaryEmail(t *testing.T) {
 		UID:   10,
 	}
 	err = ReplaceInactivePrimaryEmail(db.DefaultContext, "user10@example.com", email)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 10})
 	assert.Equal(t, "user201@example.com", user.Email)
 }
 
 func TestDeleteEmailAddresses(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
 	emails := []string{"user2-2@example.com"}
 
 	err := DeleteEmailAddresses(db.DefaultContext, user, emails)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = DeleteEmailAddresses(db.DefaultContext, user, emails)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.True(t, user_model.IsErrEmailAddressNotExist(err))
 
 	emails = []string{"user2@example.com"}
 
 	err = DeleteEmailAddresses(db.DefaultContext, user, emails)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.True(t, user_model.IsErrPrimaryEmailCannotDelete(err))
 }
 

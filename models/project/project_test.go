@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIsProjectTypeValid(t *testing.T) {
@@ -32,23 +33,23 @@ func TestIsProjectTypeValid(t *testing.T) {
 }
 
 func TestGetProjects(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	projects, err := db.Find[Project](db.DefaultContext, SearchOptions{RepoID: 1})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// 1 value for this repo exists in the fixtures
 	assert.Len(t, projects, 1)
 
 	projects, err = db.Find[Project](db.DefaultContext, SearchOptions{RepoID: 3})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// 1 value for this repo exists in the fixtures
 	assert.Len(t, projects, 1)
 }
 
 func TestProject(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	project := &Project{
 		Type:         TypeRepository,
@@ -60,31 +61,31 @@ func TestProject(t *testing.T) {
 		CreatorID:    2,
 	}
 
-	assert.NoError(t, NewProject(db.DefaultContext, project))
+	require.NoError(t, NewProject(db.DefaultContext, project))
 
 	_, err := GetProjectByID(db.DefaultContext, project.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Update project
 	project.Title = "Updated title"
-	assert.NoError(t, UpdateProject(db.DefaultContext, project))
+	require.NoError(t, UpdateProject(db.DefaultContext, project))
 
 	projectFromDB, err := GetProjectByID(db.DefaultContext, project.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, project.Title, projectFromDB.Title)
 
-	assert.NoError(t, ChangeProjectStatus(db.DefaultContext, project, true))
+	require.NoError(t, ChangeProjectStatus(db.DefaultContext, project, true))
 
 	// Retrieve from DB afresh to check if it is truly closed
 	projectFromDB, err = GetProjectByID(db.DefaultContext, project.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.True(t, projectFromDB.IsClosed)
 }
 
 func TestProjectsSort(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	tests := []struct {
 		sortType string
@@ -112,7 +113,7 @@ func TestProjectsSort(t *testing.T) {
 		projects, count, err := db.FindAndCount[Project](db.DefaultContext, SearchOptions{
 			OrderBy: GetSearchOrderByBySortType(tt.sortType),
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, int64(6), count)
 		if assert.Len(t, projects, 6) {
 			for i := range projects {

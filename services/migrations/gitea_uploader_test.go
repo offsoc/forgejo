@@ -28,6 +28,7 @@ import (
 	"code.gitea.io/gitea/modules/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGiteaUploadRepo(t *testing.T) {
@@ -60,7 +61,7 @@ func TestGiteaUploadRepo(t *testing.T) {
 		Private:      true,
 		Mirror:       false,
 	}, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, Name: repoName})
 	assert.True(t, repo.HasWiki())
@@ -70,18 +71,18 @@ func TestGiteaUploadRepo(t *testing.T) {
 		RepoID:   repo.ID,
 		IsClosed: optional.Some(false),
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, milestones, 1)
 
 	milestones, err = db.Find[issues_model.Milestone](db.DefaultContext, issues_model.FindMilestoneOptions{
 		RepoID:   repo.ID,
 		IsClosed: optional.Some(true),
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, milestones)
 
 	labels, err := issues_model.GetLabelsByRepoID(ctx, repo.ID, "", db.ListOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, labels, 12)
 
 	releases, err := db.Find[repo_model.Release](db.DefaultContext, repo_model.FindReleasesOptions{
@@ -92,7 +93,7 @@ func TestGiteaUploadRepo(t *testing.T) {
 		IncludeTags: true,
 		RepoID:      repo.ID,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, releases, 8)
 
 	releases, err = db.Find[repo_model.Release](db.DefaultContext, repo_model.FindReleasesOptions{
@@ -103,7 +104,7 @@ func TestGiteaUploadRepo(t *testing.T) {
 		IncludeTags: false,
 		RepoID:      repo.ID,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, releases, 1)
 
 	issues, err := issues_model.Issues(db.DefaultContext, &issues_model.IssuesOptions{
@@ -111,18 +112,18 @@ func TestGiteaUploadRepo(t *testing.T) {
 		IsPull:   optional.Some(false),
 		SortType: "oldest",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, issues, 15)
-	assert.NoError(t, issues[0].LoadDiscussComments(db.DefaultContext))
+	require.NoError(t, issues[0].LoadDiscussComments(db.DefaultContext))
 	assert.Empty(t, issues[0].Comments)
 
 	pulls, _, err := issues_model.PullRequests(db.DefaultContext, repo.ID, &issues_model.PullRequestsOptions{
 		SortType: "oldest",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, pulls, 30)
-	assert.NoError(t, pulls[0].LoadIssue(db.DefaultContext))
-	assert.NoError(t, pulls[0].Issue.LoadDiscussComments(db.DefaultContext))
+	require.NoError(t, pulls[0].LoadIssue(db.DefaultContext))
+	require.NoError(t, pulls[0].Issue.LoadDiscussComments(db.DefaultContext))
 	assert.Len(t, pulls[0].Issue.Comments, 2)
 }
 
@@ -150,7 +151,7 @@ func TestGiteaUploadRemapLocalUser(t *testing.T) {
 	target := repo_model.Release{}
 	uploader.userMap = make(map[int64]int64)
 	err := uploader.remapUser(&source, &target)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, user_model.GhostUserID, target.GetUserID())
 
 	//
@@ -161,7 +162,7 @@ func TestGiteaUploadRemapLocalUser(t *testing.T) {
 	target = repo_model.Release{}
 	uploader.userMap = make(map[int64]int64)
 	err = uploader.remapUser(&source, &target)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, user_model.GhostUserID, target.GetUserID())
 
 	//
@@ -172,7 +173,7 @@ func TestGiteaUploadRemapLocalUser(t *testing.T) {
 	target = repo_model.Release{}
 	uploader.userMap = make(map[int64]int64)
 	err = uploader.remapUser(&source, &target)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, user.ID, target.GetUserID())
 }
 
@@ -200,7 +201,7 @@ func TestGiteaUploadRemapExternalUser(t *testing.T) {
 	uploader.userMap = make(map[int64]int64)
 	target := repo_model.Release{}
 	err := uploader.remapUser(&source, &target)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, user_model.GhostUserID, target.GetUserID())
 
 	//
@@ -214,7 +215,7 @@ func TestGiteaUploadRemapExternalUser(t *testing.T) {
 		Provider:      structs.GiteaService.Name(),
 	}
 	err = user_model.LinkExternalToUser(db.DefaultContext, linkedUser, externalLoginUser)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	//
 	// When a user is linked to the external ID, it becomes the author of
@@ -223,7 +224,7 @@ func TestGiteaUploadRemapExternalUser(t *testing.T) {
 	uploader.userMap = make(map[int64]int64)
 	target = repo_model.Release{}
 	err = uploader.remapUser(&source, &target)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, linkedUser.ID, target.GetUserID())
 }
 
@@ -235,44 +236,44 @@ func TestGiteaUploadUpdateGitForPullRequest(t *testing.T) {
 	//
 	fromRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	baseRef := "master"
-	assert.NoError(t, git.InitRepository(git.DefaultContext, fromRepo.RepoPath(), false, fromRepo.ObjectFormatName))
+	require.NoError(t, git.InitRepository(git.DefaultContext, fromRepo.RepoPath(), false, fromRepo.ObjectFormatName))
 	err := git.NewCommand(git.DefaultContext, "symbolic-ref").AddDynamicArguments("HEAD", git.BranchPrefix+baseRef).Run(&git.RunOpts{Dir: fromRepo.RepoPath()})
-	assert.NoError(t, err)
-	assert.NoError(t, os.WriteFile(filepath.Join(fromRepo.RepoPath(), "README.md"), []byte(fmt.Sprintf("# Testing Repository\n\nOriginally created in: %s", fromRepo.RepoPath())), 0o644))
-	assert.NoError(t, git.AddChanges(fromRepo.RepoPath(), true))
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(filepath.Join(fromRepo.RepoPath(), "README.md"), []byte(fmt.Sprintf("# Testing Repository\n\nOriginally created in: %s", fromRepo.RepoPath())), 0o644))
+	require.NoError(t, git.AddChanges(fromRepo.RepoPath(), true))
 	signature := git.Signature{
 		Email: "test@example.com",
 		Name:  "test",
 		When:  time.Now(),
 	}
-	assert.NoError(t, git.CommitChanges(fromRepo.RepoPath(), git.CommitChangesOptions{
+	require.NoError(t, git.CommitChanges(fromRepo.RepoPath(), git.CommitChangesOptions{
 		Committer: &signature,
 		Author:    &signature,
 		Message:   "Initial Commit",
 	}))
 	fromGitRepo, err := gitrepo.OpenRepository(git.DefaultContext, fromRepo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer fromGitRepo.Close()
 	baseSHA, err := fromGitRepo.GetBranchCommitID(baseRef)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	//
 	// fromRepo branch1
 	//
 	headRef := "branch1"
 	_, _, err = git.NewCommand(git.DefaultContext, "checkout", "-b").AddDynamicArguments(headRef).RunStdString(&git.RunOpts{Dir: fromRepo.RepoPath()})
-	assert.NoError(t, err)
-	assert.NoError(t, os.WriteFile(filepath.Join(fromRepo.RepoPath(), "README.md"), []byte("SOMETHING"), 0o644))
-	assert.NoError(t, git.AddChanges(fromRepo.RepoPath(), true))
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(filepath.Join(fromRepo.RepoPath(), "README.md"), []byte("SOMETHING"), 0o644))
+	require.NoError(t, git.AddChanges(fromRepo.RepoPath(), true))
 	signature.When = time.Now()
-	assert.NoError(t, git.CommitChanges(fromRepo.RepoPath(), git.CommitChangesOptions{
+	require.NoError(t, git.CommitChanges(fromRepo.RepoPath(), git.CommitChangesOptions{
 		Committer: &signature,
 		Author:    &signature,
 		Message:   "Pull request",
 	}))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	headSHA, err := fromGitRepo.GetBranchCommitID(headRef)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	fromRepoOwner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: fromRepo.OwnerID})
 
@@ -281,28 +282,28 @@ func TestGiteaUploadUpdateGitForPullRequest(t *testing.T) {
 	//
 	forkHeadRef := "branch2"
 	forkRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 8})
-	assert.NoError(t, git.CloneWithArgs(git.DefaultContext, nil, fromRepo.RepoPath(), forkRepo.RepoPath(), git.CloneRepoOptions{
+	require.NoError(t, git.CloneWithArgs(git.DefaultContext, nil, fromRepo.RepoPath(), forkRepo.RepoPath(), git.CloneRepoOptions{
 		Branch: headRef,
 	}))
 	_, _, err = git.NewCommand(git.DefaultContext, "checkout", "-b").AddDynamicArguments(forkHeadRef).RunStdString(&git.RunOpts{Dir: forkRepo.RepoPath()})
-	assert.NoError(t, err)
-	assert.NoError(t, os.WriteFile(filepath.Join(forkRepo.RepoPath(), "README.md"), []byte(fmt.Sprintf("# branch2 %s", forkRepo.RepoPath())), 0o644))
-	assert.NoError(t, git.AddChanges(forkRepo.RepoPath(), true))
-	assert.NoError(t, git.CommitChanges(forkRepo.RepoPath(), git.CommitChangesOptions{
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(filepath.Join(forkRepo.RepoPath(), "README.md"), []byte(fmt.Sprintf("# branch2 %s", forkRepo.RepoPath())), 0o644))
+	require.NoError(t, git.AddChanges(forkRepo.RepoPath(), true))
+	require.NoError(t, git.CommitChanges(forkRepo.RepoPath(), git.CommitChangesOptions{
 		Committer: &signature,
 		Author:    &signature,
 		Message:   "branch2 commit",
 	}))
 	forkGitRepo, err := gitrepo.OpenRepository(git.DefaultContext, forkRepo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer forkGitRepo.Close()
 	forkHeadSHA, err := forkGitRepo.GetBranchCommitID(forkHeadRef)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	toRepoName := "migrated"
 	uploader := NewGiteaLocalUploader(context.Background(), fromRepoOwner, fromRepoOwner.Name, toRepoName)
 	uploader.gitServiceType = structs.GiteaService
-	assert.NoError(t, uploader.CreateRepo(&base.Repository{
+	require.NoError(t, uploader.CreateRepo(&base.Repository{
 		Description: "description",
 		OriginalURL: fromRepo.RepoPath(),
 		CloneURL:    fromRepo.RepoPath(),
@@ -503,7 +504,7 @@ func TestGiteaUploadUpdateGitForPullRequest(t *testing.T) {
 			testCase.pr.EnsuredSafe = true
 
 			head, err := uploader.updateGitForPullRequest(&testCase.pr)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, testCase.head, head)
 
 			log.Info(stopMark)

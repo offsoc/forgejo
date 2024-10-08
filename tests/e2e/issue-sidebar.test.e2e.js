@@ -1,15 +1,17 @@
 // @ts-check
-import {test, expect} from '@playwright/test';
-import {login_user, load_logged_in_context} from './utils_e2e.js';
+
+// @watch start
+// templates/repo/issue/view_content/**
+// web_src/css/repo/issue-**
+// web_src/js/features/repo-issue**
+// @watch end
+
+import {expect} from '@playwright/test';
+import {test, login_user, login} from './utils_e2e.js';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
 });
-
-async function login({browser}, workerInfo) {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  return await context.newPage();
-}
 
 // belongs to test: Pull: Toggle WIP
 const prTitle = 'pull5';
@@ -55,6 +57,22 @@ test('Pull: Toggle WIP', async ({browser}, workerInfo) => {
   await check_wip({page}, true);
   // remove again
   await click_toggle_wip({page});
+  await check_wip({page}, false);
+  // check maximum title length is handled gracefully
+  const maxLenStr = prTitle + 'a'.repeat(240);
+  await page.locator('#issue-title-edit-show').click();
+  await page.locator('#issue-title-editor input').fill(maxLenStr);
+  await page.getByText('Save').click();
+  await page.waitForLoadState('networkidle');
+  await click_toggle_wip({page});
+  await check_wip({page}, true);
+  await click_toggle_wip({page});
+  await check_wip({page}, false);
+  await expect(page.locator('h1')).toContainText(maxLenStr);
+  // restore original title
+  await page.locator('#issue-title-edit-show').click();
+  await page.locator('#issue-title-editor input').fill(prTitle);
+  await page.getByText('Save').click();
   await check_wip({page}, false);
 });
 
@@ -107,4 +125,26 @@ test('Issue: Milestone', async ({browser}, workerInfo) => {
   await page.getByText('Clear milestone', {exact: true}).click();
   await expect(selectedMilestone).toContainText('No milestone');
   await expect(page.locator('.timeline-item.event').last()).toContainText('user2 removed this from the milestone1 milestone');
+});
+
+test('New Issue: Milestone', async ({browser}, workerInfo) => {
+  test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
+  const page = await login({browser}, workerInfo);
+
+  const response = await page.goto('/user2/repo1/issues/new');
+  await expect(response?.status()).toBe(200);
+
+  const selectedMilestone = page.locator('.issue-content-right .select-milestone.list');
+  const milestoneDropdown = page.locator('.issue-content-right .select-milestone.dropdown');
+  await expect(selectedMilestone).toContainText('No milestone');
+
+  // Add milestone.
+  await milestoneDropdown.click();
+  await page.getByRole('option', {name: 'milestone1'}).click();
+  await expect(selectedMilestone).toContainText('milestone1');
+
+  // Clear milestone.
+  await milestoneDropdown.click();
+  await page.getByText('Clear milestone', {exact: true}).click();
+  await expect(selectedMilestone).toContainText('No milestone');
 });

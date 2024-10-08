@@ -5,6 +5,7 @@ package unittest
 
 import (
 	"math"
+	"testing"
 
 	"code.gitea.io/gitea/models/db"
 
@@ -58,16 +59,16 @@ func LoadBeanIfExists(bean any, conditions ...any) (bool, error) {
 }
 
 // BeanExists for testing, check if a bean exists
-func BeanExists(t assert.TestingT, bean any, conditions ...any) bool {
+func BeanExists(t testing.TB, bean any, conditions ...any) bool {
 	exists, err := LoadBeanIfExists(bean, conditions...)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return exists
 }
 
 // AssertExistsAndLoadBean assert that a bean exists and load it from the test database
-func AssertExistsAndLoadBean[T any](t assert.TestingT, bean T, conditions ...any) T {
+func AssertExistsAndLoadBean[T any](t testing.TB, bean T, conditions ...any) T {
 	exists, err := LoadBeanIfExists(bean, conditions...)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, exists,
 		"Expected to find %+v (of type %T, with conditions %+v), but did not",
 		bean, bean, conditions)
@@ -75,11 +76,11 @@ func AssertExistsAndLoadBean[T any](t assert.TestingT, bean T, conditions ...any
 }
 
 // AssertExistsAndLoadMap assert that a row exists and load it from the test database
-func AssertExistsAndLoadMap(t assert.TestingT, table string, conditions ...any) map[string]string {
+func AssertExistsAndLoadMap(t testing.TB, table string, conditions ...any) map[string]string {
 	e := db.GetEngine(db.DefaultContext).Table(table)
 	res, err := whereOrderConditions(e, conditions).Query()
-	assert.NoError(t, err)
-	assert.True(t, len(res) == 1,
+	require.NoError(t, err)
+	assert.Len(t, res, 1,
 		"Expected to find one row in %s (with conditions %+v), but found %d",
 		table, conditions, len(res),
 	)
@@ -95,7 +96,7 @@ func AssertExistsAndLoadMap(t assert.TestingT, table string, conditions ...any) 
 }
 
 // GetCount get the count of a bean
-func GetCount(t assert.TestingT, bean any, conditions ...any) int {
+func GetCount(t testing.TB, bean any, conditions ...any) int {
 	e := db.GetEngine(db.DefaultContext)
 	for _, condition := range conditions {
 		switch cond := condition.(type) {
@@ -106,29 +107,29 @@ func GetCount(t assert.TestingT, bean any, conditions ...any) int {
 		}
 	}
 	count, err := e.Count(bean)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return int(count)
 }
 
 // AssertNotExistsBean assert that a bean does not exist in the test database
-func AssertNotExistsBean(t assert.TestingT, bean any, conditions ...any) {
+func AssertNotExistsBean(t testing.TB, bean any, conditions ...any) {
 	exists, err := LoadBeanIfExists(bean, conditions...)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, exists)
 }
 
 // AssertExistsIf asserts that a bean exists or does not exist, depending on
 // what is expected.
-func AssertExistsIf(t assert.TestingT, expected bool, bean any, conditions ...any) {
+func AssertExistsIf(t testing.TB, expected bool, bean any, conditions ...any) {
 	exists, err := LoadBeanIfExists(bean, conditions...)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, exists)
 }
 
 // AssertSuccessfulInsert assert that beans is successfully inserted
-func AssertSuccessfulInsert(t assert.TestingT, beans ...any) {
+func AssertSuccessfulInsert(t testing.TB, beans ...any) {
 	err := db.Insert(db.DefaultContext, beans...)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 // AssertSuccessfulDelete assert that beans is successfully deleted
@@ -138,26 +139,26 @@ func AssertSuccessfulDelete(t require.TestingT, beans ...any) {
 }
 
 // AssertCount assert the count of a bean
-func AssertCount(t assert.TestingT, bean, expected any) bool {
+func AssertCount(t testing.TB, bean, expected any) bool {
 	return assert.EqualValues(t, expected, GetCount(t, bean))
 }
 
 // AssertInt64InRange assert value is in range [low, high]
-func AssertInt64InRange(t assert.TestingT, low, high, value int64) {
+func AssertInt64InRange(t testing.TB, low, high, value int64) {
 	assert.True(t, value >= low && value <= high,
 		"Expected value in range [%d, %d], found %d", low, high, value)
 }
 
 // GetCountByCond get the count of database entries matching bean
-func GetCountByCond(t assert.TestingT, tableName string, cond builder.Cond) int64 {
+func GetCountByCond(t testing.TB, tableName string, cond builder.Cond) int64 {
 	e := db.GetEngine(db.DefaultContext)
 	count, err := e.Table(tableName).Where(cond).Count()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return count
 }
 
 // AssertCountByCond test the count of database entries matching bean
-func AssertCountByCond(t assert.TestingT, tableName string, cond builder.Cond, expected int) bool {
+func AssertCountByCond(t testing.TB, tableName string, cond builder.Cond, expected int) bool {
 	return assert.EqualValues(t, expected, GetCountByCond(t, tableName, cond),
 		"Failed consistency test, the counted bean (of table %s) was %+v", tableName, cond)
 }

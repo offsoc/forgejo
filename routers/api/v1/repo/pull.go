@@ -387,6 +387,8 @@ func CreatePullRequest(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 	//   "409":
 	//     "$ref": "#/responses/error"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 	//   "423":
@@ -750,7 +752,7 @@ func EditPullRequest(ctx *context.APIContext) {
 	// update allow edits
 	if form.AllowMaintainerEdit != nil {
 		if err := pull_service.SetAllowEdits(ctx, ctx.Doer, pr, *form.AllowMaintainerEdit); err != nil {
-			if errors.Is(pull_service.ErrUserHasNoPermissionForAction, err) {
+			if errors.Is(err, pull_service.ErrUserHasNoPermissionForAction) {
 				ctx.Error(http.StatusForbidden, "SetAllowEdits", fmt.Sprintf("SetAllowEdits: %s", err))
 				return
 			}
@@ -857,6 +859,8 @@ func MergePullRequest(ctx *context.APIContext) {
 	//     "$ref": "#/responses/empty"
 	//   "409":
 	//     "$ref": "#/responses/error"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "423":
 	//     "$ref": "#/responses/repoArchivedError"
 
@@ -1218,6 +1222,8 @@ func UpdatePullRequest(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 	//   "409":
 	//     "$ref": "#/responses/error"
+	//   "413":
+	//     "$ref": "#/responses/quotaExceeded"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 

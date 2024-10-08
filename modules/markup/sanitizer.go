@@ -111,8 +111,8 @@ func createDefaultPolicy() *bluemonday.Policy {
 	// Allow icons, emojis, chroma syntax and keyword markup on span
 	policy.AllowAttrs("class").Matching(regexp.MustCompile(`^((icon(\s+[\p{L}\p{N}_-]+)+)|(emoji)|(language-math display)|(language-math inline))$|^([a-z][a-z0-9]{0,2})$|^` + keywordClass + `$`)).OnElements("span")
 
-	// Allow 'color' and 'background-color' properties for the style attribute on text elements.
-	policy.AllowStyles("color", "background-color").OnElements("span", "p")
+	// Allow 'color' and 'background-color' properties for the style attribute on text elements and table cells.
+	policy.AllowStyles("color", "background-color").OnElements("span", "p", "th", "td")
 
 	// Allow classes for file preview links...
 	policy.AllowAttrs("class").Matching(regexp.MustCompile("^(lines-num|lines-code chroma)$")).OnElements("td")
@@ -179,6 +179,7 @@ func createDefaultPolicy() *bluemonday.Policy {
 // repository descriptions.
 func createRepoDescriptionPolicy() *bluemonday.Policy {
 	policy := bluemonday.NewPolicy()
+	policy.AllowStandardURLs()
 
 	// Allow italics and bold.
 	policy.AllowElements("i", "b", "em", "strong")

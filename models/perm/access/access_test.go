@@ -14,10 +14,11 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAccessLevel(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	user5 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 5})
@@ -36,39 +37,39 @@ func TestAccessLevel(t *testing.T) {
 	repo24 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 24})
 
 	level, err := access_model.AccessLevel(db.DefaultContext, user2, repo1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, perm_model.AccessModeOwner, level)
 
 	level, err = access_model.AccessLevel(db.DefaultContext, user2, repo3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, perm_model.AccessModeOwner, level)
 
 	level, err = access_model.AccessLevel(db.DefaultContext, user5, repo1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, perm_model.AccessModeRead, level)
 
 	level, err = access_model.AccessLevel(db.DefaultContext, user5, repo3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, perm_model.AccessModeNone, level)
 
 	// restricted user has no access to a public repo
 	level, err = access_model.AccessLevel(db.DefaultContext, user29, repo1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, perm_model.AccessModeNone, level)
 
 	// ... unless he's a collaborator
 	level, err = access_model.AccessLevel(db.DefaultContext, user29, repo4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, perm_model.AccessModeWrite, level)
 
 	// ... or a team member
 	level, err = access_model.AccessLevel(db.DefaultContext, user29, repo24)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, perm_model.AccessModeRead, level)
 }
 
 func TestHasAccess(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 5})
@@ -80,47 +81,47 @@ func TestHasAccess(t *testing.T) {
 	assert.True(t, repo2.IsPrivate)
 
 	has, err := access_model.HasAccess(db.DefaultContext, user1.ID, repo1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, has)
 
 	_, err = access_model.HasAccess(db.DefaultContext, user1.ID, repo2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = access_model.HasAccess(db.DefaultContext, user2.ID, repo1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = access_model.HasAccess(db.DefaultContext, user2.ID, repo2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestRepository_RecalculateAccesses(t *testing.T) {
 	// test with organization repo
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 3})
-	assert.NoError(t, repo1.LoadOwner(db.DefaultContext))
+	require.NoError(t, repo1.LoadOwner(db.DefaultContext))
 
 	_, err := db.GetEngine(db.DefaultContext).Delete(&repo_model.Collaboration{UserID: 2, RepoID: 3})
-	assert.NoError(t, err)
-	assert.NoError(t, access_model.RecalculateAccesses(db.DefaultContext, repo1))
+	require.NoError(t, err)
+	require.NoError(t, access_model.RecalculateAccesses(db.DefaultContext, repo1))
 
 	access := &access_model.Access{UserID: 2, RepoID: 3}
 	has, err := db.GetEngine(db.DefaultContext).Get(access)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, has)
 	assert.Equal(t, perm_model.AccessModeOwner, access.Mode)
 }
 
 func TestRepository_RecalculateAccesses2(t *testing.T) {
 	// test with non-organization repo
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 4})
-	assert.NoError(t, repo1.LoadOwner(db.DefaultContext))
+	require.NoError(t, repo1.LoadOwner(db.DefaultContext))
 
 	_, err := db.GetEngine(db.DefaultContext).Delete(&repo_model.Collaboration{UserID: 4, RepoID: 4})
-	assert.NoError(t, err)
-	assert.NoError(t, access_model.RecalculateAccesses(db.DefaultContext, repo1))
+	require.NoError(t, err)
+	require.NoError(t, access_model.RecalculateAccesses(db.DefaultContext, repo1))
 
 	has, err := db.GetEngine(db.DefaultContext).Get(&access_model.Access{UserID: 4, RepoID: 4})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, has)
 }

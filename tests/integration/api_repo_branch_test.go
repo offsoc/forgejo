@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIRepoBranchesPlain(t *testing.T) {
@@ -33,10 +34,10 @@ func TestAPIRepoBranchesPlain(t *testing.T) {
 		link, _ := url.Parse(fmt.Sprintf("/api/v1/repos/org3/%s/branches", repo3.Name)) // a plain repo
 		resp := MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusOK)
 		bs, err := io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var branches []*api.Branch
-		assert.NoError(t, json.Unmarshal(bs, &branches))
+		require.NoError(t, json.Unmarshal(bs, &branches))
 		assert.Len(t, branches, 2)
 		assert.EqualValues(t, "test_branch", branches[0].Name)
 		assert.EqualValues(t, "master", branches[1].Name)
@@ -44,9 +45,9 @@ func TestAPIRepoBranchesPlain(t *testing.T) {
 		link2, _ := url.Parse(fmt.Sprintf("/api/v1/repos/org3/%s/branches/test_branch", repo3.Name))
 		resp = MakeRequest(t, NewRequest(t, "GET", link2.String()).AddTokenAuth(token), http.StatusOK)
 		bs, err = io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		var branch api.Branch
-		assert.NoError(t, json.Unmarshal(bs, &branch))
+		require.NoError(t, json.Unmarshal(bs, &branch))
 		assert.EqualValues(t, "test_branch", branch.Name)
 
 		req := NewRequest(t, "POST", link.String()).AddTokenAuth(token)
@@ -54,18 +55,18 @@ func TestAPIRepoBranchesPlain(t *testing.T) {
 		req.Body = io.NopCloser(bytes.NewBufferString(`{"new_branch_name":"test_branch2", "old_branch_name": "test_branch", "old_ref_name":"refs/heads/test_branch"}`))
 		resp = MakeRequest(t, req, http.StatusCreated)
 		bs, err = io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		var branch2 api.Branch
-		assert.NoError(t, json.Unmarshal(bs, &branch2))
+		require.NoError(t, json.Unmarshal(bs, &branch2))
 		assert.EqualValues(t, "test_branch2", branch2.Name)
 		assert.EqualValues(t, branch.Commit.ID, branch2.Commit.ID)
 
 		resp = MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusOK)
 		bs, err = io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		branches = []*api.Branch{}
-		assert.NoError(t, json.Unmarshal(bs, &branches))
+		require.NoError(t, json.Unmarshal(bs, &branches))
 		assert.Len(t, branches, 3)
 		assert.EqualValues(t, "test_branch", branches[0].Name)
 		assert.EqualValues(t, "test_branch2", branches[1].Name)
@@ -75,7 +76,7 @@ func TestAPIRepoBranchesPlain(t *testing.T) {
 		MakeRequest(t, NewRequest(t, "DELETE", link3.String()), http.StatusNotFound)
 
 		MakeRequest(t, NewRequest(t, "DELETE", link3.String()).AddTokenAuth(token), http.StatusNoContent)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 }
 
@@ -90,10 +91,10 @@ func TestAPIRepoBranchesMirror(t *testing.T) {
 	link, _ := url.Parse(fmt.Sprintf("/api/v1/repos/org3/%s/branches", repo5.Name)) // a mirror repo
 	resp := MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusOK)
 	bs, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var branches []*api.Branch
-	assert.NoError(t, json.Unmarshal(bs, &branches))
+	require.NoError(t, json.Unmarshal(bs, &branches))
 	assert.Len(t, branches, 2)
 	assert.EqualValues(t, "test_branch", branches[0].Name)
 	assert.EqualValues(t, "master", branches[1].Name)
@@ -101,9 +102,9 @@ func TestAPIRepoBranchesMirror(t *testing.T) {
 	link2, _ := url.Parse(fmt.Sprintf("/api/v1/repos/org3/%s/branches/test_branch", repo5.Name))
 	resp = MakeRequest(t, NewRequest(t, "GET", link2.String()).AddTokenAuth(token), http.StatusOK)
 	bs, err = io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	var branch api.Branch
-	assert.NoError(t, json.Unmarshal(bs, &branch))
+	require.NoError(t, json.Unmarshal(bs, &branch))
 	assert.EqualValues(t, "test_branch", branch.Name)
 
 	req := NewRequest(t, "POST", link.String()).AddTokenAuth(token)
@@ -111,11 +112,11 @@ func TestAPIRepoBranchesMirror(t *testing.T) {
 	req.Body = io.NopCloser(bytes.NewBufferString(`{"new_branch_name":"test_branch2", "old_branch_name": "test_branch", "old_ref_name":"refs/heads/test_branch"}`))
 	resp = MakeRequest(t, req, http.StatusForbidden)
 	bs, err = io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, "{\"message\":\"Git Repository is a mirror.\",\"url\":\""+setting.AppURL+"api/swagger\"}\n", string(bs))
 
 	resp = MakeRequest(t, NewRequest(t, "DELETE", link2.String()).AddTokenAuth(token), http.StatusForbidden)
 	bs, err = io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, "{\"message\":\"Git Repository is a mirror.\",\"url\":\""+setting.AppURL+"api/swagger\"}\n", string(bs))
 }

@@ -1,6 +1,18 @@
 // @ts-check
-import {test, expect} from '@playwright/test';
-import {login_user, load_logged_in_context} from './utils_e2e.js';
+
+// @watch start
+// templates/repo/actions/**
+// web_src/css/actions.css
+// web_src/js/components/ActionRunStatus.vue
+// web_src/js/components/RepoActionView.vue
+// modules/actions/**
+// modules/structs/workflow.go
+// routers/api/v1/repo/action.go
+// routers/web/repo/actions/**
+// @watch end
+
+import {expect} from '@playwright/test';
+import {test, login_user, load_logged_in_context} from './utils_e2e.js';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');

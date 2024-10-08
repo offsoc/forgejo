@@ -17,7 +17,7 @@ import (
 )
 
 func TestIssueList_LoadRepositories(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	issueList := issues_model.IssueList{
 		unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1}),
@@ -26,7 +26,7 @@ func TestIssueList_LoadRepositories(t *testing.T) {
 	}
 
 	repos, err := issueList.LoadRepositories(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, repos, 2)
 	for _, issue := range issueList {
 		assert.EqualValues(t, issue.RepoID, issue.Repo.ID)
@@ -34,14 +34,14 @@ func TestIssueList_LoadRepositories(t *testing.T) {
 }
 
 func TestIssueList_LoadAttributes(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	setting.Service.EnableTimetracking = true
 	issueList := issues_model.IssueList{
 		unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1}),
 		unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 4}),
 	}
 
-	assert.NoError(t, issueList.LoadAttributes(db.DefaultContext))
+	require.NoError(t, issueList.LoadAttributes(db.DefaultContext))
 	for _, issue := range issueList {
 		assert.EqualValues(t, issue.RepoID, issue.Repo.ID)
 		for _, label := range issue.Labels {
@@ -75,14 +75,14 @@ func TestIssueList_LoadAttributes(t *testing.T) {
 		}
 	}
 
-	assert.NoError(t, issueList.LoadIsRead(db.DefaultContext, 1))
+	require.NoError(t, issueList.LoadIsRead(db.DefaultContext, 1))
 	for _, issue := range issueList {
 		assert.Equal(t, issue.ID == 1, issue.IsRead, "unexpected is_read value for issue[%d]", issue.ID)
 	}
 }
 
 func TestIssueListLoadUser(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{})
 	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
@@ -121,7 +121,7 @@ func TestIssueListLoadUser(t *testing.T) {
 
 			issue.PosterID = testCase.poster
 			issue.Poster = nil
-			assert.NoError(t, list.LoadPosters(db.DefaultContext))
+			require.NoError(t, list.LoadPosters(db.DefaultContext))
 			require.NotNil(t, issue.Poster)
 			assert.Equal(t, testCase.user.ID, issue.Poster.ID)
 		})

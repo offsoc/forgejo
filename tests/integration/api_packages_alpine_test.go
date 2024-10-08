@@ -23,6 +23,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageAlpine(t *testing.T) {
@@ -58,7 +59,7 @@ FduBtm5sFa7C/ifOo7y5Lf2QeiHar6jTaDSbnF5Mp+fzOL/x+aJuy3g+HvGhs8JY4b3yOpMZOZEo
 lRW+MEoTTw3ZwqU0INNjsAe2VPk/9b/L3/s/kIKzqOtk+IbJGTtmr+bx7WoxOUoun98frk/un14O
 Djfa/2q5bH4699v++uMAAAAAAAAAAAAAAAAAAAAAAHbgA/eXQh8AKAAA`
 	content, err := base64.StdEncoding.DecodeString(base64AlpinePackageContent)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	branches := []string{"v3.16", "v3.17", "v3.18"}
 	repositories := []string{"main", "testing"}
@@ -95,18 +96,18 @@ Djfa/2q5bH4699v++uMAAAAAAAAAAAAAAAAAAAAAAHbgA/eXQh8AKAAA`
 					MakeRequest(t, req, http.StatusCreated)
 
 					pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeAlpine)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Len(t, pvs, 1)
 
 					pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.Nil(t, pd.SemVer)
 					assert.IsType(t, &alpine_module.VersionMetadata{}, pd.Metadata)
 					assert.Equal(t, packageName, pd.Package.Name)
 					assert.Equal(t, packageVersion, pd.Version.Version)
 
 					pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					assert.NotEmpty(t, pfs)
 					assert.Condition(t, func() bool {
 						seen := false
@@ -122,7 +123,7 @@ Djfa/2q5bH4699v++uMAAAAAAAAAAAAAAAAAAAAAAHbgA/eXQh8AKAAA`
 								assert.True(t, pf.IsLead)
 
 								pfps, err := packages.GetProperties(db.DefaultContext, packages.PropertyTypeFile, pf.ID)
-								assert.NoError(t, err)
+								require.NoError(t, err)
 
 								for _, pfp := range pfps {
 									switch pfp.Name {
@@ -192,7 +193,7 @@ Djfa/2q5bH4699v++uMAAAAAAAAAAAAAAAAAAAAAAHbgA/eXQh8AKAAA`
 					resp := MakeRequest(t, req, http.StatusOK)
 
 					content, err := readIndexContent(resp.Body)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					assert.Contains(t, content, "C:Q1/se1PjO94hYXbfpNR1/61hVORIc=\n")
 					assert.Contains(t, content, "P:"+packageName+"\n")
@@ -275,7 +276,7 @@ vZNm87hdDvs2vEwno3K7UWc1Iw1341kw21U26mkeBIFPlW+rmkktopAHTIWmihmyVvn/9dAv0/8i
 8//Hqe9OebNMus+Q75Miub8rHmw9vrzu3l53ns1h7enm9AH9/3M72/PtT/uFgg37sVdq2OEw9jpx
 MoxKyDAAAAAAAAAAAADA2noDOINxQwAoAAA=`
 	content, err := base64.StdEncoding.DecodeString(base64AlpinePackageContent)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	packageContents := map[string][]byte{}
 	packageContents["forgejo-noarch-test"] = content
@@ -309,7 +310,7 @@ W9xysWebmBuBbbgm44R1mWGHFGbIsuX/b0M/R/8Twj7nnxJS9X+VSfkb0j3UQg/9l6fbx93yYuNm
 zbm+77fu7Gfo/9/b2tRzL0r09Fwkmd/JykRR/DSO3SRw2nqZZ3p1d/rXaCtKIOTTwfaOeqmsJ0IE
 aiIK5QoSDwAAAAAAAAAAAAAAAP/IK49O1e8AKAAA`
 	content, err = base64.StdEncoding.DecodeString(base64AlpinePackageContent)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	packageContents["forgejo-noarch-test-openrc"] = content
 
@@ -349,18 +350,18 @@ aiIK5QoSDwAAAAAAAAAAAAAAAP/IK49O1e8AKAAA`
 						MakeRequest(t, req, http.StatusCreated)
 
 						pvs, err := packages.GetVersionsByPackageName(db.DefaultContext, user.ID, packages.TypeAlpine, pkg)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 						assert.Len(t, pvs, 1)
 
 						pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-						assert.NoError(t, err)
+						require.NoError(t, err)
 						assert.Nil(t, pd.SemVer)
 						assert.IsType(t, &alpine_module.VersionMetadata{}, pd.Metadata)
 						assert.Equal(t, pkg, pd.Package.Name)
 						assert.Equal(t, packageVersion, pd.Version.Version)
 
 						pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 						assert.NotEmpty(t, pfs)
 						assert.Condition(t, func() bool {
 							seen := false
@@ -376,7 +377,7 @@ aiIK5QoSDwAAAAAAAAAAAAAAAP/IK49O1e8AKAAA`
 									assert.True(t, pf.IsLead)
 
 									pfps, err := packages.GetProperties(db.DefaultContext, packages.PropertyTypeFile, pf.ID)
-									assert.NoError(t, err)
+									require.NoError(t, err)
 
 									for _, pfp := range pfps {
 										switch pfp.Name {
@@ -407,7 +408,7 @@ aiIK5QoSDwAAAAAAAAAAAAAAAP/IK49O1e8AKAAA`
 						br := bufio.NewReader(resp.Body)
 
 						gzr, err := gzip.NewReader(br)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 
 						for {
 							gzr.Multistream(false)
@@ -418,11 +419,11 @@ aiIK5QoSDwAAAAAAAAAAAAAAAP/IK49O1e8AKAAA`
 								if err == io.EOF {
 									break
 								}
-								assert.NoError(t, err)
+								require.NoError(t, err)
 
 								if hd.Name == "APKINDEX" {
 									buf, err := io.ReadAll(tr)
-									assert.NoError(t, err)
+									require.NoError(t, err)
 
 									s := string(buf)
 
@@ -462,7 +463,7 @@ aiIK5QoSDwAAAAAAAAAAAAAAAP/IK49O1e8AKAAA`
 							if err == io.EOF {
 								break
 							}
-							assert.NoError(t, err)
+							require.NoError(t, err)
 						}
 
 						return false

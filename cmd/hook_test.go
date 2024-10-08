@@ -48,66 +48,66 @@ func TestPktLine(t *testing.T) {
 		s := strings.NewReader("0000")
 		r := bufio.NewReader(s)
 		result, err := readPktLine(ctx, r, pktLineTypeFlush)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, pktLineTypeFlush, result.Type)
 
 		s = strings.NewReader("0006a\n")
 		r = bufio.NewReader(s)
 		result, err = readPktLine(ctx, r, pktLineTypeData)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, pktLineTypeData, result.Type)
 		assert.Equal(t, []byte("a\n"), result.Data)
 
 		s = strings.NewReader("0004")
 		r = bufio.NewReader(s)
 		result, err = readPktLine(ctx, r, pktLineTypeData)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, result)
 
 		data := strings.Repeat("x", 65516)
 		r = bufio.NewReader(strings.NewReader("fff0" + data))
 		result, err = readPktLine(ctx, r, pktLineTypeData)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, pktLineTypeData, result.Type)
 		assert.Equal(t, []byte(data), result.Data)
 
 		r = bufio.NewReader(strings.NewReader("fff1a"))
 		result, err = readPktLine(ctx, r, pktLineTypeData)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, result)
 	})
 
 	t.Run("Write", func(t *testing.T) {
 		w := bytes.NewBuffer([]byte{})
 		err := writeFlushPktLine(ctx, w)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, []byte("0000"), w.Bytes())
 
 		w.Reset()
 		err = writeDataPktLine(ctx, w, []byte("a\nb"))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, []byte("0007a\nb"), w.Bytes())
 
 		w.Reset()
 		data := bytes.Repeat([]byte{0x05}, 288)
 		err = writeDataPktLine(ctx, w, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, append([]byte("0124"), data...), w.Bytes())
 
 		w.Reset()
 		err = writeDataPktLine(ctx, w, nil)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Empty(t, w.Bytes())
 
 		w.Reset()
 		data = bytes.Repeat([]byte{0x64}, 65516)
 		err = writeDataPktLine(ctx, w, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, append([]byte("fff0"), data...), w.Bytes())
 
 		w.Reset()
 		err = writeDataPktLine(ctx, w, bytes.Repeat([]byte{0x64}, 65516+1))
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Empty(t, w.Bytes())
 	})
 }
@@ -117,7 +117,7 @@ func TestDelayWriter(t *testing.T) {
 	defer test.MockVariableValue(&setting.InternalToken, "Random")()
 	defer test.MockVariableValue(&setting.InstallLock, true)()
 	defer test.MockVariableValue(&setting.Git.VerbosePush, true)()
-	require.NoError(t, os.Setenv("SSH_ORIGINAL_COMMAND", "true"))
+	t.Setenv("SSH_ORIGINAL_COMMAND", "true")
 
 	// Setup the Stdin.
 	f, err := os.OpenFile(t.TempDir()+"/stdin", os.O_RDWR|os.O_CREATE|os.O_EXCL, 0o666)
@@ -174,23 +174,23 @@ func TestRunHookUpdate(t *testing.T) {
 
 		err := app.Run([]string{"./forgejo", "update", "refs/pull/1/head", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000000"})
 		out := finish()
-		assert.Error(t, err)
+		require.Error(t, err)
 
 		assert.Contains(t, out, "The deletion of refs/pull/1/head is skipped as it's an internal reference.")
 	})
 
 	t.Run("Update of internal reference", func(t *testing.T) {
 		err := app.Run([]string{"./forgejo", "update", "refs/pull/1/head", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000001"})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("Removal of branch", func(t *testing.T) {
 		err := app.Run([]string{"./forgejo", "update", "refs/head/main", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000000"})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("Not enough arguments", func(t *testing.T) {
 		err := app.Run([]string{"./forgejo", "update"})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 }

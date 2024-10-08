@@ -19,6 +19,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func generateImg() bytes.Buffer {
@@ -35,11 +36,11 @@ func createAttachment(t *testing.T, session *TestSession, repoURL, filename stri
 	// Setup multi-part
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile("file", filename)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	_, err = io.Copy(part, &buff)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = writer.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	csrf := GetCSRF(t, session, repoURL)
 
@@ -59,7 +60,8 @@ func createAttachment(t *testing.T, session *TestSession, repoURL, filename stri
 func TestCreateAnonymousAttachment(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	session := emptyTestSession(t)
-	createAttachment(t, session, "user2/repo1", "image.png", generateImg(), http.StatusSeeOther)
+	// this test is not right because it just doesn't pass the CSRF validation
+	createAttachment(t, session, "user2/repo1", "image.png", generateImg(), http.StatusBadRequest)
 }
 
 func TestCreateIssueAttachment(t *testing.T) {
@@ -126,7 +128,7 @@ func TestGetAttachment(t *testing.T) {
 			// Write empty file to be available for response
 			if tc.createFile {
 				_, err := storage.Attachments.Save(repo_model.AttachmentRelativePath(tc.uuid), strings.NewReader("hello world"), -1)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 			// Actual test
 			req := NewRequest(t, "GET", "/attachments/"+tc.uuid)

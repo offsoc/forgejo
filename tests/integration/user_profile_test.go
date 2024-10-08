@@ -44,7 +44,7 @@ func TestUserProfile(t *testing.T) {
 					})
 				}
 
-				_, _, f := CreateDeclarativeRepo(t, user2, ".profile", nil, nil, ops)
+				_, _, f := tests.CreateDeclarativeRepo(t, user2, ".profile", nil, nil, ops)
 				defer f()
 
 				// Perform the test

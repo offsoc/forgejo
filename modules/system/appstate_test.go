@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -36,30 +37,30 @@ func (*testItem2) Name() string {
 }
 
 func TestAppStateDB(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	as := &DBStore{}
 
 	item1 := new(testItem1)
-	assert.NoError(t, as.Get(db.DefaultContext, item1))
+	require.NoError(t, as.Get(db.DefaultContext, item1))
 	assert.Equal(t, "", item1.Val1)
 	assert.EqualValues(t, 0, item1.Val2)
 
 	item1 = new(testItem1)
 	item1.Val1 = "a"
 	item1.Val2 = 2
-	assert.NoError(t, as.Set(db.DefaultContext, item1))
+	require.NoError(t, as.Set(db.DefaultContext, item1))
 
 	item2 := new(testItem2)
 	item2.K = "V"
-	assert.NoError(t, as.Set(db.DefaultContext, item2))
+	require.NoError(t, as.Set(db.DefaultContext, item2))
 
 	item1 = new(testItem1)
-	assert.NoError(t, as.Get(db.DefaultContext, item1))
+	require.NoError(t, as.Get(db.DefaultContext, item1))
 	assert.Equal(t, "a", item1.Val1)
 	assert.EqualValues(t, 2, item1.Val2)
 
 	item2 = new(testItem2)
-	assert.NoError(t, as.Get(db.DefaultContext, item2))
+	require.NoError(t, as.Get(db.DefaultContext, item2))
 	assert.Equal(t, "V", item2.K)
 }

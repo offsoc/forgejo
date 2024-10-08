@@ -15,19 +15,20 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/test"
 
-	"gitea.com/go-chi/cache"
+	"code.forgejo.org/go-chi/cache"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepository_ContributorsGraph(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 2})
-	assert.NoError(t, repo.LoadOwner(db.DefaultContext))
+	require.NoError(t, repo.LoadOwner(db.DefaultContext))
 	mockCache, err := cache.NewCacher(cache.Options{
 		Adapter:  "memory",
 		Interval: 24 * 60,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	lc, cleanup := test.NewLogChecker(log.DEFAULT, log.INFO)
 	lc.StopMark(`getExtendedCommitStats[repo="user2/repo2" revision="404ref"]: object does not exist [id: 404ref, rel_path: ]`)
@@ -45,7 +46,7 @@ func TestRepository_ContributorsGraph(t *testing.T) {
 	assert.EqualValues(t, `{"ethantkoenig@gmail.com":{"name":"Ethan Koenig","login":"","avatar_link":"https://secure.gravatar.com/avatar/b42fb195faa8c61b8d88abfefe30e9e3?d=identicon","home_link":"","total_commits":1,"weeks":{"1511654400000":{"week":1511654400000,"additions":3,"deletions":0,"commits":1}}},"jimmy.praet@telenet.be":{"name":"Jimmy Praet","login":"","avatar_link":"https://secure.gravatar.com/avatar/93c49b7c89eb156971d11161c9b52795?d=identicon","home_link":"","total_commits":1,"weeks":{"1624752000000":{"week":1624752000000,"additions":2,"deletions":0,"commits":1}}},"jon@allspice.io":{"name":"Jon","login":"","avatar_link":"https://secure.gravatar.com/avatar/00388ce725e6886f3e07c3733007289b?d=identicon","home_link":"","total_commits":1,"weeks":{"1607817600000":{"week":1607817600000,"additions":10,"deletions":0,"commits":1}}},"total":{"name":"Total","login":"","avatar_link":"","home_link":"","total_commits":3,"weeks":{"1511654400000":{"week":1511654400000,"additions":3,"deletions":0,"commits":1},"1607817600000":{"week":1607817600000,"additions":10,"deletions":0,"commits":1},"1624752000000":{"week":1624752000000,"additions":2,"deletions":0,"commits":1}}}}`, dataString)
 
 	var data map[string]*ContributorData
-	assert.NoError(t, json.Unmarshal([]byte(dataString), &data))
+	require.NoError(t, json.Unmarshal([]byte(dataString), &data))
 
 	var keys []string
 	for k := range data {

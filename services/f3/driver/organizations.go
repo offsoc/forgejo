@@ -42,7 +42,7 @@ func (o *organizations) GetIDFromName(ctx context.Context, name string) generic.
 		panic(fmt.Errorf("GetOrganizationByName: %v", err))
 	}
 
-	return generic.NodeID(fmt.Sprintf("%d", organization.ID))
+	return generic.NewNodeID(organization.ID)
 }
 
 func newOrganizations() generic.NodeDriverInterface {

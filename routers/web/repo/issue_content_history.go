@@ -154,6 +154,7 @@ func GetContentHistoryDetail(ctx *context.Context) {
 	dmp := diffmatchpatch.New()
 	// `checklines=false` makes better diff result
 	diff := dmp.DiffMain(prevHistoryContentText, history.ContentText, false)
+	diff = dmp.DiffCleanupSemantic(diff)
 	diff = dmp.DiffCleanupEfficiency(diff)
 
 	// use chroma to render the diff html

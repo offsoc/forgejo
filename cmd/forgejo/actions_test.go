@@ -79,9 +79,9 @@ func TestActions_getLabels(t *testing.T) {
 				assert.Nil(t, result.labels)
 			}
 			if c.hasError {
-				assert.NotNil(t, result.err)
+				require.Error(t, result.err)
 			} else {
-				assert.Nil(t, result.err)
+				assert.NoError(t, result.err)
 			}
 		})
 	}

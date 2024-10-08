@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFeed(t *testing.T) {
@@ -62,7 +63,7 @@ func TestFeed(t *testing.T) {
 		})
 		t.Run("Empty", func(t *testing.T) {
 			err := user_model.UpdateUserCols(db.DefaultContext, &user_model.User{ID: 30, ProhibitLogin: false}, "prohibit_login")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			session := loginUser(t, "user30")
 			t.Run("Atom", func(t *testing.T) {

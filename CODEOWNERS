@@ -6,9 +6,6 @@
 
 # Please mind the alphabetic order of reviewers.
 
-# Files related to the CI of the Forgejo project.
-.forgejo/.* @dachary @earl-warren
-
 # Files related to frontend development.
 
 # Javascript and CSS code.
@@ -19,19 +16,22 @@ templates/.* @caesar @crystal @gusted
 ## the issue sidebar was touched by fnetx
 templates/repo/issue/view_content/sidebar.* @fnetx
 
+# Playwright tests
+tests/e2e/.* @fnetx
+
 # Files related to Go development.
 
 # The modules usually don't require much knowledge about Forgejo and could
 # be reviewed by Go developers.
-modules/.* @dachary @earl-warren @gusted
+modules/.* @gusted
 
 # Models has code related to SQL queries, general database knowledge and XORM.
-models/.* @dachary @earl-warren @gusted
+models/.* @gusted
 
 # The routers directory contains the most amount code that requires a good grasp
 # of how Forgejo comes together. It's tedious to write good integration testing
 # for code that lives in here.
-routers/.* @dachary @earl-warren @gusted
+routers/.* @gusted
 
 # Let new strings be checked by the translation team.
 options/locale/locale_en-US.ini @0ko
