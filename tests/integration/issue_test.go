@@ -1301,3 +1301,21 @@ func TestIssueUserDashboard(t *testing.T) {
 		htmlDoc.AssertElement(t, sel, true)
 	}
 }
+
+func TestIssueCount(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	req := NewRequest(t, "GET", "/user2/repo1/issues")
+	resp := MakeRequest(t, req, http.StatusOK)
+
+	htmlDoc := NewHTMLParser(t, resp.Body)
+
+	openCount := htmlDoc.doc.Find("a[data-test-name='open-issue-count']").Text()
+	assert.Contains(t, openCount, "1\u00a0Open")
+
+	closedCount := htmlDoc.doc.Find("a[data-test-name='closed-issue-count']").Text()
+	assert.Contains(t, closedCount, "1\u00a0Closed")
+
+	allCount := htmlDoc.doc.Find("a[data-test-name='all-issue-count']").Text()
+	assert.Contains(t, allCount, "2\u00a0All")
+}
