@@ -6,6 +6,7 @@ package git
 import (
 	"context"
 	"io"
+	"os"
 	"strings"
 
 	"code.gitea.io/gitea/modules/log"
@@ -94,6 +95,44 @@ func GetNote(ctx context.Context, repo *Repository, commitID string, note *Note)
 		return err
 	}
 	note.Commit = lastCommits[path]
+
+	return nil
+}
+
+func SetNote(ctx context.Context, repo *Repository, commitID, notes, doerName, doerEmail string) error {
+	_, err := repo.GetCommit(commitID)
+	if err != nil {
+		return err
+	}
+
+	env := append(os.Environ(),
+		"GIT_AUTHOR_NAME="+doerName,
+		"GIT_AUTHOR_EMAIL="+doerEmail,
+		"GIT_COMMITTER_NAME="+doerName,
+		"GIT_COMMITTER_EMAIL="+doerEmail,
+	)
+
+	cmd := NewCommand(ctx, "notes", "add", "-f", "-m")
+	cmd.AddDynamicArguments(notes, commitID)
+
+	_, stderr, err := cmd.RunStdString(&RunOpts{Dir: repo.Path, Env: env})
+	if err != nil {
+		log.Error("Error while running git notes add: %s", stderr)
+		return err
+	}
+
+	return nil
+}
+
+func RemoveNote(ctx context.Context, repo *Repository, commitID string) error {
+	cmd := NewCommand(ctx, "notes", "remove")
+	cmd.AddDynamicArguments(commitID)
+
+	_, stderr, err := cmd.RunStdString(&RunOpts{Dir: repo.Path})
+	if err != nil {
+		log.Error("Error while running git notes remove: %s", stderr)
+		return err
+	}
 
 	return nil
 }
