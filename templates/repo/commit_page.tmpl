@@ -286,8 +286,11 @@
 						<p>{{ctx.Locale.Tr "repo.diff.git-notes.remove-body"}}</p>
 						<div class="content">
 							<div class="text right actions">
-								<button class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
-								<a class="ui primary button red" href="{{.Link}}/notes/remove">{{ctx.Locale.Tr "remove"}}</a>
+								<form action="{{.Link}}/notes/remove" method="post">
+									{{.CsrfTokenHtml}}
+									<button type="button" class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
+									<button type="submit" class="ui primary button red" href="{{.Link}}/notes/remove">{{ctx.Locale.Tr "remove"}}</button>
+								</form>
 							</div>
 						</div>
 					</div>
@@ -306,7 +309,7 @@
 						</div>
 
 						<div class="field">
-							<button class="ui primary button">{{ctx.Locale.Tr "save"}}</button>
+							<button id="notes-save-button" class="ui primary button">{{ctx.Locale.Tr "save"}}</button>
 						</div>
 					</form>
 				</div>

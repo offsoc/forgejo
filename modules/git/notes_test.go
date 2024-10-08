@@ -80,9 +80,8 @@ func TestSetNote(t *testing.T) {
 func TestRemoveNote(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 
-	tempDir, err := os.MkdirTemp("", "")
-	require.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	tempDir := t.TempDir()
+
 	require.NoError(t, unittest.CopyDir(bareRepo1Path, filepath.Join(tempDir, "repo1")))
 
 	bareRepo1, err := openRepositoryWithDefaultContext(filepath.Join(tempDir, "repo1"))
