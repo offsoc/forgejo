@@ -61,7 +61,7 @@ func TestGetNonExistentNotes(t *testing.T) {
 
 	note := git.Note{}
 	err = git.GetNote(context.Background(), bareRepo1, "non_existent_sha", &note)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.IsType(t, git.ErrNotExist{}, err)
 }
 
@@ -101,6 +101,6 @@ func TestRemoveNote(t *testing.T) {
 
 	note := git.Note{}
 	err = git.GetNote(context.Background(), bareRepo1, "95bb4d39648ee7e325106df01a621c530863a653", &note)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.IsType(t, git.ErrNotExist{}, err)
 }
