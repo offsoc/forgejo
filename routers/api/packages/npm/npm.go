@@ -5,6 +5,7 @@ package npm
 
 import (
 	"bytes"
+	"code.gitea.io/gitea/modules/log"
 	std_ctx "context"
 	"errors"
 	"fmt"
@@ -31,6 +32,8 @@ import (
 
 // errInvalidTagName indicates an invalid tag name
 var errInvalidTagName = errors.New("The tag name is invalid")
+
+var npmRegistryUrl = "https://registry.npmjs.org/"
 
 func apiError(ctx *context.Context, status int, obj any) {
 	helper.LogAndProcessError(ctx, status, obj, func(message string) {
@@ -61,7 +64,8 @@ func PackageMetadata(ctx *context.Context) {
 		return
 	}
 	if len(pvs) == 0 {
-		apiError(ctx, http.StatusNotFound, err)
+		// todo log out the error
+		fmt.Println("No packages found locally")
 		return
 	}
 
@@ -99,7 +103,7 @@ func DownloadPackageFile(ctx *context.Context) {
 	)
 	if err != nil {
 		if err == packages_model.ErrPackageNotExist || err == packages_model.ErrPackageFileNotExist {
-			apiError(ctx, http.StatusNotFound, err)
+			// just pass on to next handler
 			return
 		}
 		apiError(ctx, http.StatusInternalServerError, err)
@@ -107,6 +111,13 @@ func DownloadPackageFile(ctx *context.Context) {
 	}
 
 	helper.ServePackageFile(ctx, s, u, pf)
+}
+
+// DownloadPackageFile serves the content of a package
+func DownloadPackageFileFromNpmRegistry(w http.ResponseWriter, ctx *context.Context) {
+	packageName := packageNameFromParams(ctx)
+	filename := ctx.Params("filename")
+	forwardGetRequest(npmRegistryUrl+packageName+"/-/"+filename, w, ctx)
 }
 
 // DownloadPackageFileByName finds the version and serves the contents of a package
@@ -128,7 +139,7 @@ func DownloadPackageFileByName(ctx *context.Context) {
 		return
 	}
 	if len(pvs) != 1 {
-		apiError(ctx, http.StatusNotFound, nil)
+		// just pass on to next handler
 		return
 	}
 
@@ -149,6 +160,11 @@ func DownloadPackageFileByName(ctx *context.Context) {
 	}
 
 	helper.ServePackageFile(ctx, s, u, pf)
+}
+
+func DownloadPackageFileByNameFromNpmRegistry(w http.ResponseWriter, ctx *context.Context) {
+	filename := ctx.Params("filename")
+	forwardGetRequest(npmRegistryUrl+packageNameFromParams(ctx)+"/-/"+filename, w, ctx)
 }
 
 // UploadPackage creates a new package
@@ -459,4 +475,39 @@ func PackageSearch(ctx *context.Context) {
 	)
 
 	ctx.JSON(http.StatusOK, resp)
+}
+
+func PackageMetadataFromNpmRegistry(w http.ResponseWriter, ctx *context.Context) {
+	packageName := packageNameFromParams(ctx)
+	forwardGetRequest(npmRegistryUrl+packageName, w, ctx)
+}
+
+func forwardGetRequest(url string, w http.ResponseWriter, ctx *context.Context) {
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Error("Failed to get response from external server", http.StatusInternalServerError)
+		apiError(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			apiError(ctx, http.StatusInternalServerError, err)
+		}
+	}(resp.Body)
+
+	w.WriteHeader(resp.StatusCode)
+
+	for key, values := range resp.Header {
+		for _, value := range values {
+			w.Header().Add(key, value)
+		}
+	}
+
+	_, err = io.Copy(w, resp.Body)
+	if err != nil {
+		apiError(ctx, http.StatusInternalServerError, err)
+		return
+	}
 }

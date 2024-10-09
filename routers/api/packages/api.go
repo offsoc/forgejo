@@ -91,7 +91,7 @@ func enforcePackagesQuota() func(ctx *context.Context) {
 	}
 }
 
-func verifyAuth(r *web.Route, authMethods []auth.Method) {
+func verifyAuth(r *web.Route, authMethods []auth.Method) { // todo one
 	if setting.Service.EnableReverseProxyAuth {
 		authMethods = append(authMethods, &auth.ReverseProxy{})
 	}
@@ -528,26 +528,26 @@ func CommonRoutes() *web.Route {
 		})
 		r.Group("/npm", func() {
 			r.Group("/@{scope}/{id}", func() {
-				r.Get("", npm.PackageMetadata)
+				r.Get("", npm.PackageMetadata, npm.PackageMetadataFromNpmRegistry)
 				r.Put("", reqPackageAccess(perm.AccessModeWrite), enforcePackagesQuota(), npm.UploadPackage)
 				r.Group("/-/{version}/{filename}", func() {
-					r.Get("", npm.DownloadPackageFile)
+					r.Get("", npm.DownloadPackageFile, npm.DownloadPackageFileFromNpmRegistry)
 					r.Delete("/-rev/{revision}", reqPackageAccess(perm.AccessModeWrite), npm.DeletePackageVersion)
 				})
-				r.Get("/-/{filename}", npm.DownloadPackageFileByName)
+				r.Get("/-/{filename}", npm.DownloadPackageFileByName, npm.DownloadPackageFileByNameFromNpmRegistry)
 				r.Group("/-rev/{revision}", func() {
 					r.Delete("", npm.DeletePackage)
 					r.Put("", npm.DeletePreview)
 				}, reqPackageAccess(perm.AccessModeWrite))
 			})
 			r.Group("/{id}", func() {
-				r.Get("", npm.PackageMetadata)
+				r.Get("", npm.PackageMetadata, npm.PackageMetadataFromNpmRegistry)
 				r.Put("", reqPackageAccess(perm.AccessModeWrite), enforcePackagesQuota(), npm.UploadPackage)
 				r.Group("/-/{version}/{filename}", func() {
-					r.Get("", npm.DownloadPackageFile)
+					r.Get("", npm.DownloadPackageFile, npm.DownloadPackageFileFromNpmRegistry)
 					r.Delete("/-rev/{revision}", reqPackageAccess(perm.AccessModeWrite), npm.DeletePackageVersion)
 				})
-				r.Get("/-/{filename}", npm.DownloadPackageFileByName)
+				r.Get("/-/{filename}", npm.DownloadPackageFileByName, npm.DownloadPackageFileByNameFromNpmRegistry)
 				r.Group("/-rev/{revision}", func() {
 					r.Delete("", npm.DeletePackage)
 					r.Put("", npm.DeletePreview)
