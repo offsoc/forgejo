@@ -91,7 +91,7 @@ func enforcePackagesQuota() func(ctx *context.Context) {
 	}
 }
 
-func verifyAuth(r *web.Route, authMethods []auth.Method) { // todo one
+func verifyAuth(r *web.Route, authMethods []auth.Method) {
 	if setting.Service.EnableReverseProxyAuth {
 		authMethods = append(authMethods, &auth.ReverseProxy{})
 	}
