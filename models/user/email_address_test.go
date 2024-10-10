@@ -220,3 +220,21 @@ func TestGetActivatedEmailAddresses(t *testing.T) {
 		})
 	}
 }
+
+func TestDeletePrimaryEmailAddressOfUser(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	user, err := user_model.GetUserByName(db.DefaultContext, "org3")
+	require.NoError(t, err)
+	assert.Equal(t, "org3@example.com", user.Email)
+
+	require.NoError(t, user_model.DeletePrimaryEmailAddressOfUser(db.DefaultContext, user.ID))
+
+	user, err = user_model.GetUserByName(db.DefaultContext, "org3")
+	require.NoError(t, err)
+	assert.Empty(t, user.Email)
+
+	email, err := user_model.GetPrimaryEmailAddressOfUser(db.DefaultContext, user.ID)
+	assert.True(t, user_model.IsErrEmailAddressNotExist(err))
+	assert.Nil(t, email)
+}

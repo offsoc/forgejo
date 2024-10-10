@@ -202,6 +202,38 @@ func GetPrimaryEmailAddressOfUser(ctx context.Context, uid int64) (*EmailAddress
 	return ea, nil
 }
 
+// Deletes the primary email address of the user
+// This is only alllowed if the user is a organization
+func DeletePrimaryEmailAddressOfUser(ctx context.Context, uid int64) error {
+	user, err := GetUserByID(ctx, uid)
+	if err != nil {
+		return err
+	}
+
+	if user.Type != UserTypeOrganization {
+		return fmt.Errorf("%s is not a organization", user.Name)
+	}
+
+	ctx, committer, err := db.TxContext(ctx)
+	if err != nil {
+		return err
+	}
+	defer committer.Close()
+
+	_, err = db.GetEngine(ctx).Exec("DELETE FROM email_address WHERE uid = ? AND is_primary = true", uid)
+	if err != nil {
+		return err
+	}
+
+	user.Email = ""
+	err = UpdateUserCols(ctx, user, "email")
+	if err != nil {
+		return err
+	}
+
+	return committer.Commit()
+}
+
 // GetEmailAddresses returns all email addresses belongs to given user.
 func GetEmailAddresses(ctx context.Context, uid int64) ([]*EmailAddress, error) {
 	emails := make([]*EmailAddress, 0, 5)

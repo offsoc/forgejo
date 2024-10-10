@@ -340,12 +340,25 @@ func Edit(ctx *context.APIContext) {
 	//     "$ref": "#/responses/Organization"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "422":
+	//     "$ref": "#/responses/error"
 
 	form := web.GetForm(ctx).(*api.EditOrgOption)
 
-	if form.Email != "" {
+	if form.Email == "" {
+		err := user_model.DeletePrimaryEmailAddressOfUser(ctx, ctx.Org.Organization.ID)
+		if err != nil {
+			ctx.Error(http.StatusInternalServerError, "DeletePrimaryEmailAddressOfUser", err)
+			return
+		}
+		ctx.Org.Organization.Email = ""
+	} else {
 		if err := user_service.ReplacePrimaryEmailAddress(ctx, ctx.Org.Organization.AsUser(), form.Email); err != nil {
-			ctx.Error(http.StatusInternalServerError, "ReplacePrimaryEmailAddress", err)
+			if user_model.IsErrEmailInvalid(err) || user_model.IsErrEmailCharIsNotSupported(err) {
+				ctx.Error(http.StatusUnprocessableEntity, "ReplacePrimaryEmailAddress", err)
+			} else {
+				ctx.Error(http.StatusInternalServerError, "ReplacePrimaryEmailAddress", err)
+			}
 			return
 		}
 	}
