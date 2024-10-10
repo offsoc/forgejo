@@ -154,9 +154,10 @@
 					{{end}}
 					<span class="text grey tw-ml-2" id="authored-time">{{TimeSince .Commit.Author.When ctx.Locale}}</span>
 					{{if or (ne .Commit.Committer.Name .Commit.Author.Name) (ne .Commit.Committer.Email .Commit.Author.Email)}}
+						<span class="tw-ml-2">•</span>
 						<span class="text grey tw-mx-2">{{ctx.Locale.Tr "repo.diff.committed_by"}}</span>
 						{{if ne .Verification.CommittingUser.ID 0}}
-							{{ctx.AvatarUtils.Avatar .Verification.CommittingUser 28 "tw-mx-2"}}
+							{{ctx.AvatarUtils.Avatar .Verification.CommittingUser 28 "tw-mr-2"}}
 							<a href="{{.Verification.CommittingUser.HomeLink}}"><strong>{{.Commit.Committer.Name}}</strong></a>
 						{{else}}
 							{{ctx.AvatarUtils.AvatarByEmail .Commit.Committer.Email .Commit.Committer.Name 28 "tw-mr-2"}}
