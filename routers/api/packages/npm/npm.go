@@ -118,6 +118,7 @@ func DownloadPackageFileFromNpmRegistry(w http.ResponseWriter, ctx *context.Cont
 	packageName := packageNameFromParams(ctx)
 	filename := ctx.Params("filename")
 	forwardGetRequest(npmRegistryUrl+packageName+"/-/"+filename, w, ctx)
+	// todo cache the package
 }
 
 // DownloadPackageFileByName finds the version and serves the contents of a package
@@ -165,6 +166,7 @@ func DownloadPackageFileByName(ctx *context.Context) {
 func DownloadPackageFileByNameFromNpmRegistry(w http.ResponseWriter, ctx *context.Context) {
 	filename := ctx.Params("filename")
 	forwardGetRequest(npmRegistryUrl+packageNameFromParams(ctx)+"/-/"+filename, w, ctx)
+	// todo cache the package
 }
 
 // UploadPackage creates a new package
