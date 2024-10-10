@@ -119,10 +119,10 @@ test('Issue: Assignees', async ({browser}, workerInfo) => {
   // Clear all assignees
   await page.locator('.select-assignees-modify.dropdown').click();
   await page.locator('.select-assignees-modify.dropdown .no-select.item').click();
-  await page.waitForLoadState('networkidle');
   await expect(assigneesList.filter({hasText: 'user2'})).toBeHidden();
   await expect(assigneesList.filter({hasText: 'user4'})).toBeHidden();
   await expect(page.locator('.ui.assignees.list .item.no-select')).toBeVisible();
+  await expect(page.locator('.select-assign-me')).toBeVisible();
 
   // Assign other user (with searchbox)
   await page.locator('.select-assignees-modify.dropdown').click();
@@ -131,20 +131,17 @@ test('Issue: Assignees', async ({browser}, workerInfo) => {
   await expect(page.locator('.select-assignees-modify .menu .item').filter({hasText: 'user4'})).toBeVisible();
   await page.locator('.select-assignees-modify .menu .item').filter({hasText: 'user4'}).click();
   await page.locator('.select-assignees-modify.dropdown').click();
-  await page.waitForLoadState('networkidle');
   await expect(assigneesList.filter({hasText: 'user4'})).toBeVisible();
 
   // remove user4
   await page.locator('.select-assignees-modify.dropdown').click();
   await page.locator('.select-assignees-modify .menu .item').filter({hasText: 'user4'}).click();
   await page.locator('.select-assignees-modify.dropdown').click();
-  await page.waitForLoadState('networkidle');
   await expect(page.locator('.ui.assignees.list .item.no-select')).toBeVisible();
   await expect(assigneesList.filter({hasText: 'user4'})).toBeHidden();
 
   // Test assign me
   await page.locator('.ui.assignees .select-assign-me').click();
-  await page.waitForLoadState('networkidle');
   await expect(assigneesList.filter({hasText: 'user2'})).toBeVisible();
   await expect(page.locator('.ui.assignees.list .item.no-select')).toBeHidden();
 });
@@ -186,6 +183,7 @@ test('New Issue: Assignees', async ({browser}, workerInfo) => {
   await page.locator('.select-assignees.dropdown').click();
   await page.fill('.select-assignees .menu .search input', '');
   await page.locator('.select-assignees.dropdown .no-select.item').click();
+  await expect(page.locator('.select-assign-me')).toBeVisible();
 });
 
 test('Issue: Milestone', async ({browser}, workerInfo) => {

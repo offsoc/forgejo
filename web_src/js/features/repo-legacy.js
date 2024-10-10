@@ -256,7 +256,7 @@ export function initRepoCommentForm() {
         icon = svg('octicon-milestone', 18, 'tw-mr-2');
       } else if (input_id === '#project_id') {
         icon = svg('octicon-project', 18, 'tw-mr-2');
-      } else if (input_id === '#assignee_id') {
+      } else if (input_id === '#assignee_ids') {
         icon = `<img class="ui avatar image tw-mr-2" alt="avatar" src=${$(this).data('avatar')}>`;
       }
 
@@ -296,7 +296,7 @@ export function initRepoCommentForm() {
   // Milestone, Assignee, Project
   selectItem('.select-project', '#project_id');
   selectItem('.select-milestone', '#milestone_id');
-  selectItem('.select-assignee', '#assignee_id');
+  selectItem('.select-assignee', '#assignee_ids');
 }
 
 async function onEditContent(event) {

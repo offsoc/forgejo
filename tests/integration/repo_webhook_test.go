@@ -172,6 +172,7 @@ func TestWebhookForms(t *testing.T) {
 	}))
 
 	t.Run("discord/required", testWebhookForms("discord", session, map[string]string{
+		"username":    "john",
 		"payload_url": "https://discord.example.com",
 	}))
 	t.Run("discord/optional", testWebhookForms("discord", session, map[string]string{
