@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"code.gitea.io/gitea/modules/activitypub"
 	"code.gitea.io/gitea/modules/forgefed"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
@@ -44,6 +45,17 @@ func Repository(ctx *context.APIContext) {
 		ctx.Error(http.StatusInternalServerError, "Set Name", err)
 		return
 	}
+
+	repo.PublicKey.ID = ap.IRI(link + "#main-key")
+	repo.PublicKey.Owner = ap.IRI(link)
+
+	publicKeyPem, err := activitypub.GetRepoPublicKey(ctx, ctx.Repo.Repository)
+	if err != nil {
+		ctx.ServerError("GetPublicKey", err)
+		return
+	}
+	repo.PublicKey.PublicKeyPem = publicKeyPem
+
 	response(ctx, repo)
 }
 

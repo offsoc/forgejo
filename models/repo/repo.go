@@ -193,6 +193,9 @@ type Repository struct {
 	CreatedUnix  timeutil.TimeStamp `xorm:"INDEX created"`
 	UpdatedUnix  timeutil.TimeStamp `xorm:"INDEX updated"`
 	ArchivedUnix timeutil.TimeStamp `xorm:"DEFAULT 0"`
+
+	RepoActivityPubPrivPem string `xorm:"VARCHAR(3072)"`
+	RepoActivityPubPubPem  string `xorm:"VARCHAR(1024)"`
 }
 
 func init() {
