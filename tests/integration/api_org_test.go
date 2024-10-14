@@ -234,7 +234,8 @@ func TestAPIOrgChangeEmail(t *testing.T) {
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteOrganization)
 
 	t.Run("Invalid", func(t *testing.T) {
-		settings := api.EditOrgOption{Email: "invalid"}
+		newMail := "invalid"
+		settings := api.EditOrgOption{Email: &newMail}
 
 		resp := MakeRequest(t, NewRequestWithJSON(t, "PATCH", "/api/v1/orgs/org3", &settings).AddTokenAuth(token), http.StatusUnprocessableEntity)
 
@@ -245,7 +246,19 @@ func TestAPIOrgChangeEmail(t *testing.T) {
 	})
 
 	t.Run("Valid", func(t *testing.T) {
-		settings := api.EditOrgOption{Email: "example@example.com"}
+		newMail := "example@example.com"
+		settings := api.EditOrgOption{Email: &newMail}
+
+		resp := MakeRequest(t, NewRequestWithJSON(t, "PATCH", "/api/v1/orgs/org3", &settings).AddTokenAuth(token), http.StatusOK)
+
+		var org *api.Organization
+		DecodeJSON(t, resp, &org)
+
+		assert.Equal(t, "example@example.com", org.Email)
+	})
+
+	t.Run("NoChange", func(t *testing.T) {
+		settings := api.EditOrgOption{}
 
 		resp := MakeRequest(t, NewRequestWithJSON(t, "PATCH", "/api/v1/orgs/org3", &settings).AddTokenAuth(token), http.StatusOK)
 
@@ -256,7 +269,8 @@ func TestAPIOrgChangeEmail(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		settings := api.EditOrgOption{Email: ""}
+		newMail := ""
+		settings := api.EditOrgOption{Email: &newMail}
 
 		resp := MakeRequest(t, NewRequestWithJSON(t, "PATCH", "/api/v1/orgs/org3", &settings).AddTokenAuth(token), http.StatusOK)
 
