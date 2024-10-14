@@ -740,6 +740,7 @@ func updateBasicProperties(ctx *context.APIContext, opts api.EditRepoOption) err
 	}
 
 	// Default branch only updated if changed and exist or the repository is empty
+	updateRepoLicense := false
 	if opts.DefaultBranch != nil && repo.DefaultBranch != *opts.DefaultBranch && (repo.IsEmpty || ctx.Repo.GitRepo.IsBranchExist(*opts.DefaultBranch)) {
 		if !repo.IsEmpty {
 			if err := gitrepo.SetDefaultBranch(ctx, ctx.Repo.Repository, *opts.DefaultBranch); err != nil {
@@ -748,6 +749,7 @@ func updateBasicProperties(ctx *context.APIContext, opts api.EditRepoOption) err
 					return err
 				}
 			}
+			updateRepoLicense = true
 		}
 		repo.DefaultBranch = *opts.DefaultBranch
 	}
@@ -767,6 +769,15 @@ func updateBasicProperties(ctx *context.APIContext, opts api.EditRepoOption) err
 	if err := repo_service.UpdateRepository(ctx, repo, visibilityChanged); err != nil {
 		ctx.Error(http.StatusInternalServerError, "UpdateRepository", err)
 		return err
+	}
+
+	if updateRepoLicense {
+		if err := repo_service.AddRepoToLicenseUpdaterQueue(&repo_service.LicenseUpdaterOptions{
+			RepoID: ctx.Repo.Repository.ID,
+		}); err != nil {
+			ctx.Error(http.StatusInternalServerError, "AddRepoToLicenseUpdaterQueue", err)
+			return err
+		}
 	}
 
 	log.Trace("Repository basic settings updated: %s/%s", owner.Name, repo.Name)

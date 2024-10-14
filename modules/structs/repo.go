@@ -115,6 +115,7 @@ type Repository struct {
 	MirrorUpdated time.Time     `json:"mirror_updated,omitempty"`
 	RepoTransfer  *RepoTransfer `json:"repo_transfer"`
 	Topics        []string      `json:"topics"`
+	Licenses      []string      `json:"licenses"`
 }
 
 // GetName implements the gitrepo.Repository interface

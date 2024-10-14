@@ -30,6 +30,7 @@ import (
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/gitdiff"
 	git_service "code.gitea.io/gitea/services/repository"
+	repo_service "code.gitea.io/gitea/services/repository"
 )
 
 const (
@@ -91,6 +92,7 @@ func Commits(ctx *context.Context) {
 	pager := context.NewPagination(int(commitsCount), pageSize, page, 5)
 	pager.SetDefaultParams(ctx)
 	ctx.Data["Page"] = pager
+	ctx.Data["LicenseFileName"] = repo_service.LicenseFileName
 
 	ctx.HTML(http.StatusOK, tplCommits)
 }
@@ -208,6 +210,8 @@ func SearchCommits(ctx *context.Context) {
 	}
 	ctx.Data["Username"] = ctx.Repo.Owner.Name
 	ctx.Data["Reponame"] = ctx.Repo.Repository.Name
+	ctx.Data["RefName"] = ctx.Repo.RefName
+	ctx.Data["LicenseFileName"] = repo_service.LicenseFileName
 	ctx.HTML(http.StatusOK, tplCommits)
 }
 
@@ -275,6 +279,7 @@ func FileHistory(ctx *context.Context) {
 	pager := context.NewPagination(int(commitsCount), setting.Git.CommitsRangeSize, page, 5)
 	pager.SetDefaultParams(ctx)
 	ctx.Data["Page"] = pager
+	ctx.Data["LicenseFileName"] = repo_service.LicenseFileName
 
 	ctx.HTML(http.StatusOK, tplCommits)
 }

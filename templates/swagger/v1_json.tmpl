@@ -11759,6 +11759,42 @@
         }
       }
     },
+    "/repos/{owner}/{repo}/licenses": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Get repo licenses",
+        "operationId": "repoGetLicenses",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/LicensesList"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
     "/repos/{owner}/{repo}/media/{filepath}": {
       "get": {
         "produces": [
@@ -26030,6 +26066,13 @@
           "type": "string",
           "x-go-name": "LanguagesURL"
         },
+        "licenses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Licenses"
+        },
         "link": {
           "type": "string",
           "x-go-name": "Link"
@@ -27643,6 +27686,15 @@
         "type": "array",
         "items": {
           "$ref": "#/definitions/LicensesTemplateListEntry"
+        }
+      }
+    },
+    "LicensesList": {
+      "description": "LicensesList",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string"
         }
       }
     },

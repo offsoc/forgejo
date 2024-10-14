@@ -82,6 +82,8 @@ var migrations = []*Migration{
 	NewMigration("Add SSH keypair to `pull_mirror` table", AddSSHKeypairToPushMirror),
 	// v22 -> v23
 	NewMigration("Add `legacy` to `web_authn_credential` table", AddLegacyToWebAuthnCredential),
+	// v23 -> v24
+	NewMigration("Add Repository Licenses", AddRepositoryLicenses),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.
