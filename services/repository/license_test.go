@@ -11,6 +11,7 @@ import (
 	repo_module "code.gitea.io/gitea/modules/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_detectLicense(t *testing.T) {
@@ -35,7 +36,7 @@ func Test_detectLicense(t *testing.T) {
 
 	repo_module.LoadRepoConfig()
 	err := loadLicenseAliases()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, licenseName := range repo_module.Licenses {
 		license, err := repo_module.GetLicense(licenseName, &repo_module.LicenseValues{
 			Owner: "Gitea",
@@ -43,7 +44,7 @@ func Test_detectLicense(t *testing.T) {
 			Repo:  "gitea",
 			Year:  "2024",
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		tests = append(tests, DetectLicenseTest{
 			name: fmt.Sprintf("single license test: %s", licenseName),
@@ -53,19 +54,19 @@ func Test_detectLicense(t *testing.T) {
 	}
 
 	err = InitLicenseClassifier()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			license, err := detectLicense(strings.NewReader(tt.arg))
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, license)
 		})
 	}
 
 	result, err := detectLicense(strings.NewReader(tests[2].arg + tests[3].arg + tests[4].arg))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	t.Run("multiple licenses test", func(t *testing.T) {
-		assert.Equal(t, 3, len(result))
+		assert.Len(t, result, 3)
 		assert.Contains(t, result, tests[2].want[0])
 		assert.Contains(t, result, tests[3].want[0])
 		assert.Contains(t, result, tests[4].want[0])
