@@ -181,3 +181,27 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
     await expect(textarea).toHaveValue(`${prefix}one\n${prefix}two`);
   }
 });
+
+test('markdown insert table', async ({browser}, workerInfo) => {
+  const context = await load_logged_in_context(browser, workerInfo, 'user2');
+
+  const page = await context.newPage();
+  const response = await page.goto('/user2/repo1/issues/new');
+  await expect(response?.status()).toBe(200);
+
+  const newTableButton = page.locator('button[data-md-action="new-table"]');
+  await newTableButton.click();
+
+  const newTableModal = page.locator('div[data-markdown-table-modal-id="0"]');
+  await expect(newTableModal).toBeVisible();
+
+  await newTableModal.locator('input[name="table-rows"]').fill('3');
+  await newTableModal.locator('input[name="table-columns"]').fill('2');
+
+  await newTableModal.locator('button[data-selector-name="ok-button"]').click();
+
+  await expect(newTableModal).toBeHidden();
+
+  const textarea = page.locator('textarea[name=content]');
+  await expect(textarea).toHaveValue('| Header  | Header  |\n|---------|---------|\n| Content | Content |\n| Content | Content |\n| Content | Content |\n');
+});

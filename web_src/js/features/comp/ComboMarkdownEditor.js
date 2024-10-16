@@ -2,7 +2,7 @@ import '@github/markdown-toolbar-element';
 import '@github/text-expander-element';
 import $ from 'jquery';
 import {attachTribute} from '../tribute.js';
-import {hideElem, showElem, autosize, isElemVisible} from '../../utils/dom.js';
+import {hideElem, showElem, autosize, isElemVisible, replaceTextareaSelection} from '../../utils/dom.js';
 import {initEasyMDEPaste, initTextareaPaste} from './Paste.js';
 import {handleGlobalEnterQuickSubmit} from './QuickSubmit.js';
 import {renderPreviewPanelContent} from '../repo-editor.js';
@@ -48,8 +48,11 @@ class ComboMarkdownEditor {
     this.setupTab();
     this.setupDropzone();
     this.setupTextarea();
+    this.setupTableInserter();
 
     await this.switchToUserPreference();
+
+    elementIdCounter++;
   }
 
   applyEditorHeights(el, heights) {
@@ -67,7 +70,7 @@ class ComboMarkdownEditor {
   setupTextarea() {
     this.textarea = this.container.querySelector('.markdown-text-editor');
     this.textarea._giteaComboMarkdownEditor = this;
-    this.textarea.id = `_combo_markdown_editor_${String(elementIdCounter++)}`;
+    this.textarea.id = `_combo_markdown_editor_${elementIdCounter}`;
     this.textarea.addEventListener('input', (e) => this.options?.onContentChanged?.(this, e));
     this.applyEditorHeights(this.textarea, this.options.editorHeights);
 
@@ -89,6 +92,7 @@ class ComboMarkdownEditor {
     this.textareaMarkdownToolbar.querySelector('button[data-md-action="unindent"]')?.addEventListener('click', () => {
       this.indentSelection(true);
     });
+    this.textareaMarkdownToolbar.querySelector('button[data-md-action="new-table"]')?.setAttribute('data-modal', `div[data-markdown-table-modal-id="${elementIdCounter}"]`);
 
     this.textarea.addEventListener('keydown', (e) => {
       if (e.shiftKey) {
@@ -155,7 +159,6 @@ class ComboMarkdownEditor {
     const panelPreviewer = $container[0].querySelector('.ui.tab[data-tab-panel="markdown-previewer"]');
     panelEditor.setAttribute('data-tab', `markdown-writer-${elementIdCounter}`);
     panelPreviewer.setAttribute('data-tab', `markdown-previewer-${elementIdCounter}`);
-    elementIdCounter++;
 
     tabEditor.addEventListener('click', () => {
       requestAnimationFrame(() => {
@@ -179,6 +182,48 @@ class ComboMarkdownEditor {
       const data = await response.text();
       renderPreviewPanelContent($(panelPreviewer), data);
     });
+  }
+
+  addNewTable(event) {
+    const elementId = event.target.getAttribute('data-element-id');
+    const newTableModal = document.querySelector(`div[data-markdown-table-modal-id="${elementId}"]`);
+    const form = newTableModal.querySelector('div[data-selector-name="form"]');
+
+    // Vaildate input fields
+    for (const currentInput of form.querySelectorAll('input')) {
+      if (!currentInput.checkValidity()) {
+        currentInput.reportValidity();
+        return;
+      }
+    }
+
+    let headerText = form.querySelector('input[name="table-header"]').value;
+    let contentText = form.querySelector('input[name="table-content"]').value;
+    const rowCount = parseInt(form.querySelector('input[name="table-rows"]').value);
+    const columnCount = parseInt(form.querySelector('input[name="table-columns"]').value);
+
+    headerText = headerText.padEnd(contentText.length);
+    contentText = contentText.padEnd(headerText.length);
+
+    let code = `| ${(new Array(columnCount)).fill(headerText).join(' | ')} |\n`;
+    code += `|-${(new Array(columnCount)).fill('-'.repeat(headerText.length)).join('-|-')}-|\n`;
+    for (let i = 0; i < rowCount; i++) {
+      code += `| ${(new Array(columnCount)).fill(contentText).join(' | ')} |\n`;
+    }
+
+    replaceTextareaSelection(document.getElementById(`_combo_markdown_editor_${elementId}`), code);
+
+    // Close the modal
+    newTableModal.querySelector('button[data-selector-name="cancel-button"]').click();
+  }
+
+  setupTableInserter() {
+    const newTableModal = this.container.querySelector('div[data-modal-name="new-markdown-table"]');
+    newTableModal.setAttribute('data-markdown-table-modal-id', elementIdCounter);
+
+    const button = newTableModal.querySelector('button[data-selector-name="ok-button"]');
+    button.setAttribute('data-element-id', elementIdCounter);
+    button.addEventListener('click', this.addNewTable);
   }
 
   prepareEasyMDEToolbarActions() {
