@@ -47,7 +47,7 @@ XGO_PACKAGE ?= src.techknowlogick.com/xgo@latest
 GO_LICENSES_PACKAGE ?= github.com/google/go-licenses@v1.6.0 # renovate: datasource=go
 GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasource=go
 DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.26.0 # renovate: datasource=go
-GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
+GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.5.0 # renovate: datasource=go
 GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.16.2 # renovate: datasource=go
 RENOVATE_NPM_PACKAGE ?= renovate@38.121.0 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
 
