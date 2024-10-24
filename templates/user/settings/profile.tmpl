@@ -111,9 +111,10 @@
 
 				<div class="field">
 					<div class="ui checkbox">
-						<label data-tooltip-content="{{ctx.Locale.Tr "settings.keep_pronouns_private_popup"}}"><strong>{{ctx.Locale.Tr "settings.keep_pronouns_private"}}</strong></label>
+						<label>{{ctx.Locale.Tr "settings.keep_pronouns_private"}}</label>
 						<input name="keep_pronouns_private" type="checkbox" {{if .SignedUser.KeepPronounsPrivate}}checked{{end}}>
 					</div>
+					<span class="help tw-block">{{ctx.Locale.Tr "settings.keep_pronouns_private_popup"}}</span>
 				</div>
 
 				<div class="field">
