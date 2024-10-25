@@ -7,7 +7,7 @@ import "xorm.io/xorm"
 
 func AddHidePronounsOptionToUser(x *xorm.Engine) error {
 	type User struct {
-		HidePronouns bool `xorm:"NOT NULL DEFAULT false"`
+		KeepPronounsPrivate bool `xorm:"NOT NULL DEFAULT false"`
 	}
 
 	return x.Sync(&User{})
