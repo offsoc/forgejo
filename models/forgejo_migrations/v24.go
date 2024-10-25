@@ -6,9 +6,9 @@ package forgejo_migrations //nolint:revive
 import "xorm.io/xorm"
 
 func AddHidePronounsOptionToUser(x *xorm.Engine) error {
-        type User struct {
-                HidePronouns bool `xorm:"NOT NULL DEFAULT false"`
-        }
+	type User struct {
+		HidePronouns bool `xorm:"NOT NULL DEFAULT false"`
+	}
 
-        return x.Sync(&User{})
+	return x.Sync(&User{})
 }
