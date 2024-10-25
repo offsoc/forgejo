@@ -418,7 +418,7 @@ lint-frontend: lint-js lint-css
 lint-frontend-fix: lint-js-fix lint-css-fix
 
 .PHONY: lint-backend
-lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate
+lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale
 
 .PHONY: lint-backend-fix
 lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig
@@ -460,6 +460,10 @@ lint-renovate: node_modules
 	npx --yes --package $(RENOVATE_NPM_PACKAGE) -- renovate-config-validator --strict > .lint-renovate 2>&1 || true
 	@if grep --quiet --extended-regexp -e '^( WARN:|ERROR:)' .lint-renovate ; then cat .lint-renovate ; rm .lint-renovate ; exit 1 ; fi
 	@rm .lint-renovate
+
+.PHONY: lint-locale
+lint-locale:
+	$(GO) run build/lint-locale.go
 
 .PHONY: lint-md
 lint-md: node_modules
