@@ -2,7 +2,6 @@
 	{{svg "octicon-no-entry" 48}}
 	<h2>{{ctx.Locale.Tr "actions.runs.no_workflows"}}</h2>
 	{{if and .CanWriteCode .CanWriteActions}}
-		<p>{{ctx.Locale.Tr "actions.runs.no_workflows.quick_start" "https://forgejo.org/docs/latest/admin/actions/"}}</p>
+		<p>{{ctx.Locale.Tr "actions.runs.no_workflows.quick_start" "https://forgejo.org/docs/latest/user/actions/#quick-start" "https://forgejo.org/docs/latest/admin/runner-installation/"}}</p>
 	{{end}}
-	<p>{{ctx.Locale.Tr "actions.runs.no_workflows.documentation" "https://forgejo.org/docs/latest/admin/actions/"}}</p>
 </div>
