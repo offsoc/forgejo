@@ -501,7 +501,8 @@ func (u *User) GetCompleteName() string {
 }
 
 // GetPronouns returns an empty string, if the user has set to keep his
-// pronouns private, otherwise the Pronouns are returned.
+// pronouns private from non-logged in users, otherwise the pronouns
+// are returned.
 func (u *User) GetPronouns(signed bool) string {
 	if u.KeepPronounsPrivate && !signed {
 		return ""
