@@ -44,6 +44,7 @@
   full_name: '   < U<se>r Tw<o > ><  '
   email: user2@example.com
   keep_email_private: true
+  keep_pronouns_private: true
   email_notifications_preference: enabled
   passwd: ZogKvWdyEx:password
   passwd_hash_algo: dummy
@@ -340,6 +341,7 @@
   full_name: User Ten
   email: user10@example.com
   keep_email_private: false
+  keep_pronouns_private: true
   email_notifications_preference: enabled
   passwd: ZogKvWdyEx:password
   passwd_hash_algo: dummy
