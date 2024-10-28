@@ -214,8 +214,24 @@ func DeletePrimaryEmailAddressOfUser(ctx context.Context, uid int64) error {
 		return fmt.Errorf("%s is not a organization", user.Name)
 	}
 
+	ctx, committer, err := db.TxContext(ctx)
+	if err != nil {
+		return err
+	}
+	defer committer.Close()
+
+	_, err = db.GetEngine(ctx).Exec("DELETE FROM email_address WHERE uid = ? AND is_primary = true", uid)
+	if err != nil {
+		return err
+	}
+
 	user.Email = ""
-	return UpdateUserCols(ctx, user, "email")
+	err = UpdateUserCols(ctx, user, "email")
+	if err != nil {
+		return err
+	}
+
+	return committer.Commit()
 }
 
 // GetEmailAddresses returns all email addresses belongs to given user.
