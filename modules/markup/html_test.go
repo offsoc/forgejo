@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/modules/markup"
 	"code.gitea.io/gitea/modules/markup/markdown"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/svg"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/modules/util"
@@ -95,6 +96,8 @@ func TestRender_Commits(t *testing.T) {
 func TestRender_CrossReferences(t *testing.T) {
 	setting.AppURL = markup.TestAppURL
 
+	svg.Init() // TODO: fix this
+
 	test := func(input, expected string) {
 		buffer, err := markup.RenderString(&markup.RenderContext{
 			Ctx:          git.DefaultContext,
@@ -104,6 +107,9 @@ func TestRender_CrossReferences(t *testing.T) {
 				Base:           setting.AppSubURL,
 			},
 			Metas: localMetas,
+			GetIssue: func(_ context.Context, issueID int64) (title, iconName, iconColor string, err error) {
+				return "Issue", "octicon-issue-opened", "green", nil // TODO: enhance this
+			},
 		}, input)
 		require.NoError(t, err)
 		assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(buffer))

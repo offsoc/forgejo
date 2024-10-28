@@ -5,11 +5,13 @@ package markup
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/url"
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -21,6 +23,7 @@ import (
 	"code.gitea.io/gitea/modules/references"
 	"code.gitea.io/gitea/modules/regexplru"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/svg"
 	"code.gitea.io/gitea/modules/templates/vars"
 	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/modules/util"
@@ -536,6 +539,29 @@ func createLink(href, content, class string) *html.Node {
 	return a
 }
 
+func createIssueLink(href, repoRef, issueTitle, iconName, iconColor string) *html.Node {
+	div := &html.Node{
+		Type: html.ElementNode,
+		Data: atom.Div.String(),
+		Attr: []html.Attribute{{Key: "class", Val: "issue-link"}},
+	}
+
+	rawSVG := string(svg.RenderHTML(iconName, 16, "text "+iconColor))
+	icon := &html.Node{
+		Type: html.RawNode,
+		Data: rawSVG,
+	}
+
+	div.AppendChild(icon)
+	div.AppendChild(createLink(href, fmt.Sprintf("%s | %s", issueTitle, repoRef), "ref-issue"))
+
+	var b bytes.Buffer
+	html.Render(&b, div)
+	fmt.Println("html:", b.String()) // TODO: remove
+
+	return div
+}
+
 func createCodeLink(href, content, class string) *html.Node {
 	a := &html.Node{
 		Type: html.ElementNode,
@@ -811,14 +837,32 @@ func fullIssuePatternProcessor(ctx *RenderContext, node *html.Node) {
 			}
 		}
 
+		var (
+			issueTitle string
+			iconName   string
+			iconColor  string
+		)
+
+		if ctx.GetIssue != nil {
+			issueNum, err := strconv.ParseInt(m[re.SubexpIndex("num")], 10, 64)
+			if err != nil {
+				return
+			}
+
+			issueTitle, iconName, iconColor, err = ctx.GetIssue(ctx.Ctx, issueNum)
+			if err != nil {
+				return
+			}
+		}
+
 		matchUser := m[re.SubexpIndex("user")]
 		matchRepo := m[re.SubexpIndex("repo")]
 
 		if matchUser == ctx.Metas["user"] && matchRepo == ctx.Metas["repo"] {
-			replaceContent(node, linkIndex[0], linkIndex[1], createLink(link, text, "ref-issue"))
+			replaceContent(node, linkIndex[0], linkIndex[1], createIssueLink(link, text, issueTitle, iconName, iconColor))
 		} else {
 			text = matchUser + "/" + matchRepo + text
-			replaceContent(node, linkIndex[0], linkIndex[1], createLink(link, text, "ref-issue"))
+			replaceContent(node, linkIndex[0], linkIndex[1], createIssueLink(link, text, issueTitle, iconName, iconColor))
 		}
 		node = node.NextSibling.NextSibling
 	}

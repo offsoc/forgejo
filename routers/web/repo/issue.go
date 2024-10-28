@@ -1395,6 +1395,41 @@ func prepareHiddenCommentType(ctx *context.Context) {
 	}
 }
 
+// TODO: move to some common place
+func getIssueColorAndIcon(ctx stdCtx.Context, issue *issues_model.Issue) (string, string) {
+	if issue.IsPull && issue.PullRequest != nil {
+		if issue.IsClosed {
+			return "red", "octicon-git-pull-request-closed"
+		}
+
+		if issue.PullRequest.HasMerged {
+			return "purple", "octicon-git-merge"
+		}
+
+		if issue.PullRequest.IsWorkInProgress(ctx) {
+			return "grey", "octicon-git-pull-request-draft"
+		}
+
+		return "green", "octicon-git-pull-request"
+	}
+
+	if issue.IsClosed {
+		return "red", "octicon-issue-closed"
+	}
+
+	return "green", "octicon-issue-opened"
+}
+
+func getIssue(ctx stdCtx.Context, issueID int64) (title, iconName, iconColor string, err error) {
+	issue, err := issues_model.GetIssueByID(ctx, issueID)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	iconColor, iconName = getIssueColorAndIcon(ctx, issue)
+	return issue.Title, iconName, iconColor, nil
+}
+
 // ViewIssue render issue view page
 func ViewIssue(ctx *context.Context) {
 	if ctx.Params(":type") == "issues" {
@@ -1496,9 +1531,10 @@ func ViewIssue(ctx *context.Context) {
 		Links: markup.Links{
 			Base: ctx.Repo.RepoLink,
 		},
-		Metas:   ctx.Repo.Repository.ComposeMetas(ctx),
-		GitRepo: ctx.Repo.GitRepo,
-		Ctx:     ctx,
+		Metas:    ctx.Repo.Repository.ComposeMetas(ctx),
+		GitRepo:  ctx.Repo.GitRepo,
+		Ctx:      ctx,
+		GetIssue: getIssue,
 	}, issue.Content)
 	if err != nil {
 		ctx.ServerError("RenderString", err)
