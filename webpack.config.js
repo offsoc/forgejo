@@ -110,7 +110,7 @@ export default {
   mode: isProduction ? 'production' : 'development',
   entry: {
     index: [
-      fileURLToPath(new URL('web_src/js/jquery.js', import.meta.url)),
+      fileURLToPath(new URL('web_src/js/global.js', import.meta.url)),
       fileURLToPath(new URL('web_src/fomantic/build/semantic.js', import.meta.url)),
       fileURLToPath(new URL('web_src/js/index.js', import.meta.url)),
       fileURLToPath(new URL('node_modules/easymde/dist/easymde.min.css', import.meta.url)),
@@ -233,9 +233,6 @@ export default {
     ],
   },
   plugins: [
-    new webpack.ProvidePlugin({ // for htmx extensions
-      htmx: 'htmx.org',
-    }),
     new DefinePlugin({
       __VUE_OPTIONS_API__: true, // at the moment, many Vue components still use the Vue Options API
       __VUE_PROD_DEVTOOLS__: false, // do not enable devtools support in production
