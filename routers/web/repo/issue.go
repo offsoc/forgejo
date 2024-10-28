@@ -1420,8 +1420,19 @@ func getIssueColorAndIcon(ctx stdCtx.Context, issue *issues_model.Issue) (string
 	return "green", "octicon-issue-opened"
 }
 
-func getIssue(ctx stdCtx.Context, issueID int64) (title, iconName, iconColor string, err error) {
-	issue, err := issues_model.GetIssueByID(ctx, issueID)
+func getIssue(ctx stdCtx.Context, repoOwner, repoName string, issueID int64) (title, iconName, iconColor string, err error) {
+	// TODO: check for smarter ways to load the issue
+	repo, err := repo_model.GetRepositoryByOwnerAndName(ctx, repoOwner, repoName)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	issue, err := issues_model.GetIssueByIndex(ctx, repo.ID, issueID)
+	if err != nil {
+		return "", "", "", err
+	}
+
+	err = issue.LoadPullRequest(ctx)
 	if err != nil {
 		return "", "", "", err
 	}

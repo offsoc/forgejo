@@ -543,10 +543,10 @@ func createIssueLink(href, repoRef, issueTitle, iconName, iconColor string) *htm
 	div := &html.Node{
 		Type: html.ElementNode,
 		Data: atom.Div.String(),
-		Attr: []html.Attribute{{Key: "class", Val: "issue-link"}},
+		Attr: []html.Attribute{{Key: "class", Val: "ref-issue tw-flex tw-gap-2 tw-items-center"}},
 	}
 
-	rawSVG := string(svg.RenderHTML(iconName, 16, "text "+iconColor))
+	rawSVG := string(svg.RenderHTML(iconName, 16, "text "+iconColor+" ref-issue"))
 	icon := &html.Node{
 		Type: html.RawNode,
 		Data: rawSVG,
@@ -554,10 +554,6 @@ func createIssueLink(href, repoRef, issueTitle, iconName, iconColor string) *htm
 
 	div.AppendChild(icon)
 	div.AppendChild(createLink(href, fmt.Sprintf("%s | %s", issueTitle, repoRef), "ref-issue"))
-
-	var b bytes.Buffer
-	html.Render(&b, div)
-	fmt.Println("html:", b.String()) // TODO: remove
 
 	return div
 }
@@ -837,6 +833,9 @@ func fullIssuePatternProcessor(ctx *RenderContext, node *html.Node) {
 			}
 		}
 
+		matchUser := m[re.SubexpIndex("user")]
+		matchRepo := m[re.SubexpIndex("repo")]
+
 		var (
 			issueTitle string
 			iconName   string
@@ -849,14 +848,11 @@ func fullIssuePatternProcessor(ctx *RenderContext, node *html.Node) {
 				return
 			}
 
-			issueTitle, iconName, iconColor, err = ctx.GetIssue(ctx.Ctx, issueNum)
+			issueTitle, iconName, iconColor, err = ctx.GetIssue(ctx.Ctx, matchUser, matchRepo, issueNum)
 			if err != nil {
 				return
 			}
 		}
-
-		matchUser := m[re.SubexpIndex("user")]
-		matchRepo := m[re.SubexpIndex("repo")]
 
 		if matchUser == ctx.Metas["user"] && matchRepo == ctx.Metas["repo"] {
 			replaceContent(node, linkIndex[0], linkIndex[1], createIssueLink(link, text, issueTitle, iconName, iconColor))

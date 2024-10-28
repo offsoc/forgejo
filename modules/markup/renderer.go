@@ -79,7 +79,7 @@ type RenderContext struct {
 	cancelFn         func()
 	SidebarTocNode   ast.Node
 	InStandalonePage bool // used by external render. the router "/org/repo/render/..." will output the rendered content in a standalone page
-	GetIssue         func(ctx context.Context, issueID int64) (title, iconName, iconColor string, err error)
+	GetIssue         func(ctx context.Context, repoOwner, repoName string, issueID int64) (title, iconName, iconColor string, err error)
 }
 
 type Links struct {

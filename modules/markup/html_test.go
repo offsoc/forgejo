@@ -96,7 +96,8 @@ func TestRender_Commits(t *testing.T) {
 func TestRender_CrossReferences(t *testing.T) {
 	setting.AppURL = markup.TestAppURL
 
-	svg.Init() // TODO: fix this
+	setting.CustomPath = "../../" // TODO: properly load svg icons
+	svg.Init()
 
 	test := func(input, expected string) {
 		buffer, err := markup.RenderString(&markup.RenderContext{
@@ -107,7 +108,7 @@ func TestRender_CrossReferences(t *testing.T) {
 				Base:           setting.AppSubURL,
 			},
 			Metas: localMetas,
-			GetIssue: func(_ context.Context, issueID int64) (title, iconName, iconColor string, err error) {
+			GetIssue: func(_ context.Context, repoOwner, repoName string, issueID int64) (title, iconName, iconColor string, err error) {
 				return "Issue", "octicon-issue-opened", "green", nil // TODO: enhance this
 			},
 		}, input)

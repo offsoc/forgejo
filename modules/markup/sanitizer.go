@@ -94,7 +94,7 @@ func createDefaultPolicy() *bluemonday.Policy {
 	}
 
 	// Allow classes for anchors
-	policy.AllowAttrs("class").Matching(regexp.MustCompile(`ref-issue( ref-external-issue)?`)).OnElements("a")
+	policy.AllowAttrs("class").Matching(regexp.MustCompile(`ref-issue( ref-external-issue)?`)).OnElements("a", "svg", "div")
 
 	// Allow classes for task lists
 	policy.AllowAttrs("class").Matching(regexp.MustCompile(`task-list-item`)).OnElements("li")
