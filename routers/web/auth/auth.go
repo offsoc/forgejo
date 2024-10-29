@@ -25,6 +25,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/modules/web/middleware"
 	auth_service "code.gitea.io/gitea/services/auth"
@@ -575,10 +576,10 @@ func createUserInContext(ctx *context.Context, tpl base.TplName, form any, u *us
 		case user_model.IsErrEmailAlreadyUsed(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_been_used"), tpl, form)
-		case user_model.IsErrEmailCharIsNotSupported(err):
+		case validation.IsErrEmailCharIsNotSupported(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tpl, form)
-		case user_model.IsErrEmailInvalid(err):
+		case validation.IsErrEmailInvalid(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tpl, form)
 		case db.IsErrNameReserved(err):

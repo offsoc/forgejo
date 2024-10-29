@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/git"
+	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/services/release"
 	"code.gitea.io/gitea/tests"
 
@@ -162,4 +163,55 @@ func TestCreateNewTagProtected(t *testing.T) {
 		err = git_model.DeleteProtectedTag(db.DefaultContext, protectedTag)
 		require.NoError(t, err)
 	}
+}
+
+func TestSyncRepoTags(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+		owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+
+		t.Run("Git", func(t *testing.T) {
+			httpContext := NewAPITestContext(t, owner.Name, repo.Name)
+
+			dstPath := t.TempDir()
+
+			u.Path = httpContext.GitPath()
+			u.User = url.UserPassword(owner.Name, userPassword)
+
+			doGitClone(dstPath, u)(t)
+
+			_, _, err := git.NewCommand(git.DefaultContext, "tag", "v2", "-m", "this is an annoted tag").RunStdString(&git.RunOpts{Dir: dstPath})
+			require.NoError(t, err)
+
+			_, _, err = git.NewCommand(git.DefaultContext, "push", "--tags").RunStdString(&git.RunOpts{Dir: dstPath})
+			require.NoError(t, err)
+
+			testTag := func(t *testing.T) {
+				t.Helper()
+				req := NewRequestf(t, "GET", "/%s/releases/tag/v2", repo.FullName())
+				resp := MakeRequest(t, req, http.StatusOK)
+				htmlDoc := NewHTMLParser(t, resp.Body)
+				tagsTab := htmlDoc.Find(".release-list-title")
+				assert.Contains(t, tagsTab.Text(), "this is an annoted tag")
+			}
+
+			// Make sure `SyncRepoTags` doesn't modify annoted tags.
+			testTag(t)
+			require.NoError(t, repo_module.SyncRepoTags(git.DefaultContext, repo.ID))
+			testTag(t)
+		})
+
+		// Cleanup
+		releases, err := db.Find[repo_model.Release](db.DefaultContext, repo_model.FindReleasesOptions{
+			IncludeTags: true,
+			TagNames:    []string{"v2"},
+			RepoID:      repo.ID,
+		})
+		require.NoError(t, err)
+
+		for _, release := range releases {
+			_, err = db.DeleteByID[repo_model.Release](db.DefaultContext, release.ID)
+			require.NoError(t, err)
+		}
+	})
 }

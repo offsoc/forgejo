@@ -26,6 +26,8 @@ const (
 	ErrUsername = "UsernameError"
 	// ErrInvalidGroupTeamMap is returned when a group team mapping is invalid
 	ErrInvalidGroupTeamMap = "InvalidGroupTeamMap"
+	// ErrEmail is returned when an email address is invalid
+	ErrEmail = "Email"
 )
 
 // AddBindingRules adds additional binding rules
@@ -38,6 +40,7 @@ func AddBindingRules() {
 	addGlobOrRegexPatternRule()
 	addUsernamePatternRule()
 	addValidGroupTeamMapRule()
+	addEmailBindingRules()
 }
 
 func addGitRefNameBindingRule() {
@@ -180,6 +183,34 @@ func addValidGroupTeamMapRule() {
 				return false, errs
 			}
 
+			return true, errs
+		},
+	})
+}
+
+func addEmailBindingRules() {
+	binding.AddRule(&binding.Rule{
+		IsMatch: func(rule string) bool {
+			return strings.HasPrefix(rule, "EmailWithAllowedDomain")
+		},
+		IsValid: func(errs binding.Errors, name string, val any) (bool, binding.Errors) {
+			if err := ValidateEmail(fmt.Sprintf("%v", val)); err != nil {
+				errs.Add([]string{name}, ErrEmail, err.Error())
+				return false, errs
+			}
+			return true, errs
+		},
+	})
+
+	binding.AddRule(&binding.Rule{
+		IsMatch: func(rule string) bool {
+			return strings.HasPrefix(rule, "EmailForAdmin")
+		},
+		IsValid: func(errs binding.Errors, name string, val any) (bool, binding.Errors) {
+			if err := ValidateEmailForAdmin(fmt.Sprintf("%v", val)); err != nil {
+				errs.Add([]string{name}, ErrEmail, err.Error())
+				return false, errs
+			}
 			return true, errs
 		},
 	})

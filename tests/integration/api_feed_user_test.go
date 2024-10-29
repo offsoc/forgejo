@@ -16,6 +16,7 @@ import (
 )
 
 func TestFeed(t *testing.T) {
+	defer tests.AddFixtures("tests/integration/fixtures/TestFeed/")()
 	defer tests.PrepareTestEnv(t)()
 
 	t.Run("User", func(t *testing.T) {
@@ -42,6 +43,28 @@ func TestFeed(t *testing.T) {
 
 	t.Run("Repo", func(t *testing.T) {
 		t.Run("Normal", func(t *testing.T) {
+			t.Run("Atom", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
+				req := NewRequest(t, "GET", "/user2/repo1.atom")
+				resp := MakeRequest(t, req, http.StatusOK)
+
+				data := resp.Body.String()
+				assert.Contains(t, data, `<feed xmlns="http://www.w3.org/2005/Atom"`)
+				assert.Contains(t, data, "This is a very long text, so lets scream together: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+			})
+			t.Run("RSS", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
+				req := NewRequest(t, "GET", "/user2/repo1.rss")
+				resp := MakeRequest(t, req, http.StatusOK)
+
+				data := resp.Body.String()
+				assert.Contains(t, data, `<rss version="2.0"`)
+				assert.Contains(t, data, "This is a very long text, so lets scream together: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+			})
+		})
+		t.Run("Branch", func(t *testing.T) {
 			t.Run("Atom", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 

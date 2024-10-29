@@ -22,6 +22,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/timeutil"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -320,7 +321,7 @@ func TestCreateUserInvalidEmail(t *testing.T) {
 
 	err := user_model.CreateUser(db.DefaultContext, user)
 	require.Error(t, err)
-	assert.True(t, user_model.IsErrEmailCharIsNotSupported(err))
+	assert.True(t, validation.IsErrEmailCharIsNotSupported(err))
 }
 
 func TestCreateUserEmailAlreadyUsed(t *testing.T) {

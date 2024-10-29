@@ -49,7 +49,7 @@ GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasour
 DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.26.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
 GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.16.2 # renovate: datasource=go
-RENOVATE_NPM_PACKAGE ?= renovate@38.110.2 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
+RENOVATE_NPM_PACKAGE ?= renovate@38.133.0 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
 
 ifeq ($(HAS_GO), yes)
 	CGO_EXTRA_CFLAGS := -DSQLITE_MAX_VARIABLE_NUMBER=32766
@@ -164,7 +164,7 @@ TAR_EXCLUDES := .git data indexers queues log node_modules $(EXECUTABLE) $(FOMAN
 GO_DIRS := build cmd models modules routers services tests
 WEB_DIRS := web_src/js web_src/css
 
-ESLINT_FILES := web_src/js tools *.js tests/e2e/*.js tests/e2e/shared/*.js
+ESLINT_FILES := web_src/js tools *.js *.mjs tests/e2e/*.js tests/e2e/shared/*.js
 STYLELINT_FILES := web_src/css web_src/js/components/*.vue
 SPELLCHECK_FILES := $(GO_DIRS) $(WEB_DIRS) docs/content templates options/locale/locale_en-US.ini .github $(wildcard *.go *.js *.md *.yml *.yaml *.toml)
 
@@ -437,11 +437,11 @@ lint-codespell-fix-i:
 
 .PHONY: lint-js
 lint-js: node_modules
-	npx eslint --color --max-warnings=0 --ext js,vue $(ESLINT_FILES)
+	npx eslint --color --max-warnings=0 $(ESLINT_FILES)
 
 .PHONY: lint-js-fix
 lint-js-fix: node_modules
-	npx eslint --color --max-warnings=0 --ext js,vue $(ESLINT_FILES) --fix
+	npx eslint --color --max-warnings=0 $(ESLINT_FILES) --fix
 
 .PHONY: lint-css
 lint-css: node_modules

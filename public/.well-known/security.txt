@@ -1,8 +1,8 @@
 # This site is running a Forgejo instance.
 # Forgejo-related security problems should be reported to the Forgejo security team.
 # Security problems related to this instance should be reported to its administration.
-Policy: https://codeberg.org/forgejo/forgejo/src/branch/forgejo/CONTRIBUTING.md
+Policy: https://codeberg.org/forgejo/governance/src/commit/5c07b3801537212ed6be1edfec298d7b004ce92d/SECURITY-POLICY.md
 Contact: mailto:security@forgejo.org
 Encryption: https://keys.openpgp.org/vks/v1/by-fingerprint/1B638BDF10969D627926B8D9F585D0F99E1FB56F
 Preferred-Languages: en
-Expires: 2025-06-25T00:00:00Z
+Expires: 2025-10-25T00:00:00Z

@@ -408,7 +408,7 @@ class ComboMarkdownEditor {
     const lineStart = Math.max(0, value.lastIndexOf('\n', start - 1) + 1);
     // Find the end and extract the line.
     const lineEnd = value.indexOf('\n', start);
-    const line = value.slice(lineStart, lineEnd < 0 ? value.length : lineEnd);
+    const line = value.slice(lineStart, lineEnd === -1 ? value.length : lineEnd);
     // Match any whitespace at the start + any repeatable prefix + exactly one space after.
     const prefix = line.match(/^\s*((\d+)[.)]\s|[-*+]\s+(\[[ x]\]\s?)?|(>\s+)+)?/);
 

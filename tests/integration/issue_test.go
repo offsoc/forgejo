@@ -1302,6 +1302,23 @@ func TestIssueUserDashboard(t *testing.T) {
 	}
 }
 
+func TestIssueOrgDashboard(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+	session := loginUser(t, user.Name)
+
+	// assert 'your_repositories' is the default filter for org dashboards
+	const sel = ".dashboard .ui.list-header.dropdown .ui.menu a.active.item[href^='?type=your_repositories']"
+
+	for _, path := range []string{"/org/org3/issues", "/org/org3/pulls"} {
+		req := NewRequest(t, "GET", path)
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, sel, true)
+	}
+}
+
 func TestIssueCount(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 

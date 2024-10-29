@@ -16,11 +16,10 @@ func TestRepoLastUpdatedTime(t *testing.T) {
 		user := "user2"
 		session := loginUser(t, user)
 
-		req := NewRequest(t, "GET", path.Join("explore", "repos"))
+		req := NewRequest(t, "GET", "/explore/repos?q=repo1")
 		resp := session.MakeRequest(t, req, http.StatusOK)
 		doc := NewHTMLParser(t, resp.Body)
 		node := doc.doc.Find(".flex-item-body").First()
-
 		{
 			buf := ""
 			findTextNonNested(t, node, &buf)

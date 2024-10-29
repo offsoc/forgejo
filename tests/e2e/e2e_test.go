@@ -8,7 +8,6 @@
 package e2e
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/url"
@@ -116,19 +115,13 @@ func TestE2e(t *testing.T) {
 				cmd.Env = os.Environ()
 				cmd.Env = append(cmd.Env, fmt.Sprintf("GITEA_URL=%s", setting.AppURL))
 
-				var stdout, stderr bytes.Buffer
-				cmd.Stdout = &stdout
-				cmd.Stderr = &stderr
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
 
 				err := cmd.Run()
 				if err != nil {
-					// Currently colored output is conflicting. Using Printf until that is resolved.
-					fmt.Printf("%v", stdout.String())
-					fmt.Printf("%v", stderr.String())
 					log.Fatal("Playwright Failed: %s", err)
 				}
-
-				fmt.Printf("%v", stdout.String())
 			})
 		})
 	}

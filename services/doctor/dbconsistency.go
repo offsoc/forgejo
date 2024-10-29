@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	issues_model "code.gitea.io/gitea/models/issues"
 	"code.gitea.io/gitea/models/migrations"
+	org_model "code.gitea.io/gitea/models/organization"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
@@ -176,6 +177,12 @@ func checkDBConsistency(ctx context.Context, logger log.Logger, autofix bool) er
 			Counter:      auth_model.CountOrphanedOAuth2Applications,
 			Fixer:        auth_model.DeleteOrphanedOAuth2Applications,
 			FixedMessage: "Removed",
+		},
+		{
+			Name:         "Owner teams with no admin access",
+			Counter:      org_model.CountInconsistentOwnerTeams,
+			Fixer:        org_model.FixInconsistentOwnerTeams,
+			FixedMessage: "Fixed",
 		},
 	}
 

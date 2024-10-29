@@ -49,7 +49,7 @@ test('Hyperlink paste behaviour', async ({browser}, workerInfo) => {
 test('Always focus edit tab first on edit', async ({browser}, workerInfo) => {
   const page = await login({browser}, workerInfo);
   const response = await page.goto('/user2/repo1/issues/1');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   // Switch to preview tab and save
   await page.click('#issue-1 .comment-container .context-menu');

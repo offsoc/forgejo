@@ -14,7 +14,7 @@ test('Migration Progress Page', async ({page: unauthedPage, browser}, workerInfo
 
   const page = await (await load_logged_in_context(browser, workerInfo, 'user2')).newPage();
 
-  await expect((await page.goto('/user2/invalidrepo'))?.status(), 'repo should not exist yet').toBe(404);
+  expect((await page.goto('/user2/invalidrepo'))?.status(), 'repo should not exist yet').toBe(404);
 
   await page.goto('/repo/migrate?service_type=1');
 
@@ -24,7 +24,7 @@ test('Migration Progress Page', async ({page: unauthedPage, browser}, workerInfo
   await form.locator('button.primary').click({timeout: 5000});
   await expect(page).toHaveURL('user2/invalidrepo');
 
-  await expect((await unauthedPage.goto('/user2/invalidrepo'))?.status(), 'public migration page should be accessible').toBe(200);
+  expect((await unauthedPage.goto('/user2/invalidrepo'))?.status(), 'public migration page should be accessible').toBe(200);
   await expect(unauthedPage.locator('#repo_migrating_progress')).toBeVisible();
 
   await page.reload();

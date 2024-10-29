@@ -26,7 +26,7 @@ export async function validate_form({page}, scope) {
   // might be necessary to adjust in case colons are strictly necessary in help text
   for (const l of await page.locator('label').all()) {
     const str = await l.textContent();
-    await expect(str.split('\n')[0]).not.toContain(':');
+    expect(str.split('\n')[0]).not.toContain(':');
   }
 
   // check that multiple help text are correctly aligned to each other
@@ -36,9 +36,9 @@ export async function validate_form({page}, scope) {
     const boxes = await Promise.all(helpLabels.map((help) => help.boundingBox()));
     for (let i = 1; i < boxes.length; i++) {
       // help texts vertically aligned on top of each other
-      await expect(boxes[i].x).toBe(boxes[0].x);
+      expect(boxes[i].x).toBe(boxes[0].x);
       // help texts don't horizontally intersect each other
-      await expect(boxes[i].y + boxes[i].height).toBeGreaterThanOrEqual(boxes[i - 1].y + boxes[i - 1].height);
+      expect(boxes[i].y + boxes[i].height).toBeGreaterThanOrEqual(boxes[i - 1].y + boxes[i - 1].height);
     }
   }
 }

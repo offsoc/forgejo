@@ -37,6 +37,7 @@ import (
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/services/automerge"
+	forgejo_context "code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/pull"
 	commitstatus_service "code.gitea.io/gitea/services/repository/commitstatus"
@@ -1148,5 +1149,36 @@ func TestPullAutoMergeAfterCommitStatusSucceedAndApprovalForAgitFlow(t *testing.
 		assert.NotEmpty(t, pr.MergedCommitID)
 
 		unittest.AssertNotExistsBean(t, &pull_model.AutoMerge{PullID: pr.ID})
+	})
+}
+
+func TestPullDeleteBranchPerms(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
+		user2Session := loginUser(t, "user2")
+		user4Session := loginUser(t, "user4")
+		testRepoFork(t, user4Session, "user2", "repo1", "user4", "repo1")
+		testEditFileToNewBranch(t, user2Session, "user2", "repo1", "master", "base-pr", "README.md", "Hello, World\n(Edited - base PR)\n")
+
+		req := NewRequestWithValues(t, "POST", "/user4/repo1/compare/master...user2/repo1:base-pr", map[string]string{
+			"_csrf": GetCSRF(t, user4Session, "/user4/repo1/compare/master...user2/repo1:base-pr"),
+			"title": "Testing PR",
+		})
+		resp := user4Session.MakeRequest(t, req, http.StatusOK)
+		elem := strings.Split(test.RedirectURL(resp), "/")
+
+		req = NewRequestWithValues(t, "POST", "/user4/repo1/pulls/"+elem[4]+"/merge", map[string]string{
+			"_csrf":                     GetCSRF(t, user4Session, "/user4/repo1/pulls/"+elem[4]),
+			"do":                        "merge",
+			"delete_branch_after_merge": "on",
+		})
+		user4Session.MakeRequest(t, req, http.StatusOK)
+
+		flashCookie := user4Session.GetCookie(forgejo_context.CookieNameFlash)
+		assert.NotNil(t, flashCookie)
+		assert.EqualValues(t, "error%3DYou%2Bdon%2527t%2Bhave%2Bpermission%2Bto%2Bdelete%2Bthe%2Bhead%2Bbranch.", flashCookie.Value)
+
+		// Check that the branch still exist.
+		req = NewRequest(t, "GET", "/user2/repo1/src/branch/base-pr")
+		user4Session.MakeRequest(t, req, http.StatusOK)
 	})
 }

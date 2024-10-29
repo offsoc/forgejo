@@ -29,7 +29,7 @@ func UpdateRepositoryUnits(ctx context.Context, repo *repo_model.Repository, uni
 	}
 
 	if slices.Contains(deleteUnitTypes, unit.TypeActions) {
-		if err := actions_model.CleanRepoScheduleTasks(ctx, repo); err != nil {
+		if err := actions_model.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
 			log.Error("CleanRepoScheduleTasks: %v", err)
 		}
 	}
