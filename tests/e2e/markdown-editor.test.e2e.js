@@ -3,6 +3,7 @@
 // @watch start
 // web_src/js/features/comp/ComboMarkdownEditor.js
 // web_src/css/editor/combomarkdowneditor.css
+// templates/shared/combomarkdowneditor.tmpl
 // @watch end
 
 import {expect} from '@playwright/test';
