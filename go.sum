@@ -491,8 +491,8 @@ github.com/mattn/go-runewidth v0.0.16 h1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6T
 github.com/mattn/go-runewidth v0.0.16/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/mattn/go-sqlite3 v1.14.24 h1:tpSp2G2KyMnnQu99ngJ47EIkWVmliIizyZBfPrBWDRM=
 github.com/mattn/go-sqlite3 v1.14.24/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
-github.com/meilisearch/meilisearch-go v0.28.0 h1:f3XJ66ZM+R8bANAOLqsjvoq/HhQNpVJPYoNt6QgNzME=
-github.com/meilisearch/meilisearch-go v0.28.0/go.mod h1:Szcc9CaDiKIfjdgdt49jlmDKpEzjD+x+b6Y6heMdlQ0=
+github.com/meilisearch/meilisearch-go v0.29.0 h1:HZ9NEKN59USINQ/DXJge/aaXq8IrsKbXGTdAoBaaDz4=
+github.com/meilisearch/meilisearch-go v0.29.0/go.mod h1:2cRCAn4ddySUsFfNDLVPod/plRibQsJkXF/4gLhxbOk=
 github.com/mholt/acmez/v2 v2.0.3 h1:CgDBlEwg3QBp6s45tPQmFIBrkRIkBT4rW4orMM6p4sw=
 github.com/mholt/acmez/v2 v2.0.3/go.mod h1:pQ1ysaDeGrIMvJ9dfJMk5kJNkn7L2sb3UhyrX6Q91cw=
 github.com/microcosm-cc/bluemonday v1.0.27 h1:MpEUotklkwCSLeH+Qdx1VJgNqLlpY2KXwXFM08ygZfk=

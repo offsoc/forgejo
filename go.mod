@@ -72,7 +72,7 @@ require (
 	github.com/markbates/goth v1.80.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-sqlite3 v1.14.24
-	github.com/meilisearch/meilisearch-go v0.28.0
+	github.com/meilisearch/meilisearch-go v0.29.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/minio/minio-go/v7 v7.0.78
