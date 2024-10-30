@@ -58,6 +58,9 @@ func hasPrefixFold(s, t string) bool {
 }
 
 func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepOptions) ([]*GrepResult, error) {
+	if CheckGitVersionAtLeast("2.32.0") != nil {
+		return nil, fmt.Errorf("git version is too old. requires at least git 2.32.0")
+	}
 	stdoutReader, stdoutWriter, err := os.Pipe()
 	if err != nil {
 		return nil, fmt.Errorf("unable to create os pipe to grep: %w", err)
