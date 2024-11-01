@@ -149,12 +149,14 @@ func (c *Client) Post(b []byte, to string) (resp *http.Response, err error) {
 		return nil, err
 	}
 
-	signer, _, err := httpsig.NewSigner(c.algs, c.digestAlg, c.postHeaders, httpsig.Signature, httpsigExpirationTime)
-	if err != nil {
-		return nil, err
-	}
-	if err := signer.SignRequest(c.priv, c.pubID, req, b); err != nil {
-		return nil, err
+	if c.pubID != "" {
+		signer, _, err := httpsig.NewSigner(c.algs, c.digestAlg, c.postHeaders, httpsig.Signature, httpsigExpirationTime)
+		if err != nil {
+			return nil, err
+		}
+		if err := signer.SignRequest(c.priv, c.pubID, req, b); err != nil {
+			return nil, err
+		}
 	}
 
 	resp, err = c.client.Do(req)
@@ -167,12 +169,15 @@ func (c *Client) Get(to string) (resp *http.Response, err error) {
 	if req, err = c.newRequest(http.MethodGet, nil, to); err != nil {
 		return nil, err
 	}
-	signer, _, err := httpsig.NewSigner(c.algs, c.digestAlg, c.getHeaders, httpsig.Signature, httpsigExpirationTime)
-	if err != nil {
-		return nil, err
-	}
-	if err := signer.SignRequest(c.priv, c.pubID, req, nil); err != nil {
-		return nil, err
+
+	if c.pubID != "" {
+		signer, _, err := httpsig.NewSigner(c.algs, c.digestAlg, c.getHeaders, httpsig.Signature, httpsigExpirationTime)
+		if err != nil {
+			return nil, err
+		}
+		if err := signer.SignRequest(c.priv, c.pubID, req, nil); err != nil {
+			return nil, err
+		}
 	}
 
 	resp, err = c.client.Do(req)

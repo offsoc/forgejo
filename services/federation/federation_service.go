@@ -168,17 +168,21 @@ func createUserFromAP(ctx *context_service.Base, actorURL *string, personID fm.P
 		return nil, nil, err
 	}
 
+	var idIRI string
+
 	// Grab the keyID from the signature
 	v, err := httpsig.NewVerifier(ctx.Req)
 	if err != nil {
-		return nil, nil, err
-	}
-	idIRI, err := url.Parse(v.KeyId())
-	if err != nil {
-		return nil, nil, err
+		idIRI = personID.AsURI()
+	} else {
+		idIRIURL, err := url.Parse(v.KeyId())
+		if err != nil {
+			return nil, nil, err
+		}
+		idIRI = idIRIURL.String()
 	}
 
-	body, err := client.GetBody(idIRI.String())
+	body, err := client.GetBody(idIRI)
 	if err != nil {
 		return nil, nil, err
 	}
