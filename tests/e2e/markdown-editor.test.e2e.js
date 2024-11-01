@@ -188,7 +188,7 @@ test('markdown insert table', async ({browser}, workerInfo) => {
 
   const page = await context.newPage();
   const response = await page.goto('/user2/repo1/issues/new');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   const newTableButton = page.locator('button[data-md-action="new-table"]');
   await newTableButton.click();
