@@ -54,6 +54,7 @@ require (
 	github.com/gogs/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-github/v64 v64.0.0
+	github.com/google/licenseclassifier/v2 v2.0.0
 	github.com/google/pprof v0.0.0-20240528025155-186aa0362fba
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/feeds v1.2.0
@@ -201,7 +202,6 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/go-tpm v0.9.1 // indirect
-	github.com/google/licenseclassifier/v2 v2.0.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
