@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"code.gitea.io/gitea/models/forgefed"
-	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	context_service "code.gitea.io/gitea/services/context"
 
@@ -45,12 +44,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 	}
 
 	// Respond back with an accept
-	binary, err := json.Marshal(map[string]string{"status": "Accepted"})
-	if err != nil {
-		log.Error("Unable to Marshal JSON: %v", err)
-		ctx.ServerError("MarshalJSON", err)
-		return
-	}
+	binary := []byte(`{"status":"Accepted"}`)
 	ctx.Resp.Header().Add("Content-Type", "application/json")
 	ctx.Resp.WriteHeader(http.StatusAccepted)
 	if _, err = ctx.Resp.Write(binary); err != nil {
