@@ -60,7 +60,7 @@ func handlePending(item pendingQueueItem) error {
 		}); err != nil {
 			return err
 		}
-		log.Debug("[follow] no inbox found for user[%d]", item.FederatedUserID)
+		log.Debug("[follow] no inbox found for federated user[%d]", item.FederatedUserID)
 		return fmt.Errorf("No Inbox URL found for federated user[%d]", item.FederatedUserID)
 	}
 

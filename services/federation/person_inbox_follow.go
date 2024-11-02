@@ -23,7 +23,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 	}
 
 	if activity.Actor.GetLink().String() == "" {
-		ctx.Error(http.StatusNotAcceptable, "Missing actor", fmt.Errorf("Missong Actor"))
+		ctx.Error(http.StatusNotAcceptable, "Missing actor", fmt.Errorf("Missing Actor"))
 		return nil
 	}
 

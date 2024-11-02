@@ -88,16 +88,16 @@ func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	}
 
 	if user != nil {
-		log.Info("Found local federatedUser: %v", user)
+		log.Trace("Found local federatedUser: %#v", user)
 	} else {
 		user, federatedUser, err = createUserFromAP(ctx.Base, &actorURI, *actorID, federationHost.ID)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, "Error creating federatedUser", err)
 			return nil, nil, nil, err
 		}
-		log.Info("Created federatedUser from ap: %v", user)
+		log.Trace("Created federatedUser from ap: %#v", user)
 	}
-	log.Info("Got user:%v", user.Name)
+	log.Trace("Got user: %v", user.Name)
 
 	return user, federatedUser, federationHost, nil
 }
@@ -195,7 +195,7 @@ func createUserFromAP(ctx *context_service.Base, actorURL *string, personID fm.P
 	if res, err := validation.IsValid(person); !res {
 		return nil, nil, err
 	}
-	log.Info("Fetched valid person:%q", person)
+	log.Trace("Fetched valid person: %#v", person)
 
 	localFqdn, err := url.ParseRequestURI(setting.AppURL)
 	if err != nil {
@@ -236,7 +236,7 @@ func createUserFromAP(ctx *context_service.Base, actorURL *string, personID fm.P
 	if err != nil {
 		return nil, nil, err
 	}
-	log.Info("Created federatedUser:%q", federatedUser)
+	log.Trace("Created federatedUser: %#v", federatedUser)
 
 	return &newUser, &federatedUser, nil
 }

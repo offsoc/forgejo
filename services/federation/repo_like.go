@@ -31,7 +31,7 @@ func ProcessLikeActivity(ctx *context_service.APIContext, form any, repositoryID
 	if res, err := validation.IsValid(activity); !res {
 		return http.StatusNotAcceptable, "Invalid activity", err
 	}
-	log.Info("Activity validated:%v", activity)
+	log.Trace("Activity validated: %#v", activity)
 
 	// parse actorID (person)
 	actorURI := activity.Actor.GetID().String()
@@ -52,7 +52,7 @@ func ProcessLikeActivity(ctx *context_service.APIContext, form any, repositoryID
 	if objectID.ID != fmt.Sprint(repositoryID) {
 		return http.StatusNotAcceptable, "Invalid objectId", err
 	}
-	log.Info("Object accepted:%v", objectID)
+	log.Trace("Object accepted: %#v", objectID)
 
 	// execute the activity if the repo was not stared already
 	alreadyStared := repo.IsStaring(ctx, user.ID, repositoryID)
@@ -103,14 +103,14 @@ func DeleteFollowingRepos(ctx context.Context, localRepoID int64) error {
 
 func SendLikeActivities(ctx context.Context, doer user.User, repoID int64) error {
 	followingRepos, err := repo.FindFollowingReposByRepoID(ctx, repoID)
-	log.Info("Federated Repos is: %v", followingRepos)
+	log.Trace("Federated Repos is: %#v", followingRepos)
 	if err != nil {
 		return err
 	}
 
 	likeActivityList := make([]fm.ForgeLike, 0)
 	for _, followingRepo := range followingRepos {
-		log.Info("Found following repo: %v", followingRepo)
+		log.Trace("Found following repo: %#v", followingRepo)
 		target := followingRepo.URI
 		likeActivity, err := fm.NewForgeLike(doer.APActorID(), target, time.Now())
 		if err != nil {
@@ -136,7 +136,7 @@ func SendLikeActivities(ctx context.Context, doer user.User, repoID int64) error
 
 		_, err = apclient.Post(json, fmt.Sprintf("%v/inbox/", activity.Object))
 		if err != nil {
-			log.Error("error %v while sending activity: %q", err, activity)
+			log.Error("error %v while sending activity: %#v", err, activity)
 		}
 	}
 
