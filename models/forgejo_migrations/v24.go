@@ -26,8 +26,8 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 	type FederatedUserFollower struct {
 		ID int64 `xorm:"pk autoincr"`
 
-		LocalUserID     int64 `xorm:"NOT NULL"`
-		FederatedUserID int64 `xorm:"NOT NULL"`
+		LocalUserID     int64 `xorm:"NOT NULL unique(fuf_rel)"`
+		FederatedUserID int64 `xorm:"NOT NULL unique(fuf_rel)"`
 	}
 
 	// Add ActorURL and InboxURL to FederatedUser
