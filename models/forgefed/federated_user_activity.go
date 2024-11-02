@@ -92,7 +92,7 @@ func AddFollower(ctx context.Context, followedUserID, followingUserID int64) (in
 }
 
 func RemoveFollower(ctx context.Context, localUserID, federatedUserID int64) error {
-	_, err := db.GetEngine(ctx).Delete(FederatedUserFollower{
+	_, err := db.GetEngine(ctx).Delete(&FederatedUserFollower{
 		LocalUserID:     localUserID,
 		FederatedUserID: federatedUserID,
 	})

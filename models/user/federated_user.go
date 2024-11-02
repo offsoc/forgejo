@@ -42,7 +42,7 @@ func (user FederatedUser) Validate() []string {
 
 func (user *FederatedUser) SetInboxURL(ctx context.Context, url *string) error {
 	user.InboxURL = url
-	_, err := db.GetEngine(ctx).ID(user.ID).Update(user)
+	_, err := db.GetEngine(ctx).ID(user.ID).Cols("inbox_url").Update(user)
 	return err
 }
 
