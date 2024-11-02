@@ -228,9 +228,7 @@ func createUserFromAP(ctx *context_service.Base, actorURL *string, personID fm.P
 	federatedUser := user.FederatedUser{
 		ExternalID:       personID.ID,
 		FederationHostID: federationHostID,
-	}
-	if actorURL != nil {
-		federatedUser.ActorURL = actorURL
+		ActorURL:         actorURL,
 	}
 	err = user.CreateFederatedUser(ctx, &newUser, &federatedUser)
 	if err != nil {
