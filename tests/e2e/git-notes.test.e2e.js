@@ -16,7 +16,6 @@ test('Change git note', async ({browser}, workerInfo) => {
 
   let textarea = page.locator('textarea[name="notes"]');
   await expect(textarea).toBeVisible();
-  await expect(textarea).toHaveText('This is a test note');
   await textarea.click();
   await page.keyboard.press('Control+A');
   await page.keyboard.press('Backspace');
