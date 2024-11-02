@@ -21,7 +21,7 @@ func ProcessPersonInbox(ctx *context_service.APIContext, form any) {
 		processPersonInboxCreate(ctx, activity)
 		return
 	case ap.FollowType:
-		_ = processPersonFollow(ctx, activity)
+		processPersonFollow(ctx, activity)
 		return
 	case ap.UndoType:
 		processPersonInboxUndo(ctx, activity)

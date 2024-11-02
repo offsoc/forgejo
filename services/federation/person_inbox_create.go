@@ -38,6 +38,7 @@ func processPersonInboxCreate(ctx *context_service.APIContext, activity *ap.Acti
 	actorURI := act.Actor.GetLink().String()
 	if _, _, _, err := findOrCreateFederatedUser(ctx, actorURI); err != nil {
 		log.Error("Error finding or creating federated user (%s): %v", actorURI, err)
+		ctx.Error(http.StatusNotAcceptable, "Federated user not found", err)
 		return
 	}
 
