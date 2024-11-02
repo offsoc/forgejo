@@ -23,9 +23,20 @@ function initEditPreviewTab($form) {
       }
       context = context.substring(0, context.lastIndexOf('/'));
 
+      // fetch branch path, Eg: `/branch/main`
+      const pathSegments = context.split("/").filter(segment => segment !== "");
+      const last2Seg = pathSegments.slice(-2);
+      const branchPath = "/" + last2Seg.join("/")
+      
+      // fetch relative path to the current repository as `/<username>/<repository>`
+      // Eg: `/jon-doe/repo1`
+      const relativePath = context.split("/src"+branchPath)[0]
+      
       const formData = new FormData();
       formData.append('mode', mode);
       formData.append('context', context);
+      formData.append('branch_path', branchPath)
+      formData.append('relative_path', relativePath)
       formData.append(
         'text',
         $form.find(`.tab[data-tab="${$tabMenu.data('write')}"] textarea`).val(),
