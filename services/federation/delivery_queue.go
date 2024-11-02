@@ -62,7 +62,7 @@ func deliverToInbox(item deliveryQueueItem) error {
 	}
 	if res.StatusCode >= 400 {
 		defer res.Body.Close()
-		body, _ := io.ReadAll(res.Body)
+		body, _ := io.ReadAll(io.LimitReader(res.Body, 16*1024))
 
 		log.Warn("Delivering to %s failed: %d %s", item.InboxURL, res.StatusCode, string(body))
 		return fmt.Errorf("Delivery failed")
