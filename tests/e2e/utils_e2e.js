@@ -30,7 +30,7 @@ export async function login_user(browser, workerInfo, user) {
   // Route to login page
   // Note: this could probably be done more quickly with a POST
   const response = await page.goto('/user/login');
-  await expect(response?.status()).toBe(200); // Status OK
+  expect(response?.status()).toBe(200); // Status OK
 
   // Fill out form
   await page.type('input[name=user_name]', user);
@@ -39,7 +39,7 @@ export async function login_user(browser, workerInfo, user) {
 
   await page.waitForLoadState('networkidle');
 
-  await expect(page.url(), {message: `Failed to login user ${user}`}).toBe(`${workerInfo.project.use.baseURL}/`);
+  expect(page.url(), {message: `Failed to login user ${user}`}).toBe(`${workerInfo.project.use.baseURL}/`);
 
   // Save state
   await context.storageState({path: `${ARTIFACTS_PATH}/state-${user}-${workerInfo.workerIndex}.json`});
@@ -79,4 +79,25 @@ export async function save_visual(page) {
       ],
     });
   }
+}
+
+// Create a temporary user and login to that user and store session info.
+// This should ideally run on a per test basis.
+export async function create_temp_user(browser, workerInfo, request) {
+  const username = globalThis.crypto.randomUUID();
+  const newUser = await request.post(`/api/v1/admin/users`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${btoa(`user1:${LOGIN_PASSWORD}`)}`,
+    },
+    data: {
+      username,
+      email: `${username}@host.invalid`,
+      password: LOGIN_PASSWORD,
+      must_change_password: false,
+    },
+  });
+  expect(newUser.ok()).toBeTruthy();
+
+  return {context: await login_user(browser, workerInfo, username), username};
 }

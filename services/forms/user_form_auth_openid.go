@@ -27,7 +27,7 @@ func (f *SignInOpenIDForm) Validate(req *http.Request, errs binding.Errors) bind
 // SignUpOpenIDForm form for signin up with OpenID
 type SignUpOpenIDForm struct {
 	UserName string `binding:"Required;Username;MaxSize(40)"`
-	Email    string `binding:"Required;Email;MaxSize(254)"`
+	Email    string `binding:"Required;EmailWithAllowedDomain;MaxSize(254)"`
 }
 
 // Validate validates the fields

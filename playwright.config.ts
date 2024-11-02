@@ -1,4 +1,3 @@
-// @ts-check
 import {devices} from '@playwright/test';
 
 const BASE_URL = process.env.GITEA_URL?.replace?.(/\/$/g, '') || 'http://localhost:3000';

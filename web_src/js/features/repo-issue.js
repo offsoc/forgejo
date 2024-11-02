@@ -12,6 +12,26 @@ import {emojiHTML} from './emoji.js';
 
 const {appSubUrl} = window.config;
 
+// if there are draft comments, confirm before reloading, to avoid losing comments
+export function reloadConfirmDraftComment() {
+  const commentTextareas = [
+    document.querySelector('.edit-content-zone:not(.tw-hidden) textarea'),
+    document.querySelector('#comment-form textarea'),
+  ];
+  for (const textarea of commentTextareas) {
+    // Most users won't feel too sad if they lose a comment with 10 chars, they can re-type these in seconds.
+    // But if they have typed more (like 50) chars and the comment is lost, they will be very unhappy.
+    if (textarea && textarea.value.trim().length > 10) {
+      textarea.parentElement.scrollIntoView();
+      if (!window.confirm('Page will be reloaded, but there are draft comments. Continuing to reload will discard the comments. Continue?')) {
+        return;
+      }
+      break;
+    }
+  }
+  window.location.reload();
+}
+
 export function initRepoIssueTimeTracking() {
   $(document).on('click', '.issue-add-time', () => {
     $('.issue-start-time-modal').modal({
@@ -189,14 +209,17 @@ export function initRepoIssueCommentDelete() {
           const path = conversationHolder.getAttribute('data-path');
           const side = conversationHolder.getAttribute('data-side');
           const idx = conversationHolder.getAttribute('data-idx');
-          const lineType = conversationHolder.closest('tr').getAttribute('data-line-type');
+          const lineType = conversationHolder.closest('tr')?.getAttribute('data-line-type');
 
-          if (lineType === 'same') {
-            document.querySelector(`[data-path="${path}"] .add-code-comment[data-idx="${idx}"]`).classList.remove('tw-invisible');
-          } else {
-            document.querySelector(`[data-path="${path}"] .add-code-comment[data-side="${side}"][data-idx="${idx}"]`).classList.remove('tw-invisible');
+          // the conversation holder could appear either on the "Conversation" page, or the "Files Changed" page
+          // on the Conversation page, there is no parent "tr", so no need to do anything for "add-code-comment"
+          if (lineType) {
+            if (lineType === 'same') {
+              document.querySelector(`[data-path="${path}"] .add-code-comment[data-idx="${idx}"]`).classList.remove('tw-invisible');
+            } else {
+              document.querySelector(`[data-path="${path}"] .add-code-comment[data-side="${side}"][data-idx="${idx}"]`).classList.remove('tw-invisible');
+            }
           }
-
           conversationHolder.remove();
         }
 
@@ -458,6 +481,9 @@ export function initRepoPullRequestReview() {
         });
       }
     }
+  } else if (window.history.scrollRestoration === 'manual') {
+    // reset scrollRestoration to 'auto' if there is no hash in url and we set it to 'manual' before
+    window.history.scrollRestoration = 'auto';
   }
 
   $(document).on('click', '.show-outdated', function (e) {
@@ -666,6 +692,40 @@ export function initRepoIssueBranchSelect() {
     pullTargetBranch.textContent = pullTargetBranch.textContent.replace(`${baseName}:${branchNameOld}`, `${baseName}:${branchNameNew}`);
     pullTargetBranch.setAttribute('data-branch', branchNameNew);
   });
+}
+
+export function initRepoIssueAssignMe() {
+  // Assign to me button
+  document.querySelector('.ui.assignees.list .item.no-select .select-assign-me')
+    ?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const selectMe = e.target;
+      const noSelect = selectMe.parentElement;
+      const selectorList = document.querySelector('.ui.select-assignees .menu');
+
+      if (selectMe.getAttribute('data-action') === 'update') {
+        (async () => {
+          await updateIssuesMeta(
+            selectMe.getAttribute('data-update-url'),
+            selectMe.getAttribute('data-action'),
+            selectMe.getAttribute('data-issue-id'),
+            selectMe.getAttribute('data-id'),
+          );
+          reloadConfirmDraftComment();
+        })();
+      } else {
+        for (const item of selectorList.querySelectorAll('.item')) {
+          if (item.getAttribute('data-id') === selectMe.getAttribute('data-id')) {
+            item.classList.add('checked');
+            item.querySelector('.octicon-check').classList.remove('tw-invisible');
+          }
+        }
+        document.querySelector(selectMe.getAttribute('data-id-selector')).classList.remove('tw-hidden');
+        noSelect.classList.add('tw-hidden');
+        document.querySelector(selectorList.getAttribute('data-id')).value = selectMe.getAttribute('data-id');
+        return false;
+      }
+    });
 }
 
 export function initSingleCommentEditor($commentForm) {

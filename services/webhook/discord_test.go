@@ -120,6 +120,49 @@ func TestDiscordPayload(t *testing.T) {
 		assert.Equal(t, p.Sender.UserName, pl.Embeds[0].Author.Name)
 		assert.Equal(t, setting.AppURL+p.Sender.UserName, pl.Embeds[0].Author.URL)
 		assert.Equal(t, p.Sender.AvatarURL, pl.Embeds[0].Author.IconURL)
+
+		j, err := json.Marshal(pl)
+		require.NoError(t, err)
+
+		unsetFields := struct {
+			Content *string `json:"content"`
+			TTS     *bool   `json:"tts"`
+			Wait    *bool   `json:"wait"`
+			Fields  []any   `json:"fields"`
+			Footer  struct {
+				Text *string `json:"text"`
+			} `json:"footer"`
+		}{}
+
+		err = json.Unmarshal(j, &unsetFields)
+		require.NoError(t, err)
+		assert.Nil(t, unsetFields.Content)
+		assert.Nil(t, unsetFields.TTS)
+		assert.Nil(t, unsetFields.Wait)
+		assert.Nil(t, unsetFields.Fields)
+		assert.Nil(t, unsetFields.Footer.Text)
+	})
+
+	t.Run("Issue with long title", func(t *testing.T) {
+		p := issueTestPayloadWithLongTitle()
+
+		p.Action = api.HookIssueOpened
+		pl, err := dc.Issue(p)
+		require.NoError(t, err)
+
+		assert.Len(t, pl.Embeds, 1)
+		assert.Len(t, pl.Embeds[0].Title, 256)
+	})
+
+	t.Run("Issue with long body", func(t *testing.T) {
+		p := issueTestPayloadWithLongBody()
+
+		p.Action = api.HookIssueOpened
+		pl, err := dc.Issue(p)
+		require.NoError(t, err)
+
+		assert.Len(t, pl.Embeds, 1)
+		assert.Len(t, pl.Embeds[0].Description, 4096)
 	})
 
 	t.Run("IssueComment", func(t *testing.T) {

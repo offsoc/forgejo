@@ -178,13 +178,13 @@ export default {
         },
       },
       {
-        test: /\.js$/i,
+        test: /\.(js|ts)$/i,
         exclude: /node_modules/,
         use: [
           {
             loader: 'esbuild-loader',
             options: {
-              loader: 'js',
+              loader: 'ts',
               target: 'es2020',
             },
           },

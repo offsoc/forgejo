@@ -4,6 +4,7 @@
 package webhook
 
 import (
+	"strings"
 	"testing"
 
 	api "code.gitea.io/gitea/modules/structs"
@@ -113,6 +114,18 @@ func pushTestPayloadWithCommitMessage(message string) *api.PushPayload {
 }
 
 func issueTestPayload() *api.IssuePayload {
+	return issuePayloadWithTitleAndBody("crash", "issue body")
+}
+
+func issueTestPayloadWithLongBody() *api.IssuePayload {
+	return issuePayloadWithTitleAndBody("crash", strings.Repeat("issue body", 4097))
+}
+
+func issueTestPayloadWithLongTitle() *api.IssuePayload {
+	return issuePayloadWithTitleAndBody(strings.Repeat("a", 257), "issue body")
+}
+
+func issuePayloadWithTitleAndBody(title, body string) *api.IssuePayload {
 	return &api.IssuePayload{
 		Index: 2,
 		Sender: &api.User{
@@ -129,8 +142,8 @@ func issueTestPayload() *api.IssuePayload {
 			Index:   2,
 			URL:     "http://localhost:3000/api/v1/repos/test/repo/issues/2",
 			HTMLURL: "http://localhost:3000/test/repo/issues/2",
-			Title:   "crash",
-			Body:    "issue body",
+			Title:   title,
+			Body:    body,
 			Poster: &api.User{
 				UserName:  "user1",
 				AvatarURL: "http://localhost:3000/user1/avatar",

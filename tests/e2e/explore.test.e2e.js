@@ -42,5 +42,5 @@ test('Explore view taborder', async ({page}) => {
       break;
     }
   }
-  await expect(res).toBe(exp);
+  expect(res).toBe(exp);
 });

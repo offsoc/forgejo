@@ -70,6 +70,14 @@ jobs:
           # https://forgejo.org/docs/next/developer/infrastructure
           curl -o /dev/null -sS https://v$major.next.forgejo.org/.well-known/wakeup-on-logs/forgejo-v$major
 
+      - name: upgrade v*.next.forgejo.org (k8s)
+        uses: https://code.forgejo.org/infrastructure/next-digest@v1.1.0
+        with:
+          url: https://placeholder:${{ secrets.TOKEN_NEXT_DIGEST }}@code.forgejo.org/infrastructure/next-digest
+          ref_name: '${{ github.ref_name }}'
+          image: 'codeberg.org/forgejo-experimental/forgejo'
+          tag_suffix: '-rootless'
+
       - name: set up go for the DNS update below
         if: vars.ROLE == 'forgejo-experimental' && secrets.OVH_APP_KEY != ''
         uses: https://code.forgejo.org/actions/setup-go@v5

@@ -18,7 +18,7 @@ type AdminCreateUserForm struct {
 	LoginType          string `binding:"Required"`
 	LoginName          string
 	UserName           string `binding:"Required;Username;MaxSize(40)"`
-	Email              string `binding:"Required;Email;MaxSize(254)"`
+	Email              string `binding:"Required;EmailForAdmin;MaxSize(254)"`
 	Password           string `binding:"MaxSize(255)"`
 	SendNotify         bool
 	MustChangePassword bool
@@ -37,7 +37,7 @@ type AdminEditUserForm struct {
 	UserName                string `binding:"Username;MaxSize(40)"`
 	LoginName               string
 	FullName                string `binding:"MaxSize(100)"`
-	Email                   string `binding:"Required;Email;MaxSize(254)"`
+	Email                   string `binding:"Required;EmailForAdmin;MaxSize(254)"`
 	Password                string `binding:"MaxSize(255)"`
 	Website                 string `binding:"ValidUrl;MaxSize(255)"`
 	Location                string `binding:"MaxSize(50)"`

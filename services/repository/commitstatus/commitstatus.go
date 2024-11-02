@@ -19,7 +19,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/automerge"
+	shared_automerge "code.gitea.io/gitea/services/shared/automerge"
 )
 
 func getCacheKey(repoID int64, brancheName string) string {
@@ -117,7 +117,7 @@ func CreateCommitStatus(ctx context.Context, repo *repo_model.Repository, creato
 	}
 
 	if status.State.IsSuccess() {
-		if err := automerge.StartPRCheckAndAutoMergeBySHA(ctx, sha, repo); err != nil {
+		if err := shared_automerge.StartPRCheckAndAutoMergeBySHA(ctx, sha, repo); err != nil {
 			return fmt.Errorf("MergeScheduledPullRequest[repo_id: %d, user_id: %d, sha: %s]: %w", repo.ID, creator.ID, sha, err)
 		}
 	}

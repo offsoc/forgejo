@@ -4,6 +4,7 @@ import {
   initRepoIssueComments, initRepoIssueDependencyDelete, initRepoIssueReferenceIssue,
   initRepoIssueTitleEdit, initRepoIssueWipToggle,
   initRepoPullRequestUpdate, updateIssuesMeta, handleReply, initIssueTemplateCommentEditors, initSingleCommentEditor,
+  initRepoIssueAssignMe, reloadConfirmDraftComment,
 } from './repo-issue.js';
 import {initUnicodeEscapeButton} from './repo-unicode-escape.js';
 import {svg} from '../svg.js';
@@ -28,26 +29,6 @@ import {attachRefIssueContextPopup} from './contextpopup.js';
 import {POST, GET} from '../modules/fetch.js';
 
 const {csrfToken} = window.config;
-
-// if there are draft comments, confirm before reloading, to avoid losing comments
-function reloadConfirmDraftComment() {
-  const commentTextareas = [
-    document.querySelector('.edit-content-zone:not(.tw-hidden) textarea'),
-    document.querySelector('#comment-form textarea'),
-  ];
-  for (const textarea of commentTextareas) {
-    // Most users won't feel too sad if they lose a comment with 10 chars, they can re-type these in seconds.
-    // But if they have typed more (like 50) chars and the comment is lost, they will be very unhappy.
-    if (textarea && textarea.value.trim().length > 10) {
-      textarea.parentElement.scrollIntoView();
-      if (!window.confirm('Page will be reloaded, but there are draft comments. Continuing to reload will discard the comments. Continue?')) {
-        return;
-      }
-      break;
-    }
-  }
-  window.location.reload();
-}
 
 export function initRepoCommentForm() {
   const $commentForm = $('.comment.form');
@@ -138,7 +119,7 @@ export function initRepoCommentForm() {
 
       hasUpdateAction = $listMenu.data('action') === 'update'; // Update the var
 
-      const clickedItem = this; // eslint-disable-line unicorn/no-this-assignment
+      const clickedItem = this; // eslint-disable-line unicorn/no-this-assignment, @typescript-eslint/no-this-alias
       const scope = this.getAttribute('data-scope');
 
       $(this).parent().find('.item').each(function () {
@@ -243,6 +224,7 @@ export function initRepoCommentForm() {
   // Init labels and assignees
   initListSubmits('select-label', 'labels');
   initListSubmits('select-assignees', 'assignees');
+  initRepoIssueAssignMe();
   initListSubmits('select-assignees-modify', 'assignees');
   initListSubmits('select-reviewers-modify', 'assignees');
 
@@ -274,7 +256,7 @@ export function initRepoCommentForm() {
         icon = svg('octicon-milestone', 18, 'tw-mr-2');
       } else if (input_id === '#project_id') {
         icon = svg('octicon-project', 18, 'tw-mr-2');
-      } else if (input_id === '#assignee_id') {
+      } else if (input_id === '#assignee_ids') {
         icon = `<img class="ui avatar image tw-mr-2" alt="avatar" src=${$(this).data('avatar')}>`;
       }
 
@@ -314,7 +296,7 @@ export function initRepoCommentForm() {
   // Milestone, Assignee, Project
   selectItem('.select-project', '#project_id');
   selectItem('.select-milestone', '#milestone_id');
-  selectItem('.select-assignee', '#assignee_id');
+  selectItem('.select-assignee', '#assignee_ids');
 }
 
 async function onEditContent(event) {
@@ -434,7 +416,10 @@ async function onEditContent(event) {
         context: editContentZone.getAttribute('data-context'),
         content_version: editContentZone.getAttribute('data-content-version'),
       });
-      for (const fileInput of dropzoneInst?.element.querySelectorAll('.files [name=files]')) params.append('files[]', fileInput.value);
+      const files = dropzoneInst?.element?.querySelectorAll('.files [name=files]') ?? [];
+      for (const fileInput of files) {
+        params.append('files[]', fileInput.value);
+      }
 
       const response = await POST(editContentZone.getAttribute('data-update-url'), {data: params});
       const data = await response.json();

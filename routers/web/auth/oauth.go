@@ -527,7 +527,7 @@ func AuthorizeOAuth(ctx *context.Context) {
 
 	grant, err := app.GetGrantByUserID(ctx, ctx.Doer.ID)
 	if err != nil {
-		handleServerError(ctx, form.State, form.RedirectURI)
+		handleServerError(ctx, form.State, form.RedirectURI, err)
 		return
 	}
 
@@ -536,12 +536,12 @@ func AuthorizeOAuth(ctx *context.Context) {
 	if app.ConfidentialClient && grant != nil {
 		code, err := grant.GenerateNewAuthorizationCode(ctx, form.RedirectURI, form.CodeChallenge, form.CodeChallengeMethod)
 		if err != nil {
-			handleServerError(ctx, form.State, form.RedirectURI)
+			handleServerError(ctx, form.State, form.RedirectURI, err)
 			return
 		}
 		redirect, err := code.GenerateRedirectURI(form.State)
 		if err != nil {
-			handleServerError(ctx, form.State, form.RedirectURI)
+			handleServerError(ctx, form.State, form.RedirectURI, err)
 			return
 		}
 		// Update nonce to reflect the new session
@@ -570,19 +570,19 @@ func AuthorizeOAuth(ctx *context.Context) {
 	// TODO document SESSION <=> FORM
 	err = ctx.Session.Set("client_id", app.ClientID)
 	if err != nil {
-		handleServerError(ctx, form.State, form.RedirectURI)
+		handleServerError(ctx, form.State, form.RedirectURI, err)
 		log.Error(err.Error())
 		return
 	}
 	err = ctx.Session.Set("redirect_uri", form.RedirectURI)
 	if err != nil {
-		handleServerError(ctx, form.State, form.RedirectURI)
+		handleServerError(ctx, form.State, form.RedirectURI, err)
 		log.Error(err.Error())
 		return
 	}
 	err = ctx.Session.Set("state", form.State)
 	if err != nil {
-		handleServerError(ctx, form.State, form.RedirectURI)
+		handleServerError(ctx, form.State, form.RedirectURI, err)
 		log.Error(err.Error())
 		return
 	}
@@ -619,7 +619,7 @@ func GrantApplicationOAuth(ctx *context.Context) {
 	}
 	grant, err := app.GetGrantByUserID(ctx, ctx.Doer.ID)
 	if err != nil {
-		handleServerError(ctx, form.State, form.RedirectURI)
+		handleServerError(ctx, form.State, form.RedirectURI, err)
 		return
 	}
 	if grant == nil {
@@ -654,12 +654,12 @@ func GrantApplicationOAuth(ctx *context.Context) {
 
 	code, err := grant.GenerateNewAuthorizationCode(ctx, form.RedirectURI, codeChallenge, codeChallengeMethod)
 	if err != nil {
-		handleServerError(ctx, form.State, form.RedirectURI)
+		handleServerError(ctx, form.State, form.RedirectURI, err)
 		return
 	}
 	redirect, err := code.GenerateRedirectURI(form.State)
 	if err != nil {
-		handleServerError(ctx, form.State, form.RedirectURI)
+		handleServerError(ctx, form.State, form.RedirectURI, err)
 		return
 	}
 	ctx.Redirect(redirect.String(), http.StatusSeeOther)
@@ -888,7 +888,8 @@ func handleAccessTokenError(ctx *context.Context, acErr AccessTokenError) {
 	ctx.JSON(http.StatusBadRequest, acErr)
 }
 
-func handleServerError(ctx *context.Context, state, redirectURI string) {
+func handleServerError(ctx *context.Context, state, redirectURI string, err error) {
+	log.Error("OAuth server error: %v", err)
 	handleAuthorizeError(ctx, AuthorizeError{
 		ErrorCode:        ErrorCodeServerError,
 		ErrorDescription: "A server error occurred",

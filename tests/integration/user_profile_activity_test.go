@@ -1,12 +1,15 @@
 // Copyright 2024 The Forgejo Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 package integration
 
 import (
 	"net/http"
 	"net/url"
+	"strconv"
 	"testing"
+
+	"code.gitea.io/gitea/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -16,6 +19,9 @@ import (
 // - Public activity tab
 // - Banner/hint in the tab
 // - "Configure" link in the hint
+// These elements might depend on the following:
+// - Profile visibility
+// - Public activity visibility
 func TestUserProfileActivity(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
 		// This test needs multiple users with different access statuses to check for all possible states
@@ -24,7 +30,7 @@ func TestUserProfileActivity(t *testing.T) {
 		// Activity availability should be the same for guest and another non-admin user, so this is not tested separately
 		userGuest := emptyTestSession(t)
 
-		// = Public =
+		// = Public profile, public activity =
 
 		// Set activity visibility of user2 to public. This is the default, but won't hurt to set it before testing.
 		testChangeUserActivityVisibility(t, userRegular, "off")
@@ -48,7 +54,22 @@ func TestUserProfileActivity(t *testing.T) {
 			assert.EqualValues(t, "/user2?tab=activity", activityLink)
 		}
 
-		// = Private =
+		// = Private profile, but public activity =
+
+		// Set profile visibility of user2 to private
+		testChangeUserProfileVisibility(t, userRegular, structs.VisibleTypePrivate)
+
+		// When profile activity is configured as public, but the profile is private, tell the user about this and link to visibility settings.
+		hintLink = testUser2ActivityVisibility(t, userRegular, "Your activity is only visible to you and the instance administrators because your profile is private. Configure.", true)
+		assert.EqualValues(t, "/user/settings#visibility-setting", hintLink)
+
+		// When the profile is private, tell the admin about this.
+		testUser2ActivityVisibility(t, userAdmin, "This activity is visible to you because you're an administrator, but the user wants it to remain private.", true)
+
+		// Set profile visibility of user2 back to public
+		testChangeUserProfileVisibility(t, userRegular, structs.VisibleTypePublic)
+
+		// = Private acitivty =
 
 		// Set activity visibility of user2 to private
 		testChangeUserActivityVisibility(t, userRegular, "on")
@@ -76,6 +97,15 @@ func testChangeUserActivityVisibility(t *testing.T, session *TestSession, newSta
 			"_csrf":                 GetCSRF(t, session, "/user/settings"),
 			"keep_activity_private": newState,
 		}), http.StatusSeeOther)
+}
+
+// testChangeUserProfileVisibility allows to easily change visibility of user's profile
+func testChangeUserProfileVisibility(t *testing.T, session *TestSession, newValue structs.VisibleType) {
+	t.Helper()
+	session.MakeRequest(t, NewRequestWithValues(t, "POST", "/user/settings", map[string]string{
+		"_csrf":      GetCSRF(t, session, "/user/settings"),
+		"visibility": strconv.Itoa(int(newValue)),
+	}), http.StatusSeeOther)
 }
 
 // testUser2ActivityVisibility checks visibility of UI elements on /<user>?tab=activity

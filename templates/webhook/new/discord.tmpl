@@ -5,9 +5,9 @@
 		<label for="payload_url">{{ctx.Locale.Tr "repo.settings.payload_url"}}</label>
 		<input id="payload_url" name="payload_url" type="url" value="{{.Webhook.URL}}" autofocus required>
 	</div>
-	<div class="field">
+	<div class="required field {{if .Err_PayloadURL}}error{{end}}">
 		<label for="username">{{ctx.Locale.Tr "repo.settings.discord_username"}}</label>
-		<input id="username" name="username" value="{{.HookMetadata.Username}}" placeholder="Forgejo">
+		<input id="username" name="username" value="{{.HookMetadata.Username}}" autofocus required placeholder="Forgejo">
 	</div>
 	<div class="field">
 		<label for="icon_url">{{ctx.Locale.Tr "repo.settings.discord_icon_url"}}</label>

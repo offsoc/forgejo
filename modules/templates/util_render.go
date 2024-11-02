@@ -262,3 +262,15 @@ func RenderLabels(ctx context.Context, locale translation.Locale, labels []*issu
 	htmlCode += "</span>"
 	return template.HTML(htmlCode)
 }
+
+func RenderReviewRequest(users []issues_model.RequestReviewTarget) template.HTML {
+	usernames := make([]string, 0, len(users))
+	for _, user := range users {
+		usernames = append(usernames, template.HTMLEscapeString(user.Name()))
+	}
+
+	htmlCode := `<span class="review-request-list">`
+	htmlCode += strings.Join(usernames, ", ")
+	htmlCode += "</span>"
+	return template.HTML(htmlCode)
+}

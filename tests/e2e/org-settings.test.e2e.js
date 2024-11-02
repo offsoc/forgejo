@@ -18,7 +18,7 @@ test('org team settings', async ({browser}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Cannot get it to work - as usual');
   const page = await login({browser}, workerInfo);
   const response = await page.goto('/org/org3/teams/team1/edit');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   await page.locator('input[name="permission"][value="admin"]').click();
   await expect(page.locator('.hide-unless-checked')).toBeHidden();

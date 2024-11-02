@@ -15,13 +15,13 @@ import (
 
 // IssueStats represents issue statistic information.
 type IssueStats struct {
-	OpenCount, ClosedCount int64
-	YourRepositoriesCount  int64
-	AssignCount            int64
-	CreateCount            int64
-	MentionCount           int64
-	ReviewRequestedCount   int64
-	ReviewedCount          int64
+	OpenCount, ClosedCount, AllCount int64
+	YourRepositoriesCount            int64
+	AssignCount                      int64
+	CreateCount                      int64
+	MentionCount                     int64
+	ReviewRequestedCount             int64
+	ReviewedCount                    int64
 }
 
 // Filter modes.
@@ -104,6 +104,7 @@ func GetIssueStats(ctx context.Context, opts *IssuesOptions) (*IssueStats, error
 		}
 		accum.OpenCount += stats.OpenCount
 		accum.ClosedCount += stats.ClosedCount
+		accum.AllCount += stats.AllCount
 		accum.YourRepositoriesCount += stats.YourRepositoriesCount
 		accum.AssignCount += stats.AssignCount
 		accum.CreateCount += stats.CreateCount
@@ -131,7 +132,13 @@ func getIssueStatsChunk(ctx context.Context, opts *IssuesOptions, issueIDs []int
 	stats.ClosedCount, err = applyIssuesOptions(sess, opts, issueIDs).
 		And("issue.is_closed = ?", true).
 		Count(new(Issue))
-	return stats, err
+	if err != nil {
+		return stats, err
+	}
+
+	stats.AllCount = stats.OpenCount + stats.ClosedCount
+
+	return stats, nil
 }
 
 func applyIssuesOptions(sess *xorm.Session, opts *IssuesOptions, issueIDs []int64) *xorm.Session {

@@ -25,6 +25,7 @@ func TestGetIssueStats(t *testing.T) {
 
 	assert.Equal(t, int64(4), stats.OpenCount)
 	assert.Equal(t, int64(1), stats.ClosedCount)
+	assert.Equal(t, int64(5), stats.AllCount)
 	assert.Equal(t, int64(0), stats.YourRepositoriesCount)
 	assert.Equal(t, int64(0), stats.AssignCount)
 	assert.Equal(t, int64(0), stats.CreateCount)

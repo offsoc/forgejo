@@ -408,7 +408,7 @@ func (pr *PullRequest) getReviewedByLines(ctx context.Context, writer io.Writer)
 
 	// Note: This doesn't page as we only expect a very limited number of reviews
 	reviews, err := FindLatestReviews(ctx, FindReviewOptions{
-		Type:         ReviewTypeApprove,
+		Types:        []ReviewType{ReviewTypeApprove},
 		IssueID:      pr.IssueID,
 		OfficialOnly: setting.Repository.PullRequest.DefaultMergeMessageOfficialApproversOnly,
 	})
@@ -689,7 +689,7 @@ func GetPullRequestByIssueID(ctx context.Context, issueID int64) (*PullRequest, 
 	return pr, pr.LoadAttributes(ctx)
 }
 
-// GetPullRequestsByBaseHeadInfo returns the pull request by given base and head
+// GetPullRequestByBaseHeadInfo returns the pull request by given base and head
 func GetPullRequestByBaseHeadInfo(ctx context.Context, baseID, headID int64, base, head string) (*PullRequest, error) {
 	pr := &PullRequest{}
 	sess := db.GetEngine(ctx).

@@ -75,7 +75,7 @@
 						{{ctx.Locale.Tr "settings.select_permissions"}}
 					</summary>
 					<p class="activity meta">
-						<p>{{ctx.Locale.Tr "settings.access_token_desc" (HTMLFormat `href="%s/api/swagger" target="_blank"` AppSubUrl) (`href="https://forgejo.org/docs/latest/user/token-scope/" target="_blank"`|SafeHTML)}}</p>
+						<p>{{ctx.Locale.Tr "settings.access_token_desc" (printf "%s/api/swagger" AppSubUrl) "https://forgejo.org/docs/latest/user/token-scope/"}}</p>
 					</p>
 					<div class="scoped-access-token"
 						data-is-admin="{{if .IsAdmin}}true{{else}}false{{end}}"

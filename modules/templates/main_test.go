@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/markup"
 
 	_ "code.gitea.io/gitea/models"
+	_ "code.gitea.io/gitea/models/forgefed"
 	_ "code.gitea.io/gitea/models/issues"
 )
 

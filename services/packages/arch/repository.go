@@ -273,16 +273,24 @@ func GetPackageFile(ctx context.Context, group, file string, ownerID int64) (io.
 	return packages_service.GetPackageFileStream(ctx, pkgFile)
 }
 
-func GetPackageDBFile(ctx context.Context, group, arch string, ownerID int64, signFile bool) (io.ReadSeekCloser, *url.URL, *packages_model.PackageFile, error) {
+func GetPackageDBFile(ctx context.Context, ownerID int64, group, arch string, sigFile bool) (io.ReadSeekCloser, *url.URL, *packages_model.PackageFile, error) {
 	pv, err := GetOrCreateRepositoryVersion(ctx, ownerID)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 	fileName := fmt.Sprintf("%s.db", arch)
-	if signFile {
+	if sigFile {
 		fileName = fmt.Sprintf("%s.db.sig", arch)
 	}
 	file, err := packages_model.GetFileForVersionByName(ctx, pv.ID, fileName, group)
+	// fail back to any db
+	if errors.Is(err, util.ErrNotExist) && arch != "any" {
+		fileName = "any.db"
+		if sigFile {
+			fileName = "any.db.sig"
+		}
+		file, err = packages_model.GetFileForVersionByName(ctx, pv.ID, fileName, group)
+	}
 	if err != nil {
 		return nil, nil, nil, err
 	}

@@ -17,6 +17,7 @@ func TestMatchColor(t *testing.T) {
 		{"#ddeeffa0", true},
 		{"#ddeefe", true},
 		{"#abcdef", true},
+		{"#fffa", true},
 		{"#abcdeg", false},
 		{"#abcdefg0", false},
 		{"black", false},

@@ -22,8 +22,11 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/util"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
+	gitea_context "code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/webhook/shared"
+
+	"gitea.com/go-chi/binding"
 )
 
 type discordHandler struct{}
@@ -31,13 +34,29 @@ type discordHandler struct{}
 func (discordHandler) Type() webhook_module.HookType { return webhook_module.DISCORD }
 func (discordHandler) Icon(size int) template.HTML   { return shared.ImgIcon("discord.png", size) }
 
-func (discordHandler) UnmarshalForm(bind func(any)) forms.WebhookForm {
-	var form struct {
-		forms.WebhookCoreForm
-		PayloadURL string `binding:"Required;ValidUrl"`
-		Username   string
-		IconURL    string
+type discordForm struct {
+	forms.WebhookCoreForm
+	PayloadURL string `binding:"Required;ValidUrl"`
+	Username   string `binding:"Required;MaxSize(80)"`
+	IconURL    string `binding:"ValidUrl"`
+}
+
+var _ binding.Validator = &discordForm{}
+
+// Validate implements binding.Validator.
+func (d *discordForm) Validate(req *http.Request, errs binding.Errors) binding.Errors {
+	ctx := gitea_context.GetWebContext(req)
+	if len([]rune(d.IconURL)) > 2048 {
+		errs = append(errs, binding.Error{
+			FieldNames: []string{"IconURL"},
+			Message:    ctx.Locale.TrString("repo.settings.discord_icon_url.exceeds_max_length"),
+		})
 	}
+	return errs
+}
+
+func (discordHandler) UnmarshalForm(bind func(any)) forms.WebhookForm {
+	var form discordForm
 	bind(&form)
 
 	return forms.WebhookForm{
@@ -56,7 +75,7 @@ func (discordHandler) UnmarshalForm(bind func(any)) forms.WebhookForm {
 type (
 	// DiscordEmbedFooter for Embed Footer Structure.
 	DiscordEmbedFooter struct {
-		Text string `json:"text"`
+		Text string `json:"text,omitempty"`
 	}
 
 	// DiscordEmbedAuthor for Embed Author Structure
@@ -80,16 +99,16 @@ type (
 		Color       int                 `json:"color"`
 		Footer      DiscordEmbedFooter  `json:"footer"`
 		Author      DiscordEmbedAuthor  `json:"author"`
-		Fields      []DiscordEmbedField `json:"fields"`
+		Fields      []DiscordEmbedField `json:"fields,omitempty"`
 	}
 
 	// DiscordPayload represents
 	DiscordPayload struct {
-		Wait      bool           `json:"wait"`
-		Content   string         `json:"content"`
+		Wait      bool           `json:"-"`
+		Content   string         `json:"-"`
 		Username  string         `json:"username"`
 		AvatarURL string         `json:"avatar_url,omitempty"`
-		TTS       bool           `json:"tts"`
+		TTS       bool           `json:"-"`
 		Embeds    []DiscordEmbed `json:"embeds"`
 	}
 
@@ -322,6 +341,12 @@ func parseHookPullRequestEventType(event webhook_module.HookEventType) (string, 
 }
 
 func (d discordConvertor) createPayload(s *api.User, title, text, url string, color int) DiscordPayload {
+	if len([]rune(title)) > 256 {
+		title = fmt.Sprintf("%.253s...", title)
+	}
+	if len([]rune(text)) > 4096 {
+		text = fmt.Sprintf("%.4093s...", text)
+	}
 	return DiscordPayload{
 		Username:  d.Username,
 		AvatarURL: d.AvatarURL,

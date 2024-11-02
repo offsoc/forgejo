@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 )
 
@@ -38,7 +39,7 @@ const (
 type GrepOptions struct {
 	RefName           string
 	MaxResultLimit    int
-	MatchesPerFile    int
+	MatchesPerFile    int // >= git 2.38
 	ContextLineNumber int
 	Mode              grepMode
 	PathSpec          []setting.Glob
@@ -92,8 +93,16 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 	} else {
 		cmd.AddArguments("--fixed-strings", "--column")
 	}
+
 	cmd.AddOptionValues("--context", fmt.Sprint(opts.ContextLineNumber))
-	cmd.AddOptionValues("--max-count", fmt.Sprint(opts.MatchesPerFile))
+
+	// --max-count requires at least git 2.38
+	if CheckGitVersionAtLeast("2.38.0") == nil {
+		cmd.AddOptionValues("--max-count", fmt.Sprint(opts.MatchesPerFile))
+	} else {
+		log.Warn("git-grep: --max-count requires at least git 2.38")
+	}
+
 	words := []string{search}
 	if opts.Mode == FixedAnyGrepMode {
 		words = strings.Fields(search)

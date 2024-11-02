@@ -65,3 +65,37 @@ func TestPullManuallyMergeWarning(t *testing.T) {
 		assert.NotContains(t, mergeInstructions, warningMessage)
 	})
 }
+
+func TestPullCombinedReviewRequest(t *testing.T) {
+	defer tests.AddFixtures("tests/integration/fixtures/TestPullCombinedReviewRequest/")()
+	defer tests.PrepareTestEnv(t)()
+
+	session := loginUser(t, "user2")
+
+	helper := func(t *testing.T, action, userID, expectedText string) {
+		t.Helper()
+
+		req := NewRequestWithValues(t, "POST", "/user2/repo1/pulls/request_review", map[string]string{
+			"_csrf":     GetCSRF(t, session, "/user2/repo1/pulls/3"),
+			"issue_ids": "3",
+			"action":    action,
+			"id":        userID,
+		})
+		session.MakeRequest(t, req, http.StatusOK)
+
+		req = NewRequest(t, "GET", "/user2/repo1/pulls/3")
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		assert.Contains(t, htmlDoc.Find(".timeline-item:has(.review-request-list)").Last().Text(), expectedText)
+	}
+
+	helper(t, "detach", "2", "refused to review")
+	helper(t, "attach", "4", "requested reviews from user4 and removed review requests for user2")
+	helper(t, "attach", "9", "requested reviews from user4, user9 and removed review requests for user2")
+	helper(t, "attach", "2", "requested reviews from user4, user9")
+	helper(t, "detach", "4", "requested review from user9")
+	helper(t, "detach", "11", "requested reviews from user9 and removed review requests for user11")
+	helper(t, "detach", "9", "removed review request for user11")
+	helper(t, "detach", "2", "removed review requests for user11, user2")
+}

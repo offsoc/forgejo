@@ -6,6 +6,7 @@ on:
     branches:
       - 'forgejo*'
       - 'v*/forgejo*'
+  workflow_dispatch:
 
 jobs:
   backend-checks:
@@ -118,6 +119,7 @@ jobs:
         timeout-minutes: 40
         env:
           USE_REPO_TEST_DIR: 1
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
           CHANGED_FILES: ${{steps.changed-files.outputs.all_changed_files}}
   test-remote-cacher:
     if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}

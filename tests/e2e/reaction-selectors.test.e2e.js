@@ -42,7 +42,7 @@ test('Reaction Selectors', async ({browser}, workerInfo) => {
   const page = await context.newPage();
 
   const response = await page.goto('/user2/repo1/issues/1');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   const comment = page.locator('.comment#issuecomment-2').first();
 
