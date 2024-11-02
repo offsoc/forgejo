@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"code.gitea.io/gitea/modules/markup"
+	mdutil "code.gitea.io/gitea/modules/markup/markdown/util"
 
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/renderer/html"
@@ -49,7 +50,7 @@ func (r *HTMLRenderer) renderCodeSpan(w util.BufWriter, source []byte, n ast.Nod
 }
 
 func (g *ASTTransformer) transformCodeSpan(_ *markup.RenderContext, v *ast.CodeSpan, reader text.Reader) {
-	colorContent := v.Text(reader.Source())
+	colorContent := mdutil.Text(v, reader.Source())
 	if matchColor(strings.ToLower(string(colorContent))) {
 		v.AppendChild(v, NewColorPreview(colorContent))
 	}

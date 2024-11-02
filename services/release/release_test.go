@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/services/attachment"
 
 	_ "code.gitea.io/gitea/models/actions"
+	_ "code.gitea.io/gitea/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

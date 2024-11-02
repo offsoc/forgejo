@@ -272,6 +272,17 @@ func CutDiffAroundLine(originalDiff io.Reader, line int64, old bool, numbersOfLi
 
 // GetAffectedFiles returns the affected files between two commits
 func GetAffectedFiles(repo *Repository, oldCommitID, newCommitID string, env []string) ([]string, error) {
+	objectFormat, err := repo.GetObjectFormat()
+	if err != nil {
+		return nil, err
+	}
+
+	// If the oldCommitID is empty, then we must assume its a new branch, so diff
+	// against the empty tree. So all changes of this new branch are included.
+	if oldCommitID == objectFormat.EmptyObjectID().String() {
+		oldCommitID = objectFormat.EmptyTree().String()
+	}
+
 	stdoutReader, stdoutWriter, err := os.Pipe()
 	if err != nil {
 		log.Error("Unable to create os.Pipe for %s", repo.Path)

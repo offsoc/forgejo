@@ -222,43 +222,51 @@ func (r RoleInRepo) LocaleHelper(lang translation.Locale) string {
 	return lang.TrString("repo.issues.role." + string(r) + "_helper")
 }
 
+type RequestReviewTarget interface {
+	ID() int64
+	Name() string
+	Type() string
+}
+
 // Comment represents a comment in commit and issue page.
 type Comment struct {
-	ID               int64            `xorm:"pk autoincr"`
-	Type             CommentType      `xorm:"INDEX"`
-	PosterID         int64            `xorm:"INDEX"`
-	Poster           *user_model.User `xorm:"-"`
-	OriginalAuthor   string
-	OriginalAuthorID int64
-	IssueID          int64  `xorm:"INDEX"`
-	Issue            *Issue `xorm:"-"`
-	LabelID          int64
-	Label            *Label   `xorm:"-"`
-	AddedLabels      []*Label `xorm:"-"`
-	RemovedLabels    []*Label `xorm:"-"`
-	OldProjectID     int64
-	ProjectID        int64
-	OldProject       *project_model.Project `xorm:"-"`
-	Project          *project_model.Project `xorm:"-"`
-	OldMilestoneID   int64
-	MilestoneID      int64
-	OldMilestone     *Milestone `xorm:"-"`
-	Milestone        *Milestone `xorm:"-"`
-	TimeID           int64
-	Time             *TrackedTime `xorm:"-"`
-	AssigneeID       int64
-	RemovedAssignee  bool
-	Assignee         *user_model.User   `xorm:"-"`
-	AssigneeTeamID   int64              `xorm:"NOT NULL DEFAULT 0"`
-	AssigneeTeam     *organization.Team `xorm:"-"`
-	ResolveDoerID    int64
-	ResolveDoer      *user_model.User `xorm:"-"`
-	OldTitle         string
-	NewTitle         string
-	OldRef           string
-	NewRef           string
-	DependentIssueID int64  `xorm:"index"` // This is used by issue_service.deleteIssue
-	DependentIssue   *Issue `xorm:"-"`
+	ID                   int64            `xorm:"pk autoincr"`
+	Type                 CommentType      `xorm:"INDEX"`
+	PosterID             int64            `xorm:"INDEX"`
+	Poster               *user_model.User `xorm:"-"`
+	OriginalAuthor       string
+	OriginalAuthorID     int64
+	IssueID              int64  `xorm:"INDEX"`
+	Issue                *Issue `xorm:"-"`
+	LabelID              int64
+	Label                *Label                `xorm:"-"`
+	AddedLabels          []*Label              `xorm:"-"`
+	RemovedLabels        []*Label              `xorm:"-"`
+	AddedRequestReview   []RequestReviewTarget `xorm:"-"`
+	RemovedRequestReview []RequestReviewTarget `xorm:"-"`
+	OldProjectID         int64
+	ProjectID            int64
+	OldProject           *project_model.Project `xorm:"-"`
+	Project              *project_model.Project `xorm:"-"`
+	OldMilestoneID       int64
+	MilestoneID          int64
+	OldMilestone         *Milestone `xorm:"-"`
+	Milestone            *Milestone `xorm:"-"`
+	TimeID               int64
+	Time                 *TrackedTime `xorm:"-"`
+	AssigneeID           int64
+	RemovedAssignee      bool
+	Assignee             *user_model.User   `xorm:"-"`
+	AssigneeTeamID       int64              `xorm:"NOT NULL DEFAULT 0"`
+	AssigneeTeam         *organization.Team `xorm:"-"`
+	ResolveDoerID        int64
+	ResolveDoer          *user_model.User `xorm:"-"`
+	OldTitle             string
+	NewTitle             string
+	OldRef               string
+	NewRef               string
+	DependentIssueID     int64  `xorm:"index"` // This is used by issue_service.deleteIssue
+	DependentIssue       *Issue `xorm:"-"`
 
 	CommitID        int64
 	Line            int64 // - previous line / + proposed line

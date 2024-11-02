@@ -10,7 +10,7 @@ branch-known:
 cleanup-line: 'sed -Ee "s/^(feat|fix):\s*//g" -e "s/^\[WIP\] //" -e "s/^WIP: //" -e "s;\[(UI|BUG|FEAT|v.*?/forgejo)\]\s*;;g"'
 render-header: |
 
-  ## Draft release notes
+  ## Release notes
 comment: |
   <details>
   <summary>Where does that come from?</summary>

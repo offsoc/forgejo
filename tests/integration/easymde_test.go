@@ -14,6 +14,8 @@ func TestEasyMDESwitch(t *testing.T) {
 	testEasyMDESwitch(t, session, "user2/glob/issues/new", false)
 	testEasyMDESwitch(t, session, "user2/glob/wiki?action=_new", true)
 	testEasyMDESwitch(t, session, "user2/glob/releases/new", true)
+	testEasyMDESwitch(t, session, "user2/glob/milestones/new", true)
+	testEasyMDESwitch(t, session, "user2/repo1/milestones/1/edit", true)
 }
 
 func testEasyMDESwitch(t *testing.T, session *TestSession, url string, expected bool) {

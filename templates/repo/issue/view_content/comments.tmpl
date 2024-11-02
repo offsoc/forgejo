@@ -522,35 +522,23 @@
 				</div>
 			</div>
 		{{else if eq .Type 27}}
-			<div class="timeline-item event" id="{{.HashTag}}">
-				<span class="badge">{{svg "octicon-eye"}}</span>
-				{{template "shared/user/avatarlink" dict "user" .Poster}}
-				<span class="text grey muted-links">
-					{{template "shared/user/authorlink" .Poster}}
-					{{if (gt .AssigneeID 0)}}
-						{{if .RemovedAssignee}}
-							{{if eq .PosterID .AssigneeID}}
-								{{ctx.Locale.Tr "repo.issues.review.remove_review_request_self" $createdStr}}
-							{{else}}
-								{{ctx.Locale.Tr "repo.issues.review.remove_review_request" .Assignee.GetDisplayName $createdStr}}
-							{{end}}
+				{{if or .AddedRequestReview .RemovedRequestReview}}
+				<div class="timeline-item event" id="{{.HashTag}}">
+					<span class="badge">{{svg "octicon-tag"}}</span>
+					{{template "shared/user/avatarlink" dict "user" .Poster}}
+					<span class="text grey muted-links">
+						{{if and (eq (len .RemovedRequestReview) 1) (eq (len .AddedRequestReview) 0) (eq ((index .RemovedRequestReview 0).ID) .PosterID) (eq ((index .RemovedRequestReview 0).Type) "user")}}
+							<span class="review-request-list">{{ctx.Locale.Tr "repo.issues.review.remove_review_request_self" $createdStr}}</span>
+						{{else if and .AddedRequestReview (not .RemovedRequestReview)}}
+							{{ctx.Locale.TrN (len .AddedRequestReview) "repo.issues.review.add_review_request" "repo.issues.review.add_review_requests" (RenderReviewRequest .AddedRequestReview) $createdStr}}
+						{{else if and (not .AddedRequestReview) .RemovedRequestReview}}
+							{{ctx.Locale.TrN (len .RemovedRequestReview) "repo.issues.review.remove_review_request" "repo.issues.review.remove_review_requests" (RenderReviewRequest .RemovedRequestReview) $createdStr}}
 						{{else}}
-							{{ctx.Locale.Tr "repo.issues.review.add_review_request" .Assignee.GetDisplayName $createdStr}}
+							{{ctx.Locale.Tr "repo.issues.review.add_remove_review_requests" (RenderReviewRequest .AddedRequestReview) (RenderReviewRequest .RemovedRequestReview) $createdStr}}
 						{{end}}
-					{{else}}
-						<!-- If the assigned team is deleted, just displaying "Ghost Team" in the comment -->
-						{{$teamName := "Ghost Team"}}
-						{{if .AssigneeTeam}}
-							{{$teamName = .AssigneeTeam.Name}}
-						{{end}}
-						{{if .RemovedAssignee}}
-							{{ctx.Locale.Tr "repo.issues.review.remove_review_request" $teamName $createdStr}}
-						{{else}}
-							{{ctx.Locale.Tr "repo.issues.review.add_review_request" $teamName $createdStr}}
-						{{end}}
-					{{end}}
-				</span>
-			</div>
+					</span>
+				</div>
+				{{end}}
 		{{else if and (eq .Type 29) (or (gt .CommitsNum 0) .IsForcePush)}}
 			<!-- If PR is closed, the comments whose type is CommentTypePullRequestPush(29) after latestCloseCommentID won't be rendered. //-->
 			{{if and .Issue.IsClosed (gt .ID $.LatestCloseCommentID)}}
@@ -561,7 +549,7 @@
 				<span class="text grey muted-links">
 					{{template "shared/user/authorlink" .Poster}}
 					{{if .IsForcePush}}
-						{{ctx.Locale.Tr "repo.issues.force_push_codes" $.Issue.PullRequest.HeadBranch (ShortSha .OldCommit) ($.Issue.Repo.CommitLink .OldCommit) (ShortSha .NewCommit) ($.Issue.Repo.CommitLink .NewCommit) $createdStr}}
+						{{ctx.Locale.Tr "repo.issues.force_push_codes" $.Issue.PullRequest.HeadBranch (ShortSha .OldCommit) ($.Issue.Repo.CommitLink .OldCommit) (ShortSha .NewCommit) ($.Issue.Repo.CommitLink .NewCommit) $createdStr "ui sha"}}
 					{{else}}
 						{{ctx.Locale.TrN (len .Commits) "repo.issues.push_commit_1" "repo.issues.push_commits_n" (len .Commits) $createdStr}}
 					{{end}}

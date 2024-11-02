@@ -8,8 +8,9 @@
   ],
   "baseBranches": [
     "$default",
-    "/^v[7-9]\\.\\d+/forgejo$/",
-    "/^v\\d\\d+\\.\\d+\\/forgejo$/"
+    "/^v7\\.\\d+/forgejo$/",
+    "/^v9\\.\\d+/forgejo$/",
+    "/^v10\\.\\d+/forgejo$/"
   ],
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
   "prConcurrentLimit": 10,
@@ -161,11 +162,6 @@
       "description": "Hold back on some package updates for a few days",
       "matchPackageNames": ["monaco-editor"],
       "minimumReleaseAge": "30 days"
-    },
-    {
-      "description": "disallow `eslint-plugin-no-use-extend-native` v0.6.0+, requires eslint v9",
-      "matchPackageNames": ["eslint-plugin-no-use-extend-native"],
-      "allowedVersions": "<0.6.0"
     },
     {
       "description": "Require approval for stable branches (must be last rule to override all others)",

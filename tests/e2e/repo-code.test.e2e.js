@@ -42,7 +42,7 @@ test('Line Range Selection', async ({browser}, workerInfo) => {
   const filePath = '/user2/repo1/src/branch/master/README.md?display=source';
 
   const response = await page.goto(filePath);
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   await assertSelectedLines(page, []);
   await page.locator('span#L1').click();
@@ -72,7 +72,7 @@ test('Readable diff', async ({page}, workerInfo) => {
   ];
   for (const thisDiff of expectedDiffs) {
     const response = await page.goto('/user2/diff-test/commits/branch/main');
-    await expect(response?.status()).toBe(200); // Status OK
+    expect(response?.status()).toBe(200); // Status OK
     await page.getByText(`Patch: ${thisDiff.id}`).click();
     if (thisDiff.removed) {
       await expect(page.getByText(thisDiff.removed, {exact: true})).toHaveClass(/removed-code/);

@@ -143,6 +143,8 @@ func Validate(errs binding.Errors, data map[string]any, f any, l translation.Loc
 				}
 			case validation.ErrInvalidGroupTeamMap:
 				data["ErrorMsg"] = trName + l.TrString("form.invalid_group_team_map_error", errs[0].Message)
+			case validation.ErrEmail:
+				data["ErrorMsg"] = trName + l.TrString("form.email_error")
 			default:
 				msg := errs[0].Classification
 				if msg != "" && errs[0].Message != "" {

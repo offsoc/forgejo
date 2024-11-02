@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	auth_model "code.gitea.io/gitea/models/auth"
-	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web/middleware"
 	"code.gitea.io/gitea/services/context"
 
@@ -110,7 +110,7 @@ func (f *RegisterForm) Validate(req *http.Request, errs binding.Errors) binding.
 // domains in the whitelist or if it doesn't match any of
 // domains in the blocklist, if any such list is not empty.
 func (f *RegisterForm) IsEmailDomainAllowed() bool {
-	return user_model.IsEmailDomainAllowed(f.Email)
+	return validation.IsEmailDomainAllowed(f.Email)
 }
 
 // MustChangePasswordForm form for updating your password after account creation
@@ -258,7 +258,7 @@ const (
 type AvatarForm struct {
 	Source      string
 	Avatar      *multipart.FileHeader
-	Gravatar    string `binding:"OmitEmpty;Email;MaxSize(254)"`
+	Gravatar    string `binding:"OmitEmpty;EmailWithAllowedDomain;MaxSize(254)"`
 	Federavatar bool
 }
 
@@ -270,7 +270,7 @@ func (f *AvatarForm) Validate(req *http.Request, errs binding.Errors) binding.Er
 
 // AddEmailForm form for adding new email
 type AddEmailForm struct {
-	Email string `binding:"Required;Email;MaxSize(254)"`
+	Email string `binding:"Required;EmailWithAllowedDomain;MaxSize(254)"`
 }
 
 // Validate validates the fields

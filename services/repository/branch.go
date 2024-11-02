@@ -14,7 +14,9 @@ import (
 	"code.gitea.io/gitea/models/db"
 	git_model "code.gitea.io/gitea/models/git"
 	issues_model "code.gitea.io/gitea/models/issues"
+	"code.gitea.io/gitea/models/perm/access"
 	repo_model "code.gitea.io/gitea/models/repo"
+	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
@@ -24,8 +26,10 @@ import (
 	"code.gitea.io/gitea/modules/queue"
 	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/timeutil"
+	"code.gitea.io/gitea/modules/util"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
 	notify_service "code.gitea.io/gitea/services/notify"
+	pull_service "code.gitea.io/gitea/services/pull"
 	files_service "code.gitea.io/gitea/services/repository/files"
 
 	"xorm.io/builder"
@@ -470,6 +474,41 @@ func DeleteBranch(ctx context.Context, doer *user_model.User, repo *repo_model.R
 			RepoName:     repo.Name,
 		}); err != nil {
 		log.Error("Update: %v", err)
+	}
+
+	return nil
+}
+
+// DeleteBranchAfterMerge deletes the head branch after a PR was merged assiociated with the head branch.
+func DeleteBranchAfterMerge(ctx context.Context, doer *user_model.User, pr *issues_model.PullRequest, headRepo *git.Repository) error {
+	// Don't cleanup when there are other PR's that use this branch as head branch.
+	exist, err := issues_model.HasUnmergedPullRequestsByHeadInfo(ctx, pr.HeadRepoID, pr.HeadBranch)
+	if err != nil {
+		return err
+	}
+	if exist {
+		return nil
+	}
+
+	// Ensure the doer has write permissions to the head repository of the branch it wants to delete.
+	perm, err := access.GetUserRepoPermission(ctx, pr.HeadRepo, doer)
+	if err != nil {
+		return err
+	}
+	if !perm.CanWrite(unit.TypeCode) {
+		return util.NewPermissionDeniedErrorf("Must have write permission to the head repository")
+	}
+
+	if err := pull_service.RetargetChildrenOnMerge(ctx, doer, pr); err != nil {
+		return err
+	}
+	if err := DeleteBranch(ctx, doer, pr.HeadRepo, headRepo, pr.HeadBranch); err != nil {
+		return err
+	}
+
+	if err := issues_model.AddDeletePRBranchComment(ctx, doer, pr.BaseRepo, pr.Issue.ID, pr.HeadBranch); err != nil {
+		// Do not fail here as branch has already been deleted
+		log.Error("DeleteBranchAfterMerge: %v", err)
 	}
 
 	return nil

@@ -9,6 +9,7 @@ import (
 
 	user_model "code.gitea.io/gitea/models/user"
 	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/convert"
@@ -66,12 +67,12 @@ func AddEmail(ctx *context.APIContext) {
 	if err := user_service.AddEmailAddresses(ctx, ctx.Doer, form.Emails); err != nil {
 		if user_model.IsErrEmailAlreadyUsed(err) {
 			ctx.Error(http.StatusUnprocessableEntity, "", "Email address has been used: "+err.(user_model.ErrEmailAlreadyUsed).Email)
-		} else if user_model.IsErrEmailCharIsNotSupported(err) || user_model.IsErrEmailInvalid(err) {
+		} else if validation.IsErrEmailCharIsNotSupported(err) || validation.IsErrEmailInvalid(err) {
 			email := ""
-			if typedError, ok := err.(user_model.ErrEmailInvalid); ok {
+			if typedError, ok := err.(validation.ErrEmailInvalid); ok {
 				email = typedError.Email
 			}
-			if typedError, ok := err.(user_model.ErrEmailCharIsNotSupported); ok {
+			if typedError, ok := err.(validation.ErrEmailCharIsNotSupported); ok {
 				email = typedError.Email
 			}
 

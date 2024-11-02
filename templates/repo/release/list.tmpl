@@ -84,7 +84,7 @@
 										</li>
 										<li class="{{if $hasReleaseAttachment}}start-gap{{end}}">
 											<a class="archive-link tw-flex-1 flex-text-inline tw-font-bold" href="{{$.RepoLink}}/archive/{{$release.TagName | PathEscapeSegments}}.tar.gz" rel="nofollow">
-												{{svg "octicon-file-zip" 16 "tw-mr-1"}}{{ctx.Locale.Tr "repo.release.source_code"}} (ZIP)
+												{{svg "octicon-file-zip" 16 "tw-mr-1"}}{{ctx.Locale.Tr "repo.release.source_code"}} (TAR.GZ)
 											</a>
 											<div class="tw-mr-1">
 												<span class="text grey">{{ctx.Locale.TrN .Release.ArchiveDownloadCount.TarGz "repo.release.download_count_one" "repo.release.download_count_few" (ctx.Locale.PrettyNumber .Release.ArchiveDownloadCount.TarGz)}}</span>

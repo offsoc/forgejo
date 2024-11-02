@@ -13,8 +13,10 @@
 		{{svg "octicon-check" 16 "tw-mr-2"}}
 		{{ctx.Locale.PrettyNumber .ClosedCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
 	</a>
-	<a class="{{if eq .State "all"}}active {{end}}item" href="{{.AllStatesLink}}" data-test-name="all-issue-count">
-		{{svg "octicon-eye" 16 "tw-mr-2"}}
-		{{ctx.Locale.PrettyNumber (.AllCount)}}&nbsp;{{ctx.Locale.Tr "repo.issues.all_title"}}
-	</a>
+	{{if not .PageIsMilestones}}
+		<a class="{{if eq .State "all"}}active {{end}}item" href="{{.AllStatesLink}}" data-test-name="all-issue-count">
+			{{svg "octicon-eye" 16 "tw-mr-2"}}
+			{{ctx.Locale.PrettyNumber (.AllCount)}}&nbsp;{{ctx.Locale.Tr "repo.issues.all_title"}}
+		</a>
+	{{end}}
 </div>

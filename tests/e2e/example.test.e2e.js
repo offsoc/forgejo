@@ -15,21 +15,21 @@ test.beforeAll(async ({browser}, workerInfo) => {
 
 test('Load Homepage', async ({page}) => {
   const response = await page.goto('/');
-  await expect(response?.status()).toBe(200); // Status OK
+  expect(response?.status()).toBe(200); // Status OK
   await expect(page).toHaveTitle(/^Forgejo: Beyond coding. We Forge.\s*$/);
   await expect(page.locator('.logo')).toHaveAttribute('src', '/assets/img/logo.svg');
 });
 
 test('Register Form', async ({page}, workerInfo) => {
   const response = await page.goto('/user/sign_up');
-  await expect(response?.status()).toBe(200); // Status OK
+  expect(response?.status()).toBe(200); // Status OK
   await page.type('input[name=user_name]', `e2e-test-${workerInfo.workerIndex}`);
   await page.type('input[name=email]', `e2e-test-${workerInfo.workerIndex}@test.com`);
   await page.type('input[name=password]', 'test123test123');
   await page.type('input[name=retype]', 'test123test123');
   await page.click('form button.ui.primary.button:visible');
   // Make sure we routed to the home page. Else login failed.
-  await expect(page.url()).toBe(`${workerInfo.project.use.baseURL}/`);
+  expect(page.url()).toBe(`${workerInfo.project.use.baseURL}/`);
   await expect(page.locator('.secondary-nav span>img.ui.avatar')).toBeVisible();
   await expect(page.locator('.ui.positive.message.flash-success')).toHaveText('Account was successfully created. Welcome!');
 

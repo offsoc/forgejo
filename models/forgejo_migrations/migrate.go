@@ -83,6 +83,8 @@ var migrations = []*Migration{
 	// v22 -> v23
 	NewMigration("Add `legacy` to `web_authn_credential` table", AddLegacyToWebAuthnCredential),
 	// v23 -> v24
+	NewMigration("Add `delete_branch_after_merge` to `auto_merge` table", AddDeleteBranchAfterMergeToAutoMerge),
+	// v24 -> 25
 	NewMigration("Add Repository Licenses", AddRepositoryLicenses),
 }
 

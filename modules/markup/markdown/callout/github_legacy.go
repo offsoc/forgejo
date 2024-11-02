@@ -7,6 +7,8 @@ package callout
 import (
 	"strings"
 
+	"code.gitea.io/gitea/modules/markup/markdown/util"
+
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
@@ -40,7 +42,7 @@ func (g *GitHubLegacyCalloutTransformer) Transform(node *ast.Document, reader te
 			if !ok {
 				return ast.WalkContinue, nil
 			}
-			calloutText := string(calloutNode.Text(reader.Source()))
+			calloutText := string(util.Text(calloutNode, reader.Source()))
 			calloutType := strings.ToLower(calloutText)
 			// We only support "Note" and "Warning" callouts in legacy mode,
 			// match only those.

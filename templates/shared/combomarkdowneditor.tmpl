@@ -37,6 +37,7 @@ Template Attributes:
 				<md-task-list class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.list.task.tooltip"}}">{{svg "octicon-tasklist"}}</md-task-list>
 				<button type="button" class="markdown-toolbar-button" data-md-button data-md-action="unindent" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.unindent.tooltip"}}">{{svg "octicon-arrow-left"}}</button>
 				<button type="button" class="markdown-toolbar-button" data-md-button data-md-action="indent" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.indent.tooltip"}}">{{svg "octicon-arrow-right"}}</button>
+				<button type="button" class="markdown-toolbar-button show-modal button" data-md-action="new-table" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.new_table.tooltip"}}">{{svg "octicon-table"}}</button>
 			</div>
 			<div class="markdown-toolbar-group">
 				<md-mention class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.mention.tooltip"}}">{{svg "octicon-mention"}}</md-mention>
@@ -60,5 +61,31 @@ Template Attributes:
 	</div>
 	<div class="ui tab markup" data-tab-panel="markdown-previewer">
 		{{ctx.Locale.Tr "loading"}}
+	</div>
+
+	<div class="ui small modal tw-w-fit" data-modal-name="new-markdown-table">
+		<div class="header">{{ctx.Locale.Tr "editor.table_modal.header"}}</div>
+
+		<div class="ui form content" data-selector-name="form">
+			<input type="hidden" name="table-header" value="{{ctx.Locale.Tr "editor.table_modal.placeholder.header"}}">
+			<input type="hidden" name="table-content" value="{{ctx.Locale.Tr "editor.table_modal.placeholder.content"}}">
+			<table>
+				<tbody>
+					<tr>
+						<td><label>{{ctx.Locale.Tr "editor.table_modal.label.rows"}}</label></td>
+						<td><input type="number" name="table-rows" min="1" value="2" required></td>
+					</tr>
+					<tr>
+						<td><label>{{ctx.Locale.Tr "editor.table_modal.label.columns"}}</label></td>
+						<td><input type="number" name="table-columns" min="1" value="2" required></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="text right actions">
+			<button class="ui cancel button" data-selector-name="cancel-button">{{ctx.Locale.Tr "cancel"}}</button>
+			<button class="ui blue button" data-selector-name="ok-button">{{ctx.Locale.Tr "ok"}}</button>
+		</div>
 	</div>
 </div>

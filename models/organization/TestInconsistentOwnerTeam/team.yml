@@ -1,0 +1,10 @@
+-
+  id: 1000
+  org_id: 1000
+  lower_name: owners
+  name: Owners
+  authorize: 4 # owner
+  num_repos: 0
+  num_members: 0
+  includes_all_repositories: true
+  can_create_org_repo: true

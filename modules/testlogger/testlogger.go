@@ -131,6 +131,8 @@ var ignoredErrorMessage = []string{
 	`:SSHLog() [E] ssh: Not allowed to push to protected branch protected. HookPreReceive(last) failed: internal API error response, status=403`,
 	// TestGit/HTTP/BranchProtectMerge
 	`:SSHLog() [E] ssh: branch protected is protected from force push. HookPreReceive(last) failed: internal API error response, status=403`,
+	// TestGit/HTTP/BranchProtect
+	`:SSHLog() [E] ssh: branch before-create-2 is protected from changing file protected-file-data-`,
 	// TestGit/HTTP/MergeFork/CreatePRAndMerge
 	`:DeleteBranchPost() [E] DeleteBranch: GetBranch: branch does not exist [repo_id: 1099 name: user2:master]`,                          // sqlite
 	"s/web/repo/branch.go:108:DeleteBranchPost() [E] DeleteBranch: GetBranch: branch does not exist [repo_id: 10000 name: user2:master]", // mysql

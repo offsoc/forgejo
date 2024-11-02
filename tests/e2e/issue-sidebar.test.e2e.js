@@ -39,7 +39,7 @@ test('Pull: Toggle WIP', async ({browser}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
   const page = await login({browser}, workerInfo);
   const response = await page.goto('/user2/repo1/pulls/5');
-  await expect(response?.status()).toBe(200); // Status OK
+  expect(response?.status()).toBe(200); // Status OK
   // initial state
   await check_wip({page}, false);
   // toggle to WIP
@@ -82,7 +82,7 @@ test('Issue: Labels', async ({browser}, workerInfo) => {
   // select label list in sidebar only
   const labelList = page.locator('.issue-content-right .labels-list a');
   const response = await page.goto('/user2/repo1/issues/1');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
   // preconditions
   await expect(labelList.filter({hasText: 'label1'})).toBeVisible();
   await expect(labelList.filter({hasText: 'label2'})).toBeHidden();
@@ -110,7 +110,7 @@ test('Issue: Assignees', async ({browser}, workerInfo) => {
   const assigneesList = page.locator('.issue-content-right .assignees.list .selected .item a');
 
   const response = await page.goto('/org3/repo3/issues/1');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
   // preconditions
   await expect(assigneesList.filter({hasText: 'user2'})).toBeVisible();
   await expect(assigneesList.filter({hasText: 'user4'})).toBeHidden();
@@ -153,7 +153,7 @@ test('New Issue: Assignees', async ({browser}, workerInfo) => {
   const assigneesList = page.locator('.issue-content-right .assignees.list .selected .item');
 
   const response = await page.goto('/org3/repo3/issues/new');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
   // preconditions
   await expect(page.locator('.ui.assignees.list .item.no-select')).toBeVisible();
   await expect(assigneesList.filter({hasText: 'user2'})).toBeHidden();
@@ -191,7 +191,7 @@ test('Issue: Milestone', async ({browser}, workerInfo) => {
   const page = await login({browser}, workerInfo);
 
   const response = await page.goto('/user2/repo1/issues/1');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   const selectedMilestone = page.locator('.issue-content-right .select-milestone.list');
   const milestoneDropdown = page.locator('.issue-content-right .select-milestone.dropdown');
@@ -215,7 +215,7 @@ test('New Issue: Milestone', async ({browser}, workerInfo) => {
   const page = await login({browser}, workerInfo);
 
   const response = await page.goto('/user2/repo1/issues/new');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   const selectedMilestone = page.locator('.issue-content-right .select-milestone.list');
   const milestoneDropdown = page.locator('.issue-content-right .select-milestone.dropdown');

@@ -7,8 +7,6 @@ package user
 import (
 	"context"
 	"fmt"
-	"net/mail"
-	"regexp"
 	"strings"
 	"time"
 
@@ -18,52 +16,9 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
 
 	"xorm.io/builder"
 )
-
-// ErrEmailNotActivated e-mail address has not been activated error
-var ErrEmailNotActivated = util.NewInvalidArgumentErrorf("e-mail address has not been activated")
-
-// ErrEmailCharIsNotSupported e-mail address contains unsupported character
-type ErrEmailCharIsNotSupported struct {
-	Email string
-}
-
-// IsErrEmailCharIsNotSupported checks if an error is an ErrEmailCharIsNotSupported
-func IsErrEmailCharIsNotSupported(err error) bool {
-	_, ok := err.(ErrEmailCharIsNotSupported)
-	return ok
-}
-
-func (err ErrEmailCharIsNotSupported) Error() string {
-	return fmt.Sprintf("e-mail address contains unsupported character [email: %s]", err.Email)
-}
-
-func (err ErrEmailCharIsNotSupported) Unwrap() error {
-	return util.ErrInvalidArgument
-}
-
-// ErrEmailInvalid represents an error where the email address does not comply with RFC 5322
-// or has a leading '-' character
-type ErrEmailInvalid struct {
-	Email string
-}
-
-// IsErrEmailInvalid checks if an error is an ErrEmailInvalid
-func IsErrEmailInvalid(err error) bool {
-	_, ok := err.(ErrEmailInvalid)
-	return ok
-}
-
-func (err ErrEmailInvalid) Error() string {
-	return fmt.Sprintf("e-mail invalid [email: %s]", err.Email)
-}
-
-func (err ErrEmailInvalid) Unwrap() error {
-	return util.ErrInvalidArgument
-}
 
 // ErrEmailAlreadyUsed represents a "EmailAlreadyUsed" kind of error.
 type ErrEmailAlreadyUsed struct {
@@ -154,22 +109,6 @@ func InsertEmailAddress(ctx context.Context, email *EmailAddress) (*EmailAddress
 func UpdateEmailAddress(ctx context.Context, email *EmailAddress) error {
 	_, err := db.GetEngine(ctx).ID(email.ID).AllCols().Update(email)
 	return err
-}
-
-var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-
-// ValidateEmail check if email is a valid & allowed address
-func ValidateEmail(email string) error {
-	if err := validateEmailBasic(email); err != nil {
-		return err
-	}
-	return validateEmailDomain(email)
-}
-
-// ValidateEmailForAdmin check if email is a valid address when admins manually add or edit users
-func ValidateEmailForAdmin(email string) error {
-	return validateEmailBasic(email)
-	// In this case we do not need to check the email domain
 }
 
 func GetEmailAddressByEmail(ctx context.Context, email string) (*EmailAddress, error) {
@@ -461,42 +400,4 @@ func ActivateUserEmail(ctx context.Context, userID int64, email string, activate
 	}
 
 	return committer.Commit()
-}
-
-// validateEmailBasic checks whether the email complies with the rules
-func validateEmailBasic(email string) error {
-	if len(email) == 0 {
-		return ErrEmailInvalid{email}
-	}
-
-	if !emailRegexp.MatchString(email) {
-		return ErrEmailCharIsNotSupported{email}
-	}
-
-	if email[0] == '-' {
-		return ErrEmailInvalid{email}
-	}
-
-	if _, err := mail.ParseAddress(email); err != nil {
-		return ErrEmailInvalid{email}
-	}
-
-	return nil
-}
-
-// validateEmailDomain checks whether the email domain is allowed or blocked
-func validateEmailDomain(email string) error {
-	if !IsEmailDomainAllowed(email) {
-		return ErrEmailInvalid{email}
-	}
-
-	return nil
-}
-
-func IsEmailDomainAllowed(email string) bool {
-	if len(setting.Service.EmailDomainAllowList) == 0 {
-		return !validation.IsEmailDomainListed(setting.Service.EmailDomainBlockList, email)
-	}
-
-	return validation.IsEmailDomainListed(setting.Service.EmailDomainAllowList, email)
 }

@@ -19,7 +19,7 @@ func (g *ASTTransformer) transformHeading(_ *markup.RenderContext, v *ast.Headin
 			v.SetAttribute(attr.Name, []byte(fmt.Sprintf("%v", attr.Value)))
 		}
 	}
-	txt := v.Text(reader.Source())
+	txt := v.Lines().Value(reader.Source())
 	header := markup.Header{
 		Text:  util.UnsafeBytesToString(txt),
 		Level: v.Level,
