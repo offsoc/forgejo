@@ -10,7 +10,7 @@ test('Change git note', async ({browser}, workerInfo) => {
   const context = await load_logged_in_context(browser, workerInfo, 'user2');
   const page = await context.newPage();
   let response = await page.goto('/user2/repo1/commit/65f1bf27bc3bf70f64657658635e66094edbcb4d');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   await page.locator('#commit-notes-edit-button').click();
 
@@ -23,10 +23,10 @@ test('Change git note', async ({browser}, workerInfo) => {
 
   await page.locator('#notes-save-button').click();
 
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   response = await page.goto('/user2/repo1/commit/65f1bf27bc3bf70f64657658635e66094edbcb4d');
-  await expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(200);
 
   textarea = page.locator('textarea[name="notes"]');
   await expect(textarea).toHaveText('This is a new note');
