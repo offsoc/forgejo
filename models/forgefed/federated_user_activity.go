@@ -99,6 +99,13 @@ func RemoveFollower(ctx context.Context, localUserID, federatedUserID int64) err
 	return err
 }
 
+func IsFollowing(ctx context.Context, followedUserID, followingUserID int64) (bool, error) {
+	return db.GetEngine(ctx).Get(&FederatedUserFollower{
+		LocalUserID:     followedUserID,
+		FederatedUserID: followingUserID,
+	})
+}
+
 type GetFollowingFeedsOptions struct {
 	db.ListOptions
 	Actor *user_model.User

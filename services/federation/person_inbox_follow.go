@@ -36,6 +36,18 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 		return
 	}
 
+	following, err := forgefed.IsFollowing(ctx, ctx.ContextUser.ID, federatedUser.ID)
+	if err != nil {
+		log.Error("forgefed.IsFollowing: %v", err)
+		ctx.Error(http.StatusInternalServerError, "forgefed.IsFollowing", err)
+		return
+	}
+	if following {
+		// If the user is already following, we're good, nothing to do.
+		log.Trace("Local user[%d] is already following federated user[%d]", ctx.ContextUser.ID, federatedUser.ID)
+		return
+	}
+
 	followingID, err := forgefed.AddFollower(ctx, ctx.ContextUser.ID, federatedUser.ID)
 	if err != nil {
 		log.Error("Unable to add follower: %v", err)
