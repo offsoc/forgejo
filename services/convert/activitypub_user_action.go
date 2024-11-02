@@ -141,9 +141,6 @@ func ActionToForgeUserActivity(ctx context.Context, action *activities_model.Act
 		return makeUserActivity("deleted tag %s at %s", action.GetTag(), renderRepo())
 	case activities_model.ActionDeleteBranch:
 		return makeUserActivity("deleted branch %s at %s", action.GetBranch(), renderRepo())
-	case activities_model.ActionMirrorSyncPush:
-	case activities_model.ActionMirrorSyncCreate:
-	case activities_model.ActionMirrorSyncDelete:
 	case activities_model.ActionApprovePullRequest:
 		if err := action.LoadIssue(ctx); err != nil {
 			return fm.ForgeUserActivity{}, err
@@ -167,6 +164,9 @@ func ActionToForgeUserActivity(ctx context.Context, action *activities_model.Act
 			renderIssue(action.Comment.Issue),
 			renderedComment,
 		)
+	case activities_model.ActionMirrorSyncPush:
+	case activities_model.ActionMirrorSyncCreate:
+	case activities_model.ActionMirrorSyncDelete:
 	case activities_model.ActionPublishRelease:
 	case activities_model.ActionPullReviewDismissed:
 	case activities_model.ActionPullRequestReadyForReview:
