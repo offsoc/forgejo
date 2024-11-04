@@ -19,7 +19,7 @@ import (
 )
 
 type Renderer struct {
-	Mode, Text, UrlPrefix, FilePath, BranchPath, RelativePath string
+	Mode, Text, URLPrefix, FilePath, BranchPath, RelativePath string
 	IsWiki                                                    bool
 }
 
@@ -40,7 +40,7 @@ func (re *Renderer) RenderMarkup(ctx *context.Base, repo *context.Repository) {
 			Ctx: ctx,
 			Links: markup.Links{
 				AbsolutePrefix: true,
-				Base:           re.UrlPrefix,
+				Base:           re.URLPrefix,
 			},
 		}, strings.NewReader(re.Text), ctx.Resp); err != nil {
 			ctx.Error(http.StatusInternalServerError, err.Error())
@@ -55,19 +55,19 @@ func (re *Renderer) RenderMarkup(ctx *context.Base, repo *context.Repository) {
 	case "file":
 		// File as document based on file extension
 		markupType = ""
-		re.UrlPrefix = re.RelativePath
+		re.URLPrefix = re.RelativePath
 		relativePath = re.FilePath
 	default:
 		ctx.Error(http.StatusUnprocessableEntity, fmt.Sprintf("Unknown mode: %s", re.Mode))
 		return
 	}
 
-	if !strings.HasPrefix(setting.AppSubURL+"/", re.UrlPrefix) {
+	if !strings.HasPrefix(setting.AppSubURL+"/", re.URLPrefix) {
 		// check if urlPrefix is already set to a URL
 		linkRegex, _ := xurls.StrictMatchingScheme("https?://")
-		m := linkRegex.FindStringIndex(re.UrlPrefix)
+		m := linkRegex.FindStringIndex(re.URLPrefix)
 		if m == nil {
-			re.UrlPrefix = util.URLJoin(setting.AppURL, re.UrlPrefix)
+			re.URLPrefix = util.URLJoin(setting.AppURL, re.URLPrefix)
 		}
 	}
 
@@ -87,7 +87,7 @@ func (re *Renderer) RenderMarkup(ctx *context.Base, repo *context.Repository) {
 		Ctx: ctx,
 		Links: markup.Links{
 			AbsolutePrefix: true,
-			Base:           re.UrlPrefix,
+			Base:           re.URLPrefix,
 			BranchPath:     re.BranchPath,
 		},
 		Metas:        meta,

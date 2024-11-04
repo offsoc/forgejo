@@ -44,7 +44,7 @@ func Markup(ctx *context.APIContext) {
 	re := common.Renderer{
 		Mode:         form.Mode,
 		Text:         form.Text,
-		UrlPrefix:    form.Context,
+		URLPrefix:    form.Context,
 		FilePath:     form.FilePath,
 		BranchPath:   form.BranchPath,
 		RelativePath: form.RelativePath,
@@ -89,7 +89,7 @@ func Markdown(ctx *context.APIContext) {
 	re := common.Renderer{
 		Mode:      mode,
 		Text:      form.Text,
-		UrlPrefix: form.Context,
+		URLPrefix: form.Context,
 		IsWiki:    form.Wiki,
 	}
 

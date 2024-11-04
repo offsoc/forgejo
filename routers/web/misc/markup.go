@@ -18,7 +18,7 @@ func Markup(ctx *context.Context) {
 	re := common.Renderer{
 		Mode:         form.Mode,
 		Text:         form.Text,
-		UrlPrefix:    form.Context,
+		URLPrefix:    form.Context,
 		FilePath:     form.FilePath,
 		BranchPath:   form.BranchPath,
 		RelativePath: form.RelativePath,
