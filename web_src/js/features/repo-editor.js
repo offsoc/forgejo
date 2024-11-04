@@ -26,8 +26,8 @@ function initEditPreviewTab($form) {
       const formData = new FormData();
       formData.append('mode', mode);
       formData.append('context', context);
-      formData.append('branch_path', $this.data('branch-path'))
-      formData.append('relative_path', $this.data('relative-path'))
+      formData.append('branch_path', $this.data('branch-path'));
+      formData.append('relative_path', $this.data('relative-path'));
       formData.append(
         'text',
         $form.find(`.tab[data-tab="${$tabMenu.data('write')}"] textarea`).val(),
