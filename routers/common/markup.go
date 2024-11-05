@@ -19,8 +19,8 @@ import (
 )
 
 type Renderer struct {
-	Mode, Text, URLPrefix, FilePath, BranchPath, RelativePath string
-	IsWiki                                                    bool
+	Mode, Text, URLPrefix, FilePath, BranchPath string
+	IsWiki                                      bool
 }
 
 // RenderMarkup renders markup text for the /markup and /markdown endpoints
@@ -55,7 +55,7 @@ func (re *Renderer) RenderMarkup(ctx *context.Base, repo *context.Repository) {
 	case "file":
 		// File as document based on file extension
 		markupType = ""
-		re.URLPrefix = re.RelativePath
+		re.URLPrefix = repo.RepoLink
 		relativePath = re.FilePath
 	default:
 		ctx.Error(http.StatusUnprocessableEntity, fmt.Sprintf("Unknown mode: %s", re.Mode))

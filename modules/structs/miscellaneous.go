@@ -41,10 +41,6 @@ type MarkupOption struct {
 	//
 	// in: body
 	BranchPath string
-	// Relative path to the repository
-	//
-	// in: body
-	RelativePath string
 }
 
 // MarkupRender is a rendered markup document

@@ -16,13 +16,12 @@ func Markup(ctx *context.Context) {
 	form := web.GetForm(ctx).(*api.MarkupOption)
 
 	re := common.Renderer{
-		Mode:         form.Mode,
-		Text:         form.Text,
-		URLPrefix:    form.Context,
-		FilePath:     form.FilePath,
-		BranchPath:   form.BranchPath,
-		RelativePath: form.RelativePath,
-		IsWiki:       form.Wiki,
+		Mode:       form.Mode,
+		Text:       form.Text,
+		URLPrefix:  form.Context,
+		FilePath:   form.FilePath,
+		BranchPath: form.BranchPath,
+		IsWiki:     form.Wiki,
 	}
 
 	re.RenderMarkup(ctx.Base, ctx.Repo)
