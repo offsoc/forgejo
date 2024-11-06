@@ -157,12 +157,7 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 
 	if options.Keyword != "" {
 		if options.IsFuzzyKeyword {
-			fuzziness := 1
-			if kl := len(options.Keyword); kl > 3 {
-				fuzziness = 2
-			} else if kl < 2 {
-				fuzziness = 0
-			}
+			fuzziness := inner_bleve.GuessFuzzinessByKeyword(options.Keyword)
 			queries = append(queries, bleve.NewDisjunctionQuery([]query.Query{
 				inner_bleve.MatchQuery(options.Keyword, "title", issueIndexerAnalyzer, fuzziness),
 				inner_bleve.MatchQuery(options.Keyword, "content", issueIndexerAnalyzer, fuzziness),

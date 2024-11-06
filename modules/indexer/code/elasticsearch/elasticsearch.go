@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	esRepoIndexerLatestVersion = 1
+	esRepoIndexerLatestVersion = 2
 	// multi-match-types, currently only 2 types are used
 	// Reference: https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-multi-match-query.html#multi-match-types
 	esMultiMatchTypeBestFields   = "best_fields"
@@ -57,6 +57,22 @@ func NewIndexer(url, indexerName string) *Indexer {
 
 const (
 	defaultMapping = `{
+		"settings": {
+    		"analysis": {
+      			"analyzer": {
+					"content_analyzer": {
+						"tokenizer": "content_tokenizer",
+						"filter" : ["lowercase"]
+					},
+      			},
+				"tokenizer": {
+					"content_tokenizer": {
+						"type": "simple_pattern_split",
+						"pattern": "[^a-zA-Z0-9]"
+					},
+				}
+			}
+		},
 		"mappings": {
 			"properties": {
 				"repo_id": {
@@ -66,7 +82,8 @@ const (
 				"content": {
 					"type": "text",
 					"term_vector": "with_positions_offsets",
-					"index": true
+					"index": true,
+					"analyzer": "content_analyzer"
 				},
 				"commit_id": {
 					"type": "keyword",
