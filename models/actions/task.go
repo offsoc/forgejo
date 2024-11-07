@@ -215,10 +215,10 @@ func GetRunningTaskByToken(ctx context.Context, token string) (*ActionTask, erro
 	return nil, errNotExist
 }
 
-func CreateTaskForRunner(ctx context.Context, runner *ActionRunner) (*ActionTask, bool, error) {
+func FindPendingJobForRunner(ctx context.Context, runner *ActionRunner) (*ActionRunJob, error) {
 	ctx, commiter, err := db.TxContext(ctx)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 	defer commiter.Close()
 
@@ -238,7 +238,7 @@ func CreateTaskForRunner(ctx context.Context, runner *ActionRunner) (*ActionTask
 
 	var jobs []*ActionRunJob
 	if err := e.Where("task_id=? AND status=?", 0, StatusWaiting).And(jobCond).Asc("updated", "id").Find(&jobs); err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
 	// TODO: a more efficient way to filter labels
@@ -251,10 +251,30 @@ func CreateTaskForRunner(ctx context.Context, runner *ActionRunner) (*ActionTask
 		}
 	}
 	if job == nil {
-		return nil, false, nil
+		return nil, nil
 	}
 	if err := job.LoadAttributes(ctx); err != nil {
+		return nil, err
+	}
+
+	return job, nil
+}
+
+func CreateTaskForRunner(ctx context.Context, runner *ActionRunner) (*ActionTask, bool, error) {
+	ctx, commiter, err := db.TxContext(ctx)
+	if err != nil {
 		return nil, false, err
+	}
+	defer commiter.Close()
+
+	e := db.GetEngine(ctx)
+
+	job, err := FindPendingJobForRunner(ctx, runner)
+	if err != nil {
+		return nil, false, err
+	}
+	if job == nil {
+		return nil, false, nil
 	}
 
 	now := timeutil.TimeStampNow()

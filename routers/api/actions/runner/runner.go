@@ -132,6 +132,37 @@ func (s *Service) Declare(
 	}), nil
 }
 
+// PeekTask checks wether a task is available, without assinging it to the runner
+func (s *Service) PeekTask(
+	ctx context.Context,
+	req *connect.Request[runnerv1.FetchTaskRequest],
+) (*connect.Response[runnerv1.FetchTaskResponse], error) {
+	runner := GetRunner(ctx)
+
+	var task *runnerv1.Task
+	tasksVersion := req.Msg.TasksVersion // task version from runner
+	latestVersion, err := actions_model.GetTasksVersionByScope(ctx, runner.OwnerID, runner.RepoID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "query tasks version failed: %v", err)
+	}
+
+	if tasksVersion != latestVersion {
+		job, err := actions_model.FindPendingJobForRunner(ctx, runner)
+		if err != nil {
+			log.Error("failed to find pending jobs for runner: %v", err)
+		}
+		if job != nil {
+			task = &runnerv1.Task{}
+		}
+	}
+
+	res := connect.NewResponse(&runnerv1.FetchTaskResponse{
+		Task:         task,
+		TasksVersion: latestVersion,
+	})
+	return res, nil
+}
+
 // FetchTask assigns a task to the runner
 func (s *Service) FetchTask(
 	ctx context.Context,
