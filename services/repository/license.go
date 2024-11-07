@@ -6,7 +6,7 @@ package repository
 import (
 	"context"
 	"fmt"
-	"io"
+	"strings"
 
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
@@ -18,14 +18,14 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/options"
 	"code.gitea.io/gitea/modules/queue"
+	api "code.gitea.io/gitea/modules/structs"
 
 	licenseclassifier "github.com/google/licenseclassifier/v2"
 )
 
 var (
-	classifier      *licenseclassifier.Classifier
-	LicenseFileName = "LICENSE"
-	licenseAliases  map[string]string
+	classifier     *licenseclassifier.Classifier
+	licenseAliases map[string]string
 
 	// licenseUpdaterQueue represents a queue to handle update repo licenses
 	licenseUpdaterQueue *queue.WorkerPoolQueue[*LicenseUpdaterOptions]
@@ -151,39 +151,62 @@ func SyncRepoLicenses(ctx context.Context) error {
 	return nil
 }
 
+func isLicenseFile(name string) bool {
+	licenseNameList := []string{"LICENSE", "COPYING"}
+
+	for _, currentName := range licenseNameList {
+		if strings.HasPrefix(strings.ToUpper(name), currentName) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // UpdateRepoLicenses will update repository licenses col if license file exists
 func UpdateRepoLicenses(ctx context.Context, repo *repo_model.Repository, commit *git.Commit) error {
 	if commit == nil {
 		return nil
 	}
 
-	b, err := commit.GetBlobByPath(LicenseFileName)
-	if err != nil && !git.IsErrNotExist(err) {
-		return fmt.Errorf("GetBlobByPath: %w", err)
+	licenseList := make([]*api.RepoLicense, 0)
+	entries, err := commit.ListEntries()
+	if err != nil {
+		return err
 	}
+	for _, entry := range entries {
+		if isLicenseFile(entry.Name()) {
+			licenses, err := detectLicense(commit, entry.Name())
+			if err != nil {
+				return err
+			}
 
-	if git.IsErrNotExist(err) {
-		return repo_model.CleanRepoLicenses(ctx, repo)
-	}
-
-	licenses := make([]string, 0)
-	if b != nil {
-		r, err := b.DataAsync()
-		if err != nil {
-			return err
-		}
-		defer r.Close()
-
-		licenses, err = detectLicense(r)
-		if err != nil {
-			return fmt.Errorf("detectLicense: %w", err)
+			for _, license := range licenses {
+				licenseList = append(licenseList, &api.RepoLicense{Name: license, Path: entry.Name()})
+			}
 		}
 	}
-	return repo_model.UpdateRepoLicenses(ctx, repo, commit.ID.String(), licenses)
+
+	return repo_model.UpdateRepoLicenses(ctx, repo, commit.ID.String(), licenseList)
 }
 
 // detectLicense returns the licenses detected by the given content buff
-func detectLicense(r io.Reader) ([]string, error) {
+func detectLicense(commit *git.Commit, path string) ([]string, error) {
+	b, err := commit.GetBlobByPath(path)
+	if err != nil {
+		return nil, fmt.Errorf("GetBlobByPath: %w", err)
+	}
+
+	if b == nil {
+		return nil, nil
+	}
+
+	r, err := b.DataAsync()
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
 	if r == nil {
 		return nil, nil
 	}

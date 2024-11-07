@@ -15,6 +15,7 @@ func AddRepositoryLicenses(x *xorm.Engine) error {
 		RepoID      int64 `xorm:"UNIQUE(s) NOT NULL"`
 		CommitID    string
 		License     string             `xorm:"VARCHAR(255) UNIQUE(s) NOT NULL"`
+		Path        string             `xorm:"UNIQUE(s) NOT NULL"`
 		CreatedUnix timeutil.TimeStamp `xorm:"INDEX CREATED"`
 		UpdatedUnix timeutil.TimeStamp `xorm:"INDEX UPDATED"`
 	}

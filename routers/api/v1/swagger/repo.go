@@ -363,7 +363,7 @@ type swaggerLanguageStatistics struct {
 // swagger:response LicensesList
 type swaggerLicensesList struct {
 	// in: body
-	Body []string `json:"body"`
+	Body api.RepoLicenseList `json:"body"`
 }
 
 // CombinedStatus

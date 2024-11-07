@@ -420,3 +420,12 @@ type UpdateRepoAvatarOption struct {
 	// image must be base64 encoded
 	Image string `json:"image" binding:"Required"`
 }
+
+type RepoLicense struct {
+	Name string `json:"name"`
+	Path string `json:"path"`
+}
+
+type RepoLicenseList struct {
+	Licenses []*RepoLicense `json:"licenses"`
+}

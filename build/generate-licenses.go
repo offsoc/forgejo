@@ -152,7 +152,7 @@ func main() {
 		}
 	}
 	// save convert license name map to file
-	b, err := json.Marshal(licenseAliases)
+	b, err := json.MarshalIndent(licenseAliases, "", "    ")
 	if err != nil {
 		log.Fatalf("Failed to create json bytes. %s", err)
 	}

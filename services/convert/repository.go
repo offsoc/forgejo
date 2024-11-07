@@ -258,3 +258,24 @@ func ToRepoTransfer(ctx context.Context, t *models.RepoTransfer) *api.RepoTransf
 		Teams:     teams,
 	}
 }
+
+// ToRepoLicense convert a models.RepoLicense to a structs.RepoLicense
+func ToRepoLicense(license *repo_model.RepoLicense) *api.RepoLicense {
+	return &api.RepoLicense{
+		Name: license.License,
+		Path: license.Path,
+	}
+}
+
+// ToRepoLicenseList convert a models.RepoLicenseList to a structs.RepoLicenseList
+func ToRepoLicenseList(licenseList repo_model.RepoLicenseList) *api.RepoLicenseList {
+	apiList := make([]*api.RepoLicense, len(licenseList))
+
+	for pos, currentLicense := range licenseList {
+		apiList[pos] = ToRepoLicense(currentLicense)
+	}
+
+	return &api.RepoLicenseList{
+		Licenses: apiList,
+	}
+}

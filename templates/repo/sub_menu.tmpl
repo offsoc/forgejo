@@ -14,8 +14,8 @@
 				</a>
 			{{end}}
 			{{if .DetectedRepoLicenses}}
-				<a class="item muted" href="{{.RepoLink}}/src/{{.Repository.DefaultBranch}}/{{PathEscapeSegments .LicenseFileName}}" data-tooltip-placement="top" data-tooltip-content="{{StringUtils.Join .DetectedRepoLicenses ", "}}">
-					{{svg "octicon-law"}} <b>{{if eq (len .DetectedRepoLicenses) 1}}{{index .DetectedRepoLicenses 0}}{{else}}{{ctx.Locale.Tr "repo.multiple_licenses"}}{{end}}</b>
+				<a class="item muted" {{if eq (len .DetectedRepoLicenses) 1}}href="{{.RepoLink}}/src/{{.Repository.DefaultBranch}}/{{PathEscapeSegments (index .DetectedRepoLicenses 0).Path}}"{{end}} data-tooltip-placement="top" data-tooltip-content="{{StringUtils.Join .DetectedRepoLicenses.StringList ", "}}">
+					{{svg "octicon-law"}} <b>{{if eq (len .DetectedRepoLicenses) 1}}{{(index .DetectedRepoLicenses 0).License}}{{else}}{{ctx.Locale.Tr "repo.multiple_licenses"}}{{end}}</b>
 				</a>
 			{{end}}
 			<span class="item not-mobile" {{if not (eq .Repository.Size 0)}}data-tooltip-content="{{.Repository.SizeDetailsString ctx.Locale}}"{{end}}>

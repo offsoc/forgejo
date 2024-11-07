@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"code.gitea.io/gitea/models/db"
+	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/timeutil"
 )
 
@@ -19,6 +20,7 @@ type RepoLicense struct { //revive:disable-line:exported
 	RepoID      int64 `xorm:"UNIQUE(s) NOT NULL"`
 	CommitID    string
 	License     string             `xorm:"VARCHAR(255) UNIQUE(s) NOT NULL"`
+	Path        string             `xorm:"UNIQUE(s) NOT NULL"`
 	CreatedUnix timeutil.TimeStamp `xorm:"INDEX CREATED"`
 	UpdatedUnix timeutil.TimeStamp `xorm:"INDEX UPDATED"`
 }
@@ -44,48 +46,56 @@ func GetRepoLicenses(ctx context.Context, repo *Repository) (RepoLicenseList, er
 }
 
 // UpdateRepoLicenses updates the license statistics for repository
-func UpdateRepoLicenses(ctx context.Context, repo *Repository, commitID string, licenses []string) error {
+func UpdateRepoLicenses(ctx context.Context, repo *Repository, commitID string, licenses []*api.RepoLicense) error {
 	oldLicenses, err := GetRepoLicenses(ctx, repo)
 	if err != nil {
 		return err
 	}
+
+	ctx, committer, err := db.TxContext(ctx)
+	if err != nil {
+		return err
+	}
+	defer committer.Close()
+
 	for _, license := range licenses {
 		upd := false
 		for _, o := range oldLicenses {
 			// Update already existing license
-			if o.License == license {
-				if _, err := db.GetEngine(ctx).ID(o.ID).Cols("`commit_id`").Update(o); err != nil {
+			if o.License == license.Name && o.Path == license.Path {
+				_, err := db.GetEngine(ctx).Exec("UPDATE repo_license SET commit_id = ? WHERE id = ?", commitID, o.ID)
+				if err != nil {
 					return err
 				}
 				upd = true
 				break
 			}
 		}
+
+		_, err = db.GetEngine(ctx).Exec("DELETE FROM repo_license WHERE repo_id = ? AND license = ? AND commit_id != ?", repo.ID, license.Name, commitID)
+		if err != nil {
+			return err
+		}
+
 		// Insert new license
 		if !upd {
 			if err := db.Insert(ctx, &RepoLicense{
 				RepoID:   repo.ID,
 				CommitID: commitID,
-				License:  license,
+				License:  license.Name,
+				Path:     license.Path,
 			}); err != nil {
 				return err
 			}
 		}
 	}
-	// Delete old licenses
-	licenseToDelete := make([]int64, 0, len(oldLicenses))
-	for _, o := range oldLicenses {
-		if o.CommitID != commitID {
-			licenseToDelete = append(licenseToDelete, o.ID)
-		}
-	}
-	if len(licenseToDelete) > 0 {
-		if _, err := db.GetEngine(ctx).In("`id`", licenseToDelete).Delete(&RepoLicense{}); err != nil {
-			return err
-		}
+
+	_, err = db.GetEngine(ctx).Exec("DELETE FROM repo_license WHERE repo_id = ? AND commit_id != ?", repo.ID, commitID)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	return committer.Commit()
 }
 
 // CopyLicense Copy originalRepo license information to destRepo (use for forked repo)

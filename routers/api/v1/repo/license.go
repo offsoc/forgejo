@@ -9,6 +9,7 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/services/context"
+	"code.gitea.io/gitea/services/convert"
 )
 
 // GetLicenses returns licenses
@@ -42,10 +43,5 @@ func GetLicenses(ctx *context.APIContext) {
 		return
 	}
 
-	resp := make([]string, len(licenses))
-	for i := range licenses {
-		resp[i] = licenses[i].License
-	}
-
-	ctx.JSON(http.StatusOK, resp)
+	ctx.JSON(http.StatusOK, convert.ToRepoLicenseList(licenses))
 }

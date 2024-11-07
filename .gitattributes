@@ -9,3 +9,4 @@
 /web_src/fomantic/_site/globals/site.variables linguist-language=Less
 /web_src/js/vendor/** -text -eol linguist-vendored
 Dockerfile.* linguist-language=Dockerfile
+/options/license/etc/license-aliases.json linguist-generated

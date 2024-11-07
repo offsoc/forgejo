@@ -25995,6 +25995,33 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "RepoLicense": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "path": {
+          "type": "string",
+          "x-go-name": "Path"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "RepoLicenseList": {
+      "type": "object",
+      "properties": {
+        "licenses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RepoLicense"
+          },
+          "x-go-name": "Licenses"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "RepoTopicOptions": {
       "description": "RepoTopicOptions a collection of repo topic names",
       "type": "object",
@@ -27809,10 +27836,7 @@
     "LicensesList": {
       "description": "LicensesList",
       "schema": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+        "$ref": "#/definitions/RepoLicenseList"
       }
     },
     "MarkdownRender": {

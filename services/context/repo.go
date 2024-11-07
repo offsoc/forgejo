@@ -430,7 +430,7 @@ func repoAssignment(ctx *Context, repo *repo_model.Repository) {
 		ctx.ServerError("GetRepoLicenses", err)
 		return
 	}
-	ctx.Data["DetectedRepoLicenses"] = repoLicenses.StringList()
+	ctx.Data["DetectedRepoLicenses"] = repoLicenses
 }
 
 // RepoIDAssignment returns a handler which assigns the repo to the context.
