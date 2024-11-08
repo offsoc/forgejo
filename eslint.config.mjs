@@ -496,7 +496,7 @@ export default tseslint.config(
         'SequenceExpression',
         {
           selector: "CallExpression[callee.name='fetch']",
-          message: 'use modules/fetch.js instead',
+          message: 'use modules/fetch.ts instead',
         },
       ],
 
@@ -878,7 +878,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['*.vue', '**/*.vue'],
     rules: {
       'import-x/consistent-type-specifier-style': [0],
       'import-x/default': [0],
@@ -1100,7 +1099,7 @@ export default tseslint.config(
       '@vitest/valid-title': [2],
     },
   }, {
-    files: ['web_src/js/modules/fetch.js', 'web_src/js/standalone/**/*'],
+    files: ['web_src/js/modules/fetch.ts', 'web_src/js/standalone/**/*'],
 
     rules: {
       'no-restricted-syntax': [

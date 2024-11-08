@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import {Bar} from 'vue-chartjs';
 import {
   Chart,
@@ -7,7 +7,7 @@ import {
   CategoryScale,
   LinearScale,
 } from 'chart.js';
-import {chartJsColors} from '../utils/color.js';
+import {chartJsColors} from '../utils/color.ts';
 import {createApp} from 'vue';
 
 Chart.defaults.color = chartJsColors.text;

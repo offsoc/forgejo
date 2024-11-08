@@ -110,30 +110,30 @@ export default {
   mode: isProduction ? 'production' : 'development',
   entry: {
     index: [
-      fileURLToPath(new URL('web_src/js/jquery.js', import.meta.url)),
+      fileURLToPath(new URL('web_src/js/jquery.ts', import.meta.url)),
       fileURLToPath(new URL('web_src/fomantic/build/semantic.js', import.meta.url)),
-      fileURLToPath(new URL('web_src/js/index.js', import.meta.url)),
+      fileURLToPath(new URL('web_src/js/index.ts', import.meta.url)),
       fileURLToPath(new URL('node_modules/easymde/dist/easymde.min.css', import.meta.url)),
       fileURLToPath(new URL('web_src/fomantic/build/semantic.css', import.meta.url)),
       fileURLToPath(new URL('web_src/css/index.css', import.meta.url)),
     ],
     webcomponents: [
-      fileURLToPath(new URL('web_src/js/webcomponents/index.js', import.meta.url)),
+      fileURLToPath(new URL('web_src/js/webcomponents/index.ts', import.meta.url)),
     ],
     forgejoswagger: [ // Forgejo swagger is OpenAPI 3.0.0 and has specific parameters
-      fileURLToPath(new URL('web_src/js/standalone/forgejo-swagger.js', import.meta.url)),
+      fileURLToPath(new URL('web_src/js/standalone/forgejo-swagger.ts', import.meta.url)),
       fileURLToPath(new URL('web_src/css/standalone/swagger.css', import.meta.url)),
     ],
     swagger: [
-      fileURLToPath(new URL('web_src/js/standalone/swagger.js', import.meta.url)),
+      fileURLToPath(new URL('web_src/js/standalone/swagger.ts', import.meta.url)),
       fileURLToPath(new URL('web_src/css/standalone/swagger.css', import.meta.url)),
     ],
     'eventsource.sharedworker': [
-      fileURLToPath(new URL('web_src/js/features/eventsource.sharedworker.js', import.meta.url)),
+      fileURLToPath(new URL('web_src/js/features/eventsource.sharedworker.ts', import.meta.url)),
     ],
     ...(!isProduction && {
       devtest: [
-        fileURLToPath(new URL('web_src/js/standalone/devtest.js', import.meta.url)),
+        fileURLToPath(new URL('web_src/js/standalone/devtest.ts', import.meta.url)),
         fileURLToPath(new URL('web_src/css/standalone/devtest.css', import.meta.url)),
       ],
     }),
@@ -261,6 +261,7 @@ export default {
   },
   resolve: {
     symlinks: false,
+    extensions: ['.ts', '.js'],
   },
   watchOptions: {
     ignored: [
