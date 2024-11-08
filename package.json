@@ -83,7 +83,7 @@
     "eslint-plugin-vue": "9.28.0",
     "eslint-plugin-vue-scoped-css": "2.8.1",
     "eslint-plugin-wc": "2.1.1",
-    "happy-dom": "15.7.4",
+    "happy-dom": "15.10.2",
     "license-checker-rseidelsohn": "4.4.2",
     "markdownlint-cli": "0.41.0",
     "postcss-html": "1.7.0",
