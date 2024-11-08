@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
 import DiffFileTreeItem from './DiffFileTreeItem.vue';
-import {loadMoreFiles} from '../features/repo-diff.js';
-import {toggleElem} from '../utils/dom.js';
-import {diffTreeStore} from '../modules/stores.js';
-import {setFileFolding} from '../features/file-fold.js';
+import {loadMoreFiles} from '../features/repo-diff';
+import {toggleElem} from '../utils/dom';
+import {diffTreeStore} from '../modules/stores';
+import {setFileFolding} from '../features/file-fold';
 
 const LOCAL_STORAGE_KEY = 'diff_file_tree_visible';
 

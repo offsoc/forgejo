@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
 import {createApp, nextTick} from 'vue';
 import $ from 'jquery';
-import {SvgIcon} from '../svg.js';
-import {GET} from '../modules/fetch.js';
+import {SvgIcon} from '../svg';
+import {GET} from '../modules/fetch';
 
 const {appSubUrl, assetUrlPrefix, pageData} = window.config;
 

@@ -1,8 +1,8 @@
-<script>
-import {SvgIcon} from '../svg.js';
-import {contrastColor} from '../utils/color.js';
-import {GET} from '../modules/fetch.js';
-import {emojiHTML} from '../features/emoji.js';
+<script lang="ts">
+import {SvgIcon} from '../svg';
+import {contrastColor} from '../utils/color';
+import {GET} from '../modules/fetch';
+import {emojiHTML} from '../features/emoji';
 import {htmlEscape} from 'escape-goat';
 
 const {appSubUrl, i18n} = window.config;

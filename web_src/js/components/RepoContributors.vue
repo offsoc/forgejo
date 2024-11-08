@@ -1,5 +1,5 @@
-<script>
-import {SvgIcon} from '../svg.js';
+<script lang="ts">
+import {SvgIcon} from '../svg';
 import {
   Chart,
   Title,
@@ -10,16 +10,16 @@ import {
   LineElement,
   Filler,
 } from 'chart.js';
-import {GET} from '../modules/fetch.js';
+import {GET} from '../modules/fetch';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {Line as ChartLine} from 'vue-chartjs';
 import {
   startDaysBetween,
   firstStartDateAfterDate,
   fillEmptyStartDaysWithZeroes,
-} from '../utils/time.js';
-import {chartJsColors} from '../utils/color.js';
-import {sleep} from '../utils.js';
+} from '../utils/time';
+import {chartJsColors} from '../utils/color';
+import {sleep} from '../utils';
 import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 import $ from 'jquery';
 

@@ -1,10 +1,10 @@
-<script>
+<script lang="ts">
 import {createApp, nextTick} from 'vue';
 import $ from 'jquery';
-import {SvgIcon} from '../svg.js';
-import {pathEscapeSegments} from '../utils/url.js';
-import {showErrorToast} from '../modules/toast.js';
-import {GET} from '../modules/fetch.js';
+import {SvgIcon} from '../svg';
+import {pathEscapeSegments} from '../utils/url';
+import {showErrorToast} from '../modules/toast';
+import {GET} from '../modules/fetch';
 
 const sfc = {
   components: {SvgIcon},

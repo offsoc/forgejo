@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import {CalendarHeatmap} from 'vue3-calendar-heatmap';
 
 export default {
