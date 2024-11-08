@@ -12,8 +12,8 @@ code.forgejo.org/forgejo/reply v1.0.2 h1:dMhQCHV6/O3L5CLWNTol+dNzDAuyCK88z4J/lCd
 code.forgejo.org/forgejo/reply v1.0.2/go.mod h1:RyZUfzQLc+fuLIGjTSQWDAJWPiL4WtKXB/FifT5fM7U=
 code.forgejo.org/go-chi/binding v1.0.0 h1:EIDJtk9brK7WsT7rvS/D4cxX8XlnhY3LMy8ex1jeHu0=
 code.forgejo.org/go-chi/binding v1.0.0/go.mod h1:fWwqaHj0H1/KeCpBqdvKunflq8pYfciEHI5v3UUeE2E=
-code.forgejo.org/go-chi/cache v0.0.0-20240912103640-dcb08fba860d h1:nOu/2GX571t4intmtfvpctS148OqsBYrGUySVm93ifc=
-code.forgejo.org/go-chi/cache v0.0.0-20240912103640-dcb08fba860d/go.mod h1:OVlZ/TqDYJ+RUJ+R+J+OLxtlyjo3pbjBeK7LAWAB+Vk=
+code.forgejo.org/go-chi/cache v1.0.0 h1:akLfGxNlHcacmtutovNtYFSTMsbdcp5MGjAEsP4pxnE=
+code.forgejo.org/go-chi/cache v1.0.0/go.mod h1:OVlZ/TqDYJ+RUJ+R+J+OLxtlyjo3pbjBeK7LAWAB+Vk=
 code.forgejo.org/go-chi/captcha v0.0.0-20240905153133-df43b9250ed5 h1:A7P1liXCpJBHEJ5KIDsF0ujnQ8FQ/aX1UixTW0vGrDQ=
 code.forgejo.org/go-chi/captcha v0.0.0-20240905153133-df43b9250ed5/go.mod h1:YLOsiln/arX3egGtxG4QNp49G2CIqP9pqD2VL56obLc=
 code.forgejo.org/go-chi/session v0.0.0-20241017103059-2a992261fc26 h1:6XCLWu8A0nPM862Uh68kQmxsBsaQNfPPFwYjzG8M8QE=
