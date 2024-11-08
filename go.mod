@@ -9,7 +9,7 @@ require (
 	code.forgejo.org/go-chi/binding v0.0.0-20241105210225-1f8bf5136720
 	code.forgejo.org/go-chi/cache v0.0.0-20240912103640-dcb08fba860d
 	code.forgejo.org/go-chi/captcha v0.0.0-20240905153133-df43b9250ed5
-	code.forgejo.org/go-chi/session v0.0.0-20241017103059-2a992261fc26
+	code.forgejo.org/go-chi/session v1.0.0
 	code.gitea.io/actions-proto-go v0.4.0
 	code.gitea.io/gitea-vet v0.2.3
 	code.gitea.io/sdk/gitea v0.17.1

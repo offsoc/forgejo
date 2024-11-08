@@ -16,8 +16,8 @@ code.forgejo.org/go-chi/cache v0.0.0-20240912103640-dcb08fba860d h1:nOu/2GX571t4
 code.forgejo.org/go-chi/cache v0.0.0-20240912103640-dcb08fba860d/go.mod h1:OVlZ/TqDYJ+RUJ+R+J+OLxtlyjo3pbjBeK7LAWAB+Vk=
 code.forgejo.org/go-chi/captcha v0.0.0-20240905153133-df43b9250ed5 h1:A7P1liXCpJBHEJ5KIDsF0ujnQ8FQ/aX1UixTW0vGrDQ=
 code.forgejo.org/go-chi/captcha v0.0.0-20240905153133-df43b9250ed5/go.mod h1:YLOsiln/arX3egGtxG4QNp49G2CIqP9pqD2VL56obLc=
-code.forgejo.org/go-chi/session v0.0.0-20241017103059-2a992261fc26 h1:6XCLWu8A0nPM862Uh68kQmxsBsaQNfPPFwYjzG8M8QE=
-code.forgejo.org/go-chi/session v0.0.0-20241017103059-2a992261fc26/go.mod h1:lS76JFHZqGXYJTBHqwZ910UG046hIXAaYIN6J0Lf8sI=
+code.forgejo.org/go-chi/session v1.0.0 h1:1hjLWHpXkb4vs/g9rk/unhRL4AoKEqVUPJ+opI8UO3Y=
+code.forgejo.org/go-chi/session v1.0.0/go.mod h1:lS76JFHZqGXYJTBHqwZ910UG046hIXAaYIN6J0Lf8sI=
 code.gitea.io/actions-proto-go v0.4.0 h1:OsPBPhodXuQnsspG1sQ4eRE1PeoZyofd7+i73zCwnsU=
 code.gitea.io/actions-proto-go v0.4.0/go.mod h1:mn7Wkqz6JbnTOHQpot3yDeHx+O5C9EGhMEE+htvHBas=
 code.gitea.io/gitea-vet v0.2.3 h1:gdFmm6WOTM65rE8FUBTRzeQZYzXePKSSB1+r574hWwI=
