@@ -39,11 +39,11 @@ func NewForgeUndoLike(actorIRI, objectIRI string, startTime time.Time) (ForgeUnd
 	result := ForgeUndoLike{}
 	result.Type = ap.UndoType
 	result.Actor = ap.IRI(actorIRI)   // That's us, a User
-	result.Object = ap.IRI(objectIRI) // That's them, a Repository
+	result.Object, _ = NewForgeLike(actorIRI, objectIRI, startTime)
 	result.StartTime = startTime
-	if valid, err := validation.IsValid(result); !valid {
+	/*if valid, err := validation.IsValid(result); !valid {
 		return ForgeUndoLike{}, err
-	}
+	}*/
 	return result, nil
 }
 
