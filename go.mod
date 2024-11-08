@@ -7,7 +7,7 @@ require (
 	code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251
 	code.forgejo.org/forgejo/reply v1.0.2
 	code.forgejo.org/go-chi/binding v0.0.0-20241105210225-1f8bf5136720
-	code.forgejo.org/go-chi/cache v0.0.0-20240912103640-dcb08fba860d
+	code.forgejo.org/go-chi/cache v0.0.0-20241107142916-f57d5273ad78
 	code.forgejo.org/go-chi/captcha v0.0.0-20240905153133-df43b9250ed5
 	code.forgejo.org/go-chi/session v0.0.0-20241017103059-2a992261fc26
 	code.gitea.io/actions-proto-go v0.4.0
