@@ -55,7 +55,6 @@ func (re *Renderer) RenderMarkup(ctx *context.Base, repo *context.Repository) {
 	case "file":
 		// File as document based on file extension
 		markupType = ""
-		re.URLPrefix = repo.RepoLink
 		relativePath = re.FilePath
 	default:
 		ctx.Error(http.StatusUnprocessableEntity, fmt.Sprintf("Unknown mode: %s", re.Mode))
