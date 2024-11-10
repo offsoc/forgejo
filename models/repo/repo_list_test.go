@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
+	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
 
 	"github.com/stretchr/testify/assert"
@@ -402,4 +403,24 @@ func TestSearchRepositoryByTopicName(t *testing.T) {
 			assert.Equal(t, int64(testCase.count), count)
 		})
 	}
+}
+
+func TestFindUserCodeAccessibleRepoIDs(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	// as a guest user
+	ids, err := repo_model.FindUserCodeAccessibleRepoIDs(db.DefaultContext, nil)
+	require.NoError(t, err)
+	// public and private repo under a limited visibility
+	assert.NotContains(t, ids, int64(38))
+	assert.NotContains(t, ids, int64(39))
+
+	// as the owner (id 22)
+	user, err := user_model.GetUserByID(db.DefaultContext, 22)
+	require.NoError(t, err)
+
+	ids, err = repo_model.FindUserCodeAccessibleRepoIDs(db.DefaultContext, user)
+	require.NoError(t, err)
+	assert.Contains(t, ids, int64(38))
+	assert.Contains(t, ids, int64(39))
 }
