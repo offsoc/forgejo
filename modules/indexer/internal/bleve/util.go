@@ -16,6 +16,13 @@ import (
 	"github.com/blevesearch/bleve/v2/index/upsidedown"
 )
 
+const (
+	// fuzzyDenominator determines the levenshtein distance per each character of a keyword
+	fuzzyDenominator = 4
+	// see https://github.com/blevesearch/bleve/issues/1563#issuecomment-786822311
+	maxFuzziness = 2
+)
+
 // openIndexer open the index at the specified path, checking for metadata
 // updates and bleve version updates.  If index needs to be created (or
 // re-created), returns (nil, nil)
@@ -48,14 +55,6 @@ func openIndexer(path string, latestVersion int) (bleve.Index, int, error) {
 
 	return index, 0, nil
 }
-
-
-const (
-	// fuzzyDenominator determines the levenshtein distance per each character of a keyword
-	fuzzyDenominator = 4
-	// see https://github.com/blevesearch/bleve/issues/1563#issuecomment-786822311
-	maxFuzziness = 2
-)
 
 // This method test the GuessFuzzinessByKeyword method. The fuzziness is based on the levenshtein distance and determines how many chars
 // may be different on two string and they still be considered equivalent.
