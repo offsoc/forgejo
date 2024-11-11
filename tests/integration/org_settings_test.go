@@ -52,6 +52,8 @@ func TestOrgSettingsChangeEmail(t *testing.T) {
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadOrganization)
 
 	t.Run("Invalid", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
 		settings := getOrgSettingsFormData(t, session, orgName)
 
 		settings["email"] = "invalid"
@@ -62,6 +64,8 @@ func TestOrgSettingsChangeEmail(t *testing.T) {
 	})
 
 	t.Run("Valid", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
 		settings := getOrgSettingsFormData(t, session, orgName)
 
 		settings["email"] = "example@example.com"
@@ -72,6 +76,8 @@ func TestOrgSettingsChangeEmail(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
 		settings := getOrgSettingsFormData(t, session, orgName)
 
 		settings["email"] = ""

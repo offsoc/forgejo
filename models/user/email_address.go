@@ -203,7 +203,7 @@ func GetPrimaryEmailAddressOfUser(ctx context.Context, uid int64) (*EmailAddress
 }
 
 // Deletes the primary email address of the user
-// This is only alllowed if the user is a organization
+// This is only allowed if the user is a organization
 func DeletePrimaryEmailAddressOfUser(ctx context.Context, uid int64) error {
 	user, err := GetUserByID(ctx, uid)
 	if err != nil {
