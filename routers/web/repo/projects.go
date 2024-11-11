@@ -135,6 +135,10 @@ func RenderNewProject(ctx *context.Context) {
 	ctx.Data["CardTypes"] = project_model.GetCardConfig()
 	ctx.Data["CanWriteProjects"] = ctx.Repo.Permission.CanWrite(unit.TypeProjects)
 	ctx.Data["CancelLink"] = ctx.Repo.Repository.Link() + "/projects"
+	ctx.Data["ProjectMarkdownPreviewURL"] = fmt.Sprintf("%s/markup", ctx.Repo.Repository.Link())
+	ctx.Data["ProjectMarkdownPreviewContext"] = ctx.Repo.Repository.Link()
+	ctx.Data["ProjectMarkdownPreviewMode"] = "comment"
+	ctx.Data["ProjectMarkdownHideRepoButtons"] = false
 	ctx.HTML(http.StatusOK, tplProjectsNew)
 }
 
@@ -238,6 +242,10 @@ func RenderEditProject(ctx *context.Context) {
 	ctx.Data["card_type"] = p.CardType
 	ctx.Data["redirect"] = ctx.FormString("redirect")
 	ctx.Data["CancelLink"] = fmt.Sprintf("%s/projects/%d", ctx.Repo.Repository.Link(), p.ID)
+	ctx.Data["ProjectMarkdownPreviewURL"] = fmt.Sprintf("%s/markup", ctx.Repo.Repository.Link())
+	ctx.Data["ProjectMarkdownPreviewContext"] = ctx.Repo.Repository.Link()
+	ctx.Data["ProjectMarkdownPreviewMode"] = "comment"
+	ctx.Data["ProjectMarkdownHideRepoButtons"] = false
 
 	ctx.HTML(http.StatusOK, tplProjectsNew)
 }
@@ -252,6 +260,10 @@ func EditProjectPost(ctx *context.Context) {
 	ctx.Data["CanWriteProjects"] = ctx.Repo.Permission.CanWrite(unit.TypeProjects)
 	ctx.Data["CardTypes"] = project_model.GetCardConfig()
 	ctx.Data["CancelLink"] = fmt.Sprintf("%s/projects/%d", ctx.Repo.Repository.Link(), projectID)
+	ctx.Data["ProjectMarkdownPreviewURL"] = fmt.Sprintf("%s/markup", ctx.Repo.Repository.Link())
+	ctx.Data["ProjectMarkdownPreviewContext"] = ctx.Repo.Repository.Link()
+	ctx.Data["ProjectMarkdownPreviewMode"] = "comment"
+	ctx.Data["ProjectMarkdownHideRepoButtons"] = false
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplProjectsNew)

@@ -11,6 +11,7 @@ import {showTemporaryTooltip} from '../modules/tippy.js';
 import {confirmModal} from './comp/ConfirmModal.js';
 import {showErrorToast} from '../modules/toast.js';
 import {request, POST, GET} from '../modules/fetch.js';
+import {initComboMarkdownEditor} from './comp/ComboMarkdownEditor.js';
 import '../htmx.js';
 
 const {appUrl, appSubUrl, csrfToken, i18n} = window.config;
@@ -460,4 +461,16 @@ export function checkAppUrl() {
   }
   showGlobalErrorMessage(`Your ROOT_URL in app.ini is "${appUrl}", it's unlikely matching the site you are visiting.
 Mismatched ROOT_URL config causes wrong URL links for web UI/mail content/webhook notification/OAuth2 sign-in.`);
+}
+
+export function initComboMarkdownEditorGlobal() {
+  const markdownEditors = document.getElementsByClassName('combo-markdown-editor-init');
+
+  for (const currentEditor of markdownEditors) {
+    if (currentEditor.querySelector('markdown-toolbar') === null) {
+      throw new Error(`${currentEditor} doesn't contains a Markdown Editor`);
+    }
+
+    initComboMarkdownEditor(currentEditor);
+  }
 }

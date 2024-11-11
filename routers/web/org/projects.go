@@ -145,6 +145,10 @@ func RenderNewProject(ctx *context.Context) {
 	ctx.Data["PageIsViewProjects"] = true
 	ctx.Data["HomeLink"] = ctx.ContextUser.HomeLink()
 	ctx.Data["CancelLink"] = ctx.ContextUser.HomeLink() + "/-/projects"
+	ctx.Data["ProjectMarkdownPreviewURL"] = fmt.Sprintf("%s/-/markup", ctx.ContextUser.HomeLink())
+	ctx.Data["ProjectMarkdownPreviewContext"] = ctx.ContextUser.HomeLink()
+	ctx.Data["ProjectMarkdownPreviewMode"] = "markdown"
+	ctx.Data["ProjectMarkdownHideRepoButtons"] = true
 	shared_user.RenderUserHeader(ctx)
 
 	err := shared_user.LoadHeaderCount(ctx)
@@ -260,6 +264,10 @@ func RenderEditProject(ctx *context.Context) {
 	ctx.Data["HomeLink"] = ctx.ContextUser.HomeLink()
 	ctx.Data["card_type"] = p.CardType
 	ctx.Data["CancelLink"] = fmt.Sprintf("%s/-/projects/%d", ctx.ContextUser.HomeLink(), p.ID)
+	ctx.Data["ProjectMarkdownPreviewURL"] = fmt.Sprintf("%s/-/markup", ctx.ContextUser.HomeLink())
+	ctx.Data["ProjectMarkdownPreviewContext"] = ctx.ContextUser.HomeLink()
+	ctx.Data["ProjectMarkdownPreviewMode"] = "markdown"
+	ctx.Data["ProjectMarkdownHideRepoButtons"] = true
 
 	ctx.HTML(http.StatusOK, tplProjectsNew)
 }
@@ -274,6 +282,10 @@ func EditProjectPost(ctx *context.Context) {
 	ctx.Data["CanWriteProjects"] = canWriteProjects(ctx)
 	ctx.Data["CardTypes"] = project_model.GetCardConfig()
 	ctx.Data["CancelLink"] = fmt.Sprintf("%s/-/projects/%d", ctx.ContextUser.HomeLink(), projectID)
+	ctx.Data["ProjectMarkdownPreviewURL"] = fmt.Sprintf("%s/-/markup", ctx.ContextUser.HomeLink())
+	ctx.Data["ProjectMarkdownPreviewContext"] = ctx.ContextUser.HomeLink()
+	ctx.Data["ProjectMarkdownPreviewMode"] = "markdown"
+	ctx.Data["ProjectMarkdownHideRepoButtons"] = true
 
 	shared_user.RenderUserHeader(ctx)
 

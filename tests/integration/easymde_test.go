@@ -6,16 +6,27 @@ package integration
 import (
 	"net/http"
 	"testing"
+
+	"code.gitea.io/gitea/tests"
 )
 
 func TestEasyMDESwitch(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
 	session := loginUser(t, "user2")
+
 	testEasyMDESwitch(t, session, "user2/glob/issues/1", false)
 	testEasyMDESwitch(t, session, "user2/glob/issues/new", false)
 	testEasyMDESwitch(t, session, "user2/glob/wiki?action=_new", true)
 	testEasyMDESwitch(t, session, "user2/glob/releases/new", true)
 	testEasyMDESwitch(t, session, "user2/glob/milestones/new", true)
 	testEasyMDESwitch(t, session, "user2/repo1/milestones/1/edit", true)
+	testEasyMDESwitch(t, session, "user/settings", false)
+	testEasyMDESwitch(t, session, "org/org3/settings", false)
+	testEasyMDESwitch(t, session, "user2/-/projects/new", false)
+	testEasyMDESwitch(t, session, "user2/-/projects/7/edit", false)
+	testEasyMDESwitch(t, session, "user2/repo1/projects/new", false)
+	testEasyMDESwitch(t, session, "user2/repo1/projects/1/edit", false)
 }
 
 func testEasyMDESwitch(t *testing.T, session *TestSession, url string, expected bool) {

@@ -170,7 +170,7 @@ class ComboMarkdownEditor {
 
     this.previewUrl = tabPreviewer.getAttribute('data-preview-url');
     this.previewContext = tabPreviewer.getAttribute('data-preview-context');
-    this.previewMode = this.options.previewMode ?? 'comment';
+    this.previewMode = tabPreviewer.getAttribute('data-preview-mode') ?? 'comment';
     this.previewWiki = this.options.previewWiki ?? false;
     tabPreviewer.addEventListener('click', async () => {
       const formData = new FormData();

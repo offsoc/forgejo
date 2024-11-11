@@ -1,5 +1,4 @@
 import {hideElem, showElem} from '../utils/dom.js';
-import {initComboMarkdownEditor} from './comp/ComboMarkdownEditor.js';
 
 export function initRepoRelease() {
   for (const el of document.querySelectorAll('.remove-rel-attach')) {
@@ -17,7 +16,6 @@ export function initRepoReleaseNew() {
   if (!document.querySelector('.repository.new.release')) return;
 
   initTagNameEditor();
-  initRepoReleaseEditor();
   initAddExternalLinkButton();
 }
 
@@ -44,16 +42,6 @@ function initTagNameEditor() {
       tagHelper.textContent = value ? newTagHelperText : defaultTagHelperText;
     }
   });
-}
-
-function initRepoReleaseEditor() {
-  const editor = document.querySelector(
-    '.repository.new.release .combo-markdown-editor',
-  );
-  if (!editor) {
-    return;
-  }
-  initComboMarkdownEditor(editor);
 }
 
 let newAttachmentCount = 0;

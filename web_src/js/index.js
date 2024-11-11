@@ -44,6 +44,7 @@ import {
   initGlobalFormDirtyLeaveConfirm,
   initGlobalLinkActions,
   initHeadNavbarContentToggle,
+  initComboMarkdownEditorGlobal,
 } from './features/common-global.js';
 import {initRepoTopicBar} from './features/repo-home.js';
 import {initAdminEmails} from './features/admin/emails.js';
@@ -86,7 +87,6 @@ import {initRepoDiffCommitBranchesAndTags} from './features/repo-diff-commit.js'
 import {initDirAuto} from './modules/dirauto.js';
 import {initRepositorySearch} from './features/repo-search.js';
 import {initColorPickers} from './features/colorpicker.js';
-import {initRepoMilestoneEditor} from './features/repo-milestone.js';
 
 // Init Gitea's Fomantic settings
 initGiteaFomantic();
@@ -103,6 +103,7 @@ onDomReady(() => {
   initGlobalEnterQuickSubmit();
   initGlobalFormDirtyLeaveConfirm();
   initGlobalLinkActions();
+  initComboMarkdownEditorGlobal();
 
   initCommonOrganization();
   initCommonIssueListQuickGoto();
@@ -176,7 +177,6 @@ onDomReady(() => {
   initRepoContributors();
   initRepoCodeFrequency();
   initRepoRecentCommits();
-  initRepoMilestoneEditor();
 
   initCommitStatuses();
   initCaptcha();
