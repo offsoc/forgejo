@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/modules/charset"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
+	alphanum_tokenizer "code.gitea.io/gitea/modules/indexer/code/bleve/tokenizer/alphanum"
 	"code.gitea.io/gitea/modules/indexer/code/internal"
 	indexer_internal "code.gitea.io/gitea/modules/indexer/internal"
 	inner_bleve "code.gitea.io/gitea/modules/indexer/internal/bleve"
@@ -30,7 +31,6 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
 	"github.com/blevesearch/bleve/v2/analysis/token/unicodenorm"
-	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
 	"github.com/blevesearch/bleve/v2/mapping"
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/go-enry/go-enry/v2"
@@ -95,7 +95,7 @@ func generateBleveIndexMapping() (mapping.IndexMapping, error) {
 	} else if err := mapping.AddCustomAnalyzer(repoIndexerAnalyzer, map[string]any{
 		"type":          analyzer_custom.Name,
 		"char_filters":  []string{},
-		"tokenizer":     letter.Name,
+		"tokenizer":     alphanum_tokenizer.Name,
 		"token_filters": []string{unicodeNormalizeName, camelcase.Name, lowercase.Name},
 	}); err != nil {
 		return nil, err

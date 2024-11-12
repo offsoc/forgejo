@@ -80,10 +80,10 @@ func guessFuzzinessByKeyword(s string) int {
 	// according to https://github.com/blevesearch/bleve/issues/1563, the supported max fuzziness is 2
 	// magic number 4 was chosen to determine the levenshtein distance per each character of a keyword
 	// BUT, when using CJK (eg: `갃갃갃` `啊啊啊`), it mismatches a lot.
-	// Likewise, queries whose terms contains characters that are *not* letters should not use fuzziness
+	// Likewise, queries whose terms contains characters that are *not* letters or digits should not use fuzziness
 
 	for _, r := range s {
-		if r >= 128 || !unicode.IsLetter(r) {
+		if r >= 128 || !(unicode.IsLetter(r) || unicode.IsNumber(r)) {
 			return 0
 		}
 	}

@@ -63,13 +63,13 @@ const (
 					"content_analyzer": {
 						"tokenizer": "content_tokenizer",
 						"filter" : ["lowercase"]
-					},
+					}
       			},
 				"tokenizer": {
 					"content_tokenizer": {
 						"type": "simple_pattern_split",
 						"pattern": "[^a-zA-Z0-9]"
-					},
+					}
 				}
 			}
 		},

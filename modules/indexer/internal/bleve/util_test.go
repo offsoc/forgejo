@@ -37,6 +37,10 @@ func TestBleveGuessFuzzinessByKeyword(t *testing.T) {
 		},
 		{
 			Input:     "repo1",
+			Fuzziness: 1,
+		},
+		{
+			Input:     "repo_one",
 			Fuzziness: 0,
 		},
 		{
