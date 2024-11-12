@@ -1,0 +1,26 @@
+Etag: "f87b0fd59e59458a9a808311324b873c6baf3fde861298a99de9986270dd4d79"
+X-Github-Media-Type: github.v3; param=squirrel-girl-preview
+X-Github-Api-Version-Selected: 2022-11-28
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Content-Type-Options: nosniff
+Content-Type: application/json; charset=utf-8
+Content-Length: 2
+Cache-Control: private, max-age=60, s-maxage=60
+Link: <https://api.github.com/repositories/220672974/issues/1/reactions?page=1&per_page=2>; rel="prev", <https://api.github.com/repositories/220672974/issues/1/reactions?page=1&per_page=2>; rel="last", <https://api.github.com/repositories/220672974/issues/1/reactions?page=1&per_page=2>; rel="first"
+X-Ratelimit-Limit: 5000
+X-Ratelimit-Remaining: 4922
+X-Ratelimit-Reset: 1730800941
+X-Xss-Protection: 0
+X-Github-Request-Id: C7CC:3118FC:3F5FA7C:403633C:6729E6B6
+X-Oauth-Scopes: 
+X-Ratelimit-Used: 78
+X-Frame-Options: deny
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+X-Accepted-Oauth-Scopes: repo
+X-Ratelimit-Resource: core
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+
+[]

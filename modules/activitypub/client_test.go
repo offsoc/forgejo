@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"regexp"
 	"testing"
 	"time"
 
@@ -119,7 +118,7 @@ func TestActivityPubSignedPost(t *testing.T) {
 
 	expected := "BODY"
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Regexp(t, regexp.MustCompile("^"+setting.Federation.DigestAlgorithm), r.Header.Get("Digest"))
+		assert.Regexp(t, "^"+setting.Federation.DigestAlgorithm, r.Header.Get("Digest"))
 		assert.Contains(t, r.Header.Get("Signature"), pubID)
 		assert.Equal(t, ActivityStreamsContentType, r.Header.Get("Content-Type"))
 		body, err := io.ReadAll(r.Body)

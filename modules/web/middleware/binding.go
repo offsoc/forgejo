@@ -13,7 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 // Form form binding interface

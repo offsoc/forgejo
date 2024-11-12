@@ -91,7 +91,7 @@ func TestMigrateActionsArtifacts(t *testing.T) {
 
 	srcStorage, _ := createLocalStorage(t)
 	defer test.MockVariableValue(&storage.ActionsArtifacts, srcStorage)()
-	id := int64(0)
+	id := int64(42)
 
 	addArtifact := func(storagePath string, status actions.ArtifactStatus) {
 		id++

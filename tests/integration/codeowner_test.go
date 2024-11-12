@@ -6,6 +6,7 @@ package integration
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -135,6 +136,28 @@ func TestCodeOwner(t *testing.T) {
 			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadBranch: "user2/codeowner-out-of-date"})
 			unittest.AssertExistsIf(t, true, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 4})
 			unittest.AssertExistsIf(t, false, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 5})
+		})
+		t.Run("From a forked repository", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			session := loginUser(t, "user1")
+
+			r := fmt.Sprintf("%suser1/repo1.git", u.String())
+			remoteURL, _ := url.Parse(r)
+			remoteURL.User = url.UserPassword("user1", userPassword)
+			doGitAddRemote(dstPath, "forked-2", remoteURL)(t)
+
+			err := git.NewCommand(git.DefaultContext, "push", "forked-2", "HEAD:branch").Run(&git.RunOpts{Dir: dstPath})
+			require.NoError(t, err)
+
+			req := NewRequestWithValues(t, "POST", repo.FullName()+"/compare/main...user1/repo1:branch", map[string]string{
+				"_csrf": GetCSRF(t, session, repo.FullName()+"/compare/main...user1/repo1:branch"),
+				"title": "pull request",
+			})
+			session.MakeRequest(t, req, http.StatusOK)
+
+			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadBranch: "branch"})
+			unittest.AssertExistsIf(t, true, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 4})
 		})
 	})
 }

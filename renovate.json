@@ -15,7 +15,8 @@
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
   "prConcurrentLimit": 10,
   "osvVulnerabilityAlerts": true,
-  "labels": ["dependency-upgrade"],
+  "automergeStrategy": "squash",
+  "labels": ["dependency-upgrade","test/not-needed"],
   "packageRules": [
     {
       "description": "Require approval for python minor version",
@@ -83,6 +84,12 @@
       "groupName": "postcss"
     },
     {
+      "description": "Group Forgejo go-chi packages",
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchPackageNames": ["code.forgejo.org/go-chi/**"],
+      "groupName": "forgejo go-chi packages"
+    },
+    {
       "description": "Split minor and patch updates",
       "matchPackageNames": [
         "containerbase/python-prebuild",
@@ -127,7 +134,7 @@
     },
     {
       "description": "Disable renovate self-updates for release branches",
-      "matchBaseBranches": ["^v\\d+\\.\\d+\\/forgejo$"],
+      "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
       "matchDatasources": ["docker"],
       "matchPackageNames": [
         "code.forgejo.org/forgejo-contrib/renovate",

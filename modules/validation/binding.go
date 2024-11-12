@@ -11,7 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/auth"
 	"code.gitea.io/gitea/modules/git"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 	"github.com/gobwas/glob"
 )
 

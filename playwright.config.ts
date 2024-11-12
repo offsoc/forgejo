@@ -1,4 +1,4 @@
-import {devices} from '@playwright/test';
+import {devices, type PlaywrightTestConfig} from '@playwright/test';
 
 const BASE_URL = process.env.GITEA_URL?.replace?.(/\/$/g, '') || 'http://localhost:3000';
 
@@ -8,7 +8,7 @@ const BASE_URL = process.env.GITEA_URL?.replace?.(/\/$/g, '') || 'http://localho
  */
 export default {
   testDir: './tests/e2e/',
-  testMatch: /.*\.test\.e2e\.js/, // Match any .test.e2e.js files
+  testMatch: /.*\.test\.e2e\.ts/, // Match any .test.e2e.js files
 
   // you can adjust this value locally to match your machine's power,
   // or pass `--workers x` to playwright
@@ -99,4 +99,4 @@ export default {
   outputDir: 'tests/e2e/test-artifacts/',
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
   snapshotDir: 'tests/e2e/test-snapshots/',
-};
+} satisfies PlaywrightTestConfig;

@@ -208,12 +208,18 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 		query.And(inner_meilisearch.NewFilterLte("updated_unix", options.UpdatedBeforeUnix.Value()))
 	}
 
-	if options.SortBy == "" {
-		options.SortBy = internal.SortByCreatedAsc
-	}
-	sortBy := []string{
-		parseSortBy(options.SortBy),
-		"id:desc",
+	var sortBy []string
+	switch options.SortBy {
+	// sort by relevancy (no explicit sorting)
+	case internal.SortByScore:
+		fallthrough
+	case "":
+		sortBy = []string{}
+	default:
+		sortBy = []string{
+			parseSortBy(options.SortBy),
+			"id:desc",
+		}
 	}
 
 	skip, limit := indexer_internal.ParsePaginator(options.Paginator, maxTotalHits)

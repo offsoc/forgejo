@@ -127,6 +127,7 @@ func (o *SearchOptions) Copy(edit ...func(options *SearchOptions)) *SearchOption
 type SortBy string
 
 const (
+	SortByScore        SortBy = "-_score"
 	SortByCreatedDesc  SortBy = "-created_unix"
 	SortByUpdatedDesc  SortBy = "-updated_unix"
 	SortByCommentsDesc SortBy = "-comment_count"

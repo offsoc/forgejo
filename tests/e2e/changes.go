@@ -29,15 +29,16 @@ func initChangedFiles() {
 	globalPatterns := []string{
 		// meta and config
 		"Makefile",
-		"playwright.config.js",
+		"playwright.config.ts",
 		".forgejo/workflows/testing.yml",
 		"tests/e2e/*.go",
 		"tests/e2e/shared/*",
 		// frontend files
-		"frontend/*.js",
-		"frontend/{base,index}.css",
-		// templates
+		"web_src/js/{index,utils}.*",
+		"web_src/css/{base,index}.css",
+		// templates and helpers
 		"templates/base/**",
+		"modules/templates/**",
 	}
 	fullRunPatterns := []glob.Glob{}
 	for _, expr := range globalPatterns {

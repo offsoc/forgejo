@@ -39,7 +39,7 @@ func TestIssueTitles(t *testing.T) {
 
 		titleHTML := []string{
 			"Title",
-			`<span class="emoji" aria-label="thumbs up">👍</span>`,
+			`<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span>`,
 			`<code class="inline-code-block">code</code>`,
 		}
 
