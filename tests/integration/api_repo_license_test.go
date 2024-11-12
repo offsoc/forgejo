@@ -56,19 +56,19 @@ func TestAPIRepoLicense(t *testing.T) {
 
 		// let gitea update repo license
 		time.Sleep(time.Second)
-		checkRepoLicense(t, "user2", "repo1", []*api.RepoLicense{&api.RepoLicense{Name: "BSD-2-Clause", Path: "LICENSE"}})
+		checkRepoLicense(t, "user2", "repo1", []*api.RepoLicense{{Name: "BSD-2-Clause", Path: "LICENSE"}})
 
 		createOrReplaceFileInBranch(user, repo, "COPYING", repo.DefaultBranch, bsd3ClauseLicense)
 
 		// let gitea update repo license
 		time.Sleep(time.Second)
-		checkRepoLicense(t, "user2", "repo1", []*api.RepoLicense{&api.RepoLicense{Name: "BSD-2-Clause", Path: "LICENSE"}, &api.RepoLicense{Name: "BSD-3-Clause", Path: "COPYING"}})
+		checkRepoLicense(t, "user2", "repo1", []*api.RepoLicense{{Name: "BSD-2-Clause", Path: "LICENSE"}, {Name: "BSD-3-Clause", Path: "COPYING"}})
 
 		deleteFileInBranch(user, repo, "LICENSE", repo.DefaultBranch)
 
 		// let gitea update repo license
 		time.Sleep(time.Second)
-		checkRepoLicense(t, "user2", "repo1", []*api.RepoLicense{&api.RepoLicense{Name: "BSD-3-Clause", Path: "COPYING"}})
+		checkRepoLicense(t, "user2", "repo1", []*api.RepoLicense{{Name: "BSD-3-Clause", Path: "COPYING"}})
 
 		// Change default branch
 		token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
@@ -80,7 +80,7 @@ func TestAPIRepoLicense(t *testing.T) {
 
 		// let gitea update repo license
 		time.Sleep(time.Second)
-		checkRepoLicense(t, "user2", "repo1", []*api.RepoLicense{&api.RepoLicense{Name: "MIT", Path: "LICENSE"}})
+		checkRepoLicense(t, "user2", "repo1", []*api.RepoLicense{{Name: "MIT", Path: "LICENSE"}})
 	})
 }
 
