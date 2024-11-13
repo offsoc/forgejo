@@ -1,4 +1,6 @@
 {
-    "go.buildTags": "sqlite,sqlite_unlock_notify",
-    "go.testFlags": ["-v"]
+  "go.buildTags": "sqlite,sqlite_unlock_notify",
+  "go.testFlags": ["-v"],
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": ["--fast"]
 }

@@ -1,0 +1,26 @@
+X-Oauth-Scopes: 
+X-Accepted-Oauth-Scopes: repo
+X-Ratelimit-Limit: 5000
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+Content-Length: 2
+Cache-Control: private, max-age=60, s-maxage=60
+Etag: "f87b0fd59e59458a9a808311324b873c6baf3fde861298a99de9986270dd4d79"
+X-Content-Type-Options: nosniff
+Content-Security-Policy: default-src 'none'
+X-Ratelimit-Remaining: 4910
+X-Ratelimit-Reset: 1730800941
+X-Frame-Options: deny
+Content-Type: application/json; charset=utf-8
+Link: <https://api.github.com/repositories/220672974/issues/4/reactions?page=1&per_page=2>; rel="prev", <https://api.github.com/repositories/220672974/issues/4/reactions?page=1&per_page=2>; rel="last", <https://api.github.com/repositories/220672974/issues/4/reactions?page=1&per_page=2>; rel="first"
+X-Xss-Protection: 0
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+X-Github-Request-Id: C7CC:3118FC:3F60EE6:40377B6:6729E6BB
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+X-Ratelimit-Used: 90
+X-Ratelimit-Resource: core
+X-Github-Media-Type: github.v3; param=squirrel-girl-preview
+X-Github-Api-Version-Selected: 2022-11-28
+Access-Control-Allow-Origin: *
+
+[]

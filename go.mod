@@ -1,20 +1,20 @@
 module code.gitea.io/gitea
 
-go 1.23.2
+go 1.23.3
 
 require (
 	code.forgejo.org/f3/gof3/v3 v3.7.0
 	code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251
 	code.forgejo.org/forgejo/reply v1.0.2
-	code.forgejo.org/go-chi/cache v0.0.0-20240912103640-dcb08fba860d
-	code.forgejo.org/go-chi/captcha v0.0.0-20240905153133-df43b9250ed5
-	code.forgejo.org/go-chi/session v0.0.0-20241017103059-2a992261fc26
+	code.forgejo.org/go-chi/binding v1.0.0
+	code.forgejo.org/go-chi/cache v1.0.0
+	code.forgejo.org/go-chi/captcha v1.0.0
+	code.forgejo.org/go-chi/session v1.0.0
 	code.gitea.io/actions-proto-go v0.4.0
 	code.gitea.io/gitea-vet v0.2.3
 	code.gitea.io/sdk/gitea v0.17.1
 	codeberg.org/gusted/mcaptcha v0.0.0-20220723083913-4f3072e1d570
 	connectrpc.com/connect v1.17.0
-	gitea.com/go-chi/binding v0.0.0-20240430071103-39a851e106ed
 	gitea.com/lunny/levelqueue v0.4.2-0.20230414023320-3c0159fe0fe4
 	github.com/42wim/sshsig v0.0.0-20211121163825-841cf5bbc121
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358
@@ -24,7 +24,7 @@ require (
 	github.com/alecthomas/chroma/v2 v2.14.0
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/blevesearch/bleve/v2 v2.4.2
-	github.com/buildkite/terminal-to-html/v3 v3.16.3
+	github.com/buildkite/terminal-to-html/v3 v3.16.4
 	github.com/caddyserver/certmagic v0.21.4
 	github.com/chi-middleware/proxy v1.1.1
 	github.com/djherbis/buffer v1.2.0
@@ -57,7 +57,7 @@ require (
 	github.com/google/pprof v0.0.0-20241017200806-017d972448fc
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/feeds v1.2.0
-	github.com/gorilla/sessions v1.2.2
+	github.com/gorilla/sessions v1.4.0
 	github.com/h2non/gock v1.2.0
 	github.com/hashicorp/go-version v1.6.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
@@ -100,12 +100,12 @@ require (
 	github.com/yuin/goldmark v1.7.8
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	go.uber.org/mock v0.4.0
-	golang.org/x/crypto v0.28.0
+	golang.org/x/crypto v0.29.0
 	golang.org/x/image v0.21.0
-	golang.org/x/net v0.30.0
+	golang.org/x/net v0.31.0
 	golang.org/x/oauth2 v0.23.0
-	golang.org/x/sys v0.26.0
-	golang.org/x/text v0.19.0
+	golang.org/x/sys v0.27.0
+	golang.org/x/text v0.20.0
 	golang.org/x/tools v0.26.0
 	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.35.1
@@ -281,7 +281,7 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
 	golang.org/x/mod v0.21.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sync v0.9.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
@@ -296,3 +296,5 @@ replace github.com/shurcooL/vfsgen => github.com/lunny/vfsgen v0.0.0-20220105142
 replace github.com/nektos/act => code.forgejo.org/forgejo/act v1.21.5
 
 replace github.com/mholt/archiver/v3 => code.forgejo.org/forgejo/archiver/v3 v3.5.1
+
+replace github.com/goccy/go-json => github.com/grafana/go-json v0.0.0-20241106155216-71a03f133f5c

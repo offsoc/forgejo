@@ -6,9 +6,10 @@ package integration
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 	"testing"
+
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -19,92 +20,92 @@ import (
 // - Followers and Following lists have correct amounts of items
 // - %d followers and %following counters are always present and always have correct numbers and use correct plurals
 func TestUserProfileFollows(t *testing.T) {
-	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
-		// This test needs 3 users to check for all possible states
-		// The accounts of user3 and user4 are not functioning
-		user1 := loginUser(t, "user1")
-		user2 := loginUser(t, "user2")
-		user5 := loginUser(t, "user5")
+	defer tests.PrepareTestEnv(t)()
 
-		followersLink := "#profile-avatar-card a[href='/user1?tab=followers']"
-		followingLink := "#profile-avatar-card a[href='/user1?tab=following']"
-		listHeader := ".user-cards h2"
-		listItems := ".user-cards .list"
+	// This test needs 3 users to check for all possible states
+	// The accounts of user3 and user4 are not functioning
+	user1 := loginUser(t, "user1")
+	user2 := loginUser(t, "user2")
+	user5 := loginUser(t, "user5")
 
-		// = No follows =
+	followersLink := "#profile-avatar-card a[href='/user1?tab=followers']"
+	followingLink := "#profile-avatar-card a[href='/user1?tab=following']"
+	listHeader := ".user-cards h2"
+	listItems := ".user-cards .list"
 
-		var followCount int
+	// = No follows =
 
-		// Request the profile of user1, the Followers tab
-		response := user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=followers"), http.StatusOK)
-		page := NewHTMLParser(t, response.Body)
+	var followCount int
 
-		// Verify that user1 has no followers
-		testSelectorEquals(t, page, followersLink, "0 followers")
-		testSelectorEquals(t, page, listHeader, "Followers")
-		testListCount(t, page, listItems, followCount)
+	// Request the profile of user1, the Followers tab
+	response := user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=followers"), http.StatusOK)
+	page := NewHTMLParser(t, response.Body)
 
-		// Request the profile of user1, the Following tab
-		response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=following"), http.StatusOK)
-		page = NewHTMLParser(t, response.Body)
+	// Verify that user1 has no followers
+	testSelectorEquals(t, page, followersLink, "0 followers")
+	testSelectorEquals(t, page, listHeader, "Followers")
+	testListCount(t, page, listItems, followCount)
 
-		// Verify that user1 does not follow anyone
-		testSelectorEquals(t, page, followingLink, "0 following")
-		testSelectorEquals(t, page, listHeader, "Following")
-		testListCount(t, page, listItems, followCount)
+	// Request the profile of user1, the Following tab
+	response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=following"), http.StatusOK)
+	page = NewHTMLParser(t, response.Body)
 
-		// Make user1 and user2 follow each other
-		testUserFollowUser(t, user1, "user2")
-		testUserFollowUser(t, user2, "user1")
+	// Verify that user1 does not follow anyone
+	testSelectorEquals(t, page, followingLink, "0 following")
+	testSelectorEquals(t, page, listHeader, "Following")
+	testListCount(t, page, listItems, followCount)
 
-		// = 1 follow each =
+	// Make user1 and user2 follow each other
+	testUserFollowUser(t, user1, "user2")
+	testUserFollowUser(t, user2, "user1")
 
-		followCount++
+	// = 1 follow each =
 
-		// Request the profile of user1, the Followers tab
-		response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=followers"), http.StatusOK)
-		page = NewHTMLParser(t, response.Body)
+	followCount++
 
-		// Verify it is now followed by 1 user
-		testSelectorEquals(t, page, followersLink, "1 follower")
-		testSelectorEquals(t, page, listHeader, "Follower")
-		testListCount(t, page, listItems, followCount)
+	// Request the profile of user1, the Followers tab
+	response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=followers"), http.StatusOK)
+	page = NewHTMLParser(t, response.Body)
 
-		// Request the profile of user1, the Following tab
-		response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=following"), http.StatusOK)
-		page = NewHTMLParser(t, response.Body)
+	// Verify it is now followed by 1 user
+	testSelectorEquals(t, page, followersLink, "1 follower")
+	testSelectorEquals(t, page, listHeader, "Follower")
+	testListCount(t, page, listItems, followCount)
 
-		// Verify it now follows follows 1 user
-		testSelectorEquals(t, page, followingLink, "1 following")
-		testSelectorEquals(t, page, listHeader, "Following")
-		testListCount(t, page, listItems, followCount)
+	// Request the profile of user1, the Following tab
+	response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=following"), http.StatusOK)
+	page = NewHTMLParser(t, response.Body)
 
-		// Make user1 and user3 follow each other
-		testUserFollowUser(t, user1, "user5")
-		testUserFollowUser(t, user5, "user1")
+	// Verify it now follows follows 1 user
+	testSelectorEquals(t, page, followingLink, "1 following")
+	testSelectorEquals(t, page, listHeader, "Following")
+	testListCount(t, page, listItems, followCount)
 
-		// = 2 follows =
+	// Make user1 and user3 follow each other
+	testUserFollowUser(t, user1, "user5")
+	testUserFollowUser(t, user5, "user1")
 
-		followCount++
+	// = 2 follows =
 
-		// Request the profile of user1, the Followers tab
-		response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=followers"), http.StatusOK)
-		page = NewHTMLParser(t, response.Body)
+	followCount++
 
-		// Verify it is now followed by 2 users
-		testSelectorEquals(t, page, followersLink, "2 followers")
-		testSelectorEquals(t, page, listHeader, "Followers")
-		testListCount(t, page, listItems, followCount)
+	// Request the profile of user1, the Followers tab
+	response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=followers"), http.StatusOK)
+	page = NewHTMLParser(t, response.Body)
 
-		// Request the profile of user1, the Following tab
-		response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=following"), http.StatusOK)
-		page = NewHTMLParser(t, response.Body)
+	// Verify it is now followed by 2 users
+	testSelectorEquals(t, page, followersLink, "2 followers")
+	testSelectorEquals(t, page, listHeader, "Followers")
+	testListCount(t, page, listItems, followCount)
 
-		// Verify it now follows follows 2 users
-		testSelectorEquals(t, page, followingLink, "2 following")
-		testSelectorEquals(t, page, listHeader, "Following")
-		testListCount(t, page, listItems, followCount)
-	})
+	// Request the profile of user1, the Following tab
+	response = user1.MakeRequest(t, NewRequest(t, "GET", "/user1?tab=following"), http.StatusOK)
+	page = NewHTMLParser(t, response.Body)
+
+	// Verify it now follows follows 2 users
+	testSelectorEquals(t, page, followingLink, "2 following")
+	testSelectorEquals(t, page, listHeader, "Following")
+	testListCount(t, page, listItems, followCount)
 }
 
 // testUserFollowUser simply follows a user `following` by session of user `follower`

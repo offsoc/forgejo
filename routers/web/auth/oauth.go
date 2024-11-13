@@ -40,7 +40,7 @@ import (
 	remote_service "code.gitea.io/gitea/services/remote"
 	user_service "code.gitea.io/gitea/services/user"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"

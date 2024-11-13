@@ -12,8 +12,10 @@
 #    whatever is in the default branch instead
 #
 #  - after it is merged, double check it works by setting the
-#    run-end-to-end-test on a pull request (any pull request will doe
+#    run-end-to-end-test on a pull request (any pull request will do)
 #
+name: end-to-end
+
 on:
   push:
     branches:
@@ -33,10 +35,9 @@ jobs:
         run: |
           echo github.event.pull_request.head.repo.fork = ${{ github.event.pull_request.head.repo.fork }}
           echo github.event.action = ${{ github.event.action }}
-          echo github.event.pull_request.merged = ${{ github.event.pull_request.merged }}
-          echo github.event.pull_request.labels.*.name
+          echo github.event.label
           cat <<'EOF'
-          ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          ${{ toJSON(github.event.label) }}
           EOF
           cat <<'EOF'
           ${{ toJSON(github.event) }}
@@ -47,7 +48,7 @@ jobs:
       !startsWith(vars.ROLE, 'forgejo-') && (
         github.event_name == 'push' ||
         (
-          github.event.action == 'label_updated' && contains(github.event.pull_request.labels.*.name, 'run-end-to-end-tests')
+          github.event.action == 'label_updated' && github.event.label.name == 'run-end-to-end-tests'
         )
       )
     runs-on: docker

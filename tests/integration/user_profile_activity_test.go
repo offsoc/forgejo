@@ -5,11 +5,11 @@ package integration
 
 import (
 	"net/http"
-	"net/url"
 	"strconv"
 	"testing"
 
 	"code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -23,70 +23,69 @@ import (
 // - Profile visibility
 // - Public activity visibility
 func TestUserProfileActivity(t *testing.T) {
-	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
-		// This test needs multiple users with different access statuses to check for all possible states
-		userAdmin := loginUser(t, "user1")
-		userRegular := loginUser(t, "user2")
-		// Activity availability should be the same for guest and another non-admin user, so this is not tested separately
-		userGuest := emptyTestSession(t)
+	defer tests.PrepareTestEnv(t)()
+	// This test needs multiple users with different access statuses to check for all possible states
+	userAdmin := loginUser(t, "user1")
+	userRegular := loginUser(t, "user2")
+	// Activity availability should be the same for guest and another non-admin user, so this is not tested separately
+	userGuest := emptyTestSession(t)
 
-		// = Public profile, public activity =
+	// = Public profile, public activity =
 
-		// Set activity visibility of user2 to public. This is the default, but won't hurt to set it before testing.
-		testChangeUserActivityVisibility(t, userRegular, "off")
+	// Set activity visibility of user2 to public. This is the default, but won't hurt to set it before testing.
+	testChangeUserActivityVisibility(t, userRegular, "off")
 
-		// Verify availability of RSS button and activity tab
-		testUser2ActivityButtonsAvailability(t, userAdmin, true)
-		testUser2ActivityButtonsAvailability(t, userRegular, true)
-		testUser2ActivityButtonsAvailability(t, userGuest, true)
+	// Verify availability of RSS button and activity tab
+	testUser2ActivityButtonsAvailability(t, userAdmin, true)
+	testUser2ActivityButtonsAvailability(t, userRegular, true)
+	testUser2ActivityButtonsAvailability(t, userGuest, true)
 
-		// Verify the hint for all types of users: admin, self, guest
-		testUser2ActivityVisibility(t, userAdmin, "This activity is visible to everyone, but as an administrator you can also see interactions in private spaces.", true)
-		hintLink := testUser2ActivityVisibility(t, userRegular, "Your activity is visible to everyone, except for interactions in private spaces. Configure.", true)
-		testUser2ActivityVisibility(t, userGuest, "", true)
+	// Verify the hint for all types of users: admin, self, guest
+	testUser2ActivityVisibility(t, userAdmin, "This activity is visible to everyone, but as an administrator you can also see interactions in private spaces.", true)
+	hintLink := testUser2ActivityVisibility(t, userRegular, "Your activity is visible to everyone, except for interactions in private spaces. Configure.", true)
+	testUser2ActivityVisibility(t, userGuest, "", true)
 
-		// When viewing own profile, the user is offered to configure activity visibility. Verify that the link is correct and works, also check that it links back to the activity tab.
-		linkCorrect := assert.EqualValues(t, "/user/settings#keep-activity-private", hintLink)
-		if linkCorrect {
-			page := NewHTMLParser(t, userRegular.MakeRequest(t, NewRequest(t, "GET", hintLink), http.StatusOK).Body)
-			activityLink, exists := page.Find(".field:has(.checkbox#keep-activity-private) .help a").Attr("href")
-			assert.True(t, exists)
-			assert.EqualValues(t, "/user2?tab=activity", activityLink)
-		}
+	// When viewing own profile, the user is offered to configure activity visibility. Verify that the link is correct and works, also check that it links back to the activity tab.
+	linkCorrect := assert.EqualValues(t, "/user/settings#keep-activity-private", hintLink)
+	if linkCorrect {
+		page := NewHTMLParser(t, userRegular.MakeRequest(t, NewRequest(t, "GET", hintLink), http.StatusOK).Body)
+		activityLink, exists := page.Find(".field:has(.checkbox#keep-activity-private) .help a").Attr("href")
+		assert.True(t, exists)
+		assert.EqualValues(t, "/user2?tab=activity", activityLink)
+	}
 
-		// = Private profile, but public activity =
+	// = Private profile, but public activity =
 
-		// Set profile visibility of user2 to private
-		testChangeUserProfileVisibility(t, userRegular, structs.VisibleTypePrivate)
+	// Set profile visibility of user2 to private
+	testChangeUserProfileVisibility(t, userRegular, structs.VisibleTypePrivate)
 
-		// When profile activity is configured as public, but the profile is private, tell the user about this and link to visibility settings.
-		hintLink = testUser2ActivityVisibility(t, userRegular, "Your activity is only visible to you and the instance administrators because your profile is private. Configure.", true)
-		assert.EqualValues(t, "/user/settings#visibility-setting", hintLink)
+	// When profile activity is configured as public, but the profile is private, tell the user about this and link to visibility settings.
+	hintLink = testUser2ActivityVisibility(t, userRegular, "Your activity is only visible to you and the instance administrators because your profile is private. Configure.", true)
+	assert.EqualValues(t, "/user/settings#visibility-setting", hintLink)
 
-		// When the profile is private, tell the admin about this.
-		testUser2ActivityVisibility(t, userAdmin, "This activity is visible to you because you're an administrator, but the user wants it to remain private.", true)
+	// When the profile is private, tell the admin about this.
+	testUser2ActivityVisibility(t, userAdmin, "This activity is visible to you because you're an administrator, but the user wants it to remain private.", true)
 
-		// Set profile visibility of user2 back to public
-		testChangeUserProfileVisibility(t, userRegular, structs.VisibleTypePublic)
+	// Set profile visibility of user2 back to public
+	testChangeUserProfileVisibility(t, userRegular, structs.VisibleTypePublic)
 
-		// = Private acitivty =
+	// = Private acitivty =
 
-		// Set activity visibility of user2 to private
-		testChangeUserActivityVisibility(t, userRegular, "on")
+	// Set activity visibility of user2 to private
+	testChangeUserActivityVisibility(t, userRegular, "on")
 
-		// Verify availability of RSS button and activity tab
-		testUser2ActivityButtonsAvailability(t, userAdmin, true)
-		testUser2ActivityButtonsAvailability(t, userRegular, true)
-		testUser2ActivityButtonsAvailability(t, userGuest, false)
+	// Verify availability of RSS button and activity tab
+	testUser2ActivityButtonsAvailability(t, userAdmin, true)
+	testUser2ActivityButtonsAvailability(t, userRegular, true)
+	testUser2ActivityButtonsAvailability(t, userGuest, false)
 
-		// Verify the hint for all types of users: admin, self, guest
-		testUser2ActivityVisibility(t, userAdmin, "This activity is visible to you because you're an administrator, but the user wants it to remain private.", true)
-		hintLink = testUser2ActivityVisibility(t, userRegular, "Your activity is only visible to you and the instance administrators. Configure.", true)
-		testUser2ActivityVisibility(t, userGuest, "This user has disabled the public visibility of the activity.", false)
+	// Verify the hint for all types of users: admin, self, guest
+	testUser2ActivityVisibility(t, userAdmin, "This activity is visible to you because you're an administrator, but the user wants it to remain private.", true)
+	hintLink = testUser2ActivityVisibility(t, userRegular, "Your activity is only visible to you and the instance administrators. Configure.", true)
+	testUser2ActivityVisibility(t, userGuest, "This user has disabled the public visibility of the activity.", false)
 
-		// Verify that Configure link is correct
-		assert.EqualValues(t, "/user/settings#keep-activity-private", hintLink)
-	})
+	// Verify that Configure link is correct
+	assert.EqualValues(t, "/user/settings#keep-activity-private", hintLink)
 }
 
 // testChangeUserActivityVisibility allows to easily change visibility of public activity for a user

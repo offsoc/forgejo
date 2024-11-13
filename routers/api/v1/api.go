@@ -103,7 +103,7 @@ import (
 
 	_ "code.gitea.io/gitea/routers/api/v1/swagger" // for swagger generation
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 func sudo() func(ctx *context.APIContext) {

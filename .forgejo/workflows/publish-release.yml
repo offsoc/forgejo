@@ -60,17 +60,6 @@ jobs:
           verbose: ${{ vars.VERBOSE }}
 
       - name: upgrade v*.next.forgejo.org
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get update -qq
-          apt-get -q install -y -qq curl
-          version="${{ github.ref_name }}"
-          version=${version##*v}
-          major=$(echo $version | sed -E -e 's/^([0-9]+).*/\1/')
-          # https://forgejo.org/docs/next/developer/infrastructure
-          curl -o /dev/null -sS https://v$major.next.forgejo.org/.well-known/wakeup-on-logs/forgejo-v$major
-
-      - name: upgrade v*.next.forgejo.org (k8s)
         uses: https://code.forgejo.org/infrastructure/next-digest@v1.1.0
         with:
           url: https://placeholder:${{ secrets.TOKEN_NEXT_DIGEST }}@code.forgejo.org/infrastructure/next-digest
