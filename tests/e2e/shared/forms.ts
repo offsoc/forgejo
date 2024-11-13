@@ -1,8 +1,7 @@
-import {expect} from '@playwright/test';
+import {expect, type Page} from '@playwright/test';
 import {AxeBuilder} from '@axe-core/playwright';
 
-export async function validate_form({page}, scope) {
-  scope ??= 'form';
+export async function validate_form({page}: {page: Page}, scope: 'form' | 'fieldset' = 'form') {
   const accessibilityScanResults = await new AxeBuilder({page})
     // disable checking for link style - should be fixed, but not now
     .disableRules('link-in-text-block')

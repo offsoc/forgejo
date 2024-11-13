@@ -1,6 +1,6 @@
-import {devices} from '@playwright/test';
+import {devices, type PlaywrightTestConfig} from '@playwright/test';
 
-const BASE_URL = process.env.GITEA_URL?.replace?.(/\/$/g, '') || 'http://localhost:3000';
+const BASE_URL = process.env.GITEA_URL?.replace?.(/\/$/g, '') || 'http://localhost:3003';
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -8,11 +8,11 @@ const BASE_URL = process.env.GITEA_URL?.replace?.(/\/$/g, '') || 'http://localho
  */
 export default {
   testDir: './tests/e2e/',
-  testMatch: /.*\.test\.e2e\.js/, // Match any .test.e2e.js files
+  testMatch: /.*\.test\.e2e\.ts/, // Match any .test.e2e.js files
 
   // you can adjust this value locally to match your machine's power,
   // or pass `--workers x` to playwright
-  workers: process.env.CI ? 1 : 2,
+  workers: 1,
 
   /* Maximum time one test can run for. */
   timeout: 30 * 1000,
@@ -22,7 +22,7 @@ export default {
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 2000,
+    timeout: 3000,
   },
 
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -30,6 +30,8 @@ export default {
 
   /* Retry on CI only */
   retries: process.env.CI ? 1 : 0,
+  /* fail fast */
+  maxFailures: process.env.CI ? 1 : 0,
 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? 'list' : [['list'], ['html', {outputFolder: 'tests/e2e/reports/', open: 'never'}]],
@@ -41,7 +43,7 @@ export default {
     locale: 'en-US',
 
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
-    actionTimeout: 2000,
+    actionTimeout: 3000,
 
     /* Maximum time allowed for navigation, such as `page.goto()`. */
     navigationTimeout: 10 * 1000,
@@ -95,8 +97,8 @@ export default {
     },
   ],
 
-  /* Folder for test artifacts such as screenshots, videos, traces, etc. */
+  /* Folder for test artifacts created during test execution such as screenshots, traces, etc. */
   outputDir: 'tests/e2e/test-artifacts/',
-  /* Folder for test artifacts such as screenshots, videos, traces, etc. */
+  /* Folder for explicit snapshots for visual testing */
   snapshotDir: 'tests/e2e/test-snapshots/',
-};
+} satisfies PlaywrightTestConfig;

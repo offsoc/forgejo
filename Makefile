@@ -716,7 +716,6 @@ test-e2e-pgsql\#%: playwright e2e.pgsql.test generate-ini-pgsql
 
 .PHONY: test-e2e-debugserver
 test-e2e-debugserver: e2e.sqlite.test generate-ini-sqlite
-	sed -i s/3003/3000/g tests/sqlite.ini
 	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini ./e2e.sqlite.test -test.run TestDebugserver -test.timeout 24h
 
 .PHONY: bench-sqlite

@@ -1,5 +1,3 @@
-// @ts-check
-
 // @watch start
 // routers/web/user/**
 // templates/shared/user/**
@@ -7,7 +5,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, load_logged_in_context} from './utils_e2e.js';
+import {test, login_user, load_logged_in_context} from './utils_e2e.ts';
 
 test('Follow actions', async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -15,7 +13,6 @@ test('Follow actions', async ({browser}, workerInfo) => {
   const page = await context.newPage();
 
   await page.goto('/user1');
-  await page.waitForLoadState('networkidle');
 
   // Check if following and then unfollowing works.
   // This checks that the event listeners of

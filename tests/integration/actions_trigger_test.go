@@ -328,7 +328,9 @@ jobs:
 				sha, err := baseGitRepo.GetRefCommitID(pr.GetGitRefName())
 				require.NoError(t, err)
 				// verify the commit status changes to CommitStatusSuccess when the job changes to StatusSuccess
-				assert.True(t, checkCommitStatus(sha, context, api.CommitStatusPending))
+				require.Eventually(t, func() bool {
+					return checkCommitStatus(sha, context, api.CommitStatusPending)
+				}, 30*time.Second, 1*time.Second)
 				for _, actionRun := range actionRuns {
 					// verify the expected  ActionRunJob was created and is StatusWaiting
 					job := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRunJob{RunID: actionRun.ID, CommitSHA: sha})
@@ -339,7 +341,9 @@ jobs:
 					actions_service.CreateCommitStatus(db.DefaultContext, job)
 				}
 				// verify the commit status changed to CommitStatusSuccess because the job(s) changed to StatusSuccess
-				assert.True(t, checkCommitStatus(sha, context, api.CommitStatusSuccess))
+				require.Eventually(t, func() bool {
+					return checkCommitStatus(sha, context, api.CommitStatusSuccess)
+				}, 30*time.Second, 1*time.Second)
 
 				testCase.assert(t, sha, testCase.onType, testCase.action, actionRuns)
 			})

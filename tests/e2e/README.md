@@ -77,7 +77,7 @@ and playwright to perform tests on it.
 > (e.g. when only creating new content),
 > or that they restore the initial state for the next browser run.
 
-#### With the playwright UI: 
+#### With the playwright UI:
 
 Playwright ships with an integrated UI mode which allows you to
 run individual tests and to debug them by seeing detailed traces of what playwright does.
@@ -90,7 +90,7 @@ npx playwright test --ui
 #### Running individual tests
 
 ```
-npx playwright test actions.test.e2e.js:9
+npx playwright test actions.test.e2e.ts:9
 ```
 
 First, specify the complete test filename,
@@ -144,7 +144,7 @@ TEST_PGSQL_HOST=localhost:5432 TEST_PGSQL_DBNAME=test TEST_PGSQL_USERNAME=postgr
 
 ### Running individual tests
 
-Example command to run `example.test.e2e.js` test file:
+Example command to run `example.test.e2e.ts` test file:
 
 > **Note**
 > Unlike integration tests, this filtering is at the file level, not function
@@ -174,6 +174,70 @@ ACCEPT_VISUAL=1 will overwrite the snapshot images with new images.
 
 If you know noteworthy tests that can act as an inspiration for new tests,
 please add some details here.
+
+### Understanding and waiting for page loads
+
+[Waiting for a load state](https://playwright.dev/docs/api/class-frame#frame-wait-for-load-state)
+sound like a convenient way to ensure the page was loaded,
+but it only works once and consecutive calls to it
+(e.g. after clicking a button which should reload a page)
+return immediately without waiting for *another* load event.
+
+If you match something which is on both the old and the new page,
+you might succeed before the page was reloaded,
+although the code using a `waitForLoadState` might intuitively suggest
+the page was changed before.
+
+Interacting with the page before the reload
+(e.g. by opening a dropdown)
+might then race and result in flaky tests,
+depending on the speed of the hardware running the test.
+
+A possible way to test that an interaction worked is by checking for a known change first.
+For example:
+
+- you submit a form and you want to check that the content persisted
+- checking for the content directly would succeed even without a page reload
+- check for a success message first (will wait until it appears), then verify the content
+
+Alternatively, if you know the backend request that will be made before the reload,
+you can explicitly wait for it:
+
+~~~js
+const submitted = page.waitForResponse('/my/backend/post/request');
+await page.locator('button').first().click(); // perform your interaction
+await submitted;
+~~~
+
+If the page redirects to another URL,
+you can alternatively use:
+
+~~~js
+await page.waitForURL('**/target.html');
+~~~
+
+### Only sign in if necessary
+
+Signing in takes time and is actually executed step-by-step.
+If your test does not rely on a user account, skip this step.
+
+~~~js
+test('For anyone', async ({page}) => {
+  await page.goto('/somepage');
+~~~
+
+If you need a user account, you can use something like:
+
+~~~js
+import {test, login_user, login} from './utils_e2e.ts';
+
+test.beforeAll(async ({browser}, workerInfo) => {
+  await login_user(browser, workerInfo, 'user2'); // or another user
+});
+
+test('For signed users only', async ({browser}, workerInfo) => {
+  const page = await login({browser}, workerInfo);
+~~~
 
 ### Run tests very selectively
 
@@ -211,7 +275,7 @@ Feel free to improve the logic used there if you need more advanced functionalit
 If you can, perform automated accessibility testing using
 [AxeCore](https://github.com/dequelabs/axe-core-npm/blob/develop/packages/playwright/README.md).
 
-Take a look at `shared/forms.js` and some other places for inspiration.
+Take a look at `shared/forms.ts` and some other places for inspiration.
 
 ### List related files coverage
 
@@ -264,3 +328,27 @@ and a set of files with a certain ending:
 
 The patterns are evaluated on a "first-match" basis.
 Under the hood, [gobwas/glob](https://github.com/gobwas/glob) is used.
+
+## Grouped retry for interactions
+
+Sometimes, it can be necessary to retry certain interactions together.
+Consider the following procedure:
+
+1. click to open a dropdown
+2. interact with content in the dropdown
+
+When for some reason the dropdown does not open,
+for example because of it taking time to initialize after page load,
+the click will succeed,
+but the depending interaction won't,
+although playwright repeatedly tries to find the content.
+
+You can [group statements using toPass]()https://playwright.dev/docs/test-assertions#expecttopass).
+This code retries the dropdown click until the second item is found.
+
+~~~js
+await expect(async () => {
+  await page.locator('.dropdown').click();
+  await page.locator('.dropdown .item').first().click();
+}).toPass();
+~~~

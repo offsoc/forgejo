@@ -1,5 +1,3 @@
-// @ts-check
-
 // @watch start
 // templates/repo/issue/view_content/**
 // web_src/css/repo/issue-**
@@ -7,98 +5,143 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, login} from './utils_e2e.js';
+import {test, login_user, login} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
 });
 
-// belongs to test: Pull: Toggle WIP
-const prTitle = 'pull5';
-
-async function click_toggle_wip({page}) {
-  await page.locator('.toggle-wip>a').click();
-  await page.waitForLoadState('networkidle');
-}
-
-async function check_wip({page}, is) {
-  const elemTitle = '#issue-title-display';
-  const stateLabel = '.issue-state-label';
-  await expect(page.locator(elemTitle)).toContainText(prTitle);
-  await expect(page.locator(elemTitle)).toContainText('#5');
-  if (is) {
-    await expect(page.locator(elemTitle)).toContainText('WIP');
-    await expect(page.locator(stateLabel)).toContainText('Draft');
-  } else {
-    await expect(page.locator(elemTitle)).not.toContainText('WIP');
-    await expect(page.locator(stateLabel)).toContainText('Open');
+/* eslint-disable playwright/expect-expect */
+// some tests are reported to have no assertions,
+// which is not correct, because they use the global helper function
+test.describe('Pull: Toggle WIP', () => {
+  const prTitle = 'pull5';
+  async function toggle_wip_to({page}, should) {
+    await page.waitForLoadState('domcontentloaded');
+    if (should) {
+      await page.getByText('Still in progress?').click();
+    } else {
+      await page.getByText('Ready for review?').click();
+    }
   }
-}
 
-test('Pull: Toggle WIP', async ({browser}, workerInfo) => {
-  test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
-  const page = await login({browser}, workerInfo);
-  const response = await page.goto('/user2/repo1/pulls/5');
-  expect(response?.status()).toBe(200); // Status OK
-  // initial state
-  await check_wip({page}, false);
-  // toggle to WIP
-  await click_toggle_wip({page});
-  await check_wip({page}, true);
-  // remove WIP
-  await click_toggle_wip({page});
-  await check_wip({page}, false);
+  async function check_wip({page}, is) {
+    const elemTitle = 'h1';
+    const stateLabel = '.issue-state-label';
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.locator(elemTitle)).toContainText(prTitle);
+    await expect(page.locator(elemTitle)).toContainText('#5');
+    if (is) {
+      await expect(page.locator(elemTitle)).toContainText('WIP');
+      await expect(page.locator(stateLabel)).toContainText('Draft');
+    } else {
+      await expect(page.locator(elemTitle)).not.toContainText('WIP');
+      await expect(page.locator(stateLabel)).toContainText('Open');
+    }
+  }
 
-  // manually edit title to another prefix
-  await page.locator('#issue-title-edit-show').click();
-  await page.locator('#issue-title-editor input').fill(`[WIP] ${prTitle}`);
-  await page.getByText('Save').click();
-  await page.waitForLoadState('networkidle');
-  await check_wip({page}, true);
-  // remove again
-  await click_toggle_wip({page});
-  await check_wip({page}, false);
-  // check maximum title length is handled gracefully
-  const maxLenStr = prTitle + 'a'.repeat(240);
-  await page.locator('#issue-title-edit-show').click();
-  await page.locator('#issue-title-editor input').fill(maxLenStr);
-  await page.getByText('Save').click();
-  await page.waitForLoadState('networkidle');
-  await click_toggle_wip({page});
-  await check_wip({page}, true);
-  await click_toggle_wip({page});
-  await check_wip({page}, false);
-  await expect(page.locator('h1')).toContainText(maxLenStr);
-  // restore original title
-  await page.locator('#issue-title-edit-show').click();
-  await page.locator('#issue-title-editor input').fill(prTitle);
-  await page.getByText('Save').click();
-  await check_wip({page}, false);
+  test.beforeEach(async ({browser}, workerInfo) => {
+    const page = await login({browser}, workerInfo);
+    const response = await page.goto('/user2/repo1/pulls/5');
+    expect(response?.status()).toBe(200); // Status OK
+    // ensure original title
+    await page.locator('#issue-title-edit-show').click();
+    await page.locator('#issue-title-editor input').fill(prTitle);
+    await page.getByText('Save').click();
+    await check_wip({page}, false);
+  });
+
+  test('simple toggle', async ({browser}, workerInfo) => {
+    test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
+    const page = await login({browser}, workerInfo);
+    await page.goto('/user2/repo1/pulls/5');
+    // toggle to WIP
+    await toggle_wip_to({page}, true);
+    await check_wip({page}, true);
+    // remove WIP
+    await toggle_wip_to({page}, false);
+    await check_wip({page}, false);
+  });
+
+  test('manual edit', async ({browser}, workerInfo) => {
+    test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
+    const page = await login({browser}, workerInfo);
+    await page.goto('/user2/repo1/pulls/5');
+    // manually edit title to another prefix
+    await page.locator('#issue-title-edit-show').click();
+    await page.locator('#issue-title-editor input').fill(`[WIP] ${prTitle}`);
+    await page.getByText('Save').click();
+    await check_wip({page}, true);
+    // remove again
+    await toggle_wip_to({page}, false);
+    await check_wip({page}, false);
+  });
+
+  test('maximum title length', async ({browser}, workerInfo) => {
+    test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
+    const page = await login({browser}, workerInfo);
+    await page.goto('/user2/repo1/pulls/5');
+    // check maximum title length is handled gracefully
+    const maxLenStr = prTitle + 'a'.repeat(240);
+    await page.locator('#issue-title-edit-show').click();
+    await page.locator('#issue-title-editor input').fill(maxLenStr);
+    await page.getByText('Save').click();
+    await expect(page.locator('h1')).toContainText(maxLenStr);
+    await check_wip({page}, false);
+    await toggle_wip_to({page}, true);
+    await check_wip({page}, true);
+    await expect(page.locator('h1')).toContainText(maxLenStr);
+    await toggle_wip_to({page}, false);
+    await check_wip({page}, false);
+    await expect(page.locator('h1')).toContainText(maxLenStr);
+  });
 });
+/* eslint-enable playwright/expect-expect */
 
 test('Issue: Labels', async ({browser}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
+
+  async function submitLabels({page}) {
+    const submitted = page.waitForResponse('/user2/repo1/issues/labels');
+    await page.locator('textarea').first().click(); // close via unrelated element
+    await submitted;
+    await page.waitForLoadState();
+  }
+
   const page = await login({browser}, workerInfo);
   // select label list in sidebar only
   const labelList = page.locator('.issue-content-right .labels-list a');
   const response = await page.goto('/user2/repo1/issues/1');
   expect(response?.status()).toBe(200);
-  // preconditions
-  await expect(labelList.filter({hasText: 'label1'})).toBeVisible();
+
+  // restore initial state
+  await page.locator('.select-label').click();
+  const responsePromise = page.waitForResponse('/user2/repo1/issues/labels');
+  await page.getByText('Clear labels').click();
+  await responsePromise;
+  await expect(labelList.filter({hasText: 'label1'})).toBeHidden();
   await expect(labelList.filter({hasText: 'label2'})).toBeHidden();
-  // add label2
+
+  // add both labels
   await page.locator('.select-label').click();
   // label search could be tested this way:
   // await page.locator('.select-label input').fill('label2');
   await page.locator('.select-label .item').filter({hasText: 'label2'}).click();
-  await page.locator('.select-label').click();
-  await page.waitForLoadState('networkidle');
+  await page.locator('.select-label .item').filter({hasText: 'label1'}).click();
+  await submitLabels({page});
   await expect(labelList.filter({hasText: 'label2'})).toBeVisible();
-  // test removing label again
-  await page.locator('.select-label').click();
-  await page.locator('.select-label .item').filter({hasText: 'label2'}).click();
-  await page.locator('.select-label').click();
-  await page.waitForLoadState('networkidle');
+  await expect(labelList.filter({hasText: 'label1'})).toBeVisible();
+
+  // test removing label2 again
+  // due to a race condition, the page could still be "reloading",
+  // closing the dropdown after it was clicked.
+  // Retry the interaction as a group
+  // also see https://playwright.dev/docs/test-assertions#expecttopass
+  await expect(async () => {
+    await page.locator('.select-label').click();
+    await page.locator('.select-label .item').filter({hasText: 'label2'}).click();
+  }).toPass();
+  await submitLabels({page});
   await expect(labelList.filter({hasText: 'label2'})).toBeHidden();
   await expect(labelList.filter({hasText: 'label1'})).toBeVisible();
 });
@@ -111,11 +154,6 @@ test('Issue: Assignees', async ({browser}, workerInfo) => {
 
   const response = await page.goto('/org3/repo3/issues/1');
   expect(response?.status()).toBe(200);
-  // preconditions
-  await expect(assigneesList.filter({hasText: 'user2'})).toBeVisible();
-  await expect(assigneesList.filter({hasText: 'user4'})).toBeHidden();
-  await expect(page.locator('.ui.assignees.list .item.no-select')).toBeHidden();
-
   // Clear all assignees
   await page.locator('.select-assignees-modify.dropdown').click();
   await page.locator('.select-assignees-modify.dropdown .no-select.item').click();
