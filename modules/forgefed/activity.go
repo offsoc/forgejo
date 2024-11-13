@@ -5,7 +5,7 @@ package forgefed
 
 import (
 	"time"
-
+	"fmt"
 	"code.gitea.io/gitea/modules/validation"
 
 	ap "github.com/go-ap/activitypub"
@@ -38,7 +38,7 @@ type ForgeUndoLike struct {
 func NewForgeUndoLike(actorIRI, objectIRI string, startTime time.Time) (ForgeUndoLike, error) {
 	result := ForgeUndoLike{}
 	result.Type = ap.UndoType
-	result.Actor = ap.IRI(actorIRI)   // That's us, a User
+	result.Actor = ap.IRI(actorIRI) // That's us, a User
 	result.Object, _ = NewForgeLike(actorIRI, objectIRI, startTime)
 	result.StartTime = startTime
 	/*if valid, err := validation.IsValid(result); !valid {
@@ -85,20 +85,29 @@ func (undo ForgeUndoLike) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(string(undo.Type), "type")...)
 	result = append(result, validation.ValidateOneOf(string(undo.Type), []any{"Undo"}, "type")...)
-	if undo.Actor == nil {
-		result = append(result, "Actor should not be nil.")
-	} else {
-		result = append(result, validation.ValidateNotEmpty(undo.Actor.GetID().String(), "actor")...)
-	}
-	if undo.Object == nil {
-		result = append(result, "Object should not be nil.")
-	} else {
-		result = append(result, validation.ValidateNotEmpty(undo.Object.GetID().String(), "object")...)
-	}
-	result = append(result, validation.ValidateNotEmpty(undo.StartTime.String(), "startTime")...)
-	if undo.StartTime.IsZero() {
-		result = append(result, "StartTime was invalid.")
-	}
 	
+		if undo.Actor == nil {
+			result = append(result, "Actor should not be nil.")
+		} else {
+			result = append(result, validation.ValidateNotEmpty(undo.Actor.GetID().String(), "actor")...)
+		}
+
+		fmt.Printf("pre ausgabe %v", undo.Object)
+		
+		if undo.Object == nil {
+			result = append(result, "Object should not be nil.")
+		}
+		/* else {
+			result = append(result, validation.ValidateNotEmpty(undo.Object.GetID().String(), "object")...)
+			fmt.Printf("inner ausgabe %v", undo.Object)
+		}
+		fmt.Printf("post ausgabe %v", undo.Object)
+		*/
+
+		result = append(result, validation.ValidateNotEmpty(undo.StartTime.String(), "startTime")...)
+		if undo.StartTime.IsZero() {
+			result = append(result, "StartTime was invalid.")
+		}
+		fmt.Printf("result %v\n", result)
 	return result
 }
