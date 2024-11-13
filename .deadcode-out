@@ -74,6 +74,7 @@ code.gitea.io/gitea/models/project
 
 code.gitea.io/gitea/models/repo
 	DeleteAttachmentsByIssue
+	CleanRepoLicenses
 	FindReposMapByIDs
 	IsErrTopicNotExist
 	ErrTopicNotExist.Error
