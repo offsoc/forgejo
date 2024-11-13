@@ -6,6 +6,7 @@
 
 import {expect} from '@playwright/test';
 import {test, load_logged_in_context, login_user} from './utils_e2e.ts';
+import type {Page, Locator} from '@playwright/test';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -205,7 +206,7 @@ test('markdown insert table', async ({browser}, workerInfo) => {
   await expect(textarea).toHaveValue('| Header  | Header  |\n|---------|---------|\n| Content | Content |\n| Content | Content |\n| Content | Content |\n');
 });
 
-async function testSingleMarkdownEditor(elem) {
+async function testSingleMarkdownEditor(elem: Locator) {
   await elem.locator('textarea').fill('**Hello**');
 
   await elem.locator('a[data-tab-for="markdown-previewer"]').click();
@@ -215,7 +216,7 @@ async function testSingleMarkdownEditor(elem) {
   expect(preview).toBe('<strong>Hello</strong>');
 }
 
-async function testMarkdownEditorPage(page, url) {
+async function testMarkdownEditorPage(page: Page, url: string) {
   const response = await page.goto(url);
   expect(response?.status()).toBe(200);
 
