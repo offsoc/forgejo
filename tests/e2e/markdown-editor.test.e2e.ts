@@ -6,6 +6,7 @@
 
 import {expect} from '@playwright/test';
 import {test, load_logged_in_context, login_user} from './utils_e2e.ts';
+// eslint-disable-next-line no-duplicate-imports
 import type {Page, Locator} from '@playwright/test';
 
 test.beforeAll(async ({browser}, workerInfo) => {
