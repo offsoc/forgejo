@@ -126,6 +126,7 @@ var cases = []*testIndexerCase{
 		},
 		SearchOptions: &internal.SearchOptions{
 			Keyword: "hello",
+			SortBy:  internal.SortByCreatedDesc,
 		},
 		ExpectedIDs:   []int64{1002, 1001, 1000},
 		ExpectedTotal: 3,
@@ -139,6 +140,7 @@ var cases = []*testIndexerCase{
 		},
 		SearchOptions: &internal.SearchOptions{
 			Keyword:        "hello world",
+			SortBy:         internal.SortByCreatedDesc,
 			IsFuzzyKeyword: true,
 		},
 		ExpectedIDs:   []int64{1002, 1001, 1000},
@@ -157,6 +159,7 @@ var cases = []*testIndexerCase{
 		},
 		SearchOptions: &internal.SearchOptions{
 			Keyword: "hello",
+			SortBy:  internal.SortByCreatedDesc,
 			RepoIDs: []int64{1, 4},
 		},
 		ExpectedIDs:   []int64{1006, 1002, 1001},
@@ -175,6 +178,7 @@ var cases = []*testIndexerCase{
 		},
 		SearchOptions: &internal.SearchOptions{
 			Keyword:   "hello",
+			SortBy:    internal.SortByCreatedDesc,
 			RepoIDs:   []int64{1, 4},
 			AllPublic: true,
 		},
@@ -593,6 +597,22 @@ var cases = []*testIndexerCase{
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {
 					assert.GreaterOrEqual(t, data[v.ID].DeadlineUnix, data[result.Hits[i+1].ID].DeadlineUnix)
+				}
+			}
+		},
+	},
+	{
+		Name: "SortByScore",
+		SearchOptions: &internal.SearchOptions{
+			Paginator: &db.ListOptionsAll,
+			SortBy:    internal.SortByScore,
+		},
+		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
+			assert.Equal(t, len(data), len(result.Hits))
+			assert.Equal(t, len(data), int(result.Total))
+			for i, v := range result.Hits {
+				if i < len(result.Hits)-1 {
+					assert.GreaterOrEqual(t, v.Score, result.Hits[i+1].Score)
 				}
 			}
 		},

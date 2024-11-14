@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	asymkey_model "code.gitea.io/gitea/models/asymkey"
 	"code.gitea.io/gitea/models/db"
@@ -198,6 +199,11 @@ func NewCommit(row, column int, line []byte) (*Commit, error) {
 	if len(data) < 5 {
 		return nil, fmt.Errorf("malformed data section on line %d with commit: %s", row, string(line))
 	}
+	// Format is a slight modifcation from RFC1123Z
+	t, err := time.Parse("Mon, _2 Jan 2006 15:04:05 -0700", string(data[2]))
+	if err != nil {
+		return nil, fmt.Errorf("could not parse date of commit: %w", err)
+	}
 	return &Commit{
 		Row:    row,
 		Column: column,
@@ -205,8 +211,8 @@ func NewCommit(row, column int, line []byte) (*Commit, error) {
 		Refs: newRefsFromRefNames(data[0]),
 		// 1 matches git log --pretty=format:%H => commit hash
 		Rev: string(data[1]),
-		// 2 matches git log --pretty=format:%ad => author date (format respects --date= option)
-		Date: string(data[2]),
+		// 2 matches git log --pretty=format:%aD => author date, RFC2822 style
+		Date: t,
 		// 3 matches git log --pretty=format:%h => abbreviated commit hash
 		ShortRev: string(data[3]),
 		// 4 matches git log --pretty=format:%s => subject
@@ -245,7 +251,7 @@ type Commit struct {
 	Column       int
 	Refs         []git.Reference
 	Rev          string
-	Date         string
+	Date         time.Time
 	ShortRev     string
 	Subject      string
 }

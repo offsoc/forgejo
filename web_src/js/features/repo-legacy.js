@@ -27,6 +27,8 @@ import {hideElem, showElem} from '../utils/dom.js';
 import {getComboMarkdownEditor, initComboMarkdownEditor} from './comp/ComboMarkdownEditor.js';
 import {attachRefIssueContextPopup} from './contextpopup.js';
 import {POST, GET} from '../modules/fetch.js';
+import {MarkdownQuote} from '@github/quote-selection';
+import {toAbsoluteUrl} from '../utils.js';
 
 const {csrfToken} = window.config;
 
@@ -119,7 +121,7 @@ export function initRepoCommentForm() {
 
       hasUpdateAction = $listMenu.data('action') === 'update'; // Update the var
 
-      const clickedItem = this; // eslint-disable-line unicorn/no-this-assignment
+      const clickedItem = this; // eslint-disable-line unicorn/no-this-assignment, @typescript-eslint/no-this-alias
       const scope = this.getAttribute('data-scope');
 
       $(this).parent().find('.item').each(function () {
@@ -416,7 +418,10 @@ async function onEditContent(event) {
         context: editContentZone.getAttribute('data-context'),
         content_version: editContentZone.getAttribute('data-content-version'),
       });
-      for (const fileInput of dropzoneInst?.element.querySelectorAll('.files [name=files]')) params.append('files[]', fileInput.value);
+      const files = dropzoneInst?.element?.querySelectorAll('.files [name=files]') ?? [];
+      for (const fileInput of files) {
+        params.append('files[]', fileInput.value);
+      }
 
       const response = await POST(editContentZone.getAttribute('data-update-url'), {data: params});
       const data = await response.json();
@@ -579,32 +584,105 @@ export function initRepository() {
   initUnicodeEscapeButton();
 }
 
+const filters = {
+  A(el) {
+    if (el.classList.contains('mention') || el.classList.contains('ref-issue')) {
+      return el.textContent;
+    }
+    return el;
+  },
+  PRE(el) {
+    const firstChild = el.children[0];
+    if (firstChild && el.classList.contains('code-block')) {
+      // Get the language of the codeblock.
+      const language = firstChild.className.match(/language-(\S+)/);
+      // Remove trailing newlines.
+      const text = el.textContent.replace(/\n+$/, '');
+      el.textContent = `\`\`\`${language[1]}\n${text}\n\`\`\`\n\n`;
+    }
+    return el;
+  },
+  SPAN(el) {
+    const emojiAlias = el.getAttribute('data-alias');
+    if (emojiAlias && el.classList.contains('emoji')) {
+      return `:${emojiAlias}:`;
+    }
+    if (el.classList.contains('katex')) {
+      const texCode = el.querySelector('annotation[encoding="application/x-tex"]').textContent;
+      if (el.parentElement.classList.contains('katex-display')) {
+        el.textContent = `\\[${texCode}\\]\n\n`;
+      } else {
+        el.textContent = `\\(${texCode}\\)\n\n`;
+      }
+    }
+    return el;
+  },
+};
+
+function hasContent(node) {
+  return node.nodeName === 'IMG' || node.firstChild !== null;
+}
+
+// This code matches that of what is done by @github/quote-selection
+function preprocessFragment(fragment) {
+  const nodeIterator = document.createNodeIterator(fragment, NodeFilter.SHOW_ELEMENT, {
+    acceptNode(node) {
+      if (node.nodeName in filters && hasContent(node)) {
+        return NodeFilter.FILTER_ACCEPT;
+      }
+
+      return NodeFilter.FILTER_SKIP;
+    },
+  });
+  const results = [];
+  let node = nodeIterator.nextNode();
+
+  while (node) {
+    if (node instanceof HTMLElement) {
+      results.push(node);
+    }
+    node = nodeIterator.nextNode();
+  }
+
+  // process deepest matches first
+  results.reverse();
+
+  for (const el of results) {
+    el.replaceWith(filters[el.nodeName](el));
+  }
+}
+
 function initRepoIssueCommentEdit() {
   // Edit issue or comment content
   $(document).on('click', '.edit-content', onEditContent);
 
   // Quote reply
-  $(document).on('click', '.quote-reply', async function (event) {
+  $(document).on('click', '.quote-reply', async (event) => {
     event.preventDefault();
-    const target = $(this).data('target');
-    const quote = $(`#${target}`).text().replace(/\n/g, '\n> ');
-    const content = `> ${quote}\n\n`;
-    let editor;
-    if (this.classList.contains('quote-reply-diff')) {
-      const $replyBtn = $(this).closest('.comment-code-cloud').find('button.comment-form-reply');
-      editor = await handleReply($replyBtn);
+    const quote = new MarkdownQuote('', preprocessFragment);
+
+    let editorTextArea;
+    if (event.target.classList.contains('quote-reply-diff')) {
+      // Temporarily store the range so it doesn't get lost (likely caused by async code).
+      const currentRange = quote.range;
+
+      const replyButton = event.target.closest('.comment-code-cloud').querySelector('button.comment-form-reply');
+      editorTextArea = (await handleReply($(replyButton))).textarea;
+
+      quote.range = currentRange;
     } else {
-      // for normal issue/comment page
-      editor = getComboMarkdownEditor($('#comment-form .combo-markdown-editor'));
+      editorTextArea = document.querySelector('#comment-form .combo-markdown-editor textarea');
     }
-    if (editor) {
-      if (editor.value()) {
-        editor.value(`${editor.value()}\n\n${content}`);
-      } else {
-        editor.value(content);
-      }
-      editor.focus();
-      editor.moveCursorToEnd();
+
+    // Select the whole comment body if there's no selection.
+    if (quote.range.collapsed) {
+      quote.select(document.querySelector(`#${event.target.getAttribute('data-target')}`));
+    }
+
+    // If the selection is in the comment body, then insert the quote.
+    if (quote.closest(`#${event.target.getAttribute('data-target')}`)) {
+      editorTextArea.value += `@${event.target.getAttribute('data-author')} wrote in ${toAbsoluteUrl(event.target.getAttribute('data-reference-url'))}:`;
+      quote.insert(editorTextArea);
     }
   });
 }

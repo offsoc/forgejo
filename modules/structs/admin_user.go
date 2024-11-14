@@ -15,7 +15,7 @@ type CreateUserOption struct {
 	FullName string `json:"full_name" binding:"MaxSize(100)"`
 	// required: true
 	// swagger:strfmt email
-	Email              string `json:"email" binding:"Required;Email;MaxSize(254)"`
+	Email              string `json:"email" binding:"Required;EmailForAdmin;MaxSize(254)"`
 	Password           string `json:"password" binding:"MaxSize(255)"`
 	MustChangePassword *bool  `json:"must_change_password"`
 	SendNotify         bool   `json:"send_notify"`

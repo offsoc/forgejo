@@ -1,0 +1,25 @@
+X-Ratelimit-Resource: core
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Xss-Protection: 0
+X-Accepted-Oauth-Scopes: repo
+Link: <https://api.github.com/repositories/220672974/issues/2/reactions?page=2&per_page=2>; rel="next", <https://api.github.com/repositories/220672974/issues/2/reactions?page=3&per_page=2>; rel="last"
+X-Ratelimit-Remaining: 4921
+X-Ratelimit-Reset: 1730800941
+X-Github-Request-Id: C7CC:3118FC:3F5FC1A:40364D4:6729E6B6
+Content-Security-Policy: default-src 'none'
+X-Oauth-Scopes: 
+X-Ratelimit-Used: 79
+X-Frame-Options: deny
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+X-Github-Api-Version-Selected: 2022-11-28
+Content-Type: application/json; charset=utf-8
+Etag: W/"27408cb5dd95878d6267de226341c84fd1d2c49695867baecf930579608e16a5"
+X-Github-Media-Type: github.v3; param=squirrel-girl-preview
+X-Content-Type-Options: nosniff
+Cache-Control: private, max-age=60, s-maxage=60
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+X-Ratelimit-Limit: 5000
+Access-Control-Allow-Origin: *
+
+[{"id":55445108,"node_id":"MDEzOklzc3VlUmVhY3Rpb241NTQ0NTEwOA==","user":{"login":"mrsdizzie","id":1669571,"node_id":"MDQ6VXNlcjE2Njk1NzE=","avatar_url":"https://avatars.githubusercontent.com/u/1669571?u=7c1ba931adbdd9bab5be1a41d244425d463568cd&v=4","gravatar_id":"","url":"https://api.github.com/users/mrsdizzie","html_url":"https://github.com/mrsdizzie","followers_url":"https://api.github.com/users/mrsdizzie/followers","following_url":"https://api.github.com/users/mrsdizzie/following{/other_user}","gists_url":"https://api.github.com/users/mrsdizzie/gists{/gist_id}","starred_url":"https://api.github.com/users/mrsdizzie/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/mrsdizzie/subscriptions","organizations_url":"https://api.github.com/users/mrsdizzie/orgs","repos_url":"https://api.github.com/users/mrsdizzie/repos","events_url":"https://api.github.com/users/mrsdizzie/events{/privacy}","received_events_url":"https://api.github.com/users/mrsdizzie/received_events","type":"User","user_view_type":"public","site_admin":false},"content":"heart","created_at":"2019-11-12T21:02:05Z"},{"id":55445150,"node_id":"MDEzOklzc3VlUmVhY3Rpb241NTQ0NTE1MA==","user":{"login":"mrsdizzie","id":1669571,"node_id":"MDQ6VXNlcjE2Njk1NzE=","avatar_url":"https://avatars.githubusercontent.com/u/1669571?u=7c1ba931adbdd9bab5be1a41d244425d463568cd&v=4","gravatar_id":"","url":"https://api.github.com/users/mrsdizzie","html_url":"https://github.com/mrsdizzie","followers_url":"https://api.github.com/users/mrsdizzie/followers","following_url":"https://api.github.com/users/mrsdizzie/following{/other_user}","gists_url":"https://api.github.com/users/mrsdizzie/gists{/gist_id}","starred_url":"https://api.github.com/users/mrsdizzie/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/mrsdizzie/subscriptions","organizations_url":"https://api.github.com/users/mrsdizzie/orgs","repos_url":"https://api.github.com/users/mrsdizzie/repos","events_url":"https://api.github.com/users/mrsdizzie/events{/privacy}","received_events_url":"https://api.github.com/users/mrsdizzie/received_events","type":"User","user_view_type":"public","site_admin":false},"content":"laugh","created_at":"2019-11-12T21:02:35Z"}]

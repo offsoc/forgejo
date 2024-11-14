@@ -10,6 +10,9 @@ import (
 	"testing"
 
 	auth_model "code.gitea.io/gitea/models/auth"
+	"code.gitea.io/gitea/models/organization"
+	"code.gitea.io/gitea/models/perm"
+	"code.gitea.io/gitea/models/unit"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	api "code.gitea.io/gitea/modules/structs"
@@ -25,6 +28,7 @@ func TestOrgRepos(t *testing.T) {
 		users = []string{"user1", "user2"}
 		cases = map[string][]string{
 			"alphabetically":        {"repo21", "repo3", "repo5"},
+			"recentupdate":          {"repo21", "repo5", "repo3"},
 			"reversealphabetically": {"repo5", "repo3", "repo21"},
 		}
 	)
@@ -242,4 +246,23 @@ func TestOrgDashboardLabels(t *testing.T) {
 	labelFilterHref, ok = htmlDoc.Find(".list-header-sort a").Attr("href")
 	assert.True(t, ok)
 	assert.Contains(t, labelFilterHref, "labels=3%2c-4")
+}
+
+func TestOwnerTeamUnit(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	org := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 3, Type: user_model.UserTypeOrganization})
+	session := loginUser(t, user.Name)
+
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{TeamID: 1, Type: unit.TypeIssues, AccessMode: perm.AccessModeOwner})
+
+	req := NewRequestWithValues(t, "GET", fmt.Sprintf("/org/%s/teams/owners/edit", org.Name), map[string]string{
+		"_csrf":       GetCSRF(t, session, fmt.Sprintf("/org/%s/teams/owners/edit", org.Name)),
+		"team_name":   "Owners",
+		"Description": "Just a description",
+	})
+	session.MakeRequest(t, req, http.StatusOK)
+
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{TeamID: 1, Type: unit.TypeIssues, AccessMode: perm.AccessModeOwner})
 }

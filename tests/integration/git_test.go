@@ -369,6 +369,28 @@ func doBranchProtect(baseCtx *APITestContext, dstPath string) func(t *testing.T)
 
 		ctx := NewAPITestContext(t, baseCtx.Username, baseCtx.Reponame, auth_model.AccessTokenScopeWriteRepository)
 
+		t.Run("PushToNewProtectedBranch", func(t *testing.T) {
+			t.Run("CreateBranchProtected", doGitCreateBranch(dstPath, "before-create-1"))
+			t.Run("ProtectProtectedBranch", doProtectBranch(ctx, "before-create-1", parameterProtectBranch{
+				"enable_push":     "all",
+				"apply_to_admins": "on",
+			}))
+			t.Run("PushProtectedBranch", doGitPushTestRepository(dstPath, "origin", "before-create-1"))
+
+			t.Run("GenerateCommit", func(t *testing.T) {
+				_, err := generateCommitWithNewData(littleSize, dstPath, "user2@example.com", "User Two", "protected-file-data-")
+				require.NoError(t, err)
+			})
+
+			t.Run("ProtectProtectedBranch", doProtectBranch(ctx, "before-create-2", parameterProtectBranch{
+				"enable_push":             "all",
+				"protected_file_patterns": "protected-file-data-*",
+				"apply_to_admins":         "on",
+			}))
+
+			doGitPushTestRepositoryFail(dstPath, "origin", "HEAD:before-create-2")(t)
+		})
+
 		t.Run("FailToPushToProtectedBranch", func(t *testing.T) {
 			t.Run("ProtectProtectedBranch", doProtectBranch(ctx, "protected"))
 			t.Run("Create modified-protected-branch", doGitCheckoutBranch(dstPath, "-b", "modified-protected-branch", "protected"))
@@ -764,6 +786,11 @@ func doInternalReferences(ctx *APITestContext, dstPath string) func(t *testing.T
 		require.Error(t, gitErr)
 		assert.Contains(t, stdErr, fmt.Sprintf("remote: Forgejo: The deletion of refs/pull/%d/head is skipped as it's an internal reference.", pr1.Index))
 		assert.Contains(t, stdErr, fmt.Sprintf("[remote rejected] refs/pull/%d/head (hook declined)", pr1.Index))
+
+		_, stdErr, gitErr = git.NewCommand(git.DefaultContext, "push", "origin", "--force").AddDynamicArguments(fmt.Sprintf("HEAD~1:refs/pull/%d/head", pr1.Index)).RunStdString(&git.RunOpts{Dir: dstPath})
+		require.Error(t, gitErr)
+		assert.Contains(t, stdErr, fmt.Sprintf("remote: Forgejo: The modification of refs/pull/%d/head is skipped as it's an internal reference.", pr1.Index))
+		assert.Contains(t, stdErr, fmt.Sprintf("[remote rejected] HEAD~1 -> refs/pull/%d/head (hook declined)", pr1.Index))
 	}
 }
 

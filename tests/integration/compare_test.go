@@ -40,7 +40,7 @@ func TestCompareTag(t *testing.T) {
 
 	req = NewRequest(t, "GET", "/user2/repo1/compare/invalid")
 	resp = session.MakeRequest(t, req, http.StatusNotFound)
-	assert.False(t, strings.Contains(resp.Body.String(), ">500<"), "expect 404 page not 500")
+	assert.NotContains(t, resp.Body.String(), ">500<", "expect 404 page not 500")
 }
 
 // Compare with inferred default branch (master)

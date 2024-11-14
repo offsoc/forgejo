@@ -137,9 +137,6 @@ code.gitea.io/gitea/modules/git
 	AddChangesWithArgs
 	CommitChanges
 	CommitChangesWithArgs
-	IsErrExecTimeout
-	ErrExecTimeout.Error
-	ErrUnsupportedVersion.Error
 	SetUpdateHook
 	openRepositoryWithDefaultContext
 	IsTagExist
@@ -249,6 +246,9 @@ code.gitea.io/gitea/modules/translation
 	MockLocale.TrN
 	MockLocale.TrSize
 	MockLocale.PrettyNumber
+
+code.gitea.io/gitea/modules/util
+	OptionalArg
 
 code.gitea.io/gitea/modules/util/filebuffer
 	CreateFromReader
