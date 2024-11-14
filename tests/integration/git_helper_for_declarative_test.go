@@ -18,7 +18,6 @@ import (
 
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/ssh"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/tests"
 
@@ -33,8 +32,10 @@ func withKeyFile(t *testing.T, keyname string, callback func(string)) {
 	require.NoError(t, err)
 
 	keyFile := filepath.Join(tmpDir, keyname)
-	err = ssh.GenKeyPair(keyFile)
+	pubkey, privkey, err := util.GenerateSSHKeypair()
 	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(keyFile, privkey, 0o600))
+	require.NoError(t, os.WriteFile(keyFile+".pub", pubkey, 0o600))
 
 	err = os.WriteFile(path.Join(tmpDir, "ssh"), []byte("#!/bin/bash\n"+
 		"ssh -o \"UserKnownHostsFile=/dev/null\" -o \"StrictHostKeyChecking=no\" -o \"IdentitiesOnly=yes\" -i \""+keyFile+"\" \"$@\""), 0o700)

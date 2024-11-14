@@ -7,7 +7,6 @@ package integration
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"testing"
 
 	auth_model "code.gitea.io/gitea/models/auth"
@@ -86,25 +85,24 @@ func TestCreateForkNoLogin(t *testing.T) {
 }
 
 func TestAPIDisabledForkRepo(t *testing.T) {
-	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		defer test.MockVariableValue(&setting.Repository.DisableForks, true)()
-		defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
+	defer test.MockVariableValue(&setting.Repository.DisableForks, true)()
+	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
+	defer tests.PrepareTestEnv(t)()
 
-		t.Run("fork listing", func(t *testing.T) {
-			defer tests.PrintCurrentTest(t)()
+	t.Run("fork listing", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 
-			req := NewRequest(t, "GET", "/api/v1/repos/user2/repo1/forks")
-			MakeRequest(t, req, http.StatusNotFound)
-		})
+		req := NewRequest(t, "GET", "/api/v1/repos/user2/repo1/forks")
+		MakeRequest(t, req, http.StatusNotFound)
+	})
 
-		t.Run("forking", func(t *testing.T) {
-			defer tests.PrintCurrentTest(t)()
+	t.Run("forking", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 
-			session := loginUser(t, "user5")
-			token := getTokenForLoggedInUser(t, session)
+		session := loginUser(t, "user5")
+		token := getTokenForLoggedInUser(t, session)
 
-			req := NewRequestWithJSON(t, "POST", "/api/v1/repos/user2/repo1/forks", &api.CreateForkOption{}).AddTokenAuth(token)
-			session.MakeRequest(t, req, http.StatusNotFound)
-		})
+		req := NewRequestWithJSON(t, "POST", "/api/v1/repos/user2/repo1/forks", &api.CreateForkOption{}).AddTokenAuth(token)
+		session.MakeRequest(t, req, http.StatusNotFound)
 	})
 }

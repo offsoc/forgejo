@@ -20,7 +20,6 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/svg"
 	"code.gitea.io/gitea/modules/templates/eval"
-	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/services/gitdiff"
 )
@@ -52,6 +51,7 @@ func NewFuncMap() template.FuncMap {
 		"StringUtils": NewStringUtils,
 		"SliceUtils":  NewSliceUtils,
 		"JsonUtils":   NewJsonUtils,
+		"DateUtils":   NewDateUtils,
 
 		// -----------------------------------------------------------------
 		// svg / avatar / icon / color
@@ -64,15 +64,17 @@ func NewFuncMap() template.FuncMap {
 
 		// -----------------------------------------------------------------
 		// time / number / format
-		"FileSize":      FileSizePanic,
-		"CountFmt":      base.FormatNumberSI,
-		"TimeSince":     timeutil.TimeSince,
-		"TimeSinceUnix": timeutil.TimeSinceUnix,
-		"DateTime":      timeutil.DateTime,
-		"Sec2Time":      util.SecToTime,
+		"FileSize": FileSizePanic,
+		"CountFmt": base.FormatNumberSI,
+		"Sec2Time": util.SecToTime,
 		"LoadTimes": func(startTime time.Time) string {
 			return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"
 		},
+
+		// for backward compatibility only, do not use them anymore
+		"TimeSince":     timeSinceLegacy,
+		"TimeSinceUnix": timeSinceLegacy,
+		"DateTime":      dateTimeLegacy,
 
 		// -----------------------------------------------------------------
 		// setting
@@ -182,6 +184,7 @@ func NewFuncMap() template.FuncMap {
 		"RenderMarkdownToHtml": RenderMarkdownToHtml,
 		"RenderLabel":          RenderLabel,
 		"RenderLabels":         RenderLabels,
+		"RenderReviewRequest":  RenderReviewRequest,
 
 		// -----------------------------------------------------------------
 		// misc

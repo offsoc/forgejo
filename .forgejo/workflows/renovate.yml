@@ -8,7 +8,9 @@ name: renovate
 on:
   push:
     branches:
-      - 'renovate/**' # self-test updates
+      - renovate/** # self-test updates
+    paths:
+      - .forgejo/workflows/renovate.yml
   schedule:
     - cron: '0 0/2 * * *'
   workflow_dispatch:
@@ -19,11 +21,11 @@ env:
 
 jobs:
   renovate:
-    if: ${{ secrets.RENOVATE_TOKEN != '' }}
+    if: vars.ROLE == 'forgejo-coding' && secrets.RENOVATE_TOKEN != ''
 
-    runs-on: docker
+    runs-on: docker-runner-one
     container:
-      image: code.forgejo.org/forgejo-contrib/renovate:38.110.2
+      image: code.forgejo.org/forgejo-contrib/renovate:39.9.1
 
     steps:
       - name: Load renovate repo cache

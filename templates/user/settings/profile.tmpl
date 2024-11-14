@@ -76,7 +76,7 @@
 				</div>
 
 				<div class="inline field {{if .Err_Visibility}}error{{end}}">
-					<span class="inline required field"><label>{{ctx.Locale.Tr "settings.visibility"}}</label></span>
+					<span class="inline required field" id="visibility-setting"><label>{{ctx.Locale.Tr "settings.visibility"}}</label></span>
 					<div class="ui selection type dropdown">
 						{{if .SignedUser.Visibility.IsPublic}}<input type="hidden" id="visibility" name="visibility" value="0">{{end}}
 						{{if .SignedUser.Visibility.IsLimited}}<input type="hidden" id="visibility" name="visibility" value="1">{{end}}

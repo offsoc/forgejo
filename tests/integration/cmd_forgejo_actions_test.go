@@ -15,6 +15,7 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -67,6 +68,7 @@ func Test_CmdForgejo_Actions(t *testing.T) {
 			},
 		} {
 			t.Run(testCase.testName, func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
 				output, err := runMainApp("forgejo-cli", "actions", "register", "--secret", testCase.secret, "--scope", testCase.scope)
 				assert.EqualValues(t, "", output)
 

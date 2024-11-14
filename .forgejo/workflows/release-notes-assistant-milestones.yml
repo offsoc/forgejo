@@ -6,7 +6,7 @@ on:
 
 jobs:
   release-notes:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-')
+    if: vars.ROLE == 'forgejo-coding'
     runs-on: docker
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'

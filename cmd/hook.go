@@ -322,7 +322,8 @@ func runHookUpdate(c *cli.Context) error {
 		return fail(ctx, fmt.Sprintf("The deletion of %s is skipped as it's an internal reference.", refFullName), "")
 	}
 
-	return nil
+	// If the new comment isn't empty it means modification.
+	return fail(ctx, fmt.Sprintf("The modification of %s is skipped as it's an internal reference.", refFullName), "")
 }
 
 func runHookPostReceive(c *cli.Context) error {

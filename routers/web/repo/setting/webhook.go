@@ -28,7 +28,7 @@ import (
 	"code.gitea.io/gitea/services/forms"
 	webhook_service "code.gitea.io/gitea/services/webhook"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 const (

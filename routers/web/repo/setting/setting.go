@@ -1031,7 +1031,7 @@ func SettingsPost(ctx *context.Context) {
 			return
 		}
 
-		if err := actions_model.CleanRepoScheduleTasks(ctx, repo); err != nil {
+		if err := actions_model.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
 			log.Error("CleanRepoScheduleTasks for archived repo %s/%s: %v", ctx.Repo.Owner.Name, repo.Name, err)
 		}
 

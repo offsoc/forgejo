@@ -76,6 +76,7 @@ func TestAPIListReleases(t *testing.T) {
 	testFilterByLen(true, url.Values{"draft": {"false"}, "pre-release": {"false"}}, 1, "exclude drafts and pre-releases")
 	testFilterByLen(true, url.Values{"pre-release": {"true"}}, 1, "only get pre-release")
 	testFilterByLen(true, url.Values{"draft": {"true"}, "pre-release": {"true"}}, 0, "there is no pre-release draft")
+	testFilterByLen(true, url.Values{"q": {"release"}}, 3, "keyword")
 }
 
 func createNewReleaseUsingAPI(t *testing.T, token string, owner *user_model.User, repo *repo_model.Repository, name, target, title, desc string) *api.Release {

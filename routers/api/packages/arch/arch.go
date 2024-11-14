@@ -173,6 +173,12 @@ func PushPackage(ctx *context.Context) {
 		apiError(ctx, http.StatusInternalServerError, err)
 		return
 	}
+	if p.FileMetadata.Arch == "any" {
+		if err = arch_service.BuildCustomRepositoryFiles(ctx, ctx.Package.Owner.ID, group); err != nil {
+			apiError(ctx, http.StatusInternalServerError, err)
+			return
+		}
+	}
 	ctx.Status(http.StatusCreated)
 }
 
@@ -197,8 +203,7 @@ func GetPackageOrDB(ctx *context.Context) {
 	}
 
 	if archDBOrSig.MatchString(file) {
-		pkg, u, pf, err := arch_service.GetPackageDBFile(ctx, group, arch, ctx.Package.Owner.ID,
-			strings.HasSuffix(file, ".sig"))
+		pkg, u, pf, err := arch_service.GetPackageDBFile(ctx, ctx.Package.Owner.ID, group, arch, strings.HasSuffix(file, ".sig"))
 		if err != nil {
 			if errors.Is(err, util.ErrNotExist) {
 				apiError(ctx, http.StatusNotFound, err)

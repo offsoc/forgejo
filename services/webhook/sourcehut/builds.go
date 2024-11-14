@@ -24,7 +24,7 @@ import (
 	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/webhook/shared"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 	"gopkg.in/yaml.v3"
 )
 

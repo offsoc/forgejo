@@ -60,7 +60,7 @@
 					{{$baseHref = HTMLFormat `<a href="%s">%s</a>` .BaseBranchLink $baseHref}}
 				{{end}}
 				{{if .Issue.PullRequest.HasMerged}}
-					{{$mergedStr:= TimeSinceUnix .Issue.PullRequest.MergedUnix ctx.Locale}}
+					{{$mergedStr:= DateUtils.TimeSince .Issue.PullRequest.MergedUnix}}
 					{{if .Issue.OriginalAuthor}}
 						{{.Issue.OriginalAuthor}}
 						<span class="pull-desc">{{ctx.Locale.TrN .NumCommits "repo.pulls.merged_title_desc_one" "repo.pulls.merged_title_desc_few" .NumCommits $headHref $baseHref $mergedStr}}</span>
@@ -79,11 +79,11 @@
 					{{end}}
 				{{else}}
 					{{if .Issue.OriginalAuthor}}
-						<span id="pull-desc-display" class="pull-desc">{{.Issue.OriginalAuthor}} {{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref}}</span>
+						<span id="pull-desc-display" class="pull-desc">{{.Issue.OriginalAuthor}} {{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref "branch_target"}}</span>
 					{{else}}
 						<span id="pull-desc-display" class="pull-desc">
 							<a {{if gt .Issue.Poster.ID 0}}href="{{.Issue.Poster.HomeLink}}"{{end}}>{{.Issue.Poster.GetDisplayName}}</a>
-							{{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref}}
+							{{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref "branch_target"}}
 						</span>
 					{{end}}
 					{{if .MadeUsingAGit}}
@@ -117,7 +117,7 @@
 										{{$sameBase := ne $.BaseName $.HeadUserName}}
 										{{$differentBranch := ne . $.HeadBranch}}
 										{{if or $sameBase $differentBranch}}
-											<div class="item {{if eq $.BaseBranch .}}selected{{end}}" data-branch="{{.}}">{{$.BaseName}}{{if $.HeadRepo}}/{{$.HeadRepo}}{{end}}:{{.}}</div>
+											<div class="item {{if eq $.BaseBranch .}}selected{{end}}" data-branch="{{.}}">{{$.BaseName}}:{{.}}</div>
 										{{end}}
 									{{end}}
 								</div>
@@ -126,7 +126,7 @@
 					</span>
 				{{end}}
 			{{else}}
-				{{$createdStr:= TimeSinceUnix .Issue.CreatedUnix ctx.Locale}}
+				{{$createdStr:= DateUtils.TimeSince .Issue.CreatedUnix}}
 				<span class="time-desc">
 					{{if .Issue.OriginalAuthor}}
 						{{ctx.Locale.Tr "repo.issues.opened_by_fake" $createdStr .Issue.OriginalAuthor}}

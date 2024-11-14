@@ -155,7 +155,7 @@ export function autosize(textarea, {viewportMarginBottom = 0} = {}) {
       const isBorderBox = computedStyle.boxSizing === 'border-box';
       const borderAddOn = isBorderBox ? topBorderWidth + bottomBorderWidth : 0;
 
-      const adjustedViewportMarginBottom = bottom < viewportMarginBottom ? bottom : viewportMarginBottom;
+      const adjustedViewportMarginBottom = Math.min(bottom, viewportMarginBottom);
       const curHeight = parseFloat(computedStyle.height);
       const maxHeight = curHeight + bottom - adjustedViewportMarginBottom;
 

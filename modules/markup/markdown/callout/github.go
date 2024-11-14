@@ -50,7 +50,7 @@ func (g *GitHubCalloutTransformer) Transform(node *ast.Document, reader text.Rea
 				return ast.WalkContinue, nil
 			}
 			firstTextNode, ok := firstParagraph.FirstChild().(*ast.Text)
-			if !ok || string(firstTextNode.Text(reader.Source())) != "[" {
+			if !ok || string(firstTextNode.Value(reader.Source())) != "[" {
 				return ast.WalkContinue, nil
 			}
 			secondTextNode, ok := firstTextNode.NextSibling().(*ast.Text)
@@ -59,14 +59,14 @@ func (g *GitHubCalloutTransformer) Transform(node *ast.Document, reader text.Rea
 			}
 			// If the second node's text isn't one of the supported attention
 			// types, continue walking.
-			secondTextNodeText := secondTextNode.Text(reader.Source())
+			secondTextNodeText := secondTextNode.Value(reader.Source())
 			attentionType := strings.ToLower(strings.TrimPrefix(string(secondTextNodeText), "!"))
 			if _, has := supportedAttentionTypes[attentionType]; !has {
 				return ast.WalkContinue, nil
 			}
 
 			thirdTextNode, ok := secondTextNode.NextSibling().(*ast.Text)
-			if !ok || string(thirdTextNode.Text(reader.Source())) != "]" {
+			if !ok || string(thirdTextNode.Value(reader.Source())) != "]" {
 				return ast.WalkContinue, nil
 			}
 

@@ -175,6 +175,9 @@ func InitTest(requireGitea bool) {
 				log.Fatal("db.Exec: CREATE SCHEMA: %v", err)
 			}
 		}
+
+	case setting.Database.Type.IsSQLite3():
+		setting.Database.Path = ":memory:"
 	}
 
 	routers.InitWebInstalled(graceful.GetManager().HammerContext())
@@ -224,23 +227,7 @@ func cancelProcesses(t testing.TB, delay time.Duration) {
 	t.Logf("PrepareTestEnv: all processes cancelled within %s", time.Since(start))
 }
 
-func PrepareTestEnv(t testing.TB, skip ...int) func() {
-	t.Helper()
-	ourSkip := 1
-	if len(skip) > 0 {
-		ourSkip += skip[0]
-	}
-	deferFn := PrintCurrentTest(t, ourSkip)
-
-	// kill all background processes to prevent them from interfering with the fixture loading
-	// see https://codeberg.org/forgejo/forgejo/issues/2962
-	cancelProcesses(t, 30*time.Second)
-	t.Cleanup(func() { cancelProcesses(t, 0) }) // cancel remaining processes in a non-blocking way
-
-	// load database fixtures
-	require.NoError(t, unittest.LoadFixtures())
-
-	// load git repo fixtures
+func PrepareGitRepoDirectory(t testing.TB) {
 	require.NoError(t, util.RemoveAll(setting.RepoRootPath))
 	require.NoError(t, unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/gitea-repositories-meta"), setting.RepoRootPath))
 	ownerDirs, err := os.ReadDir(setting.RepoRootPath)
@@ -260,11 +247,28 @@ func PrepareTestEnv(t testing.TB, skip ...int) func() {
 			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "objects", "info"), 0o755)
 			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "refs", "heads"), 0o755)
 			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "refs", "tag"), 0o755)
+			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "refs", "pull"), 0o755)
 		}
 	}
+}
 
+func PrepareArtifactsStorage(t testing.TB) {
+	// prepare actions artifacts directory and files
+	require.NoError(t, storage.Clean(storage.ActionsArtifacts))
+
+	s, err := storage.NewStorage(setting.LocalStorageType, &setting.Storage{
+		Path: filepath.Join(filepath.Dir(setting.AppPath), "tests", "testdata", "data", "artifacts"),
+	})
+	require.NoError(t, err)
+	require.NoError(t, s.IterateObjects("", func(p string, obj storage.Object) error {
+		_, err = storage.Copy(storage.ActionsArtifacts, p, s, p)
+		return err
+	}))
+}
+
+func PrepareLFSStorage(t testing.TB) {
 	// load LFS object fixtures
-	// (LFS storage can be on any of several backends, including remote servers, so we init it with the storage API)
+	// (LFS storage can be on any of several backends, including remote servers, so init it with the storage API)
 	lfsFixtures, err := storage.NewStorage(setting.LocalStorageType, &setting.Storage{
 		Path: filepath.Join(filepath.Dir(setting.AppPath), "tests/gitea-lfs-meta"),
 	})
@@ -274,7 +278,9 @@ func PrepareTestEnv(t testing.TB, skip ...int) func() {
 		_, err := storage.Copy(storage.LFS, path, lfsFixtures, path)
 		return err
 	}))
+}
 
+func PrepareCleanPackageData(t testing.TB) {
 	// clear all package data
 	require.NoError(t, db.TruncateBeans(db.DefaultContext,
 		&packages_model.Package{},
@@ -286,17 +292,28 @@ func PrepareTestEnv(t testing.TB, skip ...int) func() {
 		&packages_model.PackageCleanupRule{},
 	))
 	require.NoError(t, storage.Clean(storage.Packages))
+}
 
+func PrepareTestEnv(t testing.TB, skip ...int) func() {
+	t.Helper()
+	deferFn := PrintCurrentTest(t, util.OptionalArg(skip)+1)
+
+	cancelProcesses(t, 30*time.Second)
+	t.Cleanup(func() { cancelProcesses(t, 0) }) // cancel remaining processes in a non-blocking way
+
+	// load database fixtures
+	require.NoError(t, unittest.LoadFixtures())
+
+	// do not add more Prepare* functions here, only call necessary ones in the related test functions
+	PrepareGitRepoDirectory(t)
+	PrepareLFSStorage(t)
+	PrepareCleanPackageData(t)
 	return deferFn
 }
 
 func PrintCurrentTest(t testing.TB, skip ...int) func() {
 	t.Helper()
-	actualSkip := 1
-	if len(skip) > 0 {
-		actualSkip = skip[0] + 1
-	}
-	return testlogger.PrintCurrentTest(t, actualSkip)
+	return testlogger.PrintCurrentTest(t, util.OptionalArg(skip)+1)
 }
 
 // Printf takes a format and args and prints the string to os.Stdout

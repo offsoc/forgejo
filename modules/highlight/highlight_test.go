@@ -109,6 +109,12 @@ c=2
 			),
 			lexerName: "Python",
 		},
+		{
+			name:      "DOS.PAS",
+			code:      "",
+			want:      lines(""),
+			lexerName: "ObjectPascal",
+		},
 	}
 
 	for _, tt := range tests {

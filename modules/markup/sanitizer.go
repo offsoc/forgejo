@@ -94,7 +94,7 @@ func createDefaultPolicy() *bluemonday.Policy {
 	}
 
 	// Allow classes for anchors
-	policy.AllowAttrs("class").Matching(regexp.MustCompile(`ref-issue( ref-external-issue)?`)).OnElements("a")
+	policy.AllowAttrs("class").Matching(regexp.MustCompile(`^(ref-issue( ref-external-issue)?|mention)$`)).OnElements("a")
 
 	// Allow classes for task lists
 	policy.AllowAttrs("class").Matching(regexp.MustCompile(`task-list-item`)).OnElements("li")
@@ -110,6 +110,7 @@ func createDefaultPolicy() *bluemonday.Policy {
 
 	// Allow icons, emojis, chroma syntax and keyword markup on span
 	policy.AllowAttrs("class").Matching(regexp.MustCompile(`^((icon(\s+[\p{L}\p{N}_-]+)+)|(emoji)|(language-math display)|(language-math inline))$|^([a-z][a-z0-9]{0,2})$|^` + keywordClass + `$`)).OnElements("span")
+	policy.AllowAttrs("data-alias").Matching(regexp.MustCompile(`^[a-zA-Z0-9-_+]+$`)).OnElements("span")
 
 	// Allow 'color' and 'background-color' properties for the style attribute on text elements and table cells.
 	policy.AllowStyles("color", "background-color").OnElements("span", "p", "th", "td")

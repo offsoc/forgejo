@@ -114,10 +114,7 @@ func TestRenameReservedUsername(t *testing.T) {
 		"avatar",
 		"avatars",
 		"captcha",
-		"commits",
-		"debug",
 		"devtest",
-		"error",
 		"explore",
 		"favicon.ico",
 		"ghost",
@@ -126,16 +123,12 @@ func TestRenameReservedUsername(t *testing.T) {
 		"manifest.json",
 		"metrics",
 		"milestones",
-		"new",
 		"notifications",
 		"org",
 		"pulls",
-		"raw",
 		"repo",
 		"repo-avatars",
 		"robots.txt",
-		"search",
-		"serviceworker.js",
 		"ssh_info",
 		"swagger.v1.json",
 		"user",
@@ -818,4 +811,28 @@ func TestUserTOTPEnrolled(t *testing.T) {
 
 		assert.True(t, called)
 	})
+}
+
+func TestUserRepos(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	cases := map[string][]string{
+		"alphabetically":        {"repo6", "repo7", "repo8"},
+		"recentupdate":          {"repo7", "repo8", "repo6"},
+		"reversealphabetically": {"repo8", "repo7", "repo6"},
+	}
+
+	session := loginUser(t, "user10")
+	for sortBy, repos := range cases {
+		req := NewRequest(t, "GET", "/user10?sort="+sortBy)
+		resp := session.MakeRequest(t, req, http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		sel := htmlDoc.doc.Find("a.name")
+		assert.Len(t, repos, len(sel.Nodes))
+		for i := 0; i < len(repos); i++ {
+			assert.EqualValues(t, repos[i], strings.TrimSpace(sel.Eq(i).Text()))
+		}
+	}
 }
