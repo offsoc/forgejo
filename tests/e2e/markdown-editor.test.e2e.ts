@@ -20,14 +20,12 @@ test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
   expect(response?.status()).toBe(200);
 
   await page.locator('[data-tooltip-content="Edit file"]').click();
-  await page.waitForLoadState('networkidle');
 
   const editor = page.locator('[aria-roledescription="editor"]').first();
   await editor.fill('');
   await editor.fill('![Logo of Forgejo](./assets/logo.svg "Logo of Forgejo")');
 
   await page.locator('a[data-tab="preview"]').click();
-  await page.waitForLoadState('networkidle');
 
   const preview = page.locator('div[data-tab="preview"] p[dir="auto"] a');
   await expect(preview).toHaveAttribute('href', 'http://localhost:3003/user2/repo1/media/branch/master/assets/logo.svg');
