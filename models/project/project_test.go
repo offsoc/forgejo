@@ -93,32 +93,34 @@ func TestProjectsSort(t *testing.T) {
 	}{
 		{
 			sortType: "default",
-			wants:    []int64{1, 3, 2, 6, 5, 4},
+			wants:    []int64{1, 3, 2, 7, 6, 5, 4},
 		},
 		{
 			sortType: "oldest",
-			wants:    []int64{4, 5, 6, 2, 3, 1},
+			wants:    []int64{4, 5, 6, 7, 2, 3, 1},
 		},
 		{
 			sortType: "recentupdate",
-			wants:    []int64{1, 3, 2, 6, 5, 4},
+			wants:    []int64{1, 3, 2, 7, 6, 5, 4},
 		},
 		{
 			sortType: "leastupdate",
-			wants:    []int64{4, 5, 6, 2, 3, 1},
+			wants:    []int64{4, 5, 6, 7, 2, 3, 1},
 		},
 	}
 
 	for _, tt := range tests {
-		projects, count, err := db.FindAndCount[Project](db.DefaultContext, SearchOptions{
-			OrderBy: GetSearchOrderByBySortType(tt.sortType),
-		})
-		require.NoError(t, err)
-		assert.EqualValues(t, int64(6), count)
-		if assert.Len(t, projects, 6) {
-			for i := range projects {
-				assert.EqualValues(t, tt.wants[i], projects[i].ID)
+		t.Run(tt.sortType, func(t *testing.T) {
+			projects, count, err := db.FindAndCount[Project](db.DefaultContext, SearchOptions{
+				OrderBy: GetSearchOrderByBySortType(tt.sortType),
+			})
+			require.NoError(t, err)
+			assert.EqualValues(t, int64(7), count)
+			if assert.Len(t, projects, 7) {
+				for i := range projects {
+					assert.EqualValues(t, tt.wants[i], projects[i].ID)
+				}
 			}
-		}
+		})
 	}
 }
