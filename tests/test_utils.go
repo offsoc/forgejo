@@ -175,6 +175,9 @@ func InitTest(requireGitea bool) {
 				log.Fatal("db.Exec: CREATE SCHEMA: %v", err)
 			}
 		}
+
+	case setting.Database.Type.IsSQLite3():
+		setting.Database.Path = ":memory:"
 	}
 
 	routers.InitWebInstalled(graceful.GetManager().HammerContext())

@@ -822,6 +822,7 @@ func TestPullMergeBranchProtect(t *testing.T) {
 			}
 			for _, withAPIOrWeb := range []string{"api", "web"} {
 				t.Run(testCase.name+" "+withAPIOrWeb, func(t *testing.T) {
+					defer tests.PrintCurrentTest(t)()
 					branch := testCase.name + "-" + withAPIOrWeb
 					unprotected := branch + "-unprotected"
 					doGitCheckoutBranch(dstPath, "master")(t)
@@ -834,8 +835,7 @@ func TestPullMergeBranchProtect(t *testing.T) {
 					ctx = NewAPITestContext(t, testCase.doer, "not used", auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteUser)
 					ctx.Username = owner
 					ctx.Reponame = repo
-					_, err := generateCommitWithNewData(littleSize, dstPath, "user2@example.com", "User Two", testCase.filename)
-					require.NoError(t, err)
+					generateCommitWithNewData(t, littleSize, dstPath, "user2@example.com", "User Two", testCase.filename)
 					doGitPushTestRepository(dstPath, "origin", branch+":"+unprotected)(t)
 					pr, err := doAPICreatePullRequest(ctx, owner, repo, branch, unprotected)(t)
 					require.NoError(t, err)
@@ -1015,6 +1015,7 @@ func TestPullAutoMergeAfterCommitStatusSucceed(t *testing.T) {
 			// perform all tests with API and web routes
 			for _, withAPI := range []bool{false, true} {
 				t.Run(testCase.name, func(t *testing.T) {
+					defer tests.PrintCurrentTest(t)()
 					protectedBranch := parameterProtectBranch{
 						"enable_push":           "true",
 						"enable_status_check":   "true",

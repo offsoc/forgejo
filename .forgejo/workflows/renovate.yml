@@ -21,7 +21,7 @@ env:
 
 jobs:
   renovate:
-    if: ${{ secrets.RENOVATE_TOKEN != '' }}
+    if: vars.ROLE == 'forgejo-coding' && secrets.RENOVATE_TOKEN != ''
 
     runs-on: docker-runner-one
     container:

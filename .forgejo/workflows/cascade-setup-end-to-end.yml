@@ -26,7 +26,7 @@ on:
 
 jobs:
   info:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding'
     runs-on: docker
     container:
       image: code.forgejo.org/oci/node:20-bookworm
@@ -45,7 +45,7 @@ jobs:
 
   cascade:
     if: >
-      !startsWith(vars.ROLE, 'forgejo-') && (
+      vars.ROLE == 'forgejo-coding' && (
         github.event_name == 'push' ||
         (
           github.event.action == 'label_updated' && github.event.label.name == 'run-end-to-end-tests'

@@ -62,7 +62,7 @@ func initRemoveTags() {
 		"user", "utente", "lietotājs", "gebruiker", "usuário", "Benutzer", "Bruker",
 		"server", "servidor", "kiszolgáló", "serveris",
 		"label", "etichetta", "etiķete", "rótulo", "Label", "utilizador",
-		"filename", "bestandsnaam", "dosyaadi", "fails", "nome do arquivo",
+		"filename", "bestandsnaam", "dosyaadi", "fails", "nome do arquivo", "datnes nosaukums",
 	} {
 		oldnew = append(oldnew, "<"+el+">", "REPLACED-TAG")
 	}

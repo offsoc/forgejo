@@ -1,17 +1,14 @@
 import {expect, type Page} from '@playwright/test';
-import {AxeBuilder} from '@axe-core/playwright';
+import {accessibilityCheck} from './accessibility.ts';
 
 export async function validate_form({page}: {page: Page}, scope: 'form' | 'fieldset' = 'form') {
-  const accessibilityScanResults = await new AxeBuilder({page})
-    // disable checking for link style - should be fixed, but not now
-    .disableRules('link-in-text-block')
-    .include(scope)
+  const excludedElements = [
     // exclude automated tooltips from accessibility scan, remove when fixed
-    .exclude('span[data-tooltip-content')
+    'span[data-tooltip-content',
     // exclude weird non-semantic HTML disabled content
-    .exclude('.disabled')
-    .analyze();
-  expect(accessibilityScanResults.violations).toEqual([]);
+    '.disabled',
+  ];
+  await accessibilityCheck({page}, [scope], excludedElements, []);
 
   // assert CSS properties that needed to be overriden for forms (ensure they remain active)
   const boxes = page.getByRole('checkbox').or(page.getByRole('radio'));

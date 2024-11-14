@@ -31,7 +31,7 @@ on:
 jobs:
   backporting:
     if: >
-      !startsWith(vars.ROLE, 'forgejo-') && (
+      ( vars.ROLE == 'forgejo-coding' ) && (
         github.event.pull_request.merged
         &&
         contains(toJSON(github.event.pull_request.labels), 'backport/v')
