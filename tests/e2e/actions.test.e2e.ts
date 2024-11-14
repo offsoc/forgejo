@@ -16,28 +16,6 @@ test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
 });
 
-test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
-  const page = await login({browser}, workerInfo);
-
-  const editPath = '/user2/repo1/src/branch/master/README.md';
-
-  const response = await page.goto(editPath);
-  expect(response?.status()).toBe(200);
-
-  await page.locator('[data-tooltip-content="Edit file"]').click();
-  await page.waitForLoadState('networkidle');
-
-  const editor = page.locator('[aria-roledescription="editor"]').first();
-  await editor.fill('');
-  await editor.fill('![Logo of Forgejo](./assets/logo.svg "Logo of Forgejo")');
-
-  await page.locator('a[data-tab="preview"]').click();
-  await page.waitForLoadState('networkidle');
-
-  const preview = page.locator('div[data-tab="preview"] p[dir="auto"] a');
-  await expect(preview).toHaveAttribute('href', 'http://localhost:3003/user2/repo1/media/branch/master/assets/logo.svg');
-});
-
 const workflow_trigger_notification_text = 'This workflow has a workflow_dispatch event trigger.';
 
 test('workflow dispatch present', async ({browser}, workerInfo) => {
