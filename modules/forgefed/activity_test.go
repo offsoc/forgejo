@@ -161,17 +161,17 @@ func Test_UndoUnmarshalJSON(t *testing.T) {
 	tests := map[string]testPair{
 		"with ID": {
 			item: []byte(`{"type":"Undo",` +
-		`"startTime":"2024-03-27T00:00:00Z",` +
-		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-		`"object":{` +
-		`"type":"Like",` +
-		`"startTime":"2024-03-27T00:00:00Z",` +
-		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-		`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`),
+				`"startTime":"2024-03-27T00:00:00Z",` +
+				`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+				`"object":{` +
+				`"type":"Like",` +
+				`"startTime":"2024-03-27T00:00:00Z",` +
+				`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+				`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`),
 			want: &ForgeUndoLike{
 				Activity: ap.Activity{
-					Actor:  ap.IRI("https://repo.prod.meissa.de/api/activitypub/user-id/1"),
-					Type:   "Undo",
+					Actor: ap.IRI("https://repo.prod.meissa.de/api/activitypub/user-id/1"),
+					Type:  "Undo",
 					//Object: ap.IRI("https://codeberg.org/api/activitypub/repository-id/1"),
 				},
 			},
@@ -298,60 +298,28 @@ func TestActivityValidationUndo(t *testing.T) {
 	if sut.Validate()[0] != "Object should not be nil." {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
 	}
-	
-	
+
 	sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
-	`"startTime":"2024-03-27T00:00:00Z",` +
-	`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-	`"object":{` +
-	`"startTime":"2024-03-27T00:00:00Z",` +
-	`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-	`"object":""}}`))
-	if sut.Validate()[0] != "Object.type should not be empty" {
+		`"startTime":"2024-03-27T00:00:00Z",` +
+		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+		`"object":{` +
+		`"startTime":"2024-03-27T00:00:00Z",` +
+		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+		`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
+	if sut.Validate()[0] != "object.type should not be empty" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
 	}
-	/*	
+
 	sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
 		`"startTime":"2024-03-27T00:00:00Z",` +
 		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
 		`"object":{` +
 		`"type":"Like",` +
-		`"startTime":"2024-03-27T00:00:00Z",` +
-		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-		`"object":"bla"}}`))
-	if sut.Validate()[0] != "Object.object should not be nil." {
+		`"object":""}}`))
+	if sut.Validate()[0] != "object.object should not be empty" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
 	}
 
-		sut.UnmarshalJSON([]byte(`{"type":"bad-type",
-			"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
-		"object":"https://codeberg.org/api/activitypub/repository-id/1",
-		"startTime": "2014-12-31T23:00:00-08:00"}`))
-		if sut.Validate()[0] != "Value bad-type is not contained in allowed values [Like]" {
-			t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
-		}
-	*/
-
-	/*
-		sut.UnmarshalJSON([]byte(`{"type":"Like",
-			"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
-		"object":"https://codeberg.org/api/activitypub/repository-id/1",
-		"startTime": "not a date"}`))
-		if sut.Validate()[0] != "StartTime was invalid." {
-			t.Errorf("validation error expected but was: %v\n", sut.Validate())
-		}
-	*/
-
-	/*
-		sut.UnmarshalJSON([]byte(`{"type":"Wrong",
-			"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
-		"object":"https://codeberg.org/api/activitypub/repository-id/1",
-		"startTime": "2014-12-31T23:00:00-08:00"}`))
-		if sut.Validate()[0] != "Value Wrong is ActivityValidationUndo(t *testing.T) {
-		sut := new(ForgeUndoLike)not contained in allowed values [Like]" {
-			t.Errorf("validation error expected but was: %v\n", sut.Validate())
-		}
-	*/
 }
 
 func TestActivityValidation_Attack(t *testing.T) {
