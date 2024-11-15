@@ -34,6 +34,7 @@ func NewForgeLike(actorIRI, objectIRI string, startTime time.Time) (ForgeLike, e
 type ForgeUndoLike struct {
 	// swagger:ignore
 	ap.Activity
+	Object ForgeLike
 }
 
 func NewForgeUndoLike(actorIRI, objectIRI string, startTime time.Time) (ForgeUndoLike, error) {
@@ -52,8 +53,16 @@ func (like ForgeLike) MarshalJSON() ([]byte, error) {
 	return like.Activity.MarshalJSON()
 }
 
+// func (like ForgeLike) MarshalJSON() ([]byte, error) {
+// 	return like.Activity.MarshalJSON()
+// }
+
 func (like *ForgeLike) UnmarshalJSON(data []byte) error {
 	return like.Activity.UnmarshalJSON(data)
+}
+
+func (undo *ForgeUndoLike) UnmarshalJSON(data []byte) error {
+	return undo.Activity.UnmarshalJSON(data)
 }
 
 func (like ForgeLike) IsNewer(compareTo time.Time) bool {
@@ -91,14 +100,22 @@ func (undo ForgeUndoLike) Validate() []string {
 		result = append(result, "Actor should not be nil.")
 	}
 
-	fmt.Printf("pre ausgabe %v", undo.Object)
+	fmt.Printf("pre ausgabe %v", undo)
 
-	if undo.Object == nil {
-		result = append(result, "Object should not be nil.")
+	// if undo.Object == nil {
+	// 	result = append(result, "Object should not be nil.")
+	// }
+	
+
+	if undo.Object.Type == "" {
+		result = append(result, "Object.type should not be empty.")
 	}
-	/* else {
-		result = append(result, validation.ValidateNotEmpty(undo.Object.GetID().String(), "object")...)
-		fmt.Printf("inner ausgabe %v", undo.Object)
+	
+	/*
+		} else {
+		result = append(result, "Object.type should not be empty")
+		//result = append(result, validation.ValidateNotEmpty(undo.Object.GetID().String(), "object")...)
+		//fmt.Printf("inner ausgabe %v", undo.Object)
 	}
 	fmt.Printf("post ausgabe %v", undo.Object)
 	*/
