@@ -8,7 +8,9 @@ name: renovate
 on:
   push:
     branches:
-      - 'renovate/**' # self-test updates
+      - renovate/** # self-test updates
+    paths:
+      - .forgejo/workflows/renovate.yml
   schedule:
     - cron: '0 0/2 * * *'
   workflow_dispatch:
@@ -19,15 +21,15 @@ env:
 
 jobs:
   renovate:
-    if: ${{ secrets.RENOVATE_TOKEN != '' }}
+    if: vars.ROLE == 'forgejo-coding' && secrets.RENOVATE_TOKEN != ''
 
-    runs-on: docker
+    runs-on: docker-runner-one
     container:
-      image: code.forgejo.org/forgejo-contrib/renovate:38.93.2
+      image: code.forgejo.org/forgejo-contrib/renovate:39.19.1
 
     steps:
       - name: Load renovate repo cache
-        uses: https://code.forgejo.org/actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        uses: https://code.forgejo.org/actions/cache/restore@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
         with:
           path: |
             .tmp/cache/renovate/repository
@@ -60,7 +62,7 @@ jobs:
 
       - name: Save renovate repo cache
         if: always() && env.RENOVATE_DRY_RUN != 'full'
-        uses: https://code.forgejo.org/actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        uses: https://code.forgejo.org/actions/cache/save@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
         with:
           path: |
             .tmp/cache/renovate/repository

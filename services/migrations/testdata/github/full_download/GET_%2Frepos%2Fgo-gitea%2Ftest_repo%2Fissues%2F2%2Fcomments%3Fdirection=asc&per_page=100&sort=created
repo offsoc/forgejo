@@ -1,0 +1,24 @@
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+X-Github-Media-Type: github.v3; param=squirrel-girl-preview
+X-Ratelimit-Remaining: 4917
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+Content-Type: application/json; charset=utf-8
+X-Github-Api-Version-Selected: 2022-11-28
+X-Ratelimit-Limit: 5000
+X-Ratelimit-Reset: 1730800941
+X-Ratelimit-Used: 83
+X-Content-Type-Options: nosniff
+X-Github-Request-Id: C7CC:3118FC:3F60409:4036CD0:6729E6B8
+Etag: W/"5f4d715f2578719997e324fe7b29e7eeeec048288237b44d4f320666514813ad"
+X-Accepted-Oauth-Scopes: 
+X-Frame-Options: deny
+X-Xss-Protection: 0
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+X-Ratelimit-Resource: core
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+Cache-Control: private, max-age=60, s-maxage=60
+X-Oauth-Scopes: 
+
+[{"url":"https://api.github.com/repos/go-gitea/test_repo/issues/comments/553111966","html_url":"https://github.com/go-gitea/test_repo/issues/2#issuecomment-553111966","issue_url":"https://api.github.com/repos/go-gitea/test_repo/issues/2","id":553111966,"node_id":"MDEyOklzc3VlQ29tbWVudDU1MzExMTk2Ng==","user":{"login":"mrsdizzie","id":1669571,"node_id":"MDQ6VXNlcjE2Njk1NzE=","avatar_url":"https://avatars.githubusercontent.com/u/1669571?v=4","gravatar_id":"","url":"https://api.github.com/users/mrsdizzie","html_url":"https://github.com/mrsdizzie","followers_url":"https://api.github.com/users/mrsdizzie/followers","following_url":"https://api.github.com/users/mrsdizzie/following{/other_user}","gists_url":"https://api.github.com/users/mrsdizzie/gists{/gist_id}","starred_url":"https://api.github.com/users/mrsdizzie/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/mrsdizzie/subscriptions","organizations_url":"https://api.github.com/users/mrsdizzie/orgs","repos_url":"https://api.github.com/users/mrsdizzie/repos","events_url":"https://api.github.com/users/mrsdizzie/events{/privacy}","received_events_url":"https://api.github.com/users/mrsdizzie/received_events","type":"User","user_view_type":"public","site_admin":false},"created_at":"2019-11-12T21:00:13Z","updated_at":"2019-11-12T21:00:13Z","author_association":"MEMBER","body":"This is a comment","reactions":{"url":"https://api.github.com/repos/go-gitea/test_repo/issues/comments/553111966/reactions","total_count":1,"+1":1,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"performed_via_github_app":null},{"url":"https://api.github.com/repos/go-gitea/test_repo/issues/comments/553138856","html_url":"https://github.com/go-gitea/test_repo/issues/2#issuecomment-553138856","issue_url":"https://api.github.com/repos/go-gitea/test_repo/issues/2","id":553138856,"node_id":"MDEyOklzc3VlQ29tbWVudDU1MzEzODg1Ng==","user":{"login":"mrsdizzie","id":1669571,"node_id":"MDQ6VXNlcjE2Njk1NzE=","avatar_url":"https://avatars.githubusercontent.com/u/1669571?v=4","gravatar_id":"","url":"https://api.github.com/users/mrsdizzie","html_url":"https://github.com/mrsdizzie","followers_url":"https://api.github.com/users/mrsdizzie/followers","following_url":"https://api.github.com/users/mrsdizzie/following{/other_user}","gists_url":"https://api.github.com/users/mrsdizzie/gists{/gist_id}","starred_url":"https://api.github.com/users/mrsdizzie/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/mrsdizzie/subscriptions","organizations_url":"https://api.github.com/users/mrsdizzie/orgs","repos_url":"https://api.github.com/users/mrsdizzie/repos","events_url":"https://api.github.com/users/mrsdizzie/events{/privacy}","received_events_url":"https://api.github.com/users/mrsdizzie/received_events","type":"User","user_view_type":"public","site_admin":false},"created_at":"2019-11-12T22:07:14Z","updated_at":"2019-11-12T22:07:14Z","author_association":"MEMBER","body":"A second comment","reactions":{"url":"https://api.github.com/repos/go-gitea/test_repo/issues/comments/553138856/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"performed_via_github_app":null}]

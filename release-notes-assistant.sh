@@ -7,7 +7,7 @@ label_bug=bug
 label_feature=feature
 label_ui=forgejo/ui
 label_breaking=breaking
-label_localization=internationalization
+label_localization=forgejo/i18n
 
 payload=$(mktemp)
 pr=$(mktemp)

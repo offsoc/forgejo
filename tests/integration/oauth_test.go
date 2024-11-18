@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
@@ -24,6 +25,7 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/routers/web/auth"
+	forgejo_context "code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/markbates/goth"
@@ -803,6 +805,16 @@ func TestOAuthIntrospection(t *testing.T) {
 	})
 }
 
+func requireCookieCSRF(t *testing.T, resp http.ResponseWriter) string {
+	for _, c := range resp.(*httptest.ResponseRecorder).Result().Cookies() {
+		if c.Name == "_csrf" {
+			return c.Value
+		}
+	}
+	require.True(t, false, "_csrf not found in cookies")
+	return ""
+}
+
 func TestOAuth_GrantScopesReadUser(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
@@ -840,19 +852,18 @@ func TestOAuth_GrantScopesReadUser(t *testing.T) {
 	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
 
 	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
-	htmlDoc := NewHTMLParser(t, authorizeResp.Body)
 	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
-		"_csrf":        htmlDoc.GetCSRF(),
+		"_csrf":        requireCookieCSRF(t, authorizeResp),
 		"client_id":    app.ClientID,
 		"redirect_uri": "a",
 		"state":        "thestate",
 		"granted":      "true",
 	})
-	grantResp := ctx.MakeRequest(t, grantReq, http.StatusSeeOther)
-	htmlDocGrant := NewHTMLParser(t, grantResp.Body)
+	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
+	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
 
 	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
-		"_csrf":         htmlDocGrant.GetCSRF(),
+		"_csrf":         requireCookieCSRF(t, authorizeResp),
 		"grant_type":    "authorization_code",
 		"client_id":     app.ClientID,
 		"client_secret": app.ClientSecret,
@@ -921,19 +932,18 @@ func TestOAuth_GrantScopesFailReadRepository(t *testing.T) {
 	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
 
 	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
-	htmlDoc := NewHTMLParser(t, authorizeResp.Body)
 	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
-		"_csrf":        htmlDoc.GetCSRF(),
+		"_csrf":        requireCookieCSRF(t, authorizeResp),
 		"client_id":    app.ClientID,
 		"redirect_uri": "a",
 		"state":        "thestate",
 		"granted":      "true",
 	})
-	grantResp := ctx.MakeRequest(t, grantReq, http.StatusSeeOther)
-	htmlDocGrant := NewHTMLParser(t, grantResp.Body)
+	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
+	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
 
 	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
-		"_csrf":         htmlDocGrant.GetCSRF(),
+		"_csrf":         requireCookieCSRF(t, authorizeResp),
 		"grant_type":    "authorization_code",
 		"client_id":     app.ClientID,
 		"client_secret": app.ClientSecret,
@@ -1000,19 +1010,18 @@ func TestOAuth_GrantScopesReadRepository(t *testing.T) {
 	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
 
 	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
-	htmlDoc := NewHTMLParser(t, authorizeResp.Body)
 	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
-		"_csrf":        htmlDoc.GetCSRF(),
+		"_csrf":        requireCookieCSRF(t, authorizeResp),
 		"client_id":    app.ClientID,
 		"redirect_uri": "a",
 		"state":        "thestate",
 		"granted":      "true",
 	})
-	grantResp := ctx.MakeRequest(t, grantReq, http.StatusSeeOther)
-	htmlDocGrant := NewHTMLParser(t, grantResp.Body)
+	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
+	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
 
 	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
-		"_csrf":         htmlDocGrant.GetCSRF(),
+		"_csrf":         requireCookieCSRF(t, authorizeResp),
 		"grant_type":    "authorization_code",
 		"client_id":     app.ClientID,
 		"client_secret": app.ClientSecret,
@@ -1082,19 +1091,18 @@ func TestOAuth_GrantScopesReadPrivateGroups(t *testing.T) {
 	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
 
 	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
-	htmlDoc := NewHTMLParser(t, authorizeResp.Body)
 	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
-		"_csrf":        htmlDoc.GetCSRF(),
+		"_csrf":        requireCookieCSRF(t, authorizeResp),
 		"client_id":    app.ClientID,
 		"redirect_uri": "a",
 		"state":        "thestate",
 		"granted":      "true",
 	})
-	grantResp := ctx.MakeRequest(t, grantReq, http.StatusSeeOther)
-	htmlDocGrant := NewHTMLParser(t, grantResp.Body)
+	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
+	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
 
 	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
-		"_csrf":         htmlDocGrant.GetCSRF(),
+		"_csrf":         requireCookieCSRF(t, authorizeResp),
 		"grant_type":    "authorization_code",
 		"client_id":     app.ClientID,
 		"client_secret": app.ClientSecret,
@@ -1164,19 +1172,18 @@ func TestOAuth_GrantScopesReadOnlyPublicGroups(t *testing.T) {
 	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
 
 	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
-	htmlDoc := NewHTMLParser(t, authorizeResp.Body)
 	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
-		"_csrf":        htmlDoc.GetCSRF(),
+		"_csrf":        requireCookieCSRF(t, authorizeResp),
 		"client_id":    app.ClientID,
 		"redirect_uri": "a",
 		"state":        "thestate",
 		"granted":      "true",
 	})
-	grantResp := ctx.MakeRequest(t, grantReq, http.StatusSeeOther)
-	htmlDocGrant := NewHTMLParser(t, grantResp.Body)
+	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
+	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
 
 	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
-		"_csrf":         htmlDocGrant.GetCSRF(),
+		"_csrf":         requireCookieCSRF(t, authorizeResp),
 		"grant_type":    "authorization_code",
 		"client_id":     app.ClientID,
 		"client_secret": app.ClientSecret,
@@ -1260,19 +1267,18 @@ func TestOAuth_GrantScopesReadPublicGroupsWithTheReadScope(t *testing.T) {
 	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
 
 	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
-	htmlDoc := NewHTMLParser(t, authorizeResp.Body)
 	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
-		"_csrf":        htmlDoc.GetCSRF(),
+		"_csrf":        requireCookieCSRF(t, authorizeResp),
 		"client_id":    app.ClientID,
 		"redirect_uri": "a",
 		"state":        "thestate",
 		"granted":      "true",
 	})
-	grantResp := ctx.MakeRequest(t, grantReq, http.StatusSeeOther)
-	htmlDocGrant := NewHTMLParser(t, grantResp.Body)
+	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
+	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
 
 	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
-		"_csrf":         htmlDocGrant.GetCSRF(),
+		"_csrf":         requireCookieCSRF(t, authorizeResp),
 		"grant_type":    "authorization_code",
 		"client_id":     app.ClientID,
 		"client_secret": app.ClientSecret,

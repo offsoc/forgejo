@@ -96,7 +96,7 @@ func Code(fileName, language, code string) (output template.HTML, lexerName stri
 	}
 
 	if lexer == nil {
-		lexer = lexers.Match(fileName)
+		lexer = lexers.Match(strings.ToLower(fileName))
 		if lexer == nil {
 			lexer = lexers.Fallback
 		}
@@ -165,7 +165,7 @@ func File(fileName, language string, code []byte) ([]template.HTML, string, erro
 
 		lexer = lexers.Get(guessLanguage)
 		if lexer == nil {
-			lexer = lexers.Match(fileName)
+			lexer = lexers.Match(strings.ToLower(fileName))
 			if lexer == nil {
 				lexer = lexers.Fallback
 			}

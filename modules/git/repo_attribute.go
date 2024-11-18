@@ -250,7 +250,7 @@ func (repo *Repository) GitAttributeChecker(treeish string, attributes ...string
 			err = e
 		}
 
-		if err != nil { // decorate the returned error
+		if err != nil && !IsErrCanceledOrKilled(err) { // decorate the returned error
 			err = fmt.Errorf("git check-attr (stderr: %q): %w", strings.TrimSpace(stdErr.String()), err)
 			ac.err.Store(err)
 		}

@@ -500,7 +500,7 @@ func TestIssueCommentAttachment(t *testing.T) {
 	link, exists := htmlDoc.doc.Find("#comment-form").Attr("action")
 	assert.True(t, exists, "The template has changed")
 
-	uuid := createAttachment(t, session, repoURL, "image.png", generateImg(), http.StatusOK)
+	uuid := createAttachment(t, session, GetCSRF(t, session, repoURL), repoURL, "image.png", generateImg(), http.StatusOK)
 
 	commentCount := htmlDoc.doc.Find(".comment-list .comment .render-content").Length()
 
@@ -1300,4 +1300,39 @@ func TestIssueUserDashboard(t *testing.T) {
 		htmlDoc := NewHTMLParser(t, resp.Body)
 		htmlDoc.AssertElement(t, sel, true)
 	}
+}
+
+func TestIssueOrgDashboard(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+	session := loginUser(t, user.Name)
+
+	// assert 'your_repositories' is the default filter for org dashboards
+	const sel = ".dashboard .ui.list-header.dropdown .ui.menu a.active.item[href^='?type=your_repositories']"
+
+	for _, path := range []string{"/org/org3/issues", "/org/org3/pulls"} {
+		req := NewRequest(t, "GET", path)
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, sel, true)
+	}
+}
+
+func TestIssueCount(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	req := NewRequest(t, "GET", "/user2/repo1/issues")
+	resp := MakeRequest(t, req, http.StatusOK)
+
+	htmlDoc := NewHTMLParser(t, resp.Body)
+
+	openCount := htmlDoc.doc.Find("a[data-test-name='open-issue-count']").Text()
+	assert.Contains(t, openCount, "1\u00a0Open")
+
+	closedCount := htmlDoc.doc.Find("a[data-test-name='closed-issue-count']").Text()
+	assert.Contains(t, closedCount, "1\u00a0Closed")
+
+	allCount := htmlDoc.doc.Find("a[data-test-name='all-issue-count']").Text()
+	assert.Contains(t, allCount, "2\u00a0All")
 }

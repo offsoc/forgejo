@@ -275,3 +275,16 @@ func TestGeneratingEd25519Keypair(t *testing.T) {
 	assert.EqualValues(t, testPublicKey, string(publicKey))
 	assert.EqualValues(t, testPrivateKey, string(privateKey))
 }
+
+func TestOptionalArg(t *testing.T) {
+	foo := func(other any, optArg ...int) int {
+		return util.OptionalArg(optArg)
+	}
+	bar := func(other any, optArg ...int) int {
+		return util.OptionalArg(optArg, 42)
+	}
+	assert.Equal(t, 0, foo(nil))
+	assert.Equal(t, 100, foo(nil, 100))
+	assert.Equal(t, 42, bar(nil))
+	assert.Equal(t, 100, bar(nil, 100))
+}

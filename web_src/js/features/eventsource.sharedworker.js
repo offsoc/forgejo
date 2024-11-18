@@ -28,7 +28,7 @@ class Source {
 
   deregister(port) {
     const portIdx = this.clients.indexOf(port);
-    if (portIdx < 0) {
+    if (portIdx === -1) {
       return this.clients.length;
     }
     this.clients.splice(portIdx, 1);

@@ -1,59 +1,38 @@
 # Copyright 2024 The Forgejo Authors
 # SPDX-License-Identifier: MIT
 #
-# To modify this workflow:
-#
-#  - push it to the wip-ci-end-to-end branch on the forgejo repository
-#    otherwise it will not have access to the secrets required to push
-#    the cascading PR
-#
-#  - once it works, open a pull request for the sake of keeping track
-#    of the change even if the PR won't run it because it will use
-#    whatever is in the default branch instead
-#
-#  - after it is merged, double check it works by setting the
-#    run-end-to-end-test on a pull request (any pull request will doe
-#
+name: issue-labels
+
 on:
-  push:
-    branches:
-      - 'wip-ci-end-to-end'
   pull_request_target:
     types:
       - labeled
 
 jobs:
-  info:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
-    runs-on: docker
-    container:
-      image: code.forgejo.org/oci/node:20-bookworm
-    steps:
-      - name: event
-        run: |
-          echo github.event.pull_request.head.repo.fork = ${{ github.event.pull_request.head.repo.fork }}
-          echo github.event.action = ${{ github.event.action }}
-          echo github.event.pull_request.merged = ${{ github.event.pull_request.merged }}
-          echo github.event.pull_request.labels.*.name
-          cat <<'EOF'
-          ${{ toJSON(github.event.pull_request.labels.*.name) }}
-          EOF
-          cat <<'EOF'
-          ${{ toJSON(github.event) }}
-          EOF
-
-  cascade:
+  end-to-end:
     if: >
-      !startsWith(vars.ROLE, 'forgejo-') && (
+      vars.ROLE == 'forgejo-coding' &&
+
+      secrets.END_TO_END_CASCADING_PR_DESTINATION != '' &&
+      secrets.END_TO_END_CASCADING_PR_ORIGIN != '' &&
+
+      (
         github.event_name == 'push' ||
         (
-          github.event.action == 'label_updated' && contains(github.event.pull_request.labels.*.name, 'run-end-to-end-tests')
+          github.event_name == 'pull_request_target' &&
+          github.event.action == 'label_updated' &&
+          github.event.label.name == 'run-end-to-end-tests'
         )
       )
     runs-on: docker
     container:
       image: code.forgejo.org/oci/node:20-bookworm
     steps:
+      - name: Debug info
+        run: |
+          cat <<'EOF'
+          ${{ toJSON(github) }}
+          EOF
       - uses: actions/checkout@v4
         with:
           fetch-depth: '0'

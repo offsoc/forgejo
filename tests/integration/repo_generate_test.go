@@ -11,9 +11,11 @@ import (
 	"strings"
 	"testing"
 
+	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/tests"
 
@@ -134,4 +136,20 @@ func TestRepoGenerateToOrg(t *testing.T) {
 	org := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "org3"})
 
 	testRepoGenerate(t, session, "44", "user27", "template1", user, org, "generated2")
+}
+
+func TestRepoCreateFormTrimSpace(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	session := loginUser(t, user.Name)
+
+	req := NewRequestWithValues(t, "POST", "/repo/create", map[string]string{
+		"_csrf":     GetCSRF(t, session, "/repo/create"),
+		"uid":       "2",
+		"repo_name": " spaced-name ",
+	})
+	resp := session.MakeRequest(t, req, http.StatusSeeOther)
+
+	assert.EqualValues(t, "/user2/spaced-name", test.RedirectURL(resp))
+	unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: 2, Name: "spaced-name"})
 }

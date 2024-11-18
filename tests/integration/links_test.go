@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/test"
+	forgejo_context "code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -190,16 +191,29 @@ func TestRedirectsWebhooks(t *testing.T) {
 			{from: "/user/settings/hooks/" + kind + "/new", to: "/user/login", verb: "GET"},
 			{from: "/admin/system-hooks/" + kind + "/new", to: "/user/login", verb: "GET"},
 			{from: "/admin/default-hooks/" + kind + "/new", to: "/user/login", verb: "GET"},
-			{from: "/user2/repo1/settings/hooks/" + kind + "/new", to: "/", verb: "POST"},
-			{from: "/admin/system-hooks/" + kind + "/new", to: "/", verb: "POST"},
-			{from: "/admin/default-hooks/" + kind + "/new", to: "/", verb: "POST"},
-			{from: "/user2/repo1/settings/hooks/1", to: "/", verb: "POST"},
-			{from: "/admin/hooks/1", to: "/", verb: "POST"},
 		}
 		for _, info := range redirects {
 			req := NewRequest(t, info.verb, info.from)
 			resp := MakeRequest(t, req, http.StatusSeeOther)
 			assert.EqualValues(t, path.Join(setting.AppSubURL, info.to), test.RedirectURL(resp), info.from)
+		}
+	}
+
+	for _, kind := range []string{"forgejo", "gitea"} {
+		csrf := []struct {
+			from string
+			verb string
+		}{
+			{from: "/user2/repo1/settings/hooks/" + kind + "/new", verb: "POST"},
+			{from: "/admin/hooks/1", verb: "POST"},
+			{from: "/admin/system-hooks/" + kind + "/new", verb: "POST"},
+			{from: "/admin/default-hooks/" + kind + "/new", verb: "POST"},
+			{from: "/user2/repo1/settings/hooks/1", verb: "POST"},
+		}
+		for _, info := range csrf {
+			req := NewRequest(t, info.verb, info.from)
+			resp := MakeRequest(t, req, http.StatusBadRequest)
+			assert.Contains(t, resp.Body.String(), forgejo_context.CsrfErrorString)
 		}
 	}
 }

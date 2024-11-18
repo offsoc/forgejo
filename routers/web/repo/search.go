@@ -17,16 +17,53 @@ import (
 
 const tplSearch base.TplName = "repo/search"
 
+type searchMode int
+
+const (
+	ExactSearchMode searchMode = iota
+	FuzzySearchMode
+	RegExpSearchMode
+)
+
+func searchModeFromString(s string) searchMode {
+	switch s {
+	case "fuzzy", "union":
+		return FuzzySearchMode
+	case "regexp":
+		return RegExpSearchMode
+	default:
+		return ExactSearchMode
+	}
+}
+
+func (m searchMode) String() string {
+	switch m {
+	case ExactSearchMode:
+		return "exact"
+	case FuzzySearchMode:
+		return "fuzzy"
+	case RegExpSearchMode:
+		return "regexp"
+	default:
+		panic("cannot happen")
+	}
+}
+
 // Search render repository search page
 func Search(ctx *context.Context) {
 	language := ctx.FormTrim("l")
 	keyword := ctx.FormTrim("q")
 
-	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
+	mode := ExactSearchMode
+	if modeStr := ctx.FormString("mode"); len(modeStr) > 0 {
+		mode = searchModeFromString(modeStr)
+	} else if ctx.FormOptionalBool("fuzzy").ValueOrDefault(true) { // for backward compatibility in links
+		mode = FuzzySearchMode
+	}
 
 	ctx.Data["Keyword"] = keyword
 	ctx.Data["Language"] = language
-	ctx.Data["IsFuzzy"] = isFuzzy
+	ctx.Data["CodeSearchMode"] = mode.String()
 	ctx.Data["PageIsViewCode"] = true
 
 	if keyword == "" {
@@ -47,7 +84,7 @@ func Search(ctx *context.Context) {
 		total, searchResults, searchResultLanguages, err = code_indexer.PerformSearch(ctx, &code_indexer.SearchOptions{
 			RepoIDs:        []int64{ctx.Repo.Repository.ID},
 			Keyword:        keyword,
-			IsKeywordFuzzy: isFuzzy,
+			IsKeywordFuzzy: mode == FuzzySearchMode,
 			Language:       language,
 			Paginator: &db.ListOptions{
 				Page:     page,
@@ -63,12 +100,20 @@ func Search(ctx *context.Context) {
 		} else {
 			ctx.Data["CodeIndexerUnavailable"] = !code_indexer.IsAvailable(ctx)
 		}
+		ctx.Data["CodeSearchOptions"] = []string{"exact", "fuzzy"}
 	} else {
-		res, err := git.GrepSearch(ctx, ctx.Repo.GitRepo, keyword, git.GrepOptions{
+		grepOpt := git.GrepOptions{
 			ContextLineNumber: 1,
-			IsFuzzy:           isFuzzy,
 			RefName:           ctx.Repo.RefName,
-		})
+		}
+		switch mode {
+		case FuzzySearchMode:
+			grepOpt.Mode = git.FixedAnyGrepMode
+			ctx.Data["CodeSearchMode"] = "union"
+		case RegExpSearchMode:
+			grepOpt.Mode = git.RegExpGrepMode
+		}
+		res, err := git.GrepSearch(ctx, ctx.Repo.GitRepo, keyword, grepOpt)
 		if err != nil {
 			ctx.ServerError("GrepSearch", err)
 			return
@@ -88,6 +133,7 @@ func Search(ctx *context.Context) {
 				Lines: code_indexer.HighlightSearchResultCode(r.Filename, r.LineNumbers, r.HighlightedRanges, strings.Join(r.LineCodes, "\n")),
 			})
 		}
+		ctx.Data["CodeSearchOptions"] = []string{"exact", "union", "regexp"}
 	}
 
 	ctx.Data["CodeIndexerDisabled"] = !setting.Indexer.RepoIndexerEnabled

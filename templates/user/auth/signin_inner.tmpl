@@ -17,9 +17,8 @@
 				<input id="user_name" type="text" name="user_name" value="{{.user_name}}" autofocus required>
 			</div>
 			{{if or (not .DisablePassword) .LinkAccountMode}}
-			<div class="required field {{if and (.Err_Password) (or (not .LinkAccountMode) (and .LinkAccountMode .LinkAccountModeSignIn))}}error{{end}} form-field-content-aside-label">
+			<div class="required field {{if and (.Err_Password) (or (not .LinkAccountMode) (and .LinkAccountMode .LinkAccountModeSignIn))}}error{{end}}">
 				<label for="password">{{ctx.Locale.Tr "password"}}</label>
-				<a href="{{AppSubUrl}}/user/forgot_password">{{ctx.Locale.Tr "auth.forgot_password"}}</a>
 				<input id="password" name="password" type="password" value="{{.password}}" autocomplete="current-password" required>
 			</div>
 			{{end}}
@@ -52,11 +51,15 @@
 <div class="ui container fluid">
 	{{template "user/auth/webauthn_error" .}}
 
-	{{if .ShowRegistrationButton}}
 		<div class="ui attached segment header top tw-max-w-2xl tw-m-auto tw-flex tw-flex-col tw-items-center">
+			{{if .ShowRegistrationButton}}
 			<div class="field">
 				{{ctx.Locale.Tr "auth.hint_register" (printf "%s/user/sign_up" AppSubUrl)}}
+				<br>
+			</div>
+			{{end}}
+			<div class="field">
+				<a href="{{AppSubUrl}}/user/forgot_password">{{ctx.Locale.Tr "auth.forgot_password"}}</a>
 			</div>
 		</div>
-	{{end}}
 </div>

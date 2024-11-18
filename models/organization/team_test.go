@@ -4,11 +4,14 @@
 package organization_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
+	"code.gitea.io/gitea/models/perm"
 	"code.gitea.io/gitea/models/unittest"
+	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -197,4 +200,51 @@ func TestUsersInTeamsCount(t *testing.T) {
 	test([]int64{2}, []int64{1, 2, 3, 4}, 1)          // only userid 2
 	test([]int64{1, 2, 3, 4, 5}, []int64{2, 5}, 2)    // userid 2,4
 	test([]int64{1, 2, 3, 4, 5}, []int64{2, 3, 5}, 3) // userid 2,4,5
+}
+
+func TestInconsistentOwnerTeam(t *testing.T) {
+	defer unittest.OverrideFixtures(
+		unittest.FixturesOptions{
+			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
+			Base: setting.AppWorkPath,
+			Dirs: []string{"models/organization/TestInconsistentOwnerTeam/"},
+		},
+	)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1000, TeamID: 1000, AccessMode: perm.AccessModeNone})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1001, TeamID: 1000, AccessMode: perm.AccessModeNone})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1002, TeamID: 1000, AccessMode: perm.AccessModeNone})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1003, TeamID: 1000, AccessMode: perm.AccessModeNone})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1004, TeamID: 1000, AccessMode: perm.AccessModeNone})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1005, TeamID: 1000, AccessMode: perm.AccessModeNone})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1006, TeamID: 1000, AccessMode: perm.AccessModeNone})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1007, TeamID: 1000, AccessMode: perm.AccessModeNone})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1008, TeamID: 1000, AccessMode: perm.AccessModeNone})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1009, TeamID: 1000, AccessMode: perm.AccessModeNone})
+
+	count, err := organization.CountInconsistentOwnerTeams(db.DefaultContext)
+	require.NoError(t, err)
+	require.EqualValues(t, 1, count)
+
+	count, err = organization.FixInconsistentOwnerTeams(db.DefaultContext)
+	require.NoError(t, err)
+	require.EqualValues(t, 1, count)
+
+	count, err = organization.CountInconsistentOwnerTeams(db.DefaultContext)
+	require.NoError(t, err)
+	require.EqualValues(t, 0, count)
+
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1000, AccessMode: perm.AccessModeOwner})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1001, AccessMode: perm.AccessModeOwner})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1002, AccessMode: perm.AccessModeOwner})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1003, AccessMode: perm.AccessModeOwner})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1004, AccessMode: perm.AccessModeOwner})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1007, AccessMode: perm.AccessModeOwner})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1008, AccessMode: perm.AccessModeOwner})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1009, AccessMode: perm.AccessModeOwner})
+
+	// External wiki and issue
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1005, AccessMode: perm.AccessModeRead})
+	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1006, AccessMode: perm.AccessModeRead})
 }

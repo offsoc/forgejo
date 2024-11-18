@@ -7,7 +7,9 @@ package user
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/mail"
 	"net/url"
@@ -318,15 +320,14 @@ func (u *User) OrganisationLink() string {
 	return setting.AppSubURL + "/org/" + url.PathEscape(u.Name)
 }
 
-// GenerateEmailActivateCode generates an activate code based on user information and given e-mail.
-func (u *User) GenerateEmailActivateCode(email string) string {
-	code := base.CreateTimeLimitCode(
-		fmt.Sprintf("%d%s%s%s%s", u.ID, email, u.LowerName, u.Passwd, u.Rands),
-		setting.Service.ActiveCodeLives, time.Now(), nil)
-
-	// Add tail hex username
-	code += hex.EncodeToString([]byte(u.LowerName))
-	return code
+// GenerateEmailAuthorizationCode generates an activation code based for the user for the specified purpose.
+// The standard expiry is ActiveCodeLives minutes.
+func (u *User) GenerateEmailAuthorizationCode(ctx context.Context, purpose auth.AuthorizationPurpose) (string, error) {
+	lookup, validator, err := auth.GenerateAuthToken(ctx, u.ID, timeutil.TimeStampNow().Add(int64(setting.Service.ActiveCodeLives)*60), purpose)
+	if err != nil {
+		return "", err
+	}
+	return lookup + ":" + validator, nil
 }
 
 // GetUserFollowers returns range of user's followers.
@@ -419,6 +420,10 @@ func (u *User) IsOrganization() bool {
 // IsIndividual returns true if user is actually a individual user.
 func (u *User) IsIndividual() bool {
 	return u.Type == UserTypeIndividual
+}
+
+func (u *User) IsUser() bool {
+	return u.Type == UserTypeIndividual || u.Type == UserTypeBot
 }
 
 // IsBot returns whether or not the user is of type bot
@@ -582,44 +587,46 @@ var (
 		".",
 		"..",
 		".well-known",
-		"admin",
-		"api",
-		"assets",
-		"attachments",
-		"avatar",
-		"avatars",
-		"captcha",
-		"commits",
-		"debug",
-		"devtest",
-		"error",
-		"explore",
-		"favicon.ico",
-		"ghost",
-		"issues",
-		"login",
-		"manifest.json",
-		"metrics",
-		"milestones",
-		"new",
-		"notifications",
-		"org",
-		"pulls",
-		"raw",
-		"repo",
+
+		"api",     // gitea api
+		"metrics", // prometheus metrics api
+		"v2",      // container registry api
+
+		"assets",      // static asset files
+		"attachments", // issue attachments
+
+		"avatar",  // avatar by email hash
+		"avatars", // user avatars by file name
 		"repo-avatars",
-		"robots.txt",
-		"search",
-		"serviceworker.js",
-		"ssh_info",
+
+		"captcha",
+		"login", // oauth2 login
+		"org",   // org create/manage, or "/org/{org}", BUT if an org is named as "invite" then it goes wrong
+		"repo",  // repo create/migrate, etc
+		"user",  // user login/activate/settings, etc
+
+		"admin",
+		"devtest",
+		"explore",
+		"issues",
+		"pulls",
+		"milestones",
+		"notifications",
+
+		"favicon.ico",
+		"manifest.json", // web app manifests
+		"robots.txt",    // search engine robots
+		"sitemap.xml",   // search engine sitemap
+		"ssh_info",      // agit info
 		"swagger.v1.json",
-		"user",
-		"v2",
-		"gitea-actions",
-		"forgejo-actions",
+
+		"ghost",           // reserved name for deleted users (id: -1)
+		"gitea-actions",   // gitea builtin user (id: -2)
+		"forgejo-actions", // forgejo builtin user (id: -2)
 	}
 
-	// DON'T ADD ANY NEW STUFF, WE SOLVE THIS WITH `/user/{obj}` PATHS!
+	// These names are reserved for user accounts: user's keys, user's rss feed, user's avatar, etc.
+	// DO NOT add any new stuff! The paths with these names are processed by `/{username}` handler (UsernameSubRoute) manually.
 	reservedUserPatterns = []string{"*.keys", "*.gpg", "*.rss", "*.atom", "*.png"}
 )
 
@@ -711,11 +718,11 @@ func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefa
 	}
 
 	if createdByAdmin {
-		if err := ValidateEmailForAdmin(u.Email); err != nil {
+		if err := validation.ValidateEmailForAdmin(u.Email); err != nil {
 			return err
 		}
 	} else {
-		if err := ValidateEmail(u.Email); err != nil {
+		if err := validation.ValidateEmail(u.Email); err != nil {
 			return err
 		}
 	}
@@ -832,35 +839,50 @@ func countUsers(ctx context.Context, opts *CountUserFilter) int64 {
 	return count
 }
 
-// GetVerifyUser get user by verify code
-func GetVerifyUser(ctx context.Context, code string) (user *User) {
-	if len(code) <= base.TimeLimitCodeLength {
-		return nil
+// VerifyUserActiveCode verifies that the code is valid for the given purpose for this user.
+// If delete is specified, the token will be deleted.
+func VerifyUserAuthorizationToken(ctx context.Context, code string, purpose auth.AuthorizationPurpose, delete bool) (*User, error) {
+	lookupKey, validator, found := strings.Cut(code, ":")
+	if !found {
+		return nil, nil
 	}
 
-	// use tail hex username query user
-	hexStr := code[base.TimeLimitCodeLength:]
-	if b, err := hex.DecodeString(hexStr); err == nil {
-		if user, err = GetUserByName(ctx, string(b)); user != nil {
-			return user
+	authToken, err := auth.FindAuthToken(ctx, lookupKey, purpose)
+	if err != nil {
+		if errors.Is(err, util.ErrNotExist) {
+			return nil, nil
 		}
-		log.Error("user.getVerifyUser: %v", err)
+		return nil, err
 	}
 
-	return nil
-}
+	if authToken.IsExpired() {
+		return nil, auth.DeleteAuthToken(ctx, authToken)
+	}
 
-// VerifyUserActiveCode verifies active code when active account
-func VerifyUserActiveCode(ctx context.Context, code string) (user *User) {
-	if user = GetVerifyUser(ctx, code); user != nil {
-		// time limit code
-		prefix := code[:base.TimeLimitCodeLength]
-		data := fmt.Sprintf("%d%s%s%s%s", user.ID, user.Email, user.LowerName, user.Passwd, user.Rands)
-		if base.VerifyTimeLimitCode(time.Now(), data, setting.Service.ActiveCodeLives, prefix) {
-			return user
+	rawValidator, err := hex.DecodeString(validator)
+	if err != nil {
+		return nil, err
+	}
+
+	if subtle.ConstantTimeCompare([]byte(authToken.HashedValidator), []byte(auth.HashValidator(rawValidator))) == 0 {
+		return nil, errors.New("validator doesn't match")
+	}
+
+	u, err := GetUserByID(ctx, authToken.UID)
+	if err != nil {
+		if IsErrUserNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	if delete {
+		if err := auth.DeleteAuthToken(ctx, authToken); err != nil {
+			return nil, err
 		}
 	}
-	return nil
+
+	return u, nil
 }
 
 // ValidateUser check if user is valid to insert / update into database
@@ -879,7 +901,7 @@ func (u User) Validate() []string {
 	if err := ValidateUser(&u); err != nil {
 		result = append(result, err.Error())
 	}
-	if err := ValidateEmail(u.Email); err != nil {
+	if err := validation.ValidateEmail(u.Email); err != nil {
 		result = append(result, err.Error())
 	}
 	return result

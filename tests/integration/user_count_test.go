@@ -98,6 +98,7 @@ func (countTest *userCountTest) getCount(doc *goquery.Document, name string) (in
 
 func (countTest *userCountTest) TestPage(t *testing.T, page string, orgLink bool) {
 	t.Run(page, func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		var userLink string
 
 		if orgLink {

@@ -72,6 +72,30 @@ func testPullCreate(t *testing.T, session *TestSession, user, repo string, toSel
 	return resp
 }
 
+func testPullCreateDirectly(t *testing.T, session *TestSession, baseRepoOwner, baseRepoName, baseBranch, headRepoOwner, headRepoName, headBranch, title string) *httptest.ResponseRecorder {
+	headCompare := headBranch
+	if headRepoOwner != "" {
+		if headRepoName != "" {
+			headCompare = fmt.Sprintf("%s/%s:%s", headRepoOwner, headRepoName, headBranch)
+		} else {
+			headCompare = fmt.Sprintf("%s:%s", headRepoOwner, headBranch)
+		}
+	}
+	req := NewRequest(t, "GET", fmt.Sprintf("/%s/%s/compare/%s...%s", baseRepoOwner, baseRepoName, baseBranch, headCompare))
+	resp := session.MakeRequest(t, req, http.StatusOK)
+
+	// Submit the form for creating the pull
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	link, exists := htmlDoc.doc.Find("form.ui.form").Attr("action")
+	assert.True(t, exists, "The template has changed")
+	req = NewRequestWithValues(t, "POST", link, map[string]string{
+		"_csrf": htmlDoc.GetCSRF(),
+		"title": title,
+	})
+	resp = session.MakeRequest(t, req, http.StatusOK)
+	return resp
+}
+
 func TestPullCreate(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		session := loginUser(t, "user1")
@@ -503,5 +527,32 @@ func TestRecentlyPushed(t *testing.T) {
 			link, _ := htmlDoc.Find(".ui.message a[href*='/src/branch/']").Attr("href")
 			assert.Equal(t, "/user1/repo1/src/branch/recent-push", link)
 		})
+	})
+}
+
+/*
+Setup:
+The base repository is: user2/repo1
+Fork repository to: user1/repo1
+Push extra commit to: user2/repo1, which changes README.md
+Create a PR on user1/repo1
+
+Test checks:
+Check if pull request can be created from base to the fork repository.
+*/
+func TestPullCreatePrFromBaseToFork(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		sessionFork := loginUser(t, "user1")
+		testRepoFork(t, sessionFork, "user2", "repo1", "user1", "repo1")
+
+		// Edit base repository
+		sessionBase := loginUser(t, "user2")
+		testEditFile(t, sessionBase, "user2", "repo1", "master", "README.md", "Hello, World (Edited)\n")
+
+		// Create a PR
+		resp := testPullCreateDirectly(t, sessionFork, "user1", "repo1", "master", "user2", "repo1", "master", "This is a pull title")
+		// check the redirected URL
+		url := test.RedirectURL(resp)
+		assert.Regexp(t, "^/user1/repo1/pulls/[0-9]*$", url)
 	})
 }

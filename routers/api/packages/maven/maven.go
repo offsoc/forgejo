@@ -117,7 +117,9 @@ func serveMavenMetadata(ctx *context.Context, params parameters) {
 	xmlMetadataWithHeader := append([]byte(xml.Header), xmlMetadata...)
 
 	latest := pds[len(pds)-1]
-	ctx.Resp.Header().Set("Last-Modified", latest.Version.CreatedUnix.Format(http.TimeFormat))
+	// http.TimeFormat required a UTC time, refer to https://pkg.go.dev/net/http#TimeFormat
+	lastModifed := latest.Version.CreatedUnix.AsTime().UTC().Format(http.TimeFormat)
+	ctx.Resp.Header().Set("Last-Modified", lastModifed)
 
 	ext := strings.ToLower(filepath.Ext(params.Filename))
 	if isChecksumExtension(ext) {
@@ -215,7 +217,7 @@ func servePackageFile(ctx *context.Context, params parameters, serveContent bool
 		return
 	}
 
-	s, u, _, err := packages_service.GetPackageBlobStream(ctx, pf, pb)
+	s, u, _, err := packages_service.GetPackageBlobStream(ctx, pf, pb, nil)
 	if err != nil {
 		apiError(ctx, http.StatusInternalServerError, err)
 		return

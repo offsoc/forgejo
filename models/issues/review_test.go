@@ -64,7 +64,7 @@ func TestReviewType_Icon(t *testing.T) {
 func TestFindReviews(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	reviews, err := issues_model.FindReviews(db.DefaultContext, issues_model.FindReviewOptions{
-		Type:       issues_model.ReviewTypeApprove,
+		Types:      []issues_model.ReviewType{issues_model.ReviewTypeApprove},
 		IssueID:    2,
 		ReviewerID: 1,
 	})
@@ -76,7 +76,7 @@ func TestFindReviews(t *testing.T) {
 func TestFindLatestReviews(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	reviews, err := issues_model.FindLatestReviews(db.DefaultContext, issues_model.FindReviewOptions{
-		Type:    issues_model.ReviewTypeApprove,
+		Types:   []issues_model.ReviewType{issues_model.ReviewTypeApprove},
 		IssueID: 11,
 	})
 	require.NoError(t, err)

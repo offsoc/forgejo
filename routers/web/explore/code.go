@@ -21,12 +21,13 @@ const (
 
 // Code render explore code page
 func Code(ctx *context.Context) {
-	if !setting.Indexer.RepoIndexerEnabled {
+	if !setting.Indexer.RepoIndexerEnabled || setting.Service.Explore.DisableCodePage {
 		ctx.Redirect(setting.AppSubURL + "/explore")
 		return
 	}
 
-	ctx.Data["UsersIsDisabled"] = setting.Service.Explore.DisableUsersPage
+	ctx.Data["UsersPageIsDisabled"] = setting.Service.Explore.DisableUsersPage
+	ctx.Data["OrganizationsPageIsDisabled"] = setting.Service.Explore.DisableOrganizationsPage
 	ctx.Data["IsRepoIndexerEnabled"] = setting.Indexer.RepoIndexerEnabled
 	ctx.Data["Title"] = ctx.Tr("explore")
 	ctx.Data["PageIsExplore"] = true
@@ -36,10 +37,18 @@ func Code(ctx *context.Context) {
 	keyword := ctx.FormTrim("q")
 
 	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
+	if mode := ctx.FormTrim("mode"); len(mode) > 0 {
+		isFuzzy = mode == "fuzzy"
+	}
 
 	ctx.Data["Keyword"] = keyword
 	ctx.Data["Language"] = language
-	ctx.Data["IsFuzzy"] = isFuzzy
+	ctx.Data["CodeSearchOptions"] = []string{"exact", "fuzzy"}
+	if isFuzzy {
+		ctx.Data["CodeSearchMode"] = "fuzzy"
+	} else {
+		ctx.Data["CodeSearchMode"] = "exact"
+	}
 	ctx.Data["PageIsViewCode"] = true
 
 	if keyword == "" {

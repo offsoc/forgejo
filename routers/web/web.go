@@ -122,7 +122,7 @@ func webAuth(authMethod auth_service.Method) func(*context.Context) {
 		ar, err := common.AuthShared(ctx.Base, ctx.Session, authMethod)
 		if err != nil {
 			log.Error("Failed to verify user: %v", err)
-			ctx.Error(http.StatusUnauthorized, "Verify")
+			ctx.Error(http.StatusUnauthorized, ctx.Locale.TrString("auth.unauthorized_credentials", "https://codeberg.org/forgejo/forgejo/issues/2809"))
 			return
 		}
 		ctx.Doer = ar.Doer
@@ -132,6 +132,8 @@ func webAuth(authMethod auth_service.Method) func(*context.Context) {
 			// ensure the session uid is deleted
 			_ = ctx.Session.Delete("uid")
 		}
+
+		ctx.Csrf.PrepareForSessionUser(ctx)
 	}
 }
 
@@ -640,7 +642,7 @@ func registerRoutes(m *web.Route) {
 		m.Post("/logout", auth.SignOut)
 		m.Get("/task/{task}", reqSignIn, user.TaskStatus)
 		m.Get("/stopwatches", reqSignIn, user.GetStopwatches)
-		m.Get("/search", ignExploreSignIn, user.Search)
+		m.Get("/search_candidates", ignExploreSignIn, user.SearchCandidates)
 		m.Group("/oauth2", func() {
 			m.Get("/{provider}", auth.SignInOAuth)
 			m.Get("/{provider}/callback", auth.SignInOAuthCallback)
@@ -1560,8 +1562,10 @@ func registerRoutes(m *web.Route) {
 			m.Get("/cherry-pick/{sha:([a-f0-9]{4,64})$}", repo.SetEditorconfigIfExists, repo.CherryPick)
 		}, repo.MustBeNotEmpty, context.RepoRef(), reqRepoCodeReader)
 
-		m.Get("/rss/branch/*", repo.MustBeNotEmpty, context.RepoRefByType(context.RepoRefBranch), feedEnabled, feed.RenderBranchFeed("rss"))
-		m.Get("/atom/branch/*", repo.MustBeNotEmpty, context.RepoRefByType(context.RepoRefBranch), feedEnabled, feed.RenderBranchFeed("atom"))
+		m.Group("", func() {
+			m.Get("/rss/branch/*", feed.RenderBranchFeed("rss"))
+			m.Get("/atom/branch/*", feed.RenderBranchFeed("atom"))
+		}, repo.MustBeNotEmpty, context.RepoRefByType(context.RepoRefBranch), reqRepoCodeReader, feedEnabled)
 
 		m.Group("/src", func() {
 			m.Get("/branch/*", context.RepoRefByType(context.RepoRefBranch), repo.Home)

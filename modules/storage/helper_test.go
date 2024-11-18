@@ -38,7 +38,7 @@ func Test_discardStorage(t *testing.T) {
 				require.Error(t, err, string(tt))
 			}
 			{
-				got, err := tt.URL("path", "name")
+				got, err := tt.URL("path", "name", nil)
 				assert.Nil(t, got)
 				require.Errorf(t, err, string(tt))
 			}

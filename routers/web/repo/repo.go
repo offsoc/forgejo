@@ -505,7 +505,7 @@ func download(ctx *context.Context, archiveName string, archiver *repo_model.Rep
 	rPath := archiver.RelativePath()
 	if setting.RepoArchive.Storage.MinioConfig.ServeDirect {
 		// If we have a signed url (S3, object storage), redirect to this directly.
-		u, err := storage.RepoArchives.URL(rPath, downloadName)
+		u, err := storage.RepoArchives.URL(rPath, downloadName, nil)
 		if u != nil && err == nil {
 			if archiver.ReleaseID != 0 {
 				err = repo_model.CountArchiveDownload(ctx, ctx.Repo.Repository.ID, archiver.ReleaseID, archiver.Type)

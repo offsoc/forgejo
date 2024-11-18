@@ -138,7 +138,7 @@ func TestComposeIssueMessage(t *testing.T) {
 	references := gomailMsg.GetHeader("References")
 
 	assert.Len(t, mailto, 1, "exactly one recipient is expected in the To field")
-	assert.Equal(t, "[user2/repo1] issue1 (#1)", subject[0])
+	assert.Equal(t, "[user2/repo1] issue1 (Issue #1)", subject[0])
 	assert.Equal(t, "<user2/repo1/issues/1@localhost>", inReplyTo[0], "In-Reply-To header doesn't match")
 	assert.Equal(t, "<user2/repo1/issues/1@localhost>", references[0], "References header doesn't match")
 	assert.Equal(t, "<user2/repo1/issues/1@localhost>", messageID[0], "Message-ID header doesn't match")
@@ -293,7 +293,7 @@ func TestTemplateSelection(t *testing.T) {
 		Issue:   issue, Doer: doer, ActionType: activities_model.ActionCloseIssue,
 		Content: "test body", Comment: comment,
 	}, recipients, false, "TestTemplateSelection")
-	expect(t, msg, "Re: [user2/repo1] issue1 (#1)", "issue/close/body")
+	expect(t, msg, "Re: [user2/repo1] issue1 (Issue #1)", "issue/close/body")
 }
 
 func TestTemplateServices(t *testing.T) {
@@ -338,7 +338,7 @@ func TestTemplateServices(t *testing.T) {
 	expect(t, issue, comment, doer, activities_model.ActionCommentIssue, true,
 		"{{.FallbackSubject}}",
 		"//{{.SubjectPrefix}}//",
-		"Re: [user2/repo1] issue1 (#1)",
+		"Re: [user2/repo1] issue1 (Issue #1)",
 		"//Re: //")
 }
 
@@ -537,4 +537,12 @@ func TestFromDisplayName(t *testing.T) {
 
 		assert.EqualValues(t, "Mister X (by Code IT on [code.it])", fromDisplayName(&user_model.User{FullName: "Mister X", Name: "tmp"}))
 	})
+}
+
+func TestFallbackSubjectType(t *testing.T) {
+	_, _, issue, _ := prepareMailerTest(t)
+	assert.Contains(t, fallbackMailSubject(issue), "Issue")
+	_, _, pr, _ := prepareMailerTest(t)
+	pr.IsPull = true
+	assert.Contains(t, fallbackMailSubject(pr), "PR")
 }

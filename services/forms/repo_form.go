@@ -21,13 +21,13 @@ import (
 	"code.gitea.io/gitea/modules/web/middleware"
 	"code.gitea.io/gitea/services/context"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 // CreateRepoForm form for creating repository
 type CreateRepoForm struct {
 	UID           int64  `binding:"Required"`
-	RepoName      string `binding:"Required;AlphaDashDot;MaxSize(100)"`
+	RepoName      string `binding:"Required;AlphaDashDot;MaxSize(100)" preprocess:"TrimSpace"`
 	Private       bool
 	Description   string `binding:"MaxSize(2048)"`
 	DefaultBranch string `binding:"GitRefName;MaxSize(100)"`

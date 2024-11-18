@@ -18,7 +18,6 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/translation"
 	repo_service "code.gitea.io/gitea/services/repository"
@@ -157,15 +156,8 @@ func TestCreateBranchInvalidCSRF(t *testing.T) {
 		"_csrf":           "fake_csrf",
 		"new_branch_name": "test",
 	})
-	resp := session.MakeRequest(t, req, http.StatusSeeOther)
-	loc := resp.Header().Get("Location")
-	assert.Equal(t, setting.AppSubURL+"/", loc)
-	resp = session.MakeRequest(t, NewRequest(t, "GET", loc), http.StatusOK)
-	htmlDoc := NewHTMLParser(t, resp.Body)
-	assert.Equal(t,
-		"Bad Request: invalid CSRF token",
-		strings.TrimSpace(htmlDoc.doc.Find(".ui.message").Text()),
-	)
+	resp := session.MakeRequest(t, req, http.StatusBadRequest)
+	assert.Contains(t, resp.Body.String(), "Invalid CSRF token")
 }
 
 func TestDatabaseMissingABranch(t *testing.T) {

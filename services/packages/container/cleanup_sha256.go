@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	container_module "code.gitea.io/gitea/modules/packages/container"
+	"code.gitea.io/gitea/modules/timeutil"
 )
 
 var (
@@ -37,18 +38,24 @@ func cleanupSHA256(outerCtx context.Context, olderThan time.Duration) error {
 	defer committer.Close()
 
 	foundAtLeastOneSHA256 := false
-	shaToVersionID := make(map[string]int64, 100)
+	type packageVersion struct {
+		id      int64
+		created timeutil.TimeStamp
+	}
+	shaToPackageVersion := make(map[string]packageVersion, 100)
 	knownSHA := make(map[string]any, 100)
+
+	// compute before making the inventory to not race against ongoing
+	// image creations
+	old := timeutil.TimeStamp(time.Now().Add(-olderThan).Unix())
 
 	log.Debug("Look for all package_version.version that start with sha256:")
 
-	old := time.Now().Add(-olderThan).Unix()
-
 	// Iterate over all container versions in ascending order and store
-	// in shaToVersionID all versions with a sha256: prefix. If an index
+	// in shaToPackageVersion all versions with a sha256: prefix. If an index
 	// manifest is found, the sha256: digest it references are removed
-	// from shaToVersionID. If the sha256: digest found in an index
-	// manifest is not already in shaToVersionID, it is stored in
+	// from shaToPackageVersion. If the sha256: digest found in an index
+	// manifest is not already in shaToPackageVersion, it is stored in
 	// knownSHA to be dealt with later.
 	//
 	// Although it is theoretically possible that a sha256: is uploaded
@@ -56,16 +63,16 @@ func cleanupSHA256(outerCtx context.Context, olderThan time.Duration) error {
 	// normal order of operations. First the sha256: version is uploaded
 	// and then the index manifest. When the iteration completes,
 	// knownSHA will therefore be empty most of the time and
-	// shaToVersionID will only contain unreferenced sha256: versions.
+	// shaToPackageVersion will only contain unreferenced sha256: versions.
 	if err := db.GetEngine(ctx).
-		Select("`package_version`.`id`, `package_version`.`lower_version`, `package_version`.`metadata_json`").
+		Select("`package_version`.`id`, `package_version`.`created_unix`, `package_version`.`lower_version`, `package_version`.`metadata_json`").
 		Join("INNER", "`package`", "`package`.`id` = `package_version`.`package_id`").
-		Where("`package`.`type` = ? AND `package_version`.`created_unix` < ?", packages.TypeContainer, old).
+		Where("`package`.`type` = ?", packages.TypeContainer).
 		OrderBy("`package_version`.`id` ASC").
 		Iterate(new(packages.PackageVersion), func(_ int, bean any) error {
 			v := bean.(*packages.PackageVersion)
 			if strings.HasPrefix(v.LowerVersion, "sha256:") {
-				shaToVersionID[v.LowerVersion] = v.ID
+				shaToPackageVersion[v.LowerVersion] = packageVersion{id: v.ID, created: v.CreatedUnix}
 				foundAtLeastOneSHA256 = true
 			} else if strings.Contains(v.MetadataJSON, `"manifests":[{`) {
 				var metadata container_module.Metadata
@@ -74,8 +81,8 @@ func cleanupSHA256(outerCtx context.Context, olderThan time.Duration) error {
 					return nil
 				}
 				for _, manifest := range metadata.Manifests {
-					if _, ok := shaToVersionID[manifest.Digest]; ok {
-						delete(shaToVersionID, manifest.Digest)
+					if _, ok := shaToPackageVersion[manifest.Digest]; ok {
+						delete(shaToPackageVersion, manifest.Digest)
 					} else {
 						knownSHA[manifest.Digest] = true
 					}
@@ -87,10 +94,10 @@ func cleanupSHA256(outerCtx context.Context, olderThan time.Duration) error {
 	}
 
 	for sha := range knownSHA {
-		delete(shaToVersionID, sha)
+		delete(shaToPackageVersion, sha)
 	}
 
-	if len(shaToVersionID) == 0 {
+	if len(shaToPackageVersion) == 0 {
 		if foundAtLeastOneSHA256 {
 			log.Debug("All container images with a version matching sha256:* are referenced by an index manifest")
 		} else {
@@ -100,15 +107,24 @@ func cleanupSHA256(outerCtx context.Context, olderThan time.Duration) error {
 		return nil
 	}
 
-	found := len(shaToVersionID)
+	found := len(shaToPackageVersion)
 
 	log.Warn("%d container image(s) with a version matching sha256:* are not referenced by an index manifest", found)
 
 	log.Debug("Deleting unreferenced image versions from `package_version`, `package_file` and `package_property` (%d at a time)", SHA256BatchSize)
 
 	packageVersionIDs := make([]int64, 0, SHA256BatchSize)
-	for _, id := range shaToVersionID {
-		packageVersionIDs = append(packageVersionIDs, id)
+	tooYoung := 0
+	for _, p := range shaToPackageVersion {
+		if p.created < old {
+			packageVersionIDs = append(packageVersionIDs, p.id)
+		} else {
+			tooYoung++
+		}
+	}
+
+	if tooYoung > 0 {
+		log.Warn("%d out of %d container image(s) are not deleted because they were created less than %v ago", tooYoung, found, olderThan)
 	}
 
 	for len(packageVersionIDs) > 0 {
