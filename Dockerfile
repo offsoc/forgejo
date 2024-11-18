@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM docker.io/tonistiigi/xx AS xx
+FROM --platform=$BUILDPLATFORM code.forgejo.org/oci/xx AS xx
 
 FROM --platform=$BUILDPLATFORM code.forgejo.org/oci/golang:1.23-alpine3.20 as build-env
 
