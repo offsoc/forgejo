@@ -48,6 +48,8 @@ func exitf(format string, args ...any) {
 	os.Exit(1)
 }
 
+var preparedDir string
+
 func InitTest(requireGitea bool) {
 	log.RegisterEventWriter("test", testlogger.NewTestLoggerWriter)
 
@@ -180,6 +182,43 @@ func InitTest(requireGitea bool) {
 		setting.Database.Path = ":memory:"
 	}
 
+	setting.Repository.Local.LocalCopyPath = os.TempDir()
+	dir, err := os.MkdirTemp("", "prepared-forgejo")
+	if err != nil {
+		log.Fatal("os.MkdirTemp: %v", err)
+	}
+	preparedDir = dir
+
+	setting.Repository.Local.LocalCopyPath, err = os.MkdirTemp("", "local-upload")
+	if err != nil {
+		log.Fatal("os.MkdirTemp: %v", err)
+	}
+
+	if err := unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/gitea-repositories-meta"), dir); err != nil {
+		log.Fatal("os.RemoveAll: %v", err)
+	}
+	ownerDirs, err := os.ReadDir(dir)
+	if err != nil {
+		log.Fatal("os.ReadDir: %v", err)
+	}
+
+	for _, ownerDir := range ownerDirs {
+		if !ownerDir.Type().IsDir() {
+			continue
+		}
+		repoDirs, err := os.ReadDir(filepath.Join(dir, ownerDir.Name()))
+		if err != nil {
+			log.Fatal("os.ReadDir: %v", err)
+		}
+		for _, repoDir := range repoDirs {
+			_ = os.MkdirAll(filepath.Join(dir, ownerDir.Name(), repoDir.Name(), "objects", "pack"), 0o755)
+			_ = os.MkdirAll(filepath.Join(dir, ownerDir.Name(), repoDir.Name(), "objects", "info"), 0o755)
+			_ = os.MkdirAll(filepath.Join(dir, ownerDir.Name(), repoDir.Name(), "refs", "heads"), 0o755)
+			_ = os.MkdirAll(filepath.Join(dir, ownerDir.Name(), repoDir.Name(), "refs", "tag"), 0o755)
+			_ = os.MkdirAll(filepath.Join(dir, ownerDir.Name(), repoDir.Name(), "refs", "pull"), 0o755)
+		}
+	}
+
 	routers.InitWebInstalled(graceful.GetManager().HammerContext())
 }
 
@@ -228,28 +267,10 @@ func cancelProcesses(t testing.TB, delay time.Duration) {
 }
 
 func PrepareGitRepoDirectory(t testing.TB) {
-	require.NoError(t, util.RemoveAll(setting.RepoRootPath))
-	require.NoError(t, unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/gitea-repositories-meta"), setting.RepoRootPath))
-	ownerDirs, err := os.ReadDir(setting.RepoRootPath)
-	if err != nil {
-		require.NoError(t, err, "unable to read the new repo root: %v\n", err)
-	}
-	for _, ownerDir := range ownerDirs {
-		if !ownerDir.Type().IsDir() {
-			continue
-		}
-		repoDirs, err := os.ReadDir(filepath.Join(setting.RepoRootPath, ownerDir.Name()))
-		if err != nil {
-			require.NoError(t, err, "unable to read the new repo root: %v\n", err)
-		}
-		for _, repoDir := range repoDirs {
-			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "objects", "pack"), 0o755)
-			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "objects", "info"), 0o755)
-			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "refs", "heads"), 0o755)
-			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "refs", "tag"), 0o755)
-			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "refs", "pull"), 0o755)
-		}
-	}
+	var err error
+	setting.RepoRootPath, err = os.MkdirTemp(t.TempDir(), "forgejo-repo-rooth")
+	require.NoError(t, err)
+	require.NoError(t, unittest.CopyDir(preparedDir, setting.RepoRootPath))
 }
 
 func PrepareArtifactsStorage(t testing.TB) {

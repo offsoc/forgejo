@@ -4,7 +4,7 @@
 // services/gitdiff/**
 // @watch end
 
-import {expect} from '@playwright/test';
+import {expect, type Page} from '@playwright/test';
 import {test, login_user, login} from './utils_e2e.ts';
 import {accessibilityCheck} from './shared/accessibility.ts';
 
@@ -12,7 +12,7 @@ test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
 });
 
-async function assertSelectedLines(page, nums) {
+async function assertSelectedLines(page: Page, nums: string[]) {
   const pageAssertions = async () => {
     expect(
       await Promise.all((await page.locator('tr.active [data-line-number]').all()).map((line) => line.getAttribute('data-line-number'))),

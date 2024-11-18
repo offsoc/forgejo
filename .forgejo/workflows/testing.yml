@@ -56,13 +56,13 @@ jobs:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     services:
       elasticsearch:
-        image: docker.io/bitnami/elasticsearch:7
+        image: code.forgejo.org/oci/bitnami/elasticsearch:7
         options: --tmpfs /bitnami/elasticsearch/data
         env:
           discovery.type: single-node
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
       minio:
-        image: docker.io/bitnami/minio:2024.8.17
+        image: code.forgejo.org/oci/bitnami/minio:2024.8.17
         options: >-
           --hostname gitea.minio --tmpfs /bitnami/minio/data
         env:
@@ -122,12 +122,12 @@ jobs:
           USE_REPO_TEST_DIR: 1
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
           CHANGED_FILES: ${{steps.changed-files.outputs.all_changed_files}}
-      - name: Upload screenshots on failure
+      - name: Upload test artifacts on failure
         if: failure()
         uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
-          name: screenshots.zip
-          path: /workspace/forgejo/forgejo/tests/e2e/test-artifacts/*/*.png
+          name: test-artifacts.zip
+          path: tests/e2e/test-artifacts/
           retention-days: 3
   test-remote-cacher:
     if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
@@ -135,20 +135,21 @@ jobs:
     needs: [backend-checks, frontend-checks, test-unit]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+    name: ${{ format('test-remote-cacher ({0})', matrix.cacher.name) }}
     strategy:
       matrix:
         cacher:
-          # redis
-          - image: docker.io/bitnami/redis:7.2
+          - name: redis
+            image: code.forgejo.org/oci/bitnami/redis:7.2
             options: --tmpfs /bitnami/redis/data
-          # redict
-          - image: registry.redict.io/redict:7.3.0-scratch
+          - name: redict
+            image: registry.redict.io/redict:7.3.0-scratch
             options: --tmpfs /data
-          # valkey
-          - image: docker.io/bitnami/valkey:7.2
+          - name: valkey
+            image: code.forgejo.org/oci/bitnami/valkey:7.2
             options: --tmpfs /bitnami/redis/data
-          # garnet
-          - image: ghcr.io/microsoft/garnet-alpine:1.0.14
+          - name: garnet
+            image: ghcr.io/microsoft/garnet-alpine:1.0.14
             options: --tmpfs /data
     services:
       cacher:
@@ -177,7 +178,7 @@ jobs:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     services:
       mysql:
-        image: 'docker.io/bitnami/mysql:8.4'
+        image: 'code.forgejo.org/oci/bitnami/mysql:8.4'
         env:
           ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: testgitea
@@ -207,13 +208,13 @@ jobs:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     services:
       minio:
-        image: docker.io/bitnami/minio:2024.8.17
+        image: code.forgejo.org/oci/bitnami/minio:2024.8.17
         env:
           MINIO_ROOT_USER: 123456
           MINIO_ROOT_PASSWORD: 12345678
         options: --tmpfs /bitnami/minio/data
       ldap:
-        image: docker.io/gitea/test-openldap:latest
+        image: code.forgejo.org/oci/test-openldap:latest
       pgsql:
         image: 'code.forgejo.org/oci/postgres:15'
         env:

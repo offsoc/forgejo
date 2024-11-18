@@ -243,6 +243,9 @@ func checkDBConsistency(ctx context.Context, logger log.Logger, autofix bool) er
 		// find archive download count without existing release
 		genericOrphanCheck("Archive download count without existing Release",
 			"repo_archive_download_count", "release", "repo_archive_download_count.release_id=release.id"),
+		// find authorization tokens without existing user
+		genericOrphanCheck("Authorization token without existing User",
+			"forgejo_auth_token", "user", "forgejo_auth_token.uid=user.id"),
 	)
 
 	for _, c := range consistencyChecks {

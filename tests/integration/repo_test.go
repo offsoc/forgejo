@@ -1140,7 +1140,7 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 	t.Run("Fuzzy", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
-		req := NewRequest(t, "GET", "/user2/repo1/issues?fuzzy=true")
+		req := NewRequest(t, "GET", "/user2/repo1/issues?fuzzy=false")
 		resp := MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
@@ -1157,7 +1157,7 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 			assert.Contains(t, href, "&project=")
 			assert.Contains(t, href, "&assignee=")
 			assert.Contains(t, href, "&poster=")
-			assert.Contains(t, href, "&fuzzy=true")
+			assert.Contains(t, href, "&fuzzy=false")
 		})
 		assert.True(t, called)
 	})
@@ -1237,7 +1237,7 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 		assert.True(t, called)
 	})
 
-	t.Run("Miilestone", func(t *testing.T) {
+	t.Run("Milestone", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		req := NewRequest(t, "GET", "/user2/repo1/issues?milestone=1")

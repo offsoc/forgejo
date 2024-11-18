@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"net/url"
 	"testing"
 
 	auth_model "code.gitea.io/gitea/models/auth"
@@ -206,11 +207,11 @@ func TestAPIListWikiPages(t *testing.T) {
 }
 
 func TestAPINewWikiPage(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	for _, title := range []string{
 		"New page",
 		"&&&&",
 	} {
-		defer tests.PrepareTestEnv(t)()
 		username := "user2"
 		session := loginUser(t, username)
 		token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
@@ -386,26 +387,26 @@ func TestAPIListPageRevisions(t *testing.T) {
 }
 
 func TestAPIWikiNonMasterBranch(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
-
-	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-	repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, user, tests.DeclarativeRepoOptions{
-		WikiBranch: optional.Some("main"),
-	})
-	defer f()
-
-	uris := []string{
-		"revisions/Home",
-		"pages",
-		"page/Home",
-	}
-	baseURL := fmt.Sprintf("/api/v1/repos/%s/wiki", repo.FullName())
-	for _, uri := range uris {
-		t.Run(uri, func(t *testing.T) {
-			defer tests.PrintCurrentTest(t)()
-
-			req := NewRequestf(t, "GET", "%s/%s", baseURL, uri)
-			MakeRequest(t, req, http.StatusOK)
+	onGiteaRun(t, func(t *testing.T, _ *url.URL) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, user, tests.DeclarativeRepoOptions{
+			WikiBranch: optional.Some("main"),
 		})
-	}
+		defer f()
+
+		uris := []string{
+			"revisions/Home",
+			"pages",
+			"page/Home",
+		}
+		baseURL := fmt.Sprintf("/api/v1/repos/%s/wiki", repo.FullName())
+		for _, uri := range uris {
+			t.Run(uri, func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
+				req := NewRequestf(t, "GET", "%s/%s", baseURL, uri)
+				MakeRequest(t, req, http.StatusOK)
+			})
+		}
+	})
 }

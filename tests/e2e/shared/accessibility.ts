@@ -3,9 +3,9 @@ import {AxeBuilder} from '@axe-core/playwright';
 
 export async function accessibilityCheck({page}: {page: Page}, includes: string[], excludes: string[], disabledRules: string[]) {
   // contrast of inline links is still a global issue in Forgejo
-  disabledRules += 'link-in-text-block';
+  disabledRules.push('link-in-text-block');
 
-  let accessibilityScanner = await new AxeBuilder({page})
+  let accessibilityScanner = new AxeBuilder({page})
     .disableRules(disabledRules);
   // passing the whole array seems to be not supported,
   // iterating has the nice side-effectof skipping this if the array is empty

@@ -7,6 +7,7 @@ package user_test
 import (
 	"context"
 	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"strings"
 	"testing"
@@ -21,7 +22,9 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/timeutil"
+	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/tests"
 
@@ -699,4 +702,67 @@ func TestDisabledUserFeatures(t *testing.T) {
 	for _, f := range testValues.Values() {
 		assert.True(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
+}
+
+func TestGenerateEmailAuthorizationCode(t *testing.T) {
+	defer test.MockVariableValue(&setting.Service.ActiveCodeLives, 2)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	code, err := user.GenerateEmailAuthorizationCode(db.DefaultContext, auth.UserActivation)
+	require.NoError(t, err)
+
+	lookupKey, validator, ok := strings.Cut(code, ":")
+	assert.True(t, ok)
+
+	rawValidator, err := hex.DecodeString(validator)
+	require.NoError(t, err)
+
+	authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
+	require.NoError(t, err)
+	assert.False(t, authToken.IsExpired())
+	assert.EqualValues(t, authToken.HashedValidator, auth.HashValidator(rawValidator))
+
+	authToken.Expiry = authToken.Expiry.Add(-int64(setting.Service.ActiveCodeLives) * 60)
+	assert.True(t, authToken.IsExpired())
+}
+
+func TestVerifyUserAuthorizationToken(t *testing.T) {
+	defer test.MockVariableValue(&setting.Service.ActiveCodeLives, 2)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	code, err := user.GenerateEmailAuthorizationCode(db.DefaultContext, auth.UserActivation)
+	require.NoError(t, err)
+
+	lookupKey, _, ok := strings.Cut(code, ":")
+	assert.True(t, ok)
+
+	t.Run("Wrong purpose", func(t *testing.T) {
+		u, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.PasswordReset, false)
+		require.NoError(t, err)
+		assert.Nil(t, u)
+	})
+
+	t.Run("No delete", func(t *testing.T) {
+		u, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation, false)
+		require.NoError(t, err)
+		assert.EqualValues(t, user.ID, u.ID)
+
+		authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
+		require.NoError(t, err)
+		assert.NotNil(t, authToken)
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		u, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation, true)
+		require.NoError(t, err)
+		assert.EqualValues(t, user.ID, u.ID)
+
+		authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
+		require.ErrorIs(t, err, util.ErrNotExist)
+		assert.Nil(t, authToken)
+	})
 }

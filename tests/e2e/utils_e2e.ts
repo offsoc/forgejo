@@ -33,8 +33,8 @@ export async function login_user(browser: Browser, workerInfo: TestInfo, user: s
   expect(response?.status()).toBe(200); // Status OK
 
   // Fill out form
-  await page.type('input[name=user_name]', user);
-  await page.type('input[name=password]', LOGIN_PASSWORD);
+  await page.fill('input[name=user_name]', user);
+  await page.fill('input[name=password]', LOGIN_PASSWORD);
   await page.click('form button.ui.primary.button:visible');
 
   await page.waitForLoadState();
@@ -48,15 +48,13 @@ export async function login_user(browser: Browser, workerInfo: TestInfo, user: s
 }
 
 export async function load_logged_in_context(browser: Browser, workerInfo: TestInfo, user: string) {
-  let context;
   try {
-    context = await test_context(browser, {storageState: `${ARTIFACTS_PATH}/state-${user}-${workerInfo.workerIndex}.json`});
+    return await test_context(browser, {storageState: `${ARTIFACTS_PATH}/state-${user}-${workerInfo.workerIndex}.json`});
   } catch (err) {
     if (err.code === 'ENOENT') {
       throw new Error(`Could not find state for '${user}'. Did you call login_user(browser, workerInfo, '${user}') in test.beforeAll()?`);
     }
   }
-  return context;
 }
 
 export async function login({browser}: {browser: Browser}, workerInfo: TestInfo) {

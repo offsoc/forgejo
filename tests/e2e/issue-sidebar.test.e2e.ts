@@ -4,19 +4,18 @@
 // web_src/js/features/repo-issue**
 // @watch end
 
-import {expect} from '@playwright/test';
+/* eslint playwright/expect-expect: ["error", { "assertFunctionNames": ["check_wip"] }] */
+
+import {expect, type Page} from '@playwright/test';
 import {test, login_user, login} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
 });
 
-/* eslint-disable playwright/expect-expect */
-// some tests are reported to have no assertions,
-// which is not correct, because they use the global helper function
 test.describe('Pull: Toggle WIP', () => {
   const prTitle = 'pull5';
-  async function toggle_wip_to({page}, should) {
+  async function toggle_wip_to({page}, should: boolean) {
     await page.waitForLoadState('domcontentloaded');
     if (should) {
       await page.getByText('Still in progress?').click();
@@ -25,7 +24,7 @@ test.describe('Pull: Toggle WIP', () => {
     }
   }
 
-  async function check_wip({page}, is) {
+  async function check_wip({page}, is: boolean) {
     const elemTitle = 'h1';
     const stateLabel = '.issue-state-label';
     await page.waitForLoadState('domcontentloaded');
@@ -96,12 +95,11 @@ test.describe('Pull: Toggle WIP', () => {
     await expect(page.locator('h1')).toContainText(maxLenStr);
   });
 });
-/* eslint-enable playwright/expect-expect */
 
 test('Issue: Labels', async ({browser}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
 
-  async function submitLabels({page}) {
+  async function submitLabels({page}: {page: Page}) {
     const submitted = page.waitForResponse('/user2/repo1/issues/labels');
     await page.locator('textarea').first().click(); // close via unrelated element
     await submitted;
@@ -199,7 +197,7 @@ test('New Issue: Assignees', async ({browser}, workerInfo) => {
 
   // Assign other user (with searchbox)
   await page.locator('.select-assignees.dropdown').click();
-  await page.type('.select-assignees .menu .search input', 'user4');
+  await page.fill('.select-assignees .menu .search input', 'user4');
   await expect(page.locator('.select-assignees .menu .item').filter({hasText: 'user2'})).toBeHidden();
   await expect(page.locator('.select-assignees .menu .item').filter({hasText: 'user4'})).toBeVisible();
   await page.locator('.select-assignees .menu .item').filter({hasText: 'user4'}).click();

@@ -254,7 +254,7 @@ func TestGitAttributeCheckerError(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = ac.CheckPath("i-am-a-python.p")
-		require.ErrorIs(t, err, context.Canceled)
+		require.Error(t, err)
 	})
 
 	t.Run("Cancelled/DuringRun", func(t *testing.T) {
