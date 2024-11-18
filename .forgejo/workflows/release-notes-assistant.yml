@@ -1,3 +1,5 @@
+name: issue-labels
+
 on:
   pull_request_target:
     types:
@@ -7,21 +9,30 @@ on:
 
 jobs:
   release-notes:
-    if: ( vars.ROLE == 'forgejo-coding' ) && contains(github.event.pull_request.labels.*.name, 'worth a release-note')
+    if: >
+      vars.ROLE == 'forgejo-coding' &&
+
+      secrets.RELEASE_NOTES_ASSISTANT_TOKEN != '' &&
+
+      github.event_name == 'pull_request_target' &&
+      contains(github.event.pull_request.labels.*.name, 'worth a release-note') &&
+      (
+        github.event.action == 'label_updated' ||
+        github.event.action == 'edited' ||
+        github.event.action == 'synchronized'
+      )
+
     runs-on: docker
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v4
-
-      - name: event
+      - name: Debug info
         run: |
           cat <<'EOF'
-          ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          ${{ toJSON(github) }}
           EOF
-          cat <<'EOF'
-          ${{ toJSON(github.event) }}
-          EOF
+
+      - uses: https://code.forgejo.org/actions/checkout@v4
 
       - uses: https://code.forgejo.org/actions/setup-go@v5
         with:
