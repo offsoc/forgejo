@@ -6,6 +6,8 @@
 package templates
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"html"
 	"html/template"
@@ -28,6 +30,23 @@ import (
 func NewFuncMap() template.FuncMap {
 	return map[string]any{
 		"ctx": func() any { return nil }, // template context function
+
+		"ExecuteTemplate": func(ctx context.Context, tmplName string, args any) template.HTML {
+			h := HTMLRenderer()
+			tmpl, err := h.TemplateLookup(tmplName, ctx)
+			if err != nil {
+				panic("Template not found: " + tmplName)
+			}
+
+			buf := bytes.Buffer{}
+			if err := tmpl.Execute(&buf, args); err != nil {
+				panic("Error while executing template")
+			}
+
+			// We can safely return this as `template.HTML` as html/template will
+			// already make sure it's sanitized.
+			return template.HTML(buf.String())
+		},
 
 		"DumpVar": dumpVar,
 
