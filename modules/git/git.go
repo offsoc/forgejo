@@ -38,6 +38,8 @@ var (
 	InvertedGitFlushEnv    bool // 2.43.1
 	SupportCheckAttrOnBare bool // >= 2.40
 
+	HasSSHExecutable bool
+
 	gitVersion *version.Version
 )
 
@@ -95,12 +97,12 @@ func SetExecutablePath(path string) error {
 	}
 
 	if gitVersion.LessThan(versionRequired) {
-		moreHint := "get git: https://git-scm.com/download/"
+		moreHint := "get git: https://git-scm.com/downloads"
 		if runtime.GOOS == "linux" {
 			// there are a lot of CentOS/RHEL users using old git, so we add a special hint for them
 			if _, err = os.Stat("/etc/redhat-release"); err == nil {
 				// ius.io is the recommended official(git-scm.com) method to install git
-				moreHint = "get git: https://git-scm.com/download/linux and https://ius.io"
+				moreHint = "get git: https://git-scm.com/downloads/linux and https://ius.io"
 			}
 		}
 		return fmt.Errorf("installed git version %q is not supported, Gitea requires git version >= %q, %s", gitVersion.Original(), RequiredVersion, moreHint)
@@ -186,12 +188,12 @@ func InitFull(ctx context.Context) (err error) {
 		globalCommandArgs = append(globalCommandArgs, "-c", "credential.helper=")
 	}
 	SupportProcReceive = CheckGitVersionAtLeast("2.29") == nil
-	SupportHashSha256 = CheckGitVersionAtLeast("2.42") == nil && !isGogit
+	SupportHashSha256 = CheckGitVersionAtLeast("2.42") == nil
 	SupportCheckAttrOnBare = CheckGitVersionAtLeast("2.40") == nil
 	if SupportHashSha256 {
 		SupportedObjectFormats = append(SupportedObjectFormats, Sha256ObjectFormat)
 	} else {
-		log.Warn("sha256 hash support is disabled - requires Git >= 2.42. Gogit is currently unsupported")
+		log.Warn("sha256 hash support is disabled - requires Git >= 2.42")
 	}
 
 	InvertedGitFlushEnv = CheckGitVersionEqual("2.43.1") == nil
@@ -202,6 +204,10 @@ func InitFull(ctx context.Context) (err error) {
 		}
 		globalCommandArgs = append(globalCommandArgs, "-c", "filter.lfs.required=", "-c", "filter.lfs.smudge=", "-c", "filter.lfs.clean=")
 	}
+
+	// Detect the presence of the ssh executable in $PATH.
+	_, err = exec.LookPath("ssh")
+	HasSSHExecutable = err == nil
 
 	return syncGitConfig()
 }

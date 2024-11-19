@@ -22,7 +22,7 @@ func TestCommitsCount(t *testing.T) {
 			Revision: []string{"8006ff9adbf0cb94da7dad9e537e53817f9fa5c0"},
 		})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(3), commitsCount)
 }
 
@@ -36,7 +36,7 @@ func TestCommitsCountWithoutBase(t *testing.T) {
 			Revision: []string{"branch1"},
 		})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(2), commitsCount)
 }
 
@@ -44,7 +44,7 @@ func TestGetFullCommitID(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 
 	id, err := GetFullCommitID(DefaultContext, bareRepo1Path, "8006ff9a")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "8006ff9adbf0cb94da7dad9e537e53817f9fa5c0", id)
 }
 
@@ -85,15 +85,13 @@ empty commit`
 
 	sha := &Sha1Hash{0xfe, 0xaf, 0x4b, 0xa6, 0xbc, 0x63, 0x5f, 0xec, 0x44, 0x2f, 0x46, 0xdd, 0xd4, 0x51, 0x24, 0x16, 0xec, 0x43, 0xc2, 0xc2}
 	gitRepo, err := openRepositoryWithDefaultContext(filepath.Join(testReposDir, "repo1_bare"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, gitRepo)
 	defer gitRepo.Close()
 
 	commitFromReader, err := CommitFromReader(gitRepo, sha, strings.NewReader(commitString))
-	assert.NoError(t, err)
-	if !assert.NotNil(t, commitFromReader) {
-		return
-	}
+	require.NoError(t, err)
+	require.NotNil(t, commitFromReader)
 	assert.EqualValues(t, sha, commitFromReader.ID)
 	assert.EqualValues(t, `-----BEGIN PGP SIGNATURE-----
 
@@ -121,7 +119,7 @@ empty commit`, commitFromReader.Signature.Payload)
 	assert.EqualValues(t, "silverwind <me@silverwind.io>", commitFromReader.Author.String())
 
 	commitFromReader2, err := CommitFromReader(gitRepo, sha, strings.NewReader(commitString+"\n\n"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	commitFromReader.CommitMessage += "\n\n"
 	commitFromReader.Signature.Payload += "\n\n"
 	assert.EqualValues(t, commitFromReader, commitFromReader2)
@@ -153,15 +151,13 @@ ISO-8859-1`
 
 	sha := &Sha1Hash{0xfe, 0xaf, 0x4b, 0xa6, 0xbc, 0x63, 0x5f, 0xec, 0x44, 0x2f, 0x46, 0xdd, 0xd4, 0x51, 0x24, 0x16, 0xec, 0x43, 0xc2, 0xc2}
 	gitRepo, err := openRepositoryWithDefaultContext(filepath.Join(testReposDir, "repo1_bare"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, gitRepo)
 	defer gitRepo.Close()
 
 	commitFromReader, err := CommitFromReader(gitRepo, sha, strings.NewReader(commitString))
-	assert.NoError(t, err)
-	if !assert.NotNil(t, commitFromReader) {
-		return
-	}
+	require.NoError(t, err)
+	require.NotNil(t, commitFromReader)
 	assert.EqualValues(t, sha, commitFromReader.ID)
 	assert.EqualValues(t, `-----BEGIN PGP SIGNATURE-----
 
@@ -188,7 +184,7 @@ ISO-8859-1`, commitFromReader.Signature.Payload)
 	assert.EqualValues(t, "KN4CK3R <admin@oldschoolhack.me>", commitFromReader.Author.String())
 
 	commitFromReader2, err := CommitFromReader(gitRepo, sha, strings.NewReader(commitString+"\n\n"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	commitFromReader.CommitMessage += "\n\n"
 	commitFromReader.Signature.Payload += "\n\n"
 	assert.EqualValues(t, commitFromReader, commitFromReader2)
@@ -198,25 +194,25 @@ func TestHasPreviousCommit(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 
 	repo, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer repo.Close()
 
 	commit, err := repo.GetCommit("8006ff9adbf0cb94da7dad9e537e53817f9fa5c0")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	parentSHA := MustIDFromString("8d92fc957a4d7cfd98bc375f0b7bb189a0d6c9f2")
 	notParentSHA := MustIDFromString("2839944139e0de9737a044f78b0e4b40d989a9e3")
 
 	haz, err := commit.HasPreviousCommit(parentSHA)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, haz)
 
 	hazNot, err := commit.HasPreviousCommit(notParentSHA)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, hazNot)
 
 	selfNot, err := commit.HasPreviousCommit(commit.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, selfNot)
 }
 
@@ -329,7 +325,7 @@ func TestGetCommitFileStatusMerges(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo6_merge")
 
 	commitFileStatus, err := GetCommitFileStatus(DefaultContext, bareRepo1Path, "022f4ce6214973e018f02bf363bf8a2e3691f699")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expected := CommitFileStatus{
 		[]string{
@@ -343,9 +339,9 @@ func TestGetCommitFileStatusMerges(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, commitFileStatus.Added, expected.Added)
-	assert.Equal(t, commitFileStatus.Removed, expected.Removed)
-	assert.Equal(t, commitFileStatus.Modified, expected.Modified)
+	assert.Equal(t, expected.Added, commitFileStatus.Added)
+	assert.Equal(t, expected.Removed, commitFileStatus.Removed)
+	assert.Equal(t, expected.Modified, commitFileStatus.Modified)
 }
 
 func TestParseCommitRenames(t *testing.T) {

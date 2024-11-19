@@ -28,6 +28,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func mockRequest(t *testing.T, reqPath string) *http.Request {
@@ -37,7 +38,7 @@ func mockRequest(t *testing.T, reqPath string) *http.Request {
 		path = reqPath
 	}
 	requestURL, err := url.Parse(path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	req := &http.Request{Method: method, URL: requestURL, Form: maps.Clone(requestURL.Query()), Header: http.Header{}}
 	req = req.WithContext(middleware.WithContextData(req.Context()))
 	return req
@@ -117,10 +118,10 @@ func LoadRepo(t *testing.T, ctx gocontext.Context, repoID int64) {
 	repo.Repository = unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: repoID})
 	var err error
 	repo.Owner, err = user_model.GetUserByID(ctx, repo.Repository.OwnerID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo.RepoLink = repo.Repository.Link()
 	repo.Permission, err = access_model.GetUserRepoPermission(ctx, repo.Repository, doer)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 // LoadRepoCommit loads a repo's commit into a test context.
@@ -135,15 +136,16 @@ func LoadRepoCommit(t *testing.T, ctx gocontext.Context) {
 		assert.FailNow(t, "context is not *context.Context or *context.APIContext")
 	}
 
-	gitRepo, err := gitrepo.OpenRepository(ctx, repo.Repository)
-	assert.NoError(t, err)
-	defer gitRepo.Close()
-	branch, err := gitRepo.GetHEADBranch()
-	assert.NoError(t, err)
+	if repo.GitRepo == nil {
+		assert.FailNow(t, "must call LoadGitRepo")
+	}
+
+	branch, err := repo.GitRepo.GetHEADBranch()
+	require.NoError(t, err)
 	assert.NotNil(t, branch)
 	if branch != nil {
-		repo.Commit, err = gitRepo.GetBranchCommit(branch.Name)
-		assert.NoError(t, err)
+		repo.Commit, err = repo.GitRepo.GetBranchCommit(branch.Name)
+		require.NoError(t, err)
 	}
 }
 
@@ -175,11 +177,21 @@ func LoadOrganization(t *testing.T, ctx gocontext.Context, orgID int64) {
 
 // LoadGitRepo load a git repo into a test context. Requires that ctx.Repo has
 // already been populated.
-func LoadGitRepo(t *testing.T, ctx *context.Context) {
-	assert.NoError(t, ctx.Repo.Repository.LoadOwner(ctx))
+func LoadGitRepo(t *testing.T, ctx gocontext.Context) {
+	var repo *context.Repository
+	switch ctx := ctx.(type) {
+	case *context.Context:
+		repo = ctx.Repo
+	case *context.APIContext:
+		repo = ctx.Repo
+	default:
+		assert.FailNow(t, "context is not *context.Context or *context.APIContext")
+	}
+
+	require.NoError(t, repo.Repository.LoadOwner(ctx))
 	var err error
-	ctx.Repo.GitRepo, err = gitrepo.OpenRepository(ctx, ctx.Repo.Repository)
-	assert.NoError(t, err)
+	repo.GitRepo, err = gitrepo.OpenRepository(ctx, repo.Repository)
+	require.NoError(t, err)
 }
 
 type MockRender struct{}

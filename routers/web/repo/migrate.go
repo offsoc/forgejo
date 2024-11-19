@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/models"
 	admin_model "code.gitea.io/gitea/models/admin"
 	"code.gitea.io/gitea/models/db"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
@@ -170,6 +171,10 @@ func MigratePost(ctx *context.Context) {
 
 	tpl := base.TplName("repo/migrate/" + form.Service.Name())
 
+	if !ctx.CheckQuota(quota_model.LimitSubjectSizeReposAll, ctxUser.ID, ctxUser.Name) {
+		return
+	}
+
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tpl)
 		return
@@ -248,7 +253,7 @@ func MigratePost(ctx *context.Context) {
 }
 
 func setMigrationContextData(ctx *context.Context, serviceType structs.GitServiceType) {
-	ctx.Data["Title"] = ctx.Tr("new_migrate")
+	ctx.Data["Title"] = ctx.Tr("new_migrate.title")
 
 	ctx.Data["LFSActive"] = setting.LFS.StartServer
 	ctx.Data["IsForcedPrivate"] = setting.Repository.ForcePrivate
@@ -260,6 +265,25 @@ func setMigrationContextData(ctx *context.Context, serviceType structs.GitServic
 }
 
 func MigrateRetryPost(ctx *context.Context) {
+	ok, err := quota_model.EvaluateForUser(ctx, ctx.Repo.Repository.OwnerID, quota_model.LimitSubjectSizeReposAll)
+	if err != nil {
+		log.Error("quota_model.EvaluateForUser: %v", err)
+		ctx.ServerError("quota_model.EvaluateForUser", err)
+		return
+	}
+	if !ok {
+		if err := task.SetMigrateTaskMessage(ctx, ctx.Repo.Repository.ID, ctx.Locale.TrString("repo.settings.pull_mirror_sync_quota_exceeded")); err != nil {
+			log.Error("SetMigrateTaskMessage failed: %v", err)
+			ctx.ServerError("task.SetMigrateTaskMessage", err)
+			return
+		}
+		ctx.JSON(http.StatusRequestEntityTooLarge, map[string]any{
+			"ok":    false,
+			"error": ctx.Tr("repo.settings.pull_mirror_sync_quota_exceeded"),
+		})
+		return
+	}
+
 	if err := task.RetryMigrateTask(ctx, ctx.Repo.Repository.ID); err != nil {
 		log.Error("Retry task failed: %v", err)
 		ctx.ServerError("task.RetryMigrateTask", err)

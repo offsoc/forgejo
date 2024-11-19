@@ -41,7 +41,7 @@ func TestAmbiguousCharacterDetection(t *testing.T) {
 		session := loginUser(t, user2.Name)
 
 		// Prepare the environments. File view, commit view (diff), wiki page.
-		repo, commitID, f := CreateDeclarativeRepo(t, user2, "",
+		repo, commitID, f := tests.CreateDeclarativeRepo(t, user2, "",
 			[]unit_model.Type{unit_model.TypeCode, unit_model.TypeWiki}, nil,
 			[]*files_service.ChangeRepoFile{
 				{
@@ -135,7 +135,7 @@ func TestInHistoryButton(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 		session := loginUser(t, user2.Name)
-		repo, commitID, f := CreateDeclarativeRepo(t, user2, "",
+		repo, commitID, f := tests.CreateDeclarativeRepo(t, user2, "",
 			[]unit_model.Type{unit_model.TypeCode, unit_model.TypeWiki}, nil,
 			[]*files_service.ChangeRepoFile{
 				{

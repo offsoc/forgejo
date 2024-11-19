@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
 	"code.gitea.io/gitea/models/unittest"
@@ -19,6 +20,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOrgTeamEmailInvite(t *testing.T) {
@@ -34,7 +36,7 @@ func TestOrgTeamEmailInvite(t *testing.T) {
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 5})
 
 	isMember, err := organization.IsTeamMember(db.DefaultContext, team.OrgID, team.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isMember)
 
 	session := loginUser(t, "user1")
@@ -52,7 +54,7 @@ func TestOrgTeamEmailInvite(t *testing.T) {
 
 	// get the invite token
 	invites, err := organization.GetInvitesByTeamID(db.DefaultContext, team.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, invites, 1)
 
 	session = loginUser(t, user.Name)
@@ -68,7 +70,7 @@ func TestOrgTeamEmailInvite(t *testing.T) {
 	session.MakeRequest(t, req, http.StatusOK)
 
 	isMember, err = organization.IsTeamMember(db.DefaultContext, team.OrgID, team.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isMember)
 }
 
@@ -86,7 +88,7 @@ func TestOrgTeamEmailInviteRedirectsExistingUser(t *testing.T) {
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 5})
 
 	isMember, err := organization.IsTeamMember(db.DefaultContext, team.OrgID, team.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isMember)
 
 	// create the invite
@@ -104,7 +106,7 @@ func TestOrgTeamEmailInviteRedirectsExistingUser(t *testing.T) {
 
 	// get the invite token
 	invites, err := organization.GetInvitesByTeamID(db.DefaultContext, team.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, invites, 1)
 
 	// accept the invite
@@ -132,7 +134,7 @@ func TestOrgTeamEmailInviteRedirectsExistingUser(t *testing.T) {
 
 	session = emptyTestSession(t)
 	baseURL, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	session.jar.SetCookies(baseURL, cr.Cookies())
 
 	// make the request
@@ -144,7 +146,7 @@ func TestOrgTeamEmailInviteRedirectsExistingUser(t *testing.T) {
 	session.MakeRequest(t, req, http.StatusOK)
 
 	isMember, err = organization.IsTeamMember(db.DefaultContext, team.OrgID, team.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isMember)
 }
 
@@ -175,7 +177,7 @@ func TestOrgTeamEmailInviteRedirectsNewUser(t *testing.T) {
 
 	// get the invite token
 	invites, err := organization.GetInvitesByTeamID(db.DefaultContext, team.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, invites, 1)
 
 	// accept the invite
@@ -205,7 +207,7 @@ func TestOrgTeamEmailInviteRedirectsNewUser(t *testing.T) {
 
 	session = emptyTestSession(t)
 	baseURL, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	session.jar.SetCookies(baseURL, cr.Cookies())
 
 	// make the redirected request
@@ -218,10 +220,10 @@ func TestOrgTeamEmailInviteRedirectsNewUser(t *testing.T) {
 
 	// get the new user
 	newUser, err := user_model.GetUserByName(db.DefaultContext, "doesnotexist")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	isMember, err := organization.IsTeamMember(db.DefaultContext, team.OrgID, team.ID, newUser.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isMember)
 }
 
@@ -258,7 +260,7 @@ func TestOrgTeamEmailInviteRedirectsNewUserWithActivation(t *testing.T) {
 
 	// get the invite token
 	invites, err := organization.GetInvitesByTeamID(db.DefaultContext, team.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, invites, 1)
 
 	// accept the invite
@@ -281,7 +283,7 @@ func TestOrgTeamEmailInviteRedirectsNewUserWithActivation(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 
 	user, err := user_model.GetUserByName(db.DefaultContext, "doesnotexist")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	ch := http.Header{}
 	ch.Add("Cookie", strings.Join(resp.Header()["Set-Cookie"], ";"))
@@ -289,11 +291,13 @@ func TestOrgTeamEmailInviteRedirectsNewUserWithActivation(t *testing.T) {
 
 	session = emptyTestSession(t)
 	baseURL, err := url.Parse(setting.AppURL)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	session.jar.SetCookies(baseURL, cr.Cookies())
 
-	activateURL := fmt.Sprintf("/user/activate?code=%s", user.GenerateEmailActivateCode("doesnotexist@example.com"))
-	req = NewRequestWithValues(t, "POST", activateURL, map[string]string{
+	code, err := user.GenerateEmailAuthorizationCode(db.DefaultContext, auth.UserActivation)
+	require.NoError(t, err)
+
+	req = NewRequestWithValues(t, "POST", "/user/activate?code="+url.QueryEscape(code), map[string]string{
 		"password": "examplePassword!1",
 	})
 
@@ -314,7 +318,7 @@ func TestOrgTeamEmailInviteRedirectsNewUserWithActivation(t *testing.T) {
 	session.MakeRequest(t, req, http.StatusOK)
 
 	isMember, err := organization.IsTeamMember(db.DefaultContext, team.OrgID, team.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isMember)
 }
 
@@ -334,7 +338,7 @@ func TestOrgTeamEmailInviteRedirectsExistingUserWithLogin(t *testing.T) {
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 5})
 
 	isMember, err := organization.IsTeamMember(db.DefaultContext, team.OrgID, team.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isMember)
 
 	// create the invite
@@ -352,7 +356,7 @@ func TestOrgTeamEmailInviteRedirectsExistingUserWithLogin(t *testing.T) {
 
 	// get the invite token
 	invites, err := organization.GetInvitesByTeamID(db.DefaultContext, team.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, invites, 1)
 
 	// note: the invited user has logged in
@@ -373,6 +377,6 @@ func TestOrgTeamEmailInviteRedirectsExistingUserWithLogin(t *testing.T) {
 	session.MakeRequest(t, req, http.StatusOK)
 
 	isMember, err = organization.IsTeamMember(db.DefaultContext, team.OrgID, team.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isMember)
 }

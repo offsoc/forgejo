@@ -1,5 +1,5 @@
 {{if .IsHTMX}}
-    {{template "base/alert" .}}
+	{{template "base/alert" .}}
 {{end}}
 <div id="profile-avatar-card" class="ui card" hx-swap="morph">
 	<div id="profile-avatar" class="content tw-flex">
@@ -73,7 +73,7 @@
 					</li>
 				{{end}}
 			{{end}}
-			<li>{{svg "octicon-calendar"}} <span>{{ctx.Locale.Tr "user.joined_on" (DateTime "short" .ContextUser.CreatedUnix)}}</span></li>
+			<li>{{svg "octicon-calendar"}} <span>{{ctx.Locale.Tr "user.joined_on" (DateUtils.AbsoluteShort .ContextUser.CreatedUnix)}}</span></li>
 			{{if and .Orgs .HasOrgsVisible}}
 			<li>
 				<ul class="user-orgs">

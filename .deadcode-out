@@ -30,7 +30,6 @@ code.gitea.io/gitea/models/asymkey
 
 code.gitea.io/gitea/models/auth
 	GetSourceByName
-	GetWebAuthnCredentialByID
 	WebAuthnCredentials
 
 code.gitea.io/gitea/models/db
@@ -75,10 +74,6 @@ code.gitea.io/gitea/models/project
 
 code.gitea.io/gitea/models/repo
 	DeleteAttachmentsByIssue
-	releaseSorter.Len
-	releaseSorter.Less
-	releaseSorter.Swap
-	SortReleases
 	FindReposMapByIDs
 	IsErrTopicNotExist
 	ErrTopicNotExist.Error
@@ -87,7 +82,6 @@ code.gitea.io/gitea/models/repo
 	WatchRepoMode
 
 code.gitea.io/gitea/models/user
-	IsErrPrimaryEmailCannotDelete
 	ErrUserInactive.Error
 	ErrUserInactive.Unwrap
 	IsErrExternalLoginUserAlreadyExist
@@ -98,6 +92,10 @@ code.gitea.io/gitea/models/user
 	DeleteUserSetting
 	GetUserEmailsByNames
 	GetUserNamesByIDs
+
+code.gitea.io/gitea/modules/activitypub
+	NewContext
+	Context.APClientFactory
 
 code.gitea.io/gitea/modules/assetfs
 	Bindata
@@ -139,9 +137,6 @@ code.gitea.io/gitea/modules/git
 	AddChangesWithArgs
 	CommitChanges
 	CommitChangesWithArgs
-	IsErrExecTimeout
-	ErrExecTimeout.Error
-	ErrUnsupportedVersion.Error
 	SetUpdateHook
 	openRepositoryWithDefaultContext
 	IsTagExist
@@ -164,6 +159,9 @@ code.gitea.io/gitea/modules/graceful
 
 code.gitea.io/gitea/modules/hcaptcha
 	WithHTTP
+
+code.gitea.io/gitea/modules/hostmatcher
+	HostMatchList.AppendPattern
 
 code.gitea.io/gitea/modules/json
 	StdJSON.Marshal
@@ -249,6 +247,9 @@ code.gitea.io/gitea/modules/translation
 	MockLocale.TrSize
 	MockLocale.PrettyNumber
 
+code.gitea.io/gitea/modules/util
+	OptionalArg
+
 code.gitea.io/gitea/modules/util/filebuffer
 	CreateFromReader
 
@@ -261,6 +262,11 @@ code.gitea.io/gitea/modules/web
 
 code.gitea.io/gitea/modules/web/middleware
 	DeleteLocaleCookie
+
+code.gitea.io/gitea/modules/zstd
+	NewWriter
+	Writer.Write
+	Writer.Close
 
 code.gitea.io/gitea/routers/web
 	NotFound

@@ -9,19 +9,20 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepository_GetCodeActivityStats(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer bareRepo1.Close()
 
 	timeFrom, err := time.Parse(time.RFC3339, "2016-01-01T00:00:00+00:00")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	code, err := bareRepo1.GetCodeActivityStats(timeFrom, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, code)
 
 	assert.EqualValues(t, 10, code.CommitCount)

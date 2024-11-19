@@ -271,6 +271,27 @@ func ViewPost(ctx *context_module.Context) {
 
 			step := steps[cursor.Step]
 
+			// if task log is expired, return a consistent log line
+			if task.LogExpired {
+				if cursor.Cursor == 0 {
+					resp.Logs.StepsLog = append(resp.Logs.StepsLog, &ViewStepLog{
+						Step:   cursor.Step,
+						Cursor: 1,
+						Lines: []*ViewStepLogLine{
+							{
+								Index:   1,
+								Message: ctx.Locale.TrString("actions.runs.expire_log_message"),
+								// Timestamp doesn't mean anything when the log is expired.
+								// Set it to the task's updated time since it's probably the time when the log has expired.
+								Timestamp: float64(task.Updated.AsTime().UnixNano()) / float64(time.Second),
+							},
+						},
+						Started: int64(step.Started),
+					})
+				}
+				continue
+			}
+
 			logLines := make([]*ViewStepLogLine, 0) // marshal to '[]' instead of 'null' in json
 
 			index := step.LogIndex + cursor.Cursor
@@ -286,7 +307,6 @@ func ViewPost(ctx *context_module.Context) {
 			if validCursor {
 				length := step.LogLength - cursor.Cursor
 				offset := task.LogIndexes[index]
-				var err error
 				logRows, err := actions.ReadLogs(ctx, task.LogInStorage, task.LogFilename, offset, length)
 				if err != nil {
 					ctx.Error(http.StatusInternalServerError, err.Error())
@@ -668,7 +688,8 @@ func ArtifactsDownloadView(ctx *context_module.Context) {
 	if len(artifacts) == 1 && artifacts[0].ArtifactName+".zip" == artifacts[0].ArtifactPath && artifacts[0].ContentEncoding == "application/zip" {
 		art := artifacts[0]
 		if setting.Actions.ArtifactStorage.MinioConfig.ServeDirect {
-			u, err := storage.ActionsArtifacts.URL(art.StoragePath, art.ArtifactPath)
+			u, err := storage.ActionsArtifacts.URL(art.StoragePath, art.ArtifactPath, nil)
+
 			if u != nil && err == nil {
 				ctx.Redirect(u.String())
 				return

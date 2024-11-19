@@ -72,7 +72,7 @@ func (o *comment) Get(ctx context.Context) bool {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	comment, err := issues_model.GetCommentByID(ctx, id)
 	if issues_model.IsErrCommentNotExist(err) {
@@ -105,7 +105,7 @@ func (o *comment) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("comment created %d", o.forgejoComment.ID)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoComment.ID))
+	return generic.NewNodeID(o.forgejoComment.ID)
 }
 
 func (o *comment) Delete(ctx context.Context) {

@@ -9,6 +9,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLoadUnitConfig(t *testing.T) {
@@ -27,7 +28,7 @@ func TestLoadUnitConfig(t *testing.T) {
 		setting.Repository.DisabledRepoUnits = []string{"repo.issues"}
 		setting.Repository.DefaultRepoUnits = []string{"repo.code", "repo.releases", "repo.issues", "repo.pulls"}
 		setting.Repository.DefaultForkRepoUnits = []string{"repo.releases"}
-		assert.NoError(t, LoadUnitConfig())
+		require.NoError(t, LoadUnitConfig())
 		assert.Equal(t, []Type{TypeIssues}, DisabledRepoUnitsGet())
 		assert.Equal(t, []Type{TypeCode, TypeReleases, TypePullRequests}, DefaultRepoUnits)
 		assert.Equal(t, []Type{TypeReleases}, DefaultForkRepoUnits)
@@ -47,7 +48,7 @@ func TestLoadUnitConfig(t *testing.T) {
 		setting.Repository.DisabledRepoUnits = []string{"repo.issues", "invalid.1"}
 		setting.Repository.DefaultRepoUnits = []string{"repo.code", "invalid.2", "repo.releases", "repo.issues", "repo.pulls"}
 		setting.Repository.DefaultForkRepoUnits = []string{"invalid.3", "repo.releases"}
-		assert.NoError(t, LoadUnitConfig())
+		require.NoError(t, LoadUnitConfig())
 		assert.Equal(t, []Type{TypeIssues}, DisabledRepoUnitsGet())
 		assert.Equal(t, []Type{TypeCode, TypeReleases, TypePullRequests}, DefaultRepoUnits)
 		assert.Equal(t, []Type{TypeReleases}, DefaultForkRepoUnits)
@@ -67,7 +68,7 @@ func TestLoadUnitConfig(t *testing.T) {
 		setting.Repository.DisabledRepoUnits = []string{"repo.issues", "repo.issues"}
 		setting.Repository.DefaultRepoUnits = []string{"repo.code", "repo.releases", "repo.issues", "repo.pulls", "repo.code"}
 		setting.Repository.DefaultForkRepoUnits = []string{"repo.releases", "repo.releases"}
-		assert.NoError(t, LoadUnitConfig())
+		require.NoError(t, LoadUnitConfig())
 		assert.Equal(t, []Type{TypeIssues}, DisabledRepoUnitsGet())
 		assert.Equal(t, []Type{TypeCode, TypeReleases, TypePullRequests}, DefaultRepoUnits)
 		assert.Equal(t, []Type{TypeReleases}, DefaultForkRepoUnits)
@@ -87,7 +88,7 @@ func TestLoadUnitConfig(t *testing.T) {
 		setting.Repository.DisabledRepoUnits = []string{"repo.issues", "repo.issues"}
 		setting.Repository.DefaultRepoUnits = []string{}
 		setting.Repository.DefaultForkRepoUnits = []string{"repo.releases", "repo.releases"}
-		assert.NoError(t, LoadUnitConfig())
+		require.NoError(t, LoadUnitConfig())
 		assert.Equal(t, []Type{TypeIssues}, DisabledRepoUnitsGet())
 		assert.ElementsMatch(t, []Type{TypeCode, TypePullRequests, TypeReleases, TypeWiki, TypePackages, TypeProjects, TypeActions}, DefaultRepoUnits)
 		assert.Equal(t, []Type{TypeReleases}, DefaultForkRepoUnits)

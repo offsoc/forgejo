@@ -27,6 +27,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBadges(t *testing.T) {
@@ -34,7 +35,7 @@ func TestBadges(t *testing.T) {
 		prep := func(t *testing.T) (*repo_model.Repository, func()) {
 			owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
-			repo, _, f := CreateDeclarativeRepo(t, owner, "",
+			repo, _, f := tests.CreateDeclarativeRepo(t, owner, "",
 				[]unit_model.Type{unit_model.TypeActions},
 				[]unit_model.Type{unit_model.TypeIssues, unit_model.TypePullRequests, unit_model.TypeReleases},
 				[]*files_service.ChangeRepoFile{
@@ -130,9 +131,9 @@ func TestBadges(t *testing.T) {
 				// Lets create a tag!
 				owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 				err := release.CreateNewTag(git.DefaultContext, owner, repo, "main", "v1", "message")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
-				// Now the workflow is wating
+				// Now the workflow is waiting
 				req = NewRequestf(t, "GET", "/user2/%s/actions/workflows/tag-test.yaml/badge.svg", repo.Name)
 				resp = MakeRequest(t, req, http.StatusSeeOther)
 				assertBadge(t, resp, "tag--test.yaml-waiting-lightgrey")
@@ -239,7 +240,7 @@ func TestBadges(t *testing.T) {
 				session := loginUser(t, repo.Owner.Name)
 				token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
 				err := release.CreateNewTag(git.DefaultContext, repo.Owner, repo, "main", "repo-name-2.0", "dash in the tag name")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				createNewReleaseUsingAPI(t, token, repo.Owner, repo, "repo-name-2.0", "main", "dashed release", "dashed release")
 
 				req := NewRequestf(t, "GET", "/user2/%s/badges/release.svg", repo.Name)

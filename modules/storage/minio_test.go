@@ -14,6 +14,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMinioStorageIterator(t *testing.T) {
@@ -108,7 +109,7 @@ func TestS3StorageBadRequest(t *testing.T) {
 		}
 	}
 	_, err := NewStorage(setting.MinioStorageType, cfg)
-	assert.ErrorContains(t, err, message)
+	require.ErrorContains(t, err, message)
 }
 
 func TestMinioCredentials(t *testing.T) {
@@ -128,7 +129,7 @@ func TestMinioCredentials(t *testing.T) {
 		creds := buildMinioCredentials(cfg, FakeEndpoint)
 		v, err := creds.Get()
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, ExpectedAccessKey, v.AccessKeyID)
 		assert.Equal(t, ExpectedSecretAccessKey, v.SecretAccessKey)
 	})
@@ -143,7 +144,7 @@ func TestMinioCredentials(t *testing.T) {
 			creds := buildMinioCredentials(cfg, FakeEndpoint)
 			v, err := creds.Get()
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, ExpectedAccessKey+"Minio", v.AccessKeyID)
 			assert.Equal(t, ExpectedSecretAccessKey+"Minio", v.SecretAccessKey)
 		})
@@ -155,7 +156,7 @@ func TestMinioCredentials(t *testing.T) {
 			creds := buildMinioCredentials(cfg, FakeEndpoint)
 			v, err := creds.Get()
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, ExpectedAccessKey+"AWS", v.AccessKeyID)
 			assert.Equal(t, ExpectedSecretAccessKey+"AWS", v.SecretAccessKey)
 		})
@@ -168,7 +169,7 @@ func TestMinioCredentials(t *testing.T) {
 			creds := buildMinioCredentials(cfg, FakeEndpoint)
 			v, err := creds.Get()
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, ExpectedAccessKey+"MinioFile", v.AccessKeyID)
 			assert.Equal(t, ExpectedSecretAccessKey+"MinioFile", v.SecretAccessKey)
 		})
@@ -181,7 +182,7 @@ func TestMinioCredentials(t *testing.T) {
 			creds := buildMinioCredentials(cfg, FakeEndpoint)
 			v, err := creds.Get()
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, ExpectedAccessKey+"AWSFile", v.AccessKeyID)
 			assert.Equal(t, ExpectedSecretAccessKey+"AWSFile", v.SecretAccessKey)
 		})
@@ -207,7 +208,7 @@ func TestMinioCredentials(t *testing.T) {
 			creds := buildMinioCredentials(cfg, server.URL)
 			v, err := creds.Get()
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, ExpectedAccessKey+"IAM", v.AccessKeyID)
 			assert.Equal(t, ExpectedSecretAccessKey+"IAM", v.SecretAccessKey)
 		})

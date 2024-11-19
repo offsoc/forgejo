@@ -9,16 +9,16 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCheckRepoStats(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
-	assert.NoError(t, CheckRepoStats(db.DefaultContext))
+	require.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, CheckRepoStats(db.DefaultContext))
 }
 
 func TestDoctorUserStarNum(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
-	assert.NoError(t, DoctorUserStarNum(db.DefaultContext))
+	require.NoError(t, DoctorUserStarNum(db.DefaultContext))
 }

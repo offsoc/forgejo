@@ -1,0 +1,24 @@
+Cache-Control: max-age=0, private, must-revalidate
+X-Content-Type-Options: nosniff
+X-Next-Page: 
+Gitlab-Sv: api-gke-us-east1-d
+Cf-Cache-Status: MISS
+Content-Type: application/json
+Strict-Transport-Security: max-age=31536000
+X-Total-Pages: 1
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'
+Set-Cookie: _cfuvid=FG.klkpkCkFafn4bGe91EcTgDxILPZT9lIAALQsMguo-1725394798392-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+X-Frame-Options: SAMEORIGIN
+X-Prev-Page: 
+Link: <https://gitlab.com/api/v4/projects/61363672/issues/2/resource_state_events?eventable_id=2&id=61363672&page=1&per_page=100>; rel="first", <https://gitlab.com/api/v4/projects/61363672/issues/2/resource_state_events?eventable_id=2&id=61363672&page=1&per_page=100>; rel="last"
+X-Runtime: 0.103796
+X-Total: 1
+Etag: W/"7461fc73e919f707da29f7080cbbf5a5"
+Vary: Origin, Accept-Encoding
+X-Gitlab-Meta: {"correlation_id":"aacea0eebb5d187d57ce369f9bd57a96","version":"1"}
+X-Page: 1
+X-Per-Page: 100
+Gitlab-Lb: haproxy-main-02-lb-gprd
+
+[{"id":241837962,"user":{"id":548513,"username":"mkobel","name":"Moritz Kobel","state":"active","locked":false,"avatar_url":"https://secure.gravatar.com/avatar/eae1be6324682816aedc885acbf5858719b40956e0278edabe5c0db7cbc95f3b?s=80\u0026d=identicon","web_url":"https://gitlab.com/mkobel"},"created_at":"2024-09-03T14:43:10.947Z","resource_type":"Issue","resource_id":152568900,"state":"closed"}]

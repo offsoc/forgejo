@@ -20,6 +20,8 @@ const sniffLen = 1024
 const (
 	// SvgMimeType MIME type of SVG images.
 	SvgMimeType = "image/svg+xml"
+	// AvifMimeType MIME type of AVIF images
+	AvifMimeType = "image/avif"
 	// ApplicationOctetStream MIME type of binary files.
 	ApplicationOctetStream = "application/octet-stream"
 )
@@ -104,6 +106,12 @@ func DetectContentType(data []byte) SniffedType {
 			detectByXML && svgTagInXMLRegex.Match(dataProcessed) {
 			ct = SvgMimeType
 		}
+	}
+
+	// AVIF is unsuported by http.DetectContentType
+	// Signature taken from https://stackoverflow.com/a/68322450
+	if bytes.Index(data, []byte("ftypavif")) == 4 {
+		ct = AvifMimeType
 	}
 
 	if strings.HasPrefix(ct, "audio/") && bytes.HasPrefix(data, []byte("ID3")) {

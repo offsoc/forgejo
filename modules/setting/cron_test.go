@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_getCronSettings(t *testing.T) {
@@ -27,7 +28,7 @@ SECOND = white rabbit
 EXTEND = true
 `
 	cfg, err := NewConfigProviderFromData(iniStr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	extended := &Extended{
 		BaseStruct: BaseStruct{
@@ -36,8 +37,8 @@ EXTEND = true
 	}
 
 	_, err = getCronSettings(cfg, "test", extended)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, extended.Base)
-	assert.EqualValues(t, extended.Second, "white rabbit")
+	assert.EqualValues(t, "white rabbit", extended.Second)
 	assert.True(t, extended.Extend)
 }

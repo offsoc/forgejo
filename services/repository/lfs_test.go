@@ -19,6 +19,7 @@ import (
 	repo_service "code.gitea.io/gitea/services/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGarbageCollectLFSMetaObjects(t *testing.T) {
@@ -26,13 +27,13 @@ func TestGarbageCollectLFSMetaObjects(t *testing.T) {
 
 	setting.LFS.StartServer = true
 	err := storage.Init()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, "user2", "lfs")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	validLFSObjects, err := db.GetEngine(db.DefaultContext).Count(git_model.LFSMetaObject{RepositoryID: repo.ID})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Greater(t, validLFSObjects, int64(1))
 
 	// add lfs object
@@ -46,29 +47,29 @@ func TestGarbageCollectLFSMetaObjects(t *testing.T) {
 		UpdatedLessRecentlyThan: time.Time{}, // ensure that the models/fixtures/lfs_meta_object.yml objects are considered as well
 		LogDetail:               t.Logf,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// lfs meta has been deleted
 	_, err = git_model.GetLFSMetaObjectByOid(db.DefaultContext, repo.ID, lfsOid)
-	assert.ErrorIs(t, err, git_model.ErrLFSObjectNotExist)
+	require.ErrorIs(t, err, git_model.ErrLFSObjectNotExist)
 
 	remainingLFSObjects, err := db.GetEngine(db.DefaultContext).Count(git_model.LFSMetaObject{RepositoryID: repo.ID})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, validLFSObjects-1, remainingLFSObjects)
 }
 
 func storeObjectInRepo(t *testing.T, repositoryID int64, content *[]byte) string {
 	pointer, err := lfs.GeneratePointer(bytes.NewReader(*content))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = git_model.NewLFSMetaObject(db.DefaultContext, repositoryID, pointer)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	contentStore := lfs.NewContentStore()
 	exist, err := contentStore.Exists(pointer)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if !exist {
 		err := contentStore.Put(pointer, bytes.NewReader(*content))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 	return pointer.Oid
 }

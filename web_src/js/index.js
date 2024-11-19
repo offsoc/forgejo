@@ -33,7 +33,7 @@ import {
   initRepoPullRequestAllowMaintainerEdit,
   initRepoPullRequestReview, initRepoIssueSidebarList, initArchivedLabelHandler,
 } from './features/repo-issue.js';
-import {initRepoEllipsisButton, initCommitStatuses} from './features/repo-commit.js';
+import {initRepoEllipsisButton, initCommitStatuses, initCommitNotes} from './features/repo-commit.js';
 import {
   initFootLanguageMenu,
   initGlobalButtonClickOnEnter,
@@ -60,7 +60,7 @@ import {
   initRepoSettingSearchTeamBox,
 } from './features/repo-settings.js';
 import {initRepoDiffView} from './features/repo-diff.js';
-import {initOrgTeamSearchRepoBox, initOrgTeamSettings} from './features/org-team.js';
+import {initOrgTeamSearchRepoBox} from './features/org-team.js';
 import {initUserAuthWebAuthn, initUserAuthWebAuthnRegister} from './features/user-auth-webauthn.js';
 import {initRepoRelease, initRepoReleaseNew} from './features/repo-release.js';
 import {initRepoEditor} from './features/repo-editor.js';
@@ -86,6 +86,7 @@ import {initRepoDiffCommitBranchesAndTags} from './features/repo-diff-commit.js'
 import {initDirAuto} from './modules/dirauto.js';
 import {initRepositorySearch} from './features/repo-search.js';
 import {initColorPickers} from './features/colorpicker.js';
+import {initRepoMilestoneEditor} from './features/repo-milestone.js';
 
 // Init Gitea's Fomantic settings
 initGiteaFomantic();
@@ -138,7 +139,6 @@ onDomReady(() => {
   initNotificationsTable();
 
   initOrgTeamSearchRepoBox();
-  initOrgTeamSettings();
 
   initRepoActivityTopAuthorsChart();
   initRepoArchiveLinks();
@@ -176,8 +176,10 @@ onDomReady(() => {
   initRepoContributors();
   initRepoCodeFrequency();
   initRepoRecentCommits();
+  initRepoMilestoneEditor();
 
   initCommitStatuses();
+  initCommitNotes();
   initCaptcha();
 
   initUserAuthOauth2();

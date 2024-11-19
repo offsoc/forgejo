@@ -17,10 +17,11 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPullRequest_AddToTaskQueue(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	idChan := make(chan int64, 10)
 	testHandler := func(items ...string) []string {
@@ -32,9 +33,9 @@ func TestPullRequest_AddToTaskQueue(t *testing.T) {
 	}
 
 	cfg, err := setting.GetQueueSettings(setting.CfgProvider, "pr_patch_checker")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	prPatchCheckerQueue, err = queue.NewWorkerPoolQueueWithContext(context.Background(), "pr_patch_checker", cfg, testHandler, true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: 2})
 	AddToTaskQueue(db.DefaultContext, pr)
@@ -46,7 +47,7 @@ func TestPullRequest_AddToTaskQueue(t *testing.T) {
 
 	has, err := prPatchCheckerQueue.Has(strconv.FormatInt(pr.ID, 10))
 	assert.True(t, has)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	go prPatchCheckerQueue.Run()
 
@@ -59,7 +60,7 @@ func TestPullRequest_AddToTaskQueue(t *testing.T) {
 
 	has, err = prPatchCheckerQueue.Has(strconv.FormatInt(pr.ID, 10))
 	assert.False(t, has)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pr = unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: 2})
 	assert.Equal(t, issues_model.PullRequestStatusChecking, pr.Status)

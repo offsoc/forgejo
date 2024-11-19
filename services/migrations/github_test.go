@@ -10,38 +10,42 @@ import (
 	"testing"
 	"time"
 
+	"code.gitea.io/gitea/models/unittest"
 	base "code.gitea.io/gitea/modules/migration"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGitHubDownloadRepo(t *testing.T) {
 	GithubLimitRateRemaining = 3 // Wait at 3 remaining since we could have 3 CI in //
+
 	token := os.Getenv("GITHUB_READ_TOKEN")
-	if token == "" {
-		t.Skip("Skipping GitHub migration test because GITHUB_READ_TOKEN is empty")
-	}
-	downloader := NewGithubDownloaderV3(context.Background(), "https://github.com", "", "", token, "go-gitea", "test_repo")
+	fixturePath := "./testdata/github/full_download"
+	server := unittest.NewMockWebServer(t, "https://api.github.com", fixturePath, token != "")
+	defer server.Close()
+
+	downloader := NewGithubDownloaderV3(context.Background(), server.URL, "", "", token, "go-gitea", "test_repo")
 	err := downloader.RefreshRate()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repo, err := downloader.GetRepoInfo()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertRepositoryEqual(t, &base.Repository{
 		Name:          "test_repo",
 		Owner:         "go-gitea",
 		Description:   "Test repository for testing migration from github to gitea",
-		CloneURL:      "https://github.com/go-gitea/test_repo.git",
-		OriginalURL:   "https://github.com/go-gitea/test_repo",
+		CloneURL:      server.URL + "/go-gitea/test_repo.git",
+		OriginalURL:   server.URL + "/go-gitea/test_repo",
 		DefaultBranch: "master",
 	}, repo)
 
 	topics, err := downloader.GetTopics()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, topics, "gitea")
 
 	milestones, err := downloader.GetMilestones()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertMilestonesEqual(t, []*base.Milestone{
 		{
 			Title:       "1.0.0",
@@ -64,7 +68,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}, milestones)
 
 	labels, err := downloader.GetLabels()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertLabelsEqual(t, []*base.Label{
 		{
 			Name:        "bug",
@@ -114,7 +118,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}, labels)
 
 	releases, err := downloader.GetReleases()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReleasesEqual(t, []*base.Release{
 		{
 			TagName:         "v0.9.99",
@@ -130,7 +134,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 
 	// downloader.GetIssues()
 	issues, isEnd, err := downloader.GetIssues(1, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isEnd)
 	assertIssuesEqual(t, []*base.Issue{
 		{
@@ -219,7 +223,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 
 	// downloader.GetComments()
 	comments, _, err := downloader.GetComments(&base.Issue{Number: 2, ForeignIndex: 2})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertCommentsEqual(t, []*base.Comment{
 		{
 			IssueIndex: 2,
@@ -249,7 +253,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 
 	// downloader.GetPullRequests()
 	prs, _, err := downloader.GetPullRequests(1, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertPullRequestsEqual(t, []*base.PullRequest{
 		{
 			Number:     3,
@@ -268,10 +272,10 @@ func TestGitHubDownloadRepo(t *testing.T) {
 					Description: "Improvements or additions to documentation",
 				},
 			},
-			PatchURL: "https://github.com/go-gitea/test_repo/pull/3.patch",
+			PatchURL: server.URL + "/go-gitea/test_repo/pull/3.patch",
 			Head: base.PullRequestBranch{
 				Ref:      "master",
-				CloneURL: "https://github.com/mrsdizzie/test_repo.git",
+				CloneURL: server.URL + "/mrsdizzie/test_repo.git",
 				SHA:      "076160cf0b039f13e5eff19619932d181269414b",
 				RepoName: "test_repo",
 
@@ -306,13 +310,13 @@ func TestGitHubDownloadRepo(t *testing.T) {
 					Description: "Something isn't working",
 				},
 			},
-			PatchURL: "https://github.com/go-gitea/test_repo/pull/4.patch",
+			PatchURL: server.URL + "/go-gitea/test_repo/pull/4.patch",
 			Head: base.PullRequestBranch{
 				Ref:       "test-branch",
 				SHA:       "2be9101c543658591222acbee3eb799edfc3853d",
 				RepoName:  "test_repo",
 				OwnerName: "mrsdizzie",
-				CloneURL:  "https://github.com/mrsdizzie/test_repo.git",
+				CloneURL:  server.URL + "/mrsdizzie/test_repo.git",
 			},
 			Base: base.PullRequestBranch{
 				Ref:       "master",
@@ -339,7 +343,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}, prs)
 
 	reviews, err := downloader.GetReviews(&base.PullRequest{Number: 3, ForeignIndex: 3})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReviewsEqual(t, []*base.Review{
 		{
 			ID:           315859956,
@@ -371,7 +375,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	}, reviews)
 
 	reviews, err = downloader.GetReviews(&base.PullRequest{Number: 4, ForeignIndex: 4})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReviewsEqual(t, []*base.Review{
 		{
 			ID:           338338740,

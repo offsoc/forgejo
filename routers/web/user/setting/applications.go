@@ -110,5 +110,6 @@ func loadApplicationsData(ctx *context.Context) {
 			ctx.ServerError("GetOAuth2GrantsByUserID", err)
 			return
 		}
+		ctx.Data["EnableAdditionalGrantScopes"] = setting.OAuth2.EnableAdditionalGrantScopes
 	}
 }

@@ -11,13 +11,14 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLookupUserRedirect(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	userID, err := user_model.LookupUserRedirect(db.DefaultContext, "olduser1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 1, userID)
 
 	_, err = user_model.LookupUserRedirect(db.DefaultContext, "doesnotexist")

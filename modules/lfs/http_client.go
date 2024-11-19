@@ -16,9 +16,8 @@ import (
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/proxy"
+	"code.gitea.io/gitea/modules/setting"
 )
-
-const httpBatchSize = 20
 
 // HTTPClient is used to communicate with the LFS server
 // https://github.com/git-lfs/git-lfs/blob/main/docs/api/batch.md
@@ -30,7 +29,7 @@ type HTTPClient struct {
 
 // BatchSize returns the preferred size of batchs to process
 func (c *HTTPClient) BatchSize() int {
-	return httpBatchSize
+	return setting.LFSClient.BatchSize
 }
 
 func newHTTPClient(endpoint *url.URL, httpTransport *http.Transport) *HTTPClient {
@@ -136,14 +135,13 @@ func (c *HTTPClient) performOperation(ctx context.Context, objects []Pointer, dc
 
 	for _, object := range result.Objects {
 		if object.Error != nil {
-			objectError := errors.New(object.Error.Message)
-			log.Trace("Error on object %v: %v", object.Pointer, objectError)
+			log.Trace("Error on object %v: %v", object.Pointer, object.Error)
 			if uc != nil {
-				if _, err := uc(object.Pointer, objectError); err != nil {
+				if _, err := uc(object.Pointer, object.Error); err != nil {
 					return err
 				}
 			} else {
-				if err := dc(object.Pointer, nil, objectError); err != nil {
+				if err := dc(object.Pointer, nil, object.Error); err != nil {
 					return err
 				}
 			}

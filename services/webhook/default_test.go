@@ -58,7 +58,7 @@ func TestGiteaPayload(t *testing.T) {
 			Ref string `json:"ref"`
 		}
 		err = json.NewDecoder(req.Body).Decode(&body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "test", body.Ref) // short ref
 	})
 
@@ -87,7 +87,7 @@ func TestGiteaPayload(t *testing.T) {
 			Ref string `json:"ref"`
 		}
 		err = json.NewDecoder(req.Body).Decode(&body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "refs/heads/test", body.Ref) // full ref
 	})
 
@@ -116,7 +116,7 @@ func TestGiteaPayload(t *testing.T) {
 			Ref string `json:"ref"`
 		}
 		err = json.NewDecoder(req.Body).Decode(&body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "test", body.Ref) // short ref
 	})
 }
@@ -161,7 +161,7 @@ func TestForgejoPayload(t *testing.T) {
 			Ref string `json:"ref"`
 		}
 		err = json.NewDecoder(req.Body).Decode(&body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "refs/heads/test", body.Ref) // full ref
 	})
 
@@ -190,7 +190,7 @@ func TestForgejoPayload(t *testing.T) {
 			Ref string `json:"ref"`
 		}
 		err = json.NewDecoder(req.Body).Decode(&body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "refs/heads/test", body.Ref) // full ref
 	})
 
@@ -219,7 +219,7 @@ func TestForgejoPayload(t *testing.T) {
 			Ref string `json:"ref"`
 		}
 		err = json.NewDecoder(req.Body).Decode(&body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "refs/heads/test", body.Ref) // full ref
 	})
 }
@@ -245,9 +245,9 @@ func TestOpenProjectPayload(t *testing.T) {
 		assert.Equal(t, "test/repo", j.Get("base", "repo", "full_name").MustBeValid().ToString())
 		assert.Equal(t, "http://localhost:3000/test/repo", j.Get("base", "repo", "html_url").MustBeValid().ToString())
 
-		assert.Equal(t, false, j.Get("draft").MustBeValid().ToBool())
+		assert.False(t, j.Get("draft").MustBeValid().ToBool())
 		assert.Equal(t, jsoniter.NilValue, j.Get("merge_commit_sha").ValueType())
-		assert.Equal(t, false, j.Get("merged").MustBeValid().ToBool())
+		assert.False(t, j.Get("merged").MustBeValid().ToBool())
 		assert.Equal(t, jsoniter.NilValue, j.Get("merged_by").ValueType())
 		assert.Equal(t, jsoniter.NilValue, j.Get("merged_at").ValueType())
 		assert.Equal(t, 0, j.Get("comments").MustBeValid().ToInt())

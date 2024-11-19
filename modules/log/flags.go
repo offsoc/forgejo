@@ -31,9 +31,11 @@ const (
 	Llevelinitial                     // Initial character of the provided level in brackets, eg. [I] for info
 	Llevel                            // Provided level in brackets [INFO]
 	Lgopid                            // the Goroutine-PID of the context
+	Llevelprefix                      // printk-style logging prefixes as documented in sd-daemon(3), used by journald
 
-	Lmedfile  = Lshortfile | Llongfile                                    // last 20 characters of the filename
-	LstdFlags = Ldate | Ltime | Lmedfile | Lshortfuncname | Llevelinitial // default
+	Lmedfile       = Lshortfile | Llongfile                                    // last 20 characters of the filename
+	LstdFlags      = Ldate | Ltime | Lmedfile | Lshortfuncname | Llevelinitial // default
+	LjournaldFlags = Llevelprefix
 )
 
 const Ldefault = LstdFlags
@@ -54,10 +56,12 @@ var flagFromString = map[string]uint32{
 	"utc":           LUTC,
 	"levelinitial":  Llevelinitial,
 	"level":         Llevel,
+	"levelprefix":   Llevelprefix,
 	"gopid":         Lgopid,
 
-	"medfile":  Lmedfile,
-	"stdflags": LstdFlags,
+	"medfile":       Lmedfile,
+	"stdflags":      LstdFlags,
+	"journaldflags": LjournaldFlags,
 }
 
 var flagComboToString = []struct {

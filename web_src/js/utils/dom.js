@@ -155,7 +155,7 @@ export function autosize(textarea, {viewportMarginBottom = 0} = {}) {
       const isBorderBox = computedStyle.boxSizing === 'border-box';
       const borderAddOn = isBorderBox ? topBorderWidth + bottomBorderWidth : 0;
 
-      const adjustedViewportMarginBottom = bottom < viewportMarginBottom ? bottom : viewportMarginBottom;
+      const adjustedViewportMarginBottom = Math.min(bottom, viewportMarginBottom);
       const curHeight = parseFloat(computedStyle.height);
       const maxHeight = curHeight + bottom - adjustedViewportMarginBottom;
 
@@ -295,4 +295,11 @@ export function replaceTextareaSelection(textarea, text) {
     textarea.value = `${before}${text}${after}`;
     textarea.dispatchEvent(new CustomEvent('change', {bubbles: true, cancelable: true}));
   }
+}
+
+// Warning: Do not enter any unsanitized variables here
+export function createElementFromHTML(htmlString) {
+  const div = document.createElement('div');
+  div.innerHTML = htmlString.trim();
+  return div.firstChild;
 }

@@ -22,6 +22,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEmptyRepo(t *testing.T) {
@@ -86,7 +87,7 @@ func TestEmptyRepoUploadFile(t *testing.T) {
 	req.Header.Add("Content-Type", mpForm.FormDataContentType())
 	resp = session.MakeRequest(t, req, http.StatusOK)
 	respMap := map[string]string{}
-	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), &respMap))
+	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &respMap))
 
 	req = NewRequestWithValues(t, "POST", "/user30/empty/_upload/"+setting.Repository.DefaultBranch, map[string]string{
 		"_csrf":          GetCSRF(t, session, "/user/settings"),

@@ -11,58 +11,59 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAddTopic(t *testing.T) {
 	totalNrOfTopics := 6
 	repo1NrOfTopics := 3
 
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	topics, _, err := repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, topics, totalNrOfTopics)
 
 	topics, total, err := repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{
 		ListOptions: db.ListOptions{Page: 1, PageSize: 2},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, topics, 2)
 	assert.EqualValues(t, 6, total)
 
 	topics, _, err = repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{
 		RepoID: 1,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, topics, repo1NrOfTopics)
 
-	assert.NoError(t, repo_model.SaveTopics(db.DefaultContext, 2, "golang"))
+	require.NoError(t, repo_model.SaveTopics(db.DefaultContext, 2, "golang"))
 	repo2NrOfTopics := 1
 	topics, _, err = repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, topics, totalNrOfTopics)
 
 	topics, _, err = repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{
 		RepoID: 2,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, topics, repo2NrOfTopics)
 
-	assert.NoError(t, repo_model.SaveTopics(db.DefaultContext, 2, "golang", "gitea"))
+	require.NoError(t, repo_model.SaveTopics(db.DefaultContext, 2, "golang", "gitea"))
 	repo2NrOfTopics = 2
 	totalNrOfTopics++
 	topic, err := repo_model.GetTopicByName(db.DefaultContext, "gitea")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 1, topic.RepoCount)
 
 	topics, _, err = repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, topics, totalNrOfTopics)
 
 	topics, _, err = repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{
 		RepoID: 2,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, topics, repo2NrOfTopics)
 }
 

@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/forms"
+	"code.gitea.io/gitea/services/mailer"
 
 	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
@@ -33,8 +34,9 @@ func RegenerateScratchTwoFactor(ctx *context.Context) {
 		if auth.IsErrTwoFactorNotEnrolled(err) {
 			ctx.Flash.Error(ctx.Tr("settings.twofa_not_enrolled"))
 			ctx.Redirect(setting.AppSubURL + "/user/settings/security")
+		} else {
+			ctx.ServerError("SettingsTwoFactor: Failed to GetTwoFactorByUID", err)
 		}
-		ctx.ServerError("SettingsTwoFactor: Failed to GetTwoFactorByUID", err)
 		return
 	}
 
@@ -63,8 +65,9 @@ func DisableTwoFactor(ctx *context.Context) {
 		if auth.IsErrTwoFactorNotEnrolled(err) {
 			ctx.Flash.Error(ctx.Tr("settings.twofa_not_enrolled"))
 			ctx.Redirect(setting.AppSubURL + "/user/settings/security")
+		} else {
+			ctx.ServerError("SettingsTwoFactor: Failed to GetTwoFactorByUID", err)
 		}
-		ctx.ServerError("SettingsTwoFactor: Failed to GetTwoFactorByUID", err)
 		return
 	}
 
@@ -73,8 +76,14 @@ func DisableTwoFactor(ctx *context.Context) {
 			// There is a potential DB race here - we must have been disabled by another request in the intervening period
 			ctx.Flash.Success(ctx.Tr("settings.twofa_disabled"))
 			ctx.Redirect(setting.AppSubURL + "/user/settings/security")
+		} else {
+			ctx.ServerError("SettingsTwoFactor: Failed to DeleteTwoFactorByID", err)
 		}
-		ctx.ServerError("SettingsTwoFactor: Failed to DeleteTwoFactorByID", err)
+		return
+	}
+
+	if err := mailer.SendDisabledTOTP(ctx, ctx.Doer); err != nil {
+		ctx.ServerError("SendDisabledTOTP", err)
 		return
 	}
 
@@ -235,6 +244,11 @@ func EnrollTwoFactorPost(ctx *context.Context) {
 	if err := ctx.Session.Release(); err != nil {
 		// tolerate this failure - it's more important to continue
 		log.Error("Unable to save changes to the session: %v", err)
+	}
+
+	if err := mailer.SendTOTPEnrolled(ctx, ctx.Doer); err != nil {
+		ctx.ServerError("SendTOTPEnrolled", err)
+		return
 	}
 
 	if err = auth.NewTwoFactor(ctx, t); err != nil {

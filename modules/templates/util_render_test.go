@@ -35,8 +35,8 @@ com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit
 mail@domain.com
 @mention-user test
 #123
-  space  
-`
+  space
+` + "`code :+1: #123 code`\n"
 
 var testMetas = map[string]string{
 	"user":     "user13",
@@ -47,12 +47,12 @@ var testMetas = map[string]string{
 
 func TestApostrophesInMentions(t *testing.T) {
 	rendered := RenderMarkdownToHtml(context.Background(), "@mention-user's comment")
-	assert.EqualValues(t, template.HTML("<p><a href=\"/mention-user\" rel=\"nofollow\">@mention-user</a>&#39;s comment</p>\n"), rendered)
+	assert.EqualValues(t, template.HTML("<p><a href=\"/mention-user\" class=\"mention\" rel=\"nofollow\">@mention-user</a>&#39;s comment</p>\n"), rendered)
 }
 
 func TestNonExistantUserMention(t *testing.T) {
 	rendered := RenderMarkdownToHtml(context.Background(), "@ThisUserDoesNotExist @mention-user")
-	assert.EqualValues(t, template.HTML("<p>@ThisUserDoesNotExist <a href=\"/mention-user\" rel=\"nofollow\">@mention-user</a></p>\n"), rendered)
+	assert.EqualValues(t, template.HTML("<p>@ThisUserDoesNotExist <a href=\"/mention-user\" class=\"mention\" rel=\"nofollow\">@mention-user</a></p>\n"), rendered)
 }
 
 func TestRenderCommitBody(t *testing.T) {
@@ -111,12 +111,12 @@ func TestRenderCommitBody(t *testing.T) {
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" class="commit"><code class="nohighlight">88fc37a3c0</code></a>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit
-<span class="emoji" aria-label="thumbs up">👍</span>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span>
 <a href="mailto:mail@domain.com" class="mailto">mail@domain.com</a>
 <a href="/mention-user" class="mention">@mention-user</a> test
 <a href="/user13/repo11/issues/123" class="ref-issue">#123</a>
-  space`
-
+  space
+` + "`code <span class=\"emoji\" aria-label=\"thumbs up\" data-alias=\"+1\">👍</span> <a href=\"/user13/repo11/issues/123\" class=\"ref-issue\">#123</a> code`"
 	assert.EqualValues(t, expected, RenderCommitBody(context.Background(), testInput, testMetas))
 }
 
@@ -148,17 +148,44 @@ https://example.com/user/repo/compare/88fc37a3c0a4dda553bdcfc80c178a58247f42fb..
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare
 https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit
-<span class="emoji" aria-label="thumbs up">👍</span>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span>
 mail@domain.com
 @mention-user test
 <a href="/user13/repo11/issues/123" class="ref-issue">#123</a>
-  space  
+  space
+<code class="inline-code-block">code :+1: #123 code</code>
 `
 	assert.EqualValues(t, expected, RenderIssueTitle(context.Background(), testInput, testMetas))
 }
 
+func TestRenderRefIssueTitle(t *testing.T) {
+	expected := `  space @mention-user  
+/just/a/path.bin
+https://example.com/file.bin
+[local link](file.bin)
+[remote link](https://example.com)
+[[local link|file.bin]]
+[[remote link|https://example.com]]
+![local image](image.jpg)
+![remote image](https://example.com/image.jpg)
+[[local image|image.jpg]]
+[[remote link|https://example.com/image.jpg]]
+https://example.com/user/repo/compare/88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb#hash
+com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare
+https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb
+com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span>
+mail@domain.com
+@mention-user test
+#123
+  space
+<code class="inline-code-block">code :+1: #123 code</code>
+`
+	assert.EqualValues(t, expected, RenderRefIssueTitle(context.Background(), testInput))
+}
+
 func TestRenderMarkdownToHtml(t *testing.T) {
-	expected := `<p>space <a href="/mention-user" rel="nofollow">@mention-user</a><br/>
+	expected := `<p>space <a href="/mention-user" class="mention" rel="nofollow">@mention-user</a><br/>
 /just/a/path.bin
 <a href="https://example.com/file.bin" rel="nofollow">https://example.com/file.bin</a>
 <a href="/file.bin" rel="nofollow">local link</a>
@@ -173,11 +200,12 @@ func TestRenderMarkdownToHtml(t *testing.T) {
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow"><code>88fc37a3c0</code></a>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit
-<span class="emoji" aria-label="thumbs up">👍</span>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a>
-<a href="/mention-user" rel="nofollow">@mention-user</a> test
+<a href="/mention-user" class="mention" rel="nofollow">@mention-user</a> test
 #123
-space</p>
+space
+<code>code :+1: #123 code</code></p>
 `
 	assert.EqualValues(t, expected, RenderMarkdownToHtml(context.Background(), testInput))
 }

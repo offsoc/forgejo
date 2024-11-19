@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestManager(t *testing.T) {
@@ -38,11 +39,11 @@ func TestManager(t *testing.T) {
 DATADIR = temp-dir
 CONN_STR = redis://
 `)
-	assert.ErrorContains(t, err, "invalid leveldb connection string")
+	require.ErrorContains(t, err, "invalid leveldb connection string")
 
 	// test default config
 	q, err := newQueueFromConfig("default", "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "default", q.GetName())
 	assert.Equal(t, "level", q.GetType())
 	assert.Equal(t, filepath.Join(setting.AppDataPath, "queues/common"), q.baseConfig.DataFullDir)
@@ -78,7 +79,7 @@ SET_NAME = _u2
 MAX_WORKERS = 123
 `)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	q1 := createWorkerPoolQueue[string](context.Background(), "no-such", cfgProvider, nil, false)
 	assert.Equal(t, "no-such", q1.GetName())
@@ -118,7 +119,7 @@ MAX_WORKERS = 123
 	assert.Equal(t, 120, q1.workerMaxNum)
 
 	stop := runWorkerPoolQueue(q2)
-	assert.NoError(t, GetManager().GetManagedQueue(qid2).FlushWithContext(context.Background(), 0))
-	assert.NoError(t, GetManager().FlushAll(context.Background(), 0))
+	require.NoError(t, GetManager().GetManagedQueue(qid2).FlushWithContext(context.Background(), 0))
+	require.NoError(t, GetManager().FlushAll(context.Background(), 0))
 	stop()
 }

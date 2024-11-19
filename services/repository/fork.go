@@ -51,8 +51,8 @@ type ForkRepoOptions struct {
 	SingleBranch string
 }
 
-// ForkRepository forks a repository
-func ForkRepository(ctx context.Context, doer, owner *user_model.User, opts ForkRepoOptions) (*repo_model.Repository, error) {
+// ForkRepositoryIfNotExists creates a fork of a repository if it does not already exists and fails otherwise
+func ForkRepositoryIfNotExists(ctx context.Context, doer, owner *user_model.User, opts ForkRepoOptions) (*repo_model.Repository, error) {
 	// Fork is prohibited, if user has reached maximum limit of repositories
 	if !doer.IsAdmin && !owner.CanForkRepo() {
 		return nil, repo_model.ErrReachLimitOfRepo{
@@ -147,7 +147,7 @@ func ForkRepository(ctx context.Context, doer, owner *user_model.User, opts Fork
 		}
 		repoPath := repo_model.RepoPath(owner.Name, repo.Name)
 		if stdout, _, err := cloneCmd.AddDynamicArguments(oldRepoPath, repoPath).
-			SetDescription(fmt.Sprintf("ForkRepository(git clone): %s to %s", opts.BaseRepo.FullName(), repo.FullName())).
+			SetDescription(fmt.Sprintf("ForkRepositoryIfNotExists(git clone): %s to %s", opts.BaseRepo.FullName(), repo.FullName())).
 			RunStdBytes(&git.RunOpts{Timeout: 10 * time.Minute}); err != nil {
 			log.Error("Fork Repository (git clone) Failed for %v (from %v):\nStdout: %s\nError: %v", repo, opts.BaseRepo, stdout, err)
 			return fmt.Errorf("git clone: %w", err)
@@ -158,7 +158,7 @@ func ForkRepository(ctx context.Context, doer, owner *user_model.User, opts Fork
 		}
 
 		if stdout, _, err := git.NewCommand(txCtx, "update-server-info").
-			SetDescription(fmt.Sprintf("ForkRepository(git update-server-info): %s", repo.FullName())).
+			SetDescription(fmt.Sprintf("ForkRepositoryIfNotExists(git update-server-info): %s", repo.FullName())).
 			RunStdString(&git.RunOpts{Dir: repoPath}); err != nil {
 			log.Error("Fork Repository (git update-server-info) failed for %v:\nStdout: %s\nError: %v", repo, stdout, err)
 			return fmt.Errorf("git update-server-info: %w", err)
@@ -180,6 +180,16 @@ func ForkRepository(ctx context.Context, doer, owner *user_model.User, opts Fork
 	needsRollbackInPanic = false
 	if err != nil {
 		rollbackFn()
+		return nil, err
+	}
+
+	return repo, nil
+}
+
+// ForkRepositoryAndUpdates forks a repository. On success it updates metadata (size, stats, etc.) and send a notification.
+func ForkRepositoryAndUpdates(ctx context.Context, doer, owner *user_model.User, opts ForkRepoOptions) (*repo_model.Repository, error) {
+	repo, err := ForkRepositoryIfNotExists(ctx, doer, owner, opts)
+	if err != nil {
 		return nil, err
 	}
 

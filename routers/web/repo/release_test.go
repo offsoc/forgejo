@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/services/forms"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewReleasePost(t *testing.T) {
@@ -79,12 +80,12 @@ func TestCalReleaseNumCommitsBehind(t *testing.T) {
 		IncludeDrafts: ctx.Repo.CanWrite(unit.TypeReleases),
 		RepoID:        ctx.Repo.Repository.ID,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	countCache := make(map[string]int64)
 	for _, release := range releases {
 		err := calReleaseNumCommitsBehind(ctx.Repo, release, countCache)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	type computedFields struct {

@@ -22,9 +22,16 @@ import (
 //
 // The payload is verifiable by the generated HMAC using the user secret. It contains:
 // | Timestamp | Action/Handler Type | Action/Handler Data |
+//
+//
+// Version changelog
+//
+// v1 -> v2:
+// Use 128 instead of 80 bits of the HMAC-SHA256 output.
 
 const (
 	tokenVersion1        byte = 1
+	tokenVersion2        byte = 2
 	tokenLifetimeInYears int  = 1
 )
 
@@ -70,7 +77,7 @@ func CreateToken(ht HandlerType, user *user_model.User, data []byte) (string, er
 		return "", err
 	}
 
-	return encodingWithoutPadding.EncodeToString(append([]byte{tokenVersion1}, packagedData...)), nil
+	return encodingWithoutPadding.EncodeToString(append([]byte{tokenVersion2}, packagedData...)), nil
 }
 
 // ExtractToken extracts the action/user tuple from the token and verifies the content
@@ -84,7 +91,7 @@ func ExtractToken(ctx context.Context, token string) (HandlerType, *user_model.U
 		return UnknownHandlerType, nil, nil, &ErrToken{"no data"}
 	}
 
-	if data[0] != tokenVersion1 {
+	if data[0] != tokenVersion2 {
 		return UnknownHandlerType, nil, nil, &ErrToken{fmt.Sprintf("unsupported token version: %v", data[0])}
 	}
 
@@ -124,5 +131,8 @@ func generateHmac(secret, payload []byte) []byte {
 	mac.Write(payload)
 	hmac := mac.Sum(nil)
 
-	return hmac[:10] // RFC2104 recommends not using less then 80 bits
+	// RFC2104 section 5 recommends that if you do HMAC truncation, you should use
+	// the max(80, hash_len/2) of the leftmost bits.
+	// For SHA256 this works out to using 128 of the leftmost bits.
+	return hmac[:16]
 }

@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateMessageID(t *testing.T) {
@@ -69,7 +70,7 @@ func TestToMessage(t *testing.T) {
 
 	buf := &strings.Builder{}
 	_, err := m1.ToMessage().WriteTo(buf)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	header, _ := extractMailHeaderAndContent(t, buf.String())
 	assert.EqualValues(t, map[string]string{
 		"Content-Type":             "multipart/alternative;",
@@ -89,7 +90,7 @@ func TestToMessage(t *testing.T) {
 
 	buf = &strings.Builder{}
 	_, err = m1.ToMessage().WriteTo(buf)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	header, _ = extractMailHeaderAndContent(t, buf.String())
 	assert.EqualValues(t, map[string]string{
 		"Content-Type":             "multipart/alternative;",

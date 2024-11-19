@@ -11,7 +11,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/modules/git"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRemoveFilesFromIndexSha256(t *testing.T) {
@@ -22,7 +22,7 @@ func TestRemoveFilesFromIndexSha256(t *testing.T) {
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 
 	temp, err := NewTemporaryUploadRepository(db.DefaultContext, repo)
-	assert.NoError(t, err)
-	assert.NoError(t, temp.Init("sha256"))
-	assert.NoError(t, temp.RemoveFilesFromIndex("README.md"))
+	require.NoError(t, err)
+	require.NoError(t, temp.Init("sha256"))
+	require.NoError(t, temp.RemoveFilesFromIndex("README.md"))
 }

@@ -12,6 +12,7 @@ type CreatePushMirrorOption struct {
 	RemotePassword string `json:"remote_password"`
 	Interval       string `json:"interval"`
 	SyncOnCommit   bool   `json:"sync_on_commit"`
+	UseSSH         bool   `json:"use_ssh"`
 }
 
 // PushMirror represents information of a push mirror
@@ -27,4 +28,5 @@ type PushMirror struct {
 	LastError      string     `json:"last_error"`
 	Interval       string     `json:"interval"`
 	SyncOnCommit   bool       `json:"sync_on_commit"`
+	PublicKey      string     `json:"public_key"`
 }

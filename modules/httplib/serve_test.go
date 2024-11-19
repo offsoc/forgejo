@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestServeContentByReader(t *testing.T) {
@@ -61,7 +62,7 @@ func TestServeContentByReadSeeker(t *testing.T) {
 	data := "0123456789abcdef"
 	tmpFile := t.TempDir() + "/test"
 	err := os.WriteFile(tmpFile, []byte(data), 0o644)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	test := func(t *testing.T, expectedStatusCode int, expectedContent string) {
 		_, rangeStr, _ := strings.Cut(t.Name(), "_range_")
@@ -71,9 +72,8 @@ func TestServeContentByReadSeeker(t *testing.T) {
 		}
 
 		seekReader, err := os.OpenFile(tmpFile, os.O_RDONLY, 0o644)
-		if !assert.NoError(t, err) {
-			return
-		}
+		require.NoError(t, err)
+
 		defer seekReader.Close()
 
 		w := httptest.NewRecorder()

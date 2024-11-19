@@ -72,7 +72,7 @@ func (suite *baseRedisUnitTestSuite) TestBasic() {
 
 			// Configure expectations.
 			mockRedisStore := mock.NewInMemoryMockRedis()
-			redisClient := mock.NewMockUniversalClient(suite.mockController)
+			redisClient := mock.NewMockRedisClient(suite.mockController)
 
 			redisClient.EXPECT().
 				Ping(gomock.Any()).

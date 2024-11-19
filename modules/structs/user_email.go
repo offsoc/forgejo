@@ -7,7 +7,7 @@ package structs
 // Email an email address belonging to a user
 type Email struct {
 	// swagger:strfmt email
-	Email    string `json:"email"`
+	Email    string `json:"email" binding:"EmailWithAllowedDomain"`
 	Verified bool   `json:"verified"`
 	Primary  bool   `json:"primary"`
 	UserID   int64  `json:"user_id"`

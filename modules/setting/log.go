@@ -133,18 +133,25 @@ func loadLogModeByName(rootCfg ConfigProvider, loggerName, modeName string) (wri
 	writerMode.StacktraceLevel = log.LevelFromString(ConfigInheritedKeyString(sec, "STACKTRACE_LEVEL", Log.StacktraceLogLevel.String()))
 	writerMode.Prefix = ConfigInheritedKeyString(sec, "PREFIX")
 	writerMode.Expression = ConfigInheritedKeyString(sec, "EXPRESSION")
-	writerMode.Flags = log.FlagsFromString(ConfigInheritedKeyString(sec, "FLAGS", defaultFlags))
+	// flags are updated and set below
 
 	switch writerType {
 	case "console":
-		useStderr := ConfigInheritedKey(sec, "STDERR").MustBool(false)
+		// if stderr is on journald, prefer stderr by default
+		useStderr := ConfigInheritedKey(sec, "STDERR").MustBool(log.JournaldOnStderr)
 		defaultCanColor := log.CanColorStdout
+		defaultJournald := log.JournaldOnStdout
 		if useStderr {
 			defaultCanColor = log.CanColorStderr
+			defaultJournald = log.JournaldOnStderr
 		}
 		writerOption := log.WriterConsoleOption{Stderr: useStderr}
 		writerMode.Colorize = ConfigInheritedKey(sec, "COLORIZE").MustBool(defaultCanColor)
 		writerMode.WriterOption = writerOption
+		// if we are ultimately on journald, update default flags
+		if defaultJournald {
+			defaultFlags = "journaldflags"
+		}
 	case "file":
 		fileName := LogPrepareFilenameForWriter(ConfigInheritedKey(sec, "FILE_NAME").String(), defaultFilaName)
 		writerOption := log.WriterFileOption{}
@@ -168,6 +175,9 @@ func loadLogModeByName(rootCfg ConfigProvider, loggerName, modeName string) (wri
 			return "", "", writerMode, fmt.Errorf("invalid log writer type (mode): %s, maybe it needs something like 'MODE=file' in [log.%s] section", writerType, modeName)
 		}
 	}
+
+	// set flags last because the console writer code may update default flags
+	writerMode.Flags = log.FlagsFromString(ConfigInheritedKeyString(sec, "FLAGS", defaultFlags))
 
 	return writerName, writerType, writerMode, nil
 }

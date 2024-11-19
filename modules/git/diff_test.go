@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const exampleDiff = `diff --git a/README.md b/README.md
@@ -81,7 +82,7 @@ index d46c152..a7d2d55 100644
 
 func TestCutDiffAroundLineIssue17875(t *testing.T) {
 	result, err := CutDiffAroundLine(strings.NewReader(issue17875Diff), 23, false, 3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `diff --git a/Geschäftsordnung.md b/Geschäftsordnung.md
 --- a/Geschäftsordnung.md
 +++ b/Geschäftsordnung.md
@@ -94,7 +95,7 @@ func TestCutDiffAroundLineIssue17875(t *testing.T) {
 
 func TestCutDiffAroundLine(t *testing.T) {
 	result, err := CutDiffAroundLine(strings.NewReader(exampleDiff), 4, false, 3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	resultByLine := strings.Split(result, "\n")
 	assert.Len(t, resultByLine, 7)
 	// Check if headers got transferred
@@ -108,25 +109,25 @@ func TestCutDiffAroundLine(t *testing.T) {
 
 	// Must be same result as before since old line 3 == new line 5
 	newResult, err := CutDiffAroundLine(strings.NewReader(exampleDiff), 3, true, 3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, result, newResult, "Must be same result as before since old line 3 == new line 5")
 
 	newResult, err = CutDiffAroundLine(strings.NewReader(exampleDiff), 6, false, 300)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, exampleDiff, newResult)
 
 	emptyResult, err := CutDiffAroundLine(strings.NewReader(exampleDiff), 6, false, 0)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, emptyResult)
 
 	// Line is out of scope
 	emptyResult, err = CutDiffAroundLine(strings.NewReader(exampleDiff), 434, false, 0)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, emptyResult)
 
 	// Handle minus diffs properly
 	minusDiff, err := CutDiffAroundLine(strings.NewReader(breakingDiff), 2, false, 4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expected := `diff --git a/aaa.sql b/aaa.sql
 --- a/aaa.sql
@@ -139,7 +140,7 @@ func TestCutDiffAroundLine(t *testing.T) {
 
 	// Handle minus diffs properly
 	minusDiff, err = CutDiffAroundLine(strings.NewReader(breakingDiff), 3, false, 4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expected = `diff --git a/aaa.sql b/aaa.sql
 --- a/aaa.sql

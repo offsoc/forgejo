@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParsePackage(t *testing.T) {
@@ -42,14 +43,14 @@ Mu0UFYgZ/bYnuvn/vz4wtCz8qMwsHUvP0PX3tbYFUctAPdrY6tiiDtcCddDECahx7SuVNP5dpmb5
 7tpp/pEjDS7cGPZ6BY430+7danDq6f42Nw49b9F7zp6BiKpJb9s5P0AYN2+L159cnrur636rx+v1
 7ae1K28QbMMcqI8CqwIrgwg9nTOp8Oj9q81plUY7ZuwXN8Vvs8wbAAA=`
 	rpmPackageContent, err := base64.StdEncoding.DecodeString(base64RpmPackageContent)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	zr, err := gzip.NewReader(bytes.NewReader(rpmPackageContent))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	p, err := ParsePackage(zr)
 	assert.NotNil(t, p)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "gitea-test", p.Name)
 	assert.Equal(t, "1.0.2-1", p.Version)

@@ -11,6 +11,7 @@ import (
 	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testCase struct {
@@ -75,27 +76,27 @@ func Test_ConvertScopedAccessTokens(t *testing.T) {
 
 	// verify that no fixtures were loaded
 	count, err := x.Count(&AccessToken{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(0), count)
 
 	for _, tc := range tests {
 		_, err = x.Insert(&AccessToken{
 			Scope: string(tc.Old),
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	// migrate the scopes
 	err = ConvertScopedAccessTokens(x)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// migrate the scopes again (migration should be idempotent)
 	err = ConvertScopedAccessTokens(x)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	tokens := make([]AccessToken, 0)
 	err = x.Find(&tokens)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, len(tests), len(tokens))
 
 	// sort the tokens (insertion order by auto-incrementing primary key)

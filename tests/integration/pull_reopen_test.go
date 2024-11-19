@@ -28,6 +28,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPullrequestReopen(t *testing.T) {
@@ -36,7 +37,7 @@ func TestPullrequestReopen(t *testing.T) {
 		org26 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 26})
 
 		// Create an base repository.
-		baseRepo, _, f := CreateDeclarativeRepo(t, user2, "reopen-base",
+		baseRepo, _, f := tests.CreateDeclarativeRepo(t, user2, "reopen-base",
 			[]unit_model.Type{unit_model.TypePullRequests}, nil, nil,
 		)
 		defer f()
@@ -66,14 +67,14 @@ func TestPullrequestReopen(t *testing.T) {
 				Committer: time.Now(),
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Create an head repository.
-		headRepo, err := repo_service.ForkRepository(git.DefaultContext, user2, org26, repo_service.ForkRepoOptions{
+		headRepo, err := repo_service.ForkRepositoryAndUpdates(git.DefaultContext, user2, org26, repo_service.ForkRepoOptions{
 			BaseRepo: baseRepo,
 			Name:     "reopen-head",
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, headRepo)
 
 		// Add a change to the head repository, so a pull request can be opened.
@@ -101,7 +102,7 @@ func TestPullrequestReopen(t *testing.T) {
 				Committer: time.Now(),
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Create the pull request.
 		pullIssue := &issues_model.Issue{
@@ -121,13 +122,13 @@ func TestPullrequestReopen(t *testing.T) {
 			Type:       issues_model.PullRequestGitea,
 		}
 		err = pull_service.NewPullRequest(git.DefaultContext, baseRepo, pullIssue, nil, nil, pullRequest, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{Title: "Testing reopen functionality"})
 
 		// Close the PR.
 		err = issue_service.ChangeStatus(db.DefaultContext, issue, user2, "", true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		session := loginUser(t, "user2")
 

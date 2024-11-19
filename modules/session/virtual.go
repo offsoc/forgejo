@@ -8,12 +8,12 @@ import (
 	"sync"
 
 	"code.gitea.io/gitea/modules/json"
+	"code.gitea.io/gitea/modules/log"
 
-	"gitea.com/go-chi/session"
-	couchbase "gitea.com/go-chi/session/couchbase"
-	memcache "gitea.com/go-chi/session/memcache"
-	mysql "gitea.com/go-chi/session/mysql"
-	postgres "gitea.com/go-chi/session/postgres"
+	"code.forgejo.org/go-chi/session"
+	memcache "code.forgejo.org/go-chi/session/memcache"
+	mysql "code.forgejo.org/go-chi/session/mysql"
+	postgres "code.forgejo.org/go-chi/session/postgres"
 )
 
 // VirtualSessionProvider represents a shadowed session provider implementation.
@@ -35,6 +35,9 @@ func (o *VirtualSessionProvider) Init(gclifetime int64, config string) error {
 	switch opts.Provider {
 	case "memory":
 		o.provider = &session.MemProvider{}
+	case "couchbase":
+		log.Warn("Couchbase as session provider is no longer supported, falling back to file as session provider")
+		fallthrough
 	case "file":
 		o.provider = &session.FileProvider{}
 	case "redis":
@@ -45,8 +48,6 @@ func (o *VirtualSessionProvider) Init(gclifetime int64, config string) error {
 		o.provider = &mysql.MysqlProvider{}
 	case "postgres":
 		o.provider = &postgres.PostgresProvider{}
-	case "couchbase":
-		o.provider = &couchbase.CouchbaseProvider{}
 	case "memcache":
 		o.provider = &memcache.MemcacheProvider{}
 	default:

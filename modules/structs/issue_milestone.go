@@ -31,7 +31,7 @@ type CreateMilestoneOption struct {
 	Description string `json:"description"`
 	// swagger:strfmt date-time
 	Deadline *time.Time `json:"due_on"`
-	// enum: open,closed
+	// enum: ["open", "closed"]
 	State string `json:"state"`
 }
 

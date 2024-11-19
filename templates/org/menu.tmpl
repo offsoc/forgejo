@@ -6,7 +6,7 @@
 				{{if .RepoCount}}
 					<div class="ui small label">{{.RepoCount}}</div>
 				{{end}}
-        <span hidden test-name="repository-count">{{.RepoCount}}</span>
+				<span hidden test-name="repository-count">{{.RepoCount}}</span>
 			</a>
 			{{if .CanReadProjects}}
 			<a class="{{if .PageIsViewProjects}}active {{end}}item" href="{{$.Org.HomeLink}}/-/projects">
@@ -20,6 +20,10 @@
 			{{if and .IsPackageEnabled .CanReadPackages}}
 			<a class="{{if .IsPackagesPage}}active {{end}}item" href="{{$.Org.HomeLink}}/-/packages">
 				{{svg "octicon-package"}} {{ctx.Locale.Tr "packages.title"}}
+				{{if .PackageCount}}
+					<div class="ui small label">{{.PackageCount}}</div>
+				{{end}}
+				<span hidden test-name="package-count">{{.PackageCount}}</span>
 			</a>
 			{{end}}
 			{{if and .IsRepoIndexerEnabled .CanReadCode}}

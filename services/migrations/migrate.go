@@ -71,7 +71,7 @@ func IsMigrateURLAllowed(remoteURL string, doer *user_model.User) error {
 		return &models.ErrInvalidCloneAddr{Host: u.Host, IsURLError: true}
 	}
 
-	if u.Opaque != "" || u.Scheme != "" && u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "git" {
+	if u.Opaque != "" || u.Scheme != "" && u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "git" && u.Scheme != "ssh" {
 		return &models.ErrInvalidCloneAddr{Host: u.Host, IsProtocolInvalid: true, IsPermissionDenied: true, IsURLError: true}
 	}
 
@@ -505,10 +505,6 @@ func Init() error {
 	}
 	// TODO: at the moment, if ALLOW_LOCALNETWORKS=false, ALLOWED_DOMAINS=domain.com, and domain.com has IP 127.0.0.1, then it's still allowed.
 	// if we want to block such case, the private&loopback should be added to the blockList when ALLOW_LOCALNETWORKS=false
-
-	if setting.Proxy.Enabled && setting.Proxy.ProxyURLFixed != nil {
-		allowList.AppendPattern(setting.Proxy.ProxyURLFixed.Host)
-	}
 
 	return nil
 }

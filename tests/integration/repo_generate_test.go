@@ -1,4 +1,5 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -10,9 +11,12 @@ import (
 	"strings"
 	"testing"
 
+	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
+	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +25,15 @@ import (
 func assertRepoCreateForm(t *testing.T, htmlDoc *HTMLDoc, owner *user_model.User, templateID string) {
 	_, exists := htmlDoc.doc.Find("form.ui.form[action^='/repo/create']").Attr("action")
 	assert.True(t, exists, "Expected the repo creation form")
+	locale := translation.NewLocale("en-US")
+
+	// Verify page title
+	title := htmlDoc.doc.Find("title").Text()
+	assert.Contains(t, title, locale.TrString("new_repo.title"))
+
+	// Verify form header
+	header := strings.TrimSpace(htmlDoc.doc.Find(".form[action='/repo/create'] .header").Text())
+	assert.EqualValues(t, locale.TrString("new_repo.title"), header)
 
 	htmlDoc.AssertDropdownHasSelectedOption(t, "uid", strconv.FormatInt(owner.ID, 10))
 
@@ -123,4 +136,20 @@ func TestRepoGenerateToOrg(t *testing.T) {
 	org := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "org3"})
 
 	testRepoGenerate(t, session, "44", "user27", "template1", user, org, "generated2")
+}
+
+func TestRepoCreateFormTrimSpace(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	session := loginUser(t, user.Name)
+
+	req := NewRequestWithValues(t, "POST", "/repo/create", map[string]string{
+		"_csrf":     GetCSRF(t, session, "/repo/create"),
+		"uid":       "2",
+		"repo_name": " spaced-name ",
+	})
+	resp := session.MakeRequest(t, req, http.StatusSeeOther)
+
+	assert.EqualValues(t, "/user2/spaced-name", test.RedirectURL(resp))
+	unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: 2, Name: "spaced-name"})
 }

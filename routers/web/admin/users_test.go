@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/services/forms"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewUserPost_MustChangePassword(t *testing.T) {
@@ -48,7 +49,7 @@ func TestNewUserPost_MustChangePassword(t *testing.T) {
 
 	u, err := user_model.GetUserByName(ctx, username)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, username, u.Name)
 	assert.Equal(t, email, u.Email)
 	assert.True(t, u.MustChangePassword)
@@ -85,7 +86,7 @@ func TestNewUserPost_MustChangePasswordFalse(t *testing.T) {
 
 	u, err := user_model.GetUserByName(ctx, username)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, username, u.Name)
 	assert.Equal(t, email, u.Email)
 	assert.False(t, u.MustChangePassword)
@@ -152,7 +153,7 @@ func TestNewUserPost_VisibilityDefaultPublic(t *testing.T) {
 
 	u, err := user_model.GetUserByName(ctx, username)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, username, u.Name)
 	assert.Equal(t, email, u.Email)
 	// As default user visibility
@@ -191,7 +192,7 @@ func TestNewUserPost_VisibilityPrivate(t *testing.T) {
 
 	u, err := user_model.GetUserByName(ctx, username)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, username, u.Name)
 	assert.Equal(t, email, u.Email)
 	// As default user visibility

@@ -22,6 +22,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type ldapUser struct {
@@ -244,12 +245,13 @@ func TestLDAPUserSync(t *testing.T) {
 	}
 	defer tests.PrepareTestEnv(t)()
 	addAuthSourceLDAP(t, "", "", "", "")
-	auth.SyncExternalUsers(context.Background(), true)
+	err := auth.SyncExternalUsers(context.Background(), true)
+	require.NoError(t, err)
 
 	// Check if users exists
 	for _, gitLDAPUser := range gitLDAPUsers {
 		dbUser, err := user_model.GetUserByName(db.DefaultContext, gitLDAPUser.UserName)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, gitLDAPUser.UserName, dbUser.Name)
 		assert.Equal(t, gitLDAPUser.Email, dbUser.Email)
 		assert.Equal(t, gitLDAPUser.IsAdmin, dbUser.IsAdmin)
@@ -284,7 +286,7 @@ func TestLDAPUserSyncWithEmptyUsernameAttribute(t *testing.T) {
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
 		tr := htmlDoc.doc.Find("table.table tbody tr")
-		assert.True(t, tr.Length() == 0)
+		assert.Equal(t, 0, tr.Length())
 	}
 
 	for _, u := range gitLDAPUsers {
@@ -426,9 +428,9 @@ func TestLDAPGroupTeamSyncAddMember(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	addAuthSourceLDAP(t, "", "", "", "", "on", `{"cn=ship_crew,ou=people,dc=planetexpress,dc=com":{"org26": ["team11"]},"cn=admin_staff,ou=people,dc=planetexpress,dc=com": {"non-existent": ["non-existent"]}}`)
 	org, err := organization.GetOrgByName(db.DefaultContext, "org26")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	team, err := organization.GetTeam(db.DefaultContext, org.ID, "team11")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	auth.SyncExternalUsers(context.Background(), true)
 	for _, gitLDAPUser := range gitLDAPUsers {
 		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{
@@ -438,25 +440,25 @@ func TestLDAPGroupTeamSyncAddMember(t *testing.T) {
 			UserID:         user.ID,
 			IncludePrivate: true,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		allOrgTeams, err := organization.GetUserOrgTeams(db.DefaultContext, org.ID, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		if user.Name == "fry" || user.Name == "leela" || user.Name == "bender" {
 			// assert members of LDAP group "cn=ship_crew" are added to mapped teams
 			assert.Len(t, usersOrgs, 1, "User [%s] should be member of one organization", user.Name)
 			assert.Equal(t, "org26", usersOrgs[0].Name, "Membership should be added to the right organization")
 			isMember, err := organization.IsTeamMember(db.DefaultContext, usersOrgs[0].ID, team.ID, user.ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.True(t, isMember, "Membership should be added to the right team")
 			err = models.RemoveTeamMember(db.DefaultContext, team, user.ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			err = models.RemoveOrgUser(db.DefaultContext, usersOrgs[0].ID, user.ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		} else {
 			// assert members of LDAP group "cn=admin_staff" keep initial team membership since mapped team does not exist
 			assert.Empty(t, usersOrgs, "User should be member of no organization")
 			isMember, err := organization.IsTeamMember(db.DefaultContext, org.ID, team.ID, user.ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.False(t, isMember, "User should no be added to this team")
 			assert.Empty(t, allOrgTeams, "User should not be added to any team")
 		}
@@ -471,30 +473,30 @@ func TestLDAPGroupTeamSyncRemoveMember(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	addAuthSourceLDAP(t, "", "", "", "", "on", `{"cn=dispatch,ou=people,dc=planetexpress,dc=com": {"org26": ["team11"]}}`)
 	org, err := organization.GetOrgByName(db.DefaultContext, "org26")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	team, err := organization.GetTeam(db.DefaultContext, org.ID, "team11")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	loginUserWithPassword(t, gitLDAPUsers[0].UserName, gitLDAPUsers[0].Password)
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{
 		Name: gitLDAPUsers[0].UserName,
 	})
 	err = organization.AddOrgUser(db.DefaultContext, org.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = models.AddTeamMember(db.DefaultContext, team, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	isMember, err := organization.IsOrganizationMember(db.DefaultContext, org.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isMember, "User should be member of this organization")
 	isMember, err = organization.IsTeamMember(db.DefaultContext, org.ID, team.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isMember, "User should be member of this team")
 	// assert team member "professor" gets removed from org26 team11
 	loginUserWithPassword(t, gitLDAPUsers[0].UserName, gitLDAPUsers[0].Password)
 	isMember, err = organization.IsOrganizationMember(db.DefaultContext, org.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isMember, "User membership should have been removed from organization")
 	isMember, err = organization.IsTeamMember(db.DefaultContext, org.ID, team.ID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isMember, "User membership should have been removed from team")
 }
 
@@ -523,7 +525,7 @@ func TestLDAPUserSyncInvalidMail(t *testing.T) {
 	// Check if users exists
 	for _, gitLDAPUser := range gitLDAPUsers {
 		dbUser, err := user_model.GetUserByName(db.DefaultContext, gitLDAPUser.UserName)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, gitLDAPUser.UserName, dbUser.Name)
 		assert.Equal(t, gitLDAPUser.UserName+"@localhost.local", dbUser.Email)
 		assert.Equal(t, gitLDAPUser.IsAdmin, dbUser.IsAdmin)
@@ -549,7 +551,7 @@ func TestLDAPUserSyncInvalidMailDefaultDomain(t *testing.T) {
 	// Check if users exists
 	for _, gitLDAPUser := range gitLDAPUsers {
 		dbUser, err := user_model.GetUserByName(db.DefaultContext, gitLDAPUser.UserName)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, gitLDAPUser.UserName, dbUser.Name)
 		assert.Equal(t, gitLDAPUser.UserName+"@test.org", dbUser.Email)
 		assert.Equal(t, gitLDAPUser.IsAdmin, dbUser.IsAdmin)

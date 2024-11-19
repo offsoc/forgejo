@@ -17,10 +17,11 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPushCommits_ToAPIPayloadCommits(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	pushCommits := NewPushCommits()
 	pushCommits.Commits = []*PushCommit{
@@ -53,7 +54,7 @@ func TestPushCommits_ToAPIPayloadCommits(t *testing.T) {
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 16})
 	payloadCommits, headCommit, err := pushCommits.ToAPIPayloadCommits(git.DefaultContext, repo.RepoPath(), "/user2/repo16")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, payloadCommits, 3)
 	assert.NotNil(t, headCommit)
 
@@ -103,7 +104,7 @@ func TestPushCommits_ToAPIPayloadCommits(t *testing.T) {
 }
 
 func TestPushCommits_AvatarLink(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	pushCommits := NewPushCommits()
 	pushCommits.Commits = []*PushCommit{
@@ -146,7 +147,7 @@ func TestCommitToPushCommit(t *testing.T) {
 	}
 	const hexString = "0123456789abcdef0123456789abcdef01234567"
 	sha1, err := git.NewIDFromString(hexString)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pushCommit := CommitToPushCommit(&git.Commit{
 		ID:            sha1,
 		Author:        sig,
@@ -172,10 +173,10 @@ func TestListToPushCommits(t *testing.T) {
 
 	const hexString1 = "0123456789abcdef0123456789abcdef01234567"
 	hash1, err := git.NewIDFromString(hexString1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	const hexString2 = "fedcba9876543210fedcba9876543210fedcba98"
 	hash2, err := git.NewIDFromString(hexString2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	l := []*git.Commit{
 		{

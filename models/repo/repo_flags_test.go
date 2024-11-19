@@ -11,10 +11,11 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepositoryFlags(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 10})
 
 	// ********************
@@ -23,7 +24,7 @@ func TestRepositoryFlags(t *testing.T) {
 
 	// Unless we add flags, the repo has none
 	flags, err := repo.ListFlags(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, flags)
 
 	// If the repo has no flags, it is not flagged
@@ -36,12 +37,12 @@ func TestRepositoryFlags(t *testing.T) {
 
 	// Trying to retrieve a non-existent flag indicates not found
 	has, _, err = repo.GetFlag(db.DefaultContext, "foo")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, has)
 
 	// Deleting a non-existent flag fails
 	deleted, err := repo.DeleteFlag(db.DefaultContext, "no-such-flag")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(0), deleted)
 
 	// ********************
@@ -50,15 +51,15 @@ func TestRepositoryFlags(t *testing.T) {
 
 	// Adding a flag works
 	err = repo.AddFlag(db.DefaultContext, "foo")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Adding it again fails
 	err = repo.AddFlag(db.DefaultContext, "foo")
-	assert.Error(t, err)
+	require.Error(t, err)
 
 	// Listing flags includes the one we added
 	flags, err = repo.ListFlags(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, flags, 1)
 	assert.Equal(t, "foo", flags[0].Name)
 
@@ -72,22 +73,22 @@ func TestRepositoryFlags(t *testing.T) {
 
 	// Added flag can be retrieved
 	_, flag, err := repo.GetFlag(db.DefaultContext, "foo")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "foo", flag.Name)
 
 	// Deleting a flag works
 	deleted, err = repo.DeleteFlag(db.DefaultContext, "foo")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(1), deleted)
 
 	// The list is now empty
 	flags, err = repo.ListFlags(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, flags)
 
 	// Replacing an empty list works
 	err = repo.ReplaceAllFlags(db.DefaultContext, []string{"bar"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// The repo is now flagged with "bar"
 	has = repo.HasFlag(db.DefaultContext, "bar")
@@ -95,18 +96,18 @@ func TestRepositoryFlags(t *testing.T) {
 
 	// Replacing a tag set with another works
 	err = repo.ReplaceAllFlags(db.DefaultContext, []string{"baz", "quux"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// The repo now has two tags
 	flags, err = repo.ListFlags(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, flags, 2)
 	assert.Equal(t, "baz", flags[0].Name)
 	assert.Equal(t, "quux", flags[1].Name)
 
 	// Replacing flags with an empty set deletes all flags
 	err = repo.ReplaceAllFlags(db.DefaultContext, []string{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// The repo is now unflagged
 	flagged = repo.IsFlagged(db.DefaultContext)

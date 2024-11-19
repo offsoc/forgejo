@@ -160,6 +160,16 @@ func NewLocale(lang string) Locale {
 		defer lock.RUnlock()
 	}
 
+	if lang == "dummy" {
+		l := &locale{
+			Locale:     &i18n.KeyLocale{},
+			Lang:       lang,
+			LangName:   lang,
+			msgPrinter: message.NewPrinter(language.English),
+		}
+		return l
+	}
+
 	langName := "unknown"
 	if l, ok := allLangMap[lang]; ok {
 		langName = l.Name

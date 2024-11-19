@@ -4,8 +4,10 @@
 package user
 
 import (
+	"net/url"
 	"strings"
 
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
 )
 
@@ -67,4 +69,29 @@ func NewActionsUser() *User {
 
 func (u *User) IsActions() bool {
 	return u != nil && u.ID == ActionsUserID
+}
+
+const (
+	APActorUserID   = -3
+	APActorUserName = "actor"
+	APActorEmail    = "noreply@forgejo.org"
+)
+
+func NewAPActorUser() *User {
+	return &User{
+		ID:               APActorUserID,
+		Name:             APActorUserName,
+		LowerName:        APActorUserName,
+		IsActive:         true,
+		Email:            APActorEmail,
+		KeepEmailPrivate: true,
+		LoginName:        APActorUserName,
+		Type:             UserTypeIndividual,
+		Visibility:       structs.VisibleTypePublic,
+	}
+}
+
+func APActorUserAPActorID() string {
+	path, _ := url.JoinPath(setting.AppURL, "/api/v1/activitypub/actor")
+	return path
 }

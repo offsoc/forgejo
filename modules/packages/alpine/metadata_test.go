@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -77,7 +78,7 @@ func TestParsePackage(t *testing.T) {
 
 		pp, err := ParsePackage(data)
 		assert.Nil(t, pp)
-		assert.ErrorIs(t, err, ErrMissingPKGINFOFile)
+		require.ErrorIs(t, err, ErrMissingPKGINFOFile)
 	})
 
 	t.Run("InvalidPKGINFOFile", func(t *testing.T) {
@@ -85,14 +86,14 @@ func TestParsePackage(t *testing.T) {
 
 		pp, err := ParsePackage(data)
 		assert.Nil(t, pp)
-		assert.ErrorIs(t, err, ErrInvalidName)
+		require.ErrorIs(t, err, ErrInvalidName)
 	})
 
 	t.Run("Valid", func(t *testing.T) {
 		data := createPackage(".PKGINFO", createPKGINFOContent(packageName, packageVersion))
 
 		p, err := ParsePackage(data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, p)
 
 		assert.Equal(t, "Q1SRYURM5+uQDqfHSwTnNIOIuuDVQ=", p.FileMetadata.Checksum)
@@ -105,7 +106,7 @@ func TestParsePackageInfo(t *testing.T) {
 
 		p, err := ParsePackageInfo(bytes.NewReader(data))
 		assert.Nil(t, p)
-		assert.ErrorIs(t, err, ErrInvalidName)
+		require.ErrorIs(t, err, ErrInvalidName)
 	})
 
 	t.Run("InvalidVersion", func(t *testing.T) {
@@ -113,14 +114,14 @@ func TestParsePackageInfo(t *testing.T) {
 
 		p, err := ParsePackageInfo(bytes.NewReader(data))
 		assert.Nil(t, p)
-		assert.ErrorIs(t, err, ErrInvalidVersion)
+		require.ErrorIs(t, err, ErrInvalidVersion)
 	})
 
 	t.Run("Valid", func(t *testing.T) {
 		data := createPKGINFOContent(packageName, packageVersion)
 
 		p, err := ParsePackageInfo(bytes.NewReader(data))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, p)
 
 		assert.Equal(t, packageName, p.Name)

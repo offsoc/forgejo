@@ -40,7 +40,7 @@ func (o *users) GetIDFromName(ctx context.Context, name string) generic.NodeID {
 		panic(fmt.Errorf("GetUserByName: %v", err))
 	}
 
-	return generic.NodeID(fmt.Sprintf("%d", user.ID))
+	return generic.NewNodeID(user.ID)
 }
 
 func newUsers() generic.NodeDriverInterface {

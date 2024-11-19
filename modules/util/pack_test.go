@@ -6,7 +6,7 @@ package util
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackAndUnpackData(t *testing.T) {
@@ -19,10 +19,10 @@ func TestPackAndUnpackData(t *testing.T) {
 	var f2 float32
 
 	data, err := PackData(s, i, f)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.NoError(t, UnpackData(data, &s2, &i2, &f2))
-	assert.NoError(t, UnpackData(data, &s2))
-	assert.Error(t, UnpackData(data, &i2))
-	assert.Error(t, UnpackData(data, &s2, &f2))
+	require.NoError(t, UnpackData(data, &s2, &i2, &f2))
+	require.NoError(t, UnpackData(data, &s2))
+	require.Error(t, UnpackData(data, &i2))
+	require.Error(t, UnpackData(data, &s2, &f2))
 }

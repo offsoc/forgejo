@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIUpdateRepoAvatar(t *testing.T) {
@@ -29,7 +30,7 @@ func TestAPIUpdateRepoAvatar(t *testing.T) {
 
 	// Test what happens if you use a valid image
 	avatar, err := os.ReadFile("tests/integration/avatar.png")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if err != nil {
 		assert.FailNow(t, "Unable to open avatar.png")
 	}
@@ -53,7 +54,7 @@ func TestAPIUpdateRepoAvatar(t *testing.T) {
 
 	// Test what happens if you use a file that is not an image
 	text, err := os.ReadFile("tests/integration/README.md")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if err != nil {
 		assert.FailNow(t, "Unable to open README.md")
 	}

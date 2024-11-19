@@ -13,10 +13,11 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAddLdapSSHPublicKeys(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	s := &auth.Source{ID: 1}
@@ -71,7 +72,7 @@ ssh-dss AAAAB3NzaC1kc3MAAACBAOChCC7lf6Uo9n7BmZ6M8St19PZf4Tn59NriyboW2x/DZuYAz3ib
 			OwnerID:       user.ID,
 			LoginSourceID: s.ID,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		if err != nil {
 			continue
 		}

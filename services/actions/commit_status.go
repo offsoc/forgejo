@@ -12,6 +12,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	git_model "code.gitea.io/gitea/models/git"
 	user_model "code.gitea.io/gitea/models/user"
+	actions_module "code.gitea.io/gitea/modules/actions"
 	"code.gitea.io/gitea/modules/log"
 	api "code.gitea.io/gitea/modules/structs"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
@@ -52,8 +53,12 @@ func createCommitStatus(ctx context.Context, job *actions_model.ActionRunJob) er
 			return fmt.Errorf("head commit is missing in event payload")
 		}
 		sha = payload.HeadCommit.ID
-	case webhook_module.HookEventPullRequest, webhook_module.HookEventPullRequestSync:
-		event = "pull_request"
+	case webhook_module.HookEventPullRequest, webhook_module.HookEventPullRequestSync, webhook_module.HookEventPullRequestLabel, webhook_module.HookEventPullRequestAssign, webhook_module.HookEventPullRequestMilestone:
+		if run.TriggerEvent == actions_module.GithubEventPullRequestTarget {
+			event = "pull_request_target"
+		} else {
+			event = "pull_request"
+		}
 		payload, err := run.GetPullRequestEventPayload()
 		if err != nil {
 			return fmt.Errorf("GetPullRequestEventPayload: %w", err)

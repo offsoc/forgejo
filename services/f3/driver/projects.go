@@ -13,7 +13,6 @@ import (
 
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
-	f3_util "code.forgejo.org/f3/gof3/v3/util"
 )
 
 type projects struct {
@@ -31,7 +30,7 @@ func (o *projects) GetIDFromName(ctx context.Context, name string) generic.NodeI
 		panic(fmt.Errorf("error GetRepositoryByOwnerAndName(%s, %s): %v", owner, name, err))
 	}
 
-	return generic.NodeID(fmt.Sprintf("%d", forgejoProject.ID))
+	return generic.NewNodeID(forgejoProject.ID)
 }
 
 func (o *projects) ListPage(ctx context.Context, page int) generic.ChildrenSlice {
@@ -41,7 +40,7 @@ func (o *projects) ListPage(ctx context.Context, page int) generic.ChildrenSlice
 
 	forgejoProjects, _, err := repo_model.SearchRepository(ctx, &repo_model.SearchRepoOptions{
 		ListOptions: db.ListOptions{Page: page, PageSize: pageSize},
-		OwnerID:     f3_util.ParseInt(string(owner.GetID())),
+		OwnerID:     owner.GetID().Int64(),
 		Private:     true,
 	})
 	if err != nil {

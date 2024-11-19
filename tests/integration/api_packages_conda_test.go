@@ -17,11 +17,12 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	conda_module "code.gitea.io/gitea/modules/packages/conda"
+	"code.gitea.io/gitea/modules/zstd"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/dsnet/compress/bzip2"
-	"github.com/klauspost/compress/zstd"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageConda(t *testing.T) {
@@ -75,11 +76,11 @@ func TestPackageConda(t *testing.T) {
 			MakeRequest(t, req, http.StatusConflict)
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeConda)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1)
 
 			pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Nil(t, pd.SemVer)
 			assert.IsType(t, &conda_module.VersionMetadata{}, pd.Metadata)
 			assert.Equal(t, packageName, pd.Package.Name)
@@ -116,11 +117,11 @@ func TestPackageConda(t *testing.T) {
 			MakeRequest(t, req, http.StatusConflict)
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeConda)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 2)
 
 			pds, err := packages.GetPackageDescriptors(db.DefaultContext, pvs)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Condition(t, func() bool {
 				for _, pd := range pds {
@@ -213,10 +214,10 @@ func TestPackageConda(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			pv, err := packages.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages.TypeConda, packageName, packageVersion)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			pd, err := packages.GetPackageDescriptor(db.DefaultContext, pv)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			req := NewRequest(t, "GET", fmt.Sprintf("%s/noarch/repodata.json", root))
 			resp := MakeRequest(t, req, http.StatusOK)
@@ -244,10 +245,10 @@ func TestPackageConda(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			pv, err := packages.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages.TypeConda, channel+"/"+packageName, packageVersion)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			pd, err := packages.GetPackageDescriptor(db.DefaultContext, pv)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			req := NewRequest(t, "GET", fmt.Sprintf("%s/%s/noarch/repodata.json", root, channel))
 			resp := MakeRequest(t, req, http.StatusOK)

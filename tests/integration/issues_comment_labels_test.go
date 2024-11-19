@@ -15,40 +15,112 @@ import (
 )
 
 // TestIssuesCommentLabels is a test for user (role) labels in comment headers in PRs and issues.
-// It covers a few labels and combinations.
 func TestIssuesCommentLabels(t *testing.T) {
+	user := "user2"
+	repo := "repo1"
+
+	ownerTooltip := "This user is the owner of this repository."
+	authorTooltipPR := "This user is the author of this pull request."
+	authorTooltipIssue := "This user is the author of this issue."
+	contributorTooltip := "This user has previously committed in this repository."
+	newContributorTooltip := "This is the first contribution of this user to the repository."
+
+	// Test pulls
 	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
-		user := "user2"
-		repo := "repo1"
-		compareLink := path.Join(user, repo, "compare", "master...comment-labels")
 		sessionUser1 := loginUser(t, "user1")
 		sessionUser2 := loginUser(t, "user2")
-		sessionUser5 := loginUser(t, "user5")
-
-		ownerTooltip := "This user is the owner of this repository."
-		authorTooltipPR := "This user is the author of this pull request."
-		authorTooltipIssue := "This user is the author of this issue."
-		firstTooltip := "This is the first contribution of this user to the repository."
+		sessionUser11 := loginUser(t, "user11")
 
 		// Open a new PR as user2
-		testEditFileToNewBranch(t, sessionUser2, user, repo, "master", "comment-labels", "README.md", "test of comment labels")
-		sessionUser2.MakeRequest(t, NewRequestWithValues(t, "POST", compareLink,
+		testEditFileToNewBranch(t, sessionUser2, user, repo, "master", "comment-labels", "README.md", "test of comment labels\naline")
+		sessionUser2.MakeRequest(t, NewRequestWithValues(t, "POST", path.Join(user, repo, "compare", "master...comment-labels"),
 			map[string]string{
-				"_csrf": GetCSRF(t, sessionUser2, compareLink),
+				"_csrf": GetCSRF(t, sessionUser2, path.Join(user, repo, "compare", "master...comment-labels")),
 				"title": "Pull used for testing commit labels",
 			},
 		), http.StatusOK)
 
 		// Pull number, expected to be 6
 		testID := "6"
+
 		// Add a few comments
 		// (first: Owner)
-		testEasyLeavePRComment(t, sessionUser2, user, repo, testID, "New comment from user2 on this PR") // Author, Owner
-		testEasyLeavePRComment(t, sessionUser1, user, repo, testID, "New comment from user1 on this PR") // First-time contributor
-		testEasyLeavePRComment(t, sessionUser5, user, repo, testID, "New comment from user5 on this PR") // no labels
+		testEasyLeavePRReviewComment(t, sessionUser2, user, repo, testID, "README.md", "1", "New review comment from user2 on this line", "")
+
+		// Have to fetch reply ID for reviews
+		response := sessionUser2.MakeRequest(t, NewRequest(t, "GET", path.Join(user, repo, "pulls", testID)), http.StatusOK)
+		page := NewHTMLParser(t, response.Body)
+		replyID, _ := page.Find(".comment-form input[name='reply']").Attr("value")
+
+		testEasyLeavePRReviewComment(t, sessionUser2, user, repo, testID, "README.md", "1", "Another review comment from user2 on this line", replyID)
+		testEasyLeavePRComment(t, sessionUser2, user, repo, testID, "New comment from user2 on this PR")   // Author, Owner
+		testEasyLeavePRComment(t, sessionUser1, user, repo, testID, "New comment from user1 on this PR")   // Contributor
+		testEasyLeavePRComment(t, sessionUser11, user, repo, testID, "New comment from user11 on this PR") // First-time contributor
 
 		// Fetch the PR page
-		response := sessionUser2.MakeRequest(t, NewRequest(t, "GET", path.Join(user, repo, "pulls", testID)), http.StatusOK)
+		response = sessionUser2.MakeRequest(t, NewRequest(t, "GET", path.Join(user, repo, "pulls", testID)), http.StatusOK)
+		page = NewHTMLParser(t, response.Body)
+		commentHeads := page.Find(".timeline .comment .comment-header .comment-header-right")
+		assert.EqualValues(t, 6, commentHeads.Length())
+
+		// Test the first comment and it's label "Owner"
+		labels := commentHeads.Eq(0).Find(".role-label")
+		assert.EqualValues(t, 1, labels.Length())
+		testIssueCommentUserLabel(t, labels.Eq(0), "Owner", ownerTooltip)
+
+		// Test the second (review) comment and it's labels "Author" and "Owner"
+		labels = commentHeads.Eq(1).Find(".role-label")
+		assert.EqualValues(t, 2, labels.Length())
+		testIssueCommentUserLabel(t, labels.Eq(0), "Author", authorTooltipPR)
+		testIssueCommentUserLabel(t, labels.Eq(1), "Owner", ownerTooltip)
+
+		// Test the third (review) comment and it's labels "Author" and "Owner"
+		labels = commentHeads.Eq(2).Find(".role-label")
+		assert.EqualValues(t, 2, labels.Length())
+		testIssueCommentUserLabel(t, labels.Eq(0), "Author", authorTooltipPR)
+		testIssueCommentUserLabel(t, labels.Eq(1), "Owner", ownerTooltip)
+
+		// Test the fourth comment and it's labels "Author" and "Owner"
+		labels = commentHeads.Eq(3).Find(".role-label")
+		assert.EqualValues(t, 2, labels.Length())
+		testIssueCommentUserLabel(t, labels.Eq(0), "Author", authorTooltipPR)
+		testIssueCommentUserLabel(t, labels.Eq(1), "Owner", ownerTooltip)
+
+		// Test the fivth comment and it's label "Contributor"
+		labels = commentHeads.Eq(4).Find(".role-label")
+		assert.EqualValues(t, 1, labels.Length())
+		testIssueCommentUserLabel(t, labels.Eq(0), "Contributor", contributorTooltip)
+
+		// Test the sixth comment and it's label "First-time contributor"
+		labels = commentHeads.Eq(5).Find(".role-label")
+		assert.EqualValues(t, 1, labels.Length())
+		testIssueCommentUserLabel(t, labels.Eq(0), "First-time contributor", newContributorTooltip)
+	})
+
+	// Test issues
+	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
+		sessionUser1 := loginUser(t, "user1")
+		sessionUser2 := loginUser(t, "user2")
+		sessionUser5 := loginUser(t, "user5")
+
+		// Open a new issue in the same repo
+		sessionUser2.MakeRequest(t, NewRequestWithValues(t, "POST", path.Join(user, repo, "issues/new"),
+			map[string]string{
+				"_csrf": GetCSRF(t, sessionUser2, path.Join(user, repo)),
+				"title": "Issue used for testing commit labels",
+			},
+		), http.StatusOK)
+
+		// Issue number, expected to be 6
+		testID := "6"
+		// Add a few comments
+		// (first: Owner)
+		testEasyLeaveIssueComment(t, sessionUser2, user, repo, testID, "New comment from user2 on this issue") // Author, Owner
+		testEasyLeaveIssueComment(t, sessionUser1, user, repo, testID, "New comment from user1 on this issue") // Contributor
+		testEasyLeaveIssueComment(t, sessionUser5, user, repo, testID, "New comment from user5 on this issue") // no labels
+
+		// Fetch the issue page
+		response := sessionUser2.MakeRequest(t, NewRequest(t, "GET", path.Join(user, repo, "issues", testID)), http.StatusOK)
 		page := NewHTMLParser(t, response.Body)
 		commentHeads := page.Find(".timeline .comment .comment-header .comment-header-right")
 		assert.EqualValues(t, 4, commentHeads.Length())
@@ -61,51 +133,15 @@ func TestIssuesCommentLabels(t *testing.T) {
 		// Test the second comment and it's labels "Author" and "Owner"
 		labels = commentHeads.Eq(1).Find(".role-label")
 		assert.EqualValues(t, 2, labels.Length())
-		testIssueCommentUserLabel(t, labels.Eq(0), "Author", authorTooltipPR)
-		testIssueCommentUserLabel(t, labels.Eq(1), "Owner", ownerTooltip)
-
-		// Test the third comment and it's label "First-time contributor"
-		labels = commentHeads.Eq(3).Find(".role-label")
-		assert.EqualValues(t, 1, labels.Length())
-		testIssueCommentUserLabel(t, labels.Eq(0), "First-time contributor", firstTooltip)
-
-		// Test the fourth comment and it's lack of labels
-		labels = commentHeads.Eq(4).Find(".role-label")
-		assert.EqualValues(t, 0, labels.Length())
-
-		// Open a new issue in the same repo
-		sessionUser2.MakeRequest(t, NewRequestWithValues(t, "POST", path.Join(user, repo, "issues/new"),
-			map[string]string{
-				"_csrf": GetCSRF(t, sessionUser2, compareLink),
-				"title": "Issue used for testing commit labels",
-			},
-		), http.StatusOK)
-
-		// Issue number, expected to be 7 after the PR
-		testID = "7"
-		// Add a few comments
-		// (first: Owner)
-		testEasyLeaveIssueComment(t, sessionUser2, user, repo, testID, "New comment from user2 on this issue") // Author, Owner
-		testEasyLeaveIssueComment(t, sessionUser5, user, repo, testID, "New comment from user5 on this issue") // no labels
-
-		// Fetch the issue page
-		response = sessionUser2.MakeRequest(t, NewRequest(t, "GET", path.Join(user, repo, "issues", testID)), http.StatusOK)
-		page = NewHTMLParser(t, response.Body)
-		commentHeads = page.Find(".timeline .comment .comment-header .comment-header-right")
-		assert.EqualValues(t, 3, commentHeads.Length())
-
-		// Test the first comment and it's label "Owner"
-		labels = commentHeads.Eq(0).Find(".role-label")
-		assert.EqualValues(t, 1, labels.Length())
-		testIssueCommentUserLabel(t, labels.Eq(0), "Owner", ownerTooltip)
-
-		// Test the second comment and it's labels "Author" and "Owner"
-		labels = commentHeads.Eq(1).Find(".role-label")
-		assert.EqualValues(t, 2, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "Author", authorTooltipIssue)
 		testIssueCommentUserLabel(t, labels.Eq(1), "Owner", ownerTooltip)
 
-		// Test the third comment and it's lack of labels
+		// Test the third comment and it's label "Contributor"
+		labels = commentHeads.Eq(2).Find(".role-label")
+		assert.EqualValues(t, 1, labels.Length())
+		testIssueCommentUserLabel(t, labels.Eq(0), "Contributor", contributorTooltip)
+
+		// Test the fifth comment and it's lack of labels
 		labels = commentHeads.Eq(3).Find(".role-label")
 		assert.EqualValues(t, 0, labels.Length())
 	})
@@ -140,4 +176,22 @@ func testEasyLeavePRComment(t *testing.T, session *TestSession, user, repo, id, 
 		"content": message,
 		"status":  "",
 	}), 200)
+}
+
+// testEasyLeavePRReviewComment is used to add review comments to specific lines of changed files in the diff of the PR.
+func testEasyLeavePRReviewComment(t *testing.T, session *TestSession, user, repo, id, file, line, message, replyID string) {
+	t.Helper()
+	values := map[string]string{
+		"_csrf":         GetCSRF(t, session, path.Join(user, repo, "pulls", id, "files")),
+		"origin":        "diff",
+		"side":          "proposed",
+		"line":          line,
+		"path":          file,
+		"content":       message,
+		"single_review": "true",
+	}
+	if len(replyID) > 0 {
+		values["reply"] = replyID
+	}
+	session.MakeRequest(t, NewRequestWithValues(t, "POST", path.Join(user, repo, "pulls", id, "files/reviews/comments"), values), http.StatusOK)
 }

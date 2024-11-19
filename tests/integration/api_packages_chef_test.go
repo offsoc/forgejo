@@ -35,6 +35,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageChef(t *testing.T) {
@@ -84,7 +85,7 @@ nwIDAQAB
 -----END PUBLIC KEY-----`
 
 	err := user_model.SetUserSetting(db.DefaultContext, user.ID, chef_module.SettingPublicPem, pubPem)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	t.Run("Authenticate", func(t *testing.T) {
 		auth := &chef_router.Auth{}
@@ -95,7 +96,7 @@ nwIDAQAB
 			req := NewRequest(t, "POST", "/dummy")
 			u, err := auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 
 		t.Run("NotExistingUser", func(t *testing.T) {
@@ -105,7 +106,7 @@ nwIDAQAB
 				SetHeader("X-Ops-Userid", "not-existing-user")
 			u, err := auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.Error(t, err)
+			require.Error(t, err)
 		})
 
 		t.Run("Timestamp", func(t *testing.T) {
@@ -115,12 +116,12 @@ nwIDAQAB
 				SetHeader("X-Ops-Userid", user.Name)
 			u, err := auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.Error(t, err)
+			require.Error(t, err)
 
 			req.SetHeader("X-Ops-Timestamp", "2023-01-01T00:00:00Z")
 			u, err = auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.Error(t, err)
+			require.Error(t, err)
 		})
 
 		t.Run("SigningVersion", func(t *testing.T) {
@@ -131,27 +132,27 @@ nwIDAQAB
 				SetHeader("X-Ops-Timestamp", time.Now().UTC().Format(time.RFC3339))
 			u, err := auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.Error(t, err)
+			require.Error(t, err)
 
 			req.SetHeader("X-Ops-Sign", "version=none")
 			u, err = auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.Error(t, err)
+			require.Error(t, err)
 
 			req.SetHeader("X-Ops-Sign", "version=1.4")
 			u, err = auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.Error(t, err)
+			require.Error(t, err)
 
 			req.SetHeader("X-Ops-Sign", "version=1.0;algorithm=sha2")
 			u, err = auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.Error(t, err)
+			require.Error(t, err)
 
 			req.SetHeader("X-Ops-Sign", "version=1.0;algorithm=sha256")
 			u, err = auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.Error(t, err)
+			require.Error(t, err)
 		})
 
 		t.Run("SignedHeaders", func(t *testing.T) {
@@ -167,7 +168,7 @@ nwIDAQAB
 				SetHeader("X-Ops-Authorization-4", "dummy")
 			u, err := auth.Verify(req.Request, nil, nil, nil)
 			assert.Nil(t, u)
-			assert.Error(t, err)
+			require.Error(t, err)
 
 			signRequest := func(rw *RequestWrapper, version string) {
 				req := rw.Request
@@ -258,7 +259,7 @@ nwIDAQAB
 					signRequest(req, v)
 					u, err = auth.Verify(req.Request, nil, nil, nil)
 					assert.NotNil(t, u)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 				})
 			}
 		})
@@ -307,18 +308,18 @@ nwIDAQAB
 		uploadPackage(t, packageVersion, http.StatusCreated)
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeChef)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 
 		pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, pd.SemVer)
 		assert.IsType(t, &chef_module.Metadata{}, pd.Metadata)
 		assert.Equal(t, packageName, pd.Package.Name)
 		assert.Equal(t, packageVersion, pd.Version.Version)
 
 		pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pfs, 1)
 		assert.Equal(t, fmt.Sprintf("%s.tar.gz", packageVersion), pfs[0].Name)
 		assert.True(t, pfs[0].IsLead)
@@ -540,7 +541,7 @@ nwIDAQAB
 
 			pv, err := packages.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages.TypeChef, packageName, "1.0.2")
 			assert.Nil(t, pv)
-			assert.Error(t, err)
+			require.Error(t, err)
 		})
 
 		t.Run("Package", func(t *testing.T) {
@@ -554,7 +555,7 @@ nwIDAQAB
 			MakeRequest(t, req, http.StatusOK)
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeChef)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Empty(t, pvs)
 		})
 	})

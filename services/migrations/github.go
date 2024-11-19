@@ -20,7 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/proxy"
 	"code.gitea.io/gitea/modules/structs"
 
-	"github.com/google/go-github/v57/github"
+	"github.com/google/go-github/v64/github"
 	"golang.org/x/oauth2"
 )
 
@@ -43,6 +43,11 @@ func (f *GithubDownloaderV3Factory) New(ctx context.Context, opts base.MigrateOp
 	u, err := url.Parse(opts.CloneAddr)
 	if err != nil {
 		return nil, err
+	}
+
+	// some users are using the github redirect url for migration
+	if u.Host == "www.github.com" {
+		u.Host = "github.com"
 	}
 
 	baseURL := u.Scheme + "://" + u.Host
@@ -737,6 +742,7 @@ func (g *GithubDownloaderV3) GetPullRequests(page, perPage int) ([]*base.PullReq
 			PatchURL:     pr.GetPatchURL(), // see below for SECURITY related issues here
 			Reactions:    reactions,
 			ForeignIndex: int64(*pr.Number),
+			IsDraft:      pr.GetDraft(),
 		})
 
 		// SECURITY: Ensure that the PR is safe

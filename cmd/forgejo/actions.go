@@ -86,6 +86,11 @@ func SubcmdActionsRegister(ctx context.Context) *cli.Command {
 				Value: "",
 				Usage: "comma separated list of labels supported by the runner (e.g. docker,ubuntu-latest,self-hosted)  (not required since v1.21)",
 			},
+			&cli.BoolFlag{
+				Name:  "keep-labels",
+				Value: false,
+				Usage: "do not affect the labels when updating an existing runner",
+			},
 			&cli.StringFlag{
 				Name:  "name",
 				Value: "runner",
@@ -133,6 +138,17 @@ func validateSecret(secret string) error {
 	return nil
 }
 
+func getLabels(cliCtx *cli.Context) (*[]string, error) {
+	if !cliCtx.Bool("keep-labels") {
+		lblValue := strings.Split(cliCtx.String("labels"), ",")
+		return &lblValue, nil
+	}
+	if cliCtx.String("labels") != "" {
+		return nil, fmt.Errorf("--labels and --keep-labels should not be used together")
+	}
+	return nil, nil
+}
+
 func RunRegister(ctx context.Context, cliCtx *cli.Context) error {
 	var cancel context.CancelFunc
 	if !ContextGetNoInit(ctx) {
@@ -153,9 +169,12 @@ func RunRegister(ctx context.Context, cliCtx *cli.Context) error {
 		return err
 	}
 	scope := cliCtx.String("scope")
-	labels := cliCtx.String("labels")
 	name := cliCtx.String("name")
 	version := cliCtx.String("version")
+	labels, err := getLabels(cliCtx)
+	if err != nil {
+		return err
+	}
 
 	//
 	// There are two kinds of tokens
@@ -179,7 +198,7 @@ func RunRegister(ctx context.Context, cliCtx *cli.Context) error {
 		return err
 	}
 
-	runner, err := actions_model.RegisterRunner(ctx, owner, repo, secret, strings.Split(labels, ","), name, version)
+	runner, err := actions_model.RegisterRunner(ctx, owner, repo, secret, labels, name, version)
 	if err != nil {
 		return fmt.Errorf("error while registering runner: %v", err)
 	}

@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBasicTransferAdapterName(t *testing.T) {
@@ -39,7 +40,7 @@ func TestBasicTransferAdapter(t *testing.T) {
 			assert.Equal(t, "application/octet-stream", req.Header.Get("Content-Type"))
 
 			b, err := io.ReadAll(req.Body)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, "dummy", string(b))
 
 			return &http.Response{StatusCode: http.StatusOK}
@@ -49,7 +50,7 @@ func TestBasicTransferAdapter(t *testing.T) {
 
 			var vp Pointer
 			err := json.NewDecoder(req.Body).Decode(&vp)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, p.Oid, vp.Oid)
 			assert.Equal(t, p.Size, vp.Size)
 
@@ -96,9 +97,9 @@ func TestBasicTransferAdapter(t *testing.T) {
 		for n, c := range cases {
 			_, err := a.Download(context.Background(), c.link)
 			if len(c.expectederror) > 0 {
-				assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
+				assert.Contains(t, err.Error(), c.expectederror, "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 			} else {
-				assert.NoError(t, err, "case %d", n)
+				require.NoError(t, err, "case %d", n)
 			}
 		}
 	})
@@ -129,9 +130,9 @@ func TestBasicTransferAdapter(t *testing.T) {
 		for n, c := range cases {
 			err := a.Upload(context.Background(), c.link, p, bytes.NewBufferString("dummy"))
 			if len(c.expectederror) > 0 {
-				assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
+				assert.Contains(t, err.Error(), c.expectederror, "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 			} else {
-				assert.NoError(t, err, "case %d", n)
+				require.NoError(t, err, "case %d", n)
 			}
 		}
 	})
@@ -162,9 +163,9 @@ func TestBasicTransferAdapter(t *testing.T) {
 		for n, c := range cases {
 			err := a.Verify(context.Background(), c.link, p)
 			if len(c.expectederror) > 0 {
-				assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
+				assert.Contains(t, err.Error(), c.expectederror, "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
 			} else {
-				assert.NoError(t, err, "case %d", n)
+				require.NoError(t, err, "case %d", n)
 			}
 		}
 	})

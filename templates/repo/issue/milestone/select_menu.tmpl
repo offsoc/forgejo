@@ -1,3 +1,4 @@
+{{$useHTMX := not .NewIssuePage}}
 {{if or .OpenMilestones .ClosedMilestones}}
 	<div class="ui icon search input">
 		<i class="icon">{{svg "octicon-search" 16}}</i>
@@ -5,7 +6,7 @@
 	</div>
 	<div class="divider"></div>
 {{end}}
-<div class="no-select item" hx-post="{{$.RepoLink}}/issues/milestone?issue_ids={{$.Issue.ID}}&htmx=true">{{ctx.Locale.Tr "repo.issues.new.clear_milestone"}}</div>
+<div class="no-select item"{{if $useHTMX}} hx-post="{{$.RepoLink}}/issues/milestone?issue_ids={{$.Issue.ID}}&htmx=true"{{end}}>{{ctx.Locale.Tr "repo.issues.new.clear_milestone"}}</div>
 {{if and (not .OpenMilestones) (not .ClosedMilestones)}}
 	<div class="disabled item">
 		{{ctx.Locale.Tr "repo.issues.new.no_items"}}
@@ -17,7 +18,7 @@
 			{{ctx.Locale.Tr "repo.issues.new.open_milestone"}}
 		</div>
 		{{range .OpenMilestones}}
-			<a class="item" hx-post="{{$.RepoLink}}/issues/milestone?id={{.ID}}&issue_ids={{$.Issue.ID}}&htmx=true">
+			<a class="item"{{if $useHTMX}} hx-post="{{$.RepoLink}}/issues/milestone?id={{.ID}}&issue_ids={{$.Issue.ID}}&htmx=true"{{else}} data-id="{{.ID}}" data-href="{{$.RepoLink}}/issues?milestone={{.ID}}"{{end}}>
 				{{svg "octicon-milestone" 16 "tw-mr-1"}}
 				{{.Name}}
 			</a>
@@ -29,7 +30,7 @@
 			{{ctx.Locale.Tr "repo.issues.new.closed_milestone"}}
 		</div>
 		{{range .ClosedMilestones}}
-			<a class="item" hx-post="{{$.RepoLink}}/issues/milestone?id={{.ID}}&issue_ids={{$.Issue.ID}}&htmx=true">
+			<a class="item"{{if $useHTMX}} hx-post="{{$.RepoLink}}/issues/milestone?id={{.ID}}&issue_ids={{$.Issue.ID}}&htmx=true"{{else}} data-id="{{.ID}}" data-href="{{$.RepoLink}}/issues?milestone={{.ID}}"{{end}}>
 				{{svg "octicon-milestone" 16 "tw-mr-1"}}
 				{{.Name}}
 			</a>

@@ -18,8 +18,10 @@ import (
 	_ "code.gitea.io/gitea/models"
 	_ "code.gitea.io/gitea/models/actions"
 	_ "code.gitea.io/gitea/models/activities"
+	_ "code.gitea.io/gitea/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -30,7 +32,7 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 	t.Run(name, func(t *testing.T) {
 		var repoID int64 = 1
 		err := index(git.DefaultContext, indexer, repoID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		keywords := []struct {
 			RepoIDs []int64
 			Keyword string
@@ -86,7 +88,7 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 					},
 					IsKeywordFuzzy: true,
 				})
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Len(t, kw.IDs, int(total))
 				assert.Len(t, langs, kw.Langs)
 
@@ -99,7 +101,7 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 			})
 		}
 
-		assert.NoError(t, indexer.Delete(context.Background(), repoID))
+		require.NoError(t, indexer.Delete(context.Background(), repoID))
 	})
 }
 
@@ -118,7 +120,7 @@ func TestBleveIndexAndSearch(t *testing.T) {
 	}
 	defer idx.Close()
 
-	testIndexer("beleve", t, idx)
+	testIndexer("bleve", t, idx)
 }
 
 func TestESIndexAndSearch(t *testing.T) {

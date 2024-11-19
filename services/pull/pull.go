@@ -356,43 +356,7 @@ func TestPullRequest(ctx context.Context, doer *user_model.User, repoID, olderTh
 		}
 		if err == nil {
 			for _, pr := range prs {
-				objectFormat := git.ObjectFormatFromName(pr.BaseRepo.ObjectFormatName)
-				if newCommitID != "" && newCommitID != objectFormat.EmptyObjectID().String() {
-					changed, err := checkIfPRContentChanged(ctx, pr, oldCommitID, newCommitID)
-					if err != nil {
-						log.Error("checkIfPRContentChanged: %v", err)
-					}
-					if changed {
-						// Mark old reviews as stale if diff to mergebase has changed
-						if err := issues_model.MarkReviewsAsStale(ctx, pr.IssueID); err != nil {
-							log.Error("MarkReviewsAsStale: %v", err)
-						}
-
-						// dismiss all approval reviews if protected branch rule item enabled.
-						pb, err := git_model.GetFirstMatchProtectedBranchRule(ctx, pr.BaseRepoID, pr.BaseBranch)
-						if err != nil {
-							log.Error("GetFirstMatchProtectedBranchRule: %v", err)
-						}
-						if pb != nil && pb.DismissStaleApprovals {
-							if err := DismissApprovalReviews(ctx, doer, pr); err != nil {
-								log.Error("DismissApprovalReviews: %v", err)
-							}
-						}
-					}
-					if err := issues_model.MarkReviewsAsNotStale(ctx, pr.IssueID, newCommitID); err != nil {
-						log.Error("MarkReviewsAsNotStale: %v", err)
-					}
-					divergence, err := GetDiverging(ctx, pr)
-					if err != nil {
-						log.Error("GetDiverging: %v", err)
-					} else {
-						err = pr.UpdateCommitDivergence(ctx, divergence.Ahead, divergence.Behind)
-						if err != nil {
-							log.Error("UpdateCommitDivergence: %v", err)
-						}
-					}
-				}
-
+				ValidatePullRequest(ctx, pr, newCommitID, oldCommitID, doer)
 				notify_service.PullRequestSynchronized(ctx, doer, pr)
 			}
 		}
@@ -419,6 +383,46 @@ func TestPullRequest(ctx context.Context, doer *user_model.User, repoID, olderTh
 			}
 		}
 		AddToTaskQueue(ctx, pr)
+	}
+}
+
+// Mark old reviews as stale if diff to mergebase has changed.
+// Dismiss all approval reviews if protected branch rule item enabled.
+// Update commit divergence.
+func ValidatePullRequest(ctx context.Context, pr *issues_model.PullRequest, newCommitID, oldCommitID string, doer *user_model.User) {
+	objectFormat := git.ObjectFormatFromName(pr.BaseRepo.ObjectFormatName)
+	if newCommitID != "" && newCommitID != objectFormat.EmptyObjectID().String() {
+		changed, err := checkIfPRContentChanged(ctx, pr, oldCommitID, newCommitID)
+		if err != nil {
+			log.Error("checkIfPRContentChanged: %v", err)
+		}
+		if changed {
+			if err := issues_model.MarkReviewsAsStale(ctx, pr.IssueID); err != nil {
+				log.Error("MarkReviewsAsStale: %v", err)
+			}
+
+			pb, err := git_model.GetFirstMatchProtectedBranchRule(ctx, pr.BaseRepoID, pr.BaseBranch)
+			if err != nil {
+				log.Error("GetFirstMatchProtectedBranchRule: %v", err)
+			}
+			if pb != nil && pb.DismissStaleApprovals {
+				if err := DismissApprovalReviews(ctx, doer, pr); err != nil {
+					log.Error("DismissApprovalReviews: %v", err)
+				}
+			}
+		}
+		if err := issues_model.MarkReviewsAsNotStale(ctx, pr.IssueID, newCommitID); err != nil {
+			log.Error("MarkReviewsAsNotStale: %v", err)
+		}
+		divergence, err := GetDiverging(ctx, pr)
+		if err != nil {
+			log.Error("GetDiverging: %v", err)
+		} else {
+			err = pr.UpdateCommitDivergence(ctx, divergence.Ahead, divergence.Behind)
+			if err != nil {
+				log.Error("UpdateCommitDivergence: %v", err)
+			}
+		}
 	}
 }
 
@@ -962,6 +966,8 @@ type CommitInfo struct {
 }
 
 // GetPullCommits returns all commits on given pull request and the last review commit sha
+// Attention: The last review commit sha must be from the latest review whose commit id is not empty.
+// So the type of the latest review cannot be "ReviewTypeRequest".
 func GetPullCommits(ctx *gitea_context.Context, issue *issues_model.Issue) ([]CommitInfo, string, error) {
 	pull := issue.PullRequest
 
@@ -1007,7 +1013,11 @@ func GetPullCommits(ctx *gitea_context.Context, issue *issues_model.Issue) ([]Co
 		lastreview, err := issues_model.FindLatestReviews(ctx, issues_model.FindReviewOptions{
 			IssueID:    issue.ID,
 			ReviewerID: ctx.Doer.ID,
-			Type:       issues_model.ReviewTypeUnknown,
+			Types: []issues_model.ReviewType{
+				issues_model.ReviewTypeApprove,
+				issues_model.ReviewTypeComment,
+				issues_model.ReviewTypeReject,
+			},
 		})
 
 		if err != nil && !issues_model.IsErrReviewNotExist(err) {

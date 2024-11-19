@@ -39,11 +39,11 @@ func (m *Manager) CloseRedisClient(connection string) error {
 	for _, name := range client.name {
 		delete(m.RedisConnections, name)
 	}
-	return client.UniversalClient.Close()
+	return client.RedisClient.Close()
 }
 
 // GetRedisClient gets a redis client for a particular connection
-func (m *Manager) GetRedisClient(connection string) (client redis.UniversalClient) {
+func (m *Manager) GetRedisClient(connection string) (client RedisClient) {
 	// Because we want associate any goroutines created by this call to the main nosqldb context we need to
 	// wrap this in a goroutine labelled with the nosqldb context
 	done := make(chan struct{})
@@ -67,7 +67,7 @@ func (m *Manager) GetRedisClient(connection string) (client redis.UniversalClien
 	return client
 }
 
-func (m *Manager) getRedisClient(connection string) redis.UniversalClient {
+func (m *Manager) getRedisClient(connection string) RedisClient {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	client, ok := m.RedisConnections[connection]
@@ -102,24 +102,24 @@ func (m *Manager) getRedisClient(connection string) redis.UniversalClient {
 		opts.TLSConfig = tlsConfig
 		fallthrough
 	case "redis+sentinel":
-		client.UniversalClient = redis.NewFailoverClient(opts.Failover())
+		client.RedisClient = redis.NewFailoverClient(opts.Failover())
 	case "redis+clusters":
 		fallthrough
 	case "rediss+cluster":
 		opts.TLSConfig = tlsConfig
 		fallthrough
 	case "redis+cluster":
-		client.UniversalClient = redis.NewClusterClient(opts.Cluster())
+		client.RedisClient = redis.NewClusterClient(opts.Cluster())
 	case "redis+socket":
 		simpleOpts := opts.Simple()
 		simpleOpts.Network = "unix"
 		simpleOpts.Addr = path.Join(uri.Host, uri.Path)
-		client.UniversalClient = redis.NewClient(simpleOpts)
+		client.RedisClient = redis.NewClient(simpleOpts)
 	case "rediss":
 		opts.TLSConfig = tlsConfig
 		fallthrough
 	case "redis":
-		client.UniversalClient = redis.NewClient(opts.Simple())
+		client.RedisClient = redis.NewClient(opts.Simple())
 	default:
 		return nil
 	}

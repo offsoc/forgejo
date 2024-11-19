@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIListLabelTemplates(t *testing.T) {
@@ -50,7 +51,7 @@ func TestAPIGetLabelTemplateInfo(t *testing.T) {
 	DecodeJSON(t, resp, &templateInfo)
 
 	labels, err := repo_module.LoadTemplateLabelsByDisplayName(templateName)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	for i := range labels {
 		assert.Equal(t, strings.TrimLeft(labels[i].Color, "#"), templateInfo[i].Color)

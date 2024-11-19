@@ -8,12 +8,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRunWithContextStd(t *testing.T) {
 	cmd := NewCommand(context.Background(), "--version")
 	stdout, stderr, err := cmd.RunStdString(&RunOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, stderr)
 	assert.Contains(t, stdout, "git version")
 
@@ -28,16 +29,16 @@ func TestRunWithContextStd(t *testing.T) {
 
 	cmd = NewCommand(context.Background())
 	cmd.AddDynamicArguments("-test")
-	assert.ErrorIs(t, cmd.Run(&RunOpts{}), ErrBrokenCommand)
+	require.ErrorIs(t, cmd.Run(&RunOpts{}), ErrBrokenCommand)
 
 	cmd = NewCommand(context.Background())
 	cmd.AddDynamicArguments("--test")
-	assert.ErrorIs(t, cmd.Run(&RunOpts{}), ErrBrokenCommand)
+	require.ErrorIs(t, cmd.Run(&RunOpts{}), ErrBrokenCommand)
 
 	subCmd := "version"
 	cmd = NewCommand(context.Background()).AddDynamicArguments(subCmd) // for test purpose only, the sub-command should never be dynamic for production
 	stdout, stderr, err = cmd.RunStdString(&RunOpts{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, stderr)
 	assert.Contains(t, stdout, "git version")
 }
@@ -59,4 +60,11 @@ func TestCommandString(t *testing.T) {
 
 	cmd = NewCommandContextNoGlobals(context.Background(), "url: https://a:b@c/")
 	assert.EqualValues(t, cmd.prog+` "url: https://sanitized-credential@c/"`, cmd.toString(true))
+}
+
+func TestGrepOnlyFunction(t *testing.T) {
+	cmd := NewCommand(context.Background(), "anything-but-grep")
+	assert.Panics(t, func() {
+		cmd.AddGitGrepExpression("whatever")
+	})
 }

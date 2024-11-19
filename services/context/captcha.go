@@ -16,23 +16,46 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/turnstile"
 
-	"gitea.com/go-chi/captcha"
+	mc "code.forgejo.org/go-chi/cache"
+	"code.forgejo.org/go-chi/captcha"
 )
 
 var (
 	imageCaptchaOnce sync.Once
-	cpt              *captcha.Captcha
+	imageCachePrefix = "captcha:"
 )
 
-// GetImageCaptcha returns global image captcha
-func GetImageCaptcha() *captcha.Captcha {
+type imageCaptchaStore struct {
+	c mc.Cache
+}
+
+func (c *imageCaptchaStore) Set(id string, digits []byte) {
+	if err := c.c.Put(imageCachePrefix+id, string(digits), int64(captcha.Expiration.Seconds())); err != nil {
+		log.Error("Couldn't store captcha cache for %q: %v", id, err)
+	}
+}
+
+func (c *imageCaptchaStore) Get(id string, clear bool) (digits []byte) {
+	val, ok := c.c.Get(imageCachePrefix + id).(string)
+	if !ok {
+		return digits
+	}
+
+	if clear {
+		if err := c.c.Delete(imageCachePrefix + id); err != nil {
+			log.Error("Couldn't delete captcha cache for %q: %v", id, err)
+		}
+	}
+
+	return []byte(val)
+}
+
+// GetImageCaptcha returns image captcha ID.
+func GetImageCaptcha() string {
 	imageCaptchaOnce.Do(func() {
-		cpt = captcha.NewCaptcha(captcha.Options{
-			SubURL: setting.AppSubURL,
-		})
-		cpt.Store = cache.GetCache()
+		captcha.SetCustomStore(&imageCaptchaStore{c: cache.GetCache()})
 	})
-	return cpt
+	return captcha.New()
 }
 
 // SetCaptchaData sets common captcha data
@@ -52,6 +75,8 @@ func SetCaptchaData(ctx *Context) {
 }
 
 const (
+	imgCaptchaIDField        = "img-captcha-id"
+	imgCaptchaResponseField  = "img-captcha-response"
 	gRecaptchaResponseField  = "g-recaptcha-response"
 	hCaptchaResponseField    = "h-captcha-response"
 	mCaptchaResponseField    = "m-captcha-response"
@@ -69,7 +94,7 @@ func VerifyCaptcha(ctx *Context, tpl base.TplName, form any) {
 	var err error
 	switch setting.Service.CaptchaType {
 	case setting.ImageCaptcha:
-		valid = GetImageCaptcha().VerifyReq(ctx.Req)
+		valid = captcha.VerifyString(ctx.Req.Form.Get(imgCaptchaIDField), ctx.Req.Form.Get(imgCaptchaResponseField))
 	case setting.ReCaptcha:
 		valid, err = recaptcha.Verify(ctx, ctx.Req.Form.Get(gRecaptchaResponseField))
 	case setting.HCaptcha:

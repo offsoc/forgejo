@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCSVDiff(t *testing.T) {
@@ -212,7 +213,7 @@ c,d,e`,
 		}
 
 		result, err := CreateCsvDiff(diff.Files[0], baseReader, headReader)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, result, 1, "case %d: should be one section", n)
 
 		section := result[0]

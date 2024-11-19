@@ -13,20 +13,21 @@ import (
 	"code.gitea.io/gitea/modules/setting/config"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const gravatarSource = "https://secure.gravatar.com/avatar/"
 
 func disableGravatar(t *testing.T) {
 	err := system_model.SetSettings(db.DefaultContext, map[string]string{setting.Config().Picture.EnableFederatedAvatar.DynKey(): "false"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = system_model.SetSettings(db.DefaultContext, map[string]string{setting.Config().Picture.DisableGravatar.DynKey(): "true"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func enableGravatar(t *testing.T) {
 	err := system_model.SetSettings(db.DefaultContext, map[string]string{setting.Config().Picture.DisableGravatar.DynKey(): "false"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	setting.GravatarSource = gravatarSource
 }
 

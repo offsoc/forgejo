@@ -23,6 +23,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIUserReposNotLogin(t *testing.T) {
@@ -225,7 +226,7 @@ func TestAPISearchRepo(t *testing.T) {
 					for _, repo := range body.Data {
 						r := getRepo(t, repo.ID)
 						hasAccess, err := access_model.HasAccess(db.DefaultContext, userID, r)
-						assert.NoError(t, err, "Error when checking if User: %d has access to %s: %v", userID, repo.FullName, err)
+						require.NoError(t, err, "Error when checking if User: %d has access to %s: %v", userID, repo.FullName, err)
 						assert.True(t, hasAccess, "User: %d does not have access to %s", userID, repo.FullName)
 
 						assert.NotEmpty(t, repo.Name)
@@ -431,7 +432,7 @@ func testAPIRepoMigrateConflict(t *testing.T, u *url.URL) {
 		t.Run("CreateRepo", doAPICreateRepository(httpContext, false, git.Sha1ObjectFormat)) // FIXME: use forEachObjectFormat
 
 		user, err := user_model.GetUserByName(db.DefaultContext, httpContext.Username)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		userID := user.ID
 
 		cloneURL := "https://github.com/go-gitea/test_repo.git"

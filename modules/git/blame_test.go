@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReadingBlameOutput(t *testing.T) {
@@ -16,11 +17,11 @@ func TestReadingBlameOutput(t *testing.T) {
 
 	t.Run("Without .git-blame-ignore-revs", func(t *testing.T) {
 		repo, err := OpenRepository(ctx, "./tests/repos/repo5_pulls")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer repo.Close()
 
 		commit, err := repo.GetCommit("f32b0a9dfd09a60f616f29158f772cedd89942d2")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		parts := []*BlamePart{
 			{
@@ -40,7 +41,7 @@ func TestReadingBlameOutput(t *testing.T) {
 
 		for _, bypass := range []bool{false, true} {
 			blameReader, err := CreateBlameReader(ctx, Sha1ObjectFormat, "./tests/repos/repo5_pulls", commit, "README.md", bypass)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, blameReader)
 			defer blameReader.Close()
 
@@ -48,20 +49,20 @@ func TestReadingBlameOutput(t *testing.T) {
 
 			for _, part := range parts {
 				actualPart, err := blameReader.NextPart()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, part, actualPart)
 			}
 
 			// make sure all parts have been read
 			actualPart, err := blameReader.NextPart()
 			assert.Nil(t, actualPart)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}
 	})
 
 	t.Run("With .git-blame-ignore-revs", func(t *testing.T) {
 		repo, err := OpenRepository(ctx, "./tests/repos/repo6_blame")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer repo.Close()
 
 		full := []*BlamePart{
@@ -119,13 +120,13 @@ func TestReadingBlameOutput(t *testing.T) {
 		}
 
 		objectFormat, err := repo.GetObjectFormat()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		for _, c := range cases {
 			commit, err := repo.GetCommit(c.CommitID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			blameReader, err := CreateBlameReader(ctx, objectFormat, "./tests/repos/repo6_blame", commit, "blame.txt", c.Bypass)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, blameReader)
 			defer blameReader.Close()
 
@@ -133,14 +134,14 @@ func TestReadingBlameOutput(t *testing.T) {
 
 			for _, part := range c.Parts {
 				actualPart, err := blameReader.NextPart()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, part, actualPart)
 			}
 
 			// make sure all parts have been read
 			actualPart, err := blameReader.NextPart()
 			assert.Nil(t, actualPart)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}
 	})
 }

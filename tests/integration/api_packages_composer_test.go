@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageComposer(t *testing.T) {
@@ -36,6 +37,7 @@ func TestPackageComposer(t *testing.T) {
 	packageType := "composer-plugin"
 	packageAuthor := "Gitea Authors"
 	packageLicense := "MIT"
+	packageBin := "./bin/script"
 
 	var buf bytes.Buffer
 	archive := zip.NewWriter(&buf)
@@ -49,6 +51,9 @@ func TestPackageComposer(t *testing.T) {
 			{
 				"name": "` + packageAuthor + `"
 			}
+		],
+		"bin": [
+			"` + packageBin + `"
 		]
 	}`))
 	archive.Close()
@@ -90,24 +95,24 @@ func TestPackageComposer(t *testing.T) {
 			MakeRequest(t, req, http.StatusCreated)
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeComposer)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1)
 
 			pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, pd.SemVer)
 			assert.IsType(t, &composer_module.Metadata{}, pd.Metadata)
 			assert.Equal(t, packageName, pd.Package.Name)
 			assert.Equal(t, packageVersion, pd.Version.Version)
 
 			pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pfs, 1)
 			assert.Equal(t, fmt.Sprintf("%s-%s.%s.zip", vendorName, projectName, packageVersion), pfs[0].Name)
 			assert.True(t, pfs[0].IsLead)
 
 			pb, err := packages.GetBlobByID(db.DefaultContext, pfs[0].BlobID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, int64(len(content)), pb.Size)
 
 			req = NewRequestWithBody(t, "PUT", uploadURL, bytes.NewReader(content)).
@@ -120,12 +125,12 @@ func TestPackageComposer(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeComposer)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 		assert.Equal(t, int64(0), pvs[0].DownloadCount)
 
 		pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pfs, 1)
 
 		req := NewRequest(t, "GET", fmt.Sprintf("%s/files/%s/%s/%s", url, neturl.PathEscape(packageName), neturl.PathEscape(pvs[0].LowerVersion), neturl.PathEscape(pfs[0].LowerName))).
@@ -135,7 +140,7 @@ func TestPackageComposer(t *testing.T) {
 		assert.Equal(t, content, resp.Body.Bytes())
 
 		pvs, err = packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeComposer)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pvs, 1)
 		assert.Equal(t, int64(1), pvs[0].DownloadCount)
 	})
@@ -210,6 +215,8 @@ func TestPackageComposer(t *testing.T) {
 		assert.Len(t, pkgs[0].Authors, 1)
 		assert.Equal(t, packageAuthor, pkgs[0].Authors[0].Name)
 		assert.Equal(t, "zip", pkgs[0].Dist.Type)
-		assert.Equal(t, "7b40bfd6da811b2b78deec1e944f156dbb2c747b", pkgs[0].Dist.Checksum)
+		assert.Equal(t, "4f5fa464c3cb808a1df191dbf6cb75363f8b7072", pkgs[0].Dist.Checksum)
+		assert.Len(t, pkgs[0].Bin, 1)
+		assert.Equal(t, packageBin, pkgs[0].Bin[0])
 	})
 }

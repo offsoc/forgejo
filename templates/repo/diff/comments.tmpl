@@ -1,6 +1,6 @@
 {{range .comments}}
 
-{{$createdStr:= TimeSinceUnix .CreatedUnix ctx.Locale}}
+{{$createdStr:= DateUtils.TimeSince .CreatedUnix}}
 <div class="comment" id="{{.HashTag}}">
 	{{if .OriginalAuthor}}
 		<span class="avatar">{{ctx.AvatarUtils.Avatar nil}}</span>
@@ -53,7 +53,7 @@
 			</div>
 		</div>
 		<div class="ui attached segment comment-body">
-			<div class="render-content markup" {{if or $.Permission.IsAdmin $.HasIssuesOrPullsWritePermission (and $.root.IsSigned (eq $.root.SignedUserID .PosterID))}}data-can-edit="true"{{end}}>
+			<div id="issuecomment-{{.ID}}-content" class="render-content markup" {{if or $.Permission.IsAdmin $.HasIssuesOrPullsWritePermission (and $.root.IsSigned (eq $.root.SignedUserID .PosterID))}}data-can-edit="true"{{end}}>
 			{{if .RenderedContent}}
 				{{.RenderedContent}}
 			{{else}}

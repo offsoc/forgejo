@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLayered(t *testing.T) {
@@ -19,10 +20,10 @@ func TestLayered(t *testing.T) {
 	dir2 := filepath.Join(dir, "l2")
 
 	mkdir := func(elems ...string) {
-		assert.NoError(t, os.MkdirAll(filepath.Join(elems...), 0o755))
+		require.NoError(t, os.MkdirAll(filepath.Join(elems...), 0o755))
 	}
 	write := func(content string, elems ...string) {
-		assert.NoError(t, os.WriteFile(filepath.Join(elems...), []byte(content), 0o644))
+		require.NoError(t, os.WriteFile(filepath.Join(elems...), []byte(content), 0o644))
 	}
 
 	// d1 & f1: only in "l1"; d2 & f2: only in "l2"
@@ -49,18 +50,18 @@ func TestLayered(t *testing.T) {
 	assets := Layered(Local("l1", dir1), Local("l2", dir2))
 
 	f, err := assets.Open("f1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	bs, err := io.ReadAll(f)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, "f1", string(bs))
 	_ = f.Close()
 
 	assertRead := func(expected string, expectedErr error, elems ...string) {
 		bs, err := assets.ReadFile(elems...)
 		if err != nil {
-			assert.ErrorAs(t, err, &expectedErr)
+			require.ErrorIs(t, err, expectedErr)
 		} else {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, expected, string(bs))
 		}
 	}
@@ -75,27 +76,27 @@ func TestLayered(t *testing.T) {
 	assertRead("", fs.ErrNotExist, "no-such")
 
 	files, err := assets.ListFiles(".", true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, []string{"f1", "f2", "fa"}, files)
 
 	files, err = assets.ListFiles(".", false)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, []string{"d1", "d2", "da"}, files)
 
 	files, err = assets.ListFiles(".")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, []string{"d1", "d2", "da", "f1", "f2", "fa"}, files)
 
 	files, err = assets.ListAllFiles(".", true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, []string{"d1/f", "d2/f", "da/f", "f1", "f2", "fa"}, files)
 
 	files, err = assets.ListAllFiles(".", false)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, []string{"d1", "d2", "da", "da/sub1", "da/sub2"}, files)
 
 	files, err = assets.ListAllFiles(".")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, []string{
 		"d1", "d1/f",
 		"d2", "d2/f",

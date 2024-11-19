@@ -22,7 +22,7 @@ import (
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/mailer"
 
-	"gitea.com/go-chi/session"
+	"code.forgejo.org/go-chi/session"
 )
 
 const (

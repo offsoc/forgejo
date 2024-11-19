@@ -12,10 +12,11 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepository_WikiCloneLink(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	cloneLink := repo.WikiCloneLink()
@@ -24,13 +25,13 @@ func TestRepository_WikiCloneLink(t *testing.T) {
 }
 
 func TestWikiPath(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	expected := filepath.Join(setting.RepoRootPath, "user2/repo1.wiki.git")
 	assert.Equal(t, expected, repo_model.WikiPath("user2", "repo1"))
 }
 
 func TestRepository_WikiPath(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	expected := filepath.Join(setting.RepoRootPath, "user2/repo1.wiki.git")
 	assert.Equal(t, expected, repo.WikiPath())

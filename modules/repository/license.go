@@ -98,8 +98,7 @@ func getLicensePlaceholder(name string) *licensePlaceholder {
 
 	// Some special placeholders for specific licenses.
 	// It's unsafe to apply them to all licenses.
-	switch name {
-	case "0BSD":
+	if name == "0BSD" {
 		return &licensePlaceholder{
 			Owner:     []string{"AUTHOR"},
 			Email:     []string{"EMAIL"},

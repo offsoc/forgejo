@@ -141,13 +141,17 @@ func GetNextCommitStatusIndex(ctx context.Context, repoID int64, sha string) (in
 	return newIdx, nil
 }
 
-func (status *CommitStatus) loadAttributes(ctx context.Context) (err error) {
+func (status *CommitStatus) loadRepository(ctx context.Context) (err error) {
 	if status.Repo == nil {
 		status.Repo, err = repo_model.GetRepositoryByID(ctx, status.RepoID)
 		if err != nil {
 			return fmt.Errorf("getRepositoryByID [%d]: %w", status.RepoID, err)
 		}
 	}
+	return nil
+}
+
+func (status *CommitStatus) loadCreator(ctx context.Context) (err error) {
 	if status.Creator == nil && status.CreatorID > 0 {
 		status.Creator, err = user_model.GetUserByID(ctx, status.CreatorID)
 		if err != nil {
@@ -155,6 +159,13 @@ func (status *CommitStatus) loadAttributes(ctx context.Context) (err error) {
 		}
 	}
 	return nil
+}
+
+func (status *CommitStatus) loadAttributes(ctx context.Context) (err error) {
+	if err := status.loadRepository(ctx); err != nil {
+		return err
+	}
+	return status.loadCreator(ctx)
 }
 
 // APIURL returns the absolute APIURL to this commit-status.
@@ -166,6 +177,25 @@ func (status *CommitStatus) APIURL(ctx context.Context) string {
 // LocaleString returns the locale string name of the Status
 func (status *CommitStatus) LocaleString(lang translation.Locale) string {
 	return lang.TrString("repo.commitstatus." + status.State.String())
+}
+
+// HideActionsURL set `TargetURL` to an empty string if the status comes from Gitea Actions
+func (status *CommitStatus) HideActionsURL(ctx context.Context) {
+	if status.RepoID == 0 {
+		return
+	}
+
+	if status.Repo == nil {
+		if err := status.loadRepository(ctx); err != nil {
+			log.Error("loadRepository: %v", err)
+			return
+		}
+	}
+
+	prefix := fmt.Sprintf("%s/actions", status.Repo.Link())
+	if strings.HasPrefix(status.TargetURL, prefix) {
+		status.TargetURL = ""
+	}
 }
 
 // CalcCommitStatus returns commit status state via some status, the commit statues should order by id desc
@@ -258,27 +288,18 @@ func GetLatestCommitStatus(ctx context.Context, repoID int64, sha string, listOp
 
 // GetLatestCommitStatusForPairs returns all statuses with a unique context for a given list of repo-sha pairs
 func GetLatestCommitStatusForPairs(ctx context.Context, repoSHAs []RepoSHA) (map[int64][]*CommitStatus, error) {
-	type result struct {
-		Index  int64
-		RepoID int64
-		SHA    string
-	}
-
-	results := make([]result, 0, len(repoSHAs))
-
-	getBase := func() *xorm.Session {
-		return db.GetEngine(ctx).Table(&CommitStatus{})
-	}
+	results := []*CommitStatus{}
 
 	// Create a disjunction of conditions for each repoID and SHA pair
 	conds := make([]builder.Cond, 0, len(repoSHAs))
 	for _, repoSHA := range repoSHAs {
 		conds = append(conds, builder.Eq{"repo_id": repoSHA.RepoID, "sha": repoSHA.SHA})
 	}
-	sess := getBase().Where(builder.Or(conds...)).
-		Select("max( `index` ) as `index`, repo_id, sha").
-		GroupBy("context_hash, repo_id, sha").OrderBy("max( `index` ) desc")
 
+	sess := db.GetEngine(ctx).Table(&CommitStatus{}).
+		Select("MAX(`index`) AS `index`, *").
+		Where(builder.Or(conds...)).
+		GroupBy("context_hash, repo_id, sha").OrderBy("MAX(`index`) DESC")
 	err := sess.Find(&results)
 	if err != nil {
 		return nil, err
@@ -286,27 +307,9 @@ func GetLatestCommitStatusForPairs(ctx context.Context, repoSHAs []RepoSHA) (map
 
 	repoStatuses := make(map[int64][]*CommitStatus)
 
-	if len(results) > 0 {
-		statuses := make([]*CommitStatus, 0, len(results))
-
-		conds = make([]builder.Cond, 0, len(results))
-		for _, result := range results {
-			cond := builder.Eq{
-				"`index`": result.Index,
-				"repo_id": result.RepoID,
-				"sha":     result.SHA,
-			}
-			conds = append(conds, cond)
-		}
-		err = getBase().Where(builder.Or(conds...)).Find(&statuses)
-		if err != nil {
-			return nil, err
-		}
-
-		// Group the statuses by repo ID
-		for _, status := range statuses {
-			repoStatuses[status.RepoID] = append(repoStatuses[status.RepoID], status)
-		}
+	// Group the statuses by repo ID
+	for _, status := range results {
+		repoStatuses[status.RepoID] = append(repoStatuses[status.RepoID], status)
 	}
 
 	return repoStatuses, nil
@@ -470,4 +473,20 @@ func ConvertFromGitCommit(ctx context.Context, commits []*git.Commit, repo *repo
 		),
 		repo,
 	)
+}
+
+// CommitStatusesHideActionsURL hide Gitea Actions urls
+func CommitStatusesHideActionsURL(ctx context.Context, statuses []*CommitStatus) {
+	idToRepos := make(map[int64]*repo_model.Repository)
+	for _, status := range statuses {
+		if status == nil {
+			continue
+		}
+
+		if status.Repo == nil {
+			status.Repo = idToRepos[status.RepoID]
+		}
+		status.HideActionsURL(ctx)
+		idToRepos[status.RepoID] = status.Repo
+	}
 }

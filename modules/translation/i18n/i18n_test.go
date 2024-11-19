@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLocaleStore(t *testing.T) {
@@ -29,8 +30,8 @@ sub = Changed Sub String
 `)
 
 	ls := NewLocaleStore()
-	assert.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", testData1, nil))
-	assert.NoError(t, ls.AddLocaleByIni("lang2", "Lang2", testData2, nil))
+	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", testData1, nil))
+	require.NoError(t, ls.AddLocaleByIni("lang2", "Lang2", testData2, nil))
 	ls.SetDefaultLang("lang1")
 
 	lang1, _ := ls.Locale("lang1")
@@ -61,7 +62,7 @@ sub = Changed Sub String
 
 	found := lang1.HasKey("no-such")
 	assert.False(t, found)
-	assert.NoError(t, ls.Close())
+	require.NoError(t, ls.Close())
 }
 
 func TestLocaleStoreMoreSource(t *testing.T) {
@@ -76,7 +77,7 @@ c=22
 `)
 
 	ls := NewLocaleStore()
-	assert.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", testData1, testData2))
+	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", testData1, testData2))
 	lang1, _ := ls.Locale("lang1")
 	assert.Equal(t, "11", lang1.TrString("a"))
 	assert.Equal(t, "21", lang1.TrString("b"))
@@ -117,7 +118,7 @@ func (e *errorPointerReceiver) Error() string {
 
 func TestLocaleWithTemplate(t *testing.T) {
 	ls := NewLocaleStore()
-	assert.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", []byte(`key=<a>%s</a>`), nil))
+	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", []byte(`key=<a>%s</a>`), nil))
 	lang1, _ := ls.Locale("lang1")
 
 	tmpl := template.New("test").Funcs(template.FuncMap{"tr": lang1.TrHTML})
@@ -143,7 +144,7 @@ func TestLocaleWithTemplate(t *testing.T) {
 	buf := &strings.Builder{}
 	for _, c := range cases {
 		buf.Reset()
-		assert.NoError(t, tmpl.Execute(buf, map[string]any{"var": c.in}))
+		require.NoError(t, tmpl.Execute(buf, map[string]any{"var": c.in}))
 		assert.Equal(t, c.want, buf.String())
 	}
 }
@@ -182,9 +183,9 @@ func TestLocaleStoreQuirks(t *testing.T) {
 		ls := NewLocaleStore()
 		err := ls.AddLocaleByIni("lang1", "Lang1", []byte("a="+testData.in), nil)
 		lang1, _ := ls.Locale("lang1")
-		assert.NoError(t, err, testData.hint)
+		require.NoError(t, err, testData.hint)
 		assert.Equal(t, testData.out, lang1.TrString("a"), testData.hint)
-		assert.NoError(t, ls.Close())
+		require.NoError(t, ls.Close())
 	}
 
 	// TODO: Crowdin needs the strings to be quoted correctly and doesn't like incomplete quotes

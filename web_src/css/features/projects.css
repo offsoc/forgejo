@@ -78,7 +78,8 @@
 .card-attachment-images {
   display: inline-block;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: scroll;
+  cursor: default;
   text-align: center;
 }
 
@@ -86,7 +87,9 @@
   display: inline-block;
   max-height: 50px;
   border-radius: var(--border-radius);
+  text-align: left;
   margin-right: 2px;
+  aspect-ratio: 1;
 }
 
 .card-attachment-images img:only-child {

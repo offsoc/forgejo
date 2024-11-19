@@ -1,0 +1,15 @@
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no">
+</head>
+
+<body>
+	<p>{{.locale.Tr "mail.hi_user_x" (.DisplayName|DotEscape)}}</p><br>
+	<p>{{.locale.Tr "mail.totp_disabled.text_1"}}</p><br>
+	{{if not .HasWebAuthn}}<p>{{.locale.Tr "mail.totp_disabled.no_2fa"}}</p><br>{{end}}
+	<p>{{.locale.Tr "mail.account_security_caution.text_1"}}</p><br>
+	<p>{{.locale.Tr "mail.account_security_caution.text_2"}}</p><br>
+
+	{{template "common/footer_simple" .}}
+</body>
+</html>

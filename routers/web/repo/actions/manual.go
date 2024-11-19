@@ -1,5 +1,5 @@
-// Copyright The Forgejo Authors.
-// SPDX-License-Identifier: MIT
+// Copyright 2024 The Forgejo Authors.
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 package actions
 
@@ -43,7 +43,7 @@ func ManualRunWorkflow(ctx *context_module.Context) {
 
 	formKeyGetter := func(key string) string {
 		formKey := "inputs[" + key + "]"
-		return ctx.FormString(formKey)
+		return ctx.Req.PostFormValue(formKey)
 	}
 
 	if err := workflow.Dispatch(ctx, formKeyGetter, ctx.Repo.Repository, ctx.Doer); err != nil {

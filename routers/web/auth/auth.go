@@ -5,8 +5,6 @@
 package auth
 
 import (
-	"crypto/subtle"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -25,6 +23,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/modules/web/middleware"
 	auth_service "code.gitea.io/gitea/services/auth"
@@ -62,38 +61,11 @@ func autoSignIn(ctx *context.Context) (bool, error) {
 		return false, nil
 	}
 
-	lookupKey, validator, found := strings.Cut(authCookie, ":")
-	if !found {
-		return false, nil
-	}
-
-	authToken, err := auth.FindAuthToken(ctx, lookupKey)
+	u, err := user_model.VerifyUserAuthorizationToken(ctx, authCookie, auth.LongTermAuthorization, false)
 	if err != nil {
-		if errors.Is(err, util.ErrNotExist) {
-			return false, nil
-		}
-		return false, err
+		return false, fmt.Errorf("VerifyUserAuthorizationToken: %w", err)
 	}
-
-	if authToken.IsExpired() {
-		err = auth.DeleteAuthToken(ctx, authToken)
-		return false, err
-	}
-
-	rawValidator, err := hex.DecodeString(validator)
-	if err != nil {
-		return false, err
-	}
-
-	if subtle.ConstantTimeCompare([]byte(authToken.HashedValidator), []byte(auth.HashValidator(rawValidator))) == 0 {
-		return false, nil
-	}
-
-	u, err := user_model.GetUserByID(ctx, authToken.UID)
-	if err != nil {
-		if !user_model.IsErrUserNotExist(err) {
-			return false, fmt.Errorf("GetUserByID: %w", err)
-		}
+	if u == nil {
 		return false, nil
 	}
 
@@ -236,12 +208,12 @@ func SignInPost(ctx *context.Context) {
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) || errors.Is(err, util.ErrInvalidArgument) {
 			ctx.RenderWithErr(ctx.Tr("form.username_password_incorrect"), tplSignIn, &form)
-			log.Info("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
+			log.Warn("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
 		} else if user_model.IsErrEmailAlreadyUsed(err) {
 			ctx.RenderWithErr(ctx.Tr("form.email_been_used"), tplSignIn, &form)
-			log.Info("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
+			log.Warn("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
 		} else if user_model.IsErrUserProhibitLogin(err) {
-			log.Info("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
+			log.Warn("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
 			ctx.Data["Title"] = ctx.Tr("auth.prohibit_login")
 			ctx.HTML(http.StatusOK, "user/auth/prohibit_login")
 		} else if user_model.IsErrUserInactive(err) {
@@ -249,7 +221,7 @@ func SignInPost(ctx *context.Context) {
 				ctx.Data["Title"] = ctx.Tr("auth.active_your_account")
 				ctx.HTML(http.StatusOK, TplActivate)
 			} else {
-				log.Info("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
+				log.Warn("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
 				ctx.Data["Title"] = ctx.Tr("auth.prohibit_login")
 				ctx.HTML(http.StatusOK, "user/auth/prohibit_login")
 			}
@@ -408,7 +380,7 @@ func HandleSignOut(ctx *context.Context) {
 // SignOut sign out from login status
 func SignOut(ctx *context.Context) {
 	if ctx.Doer != nil {
-		eventsource.GetManager().SendMessageBlocking(ctx.Doer.ID, &eventsource.Event{
+		eventsource.GetManager().SendMessage(ctx.Doer.ID, &eventsource.Event{
 			Name: "logout",
 			Data: ctx.Session.ID(),
 		})
@@ -500,7 +472,7 @@ func SignUpPost(ctx *context.Context) {
 		return
 	}
 	if err := password.IsPwned(ctx, form.Password); err != nil {
-		errMsg := ctx.Tr("auth.password_pwned")
+		errMsg := ctx.Tr("auth.password_pwned", "https://haveibeenpwned.com/Passwords")
 		if password.IsErrIsPwnedRequest(err) {
 			log.Error(err.Error())
 			errMsg = ctx.Tr("auth.password_pwned_err")
@@ -575,10 +547,10 @@ func createUserInContext(ctx *context.Context, tpl base.TplName, form any, u *us
 		case user_model.IsErrEmailAlreadyUsed(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_been_used"), tpl, form)
-		case user_model.IsErrEmailCharIsNotSupported(err):
+		case validation.IsErrEmailCharIsNotSupported(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tpl, form)
-		case user_model.IsErrEmailInvalid(err):
+		case validation.IsErrEmailInvalid(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tpl, form)
 		case db.IsErrNameReserved(err):
@@ -619,10 +591,8 @@ func handleUserCreated(ctx *context.Context, u *user_model.User, gothUser *goth.
 	notify_service.NewUserSignUp(ctx, u)
 	// update external user information
 	if gothUser != nil {
-		if err := externalaccount.UpdateExternalUser(ctx, u, *gothUser); err != nil {
-			if !errors.Is(err, util.ErrNotExist) {
-				log.Error("UpdateExternalUser failed: %v", err)
-			}
+		if err := externalaccount.EnsureLinkExternalToUser(ctx, u, *gothUser); err != nil {
+			log.Error("EnsureLinkExternalToUser failed: %v", err)
 		}
 	}
 
@@ -634,7 +604,10 @@ func handleUserCreated(ctx *context.Context, u *user_model.User, gothUser *goth.
 			return false
 		}
 
-		mailer.SendActivateAccountMail(ctx.Locale, u)
+		if err := mailer.SendActivateAccountMail(ctx, u); err != nil {
+			ctx.ServerError("SendActivateAccountMail", err)
+			return false
+		}
 
 		ctx.Data["IsSendRegisterMail"] = true
 		ctx.Data["Email"] = u.Email
@@ -675,7 +648,10 @@ func Activate(ctx *context.Context) {
 				ctx.Data["ResendLimited"] = true
 			} else {
 				ctx.Data["ActiveCodeLives"] = timeutil.MinutesToFriendly(setting.Service.ActiveCodeLives, ctx.Locale)
-				mailer.SendActivateAccountMail(ctx.Locale, ctx.Doer)
+				if err := mailer.SendActivateAccountMail(ctx, ctx.Doer); err != nil {
+					ctx.ServerError("SendActivateAccountMail", err)
+					return
+				}
 
 				if err := ctx.Cache.Put(cacheKey+ctx.Doer.LowerName, ctx.Doer.LowerName, 180); err != nil {
 					log.Error("Set cache(MailResendLimit) fail: %v", err)
@@ -688,7 +664,12 @@ func Activate(ctx *context.Context) {
 		return
 	}
 
-	user := user_model.VerifyUserActiveCode(ctx, code)
+	user, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.UserActivation, false)
+	if err != nil {
+		ctx.ServerError("VerifyUserAuthorizationToken", err)
+		return
+	}
+
 	// if code is wrong
 	if user == nil {
 		ctx.Data["IsCodeInvalid"] = true
@@ -752,7 +733,12 @@ func ActivatePost(ctx *context.Context) {
 		return
 	}
 
-	user := user_model.VerifyUserActiveCode(ctx, code)
+	user, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.UserActivation, true)
+	if err != nil {
+		ctx.ServerError("VerifyUserAuthorizationToken", err)
+		return
+	}
+
 	// if code is wrong
 	if user == nil {
 		ctx.Data["IsCodeInvalid"] = true
@@ -836,23 +822,32 @@ func ActivateEmail(ctx *context.Context) {
 	code := ctx.FormString("code")
 	emailStr := ctx.FormString("email")
 
-	// Verify code.
-	if email := user_model.VerifyActiveEmailCode(ctx, code, emailStr); email != nil {
-		if err := user_model.ActivateEmail(ctx, email); err != nil {
-			ctx.ServerError("ActivateEmail", err)
-			return
-		}
-
-		log.Trace("Email activated: %s", email.Email)
-		ctx.Flash.Success(ctx.Tr("settings.add_email_success"))
-
-		if u, err := user_model.GetUserByID(ctx, email.UID); err != nil {
-			log.Warn("GetUserByID: %d", email.UID)
-		} else {
-			// Allow user to validate more emails
-			_ = ctx.Cache.Delete("MailResendLimit_" + u.LowerName)
-		}
+	u, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.EmailActivation(emailStr), true)
+	if err != nil {
+		ctx.ServerError("VerifyUserAuthorizationToken", err)
+		return
 	}
+	if u == nil {
+		ctx.Redirect(setting.AppSubURL + "/user/settings/account")
+		return
+	}
+
+	email, err := user_model.GetEmailAddressOfUser(ctx, emailStr, u.ID)
+	if err != nil {
+		ctx.ServerError("GetEmailAddressOfUser", err)
+		return
+	}
+
+	if err := user_model.ActivateEmail(ctx, email); err != nil {
+		ctx.ServerError("ActivateEmail", err)
+		return
+	}
+
+	log.Trace("Email activated: %s", email.Email)
+	ctx.Flash.Success(ctx.Tr("settings.add_email_success"))
+
+	// Allow user to validate more emails
+	_ = ctx.Cache.Delete("MailResendLimit_" + u.LowerName)
 
 	// FIXME: e-mail verification does not require the user to be logged in,
 	// so this could be redirecting to the login page.

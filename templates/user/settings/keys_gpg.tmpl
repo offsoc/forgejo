@@ -64,13 +64,9 @@
 					</div>
 					<div class="flex-item-body">
 						<p>
-							{{ctx.Locale.Tr "settings.added_on" (DateTime "short" .AddedUnix)}}
-							-
-							{{if not .ExpiredUnix.IsZero}}
-								{{ctx.Locale.Tr "settings.valid_until_date" (DateTime "short" .ExpiredUnix)}}
-							{{else}}
-								{{ctx.Locale.Tr "settings.valid_forever"}}
-							{{end}}
+						{{ctx.Locale.Tr "settings.added_on" (DateUtils.AbsoluteShort .AddedUnix)}}
+						-
+						{{if not .ExpiredUnix.IsZero}}{{ctx.Locale.Tr "settings.valid_until_date" (DateUtils.AbsoluteShort .ExpiredUnix)}}{{else}}{{ctx.Locale.Tr "settings.valid_forever"}}{{end}}
 						</p>
 					</div>
 				</div>

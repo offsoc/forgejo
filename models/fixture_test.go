@@ -14,21 +14,20 @@ import (
 	"code.gitea.io/gitea/modules/util"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFixtureGeneration(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	test := func(ctx context.Context, gen func(ctx context.Context) (string, error), name string) {
 		expected, err := gen(ctx)
-		if !assert.NoError(t, err) {
-			return
-		}
+		require.NoError(t, err)
+
 		p := filepath.Join(unittest.FixturesDir(), name+".yml")
 		bytes, err := os.ReadFile(p)
-		if !assert.NoError(t, err) {
-			return
-		}
+		require.NoError(t, err)
+
 		data := string(util.NormalizeEOL(bytes))
 		assert.EqualValues(t, expected, data, "Differences detected for %s", p)
 	}

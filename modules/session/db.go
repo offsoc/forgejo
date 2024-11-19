@@ -11,7 +11,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/modules/timeutil"
 
-	"gitea.com/go-chi/session"
+	"code.forgejo.org/go-chi/session"
 )
 
 // DBStore represents a session store implementation based on the DB.

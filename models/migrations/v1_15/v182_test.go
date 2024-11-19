@@ -9,6 +9,7 @@ import (
 	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_AddIssueResourceIndexTable(t *testing.T) {
@@ -29,7 +30,7 @@ func Test_AddIssueResourceIndexTable(t *testing.T) {
 
 	// Run the migration
 	if err := AddIssueResourceIndexTable(x); err != nil {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return
 	}
 
@@ -43,12 +44,12 @@ func Test_AddIssueResourceIndexTable(t *testing.T) {
 	for {
 		indexes := make([]ResourceIndex, 0, batchSize)
 		err := x.Table("issue_index").Limit(batchSize, start).Find(&indexes)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		for _, idx := range indexes {
 			var maxIndex int
 			has, err := x.SQL("SELECT max(`index`) FROM issue WHERE repo_id = ?", idx.GroupID).Get(&maxIndex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.True(t, has)
 			assert.EqualValues(t, maxIndex, idx.MaxIndex)
 		}

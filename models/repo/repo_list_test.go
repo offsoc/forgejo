@@ -4,15 +4,21 @@
 package repo_test
 
 import (
+	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
+	"code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
+	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/structs"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func getTestCases() []struct {
@@ -181,7 +187,7 @@ func getTestCases() []struct {
 }
 
 func TestSearchRepository(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// test search public repository on explore page
 	repos, count, err := repo_model.SearchRepositoryByName(db.DefaultContext, &repo_model.SearchRepoOptions{
@@ -193,7 +199,7 @@ func TestSearchRepository(t *testing.T) {
 		Collaborate: optional.Some(false),
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.Len(t, repos, 1) {
 		assert.Equal(t, "test_repo_12", repos[0].Name)
 	}
@@ -208,7 +214,7 @@ func TestSearchRepository(t *testing.T) {
 		Collaborate: optional.Some(false),
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(2), count)
 	assert.Len(t, repos, 2)
 
@@ -223,7 +229,7 @@ func TestSearchRepository(t *testing.T) {
 		Collaborate: optional.Some(false),
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.Len(t, repos, 1) {
 		assert.Equal(t, "test_repo_13", repos[0].Name)
 	}
@@ -239,14 +245,14 @@ func TestSearchRepository(t *testing.T) {
 		Collaborate: optional.Some(false),
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int64(3), count)
 	assert.Len(t, repos, 3)
 
 	// Test non existing owner
 	repos, count, err = repo_model.SearchRepositoryByName(db.DefaultContext, &repo_model.SearchRepoOptions{OwnerID: unittest.NonexistentID})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, repos)
 	assert.Equal(t, int64(0), count)
 
@@ -261,7 +267,7 @@ func TestSearchRepository(t *testing.T) {
 		IncludeDescription: true,
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.Len(t, repos, 1) {
 		assert.Equal(t, "test_repo_14", repos[0].Name)
 	}
@@ -278,7 +284,7 @@ func TestSearchRepository(t *testing.T) {
 		IncludeDescription: false,
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, repos)
 	assert.Equal(t, int64(0), count)
 
@@ -288,7 +294,7 @@ func TestSearchRepository(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			repos, count, err := repo_model.SearchRepositoryByName(db.DefaultContext, testCase.opts)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, int64(testCase.count), count)
 
 			page := testCase.opts.Page
@@ -355,7 +361,7 @@ func TestSearchRepository(t *testing.T) {
 }
 
 func TestCountRepository(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testCases := getTestCases()
 
@@ -363,14 +369,14 @@ func TestCountRepository(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			count, err := repo_model.CountRepository(db.DefaultContext, testCase.opts)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, int64(testCase.count), count)
 		})
 	}
 }
 
 func TestSearchRepositoryByTopicName(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testCases := []struct {
 		name  string
@@ -397,8 +403,48 @@ func TestSearchRepositoryByTopicName(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			_, count, err := repo_model.SearchRepositoryByName(db.DefaultContext, testCase.opts)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, int64(testCase.count), count)
 		})
+	}
+}
+
+func TestSearchRepositoryIDsByCondition(t *testing.T) {
+	defer unittest.OverrideFixtures(
+		unittest.FixturesOptions{
+			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
+			Base: setting.AppWorkPath,
+			Dirs: []string{"models/repo/TestSearchRepositoryIDsByCondition/"},
+		},
+	)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+	// Sanity check of the database
+	limitedUser := unittest.AssertExistsAndLoadBean(t, &user.User{ID: 33, Visibility: structs.VisibleTypeLimited})
+	unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1001, OwnerID: limitedUser.ID})
+
+	testCases := []struct {
+		user    *user.User
+		repoIDs []int64
+	}{
+		{
+			user:    nil,
+			repoIDs: []int64{1, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 1059},
+		},
+		{
+			user:    unittest.AssertExistsAndLoadBean(t, &user.User{ID: 4}),
+			repoIDs: []int64{1, 3, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 38, 40, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 1001, 1059},
+		},
+		{
+			user:    unittest.AssertExistsAndLoadBean(t, &user.User{ID: 5}),
+			repoIDs: []int64{1, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 38, 40, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 1001, 1059},
+		},
+	}
+
+	for _, testCase := range testCases {
+		repoIDs, err := repo_model.FindUserCodeAccessibleRepoIDs(db.DefaultContext, testCase.user)
+		require.NoError(t, err)
+
+		slices.Sort(repoIDs)
+		assert.EqualValues(t, testCase.repoIDs, repoIDs)
 	}
 }

@@ -9,11 +9,11 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMigrate_InsertReleases(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	a := &Attachment{
 		UUID: "a0eebc91-9c0c-4ef7-bb6e-6bb9bd380a12",
@@ -23,5 +23,5 @@ func TestMigrate_InsertReleases(t *testing.T) {
 	}
 
 	err := InsertReleases(db.DefaultContext, r)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

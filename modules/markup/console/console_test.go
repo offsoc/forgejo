@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/markup"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRenderConsole(t *testing.T) {
@@ -26,7 +27,7 @@ func TestRenderConsole(t *testing.T) {
 
 		err := render.Render(&markup.RenderContext{Ctx: git.DefaultContext},
 			strings.NewReader(k), &buf)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, v, buf.String())
 	}
 }

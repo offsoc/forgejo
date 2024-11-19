@@ -10,11 +10,12 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testStorageIterator(t *testing.T, typStr Type, cfg *setting.Storage) {
 	l, err := NewStorage(typStr, cfg)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	testFiles := [][]string{
 		{"a/1.txt", "a1"},
@@ -27,7 +28,7 @@ func testStorageIterator(t *testing.T, typStr Type, cfg *setting.Storage) {
 	}
 	for _, f := range testFiles {
 		_, err = l.Save(f[0], bytes.NewBufferString(f[1]), -1)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	expectedList := map[string][]string{
@@ -45,7 +46,7 @@ func testStorageIterator(t *testing.T, typStr Type, cfg *setting.Storage) {
 			count++
 			return nil
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, expected, count)
 	}
 }

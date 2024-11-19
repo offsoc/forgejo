@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStringContent(t *testing.T) {
@@ -45,7 +46,7 @@ func TestIsValid(t *testing.T) {
 
 func TestGeneratePointer(t *testing.T) {
 	p, err := GeneratePointer(strings.NewReader("Gitea"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, p.IsValid())
 	assert.Equal(t, "94cb57646c54a297c9807697e80a30946f79a4b82cb079d2606847825b1812cc", p.Oid)
 	assert.Equal(t, int64(5), p.Size)
@@ -53,41 +54,41 @@ func TestGeneratePointer(t *testing.T) {
 
 func TestReadPointerFromBuffer(t *testing.T) {
 	p, err := ReadPointerFromBuffer([]byte{})
-	assert.ErrorIs(t, err, ErrMissingPrefix)
+	require.ErrorIs(t, err, ErrMissingPrefix)
 	assert.False(t, p.IsValid())
 
 	p, err = ReadPointerFromBuffer([]byte("test"))
-	assert.ErrorIs(t, err, ErrMissingPrefix)
+	require.ErrorIs(t, err, ErrMissingPrefix)
 	assert.False(t, p.IsValid())
 
 	p, err = ReadPointerFromBuffer([]byte("version https://git-lfs.github.com/spec/v1\n"))
-	assert.ErrorIs(t, err, ErrInvalidStructure)
+	require.ErrorIs(t, err, ErrInvalidStructure)
 	assert.False(t, p.IsValid())
 
 	p, err = ReadPointerFromBuffer([]byte("version https://git-lfs.github.com/spec/v1\noid sha256:4d7a\nsize 1234\n"))
-	assert.ErrorIs(t, err, ErrInvalidOIDFormat)
+	require.ErrorIs(t, err, ErrInvalidOIDFormat)
 	assert.False(t, p.IsValid())
 
 	p, err = ReadPointerFromBuffer([]byte("version https://git-lfs.github.com/spec/v1\noid sha256:4d7a2146z4ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393\nsize 1234\n"))
-	assert.ErrorIs(t, err, ErrInvalidOIDFormat)
+	require.ErrorIs(t, err, ErrInvalidOIDFormat)
 	assert.False(t, p.IsValid())
 
 	p, err = ReadPointerFromBuffer([]byte("version https://git-lfs.github.com/spec/v1\noid sha256:4d7a214614ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393\ntest 1234\n"))
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.False(t, p.IsValid())
 
 	p, err = ReadPointerFromBuffer([]byte("version https://git-lfs.github.com/spec/v1\noid sha256:4d7a214614ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393\nsize test\n"))
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.False(t, p.IsValid())
 
 	p, err = ReadPointerFromBuffer([]byte("version https://git-lfs.github.com/spec/v1\noid sha256:4d7a214614ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393\nsize 1234\n"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, p.IsValid())
 	assert.Equal(t, "4d7a214614ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393", p.Oid)
 	assert.Equal(t, int64(1234), p.Size)
 
 	p, err = ReadPointerFromBuffer([]byte("version https://git-lfs.github.com/spec/v1\noid sha256:4d7a214614ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393\nsize 1234\ntest"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, p.IsValid())
 	assert.Equal(t, "4d7a214614ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393", p.Oid)
 	assert.Equal(t, int64(1234), p.Size)
@@ -95,7 +96,7 @@ func TestReadPointerFromBuffer(t *testing.T) {
 
 func TestReadPointer(t *testing.T) {
 	p, err := ReadPointer(strings.NewReader("version https://git-lfs.github.com/spec/v1\noid sha256:4d7a214614ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393\nsize 1234\n"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, p.IsValid())
 	assert.Equal(t, "4d7a214614ab2935c943f9e0ff69d22eadbb8f32b1258daaa5e2ca24d17e2393", p.Oid)
 	assert.Equal(t, int64(1234), p.Size)

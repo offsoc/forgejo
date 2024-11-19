@@ -9,6 +9,10 @@ import (
 )
 
 func WebAssetDownloadURL(repo *repo_model.Repository, attach *repo_model.Attachment) string {
+	if attach.ExternalURL != "" {
+		return attach.ExternalURL
+	}
+
 	return attach.DownloadURL()
 }
 
@@ -28,6 +32,12 @@ func ToAPIAttachment(repo *repo_model.Repository, a *repo_model.Attachment) *api
 
 // toAttachment converts models.Attachment to api.Attachment for API usage
 func toAttachment(repo *repo_model.Repository, a *repo_model.Attachment, getDownloadURL func(repo *repo_model.Repository, attach *repo_model.Attachment) string) *api.Attachment {
+	var typeName string
+	if a.ExternalURL != "" {
+		typeName = "external"
+	} else {
+		typeName = "attachment"
+	}
 	return &api.Attachment{
 		ID:            a.ID,
 		Name:          a.Name,
@@ -36,6 +46,7 @@ func toAttachment(repo *repo_model.Repository, a *repo_model.Attachment, getDown
 		Size:          a.Size,
 		UUID:          a.UUID,
 		DownloadURL:   getDownloadURL(repo, a), // for web request json and api request json, return different download urls
+		Type:          typeName,
 	}
 }
 

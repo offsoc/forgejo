@@ -18,7 +18,7 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/test"
 	issue_service "code.gitea.io/gitea/services/issue"
 	repo_service "code.gitea.io/gitea/services/repository"
@@ -27,6 +27,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPullView_ReviewerMissed(t *testing.T) {
@@ -45,9 +46,9 @@ func TestPullView_ReviewerMissed(t *testing.T) {
 	reviews, err := issues_model.FindReviews(db.DefaultContext, issues_model.FindReviewOptions{
 		IssueID: 2,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, r := range reviews {
-		assert.NoError(t, issues_model.DeleteReview(db.DefaultContext, r))
+		require.NoError(t, issues_model.DeleteReview(db.DefaultContext, r))
 	}
 	req = NewRequest(t, "GET", "/user2/repo1/pulls/2")
 	resp = session.MakeRequest(t, req, http.StatusOK)
@@ -57,7 +58,7 @@ func TestPullView_ReviewerMissed(t *testing.T) {
 func loadComment(t *testing.T, commentID string) *issues_model.Comment {
 	t.Helper()
 	id, err := strconv.ParseInt(commentID, 10, 64)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: id})
 }
 
@@ -107,7 +108,7 @@ func TestPullView_ResolveInvalidatedReviewComment(t *testing.T) {
 		// (to invalidate it properly, one should push a commit which should trigger this logic,
 		// in the meantime, use this quick-and-dirty trick)
 		comment := loadComment(t, commentID)
-		assert.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
+		require.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
 			ID:          comment.ID,
 			Invalidated: true,
 		}))
@@ -169,7 +170,7 @@ func TestPullView_ResolveInvalidatedReviewComment(t *testing.T) {
 			// (to invalidate it properly, one should push a commit which should trigger this logic,
 			// in the meantime, use this quick-and-dirty trick)
 			comment := loadComment(t, commentID)
-			assert.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
+			require.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
 				ID:          comment.ID,
 				Invalidated: true,
 			}))
@@ -281,32 +282,18 @@ func TestPullView_CodeOwner(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
-		// Create the repo.
-		repo, err := repo_service.CreateRepositoryDirectly(db.DefaultContext, user2, user2, repo_service.CreateRepoOptions{
-			Name:             "test_codeowner",
-			Readme:           "Default",
-			AutoInit:         true,
-			ObjectFormatName: git.Sha1ObjectFormat.Name(),
-			DefaultBranch:    "master",
-		})
-		assert.NoError(t, err)
-
-		// add CODEOWNERS to default branch
-		_, err = files_service.ChangeRepoFiles(db.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
-			OldBranch: repo.DefaultBranch,
-			Files: []*files_service.ChangeRepoFile{
-				{
-					Operation:     "create",
-					TreePath:      "CODEOWNERS",
-					ContentReader: strings.NewReader("README.md @user5\n"),
-				},
+		repo, _, f := tests.CreateDeclarativeRepo(t, user2, "test_codeowner", nil, nil, []*files_service.ChangeRepoFile{
+			{
+				Operation:     "create",
+				TreePath:      "CODEOWNERS",
+				ContentReader: strings.NewReader("README.md @user5\n"),
 			},
 		})
-		assert.NoError(t, err)
+		defer f()
 
 		t.Run("First Pull Request", func(t *testing.T) {
 			// create a new branch to prepare for pull request
-			_, err = files_service.ChangeRepoFiles(db.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
+			_, err := files_service.ChangeRepoFiles(db.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
 				NewBranch: "codeowner-basebranch",
 				Files: []*files_service.ChangeRepoFile{
 					{
@@ -316,7 +303,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 					},
 				},
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// Create a pull request.
 			session := loginUser(t, "user2")
@@ -324,23 +311,23 @@ func TestPullView_CodeOwner(t *testing.T) {
 
 			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadRepoID: repo.ID, HeadBranch: "codeowner-basebranch"})
 			unittest.AssertExistsIf(t, true, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 5})
-			assert.NoError(t, pr.LoadIssue(db.DefaultContext))
+			require.NoError(t, pr.LoadIssue(db.DefaultContext))
 
-			err := issue_service.ChangeTitle(db.DefaultContext, pr.Issue, user2, "[WIP] Test Pull Request")
-			assert.NoError(t, err)
+			err = issue_service.ChangeTitle(db.DefaultContext, pr.Issue, user2, "[WIP] Test Pull Request")
+			require.NoError(t, err)
 			prUpdated1 := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: pr.ID})
-			assert.NoError(t, prUpdated1.LoadIssue(db.DefaultContext))
+			require.NoError(t, prUpdated1.LoadIssue(db.DefaultContext))
 			assert.EqualValues(t, "[WIP] Test Pull Request", prUpdated1.Issue.Title)
 
 			err = issue_service.ChangeTitle(db.DefaultContext, prUpdated1.Issue, user2, "Test Pull Request2")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			prUpdated2 := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: pr.ID})
-			assert.NoError(t, prUpdated2.LoadIssue(db.DefaultContext))
+			require.NoError(t, prUpdated2.LoadIssue(db.DefaultContext))
 			assert.EqualValues(t, "Test Pull Request2", prUpdated2.Issue.Title)
 		})
 
 		// change the default branch CODEOWNERS file to change README.md's codeowner
-		_, err = files_service.ChangeRepoFiles(db.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
+		_, err := files_service.ChangeRepoFiles(db.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
 			Files: []*files_service.ChangeRepoFile{
 				{
 					Operation:     "update",
@@ -349,7 +336,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 				},
 			},
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		t.Run("Second Pull Request", func(t *testing.T) {
 			// create a new branch to prepare for pull request
@@ -363,7 +350,7 @@ func TestPullView_CodeOwner(t *testing.T) {
 					},
 				},
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// Create a pull request.
 			session := loginUser(t, "user2")
@@ -375,11 +362,11 @@ func TestPullView_CodeOwner(t *testing.T) {
 
 		t.Run("Forked Repo Pull Request", func(t *testing.T) {
 			user5 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 5})
-			forkedRepo, err := repo_service.ForkRepository(db.DefaultContext, user2, user5, repo_service.ForkRepoOptions{
+			forkedRepo, err := repo_service.ForkRepositoryAndUpdates(db.DefaultContext, user2, user5, repo_service.ForkRepoOptions{
 				BaseRepo: repo,
 				Name:     "test_codeowner_fork",
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// create a new branch to prepare for pull request
 			_, err = files_service.ChangeRepoFiles(db.DefaultContext, forkedRepo, user5, &files_service.ChangeRepoFilesOptions{
@@ -392,13 +379,21 @@ func TestPullView_CodeOwner(t *testing.T) {
 					},
 				},
 			})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			session := loginUser(t, "user5")
-			testPullCreate(t, session, "user5", "test_codeowner_fork", false, forkedRepo.DefaultBranch, "codeowner-basebranch-forked", "Test Pull Request2")
 
-			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadBranch: "codeowner-basebranch-forked"})
+			// create a pull request on the forked repository, code reviewers should not be mentioned
+			testPullCreateDirectly(t, session, "user5", "test_codeowner_fork", forkedRepo.DefaultBranch, "", "", "codeowner-basebranch-forked", "Test Pull Request on Forked Repository")
+
+			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: forkedRepo.ID, HeadBranch: "codeowner-basebranch-forked"})
 			unittest.AssertExistsIf(t, false, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 8})
+
+			// create a pull request to base repository, code reviewers should be mentioned
+			testPullCreateDirectly(t, session, repo.OwnerName, repo.Name, repo.DefaultBranch, forkedRepo.OwnerName, forkedRepo.Name, "codeowner-basebranch-forked", "Test Pull Request3")
+
+			pr = unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadRepoID: forkedRepo.ID, HeadBranch: "codeowner-basebranch-forked"})
+			unittest.AssertExistsIf(t, true, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 8})
 		})
 	})
 }
@@ -411,6 +406,12 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 		// Have user1 create a fork of repo1.
 		testRepoFork(t, user1Session, "user2", "repo1", "user1", "repo1")
 
+		baseRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerName: "user2", Name: "repo1"})
+		forkedRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerName: "user1", Name: "repo1"})
+		baseGitRepo, err := gitrepo.OpenRepository(db.DefaultContext, baseRepo)
+		require.NoError(t, err)
+		defer baseGitRepo.Close()
+
 		t.Run("Submit approve/reject review on merged PR", func(t *testing.T) {
 			// Create a merged PR (made by user1) in the upstream repo1.
 			testEditFile(t, user1Session, "user1", "repo1", "master", "README.md", "Hello, World (Edited)\n")
@@ -419,16 +420,26 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 			assert.EqualValues(t, "pulls", elem[3])
 			testPullMerge(t, user1Session, elem[1], elem[2], elem[4], repo_model.MergeStyleMerge, false)
 
+			// Get the commit SHA
+			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{
+				BaseRepoID: baseRepo.ID,
+				BaseBranch: "master",
+				HeadRepoID: forkedRepo.ID,
+				HeadBranch: "master",
+			})
+			sha, err := baseGitRepo.GetRefCommitID(pr.GetGitRefName())
+			require.NoError(t, err)
+
 			// Grab the CSRF token.
 			req := NewRequest(t, "GET", path.Join(elem[1], elem[2], "pulls", elem[4]))
 			resp = user2Session.MakeRequest(t, req, http.StatusOK)
 			htmlDoc := NewHTMLParser(t, resp.Body)
 
 			// Submit an approve review on the PR.
-			testSubmitReview(t, user2Session, htmlDoc.GetCSRF(), "user2", "repo1", elem[4], "", "approve", http.StatusUnprocessableEntity)
+			testSubmitReview(t, user2Session, htmlDoc.GetCSRF(), "user2", "repo1", elem[4], sha, "approve", http.StatusOK)
 
 			// Submit a reject review on the PR.
-			testSubmitReview(t, user2Session, htmlDoc.GetCSRF(), "user2", "repo1", elem[4], "", "reject", http.StatusUnprocessableEntity)
+			testSubmitReview(t, user2Session, htmlDoc.GetCSRF(), "user2", "repo1", elem[4], sha, "reject", http.StatusOK)
 		})
 
 		t.Run("Submit approve/reject review on closed PR", func(t *testing.T) {
@@ -439,16 +450,26 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 			assert.EqualValues(t, "pulls", elem[3])
 			testIssueClose(t, user1Session, elem[1], elem[2], elem[4])
 
+			// Get the commit SHA
+			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{
+				BaseRepoID: baseRepo.ID,
+				BaseBranch: "master",
+				HeadRepoID: forkedRepo.ID,
+				HeadBranch: "a-test-branch",
+			})
+			sha, err := baseGitRepo.GetRefCommitID(pr.GetGitRefName())
+			require.NoError(t, err)
+
 			// Grab the CSRF token.
 			req := NewRequest(t, "GET", path.Join(elem[1], elem[2], "pulls", elem[4]))
 			resp = user2Session.MakeRequest(t, req, http.StatusOK)
 			htmlDoc := NewHTMLParser(t, resp.Body)
 
 			// Submit an approve review on the PR.
-			testSubmitReview(t, user2Session, htmlDoc.GetCSRF(), "user2", "repo1", elem[4], "", "approve", http.StatusUnprocessableEntity)
+			testSubmitReview(t, user2Session, htmlDoc.GetCSRF(), "user2", "repo1", elem[4], sha, "approve", http.StatusOK)
 
 			// Submit a reject review on the PR.
-			testSubmitReview(t, user2Session, htmlDoc.GetCSRF(), "user2", "repo1", elem[4], "", "reject", http.StatusUnprocessableEntity)
+			testSubmitReview(t, user2Session, htmlDoc.GetCSRF(), "user2", "repo1", elem[4], sha, "reject", http.StatusOK)
 		})
 	})
 }

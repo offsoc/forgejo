@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -40,7 +41,7 @@ class ConanPackageConan(ConanFile):
 
 func TestParseConanfile(t *testing.T) {
 	metadata, err := ParseConanfile(strings.NewReader(contentConanfile))
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, license, metadata.License)
 	assert.Equal(t, author, metadata.Author)
 	assert.Equal(t, homepage, metadata.ProjectURL)

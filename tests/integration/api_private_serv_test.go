@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/private"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIPrivateNoServ(t *testing.T) {
@@ -20,17 +21,17 @@ func TestAPIPrivateNoServ(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 		key, user, err := private.ServNoCommand(ctx, 1)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, int64(2), user.ID)
 		assert.Equal(t, "user2", user.Name)
 		assert.Equal(t, int64(1), key.ID)
 		assert.Equal(t, "user2@localhost", key.Name)
 
 		deployKey, err := asymkey_model.AddDeployKey(ctx, 1, "test-deploy", "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBGXEEzWmm1dxb+57RoK5KVCL0w2eNv9cqJX2AGGVlkFsVDhOXHzsadS3LTK4VlEbbrDMJdoti9yM8vclA8IeRacAAAAEc3NoOg== nocomment", false)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		key, user, err = private.ServNoCommand(ctx, deployKey.KeyID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Empty(t, user)
 		assert.Equal(t, deployKey.KeyID, key.ID)
 		assert.Equal(t, "test-deploy", key.Name)
@@ -44,7 +45,7 @@ func TestAPIPrivateServ(t *testing.T) {
 
 		// Can push to a repo we own
 		results, extra := private.ServCommand(ctx, 1, "user2", "repo1", perm.AccessModeWrite, "git-upload-pack", "")
-		assert.NoError(t, extra.Error)
+		require.NoError(t, extra.Error)
 		assert.False(t, results.IsWiki)
 		assert.Zero(t, results.DeployKeyID)
 		assert.Equal(t, int64(1), results.KeyID)
@@ -57,17 +58,17 @@ func TestAPIPrivateServ(t *testing.T) {
 
 		// Cannot push to a private repo we're not associated with
 		results, extra = private.ServCommand(ctx, 1, "user15", "big_test_private_1", perm.AccessModeWrite, "git-upload-pack", "")
-		assert.Error(t, extra.Error)
+		require.Error(t, extra.Error)
 		assert.Empty(t, results)
 
 		// Cannot pull from a private repo we're not associated with
 		results, extra = private.ServCommand(ctx, 1, "user15", "big_test_private_1", perm.AccessModeRead, "git-upload-pack", "")
-		assert.Error(t, extra.Error)
+		require.Error(t, extra.Error)
 		assert.Empty(t, results)
 
 		// Can pull from a public repo we're not associated with
 		results, extra = private.ServCommand(ctx, 1, "user15", "big_test_public_1", perm.AccessModeRead, "git-upload-pack", "")
-		assert.NoError(t, extra.Error)
+		require.NoError(t, extra.Error)
 		assert.False(t, results.IsWiki)
 		assert.Zero(t, results.DeployKeyID)
 		assert.Equal(t, int64(1), results.KeyID)
@@ -80,16 +81,16 @@ func TestAPIPrivateServ(t *testing.T) {
 
 		// Cannot push to a public repo we're not associated with
 		results, extra = private.ServCommand(ctx, 1, "user15", "big_test_public_1", perm.AccessModeWrite, "git-upload-pack", "")
-		assert.Error(t, extra.Error)
+		require.Error(t, extra.Error)
 		assert.Empty(t, results)
 
 		// Add reading deploy key
 		deployKey, err := asymkey_model.AddDeployKey(ctx, 19, "test-deploy", "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBGXEEzWmm1dxb+57RoK5KVCL0w2eNv9cqJX2AGGVlkFsVDhOXHzsadS3LTK4VlEbbrDMJdoti9yM8vclA8IeRacAAAAEc3NoOg== nocomment", true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Can pull from repo we're a deploy key for
 		results, extra = private.ServCommand(ctx, deployKey.KeyID, "user15", "big_test_private_1", perm.AccessModeRead, "git-upload-pack", "")
-		assert.NoError(t, extra.Error)
+		require.NoError(t, extra.Error)
 		assert.False(t, results.IsWiki)
 		assert.NotZero(t, results.DeployKeyID)
 		assert.Equal(t, deployKey.KeyID, results.KeyID)
@@ -102,31 +103,31 @@ func TestAPIPrivateServ(t *testing.T) {
 
 		// Cannot push to a private repo with reading key
 		results, extra = private.ServCommand(ctx, deployKey.KeyID, "user15", "big_test_private_1", perm.AccessModeWrite, "git-upload-pack", "")
-		assert.Error(t, extra.Error)
+		require.Error(t, extra.Error)
 		assert.Empty(t, results)
 
 		// Cannot pull from a private repo we're not associated with
 		results, extra = private.ServCommand(ctx, deployKey.ID, "user15", "big_test_private_2", perm.AccessModeRead, "git-upload-pack", "")
-		assert.Error(t, extra.Error)
+		require.Error(t, extra.Error)
 		assert.Empty(t, results)
 
 		// Cannot pull from a public repo we're not associated with
 		results, extra = private.ServCommand(ctx, deployKey.ID, "user15", "big_test_public_1", perm.AccessModeRead, "git-upload-pack", "")
-		assert.Error(t, extra.Error)
+		require.Error(t, extra.Error)
 		assert.Empty(t, results)
 
 		// Add writing deploy key
 		deployKey, err = asymkey_model.AddDeployKey(ctx, 20, "test-deploy", "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBGXEEzWmm1dxb+57RoK5KVCL0w2eNv9cqJX2AGGVlkFsVDhOXHzsadS3LTK4VlEbbrDMJdoti9yM8vclA8IeRacAAAAEc3NoOg== nocomment", false)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Cannot push to a private repo with reading key
 		results, extra = private.ServCommand(ctx, deployKey.KeyID, "user15", "big_test_private_1", perm.AccessModeWrite, "git-upload-pack", "")
-		assert.Error(t, extra.Error)
+		require.Error(t, extra.Error)
 		assert.Empty(t, results)
 
 		// Can pull from repo we're a writing deploy key for
 		results, extra = private.ServCommand(ctx, deployKey.KeyID, "user15", "big_test_private_2", perm.AccessModeRead, "git-upload-pack", "")
-		assert.NoError(t, extra.Error)
+		require.NoError(t, extra.Error)
 		assert.False(t, results.IsWiki)
 		assert.NotZero(t, results.DeployKeyID)
 		assert.Equal(t, deployKey.KeyID, results.KeyID)
@@ -139,7 +140,7 @@ func TestAPIPrivateServ(t *testing.T) {
 
 		// Can push to repo we're a writing deploy key for
 		results, extra = private.ServCommand(ctx, deployKey.KeyID, "user15", "big_test_private_2", perm.AccessModeWrite, "git-upload-pack", "")
-		assert.NoError(t, extra.Error)
+		require.NoError(t, extra.Error)
 		assert.False(t, results.IsWiki)
 		assert.NotZero(t, results.DeployKeyID)
 		assert.Equal(t, deployKey.KeyID, results.KeyID)

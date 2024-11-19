@@ -90,9 +90,17 @@ func colorSprintf(colorize bool, format string, args ...any) string {
 // EventFormatTextMessage makes the log message for a writer with its mode. This function is a copy of the original package
 func EventFormatTextMessage(mode *WriterMode, event *Event, msgFormat string, msgArgs ...any) []byte {
 	buf := make([]byte, 0, 1024)
-	buf = append(buf, mode.Prefix...)
 	t := event.Time
 	flags := mode.Flags.Bits()
+
+	// if log level prefixes are enabled, the message must begin with the prefix, see sd_daemon(3)
+	// "A line that is not prefixed will be logged at the default log level SD_INFO"
+	if flags&Llevelprefix != 0 {
+		prefix := event.Level.JournalPrefix()
+		buf = append(buf, prefix...)
+	}
+
+	buf = append(buf, mode.Prefix...)
 	if flags&(Ldate|Ltime|Lmicroseconds) != 0 {
 		if mode.Colorize {
 			buf = append(buf, fgCyanBytes...)

@@ -14,15 +14,16 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func listenReadAndClose(t *testing.T, l net.Listener, expected string) {
 	conn, err := l.Accept()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer conn.Close()
 	written, err := io.ReadAll(conn)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, string(written))
 }
 

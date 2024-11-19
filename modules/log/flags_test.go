@@ -9,6 +9,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFlags(t *testing.T) {
@@ -22,9 +23,9 @@ func TestFlags(t *testing.T) {
 	assert.EqualValues(t, "medfile", FlagsFromString("medfile").String())
 
 	bs, err := json.Marshal(FlagsFromString("utc,level"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, `"level,utc"`, string(bs))
 	var flags Flags
-	assert.NoError(t, json.Unmarshal(bs, &flags))
+	require.NoError(t, json.Unmarshal(bs, &flags))
 	assert.EqualValues(t, LUTC|Llevel, flags.Bits())
 }

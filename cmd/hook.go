@@ -322,7 +322,8 @@ func runHookUpdate(c *cli.Context) error {
 		return fail(ctx, fmt.Sprintf("The deletion of %s is skipped as it's an internal reference.", refFullName), "")
 	}
 
-	return nil
+	// If the new comment isn't empty it means modification.
+	return fail(ctx, fmt.Sprintf("The modification of %s is skipped as it's an internal reference.", refFullName), "")
 }
 
 func runHookPostReceive(c *cli.Context) error {
@@ -535,14 +536,14 @@ Forgejo or set your environment appropriately.`, "")
 
 	index := bytes.IndexByte(rs.Data, byte(0))
 	if index >= len(rs.Data) {
-		return fail(ctx, "Protocol: format error", "pkt-line: format error "+fmt.Sprint(rs.Data))
+		return fail(ctx, "Protocol: format error", "pkt-line: format error %s", rs.Data)
 	}
 
 	if index < 0 {
 		if len(rs.Data) == 10 && rs.Data[9] == '\n' {
 			index = 9
 		} else {
-			return fail(ctx, "Protocol: format error", "pkt-line: format error "+fmt.Sprint(rs.Data))
+			return fail(ctx, "Protocol: format error", "pkt-line: format error %s", rs.Data)
 		}
 	}
 

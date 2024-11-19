@@ -21,7 +21,7 @@ func TestAPIRepoActivitiyFeeds(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-	repo, _, f := CreateDeclarativeRepoWithOptions(t, owner, DeclarativeRepoOptions{})
+	repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, owner, tests.DeclarativeRepoOptions{})
 	defer f()
 
 	feedURL := fmt.Sprintf("/api/v1/repos/%s/activities/feeds", repo.FullName())

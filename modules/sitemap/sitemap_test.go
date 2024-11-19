@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewSitemap(t *testing.T) {
@@ -82,7 +83,7 @@ func TestNewSitemap(t *testing.T) {
 			if tt.wantErr != "" {
 				assert.EqualError(t, err, tt.wantErr)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equalf(t, tt.want, buf.String(), "NewSitemap()")
 			}
 		})
@@ -158,7 +159,7 @@ func TestNewSitemapIndex(t *testing.T) {
 			if tt.wantErr != "" {
 				assert.EqualError(t, err, tt.wantErr)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equalf(t, tt.want, buf.String(), "NewSitemapIndex()")
 			}
 		})

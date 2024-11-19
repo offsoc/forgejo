@@ -76,11 +76,11 @@ func TestWebhookProxy(t *testing.T) {
 
 			u, err := webhookProxy(allowedHostMatcher)(req)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			got := ""
 			if u != nil {
@@ -92,7 +92,7 @@ func TestWebhookProxy(t *testing.T) {
 }
 
 func TestWebhookDeliverAuthorizationHeader(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	done := make(chan struct{}, 1)
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -111,8 +111,8 @@ func TestWebhookDeliverAuthorizationHeader(t *testing.T) {
 		Type:        webhook_module.GITEA,
 	}
 	err := hook.SetHeaderAuthorization("Bearer s3cr3t-t0ken")
-	assert.NoError(t, err)
-	assert.NoError(t, webhook_model.CreateWebhook(db.DefaultContext, hook))
+	require.NoError(t, err)
+	require.NoError(t, webhook_model.CreateWebhook(db.DefaultContext, hook))
 
 	hookTask := &webhook_model.HookTask{
 		HookID:         hook.ID,
@@ -121,10 +121,10 @@ func TestWebhookDeliverAuthorizationHeader(t *testing.T) {
 	}
 
 	hookTask, err = webhook_model.CreateHookTask(db.DefaultContext, hookTask)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, hookTask)
 
-	assert.NoError(t, Deliver(context.Background(), hookTask))
+	require.NoError(t, Deliver(context.Background(), hookTask))
 	select {
 	case <-done:
 	case <-time.After(5 * time.Second):
@@ -136,7 +136,7 @@ func TestWebhookDeliverAuthorizationHeader(t *testing.T) {
 }
 
 func TestWebhookDeliverHookTask(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	done := make(chan struct{}, 1)
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -147,14 +147,14 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 			assert.Equal(t, "push", r.Header.Get("X-GitHub-Event"))
 			assert.Equal(t, "", r.Header.Get("Content-Type"))
 			body, err := io.ReadAll(r.Body)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, `{"data": 42}`, string(body))
 
 		case "/webhook/6db5dc1e282529a8c162c7fe93dd2667494eeb51":
 			// Version 2
 			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 			body, err := io.ReadAll(r.Body)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, body, 2147)
 
 		default:
@@ -176,7 +176,7 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 		ContentType: webhook_model.ContentTypeJSON,
 		Meta:        `{"message_type":0}`, // text
 	}
-	assert.NoError(t, webhook_model.CreateWebhook(db.DefaultContext, hook))
+	require.NoError(t, webhook_model.CreateWebhook(db.DefaultContext, hook))
 
 	t.Run("Version 1", func(t *testing.T) {
 		hookTask := &webhook_model.HookTask{
@@ -187,10 +187,10 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 		}
 
 		hookTask, err := webhook_model.CreateHookTask(db.DefaultContext, hookTask)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, hookTask)
 
-		assert.NoError(t, Deliver(context.Background(), hookTask))
+		require.NoError(t, Deliver(context.Background(), hookTask))
 		select {
 		case <-done:
 		case <-time.After(5 * time.Second):
@@ -203,7 +203,7 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 	t.Run("Version 2", func(t *testing.T) {
 		p := pushTestPayload()
 		data, err := p.JSONPayload()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		hookTask := &webhook_model.HookTask{
 			HookID:         hook.ID,
@@ -213,10 +213,10 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 		}
 
 		hookTask, err = webhook_model.CreateHookTask(db.DefaultContext, hookTask)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, hookTask)
 
-		assert.NoError(t, Deliver(context.Background(), hookTask))
+		require.NoError(t, Deliver(context.Background(), hookTask))
 		select {
 		case <-done:
 		case <-time.After(5 * time.Second):
@@ -228,7 +228,7 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 }
 
 func TestWebhookDeliverSpecificTypes(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	type hookCase struct {
 		gotBody        chan []byte
@@ -280,7 +280,7 @@ func TestWebhookDeliverSpecificTypes(t *testing.T) {
 
 		require.NotNil(t, hc.gotBody, r.URL.Path)
 		body, err := io.ReadAll(r.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		w.WriteHeader(200)
 		hc.gotBody <- body
 	}))
@@ -288,7 +288,7 @@ func TestWebhookDeliverSpecificTypes(t *testing.T) {
 
 	p := pushTestPayload()
 	data, err := p.JSONPayload()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	for typ, hc := range cases {
 		typ := typ
@@ -304,7 +304,7 @@ func TestWebhookDeliverSpecificTypes(t *testing.T) {
 				ContentType: 0,  // set to 0 so that falling back to default request fails with "invalid content type"
 				Meta:        "{}",
 			}
-			assert.NoError(t, webhook_model.CreateWebhook(db.DefaultContext, hook))
+			require.NoError(t, webhook_model.CreateWebhook(db.DefaultContext, hook))
 
 			hookTask := &webhook_model.HookTask{
 				HookID:         hook.ID,
@@ -314,10 +314,10 @@ func TestWebhookDeliverSpecificTypes(t *testing.T) {
 			}
 
 			hookTask, err := webhook_model.CreateHookTask(db.DefaultContext, hookTask)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, hookTask)
 
-			assert.NoError(t, Deliver(context.Background(), hookTask))
+			require.NoError(t, Deliver(context.Background(), hookTask))
 			select {
 			case gotBody := <-hc.gotBody:
 				assert.NotEqual(t, string(data), string(gotBody), "request body must be different from the event payload")

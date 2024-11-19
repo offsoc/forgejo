@@ -5,9 +5,13 @@ package integration
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 
+	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/tests"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // This test makes sure that organization members are able to navigate between `/<orgname>` and `/org/<orgname>/<section>` freely.
@@ -18,6 +22,8 @@ import (
 // owners/admins/members of the organization.
 func TestOrgNavigationDashboard(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
+
+	locale := translation.NewLocale("en-US")
 
 	// Login as the future organization admin and create an organization
 	session1 := loginUser(t, "user2")
@@ -32,6 +38,11 @@ func TestOrgNavigationDashboard(t *testing.T) {
 	resp := session1.MakeRequest(t, NewRequest(t, "GET", "/org_navigation_test"), http.StatusOK)
 	doc := NewHTMLParser(t, resp.Body)
 	doc.AssertElement(t, "#org-info a[href='/org/org_navigation_test/dashboard']", true)
+
+	// Verify the "New repository" and "New migration" buttons
+	links := doc.Find(".organization.profile .grid .column .center")
+	assert.EqualValues(t, locale.TrString("new_repo.link"), strings.TrimSpace(links.Find("a[href^='/repo/create?org=']").Text()))
+	assert.EqualValues(t, locale.TrString("new_migrate.link"), strings.TrimSpace(links.Find("a[href^='/repo/migrate?org=']").Text()))
 
 	// Check if the "View <orgname>" button is available on dashboard for the org admin (member)
 	resp = session1.MakeRequest(t, NewRequest(t, "GET", "/org/org_navigation_test/dashboard"), http.StatusOK)

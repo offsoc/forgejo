@@ -63,7 +63,7 @@ type Issue struct {
 	// Whether the issue is open or closed
 	//
 	// type: string
-	// enum: open,closed
+	// enum: ["open", "closed"]
 	State    StateType `json:"state"`
 	IsLocked bool      `json:"is_locked"`
 	Comments int       `json:"comments"`

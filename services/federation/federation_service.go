@@ -99,7 +99,11 @@ func ProcessLikeActivity(ctx context.Context, form any, repositoryID int64) (int
 
 func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forgefed.FederationHost, error) {
 	actionsUser := user.NewActionsUser()
-	client, err := activitypub.NewClient(ctx, actionsUser, "no idea where to get key material.")
+	clientFactory, err := activitypub.GetClientFactory(ctx)
+	if err != nil {
+		return nil, err
+	}
+	client, err := clientFactory.WithKeys(ctx, actionsUser, "no idea where to get key material.")
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +157,11 @@ func GetFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.Fe
 func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
 	// ToDo: Do we get a publicKeyId from server, repo or owner or repo?
 	actionsUser := user.NewActionsUser()
-	client, err := activitypub.NewClient(ctx, actionsUser, "no idea where to get key material.")
+	clientFactory, err := activitypub.GetClientFactory(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	client, err := clientFactory.WithKeys(ctx, actionsUser, "no idea where to get key material.")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -262,7 +270,11 @@ func SendLikeActivities(ctx context.Context, doer user.User, repoID int64) error
 		likeActivityList = append(likeActivityList, likeActivity)
 	}
 
-	apclient, err := activitypub.NewClient(ctx, &doer, doer.APActorID())
+	apclientFactory, err := activitypub.GetClientFactory(ctx)
+	if err != nil {
+		return err
+	}
+	apclient, err := apclientFactory.WithKeys(ctx, &doer, doer.APActorID())
 	if err != nil {
 		return err
 	}

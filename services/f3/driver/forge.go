@@ -50,7 +50,7 @@ func (o *forge) getOwnersPath(ctx context.Context, id string) f3_tree.Path {
 
 func (o *forge) Equals(context.Context, generic.NodeInterface) bool { return true }
 func (o *forge) Get(context.Context) bool                           { return true }
-func (o *forge) Put(context.Context) generic.NodeID                 { return generic.NodeID("forge") }
+func (o *forge) Put(context.Context) generic.NodeID                 { return generic.NewNodeID("forge") }
 func (o *forge) Patch(context.Context)                              {}
 func (o *forge) Delete(context.Context)                             {}
 func (o *forge) NewFormat() f3.Interface                            { return &f3.Forge{} }

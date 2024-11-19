@@ -78,12 +78,12 @@ func testLoggerCase(t *testing.T, level logger.Level, loggerFunc func(logger.Mes
 	assert.True(t, logFiltered[i], filtered[i])
 	if moreVerbose != nil {
 		i++
-		require.True(t, len(logFiltered) > i)
+		require.Greater(t, len(logFiltered), i)
 		assert.False(t, logFiltered[i], filtered[i])
 	}
 	if lessVerbose != nil {
 		i++
-		require.True(t, len(logFiltered) > i)
+		require.Greater(t, len(logFiltered), i)
 		assert.True(t, logFiltered[i], filtered[i])
 	}
 }

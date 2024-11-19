@@ -12,6 +12,8 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/modules/validation"
+	"code.gitea.io/gitea/services/mailer"
 )
 
 // AdminAddOrSetPrimaryEmailAddress is used by admins to add or set a user's primary email address
@@ -20,7 +22,7 @@ func AdminAddOrSetPrimaryEmailAddress(ctx context.Context, u *user_model.User, e
 		return nil
 	}
 
-	if err := user_model.ValidateEmailForAdmin(emailStr); err != nil {
+	if err := validation.ValidateEmailForAdmin(emailStr); err != nil {
 		return err
 	}
 
@@ -73,7 +75,7 @@ func ReplacePrimaryEmailAddress(ctx context.Context, u *user_model.User, emailSt
 		return nil
 	}
 
-	if err := user_model.ValidateEmail(emailStr); err != nil {
+	if err := validation.ValidateEmail(emailStr); err != nil {
 		return err
 	}
 
@@ -118,7 +120,7 @@ func ReplacePrimaryEmailAddress(ctx context.Context, u *user_model.User, emailSt
 
 func AddEmailAddresses(ctx context.Context, u *user_model.User, emails []string) error {
 	for _, emailStr := range emails {
-		if err := user_model.ValidateEmail(emailStr); err != nil {
+		if err := validation.ValidateEmail(emailStr); err != nil {
 			return err
 		}
 
@@ -163,7 +165,7 @@ func ReplaceInactivePrimaryEmail(ctx context.Context, oldEmail string, email *us
 		return err
 	}
 
-	err = user_model.MakeEmailPrimaryWithUser(ctx, user, email)
+	err = MakeEmailAddressPrimary(ctx, user, email, false)
 	if err != nil {
 		return err
 	}
@@ -188,5 +190,44 @@ func DeleteEmailAddresses(ctx context.Context, u *user_model.User, emails []stri
 		}
 	}
 
+	return nil
+}
+
+func MakeEmailAddressPrimary(ctx context.Context, u *user_model.User, newPrimaryEmail *user_model.EmailAddress, notify bool) error {
+	ctx, committer, err := db.TxContext(ctx)
+	if err != nil {
+		return err
+	}
+	defer committer.Close()
+	sess := db.GetEngine(ctx)
+
+	oldPrimaryEmail := u.Email
+
+	// 1. Update user table
+	u.Email = newPrimaryEmail.Email
+	if _, err = sess.ID(u.ID).Cols("email").Update(u); err != nil {
+		return err
+	}
+
+	// 2. Update old primary email
+	if _, err = sess.Where("uid=? AND is_primary=?", u.ID, true).Cols("is_primary").Update(&user_model.EmailAddress{
+		IsPrimary: false,
+	}); err != nil {
+		return err
+	}
+
+	// 3. update new primary email
+	newPrimaryEmail.IsPrimary = true
+	if _, err = sess.ID(newPrimaryEmail.ID).Cols("is_primary").Update(newPrimaryEmail); err != nil {
+		return err
+	}
+
+	if err := committer.Commit(); err != nil {
+		return err
+	}
+
+	if notify {
+		return mailer.SendPrimaryMailChange(u, oldPrimaryEmail)
+	}
 	return nil
 }

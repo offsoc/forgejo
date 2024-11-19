@@ -13,6 +13,7 @@ import (
 	base "code.gitea.io/gitea/modules/migration"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGogsDownloadRepo(t *testing.T) {
@@ -31,7 +32,7 @@ func TestGogsDownloadRepo(t *testing.T) {
 
 	downloader := NewGogsDownloader(context.Background(), "https://try.gogs.io", "", "", gogsPersonalAccessToken, "lunnytest", "TESTREPO")
 	repo, err := downloader.GetRepoInfo()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assertRepositoryEqual(t, &base.Repository{
 		Name:          "TESTREPO",
@@ -43,7 +44,7 @@ func TestGogsDownloadRepo(t *testing.T) {
 	}, repo)
 
 	milestones, err := downloader.GetMilestones()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertMilestonesEqual(t, []*base.Milestone{
 		{
 			Title: "1.0",
@@ -52,7 +53,7 @@ func TestGogsDownloadRepo(t *testing.T) {
 	}, milestones)
 
 	labels, err := downloader.GetLabels()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertLabelsEqual(t, []*base.Label{
 		{
 			Name:  "bug",
@@ -86,7 +87,7 @@ func TestGogsDownloadRepo(t *testing.T) {
 
 	// downloader.GetIssues()
 	issues, isEnd, err := downloader.GetIssues(1, 8)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isEnd)
 	assertIssuesEqual(t, []*base.Issue{
 		{
@@ -111,7 +112,7 @@ func TestGogsDownloadRepo(t *testing.T) {
 
 	// downloader.GetComments()
 	comments, _, err := downloader.GetComments(&base.Issue{Number: 1, ForeignIndex: 1})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertCommentsEqual(t, []*base.Comment{
 		{
 			IssueIndex:  1,
@@ -135,7 +136,7 @@ func TestGogsDownloadRepo(t *testing.T) {
 
 	// downloader.GetPullRequests()
 	_, _, err = downloader.GetPullRequests(1, 3)
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestGogsDownloaderFactory_New(t *testing.T) {

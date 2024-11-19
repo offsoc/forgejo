@@ -19,9 +19,11 @@ func TestTestHook(t *testing.T) {
 
 	ctx, _ := contexttest.MockAPIContext(t, "user2/repo1/wiki/_pages")
 	ctx.SetParams(":id", "1")
-	contexttest.LoadRepo(t, ctx, 1)
-	contexttest.LoadRepoCommit(t, ctx)
 	contexttest.LoadUser(t, ctx, 2)
+	contexttest.LoadRepo(t, ctx, 1)
+	contexttest.LoadGitRepo(t, ctx)
+	defer ctx.Repo.GitRepo.Close()
+	contexttest.LoadRepoCommit(t, ctx)
 	TestHook(ctx)
 	assert.EqualValues(t, http.StatusNoContent, ctx.Resp.Status())
 

@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testRun(m *testing.M) error {
@@ -52,33 +53,33 @@ func gitConfigContains(sub string) bool {
 func TestGitConfig(t *testing.T) {
 	assert.False(t, gitConfigContains("key-a"))
 
-	assert.NoError(t, configSetNonExist("test.key-a", "val-a"))
+	require.NoError(t, configSetNonExist("test.key-a", "val-a"))
 	assert.True(t, gitConfigContains("key-a = val-a"))
 
-	assert.NoError(t, configSetNonExist("test.key-a", "val-a-changed"))
+	require.NoError(t, configSetNonExist("test.key-a", "val-a-changed"))
 	assert.False(t, gitConfigContains("key-a = val-a-changed"))
 
-	assert.NoError(t, configSet("test.key-a", "val-a-changed"))
+	require.NoError(t, configSet("test.key-a", "val-a-changed"))
 	assert.True(t, gitConfigContains("key-a = val-a-changed"))
 
-	assert.NoError(t, configAddNonExist("test.key-b", "val-b"))
+	require.NoError(t, configAddNonExist("test.key-b", "val-b"))
 	assert.True(t, gitConfigContains("key-b = val-b"))
 
-	assert.NoError(t, configAddNonExist("test.key-b", "val-2b"))
+	require.NoError(t, configAddNonExist("test.key-b", "val-2b"))
 	assert.True(t, gitConfigContains("key-b = val-b"))
 	assert.True(t, gitConfigContains("key-b = val-2b"))
 
-	assert.NoError(t, configUnsetAll("test.key-b", "val-b"))
+	require.NoError(t, configUnsetAll("test.key-b", "val-b"))
 	assert.False(t, gitConfigContains("key-b = val-b"))
 	assert.True(t, gitConfigContains("key-b = val-2b"))
 
-	assert.NoError(t, configUnsetAll("test.key-b", "val-2b"))
+	require.NoError(t, configUnsetAll("test.key-b", "val-2b"))
 	assert.False(t, gitConfigContains("key-b = val-2b"))
 
-	assert.NoError(t, configSet("test.key-x", "*"))
+	require.NoError(t, configSet("test.key-x", "*"))
 	assert.True(t, gitConfigContains("key-x = *"))
-	assert.NoError(t, configSetNonExist("test.key-x", "*"))
-	assert.NoError(t, configUnsetAll("test.key-x", "*"))
+	require.NoError(t, configSetNonExist("test.key-x", "*"))
+	require.NoError(t, configUnsetAll("test.key-x", "*"))
 	assert.False(t, gitConfigContains("key-x = *"))
 }
 
@@ -89,7 +90,7 @@ func TestSyncConfig(t *testing.T) {
 	}()
 
 	setting.GitConfig.Options["sync-test.cfg-key-a"] = "CfgValA"
-	assert.NoError(t, syncGitConfig())
+	require.NoError(t, syncGitConfig())
 	assert.True(t, gitConfigContains("[sync-test]"))
 	assert.True(t, gitConfigContains("cfg-key-a = CfgValA"))
 }

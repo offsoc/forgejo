@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIterateRepositoryIDsWithLFSMetaObjects(t *testing.T) {
@@ -24,7 +25,7 @@ func TestIterateRepositoryIDsWithLFSMetaObjects(t *testing.T) {
 			Dirs: []string{"models/git/TestIterateRepositoryIDsWithLFSMetaObjects/"},
 		},
 	)()
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	type repocount struct {
 		repoid int64
@@ -40,7 +41,7 @@ func TestIterateRepositoryIDsWithLFSMetaObjects(t *testing.T) {
 			cases = append(cases, repocount{repoID, count})
 			return nil
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, expected, cases)
 	})
 
@@ -52,13 +53,13 @@ func TestIterateRepositoryIDsWithLFSMetaObjects(t *testing.T) {
 			cases = append(cases, repocount{repoID, count})
 			return nil
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, expected, cases)
 	})
 }
 
 func TestIterateLFSMetaObjectsForRepo(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	expectedIDs := []int64{1, 2, 3, 4}
 
@@ -70,7 +71,7 @@ func TestIterateLFSMetaObjectsForRepo(t *testing.T) {
 			actualIDs = append(actualIDs, lo.ID)
 			return nil
 		}, &IterateLFSMetaObjectsForRepoOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, expectedIDs, actualIDs)
 	})
 
@@ -82,7 +83,7 @@ func TestIterateLFSMetaObjectsForRepo(t *testing.T) {
 			actualIDs = append(actualIDs, lo.ID)
 			return nil
 		}, &IterateLFSMetaObjectsForRepoOptions{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, expectedIDs, actualIDs)
 
 		t.Run("Batch handles updates", func(t *testing.T) {
@@ -91,10 +92,10 @@ func TestIterateLFSMetaObjectsForRepo(t *testing.T) {
 			err := IterateLFSMetaObjectsForRepo(db.DefaultContext, 54, func(ctx context.Context, lo *LFSMetaObject) error {
 				actualIDs = append(actualIDs, lo.ID)
 				_, err := db.DeleteByID[LFSMetaObject](ctx, lo.ID)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return nil
 			}, &IterateLFSMetaObjectsForRepoOptions{})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, expectedIDs, actualIDs)
 		})
 	})

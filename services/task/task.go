@@ -152,3 +152,18 @@ func RetryMigrateTask(ctx context.Context, repoID int64) error {
 
 	return taskQueue.Push(migratingTask)
 }
+
+func SetMigrateTaskMessage(ctx context.Context, repoID int64, message string) error {
+	migratingTask, err := admin_model.GetMigratingTask(ctx, repoID)
+	if err != nil {
+		log.Error("GetMigratingTask: %v", err)
+		return err
+	}
+
+	migratingTask.Message = message
+	if err = migratingTask.UpdateCols(ctx, "message"); err != nil {
+		log.Error("task.UpdateCols failed: %v", err)
+		return err
+	}
+	return nil
+}

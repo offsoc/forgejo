@@ -16,15 +16,16 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 )
 
 func createIssueConfigInDirectory(t *testing.T, user *user_model.User, repo *repo_model.Repository, dir string, issueConfig map[string]any) {
 	config, err := yaml.Marshal(issueConfig)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = createOrReplaceFileInBranch(user, repo, fmt.Sprintf("%s/ISSUE_TEMPLATE/config.yaml", dir), repo.DefaultBranch, string(config))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func createIssueConfig(t *testing.T, user *user_model.User, repo *repo_model.Repository, issueConfig map[string]any) {
@@ -54,7 +55,7 @@ func TestAPIRepoGetIssueConfig(t *testing.T) {
 		issueConfig := getIssueConfig(t, owner.Name, repo.Name)
 
 		assert.True(t, issueConfig.BlankIssuesEnabled)
-		assert.Len(t, issueConfig.ContactLinks, 0)
+		assert.Empty(t, issueConfig.ContactLinks)
 	})
 
 	t.Run("DisableBlankIssues", func(t *testing.T) {
@@ -68,7 +69,7 @@ func TestAPIRepoGetIssueConfig(t *testing.T) {
 		issueConfig := getIssueConfig(t, owner.Name, repo.Name)
 
 		assert.False(t, issueConfig.BlankIssuesEnabled)
-		assert.Len(t, issueConfig.ContactLinks, 0)
+		assert.Empty(t, issueConfig.ContactLinks)
 	})
 
 	t.Run("ContactLinks", func(t *testing.T) {
@@ -144,18 +145,18 @@ func TestAPIRepoIssueConfigPaths(t *testing.T) {
 				configMap["blank_issues_enabled"] = false
 
 				configData, err := yaml.Marshal(configMap)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				_, err = createFileInBranch(owner, repo, fullPath, repo.DefaultBranch, string(configData))
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				issueConfig := getIssueConfig(t, owner.Name, repo.Name)
 
 				assert.False(t, issueConfig.BlankIssuesEnabled)
-				assert.Len(t, issueConfig.ContactLinks, 0)
+				assert.Empty(t, issueConfig.ContactLinks)
 
 				_, err = deleteFileInBranch(owner, repo, fullPath, repo.DefaultBranch)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			})
 		}
 	}

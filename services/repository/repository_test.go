@@ -12,10 +12,11 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLinkedRepository(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	testCases := []struct {
 		name             string
 		attachID         int64
@@ -30,9 +31,9 @@ func TestLinkedRepository(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			attach, err := repo_model.GetAttachmentByID(db.DefaultContext, tc.attachID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			repo, unitType, err := LinkedRepository(db.DefaultContext, attach)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			if tc.expectedRepo != nil {
 				assert.Equal(t, tc.expectedRepo.ID, repo.ID)
 			}

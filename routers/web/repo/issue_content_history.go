@@ -14,7 +14,6 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/services/context"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
@@ -73,10 +72,10 @@ func GetContentHistoryList(ctx *context.Context) {
 		class := avatars.DefaultAvatarClass + " tw-mr-2"
 		name := html.EscapeString(username)
 		avatarHTML := string(templates.AvatarHTML(src, 28, class, username))
-		timeSinceText := string(timeutil.TimeSinceUnix(item.EditedUnix, ctx.Locale))
+		timeSinceHTML := string(templates.TimeSince(item.EditedUnix))
 
 		results = append(results, map[string]any{
-			"name":  avatarHTML + "<strong>" + name + "</strong> " + actionText + " " + timeSinceText,
+			"name":  avatarHTML + "<strong>" + name + "</strong> " + actionText + " " + timeSinceHTML,
 			"value": item.HistoryID,
 		})
 	}
@@ -154,6 +153,7 @@ func GetContentHistoryDetail(ctx *context.Context) {
 	dmp := diffmatchpatch.New()
 	// `checklines=false` makes better diff result
 	diff := dmp.DiffMain(prevHistoryContentText, history.ContentText, false)
+	diff = dmp.DiffCleanupSemantic(diff)
 	diff = dmp.DiffCleanupEfficiency(diff)
 
 	// use chroma to render the diff html

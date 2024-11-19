@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 #
-# See also https://forgejo.org/docs/next/developer/RELEASE/#release-process
+# See also https://forgejo.org/docs/next/contributor/release/#stable-release-process
 #
 # https://codeberg.org/forgejo-experimental/forgejo
 #
@@ -39,7 +39,7 @@ jobs:
     runs-on: self-hosted
     if: vars.DOER != '' && vars.FORGEJO != '' && vars.TO_OWNER != '' && vars.FROM_OWNER != '' && secrets.TOKEN != ''
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: copy & sign
         uses: https://code.forgejo.org/forgejo/forgejo-build-publish/publish@v5
@@ -59,23 +59,37 @@ jobs:
           gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
           verbose: ${{ vars.VERBOSE }}
 
+      - name: get trigger mirror issue
+        id: mirror
+        uses: https://code.forgejo.org/infrastructure/issue-action/get@v1.1.0
+        with:
+          forgejo: https://code.forgejo.org
+          repository: forgejo/forgejo
+          labels: mirror-trigger
+
+      - name: trigger the mirror
+        uses: https://code.forgejo.org/infrastructure/issue-action/set@v1.1.0
+        with:
+          forgejo: https://code.forgejo.org
+          repository: forgejo/forgejo
+          token: ${{ secrets.LABEL_ISSUE_FORGEJO_MIRROR_TOKEN }}
+          numbers: ${{ steps.mirror.outputs.numbers }}
+          label-wait-if-exists: 3600
+          label: trigger
+
       - name: upgrade v*.next.forgejo.org
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get update -qq
-          apt-get -q install -y -qq curl
-          version="${{ github.ref_name }}"
-          version=${version##*v}
-          major=$(echo $version | sed -E -e 's/^([0-9]+).*/\1/')
-          # https://forgejo.org/docs/next/developer/infrastructure
-          curl -o /dev/null -sS https://v$major.next.forgejo.org/.well-known/wakeup-on-logs/forgejo-v$major
+        uses: https://code.forgejo.org/infrastructure/next-digest@v1.1.0
+        with:
+          url: https://placeholder:${{ secrets.TOKEN_NEXT_DIGEST }}@code.forgejo.org/infrastructure/next-digest
+          ref_name: '${{ github.ref_name }}'
+          image: 'codeberg.org/forgejo-experimental/forgejo'
+          tag_suffix: '-rootless'
 
       - name: set up go for the DNS update below
         if: vars.ROLE == 'forgejo-experimental' && secrets.OVH_APP_KEY != ''
-        uses: https://code.forgejo.org/actions/setup-go@v4
+        uses: https://code.forgejo.org/actions/setup-go@v5
         with:
-          go-version: "1.22"
-          check-latest: true
+          go-version-file: "go.mod"
       - name: update the _release.experimental DNS record
         if: vars.ROLE == 'forgejo-experimental' && secrets.OVH_APP_KEY != ''
         uses: https://code.forgejo.org/actions/ovh-dns-update@v1

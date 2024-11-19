@@ -13,6 +13,7 @@ import (
 	base "code.gitea.io/gitea/modules/migration"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCodebaseDownloadRepo(t *testing.T) {
@@ -41,7 +42,7 @@ func TestCodebaseDownloadRepo(t *testing.T) {
 		t.Fatalf("Error creating Codebase downloader: %v", err)
 	}
 	repo, err := downloader.GetRepoInfo()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertRepositoryEqual(t, &base.Repository{
 		Name:        "test",
 		Owner:       "",
@@ -51,7 +52,7 @@ func TestCodebaseDownloadRepo(t *testing.T) {
 	}, repo)
 
 	milestones, err := downloader.GetMilestones()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertMilestonesEqual(t, []*base.Milestone{
 		{
 			Title:    "Milestone1",
@@ -66,11 +67,11 @@ func TestCodebaseDownloadRepo(t *testing.T) {
 	}, milestones)
 
 	labels, err := downloader.GetLabels()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, labels, 4)
 
 	issues, isEnd, err := downloader.GetIssues(1, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, isEnd)
 	assertIssuesEqual(t, []*base.Issue{
 		{
@@ -107,7 +108,7 @@ func TestCodebaseDownloadRepo(t *testing.T) {
 	}, issues)
 
 	comments, _, err := downloader.GetComments(issues[0])
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertCommentsEqual(t, []*base.Comment{
 		{
 			IssueIndex:  2,
@@ -120,7 +121,7 @@ func TestCodebaseDownloadRepo(t *testing.T) {
 	}, comments)
 
 	prs, _, err := downloader.GetPullRequests(1, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertPullRequestsEqual(t, []*base.PullRequest{
 		{
 			Number:      3,
@@ -145,6 +146,6 @@ func TestCodebaseDownloadRepo(t *testing.T) {
 	}, prs)
 
 	rvs, err := downloader.GetReviews(prs[0])
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, rvs)
 }

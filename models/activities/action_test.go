@@ -17,10 +17,11 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAction_GetRepoPath(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
 	action := &activities_model.Action{RepoID: repo.ID}
@@ -28,7 +29,7 @@ func TestAction_GetRepoPath(t *testing.T) {
 }
 
 func TestAction_GetRepoLink(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
 	comment := unittest.AssertExistsAndLoadBean(t, &issue_model.Comment{ID: 2})
@@ -42,7 +43,7 @@ func TestAction_GetRepoLink(t *testing.T) {
 
 func TestGetFeeds(t *testing.T) {
 	// test with an individual user
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
 	actions, count, err := activities_model.GetFeeds(db.DefaultContext, activities_model.GetFeedsOptions{
@@ -52,7 +53,7 @@ func TestGetFeeds(t *testing.T) {
 		OnlyPerformedBy: false,
 		IncludeDeleted:  true,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if assert.Len(t, actions, 1) {
 		assert.EqualValues(t, 1, actions[0].ID)
 		assert.EqualValues(t, user.ID, actions[0].UserID)
@@ -65,13 +66,13 @@ func TestGetFeeds(t *testing.T) {
 		IncludePrivate:  false,
 		OnlyPerformedBy: false,
 	})
-	assert.NoError(t, err)
-	assert.Len(t, actions, 0)
+	require.NoError(t, err)
+	assert.Empty(t, actions)
 	assert.Equal(t, int64(0), count)
 }
 
 func TestGetFeedsForRepos(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	privRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 2})
 	pubRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 8})
@@ -81,8 +82,8 @@ func TestGetFeedsForRepos(t *testing.T) {
 		RequestedRepo:  privRepo,
 		IncludePrivate: true,
 	})
-	assert.NoError(t, err)
-	assert.Len(t, actions, 0)
+	require.NoError(t, err)
+	assert.Empty(t, actions)
 	assert.Equal(t, int64(0), count)
 
 	// public repo & no login
@@ -90,7 +91,7 @@ func TestGetFeedsForRepos(t *testing.T) {
 		RequestedRepo:  pubRepo,
 		IncludePrivate: true,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, actions, 1)
 	assert.Equal(t, int64(1), count)
 
@@ -100,7 +101,7 @@ func TestGetFeedsForRepos(t *testing.T) {
 		IncludePrivate: true,
 		Actor:          user,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, actions, 1)
 	assert.Equal(t, int64(1), count)
 
@@ -110,14 +111,14 @@ func TestGetFeedsForRepos(t *testing.T) {
 		IncludePrivate: true,
 		Actor:          user,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, actions, 1)
 	assert.Equal(t, int64(1), count)
 }
 
 func TestGetFeeds2(t *testing.T) {
 	// test with an organization user
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	org := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 3})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
@@ -128,7 +129,7 @@ func TestGetFeeds2(t *testing.T) {
 		OnlyPerformedBy: false,
 		IncludeDeleted:  true,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, actions, 1)
 	if assert.Len(t, actions, 1) {
 		assert.EqualValues(t, 2, actions[0].ID)
@@ -143,8 +144,8 @@ func TestGetFeeds2(t *testing.T) {
 		OnlyPerformedBy: false,
 		IncludeDeleted:  true,
 	})
-	assert.NoError(t, err)
-	assert.Len(t, actions, 0)
+	require.NoError(t, err)
+	assert.Empty(t, actions)
 	assert.Equal(t, int64(0), count)
 }
 
@@ -189,14 +190,14 @@ func TestActivityReadable(t *testing.T) {
 }
 
 func TestNotifyWatchers(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	action := &activities_model.Action{
 		ActUserID: 8,
 		RepoID:    1,
 		OpType:    activities_model.ActionStarRepo,
 	}
-	assert.NoError(t, activities_model.NotifyWatchers(db.DefaultContext, action))
+	require.NoError(t, activities_model.NotifyWatchers(db.DefaultContext, action))
 
 	// One watchers are inactive, thus action is only created for user 8, 1, 4, 11
 	unittest.AssertExistsAndLoadBean(t, &activities_model.Action{
@@ -226,7 +227,7 @@ func TestNotifyWatchers(t *testing.T) {
 }
 
 func TestGetFeedsCorrupted(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	unittest.AssertExistsAndLoadBean(t, &activities_model.Action{
 		ID:     8,
@@ -238,8 +239,8 @@ func TestGetFeedsCorrupted(t *testing.T) {
 		Actor:          user,
 		IncludePrivate: true,
 	})
-	assert.NoError(t, err)
-	assert.Len(t, actions, 0)
+	require.NoError(t, err)
+	assert.Empty(t, actions)
 	assert.Equal(t, int64(0), count)
 }
 
@@ -247,47 +248,46 @@ func TestConsistencyUpdateAction(t *testing.T) {
 	if !setting.Database.Type.IsSQLite3() {
 		t.Skip("Test is only for SQLite database.")
 	}
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	id := 8
 	unittest.AssertExistsAndLoadBean(t, &activities_model.Action{
 		ID: int64(id),
 	})
 	_, err := db.GetEngine(db.DefaultContext).Exec(`UPDATE action SET created_unix = "" WHERE id = ?`, id)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	actions := make([]*activities_model.Action, 0, 1)
 	//
 	// XORM returns an error when created_unix is a string
 	//
 	err = db.GetEngine(db.DefaultContext).Where("id = ?", id).Find(&actions)
-	if assert.Error(t, err) {
-		assert.Contains(t, err.Error(), "type string to a int64: invalid syntax")
-	}
+	require.ErrorContains(t, err, "type string to a int64: invalid syntax")
+
 	//
 	// Get rid of incorrectly set created_unix
 	//
 	count, err := activities_model.CountActionCreatedUnixString(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 1, count)
 	count, err = activities_model.FixActionCreatedUnixString(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 1, count)
 
 	count, err = activities_model.CountActionCreatedUnixString(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 0, count)
 	count, err = activities_model.FixActionCreatedUnixString(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 0, count)
 
 	//
 	// XORM must be happy now
 	//
-	assert.NoError(t, db.GetEngine(db.DefaultContext).Where("id = ?", id).Find(&actions))
+	require.NoError(t, db.GetEngine(db.DefaultContext).Where("id = ?", id).Find(&actions))
 	unittest.CheckConsistencyFor(t, &activities_model.Action{})
 }
 
 func TestDeleteIssueActions(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// load an issue
 	issue := unittest.AssertExistsAndLoadBean(t, &issue_model.Issue{ID: 4})
@@ -295,26 +295,26 @@ func TestDeleteIssueActions(t *testing.T) {
 
 	// insert a comment
 	err := db.Insert(db.DefaultContext, &issue_model.Comment{Type: issue_model.CommentTypeComment, IssueID: issue.ID})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	comment := unittest.AssertExistsAndLoadBean(t, &issue_model.Comment{Type: issue_model.CommentTypeComment, IssueID: issue.ID})
 
 	// truncate action table and insert some actions
 	err = db.TruncateBeans(db.DefaultContext, &activities_model.Action{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = db.Insert(db.DefaultContext, &activities_model.Action{
 		OpType:    activities_model.ActionCommentIssue,
 		CommentID: comment.ID,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = db.Insert(db.DefaultContext, &activities_model.Action{
 		OpType:  activities_model.ActionCreateIssue,
 		RepoID:  issue.RepoID,
 		Content: fmt.Sprintf("%d|content...", issue.Index),
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// assert that the actions exist, then delete them
 	unittest.AssertCount(t, &activities_model.Action{}, 2)
-	assert.NoError(t, activities_model.DeleteIssueActions(db.DefaultContext, issue.RepoID, issue.ID, issue.Index))
+	require.NoError(t, activities_model.DeleteIssueActions(db.DefaultContext, issue.RepoID, issue.ID, issue.Index))
 	unittest.AssertCount(t, &activities_model.Action{}, 0)
 }

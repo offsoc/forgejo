@@ -87,7 +87,7 @@ func (o *asset) Get(ctx context.Context) bool {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	asset, err := repo_model.GetAttachmentByID(ctx, id)
 	if repo_model.IsErrAttachmentNotExist(err) {
@@ -154,7 +154,7 @@ func (o *asset) Put(ctx context.Context) generic.NodeID {
 	}
 
 	o.Trace("asset created %d", o.forgejoAsset.ID)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoAsset.ID))
+	return generic.NewNodeID(o.forgejoAsset.ID)
 }
 
 func (o *asset) Delete(ctx context.Context) {

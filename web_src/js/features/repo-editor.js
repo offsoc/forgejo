@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import {htmlEscape} from 'escape-goat';
 import {createCodeEditor} from './codeeditor.js';
-import {hideElem, showElem} from '../utils/dom.js';
+import {hideElem, showElem, createElementFromHTML} from '../utils/dom.js';
 import {initMarkupContent} from '../markup/content.js';
 import {attachRefIssueContextPopup} from './contextpopup.js';
 import {POST} from '../modules/fetch.js';
@@ -9,7 +9,9 @@ import {POST} from '../modules/fetch.js';
 function initEditPreviewTab($form) {
   const $tabMenu = $form.find('.tabular.menu');
   $tabMenu.find('.item').tab();
-  const $previewTab = $tabMenu.find(`.item[data-tab="${$tabMenu.data('preview')}"]`);
+  const $previewTab = $tabMenu.find(
+    `.item[data-tab="${$tabMenu.data('preview')}"]`,
+  );
   if ($previewTab.length) {
     $previewTab.on('click', async function () {
       const $this = $(this);
@@ -24,12 +26,17 @@ function initEditPreviewTab($form) {
       const formData = new FormData();
       formData.append('mode', mode);
       formData.append('context', context);
-      formData.append('text', $form.find(`.tab[data-tab="${$tabMenu.data('write')}"] textarea`).val());
+      formData.append(
+        'text',
+        $form.find(`.tab[data-tab="${$tabMenu.data('write')}"] textarea`).val(),
+      );
       formData.append('file_path', $treePathEl.val());
       try {
         const response = await POST($this.data('url'), {data: formData});
         const data = await response.text();
-        const $previewPanel = $form.find(`.tab[data-tab="${$tabMenu.data('preview')}"]`);
+        const $previewPanel = $form.find(
+          `.tab[data-tab="${$tabMenu.data('preview')}"]`,
+        );
         renderPreviewPanelContent($previewPanel, data);
       } catch (error) {
         console.error('Error:', error);
@@ -96,8 +103,14 @@ export function initRepoEditor() {
         const value = parts[i];
         if (i < parts.length - 1) {
           if (value.length) {
-            $(`<span class="section"><a href="#">${htmlEscape(value)}</a></span>`).insertBefore($(this));
-            $('<div class="breadcrumb-divider">/</div>').insertBefore($(this));
+            $editFilename[0].before(
+              createElementFromHTML(
+                `<span class="section"><a href="#">${htmlEscape(value)}</a></span>`,
+              ),
+            );
+            $editFilename[0].before(
+              createElementFromHTML(`<div class="breadcrumb-divider">/</div>`),
+            );
           }
         } else {
           $(this).val(value);
@@ -113,7 +126,11 @@ export function initRepoEditor() {
     const $section = $('.breadcrumb span.section');
 
     // Jump back to last directory once the filename is empty
-    if (e.code === 'Backspace' && getCursorPosition($(this)) === 0 && $section.length > 0) {
+    if (
+      e.code === 'Backspace' &&
+      getCursorPosition($(this)) === 0 &&
+      $section.length > 0
+    ) {
       e.preventDefault();
       const $divider = $('.breadcrumb .breadcrumb-divider');
       const value = $section.last().find('a').text();
@@ -164,11 +181,13 @@ export function initRepoEditor() {
     commitButton?.addEventListener('click', (e) => {
       // A modal which asks if an empty file should be committed
       if (!$editArea.val()) {
-        $('#edit-empty-content-modal').modal({
-          onApprove() {
-            $('.edit.form').trigger('submit');
-          },
-        }).modal('show');
+        $('#edit-empty-content-modal')
+          .modal({
+            onApprove() {
+              $('.edit.form').trigger('submit');
+            },
+          })
+          .modal('show');
         e.preventDefault();
       }
     });

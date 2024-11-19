@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/services/forms"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func int64SliceToCommaSeparated(a []int64) string {
@@ -32,7 +33,7 @@ func int64SliceToCommaSeparated(a []int64) string {
 
 func TestInitializeLabels(t *testing.T) {
 	unittest.PrepareTestEnv(t)
-	assert.NoError(t, repository.LoadRepoConfig())
+	require.NoError(t, repository.LoadRepoConfig())
 	ctx, _ := contexttest.MockContext(t, "user2/repo1/labels/initialize")
 	contexttest.LoadUser(t, ctx, 2)
 	contexttest.LoadRepo(t, ctx, 2)

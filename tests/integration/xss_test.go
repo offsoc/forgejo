@@ -55,9 +55,9 @@ func TestXSSWikiLastCommitInfo(t *testing.T) {
 		dstPath := t.TempDir()
 		r := fmt.Sprintf("%suser2/repo1.wiki.git", u.String())
 		u, err := url.Parse(r)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		u.User = url.UserPassword("user2", userPassword)
-		assert.NoError(t, git.CloneWithArgs(context.Background(), git.AllowLFSFiltersArgs(), u.String(), dstPath, git.CloneRepoOptions{}))
+		require.NoError(t, git.CloneWithArgs(context.Background(), git.AllowLFSFiltersArgs(), u.String(), dstPath, git.CloneRepoOptions{}))
 
 		// Use go-git here, because using git wouldn't work, it has code to remove
 		// `<`, `>` and `\n` in user names. Even though this is permitted and

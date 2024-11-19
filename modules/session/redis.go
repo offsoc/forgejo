@@ -25,13 +25,12 @@ import (
 	"code.gitea.io/gitea/modules/graceful"
 	"code.gitea.io/gitea/modules/nosql"
 
-	"gitea.com/go-chi/session"
-	"github.com/redis/go-redis/v9"
+	"code.forgejo.org/go-chi/session"
 )
 
 // RedisStore represents a redis session store implementation.
 type RedisStore struct {
-	c           redis.UniversalClient
+	c           nosql.RedisClient
 	prefix, sid string
 	duration    time.Duration
 	lock        sync.RWMutex
@@ -39,7 +38,7 @@ type RedisStore struct {
 }
 
 // NewRedisStore creates and returns a redis session store.
-func NewRedisStore(c redis.UniversalClient, prefix, sid string, dur time.Duration, kv map[any]any) *RedisStore {
+func NewRedisStore(c nosql.RedisClient, prefix, sid string, dur time.Duration, kv map[any]any) *RedisStore {
 	return &RedisStore{
 		c:        c,
 		prefix:   prefix,
@@ -106,7 +105,7 @@ func (s *RedisStore) Flush() error {
 
 // RedisProvider represents a redis session provider implementation.
 type RedisProvider struct {
-	c        redis.UniversalClient
+	c        nosql.RedisClient
 	duration time.Duration
 	prefix   string
 }
@@ -122,8 +121,7 @@ func (p *RedisProvider) Init(maxlifetime int64, configs string) (err error) {
 	uri := nosql.ToRedisURI(configs)
 
 	for k, v := range uri.Query() {
-		switch k {
-		case "prefix":
+		if k == "prefix" {
 			p.prefix = v[0]
 		}
 	}

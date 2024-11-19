@@ -23,27 +23,28 @@ import (
 	"github.com/klauspost/compress/gzhttp"
 	gzipp "github.com/klauspost/compress/gzip"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func storeObjectInRepo(t *testing.T, repositoryID int64, content *[]byte) string {
 	pointer, err := lfs.GeneratePointer(bytes.NewReader(*content))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = git_model.NewLFSMetaObject(db.DefaultContext, repositoryID, pointer)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	contentStore := lfs.NewContentStore()
 	exist, err := contentStore.Exists(pointer)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if !exist {
 		err := contentStore.Put(pointer, bytes.NewReader(*content))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 	return pointer.Oid
 }
 
 func storeAndGetLfsToken(t *testing.T, content *[]byte, extraHeader *http.Header, expectedStatus int, ts ...auth.AccessTokenScope) *httptest.ResponseRecorder {
 	repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, "user2", "repo1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	oid := storeObjectInRepo(t, repo.ID, content)
 	defer git_model.RemoveLFSMetaObjectByOid(db.DefaultContext, repo.ID, oid)
 
@@ -68,7 +69,7 @@ func storeAndGetLfsToken(t *testing.T, content *[]byte, extraHeader *http.Header
 
 func storeAndGetLfs(t *testing.T, content *[]byte, extraHeader *http.Header, expectedStatus int) *httptest.ResponseRecorder {
 	repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, "user2", "repo1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	oid := storeObjectInRepo(t, repo.ID, content)
 	defer git_model.RemoveLFSMetaObjectByOid(db.DefaultContext, repo.ID, oid)
 
@@ -100,9 +101,9 @@ func checkResponseTestContentEncoding(t *testing.T, content *[]byte, resp *httpt
 	} else {
 		assert.Contains(t, contentEncoding, "gzip")
 		gzippReader, err := gzipp.NewReader(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		result, err := io.ReadAll(gzippReader)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, *content, result)
 	}
 }
@@ -166,7 +167,7 @@ func TestGetLFSZip(t *testing.T) {
 	outputBuffer := bytes.NewBuffer([]byte{})
 	zipWriter := zip.NewWriter(outputBuffer)
 	fileWriter, err := zipWriter.Create("default")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	fileWriter.Write(b)
 	zipWriter.Close()
 	content := outputBuffer.Bytes()
@@ -219,7 +220,7 @@ func TestGetLFSRange(t *testing.T) {
 			} else {
 				var er lfs.ErrorResponse
 				err := json.Unmarshal(resp.Body.Bytes(), &er)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tt.out, er.Message)
 			}
 		})

@@ -6,8 +6,10 @@
 package forms
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"code.gitea.io/gitea/models"
@@ -19,13 +21,13 @@ import (
 	"code.gitea.io/gitea/modules/web/middleware"
 	"code.gitea.io/gitea/services/context"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 // CreateRepoForm form for creating repository
 type CreateRepoForm struct {
 	UID           int64  `binding:"Required"`
-	RepoName      string `binding:"Required;AlphaDashDot;MaxSize(100)"`
+	RepoName      string `binding:"Required;AlphaDashDot;MaxSize(100)" preprocess:"TrimSpace"`
 	Private       bool
 	Description   string `binding:"MaxSize(2048)"`
 	DefaultBranch string `binding:"GitRefName;MaxSize(100)"`
@@ -88,6 +90,9 @@ func (f *MigrateRepoForm) Validate(req *http.Request, errs binding.Errors) bindi
 	return middleware.Validate(errs, ctx.Data, f, ctx.Locale)
 }
 
+// scpRegex matches the SCP-like addresses used by Git to access repositories over SSH.
+var scpRegex = regexp.MustCompile(`^([a-zA-Z0-9_]+)@([a-zA-Z0-9._-]+):(.*)$`)
+
 // ParseRemoteAddr checks if given remote address is valid,
 // and returns composed URL with needed username and password.
 func ParseRemoteAddr(remoteAddr, authUsername, authPassword string) (string, error) {
@@ -103,7 +108,15 @@ func ParseRemoteAddr(remoteAddr, authUsername, authPassword string) (string, err
 		if len(authUsername)+len(authPassword) > 0 {
 			u.User = url.UserPassword(authUsername, authPassword)
 		}
-		remoteAddr = u.String()
+		return u.String(), nil
+	}
+
+	// Detect SCP-like remote addresses and return host.
+	if m := scpRegex.FindStringSubmatch(remoteAddr); m != nil {
+		// Match SCP-like syntax and convert it to a URL.
+		// Eg, "git@forgejo.org:user/repo" becomes
+		// "ssh://git@forgejo.org/user/repo".
+		return fmt.Sprintf("ssh://%s@%s/%s", url.User(m[1]), m[2], m[3]), nil
 	}
 
 	return remoteAddr, nil
@@ -127,6 +140,7 @@ type RepoSettingForm struct {
 	PushMirrorPassword     string
 	PushMirrorSyncOnCommit bool
 	PushMirrorInterval     string
+	PushMirrorUseSSH       bool
 	Private                bool
 	Template               bool
 	EnablePrune            bool
@@ -429,7 +443,7 @@ func (f *InitializeLabelsForm) Validate(req *http.Request, errs binding.Errors) 
 // swagger:model MergePullRequestOption
 type MergePullRequestForm struct {
 	// required: true
-	// enum: merge,rebase,rebase-merge,squash,fast-forward-only,manually-merged
+	// enum: ["merge", "rebase", "rebase-merge", "squash", "fast-forward-only", "manually-merged"]
 	Do                     string `binding:"Required;In(merge,rebase,rebase-merge,squash,fast-forward-only,manually-merged)"`
 	MergeTitleField        string
 	MergeMessageField      string
@@ -734,4 +748,8 @@ type DeadlineForm struct {
 func (f *DeadlineForm) Validate(req *http.Request, errs binding.Errors) binding.Errors {
 	ctx := context.GetValidateContext(req)
 	return middleware.Validate(errs, ctx.Data, f, ctx.Locale)
+}
+
+type CommitNotesForm struct {
+	Notes string
 }

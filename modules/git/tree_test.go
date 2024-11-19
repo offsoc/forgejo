@@ -8,20 +8,21 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSubTree_Issue29101(t *testing.T) {
 	repo, err := openRepositoryWithDefaultContext(filepath.Join(testReposDir, "repo1_bare"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer repo.Close()
 
 	commit, err := repo.GetCommit("ce064814f4a0d337b333e646ece456cd39fab612")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// old code could produce a different error if called multiple times
 	for i := 0; i < 10; i++ {
 		_, err = commit.SubTree("file1.txt")
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.True(t, IsErrNotExist(err))
 	}
 }

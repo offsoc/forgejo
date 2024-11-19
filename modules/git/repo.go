@@ -1,5 +1,6 @@
 // Copyright 2015 The Gogs Authors. All rights reserved.
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package git
@@ -18,6 +19,7 @@ import (
 	"time"
 
 	"code.gitea.io/gitea/modules/proxy"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 )
 
@@ -190,17 +192,39 @@ func CloneWithArgs(ctx context.Context, args TrustedCmdArgs, from, to string, op
 
 // PushOptions options when push to remote
 type PushOptions struct {
-	Remote  string
-	Branch  string
-	Force   bool
-	Mirror  bool
-	Env     []string
-	Timeout time.Duration
+	Remote         string
+	Branch         string
+	Force          bool
+	Mirror         bool
+	Env            []string
+	Timeout        time.Duration
+	PrivateKeyPath string
 }
 
 // Push pushs local commits to given remote branch.
 func Push(ctx context.Context, repoPath string, opts PushOptions) error {
 	cmd := NewCommand(ctx, "push")
+
+	if opts.PrivateKeyPath != "" {
+		// Preserve the behavior that existing environments are used if no
+		// environments are passed.
+		if len(opts.Env) == 0 {
+			opts.Env = os.Environ()
+		}
+
+		// Use environment because it takes precedence over using -c core.sshcommand
+		// and it's possible that a system might have an existing GIT_SSH_COMMAND
+		// environment set.
+		opts.Env = append(opts.Env, "GIT_SSH_COMMAND=ssh"+
+			fmt.Sprintf(` -i %s`, opts.PrivateKeyPath)+
+			" -o IdentitiesOnly=yes"+
+			// This will store new SSH host keys and verify connections to existing
+			// host keys, but it doesn't allow replacement of existing host keys. This
+			// means TOFU is used for Git over SSH pushes.
+			" -o StrictHostKeyChecking=accept-new"+
+			" -o UserKnownHostsFile="+filepath.Join(setting.SSH.RootPath, "known_hosts"))
+	}
+
 	if opts.Force {
 		cmd.AddArguments("-f")
 	}

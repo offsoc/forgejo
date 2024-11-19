@@ -10,6 +10,7 @@ import (
 	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm/schemas"
 )
 
@@ -28,18 +29,18 @@ func Test_AddUniqueIndexForProjectIssue(t *testing.T) {
 	}
 
 	cnt, err := x.Table("project_issue").Where("project_id=1 AND issue_id=1").Count()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 2, cnt)
 
-	assert.NoError(t, AddUniqueIndexForProjectIssue(x))
+	require.NoError(t, AddUniqueIndexForProjectIssue(x))
 
 	cnt, err = x.Table("project_issue").Where("project_id=1 AND issue_id=1").Count()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 1, cnt)
 
 	tables, err := x.DBMetas()
-	assert.NoError(t, err)
-	assert.EqualValues(t, 1, len(tables))
+	require.NoError(t, err)
+	assert.Len(t, tables, 1)
 	found := false
 	for _, index := range tables[0].Indexes {
 		if index.Type == schemas.UniqueType {

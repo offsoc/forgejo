@@ -67,7 +67,7 @@ func (o *reaction) Get(ctx context.Context) bool {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	if has, err := db.GetEngine(ctx).Where("ID = ?", id).Get(o.forgejoReaction); err != nil {
 		panic(fmt.Errorf("reaction %v %w", id, err))
@@ -115,7 +115,7 @@ func (o *reaction) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("reaction created %d", o.forgejoReaction.ID)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoReaction.ID))
+	return generic.NewNodeID(o.forgejoReaction.ID)
 }
 
 func (o *reaction) Delete(ctx context.Context) {

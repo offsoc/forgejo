@@ -11,7 +11,6 @@ import (
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +22,7 @@ func initLoggersByConfig(t *testing.T, config string) (*log.LoggerManager, func(
 	}()
 
 	cfg, err := NewConfigProviderFromData(config)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	manager := log.NewManager()
 	initManagedLoggers(manager, cfg)

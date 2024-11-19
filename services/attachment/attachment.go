@@ -13,6 +13,7 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/modules/storage"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/services/context/upload"
 
 	"github.com/google/uuid"
@@ -39,6 +40,28 @@ func NewAttachment(ctx context.Context, attach *repo_model.Attachment, file io.R
 		_, err = eng.Insert(attach)
 		return err
 	})
+
+	return attach, err
+}
+
+func NewExternalAttachment(ctx context.Context, attach *repo_model.Attachment) (*repo_model.Attachment, error) {
+	if attach.RepoID == 0 {
+		return nil, fmt.Errorf("attachment %s should belong to a repository", attach.Name)
+	}
+	if attach.ExternalURL == "" {
+		return nil, fmt.Errorf("attachment %s should have a external url", attach.Name)
+	}
+	if !validation.IsValidExternalURL(attach.ExternalURL) {
+		return nil, repo_model.ErrInvalidExternalURL{ExternalURL: attach.ExternalURL}
+	}
+
+	attach.UUID = uuid.New().String()
+
+	eng := db.GetEngine(ctx)
+	if attach.NoAutoTime {
+		eng.NoAutoTime()
+	}
+	_, err := eng.Insert(attach)
 
 	return attach, err
 }

@@ -61,7 +61,7 @@ WorkingDirectory=/var/lib/forgejo/
 #RuntimeDirectory=forgejo
 ExecStart=/usr/local/bin/forgejo web --config /etc/forgejo/app.ini
 Restart=always
-Environment=USER=git HOME=/home/git GITEA_WORK_DIR=/var/lib/forgejo
+Environment=USER=git HOME=/home/git FORGEJO_WORK_DIR=/var/lib/forgejo
 # If you install Git to directory prefix other than default PATH (which happens
 # for example if you install other versions of Git side-to-side with
 # distribution version), uncomment below line and add that prefix to PATH

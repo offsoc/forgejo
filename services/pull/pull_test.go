@@ -16,6 +16,7 @@ import (
 	"code.gitea.io/gitea/modules/gitrepo"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TODO TestPullRequest_PushToBaseRepo
@@ -38,27 +39,28 @@ func TestPullRequest_CommitMessageTrailersPattern(t *testing.T) {
 }
 
 func TestPullRequest_GetDefaultMergeMessage_InternalTracker(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: 2})
 
-	assert.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
+	require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, pr.BaseRepo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
-	mergeMessage, _, err := GetDefaultMergeMessage(db.DefaultContext, gitRepo, pr, "")
-	assert.NoError(t, err)
+	mergeMessage, body, err := GetDefaultMergeMessage(db.DefaultContext, gitRepo, pr, "")
+	require.NoError(t, err)
 	assert.Equal(t, "Merge pull request 'issue3' (#3) from branch2 into master", mergeMessage)
+	assert.Equal(t, "Reviewed-on: https://try.gitea.io/user2/repo1/pulls/3\n", body)
 
 	pr.BaseRepoID = 1
 	pr.HeadRepoID = 2
 	mergeMessage, _, err = GetDefaultMergeMessage(db.DefaultContext, gitRepo, pr, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "Merge pull request 'issue3' (#3) from user2/repo1:branch2 into master", mergeMessage)
 }
 
 func TestPullRequest_GetDefaultMergeMessage_ExternalTracker(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	externalTracker := repo_model.RepoUnit{
 		Type: unit.TypeExternalTracker,
@@ -71,13 +73,13 @@ func TestPullRequest_GetDefaultMergeMessage_ExternalTracker(t *testing.T) {
 
 	pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: 2, BaseRepo: baseRepo})
 
-	assert.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
+	require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, pr.BaseRepo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	mergeMessage, _, err := GetDefaultMergeMessage(db.DefaultContext, gitRepo, pr, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "Merge pull request 'issue3' (!3) from branch2 into master", mergeMessage)
 
@@ -86,7 +88,7 @@ func TestPullRequest_GetDefaultMergeMessage_ExternalTracker(t *testing.T) {
 	pr.BaseRepo = nil
 	pr.HeadRepo = nil
 	mergeMessage, _, err = GetDefaultMergeMessage(db.DefaultContext, gitRepo, pr, "")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "Merge pull request 'issue3' (#3) from user2/repo2:branch2 into master", mergeMessage)
 }

@@ -13,14 +13,15 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	_ "code.gitea.io/gitea/models/actions"
+	_ "code.gitea.io/gitea/models/forgefed"
 	_ "code.gitea.io/gitea/models/system"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestFixturesAreConsistent assert that test fixtures are consistent
 func TestFixturesAreConsistent(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	unittest.CheckConsistencyFor(t,
 		&user_model.User{},
 		&repo_model.Repository{},

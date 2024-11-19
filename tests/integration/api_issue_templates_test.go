@@ -16,6 +16,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIIssueTemplateList(t *testing.T) {
@@ -59,7 +60,7 @@ ref: 'main'
 ---
 
 This is the template!`)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/repos/%s/issue_templates", repo.FullName()))
 					resp := MakeRequest(t, req, http.StatusOK)
@@ -97,7 +98,7 @@ ref: 'main'
 ---
 
 This is the template!`)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 
 			req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/repos/%s/issue_templates", repo.FullName()))

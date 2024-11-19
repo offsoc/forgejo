@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/modules/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type alreadyDeletedStorage struct {
@@ -35,18 +36,18 @@ func TestUserDeleteAvatar(t *testing.T) {
 	t.Run("AtomicStorageFailure", func(t *testing.T) {
 		defer test.MockProtect[storage.ObjectStorage](&storage.Avatars)()
 
-		assert.NoError(t, unittest.PrepareTestDatabase())
+		require.NoError(t, unittest.PrepareTestDatabase())
 		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
 		err := UploadAvatar(db.DefaultContext, user, buff.Bytes())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		verification := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 		assert.NotEqual(t, "", verification.Avatar)
 
 		// fail to delete ...
 		storage.Avatars = storage.UninitializedStorage
 		err = DeleteAvatar(db.DefaultContext, user)
-		assert.Error(t, err)
+		require.Error(t, err)
 
 		// ... the avatar is not removed from the database
 		verification = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
@@ -55,7 +56,7 @@ func TestUserDeleteAvatar(t *testing.T) {
 		// already deleted ...
 		storage.Avatars = alreadyDeletedStorage{}
 		err = DeleteAvatar(db.DefaultContext, user)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// ... the avatar is removed from the database
 		verification = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
@@ -63,16 +64,16 @@ func TestUserDeleteAvatar(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		assert.NoError(t, unittest.PrepareTestDatabase())
+		require.NoError(t, unittest.PrepareTestDatabase())
 		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
 		err := UploadAvatar(db.DefaultContext, user, buff.Bytes())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		verification := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 		assert.NotEqual(t, "", verification.Avatar)
 
 		err = DeleteAvatar(db.DefaultContext, user)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		verification = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 		assert.Equal(t, "", verification.Avatar)

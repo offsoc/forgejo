@@ -19,11 +19,12 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/builder"
 )
 
 func TestIssue_ReplaceLabels(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testSuccess := func(issueID int64, labelIDs, expectedLabelIDs []int64) {
 		issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: issueID})
@@ -34,7 +35,7 @@ func TestIssue_ReplaceLabels(t *testing.T) {
 		for i, labelID := range labelIDs {
 			labels[i] = unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: labelID, RepoID: repo.ID})
 		}
-		assert.NoError(t, issues_model.ReplaceIssueLabels(db.DefaultContext, issue, labels, doer))
+		require.NoError(t, issues_model.ReplaceIssueLabels(db.DefaultContext, issue, labels, doer))
 		unittest.AssertCount(t, &issues_model.IssueLabel{IssueID: issueID}, len(expectedLabelIDs))
 		for _, labelID := range expectedLabelIDs {
 			unittest.AssertExistsAndLoadBean(t, &issues_model.IssueLabel{IssueID: issueID, LabelID: labelID})
@@ -52,27 +53,27 @@ func TestIssue_ReplaceLabels(t *testing.T) {
 }
 
 func Test_GetIssueIDsByRepoID(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	ids, err := issues_model.GetIssueIDsByRepoID(db.DefaultContext, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, ids, 5)
 }
 
 func TestIssueAPIURL(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1})
 	err := issue.LoadAttributes(db.DefaultContext)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "https://try.gitea.io/api/v1/repos/user2/repo1/issues/1", issue.APIURL(db.DefaultContext))
 }
 
 func TestGetIssuesByIDs(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	testSuccess := func(expectedIssueIDs, nonExistentIssueIDs []int64) {
 		issues, err := issues_model.GetIssuesByIDs(db.DefaultContext, append(expectedIssueIDs, nonExistentIssueIDs...), true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		actualIssueIDs := make([]int64, len(issues))
 		for i, issue := range issues {
 			actualIssueIDs[i] = issue.ID
@@ -85,21 +86,22 @@ func TestGetIssuesByIDs(t *testing.T) {
 }
 
 func TestGetParticipantIDsByIssue(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	checkParticipants := func(issueID int64, userIDs []int) {
 		issue, err := issues_model.GetIssueByID(db.DefaultContext, issueID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		participants, err := issue.GetParticipantIDsByIssue(db.DefaultContext)
-		if assert.NoError(t, err) {
-			participantsIDs := make([]int, len(participants))
-			for i, uid := range participants {
-				participantsIDs[i] = int(uid)
-			}
-			sort.Ints(participantsIDs)
-			sort.Ints(userIDs)
-			assert.Equal(t, userIDs, participantsIDs)
+		require.NoError(t, err)
+
+		participantsIDs := make([]int, len(participants))
+		for i, uid := range participants {
+			participantsIDs[i] = int(uid)
 		}
+		sort.Ints(participantsIDs)
+		sort.Ints(userIDs)
+		assert.Equal(t, userIDs, participantsIDs)
 	}
 
 	// User 1 is issue1 poster (see fixtures/issue.yml)
@@ -119,16 +121,16 @@ func TestIssue_ClearLabels(t *testing.T) {
 		{3, 2}, // pull-request, has no labels
 	}
 	for _, test := range tests {
-		assert.NoError(t, unittest.PrepareTestDatabase())
+		require.NoError(t, unittest.PrepareTestDatabase())
 		issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: test.issueID})
 		doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: test.doerID})
-		assert.NoError(t, issues_model.ClearIssueLabels(db.DefaultContext, issue, doer))
+		require.NoError(t, issues_model.ClearIssueLabels(db.DefaultContext, issue, doer))
 		unittest.AssertNotExistsBean(t, &issues_model.IssueLabel{IssueID: test.issueID})
 	}
 }
 
 func TestUpdateIssueCols(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{})
 
 	const newTitle = "New Title for unit test"
@@ -138,7 +140,7 @@ func TestUpdateIssueCols(t *testing.T) {
 	issue.Content = "This should have no effect"
 
 	now := time.Now().Unix()
-	assert.NoError(t, issues_model.UpdateIssueCols(db.DefaultContext, issue, "name"))
+	require.NoError(t, issues_model.UpdateIssueCols(db.DefaultContext, issue, "name"))
 	then := time.Now().Unix()
 
 	updatedIssue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: issue.ID})
@@ -148,7 +150,7 @@ func TestUpdateIssueCols(t *testing.T) {
 }
 
 func TestIssues(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	for _, test := range []struct {
 		Opts             issues_model.IssuesOptions
 		ExpectedIssueIDs []int64
@@ -212,7 +214,7 @@ func TestIssues(t *testing.T) {
 		},
 	} {
 		issues, err := issues_model.Issues(db.DefaultContext, &test.Opts)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		if assert.Len(t, issues, len(test.ExpectedIssueIDs)) {
 			for i, issue := range issues {
 				assert.EqualValues(t, test.ExpectedIssueIDs[i], issue.ID)
@@ -222,10 +224,10 @@ func TestIssues(t *testing.T) {
 }
 
 func TestIssue_loadTotalTimes(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	ms, err := issues_model.GetIssueByID(db.DefaultContext, 2)
-	assert.NoError(t, err)
-	assert.NoError(t, ms.LoadTotalTimes(db.DefaultContext))
+	require.NoError(t, err)
+	require.NoError(t, ms.LoadTotalTimes(db.DefaultContext))
 	assert.Equal(t, int64(3682), ms.TotalTrackedTime)
 }
 
@@ -243,10 +245,10 @@ func testInsertIssue(t *testing.T, title, content string, expectIndex int64) *is
 			Content:  content,
 		}
 		err := issues_model.NewIssue(db.DefaultContext, repo, &issue, nil, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		has, err := db.GetEngine(db.DefaultContext).ID(issue.ID).Get(&newIssue)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, has)
 		assert.EqualValues(t, issue.Title, newIssue.Title)
 		assert.EqualValues(t, issue.Content, newIssue.Content)
@@ -258,20 +260,20 @@ func testInsertIssue(t *testing.T, title, content string, expectIndex int64) *is
 }
 
 func TestIssue_InsertIssue(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// there are 5 issues and max index is 5 on repository 1, so this one should 6
 	issue := testInsertIssue(t, "my issue1", "special issue's comments?", 6)
 	_, err := db.DeleteByID[issues_model.Issue](db.DefaultContext, issue.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	issue = testInsertIssue(t, `my issue2, this is my son's love \n \r \ `, "special issue's '' comments?", 7)
 	_, err = db.DeleteByID[issues_model.Issue](db.DefaultContext, issue.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestIssue_ResolveMentions(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testSuccess := func(owner, repo, doer string, mentions []string, expected []int64) {
 		o := unittest.AssertExistsAndLoadBean(t, &user_model.User{LowerName: owner})
@@ -279,7 +281,7 @@ func TestIssue_ResolveMentions(t *testing.T) {
 		issue := &issues_model.Issue{RepoID: r.ID}
 		d := unittest.AssertExistsAndLoadBean(t, &user_model.User{LowerName: doer})
 		resolved, err := issues_model.ResolveIssueMentionsByVisibility(db.DefaultContext, issue, d, mentions)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		ids := make([]int64, len(resolved))
 		for i, user := range resolved {
 			ids[i] = user.ID
@@ -305,21 +307,33 @@ func TestIssue_ResolveMentions(t *testing.T) {
 }
 
 func TestResourceIndex(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	beforeCount, err := issues_model.CountIssues(context.Background(), &issues_model.IssuesOptions{})
+	require.NoError(t, err)
 
 	var wg sync.WaitGroup
 	for i := 0; i < 100; i++ {
 		wg.Add(1)
-		go func(i int) {
+		t.Run(fmt.Sprintf("issue %d", i+1), func(t *testing.T) {
+			t.Parallel()
 			testInsertIssue(t, fmt.Sprintf("issue %d", i+1), "my issue", 0)
 			wg.Done()
-		}(i)
+		})
 	}
-	wg.Wait()
+
+	t.Run("Check the count", func(t *testing.T) {
+		t.Parallel()
+
+		wg.Wait()
+		afterCount, err := issues_model.CountIssues(context.Background(), &issues_model.IssuesOptions{})
+		require.NoError(t, err)
+		assert.EqualValues(t, 100, afterCount-beforeCount)
+	})
 }
 
 func TestCorrectIssueStats(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// Because the condition is to have chunked database look-ups,
 	// We have to more issues than `maxQueryParameters`, we will insert.
@@ -355,7 +369,7 @@ func TestCorrectIssueStats(t *testing.T) {
 	}
 
 	// Just to be sure.
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, issueAmount, total)
 
 	// Now we will call the GetIssueStats with these IDs and if working,
@@ -366,39 +380,39 @@ func TestCorrectIssueStats(t *testing.T) {
 	})
 
 	// Now check the values.
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, issueStats.OpenCount, issueAmount)
 }
 
 func TestMilestoneList_LoadTotalTrackedTimes(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	miles := issues_model.MilestoneList{
 		unittest.AssertExistsAndLoadBean(t, &issues_model.Milestone{ID: 1}),
 	}
 
-	assert.NoError(t, miles.LoadTotalTrackedTimes(db.DefaultContext))
+	require.NoError(t, miles.LoadTotalTrackedTimes(db.DefaultContext))
 
 	assert.Equal(t, int64(3682), miles[0].TotalTrackedTime)
 }
 
 func TestLoadTotalTrackedTime(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	milestone := unittest.AssertExistsAndLoadBean(t, &issues_model.Milestone{ID: 1})
 
-	assert.NoError(t, milestone.LoadTotalTrackedTime(db.DefaultContext))
+	require.NoError(t, milestone.LoadTotalTrackedTime(db.DefaultContext))
 
 	assert.Equal(t, int64(3682), milestone.TotalTrackedTime)
 }
 
 func TestCountIssues(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	count, err := issues_model.CountIssues(db.DefaultContext, &issues_model.IssuesOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 22, count)
 }
 
 func TestIssueLoadAttributes(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	setting.Service.EnableTimetracking = true
 
 	issueList := issues_model.IssueList{
@@ -407,7 +421,7 @@ func TestIssueLoadAttributes(t *testing.T) {
 	}
 
 	for _, issue := range issueList {
-		assert.NoError(t, issue.LoadAttributes(db.DefaultContext))
+		require.NoError(t, issue.LoadAttributes(db.DefaultContext))
 		assert.EqualValues(t, issue.RepoID, issue.Repo.ID)
 		for _, label := range issue.Labels {
 			assert.EqualValues(t, issue.RepoID, label.RepoID)
@@ -442,13 +456,13 @@ func TestIssueLoadAttributes(t *testing.T) {
 }
 
 func assertCreateIssues(t *testing.T, isPull bool) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	reponame := "repo1"
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: reponame})
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
 	label := unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: 1})
 	milestone := unittest.AssertExistsAndLoadBean(t, &issues_model.Milestone{ID: 1})
-	assert.EqualValues(t, milestone.ID, 1)
+	assert.EqualValues(t, 1, milestone.ID)
 	reaction := &issues_model.Reaction{
 		Type:   "heart",
 		UserID: owner.ID,
@@ -469,7 +483,7 @@ func assertCreateIssues(t *testing.T, isPull bool) {
 		Reactions:   []*issues_model.Reaction{reaction},
 	}
 	err := issues_model.InsertIssues(db.DefaultContext, is)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	i := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{Title: title})
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Reaction{Type: "heart", UserID: owner.ID, IssueID: i.ID})

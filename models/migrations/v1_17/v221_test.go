@@ -10,6 +10,7 @@ import (
 	migration_tests "code.gitea.io/gitea/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_StoreWebauthnCredentialIDAsBytes(t *testing.T) {
@@ -44,20 +45,16 @@ func Test_StoreWebauthnCredentialIDAsBytes(t *testing.T) {
 		return
 	}
 
-	if err := StoreWebauthnCredentialIDAsBytes(x); err != nil {
-		assert.NoError(t, err)
-		return
-	}
+	err := StoreWebauthnCredentialIDAsBytes(x)
+	require.NoError(t, err)
 
 	expected := []ExpectedWebauthnCredential{}
-	if err := x.Table("expected_webauthn_credential").Asc("id").Find(&expected); !assert.NoError(t, err) {
-		return
-	}
+	err = x.Table("expected_webauthn_credential").Asc("id").Find(&expected)
+	require.NoError(t, err)
 
 	got := []ConvertedWebauthnCredential{}
-	if err := x.Table("webauthn_credential").Select("id, credential_id_bytes").Asc("id").Find(&got); !assert.NoError(t, err) {
-		return
-	}
+	err = x.Table("webauthn_credential").Select("id, credential_id_bytes").Asc("id").Find(&got)
+	require.NoError(t, err)
 
 	for i, e := range expected {
 		credIDBytes, _ := base32.HexEncoding.DecodeString(e.CredentialID)

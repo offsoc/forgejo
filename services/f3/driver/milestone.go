@@ -89,7 +89,7 @@ func (o *milestone) FromFormat(content f3.Interface) {
 		ID:             f3_util.ParseInt(milestone.GetID()),
 		Name:           milestone.Title,
 		Content:        milestone.Description,
-		IsClosed:       milestone.State == "closed",
+		IsClosed:       milestone.State == f3.MilestoneStateClosed,
 		CreatedUnix:    timeutil.TimeStamp(milestone.Created.Unix()),
 		UpdatedUnix:    timeutil.TimeStamp(milestone.Updated.Unix()),
 		ClosedDateUnix: closed,
@@ -102,7 +102,7 @@ func (o *milestone) Get(ctx context.Context) bool {
 	o.Trace("%s", node.GetID())
 
 	project := f3_tree.GetProjectID(o.GetNode())
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	milestone, err := issues_model.GetMilestoneByRepoID(ctx, project, id)
 	if issues_model.IsErrMilestoneNotExist(err) {
@@ -131,7 +131,7 @@ func (o *milestone) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("milestone created %d", o.forgejoMilestone.ID)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoMilestone.ID))
+	return generic.NewNodeID(o.forgejoMilestone.ID)
 }
 
 func (o *milestone) Delete(ctx context.Context) {

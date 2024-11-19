@@ -1,0 +1,24 @@
+X-Gitlab-Meta: {"correlation_id":"46af78321ea2674ac3e1e56243baabf6","version":"1"}
+Gitlab-Lb: haproxy-main-27-lb-gprd
+Vary: Origin, Accept-Encoding
+X-Total-Pages: 2
+Strict-Transport-Security: max-age=31536000
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+X-Page: 1
+X-Runtime: 0.071781
+Cf-Cache-Status: MISS
+Link: <https://gitlab.com/api/v4/projects/61363672/merge_requests/1/award_emoji?id=61363672&merge_request_iid=1&page=2&per_page=1>; rel="next", <https://gitlab.com/api/v4/projects/61363672/merge_requests/1/award_emoji?id=61363672&merge_request_iid=1&page=1&per_page=1>; rel="first", <https://gitlab.com/api/v4/projects/61363672/merge_requests/1/award_emoji?id=61363672&merge_request_iid=1&page=2&per_page=1>; rel="last"
+Etag: W/"a08d29f7fa018b5a6f30ae6de1035350"
+X-Prev-Page: 
+X-Total: 2
+Content-Type: application/json
+X-Frame-Options: SAMEORIGIN
+X-Next-Page: 2
+X-Per-Page: 1
+Referrer-Policy: strict-origin-when-cross-origin
+Gitlab-Sv: api-gke-us-east1-b
+Set-Cookie: _cfuvid=PKNy4TeWDnd8j772wQMiBZpmFpOjDfu9JcpnUSyVULU-1725394799568-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+Cache-Control: max-age=0, private, must-revalidate
+
+[{"id":28098492,"name":"thumbsup","user":{"id":548513,"username":"mkobel","name":"Moritz Kobel","state":"active","locked":false,"avatar_url":"https://secure.gravatar.com/avatar/eae1be6324682816aedc885acbf5858719b40956e0278edabe5c0db7cbc95f3b?s=80\u0026d=identicon","web_url":"https://gitlab.com/mkobel"},"created_at":"2024-09-03T18:49:58.072Z","updated_at":"2024-09-03T18:49:58.072Z","awardable_id":324657888,"awardable_type":"MergeRequest","url":null}]

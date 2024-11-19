@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/assetfs"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExtractErrorLine(t *testing.T) {
@@ -60,10 +61,10 @@ func TestHandleError(t *testing.T) {
 
 	test := func(s string, h func(error) string, expect string) {
 		err := os.WriteFile(dir+"/test.tmpl", []byte(s), 0o644)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		tmpl := template.New("test")
 		_, err = tmpl.Parse(s)
-		assert.Error(t, err)
+		require.Error(t, err)
 		msg := h(err)
 		assert.EqualValues(t, strings.TrimSpace(expect), strings.TrimSpace(msg))
 	}
@@ -93,7 +94,7 @@ template error: tmp:test:1 : unexpected "3" in operand
 
 	// no idea about how to trigger such strange error, so mock an error to test it
 	err := os.WriteFile(dir+"/test.tmpl", []byte("god knows XXX"), 0o644)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expectedMsg := `
 template error: tmp:test:1 : expected end; found XXX
 ----------------------------------------------------------------------

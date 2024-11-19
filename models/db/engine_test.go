@@ -18,11 +18,12 @@ import (
 	_ "code.gitea.io/gitea/cmd" // for TestPrimaryKeys
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
 )
 
 func TestDumpDatabase(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	dir := t.TempDir()
 
@@ -30,31 +31,31 @@ func TestDumpDatabase(t *testing.T) {
 		ID      int64 `xorm:"pk autoincr"`
 		Version int64
 	}
-	assert.NoError(t, db.GetEngine(db.DefaultContext).Sync(new(Version)))
+	require.NoError(t, db.GetEngine(db.DefaultContext).Sync(new(Version)))
 
 	for _, dbType := range setting.SupportedDatabaseTypes {
-		assert.NoError(t, db.DumpDatabase(filepath.Join(dir, dbType+".sql"), dbType))
+		require.NoError(t, db.DumpDatabase(filepath.Join(dir, dbType+".sql"), dbType))
 	}
 }
 
 func TestDeleteOrphanedObjects(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	countBefore, err := db.GetEngine(db.DefaultContext).Count(&issues_model.PullRequest{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = db.GetEngine(db.DefaultContext).Insert(&issues_model.PullRequest{IssueID: 1000}, &issues_model.PullRequest{IssueID: 1001}, &issues_model.PullRequest{IssueID: 1003})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	orphaned, err := db.CountOrphanedObjects(db.DefaultContext, "pull_request", "issue", "pull_request.issue_id=issue.id")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, 3, orphaned)
 
 	err = db.DeleteOrphanedObjects(db.DefaultContext, "pull_request", "issue", "pull_request.issue_id=issue.id")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	countAfter, err := db.GetEngine(db.DefaultContext).Count(&issues_model.PullRequest{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, countBefore, countAfter)
 }
 

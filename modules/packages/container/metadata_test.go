@@ -11,6 +11,7 @@ import (
 
 	oci "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseImageConfig(t *testing.T) {
@@ -24,7 +25,7 @@ func TestParseImageConfig(t *testing.T) {
 	configOCI := `{"config": {"labels": {"` + labelAuthors + `": "` + author + `", "` + labelLicenses + `": "` + license + `", "` + labelURL + `": "` + projectURL + `", "` + labelSource + `": "` + repositoryURL + `", "` + labelDocumentation + `": "` + documentationURL + `", "` + labelDescription + `": "` + description + `"}}, "history": [{"created_by": "do it 1"}, {"created_by": "dummy #(nop) do it 2"}]}`
 
 	metadata, err := ParseImageConfig(oci.MediaTypeImageManifest, strings.NewReader(configOCI))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, TypeOCI, metadata.Type)
 	assert.Equal(t, description, metadata.Description)
@@ -51,7 +52,7 @@ func TestParseImageConfig(t *testing.T) {
 	configHelm := `{"description":"` + description + `", "home": "` + projectURL + `", "sources": ["` + repositoryURL + `"], "maintainers":[{"name":"` + author + `"}]}`
 
 	metadata, err = ParseImageConfig(helm.ConfigMediaType, strings.NewReader(configHelm))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, TypeHelm, metadata.Type)
 	assert.Equal(t, description, metadata.Description)

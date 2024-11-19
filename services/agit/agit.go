@@ -211,6 +211,8 @@ func ProcReceive(ctx context.Context, repo *repo_model.Repository, gitRepo *git.
 			return nil, fmt.Errorf("failed to update the reference of the pull request: %w", err)
 		}
 
+		// TODO: refactor to unify with `pull_service.AddTestPullRequestTask`
+
 		// Add the pull request to the merge conflicting checker queue.
 		pull_service.AddToTaskQueue(ctx, pr)
 
@@ -218,12 +220,19 @@ func ProcReceive(ctx context.Context, repo *repo_model.Repository, gitRepo *git.
 			return nil, fmt.Errorf("failed to load the issue of the pull request: %w", err)
 		}
 
+		// Validate pull request.
+		pull_service.ValidatePullRequest(ctx, pr, oldCommitID, opts.NewCommitIDs[i], pusher)
+
+		// TODO: call `InvalidateCodeComments`
+
 		// Create and notify about the new commits.
 		comment, err := pull_service.CreatePushPullComment(ctx, pusher, pr, oldCommitID, opts.NewCommitIDs[i])
 		if err == nil && comment != nil {
 			notify_service.PullRequestPushCommits(ctx, pusher, pr, comment)
 		}
 		notify_service.PullRequestSynchronized(ctx, pusher, pr)
+
+		// this always seems to be false
 		isForcePush := comment != nil && comment.IsForcePush
 
 		results = append(results, private.HookProcReceiveRefResult{

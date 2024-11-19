@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepoDownloadArchive(t *testing.T) {
@@ -27,7 +28,7 @@ func TestRepoDownloadArchive(t *testing.T) {
 	req.Header.Set("Accept-Encoding", "gzip")
 	resp := MakeRequest(t, req, http.StatusOK)
 	bs, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, resp.Header().Get("Content-Encoding"))
-	assert.Equal(t, 320, len(bs))
+	assert.Len(t, bs, 320)
 }

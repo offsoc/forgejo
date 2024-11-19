@@ -23,6 +23,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIListIssues(t *testing.T) {
@@ -73,6 +74,34 @@ func TestAPIListIssues(t *testing.T) {
 	if assert.Len(t, apiIssues, 1) {
 		assert.EqualValues(t, 1, apiIssues[0].ID)
 	}
+}
+
+func TestAPIListIssuesPublicOnly(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+	owner1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo1.OwnerID})
+
+	session := loginUser(t, owner1.Name)
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadIssue)
+	link, _ := url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/issues", owner1.Name, repo1.Name))
+	link.RawQuery = url.Values{"state": {"all"}}.Encode()
+	req := NewRequest(t, "GET", link.String()).AddTokenAuth(token)
+	MakeRequest(t, req, http.StatusOK)
+
+	repo2 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 2})
+	owner2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo2.OwnerID})
+
+	session = loginUser(t, owner2.Name)
+	token = getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadIssue)
+	link, _ = url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/issues", owner2.Name, repo2.Name))
+	link.RawQuery = url.Values{"state": {"all"}}.Encode()
+	req = NewRequest(t, "GET", link.String()).AddTokenAuth(token)
+	MakeRequest(t, req, http.StatusOK)
+
+	publicOnlyToken := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadIssue, auth_model.AccessTokenScopePublicOnly)
+	req = NewRequest(t, "GET", link.String()).AddTokenAuth(publicOnlyToken)
+	MakeRequest(t, req, http.StatusForbidden)
 }
 
 func TestAPICreateIssue(t *testing.T) {
@@ -157,7 +186,7 @@ func TestAPIEditIssue(t *testing.T) {
 	issueBefore := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 10})
 	repoBefore := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: issueBefore.RepoID})
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repoBefore.OwnerID})
-	assert.NoError(t, issueBefore.LoadAttributes(db.DefaultContext))
+	require.NoError(t, issueBefore.LoadAttributes(db.DefaultContext))
 	assert.Equal(t, int64(1019307200), int64(issueBefore.DeadlineUnix))
 	assert.Equal(t, api.StateOpen, issueBefore.State())
 
@@ -194,7 +223,7 @@ func TestAPIEditIssue(t *testing.T) {
 
 	// check deleted user
 	assert.Equal(t, int64(500), issueAfter.PosterID)
-	assert.NoError(t, issueAfter.LoadAttributes(db.DefaultContext))
+	require.NoError(t, issueAfter.LoadAttributes(db.DefaultContext))
 	assert.Equal(t, int64(-1), issueAfter.PosterID)
 	assert.Equal(t, int64(-1), issueBefore.PosterID)
 	assert.Equal(t, int64(-1), apiIssue.Poster.ID)
@@ -206,7 +235,7 @@ func TestAPIEditIssue(t *testing.T) {
 	assert.Equal(t, api.StateClosed, apiIssue.State)
 	assert.Equal(t, milestone, apiIssue.Milestone.ID)
 	assert.Equal(t, body, apiIssue.Body)
-	assert.True(t, apiIssue.Deadline == nil)
+	assert.Nil(t, apiIssue.Deadline)
 	assert.Equal(t, title, apiIssue.Title)
 
 	// in database
@@ -215,6 +244,21 @@ func TestAPIEditIssue(t *testing.T) {
 	assert.Equal(t, int64(0), int64(issueAfter.DeadlineUnix))
 	assert.Equal(t, body, issueAfter.Content)
 	assert.Equal(t, title, issueAfter.Title)
+
+	// verify the idempotency of state, milestone, body and title changes
+	req = NewRequestWithJSON(t, "PATCH", urlStr, api.EditIssueOption{
+		State:     &issueState,
+		Milestone: &milestone,
+		Body:      &body,
+		Title:     title,
+	}).AddTokenAuth(token)
+	resp = MakeRequest(t, req, http.StatusCreated)
+	var apiIssueIdempotent api.Issue
+	DecodeJSON(t, resp, &apiIssueIdempotent)
+	assert.Equal(t, apiIssue.State, apiIssueIdempotent.State)
+	assert.Equal(t, apiIssue.Milestone.Title, apiIssueIdempotent.Milestone.Title)
+	assert.Equal(t, apiIssue.Body, apiIssueIdempotent.Body)
+	assert.Equal(t, apiIssue.Title, apiIssueIdempotent.Title)
 }
 
 func TestAPIEditIssueAutoDate(t *testing.T) {
@@ -223,7 +267,7 @@ func TestAPIEditIssueAutoDate(t *testing.T) {
 	issueBefore := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 13})
 	repoBefore := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: issueBefore.RepoID})
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repoBefore.OwnerID})
-	assert.NoError(t, issueBefore.LoadAttributes(db.DefaultContext))
+	require.NoError(t, issueBefore.LoadAttributes(db.DefaultContext))
 
 	t.Run("WithAutoDate", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
@@ -305,7 +349,7 @@ func TestAPIEditIssueMilestoneAutoDate(t *testing.T) {
 	repoBefore := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: issueBefore.RepoID})
 
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repoBefore.OwnerID})
-	assert.NoError(t, issueBefore.LoadAttributes(db.DefaultContext))
+	require.NoError(t, issueBefore.LoadAttributes(db.DefaultContext))
 
 	session := loginUser(t, owner.Name)
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteIssue)
@@ -387,6 +431,12 @@ func TestAPISearchIssues(t *testing.T) {
 	resp := MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiIssues)
 	assert.Len(t, apiIssues, expectedIssueCount)
+
+	publicOnlyToken := getUserToken(t, "user1", auth_model.AccessTokenScopeReadIssue, auth_model.AccessTokenScopePublicOnly)
+	req = NewRequest(t, "GET", link.String()).AddTokenAuth(publicOnlyToken)
+	resp = MakeRequest(t, req, http.StatusOK)
+	DecodeJSON(t, resp, &apiIssues)
+	assert.Len(t, apiIssues, 15) // 15 public issues
 
 	since := "2000-01-01T00:50:01+00:00" // 946687801
 	before := time.Unix(999307200, 0).Format(time.RFC3339)

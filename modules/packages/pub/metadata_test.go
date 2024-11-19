@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -65,7 +66,7 @@ func TestParsePackage(t *testing.T) {
 
 		pp, err := ParsePackage(data)
 		assert.Nil(t, pp)
-		assert.ErrorIs(t, err, ErrMissingPubspecFile)
+		require.ErrorIs(t, err, ErrMissingPubspecFile)
 	})
 
 	t.Run("PubspecFileTooLarge", func(t *testing.T) {
@@ -73,7 +74,7 @@ func TestParsePackage(t *testing.T) {
 
 		pp, err := ParsePackage(data)
 		assert.Nil(t, pp)
-		assert.ErrorIs(t, err, ErrPubspecFileTooLarge)
+		require.ErrorIs(t, err, ErrPubspecFileTooLarge)
 	})
 
 	t.Run("InvalidPubspecFile", func(t *testing.T) {
@@ -81,14 +82,14 @@ func TestParsePackage(t *testing.T) {
 
 		pp, err := ParsePackage(data)
 		assert.Nil(t, pp)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("Valid", func(t *testing.T) {
 		data := createArchive(map[string][]byte{"pubspec.yaml": []byte(pubspecContent)})
 
 		pp, err := ParsePackage(data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, pp)
 		assert.Empty(t, pp.Metadata.Readme)
 	})
@@ -97,7 +98,7 @@ func TestParsePackage(t *testing.T) {
 		data := createArchive(map[string][]byte{"pubspec.yaml": []byte(pubspecContent), "README.md": []byte("readme")})
 
 		pp, err := ParsePackage(data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, pp)
 		assert.Equal(t, "readme", pp.Metadata.Readme)
 	})
@@ -108,7 +109,7 @@ func TestParsePubspecMetadata(t *testing.T) {
 		for _, name := range []string{"123abc", "ab-cd"} {
 			pp, err := ParsePubspecMetadata(strings.NewReader(`name: ` + name))
 			assert.Nil(t, pp)
-			assert.ErrorIs(t, err, ErrInvalidName)
+			require.ErrorIs(t, err, ErrInvalidName)
 		}
 	})
 
@@ -116,12 +117,12 @@ func TestParsePubspecMetadata(t *testing.T) {
 		pp, err := ParsePubspecMetadata(strings.NewReader(`name: dummy
 version: invalid`))
 		assert.Nil(t, pp)
-		assert.ErrorIs(t, err, ErrInvalidVersion)
+		require.ErrorIs(t, err, ErrInvalidVersion)
 	})
 
 	t.Run("Valid", func(t *testing.T) {
 		pp, err := ParsePubspecMetadata(strings.NewReader(pubspecContent))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, pp)
 
 		assert.Equal(t, packageName, pp.Name)

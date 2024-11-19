@@ -12,10 +12,11 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChangeMilestoneAssign(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: 1})
 	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	assert.NotNil(t, issue)
@@ -23,7 +24,7 @@ func TestChangeMilestoneAssign(t *testing.T) {
 
 	oldMilestoneID := issue.MilestoneID
 	issue.MilestoneID = 2
-	assert.NoError(t, ChangeMilestoneAssign(db.DefaultContext, issue, doer, oldMilestoneID))
+	require.NoError(t, ChangeMilestoneAssign(db.DefaultContext, issue, doer, oldMilestoneID))
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{
 		IssueID:        issue.ID,
 		Type:           issues_model.CommentTypeMilestone,

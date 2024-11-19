@@ -75,7 +75,12 @@ func CreateIssueComment(ctx context.Context, doer *user_model.User, repo *repo_m
 
 // UpdateComment updates information of comment.
 func UpdateComment(ctx context.Context, c *issues_model.Comment, contentVersion int, doer *user_model.User, oldContent string) error {
-	needsContentHistory := c.Content != oldContent && c.Type.HasContentSupport()
+	if err := c.LoadReview(ctx); err != nil {
+		return err
+	}
+	isPartOfPendingReview := c.Review != nil && c.Review.Type == issues_model.ReviewTypePending
+
+	needsContentHistory := c.Content != oldContent && c.Type.HasContentSupport() && !isPartOfPendingReview
 	if needsContentHistory {
 		hasContentHistory, err := issues_model.HasIssueContentHistory(ctx, c.IssueID, c.ID)
 		if err != nil {
@@ -104,7 +109,9 @@ func UpdateComment(ctx context.Context, c *issues_model.Comment, contentVersion 
 		}
 	}
 
-	notify_service.UpdateComment(ctx, doer, c, oldContent)
+	if !isPartOfPendingReview {
+		notify_service.UpdateComment(ctx, doer, c, oldContent)
+	}
 
 	return nil
 }
@@ -118,7 +125,12 @@ func DeleteComment(ctx context.Context, doer *user_model.User, comment *issues_m
 		return err
 	}
 
-	notify_service.DeleteComment(ctx, doer, comment)
+	if err := comment.LoadReview(ctx); err != nil {
+		return err
+	}
+	if comment.Review == nil || comment.Review.Type != issues_model.ReviewTypePending {
+		notify_service.DeleteComment(ctx, doer, comment)
+	}
 
 	return nil
 }

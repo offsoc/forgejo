@@ -1,6 +1,8 @@
 name: mirror
 
 on:
+  workflow_dispatch:
+
   schedule:
     - cron: '@daily'
 
@@ -9,7 +11,7 @@ jobs:
     if: ${{ secrets.MIRROR_TOKEN != '' }}
     runs-on: docker
     container:
-      image: 'docker.io/node:20-bookworm'
+      image: 'code.forgejo.org/oci/node:20-bookworm'
     steps:
       - name: git push {v*/,}forgejo
         run: |

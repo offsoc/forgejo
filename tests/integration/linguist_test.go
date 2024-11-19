@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLinguistSupport(t *testing.T) {
@@ -33,7 +34,7 @@ func TestLinguistSupport(t *testing.T) {
 
 			user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
-			repo, sha, f := CreateDeclarativeRepo(t, user2, "", nil, nil,
+			repo, sha, f := tests.CreateDeclarativeRepo(t, user2, "", nil, nil,
 				[]*files_service.ChangeRepoFile{
 					{
 						Operation:     "create",
@@ -48,7 +49,7 @@ func TestLinguistSupport(t *testing.T) {
 					{
 						Operation:     "create",
 						TreePath:      "foo.c",
-						ContentReader: strings.NewReader(`#include <stdio.h>\nint main() {\n  printf("Hello world!\n");\n  return 0;\n}\n`),
+						ContentReader: strings.NewReader("#include <stdio.h>\nint main() {\n  printf(\"Hello world!\n\");\n  return 0;\n}\n"),
 					},
 					{
 						Operation:     "create",
@@ -63,12 +64,12 @@ func TestLinguistSupport(t *testing.T) {
 					{
 						Operation:     "create",
 						TreePath:      "cpplint.py",
-						ContentReader: strings.NewReader(`#! /usr/bin/env python\n\nprint("Hello world!")\n`),
+						ContentReader: strings.NewReader("#! /usr/bin/env python\n\nprint(\"Hello world!\")\n"),
 					},
 					{
 						Operation:     "create",
 						TreePath:      "some-file.xml",
-						ContentReader: strings.NewReader(`<?xml version="1.0"?>\n<foo>\n <bar>Hello</bar>\n</foo>\n`),
+						ContentReader: strings.NewReader("<?xml version=\"1.0\"?>\n<foo>\n <bar>Hello</bar>\n</foo>\n"),
 					},
 				})
 
@@ -79,15 +80,15 @@ func TestLinguistSupport(t *testing.T) {
 			t.Helper()
 
 			err := stats.UpdateRepoIndexer(repo)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.NoError(t, queue.GetManager().FlushAll(context.Background(), 10*time.Second))
+			require.NoError(t, queue.GetManager().FlushAll(context.Background(), 10*time.Second))
 
 			status, err := repo_model.GetIndexerStatus(db.DefaultContext, repo, repo_model.RepoIndexerTypeStats)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, sha, status.CommitSha)
 			langs, err := repo_model.GetTopLanguageStats(db.DefaultContext, repo, 5)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			return langs
 		}

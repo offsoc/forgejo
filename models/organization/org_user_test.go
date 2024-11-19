@@ -14,10 +14,11 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUserIsPublicMember(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	tt := []struct {
 		uid      int64
@@ -38,14 +39,14 @@ func TestUserIsPublicMember(t *testing.T) {
 
 func testUserIsPublicMember(t *testing.T, uid, orgID int64, expected bool) {
 	user, err := user_model.GetUserByID(db.DefaultContext, uid)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	is, err := organization.IsPublicMembership(db.DefaultContext, orgID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, is)
 }
 
 func TestIsUserOrgOwner(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	tt := []struct {
 		uid      int64
@@ -66,14 +67,14 @@ func TestIsUserOrgOwner(t *testing.T) {
 
 func testIsUserOrgOwner(t *testing.T, uid, orgID int64, expected bool) {
 	user, err := user_model.GetUserByID(db.DefaultContext, uid)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	is, err := organization.IsOrganizationOwner(db.DefaultContext, orgID, user.ID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, is)
 }
 
 func TestUserListIsPublicMember(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	tt := []struct {
 		orgid    int64
 		expected map[int64]bool
@@ -93,14 +94,14 @@ func TestUserListIsPublicMember(t *testing.T) {
 
 func testUserListIsPublicMember(t *testing.T, orgID int64, expected map[int64]bool) {
 	org, err := organization.GetOrgByID(db.DefaultContext, orgID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	_, membersIsPublic, err := org.GetMembers(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, membersIsPublic)
 }
 
 func TestUserListIsUserOrgOwner(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	tt := []struct {
 		orgid    int64
 		expected map[int64]bool
@@ -120,21 +121,21 @@ func TestUserListIsUserOrgOwner(t *testing.T) {
 
 func testUserListIsUserOrgOwner(t *testing.T, orgID int64, expected map[int64]bool) {
 	org, err := organization.GetOrgByID(db.DefaultContext, orgID)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	members, _, err := org.GetMembers(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, organization.IsUserOrgOwner(db.DefaultContext, members, orgID))
 }
 
 func TestAddOrgUser(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	testSuccess := func(orgID, userID int64, isPublic bool) {
 		org := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: orgID})
 		expectedNumMembers := org.NumMembers
 		if !unittest.BeanExists(t, &organization.OrgUser{OrgID: orgID, UID: userID}) {
 			expectedNumMembers++
 		}
-		assert.NoError(t, organization.AddOrgUser(db.DefaultContext, orgID, userID))
+		require.NoError(t, organization.AddOrgUser(db.DefaultContext, orgID, userID))
 		ou := &organization.OrgUser{OrgID: orgID, UID: userID}
 		unittest.AssertExistsAndLoadBean(t, ou)
 		assert.Equal(t, isPublic, ou.IsPublic)

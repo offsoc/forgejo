@@ -16,6 +16,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	git_model "code.gitea.io/gitea/models/git"
 	repo_model "code.gitea.io/gitea/models/repo"
+	unit_model "code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/charset"
@@ -26,7 +27,9 @@ import (
 	"code.gitea.io/gitea/modules/markup"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
+	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/gitdiff"
 	git_service "code.gitea.io/gitea/services/repository"
 )
@@ -81,7 +84,7 @@ func Commits(ctx *context.Context) {
 		ctx.ServerError("CommitsByRange", err)
 		return
 	}
-	ctx.Data["Commits"] = git_model.ConvertFromGitCommit(ctx, commits, ctx.Repo.Repository)
+	ctx.Data["Commits"] = processGitCommits(ctx, commits)
 
 	ctx.Data["Username"] = ctx.Repo.Owner.Name
 	ctx.Data["Reponame"] = ctx.Repo.Repository.Name
@@ -199,7 +202,7 @@ func SearchCommits(ctx *context.Context) {
 		return
 	}
 	ctx.Data["CommitCount"] = len(commits)
-	ctx.Data["Commits"] = git_model.ConvertFromGitCommit(ctx, commits, ctx.Repo.Repository)
+	ctx.Data["Commits"] = processGitCommits(ctx, commits)
 
 	ctx.Data["Keyword"] = query
 	if all {
@@ -264,7 +267,7 @@ func FileHistory(ctx *context.Context) {
 		}
 	}
 
-	ctx.Data["Commits"] = git_model.ConvertFromGitCommit(ctx, commits, ctx.Repo.Repository)
+	ctx.Data["Commits"] = processGitCommits(ctx, commits)
 
 	ctx.Data["Username"] = ctx.Repo.Owner.Name
 	ctx.Data["Reponame"] = ctx.Repo.Repository.Name
@@ -337,6 +340,7 @@ func Diff(ctx *context.Context) {
 		MaxLineCharacters:  setting.Git.MaxGitDiffLineCharacters,
 		MaxFiles:           maxFiles,
 		WhitespaceBehavior: gitdiff.GetWhitespaceFlag(ctx.Data["WhitespaceBehavior"].(string)),
+		FileOnly:           fileOnly,
 	}, files...)
 	if err != nil {
 		ctx.NotFound("GetDiff", err)
@@ -375,6 +379,9 @@ func Diff(ctx *context.Context) {
 	if err != nil {
 		log.Error("GetLatestCommitStatus: %v", err)
 	}
+	if !ctx.Repo.CanRead(unit_model.TypeActions) {
+		git_model.CommitStatusesHideActionsURL(ctx, statuses)
+	}
 
 	ctx.Data["CommitStatus"] = git_model.CalcCommitStatus(statuses)
 	ctx.Data["CommitStatuses"] = statuses
@@ -412,12 +419,6 @@ func Diff(ctx *context.Context) {
 		}
 	}
 
-	ctx.Data["BranchName"], err = commit.GetBranchName()
-	if err != nil {
-		ctx.ServerError("commit.GetBranchName", err)
-		return
-	}
-
 	ctx.HTML(http.StatusOK, tplCommitPage)
 }
 
@@ -453,4 +454,44 @@ func RawDiff(ctx *context.Context) {
 		ctx.ServerError("GetRawDiff", err)
 		return
 	}
+}
+
+func processGitCommits(ctx *context.Context, gitCommits []*git.Commit) []*git_model.SignCommitWithStatuses {
+	commits := git_model.ConvertFromGitCommit(ctx, gitCommits, ctx.Repo.Repository)
+	if !ctx.Repo.CanRead(unit_model.TypeActions) {
+		for _, commit := range commits {
+			if commit.Status == nil {
+				continue
+			}
+			commit.Status.HideActionsURL(ctx)
+			git_model.CommitStatusesHideActionsURL(ctx, commit.Statuses)
+		}
+	}
+	return commits
+}
+
+func SetCommitNotes(ctx *context.Context) {
+	form := web.GetForm(ctx).(*forms.CommitNotesForm)
+
+	commitID := ctx.Params(":sha")
+
+	err := git.SetNote(ctx, ctx.Repo.GitRepo, commitID, form.Notes, ctx.Doer.Name, ctx.Doer.GetEmail())
+	if err != nil {
+		ctx.ServerError("SetNote", err)
+		return
+	}
+
+	ctx.Redirect(fmt.Sprintf("%s/commit/%s", ctx.Repo.Repository.HTMLURL(), commitID))
+}
+
+func RemoveCommitNotes(ctx *context.Context) {
+	commitID := ctx.Params(":sha")
+
+	err := git.RemoveNote(ctx, ctx.Repo.GitRepo, commitID)
+	if err != nil {
+		ctx.ServerError("RemoveNotes", err)
+		return
+	}
+
+	ctx.Redirect(fmt.Sprintf("%s/commit/%s", ctx.Repo.Repository.HTMLURL(), commitID))
 }

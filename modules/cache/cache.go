@@ -10,9 +10,9 @@ import (
 
 	"code.gitea.io/gitea/modules/setting"
 
-	mc "gitea.com/go-chi/cache"
+	mc "code.forgejo.org/go-chi/cache"
 
-	_ "gitea.com/go-chi/cache/memcache" // memcache plugin for cache
+	_ "code.forgejo.org/go-chi/cache/memcache" // memcache plugin for cache
 )
 
 var conn mc.Cache

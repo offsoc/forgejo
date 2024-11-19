@@ -17,12 +17,14 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/routers"
 	repo_service "code.gitea.io/gitea/services/repository"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testRepoFork(t *testing.T, session *TestSession, ownerName, repoName, forkOwnerName, forkRepoName string) *httptest.ResponseRecorder {
@@ -44,7 +46,7 @@ func testRepoFork(t *testing.T, session *TestSession, ownerName, repoName, forkO
 	link, exists := htmlDoc.doc.Find(fmt.Sprintf("form.ui.form[action=\"%s\"]", forkURL)).Attr("action")
 	assert.True(t, exists, "The template has changed")
 	_, exists = htmlDoc.doc.Find(fmt.Sprintf(".owner.dropdown .item[data-value=\"%d\"]", forkOwner.ID)).Attr("data-value")
-	assert.True(t, exists, fmt.Sprintf("Fork owner '%s' is not present in select box", forkOwnerName))
+	assert.True(t, exists, "Fork owner %q is not present in select box", forkOwnerName)
 	req = NewRequestWithValues(t, "POST", link, map[string]string{
 		"_csrf":     htmlDoc.GetCSRF(),
 		"uid":       fmt.Sprintf("%d", forkOwner.ID),
@@ -150,7 +152,7 @@ func TestRepoFork(t *testing.T) {
 				defer func() {
 					repo_service.DeleteRepository(db.DefaultContext, user5, repo, false)
 				}()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotEmpty(t, repo)
 
 				// Load the repository home view
@@ -234,6 +236,37 @@ func TestRepoForkToOrg(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			testRepoForkLegacyRedirect(t, session, "user2", "repo1")
+		})
+	})
+}
+
+func TestForkListPrivateRepo(t *testing.T) {
+	forkItemSelector := ".tw-flex.tw-items-center.tw-py-2"
+
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		session := loginUser(t, "user5")
+		org23 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 23, Visibility: structs.VisibleTypePrivate})
+
+		testRepoFork(t, session, "user2", "repo1", org23.Name, "repo1")
+
+		t.Run("Anomynous", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			req := NewRequest(t, "GET", "/user2/repo1/forks")
+			resp := MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+
+			htmlDoc.AssertElement(t, forkItemSelector, false)
+		})
+
+		t.Run("Logged in", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			req := NewRequest(t, "GET", "/user2/repo1/forks")
+			resp := session.MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+
+			htmlDoc.AssertElement(t, forkItemSelector, true)
 		})
 	})
 }

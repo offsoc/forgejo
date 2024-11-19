@@ -13,10 +13,11 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPushMirrorsIterate(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	now := timeutil.TimeStampNow()
 
@@ -47,5 +48,32 @@ func TestPushMirrorsIterate(t *testing.T) {
 		assert.Equal(t, "test-1", m.RemoteName)
 		assert.Equal(t, m.RemoteName, m.GetRemoteName())
 		return nil
+	})
+}
+
+func TestPushMirrorPrivatekey(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	m := &repo_model.PushMirror{
+		RemoteName: "test-privatekey",
+	}
+	require.NoError(t, db.Insert(db.DefaultContext, m))
+
+	privateKey := []byte{0x00, 0x01, 0x02, 0x04, 0x08, 0x10}
+	t.Run("Set privatekey", func(t *testing.T) {
+		require.NoError(t, m.SetPrivatekey(db.DefaultContext, privateKey))
+	})
+
+	t.Run("Normal retrieval", func(t *testing.T) {
+		actualPrivateKey, err := m.Privatekey()
+		require.NoError(t, err)
+		assert.EqualValues(t, privateKey, actualPrivateKey)
+	})
+
+	t.Run("Incorrect retrieval", func(t *testing.T) {
+		m.ID++
+		actualPrivateKey, err := m.Privatekey()
+		require.Error(t, err)
+		assert.Empty(t, actualPrivateKey)
 	})
 }

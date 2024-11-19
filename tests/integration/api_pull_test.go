@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"testing"
 
 	auth_model "code.gitea.io/gitea/models/auth"
@@ -17,11 +19,13 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/services/forms"
 	issue_service "code.gitea.io/gitea/services/issue"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIViewPulls(t *testing.T) {
@@ -44,7 +48,7 @@ func TestAPIViewPulls(t *testing.T) {
 	if assert.EqualValues(t, 5, pull.ID) {
 		resp = ctx.Session.MakeRequest(t, NewRequest(t, "GET", pull.DiffURL), http.StatusOK)
 		_, err := io.ReadAll(resp.Body)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		// TODO: use diff to generate stats to test against
 
 		t.Run(fmt.Sprintf("APIGetPullFiles_%d", pull.ID),
@@ -236,7 +240,8 @@ func TestAPIEditPull(t *testing.T) {
 
 	newTitle := "edit a this pr"
 	newBody := "edited body"
-	req = NewRequestWithJSON(t, http.MethodPatch, fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d", owner10.Name, repo10.Name, apiPull.Index), &api.EditPullRequestOption{
+	urlStr := fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d", owner10.Name, repo10.Name, apiPull.Index)
+	req = NewRequestWithJSON(t, http.MethodPatch, urlStr, &api.EditPullRequestOption{
 		Base:  "feature/1",
 		Title: newTitle,
 		Body:  &newBody,
@@ -247,11 +252,21 @@ func TestAPIEditPull(t *testing.T) {
 	// check comment history
 	pull := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: apiPull.ID})
 	err := pull.LoadIssue(db.DefaultContext)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{IssueID: pull.Issue.ID, OldTitle: title, NewTitle: newTitle})
 	unittest.AssertExistsAndLoadBean(t, &issues_model.ContentHistory{IssueID: pull.Issue.ID, ContentText: newBody, IsFirstCreated: false})
 
-	req = NewRequestWithJSON(t, http.MethodPatch, fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d", owner10.Name, repo10.Name, pull.Index), &api.EditPullRequestOption{
+	// verify the idempotency of a state change
+	pullState := string(apiPull.State)
+	req = NewRequestWithJSON(t, http.MethodPatch, urlStr, &api.EditPullRequestOption{
+		State: &pullState,
+	}).AddTokenAuth(token)
+	apiPullIdempotent := new(api.PullRequest)
+	resp = MakeRequest(t, req, http.StatusCreated)
+	DecodeJSON(t, resp, apiPullIdempotent)
+	assert.EqualValues(t, apiPull.State, apiPullIdempotent.State)
+
+	req = NewRequestWithJSON(t, http.MethodPatch, urlStr, &api.EditPullRequestOption{
 		Base: "not-exist",
 	}).AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusNotFound)
@@ -296,4 +311,39 @@ func doAPIGetPullFiles(ctx APITestContext, pr *api.PullRequest, callback func(*t
 			callback(t, files)
 		}
 	}
+}
+
+func TestAPIPullDeleteBranchPerms(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
+		user2Session := loginUser(t, "user2")
+		user4Session := loginUser(t, "user4")
+		testRepoFork(t, user4Session, "user2", "repo1", "user4", "repo1")
+		testEditFileToNewBranch(t, user2Session, "user2", "repo1", "master", "base-pr", "README.md", "Hello, World\n(Edited - base PR)\n")
+
+		req := NewRequestWithValues(t, "POST", "/user4/repo1/compare/master...user2/repo1:base-pr", map[string]string{
+			"_csrf": GetCSRF(t, user4Session, "/user4/repo1/compare/master...user2/repo1:base-pr"),
+			"title": "Testing PR",
+		})
+		resp := user4Session.MakeRequest(t, req, http.StatusOK)
+		elem := strings.Split(test.RedirectURL(resp), "/")
+
+		token := getTokenForLoggedInUser(t, user4Session, auth_model.AccessTokenScopeWriteRepository)
+		req = NewRequestWithValues(t, "POST", "/api/v1/repos/user4/repo1/pulls/"+elem[4]+"/merge", map[string]string{
+			"do":                        "merge",
+			"delete_branch_after_merge": "on",
+		}).AddTokenAuth(token)
+		resp = user4Session.MakeRequest(t, req, http.StatusForbidden)
+
+		type userResponse struct {
+			Message string `json:"message"`
+		}
+		var bodyResp userResponse
+		DecodeJSON(t, resp, &bodyResp)
+
+		assert.EqualValues(t, "insufficient permission to delete head branch", bodyResp.Message)
+
+		// Check that the branch still exist.
+		req = NewRequest(t, "GET", "/api/v1/repos/user2/repo1/branches/base-pr").AddTokenAuth(token)
+		user4Session.MakeRequest(t, req, http.StatusOK)
+	})
 }

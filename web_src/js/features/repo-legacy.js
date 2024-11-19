@@ -4,6 +4,7 @@ import {
   initRepoIssueComments, initRepoIssueDependencyDelete, initRepoIssueReferenceIssue,
   initRepoIssueTitleEdit, initRepoIssueWipToggle,
   initRepoPullRequestUpdate, updateIssuesMeta, handleReply, initIssueTemplateCommentEditors, initSingleCommentEditor,
+  initRepoIssueAssignMe, reloadConfirmDraftComment,
 } from './repo-issue.js';
 import {initUnicodeEscapeButton} from './repo-unicode-escape.js';
 import {svg} from '../svg.js';
@@ -26,28 +27,10 @@ import {hideElem, showElem} from '../utils/dom.js';
 import {getComboMarkdownEditor, initComboMarkdownEditor} from './comp/ComboMarkdownEditor.js';
 import {attachRefIssueContextPopup} from './contextpopup.js';
 import {POST, GET} from '../modules/fetch.js';
+import {MarkdownQuote} from '@github/quote-selection';
+import {toAbsoluteUrl} from '../utils.js';
 
 const {csrfToken} = window.config;
-
-// if there are draft comments, confirm before reloading, to avoid losing comments
-function reloadConfirmDraftComment() {
-  const commentTextareas = [
-    document.querySelector('.edit-content-zone:not(.tw-hidden) textarea'),
-    document.querySelector('#comment-form textarea'),
-  ];
-  for (const textarea of commentTextareas) {
-    // Most users won't feel too sad if they lose a comment with 10 chars, they can re-type these in seconds.
-    // But if they have typed more (like 50) chars and the comment is lost, they will be very unhappy.
-    if (textarea && textarea.value.trim().length > 10) {
-      textarea.parentElement.scrollIntoView();
-      if (!window.confirm('Page will be reloaded, but there are draft comments. Continuing to reload will discard the comments. Continue?')) {
-        return;
-      }
-      break;
-    }
-  }
-  window.location.reload();
-}
 
 export function initRepoCommentForm() {
   const $commentForm = $('.comment.form');
@@ -64,7 +47,7 @@ export function initRepoCommentForm() {
   function initBranchSelector() {
     const $selectBranch = $('.ui.select-branch');
     const $branchMenu = $selectBranch.find('.reference-list-menu');
-    const $isNewIssue = $branchMenu.hasClass('new-issue');
+    const $isNewIssue = $branchMenu[0]?.classList.contains('new-issue');
     $branchMenu.find('.item:not(.no-select)').on('click', async function () {
       const selectedValue = $(this).data('id');
       const editMode = $('#editing_mode').val();
@@ -132,13 +115,13 @@ export function initRepoCommentForm() {
 
     $listMenu.find('.item:not(.no-select)').on('click', function (e) {
       e.preventDefault();
-      if ($(this).hasClass('ban-change')) {
+      if (this.classList.contains('ban-change')) {
         return false;
       }
 
       hasUpdateAction = $listMenu.data('action') === 'update'; // Update the var
 
-      const clickedItem = this; // eslint-disable-line unicorn/no-this-assignment
+      const clickedItem = this; // eslint-disable-line unicorn/no-this-assignment, @typescript-eslint/no-this-alias
       const scope = this.getAttribute('data-scope');
 
       $(this).parent().find('.item').each(function () {
@@ -147,7 +130,7 @@ export function initRepoCommentForm() {
           if (this.getAttribute('data-scope') !== scope) {
             return true;
           }
-          if (this !== clickedItem && !$(this).hasClass('checked')) {
+          if (this !== clickedItem && !this.classList.contains('checked')) {
             return true;
           }
         } else if (this !== clickedItem) {
@@ -155,7 +138,7 @@ export function initRepoCommentForm() {
           return true;
         }
 
-        if ($(this).hasClass('checked')) {
+        if (this.classList.contains('checked')) {
           $(this).removeClass('checked');
           $(this).find('.octicon-check').addClass('tw-invisible');
           if (hasUpdateAction) {
@@ -194,7 +177,7 @@ export function initRepoCommentForm() {
 
       const listIds = [];
       $(this).parent().find('.item').each(function () {
-        if ($(this).hasClass('checked')) {
+        if (this.classList.contains('checked')) {
           listIds.push($(this).data('id'));
           $($(this).data('id-selector')).removeClass('tw-hidden');
         } else {
@@ -243,6 +226,7 @@ export function initRepoCommentForm() {
   // Init labels and assignees
   initListSubmits('select-label', 'labels');
   initListSubmits('select-assignees', 'assignees');
+  initRepoIssueAssignMe();
   initListSubmits('select-assignees-modify', 'assignees');
   initListSubmits('select-reviewers-modify', 'assignees');
 
@@ -270,9 +254,11 @@ export function initRepoCommentForm() {
       }
 
       let icon = '';
-      if (input_id === '#project_id') {
+      if (input_id === '#milestone_id') {
+        icon = svg('octicon-milestone', 18, 'tw-mr-2');
+      } else if (input_id === '#project_id') {
         icon = svg('octicon-project', 18, 'tw-mr-2');
-      } else if (input_id === '#assignee_id') {
+      } else if (input_id === '#assignee_ids') {
         icon = `<img class="ui avatar image tw-mr-2" alt="avatar" src=${$(this).data('avatar')}>`;
       }
 
@@ -311,7 +297,8 @@ export function initRepoCommentForm() {
 
   // Milestone, Assignee, Project
   selectItem('.select-project', '#project_id');
-  selectItem('.select-assignee', '#assignee_id');
+  selectItem('.select-milestone', '#milestone_id');
+  selectItem('.select-assignee', '#assignee_ids');
 }
 
 async function onEditContent(event) {
@@ -431,7 +418,10 @@ async function onEditContent(event) {
         context: editContentZone.getAttribute('data-context'),
         content_version: editContentZone.getAttribute('data-content-version'),
       });
-      for (const fileInput of dropzoneInst?.element.querySelectorAll('.files [name=files]')) params.append('files[]', fileInput.value);
+      const files = dropzoneInst?.element?.querySelectorAll('.files [name=files]') ?? [];
+      for (const fileInput of files) {
+        params.append('files[]', fileInput.value);
+      }
 
       const response = await POST(editContentZone.getAttribute('data-update-url'), {data: params});
       const data = await response.json();
@@ -594,32 +584,105 @@ export function initRepository() {
   initUnicodeEscapeButton();
 }
 
+const filters = {
+  A(el) {
+    if (el.classList.contains('mention') || el.classList.contains('ref-issue')) {
+      return el.textContent;
+    }
+    return el;
+  },
+  PRE(el) {
+    const firstChild = el.children[0];
+    if (firstChild && el.classList.contains('code-block')) {
+      // Get the language of the codeblock.
+      const language = firstChild.className.match(/language-(\S+)/);
+      // Remove trailing newlines.
+      const text = el.textContent.replace(/\n+$/, '');
+      el.textContent = `\`\`\`${language[1]}\n${text}\n\`\`\`\n\n`;
+    }
+    return el;
+  },
+  SPAN(el) {
+    const emojiAlias = el.getAttribute('data-alias');
+    if (emojiAlias && el.classList.contains('emoji')) {
+      return `:${emojiAlias}:`;
+    }
+    if (el.classList.contains('katex')) {
+      const texCode = el.querySelector('annotation[encoding="application/x-tex"]').textContent;
+      if (el.parentElement.classList.contains('katex-display')) {
+        el.textContent = `\\[${texCode}\\]\n\n`;
+      } else {
+        el.textContent = `\\(${texCode}\\)\n\n`;
+      }
+    }
+    return el;
+  },
+};
+
+function hasContent(node) {
+  return node.nodeName === 'IMG' || node.firstChild !== null;
+}
+
+// This code matches that of what is done by @github/quote-selection
+function preprocessFragment(fragment) {
+  const nodeIterator = document.createNodeIterator(fragment, NodeFilter.SHOW_ELEMENT, {
+    acceptNode(node) {
+      if (node.nodeName in filters && hasContent(node)) {
+        return NodeFilter.FILTER_ACCEPT;
+      }
+
+      return NodeFilter.FILTER_SKIP;
+    },
+  });
+  const results = [];
+  let node = nodeIterator.nextNode();
+
+  while (node) {
+    if (node instanceof HTMLElement) {
+      results.push(node);
+    }
+    node = nodeIterator.nextNode();
+  }
+
+  // process deepest matches first
+  results.reverse();
+
+  for (const el of results) {
+    el.replaceWith(filters[el.nodeName](el));
+  }
+}
+
 function initRepoIssueCommentEdit() {
   // Edit issue or comment content
   $(document).on('click', '.edit-content', onEditContent);
 
   // Quote reply
-  $(document).on('click', '.quote-reply', async function (event) {
+  $(document).on('click', '.quote-reply', async (event) => {
     event.preventDefault();
-    const target = $(this).data('target');
-    const quote = $(`#${target}`).text().replace(/\n/g, '\n> ');
-    const content = `> ${quote}\n\n`;
-    let editor;
-    if ($(this).hasClass('quote-reply-diff')) {
-      const $replyBtn = $(this).closest('.comment-code-cloud').find('button.comment-form-reply');
-      editor = await handleReply($replyBtn);
+    const quote = new MarkdownQuote('', preprocessFragment);
+
+    let editorTextArea;
+    if (event.target.classList.contains('quote-reply-diff')) {
+      // Temporarily store the range so it doesn't get lost (likely caused by async code).
+      const currentRange = quote.range;
+
+      const replyButton = event.target.closest('.comment-code-cloud').querySelector('button.comment-form-reply');
+      editorTextArea = (await handleReply($(replyButton))).textarea;
+
+      quote.range = currentRange;
     } else {
-      // for normal issue/comment page
-      editor = getComboMarkdownEditor($('#comment-form .combo-markdown-editor'));
+      editorTextArea = document.querySelector('#comment-form .combo-markdown-editor textarea');
     }
-    if (editor) {
-      if (editor.value()) {
-        editor.value(`${editor.value()}\n\n${content}`);
-      } else {
-        editor.value(content);
-      }
-      editor.focus();
-      editor.moveCursorToEnd();
+
+    // Select the whole comment body if there's no selection.
+    if (quote.range.collapsed) {
+      quote.select(document.querySelector(`#${event.target.getAttribute('data-target')}`));
+    }
+
+    // If the selection is in the comment body, then insert the quote.
+    if (quote.closest(`#${event.target.getAttribute('data-target')}`)) {
+      editorTextArea.value += `@${event.target.getAttribute('data-author')} wrote in ${toAbsoluteUrl(event.target.getAttribute('data-reference-url'))}:`;
+      quote.insert(editorTextArea);
     }
   });
 }

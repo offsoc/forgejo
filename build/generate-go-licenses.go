@@ -77,6 +77,20 @@ func main() {
 	sort.Strings(paths)
 
 	var entries []LicenseEntry
+
+	{
+		licenseText, err := os.ReadFile("LICENSE")
+		if err != nil {
+			panic(err)
+		}
+
+		entries = append(entries, LicenseEntry{
+			Name:        "codeberg.org/forgejo/forgejo",
+			Path:        "codeberg.org/forgejo/forgejo/GPL-3.0-or-later",
+			LicenseText: string(licenseText),
+		})
+	}
+
 	for _, filePath := range paths {
 		licenseText, err := os.ReadFile(filePath)
 		if err != nil {

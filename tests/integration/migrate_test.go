@@ -1,10 +1,10 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -20,14 +20,17 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/test"
+	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/services/migrations"
-	"code.gitea.io/gitea/services/repository"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMigrateLocalPath(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	adminUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user1"})
 
@@ -38,34 +41,26 @@ func TestMigrateLocalPath(t *testing.T) {
 
 	lowercasePath := filepath.Join(basePath, "lowercase")
 	err := os.Mkdir(lowercasePath, 0o700)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = migrations.IsMigrateURLAllowed(lowercasePath, adminUser)
-	assert.NoError(t, err, "case lowercase path")
+	require.NoError(t, err, "case lowercase path")
 
 	mixedcasePath := filepath.Join(basePath, "mIxeDCaSe")
 	err = os.Mkdir(mixedcasePath, 0o700)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = migrations.IsMigrateURLAllowed(mixedcasePath, adminUser)
-	assert.NoError(t, err, "case mixedcase path")
+	require.NoError(t, err, "case mixedcase path")
 
 	setting.ImportLocalPaths = old
 }
 
 func TestMigrate(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		AllowLocalNetworks := setting.Migrations.AllowLocalNetworks
-		setting.Migrations.AllowLocalNetworks = true
-		AppVer := setting.AppVer
-		// Gitea SDK (go-sdk) need to parse the AppVer from server response, so we must set it to a valid version string.
-		setting.AppVer = "1.16.0"
-		defer func() {
-			setting.Migrations.AllowLocalNetworks = AllowLocalNetworks
-			setting.AppVer = AppVer
-			migrations.Init()
-		}()
-		assert.NoError(t, migrations.Init())
+		defer test.MockVariableValue(&setting.Migrations.AllowLocalNetworks, true)()
+		defer test.MockVariableValue(&setting.AppVer, "1.16.0")()
+		require.NoError(t, migrations.Init())
 
 		ownerName := "user2"
 		repoName := "repo1"
@@ -79,45 +74,47 @@ func TestMigrate(t *testing.T) {
 			{svc: structs.GiteaService},
 			{svc: structs.ForgejoService},
 		} {
-			// Step 0: verify the repo is available
-			req := NewRequestf(t, "GET", fmt.Sprintf("/%s/%s", ownerName, repoName))
-			_ = session.MakeRequest(t, req, http.StatusOK)
-			// Step 1: get the Gitea migration form
-			req = NewRequestf(t, "GET", "/repo/migrate/?service_type=%d", s.svc)
-			resp := session.MakeRequest(t, req, http.StatusOK)
-			// Step 2: load the form
-			htmlDoc := NewHTMLParser(t, resp.Body)
-			link, exists := htmlDoc.doc.Find(`form.ui.form[action^="/repo/migrate"]`).Attr("action")
-			assert.True(t, exists, "The template has changed")
-			// Step 4: submit the migration to only migrate issues
-			migratedRepoName := "otherrepo"
-			req = NewRequestWithValues(t, "POST", link, map[string]string{
-				"_csrf":       htmlDoc.GetCSRF(),
-				"service":     fmt.Sprintf("%d", s.svc),
-				"clone_addr":  fmt.Sprintf("%s%s/%s", u, ownerName, repoName),
-				"auth_token":  token,
-				"issues":      "on",
-				"repo_name":   migratedRepoName,
-				"description": "",
-				"uid":         fmt.Sprintf("%d", repoOwner.ID),
+			t.Run(s.svc.Name(), func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+				// Step 0: verify the repo is available
+				req := NewRequestf(t, "GET", "/%s/%s", ownerName, repoName)
+				_ = session.MakeRequest(t, req, http.StatusOK)
+				// Step 1: get the Gitea migration form
+				req = NewRequestf(t, "GET", "/repo/migrate/?service_type=%d", s.svc)
+				resp := session.MakeRequest(t, req, http.StatusOK)
+				// Step 2: load the form
+				htmlDoc := NewHTMLParser(t, resp.Body)
+				// Check form title
+				title := htmlDoc.doc.Find("title").Text()
+				assert.Contains(t, title, translation.NewLocale("en-US").TrString("new_migrate.title"))
+				// Get the link of migration button
+				link, exists := htmlDoc.doc.Find(`form.ui.form[action^="/repo/migrate"]`).Attr("action")
+				assert.True(t, exists, "The template has changed")
+				// Step 4: submit the migration to only migrate issues
+				migratedRepoName := "otherrepo-" + s.svc.Name()
+				req = NewRequestWithValues(t, "POST", link, map[string]string{
+					"_csrf":       htmlDoc.GetCSRF(),
+					"service":     fmt.Sprintf("%d", s.svc),
+					"clone_addr":  fmt.Sprintf("%s%s/%s", u, ownerName, repoName),
+					"auth_token":  token,
+					"issues":      "on",
+					"repo_name":   migratedRepoName,
+					"description": "",
+					"uid":         fmt.Sprintf("%d", repoOwner.ID),
+				})
+				resp = session.MakeRequest(t, req, http.StatusSeeOther)
+				// Step 5: a redirection displays the migrated repository
+				assert.EqualValues(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
+				// Step 6: check the repo was created
+				unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName})
 			})
-			resp = session.MakeRequest(t, req, http.StatusSeeOther)
-			// Step 5: a redirection displays the migrated repository
-			loc := resp.Header().Get("Location")
-			assert.EqualValues(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), loc)
-			// Step 6: check the repo was created
-			repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName})
-
-			// Step 7: delete the repository, so we can test with other services
-			err := repository.DeleteRepository(context.Background(), repoOwner, repo, false)
-			assert.NoError(t, err)
 		}
 	})
 }
 
 func Test_UpdateCommentsMigrationsByType(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	err := issues_model.UpdateCommentsMigrationsByType(db.DefaultContext, structs.GithubService, "1", 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

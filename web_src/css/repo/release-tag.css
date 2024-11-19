@@ -99,10 +99,6 @@
   padding-bottom: 10px;
 }
 
-.repository.new.release .prerelease.field {
-  margin-bottom: 0;
-}
-
 @media (max-width: 438px) {
   .repository.new.release .field button,
   .repository.new.release .field input {

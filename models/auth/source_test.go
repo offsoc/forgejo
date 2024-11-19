@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm/schemas"
 )
 
@@ -35,10 +36,10 @@ func (source *TestSource) ToDB() ([]byte, error) {
 }
 
 func TestDumpAuthSource(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	authSourceSchema, err := db.TableInfo(new(auth_model.Source))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	auth_model.RegisterTypeConfig(auth_model.OAuth2, new(TestSource))
 

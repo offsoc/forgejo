@@ -22,14 +22,14 @@ func TestMain(m *testing.M) {
 	unittest.MainTest(m)
 }
 
-func assertTranslatedLocale(t *testing.T, message string, prefixes ...string) {
+func AssertTranslatedLocale(t *testing.T, message string, prefixes ...string) {
 	t.Helper()
 	for _, prefix := range prefixes {
 		assert.NotContains(t, message, prefix, "there is an untranslated locale prefix")
 	}
 }
 
-func mockMailSettings(send func(msgs ...*Message)) func() {
+func MockMailSettings(send func(msgs ...*Message)) func() {
 	translation.InitLocales(context.Background())
 	subjectTemplates, bodyTemplates = templates.Mailer(context.Background())
 	mailService := setting.Mailer{

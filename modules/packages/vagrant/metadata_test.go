@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -46,7 +47,7 @@ func TestParseMetadataFromBox(t *testing.T) {
 
 		metadata, err := ParseMetadataFromBox(data)
 		assert.NotNil(t, metadata)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("Valid", func(t *testing.T) {
@@ -56,13 +57,13 @@ func TestParseMetadataFromBox(t *testing.T) {
 			"website":     projectURL,
 			"repository":  repositoryURL,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		data := createArchive(map[string][]byte{"info.json": content})
 
 		metadata, err := ParseMetadataFromBox(data)
 		assert.NotNil(t, metadata)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, author, metadata.Author)
 		assert.Equal(t, description, metadata.Description)
@@ -77,11 +78,11 @@ func TestParseInfoFile(t *testing.T) {
 			"package": "",
 			"dummy":   "",
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		metadata, err := ParseInfoFile(bytes.NewReader(content))
 		assert.NotNil(t, metadata)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Empty(t, metadata.Author)
 		assert.Empty(t, metadata.Description)
@@ -96,11 +97,11 @@ func TestParseInfoFile(t *testing.T) {
 			"website":     projectURL,
 			"repository":  repositoryURL,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		metadata, err := ParseInfoFile(bytes.NewReader(content))
 		assert.NotNil(t, metadata)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, author, metadata.Author)
 		assert.Equal(t, description, metadata.Description)

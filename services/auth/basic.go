@@ -5,6 +5,7 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -72,7 +73,7 @@ func (b *Basic) Verify(req *http.Request, w http.ResponseWriter, store DataStore
 	}
 
 	// check oauth2 token
-	uid := CheckOAuthAccessToken(req.Context(), authToken)
+	uid, _ := CheckOAuthAccessToken(req.Context(), authToken)
 	if uid != 0 {
 		log.Trace("Basic Authorization: Valid OAuthAccessToken for user[%d]", uid)
 
@@ -130,6 +131,16 @@ func (b *Basic) Verify(req *http.Request, w http.ResponseWriter, store DataStore
 			log.Error("UserSignIn: %v", err)
 		}
 		return nil, err
+	}
+
+	hashWebAuthn, err := auth_model.HasWebAuthnRegistrationsByUID(req.Context(), u.ID)
+	if err != nil {
+		log.Error("HasWebAuthnRegistrationsByUID: %v", err)
+		return nil, err
+	}
+
+	if hashWebAuthn {
+		return nil, errors.New("Basic authorization is not allowed while having security keys enrolled")
 	}
 
 	if skipper, ok := source.Cfg.(LocalTwoFASkipper); !ok || !skipper.IsSkipLocalTwoFA() {

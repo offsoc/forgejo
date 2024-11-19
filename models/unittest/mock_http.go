@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/modules/log"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Mocks HTTP responses of a third-party service (such as GitHub, GitLab…)
@@ -32,6 +33,11 @@ func NewMockWebServer(t *testing.T, liveServerBaseURL, testDataDir string, liveM
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := NormalizedFullPath(r.URL)
+		isGh := liveServerBaseURL == "https://api.github.com"
+		if isGh {
+			// Workaround for GitHub: trim `/api/v3` from the path
+			path = strings.TrimPrefix(path, "/api/v3")
+		}
 		log.Info("Mock HTTP Server: got request for path %s", r.URL.Path)
 		// TODO check request method (support POST?)
 		fixturePath := fmt.Sprintf("%s/%s_%s", testDataDir, r.Method, url.PathEscape(path))
@@ -39,7 +45,7 @@ func NewMockWebServer(t *testing.T, liveServerBaseURL, testDataDir string, liveM
 			liveURL := fmt.Sprintf("%s%s", liveServerBaseURL, path)
 
 			request, err := http.NewRequest(r.Method, liveURL, nil)
-			assert.NoError(t, err, "constructing an HTTP request to %s failed", liveURL)
+			require.NoError(t, err, "constructing an HTTP request to %s failed", liveURL)
 			for headerName, headerValues := range r.Header {
 				// do not pass on the encoding: let the Transport of the HTTP client handle that for us
 				if strings.ToLower(headerName) != "accept-encoding" {
@@ -50,11 +56,11 @@ func NewMockWebServer(t *testing.T, liveServerBaseURL, testDataDir string, liveM
 			}
 
 			response, err := http.DefaultClient.Do(request)
-			assert.NoError(t, err, "HTTP request to %s failed: %s", liveURL)
+			require.NoError(t, err, "HTTP request to %s failed: %s", liveURL)
 			assert.Less(t, response.StatusCode, 400, "unexpected status code for %s", liveURL)
 
 			fixture, err := os.Create(fixturePath)
-			assert.NoError(t, err, "failed to open the fixture file %s for writing", fixturePath)
+			require.NoError(t, err, "failed to open the fixture file %s for writing", fixturePath)
 			defer fixture.Close()
 			fixtureWriter := bufio.NewWriter(fixture)
 
@@ -62,29 +68,33 @@ func NewMockWebServer(t *testing.T, liveServerBaseURL, testDataDir string, liveM
 				for _, headerValue := range headerValues {
 					if !slices.Contains(ignoredHeaders, strings.ToLower(headerName)) {
 						_, err := fixtureWriter.WriteString(fmt.Sprintf("%s: %s\n", headerName, headerValue))
-						assert.NoError(t, err, "writing the header of the HTTP response to the fixture file failed")
+						require.NoError(t, err, "writing the header of the HTTP response to the fixture file failed")
 					}
 				}
 			}
 			_, err = fixtureWriter.WriteString("\n")
-			assert.NoError(t, err, "writing the header of the HTTP response to the fixture file failed")
+			require.NoError(t, err, "writing the header of the HTTP response to the fixture file failed")
 			fixtureWriter.Flush()
 
 			log.Info("Mock HTTP Server: writing response to %s", fixturePath)
 			_, err = io.Copy(fixture, response.Body)
-			assert.NoError(t, err, "writing the body of the HTTP response to %s failed", liveURL)
+			require.NoError(t, err, "writing the body of the HTTP response to %s failed", liveURL)
 
 			err = fixture.Sync()
-			assert.NoError(t, err, "writing the body of the HTTP response to the fixture file failed")
+			require.NoError(t, err, "writing the body of the HTTP response to the fixture file failed")
 		}
 
 		fixture, err := os.ReadFile(fixturePath)
-		assert.NoError(t, err, "missing mock HTTP response: "+fixturePath)
+		require.NoError(t, err, "missing mock HTTP response: "+fixturePath)
 
 		w.WriteHeader(http.StatusOK)
 
 		// replace any mention of the live HTTP service by the mocked host
 		stringFixture := strings.ReplaceAll(string(fixture), liveServerBaseURL, mockServerBaseURL)
+		if isGh {
+			// Workaround for GitHub: replace github.com by the mock server's base URL
+			stringFixture = strings.ReplaceAll(stringFixture, "https://github.com", mockServerBaseURL)
+		}
 		// parse back the fixture file into a series of HTTP headers followed by response body
 		lines := strings.Split(stringFixture, "\n")
 		for idx, line := range lines {
@@ -95,7 +105,7 @@ func NewMockWebServer(t *testing.T, liveServerBaseURL, testDataDir string, liveM
 				// we reached the end of the headers (empty line), so what follows is the body
 				responseBody := strings.Join(lines[idx+1:], "\n")
 				_, err := w.Write([]byte(responseBody))
-				assert.NoError(t, err, "writing the body of the HTTP response failed")
+				require.NoError(t, err, "writing the body of the HTTP response failed")
 				break
 			}
 		}

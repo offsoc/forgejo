@@ -17,12 +17,13 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIPinIssue(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repo.ID})
@@ -47,7 +48,7 @@ func TestAPIPinIssue(t *testing.T) {
 func TestAPIUnpinIssue(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repo.ID})
@@ -83,7 +84,7 @@ func TestAPIUnpinIssue(t *testing.T) {
 func TestAPIMoveIssuePin(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repo.ID})
@@ -133,7 +134,7 @@ func TestAPIMoveIssuePin(t *testing.T) {
 func TestAPIListPinnedIssues(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repo.ID})
@@ -153,14 +154,14 @@ func TestAPIListPinnedIssues(t *testing.T) {
 	var issueList []api.Issue
 	DecodeJSON(t, resp, &issueList)
 
-	assert.Equal(t, 1, len(issueList))
+	assert.Len(t, issueList, 1)
 	assert.Equal(t, issue.ID, issueList[0].ID)
 }
 
 func TestAPIListPinnedPullrequests(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 
@@ -169,7 +170,7 @@ func TestAPIListPinnedPullrequests(t *testing.T) {
 	var prList []api.PullRequest
 	DecodeJSON(t, resp, &prList)
 
-	assert.Equal(t, 0, len(prList))
+	assert.Empty(t, prList)
 }
 
 func TestAPINewPinAllowed(t *testing.T) {

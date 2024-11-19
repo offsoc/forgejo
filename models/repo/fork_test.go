@@ -11,23 +11,24 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetUserFork(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// User13 has repo 11 forked from repo10
 	repo, err := repo_model.GetRepositoryByID(db.DefaultContext, 10)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, repo)
 	repo, err = repo_model.GetUserFork(db.DefaultContext, repo.ID, 13)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, repo)
 
 	repo, err = repo_model.GetRepositoryByID(db.DefaultContext, 9)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, repo)
 	repo, err = repo_model.GetUserFork(db.DefaultContext, repo.ID, 13)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, repo)
 }

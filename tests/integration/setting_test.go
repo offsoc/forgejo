@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -15,6 +16,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSettingShowUserEmailExplore(t *testing.T) {
@@ -133,7 +135,7 @@ func TestSettingSecurityAuthSource(t *testing.T) {
 		LoginSourceID: active.ID,
 	}
 	err := user_model.LinkExternalToUser(db.DefaultContext, user, activeExternalLoginUser)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	inactive := addAuthSource(t, authSourcePayloadGitLabCustom("gitlab-inactive"))
 	inactiveExternalLoginUser := &user_model.ExternalLoginUser{
@@ -142,16 +144,36 @@ func TestSettingSecurityAuthSource(t *testing.T) {
 		LoginSourceID: inactive.ID,
 	}
 	err = user_model.LinkExternalToUser(db.DefaultContext, user, inactiveExternalLoginUser)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// mark the authSource as inactive
 	inactive.IsActive = false
 	err = auth_model.UpdateSource(db.DefaultContext, inactive)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	session := loginUser(t, "user1")
 	req := NewRequest(t, "GET", "user/settings/security")
 	resp := session.MakeRequest(t, req, http.StatusOK)
 	assert.Contains(t, resp.Body.String(), `gitlab-active`)
 	assert.Contains(t, resp.Body.String(), `gitlab-inactive`)
+}
+
+func TestSettingShowUserEmailSettings(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	// user1: keep_email_private = false, user2: keep_email_private = true
+
+	// user1 can see own visible email
+	session := loginUser(t, "user1")
+	req := NewRequest(t, "GET", "/user/settings")
+	resp := session.MakeRequest(t, req, http.StatusOK)
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	assert.Contains(t, htmlDoc.doc.Find("#signed-user-email").Text(), "user1@example.com")
+
+	// user2 cannot see own hidden email
+	session = loginUser(t, "user2")
+	req = NewRequest(t, "GET", "/user/settings")
+	resp = session.MakeRequest(t, req, http.StatusOK)
+	htmlDoc = NewHTMLParser(t, resp.Body)
+	assert.NotContains(t, htmlDoc.doc.Find("#signed-user-email").Text(), "user2@example.com")
 }

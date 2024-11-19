@@ -13,9 +13,18 @@ import (
 // NumericEqualityQuery generates a numeric equality query for the given value and field
 func NumericEqualityQuery(value int64, field string) *query.NumericRangeQuery {
 	f := float64(value)
-	tru := true
-	q := bleve.NewNumericRangeInclusiveQuery(&f, &f, &tru, &tru)
+	tru := true                                                  // codespell-ignore
+	q := bleve.NewNumericRangeInclusiveQuery(&f, &f, &tru, &tru) // codespell-ignore
 	q.SetField(field)
+	return q
+}
+
+// MatchQuery generates a match query for the given phrase, field and analyzer
+func MatchQuery(matchTerm, field, analyzer string, fuzziness int) *query.MatchQuery {
+	q := bleve.NewMatchQuery(matchTerm)
+	q.FieldVal = field
+	q.Analyzer = analyzer
+	q.Fuzziness = fuzziness
 	return q
 }
 

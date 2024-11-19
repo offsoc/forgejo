@@ -15,10 +15,11 @@ import (
 	repo_service "code.gitea.io/gitea/services/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTeam_HasRepository(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	test := func(teamID, repoID int64, expected bool) {
 		team := unittest.AssertExistsAndLoadBean(t, &organization.Team{ID: teamID})
@@ -34,11 +35,11 @@ func TestTeam_HasRepository(t *testing.T) {
 }
 
 func TestTeam_RemoveRepository(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	testSuccess := func(teamID, repoID int64) {
 		team := unittest.AssertExistsAndLoadBean(t, &organization.Team{ID: teamID})
-		assert.NoError(t, repo_service.RemoveRepositoryFromTeam(db.DefaultContext, team, repoID))
+		require.NoError(t, repo_service.RemoveRepositoryFromTeam(db.DefaultContext, team, repoID))
 		unittest.AssertNotExistsBean(t, &organization.TeamRepo{TeamID: teamID, RepoID: repoID})
 		unittest.CheckConsistencyFor(t, &organization.Team{ID: teamID}, &repo_model.Repository{ID: repoID})
 	}
@@ -62,7 +63,7 @@ func TestDeleteOwnerRepositoriesDirectly(t *testing.T) {
 		HookID: preservedHookID,
 	})
 
-	assert.NoError(t, repo_service.DeleteOwnerRepositoriesDirectly(db.DefaultContext, user))
+	require.NoError(t, repo_service.DeleteOwnerRepositoriesDirectly(db.DefaultContext, user))
 
 	unittest.AssertNotExistsBean(t, &webhook_model.HookTask{
 		HookID: deletedHookID,

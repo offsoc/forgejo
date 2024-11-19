@@ -4,6 +4,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 
 	"code.gitea.io/gitea/models/db"
@@ -18,6 +19,7 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/optional"
 	alpine_module "code.gitea.io/gitea/modules/packages/alpine"
+	arch_model "code.gitea.io/gitea/modules/packages/arch"
 	debian_module "code.gitea.io/gitea/modules/packages/debian"
 	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
 	"code.gitea.io/gitea/modules/setting"
@@ -200,6 +202,18 @@ func ViewPackageVersion(ctx *context.Context) {
 		ctx.Data["Branches"] = util.Sorted(branches.Values())
 		ctx.Data["Repositories"] = util.Sorted(repositories.Values())
 		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
+	case packages_model.TypeArch:
+		ctx.Data["RegistryHost"] = setting.Packages.RegistryHost
+		ctx.Data["SignMail"] = fmt.Sprintf("%s@noreply.%s", ctx.Package.Owner.Name, setting.Packages.RegistryHost)
+		groups := make(container.Set[string])
+		for _, f := range pd.Files {
+			for _, pp := range f.Properties {
+				if pp.Name == arch_model.PropertyDistribution {
+					groups.Add(pp.Value)
+				}
+			}
+		}
+		ctx.Data["Groups"] = util.Sorted(groups.Values())
 	case packages_model.TypeDebian:
 		distributions := make(container.Set[string])
 		components := make(container.Set[string])

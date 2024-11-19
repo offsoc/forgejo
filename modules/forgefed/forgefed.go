@@ -16,8 +16,9 @@ func GetItemByType(typ ap.ActivityVocabularyType) (ap.Item, error) {
 	switch typ {
 	case RepositoryType:
 		return RepositoryNew(""), nil
+	default:
+		return ap.GetItemByType(typ)
 	}
-	return ap.GetItemByType(typ)
 }
 
 // JSONUnmarshalerFn is the function that will load the data from a fastjson.Value into an Item
@@ -28,8 +29,9 @@ func JSONUnmarshalerFn(typ ap.ActivityVocabularyType, val *fastjson.Value, i ap.
 		return OnRepository(i, func(r *Repository) error {
 			return JSONLoadRepository(val, r)
 		})
+	default:
+		return nil
 	}
-	return nil
 }
 
 // NotEmpty is the function that checks if an object is empty
@@ -44,6 +46,7 @@ func NotEmpty(i ap.Item) bool {
 			return false
 		}
 		return ap.NotEmpty(r.Actor)
+	default:
+		return ap.NotEmpty(i)
 	}
-	return ap.NotEmpty(i)
 }

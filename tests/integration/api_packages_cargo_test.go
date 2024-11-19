@@ -27,6 +27,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPackageCargo(t *testing.T) {
@@ -71,25 +72,25 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 	}
 
 	err := cargo_service.InitializeIndexRepository(db.DefaultContext, user, user)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	repo, err := repo_model.GetRepositoryByOwnerAndName(db.DefaultContext, user.Name, cargo_service.IndexRepositoryName)
 	assert.NotNil(t, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	readGitContent := func(t *testing.T, path string) string {
 		gitRepo, err := gitrepo.OpenRepository(db.DefaultContext, repo)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer gitRepo.Close()
 
 		commit, err := gitRepo.GetBranchCommit(repo.DefaultBranch)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		blob, err := commit.GetBlobByPath(path)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		content, err := blob.GetBlobContent(1024)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		return content
 	}
@@ -105,7 +106,7 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 
 			var config cargo_service.Config
 			err := json.Unmarshal([]byte(content), &config)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, url, config.DownloadURL)
 			assert.Equal(t, root, config.APIURL)
@@ -119,7 +120,7 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 
 			var config cargo_service.Config
 			err := json.Unmarshal(resp.Body.Bytes(), &config)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, url, config.DownloadURL)
 			assert.Equal(t, root, config.APIURL)
@@ -181,24 +182,24 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 			assert.True(t, status.OK)
 
 			pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeCargo)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pvs, 1)
 
 			pd, err := packages.GetPackageDescriptor(db.DefaultContext, pvs[0])
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, pd.SemVer)
 			assert.IsType(t, &cargo_module.Metadata{}, pd.Metadata)
 			assert.Equal(t, packageName, pd.Package.Name)
 			assert.Equal(t, packageVersion, pd.Version.Version)
 
 			pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pvs[0].ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Len(t, pfs, 1)
 			assert.Equal(t, fmt.Sprintf("%s-%s.crate", packageName, packageVersion), pfs[0].Name)
 			assert.True(t, pfs[0].IsLead)
 
 			pb, err := packages.GetBlobByID(db.DefaultContext, pfs[0].BlobID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.EqualValues(t, 4, pb.Size)
 
 			req = NewRequestWithBody(t, "PUT", url+"/new", createPackage(packageName, packageVersion)).
@@ -214,7 +215,7 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 
 						var entry cargo_service.IndexVersionEntry
 						err := json.Unmarshal([]byte(content), &entry)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 
 						assert.Equal(t, packageName, entry.Name)
 						assert.Equal(t, packageVersion, entry.Version)
@@ -238,7 +239,7 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 						defer tests.PrintCurrentTest(t)()
 
 						err := cargo_service.RebuildIndex(db.DefaultContext, user, user)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 
 						_ = readGitContent(t, cargo_service.BuildPackagePath(packageName))
 					})
@@ -253,7 +254,7 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 
 						var entry cargo_service.IndexVersionEntry
 						err := json.Unmarshal(resp.Body.Bytes(), &entry)
-						assert.NoError(t, err)
+						require.NoError(t, err)
 
 						assert.Equal(t, packageName, entry.Name)
 						assert.Equal(t, packageVersion, entry.Version)
@@ -281,11 +282,11 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 		defer tests.PrintCurrentTest(t)()
 
 		pv, err := packages.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages.TypeCargo, packageName, packageVersion)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, 0, pv.DownloadCount)
 
 		pfs, err := packages.GetFilesByVersionID(db.DefaultContext, pv.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pfs, 1)
 
 		req := NewRequest(t, "GET", fmt.Sprintf("%s/%s/%s/download", url, neturl.PathEscape(packageName), neturl.PathEscape(pv.Version))).
@@ -295,7 +296,7 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 		assert.Equal(t, "test", resp.Body.String())
 
 		pv, err = packages.GetVersionByNameAndVersion(db.DefaultContext, user.ID, packages.TypeCargo, packageName, packageVersion)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.EqualValues(t, 1, pv.DownloadCount)
 	})
 
@@ -345,7 +346,7 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 
 		var entry cargo_service.IndexVersionEntry
 		err := json.Unmarshal([]byte(content), &entry)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.True(t, entry.Yanked)
 	})
@@ -365,7 +366,7 @@ func testPackageCargo(t *testing.T, _ *neturl.URL) {
 
 		var entry cargo_service.IndexVersionEntry
 		err := json.Unmarshal([]byte(content), &entry)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.False(t, entry.Yanked)
 	})

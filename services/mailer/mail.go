@@ -17,6 +17,7 @@ import (
 	"time"
 
 	activities_model "code.gitea.io/gitea/models/activities"
+	auth_model "code.gitea.io/gitea/models/auth"
 	issues_model "code.gitea.io/gitea/models/issues"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
@@ -35,10 +36,15 @@ import (
 )
 
 const (
-	mailAuthActivate       base.TplName = "auth/activate"
-	mailAuthActivateEmail  base.TplName = "auth/activate_email"
-	mailAuthResetPassword  base.TplName = "auth/reset_passwd"
-	mailAuthRegisterNotify base.TplName = "auth/register_notify"
+	mailAuthActivate           base.TplName = "auth/activate"
+	mailAuthActivateEmail      base.TplName = "auth/activate_email"
+	mailAuthResetPassword      base.TplName = "auth/reset_passwd"
+	mailAuthRegisterNotify     base.TplName = "auth/register_notify"
+	mailAuthPasswordChange     base.TplName = "auth/password_change"
+	mailAuthPrimaryMailChange  base.TplName = "auth/primary_mail_change"
+	mailAuth2faDisabled        base.TplName = "auth/2fa_disabled"
+	mailAuthRemovedSecurityKey base.TplName = "auth/removed_security_key"
+	mailAuthTOTPEnrolled       base.TplName = "auth/totp_enrolled"
 
 	mailNotifyCollaborator base.TplName = "notify/collaborator"
 
@@ -64,7 +70,7 @@ func SendTestMail(email string) error {
 }
 
 // sendUserMail sends a mail to the user
-func sendUserMail(language string, u *user_model.User, tpl base.TplName, code, subject, info string) {
+func sendUserMail(language string, u *user_model.User, tpl base.TplName, code, subject, info string) error {
 	locale := translation.NewLocale(language)
 	data := map[string]any{
 		"locale":            locale,
@@ -78,47 +84,66 @@ func sendUserMail(language string, u *user_model.User, tpl base.TplName, code, s
 	var content bytes.Buffer
 
 	if err := bodyTemplates.ExecuteTemplate(&content, string(tpl), data); err != nil {
-		log.Error("Template: %v", err)
-		return
+		return err
 	}
 
 	msg := NewMessage(u.EmailTo(), subject, content.String())
 	msg.Info = fmt.Sprintf("UID: %d, %s", u.ID, info)
 
 	SendAsync(msg)
+	return nil
 }
 
 // SendActivateAccountMail sends an activation mail to the user (new user registration)
-func SendActivateAccountMail(locale translation.Locale, u *user_model.User) {
+func SendActivateAccountMail(ctx context.Context, u *user_model.User) error {
 	if setting.MailService == nil {
 		// No mail service configured
-		return
+		return nil
 	}
-	sendUserMail(locale.Language(), u, mailAuthActivate, u.GenerateEmailActivateCode(u.Email), locale.TrString("mail.activate_account"), "activate account")
+
+	locale := translation.NewLocale(u.Language)
+	code, err := u.GenerateEmailAuthorizationCode(ctx, auth_model.UserActivation)
+	if err != nil {
+		return err
+	}
+
+	return sendUserMail(locale.Language(), u, mailAuthActivate, code, locale.TrString("mail.activate_account"), "activate account")
 }
 
 // SendResetPasswordMail sends a password reset mail to the user
-func SendResetPasswordMail(u *user_model.User) {
+func SendResetPasswordMail(ctx context.Context, u *user_model.User) error {
 	if setting.MailService == nil {
 		// No mail service configured
-		return
+		return nil
 	}
+
 	locale := translation.NewLocale(u.Language)
-	sendUserMail(u.Language, u, mailAuthResetPassword, u.GenerateEmailActivateCode(u.Email), locale.TrString("mail.reset_password"), "recover account")
+	code, err := u.GenerateEmailAuthorizationCode(ctx, auth_model.PasswordReset)
+	if err != nil {
+		return err
+	}
+
+	return sendUserMail(u.Language, u, mailAuthResetPassword, code, locale.TrString("mail.reset_password"), "recover account")
 }
 
 // SendActivateEmailMail sends confirmation email to confirm new email address
-func SendActivateEmailMail(u *user_model.User, email string) {
+func SendActivateEmailMail(ctx context.Context, u *user_model.User, email string) error {
 	if setting.MailService == nil {
 		// No mail service configured
-		return
+		return nil
 	}
+
 	locale := translation.NewLocale(u.Language)
+	code, err := u.GenerateEmailAuthorizationCode(ctx, auth_model.EmailActivation(email))
+	if err != nil {
+		return err
+	}
+
 	data := map[string]any{
 		"locale":          locale,
 		"DisplayName":     u.DisplayName(),
 		"ActiveCodeLives": timeutil.MinutesToFriendly(setting.Service.ActiveCodeLives, locale),
-		"Code":            u.GenerateEmailActivateCode(email),
+		"Code":            code,
 		"Email":           email,
 		"Language":        locale.Language(),
 	}
@@ -126,14 +151,14 @@ func SendActivateEmailMail(u *user_model.User, email string) {
 	var content bytes.Buffer
 
 	if err := bodyTemplates.ExecuteTemplate(&content, string(mailAuthActivateEmail), data); err != nil {
-		log.Error("Template: %v", err)
-		return
+		return err
 	}
 
 	msg := NewMessage(email, locale.TrString("mail.activate_email"), content.String())
 	msg.Info = fmt.Sprintf("UID: %d, activate email", u.ID)
 
 	SendAsync(msg)
+	return nil
 }
 
 // SendRegisterNotifyMail triggers a notify e-mail by admin created a account.
@@ -313,7 +338,7 @@ func composeIssueCommentMessages(ctx *mailCommentContext, lang string, recipient
 	for _, recipient := range recipients {
 		msg := NewMessageFrom(
 			recipient.Email,
-			ctx.Doer.GetCompleteName(),
+			fromDisplayName(ctx.Doer),
 			setting.MailService.FromEmail,
 			subject,
 			mailBody.String(),
@@ -544,4 +569,183 @@ func actionToTemplate(issue *issues_model.Issue, actionType activities_model.Act
 		template = "issue/default"
 	}
 	return typeName, name, template
+}
+
+func fromDisplayName(u *user_model.User) string {
+	if setting.MailService.FromDisplayNameFormatTemplate != nil {
+		var ctx bytes.Buffer
+		err := setting.MailService.FromDisplayNameFormatTemplate.Execute(&ctx, map[string]any{
+			"DisplayName": u.DisplayName(),
+			"AppName":     setting.AppName,
+			"Domain":      setting.Domain,
+		})
+		if err == nil {
+			return mime.QEncoding.Encode("utf-8", ctx.String())
+		}
+		log.Error("fromDisplayName: %w", err)
+	}
+	return u.GetCompleteName()
+}
+
+// SendPasswordChange informs the user on their primary email address that
+// their password was changed.
+func SendPasswordChange(u *user_model.User) error {
+	if setting.MailService == nil {
+		return nil
+	}
+	locale := translation.NewLocale(u.Language)
+
+	data := map[string]any{
+		"locale":      locale,
+		"DisplayName": u.DisplayName(),
+		"Username":    u.Name,
+		"Language":    locale.Language(),
+	}
+
+	var content bytes.Buffer
+
+	if err := bodyTemplates.ExecuteTemplate(&content, string(mailAuthPasswordChange), data); err != nil {
+		return err
+	}
+
+	msg := NewMessage(u.EmailTo(), locale.TrString("mail.password_change.subject"), content.String())
+	msg.Info = fmt.Sprintf("UID: %d, password change notification", u.ID)
+
+	SendAsync(msg)
+	return nil
+}
+
+// SendPrimaryMailChange informs the user on their old primary email address
+// that it's no longer used as primary mail and will no longer receive
+// notification on that email address.
+func SendPrimaryMailChange(u *user_model.User, oldPrimaryEmail string) error {
+	if setting.MailService == nil {
+		return nil
+	}
+	locale := translation.NewLocale(u.Language)
+
+	data := map[string]any{
+		"locale":         locale,
+		"NewPrimaryMail": u.Email,
+		"DisplayName":    u.DisplayName(),
+		"Username":       u.Name,
+		"Language":       locale.Language(),
+	}
+
+	var content bytes.Buffer
+
+	if err := bodyTemplates.ExecuteTemplate(&content, string(mailAuthPrimaryMailChange), data); err != nil {
+		return err
+	}
+
+	msg := NewMessage(u.EmailTo(oldPrimaryEmail), locale.TrString("mail.primary_mail_change.subject"), content.String())
+	msg.Info = fmt.Sprintf("UID: %d, primary email change notification", u.ID)
+
+	SendAsync(msg)
+	return nil
+}
+
+// SendDisabledTOTP informs the user that their totp has been disabled.
+func SendDisabledTOTP(ctx context.Context, u *user_model.User) error {
+	if setting.MailService == nil {
+		return nil
+	}
+	locale := translation.NewLocale(u.Language)
+
+	hasWebAuthn, err := auth_model.HasWebAuthnRegistrationsByUID(ctx, u.ID)
+	if err != nil {
+		return err
+	}
+
+	data := map[string]any{
+		"locale":      locale,
+		"HasWebAuthn": hasWebAuthn,
+		"DisplayName": u.DisplayName(),
+		"Username":    u.Name,
+		"Language":    locale.Language(),
+	}
+
+	var content bytes.Buffer
+
+	if err := bodyTemplates.ExecuteTemplate(&content, string(mailAuth2faDisabled), data); err != nil {
+		return err
+	}
+
+	msg := NewMessage(u.EmailTo(), locale.TrString("mail.totp_disabled.subject"), content.String())
+	msg.Info = fmt.Sprintf("UID: %d, 2fa disabled notification", u.ID)
+
+	SendAsync(msg)
+	return nil
+}
+
+// SendRemovedWebAuthn informs the user that one of their security keys has been removed.
+func SendRemovedSecurityKey(ctx context.Context, u *user_model.User, securityKeyName string) error {
+	if setting.MailService == nil {
+		return nil
+	}
+	locale := translation.NewLocale(u.Language)
+
+	hasWebAuthn, err := auth_model.HasWebAuthnRegistrationsByUID(ctx, u.ID)
+	if err != nil {
+		return err
+	}
+	hasTOTP, err := auth_model.HasTwoFactorByUID(ctx, u.ID)
+	if err != nil {
+		return err
+	}
+
+	data := map[string]any{
+		"locale":          locale,
+		"HasWebAuthn":     hasWebAuthn,
+		"HasTOTP":         hasTOTP,
+		"SecurityKeyName": securityKeyName,
+		"DisplayName":     u.DisplayName(),
+		"Username":        u.Name,
+		"Language":        locale.Language(),
+	}
+
+	var content bytes.Buffer
+
+	if err := bodyTemplates.ExecuteTemplate(&content, string(mailAuthRemovedSecurityKey), data); err != nil {
+		return err
+	}
+
+	msg := NewMessage(u.EmailTo(), locale.TrString("mail.removed_security_key.subject"), content.String())
+	msg.Info = fmt.Sprintf("UID: %d, security key removed notification", u.ID)
+
+	SendAsync(msg)
+	return nil
+}
+
+// SendTOTPEnrolled informs the user that they've been enrolled into TOTP.
+func SendTOTPEnrolled(ctx context.Context, u *user_model.User) error {
+	if setting.MailService == nil {
+		return nil
+	}
+	locale := translation.NewLocale(u.Language)
+
+	hasWebAuthn, err := auth_model.HasWebAuthnRegistrationsByUID(ctx, u.ID)
+	if err != nil {
+		return err
+	}
+
+	data := map[string]any{
+		"locale":      locale,
+		"HasWebAuthn": hasWebAuthn,
+		"DisplayName": u.DisplayName(),
+		"Username":    u.Name,
+		"Language":    locale.Language(),
+	}
+
+	var content bytes.Buffer
+
+	if err := bodyTemplates.ExecuteTemplate(&content, string(mailAuthTOTPEnrolled), data); err != nil {
+		return err
+	}
+
+	msg := NewMessage(u.EmailTo(), locale.TrString("mail.totp_enrolled.subject"), content.String())
+	msg.Info = fmt.Sprintf("UID: %d, enrolled into TOTP notification", u.ID)
+
+	SendAsync(msg)
+	return nil
 }

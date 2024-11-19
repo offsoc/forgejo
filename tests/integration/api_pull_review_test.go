@@ -27,7 +27,7 @@ import (
 func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	pullIssue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 3})
-	assert.NoError(t, pullIssue.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pullIssue.LoadAttributes(db.DefaultContext))
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: pullIssue.RepoID})
 
 	username := "user2"
@@ -60,6 +60,9 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 				var reviews []*api.PullReview
 				DecodeJSON(t, resp, &reviews)
 				for _, review := range reviews {
+					if review.State == api.ReviewStateRequestReview {
+						continue
+					}
 					req := NewRequestf(t, http.MethodDelete, "/api/v1/repos/%s/pulls/%d/reviews/%d", repo.FullName(), pullIssue.Index, review.ID).
 						AddTokenAuth(token)
 					MakeRequest(t, req, http.StatusNoContent)
@@ -71,7 +74,7 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 				resp := MakeRequest(t, req, http.StatusOK)
 				var reviews []*api.PullReview
 				DecodeJSON(t, resp, &reviews)
-				require.EqualValues(t, count, len(reviews))
+				require.Len(t, reviews, count)
 			}
 
 			{
@@ -93,7 +96,7 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 				DecodeJSON(t, resp, &getReview)
 				require.EqualValues(t, getReview, review)
 			}
-			requireReviewCount(1)
+			requireReviewCount(2)
 
 			newCommentBody := "first new line"
 			var reviewComment api.PullReviewComment
@@ -140,7 +143,7 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 					AddTokenAuth(token)
 				MakeRequest(t, req, http.StatusNoContent)
 			}
-			requireReviewCount(0)
+			requireReviewCount(1)
 		})
 	}
 }
@@ -148,7 +151,7 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 func TestAPIPullReview(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	pullIssue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 3})
-	assert.NoError(t, pullIssue.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pullIssue.LoadAttributes(db.DefaultContext))
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: pullIssue.RepoID})
 
 	// test ListPullReviews
@@ -160,7 +163,7 @@ func TestAPIPullReview(t *testing.T) {
 
 	var reviews []*api.PullReview
 	DecodeJSON(t, resp, &reviews)
-	if !assert.Len(t, reviews, 6) {
+	if !assert.Len(t, reviews, 8) {
 		return
 	}
 	for _, r := range reviews {
@@ -333,7 +336,7 @@ func TestAPIPullReview(t *testing.T) {
 	// test get review requests
 	// to make it simple, use same api with get review
 	pullIssue12 := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 12})
-	assert.NoError(t, pullIssue12.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pullIssue12.LoadAttributes(db.DefaultContext))
 	repo3 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: pullIssue12.RepoID})
 
 	req = NewRequestf(t, http.MethodGet, "/api/v1/repos/%s/%s/pulls/%d/reviews", repo3.OwnerName, repo3.Name, pullIssue12.Index).
@@ -358,7 +361,7 @@ func TestAPIPullReview(t *testing.T) {
 func TestAPIPullReviewRequest(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	pullIssue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 3})
-	assert.NoError(t, pullIssue.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pullIssue.LoadAttributes(db.DefaultContext))
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: pullIssue.RepoID})
 
 	// Test add Review Request
@@ -403,7 +406,7 @@ func TestAPIPullReviewRequest(t *testing.T) {
 
 	// a collaborator can add/remove a review request
 	pullIssue21 := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 21})
-	assert.NoError(t, pullIssue21.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pullIssue21.LoadAttributes(db.DefaultContext))
 	pull21Repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: pullIssue21.RepoID}) // repo60
 	user38Session := loginUser(t, "user38")
 	user38Token := getTokenForLoggedInUser(t, user38Session, auth_model.AccessTokenScopeWriteRepository)
@@ -432,7 +435,7 @@ func TestAPIPullReviewRequest(t *testing.T) {
 
 	// user with read permission on pull requests unit can add/remove a review request
 	pullIssue22 := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 22})
-	assert.NoError(t, pullIssue22.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pullIssue22.LoadAttributes(db.DefaultContext))
 	pull22Repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: pullIssue22.RepoID}) // repo61
 	req = NewRequestWithJSON(t, http.MethodPost, fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d/requested_reviewers", pull22Repo.OwnerName, pull22Repo.Name, pullIssue22.Index), &api.PullReviewRequestOptions{
 		Reviewers: []string{"user38"},
@@ -446,7 +449,7 @@ func TestAPIPullReviewRequest(t *testing.T) {
 
 	// Test team review request
 	pullIssue12 := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 12})
-	assert.NoError(t, pullIssue12.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pullIssue12.LoadAttributes(db.DefaultContext))
 	repo3 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: pullIssue12.RepoID})
 
 	// Test add Team Review Request
@@ -488,7 +491,7 @@ func TestAPIPullReviewStayDismissed(t *testing.T) {
 	// where old reviews surface after a review request got dismissed.
 	defer tests.PrepareTestEnv(t)()
 	pullIssue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 3})
-	assert.NoError(t, pullIssue.LoadAttributes(db.DefaultContext))
+	require.NoError(t, pullIssue.LoadAttributes(db.DefaultContext))
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: pullIssue.RepoID})
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	session2 := loginUser(t, user2.LoginName)
@@ -531,7 +534,7 @@ func TestAPIPullReviewStayDismissed(t *testing.T) {
 	// emulate of auto-dismiss lgtm on a protected branch that where a pull just got an update
 	_, err := db.GetEngine(db.DefaultContext).Where("issue_id = ? AND reviewer_id = ?", pullIssue.ID, user8.ID).
 		Cols("dismissed").Update(&issues_model.Review{Dismissed: true})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// user2 request user8 again
 	req = NewRequestWithJSON(t, http.MethodPost, fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d/requested_reviewers", repo.OwnerName, repo.Name, pullIssue.Index), &api.PullReviewRequestOptions{
@@ -545,7 +548,7 @@ func TestAPIPullReviewStayDismissed(t *testing.T) {
 
 	// user8 dismiss review
 	_, err = issue_service.ReviewRequest(db.DefaultContext, pullIssue, user8, user8, false)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	reviewsCountCheck(t,
 		"check new review request is now dismissed",

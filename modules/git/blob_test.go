@@ -17,22 +17,21 @@ func TestBlob_Data(t *testing.T) {
 	output := "file2\n"
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 	repo, err := openRepositoryWithDefaultContext(bareRepo1Path)
-	if !assert.NoError(t, err) {
-		t.Fatal()
-	}
+	require.NoError(t, err)
+
 	defer repo.Close()
 
 	testBlob, err := repo.GetBlob("6c493ff740f9380390d5c9ddef4af18697ac9375")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	r, err := testBlob.DataAsync()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	require.NotNil(t, r)
 
 	data, err := io.ReadAll(r)
-	assert.NoError(t, r.Close())
+	require.NoError(t, r.Close())
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, output, string(data))
 }
 

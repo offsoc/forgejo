@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/translation"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testContext = escapeContext("test")
@@ -163,7 +164,7 @@ func TestEscapeControlReader(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			output := &strings.Builder{}
 			status, err := EscapeControlReader(strings.NewReader(tt.text), output, &translation.MockLocale{}, testContext)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.status, *status)
 			assert.Equal(t, tt.result, output.String())
 		})

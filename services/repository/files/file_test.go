@@ -6,13 +6,15 @@ package files
 import (
 	"testing"
 
+	"code.gitea.io/gitea/models/db"
+	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCleanUploadFileName(t *testing.T) {
@@ -98,23 +100,16 @@ func getExpectedFileResponse() *api.FileResponse {
 
 func TestGetFileResponseFromCommit(t *testing.T) {
 	unittest.PrepareTestEnv(t)
-	ctx, _ := contexttest.MockContext(t, "user2/repo1")
-	ctx.SetParams(":id", "1")
-	contexttest.LoadRepo(t, ctx, 1)
-	contexttest.LoadRepoCommit(t, ctx)
-	contexttest.LoadUser(t, ctx, 2)
-	contexttest.LoadGitRepo(t, ctx)
-	defer ctx.Repo.GitRepo.Close()
 
-	repo := ctx.Repo.Repository
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	branch := repo.DefaultBranch
 	treePath := "README.md"
-	gitRepo, _ := gitrepo.OpenRepository(ctx, repo)
+	gitRepo, _ := gitrepo.OpenRepository(db.DefaultContext, repo)
 	defer gitRepo.Close()
 	commit, _ := gitRepo.GetBranchCommit(branch)
 	expectedFileResponse := getExpectedFileResponse()
 
-	fileResponse, err := GetFileResponseFromCommit(ctx, repo, commit, branch, treePath)
-	assert.NoError(t, err)
+	fileResponse, err := GetFileResponseFromCommit(db.DefaultContext, repo, commit, branch, treePath)
+	require.NoError(t, err)
 	assert.EqualValues(t, expectedFileResponse, fileResponse)
 }

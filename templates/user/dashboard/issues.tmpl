@@ -38,6 +38,10 @@
 						{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 					</span>
 					<div class="ui menu">
+						<a class="{{if eq .ViewType "created_by"}}active{{end}} item" href="?type=created_by&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
+							<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.CreateCount}}</div>
+							{{ctx.Locale.Tr "repo.issues.filter_type.created_by_you"}}
+						</a>
 						<a class="{{if eq .ViewType "your_repositories"}}active{{end}} item" href="?type=your_repositories&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
 							<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.YourRepositoriesCount}}</div>
 							{{ctx.Locale.Tr "home.issues.in_your_repos"}}
@@ -45,10 +49,6 @@
 						<a class="{{if eq .ViewType "assigned"}}active{{end}} item" href="?type=assigned&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
 							<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.AssignCount}}</div>
 							{{ctx.Locale.Tr "repo.issues.filter_type.assigned_to_you"}}
-						</a>
-						<a class="{{if eq .ViewType "created_by"}}active{{end}} item" href="?type=created_by&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
-							<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.CreateCount}}</div>
-							{{ctx.Locale.Tr "repo.issues.filter_type.created_by_you"}}
 						</a>
 						{{if .PageIsPulls}}
 							<a class="{{if eq .ViewType "review_requested"}}active{{end}} item" href="?type=review_requested&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">

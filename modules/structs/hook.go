@@ -45,7 +45,7 @@ type CreateHookOptionConfig map[string]string
 // CreateHookOption options when create a hook
 type CreateHookOption struct {
 	// required: true
-	// enum: forgejo,dingtalk,discord,gitea,gogs,msteams,slack,telegram,feishu,wechatwork,packagist
+	// enum: ["forgejo", "dingtalk", "discord", "gitea", "gogs", "msteams", "slack", "telegram", "feishu", "wechatwork", "packagist"]
 	Type string `json:"type" binding:"Required"`
 	// required: true
 	Config              CreateHookOptionConfig `json:"config" binding:"Required"`
@@ -221,13 +221,14 @@ const (
 
 // IssueCommentPayload represents a payload information of issue comment event.
 type IssueCommentPayload struct {
-	Action     HookIssueCommentAction `json:"action"`
-	Issue      *Issue                 `json:"issue"`
-	Comment    *Comment               `json:"comment"`
-	Changes    *ChangesPayload        `json:"changes,omitempty"`
-	Repository *Repository            `json:"repository"`
-	Sender     *User                  `json:"sender"`
-	IsPull     bool                   `json:"is_pull"`
+	Action      HookIssueCommentAction `json:"action"`
+	Issue       *Issue                 `json:"issue"`
+	PullRequest *PullRequest           `json:"pull_request,omitempty"`
+	Comment     *Comment               `json:"comment"`
+	Changes     *ChangesPayload        `json:"changes,omitempty"`
+	Repository  *Repository            `json:"repository"`
+	Sender      *User                  `json:"sender"`
+	IsPull      bool                   `json:"is_pull"`
 }
 
 // JSONPayload implements Payload
@@ -362,6 +363,7 @@ type IssuePayload struct {
 	Repository *Repository     `json:"repository"`
 	Sender     *User           `json:"sender"`
 	CommitID   string          `json:"commit_id"`
+	Label      *Label          `json:"label,omitempty"`
 }
 
 // JSONPayload encodes the IssuePayload to JSON, with an indentation of two spaces.
@@ -399,6 +401,7 @@ type PullRequestPayload struct {
 	Sender            *User           `json:"sender"`
 	CommitID          string          `json:"commit_id"`
 	Review            *ReviewPayload  `json:"review"`
+	Label             *Label          `json:"label,omitempty"`
 }
 
 // JSONPayload FIXME

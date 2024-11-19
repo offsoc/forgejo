@@ -13,6 +13,7 @@ import (
 	base "code.gitea.io/gitea/modules/migration"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOneDevDownloadRepo(t *testing.T) {
@@ -27,7 +28,7 @@ func TestOneDevDownloadRepo(t *testing.T) {
 		t.Fatalf("NewOneDevDownloader is nil: %v", err)
 	}
 	repo, err := downloader.GetRepoInfo()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertRepositoryEqual(t, &base.Repository{
 		Name:        "go-gitea-test_repo",
 		Owner:       "",
@@ -37,7 +38,7 @@ func TestOneDevDownloadRepo(t *testing.T) {
 	}, repo)
 
 	milestones, err := downloader.GetMilestones()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	deadline := time.Unix(1620086400, 0)
 	assertMilestonesEqual(t, []*base.Milestone{
 		{
@@ -52,11 +53,11 @@ func TestOneDevDownloadRepo(t *testing.T) {
 	}, milestones)
 
 	labels, err := downloader.GetLabels()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, labels, 6)
 
 	issues, isEnd, err := downloader.GetIssues(1, 2)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, isEnd)
 	assertIssuesEqual(t, []*base.Issue{
 		{
@@ -99,7 +100,7 @@ func TestOneDevDownloadRepo(t *testing.T) {
 		ForeignIndex: 398,
 		Context:      onedevIssueContext{IsPullRequest: false},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertCommentsEqual(t, []*base.Comment{
 		{
 			IssueIndex: 4,
@@ -111,7 +112,7 @@ func TestOneDevDownloadRepo(t *testing.T) {
 	}, comments)
 
 	prs, _, err := downloader.GetPullRequests(1, 1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertPullRequestsEqual(t, []*base.PullRequest{
 		{
 			Number:     5,
@@ -137,7 +138,7 @@ func TestOneDevDownloadRepo(t *testing.T) {
 	}, prs)
 
 	rvs, err := downloader.GetReviews(&base.PullRequest{Number: 5, ForeignIndex: 186})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assertReviewsEqual(t, []*base.Review{
 		{
 			IssueIndex:   5,

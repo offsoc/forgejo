@@ -16,10 +16,11 @@ import (
 	"code.gitea.io/gitea/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestProcessorHelper(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	userPublic := "user1"
 	userPrivate := "user31"
@@ -39,7 +40,7 @@ func TestProcessorHelper(t *testing.T) {
 
 	// when using web context, use user.IsUserVisibleToViewer to check
 	req, err := http.NewRequest("GET", "/", nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	base, baseCleanUp := gitea_context.NewBaseContext(httptest.NewRecorder(), req)
 	defer baseCleanUp()
 	giteaCtx := gitea_context.NewWebContext(base, &contexttest.MockRender{}, nil)
@@ -48,7 +49,7 @@ func TestProcessorHelper(t *testing.T) {
 	assert.False(t, ProcessorHelper().IsUsernameMentionable(giteaCtx, userPrivate))
 
 	giteaCtx.Doer, err = user.GetUserByName(db.DefaultContext, userPrivate)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, ProcessorHelper().IsUsernameMentionable(giteaCtx, userPublic))
 	assert.True(t, ProcessorHelper().IsUsernameMentionable(giteaCtx, userPrivate))
 }

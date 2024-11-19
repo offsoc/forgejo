@@ -13,7 +13,7 @@ import (
 )
 
 func TestDiffWithHighlight(t *testing.T) {
-	hcd := newHighlightCodeDiff()
+	hcd := NewHighlightCodeDiff()
 	diffs := hcd.diffWithHighlight(
 		"main.v", "",
 		"		run('<>')\n",
@@ -28,9 +28,9 @@ func TestDiffWithHighlight(t *testing.T) {
 	output = diffToHTML(nil, diffs, DiffLineAdd)
 	assert.Equal(t, expected, output)
 
-	hcd = newHighlightCodeDiff()
-	hcd.placeholderTokenMap['O'] = "<span>"
-	hcd.placeholderTokenMap['C'] = "</span>"
+	hcd = NewHighlightCodeDiff()
+	hcd.PlaceholderTokenMap['O'] = "<span>"
+	hcd.PlaceholderTokenMap['C'] = "</span>"
 	diff := diffmatchpatch.Diff{}
 
 	diff.Text = "OC"
@@ -47,20 +47,20 @@ func TestDiffWithHighlight(t *testing.T) {
 }
 
 func TestDiffWithHighlightPlaceholder(t *testing.T) {
-	hcd := newHighlightCodeDiff()
+	hcd := NewHighlightCodeDiff()
 	diffs := hcd.diffWithHighlight(
 		"main.js", "",
 		"a='\U00100000'",
 		"a='\U0010FFFD''",
 	)
-	assert.Equal(t, "", hcd.placeholderTokenMap[0x00100000])
-	assert.Equal(t, "", hcd.placeholderTokenMap[0x0010FFFD])
+	assert.Equal(t, "", hcd.PlaceholderTokenMap[0x00100000])
+	assert.Equal(t, "", hcd.PlaceholderTokenMap[0x0010FFFD])
 
 	expected := fmt.Sprintf(`<span class="nx">a</span><span class="o">=</span><span class="s1">&#39;</span><span class="removed-code">%s</span>&#39;`, "\U00100000")
 	output := diffToHTML(hcd.lineWrapperTags, diffs, DiffLineDel)
 	assert.Equal(t, expected, output)
 
-	hcd = newHighlightCodeDiff()
+	hcd = NewHighlightCodeDiff()
 	diffs = hcd.diffWithHighlight(
 		"main.js", "",
 		"a='\U00100000'",
@@ -72,7 +72,7 @@ func TestDiffWithHighlightPlaceholder(t *testing.T) {
 }
 
 func TestDiffWithHighlightPlaceholderExhausted(t *testing.T) {
-	hcd := newHighlightCodeDiff()
+	hcd := NewHighlightCodeDiff()
 	hcd.placeholderMaxCount = 0
 	diffs := hcd.diffWithHighlight(
 		"main.js", "",
@@ -83,7 +83,7 @@ func TestDiffWithHighlightPlaceholderExhausted(t *testing.T) {
 	expected := fmt.Sprintf(`<span class="removed-code">%s#39;</span>`, "\uFFFD")
 	assert.Equal(t, expected, output)
 
-	hcd = newHighlightCodeDiff()
+	hcd = NewHighlightCodeDiff()
 	hcd.placeholderMaxCount = 0
 	diffs = hcd.diffWithHighlight(
 		"main.js", "",
@@ -102,7 +102,7 @@ func TestDiffWithHighlightPlaceholderExhausted(t *testing.T) {
 func TestDiffWithHighlightTagMatch(t *testing.T) {
 	totalOverflow := 0
 	for i := 0; i < 100; i++ {
-		hcd := newHighlightCodeDiff()
+		hcd := NewHighlightCodeDiff()
 		hcd.placeholderMaxCount = i
 		diffs := hcd.diffWithHighlight(
 			"main.js", "",

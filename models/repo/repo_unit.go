@@ -235,8 +235,7 @@ func (cfg *ActionsConfig) ToDB() ([]byte, error) {
 
 // BeforeSet is invoked from XORM before setting the value of a field of this object.
 func (r *RepoUnit) BeforeSet(colName string, val xorm.Cell) {
-	switch colName {
-	case "type":
+	if colName == "type" {
 		switch unit.Type(db.Cell2Int64(val)) {
 		case unit.TypeExternalWiki:
 			r.Config = new(ExternalWikiConfig)

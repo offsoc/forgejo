@@ -12,9 +12,11 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFeed(t *testing.T) {
+	defer tests.AddFixtures("tests/integration/fixtures/TestFeed/")()
 	defer tests.PrepareTestEnv(t)()
 
 	t.Run("User", func(t *testing.T) {
@@ -44,6 +46,28 @@ func TestFeed(t *testing.T) {
 			t.Run("Atom", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
+				req := NewRequest(t, "GET", "/user2/repo1.atom")
+				resp := MakeRequest(t, req, http.StatusOK)
+
+				data := resp.Body.String()
+				assert.Contains(t, data, `<feed xmlns="http://www.w3.org/2005/Atom"`)
+				assert.Contains(t, data, "This is a very long text, so lets scream together: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+			})
+			t.Run("RSS", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
+				req := NewRequest(t, "GET", "/user2/repo1.rss")
+				resp := MakeRequest(t, req, http.StatusOK)
+
+				data := resp.Body.String()
+				assert.Contains(t, data, `<rss version="2.0"`)
+				assert.Contains(t, data, "This is a very long text, so lets scream together: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+			})
+		})
+		t.Run("Branch", func(t *testing.T) {
+			t.Run("Atom", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+
 				req := NewRequest(t, "GET", "/user2/repo1/atom/branch/master")
 				resp := MakeRequest(t, req, http.StatusOK)
 
@@ -62,7 +86,7 @@ func TestFeed(t *testing.T) {
 		})
 		t.Run("Empty", func(t *testing.T) {
 			err := user_model.UpdateUserCols(db.DefaultContext, &user_model.User{ID: 30, ProhibitLogin: false}, "prohibit_login")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			session := loginUser(t, "user30")
 			t.Run("Atom", func(t *testing.T) {
@@ -83,6 +107,26 @@ func TestFeed(t *testing.T) {
 				req = NewRequest(t, "GET", "/user30/empty.rss/src/branch/master")
 				session.MakeRequest(t, req, http.StatusNotFound)
 			})
+		})
+	})
+
+	t.Run("View permission", func(t *testing.T) {
+		t.Run("Anomynous", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+			req := NewRequest(t, "GET", "/org3/repo3/rss/branch/master")
+			MakeRequest(t, req, http.StatusNotFound)
+		})
+		t.Run("No code permission", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+			session := loginUser(t, "user8")
+			req := NewRequest(t, "GET", "/org3/repo3/rss/branch/master")
+			session.MakeRequest(t, req, http.StatusNotFound)
+		})
+		t.Run("With code permission", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+			session := loginUser(t, "user9")
+			req := NewRequest(t, "GET", "/org3/repo3/rss/branch/master")
+			session.MakeRequest(t, req, http.StatusOK)
 		})
 	})
 }

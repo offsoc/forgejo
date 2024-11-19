@@ -17,6 +17,7 @@ import (
 	actions_model "code.gitea.io/gitea/models/actions"
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
+	quota_model "code.gitea.io/gitea/models/quota"
 	repo_model "code.gitea.io/gitea/models/repo"
 	unit_model "code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
@@ -91,6 +92,7 @@ func SettingsCtxData(ctx *context.Context) {
 		return
 	}
 	ctx.Data["PushMirrors"] = pushMirrors
+	ctx.Data["CanUseSSHMirroring"] = git.HasSSHExecutable
 }
 
 // Units show a repositorys unit settings page
@@ -477,10 +479,10 @@ func SettingsPost(ctx *context.Context) {
 			ctx.ServerError("UpdateAddress", err)
 			return
 		}
-
-		remoteAddress, err := util.SanitizeURL(form.MirrorAddress)
+		remoteAddress, err := util.SanitizeURL(address)
 		if err != nil {
-			ctx.ServerError("SanitizeURL", err)
+			ctx.Data["Err_MirrorAddress"] = true
+			handleSettingRemoteAddrError(ctx, err, form)
 			return
 		}
 		pullMirror.RemoteAddress = remoteAddress
@@ -518,6 +520,20 @@ func SettingsPost(ctx *context.Context) {
 			return
 		}
 
+		ok, err := quota_model.EvaluateForUser(ctx, repo.OwnerID, quota_model.LimitSubjectSizeReposAll)
+		if err != nil {
+			ctx.ServerError("quota_model.EvaluateForUser", err)
+			return
+		}
+		if !ok {
+			// This section doesn't require repo_name/RepoName to be set in the form, don't show it
+			// as an error on the UI for this action
+			ctx.Data["Err_RepoName"] = nil
+
+			ctx.RenderWithErr(ctx.Tr("repo.settings.pull_mirror_sync_quota_exceeded"), tplSettingsOptions, &form)
+			return
+		}
+
 		mirror_service.AddPullMirrorToQueue(repo.ID)
 
 		ctx.Flash.Info(ctx.Tr("repo.settings.pull_mirror_sync_in_progress", repo.OriginalURL))
@@ -550,21 +566,19 @@ func SettingsPost(ctx *context.Context) {
 		// as an error on the UI for this action
 		ctx.Data["Err_RepoName"] = nil
 
+		m, err := selectPushMirrorByForm(ctx, form, repo)
+		if err != nil {
+			ctx.NotFound("", nil)
+			return
+		}
+
 		interval, err := time.ParseDuration(form.PushMirrorInterval)
 		if err != nil || (interval != 0 && interval < setting.Mirror.MinInterval) {
 			ctx.RenderWithErr(ctx.Tr("repo.mirror_interval_invalid"), tplSettingsOptions, &forms.RepoSettingForm{})
 			return
 		}
 
-		id, err := strconv.ParseInt(form.PushMirrorID, 10, 64)
-		if err != nil {
-			ctx.ServerError("UpdatePushMirrorIntervalPushMirrorID", err)
-			return
-		}
-		m := &repo_model.PushMirror{
-			ID:       id,
-			Interval: interval,
-		}
+		m.Interval = interval
 		if err := repo_model.UpdatePushMirrorInterval(ctx, m); err != nil {
 			ctx.ServerError("UpdatePushMirrorInterval", err)
 			return
@@ -623,6 +637,17 @@ func SettingsPost(ctx *context.Context) {
 			return
 		}
 
+		if form.PushMirrorUseSSH && (form.PushMirrorUsername != "" || form.PushMirrorPassword != "") {
+			ctx.Data["Err_PushMirrorUseSSH"] = true
+			ctx.RenderWithErr(ctx.Tr("repo.mirror_denied_combination"), tplSettingsOptions, &form)
+			return
+		}
+
+		if form.PushMirrorUseSSH && !git.HasSSHExecutable {
+			ctx.RenderWithErr(ctx.Tr("repo.mirror_use_ssh.not_available"), tplSettingsOptions, &form)
+			return
+		}
+
 		address, err := forms.ParseRemoteAddr(form.PushMirrorAddress, form.PushMirrorUsername, form.PushMirrorPassword)
 		if err == nil {
 			err = migrations.IsMigrateURLAllowed(address, ctx.Doer)
@@ -639,9 +664,10 @@ func SettingsPost(ctx *context.Context) {
 			return
 		}
 
-		remoteAddress, err := util.SanitizeURL(form.PushMirrorAddress)
+		remoteAddress, err := util.SanitizeURL(address)
 		if err != nil {
-			ctx.ServerError("SanitizeURL", err)
+			ctx.Data["Err_PushMirrorAddress"] = true
+			handleSettingRemoteAddrError(ctx, err, form)
 			return
 		}
 
@@ -653,9 +679,28 @@ func SettingsPost(ctx *context.Context) {
 			Interval:      interval,
 			RemoteAddress: remoteAddress,
 		}
+
+		var plainPrivateKey []byte
+		if form.PushMirrorUseSSH {
+			publicKey, privateKey, err := util.GenerateSSHKeypair()
+			if err != nil {
+				ctx.ServerError("GenerateSSHKeypair", err)
+				return
+			}
+			plainPrivateKey = privateKey
+			m.PublicKey = string(publicKey)
+		}
+
 		if err := db.Insert(ctx, m); err != nil {
 			ctx.ServerError("InsertPushMirror", err)
 			return
+		}
+
+		if form.PushMirrorUseSSH {
+			if err := m.SetPrivatekey(ctx, plainPrivateKey); err != nil {
+				ctx.ServerError("SetPrivatekey", err)
+				return
+			}
 		}
 
 		if err := mirror_service.AddPushMirrorRemote(ctx, m, address); err != nil {
@@ -828,6 +873,17 @@ func SettingsPost(ctx *context.Context) {
 			}
 		}
 
+		// Check the quota of the new owner
+		ok, err := quota_model.EvaluateForUser(ctx, newOwner.ID, quota_model.LimitSubjectSizeReposAll)
+		if err != nil {
+			ctx.ServerError("quota_model.EvaluateForUser", err)
+			return
+		}
+		if !ok {
+			ctx.RenderWithErr(ctx.Tr("repo.settings.transfer_quota_exceeded", newOwner.Name), tplSettingsOptions, &form)
+			return
+		}
+
 		// Close the GitRepo if open
 		if ctx.Repo.GitRepo != nil {
 			ctx.Repo.GitRepo.Close()
@@ -973,7 +1029,7 @@ func SettingsPost(ctx *context.Context) {
 			return
 		}
 
-		if err := actions_model.CleanRepoScheduleTasks(ctx, repo); err != nil {
+		if err := actions_model.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
 			log.Error("CleanRepoScheduleTasks for archived repo %s/%s: %v", ctx.Repo.Owner.Name, repo.Name, err)
 		}
 

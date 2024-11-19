@@ -39,5 +39,5 @@ func (o *container) Patch(ctx context.Context) {
 }
 
 func (o *container) upsert(context.Context) generic.NodeID {
-	return generic.NodeID(o.getKind())
+	return generic.NewNodeID(o.getKind())
 }

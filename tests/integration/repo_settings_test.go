@@ -28,6 +28,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepoSettingsUnits(t *testing.T) {
@@ -50,7 +51,7 @@ func TestRepoAddMoreUnitsHighlighting(t *testing.T) {
 	unit_model.LoadUnitConfig()
 
 	// Create a known-good repo, with some units disabled.
-	repo, _, f := CreateDeclarativeRepo(t, user, "", []unit_model.Type{
+	repo, _, f := tests.CreateDeclarativeRepo(t, user, "", []unit_model.Type{
 		unit_model.TypeCode,
 		unit_model.TypePullRequests,
 		unit_model.TypeProjects,
@@ -63,12 +64,12 @@ func TestRepoAddMoreUnitsHighlighting(t *testing.T) {
 	setUserHints := func(t *testing.T, hints bool) func() {
 		saved := user.EnableRepoUnitHints
 
-		assert.NoError(t, user_service.UpdateUser(db.DefaultContext, user, &user_service.UpdateOptions{
+		require.NoError(t, user_service.UpdateUser(db.DefaultContext, user, &user_service.UpdateOptions{
 			EnableRepoUnitHints: optional.Some(hints),
 		}))
 
 		return func() {
-			assert.NoError(t, user_service.UpdateUser(db.DefaultContext, user, &user_service.UpdateOptions{
+			require.NoError(t, user_service.UpdateUser(db.DefaultContext, user, &user_service.UpdateOptions{
 				EnableRepoUnitHints: optional.Some(saved),
 			}))
 		}
@@ -141,7 +142,7 @@ func TestRepoAddMoreUnits(t *testing.T) {
 	unit_model.LoadUnitConfig()
 
 	// Create a known-good repo, with all units enabled.
-	repo, _, f := CreateDeclarativeRepo(t, user, "", []unit_model.Type{
+	repo, _, f := tests.CreateDeclarativeRepo(t, user, "", []unit_model.Type{
 		unit_model.TypeCode,
 		unit_model.TypePullRequests,
 		unit_model.TypeProjects,
@@ -178,7 +179,7 @@ func TestRepoAddMoreUnits(t *testing.T) {
 
 		// Disable the Packages unit
 		err := repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, nil, []unit_model.Type{unit_model.TypePackages})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assertAddMore(t, true)
 	})
@@ -200,7 +201,7 @@ func TestRepoAddMoreUnits(t *testing.T) {
 
 		// Disable the Packages unit
 		err := repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, nil, []unit_model.Type{unit_model.TypePackages})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The "Add more" link appears no more
 		assertAddMore(t, false)
@@ -223,7 +224,7 @@ func TestRepoAddMoreUnits(t *testing.T) {
 
 		// Disable the Issues unit
 		err := repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, nil, []unit_model.Type{unit_model.TypeIssues})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// The "Add more" link appears no more
 		assertAddMore(t, false)

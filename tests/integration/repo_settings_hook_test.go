@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepoSettingsHookHistory(t *testing.T) {
@@ -26,7 +27,7 @@ func TestRepoSettingsHookHistory(t *testing.T) {
 
 	t.Run("1/delivered", func(t *testing.T) {
 		html, err := doc.doc.Find(".webhook div[data-tab='request-1']").Html()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, html, "<strong>Request URL:</strong> /matrix-delivered\n")
 		assert.Contains(t, html, "<strong>Request method:</strong> PUT")
 		assert.Contains(t, html, "<strong>X-Head:</strong> 42")
@@ -39,7 +40,7 @@ func TestRepoSettingsHookHistory(t *testing.T) {
 
 	t.Run("2/undelivered", func(t *testing.T) {
 		html, err := doc.doc.Find(".webhook div[data-tab='request-2']").Html()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "-", strings.TrimSpace(html))
 
 		val, ok := doc.doc.Find(".webhook div.item:has(div#info-2) svg").Attr("class")
@@ -49,7 +50,7 @@ func TestRepoSettingsHookHistory(t *testing.T) {
 
 	t.Run("3/success", func(t *testing.T) {
 		html, err := doc.doc.Find(".webhook div[data-tab='request-3']").Html()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, html, "<strong>Request URL:</strong> /matrix-success\n")
 		assert.Contains(t, html, "<strong>Request method:</strong> PUT")
 		assert.Contains(t, html, "<strong>X-Head:</strong> 42")

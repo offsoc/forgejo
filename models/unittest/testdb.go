@@ -22,7 +22,7 @@ import (
 	"code.gitea.io/gitea/modules/storage"
 	"code.gitea.io/gitea/modules/util"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
 	"xorm.io/xorm/names"
 )
@@ -243,18 +243,18 @@ func PrepareTestDatabase() error {
 // PrepareTestEnv prepares the environment for unit tests. Can only be called
 // by tests that use the above MainTest(..) function.
 func PrepareTestEnv(t testing.TB) {
-	assert.NoError(t, PrepareTestDatabase())
-	assert.NoError(t, util.RemoveAll(setting.RepoRootPath))
+	require.NoError(t, PrepareTestDatabase())
+	require.NoError(t, util.RemoveAll(setting.RepoRootPath))
 	metaPath := filepath.Join(giteaRoot, "tests", "gitea-repositories-meta")
-	assert.NoError(t, CopyDir(metaPath, setting.RepoRootPath))
+	require.NoError(t, CopyDir(metaPath, setting.RepoRootPath))
 	ownerDirs, err := os.ReadDir(setting.RepoRootPath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for _, ownerDir := range ownerDirs {
 		if !ownerDir.Type().IsDir() {
 			continue
 		}
 		repoDirs, err := os.ReadDir(filepath.Join(setting.RepoRootPath, ownerDir.Name()))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		for _, repoDir := range repoDirs {
 			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "objects", "pack"), 0o755)
 			_ = os.MkdirAll(filepath.Join(setting.RepoRootPath, ownerDir.Name(), repoDir.Name(), "objects", "info"), 0o755)

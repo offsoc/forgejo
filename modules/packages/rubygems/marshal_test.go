@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMinimalEncoder(t *testing.T) {
@@ -92,7 +93,7 @@ func TestMinimalEncoder(t *testing.T) {
 	for i, c := range cases {
 		var b bytes.Buffer
 		err := NewMarshalEncoder(&b).Encode(c.Value)
-		assert.ErrorIs(t, err, c.Error)
+		require.ErrorIs(t, err, c.Error)
 		assert.Equal(t, c.Expected, b.Bytes(), "case %d", i)
 	}
 }

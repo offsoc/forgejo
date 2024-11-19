@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestWebhookPayloadRef(t *testing.T) {
@@ -29,8 +30,8 @@ func TestWebhookPayloadRef(t *testing.T) {
 		w.HookEvent = &webhook_module.HookEvent{
 			SendEverything: true,
 		}
-		assert.NoError(t, w.UpdateEvent())
-		assert.NoError(t, webhook_model.UpdateWebhook(db.DefaultContext, w))
+		require.NoError(t, w.UpdateEvent())
+		require.NoError(t, webhook_model.UpdateWebhook(db.DefaultContext, w))
 
 		hookTasks := retrieveHookTasks(t, w.ID, true)
 		hookTasksLenBefore := len(hookTasks)
@@ -69,7 +70,7 @@ func TestWebhookPayloadRef(t *testing.T) {
 			var payload struct {
 				Ref string `json:"ref"`
 			}
-			assert.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payload))
+			require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payload))
 			assert.Equal(t, "refs/heads/arbre", payload.Ref, "unexpected ref for %q event", hookTask.EventType)
 			delete(expected, hookTask.EventType)
 		}
@@ -89,17 +90,17 @@ func TestWebhookReleaseEvents(t *testing.T) {
 	w.HookEvent = &webhook_module.HookEvent{
 		SendEverything: true,
 	}
-	assert.NoError(t, w.UpdateEvent())
-	assert.NoError(t, webhook_model.UpdateWebhook(db.DefaultContext, w))
+	require.NoError(t, w.UpdateEvent())
+	require.NoError(t, webhook_model.UpdateWebhook(db.DefaultContext, w))
 
 	hookTasks := retrieveHookTasks(t, w.ID, true)
 
 	gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer gitRepo.Close()
 
 	t.Run("CreateRelease", func(t *testing.T) {
-		assert.NoError(t, release.CreateRelease(gitRepo, &repo_model.Release{
+		require.NoError(t, release.CreateRelease(gitRepo, &repo_model.Release{
 			RepoID:       repo.ID,
 			Repo:         repo,
 			PublisherID:  user.ID,
@@ -111,7 +112,7 @@ func TestWebhookReleaseEvents(t *testing.T) {
 			IsDraft:      false,
 			IsPrerelease: false,
 			IsTag:        false,
-		}, nil, ""))
+		}, "", nil))
 
 		// check the newly created hooktasks
 		hookTasksLenBefore := len(hookTasks)
@@ -125,7 +126,7 @@ func TestWebhookReleaseEvents(t *testing.T) {
 
 		t.Run("UpdateRelease", func(t *testing.T) {
 			rel := unittest.AssertExistsAndLoadBean(t, &repo_model.Release{RepoID: repo.ID, TagName: "v1.1.1"})
-			assert.NoError(t, release.UpdateRelease(db.DefaultContext, user, gitRepo, rel, nil, nil, nil, false))
+			require.NoError(t, release.UpdateRelease(db.DefaultContext, user, gitRepo, rel, false, nil))
 
 			// check the newly created hooktasks
 			hookTasksLenBefore := len(hookTasks)
@@ -138,7 +139,7 @@ func TestWebhookReleaseEvents(t *testing.T) {
 	})
 
 	t.Run("CreateNewTag", func(t *testing.T) {
-		assert.NoError(t, release.CreateNewTag(db.DefaultContext,
+		require.NoError(t, release.CreateNewTag(db.DefaultContext,
 			user,
 			repo,
 			"master",
@@ -157,7 +158,7 @@ func TestWebhookReleaseEvents(t *testing.T) {
 
 		t.Run("UpdateRelease", func(t *testing.T) {
 			rel := unittest.AssertExistsAndLoadBean(t, &repo_model.Release{RepoID: repo.ID, TagName: "v1.1.2"})
-			assert.NoError(t, release.UpdateRelease(db.DefaultContext, user, gitRepo, rel, nil, nil, nil, true))
+			require.NoError(t, release.UpdateRelease(db.DefaultContext, user, gitRepo, rel, true, nil))
 
 			// check the newly created hooktasks
 			hookTasksLenBefore := len(hookTasks)
@@ -180,7 +181,7 @@ func checkHookTasks(t *testing.T, expectedActions map[webhook_module.HookEventTy
 		var payload struct {
 			Action string `json:"action"`
 		}
-		assert.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payload))
+		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payload))
 		assert.Equal(t, expectedAction, payload.Action, "unexpected action for %q event", hookTask.EventType)
 		delete(expectedActions, hookTask.EventType)
 	}

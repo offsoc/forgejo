@@ -85,7 +85,7 @@ func (o *release) Get(ctx context.Context) bool {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
-	id := f3_util.ParseInt(string(node.GetID()))
+	id := node.GetID().Int64()
 
 	release, err := repo_model.GetReleaseByID(ctx, id)
 	if repo_model.IsErrReleaseNotExist(err) {
@@ -129,11 +129,11 @@ func (o *release) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	defer gitRepo.Close()
-	if err := release_service.CreateRelease(gitRepo, o.forgejoRelease, nil, ""); err != nil {
+	if err := release_service.CreateRelease(gitRepo, o.forgejoRelease, "", nil); err != nil {
 		panic(err)
 	}
 	o.Trace("release created %d", o.forgejoRelease.ID)
-	return generic.NodeID(fmt.Sprintf("%d", o.forgejoRelease.ID))
+	return generic.NewNodeID(o.forgejoRelease.ID)
 }
 
 func (o *release) Delete(ctx context.Context) {

@@ -1,0 +1,24 @@
+X-Ratelimit-Reset: 1730800941
+Access-Control-Allow-Origin: *
+Content-Security-Policy: default-src 'none'
+X-Github-Api-Version-Selected: 2022-11-28
+Etag: W/"01cc307b238564f2a086999fed53e0d5c880b8ec1d8d2256d99188ff47ff0ea0"
+X-Github-Media-Type: github.v3; format=json
+X-Ratelimit-Used: 74
+X-Ratelimit-Resource: core
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset
+X-Ratelimit-Limit: 5000
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Xss-Protection: 0
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+Cache-Control: private, max-age=60, s-maxage=60
+X-Oauth-Scopes: 
+X-Accepted-Oauth-Scopes: repo
+X-Ratelimit-Remaining: 4926
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Content-Type: application/json; charset=utf-8
+X-Github-Request-Id: C7CC:3118FC:3F5F29C:4035B65:6729E6B4
+
+[{"id":1667254252,"node_id":"MDU6TGFiZWwxNjY3MjU0MjUy","url":"https://api.github.com/repos/go-gitea/test_repo/labels/bug","name":"bug","color":"d73a4a","default":true,"description":"Something isn't working"},{"id":1667254254,"node_id":"MDU6TGFiZWwxNjY3MjU0MjU0","url":"https://api.github.com/repos/go-gitea/test_repo/labels/documentation","name":"documentation","color":"0075ca","default":true,"description":"Improvements or additions to documentation"},{"id":1667254257,"node_id":"MDU6TGFiZWwxNjY3MjU0MjU3","url":"https://api.github.com/repos/go-gitea/test_repo/labels/duplicate","name":"duplicate","color":"cfd3d7","default":true,"description":"This issue or pull request already exists"},{"id":1667254260,"node_id":"MDU6TGFiZWwxNjY3MjU0MjYw","url":"https://api.github.com/repos/go-gitea/test_repo/labels/enhancement","name":"enhancement","color":"a2eeef","default":true,"description":"New feature or request"},{"id":1667254261,"node_id":"MDU6TGFiZWwxNjY3MjU0MjYx","url":"https://api.github.com/repos/go-gitea/test_repo/labels/good%20first%20issue","name":"good first issue","color":"7057ff","default":true,"description":"Good for newcomers"},{"id":1667254265,"node_id":"MDU6TGFiZWwxNjY3MjU0MjY1","url":"https://api.github.com/repos/go-gitea/test_repo/labels/help%20wanted","name":"help wanted","color":"008672","default":true,"description":"Extra attention is needed"},{"id":1667254269,"node_id":"MDU6TGFiZWwxNjY3MjU0MjY5","url":"https://api.github.com/repos/go-gitea/test_repo/labels/invalid","name":"invalid","color":"e4e669","default":true,"description":"This doesn't seem right"},{"id":1667254273,"node_id":"MDU6TGFiZWwxNjY3MjU0Mjcz","url":"https://api.github.com/repos/go-gitea/test_repo/labels/question","name":"question","color":"d876e3","default":true,"description":"Further information is requested"},{"id":1667254276,"node_id":"MDU6TGFiZWwxNjY3MjU0Mjc2","url":"https://api.github.com/repos/go-gitea/test_repo/labels/wontfix","name":"wontfix","color":"ffffff","default":true,"description":"This will not be worked on"}]

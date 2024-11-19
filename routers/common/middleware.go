@@ -15,7 +15,7 @@ import (
 	"code.gitea.io/gitea/modules/web/routing"
 	"code.gitea.io/gitea/services/context"
 
-	"gitea.com/go-chi/session"
+	"code.forgejo.org/go-chi/session"
 	"github.com/chi-middleware/proxy"
 	chi "github.com/go-chi/chi/v5"
 )

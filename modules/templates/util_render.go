@@ -130,6 +130,17 @@ func RenderIssueTitle(ctx context.Context, text string, metas map[string]string)
 	return template.HTML(renderedText)
 }
 
+// RenderRefIssueTitle renders referenced issue/pull title with defined post processors
+func RenderRefIssueTitle(ctx context.Context, text string) template.HTML {
+	renderedText, err := markup.RenderRefIssueTitle(&markup.RenderContext{Ctx: ctx}, template.HTMLEscapeString(text))
+	if err != nil {
+		log.Error("RenderRefIssueTitle: %v", err)
+		return ""
+	}
+
+	return template.HTML(renderedText)
+}
+
 // RenderLabel renders a label
 // locale is needed due to an import cycle with our context providing the `Tr` function
 func RenderLabel(ctx context.Context, locale translation.Locale, label *issues_model.Label) template.HTML {
@@ -245,9 +256,21 @@ func RenderLabels(ctx context.Context, locale translation.Locale, labels []*issu
 		if isPull {
 			issuesOrPull = "pulls"
 		}
-		htmlCode += fmt.Sprintf("<a href='%s/%s?labels=%d'>%s</a> ",
+		htmlCode += fmt.Sprintf("<a href='%s/%s?labels=%d' rel='nofollow'>%s</a> ",
 			repoLink, issuesOrPull, label.ID, RenderLabel(ctx, locale, label))
 	}
+	htmlCode += "</span>"
+	return template.HTML(htmlCode)
+}
+
+func RenderReviewRequest(users []issues_model.RequestReviewTarget) template.HTML {
+	usernames := make([]string, 0, len(users))
+	for _, user := range users {
+		usernames = append(usernames, template.HTMLEscapeString(user.Name()))
+	}
+
+	htmlCode := `<span class="review-request-list">`
+	htmlCode += strings.Join(usernames, ", ")
 	htmlCode += "</span>"
 	return template.HTML(htmlCode)
 }

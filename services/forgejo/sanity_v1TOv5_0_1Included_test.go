@@ -11,11 +11,11 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/modules/log"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestForgejo_v1TOv5_0_1Included(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	logFatal = func(string, ...any) {}
 	defer func() {
@@ -71,7 +71,7 @@ func verifyForgejoV1TOv5_0_1Included(t *testing.T, config, message string) {
 	} {
 		cfg := configFixture(t, testCase.config)
 		semver.SetVersionString(ctx, testCase.semver)
-		assert.NoError(t, v1TOv5_0_1Included(e, testCase.dbVersion, cfg))
+		require.NoError(t, v1TOv5_0_1Included(e, testCase.dbVersion, cfg))
 	}
 
 	for _, testCase := range []struct {
@@ -110,6 +110,6 @@ func verifyForgejoV1TOv5_0_1Included(t *testing.T, config, message string) {
 	} {
 		cfg := configFixture(t, testCase.config)
 		semver.SetVersionString(ctx, testCase.semver)
-		assert.ErrorContains(t, v1TOv5_0_1Included(e, testCase.dbVersion, cfg), message)
+		require.ErrorContains(t, v1TOv5_0_1Included(e, testCase.dbVersion, cfg), message)
 	}
 }

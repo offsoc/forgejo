@@ -1,0 +1,24 @@
+Etag: W/"9d4f10c73db7508f9f63f83f4f3e9dd2"
+Link: <https://gitlab.com/api/v4/projects/61363672/merge_requests/1/award_emoji?id=61363672&merge_request_iid=1&page=1&per_page=1>; rel="prev", <https://gitlab.com/api/v4/projects/61363672/merge_requests/1/award_emoji?id=61363672&merge_request_iid=1&page=1&per_page=1>; rel="first", <https://gitlab.com/api/v4/projects/61363672/merge_requests/1/award_emoji?id=61363672&merge_request_iid=1&page=2&per_page=1>; rel="last"
+X-Runtime: 0.070580
+Gitlab-Sv: api-gke-us-east1-c
+Content-Type: application/json
+Cf-Cache-Status: MISS
+Vary: Origin, Accept-Encoding
+X-Frame-Options: SAMEORIGIN
+X-Prev-Page: 1
+Gitlab-Lb: haproxy-main-58-lb-gprd
+Cache-Control: max-age=0, private, must-revalidate
+X-Total: 2
+X-Total-Pages: 2
+Strict-Transport-Security: max-age=31536000
+Referrer-Policy: strict-origin-when-cross-origin
+X-Gitlab-Meta: {"correlation_id":"c39c59a22f48b51fcdbe4d7121983045","version":"1"}
+X-Next-Page: 
+X-Per-Page: 1
+Set-Cookie: _cfuvid=ocsAYkwqggUMC09s009R.yWb7q3OTyWzwjV73iFeOAM-1725394799827-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+Content-Security-Policy: default-src 'none'
+X-Content-Type-Options: nosniff
+X-Page: 2
+
+[{"id":28098494,"name":"tada","user":{"id":548513,"username":"mkobel","name":"Moritz Kobel","state":"active","locked":false,"avatar_url":"https://secure.gravatar.com/avatar/eae1be6324682816aedc885acbf5858719b40956e0278edabe5c0db7cbc95f3b?s=80\u0026d=identicon","web_url":"https://gitlab.com/mkobel"},"created_at":"2024-09-03T18:50:02.028Z","updated_at":"2024-09-03T18:50:02.028Z","awardable_id":324657888,"awardable_type":"MergeRequest","url":null}]

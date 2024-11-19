@@ -12,10 +12,11 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTeamInvite(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	team := unittest.AssertExistsAndLoadBean(t, &organization.Team{ID: 2})
 
@@ -24,7 +25,7 @@ func TestTeamInvite(t *testing.T) {
 
 		// user 2 already added to team 2, should result in error
 		_, err := organization.CreateTeamInvite(db.DefaultContext, user2, team, user2.Email)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("CreateAndRemove", func(t *testing.T) {
@@ -32,17 +33,17 @@ func TestTeamInvite(t *testing.T) {
 
 		invite, err := organization.CreateTeamInvite(db.DefaultContext, user1, team, "org3@example.com")
 		assert.NotNil(t, invite)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Shouldn't allow duplicate invite
 		_, err = organization.CreateTeamInvite(db.DefaultContext, user1, team, "org3@example.com")
-		assert.Error(t, err)
+		require.Error(t, err)
 
 		// should remove invite
-		assert.NoError(t, organization.RemoveInviteByID(db.DefaultContext, invite.ID, invite.TeamID))
+		require.NoError(t, organization.RemoveInviteByID(db.DefaultContext, invite.ID, invite.TeamID))
 
 		// invite should not exist
 		_, err = organization.GetInviteByToken(db.DefaultContext, invite.Token)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }

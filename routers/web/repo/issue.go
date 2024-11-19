@@ -57,6 +57,8 @@ import (
 	issue_service "code.gitea.io/gitea/services/issue"
 	pull_service "code.gitea.io/gitea/services/pull"
 	repo_service "code.gitea.io/gitea/services/repository"
+
+	"code.forgejo.org/go-chi/binding"
 )
 
 const (
@@ -201,7 +203,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		keyword = ""
 	}
 
-	isFuzzy := ctx.FormBool("fuzzy")
+	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
 
 	var mileIDs []int64
 	if milestoneID > 0 || milestoneID == db.NoConditionID { // -1 to get those issues which have no any milestone assigned
@@ -346,6 +348,11 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		ctx.ServerError("GetIssuesAllCommitStatus", err)
 		return
 	}
+	if !ctx.Repo.CanRead(unit.TypeActions) {
+		for key := range commitStatuses {
+			git_model.CommitStatusesHideActionsURL(ctx, commitStatuses[key])
+		}
+	}
 
 	if err := issues.LoadAttributes(ctx); err != nil {
 		ctx.ServerError("issues.LoadAttributes", err)
@@ -449,16 +456,17 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	ctx.Data["IssueStats"] = issueStats
 	ctx.Data["OpenCount"] = issueStats.OpenCount
 	ctx.Data["ClosedCount"] = issueStats.ClosedCount
-	linkStr := "%s?q=%s&type=%s&sort=%s&state=%s&labels=%s&milestone=%d&project=%d&assignee=%d&poster=%d&archived=%t"
-	ctx.Data["AllStatesLink"] = fmt.Sprintf(linkStr, ctx.Link,
+	ctx.Data["AllCount"] = issueStats.AllCount
+	linkStr := "?q=%s&type=%s&sort=%s&state=%s&labels=%s&milestone=%d&project=%d&assignee=%d&poster=%d&fuzzy=%t&archived=%t"
+	ctx.Data["AllStatesLink"] = fmt.Sprintf(linkStr,
 		url.QueryEscape(keyword), url.QueryEscape(viewType), url.QueryEscape(sortType), "all", url.QueryEscape(selectLabels),
-		milestoneID, projectID, assigneeID, posterID, archived)
-	ctx.Data["OpenLink"] = fmt.Sprintf(linkStr, ctx.Link,
+		milestoneID, projectID, assigneeID, posterID, isFuzzy, archived)
+	ctx.Data["OpenLink"] = fmt.Sprintf(linkStr,
 		url.QueryEscape(keyword), url.QueryEscape(viewType), url.QueryEscape(sortType), "open", url.QueryEscape(selectLabels),
-		milestoneID, projectID, assigneeID, posterID, archived)
-	ctx.Data["ClosedLink"] = fmt.Sprintf(linkStr, ctx.Link,
+		milestoneID, projectID, assigneeID, posterID, isFuzzy, archived)
+	ctx.Data["ClosedLink"] = fmt.Sprintf(linkStr,
 		url.QueryEscape(keyword), url.QueryEscape(viewType), url.QueryEscape(sortType), "closed", url.QueryEscape(selectLabels),
-		milestoneID, projectID, assigneeID, posterID, archived)
+		milestoneID, projectID, assigneeID, posterID, isFuzzy, archived)
 	ctx.Data["SelLabelIDs"] = labelIDs
 	ctx.Data["SelectLabels"] = selectLabels
 	ctx.Data["ViewType"] = viewType
@@ -469,6 +477,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	ctx.Data["PosterID"] = posterID
 	ctx.Data["IsFuzzy"] = isFuzzy
 	ctx.Data["Keyword"] = keyword
+	ctx.Data["IsShowClosed"] = isShowClosed
 	switch {
 	case isShowClosed.Value():
 		ctx.Data["State"] = "closed"
@@ -1258,7 +1267,7 @@ func NewIssuePost(ctx *context.Context) {
 
 	if err := issue_service.NewIssue(ctx, repo, issue, labelIDs, attachments, assigneeIDs); err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.RenderWithErr(ctx.Tr("repo.issues.blocked_by_user"), tplIssueNew, form)
+			ctx.JSONError(ctx.Tr("repo.issues.blocked_by_user"))
 			return
 		} else if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) {
 			ctx.Error(http.StatusBadRequest, "UserDoesNotHaveAccessToRepo", err.Error())
@@ -1692,7 +1701,7 @@ func ViewIssue(ctx *context.Context) {
 			}
 
 			ghostProject := &project_model.Project{
-				ID:    -1,
+				ID:    project_model.GhostProjectID,
 				Title: ctx.Locale.TrString("repo.issues.deleted_project"),
 			}
 
@@ -1777,6 +1786,15 @@ func ViewIssue(ctx *context.Context) {
 				ctx.ServerError("LoadPushCommits", err)
 				return
 			}
+			if !ctx.Repo.CanRead(unit.TypeActions) {
+				for _, commit := range comment.Commits {
+					if commit.Status == nil {
+						continue
+					}
+					commit.Status.HideActionsURL(ctx)
+					git_model.CommitStatusesHideActionsURL(ctx, commit.Statuses)
+				}
+			}
 		} else if comment.Type == issues_model.CommentTypeAddTimeManual ||
 			comment.Type == issues_model.CommentTypeStopTracking ||
 			comment.Type == issues_model.CommentTypeDeleteTimeManual {
@@ -1807,6 +1825,7 @@ func ViewIssue(ctx *context.Context) {
 
 	// Combine multiple label assignments into a single comment
 	combineLabelComments(issue)
+	combineRequestReviewComments(issue)
 
 	getBranchData(ctx, issue)
 	if issue.IsPull {
@@ -1866,6 +1885,8 @@ func ViewIssue(ctx *context.Context) {
 			return
 		}
 		prConfig := prUnit.PullRequestsConfig()
+
+		ctx.Data["AutodetectManualMerge"] = prConfig.AutodetectManualMerge
 
 		var mergeStyle repo_model.MergeStyle
 		// Check correct values and select default
@@ -2202,10 +2223,20 @@ func UpdateIssueTitle(ctx *context.Context) {
 		ctx.Error(http.StatusForbidden)
 		return
 	}
-
 	title := ctx.FormTrim("title")
-	if len(title) == 0 {
-		ctx.Error(http.StatusNoContent)
+	if util.IsEmptyString(title) {
+		ctx.Error(http.StatusBadRequest, "Title cannot be empty or spaces")
+		return
+	}
+
+	// Creating a CreateIssueForm with the title so that we can validate the max title length
+	i := forms.CreateIssueForm{
+		Title: title,
+	}
+
+	bindingErr := binding.RawValidate(i)
+	if bindingErr.Has(binding.ERR_MAX_SIZE) {
+		ctx.Error(http.StatusBadRequest, "Title cannot be longer than 255 characters")
 		return
 	}
 
@@ -3183,7 +3214,7 @@ func NewComment(ctx *context.Context) {
 	comment, err := issue_service.CreateIssueComment(ctx, ctx.Doer, ctx.Repo.Repository, issue, form.Content, attachments)
 	if err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.Flash.Error(ctx.Tr("repo.issues.comment.blocked_by_user"))
+			ctx.JSONError(ctx.Tr("repo.issues.comment.blocked_by_user"))
 		} else {
 			ctx.ServerError("CreateIssueComment", err)
 		}
@@ -3349,12 +3380,6 @@ func ChangeIssueReaction(ctx *context.Context) {
 			log.Info("CreateIssueReaction: %s", err)
 			break
 		}
-		// Reload new reactions
-		issue.Reactions = nil
-		if err = issue.LoadAttributes(ctx); err != nil {
-			log.Info("issue.LoadAttributes: %s", err)
-			break
-		}
 
 		log.Trace("Reaction for issue created: %d/%d/%d", ctx.Repo.Repository.ID, issue.ID, reaction.ID)
 	case "unreact":
@@ -3363,16 +3388,16 @@ func ChangeIssueReaction(ctx *context.Context) {
 			return
 		}
 
-		// Reload new reactions
-		issue.Reactions = nil
-		if err := issue.LoadAttributes(ctx); err != nil {
-			log.Info("issue.LoadAttributes: %s", err)
-			break
-		}
-
 		log.Trace("Reaction for issue removed: %d/%d", ctx.Repo.Repository.ID, issue.ID)
 	default:
 		ctx.NotFound(fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
+		return
+	}
+
+	// Reload new reactions
+	issue.Reactions = nil
+	if err := issue.LoadAttributes(ctx); err != nil {
+		ctx.ServerError("ChangeIssueReaction.LoadAttributes", err)
 		return
 	}
 
@@ -3456,12 +3481,6 @@ func ChangeCommentReaction(ctx *context.Context) {
 			log.Info("CreateCommentReaction: %s", err)
 			break
 		}
-		// Reload new reactions
-		comment.Reactions = nil
-		if err = comment.LoadReactions(ctx, ctx.Repo.Repository); err != nil {
-			log.Info("comment.LoadReactions: %s", err)
-			break
-		}
 
 		log.Trace("Reaction for comment created: %d/%d/%d/%d", ctx.Repo.Repository.ID, comment.Issue.ID, comment.ID, reaction.ID)
 	case "unreact":
@@ -3470,16 +3489,16 @@ func ChangeCommentReaction(ctx *context.Context) {
 			return
 		}
 
-		// Reload new reactions
-		comment.Reactions = nil
-		if err = comment.LoadReactions(ctx, ctx.Repo.Repository); err != nil {
-			log.Info("comment.LoadReactions: %s", err)
-			break
-		}
-
 		log.Trace("Reaction for comment removed: %d/%d/%d", ctx.Repo.Repository.ID, comment.Issue.ID, comment.ID)
 	default:
 		ctx.NotFound(fmt.Sprintf("Unknown action %s", ctx.Params(":action")), nil)
+		return
+	}
+
+	// Reload new reactions
+	comment.Reactions = nil
+	if err = comment.LoadReactions(ctx, ctx.Repo.Repository); err != nil {
+		ctx.ServerError("ChangeCommentReaction.LoadReactions", err)
 		return
 	}
 
@@ -3645,6 +3664,127 @@ func attachmentsHTML(ctx *context.Context, attachments []*repo_model.Attachment,
 		return ""
 	}
 	return attachHTML
+}
+
+type RequestReviewTarget struct {
+	user *user_model.User
+	team *organization.Team
+}
+
+func (t *RequestReviewTarget) ID() int64 {
+	if t.user != nil {
+		return t.user.ID
+	}
+	return t.team.ID
+}
+
+func (t *RequestReviewTarget) Name() string {
+	if t.user != nil {
+		return t.user.GetDisplayName()
+	}
+	return t.team.Name
+}
+
+func (t *RequestReviewTarget) Type() string {
+	if t.user != nil {
+		return "user"
+	}
+	return "team"
+}
+
+// combineRequestReviewComments combine the nearby request review comments as one.
+func combineRequestReviewComments(issue *issues_model.Issue) {
+	var prev, cur *issues_model.Comment
+	for i := 0; i < len(issue.Comments); i++ {
+		cur = issue.Comments[i]
+		if i > 0 {
+			prev = issue.Comments[i-1]
+		}
+		if i == 0 || cur.Type != issues_model.CommentTypeReviewRequest ||
+			(prev != nil && prev.PosterID != cur.PosterID) ||
+			(prev != nil && cur.CreatedUnix-prev.CreatedUnix >= 60) {
+			if cur.Type == issues_model.CommentTypeReviewRequest && (cur.Assignee != nil || cur.AssigneeTeam != nil) {
+				if cur.RemovedAssignee {
+					if cur.AssigneeTeam != nil {
+						cur.RemovedRequestReview = append(cur.RemovedRequestReview, &RequestReviewTarget{team: cur.AssigneeTeam})
+					} else {
+						cur.RemovedRequestReview = append(cur.RemovedRequestReview, &RequestReviewTarget{user: cur.Assignee})
+					}
+				} else {
+					if cur.AssigneeTeam != nil {
+						cur.AddedRequestReview = append(cur.AddedRequestReview, &RequestReviewTarget{team: cur.AssigneeTeam})
+					} else {
+						cur.AddedRequestReview = append(cur.AddedRequestReview, &RequestReviewTarget{user: cur.Assignee})
+					}
+				}
+			}
+			continue
+		}
+
+		// Previous comment is not a review request, so cannot group. Start a new group.
+		if prev.Type != issues_model.CommentTypeReviewRequest {
+			if cur.RemovedAssignee {
+				if cur.AssigneeTeam != nil {
+					cur.RemovedRequestReview = append(cur.RemovedRequestReview, &RequestReviewTarget{team: cur.AssigneeTeam})
+				} else {
+					cur.RemovedRequestReview = append(cur.RemovedRequestReview, &RequestReviewTarget{user: cur.Assignee})
+				}
+			} else {
+				if cur.AssigneeTeam != nil {
+					cur.AddedRequestReview = append(cur.AddedRequestReview, &RequestReviewTarget{team: cur.AssigneeTeam})
+				} else {
+					cur.AddedRequestReview = append(cur.AddedRequestReview, &RequestReviewTarget{user: cur.Assignee})
+				}
+			}
+			continue
+		}
+
+		// Start grouping.
+		if cur.RemovedAssignee {
+			addedIndex := slices.IndexFunc(prev.AddedRequestReview, func(t issues_model.RequestReviewTarget) bool {
+				if cur.AssigneeTeam != nil {
+					return cur.AssigneeTeam.ID == t.ID() && t.Type() == "team"
+				}
+				return cur.Assignee.ID == t.ID() && t.Type() == "user"
+			})
+
+			// If for this target a AddedRequestReview, then we remove that entry. If it's not found, then add it to the RemovedRequestReview.
+			if addedIndex == -1 {
+				if cur.AssigneeTeam != nil {
+					prev.RemovedRequestReview = append(prev.RemovedRequestReview, &RequestReviewTarget{team: cur.AssigneeTeam})
+				} else {
+					prev.RemovedRequestReview = append(prev.RemovedRequestReview, &RequestReviewTarget{user: cur.Assignee})
+				}
+			} else {
+				prev.AddedRequestReview = slices.Delete(prev.AddedRequestReview, addedIndex, addedIndex+1)
+			}
+		} else {
+			removedIndex := slices.IndexFunc(prev.RemovedRequestReview, func(t issues_model.RequestReviewTarget) bool {
+				if cur.AssigneeTeam != nil {
+					return cur.AssigneeTeam.ID == t.ID() && t.Type() == "team"
+				}
+				return cur.Assignee.ID == t.ID() && t.Type() == "user"
+			})
+
+			// If for this target a RemovedRequestReview, then we remove that entry. If it's not found, then add it to the AddedRequestReview.
+			if removedIndex == -1 {
+				if cur.AssigneeTeam != nil {
+					prev.AddedRequestReview = append(prev.AddedRequestReview, &RequestReviewTarget{team: cur.AssigneeTeam})
+				} else {
+					prev.AddedRequestReview = append(prev.AddedRequestReview, &RequestReviewTarget{user: cur.Assignee})
+				}
+			} else {
+				prev.RemovedRequestReview = slices.Delete(prev.RemovedRequestReview, removedIndex, removedIndex+1)
+			}
+		}
+
+		// Propoagate creation time.
+		prev.CreatedUnix = cur.CreatedUnix
+
+		// Remove the current comment since it has been combined to prev comment
+		issue.Comments = append(issue.Comments[:i], issue.Comments[i+1:]...)
+		i--
+	}
 }
 
 // combineLabelComments combine the nearby label comments as one.

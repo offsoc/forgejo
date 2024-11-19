@@ -13,12 +13,13 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestBlockUser will ensure that when you block a user, certain actions have
 // been taken, like unfollowing each other etc.
 func TestBlockUser(t *testing.T) {
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 
 	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 5})
 	blockedUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
@@ -27,10 +28,10 @@ func TestBlockUser(t *testing.T) {
 		defer user_model.UnblockUser(db.DefaultContext, doer.ID, blockedUser.ID)
 
 		// Follow each other.
-		assert.NoError(t, user_model.FollowUser(db.DefaultContext, doer.ID, blockedUser.ID))
-		assert.NoError(t, user_model.FollowUser(db.DefaultContext, blockedUser.ID, doer.ID))
+		require.NoError(t, user_model.FollowUser(db.DefaultContext, doer.ID, blockedUser.ID))
+		require.NoError(t, user_model.FollowUser(db.DefaultContext, blockedUser.ID, doer.ID))
 
-		assert.NoError(t, BlockUser(db.DefaultContext, doer.ID, blockedUser.ID))
+		require.NoError(t, BlockUser(db.DefaultContext, doer.ID, blockedUser.ID))
 
 		// Ensure they aren't following each other anymore.
 		assert.False(t, user_model.IsFollowing(db.DefaultContext, doer.ID, blockedUser.ID))
@@ -42,9 +43,9 @@ func TestBlockUser(t *testing.T) {
 
 		// Blocked user watch repository of doer.
 		repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: doer.ID})
-		assert.NoError(t, repo_model.WatchRepo(db.DefaultContext, blockedUser.ID, repo.ID, true))
+		require.NoError(t, repo_model.WatchRepo(db.DefaultContext, blockedUser.ID, repo.ID, true))
 
-		assert.NoError(t, BlockUser(db.DefaultContext, doer.ID, blockedUser.ID))
+		require.NoError(t, BlockUser(db.DefaultContext, doer.ID, blockedUser.ID))
 
 		// Ensure blocked user isn't following doer's repository.
 		assert.False(t, repo_model.IsWatching(db.DefaultContext, blockedUser.ID, repo.ID))
@@ -59,14 +60,14 @@ func TestBlockUser(t *testing.T) {
 
 		isBlockedUserCollab := func(repo *repo_model.Repository) bool {
 			isCollaborator, err := repo_model.IsCollaborator(db.DefaultContext, repo.ID, blockedUser.ID)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			return isCollaborator
 		}
 
 		assert.True(t, isBlockedUserCollab(repo1))
 		assert.True(t, isBlockedUserCollab(repo2))
 
-		assert.NoError(t, BlockUser(db.DefaultContext, doer.ID, blockedUser.ID))
+		require.NoError(t, BlockUser(db.DefaultContext, doer.ID, blockedUser.ID))
 
 		assert.False(t, isBlockedUserCollab(repo1))
 		assert.False(t, isBlockedUserCollab(repo2))
@@ -80,7 +81,7 @@ func TestBlockUser(t *testing.T) {
 		unittest.AssertExistsIf(t, true, &repo_model.Repository{ID: 3, OwnerID: blockedUser.ID, Status: repo_model.RepositoryPendingTransfer})
 		unittest.AssertExistsIf(t, true, &model.RepoTransfer{ID: 1, RecipientID: doer.ID, DoerID: blockedUser.ID})
 
-		assert.NoError(t, BlockUser(db.DefaultContext, doer.ID, blockedUser.ID))
+		require.NoError(t, BlockUser(db.DefaultContext, doer.ID, blockedUser.ID))
 
 		unittest.AssertExistsIf(t, false, &model.RepoTransfer{ID: 1, RecipientID: doer.ID, DoerID: blockedUser.ID})
 

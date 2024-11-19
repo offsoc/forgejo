@@ -27,35 +27,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateFile(t *testing.T) {
-	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		session := loginUser(t, "user2")
-		testCreateFile(t, session, "user2", "repo1", "master", "test.txt", "Content")
-	})
-}
-
-func testCreateFile(t *testing.T, session *TestSession, user, repo, branch, filePath, content string) *httptest.ResponseRecorder {
-	// Request editor page
-	newURL := fmt.Sprintf("/%s/%s/_new/%s/", user, repo, branch)
-	req := NewRequest(t, "GET", newURL)
-	resp := session.MakeRequest(t, req, http.StatusOK)
-
-	doc := NewHTMLParser(t, resp.Body)
-	lastCommit := doc.GetInputValueByName("last_commit")
-	assert.NotEmpty(t, lastCommit)
-
-	// Save new file to master branch
-	req = NewRequestWithValues(t, "POST", newURL, map[string]string{
-		"_csrf":          doc.GetCSRF(),
-		"last_commit":    lastCommit,
-		"tree_path":      filePath,
-		"content":        content,
-		"commit_choice":  "direct",
-		"commit_mail_id": "3",
-	})
-	return session.MakeRequest(t, req, http.StatusSeeOther)
-}
-
 func TestCreateFileOnProtectedBranch(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		session := loginUser(t, "user2")
@@ -106,7 +77,7 @@ func TestCreateFileOnProtectedBranch(t *testing.T) {
 		resp = session.MakeRequest(t, req, http.StatusOK)
 
 		res := make(map[string]string)
-		assert.NoError(t, json.NewDecoder(resp.Body).Decode(&res))
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&res))
 		assert.EqualValues(t, "/user2/repo1/settings/branches", res["redirect"])
 
 		// Check if master branch has been locked successfully
@@ -309,7 +280,7 @@ func TestCommitMail(t *testing.T) {
 				}
 
 				commit, err := gitRepo.GetCommitByPath(case1.fileName)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.EqualValues(t, "user2", commit.Author.Name)
 				assert.EqualValues(t, "user2@noreply.example.org", commit.Author.Email)
@@ -334,7 +305,7 @@ func TestCommitMail(t *testing.T) {
 				}
 
 				commit, err := gitRepo.GetCommitByPath(case2.fileName)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				assert.EqualValues(t, "user2", commit.Author.Name)
 				assert.EqualValues(t, primaryEmail.Email, commit.Author.Email)
@@ -495,9 +466,9 @@ index 0000000000..4475433e27
 			defer tests.PrintCurrentTest(t)()
 
 			commitID1, err := gitRepo.GetCommitByPath("diff-file-1.txt")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			commitID2, err := gitRepo.GetCommitByPath("diff-file-2.txt")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assertCase(t, caseOpts{
 				fileName: "diff-file-1.txt",

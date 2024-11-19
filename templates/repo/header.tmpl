@@ -74,7 +74,7 @@
 			<div class="fork-flag">
 				{{ctx.Locale.Tr "repo.mirror_from"}}
 				<a target="_blank" rel="noopener noreferrer" href="{{$.PullMirror.RemoteAddress}}">{{$.PullMirror.RemoteAddress}}</a>
-				{{if $.PullMirror.UpdatedUnix}}{{ctx.Locale.Tr "repo.mirror_sync"}} {{TimeSinceUnix $.PullMirror.UpdatedUnix ctx.Locale}}{{end}}
+				{{if $.PullMirror.UpdatedUnix}}{{ctx.Locale.Tr "repo.mirror_sync"}} {{DateUtils.TimeSince $.PullMirror.UpdatedUnix}}{{end}}
 			</div>
 		{{end}}
 		{{if .IsFork}}<div class="fork-flag">{{ctx.Locale.Tr "repo.forked_from"}} <a href="{{.BaseRepo.Link}}">{{.BaseRepo.FullName}}</a></div>{{end}}
@@ -135,6 +135,9 @@
 				{{if .Permission.CanRead $.UnitTypePackages}}
 					<a href="{{.RepoLink}}/packages" class="{{if .IsPackagesPage}}active {{end}}item">
 						{{svg "octicon-package"}} {{ctx.Locale.Tr "packages.title"}}
+						{{if .NumPackages}}
+							<span class="ui small label">{{CountFmt .NumPackages}}</span>
+						{{end}}
 					</a>
 				{{end}}
 

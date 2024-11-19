@@ -80,6 +80,34 @@ func TestDiscordPayload(t *testing.T) {
 		assert.Equal(t, p.Sender.AvatarURL, pl.Embeds[0].Author.IconURL)
 	})
 
+	t.Run("PushWithLongCommitMessage", func(t *testing.T) {
+		p := pushTestMultilineCommitMessagePayload()
+
+		pl, err := dc.Push(p)
+		require.NoError(t, err)
+
+		assert.Len(t, pl.Embeds, 1)
+		assert.Equal(t, "[test/repo:test] 2 new commits", pl.Embeds[0].Title)
+		assert.Equal(t, "[2020558](http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778) This is a commit summary ⚠️⚠️⚠️⚠️ containing 你好... - user1\n[2020558](http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778) This is a commit summary ⚠️⚠️⚠️⚠️ containing 你好... - user1", pl.Embeds[0].Description)
+		assert.Equal(t, p.Sender.UserName, pl.Embeds[0].Author.Name)
+		assert.Equal(t, setting.AppURL+p.Sender.UserName, pl.Embeds[0].Author.URL)
+		assert.Equal(t, p.Sender.AvatarURL, pl.Embeds[0].Author.IconURL)
+	})
+
+	t.Run("PushWithMarkdownCharactersInCommitMessage", func(t *testing.T) {
+		p := pushTestEscapeCommitMessagePayload()
+
+		pl, err := dc.Push(p)
+		require.NoError(t, err)
+
+		assert.Len(t, pl.Embeds, 1)
+		assert.Equal(t, "[test/repo:test] 2 new commits", pl.Embeds[0].Title)
+		assert.Equal(t, "[2020558](http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778) \\# conflicts\n\\# \\- some/conflicting/file.txt - user1\n[2020558](http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778) \\# conflicts\n\\# \\- some/conflicting/file.txt - user1", pl.Embeds[0].Description)
+		assert.Equal(t, p.Sender.UserName, pl.Embeds[0].Author.Name)
+		assert.Equal(t, setting.AppURL+p.Sender.UserName, pl.Embeds[0].Author.URL)
+		assert.Equal(t, p.Sender.AvatarURL, pl.Embeds[0].Author.IconURL)
+	})
+
 	t.Run("Issue", func(t *testing.T) {
 		p := issueTestPayload()
 
@@ -106,6 +134,49 @@ func TestDiscordPayload(t *testing.T) {
 		assert.Equal(t, p.Sender.UserName, pl.Embeds[0].Author.Name)
 		assert.Equal(t, setting.AppURL+p.Sender.UserName, pl.Embeds[0].Author.URL)
 		assert.Equal(t, p.Sender.AvatarURL, pl.Embeds[0].Author.IconURL)
+
+		j, err := json.Marshal(pl)
+		require.NoError(t, err)
+
+		unsetFields := struct {
+			Content *string `json:"content"`
+			TTS     *bool   `json:"tts"`
+			Wait    *bool   `json:"wait"`
+			Fields  []any   `json:"fields"`
+			Footer  struct {
+				Text *string `json:"text"`
+			} `json:"footer"`
+		}{}
+
+		err = json.Unmarshal(j, &unsetFields)
+		require.NoError(t, err)
+		assert.Nil(t, unsetFields.Content)
+		assert.Nil(t, unsetFields.TTS)
+		assert.Nil(t, unsetFields.Wait)
+		assert.Nil(t, unsetFields.Fields)
+		assert.Nil(t, unsetFields.Footer.Text)
+	})
+
+	t.Run("Issue with long title", func(t *testing.T) {
+		p := issueTestPayloadWithLongTitle()
+
+		p.Action = api.HookIssueOpened
+		pl, err := dc.Issue(p)
+		require.NoError(t, err)
+
+		assert.Len(t, pl.Embeds, 1)
+		assert.Len(t, pl.Embeds[0].Title, 256)
+	})
+
+	t.Run("Issue with long body", func(t *testing.T) {
+		p := issueTestPayloadWithLongBody()
+
+		p.Action = api.HookIssueOpened
+		pl, err := dc.Issue(p)
+		require.NoError(t, err)
+
+		assert.Len(t, pl.Embeds, 1)
+		assert.Len(t, pl.Embeds[0].Description, 4096)
 	})
 
 	t.Run("IssueComment", func(t *testing.T) {
@@ -286,6 +357,92 @@ func TestDiscordJSONPayload(t *testing.T) {
 	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 	var body DiscordPayload
 	err = json.NewDecoder(req.Body).Decode(&body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "[2020558](http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778) commit message - user1\n[2020558](http://localhost:3000/test/repo/commit/2020558fe2e34debb818a514715839cabd25e778) commit message - user1", body.Embeds[0].Description)
+}
+
+var escapedMarkdownTests = map[string]struct {
+	input    string
+	expected string
+}{
+	"Escape heading level 1": {
+		input:    "# Heading level 1",
+		expected: "\\# Heading level 1",
+	},
+	"Escape heading level 2": {
+		input:    "## Heading level 2",
+		expected: "\\#\\# Heading level 2",
+	},
+	"Escape heading level 3": {
+		input:    "### Heading level 3",
+		expected: "\\#\\#\\# Heading level 3",
+	},
+	"Escape bold text": {
+		input:    "**bold text**",
+		expected: "\\*\\*bold text\\*\\*",
+	},
+	"Escape italic text": {
+		input:    "*italic text*",
+		expected: "\\*italic text\\*",
+	},
+	"Escape italic text underline": {
+		input:    "_italic text_",
+		expected: "\\_italic text\\_",
+	},
+	"Escape strikethrough": {
+		input:    "~~strikethrough~~",
+		expected: "\\~\\~strikethrough\\~\\~",
+	},
+	"Escape Ordered list item": {
+		input:    "1. Ordered list item\n2. Second ordered list item\n999999999999. 999999999999 ordered list item",
+		expected: "1\\. Ordered list item\n2\\. Second ordered list item\n999999999999\\. 999999999999 ordered list item",
+	},
+	"Escape Unordered list item": {
+		input:    "- Unordered list\n + using plus",
+		expected: "\\- Unordered list\n \\+ using plus",
+	},
+	"Escape bullet list item": {
+		input:    "* Bullet list item",
+		expected: "\\* Bullet list item",
+	},
+	"Escape table": {
+		input:    "| Table | Example |\n|-|-|\n| Lorem | Ipsum |",
+		expected: "\\| Table \\| Example \\|\n\\|-\\|-\\|\n\\| Lorem \\| Ipsum \\|",
+	},
+	"Escape link": {
+		input:    "[Link to Forgejo](https://forgejo.org/)",
+		expected: "\\[Link to Forgejo\\]\\(https://forgejo.org/\\)",
+	},
+	"Escape Alt text for an image": {
+		input:    "![Alt text for an image](https://forgejo.org/_astro/mascot-dark.1omhhgvT_Zm0N2n.webp)",
+		expected: "\\!\\[Alt text for an image\\]\\(https://forgejo.org/\\_astro/mascot-dark.1omhhgvT\\_Zm0N2n.webp\\)",
+	},
+	"Escape URL if it has markdown character": {
+		input:    "https://forgejo.org/_astro/mascot-dark.1omhhgvT_Zm0N2n.webp",
+		expected: "https://forgejo.org/\\_astro/mascot-dark.1omhhgvT\\_Zm0N2n.webp",
+	},
+	"Escape blockquote text": {
+		input:    "> Blockquote text.",
+		expected: "\\> Blockquote text.",
+	},
+	"Escape inline code": {
+		input:    "`Inline code`",
+		expected: "\\`Inline code\\`",
+	},
+	"Escape multiple code": {
+		input:    "```\nCode block\nwith multiple lines\n```\n",
+		expected: "\\`\\`\\`\nCode block\nwith multiple lines\n\\`\\`\\`\n",
+	},
+	"Escape horizontal rule": {
+		input:    "---",
+		expected: "\\---",
+	},
+}
+
+func TestEscapeMarkdownChar(t *testing.T) {
+	for name, test := range escapedMarkdownTests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, test.expected, escapeMarkdown(test.input))
+		})
+	}
 }

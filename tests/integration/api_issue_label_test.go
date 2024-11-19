@@ -19,10 +19,11 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIModifyLabels(t *testing.T) {
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 2})
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
@@ -94,7 +95,7 @@ func TestAPIModifyLabels(t *testing.T) {
 }
 
 func TestAPIAddIssueLabels(t *testing.T) {
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repo.ID})
@@ -117,7 +118,7 @@ func TestAPIAddIssueLabels(t *testing.T) {
 }
 
 func TestAPIAddIssueLabelsWithLabelNames(t *testing.T) {
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repo.ID})
@@ -186,7 +187,7 @@ func TestAPIAddIssueLabelsAutoDate(t *testing.T) {
 }
 
 func TestAPIReplaceIssueLabels(t *testing.T) {
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repo.ID})
@@ -212,7 +213,7 @@ func TestAPIReplaceIssueLabels(t *testing.T) {
 }
 
 func TestAPIReplaceIssueLabelsWithLabelNames(t *testing.T) {
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repo.ID})
@@ -235,7 +236,7 @@ func TestAPIReplaceIssueLabelsWithLabelNames(t *testing.T) {
 }
 
 func TestAPIModifyOrgLabels(t *testing.T) {
-	assert.NoError(t, unittest.LoadFixtures())
+	require.NoError(t, unittest.LoadFixtures())
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 3})
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})

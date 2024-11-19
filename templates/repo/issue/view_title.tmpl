@@ -7,8 +7,7 @@
 	{{$canEditIssueTitle := and (or .HasIssuesOrPullsWritePermission .IsIssuePoster) (not .Repository.IsArchived)}}
 	<div class="issue-title" id="issue-title-display">
 		<h1 class="tw-break-anywhere">
-			{{RenderIssueTitle $.Context .Issue.Title ($.Repository.ComposeMetas ctx) | RenderCodeBlock}}
-			<span class="index">#{{.Issue.Index}}</span>
+			{{RenderIssueTitle $.Context .Issue.Title ($.Repository.ComposeMetas ctx)}}				<span class="index">#{{.Issue.Index}}</span>
 		</h1>
 		<div class="button-row">
 			{{if $canEditIssueTitle}}
@@ -22,7 +21,7 @@
 	{{if $canEditIssueTitle}}
 	<div class="ui form issue-title tw-hidden" id="issue-title-editor">
 		<div class="ui input tw-flex-1">
-			<input value="{{.Issue.Title}}" data-old-title="{{.Issue.Title}}" maxlength="255" autocomplete="off" class="js-quick-submit">
+			<input value="{{.Issue.Title}}" data-old-title="{{.Issue.Title}}" maxlength="245" autocomplete="off" class="js-quick-submit">
 		</div>
 		<div class="button-row">
 			<button class="ui small basic cancel button">{{ctx.Locale.Tr "repo.issues.cancel"}}</button>
@@ -61,7 +60,7 @@
 					{{$baseHref = HTMLFormat `<a href="%s">%s</a>` .BaseBranchLink $baseHref}}
 				{{end}}
 				{{if .Issue.PullRequest.HasMerged}}
-					{{$mergedStr:= TimeSinceUnix .Issue.PullRequest.MergedUnix ctx.Locale}}
+					{{$mergedStr:= DateUtils.TimeSince .Issue.PullRequest.MergedUnix}}
 					{{if .Issue.OriginalAuthor}}
 						{{.Issue.OriginalAuthor}}
 						<span class="pull-desc">{{ctx.Locale.TrN .NumCommits "repo.pulls.merged_title_desc_one" "repo.pulls.merged_title_desc_few" .NumCommits $headHref $baseHref $mergedStr}}</span>
@@ -69,13 +68,22 @@
 						<a {{if gt .Issue.PullRequest.Merger.ID 0}}href="{{.Issue.PullRequest.Merger.HomeLink}}"{{end}}>{{.Issue.PullRequest.Merger.GetDisplayName}}</a>
 						<span class="pull-desc">{{ctx.Locale.TrN .NumCommits "repo.pulls.merged_title_desc_one" "repo.pulls.merged_title_desc_few" .NumCommits $headHref $baseHref $mergedStr}}</span>
 					{{end}}
+					{{if .MadeUsingAGit}}
+						{{/* TODO: Move documentation link to the instructions at the bottom of the PR, show instructions when clicking label */}}
+						{{/* Note: #agit-label is necessary for testing whether the label appears when it should in tests/integration/git_test.go */}}
+						<a target="_blank" rel="noopener" href="https://forgejo.org/docs/latest/user/agit-support/">
+							<span id="agit-label" data-tooltip-content="{{ctx.Locale.Tr "repo.pulls.agit_explanation"}}" class="ui small label">
+								{{ctx.Locale.Tr "repo.pulls.made_using_agit"}}
+							</span>
+						</a>
+					{{end}}
 				{{else}}
 					{{if .Issue.OriginalAuthor}}
-						<span id="pull-desc-display" class="pull-desc">{{.Issue.OriginalAuthor}} {{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref}}</span>
+						<span id="pull-desc-display" class="pull-desc">{{.Issue.OriginalAuthor}} {{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref "branch_target"}}</span>
 					{{else}}
 						<span id="pull-desc-display" class="pull-desc">
 							<a {{if gt .Issue.Poster.ID 0}}href="{{.Issue.Poster.HomeLink}}"{{end}}>{{.Issue.Poster.GetDisplayName}}</a>
-							{{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref}}
+							{{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref "branch_target"}}
 						</span>
 					{{end}}
 					{{if .MadeUsingAGit}}
@@ -109,7 +117,7 @@
 										{{$sameBase := ne $.BaseName $.HeadUserName}}
 										{{$differentBranch := ne . $.HeadBranch}}
 										{{if or $sameBase $differentBranch}}
-											<div class="item {{if eq $.BaseBranch .}}selected{{end}}" data-branch="{{.}}">{{$.BaseName}}{{if $.HeadRepo}}/{{$.HeadRepo}}{{end}}:{{.}}</div>
+											<div class="item {{if eq $.BaseBranch .}}selected{{end}}" data-branch="{{.}}">{{$.BaseName}}:{{.}}</div>
 										{{end}}
 									{{end}}
 								</div>
@@ -118,7 +126,7 @@
 					</span>
 				{{end}}
 			{{else}}
-				{{$createdStr:= TimeSinceUnix .Issue.CreatedUnix ctx.Locale}}
+				{{$createdStr:= DateUtils.TimeSince .Issue.CreatedUnix}}
 				<span class="time-desc">
 					{{if .Issue.OriginalAuthor}}
 						{{ctx.Locale.Tr "repo.issues.opened_by_fake" $createdStr .Issue.OriginalAuthor}}

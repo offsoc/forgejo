@@ -116,7 +116,7 @@ function handleClipboardText(textarea, text, e) {
   if (_shiftDown) return;
   const selectedText = value.substring(selectionStart, selectionEnd);
   const trimmedText = text.trim();
-  if (selectedText && isUrl(trimmedText)) {
+  if (selectedText && isUrl(trimmedText) && !isUrl(selectedText)) {
     e.stopPropagation();
     e.preventDefault();
     replaceTextareaSelection(textarea, `[${selectedText}](${trimmedText})`);

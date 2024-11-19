@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAPIGetIssueAttachment(t *testing.T) {
@@ -80,11 +81,11 @@ func TestAPICreateIssueAttachment(t *testing.T) {
 	// Setup multi-part
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile("attachment", filename)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	_, err = io.Copy(part, &buff)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = writer.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req := NewRequestWithBody(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/assets", repoOwner.Name, repo.Name, issue.Index), body).
 		AddTokenAuth(token)
@@ -119,11 +120,11 @@ func TestAPICreateIssueAttachmentAutoDate(t *testing.T) {
 		// Setup multi-part
 		writer := multipart.NewWriter(body)
 		part, err := writer.CreateFormFile("attachment", filename)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		_, err = io.Copy(part, &buff)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		err = writer.Close()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		req := NewRequestWithBody(t, "POST", urlStr, body).AddTokenAuth(token)
 		req.Header.Add("Content-Type", writer.FormDataContentType())
@@ -151,11 +152,11 @@ func TestAPICreateIssueAttachmentAutoDate(t *testing.T) {
 		// Setup multi-part
 		writer := multipart.NewWriter(body)
 		part, err := writer.CreateFormFile("attachment", filename)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		_, err = io.Copy(part, &buff)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		err = writer.Close()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		req := NewRequestWithBody(t, "POST", urlStr, body).AddTokenAuth(token)
 		req.Header.Add("Content-Type", writer.FormDataContentType())
@@ -189,9 +190,9 @@ func TestAPICreateIssueAttachmentWithUnallowedFile(t *testing.T) {
 	// Setup multi-part.
 	writer := multipart.NewWriter(body)
 	_, err := writer.CreateFormFile("attachment", filename)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = writer.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req := NewRequestWithBody(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/assets", repoOwner.Name, repo.Name, issue.Index), body).
 		AddTokenAuth(token)

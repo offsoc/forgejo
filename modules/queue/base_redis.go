@@ -16,7 +16,7 @@ import (
 )
 
 type baseRedis struct {
-	client   redis.UniversalClient
+	client   nosql.RedisClient
 	isUnique bool
 	cfg      *BaseConfig
 	prefix   string
@@ -26,7 +26,7 @@ type baseRedis struct {
 
 var _ baseQueue = (*baseRedis)(nil)
 
-func newBaseRedisGeneric(cfg *BaseConfig, unique bool, client redis.UniversalClient) (baseQueue, error) {
+func newBaseRedisGeneric(cfg *BaseConfig, unique bool, client nosql.RedisClient) (baseQueue, error) {
 	if client == nil {
 		client = nosql.GetManager().GetRedisClient(cfg.ConnStr)
 	}

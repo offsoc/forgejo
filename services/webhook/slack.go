@@ -22,7 +22,7 @@ import (
 	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/webhook/shared"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 type slackHandler struct{}
@@ -289,8 +289,7 @@ func (s slackConvertor) Review(p *api.PullRequestPayload, event webhook_module.H
 	repoLink := SlackLinkFormatter(p.Repository.HTMLURL, p.Repository.FullName)
 	var text string
 
-	switch p.Action {
-	case api.HookIssueReviewed:
+	if p.Action == api.HookIssueReviewed {
 		action, err := parseHookPullRequestEventType(event)
 		if err != nil {
 			return SlackPayload{}, err

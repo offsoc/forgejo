@@ -26,7 +26,7 @@ const (
 
 // Create render the page for create organization
 func Create(ctx *context.Context) {
-	ctx.Data["Title"] = ctx.Tr("new_org")
+	ctx.Data["Title"] = ctx.Tr("new_org.title")
 	ctx.Data["DefaultOrgVisibilityMode"] = setting.Service.DefaultOrgVisibilityMode
 	if !ctx.Doer.CanCreateOrganization() {
 		ctx.ServerError("Not allowed", errors.New(ctx.Locale.TrString("org.form.create_org_not_allowed")))
@@ -38,7 +38,7 @@ func Create(ctx *context.Context) {
 // CreatePost response for create organization
 func CreatePost(ctx *context.Context) {
 	form := *web.GetForm(ctx).(*forms.CreateOrgForm)
-	ctx.Data["Title"] = ctx.Tr("new_org")
+	ctx.Data["Title"] = ctx.Tr("new_org.title")
 
 	if !ctx.Doer.CanCreateOrganization() {
 		ctx.ServerError("Not allowed", errors.New(ctx.Locale.TrString("org.form.create_org_not_allowed")))

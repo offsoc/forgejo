@@ -1,7 +1,9 @@
-import SwaggerUI from 'swagger-ui-dist/swagger-ui-es-bundle.js';
-import 'swagger-ui-dist/swagger-ui.css';
-
 window.addEventListener('load', async () => {
+  const [{default: SwaggerUI}] = await Promise.all([
+    import(/* webpackChunkName: "swagger-ui" */'swagger-ui-dist/swagger-ui-es-bundle.js'),
+    import(/* webpackChunkName: "swagger-ui" */'swagger-ui-dist/swagger-ui.css'),
+  ]);
+
   const url = document.getElementById('swagger-ui').getAttribute('data-source');
   const res = await fetch(url);
   const spec = await res.json();

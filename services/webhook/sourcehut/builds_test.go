@@ -6,12 +6,7 @@ package sourcehut
 import (
 	"context"
 	"testing"
-	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
 	webhook_model "code.gitea.io/gitea/models/webhook"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/json"
@@ -19,8 +14,6 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/test"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
-	repo_service "code.gitea.io/gitea/services/repository"
-	files_service "code.gitea.io/gitea/services/repository/files"
 	"code.gitea.io/gitea/services/webhook/shared"
 
 	"github.com/stretchr/testify/assert"
@@ -32,7 +25,7 @@ func gitInit(t testing.TB) {
 		return
 	}
 	t.Cleanup(test.MockVariableValue(&setting.Git.HomePath, t.TempDir()))
-	assert.NoError(t, git.InitSimple(context.Background()))
+	require.NoError(t, git.InitSimple(context.Background()))
 }
 
 func TestSourcehutBuildsPayload(t *testing.T) {
@@ -129,16 +122,16 @@ tasks:
 		p := &api.DeletePayload{}
 
 		pl, err := pc.Delete(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("Fork", func(t *testing.T) {
 		p := &api.ForkPayload{}
 
 		pl, err := pc.Fork(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("Push/simple", func(t *testing.T) {
@@ -250,29 +243,29 @@ triggers:
 
 		p.Action = api.HookIssueOpened
 		pl, err := pc.Issue(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 
 		p.Action = api.HookIssueClosed
 		pl, err = pc.Issue(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("IssueComment", func(t *testing.T) {
 		p := &api.IssueCommentPayload{}
 
 		pl, err := pc.IssueComment(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("PullRequest", func(t *testing.T) {
 		p := &api.PullRequestPayload{}
 
 		pl, err := pc.PullRequest(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("PullRequestComment", func(t *testing.T) {
@@ -281,8 +274,8 @@ triggers:
 		}
 
 		pl, err := pc.IssueComment(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("Review", func(t *testing.T) {
@@ -290,24 +283,24 @@ triggers:
 		p.Action = api.HookIssueReviewed
 
 		pl, err := pc.Review(p, webhook_module.HookEventPullRequestReviewApproved)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("Repository", func(t *testing.T) {
 		p := &api.RepositoryPayload{}
 
 		pl, err := pc.Repository(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("Package", func(t *testing.T) {
 		p := &api.PackagePayload{}
 
 		pl, err := pc.Package(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("Wiki", func(t *testing.T) {
@@ -315,26 +308,26 @@ triggers:
 
 		p.Action = api.HookWikiCreated
 		pl, err := pc.Wiki(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 
 		p.Action = api.HookWikiEdited
 		pl, err = pc.Wiki(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 
 		p.Action = api.HookWikiDeleted
 		pl, err = pc.Wiki(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 
 	t.Run("Release", func(t *testing.T) {
 		p := &api.ReleasePayload{}
 
 		pl, err := pc.Release(p)
-		require.Equal(t, err, shared.ErrPayloadTypeNotSupported)
-		require.Equal(t, pl, graphqlPayload[buildsVariables]{})
+		require.Equal(t, shared.ErrPayloadTypeNotSupported, err)
+		require.Equal(t, graphqlPayload[buildsVariables]{}, pl)
 	})
 }
 
@@ -388,67 +381,6 @@ func TestSourcehutJSONPayload(t *testing.T) {
 	assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 	var body graphqlPayload[buildsVariables]
 	err = json.NewDecoder(req.Body).Decode(&body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "json test", body.Variables.Note)
-}
-
-func CreateDeclarativeRepo(t *testing.T, owner *user_model.User, name string, enabledUnits, disabledUnits []unit_model.Type, files []*files_service.ChangeRepoFile) (*repo_model.Repository, string) {
-	t.Helper()
-
-	// Create a new repository
-	repo, err := repo_service.CreateRepository(db.DefaultContext, owner, owner, repo_service.CreateRepoOptions{
-		Name:          name,
-		Description:   "Temporary Repo",
-		AutoInit:      true,
-		Gitignores:    "",
-		License:       "WTFPL",
-		Readme:        "Default",
-		DefaultBranch: "main",
-	})
-	assert.NoError(t, err)
-	assert.NotEmpty(t, repo)
-	t.Cleanup(func() {
-		repo_service.DeleteRepository(db.DefaultContext, owner, repo, false)
-	})
-
-	if enabledUnits != nil || disabledUnits != nil {
-		units := make([]repo_model.RepoUnit, len(enabledUnits))
-		for i, unitType := range enabledUnits {
-			units[i] = repo_model.RepoUnit{
-				RepoID: repo.ID,
-				Type:   unitType,
-			}
-		}
-
-		err := repo_service.UpdateRepositoryUnits(db.DefaultContext, repo, units, disabledUnits)
-		assert.NoError(t, err)
-	}
-
-	var sha string
-	if len(files) > 0 {
-		resp, err := files_service.ChangeRepoFiles(git.DefaultContext, repo, owner, &files_service.ChangeRepoFilesOptions{
-			Files:     files,
-			Message:   "add files",
-			OldBranch: "main",
-			NewBranch: "main",
-			Author: &files_service.IdentityOptions{
-				Name:  owner.Name,
-				Email: owner.Email,
-			},
-			Committer: &files_service.IdentityOptions{
-				Name:  owner.Name,
-				Email: owner.Email,
-			},
-			Dates: &files_service.CommitDateOptions{
-				Author:    time.Now(),
-				Committer: time.Now(),
-			},
-		})
-		assert.NoError(t, err)
-		assert.NotEmpty(t, resp)
-
-		sha = resp.Commit.SHA
-	}
-
-	return repo, sha
 }

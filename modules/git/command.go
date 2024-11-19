@@ -153,6 +153,18 @@ func (c *Command) AddOptionValues(opt internal.CmdArg, args ...string) *Command 
 	return c
 }
 
+// AddGitGrepExpression adds an expression option (-e) to git-grep command
+// It is different from AddOptionValues in that it allows the actual expression
+// to not be filtered out for leading dashes (which is otherwise a security feature
+// of AddOptionValues).
+func (c *Command) AddGitGrepExpression(exp string) *Command {
+	if c.args[len(globalCommandArgs)] != "grep" {
+		panic("function called on a non-grep git program: " + c.args[0])
+	}
+	c.args = append(c.args, "-e", exp)
+	return c
+}
+
 // AddOptionFormat adds a new option with a format string and arguments
 // For example: AddOptionFormat("--opt=%s %s", val1, val2) means 1 argument: {"--opt=val1 val2"}.
 func (c *Command) AddOptionFormat(opt string, args ...any) *Command {

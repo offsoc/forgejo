@@ -21,7 +21,7 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/tests"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRepoSSHSignedTags(t *testing.T) {
@@ -29,19 +29,19 @@ func TestRepoSSHSignedTags(t *testing.T) {
 
 	// Preparations
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
-	repo, _, f := CreateDeclarativeRepo(t, user, "", nil, nil, nil)
+	repo, _, f := tests.CreateDeclarativeRepo(t, user, "", nil, nil, nil)
 	defer f()
 
 	// Set up an SSH key for the tagger
 	tmpDir := t.TempDir()
 	err := os.Chmod(tmpDir, 0o700)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	signingKey := fmt.Sprintf("%s/ssh_key", tmpDir)
 
 	cmd := exec.Command("ssh-keygen", "-t", "ed25519", "-N", "", "-f", signingKey)
 	err = cmd.Run()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Set up git config for the tagger
 	_ = git.NewCommand(git.DefaultContext, "config", "user.name").AddDynamicArguments(user.Name).Run(&git.RunOpts{Dir: repo.RepoPath()})
@@ -55,7 +55,7 @@ func TestRepoSSHSignedTags(t *testing.T) {
 
 	// Create a signed tag
 	err = git.NewCommand(git.DefaultContext, "tag", "-s", "-m", "this is a signed tag", "ssh-signed-tag").Run(&git.RunOpts{Dir: repo.RepoPath()})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Sync the tag to the DB
 	repo_module.SyncRepoTags(graceful.GetManager().ShutdownContext(), repo.ID)
@@ -83,7 +83,7 @@ func TestRepoSSHSignedTags(t *testing.T) {
 
 		// Upload the signing key
 		keyData, err := os.ReadFile(fmt.Sprintf("%s.pub", signingKey))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		key := string(keyData)
 
 		session := loginUser(t, user.Name)

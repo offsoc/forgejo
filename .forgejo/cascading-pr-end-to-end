@@ -13,21 +13,22 @@ minor_version=$(make show-version-minor)
 
 cd $end_to_end
 
-if ! test -f forgejo/sources/$minor_version ; then
-    echo "FAIL: forgejo/sources/$minor_version does not exist in the end-to-end repository"
-    false
+if ! test -f forgejo/sources/$minor_version; then
+  echo "FAIL: forgejo/sources/$minor_version does not exist in the end-to-end repository"
+  false
 fi
 
-date > last-upgrade
+echo -n $minor_version >forgejo/build-from-sources
+date >last-upgrade
 
-if test -f "$forgejo_pr_or_ref" ; then
-    forgejo_pr=$forgejo_pr_or_ref
-    head_url=$(jq --raw-output .head.repo.html_url < $forgejo_pr)
-    test "$head_url" != null
-    branch=$(jq --raw-output .head.ref < $forgejo_pr)
-    test "$branch" != null
-    echo $head_url $branch $full_version > forgejo/sources/$minor_version
+if test -f "$forgejo_pr_or_ref"; then
+  forgejo_pr=$forgejo_pr_or_ref
+  head_url=$(jq --raw-output .head.repo.html_url <$forgejo_pr)
+  test "$head_url" != null
+  branch=$(jq --raw-output .head.ref <$forgejo_pr)
+  test "$branch" != null
+  echo $head_url $branch $full_version >forgejo/sources/$minor_version
 else
-    forgejo_ref=$forgejo_pr_or_ref
-    echo $GITHUB_SERVER_URL/$GITHUB_REPOSITORY ${forgejo_ref#refs/heads/} $full_version > forgejo/sources/$minor_version
+  forgejo_ref=$forgejo_pr_or_ref
+  echo $GITHUB_SERVER_URL/$GITHUB_REPOSITORY ${forgejo_ref#refs/heads/} $full_version >forgejo/sources/$minor_version
 fi

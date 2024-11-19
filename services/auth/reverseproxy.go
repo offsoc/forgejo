@@ -164,6 +164,11 @@ func (r *ReverseProxy) newUser(req *http.Request) *user_model.User {
 		IsActive: optional.Some(true),
 	}
 
+	// The first user created should be an admin.
+	if user_model.CountUsers(req.Context(), nil) == 0 {
+		user.IsAdmin = true
+	}
+
 	if err := user_model.CreateUser(req.Context(), user, &overwriteDefault); err != nil {
 		// FIXME: should I create a system notice?
 		log.Error("CreateUser: %v", err)

@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRouteMock(t *testing.T) {
@@ -31,7 +32,7 @@ func TestRouteMock(t *testing.T) {
 	// normal request
 	recorder := httptest.NewRecorder()
 	req, err := http.NewRequest("GET", "http://localhost:8000/foo", nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
 	assert.Len(t, recorder.Header(), 3)
 	assert.EqualValues(t, "m1", recorder.Header().Get("X-Test-Middleware1"))
@@ -46,7 +47,7 @@ func TestRouteMock(t *testing.T) {
 	})
 	recorder = httptest.NewRecorder()
 	req, err = http.NewRequest("GET", "http://localhost:8000/foo", nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
 	assert.Len(t, recorder.Header(), 2)
 	assert.EqualValues(t, "m1", recorder.Header().Get("X-Test-Middleware1"))
@@ -60,7 +61,7 @@ func TestRouteMock(t *testing.T) {
 	})
 	recorder = httptest.NewRecorder()
 	req, err = http.NewRequest("GET", "http://localhost:8000/foo", nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
 	assert.Len(t, recorder.Header(), 3)
 	assert.EqualValues(t, "m1", recorder.Header().Get("X-Test-Middleware1"))
