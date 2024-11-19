@@ -16,14 +16,14 @@ test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
 
   const editPath = '/user2/repo1/src/branch/master/README.md';
 
-  const response = await page.goto(editPath, { waitUntil: 'domcontentloaded' });
+  const response = await page.goto(editPath, {waitUntil: 'domcontentloaded'});
   expect(response?.status()).toBe(200);
 
   await page.locator('[data-tooltip-content="Edit file"]').click();
 
-  const editor = page.getByRole("presentation").nth(0);
+  const editor = page.getByRole('presentation').nth(0);
   await editor.click();
-  await page.keyboard.press("ControlOrMeta+KeyA");
+  await page.keyboard.press('ControlOrMeta+KeyA');
   await page.keyboard.type('![Logo of Forgejo](./assets/logo.svg "Logo of Forgejo")');
 
   await page.locator('a[data-tab="preview"]').click();
