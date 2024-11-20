@@ -1413,3 +1413,43 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 		assert.True(t, called)
 	})
 }
+
+func TestViewRepoSize(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	t.Run("With LFS", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		setting.LFS.StartServer = true
+
+		req := NewRequest(t, "GET", "/user2/repo1")
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		sizeSpan := htmlDoc.doc.Find("span[data-test-name='repo-size']")
+		require.NotNil(t, sizeSpan)
+
+		attr, exists := sizeSpan.Attr("data-tooltip-content")
+
+		assert.True(t, exists)
+		assert.Equal(t, "git: 0 B, lfs: 0 B", attr)
+	})
+
+	t.Run("Without LFS", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		setting.LFS.StartServer = false
+
+		req := NewRequest(t, "GET", "/user2/repo1")
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		sizeSpan := htmlDoc.doc.Find("span[data-test-name='repo-size']")
+		require.NotNil(t, sizeSpan)
+
+		attr, exists := sizeSpan.Attr("data-tooltip-content")
+
+		assert.True(t, exists)
+		assert.Equal(t, "git: 0 B", attr)
+	})
+}

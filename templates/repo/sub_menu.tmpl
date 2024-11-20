@@ -13,7 +13,7 @@
 					{{svg "octicon-tag"}} {{ctx.Locale.TrN .NumTags "repo.n_tag_one" "repo.n_tag_few" (printf "<b>%d</b>" .NumTags | SafeHTML)}}
 				</a>
 			{{end}}
-			<span class="item not-mobile" {{if not (eq .Repository.Size 0)}}data-tooltip-content="{{.Repository.SizeDetailsString ctx.Locale}}"{{end}}>
+			<span class="item not-mobile" {{if not (eq .Repository.Size 0)}}data-tooltip-content="{{.Repository.SizeDetailsString ctx.Locale}}"{{end}} data-test-name="repo-size">
 				{{$fileSizeFields :=  ctx.Locale.TrSize .Repository.Size}}
 				{{svg "octicon-database"}} <b>{{$fileSizeFields.PrettyNumber}}</b> {{$fileSizeFields.TranslatedUnit}}
 			</span>
