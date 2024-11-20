@@ -26,7 +26,7 @@ test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
 
   // This yields the monaco editor
   const editor = page.getByRole('presentation').nth(0);
-  expect(editor).toBeVisible();
+  await expect(editor).toBeVisible();
   await editor.click();
   // Clear all the content
   await page.keyboard.press('ControlOrMeta+KeyA');
