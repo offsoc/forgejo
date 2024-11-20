@@ -8,3 +8,7 @@ type Note struct {
 	Message string  `json:"message"`
 	Commit  *Commit `json:"commit"`
 }
+
+type NoteOptions struct {
+	Message string `json:"message"`
+}

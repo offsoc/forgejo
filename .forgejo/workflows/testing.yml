@@ -216,11 +216,13 @@ jobs:
       ldap:
         image: code.forgejo.org/oci/test-openldap:latest
       pgsql:
-        image: 'code.forgejo.org/oci/postgres:15'
+        image: code.forgejo.org/oci/bitnami/postgresql:15
         env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: postgres
-        options: --tmpfs /var/lib/postgresql/data
+          POSTGRESQL_DATABASE: test
+          POSTGRESQL_PASSWORD: postgres
+          POSTGRESQL_FSYNC: off
+          POSTGRESQL_EXTRA_FLAGS: -c full_page_writes=off
+        options: --tmpfs /bitnami/postgresql
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows-composite/setup-env
