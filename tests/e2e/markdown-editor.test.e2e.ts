@@ -4,10 +4,8 @@
 // templates/shared/combomarkdowneditor.tmpl
 // @watch end
 
-import {expect} from '@playwright/test';
+import {expect, type Page, type Locator} from '@playwright/test';
 import {test, load_logged_in_context, login_user} from './utils_e2e.ts';
-// eslint-disable-next-line no-duplicate-imports
-import type {Page, Locator} from '@playwright/test';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -229,7 +227,7 @@ async function testMarkdownEditorPage(page: Page, url: string) {
   }
 }
 
-// eslint-disable-next-line playwright/expect-expect
+/* eslint playwright/expect-expect: ["error", { "assertFunctionNames": ["testMarkdownEditorPage"] }] */
 test('markdown editor init', async ({browser}, workerInfo) => {
   const context = await load_logged_in_context(browser, workerInfo, 'user2');
 
