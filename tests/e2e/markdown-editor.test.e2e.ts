@@ -14,28 +14,29 @@ test.beforeAll(async ({browser}, workerInfo) => {
 test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
   const context = await load_logged_in_context(browser, workerInfo, 'user2');
 
-  // editing the root README.md file for image preview
+  // Editing the root README.md file for image preview
   const editPath = '/user2/repo1/src/branch/master/README.md';
 
   const page = await context.newPage();
   const response = await page.goto(editPath, {waitUntil: 'domcontentloaded'});
   expect(response?.status()).toBe(200);
 
-  // click 'Edit file' tab
+  // Click 'Edit file' tab
   await page.locator('[data-tooltip-content="Edit file"]').click();
 
-  // this yields the monaco editor
+  // This yields the monaco editor
   const editor = page.getByRole('presentation').nth(0);
+  expect(editor).toBeVisible();
   await editor.click();
-  // clear all the content
+  // Clear all the content
   await page.keyboard.press('ControlOrMeta+KeyA');
-  // add the image
+  // Add the image
   await page.keyboard.type('![Logo of Forgejo](./assets/logo.svg "Logo of Forgejo")');
 
-  // click 'Preview' tab
+  // Click 'Preview' tab
   await page.locator('a[data-tab="preview"]').click();
 
-  // check for the image preview via the expected attribute
+  // Check for the image preview via the expected attribute
   const preview = page.locator('div[data-tab="preview"] p[dir="auto"] a');
   await expect(preview).toHaveAttribute('href', 'http://localhost:3003/user2/repo1/media/branch/master/assets/logo.svg');
 });
