@@ -254,11 +254,11 @@ func (repo *Repository) SizeDetails() []SizeDetail {
 func (repo *Repository) SizeDetailsString(locale translation.Locale) string {
 	sizeDetails := repo.SizeDetails()
 
-	if setting.LFS.StartServer {
-		return locale.TrString("repo.size_format", sizeDetails[0].Name, locale.TrSize(sizeDetails[0].Size), sizeDetails[1].Name, locale.TrSize(sizeDetails[1].Size))
-	} else {
+	if !setting.LFS.StartServer {
 		return locale.TrString("repo.size_format_without_lfs", sizeDetails[0].Name, locale.TrSize(sizeDetails[0].Size))
 	}
+
+	return locale.TrString("repo.size_format", sizeDetails[0].Name, locale.TrSize(sizeDetails[0].Size), sizeDetails[1].Name, locale.TrSize(sizeDetails[1].Size))
 }
 
 func (repo *Repository) LogString() string {
