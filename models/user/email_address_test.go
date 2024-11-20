@@ -129,6 +129,7 @@ func TestListEmails(t *testing.T) {
 	assert.Len(t, emails, 5)
 	assert.Greater(t, count, int64(len(emails)))
 }
+
 func TestGetActivatedEmailAddresses(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
