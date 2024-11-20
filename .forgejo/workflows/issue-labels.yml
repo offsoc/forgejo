@@ -1,0 +1,205 @@
+# Copyright 2024 The Forgejo Authors
+# SPDX-License-Identifier: MIT
+#
+# To modify the pull_request_target jobs:
+#
+#  - push it to the wip-ci-issue-labels branch on the forgejo repository
+#    otherwise it will not have access to the required secrets.
+#
+#  - once it works, open a pull request for the sake of keeping track
+#    of the change even if the PR won't run it because it will use
+#    whatever is in the default branch instead
+#
+#  - after it is merged, double check it works by changing the labels
+#    to trigger the job.
+#
+name: issue-labels
+
+on:
+  push:
+    branches:
+      - 'wip-ci-issue-labels'
+
+  pull_request_target:
+    types:
+      - closed
+      - edited
+      - labeled
+      - synchronize
+
+  pull_request:
+    types:
+      - edited
+      - labeled
+      - opened
+      - synchronize
+
+jobs:
+  info:
+    if: vars.ROLE == 'forgejo-coding'
+    runs-on: docker
+    container:
+      image: code.forgejo.org/oci/node:20-bookworm
+    steps:
+      - name: Debug info
+        run: |
+          cat <<'EOF'
+          ${{ toJSON(github) }}
+          EOF
+
+  end-to-end:
+    if: >
+      vars.ROLE == 'forgejo-coding' &&
+
+      secrets.END_TO_END_CASCADING_PR_DESTINATION != '' &&
+      secrets.END_TO_END_CASCADING_PR_ORIGIN != '' &&
+
+      (
+        github.event_name == 'push' ||
+        (
+          github.event_name == 'pull_request_target' &&
+          github.event.action == 'label_updated' &&
+          github.event.label.name == 'run-end-to-end-tests'
+        )
+      )
+    runs-on: docker
+    container:
+      image: code.forgejo.org/oci/node:20-bookworm
+    steps:
+      - name: Debug info
+        run: |
+          cat <<'EOF'
+          ${{ toJSON(github) }}
+          EOF
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+          show-progress: 'false'
+      - uses: actions/cascading-pr@v2
+        with:
+          origin-url: ${{ env.GITHUB_SERVER_URL }}
+          origin-repo: ${{ github.repository }}
+          origin-token: ${{ secrets.END_TO_END_CASCADING_PR_ORIGIN }}
+          origin-pr: ${{ github.event.pull_request.number }}
+          origin-ref: ${{ github.event_name == 'push' && github.event.ref || '' }}
+          destination-url: https://code.forgejo.org
+          destination-fork-repo: cascading-pr/end-to-end
+          destination-repo: forgejo/end-to-end
+          destination-branch: main
+          destination-token: ${{ secrets.END_TO_END_CASCADING_PR_DESTINATION }}
+          close-merge: true
+          update: .forgejo/cascading-pr-end-to-end
+
+  backporting:
+    if: >
+      vars.ROLE == 'forgejo-coding' &&
+
+      secrets.BACKPORT_TOKEN != '' &&
+
+      github.event_name == 'pull_request_target' &&
+      (
+        github.event.pull_request.merged &&
+        contains(toJSON(github.event.pull_request.labels), 'backport/v')
+      )
+    runs-on: docker
+    container:
+      image: 'code.forgejo.org/oci/node:20-bookworm'
+    steps:
+      - name: Debug info
+        run: |
+          cat <<'EOF'
+          ${{ toJSON(github) }}
+          EOF
+      - uses: https://code.forgejo.org/actions/git-backporting@v4.8.4
+        with:
+          target-branch-pattern: "^backport/(?<target>(v.*))$"
+          strategy: ort
+          strategy-option: find-renames
+          cherry-pick-options: -x
+          auth: ${{ secrets.BACKPORT_TOKEN }}
+          pull-request: ${{ github.event.pull_request.url }}
+          auto-no-squash: true
+          enable-err-notification: true
+          git-user: forgejo-backport-action
+          git-email: forgejo-backport-action@noreply.codeberg.org
+
+  merge-conditions:
+    if: >
+      vars.ROLE == 'forgejo-coding' &&
+
+      github.event_name == 'pull_request' &&
+      (
+        github.event.action == 'label_updated' ||
+        github.event.action == 'edited' ||
+        github.event.action == 'opened'
+      )
+    runs-on: docker
+    container:
+      image: 'code.forgejo.org/oci/node:20-bookworm'
+    steps:
+      - name: Debug info
+        run: |
+          cat <<'EOF'
+          ${{ toJSON(github) }}
+          EOF
+      - name: Missing test label
+        if: >
+          !(
+            contains(toJSON(github.event.pull_request.labels), 'test/present')
+            || contains(toJSON(github.event.pull_request.labels), 'test/not-needed')
+            || contains(toJSON(github.event.pull_request.labels), 'test/manual')
+          )
+        run: |
+          echo "Test label must be set to either 'present', 'not-needed' or 'manual'."
+          exit 1
+      - name: Missing manual test instructions
+        if: >
+          (
+            contains(toJSON(github.event.pull_request.labels), 'test/manual')
+            && !contains(toJSON(github.event.pull_request.body), '# Test')
+          )
+        run: |
+          echo "Manual test label is set. The PR description needs to contain test steps introduced by a heading like:"
+          echo "# Testing"
+          exit 1
+
+  release-notes:
+    if: >
+      vars.ROLE == 'forgejo-coding' &&
+
+      secrets.RELEASE_NOTES_ASSISTANT_TOKEN != '' &&
+
+      github.event_name == 'pull_request_target' &&
+      contains(github.event.pull_request.labels.*.name, 'worth a release-note') &&
+      (
+        github.event.action == 'label_updated' ||
+        github.event.action == 'edited' ||
+        github.event.action == 'synchronized'
+      )
+
+    runs-on: docker
+    container:
+      image: 'code.forgejo.org/oci/node:20-bookworm'
+    steps:
+      - name: Debug info
+        run: |
+          cat <<'EOF'
+          ${{ toJSON(github) }}
+          EOF
+
+      - uses: https://code.forgejo.org/actions/checkout@v4
+
+      - uses: https://code.forgejo.org/actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: false
+
+      - name: apt install jq
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get -q install -y -qq jq
+
+      - name: release-notes-assistant preview
+        run: |
+          go run code.forgejo.org/forgejo/release-notes-assistant@v1.1.1 --config .release-notes-assistant.yaml --storage pr --storage-location ${{ github.event.pull_request.number }}  --forgejo-url $GITHUB_SERVER_URL --repository $GITHUB_REPOSITORY --token ${{ secrets.RELEASE_NOTES_ASSISTANT_TOKEN }} preview ${{ github.event.pull_request.number }}

@@ -27,7 +27,9 @@ import (
 	"code.gitea.io/gitea/modules/markup"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
+	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/gitdiff"
 	git_service "code.gitea.io/gitea/services/repository"
 )
@@ -466,4 +468,30 @@ func processGitCommits(ctx *context.Context, gitCommits []*git.Commit) []*git_mo
 		}
 	}
 	return commits
+}
+
+func SetCommitNotes(ctx *context.Context) {
+	form := web.GetForm(ctx).(*forms.CommitNotesForm)
+
+	commitID := ctx.Params(":sha")
+
+	err := git.SetNote(ctx, ctx.Repo.GitRepo, commitID, form.Notes, ctx.Doer.Name, ctx.Doer.GetEmail())
+	if err != nil {
+		ctx.ServerError("SetNote", err)
+		return
+	}
+
+	ctx.Redirect(fmt.Sprintf("%s/commit/%s", ctx.Repo.Repository.HTMLURL(), commitID))
+}
+
+func RemoveCommitNotes(ctx *context.Context) {
+	commitID := ctx.Params(":sha")
+
+	err := git.RemoveNote(ctx, ctx.Repo.GitRepo, commitID)
+	if err != nil {
+		ctx.ServerError("RemoveNotes", err)
+		return
+	}
+
+	ctx.Redirect(fmt.Sprintf("%s/commit/%s", ctx.Repo.Repository.HTMLURL(), commitID))
 }
