@@ -15,6 +15,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
 	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/routers/api/v1/user"
 	"code.gitea.io/gitea/routers/api/v1/utils"
@@ -355,7 +356,7 @@ func Edit(ctx *context.APIContext) {
 			ctx.Org.Organization.Email = ""
 		} else {
 			if err := user_service.ReplacePrimaryEmailAddress(ctx, ctx.Org.Organization.AsUser(), *form.Email); err != nil {
-				if user_model.IsErrEmailInvalid(err) || user_model.IsErrEmailCharIsNotSupported(err) {
+				if validation.IsErrEmailInvalid(err) || validation.IsErrEmailCharIsNotSupported(err) {
 					ctx.Error(http.StatusUnprocessableEntity, "ReplacePrimaryEmailAddress", err)
 				} else {
 					ctx.Error(http.StatusInternalServerError, "ReplacePrimaryEmailAddress", err)
