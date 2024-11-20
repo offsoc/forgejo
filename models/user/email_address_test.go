@@ -12,53 +12,9 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
 
-	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestEmailDomainAllowList(t *testing.T) {
-	res := user_model.IsEmailDomainAllowed("someuser@localhost.localdomain")
-	assert.True(t, res)
-}
-
-func TestEmailDomainAllowListInternal(t *testing.T) {
-	domain, _ := glob.Compile("domain.de", ',')
-	emailDomainAllowList := []glob.Glob{domain}
-	emailDomainBlockList := []glob.Glob{}
-
-	res := user_model.IsEmailDomainAllowedInternal(
-		"user@repo.domain.de",
-		emailDomainAllowList,
-		emailDomainBlockList,
-		false,
-		"https://repo.domain.de")
-	assert.False(t, res)
-
-	res = user_model.IsEmailDomainAllowedInternal(
-		"user@repo.domain.de",
-		emailDomainAllowList,
-		emailDomainBlockList,
-		true,
-		"xttps://repo")
-	assert.False(t, res)
-
-	res = user_model.IsEmailDomainAllowedInternal(
-		"user@repo.Domain.de",
-		emailDomainAllowList,
-		emailDomainBlockList,
-		true,
-		"https://repo.domain.de")
-	assert.True(t, res)
-
-	res = user_model.IsEmailDomainAllowedInternal(
-		"user@repo.domain.de",
-		emailDomainAllowList,
-		emailDomainBlockList,
-		true,
-		"https://repo.domain.de")
-	assert.True(t, res)
-}
 
 func TestGetEmailAddresses(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
@@ -173,64 +129,6 @@ func TestListEmails(t *testing.T) {
 	assert.Len(t, emails, 5)
 	assert.Greater(t, count, int64(len(emails)))
 }
-
-func TestEmailAddressValidate(t *testing.T) {
-	kases := map[string]error{
-		"abc@gmail.com":                  nil,
-		"132@hotmail.com":                nil,
-		"1-3-2@test.org":                 nil,
-		"1.3.2@test.org":                 nil,
-		"a_123@test.org.cn":              nil,
-		`first.last@iana.org`:            nil,
-		`first!last@iana.org`:            nil,
-		`first#last@iana.org`:            nil,
-		`first$last@iana.org`:            nil,
-		`first%last@iana.org`:            nil,
-		`first&last@iana.org`:            nil,
-		`first'last@iana.org`:            nil,
-		`first*last@iana.org`:            nil,
-		`first+last@iana.org`:            nil,
-		`first/last@iana.org`:            nil,
-		`first=last@iana.org`:            nil,
-		`first?last@iana.org`:            nil,
-		`first^last@iana.org`:            nil,
-		"first`last@iana.org":            nil,
-		`first{last@iana.org`:            nil,
-		`first|last@iana.org`:            nil,
-		`first}last@iana.org`:            nil,
-		`first~last@iana.org`:            nil,
-		`first;last@iana.org`:            user_model.ErrEmailCharIsNotSupported{`first;last@iana.org`},
-		".233@qq.com":                    user_model.ErrEmailInvalid{".233@qq.com"},
-		"!233@qq.com":                    nil,
-		"#233@qq.com":                    nil,
-		"$233@qq.com":                    nil,
-		"%233@qq.com":                    nil,
-		"&233@qq.com":                    nil,
-		"'233@qq.com":                    nil,
-		"*233@qq.com":                    nil,
-		"+233@qq.com":                    nil,
-		"-233@qq.com":                    user_model.ErrEmailInvalid{"-233@qq.com"},
-		"/233@qq.com":                    nil,
-		"=233@qq.com":                    nil,
-		"?233@qq.com":                    nil,
-		"^233@qq.com":                    nil,
-		"_233@qq.com":                    nil,
-		"`233@qq.com":                    nil,
-		"{233@qq.com":                    nil,
-		"|233@qq.com":                    nil,
-		"}233@qq.com":                    nil,
-		"~233@qq.com":                    nil,
-		";233@qq.com":                    user_model.ErrEmailCharIsNotSupported{";233@qq.com"},
-		"Foo <foo@bar.com>":              user_model.ErrEmailCharIsNotSupported{"Foo <foo@bar.com>"},
-		string([]byte{0xE2, 0x84, 0xAA}): user_model.ErrEmailCharIsNotSupported{string([]byte{0xE2, 0x84, 0xAA})},
-	}
-	for kase, err := range kases {
-		t.Run(kase, func(t *testing.T) {
-			assert.EqualValues(t, err, user_model.ValidateEmail(kase))
-		})
-	}
-}
-
 func TestGetActivatedEmailAddresses(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
