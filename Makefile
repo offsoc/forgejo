@@ -51,6 +51,9 @@ GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
 GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.16.2 # renovate: datasource=go
 RENOVATE_NPM_PACKAGE ?= renovate@39.19.1 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
 
+# https://github.com/disposable-email-domains/disposable-email-domains/commits/main/
+DISPOSABLE_EMAILS_SHA ?= 0c27e671231d27cf66370034d7f6818037416989 # renovate: ...
+
 ifeq ($(HAS_GO), yes)
 	CGO_EXTRA_CFLAGS := -DSQLITE_MAX_VARIABLE_NUMBER=32766
 	CGO_CFLAGS ?= $(shell $(GO) env CGO_CFLAGS) $(CGO_EXTRA_CFLAGS)
@@ -417,10 +420,10 @@ lint-frontend: lint-js lint-css
 lint-frontend-fix: lint-js-fix lint-css-fix
 
 .PHONY: lint-backend
-lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale
+lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale lint-disposable-emails
 
 .PHONY: lint-backend-fix
-lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig
+lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig lint-disposable-emails-fix
 
 .PHONY: lint-codespell
 lint-codespell:
@@ -510,6 +513,14 @@ lint-go-gopls:
 .PHONY: lint-editorconfig
 lint-editorconfig:
 	$(GO) run $(EDITORCONFIG_CHECKER_PACKAGE) templates .forgejo/workflows
+
+.PHONY: lint-disposable-emails
+lint-disposable-emails:
+	$(GO) run build/generate-disposable-email.go -check -r $(DISPOSABLE_EMAILS_SHA)
+
+.PHONY: lint-disposable-emails-fix
+lint-disposable-emails-fix:
+	$(GO) run build/generate-disposable-email.go -r $(DISPOSABLE_EMAILS_SHA)
 
 .PHONY: lint-templates
 lint-templates: .venv node_modules

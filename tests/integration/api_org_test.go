@@ -218,3 +218,57 @@ func TestAPIOrgSearchEmptyTeam(t *testing.T) {
 		assert.EqualValues(t, "Empty", data.Data[0].Name)
 	}
 }
+
+func TestAPIOrgChangeEmail(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	session := loginUser(t, "user1")
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteOrganization)
+
+	t.Run("Invalid", func(t *testing.T) {
+		newMail := "invalid"
+		settings := api.EditOrgOption{Email: &newMail}
+
+		resp := MakeRequest(t, NewRequestWithJSON(t, "PATCH", "/api/v1/orgs/org3", &settings).AddTokenAuth(token), http.StatusUnprocessableEntity)
+
+		var org *api.Organization
+		DecodeJSON(t, resp, &org)
+
+		assert.Empty(t, org.Email)
+	})
+
+	t.Run("Valid", func(t *testing.T) {
+		newMail := "example@example.com"
+		settings := api.EditOrgOption{Email: &newMail}
+
+		resp := MakeRequest(t, NewRequestWithJSON(t, "PATCH", "/api/v1/orgs/org3", &settings).AddTokenAuth(token), http.StatusOK)
+
+		var org *api.Organization
+		DecodeJSON(t, resp, &org)
+
+		assert.Equal(t, "example@example.com", org.Email)
+	})
+
+	t.Run("NoChange", func(t *testing.T) {
+		settings := api.EditOrgOption{}
+
+		resp := MakeRequest(t, NewRequestWithJSON(t, "PATCH", "/api/v1/orgs/org3", &settings).AddTokenAuth(token), http.StatusOK)
+
+		var org *api.Organization
+		DecodeJSON(t, resp, &org)
+
+		assert.Equal(t, "example@example.com", org.Email)
+	})
+
+	t.Run("Empty", func(t *testing.T) {
+		newMail := ""
+		settings := api.EditOrgOption{Email: &newMail}
+
+		resp := MakeRequest(t, NewRequestWithJSON(t, "PATCH", "/api/v1/orgs/org3", &settings).AddTokenAuth(token), http.StatusOK)
+
+		var org *api.Organization
+		DecodeJSON(t, resp, &org)
+
+		assert.Empty(t, org.Email)
+	})
+}

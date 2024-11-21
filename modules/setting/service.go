@@ -5,6 +5,7 @@ package setting
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -37,6 +38,7 @@ var Service = struct {
 	RegisterManualConfirm                   bool
 	EmailDomainAllowList                    []glob.Glob
 	EmailDomainBlockList                    []glob.Glob
+	EmailDomainBlockDisposable              bool
 	DisableRegistration                     bool
 	AllowOnlyInternalRegistration           bool
 	AllowOnlyExternalRegistration           bool
@@ -156,6 +158,22 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 	}
 	Service.EmailDomainAllowList = CompileEmailGlobList(sec, "EMAIL_DOMAIN_WHITELIST", "EMAIL_DOMAIN_ALLOWLIST")
 	Service.EmailDomainBlockList = CompileEmailGlobList(sec, "EMAIL_DOMAIN_BLOCKLIST")
+	Service.EmailDomainBlockDisposable = sec.Key("EMAIL_DOMAIN_BLOCK_DISPOSABLE").MustBool(false)
+	if Service.EmailDomainBlockDisposable {
+		toAdd := make([]glob.Glob, 0, len(DisposableEmailDomains()))
+		for _, domain := range DisposableEmailDomains() {
+			domain = strings.ToLower(domain)
+			// Only add domains that aren't blocked yet.
+			if !slices.ContainsFunc(Service.EmailDomainBlockList, func(g glob.Glob) bool { return g.Match(domain) }) {
+				if g, err := glob.Compile(domain); err != nil {
+					log.Error("Error in disposable domain %s: %v", domain, err)
+				} else {
+					toAdd = append(toAdd, g)
+				}
+			}
+		}
+		Service.EmailDomainBlockList = append(Service.EmailDomainBlockList, toAdd...)
+	}
 	Service.ShowRegistrationButton = sec.Key("SHOW_REGISTRATION_BUTTON").MustBool(!(Service.DisableRegistration || Service.AllowOnlyExternalRegistration))
 	Service.ShowMilestonesDashboardPage = sec.Key("SHOW_MILESTONES_DASHBOARD_PAGE").MustBool(true)
 	Service.RequireSignInView = sec.Key("REQUIRE_SIGNIN_VIEW").MustBool()

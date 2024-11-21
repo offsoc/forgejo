@@ -15,6 +15,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
 	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/routers/api/v1/user"
 	"code.gitea.io/gitea/routers/api/v1/utils"
@@ -340,13 +341,28 @@ func Edit(ctx *context.APIContext) {
 	//     "$ref": "#/responses/Organization"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "422":
+	//     "$ref": "#/responses/error"
 
 	form := web.GetForm(ctx).(*api.EditOrgOption)
 
-	if form.Email != "" {
-		if err := user_service.ReplacePrimaryEmailAddress(ctx, ctx.Org.Organization.AsUser(), form.Email); err != nil {
-			ctx.Error(http.StatusInternalServerError, "ReplacePrimaryEmailAddress", err)
-			return
+	if form.Email != nil {
+		if *form.Email == "" {
+			err := user_model.DeletePrimaryEmailAddressOfUser(ctx, ctx.Org.Organization.ID)
+			if err != nil {
+				ctx.Error(http.StatusInternalServerError, "DeletePrimaryEmailAddressOfUser", err)
+				return
+			}
+			ctx.Org.Organization.Email = ""
+		} else {
+			if err := user_service.ReplacePrimaryEmailAddress(ctx, ctx.Org.Organization.AsUser(), *form.Email); err != nil {
+				if validation.IsErrEmailInvalid(err) || validation.IsErrEmailCharIsNotSupported(err) {
+					ctx.Error(http.StatusUnprocessableEntity, "ReplacePrimaryEmailAddress", err)
+				} else {
+					ctx.Error(http.StatusInternalServerError, "ReplacePrimaryEmailAddress", err)
+				}
+				return
+			}
 		}
 	}
 
