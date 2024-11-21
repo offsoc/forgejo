@@ -18,6 +18,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"image"
+	"image/color"
+	"image/png"
 
 	activities_model "code.gitea.io/gitea/models/activities"
 	"code.gitea.io/gitea/models/db"
@@ -59,6 +62,10 @@ import (
 	repo_service "code.gitea.io/gitea/services/repository"
 
 	"code.forgejo.org/go-chi/binding"
+
+	"github.com/golang/freetype"
+	"github.com/golang/freetype/truetype"
+	"golang.org/x/image/font/gofont/goregular"
 )
 
 const (
@@ -2212,6 +2219,30 @@ func GetIssueInfo(ctx *context.Context) {
 	ctx.JSON(http.StatusOK, convert.ToIssue(ctx, ctx.Doer, issue))
 }
 
+func drawBackground(img *image.RGBA, bgColor color.Color) {
+	for y := 0; y < img.Bounds().Dy(); y++ {
+		for x := 0; x < img.Bounds().Dx(); x++ {
+			img.Set(x, y, bgColor)
+		}
+	}
+}
+
+func drawText(img *image.RGBA, font *truetype.Font, text string) error {
+	c := freetype.NewContext()
+	c.SetDPI(72)
+	c.SetFont(font)
+	c.SetFontSize(48)
+	c.SetClip(img.Bounds())
+	c.SetDst(img)
+	c.SetSrc(image.Black)
+
+	// Calculate the position to start drawing the text
+	pt := freetype.Pt(100, 100+int(c.PointToFixed(48)>>6))
+
+	_, err := c.DrawString(text, pt)
+	return err
+}
+
 // GetSummaryImage get an issue of a repository
 func GetSummaryImage(ctx *context.Context) {
 	issue, err := issues_model.GetIssueWithAttrsByIndex(ctx, ctx.Repo.Repository.ID, ctx.ParamsInt64(":index"))
@@ -2238,7 +2269,34 @@ func GetSummaryImage(ctx *context.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, convert.ToIssue(ctx, ctx.Doer, issue))
+	// Create a new RGBA image
+	img := image.NewRGBA(image.Rect(0, 0, 1200, 600))
+
+	// Set the background color to white
+	drawBackground(img, color.RGBA{255, 255, 255, 255})
+
+	// Load the TrueType font
+	font, err := truetype.Parse(goregular.TTF)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "Unable to parse font")
+		// http.Error(w, "Failed to parse font", http.StatusInternalServerError)
+		return
+	}
+
+	// Draw the text onto the image
+	if err := drawText(img, font, issue.Title); err != nil {
+		ctx.Error(http.StatusInternalServerError, "Failed to draw text")
+		// http.Error(w, "Failed to draw text", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the header and write the image
+	ctx.Resp.Header().Set("Content-Type", "image/png")
+	ctx.Resp.WriteHeader(http.StatusOK)
+	if err := png.Encode(ctx.Resp, img); err != nil {
+		ctx.Error(http.StatusInternalServerError, "Failed to encode png")
+		return
+	}
 }
 
 // UpdateIssueTitle change issue's title

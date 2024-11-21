@@ -14,8 +14,9 @@
 		{{if .Issue.Content}}
 			<meta property="og:description" content="{{StringUtils.EllipsisString .Issue.Content 300}}">
 		{{end}}
-		<meta property="og:issue" content="yes, it's an issue!">
-		<!-- we'd probably want to put og:image here, and then that means moving it out of the outside location -->
+		<!-- both PR & Issue land here, great! -->
+		<!-- FIXME: Likely would want to put this URL into a data field, HTMLURL is -->
+		<meta property="og:image" content="{{.Issue.HTMLURL}}/summary-image">
 	{{else if or .PageIsDiff .IsViewFile}}
 		<meta property="og:title" content="{{.Title}}">
 		<meta property="og:url" content="{{AppUrl}}{{.Link}}">
@@ -42,10 +43,12 @@
 	<meta property="og:type" content="object">
 	<!-- Here's where we'd want to identify, if you're viewing something like a Issue/PR, that the og:image is customized -->
 
-	{{if (.Repository.AvatarLink ctx)}}
-		<meta property="og:image" content="{{.Repository.AvatarLink ctx}}">
-	{{else}}
-		<meta property="og:image" content="{{.Repository.Owner.AvatarLink ctx}}">
+	{{if not .Issue}}
+		{{if (.Repository.AvatarLink ctx)}}
+			<meta property="og:image" content="{{.Repository.AvatarLink ctx}}">
+		{{else}}
+			<meta property="og:image" content="{{.Repository.Owner.AvatarLink ctx}}">
+		{{end}}
 	{{end}}
 {{else}}
 	<meta property="og:title" content="{{AppDisplayName}}">
