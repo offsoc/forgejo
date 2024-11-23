@@ -18,7 +18,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"image"
+
+	// "image"
 	"image/color"
 	"image/png"
 
@@ -34,6 +35,7 @@ import (
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
+	"code.gitea.io/gitea/modules/card"
 	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/emoji"
 	"code.gitea.io/gitea/modules/git"
@@ -62,10 +64,6 @@ import (
 	repo_service "code.gitea.io/gitea/services/repository"
 
 	"code.forgejo.org/go-chi/binding"
-
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
-	"golang.org/x/image/font/gofont/goregular"
 )
 
 const (
@@ -2219,32 +2217,8 @@ func GetIssueInfo(ctx *context.Context) {
 	ctx.JSON(http.StatusOK, convert.ToIssue(ctx, ctx.Doer, issue))
 }
 
-func drawBackground(img *image.RGBA, bgColor color.Color) {
-	for y := 0; y < img.Bounds().Dy(); y++ {
-		for x := 0; x < img.Bounds().Dx(); x++ {
-			img.Set(x, y, bgColor)
-		}
-	}
-}
-
-func drawText(img *image.RGBA, font *truetype.Font, text string) error {
-	c := freetype.NewContext()
-	c.SetDPI(72)
-	c.SetFont(font)
-	c.SetFontSize(48)
-	c.SetClip(img.Bounds())
-	c.SetDst(img)
-	c.SetSrc(image.Black)
-
-	// Calculate the position to start drawing the text
-	pt := freetype.Pt(100, 100+int(c.PointToFixed(48)>>6))
-
-	_, err := c.DrawString(text, pt)
-	return err
-}
-
-// GetSummaryImage get an issue of a repository
-func GetSummaryImage(ctx *context.Context) {
+// GetSummaryCard get an issue of a repository
+func GetSummaryCard(ctx *context.Context) {
 	issue, err := issues_model.GetIssueWithAttrsByIndex(ctx, ctx.Repo.Repository.ID, ctx.ParamsInt64(":index"))
 	if err != nil {
 		if issues_model.IsErrIssueNotExist(err) {
@@ -2269,31 +2243,87 @@ func GetSummaryImage(ctx *context.Context) {
 		}
 	}
 
-	// Create a new RGBA image
-	img := image.NewRGBA(image.Rect(0, 0, 1200, 600))
-
-	// Set the background color to white
-	drawBackground(img, color.RGBA{255, 255, 255, 255})
-
-	// Load the TrueType font
-	font, err := truetype.Parse(goregular.TTF)
+	mainCard, err := card.NewCard(1200, 600)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "Unable to parse font")
-		// http.Error(w, "Failed to parse font", http.StatusInternalServerError)
+		ctx.ServerError("GetSummaryCard", err)
+		return
+	}
+	mainCard.SetMargin(50)
+
+	topSection, bottomSection := mainCard.Split(false, 75)
+
+	issueSummary, issueIcon := topSection.Split(true, 80)
+
+	repoInfo, issueDescription := issueSummary.Split(false, 10)
+
+	repoInfo.SetMargin(10)
+	err = repoInfo.DrawText("mfenniak/pixelperfectpi", color.Gray{128}, 24, card.Top, card.Left)
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
 		return
 	}
 
-	// Draw the text onto the image
-	if err := drawText(img, font, issue.Title); err != nil {
-		ctx.Error(http.StatusInternalServerError, "Failed to draw text")
-		// http.Error(w, "Failed to draw text", http.StatusInternalServerError)
+	issueDescription.SetMargin(10)
+	err = issueDescription.DrawText(
+		"#6 Reimplement layout with flexbox & stretchable library",
+		color.Black, 56, card.Top, card.Left)
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
 		return
 	}
+
+	issueIcon.SetMargin(10)
+	err = issueIcon.DrawText("Icon Here", color.Gray{128}, 48, card.Top, card.Left)
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
+		return
+	}
+
+	issueStats, issueAttribution := bottomSection.Split(false, 50)
+
+	issueStats.SetMargin(10)
+	err = issueStats.DrawText("0 comments, 0 reviews, 44 files, +1590 -1100", color.Black, 24, card.Top, card.Left)
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
+		return
+	}
+
+	issueAttribution.SetMargin(10)
+	err = issueAttribution.DrawText("mfenniak - July 9, 2024 - 22 commits", color.Black, 24, card.Top, card.Left)
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
+		return
+	}
+
+	// file, _ := os.Create("output.png")
+	// defer file.Close()
+	// png.Encode(file, mainCard.Img)
+
+	// // Create a new RGBA image
+	// img := image.NewRGBA(image.Rect(0, 0, 1200, 600))
+
+	// // Set the background color to white
+	// card.DrawBackground(img, color.RGBA{255, 255, 255, 255})
+
+	// // Load the TrueType font
+	// font, err := truetype.Parse(goregular.TTF)
+	// if err != nil {
+	// 	ctx.Error(http.StatusInternalServerError, "Unable to parse font")
+	// 	// http.Error(w, "Failed to parse font", http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// // Draw the text onto the image
+	// if err := card.DrawText(img, font, issue.Title); err != nil {
+	// 	ctx.Error(http.StatusInternalServerError, "Failed to draw text")
+	// 	// http.Error(w, "Failed to draw text", http.StatusInternalServerError)
+	// 	return
+	// }
 
 	// Set the header and write the image
 	ctx.Resp.Header().Set("Content-Type", "image/png")
 	ctx.Resp.WriteHeader(http.StatusOK)
-	if err := png.Encode(ctx.Resp, img); err != nil {
+	if err := png.Encode(ctx.Resp, mainCard.Img); err != nil {
 		ctx.Error(http.StatusInternalServerError, "Failed to encode png")
 		return
 	}
