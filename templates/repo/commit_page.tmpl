@@ -278,9 +278,9 @@
 					<strong>{{.NoteCommit.Author.Name}}</strong>
 				{{end}}
 				<span class="text grey" id="note-authored-time">{{DateUtils.TimeSince .NoteCommit.Author.When}}</span>
-				{{if or ($.Permission.CanWrite $.UnitTypeCode) (not $.Repository.IsArchived) (not .IsDeleted)}}
+				{{if and ($.Permission.CanWrite $.UnitTypeCode) (not $.Repository.IsArchived) (not .IsDeleted)}}
 					<div class="ui right">
-						<button id="commit-notes-edit-button" class="ui tiny primary button" data-modal="#delete-note-modal">{{ctx.Locale.Tr "edit"}}</button>
+						<button id="commit-notes-edit-button" class="ui tiny primary button">{{ctx.Locale.Tr "edit"}}</button>
 						<button class="ui tiny button red show-modal" data-modal="#delete-note-modal">{{ctx.Locale.Tr "remove"}}</button>
 					</div>
 					<div class="ui small modal" id="delete-note-modal">

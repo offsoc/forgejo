@@ -84,20 +84,3 @@ jobs:
           ref_name: '${{ github.ref_name }}'
           image: 'codeberg.org/forgejo-experimental/forgejo'
           tag_suffix: '-rootless'
-
-      - name: set up go for the DNS update below
-        if: vars.ROLE == 'forgejo-experimental' && secrets.OVH_APP_KEY != ''
-        uses: https://code.forgejo.org/actions/setup-go@v5
-        with:
-          go-version-file: "go.mod"
-      - name: update the _release.experimental DNS record
-        if: vars.ROLE == 'forgejo-experimental' && secrets.OVH_APP_KEY != ''
-        uses: https://code.forgejo.org/actions/ovh-dns-update@v1
-        with:
-          subdomain: _release.experimental
-          domain: forgejo.com # there is a CNAME from .org to .com (for security reasons)
-          record-id: 5283602601
-          value: v=${{ github.ref_name }}
-          ovh-app-key: ${{ secrets.OVH_APP_KEY }}
-          ovh-app-secret: ${{ secrets.OVH_APP_SECRET }}
-          ovh-consumer-key: ${{ secrets.OVH_CON_KEY }}

@@ -151,6 +151,7 @@ func CreateRelease(gitRepo *git.Repository, rel *repo_model.Release, msg string,
 		return err
 	}
 
+	rel.Title, _ = util.SplitStringAtByteN(rel.Title, 255)
 	rel.LowerTagName = strings.ToLower(rel.TagName)
 	if err = db.Insert(gitRepo.Ctx, rel); err != nil {
 		return err
