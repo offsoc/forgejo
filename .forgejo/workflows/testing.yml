@@ -14,6 +14,7 @@ jobs:
     runs-on: docker
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - name: event info
         run: |
@@ -30,6 +31,7 @@ jobs:
     runs-on: docker
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - run: make deps-frontend
@@ -54,6 +56,7 @@ jobs:
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     services:
       elasticsearch:
         image: code.forgejo.org/oci/bitnami/elasticsearch:7
@@ -64,7 +67,7 @@ jobs:
       minio:
         image: code.forgejo.org/oci/bitnami/minio:2024.8.17
         options: >-
-          --hostname gitea.minio --tmpfs /bitnami/minio/data
+          --hostname gitea.minio --tmpfs /bitnami/minio/data:noatime
         env:
           MINIO_DOMAIN: minio
           MINIO_ROOT_USER: 123456
@@ -94,6 +97,7 @@ jobs:
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/playwright:latest'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
         with:
@@ -135,22 +139,23 @@ jobs:
     needs: [backend-checks, frontend-checks, test-unit]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     name: ${{ format('test-remote-cacher ({0})', matrix.cacher.name) }}
     strategy:
       matrix:
         cacher:
           - name: redis
             image: code.forgejo.org/oci/bitnami/redis:7.2
-            options: --tmpfs /bitnami/redis/data
+            options: --tmpfs /bitnami/redis/data:noatime
           - name: redict
             image: registry.redict.io/redict:7.3.0-scratch
-            options: --tmpfs /data
+            options: --tmpfs /data:noatime
           - name: valkey
             image: code.forgejo.org/oci/bitnami/valkey:7.2
-            options: --tmpfs /bitnami/redis/data
+            options: --tmpfs /bitnami/redis/data:noatime
           - name: garnet
             image: ghcr.io/microsoft/garnet-alpine:1.0.14
-            options: --tmpfs /data
+            options: --tmpfs /data:noatime
     services:
       cacher:
         image: ${{ matrix.cacher.image }}
@@ -176,6 +181,7 @@ jobs:
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     services:
       mysql:
         image: 'code.forgejo.org/oci/bitnami/mysql:8.4'
@@ -186,7 +192,7 @@ jobs:
           # See also https://codeberg.org/forgejo/forgejo/issues/976
           #
           MYSQL_EXTRA_FLAGS: --innodb-adaptive-flushing=OFF --innodb-buffer-pool-size=4G --innodb-log-buffer-size=128M --innodb-flush-log-at-trx-commit=0 --innodb-flush-log-at-timeout=30 --innodb-flush-method=nosync --innodb-fsync-threshold=1000000000 --disable-log-bin
-        options: --tmpfs /bitnami/mysql/data
+        options: --tmpfs /bitnami/mysql/data:noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows-composite/setup-env
@@ -206,6 +212,7 @@ jobs:
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     services:
       minio:
         image: code.forgejo.org/oci/bitnami/minio:2024.8.17
@@ -244,6 +251,7 @@ jobs:
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows-composite/setup-env
@@ -271,6 +279,7 @@ jobs:
       - test-unit
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows-composite/setup-env

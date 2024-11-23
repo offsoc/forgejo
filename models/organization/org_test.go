@@ -4,6 +4,7 @@
 package organization_test
 
 import (
+	"sort"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
@@ -104,7 +105,7 @@ func TestUser_GetTeams(t *testing.T) {
 func TestUser_GetMembers(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	org := unittest.AssertExistsAndLoadBean(t, &organization.Organization{ID: 3})
-	members, _, err := org.GetMembers(db.DefaultContext)
+	members, _, err := org.GetMembers(db.DefaultContext, &user_model.User{IsAdmin: true})
 	require.NoError(t, err)
 	if assert.Len(t, members, 3) {
 		assert.Equal(t, int64(2), members[0].ID)
@@ -126,15 +127,6 @@ func TestGetOrgByName(t *testing.T) {
 
 	_, err = organization.GetOrgByName(db.DefaultContext, "") // corner case
 	assert.True(t, organization.IsErrOrgNotExist(err))
-}
-
-func TestCountOrganizations(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-	expected, err := db.GetEngine(db.DefaultContext).Where("type=?", user_model.UserTypeOrganization).Count(&organization.Organization{})
-	require.NoError(t, err)
-	cnt, err := db.Count[organization.Organization](db.DefaultContext, organization.FindOrgOptions{IncludePrivate: true})
-	require.NoError(t, err)
-	assert.Equal(t, expected, cnt)
 }
 
 func TestIsOrganizationOwner(t *testing.T) {
@@ -181,67 +173,45 @@ func TestIsPublicMembership(t *testing.T) {
 	test(unittest.NonexistentID, unittest.NonexistentID, false)
 }
 
-func TestFindOrgs(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-
-	orgs, err := db.Find[organization.Organization](db.DefaultContext, organization.FindOrgOptions{
-		UserID:         4,
-		IncludePrivate: true,
-	})
-	require.NoError(t, err)
-	if assert.Len(t, orgs, 1) {
-		assert.EqualValues(t, 3, orgs[0].ID)
-	}
-
-	orgs, err = db.Find[organization.Organization](db.DefaultContext, organization.FindOrgOptions{
-		UserID:         4,
-		IncludePrivate: false,
-	})
-	require.NoError(t, err)
-	assert.Empty(t, orgs)
-
-	total, err := db.Count[organization.Organization](db.DefaultContext, organization.FindOrgOptions{
-		UserID:         4,
-		IncludePrivate: true,
-	})
-	require.NoError(t, err)
-	assert.EqualValues(t, 1, total)
-}
-
 func TestGetOrgUsersByOrgID(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
-	orgUsers, err := organization.GetOrgUsersByOrgID(db.DefaultContext, &organization.FindOrgMembersOpts{
-		ListOptions: db.ListOptions{},
-		OrgID:       3,
-		PublicOnly:  false,
-	})
-	require.NoError(t, err)
-	if assert.Len(t, orgUsers, 3) {
-		assert.Equal(t, organization.OrgUser{
-			ID:       orgUsers[0].ID,
-			OrgID:    3,
-			UID:      2,
-			IsPublic: true,
-		}, *orgUsers[0])
-		assert.Equal(t, organization.OrgUser{
-			ID:       orgUsers[1].ID,
-			OrgID:    3,
-			UID:      4,
-			IsPublic: false,
-		}, *orgUsers[1])
-		assert.Equal(t, organization.OrgUser{
-			ID:       orgUsers[2].ID,
-			OrgID:    3,
-			UID:      28,
-			IsPublic: true,
-		}, *orgUsers[2])
+	opts := &organization.FindOrgMembersOpts{
+		Doer:  &user_model.User{IsAdmin: true},
+		OrgID: 3,
 	}
+	assert.False(t, opts.PublicOnly())
+	orgUsers, err := organization.GetOrgUsersByOrgID(db.DefaultContext, opts)
+	require.NoError(t, err)
+	sort.Slice(orgUsers, func(i, j int) bool {
+		return orgUsers[i].ID < orgUsers[j].ID
+	})
+	assert.EqualValues(t, []*organization.OrgUser{{
+		ID:       1,
+		OrgID:    3,
+		UID:      2,
+		IsPublic: true,
+	}, {
+		ID:       2,
+		OrgID:    3,
+		UID:      4,
+		IsPublic: false,
+	}, {
+		ID:       9,
+		OrgID:    3,
+		UID:      28,
+		IsPublic: true,
+	}}, orgUsers)
+
+	opts = &organization.FindOrgMembersOpts{OrgID: 3}
+	assert.True(t, opts.PublicOnly())
+	orgUsers, err = organization.GetOrgUsersByOrgID(db.DefaultContext, opts)
+	require.NoError(t, err)
+	assert.Len(t, orgUsers, 2)
 
 	orgUsers, err = organization.GetOrgUsersByOrgID(db.DefaultContext, &organization.FindOrgMembersOpts{
 		ListOptions: db.ListOptions{},
 		OrgID:       unittest.NonexistentID,
-		PublicOnly:  false,
 	})
 	require.NoError(t, err)
 	assert.Empty(t, orgUsers)

@@ -289,9 +289,6 @@ code.gitea.io/gitea/services/pull
 code.gitea.io/gitea/services/repository
 	IsErrForkAlreadyExist
 
-code.gitea.io/gitea/services/repository/archiver
-	ArchiveRepository
-
 code.gitea.io/gitea/services/repository/files
 	ContentType.String
 	GetFileResponseFromCommit

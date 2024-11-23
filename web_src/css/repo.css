@@ -2256,7 +2256,6 @@ details.repo-search-result summary::marker {
   background: var(--color-box-header);
   border-bottom: 1px solid var(--color-secondary) !important;
   font-weight: var(--font-weight-normal) !important;
-  padding: 0.5rem 1rem;
   margin: 0 !important;
   position: relative;
   color: var(--color-text);
@@ -2265,6 +2264,10 @@ details.repo-search-result summary::marker {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.timeline .ui.comment-header {
+  padding: 0.5rem 1rem;
 }
 
 .comment-header::before,
