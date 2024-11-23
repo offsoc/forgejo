@@ -2259,16 +2259,14 @@ func GetSummaryCard(ctx *context.Context) {
 	repoInfo, issueDescription := issueSummary.Split(false, 12)
 
 	repoInfo.SetMargin(10)
-	err = repoInfo.DrawText(fmt.Sprintf("%s/%s", issue.Repo.OwnerName, issue.Repo.Name), color.Gray{128}, 24, card.Top, card.Left)
+	err = repoInfo.DrawText(fmt.Sprintf("%s/%s - #%d", issue.Repo.OwnerName, issue.Repo.Name, issue.ID), color.Gray{128}, 24, card.Top, card.Left)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
 	}
 
 	issueDescription.SetMargin(10)
-	err = issueDescription.DrawText(
-		"#6 Reimplement layout with flexbox & stretchable library",
-		color.Black, 56, card.Top, card.Left)
+	err = issueDescription.DrawText(issue.Title, color.Black, 56, card.Top, card.Left)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
@@ -2287,8 +2285,69 @@ func GetSummaryCard(ctx *context.Context) {
 
 	issueStats, issueAttribution := bottomSection.Split(false, 50)
 
+	// FIXME: reviews, files, lines changed -- all should be only displayed in a PR
+	// FIXME: should include status of the issue -- eg. Open, Closed, Merged
+	// FIXME: maybe we could include the "reactions"?  But the font won't support the emojis, so, kinda a pain.
+	// FIXME: localization of the text (comments, reviews, files, etc.), including pluralization -- which will require using the ctx's language?
+
+	state := ""
+	if issue.IsPull && issue.PullRequest.HasMerged {
+		if issue.PullRequest.Status == 3 {
+			state = ctx.Locale.TrString("repo.pulls.manually_merged")
+		} else {
+			state = ctx.Locale.TrString("repo.pulls.merged")
+		}
+	} else if issue.IsClosed {
+		state = ctx.Locale.TrString("repo.issues.closed_title")
+	} else if issue.IsPull {
+		if issue.PullRequest.IsWorkInProgress(ctx) {
+			state = ctx.Locale.TrString("repo.issues.draft_title")
+		} else {
+			state = ctx.Locale.TrString("repo.issues.open_title")
+		}
+	} else {
+		state = ctx.Locale.TrString("repo.issues.open_title")
+	}
+
 	issueStats.SetMargin(10)
-	err = issueStats.DrawText("0 comments, 0 reviews, 44 files, +1590 -1100", color.Black, 24, card.Top, card.Left)
+	if issue.IsPull {
+		reviews := map[int64]bool{}
+		for _, comment := range issue.Comments {
+			if comment.Review != nil {
+				reviews[comment.Review.ID] = true
+			}
+		}
+		err = issueStats.DrawText(
+			fmt.Sprintf("%s, %s, %s",
+				ctx.Locale.TrN(
+					issue.NumComments,
+					"repo.issues.num_comments_1",
+					"repo.issues.num_comments",
+					issue.NumComments,
+				),
+				ctx.Locale.TrN(
+					len(reviews),
+					"repo.issues.num_reviews_one",
+					"repo.issues.num_reviews_few",
+					len(reviews),
+				),
+				state,
+			),
+			color.Black, 24, card.Top, card.Left)
+	} else {
+		err = issueStats.DrawText(
+			fmt.Sprintf("%s, %s",
+				ctx.Locale.TrN(
+					issue.NumComments,
+					"repo.issues.num_comments_1",
+					"repo.issues.num_comments",
+					issue.NumComments,
+				),
+				state,
+			),
+			color.Black, 24, card.Top, card.Left)
+
+	}
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
@@ -2296,7 +2355,13 @@ func GetSummaryCard(ctx *context.Context) {
 
 	issueAttributionIcon, issueAttributionText := issueAttribution.Split(true, 7)
 	issueAttributionText.SetMargin(5)
-	err = issueAttributionText.DrawText("mfenniak - July 9, 2024 - 22 commits", color.Black, 24, card.Middle, card.Left)
+	err = issueAttributionText.DrawText(
+		fmt.Sprintf(
+			"%s - %s",
+			issue.Poster.Name,
+			issue.Created.AsTime().Format("2006-01-02"),
+		),
+		color.Black, 24, card.Middle, card.Left)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
