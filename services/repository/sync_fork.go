@@ -77,11 +77,6 @@ func GetSyncForkInfo(ctx context.Context, repo *repo_model.Repository, branch st
 		return info, nil
 	}
 
-	// If the fork has newer commits, we can't sync
-	if forkBranch.CommitTime >= baseBranch.CommitTime {
-		return info, nil
-	}
-
 	// Check if the latest commit of the fork is also in the base
 	gitRepo, err := git.OpenRepository(ctx, repo.BaseRepo.RepoPath())
 	if err != nil {
