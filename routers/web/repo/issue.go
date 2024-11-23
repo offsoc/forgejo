@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"image"
 	"math/big"
 	"net/http"
 	"net/url"
@@ -47,6 +48,7 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/storage"
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/templates"
 	"code.gitea.io/gitea/modules/templates/vars"
@@ -2254,10 +2256,10 @@ func GetSummaryCard(ctx *context.Context) {
 
 	issueSummary, issueIcon := topSection.Split(true, 80)
 
-	repoInfo, issueDescription := issueSummary.Split(false, 10)
+	repoInfo, issueDescription := issueSummary.Split(false, 12)
 
 	repoInfo.SetMargin(10)
-	err = repoInfo.DrawText("mfenniak/pixelperfectpi", color.Gray{128}, 24, card.Top, card.Left)
+	err = repoInfo.DrawText(fmt.Sprintf("%s/%s", issue.Repo.OwnerName, issue.Repo.Name), color.Gray{128}, 24, card.Top, card.Left)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
@@ -2273,11 +2275,15 @@ func GetSummaryCard(ctx *context.Context) {
 	}
 
 	issueIcon.SetMargin(10)
-	err = issueIcon.DrawText("Icon Here", color.Gray{128}, 48, card.Top, card.Left)
+	repoAvatarFile, err := storage.RepoAvatars.Open(issue.Repo.CustomAvatarRelativePath())
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
-		return
 	}
+	repoAvatarImage, _, err := image.Decode(repoAvatarFile)
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
+	}
+	issueIcon.DrawImage(repoAvatarImage)
 
 	issueStats, issueAttribution := bottomSection.Split(false, 50)
 
@@ -2288,37 +2294,22 @@ func GetSummaryCard(ctx *context.Context) {
 		return
 	}
 
-	issueAttribution.SetMargin(10)
-	err = issueAttribution.DrawText("mfenniak - July 9, 2024 - 22 commits", color.Black, 24, card.Top, card.Left)
+	issueAttributionIcon, issueAttributionText := issueAttribution.Split(true, 7)
+	issueAttributionText.SetMargin(5)
+	err = issueAttributionText.DrawText("mfenniak - July 9, 2024 - 22 commits", color.Black, 24, card.Middle, card.Left)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
 	}
-
-	// file, _ := os.Create("output.png")
-	// defer file.Close()
-	// png.Encode(file, mainCard.Img)
-
-	// // Create a new RGBA image
-	// img := image.NewRGBA(image.Rect(0, 0, 1200, 600))
-
-	// // Set the background color to white
-	// card.DrawBackground(img, color.RGBA{255, 255, 255, 255})
-
-	// // Load the TrueType font
-	// font, err := truetype.Parse(goregular.TTF)
-	// if err != nil {
-	// 	ctx.Error(http.StatusInternalServerError, "Unable to parse font")
-	// 	// http.Error(w, "Failed to parse font", http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// // Draw the text onto the image
-	// if err := card.DrawText(img, font, issue.Title); err != nil {
-	// 	ctx.Error(http.StatusInternalServerError, "Failed to draw text")
-	// 	// http.Error(w, "Failed to draw text", http.StatusInternalServerError)
-	// 	return
-	// }
+	userAvatarFile, err := storage.Avatars.Open(issue.Poster.CustomAvatarRelativePath())
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
+	}
+	userAvatarImage, _, err := image.Decode(userAvatarFile)
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
+	}
+	issueAttributionIcon.DrawImage(userAvatarImage)
 
 	// Set the header and write the image
 	ctx.Resp.Header().Set("Content-Type", "image/png")

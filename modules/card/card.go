@@ -181,18 +181,30 @@ func (c *Card) DrawText(text string, text_color color.Color, size_pt float64, va
 	return nil
 }
 
-// DrawImage fills the card with an image, scaled to fit
+// DrawImage fills the card with an image, scaled to maintain the original aspect ratio and centered with respect to the non-filled dimension
 func (c *Card) DrawImage(img image.Image) {
-	rect := c.Img.Bounds()
-	rect = image.Rect(rect.Min.X+c.Margin, rect.Min.Y+c.Margin, rect.Max.X-c.Margin, rect.Max.Y-c.Margin)
-	// rect := image.Rect(c.Bounds.Min.X+c.Margin, c.Bounds.Min.Y+c.Margin, c.Bounds.Max.X-c.Margin, c.Bounds.Max.Y-c.Margin)
-	draw.CatmullRom.Scale(c.Img, rect, img, img.Bounds(), draw.Over, nil)
-}
+	bounds := c.Img.Bounds()
+	targetRect := image.Rect(bounds.Min.X+c.Margin, bounds.Min.Y+c.Margin, bounds.Max.X-c.Margin, bounds.Max.Y-c.Margin)
+	srcBounds := img.Bounds()
+	srcAspect := float64(srcBounds.Dx()) / float64(srcBounds.Dy())
+	targetAspect := float64(targetRect.Dx()) / float64(targetRect.Dy())
 
-// func DrawBackground(img *image.RGBA, bgColor color.Color) {
-// 	for y := 0; y < img.Bounds().Dy(); y++ {
-// 		for x := 0; x < img.Bounds().Dx(); x++ {
-// 			img.Set(x, y, bgColor)
-// 		}
-// 	}
-// }
+	scale := 0.0
+	if srcAspect > targetAspect {
+		// Image is wider than target, scale by width
+		scale = float64(targetRect.Dx()) / float64(srcBounds.Dx())
+	} else {
+		// Image is taller or equal, scale by height
+		scale = float64(targetRect.Dy()) / float64(srcBounds.Dy())
+	}
+
+	newWidth := int(float64(srcBounds.Dx()) * scale)
+	newHeight := int(float64(srcBounds.Dy()) * scale)
+
+	// Center the image within the target rectangle
+	offsetX := (targetRect.Dx() - newWidth) / 2
+	offsetY := (targetRect.Dy() - newHeight) / 2
+
+	scaledRect := image.Rect(targetRect.Min.X+offsetX, targetRect.Min.Y+offsetY, targetRect.Min.X+offsetX+newWidth, targetRect.Min.Y+offsetY+newHeight)
+	draw.CatmullRom.Scale(c.Img, scaledRect, img, srcBounds, draw.Over, nil)
+}
