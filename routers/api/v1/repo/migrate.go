@@ -218,6 +218,18 @@ func Migrate(ctx *context.APIContext) {
 		return
 	}
 
+	if opts.Releases || opts.Wiki {
+		repoOpt := api.EditRepoOption{
+			HasReleases: &opts.Releases,
+			HasWiki:     &opts.Wiki,
+		}
+
+		// only enabling wiki could return an error
+		if err = updateRepoUnits(ctx, repoOpt); err != nil {
+			log.Trace("Enabling wiki on %s/%s repo failed. %w", repoOwner.Name, form.RepoName, err)
+		}
+	}
+
 	log.Trace("Repository migrated: %s/%s", repoOwner.Name, form.RepoName)
 	ctx.JSON(http.StatusCreated, convert.ToRepo(ctx, repo, access_model.Permission{AccessMode: perm.AccessModeAdmin}))
 }
