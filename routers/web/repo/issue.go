@@ -2250,7 +2250,7 @@ func GetSummaryCard(ctx *context.Context) {
 		ctx.ServerError("GetSummaryCard", err)
 		return
 	}
-	mainCard.SetMargin(50)
+	mainCard.SetMargin(60)
 
 	topSection, bottomSection := mainCard.Split(false, 75)
 
@@ -2284,11 +2284,6 @@ func GetSummaryCard(ctx *context.Context) {
 	issueIcon.DrawImage(repoAvatarImage)
 
 	issueStats, issueAttribution := bottomSection.Split(false, 50)
-
-	// FIXME: reviews, files, lines changed -- all should be only displayed in a PR
-	// FIXME: should include status of the issue -- eg. Open, Closed, Merged
-	// FIXME: maybe we could include the "reactions"?  But the font won't support the emojis, so, kinda a pain.
-	// FIXME: localization of the text (comments, reviews, files, etc.), including pluralization -- which will require using the ctx's language?
 
 	state := ""
 	if issue.IsPull && issue.PullRequest.HasMerged {
@@ -2333,7 +2328,7 @@ func GetSummaryCard(ctx *context.Context) {
 				),
 				state,
 			),
-			color.Black, 24, card.Top, card.Left)
+			color.Gray{128}, 24, card.Top, card.Left)
 	} else {
 		err = issueStats.DrawText(
 			fmt.Sprintf("%s, %s",
@@ -2345,7 +2340,7 @@ func GetSummaryCard(ctx *context.Context) {
 				),
 				state,
 			),
-			color.Black, 24, card.Top, card.Left)
+			color.Gray{128}, 24, card.Top, card.Left)
 
 	}
 	if err != nil {
@@ -2361,7 +2356,7 @@ func GetSummaryCard(ctx *context.Context) {
 			issue.Poster.Name,
 			issue.Created.AsTime().Format("2006-01-02"),
 		),
-		color.Black, 24, card.Middle, card.Left)
+		color.Gray{128}, 24, card.Middle, card.Left)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
