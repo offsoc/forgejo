@@ -2273,15 +2273,22 @@ func GetSummaryCard(ctx *context.Context) {
 	}
 
 	issueIcon.SetMargin(10)
-	repoAvatarFile, err := storage.RepoAvatars.Open(issue.Repo.CustomAvatarRelativePath())
-	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
+
+	repoAvatarPath := issue.Repo.CustomAvatarRelativePath()
+	fmt.Printf("repoAvatarPath = %s\n", repoAvatarPath)
+	if repoAvatarPath != "" {
+		repoAvatarFile, err := storage.RepoAvatars.Open(repoAvatarPath)
+		fmt.Printf("repoAvatarFile = %s, err = %s\n", repoAvatarFile, err)
+		if err != nil {
+			ctx.ServerError("GetSummaryCard", err)
+		}
+		repoAvatarImage, _, err := image.Decode(repoAvatarFile)
+		fmt.Printf("repoAvatarImage = %s, err = %s\n", repoAvatarImage, err)
+		if err != nil {
+			ctx.ServerError("GetSummaryCard", err)
+		}
+		issueIcon.DrawImage(repoAvatarImage)
 	}
-	repoAvatarImage, _, err := image.Decode(repoAvatarFile)
-	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
-	}
-	issueIcon.DrawImage(repoAvatarImage)
 
 	issueStats, issueAttribution := bottomSection.Split(false, 50)
 
@@ -2361,15 +2368,19 @@ func GetSummaryCard(ctx *context.Context) {
 		ctx.ServerError("GetSummaryCard", err)
 		return
 	}
-	userAvatarFile, err := storage.Avatars.Open(issue.Poster.CustomAvatarRelativePath())
-	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
+	posterAvatarPath := issue.Poster.CustomAvatarRelativePath()
+	fmt.Printf("posterAvatarPath = %s\n", posterAvatarPath)
+	if posterAvatarPath != "" {
+		userAvatarFile, err := storage.Avatars.Open(issue.Poster.CustomAvatarRelativePath())
+		if err != nil {
+			ctx.ServerError("GetSummaryCard", err)
+		}
+		userAvatarImage, _, err := image.Decode(userAvatarFile)
+		if err != nil {
+			ctx.ServerError("GetSummaryCard", err)
+		}
+		issueAttributionIcon.DrawImage(userAvatarImage)
 	}
-	userAvatarImage, _, err := image.Decode(userAvatarFile)
-	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
-	}
-	issueAttributionIcon.DrawImage(userAvatarImage)
 
 	// Set the header and write the image
 	ctx.Resp.Header().Set("Content-Type", "image/png")
