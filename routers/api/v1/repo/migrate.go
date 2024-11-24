@@ -226,7 +226,7 @@ func Migrate(ctx *context.APIContext) {
 
 		// only enabling wiki could return an error
 		if err = updateRepoUnits(ctx, repoOpt); err != nil {
-			log.Trace("Enabling wiki on %s/%s repo failed. %w", repoOwner.Name, form.RepoName, err)
+			log.Error("Failed to enable wiki on %s/%s repo. %w", repoOwner.Name, form.RepoName, err)
 		}
 	}
 
