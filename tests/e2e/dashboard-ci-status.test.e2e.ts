@@ -19,5 +19,5 @@ test('Correct link and tooltip', async ({browser}, workerInfo) => {
   // wait for network activity to cease (so status was loaded in frontend)
   await page.waitForLoadState('networkidle'); // eslint-disable-line playwright/no-networkidle
   await expect(repoStatus).toHaveAttribute('href', '/user2/test_workflows/actions', {timeout: 10000});
-  await expect(repoStatus).toHaveAttribute('data-tooltip-content', 'Failure');
+  await expect(repoStatus).toHaveAttribute('data-tooltip-content', /^(Error|Failure)$/);
 });

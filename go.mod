@@ -91,7 +91,7 @@ require (
 	github.com/sassoftware/go-rpmutils v0.4.0
 	github.com/sergi/go-diff v1.3.1
 	github.com/shurcooL/vfsgen v0.0.0-20230704071429-0000e147ea92
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/ulikunitz/xz v0.5.12
 	github.com/urfave/cli/v2 v2.27.5

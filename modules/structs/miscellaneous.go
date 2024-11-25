@@ -37,6 +37,10 @@ type MarkupOption struct {
 	//
 	// in: body
 	FilePath string
+	// The current branch path where the form gets posted
+	//
+	// in: body
+	BranchPath string
 }
 
 // MarkupRender is a rendered markup document

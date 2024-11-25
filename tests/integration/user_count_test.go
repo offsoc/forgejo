@@ -75,8 +75,9 @@ func (countTest *userCountTest) Init(t *testing.T, doerID, userID int64) {
 	require.NoError(t, err)
 
 	countTest.memberCount, err = organization.CountOrgMembers(db.DefaultContext, &organization.FindOrgMembersOpts{
-		OrgID:      org.ID,
-		PublicOnly: !isMember,
+		Doer:         countTest.doer,
+		OrgID:        org.ID,
+		IsDoerMember: isMember,
 	})
 	require.NoError(t, err)
 
