@@ -37,6 +37,7 @@ import (
 	"code.gitea.io/gitea/models/user"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
+	"code.gitea.io/gitea/modules/cache"
 	"code.gitea.io/gitea/modules/card"
 	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/emoji"
@@ -2246,32 +2247,67 @@ func GetSummaryCard(ctx *context.Context) {
 		}
 	}
 
-	cardSize := issue.SummaryCardSize()
-	mainCard, err := card.NewCard(cardSize.Width, cardSize.Height)
+	cache := cache.GetCache()
+	cacheKey := fmt.Sprintf("summary_card:issue:%s:%s:%d", issue.Repo.OwnerName, issue.Repo.Name, issue.ID)
+	pngData, ok := cache.Get(cacheKey).([]byte)
+	if ok && pngData != nil && len(pngData) > 0 {
+		ctx.Resp.Header().Set("Content-Type", "image/png")
+		ctx.Resp.WriteHeader(http.StatusOK)
+		_, err = ctx.Resp.Write(pngData)
+		if err != nil {
+			ctx.ServerError("GetSummaryCard", err)
+		}
+		return
+	}
+
+	card, err := drawSummaryCard(ctx, issue)
+
+	// Encode image, store in cache
+	var imageBuffer bytes.Buffer
+	err = png.Encode(&imageBuffer, card.Img)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
 	}
+	imageBytes := imageBuffer.Bytes()
+	err = cache.Put(cacheKey, imageBytes, setting.CacheService.TTLSeconds())
+	if err != nil {
+		// don't abort serving the image if we just had a cache storage failure
+		log.Warn("failed to cache issue summary card: %v", err)
+	}
+
+	// Finish the uncached image response
+	ctx.Resp.Header().Set("Content-Type", "image/png")
+	ctx.Resp.WriteHeader(http.StatusOK)
+	_, err = ctx.Resp.Write(imageBytes)
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
+		return
+	}
+}
+
+func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Card, error) {
+	cardSize := issue.SummaryCardSize()
+	mainCard, err := card.NewCard(cardSize.Width, cardSize.Height)
+	if err != nil {
+		return nil, err
+	}
+
 	mainCard.SetMargin(60)
-
 	topSection, bottomSection := mainCard.Split(false, 75)
-
 	issueSummary, issueIcon := topSection.Split(true, 80)
-
 	repoInfo, issueDescription := issueSummary.Split(false, 12)
 
 	repoInfo.SetMargin(10)
 	_, err = repoInfo.DrawText(fmt.Sprintf("%s/%s - #%d", issue.Repo.OwnerName, issue.Repo.Name, issue.ID), color.Gray{128}, 24, card.Top, card.Left)
 	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
-		return
+		return nil, err
 	}
 
 	issueDescription.SetMargin(10)
 	_, err = issueDescription.DrawText(issue.Title, color.Black, 56, card.Top, card.Left)
 	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
-		return
+		return nil, err
 	}
 
 	issueIcon.SetMargin(10)
@@ -2356,8 +2392,7 @@ func GetSummaryCard(ctx *context.Context) {
 
 	}
 	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
-		return
+		return nil, err
 	}
 
 	issueAttributionIcon, issueAttributionText := issueAttribution.Split(true, 7)
@@ -2370,18 +2405,11 @@ func GetSummaryCard(ctx *context.Context) {
 		),
 		color.Gray{128}, 24, card.Middle, card.Left)
 	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
-		return
+		return nil, err
 	}
 	drawUser(ctx, issueAttributionIcon, issue.Poster)
 
-	// Set the header and write the image
-	ctx.Resp.Header().Set("Content-Type", "image/png")
-	ctx.Resp.WriteHeader(http.StatusOK)
-	if err := png.Encode(ctx.Resp, mainCard.Img); err != nil {
-		ctx.Error(http.StatusInternalServerError, "Failed to encode png")
-		return
-	}
+	return mainCard, nil
 }
 
 func drawUser(ctx *context.Context, card *card.Card, user *user.User) error {
