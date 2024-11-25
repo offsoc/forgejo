@@ -14,9 +14,10 @@
 		{{if .Issue.Content}}
 			<meta property="og:description" content="{{StringUtils.EllipsisString .Issue.Content 300}}">
 		{{end}}
-		<!-- both PR & Issue land here, great! -->
-		<!-- FIXME: Likely would want to put this URL into a data field, HTMLURL is -->
-		<meta property="og:image" content="{{.Issue.HTMLURL}}/summary-card">
+		<meta property="og:image" content="{{.Issue.SummaryCardURL}}">
+		<meta property="og:image:width" content="{{.Issue.SummaryCardSize.Width}}">
+		<meta property="og:image:height" content="{{.Issue.SummaryCardSize.Height}}">
+		<meta property="og:image:alt" content="{{ctx.Locale.Tr "repo.issues.summary_card_alt" .Repository.Name .Issue.Title}}">
 	{{else if or .PageIsDiff .IsViewFile}}
 		<meta property="og:title" content="{{.Title}}">
 		<meta property="og:url" content="{{AppUrl}}{{.Link}}">
@@ -41,8 +42,6 @@
 		{{end}}
 	{{end}}
 	<meta property="og:type" content="object">
-	<!-- Here's where we'd want to identify, if you're viewing something like a Issue/PR, that the og:image is customized -->
-
 	{{if not .Issue}}
 		{{if (.Repository.AvatarLink ctx)}}
 			<meta property="og:image" content="{{.Repository.AvatarLink ctx}}">

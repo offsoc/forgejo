@@ -2246,7 +2246,8 @@ func GetSummaryCard(ctx *context.Context) {
 		}
 	}
 
-	mainCard, err := card.NewCard(1200, 600)
+	cardSize := issue.SummaryCardSize()
+	mainCard, err := card.NewCard(cardSize.Width, cardSize.Height)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return

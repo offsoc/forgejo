@@ -411,6 +411,20 @@ func (issue *Issue) HTMLURL() string {
 	return fmt.Sprintf("%s/%s/%d", issue.Repo.HTMLURL(), path, issue.Index)
 }
 
+// SummaryCardURL returns the absolute URL to an image providing a summary of the issue
+func (issue *Issue) SummaryCardURL() string {
+	return fmt.Sprintf("%s/summary-card", issue.HTMLURL())
+}
+
+func (issue *Issue) SummaryCardSize() (retval struct {
+	Width  int
+	Height int
+}) {
+	retval.Width = 1200
+	retval.Height = 600
+	return
+}
+
 // Link returns the issue's relative URL.
 func (issue *Issue) Link() string {
 	var path string
