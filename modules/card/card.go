@@ -4,14 +4,27 @@
 package card
 
 import (
+	"bytes"
 	"image"
 	"image/color"
+	"io"
+	"net/http"
 	"strings"
+	"time"
+
+	_ "image/gif"  // for processing gif images
+	_ "image/jpeg" // for processing jpeg images
+	_ "image/png"  // for processing png images
+
+	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font/gofont/goregular"
+
+	_ "golang.org/x/image/webp" // for processing webp images
 )
 
 type Card struct {
@@ -207,4 +220,88 @@ func (c *Card) DrawImage(img image.Image) {
 
 	scaledRect := image.Rect(targetRect.Min.X+offsetX, targetRect.Min.Y+offsetY, targetRect.Min.X+offsetX+newWidth, targetRect.Min.Y+offsetY+newHeight)
 	draw.CatmullRom.Scale(c.Img, scaledRect, img, srcBounds, draw.Over, nil)
+}
+
+func fallbackImage() image.Image {
+	// can't usage image.Uniform(color.White) because it's infinitely sized causing a panic in the scaler in DrawImage
+	rect := image.Rect(0, 0, 1, 1)
+	img := image.NewRGBA(rect)
+	white := color.RGBA{255, 255, 255, 255}
+	img.Set(0, 0, white)
+	return img
+}
+
+// As defensively as possible, attempt to load an image from a presumed external and untrusted URL
+func (c *Card) fetchExternalImage(url string) image.Image {
+	// Use a short timeout; in the event of any failure we'll be logging and returning a placeholder, but we don't want
+	// this rendering process to be slowed down
+	client := &http.Client{
+		Timeout: 1 * time.Second, // 1 second timeout
+	}
+
+	resp, err := client.Get(url)
+	if err != nil {
+		log.Warn("error when fetching external image from %s: %w", url, err)
+		return fallbackImage()
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Warn("non-OK error code when fetching external image from %s: %s", url, resp.Status)
+		return fallbackImage()
+	}
+
+	contentType := resp.Header.Get("Content-Type")
+	// Support content types are in-sync with the allowed custom avatar file types
+	if contentType != "image/png" && contentType != "image/jpeg" && contentType != "image/gif" && contentType != "image/webp" {
+		log.Warn("fetching external image returned unsupported Content-Type which was ignored: %s", contentType)
+		return fallbackImage()
+	}
+
+	body := io.LimitReader(resp.Body, setting.Avatar.MaxFileSize)
+	bodyBytes, err := io.ReadAll(body)
+	if int64(len(bodyBytes)) >= setting.Avatar.MaxFileSize {
+		log.Warn("while fetching external image response size hit MaxFileSize (%d) and was discarded from url %s", setting.Avatar.MaxFileSize, url)
+		return fallbackImage()
+	}
+
+	bodyBuffer := bytes.NewReader(bodyBytes)
+	imgCfg, imgType, err := image.DecodeConfig(bodyBuffer)
+	if err != nil {
+		log.Warn("error when decoding external image from %s: %w", url, err)
+		return fallbackImage()
+	}
+
+	// Verify that we have a match between actual data understood in the image body and the reported Content-Type
+	if (contentType == "image/png" && imgType != "png") ||
+		(contentType == "image/jpeg" && imgType != "jpeg") ||
+		(contentType == "image/gif" && imgType != "gif") ||
+		(contentType == "image/webp" && imgType != "webp") {
+		log.Warn("while fetching external image, mismatched image body (%s) and Content-Type (%s)", imgType, contentType)
+		return fallbackImage()
+	}
+
+	// do not process image which is too large, it would consume too much memory
+	if imgCfg.Width > setting.Avatar.MaxWidth {
+		log.Warn("while fetching external image, width %s exceeds Avatar.MaxWidth %s", imgCfg.Width, setting.Avatar.MaxWidth)
+		return fallbackImage()
+	}
+	if imgCfg.Height > setting.Avatar.MaxHeight {
+		log.Warn("while fetching external image, height %s exceeds Avatar.MaxHeight %s", imgCfg.Height, setting.Avatar.MaxHeight)
+		return fallbackImage()
+	}
+
+	bodyBuffer.Seek(0, io.SeekStart) // reset for actual decode
+	img, imgType, err := image.Decode(bodyBuffer)
+	if err != nil {
+		log.Warn("error when decoding external image from %s: %w", url, err)
+		return fallbackImage()
+	}
+
+	return img
+}
+
+func (c *Card) DrawExternalImage(url string) {
+	image := c.fetchExternalImage(url)
+	c.DrawImage(image)
 }

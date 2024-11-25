@@ -34,6 +34,7 @@ import (
 	pull_model "code.gitea.io/gitea/models/pull"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
+	"code.gitea.io/gitea/models/user"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/card"
@@ -2275,19 +2276,22 @@ func GetSummaryCard(ctx *context.Context) {
 	issueIcon.SetMargin(10)
 
 	repoAvatarPath := issue.Repo.CustomAvatarRelativePath()
-	fmt.Printf("repoAvatarPath = %s\n", repoAvatarPath)
 	if repoAvatarPath != "" {
 		repoAvatarFile, err := storage.RepoAvatars.Open(repoAvatarPath)
-		fmt.Printf("repoAvatarFile = %s, err = %s\n", repoAvatarFile, err)
 		if err != nil {
 			ctx.ServerError("GetSummaryCard", err)
 		}
 		repoAvatarImage, _, err := image.Decode(repoAvatarFile)
-		fmt.Printf("repoAvatarImage = %s, err = %s\n", repoAvatarImage, err)
 		if err != nil {
 			ctx.ServerError("GetSummaryCard", err)
 		}
 		issueIcon.DrawImage(repoAvatarImage)
+	} else {
+		// If the repo didn't have an avatar, fallback to the repo owner's avatar for the right-hand-side icon
+		issue.Repo.LoadOwner(ctx)
+		if issue.Repo.Owner != nil {
+			drawUser(ctx, issueIcon, issue.Repo.Owner)
+		}
 	}
 
 	issueStats, issueAttribution := bottomSection.Split(false, 50)
@@ -2368,19 +2372,7 @@ func GetSummaryCard(ctx *context.Context) {
 		ctx.ServerError("GetSummaryCard", err)
 		return
 	}
-	posterAvatarPath := issue.Poster.CustomAvatarRelativePath()
-	fmt.Printf("posterAvatarPath = %s\n", posterAvatarPath)
-	if posterAvatarPath != "" {
-		userAvatarFile, err := storage.Avatars.Open(issue.Poster.CustomAvatarRelativePath())
-		if err != nil {
-			ctx.ServerError("GetSummaryCard", err)
-		}
-		userAvatarImage, _, err := image.Decode(userAvatarFile)
-		if err != nil {
-			ctx.ServerError("GetSummaryCard", err)
-		}
-		issueAttributionIcon.DrawImage(userAvatarImage)
-	}
+	drawUser(ctx, issueAttributionIcon, issue.Poster)
 
 	// Set the header and write the image
 	ctx.Resp.Header().Set("Content-Type", "image/png")
@@ -2389,6 +2381,27 @@ func GetSummaryCard(ctx *context.Context) {
 		ctx.Error(http.StatusInternalServerError, "Failed to encode png")
 		return
 	}
+}
+
+func drawUser(ctx *context.Context, card *card.Card, user *user.User) error {
+	if user.UseCustomAvatar {
+		posterAvatarPath := user.CustomAvatarRelativePath()
+		if posterAvatarPath != "" {
+			userAvatarFile, err := storage.Avatars.Open(user.CustomAvatarRelativePath())
+			if err != nil {
+				return err
+			}
+			userAvatarImage, _, err := image.Decode(userAvatarFile)
+			if err != nil {
+				return err
+			}
+			card.DrawImage(userAvatarImage)
+		}
+	} else {
+		posterAvatarLink := user.AvatarLinkWithSize(ctx, 256)
+		card.DrawExternalImage(posterAvatarLink)
+	}
+	return nil
 }
 
 // UpdateIssueTitle change issue's title
