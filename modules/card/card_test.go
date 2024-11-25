@@ -1,137 +1,228 @@
-// Copyright 2016 The Gogs Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package card
 
 import (
 	"bytes"
+	"encoding/base64"
+	"fmt"
 	"image"
+	"image/color"
 	"image/png"
-	"os"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
 
-	"code.gitea.io/gitea/modules/setting"
-
+	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/test"
+	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"golang.org/x/image/font/gofont/goregular"
 )
 
-// func Test_RandomImageSize(t *testing.T) {
-// 	_, err := RandomImageSize(0, []byte("gitea@local"))
-// 	require.Error(t, err)
+func TestNewCard(t *testing.T) {
+	width, height := 100, 50
+	card, err := NewCard(width, height)
+	assert.Nil(t, err, "No error should occur when creating a new card")
+	assert.NotNil(t, card, "Card should not be nil")
+	assert.Equal(t, width, card.Img.Bounds().Dx(), "Width should match the provided width")
+	assert.Equal(t, height, card.Img.Bounds().Dy(), "Height should match the provided height")
 
-// 	_, err = RandomImageSize(64, []byte("gitea@local"))
-// 	require.NoError(t, err)
-// }
+	// Checking default margin
+	assert.Equal(t, 0, card.Margin, "Default margin should be 0")
 
-// func Test_RandomImage(t *testing.T) {
-// 	_, err := RandomImage([]byte("gitea@local"))
-// 	require.NoError(t, err)
-// }
+	// Checking font parsing
+	originalFont, _ := truetype.Parse(goregular.TTF)
+	assert.Equal(t, originalFont, card.Font, "Fonts should be equivalent")
+}
 
-// func Test_ProcessAvatarPNG(t *testing.T) {
-// 	setting.Avatar.MaxWidth = 4096
-// 	setting.Avatar.MaxHeight = 4096
+func TestSplit(t *testing.T) {
+	card, _ := NewCard(200, 100)
+	// Test vertical split
+	leftCard, rightCard := card.Split(true, 50)
+	assert.Equal(t, 100, leftCard.Img.Bounds().Dx(), "Left card should have half the width of original")
+	assert.Equal(t, 100, rightCard.Img.Bounds().Dx(), "Right card should have half the width of original")
 
-// 	data, err := os.ReadFile("testdata/avatar.png")
-// 	require.NoError(t, err)
+	// Test horizontal split
+	topCard, bottomCard := card.Split(false, 50)
+	assert.Equal(t, 50, topCard.Img.Bounds().Dy(), "Top card should have half the height of original")
+	assert.Equal(t, 50, bottomCard.Img.Bounds().Dy(), "Bottom card should have half the height of original")
+}
 
-// 	_, err = processAvatarImage(data, 262144)
-// 	require.NoError(t, err)
-// }
+func TestDrawTextSingleLine(t *testing.T) {
+	card, _ := NewCard(300, 100)
+	lines, err := card.DrawText("This is a single line", color.Black, 12, Middle, Center)
+	assert.Nil(t, err, "No error should occur when drawing text")
+	assert.Len(t, lines, 1, "Should be exactly one line")
+	assert.Equal(t, "This is a single line", lines[0], "Text should match the input")
+}
 
-// func Test_ProcessAvatarJPEG(t *testing.T) {
-// 	setting.Avatar.MaxWidth = 4096
-// 	setting.Avatar.MaxHeight = 4096
+func TestDrawTextLongLine(t *testing.T) {
+	card, _ := NewCard(300, 100)
+	text := "This text is definitely too long to fit in three hundred pixels width without wrapping"
+	lines, err := card.DrawText(text, color.Black, 12, Middle, Center)
+	assert.Nil(t, err, "No error should occur when drawing text")
+	assert.True(t, len(lines) == 2, "Text should wrap into multiple lines")
+	assert.Equal(t, "This text is definitely too long to fit in three hundred", lines[0], "Text should match the input")
+	assert.Equal(t, "pixels width without wrapping", lines[1], "Text should match the input")
+}
 
-// 	data, err := os.ReadFile("testdata/avatar.jpeg")
-// 	require.NoError(t, err)
+func TestDrawTextWordTooLong(t *testing.T) {
+	card, _ := NewCard(300, 100)
+	text := "Line 1 Superduperlongwordthatcannotbewrappedbutshouldenduponitsownsingleline Line 3"
+	lines, err := card.DrawText(text, color.Black, 12, Middle, Center)
+	assert.Nil(t, err, "No error should occur when drawing text")
+	assert.Equal(t, 3, len(lines), "Text should create two lines despite long word")
+	assert.Equal(t, "Line 1", lines[0], "First line should contain text before the long word")
+	assert.Equal(t, "Superduperlongwordthatcannotbewrappedbutshouldenduponitsownsingleline", lines[1], "Second line couldn't wrap the word so it just overflowed")
+	assert.Equal(t, "Line 3", lines[2], "Third line continued with wrapping")
+}
 
-// 	_, err = processAvatarImage(data, 262144)
-// 	require.NoError(t, err)
-// }
+func TestFetchExternalImageServer(t *testing.T) {
+	blackPng, err := base64.URLEncoding.DecodeString("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==")
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
-// func Test_ProcessAvatarInvalidData(t *testing.T) {
-// 	setting.Avatar.MaxWidth = 5
-// 	setting.Avatar.MaxHeight = 5
+	var tooWideBuf bytes.Buffer
+	imgTooWide := image.NewGray(image.Rect(0, 0, 16001, 10))
+	err = png.Encode(&tooWideBuf, imgTooWide)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	imgTooWidePng := tooWideBuf.Bytes()
 
-// 	_, err := processAvatarImage([]byte{}, 12800)
-// 	assert.EqualError(t, err, "image.DecodeConfig: image: unknown format")
-// }
+	var tooTallBuf bytes.Buffer
+	imgTooTall := image.NewGray(image.Rect(0, 0, 10, 16002))
+	err = png.Encode(&tooTallBuf, imgTooTall)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	imgTooTallPng := tooTallBuf.Bytes()
 
-// func Test_ProcessAvatarInvalidImageSize(t *testing.T) {
-// 	setting.Avatar.MaxWidth = 5
-// 	setting.Avatar.MaxHeight = 5
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/timeout":
+			// Simulate a timeout by taking a long time to respond
+			time.Sleep(8 * time.Second)
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(blackPng)
+		case "/notfound":
+			http.NotFound(w, r)
+		case "/image.png":
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(blackPng)
+		case "/weird-content":
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte("<html></html>"))
+		case "/giant-response":
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(make([]byte, 10485760))
+		case "/invalid.png":
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(make([]byte, 100))
+		case "/mismatched.jpg":
+			w.Header().Set("Content-Type", "image/jpeg")
+			w.Write(blackPng) // valid png, but wrong content-type
+		case "/too-wide.png":
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(imgTooWidePng)
+		case "/too-tall.png":
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(imgTooTallPng)
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}))
+	defer server.Close()
 
-// 	data, err := os.ReadFile("testdata/avatar.png")
-// 	require.NoError(t, err)
+	tests := []struct {
+		name          string
+		url           string
+		expectedLog   string
+		expectedColor color.Color
+	}{
+		{
+			name:          "timeout error",
+			url:           "/timeout",
+			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
+			expectedLog:   "error when fetching external image from",
+		},
+		{
+			name:          "external fetch success",
+			url:           "/image.png",
+			expectedColor: color.Gray(color.Gray{Y: 0x0}),
+			expectedLog:   "",
+		},
+		{
+			name:          "404 fallback",
+			url:           "/notfound",
+			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
+			expectedLog:   "non-OK error code when fetching external image",
+		},
+		{
+			name:          "unsupported content type",
+			url:           "/weird-content",
+			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
+			expectedLog:   "fetching external image returned unsupported Content-Type",
+		},
+		{
+			name:          "response too large",
+			url:           "/giant-response",
+			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
+			expectedLog:   "while fetching external image response size hit MaxFileSize",
+		},
+		{
+			name:          "invalid png",
+			url:           "/invalid.png",
+			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
+			expectedLog:   "error when decoding external image",
+		},
+		{
+			name:          "mismatched content type",
+			url:           "/mismatched.jpg",
+			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
+			expectedLog:   "while fetching external image, mismatched image body",
+		},
+		{
+			name:          "too wide",
+			url:           "/too-wide.png",
+			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
+			expectedLog:   "while fetching external image, width 16001 exceeds Avatar.MaxWidth",
+		},
+		{
+			name:          "too tall",
+			url:           "/too-tall.png",
+			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
+			expectedLog:   "while fetching external image, height 16002 exceeds Avatar.MaxHeight",
+		},
+	}
 
-// 	_, err = processAvatarImage(data, 12800)
-// 	assert.EqualError(t, err, "image width is too large: 10 > 5")
-// }
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			stopMark := fmt.Sprintf(">>>>>>>>>>>>>STOP: %s<<<<<<<<<<<<<<<", testCase.name)
 
-// func Test_ProcessAvatarImage(t *testing.T) {
-// 	setting.Avatar.MaxWidth = 4096
-// 	setting.Avatar.MaxHeight = 4096
-// 	scaledSize := DefaultAvatarSize * setting.Avatar.RenderedSizeFactor
+			logChecker, cleanup := test.NewLogChecker(log.DEFAULT, log.TRACE)
+			logChecker.Filter(testCase.expectedLog).StopMark(stopMark)
+			defer cleanup()
 
-// 	newImgData := func(size int, optHeight ...int) []byte {
-// 		width := size
-// 		height := size
-// 		if len(optHeight) == 1 {
-// 			height = optHeight[0]
-// 		}
-// 		img := image.NewRGBA(image.Rect(0, 0, width, height))
-// 		bs := bytes.Buffer{}
-// 		err := png.Encode(&bs, img)
-// 		require.NoError(t, err)
-// 		return bs.Bytes()
-// 	}
+			card, _ := NewCard(100, 100)
+			img := card.fetchExternalImage(server.URL + testCase.url)
+			// rgbaImg, ok := img.(*image.RGBA)
+			// assert.True(t, ok, "Image should be of type *image.RGBA")
+			assert.Equal(t, testCase.expectedColor, img.At(0, 0))
 
-// 	// if origin image canvas is too large, crop and resize it
-// 	origin := newImgData(500, 600)
-// 	result, err := processAvatarImage(origin, 0)
-// 	require.NoError(t, err)
-// 	assert.NotEqual(t, origin, result)
-// 	decoded, err := png.Decode(bytes.NewReader(result))
-// 	require.NoError(t, err)
-// 	assert.EqualValues(t, scaledSize, decoded.Bounds().Max.X)
-// 	assert.EqualValues(t, scaledSize, decoded.Bounds().Max.Y)
+			log.Info(stopMark)
+			// assert.Contains(t, logBuffer.String(), testCase.expectedLog, "Log should contain the expected message")
 
-// 	// if origin image is smaller than the default size, use the origin image
-// 	origin = newImgData(1)
-// 	result, err = processAvatarImage(origin, 0)
-// 	require.NoError(t, err)
-// 	assert.Equal(t, origin, result)
-
-// 	// use the origin image if the origin is smaller
-// 	origin = newImgData(scaledSize + 100)
-// 	result, err = processAvatarImage(origin, 0)
-// 	require.NoError(t, err)
-// 	assert.Less(t, len(result), len(origin))
-
-// 	// still use the origin image if the origin doesn't exceed the max-origin-size
-// 	origin = newImgData(scaledSize + 100)
-// 	result, err = processAvatarImage(origin, 262144)
-// 	require.NoError(t, err)
-// 	assert.Equal(t, origin, result)
-
-// 	// allow to use known image format (eg: webp) if it is small enough
-// 	origin, err = os.ReadFile("testdata/animated.webp")
-// 	require.NoError(t, err)
-// 	result, err = processAvatarImage(origin, 262144)
-// 	require.NoError(t, err)
-// 	assert.Equal(t, origin, result)
-
-// 	// do not support unknown image formats, eg: SVG may contain embedded JS
-// 	origin = []byte("<svg></svg>")
-// 	_, err = processAvatarImage(origin, 262144)
-// 	require.ErrorContains(t, err, "image: unknown format")
-
-// 	// make sure the canvas size limit works
-// 	setting.Avatar.MaxWidth = 5
-// 	setting.Avatar.MaxHeight = 5
-// 	origin = newImgData(10)
-// 	_, err = processAvatarImage(origin, 262144)
-// 	require.ErrorContains(t, err, "image width is too large: 10 > 5")
-// }
+			logFiltered, logStopped := logChecker.Check(5 * time.Second)
+			assert.True(t, logStopped, "failed to find log stop mark")
+			assert.True(t, logFiltered[0], "failed to find in log: '%s'", testCase.expectedLog)
+		})
+	}
+}

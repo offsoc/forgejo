@@ -1,4 +1,4 @@
-// Copyright 2014 The Gogs Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package card
@@ -90,7 +90,7 @@ const (
 )
 
 // DrawText draws text within the card, respecting margins and alignment
-func (c *Card) DrawText(text string, text_color color.Color, size_pt float64, valign VAlign, halign HAlign) error {
+func (c *Card) DrawText(text string, text_color color.Color, size_pt float64, valign VAlign, halign HAlign) ([]string, error) {
 	ft := freetype.NewContext()
 	ft.SetDPI(72)
 	ft.SetFont(c.Font)
@@ -134,7 +134,7 @@ func (c *Card) DrawText(text string, text_color color.Color, size_pt float64, va
 
 		proposed_line_width, err := ft.DrawString(proposed_line, offscreenDraw)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if proposed_line_width.X.Ceil() > box_width {
 			// no, proposed line is too big; we'll use the last "current_line"
@@ -170,7 +170,7 @@ func (c *Card) DrawText(text string, text_color color.Color, size_pt float64, va
 	for _, line := range lines {
 		line_width, err := ft.DrawString(line, offscreenDraw)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		text_x := 0
@@ -185,13 +185,13 @@ func (c *Card) DrawText(text string, text_color color.Color, size_pt float64, va
 		pt := freetype.Pt(bounds.Min.X+text_x, bounds.Min.Y+text_y)
 		_, err = ft.DrawString(line, pt)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		text_y += font_height
 	}
 
-	return nil
+	return lines, nil
 }
 
 // DrawImage fills the card with an image, scaled to maintain the original aspect ratio and centered with respect to the non-filled dimension
@@ -283,11 +283,11 @@ func (c *Card) fetchExternalImage(url string) image.Image {
 
 	// do not process image which is too large, it would consume too much memory
 	if imgCfg.Width > setting.Avatar.MaxWidth {
-		log.Warn("while fetching external image, width %s exceeds Avatar.MaxWidth %s", imgCfg.Width, setting.Avatar.MaxWidth)
+		log.Warn("while fetching external image, width %d exceeds Avatar.MaxWidth %d", imgCfg.Width, setting.Avatar.MaxWidth)
 		return fallbackImage()
 	}
 	if imgCfg.Height > setting.Avatar.MaxHeight {
-		log.Warn("while fetching external image, height %s exceeds Avatar.MaxHeight %s", imgCfg.Height, setting.Avatar.MaxHeight)
+		log.Warn("while fetching external image, height %d exceeds Avatar.MaxHeight %d", imgCfg.Height, setting.Avatar.MaxHeight)
 		return fallbackImage()
 	}
 

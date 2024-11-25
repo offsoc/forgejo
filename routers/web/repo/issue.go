@@ -2260,14 +2260,14 @@ func GetSummaryCard(ctx *context.Context) {
 	repoInfo, issueDescription := issueSummary.Split(false, 12)
 
 	repoInfo.SetMargin(10)
-	err = repoInfo.DrawText(fmt.Sprintf("%s/%s - #%d", issue.Repo.OwnerName, issue.Repo.Name, issue.ID), color.Gray{128}, 24, card.Top, card.Left)
+	_, err = repoInfo.DrawText(fmt.Sprintf("%s/%s - #%d", issue.Repo.OwnerName, issue.Repo.Name, issue.ID), color.Gray{128}, 24, card.Top, card.Left)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
 	}
 
 	issueDescription.SetMargin(10)
-	err = issueDescription.DrawText(issue.Title, color.Black, 56, card.Top, card.Left)
+	_, err = issueDescription.DrawText(issue.Title, color.Black, 56, card.Top, card.Left)
 	if err != nil {
 		ctx.ServerError("GetSummaryCard", err)
 		return
@@ -2323,7 +2323,7 @@ func GetSummaryCard(ctx *context.Context) {
 				reviews[comment.Review.ID] = true
 			}
 		}
-		err = issueStats.DrawText(
+		_, err = issueStats.DrawText(
 			fmt.Sprintf("%s, %s, %s",
 				ctx.Locale.TrN(
 					issue.NumComments,
@@ -2341,7 +2341,7 @@ func GetSummaryCard(ctx *context.Context) {
 			),
 			color.Gray{128}, 24, card.Top, card.Left)
 	} else {
-		err = issueStats.DrawText(
+		_, err = issueStats.DrawText(
 			fmt.Sprintf("%s, %s",
 				ctx.Locale.TrN(
 					issue.NumComments,
@@ -2361,7 +2361,7 @@ func GetSummaryCard(ctx *context.Context) {
 
 	issueAttributionIcon, issueAttributionText := issueAttribution.Split(true, 7)
 	issueAttributionText.SetMargin(5)
-	err = issueAttributionText.DrawText(
+	_, err = issueAttributionText.DrawText(
 		fmt.Sprintf(
 			"%s - %s",
 			issue.Poster.Name,
