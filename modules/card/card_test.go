@@ -213,12 +213,9 @@ func TestFetchExternalImageServer(t *testing.T) {
 
 			card, _ := NewCard(100, 100)
 			img := card.fetchExternalImage(server.URL + testCase.url)
-			// rgbaImg, ok := img.(*image.RGBA)
-			// assert.True(t, ok, "Image should be of type *image.RGBA")
 			assert.Equal(t, testCase.expectedColor, img.At(0, 0))
 
 			log.Info(stopMark)
-			// assert.Contains(t, logBuffer.String(), testCase.expectedLog, "Log should contain the expected message")
 
 			logFiltered, logStopped := logChecker.Check(5 * time.Second)
 			assert.True(t, logStopped, "failed to find log stop mark")
