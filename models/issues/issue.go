@@ -419,10 +419,11 @@ func (issue *Issue) SummaryCardURL() string {
 func (issue *Issue) SummaryCardSize() (retval struct {
 	Width  int
 	Height int
-}) {
+},
+) {
 	retval.Width = 1200
 	retval.Height = 600
-	return
+	return retval
 }
 
 // Link returns the issue's relative URL.

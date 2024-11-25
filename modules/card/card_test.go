@@ -17,15 +17,17 @@ import (
 
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/test"
+
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/image/font/gofont/goregular"
 )
 
 func TestNewCard(t *testing.T) {
 	width, height := 100, 50
 	card, err := NewCard(width, height)
-	assert.Nil(t, err, "No error should occur when creating a new card")
+	require.NoError(t, err, "No error should occur when creating a new card")
 	assert.NotNil(t, card, "Card should not be nil")
 	assert.Equal(t, width, card.Img.Bounds().Dx(), "Width should match the provided width")
 	assert.Equal(t, height, card.Img.Bounds().Dy(), "Height should match the provided height")
@@ -54,7 +56,7 @@ func TestSplit(t *testing.T) {
 func TestDrawTextSingleLine(t *testing.T) {
 	card, _ := NewCard(300, 100)
 	lines, err := card.DrawText("This is a single line", color.Black, 12, Middle, Center)
-	assert.Nil(t, err, "No error should occur when drawing text")
+	require.NoError(t, err, "No error should occur when drawing text")
 	assert.Len(t, lines, 1, "Should be exactly one line")
 	assert.Equal(t, "This is a single line", lines[0], "Text should match the input")
 }
@@ -63,8 +65,8 @@ func TestDrawTextLongLine(t *testing.T) {
 	card, _ := NewCard(300, 100)
 	text := "This text is definitely too long to fit in three hundred pixels width without wrapping"
 	lines, err := card.DrawText(text, color.Black, 12, Middle, Center)
-	assert.Nil(t, err, "No error should occur when drawing text")
-	assert.True(t, len(lines) == 2, "Text should wrap into multiple lines")
+	require.NoError(t, err, "No error should occur when drawing text")
+	assert.Len(t, lines, 2, "Text should wrap into multiple lines")
 	assert.Equal(t, "This text is definitely too long to fit in three hundred", lines[0], "Text should match the input")
 	assert.Equal(t, "pixels width without wrapping", lines[1], "Text should match the input")
 }
@@ -73,8 +75,8 @@ func TestDrawTextWordTooLong(t *testing.T) {
 	card, _ := NewCard(300, 100)
 	text := "Line 1 Superduperlongwordthatcannotbewrappedbutshouldenduponitsownsingleline Line 3"
 	lines, err := card.DrawText(text, color.Black, 12, Middle, Center)
-	assert.Nil(t, err, "No error should occur when drawing text")
-	assert.Equal(t, 3, len(lines), "Text should create two lines despite long word")
+	require.NoError(t, err, "No error should occur when drawing text")
+	assert.Len(t, lines, 3, "Text should create two lines despite long word")
 	assert.Equal(t, "Line 1", lines[0], "First line should contain text before the long word")
 	assert.Equal(t, "Superduperlongwordthatcannotbewrappedbutshouldenduponitsownsingleline", lines[1], "Second line couldn't wrap the word so it just overflowed")
 	assert.Equal(t, "Line 3", lines[2], "Third line continued with wrapping")
@@ -156,7 +158,7 @@ func TestFetchExternalImageServer(t *testing.T) {
 		{
 			name:          "external fetch success",
 			url:           "/image.png",
-			expectedColor: color.Gray(color.Gray{Y: 0x0}),
+			expectedColor: color.Gray{Y: 0x0},
 			expectedLog:   "",
 		},
 		{

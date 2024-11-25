@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"html/template"
 	"image"
+	"image/color"
+	"image/png"
 	"math/big"
 	"net/http"
 	"net/url"
@@ -19,10 +21,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	// "image"
-	"image/color"
-	"image/png"
 
 	activities_model "code.gitea.io/gitea/models/activities"
 	"code.gitea.io/gitea/models/db"
@@ -34,7 +32,6 @@ import (
 	pull_model "code.gitea.io/gitea/models/pull"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/user"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/cache"
@@ -2261,6 +2258,10 @@ func GetSummaryCard(ctx *context.Context) {
 	}
 
 	card, err := drawSummaryCard(ctx, issue)
+	if err != nil {
+		ctx.ServerError("GetSummaryCard", err)
+		return
+	}
 
 	// Encode image, store in cache
 	var imageBuffer bytes.Buffer
@@ -2316,24 +2317,30 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 	if repoAvatarPath != "" {
 		repoAvatarFile, err := storage.RepoAvatars.Open(repoAvatarPath)
 		if err != nil {
-			ctx.ServerError("GetSummaryCard", err)
+			return nil, err
 		}
 		repoAvatarImage, _, err := image.Decode(repoAvatarFile)
 		if err != nil {
-			ctx.ServerError("GetSummaryCard", err)
+			return nil, err
 		}
 		issueIcon.DrawImage(repoAvatarImage)
 	} else {
 		// If the repo didn't have an avatar, fallback to the repo owner's avatar for the right-hand-side icon
-		issue.Repo.LoadOwner(ctx)
+		err = issue.Repo.LoadOwner(ctx)
+		if err != nil {
+			return nil, err
+		}
 		if issue.Repo.Owner != nil {
-			drawUser(ctx, issueIcon, issue.Repo.Owner)
+			err = drawUser(ctx, issueIcon, issue.Repo.Owner)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	issueStats, issueAttribution := bottomSection.Split(false, 50)
 
-	state := ""
+	var state string
 	if issue.IsPull && issue.PullRequest.HasMerged {
 		if issue.PullRequest.Status == 3 {
 			state = ctx.Locale.TrString("repo.pulls.manually_merged")
@@ -2389,7 +2396,6 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 				state,
 			),
 			color.Gray{128}, 24, card.Top, card.Left)
-
 	}
 	if err != nil {
 		return nil, err
@@ -2407,12 +2413,15 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 	if err != nil {
 		return nil, err
 	}
-	drawUser(ctx, issueAttributionIcon, issue.Poster)
+	err = drawUser(ctx, issueAttributionIcon, issue.Poster)
+	if err != nil {
+		return nil, err
+	}
 
 	return mainCard, nil
 }
 
-func drawUser(ctx *context.Context, card *card.Card, user *user.User) error {
+func drawUser(ctx *context.Context, card *card.Card, user *user_model.User) error {
 	if user.UseCustomAvatar {
 		posterAvatarPath := user.CustomAvatarRelativePath()
 		if posterAvatarPath != "" {

@@ -74,8 +74,10 @@ func (c *Card) SetMargin(margin int) {
 	c.Margin = margin
 }
 
-type VAlign int64
-type HAlign int64
+type (
+	VAlign int64
+	HAlign int64
+)
 
 const (
 	Top VAlign = iota
@@ -90,105 +92,104 @@ const (
 )
 
 // DrawText draws text within the card, respecting margins and alignment
-func (c *Card) DrawText(text string, text_color color.Color, size_pt float64, valign VAlign, halign HAlign) ([]string, error) {
+func (c *Card) DrawText(text string, textColor color.Color, sizePt float64, valign VAlign, halign HAlign) ([]string, error) {
 	ft := freetype.NewContext()
 	ft.SetDPI(72)
 	ft.SetFont(c.Font)
-	ft.SetFontSize(size_pt)
+	ft.SetFontSize(sizePt)
 	ft.SetClip(c.Img.Bounds())
 	ft.SetDst(c.Img)
-	ft.SetSrc(image.NewUniform(text_color))
+	ft.SetSrc(image.NewUniform(textColor))
 
-	font_height := ft.PointToFixed(size_pt).Ceil()
+	fontHeight := ft.PointToFixed(sizePt).Ceil()
 	offscreenDraw := freetype.Pt(0, -1000)
 
 	bounds := c.Img.Bounds()
 	bounds = image.Rect(bounds.Min.X+c.Margin, bounds.Min.Y+c.Margin, bounds.Max.X-c.Margin, bounds.Max.Y-c.Margin)
-	box_width, box_height := bounds.Size().X, bounds.Size().Y
+	boxWidth, boxHeight := bounds.Size().X, bounds.Size().Y
 	// draw.Draw(c.Img, bounds, image.NewUniform(color.Gray{128}), image.Point{}, draw.Src) // Debug draw box
 
 	// Try to apply wrapping to this text; we'll find the most text that will fit into one line, record that line, move
 	// on.  We precalculate each line before drawing so that we can support valign="middle" correctly which requires
 	// knowing the total height, which is related to how many lines we'll have.
 	lines := make([]string, 0)
-	text_words := strings.Split(text, " ")
-	current_line := ""
-	height_total := 0
+	textWords := strings.Split(text, " ")
+	currentLine := ""
+	heightTotal := 0
 
 	for {
-		if len(text_words) == 0 {
+		if len(textWords) == 0 {
 			// Ran out of words.
-			if current_line != "" {
-				height_total += font_height
-				lines = append(lines, current_line)
+			if currentLine != "" {
+				heightTotal += fontHeight
+				lines = append(lines, currentLine)
 			}
 			break
 		}
 
-		next_word := text_words[0]
-		proposed_line := current_line
-		if proposed_line != "" {
-			proposed_line += " "
+		nextWord := textWords[0]
+		proposedLine := currentLine
+		if proposedLine != "" {
+			proposedLine += " "
 		}
-		proposed_line += next_word
+		proposedLine += nextWord
 
-		proposed_line_width, err := ft.DrawString(proposed_line, offscreenDraw)
+		proposedLineWidth, err := ft.DrawString(proposedLine, offscreenDraw)
 		if err != nil {
 			return nil, err
 		}
-		if proposed_line_width.X.Ceil() > box_width {
-			// no, proposed line is too big; we'll use the last "current_line"
-			height_total += font_height
-			if current_line != "" {
-				lines = append(lines, current_line)
-				current_line = ""
-				// leave next_word in text_words and keep going
+		if proposedLineWidth.X.Ceil() > boxWidth {
+			// no, proposed line is too big; we'll use the last "currentLine"
+			heightTotal += fontHeight
+			if currentLine != "" {
+				lines = append(lines, currentLine)
+				currentLine = ""
+				// leave nextWord in textWords and keep going
 			} else {
-				// just next_word by itself doesn't fit on a line; well, we can't skip it, but we'll consume it
+				// just nextWord by itself doesn't fit on a line; well, we can't skip it, but we'll consume it
 				// regardless as a line by itself.  It will be clipped by the drawing routine.  We'll ignore it for the
 				// widest_line calc.
-				lines = append(lines, next_word)
-				text_words = text_words[1:]
+				lines = append(lines, nextWord)
+				textWords = textWords[1:]
 			}
 		} else {
 			// yes, it will fit
-			current_line = proposed_line
-			text_words = text_words[1:]
+			currentLine = proposedLine
+			textWords = textWords[1:]
 		}
 	}
 
-	text_y := 0
+	textY := 0
 	if valign == Top {
-		text_y = font_height
+		textY = fontHeight
 	} else if valign == Bottom {
-		text_y = box_height - height_total + font_height
+		textY = boxHeight - heightTotal + fontHeight
 	} else if valign == Middle {
-		extra_space := box_height - height_total
-		text_y = (extra_space / 2) + font_height
+		textY = ((boxHeight - heightTotal) / 2) + fontHeight
 	}
 
 	for _, line := range lines {
-		line_width, err := ft.DrawString(line, offscreenDraw)
+		lineWidth, err := ft.DrawString(line, offscreenDraw)
 		if err != nil {
 			return nil, err
 		}
 
-		text_x := 0
+		textX := 0
 		if halign == Left {
-			text_x = 0
+			textX = 0
 		} else if halign == Right {
-			text_x = box_width - line_width.X.Ceil()
+			textX = boxWidth - lineWidth.X.Ceil()
 		} else if halign == Center {
-			text_x = (box_width - line_width.X.Ceil()) / 2
+			textX = (boxWidth - lineWidth.X.Ceil()) / 2
 		}
 
-		pt := freetype.Pt(bounds.Min.X+text_x, bounds.Min.Y+text_y)
+		pt := freetype.Pt(bounds.Min.X+textX, bounds.Min.Y+textY)
 		_, err = ft.DrawString(line, pt)
 		if err != nil {
 			return nil, err
 		}
 
-		text_y += font_height
+		textY += fontHeight
 	}
 
 	return lines, nil
@@ -202,7 +203,7 @@ func (c *Card) DrawImage(img image.Image) {
 	srcAspect := float64(srcBounds.Dx()) / float64(srcBounds.Dy())
 	targetAspect := float64(targetRect.Dx()) / float64(targetRect.Dy())
 
-	scale := 0.0
+	var scale float64
 	if srcAspect > targetAspect {
 		// Image is wider than target, scale by width
 		scale = float64(targetRect.Dx()) / float64(srcBounds.Dx())
@@ -260,6 +261,10 @@ func (c *Card) fetchExternalImage(url string) image.Image {
 
 	body := io.LimitReader(resp.Body, setting.Avatar.MaxFileSize)
 	bodyBytes, err := io.ReadAll(body)
+	if err != nil {
+		log.Warn("error when fetching external image from %s: %w", url, err)
+		return fallbackImage()
+	}
 	if int64(len(bodyBytes)) >= setting.Avatar.MaxFileSize {
 		log.Warn("while fetching external image response size hit MaxFileSize (%d) and was discarded from url %s", setting.Avatar.MaxFileSize, url)
 		return fallbackImage()
@@ -291,8 +296,12 @@ func (c *Card) fetchExternalImage(url string) image.Image {
 		return fallbackImage()
 	}
 
-	bodyBuffer.Seek(0, io.SeekStart) // reset for actual decode
-	img, imgType, err := image.Decode(bodyBuffer)
+	_, err = bodyBuffer.Seek(0, io.SeekStart) // reset for actual decode
+	if err != nil {
+		log.Warn("error w/ bodyBuffer.Seek")
+		return fallbackImage()
+	}
+	img, _, err := image.Decode(bodyBuffer)
 	if err != nil {
 		log.Warn("error when decoding external image from %s: %w", url, err)
 		return fallbackImage()
