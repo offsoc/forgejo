@@ -347,12 +347,30 @@ func loadOrCreateAsymmetricKey() (any, error) {
 			key, err := func() (any, error) {
 				switch {
 				case strings.HasPrefix(setting.OAuth2.JWTSigningAlgorithm, "RS"):
-					return rsa.GenerateKey(rand.Reader, 4096)
+					var bits int
+					switch setting.OAuth2.JWTSigningAlgorithm {
+					case "RS256":
+						bits = 2048
+					case "RS384":
+						bits = 3072
+					case "RS512":
+						bits = 4096
+					}
+					return rsa.GenerateKey(rand.Reader, bits)
 				case setting.OAuth2.JWTSigningAlgorithm == "EdDSA":
 					_, pk, err := ed25519.GenerateKey(rand.Reader)
 					return pk, err
 				default:
-					return ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+					var curve elliptic.Curve
+					switch setting.OAuth2.JWTSigningAlgorithm {
+					case "ES256":
+						curve = elliptic.P256()
+					case "ES384":
+						curve = elliptic.P384()
+					case "ES512":
+						curve = elliptic.P521()
+					}
+					return ecdsa.GenerateKey(curve, rand.Reader)
 				}
 			}()
 			if err != nil {

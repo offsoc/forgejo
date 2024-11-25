@@ -146,7 +146,11 @@ func (run *ActionRun) GetPushEventPayload() (*api.PushPayload, error) {
 }
 
 func (run *ActionRun) GetPullRequestEventPayload() (*api.PullRequestPayload, error) {
-	if run.Event == webhook_module.HookEventPullRequest || run.Event == webhook_module.HookEventPullRequestSync {
+	if run.Event == webhook_module.HookEventPullRequest ||
+		run.Event == webhook_module.HookEventPullRequestSync ||
+		run.Event == webhook_module.HookEventPullRequestAssign ||
+		run.Event == webhook_module.HookEventPullRequestMilestone ||
+		run.Event == webhook_module.HookEventPullRequestLabel {
 		var payload api.PullRequestPayload
 		if err := json.Unmarshal([]byte(run.EventPayload), &payload); err != nil {
 			return nil, err
@@ -250,6 +254,7 @@ func CancelPreviousJobs(ctx context.Context, repoID int64, ref, workflowID strin
 }
 
 // InsertRun inserts a run
+// The title will be cut off at 255 characters if it's longer than 255 characters.
 func InsertRun(ctx context.Context, run *ActionRun, jobs []*jobparser.SingleWorkflow) error {
 	ctx, commiter, err := db.TxContext(ctx)
 	if err != nil {
@@ -262,6 +267,7 @@ func InsertRun(ctx context.Context, run *ActionRun, jobs []*jobparser.SingleWork
 		return err
 	}
 	run.Index = index
+	run.Title, _ = util.SplitStringAtByteN(run.Title, 255)
 
 	if err := db.Insert(ctx, run); err != nil {
 		return err
@@ -387,6 +393,7 @@ func UpdateRun(ctx context.Context, run *ActionRun, cols ...string) error {
 	if len(cols) > 0 {
 		sess.Cols(cols...)
 	}
+	run.Title, _ = util.SplitStringAtByteN(run.Title, 255)
 	affected, err := sess.Update(run)
 	if err != nil {
 		return err

@@ -288,27 +288,18 @@ func GetLatestCommitStatus(ctx context.Context, repoID int64, sha string, listOp
 
 // GetLatestCommitStatusForPairs returns all statuses with a unique context for a given list of repo-sha pairs
 func GetLatestCommitStatusForPairs(ctx context.Context, repoSHAs []RepoSHA) (map[int64][]*CommitStatus, error) {
-	type result struct {
-		Index  int64
-		RepoID int64
-		SHA    string
-	}
-
-	results := make([]result, 0, len(repoSHAs))
-
-	getBase := func() *xorm.Session {
-		return db.GetEngine(ctx).Table(&CommitStatus{})
-	}
+	results := []*CommitStatus{}
 
 	// Create a disjunction of conditions for each repoID and SHA pair
 	conds := make([]builder.Cond, 0, len(repoSHAs))
 	for _, repoSHA := range repoSHAs {
 		conds = append(conds, builder.Eq{"repo_id": repoSHA.RepoID, "sha": repoSHA.SHA})
 	}
-	sess := getBase().Where(builder.Or(conds...)).
-		Select("max( `index` ) as `index`, repo_id, sha").
-		GroupBy("context_hash, repo_id, sha").OrderBy("max( `index` ) desc")
 
+	sess := db.GetEngine(ctx).Table(&CommitStatus{}).
+		Select("MAX(`index`) AS `index`, *").
+		Where(builder.Or(conds...)).
+		GroupBy("context_hash, repo_id, sha").OrderBy("MAX(`index`) DESC")
 	err := sess.Find(&results)
 	if err != nil {
 		return nil, err
@@ -316,27 +307,9 @@ func GetLatestCommitStatusForPairs(ctx context.Context, repoSHAs []RepoSHA) (map
 
 	repoStatuses := make(map[int64][]*CommitStatus)
 
-	if len(results) > 0 {
-		statuses := make([]*CommitStatus, 0, len(results))
-
-		conds = make([]builder.Cond, 0, len(results))
-		for _, result := range results {
-			cond := builder.Eq{
-				"`index`": result.Index,
-				"repo_id": result.RepoID,
-				"sha":     result.SHA,
-			}
-			conds = append(conds, cond)
-		}
-		err = getBase().Where(builder.Or(conds...)).Find(&statuses)
-		if err != nil {
-			return nil, err
-		}
-
-		// Group the statuses by repo ID
-		for _, status := range statuses {
-			repoStatuses[status.RepoID] = append(repoStatuses[status.RepoID], status)
-		}
+	// Group the statuses by repo ID
+	for _, status := range results {
+		repoStatuses[status.RepoID] = append(repoStatuses[status.RepoID], status)
 	}
 
 	return repoStatuses, nil

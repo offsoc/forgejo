@@ -60,6 +60,9 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 				var reviews []*api.PullReview
 				DecodeJSON(t, resp, &reviews)
 				for _, review := range reviews {
+					if review.State == api.ReviewStateRequestReview {
+						continue
+					}
 					req := NewRequestf(t, http.MethodDelete, "/api/v1/repos/%s/pulls/%d/reviews/%d", repo.FullName(), pullIssue.Index, review.ID).
 						AddTokenAuth(token)
 					MakeRequest(t, req, http.StatusNoContent)
@@ -93,7 +96,7 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 				DecodeJSON(t, resp, &getReview)
 				require.EqualValues(t, getReview, review)
 			}
-			requireReviewCount(1)
+			requireReviewCount(2)
 
 			newCommentBody := "first new line"
 			var reviewComment api.PullReviewComment
@@ -140,7 +143,7 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 					AddTokenAuth(token)
 				MakeRequest(t, req, http.StatusNoContent)
 			}
-			requireReviewCount(0)
+			requireReviewCount(1)
 		})
 	}
 }
@@ -160,7 +163,7 @@ func TestAPIPullReview(t *testing.T) {
 
 	var reviews []*api.PullReview
 	DecodeJSON(t, resp, &reviews)
-	if !assert.Len(t, reviews, 6) {
+	if !assert.Len(t, reviews, 8) {
 		return
 	}
 	for _, r := range reviews {

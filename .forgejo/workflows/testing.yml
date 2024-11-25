@@ -6,13 +6,15 @@ on:
     branches:
       - 'forgejo*'
       - 'v*/forgejo*'
+  workflow_dispatch:
 
 jobs:
   backend-checks:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - name: event info
         run: |
@@ -25,10 +27,11 @@ jobs:
       - run: su forgejo -c 'make --always-make -j$(nproc) lint-backend tidy-check swagger-check fmt-check swagger-validate' # ensure the "go-licenses" make target runs
       - uses: ./.forgejo/workflows-composite/build-backend
   frontend-checks:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - run: make deps-frontend
@@ -48,21 +51,23 @@ jobs:
           path: ${{github.workspace}}/public/assets
           key: frontend-build-${{ github.sha }}
   test-unit:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     services:
       elasticsearch:
-        image: docker.io/bitnami/elasticsearch:7
+        image: code.forgejo.org/oci/bitnami/elasticsearch:7
+        options: --tmpfs /bitnami/elasticsearch/data
         env:
           discovery.type: single-node
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
       minio:
-        image: docker.io/bitnami/minio:2024.8.17
+        image: code.forgejo.org/oci/bitnami/minio:2024.8.17
         options: >-
-          --hostname gitea.minio
+          --hostname gitea.minio --tmpfs /bitnami/minio/data:noatime
         env:
           MINIO_DOMAIN: minio
           MINIO_ROOT_USER: 123456
@@ -81,17 +86,18 @@ jobs:
       - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-backend test-check'
-        timeout-minutes: 50
+        timeout-minutes: 120
         env:
           RACE_ENABLED: 'true'
           TAGS: bindata
           TEST_ELASTICSEARCH_URL: http://elasticsearch:9200
   test-e2e:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/playwright:latest'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
         with:
@@ -110,36 +116,46 @@ jobs:
       - uses: ./.forgejo/workflows-composite/build-backend
       - name: Get changed files
         id: changed-files
-        uses: https://code.forgejo.org/fossdd/changed-files@v45
+        uses: https://code.forgejo.org/tj-actions/changed-files@v45
         with:
           separator: '\n'
       - run: |
           su forgejo -c 'make generate test-e2e-sqlite'
-        timeout-minutes: 40
+        timeout-minutes: 120
         env:
           USE_REPO_TEST_DIR: 1
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
           CHANGED_FILES: ${{steps.changed-files.outputs.all_changed_files}}
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+        with:
+          name: test-artifacts.zip
+          path: tests/e2e/test-artifacts/
+          retention-days: 3
   test-remote-cacher:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     needs: [backend-checks, frontend-checks, test-unit]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
+    name: ${{ format('test-remote-cacher ({0})', matrix.cacher.name) }}
     strategy:
       matrix:
         cacher:
-          # redis
-          - image: docker.io/bitnami/redis:7.2
-            port: 6379
-          # redict
-          - image: registry.redict.io/redict:7.3.0-scratch
-            port: 6379
-          # valkey
-          - image: docker.io/bitnami/valkey:7.2
-            port: 6379
-          # garnet
-          - image: ghcr.io/microsoft/garnet-alpine:1.0.14
-            port: 6379
+          - name: redis
+            image: code.forgejo.org/oci/bitnami/redis:7.2
+            options: --tmpfs /bitnami/redis/data:noatime
+          - name: redict
+            image: registry.redict.io/redict:7.3.0-scratch
+            options: --tmpfs /data:noatime
+          - name: valkey
+            image: code.forgejo.org/oci/bitnami/valkey:7.2
+            options: --tmpfs /bitnami/redis/data:noatime
+          - name: garnet
+            image: ghcr.io/microsoft/garnet-alpine:1.0.14
+            options: --tmpfs /data:noatime
     services:
       cacher:
         image: ${{ matrix.cacher.image }}
@@ -154,27 +170,29 @@ jobs:
       - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-remote-cacher test-check'
-        timeout-minutes: 50
+        timeout-minutes: 120
         env:
           RACE_ENABLED: 'true'
           TAGS: bindata
           TEST_REDIS_SERVER: cacher:${{ matrix.cacher.port }}
   test-mysql:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     services:
       mysql:
-        image: 'docker.io/bitnami/mysql:8.4'
+        image: 'code.forgejo.org/oci/bitnami/mysql:8.4'
         env:
           ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: testgitea
           #
           # See also https://codeberg.org/forgejo/forgejo/issues/976
           #
-          MYSQL_EXTRA_FLAGS: --innodb-adaptive-flushing=OFF --innodb-buffer-pool-size=4G --innodb-log-buffer-size=128M --innodb-flush-log-at-trx-commit=0 --innodb-flush-log-at-timeout=30 --innodb-flush-method=nosync --innodb-fsync-threshold=1000000000
+          MYSQL_EXTRA_FLAGS: --innodb-adaptive-flushing=OFF --innodb-buffer-pool-size=4G --innodb-log-buffer-size=128M --innodb-flush-log-at-trx-commit=0 --innodb-flush-log-at-timeout=30 --innodb-flush-method=nosync --innodb-fsync-threshold=1000000000 --disable-log-bin
+        options: --tmpfs /bitnami/mysql/data:noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows-composite/setup-env
@@ -185,28 +203,33 @@ jobs:
       - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-mysql-migration test-mysql'
-        timeout-minutes: 50
+        timeout-minutes: 120
         env:
           USE_REPO_TEST_DIR: 1
   test-pgsql:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     services:
       minio:
-        image: docker.io/bitnami/minio:2024.8.17
+        image: code.forgejo.org/oci/bitnami/minio:2024.8.17
         env:
           MINIO_ROOT_USER: 123456
           MINIO_ROOT_PASSWORD: 12345678
+        options: --tmpfs /bitnami/minio/data
       ldap:
-        image: docker.io/gitea/test-openldap:latest
+        image: code.forgejo.org/oci/test-openldap:latest
       pgsql:
-        image: 'code.forgejo.org/oci/postgres:15'
+        image: code.forgejo.org/oci/bitnami/postgresql:15
         env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: postgres
+          POSTGRESQL_DATABASE: test
+          POSTGRESQL_PASSWORD: postgres
+          POSTGRESQL_FSYNC: off
+          POSTGRESQL_EXTRA_FLAGS: -c full_page_writes=off
+        options: --tmpfs /bitnami/postgresql
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows-composite/setup-env
@@ -217,17 +240,18 @@ jobs:
       - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-pgsql-migration test-pgsql'
-        timeout-minutes: 50
+        timeout-minutes: 120
         env:
           RACE_ENABLED: true
           USE_REPO_TEST_DIR: 1
           TEST_LDAP: 1
   test-sqlite:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     needs: [backend-checks, frontend-checks]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows-composite/setup-env
@@ -238,14 +262,14 @@ jobs:
       - uses: ./.forgejo/workflows-composite/build-backend
       - run: |
           su forgejo -c 'make test-sqlite-migration test-sqlite'
-        timeout-minutes: 50
+        timeout-minutes: 120
         env:
           TAGS: sqlite sqlite_unlock_notify
           RACE_ENABLED: true
           TEST_TAGS: sqlite sqlite_unlock_notify
           USE_REPO_TEST_DIR: 1
   security-check:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     needs:
       - test-sqlite
@@ -255,6 +279,7 @@ jobs:
       - test-unit
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
+      options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows-composite/setup-env

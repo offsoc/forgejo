@@ -75,8 +75,9 @@ func (countTest *userCountTest) Init(t *testing.T, doerID, userID int64) {
 	require.NoError(t, err)
 
 	countTest.memberCount, err = organization.CountOrgMembers(db.DefaultContext, &organization.FindOrgMembersOpts{
-		OrgID:      org.ID,
-		PublicOnly: !isMember,
+		Doer:         countTest.doer,
+		OrgID:        org.ID,
+		IsDoerMember: isMember,
 	})
 	require.NoError(t, err)
 
@@ -98,6 +99,7 @@ func (countTest *userCountTest) getCount(doc *goquery.Document, name string) (in
 
 func (countTest *userCountTest) TestPage(t *testing.T, page string, orgLink bool) {
 	t.Run(page, func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		var userLink string
 
 		if orgLink {

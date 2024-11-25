@@ -68,6 +68,9 @@ func grantAdditionalScopes(grantScopes string) string {
 // CheckOAuthAccessToken returns uid of user from oauth token
 // + non default openid scopes requested
 func CheckOAuthAccessToken(ctx context.Context, accessToken string) (int64, string) {
+	if !setting.OAuth2.Enabled {
+		return 0, ""
+	}
 	// JWT tokens require a "."
 	if !strings.Contains(accessToken, ".") {
 		return 0, ""

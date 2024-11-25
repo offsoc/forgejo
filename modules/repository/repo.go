@@ -90,11 +90,11 @@ func SyncReleasesWithTags(ctx context.Context, repo *repo_model.Repository, gitR
 			if rel.IsDraft {
 				continue
 			}
-			commitID, err := gitRepo.GetTagCommitID(rel.TagName)
+			commit, err := gitRepo.GetTagCommit(rel.TagName)
 			if err != nil && !git.IsErrNotExist(err) {
 				return fmt.Errorf("unable to GetTagCommitID for %q in Repo[%d:%s/%s]: %w", rel.TagName, repo.ID, repo.OwnerName, repo.Name, err)
 			}
-			if git.IsErrNotExist(err) || commitID != rel.Sha1 {
+			if git.IsErrNotExist(err) || commit.ID.String() != rel.Sha1 {
 				if err := repo_model.PushUpdateDeleteTag(ctx, repo, rel.TagName); err != nil {
 					return fmt.Errorf("unable to PushUpdateDeleteTag: %q in Repo[%d:%s/%s]: %w", rel.TagName, repo.ID, repo.OwnerName, repo.Name, err)
 				}
@@ -341,9 +341,10 @@ func pullMirrorReleaseSync(ctx context.Context, repo *repo_model.Repository, git
 
 		for _, tag := range updates {
 			if _, err := db.GetEngine(ctx).Where("repo_id = ? AND lower_tag_name = ?", repo.ID, strings.ToLower(tag.Name)).
-				Cols("sha1").
+				Cols("sha1", "created_unix").
 				Update(&repo_model.Release{
-					Sha1: tag.Object.String(),
+					Sha1:        tag.Object.String(),
+					CreatedUnix: timeutil.TimeStamp(tag.Tagger.When.Unix()),
 				}); err != nil {
 				return fmt.Errorf("unable to update tag %s for pull-mirror Repo[%d:%s/%s]: %w", tag.Name, repo.ID, repo.OwnerName, repo.Name, err)
 			}

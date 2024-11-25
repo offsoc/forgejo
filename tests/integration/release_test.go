@@ -272,6 +272,35 @@ func TestViewReleaseListLogin(t *testing.T) {
 	}, links)
 }
 
+func TestViewReleaseListKeyword(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+
+	link := repo.Link() + "/releases?q=testing"
+
+	session := loginUser(t, "user1")
+	req := NewRequest(t, "GET", link)
+	rsp := session.MakeRequest(t, req, http.StatusOK)
+
+	htmlDoc := NewHTMLParser(t, rsp.Body)
+	releases := htmlDoc.Find("#release-list li.ui.grid")
+	assert.Equal(t, 1, releases.Length())
+
+	links := make([]string, 0, 5)
+	releases.Each(func(i int, s *goquery.Selection) {
+		link, exist := s.Find(".release-list-title a").Attr("href")
+		if !exist {
+			return
+		}
+		links = append(links, link)
+	})
+
+	assert.EqualValues(t, []string{
+		"/user2/repo1/releases/tag/v1.1",
+	}, links)
+}
+
 func TestReleaseOnCommit(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 

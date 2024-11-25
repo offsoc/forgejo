@@ -33,6 +33,11 @@ func NewMockWebServer(t *testing.T, liveServerBaseURL, testDataDir string, liveM
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := NormalizedFullPath(r.URL)
+		isGh := liveServerBaseURL == "https://api.github.com"
+		if isGh {
+			// Workaround for GitHub: trim `/api/v3` from the path
+			path = strings.TrimPrefix(path, "/api/v3")
+		}
 		log.Info("Mock HTTP Server: got request for path %s", r.URL.Path)
 		// TODO check request method (support POST?)
 		fixturePath := fmt.Sprintf("%s/%s_%s", testDataDir, r.Method, url.PathEscape(path))
@@ -86,6 +91,10 @@ func NewMockWebServer(t *testing.T, liveServerBaseURL, testDataDir string, liveM
 
 		// replace any mention of the live HTTP service by the mocked host
 		stringFixture := strings.ReplaceAll(string(fixture), liveServerBaseURL, mockServerBaseURL)
+		if isGh {
+			// Workaround for GitHub: replace github.com by the mock server's base URL
+			stringFixture = strings.ReplaceAll(stringFixture, "https://github.com", mockServerBaseURL)
+		}
 		// parse back the fixture file into a series of HTTP headers followed by response body
 		lines := strings.Split(stringFixture, "\n")
 		for idx, line := range lines {

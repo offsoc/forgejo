@@ -380,9 +380,11 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	}
 
 	var (
-		viewType   string
-		sortType   = ctx.FormString("sort")
-		filterMode int
+		viewType          string
+		sortType          = ctx.FormString("sort")
+		filterMode        int
+		defaultFilterMode int
+		defaultViewType   string
 	)
 
 	// Default to recently updated, unlike repository issues list
@@ -403,6 +405,18 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 
 	// TODO: distinguish during routing
 
+	// Default to created_by on /pulls and /issues
+	// because it is most relevant to the user in the global context
+	if ctx.Org == nil || ctx.Org.Organization == nil {
+		defaultFilterMode = issues_model.FilterModeCreate
+		defaultViewType = "created_by"
+	} else {
+		// Default to your_repositories on /org/*/pulls and /org/*/issues
+		// because it is the most relevant to the user in the context of an org
+		defaultFilterMode = issues_model.FilterModeYourRepositories
+		defaultViewType = "your_repositories"
+	}
+
 	viewType = ctx.FormString("type")
 	switch viewType {
 	case "assigned":
@@ -418,8 +432,8 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	case "created_by":
 		fallthrough
 	default:
-		filterMode = issues_model.FilterModeCreate
-		viewType = "created_by"
+		filterMode = defaultFilterMode
+		viewType = defaultViewType
 	}
 
 	// --------------------------------------------------------------------------

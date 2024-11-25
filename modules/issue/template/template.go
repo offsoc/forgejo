@@ -13,7 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/container"
 	api "code.gitea.io/gitea/modules/structs"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 // Validate checks whether an IssueTemplate is considered valid, and returns the first error

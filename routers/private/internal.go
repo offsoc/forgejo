@@ -5,6 +5,7 @@
 package private
 
 import (
+	"crypto/subtle"
 	"net/http"
 	"strings"
 
@@ -14,7 +15,7 @@ import (
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 	chi_middleware "github.com/go-chi/chi/v5/middleware"
 )
 
@@ -28,7 +29,7 @@ func CheckInternalToken(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 			return
 		}
-		if len(fields) != 2 || fields[0] != "Bearer" || fields[1] != setting.InternalToken {
+		if len(fields) != 2 || fields[0] != "Bearer" || subtle.ConstantTimeCompare([]byte(fields[1]), []byte(setting.InternalToken)) == 0 {
 			log.Debug("Forbidden attempt to access internal url: Authorization header: %s", tokens)
 			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		} else {

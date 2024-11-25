@@ -45,6 +45,7 @@ type APIContext struct {
 	Package    *Package
 	QuotaGroup *quota_model.Group
 	QuotaRule  *quota_model.Rule
+	PublicOnly bool // Whether the request is for a public endpoint
 }
 
 func init() {
@@ -58,40 +59,69 @@ func init() {
 //            if we need to indicate some errors, we should introduce some new fields like ErrorCode or ErrorType
 // * url:     the swagger document URL
 
+type APIError struct {
+	Message string `json:"message"`
+	URL     string `json:"url"`
+}
+
 // APIError is error format response
 // swagger:response error
-type APIError struct {
+type swaggerAPIError struct {
+	// in:body
+	Body APIError `json:"body"`
+}
+
+type APIValidationError struct {
 	Message string `json:"message"`
 	URL     string `json:"url"`
 }
 
 // APIValidationError is error format response related to input validation
 // swagger:response validationError
-type APIValidationError struct {
-	Message string `json:"message"`
-	URL     string `json:"url"`
+type swaggerAPIValidationError struct {
+	// in:body
+	Body APIValidationError `json:"body"`
+}
+
+type APIInvalidTopicsError struct {
+	Message       string   `json:"message"`
+	InvalidTopics []string `json:"invalidTopics"`
 }
 
 // APIInvalidTopicsError is error format response to invalid topics
 // swagger:response invalidTopicsError
-type APIInvalidTopicsError struct {
-	Message       string   `json:"message"`
-	InvalidTopics []string `json:"invalidTopics"`
+type swaggerAPIInvalidTopicsError struct {
+	// in:body
+	Body APIInvalidTopicsError `json:"body"`
 }
 
 // APIEmpty is an empty response
 // swagger:response empty
 type APIEmpty struct{}
 
-// APIForbiddenError is a forbidden error response
-// swagger:response forbidden
 type APIForbiddenError struct {
 	APIError
 }
 
-// APINotFound is a not found empty response
+// APIForbiddenError is a forbidden error response
+// swagger:response forbidden
+type swaggerAPIForbiddenError struct {
+	// in:body
+	Body APIForbiddenError `json:"body"`
+}
+
+type APINotFound struct {
+	Message string   `json:"message"`
+	URL     string   `json:"url"`
+	Errors  []string `json:"errors"`
+}
+
+// APINotFound is a not found error response
 // swagger:response notFound
-type APINotFound struct{}
+type swaggerAPINotFound struct {
+	// in:body
+	Body APINotFound `json:"body"`
+}
 
 // APIConflict is a conflict empty response
 // swagger:response conflict
@@ -105,10 +135,15 @@ type APIRedirect struct{}
 // swagger:response string
 type APIString string
 
-// APIRepoArchivedError is an error that is raised when an archived repo should be modified
-// swagger:response repoArchivedError
 type APIRepoArchivedError struct {
 	APIError
+}
+
+// APIRepoArchivedError is an error that is raised when an archived repo should be modified
+// swagger:response repoArchivedError
+type swaggerAPIRepoArchivedError struct {
+	// in:body
+	Body APIRepoArchivedError `json:"body"`
 }
 
 // ServerError responds with error message, status is 500
@@ -251,7 +286,7 @@ func APIContexter() func(http.Handler) http.Handler {
 // String will replace message, errors will be added to a slice
 func (ctx *APIContext) NotFound(objs ...any) {
 	message := ctx.Locale.TrString("error.not_found")
-	var errors []string
+	errors := make([]string, 0)
 	for _, obj := range objs {
 		// Ignore nil
 		if obj == nil {
@@ -265,10 +300,10 @@ func (ctx *APIContext) NotFound(objs ...any) {
 		}
 	}
 
-	ctx.JSON(http.StatusNotFound, map[string]any{
-		"message": message,
-		"url":     setting.API.SwaggerURL,
-		"errors":  errors,
+	ctx.JSON(http.StatusNotFound, APINotFound{
+		Message: message,
+		URL:     setting.API.SwaggerURL,
+		Errors:  errors,
 	})
 }
 
