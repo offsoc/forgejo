@@ -6,7 +6,6 @@ package integration
 import (
 	"image"
 	"net/http"
-	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/modules/setting"
@@ -45,7 +44,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "User Thirty",
 				"og:url":       setting.AppURL + "user30",
 				"og:type":      "profile",
-				"og:image":     "http://localhost:3003/assets/img/avatar_default.png",
+				"og:image":     setting.AppURL + "assets/img/avatar_default.png",
 				"og:site_name": siteName,
 			},
 		},
@@ -57,7 +56,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:url":         setting.AppURL + "the_34-user.with.all.allowedChars",
 				"og:description": "some [commonmark](https://commonmark.org/)!",
 				"og:type":        "profile",
-				"og:image":       "http://localhost:3003/assets/img/avatar_default.png",
+				"og:image":       setting.AppURL + "assets/img/avatar_default.png",
 				"og:site_name":   siteName,
 			},
 		},
@@ -98,7 +97,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "repo49/test/test.txt at master",
 				"og:url":       setting.AppURL + "/user27/repo49/src/branch/master/test/test.txt",
 				"og:type":      "object",
-				"og:image":     "http://localhost:3003/assets/img/avatar_default.png",
+				"og:image":     setting.AppURL + "assets/img/avatar_default.png",
 				"og:site_name": siteName,
 			},
 		},
@@ -109,7 +108,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "Page With Spaced Name",
 				"og:url":       setting.AppURL + "/user2/repo1/wiki/Page-With-Spaced-Name",
 				"og:type":      "object",
-				"og:image":     "http://localhost:3003/avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
+				"og:image":     setting.AppURL + "avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
 				"og:site_name": siteName,
 			},
 		},
@@ -120,7 +119,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "repo1",
 				"og:url":       setting.AppURL + "user2/repo1",
 				"og:type":      "object",
-				"og:image":     "http://localhost:3003/avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
+				"og:image":     setting.AppURL + "avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
 				"og:site_name": siteName,
 			},
 		},
@@ -132,7 +131,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:url":         setting.AppURL + "user27/repo49",
 				"og:description": "A wonderful repository with more than just a README.md",
 				"og:type":        "object",
-				"og:image":       "http://localhost:3003/assets/img/avatar_default.png",
+				"og:image":       setting.AppURL + "assets/img/avatar_default.png",
 				"og:site_name":   siteName,
 			},
 		},
@@ -150,10 +149,6 @@ func TestOpenGraphProperties(t *testing.T) {
 				assert.True(t, foundProp)
 				content, foundContent := selection.Attr("content")
 				assert.True(t, foundContent, "opengraph meta tag without a content property")
-				if prop == "og:image" {
-					content = strings.ReplaceAll(content, "http://localhost:3001", "http://localhost:3003")
-					content = strings.ReplaceAll(content, "http://localhost:3002", "http://localhost:3003")
-				}
 				foundProps[prop] = content
 			})
 
