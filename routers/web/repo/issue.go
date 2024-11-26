@@ -2288,10 +2288,10 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 	mainCard.SetMargin(60)
 	topSection, bottomSection := mainCard.Split(false, 75)
 	issueSummary, issueIcon := topSection.Split(true, 80)
-	repoInfo, issueDescription := issueSummary.Split(false, 12)
+	repoInfo, issueDescription := issueSummary.Split(false, 15)
 
 	repoInfo.SetMargin(10)
-	_, err = repoInfo.DrawText(fmt.Sprintf("%s/%s - #%d", issue.Repo.OwnerName, issue.Repo.Name, issue.ID), color.Gray{128}, 24, card.Top, card.Left)
+	_, err = repoInfo.DrawText(fmt.Sprintf("%s - #%d", issue.Repo.FullName(), issue.ID), color.Gray{128}, 36, card.Top, card.Left)
 	if err != nil {
 		return nil, err
 	}
@@ -2374,7 +2374,7 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 				),
 				state,
 			),
-			color.Gray{128}, 24, card.Top, card.Left)
+			color.Gray{128}, 36, card.Top, card.Left)
 	} else {
 		_, err = issueStats.DrawText(
 			fmt.Sprintf("%s, %s",
@@ -2386,13 +2386,13 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 				),
 				state,
 			),
-			color.Gray{128}, 24, card.Top, card.Left)
+			color.Gray{128}, 36, card.Top, card.Left)
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	issueAttributionIcon, issueAttributionText := issueAttribution.Split(true, 7)
+	issueAttributionIcon, issueAttributionText := issueAttribution.Split(true, 8)
 	issueAttributionText.SetMargin(5)
 	_, err = issueAttributionText.DrawText(
 		fmt.Sprintf(
@@ -2400,7 +2400,7 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 			issue.Poster.Name,
 			issue.Created.AsTime().Format("2006-01-02"),
 		),
-		color.Gray{128}, 24, card.Middle, card.Left)
+		color.Gray{128}, 36, card.Middle, card.Left)
 	if err != nil {
 		return nil, err
 	}
