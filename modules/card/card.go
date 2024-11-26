@@ -19,6 +19,7 @@ import (
 	_ "image/png"  // for processing png images
 
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/proxy"
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/golang/freetype"
@@ -238,6 +239,9 @@ func (c *Card) fetchExternalImage(url string) (image.Image, bool) {
 	// this rendering process to be slowed down
 	client := &http.Client{
 		Timeout: 1 * time.Second, // 1 second timeout
+		Transport: &http.Transport{
+			Proxy: proxy.Proxy(),
+		},
 	}
 
 	resp, err := client.Get(url)
@@ -265,7 +269,7 @@ func (c *Card) fetchExternalImage(url string) (image.Image, bool) {
 		log.Warn("error when fetching external image from %s: %w", url, err)
 		return nil, false
 	}
-	if int64(len(bodyBytes)) >= setting.Avatar.MaxFileSize {
+	if int64(len(bodyBytes)) == setting.Avatar.MaxFileSize {
 		log.Warn("while fetching external image response size hit MaxFileSize (%d) and was discarded from url %s", setting.Avatar.MaxFileSize, url)
 		return nil, false
 	}

@@ -41,15 +41,22 @@ func TestNewCard(t *testing.T) {
 }
 
 func TestSplit(t *testing.T) {
+	// Note: you normally wouldn't split the same card twice as draw operations would start to overlap each other; but
+	// it's fine for this limited scope test
 	card, _ := NewCard(200, 100)
+
 	// Test vertical split
 	leftCard, rightCard := card.Split(true, 50)
 	assert.Equal(t, 100, leftCard.Img.Bounds().Dx(), "Left card should have half the width of original")
+	assert.Equal(t, 100, leftCard.Img.Bounds().Dy(), "Left card height unchanged by split")
 	assert.Equal(t, 100, rightCard.Img.Bounds().Dx(), "Right card should have half the width of original")
+	assert.Equal(t, 100, rightCard.Img.Bounds().Dy(), "Right card height unchanged by split")
 
 	// Test horizontal split
 	topCard, bottomCard := card.Split(false, 50)
+	assert.Equal(t, 200, topCard.Img.Bounds().Dx(), "Top card width unchanged by split")
 	assert.Equal(t, 50, topCard.Img.Bounds().Dy(), "Top card should have half the height of original")
+	assert.Equal(t, 200, bottomCard.Img.Bounds().Dx(), "Bottom width unchanged by split")
 	assert.Equal(t, 50, bottomCard.Img.Bounds().Dy(), "Bottom card should have half the height of original")
 }
 
