@@ -2279,8 +2279,8 @@ func GetSummaryCard(ctx *context.Context) {
 }
 
 func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Card, error) {
-	cardSize := issue.SummaryCardSize()
-	mainCard, err := card.NewCard(cardSize.Width, cardSize.Height)
+	width, height := issue.SummaryCardSize()
+	mainCard, err := card.NewCard(width, height)
 	if err != nil {
 		return nil, err
 	}

@@ -15,8 +15,8 @@
 			<meta property="og:description" content="{{StringUtils.EllipsisString .Issue.Content 300}}">
 		{{end}}
 		<meta property="og:image" content="{{.Issue.SummaryCardURL}}">
-		<meta property="og:image:width" content="{{.Issue.SummaryCardSize.Width}}">
-		<meta property="og:image:height" content="{{.Issue.SummaryCardSize.Height}}">
+		<meta property="og:image:width" content="{{.Issue.SummaryCardWidth}}">
+		<meta property="og:image:height" content="{{.Issue.SummaryCardHeight}}">
 		<meta property="og:image:alt" content="{{ctx.Locale.Tr "repo.issues.summary_card_alt" .Repository.Name .Issue.Title}}">
 	{{else if or .PageIsDiff .IsViewFile}}
 		<meta property="og:title" content="{{.Title}}">
