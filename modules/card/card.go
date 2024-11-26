@@ -8,8 +8,10 @@ import (
 	"image"
 	"image/color"
 	"io"
+	"math"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	_ "image/gif"  // for processing gif images
@@ -22,6 +24,7 @@ import (
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/draw"
+	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 
 	_ "golang.org/x/image/webp" // for processing webp images
@@ -33,12 +36,16 @@ type Card struct {
 	Margin int
 }
 
+var fontCache = sync.OnceValues(func() (*truetype.Font, error) {
+	return truetype.Parse(goregular.TTF)
+})
+
 // NewCard creates a new card with the given dimensions in pixels
 func NewCard(width, height int) (*Card, error) {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	draw.Draw(img, img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
 
-	font, err := truetype.Parse(goregular.TTF)
+	font, err := fontCache()
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +108,8 @@ func (c *Card) DrawText(text string, textColor color.Color, sizePt float64, vali
 	ft.SetDst(c.Img)
 	ft.SetSrc(image.NewUniform(textColor))
 
+	face := truetype.NewFace(c.Font, &truetype.Options{Size: sizePt, DPI: 72})
 	fontHeight := ft.PointToFixed(sizePt).Ceil()
-	offscreenDraw := freetype.Pt(0, -1000)
 
 	bounds := c.Img.Bounds()
 	bounds = image.Rect(bounds.Min.X+c.Margin, bounds.Min.Y+c.Margin, bounds.Max.X-c.Margin, bounds.Max.Y-c.Margin)
@@ -134,11 +141,8 @@ func (c *Card) DrawText(text string, textColor color.Color, sizePt float64, vali
 		}
 		proposedLine += nextWord
 
-		proposedLineWidth, err := ft.DrawString(proposedLine, offscreenDraw)
-		if err != nil {
-			return nil, err
-		}
-		if proposedLineWidth.X.Ceil() > boxWidth {
+		proposedLineWidth := font.MeasureString(face, proposedLine)
+		if proposedLineWidth.Ceil() > boxWidth {
 			// no, proposed line is too big; we'll use the last "currentLine"
 			heightTotal += fontHeight
 			if currentLine != "" {
@@ -147,8 +151,7 @@ func (c *Card) DrawText(text string, textColor color.Color, sizePt float64, vali
 				// leave nextWord in textWords and keep going
 			} else {
 				// just nextWord by itself doesn't fit on a line; well, we can't skip it, but we'll consume it
-				// regardless as a line by itself.  It will be clipped by the drawing routine.  We'll ignore it for the
-				// widest_line calc.
+				// regardless as a line by itself.  It will be clipped by the drawing routine.
 				lines = append(lines, nextWord)
 				textWords = textWords[1:]
 			}
@@ -169,22 +172,19 @@ func (c *Card) DrawText(text string, textColor color.Color, sizePt float64, vali
 	}
 
 	for _, line := range lines {
-		lineWidth, err := ft.DrawString(line, offscreenDraw)
-		if err != nil {
-			return nil, err
-		}
+		lineWidth := font.MeasureString(face, line)
 
 		textX := 0
 		if halign == Left {
 			textX = 0
 		} else if halign == Right {
-			textX = boxWidth - lineWidth.X.Ceil()
+			textX = boxWidth - lineWidth.Ceil()
 		} else if halign == Center {
-			textX = (boxWidth - lineWidth.X.Ceil()) / 2
+			textX = (boxWidth - lineWidth.Ceil()) / 2
 		}
 
 		pt := freetype.Pt(bounds.Min.X+textX, bounds.Min.Y+textY)
-		_, err = ft.DrawString(line, pt)
+		_, err := ft.DrawString(line, pt)
 		if err != nil {
 			return nil, err
 		}
@@ -212,8 +212,8 @@ func (c *Card) DrawImage(img image.Image) {
 		scale = float64(targetRect.Dy()) / float64(srcBounds.Dy())
 	}
 
-	newWidth := int(float64(srcBounds.Dx()) * scale)
-	newHeight := int(float64(srcBounds.Dy()) * scale)
+	newWidth := int(math.Round(float64(srcBounds.Dx()) * scale))
+	newHeight := int(math.Round(float64(srcBounds.Dy()) * scale))
 
 	// Center the image within the target rectangle
 	offsetX := (targetRect.Dx() - newWidth) / 2
@@ -233,7 +233,7 @@ func fallbackImage() image.Image {
 }
 
 // As defensively as possible, attempt to load an image from a presumed external and untrusted URL
-func (c *Card) fetchExternalImage(url string) image.Image {
+func (c *Card) fetchExternalImage(url string) (image.Image, bool) {
 	// Use a short timeout; in the event of any failure we'll be logging and returning a placeholder, but we don't want
 	// this rendering process to be slowed down
 	client := &http.Client{
@@ -243,38 +243,38 @@ func (c *Card) fetchExternalImage(url string) image.Image {
 	resp, err := client.Get(url)
 	if err != nil {
 		log.Warn("error when fetching external image from %s: %w", url, err)
-		return fallbackImage()
+		return nil, false
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Warn("non-OK error code when fetching external image from %s: %s", url, resp.Status)
-		return fallbackImage()
+		return nil, false
 	}
 
 	contentType := resp.Header.Get("Content-Type")
 	// Support content types are in-sync with the allowed custom avatar file types
 	if contentType != "image/png" && contentType != "image/jpeg" && contentType != "image/gif" && contentType != "image/webp" {
 		log.Warn("fetching external image returned unsupported Content-Type which was ignored: %s", contentType)
-		return fallbackImage()
+		return nil, false
 	}
 
 	body := io.LimitReader(resp.Body, setting.Avatar.MaxFileSize)
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
 		log.Warn("error when fetching external image from %s: %w", url, err)
-		return fallbackImage()
+		return nil, false
 	}
 	if int64(len(bodyBytes)) >= setting.Avatar.MaxFileSize {
 		log.Warn("while fetching external image response size hit MaxFileSize (%d) and was discarded from url %s", setting.Avatar.MaxFileSize, url)
-		return fallbackImage()
+		return nil, false
 	}
 
 	bodyBuffer := bytes.NewReader(bodyBytes)
 	imgCfg, imgType, err := image.DecodeConfig(bodyBuffer)
 	if err != nil {
 		log.Warn("error when decoding external image from %s: %w", url, err)
-		return fallbackImage()
+		return nil, false
 	}
 
 	// Verify that we have a match between actual data understood in the image body and the reported Content-Type
@@ -283,34 +283,37 @@ func (c *Card) fetchExternalImage(url string) image.Image {
 		(contentType == "image/gif" && imgType != "gif") ||
 		(contentType == "image/webp" && imgType != "webp") {
 		log.Warn("while fetching external image, mismatched image body (%s) and Content-Type (%s)", imgType, contentType)
-		return fallbackImage()
+		return nil, false
 	}
 
 	// do not process image which is too large, it would consume too much memory
 	if imgCfg.Width > setting.Avatar.MaxWidth {
 		log.Warn("while fetching external image, width %d exceeds Avatar.MaxWidth %d", imgCfg.Width, setting.Avatar.MaxWidth)
-		return fallbackImage()
+		return nil, false
 	}
 	if imgCfg.Height > setting.Avatar.MaxHeight {
 		log.Warn("while fetching external image, height %d exceeds Avatar.MaxHeight %d", imgCfg.Height, setting.Avatar.MaxHeight)
-		return fallbackImage()
+		return nil, false
 	}
 
 	_, err = bodyBuffer.Seek(0, io.SeekStart) // reset for actual decode
 	if err != nil {
 		log.Warn("error w/ bodyBuffer.Seek")
-		return fallbackImage()
+		return nil, false
 	}
 	img, _, err := image.Decode(bodyBuffer)
 	if err != nil {
 		log.Warn("error when decoding external image from %s: %w", url, err)
-		return fallbackImage()
+		return nil, false
 	}
 
-	return img
+	return img, true
 }
 
 func (c *Card) DrawExternalImage(url string) {
-	image := c.fetchExternalImage(url)
+	image, ok := c.fetchExternalImage(url)
+	if !ok {
+		image = fallbackImage()
+	}
 	c.DrawImage(image)
 }

@@ -144,64 +144,64 @@ func TestFetchExternalImageServer(t *testing.T) {
 	defer server.Close()
 
 	tests := []struct {
-		name          string
-		url           string
-		expectedLog   string
-		expectedColor color.Color
+		name            string
+		url             string
+		expectedSuccess bool
+		expectedLog     string
 	}{
 		{
-			name:          "timeout error",
-			url:           "/timeout",
-			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
-			expectedLog:   "error when fetching external image from",
+			name:            "timeout error",
+			url:             "/timeout",
+			expectedSuccess: false,
+			expectedLog:     "error when fetching external image from",
 		},
 		{
-			name:          "external fetch success",
-			url:           "/image.png",
-			expectedColor: color.Gray{Y: 0x0},
-			expectedLog:   "",
+			name:            "external fetch success",
+			url:             "/image.png",
+			expectedSuccess: true,
+			expectedLog:     "",
 		},
 		{
-			name:          "404 fallback",
-			url:           "/notfound",
-			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
-			expectedLog:   "non-OK error code when fetching external image",
+			name:            "404 fallback",
+			url:             "/notfound",
+			expectedSuccess: false,
+			expectedLog:     "non-OK error code when fetching external image",
 		},
 		{
-			name:          "unsupported content type",
-			url:           "/weird-content",
-			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
-			expectedLog:   "fetching external image returned unsupported Content-Type",
+			name:            "unsupported content type",
+			url:             "/weird-content",
+			expectedSuccess: false,
+			expectedLog:     "fetching external image returned unsupported Content-Type",
 		},
 		{
-			name:          "response too large",
-			url:           "/giant-response",
-			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
-			expectedLog:   "while fetching external image response size hit MaxFileSize",
+			name:            "response too large",
+			url:             "/giant-response",
+			expectedSuccess: false,
+			expectedLog:     "while fetching external image response size hit MaxFileSize",
 		},
 		{
-			name:          "invalid png",
-			url:           "/invalid.png",
-			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
-			expectedLog:   "error when decoding external image",
+			name:            "invalid png",
+			url:             "/invalid.png",
+			expectedSuccess: false,
+			expectedLog:     "error when decoding external image",
 		},
 		{
-			name:          "mismatched content type",
-			url:           "/mismatched.jpg",
-			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
-			expectedLog:   "while fetching external image, mismatched image body",
+			name:            "mismatched content type",
+			url:             "/mismatched.jpg",
+			expectedSuccess: false,
+			expectedLog:     "while fetching external image, mismatched image body",
 		},
 		{
-			name:          "too wide",
-			url:           "/too-wide.png",
-			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
-			expectedLog:   "while fetching external image, width 16001 exceeds Avatar.MaxWidth",
+			name:            "too wide",
+			url:             "/too-wide.png",
+			expectedSuccess: false,
+			expectedLog:     "while fetching external image, width 16001 exceeds Avatar.MaxWidth",
 		},
 		{
-			name:          "too tall",
-			url:           "/too-tall.png",
-			expectedColor: color.RGBA{255, 255, 255, 255}, // fallback - white image
-			expectedLog:   "while fetching external image, height 16002 exceeds Avatar.MaxHeight",
+			name:            "too tall",
+			url:             "/too-tall.png",
+			expectedSuccess: false,
+			expectedLog:     "while fetching external image, height 16002 exceeds Avatar.MaxHeight",
 		},
 	}
 
@@ -214,8 +214,15 @@ func TestFetchExternalImageServer(t *testing.T) {
 			defer cleanup()
 
 			card, _ := NewCard(100, 100)
-			img := card.fetchExternalImage(server.URL + testCase.url)
-			assert.Equal(t, testCase.expectedColor, img.At(0, 0))
+			img, ok := card.fetchExternalImage(server.URL + testCase.url)
+
+			if testCase.expectedSuccess {
+				assert.True(t, ok, "expected success from fetchExternalImage")
+				assert.NotNil(t, img)
+			} else {
+				assert.False(t, ok, "expected failure from fetchExternalImage")
+				assert.Nil(t, img)
+			}
 
 			log.Info(stopMark)
 
