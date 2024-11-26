@@ -4,6 +4,7 @@
 package integration
 
 import (
+	"image"
 	"net/http"
 	"testing"
 
@@ -12,6 +13,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOpenGraphProperties(t *testing.T) {
@@ -151,6 +153,38 @@ func TestOpenGraphProperties(t *testing.T) {
 			})
 
 			assert.EqualValues(t, tc.expected, foundProps, "mismatching opengraph properties")
+		})
+	}
+}
+
+func TestOpenGraphSummaryCard(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	cases := []struct {
+		name string
+		url  string
+	}{
+		{
+			name: "issue",
+			url:  "/user2/repo1/issues/1/summary-card",
+		},
+		{
+			name: "pull request",
+			url:  "/user2/repo1/pulls/2/summary-card",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := NewRequest(t, "GET", tc.url)
+			resp := MakeRequest(t, req, http.StatusOK)
+
+			assert.Equal(t, "image/png", resp.Header().Get("Content-Type"))
+			img, imgType, err := image.Decode(resp.Body)
+			require.NoError(t, err)
+			assert.Equal(t, "png", imgType)
+			assert.Equal(t, 1200, img.Bounds().Dx())
+			assert.Equal(t, 600, img.Bounds().Dy())
 		})
 	}
 }
