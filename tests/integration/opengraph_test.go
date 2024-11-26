@@ -6,6 +6,7 @@ package integration
 import (
 	"image"
 	"net/http"
+	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/modules/setting"
@@ -44,7 +45,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "User Thirty",
 				"og:url":       setting.AppURL + "user30",
 				"og:type":      "profile",
-				"og:image":     "https://secure.gravatar.com/avatar/eae1f44b34ff27284cb0792c7601c89c?d=identicon",
+				"og:image":     "http://localhost:3003/assets/img/avatar_default.png",
 				"og:site_name": siteName,
 			},
 		},
@@ -56,7 +57,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:url":         setting.AppURL + "the_34-user.with.all.allowedChars",
 				"og:description": "some [commonmark](https://commonmark.org/)!",
 				"og:type":        "profile",
-				"og:image":       setting.AppURL + "avatars/avatar34",
+				"og:image":       "http://localhost:3003/assets/img/avatar_default.png",
 				"og:site_name":   siteName,
 			},
 		},
@@ -69,7 +70,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:description":  "content for the first issue",
 				"og:type":         "object",
 				"og:image":        setting.AppURL + "user2/repo1/issues/1/summary-card",
-				"og:image:alt":    "Summary card of an issue in a repo named repo1, which reads \"issue1\"",
+				"og:image:alt":    "Summary card of an issue titled \"issue1\" in repository user2/repo1",
 				"og:image:width":  "1200",
 				"og:image:height": "600",
 				"og:site_name":    siteName,
@@ -84,7 +85,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:description":  "content for the second issue",
 				"og:type":         "object",
 				"og:image":        setting.AppURL + "user2/repo1/pulls/2/summary-card",
-				"og:image:alt":    "Summary card of an issue in a repo named repo1, which reads \"issue2\"",
+				"og:image:alt":    "Summary card of an issue titled \"issue2\" in repository user2/repo1",
 				"og:image:width":  "1200",
 				"og:image:height": "600",
 				"og:site_name":    siteName,
@@ -97,7 +98,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "repo49/test/test.txt at master",
 				"og:url":       setting.AppURL + "/user27/repo49/src/branch/master/test/test.txt",
 				"og:type":      "object",
-				"og:image":     "https://secure.gravatar.com/avatar/7095710e927665f1bdd1ced94152f232?d=identicon",
+				"og:image":     "http://localhost:3003/assets/img/avatar_default.png",
 				"og:site_name": siteName,
 			},
 		},
@@ -108,7 +109,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "Page With Spaced Name",
 				"og:url":       setting.AppURL + "/user2/repo1/wiki/Page-With-Spaced-Name",
 				"og:type":      "object",
-				"og:image":     "https://secure.gravatar.com/avatar/ab53a2911ddf9b4817ac01ddcd3d975f?d=identicon",
+				"og:image":     "http://localhost:3003/avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
 				"og:site_name": siteName,
 			},
 		},
@@ -119,7 +120,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "repo1",
 				"og:url":       setting.AppURL + "user2/repo1",
 				"og:type":      "object",
-				"og:image":     "https://secure.gravatar.com/avatar/ab53a2911ddf9b4817ac01ddcd3d975f?d=identicon",
+				"og:image":     "http://localhost:3003/avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
 				"og:site_name": siteName,
 			},
 		},
@@ -131,7 +132,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:url":         setting.AppURL + "user27/repo49",
 				"og:description": "A wonderful repository with more than just a README.md",
 				"og:type":        "object",
-				"og:image":       "https://secure.gravatar.com/avatar/7095710e927665f1bdd1ced94152f232?d=identicon",
+				"og:image":       "http://localhost:3003/assets/img/avatar_default.png",
 				"og:site_name":   siteName,
 			},
 		},
@@ -149,6 +150,10 @@ func TestOpenGraphProperties(t *testing.T) {
 				assert.True(t, foundProp)
 				content, foundContent := selection.Attr("content")
 				assert.True(t, foundContent, "opengraph meta tag without a content property")
+				if prop == "og:image" {
+					content = strings.ReplaceAll(content, "http://localhost:3001", "http://localhost:3003")
+					content = strings.ReplaceAll(content, "http://localhost:3002", "http://localhost:3003")
+				}
 				foundProps[prop] = content
 			})
 

@@ -530,7 +530,7 @@ func registerRoutes(m *web.Route) {
 			m.Post("/authorize", web.Bind(forms.AuthorizationForm{}), auth.AuthorizeOAuth)
 		}, ignSignInAndCsrf, reqSignIn)
 
-		m.Methods("GET, OPTIONS", "/userinfo", optionsCorsHandler(), ignSignInAndCsrf, auth.InfoOAuth)
+		m.Methods("GET, POST, OPTIONS", "/userinfo", optionsCorsHandler(), ignSignInAndCsrf, auth.InfoOAuth)
 		m.Methods("POST, OPTIONS", "/access_token", optionsCorsHandler(), web.Bind(forms.AccessTokenForm{}), ignSignInAndCsrf, auth.AccessTokenOAuth)
 		m.Methods("GET, OPTIONS", "/keys", optionsCorsHandler(), ignSignInAndCsrf, auth.OIDCKeys)
 		m.Methods("POST, OPTIONS", "/introspect", optionsCorsHandler(), web.Bind(forms.IntrospectTokenForm{}), ignSignInAndCsrf, auth.IntrospectOAuth)
