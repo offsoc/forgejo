@@ -228,10 +228,8 @@ func (c *Card) DrawImage(img image.Image) {
 
 func fallbackImage() image.Image {
 	// can't usage image.Uniform(color.White) because it's infinitely sized causing a panic in the scaler in DrawImage
-	rect := image.Rect(0, 0, 1, 1)
-	img := image.NewRGBA(rect)
-	white := color.RGBA{255, 255, 255, 255}
-	img.Set(0, 0, white)
+	img := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	img.Set(0, 0, color.White)
 	return img
 }
 
