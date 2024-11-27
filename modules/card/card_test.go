@@ -214,6 +214,9 @@ func TestFetchExternalImageServer(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
+			// stopMark is used as a logging boundary to verify that the expected message (testCase.expectedLog) is
+			// logged during the `fetchExternalImage` operation.  This is verified by a combination of checking that the
+			// stopMark message was received, and that the filtered log (logFiltered[0]) was received.
 			stopMark := fmt.Sprintf(">>>>>>>>>>>>>STOP: %s<<<<<<<<<<<<<<<", testCase.name)
 
 			logChecker, cleanup := test.NewLogChecker(log.DEFAULT, log.TRACE)
