@@ -1578,6 +1578,10 @@ table th[data-sortt-desc] .svg {
   min-width: 0;
 }
 
+.ui.multiple.selection.dropdown {
+  flex-wrap: wrap; /* prevent overflow/crushing */
+}
+
 .ui.ui.button {
   justify-content: center;
 }

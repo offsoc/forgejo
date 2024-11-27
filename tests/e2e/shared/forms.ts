@@ -37,4 +37,13 @@ export async function validate_form({page}: {page: Page}, scope: 'form' | 'field
       expect(boxes[i].y + boxes[i].height).toBeGreaterThanOrEqual(boxes[i - 1].y + boxes[i - 1].height);
     }
   }
+
+  // Prevent issues with flex wrapping
+  for (const m of await page.locator('.ui.multiple.selection.dropdown').all()) {
+    for (const pill of await m.locator('a.ui.label').all()) {
+      const pillBox = await pill.boundingBox();
+      const svgBox = await pill.locator('svg').boundingBox();
+      expect(pillBox.x + pillBox.width).toBeLessThanOrEqual(svgBox.x);
+    }
+  }
 }
