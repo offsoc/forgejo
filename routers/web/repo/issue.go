@@ -2236,7 +2236,7 @@ func GetSummaryCard(ctx *context.Context) {
 	}
 
 	cache := cache.GetCache()
-	cacheKey := fmt.Sprintf("summary_card:issue:%s:%s:%d", issue.Repo.OwnerName, issue.Repo.Name, issue.ID)
+	cacheKey := fmt.Sprintf("summary_card:issue:%s:%s:%s:%d", ctx.Locale.Language(), issue.Repo.OwnerName, issue.Repo.Name, issue.ID)
 	pngData, ok := cache.Get(cacheKey).([]byte)
 	if ok && pngData != nil && len(pngData) > 0 {
 		ctx.Resp.Header().Set("Content-Type", "image/png")
