@@ -2349,6 +2349,7 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 	} else {
 		state = ctx.Locale.TrString("repo.issues.open_title")
 	}
+	state = strings.ToLower(state)
 
 	issueStats.SetMargin(10)
 	if issue.IsPull {
