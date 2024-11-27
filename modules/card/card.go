@@ -164,11 +164,12 @@ func (c *Card) DrawText(text string, textColor color.Color, sizePt float64, vali
 	}
 
 	textY := 0
-	if valign == Top {
+	switch valign {
+	case Top:
 		textY = fontHeight
-	} else if valign == Bottom {
+	case Bottom:
 		textY = boxHeight - heightTotal + fontHeight
-	} else if valign == Middle {
+	case Middle:
 		textY = ((boxHeight - heightTotal) / 2) + fontHeight
 	}
 
@@ -176,11 +177,12 @@ func (c *Card) DrawText(text string, textColor color.Color, sizePt float64, vali
 		lineWidth := font.MeasureString(face, line)
 
 		textX := 0
-		if halign == Left {
+		switch halign {
+		case Left:
 			textX = 0
-		} else if halign == Right {
+		case Right:
 			textX = boxWidth - lineWidth.Ceil()
-		} else if halign == Center {
+		case Center:
 			textX = (boxWidth - lineWidth.Ceil()) / 2
 		}
 
