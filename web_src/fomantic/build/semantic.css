@@ -3513,6 +3513,7 @@ select.ui.dropdown {
 
 .ui.ui.multiple.dropdown {
   padding: 0.22619048em 3.2em 0.22619048em 0.35714286em;
+  flex-wrap: wrap;
 }
 
 .ui.multiple.dropdown .menu {
