@@ -139,6 +139,8 @@ func TestOpenGraphProperties(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
 			req := NewRequest(t, "GET", tc.url)
 			resp := MakeRequest(t, req, http.StatusOK)
 			doc := NewHTMLParser(t, resp.Body)
@@ -176,6 +178,8 @@ func TestOpenGraphSummaryCard(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
 			req := NewRequest(t, "GET", tc.url)
 			resp := MakeRequest(t, req, http.StatusOK)
 
