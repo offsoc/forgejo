@@ -29142,13 +29142,8 @@
     },
     "unauthorized": {
       "description": "APIUnauthorizedError is a unauthorized error response",
-      "headers": {
-        "message": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        }
+      "schema": {
+        "$ref": "#/definitions/APINotFound"
       }
     },
     "validationError": {
