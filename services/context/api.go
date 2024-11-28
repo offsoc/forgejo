@@ -107,7 +107,7 @@ type APIUnauthorizedError struct {
 
 // APIUnauthorizedError is a unauthorized error response
 // swagger:response unauthorized
-type swaggerAPUnauthorizedError struct {
+type swaggerAPInauthorizedError struct {
 	// in:body
 	Body APIUnauthorizedError `json:"body"`
 }
@@ -147,17 +147,6 @@ type APIRedirect struct{}
 // APIString is a string response
 // swagger:response string
 type APIString string
-
-type APIUnauthorizedError struct {
-	APIError
-}
-
-// APIUnauthorizedError is a unauthorized error response
-// swagger:response unauthorized
-type swaggerAPIUnauthorizedError struct {
-	// in:body
-	Body APINotFound `json:"body"`
-}
 
 // APIFeatureDisabledError is a error that is retruned when the given feature is disabled
 // swagger:response featureDisabled
