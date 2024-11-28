@@ -46,6 +46,8 @@ func ListAccessTokens(ctx *context.APIContext) {
 	//     "$ref": "#/responses/AccessTokenList"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
 
 	opts := auth_model.ListAccessTokensOptions{UserID: ctx.ContextUser.ID, ListOptions: utils.GetListOptions(ctx)}
 
@@ -95,6 +97,8 @@ func CreateAccessToken(ctx *context.APIContext) {
 	//     "$ref": "#/responses/error"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
 
 	form := web.GetForm(ctx).(*api.CreateAccessTokenOption)
 
@@ -224,6 +228,10 @@ func CreateOauth2Application(ctx *context.APIContext) {
 	//     "$ref": "#/responses/OAuth2Application"
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	data := web.GetForm(ctx).(*api.CreateOAuth2ApplicationOptions)
 
@@ -266,6 +274,10 @@ func ListOauth2Applications(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/OAuth2ApplicationList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	apps, total, err := db.FindAndCount[auth_model.OAuth2Application](ctx, auth_model.FindOAuth2ApplicationsOptions{
 		ListOptions: utils.GetListOptions(ctx),
@@ -303,6 +315,10 @@ func DeleteOauth2Application(ctx *context.APIContext) {
 	// responses:
 	//   "204":
 	//     "$ref": "#/responses/empty"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	appID := ctx.ParamsInt64(":id")
@@ -335,6 +351,10 @@ func GetOauth2Application(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/OAuth2Application"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	appID := ctx.ParamsInt64(":id")
@@ -379,6 +399,10 @@ func UpdateOauth2Application(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/OAuth2Application"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	appID := ctx.ParamsInt64(":id")

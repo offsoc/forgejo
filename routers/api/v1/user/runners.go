@@ -21,6 +21,10 @@ func GetRegistrationToken(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/RegistrationToken"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	shared.GetRegistrationToken(ctx, ctx.Doer.ID, 0)
 }

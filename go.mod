@@ -45,6 +45,7 @@ require (
 	github.com/go-fed/httpsig v1.1.1-0.20201223112313-55836744818e
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/go-ldap/ldap/v3 v3.4.6
+	github.com/go-openapi/spec v0.20.14
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-swagger/go-swagger v0.30.5
 	github.com/go-testfixtures/testfixtures/v3 v3.12.0
@@ -186,7 +187,6 @@ require (
 	github.com/go-openapi/jsonreference v0.20.4 // indirect
 	github.com/go-openapi/loads v0.21.5 // indirect
 	github.com/go-openapi/runtime v0.26.2 // indirect
-	github.com/go-openapi/spec v0.20.14 // indirect
 	github.com/go-openapi/strfmt v0.22.0 // indirect
 	github.com/go-openapi/swag v0.22.7 // indirect
 	github.com/go-openapi/validate v0.22.6 // indirect
