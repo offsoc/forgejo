@@ -51,10 +51,12 @@
 					</div>
 					<input id="pronouns-custom" name="pronouns" value="{{.SignedUser.Pronouns}}" maxlength="50">
 				</div>
-				<div class="field {{if .Err_Email}}error{{end}}">
-					<label>{{ctx.Locale.Tr "email"}}</label>
-					<p id="signed-user-email">{{.SignedUser.Email}}</p>
-				</div>
+				{{if not .SignedUser.KeepEmailPrivate}}
+					<div class="field">
+						<label>{{ctx.Locale.Tr "email"}}</label>
+						<p id="signed-user-email">{{.SignedUser.Email}}</p>
+					</div>
+				{{end}}
 				<div class="field {{if .Err_Biography}}error{{end}}">
 					<label for="biography">{{ctx.Locale.Tr "user.user_bio"}}</label>
 					<textarea id="biography" name="biography" rows="2" placeholder="{{ctx.Locale.Tr "settings.biography_placeholder"}}" maxlength="255">{{.SignedUser.Description}}</textarea>
@@ -76,7 +78,7 @@
 				</div>
 
 				<div class="inline field {{if .Err_Visibility}}error{{end}}">
-					<span class="inline required field"><label>{{ctx.Locale.Tr "settings.visibility"}}</label></span>
+					<span class="inline required field" id="visibility-setting"><label>{{ctx.Locale.Tr "settings.visibility"}}</label></span>
 					<div class="ui selection type dropdown">
 						{{if .SignedUser.Visibility.IsPublic}}<input type="hidden" id="visibility" name="visibility" value="0">{{end}}
 						{{if .SignedUser.Visibility.IsLimited}}<input type="hidden" id="visibility" name="visibility" value="1">{{end}}

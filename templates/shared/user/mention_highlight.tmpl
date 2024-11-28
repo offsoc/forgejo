@@ -1,0 +1,14 @@
+{{if .IsSigned}}
+	<style>
+		.comment,
+		.commit-summary,
+		.commit-body {
+			.mention[href="{{AppSubUrl}}/{{.SignedUser.Name}}" i] {
+				background-color: var(--color-primary-alpha-30);
+				color: var(--color-primary-dark-2);
+				border-radius: 5px;
+				padding: 1px 4px;
+			}
+		}
+	</style>
+{{end}}

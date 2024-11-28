@@ -13,7 +13,9 @@ import (
 	"strings"
 
 	activities_model "code.gitea.io/gitea/models/activities"
+	issues_model "code.gitea.io/gitea/models/issues"
 	repo_model "code.gitea.io/gitea/models/repo"
+	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/markup"
 	"code.gitea.io/gitea/modules/markup/markdown"
 	"code.gitea.io/gitea/modules/setting"
@@ -232,6 +234,16 @@ func feedActionsToFeedItems(ctx *context.Context, actions activities_model.Actio
 			case activities_model.ActionCommentIssue, activities_model.ActionApprovePullRequest, activities_model.ActionRejectPullRequest, activities_model.ActionCommentPull:
 				desc = act.GetIssueTitle(ctx)
 				comment := act.GetIssueInfos()[1]
+				if strings.HasSuffix(comment, "…") {
+					// Comment was truncated get the full content from the database.
+					// This truncation is done in `NotifyCreateIssueComment`.
+					commentModel, err := issues_model.GetCommentByID(ctx, act.CommentID)
+					if err != nil {
+						log.Error("Couldn't get comment[%d] for RSS feed: %v", act.CommentID, err)
+					} else {
+						comment = commentModel.Content
+					}
+				}
 				if len(comment) != 0 {
 					desc += "\n\n" + string(renderMarkdown(ctx, act, comment))
 				}

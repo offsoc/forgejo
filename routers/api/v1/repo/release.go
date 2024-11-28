@@ -136,6 +136,10 @@ func ListReleases(ctx *context.APIContext) {
 	//   in: query
 	//   description: filter (exclude / include) pre-releases
 	//   type: boolean
+	// - name: q
+	//   in: query
+	//   description: Search string
+	//   type: string
 	// - name: page
 	//   in: query
 	//   description: page number of results to return (1-based)
@@ -158,6 +162,7 @@ func ListReleases(ctx *context.APIContext) {
 		IsDraft:       ctx.FormOptionalBool("draft"),
 		IsPreRelease:  ctx.FormOptionalBool("pre-release"),
 		RepoID:        ctx.Repo.Repository.ID,
+		Keyword:       ctx.FormTrim("q"),
 	}
 
 	releases, err := db.Find[repo_model.Release](ctx, opts)

@@ -337,8 +337,7 @@ func newlyCreatedIssues(ctx context.Context, repoID int64, fromTime time.Time) *
 func activeIssues(ctx context.Context, repoID int64, fromTime time.Time) *xorm.Session {
 	sess := db.GetEngine(ctx).Where("issue.repo_id = ?", repoID).
 		And("issue.is_pull = ?", false).
-		And("issue.created_unix >= ?", fromTime.Unix()).
-		Or("issue.closed_unix >= ?", fromTime.Unix())
+		And("issue.created_unix >= ? OR issue.closed_unix >= ?", fromTime.Unix(), fromTime.Unix())
 
 	return sess
 }

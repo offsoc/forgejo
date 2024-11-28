@@ -566,21 +566,19 @@ func SettingsPost(ctx *context.Context) {
 		// as an error on the UI for this action
 		ctx.Data["Err_RepoName"] = nil
 
+		m, err := selectPushMirrorByForm(ctx, form, repo)
+		if err != nil {
+			ctx.NotFound("", nil)
+			return
+		}
+
 		interval, err := time.ParseDuration(form.PushMirrorInterval)
 		if err != nil || (interval != 0 && interval < setting.Mirror.MinInterval) {
 			ctx.RenderWithErr(ctx.Tr("repo.mirror_interval_invalid"), tplSettingsOptions, &forms.RepoSettingForm{})
 			return
 		}
 
-		id, err := strconv.ParseInt(form.PushMirrorID, 10, 64)
-		if err != nil {
-			ctx.ServerError("UpdatePushMirrorIntervalPushMirrorID", err)
-			return
-		}
-		m := &repo_model.PushMirror{
-			ID:       id,
-			Interval: interval,
-		}
+		m.Interval = interval
 		if err := repo_model.UpdatePushMirrorInterval(ctx, m); err != nil {
 			ctx.ServerError("UpdatePushMirrorInterval", err)
 			return
@@ -1031,7 +1029,7 @@ func SettingsPost(ctx *context.Context) {
 			return
 		}
 
-		if err := actions_model.CleanRepoScheduleTasks(ctx, repo); err != nil {
+		if err := actions_model.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
 			log.Error("CleanRepoScheduleTasks for archived repo %s/%s: %v", ctx.Repo.Owner.Name, repo.Name, err)
 		}
 

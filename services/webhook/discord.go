@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -22,8 +23,11 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/util"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
+	gitea_context "code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/webhook/shared"
+
+	"code.forgejo.org/go-chi/binding"
 )
 
 type discordHandler struct{}
@@ -31,13 +35,29 @@ type discordHandler struct{}
 func (discordHandler) Type() webhook_module.HookType { return webhook_module.DISCORD }
 func (discordHandler) Icon(size int) template.HTML   { return shared.ImgIcon("discord.png", size) }
 
-func (discordHandler) UnmarshalForm(bind func(any)) forms.WebhookForm {
-	var form struct {
-		forms.WebhookCoreForm
-		PayloadURL string `binding:"Required;ValidUrl"`
-		Username   string
-		IconURL    string
+type discordForm struct {
+	forms.WebhookCoreForm
+	PayloadURL string `binding:"Required;ValidUrl"`
+	Username   string `binding:"Required;MaxSize(80)"`
+	IconURL    string `binding:"ValidUrl"`
+}
+
+var _ binding.Validator = &discordForm{}
+
+// Validate implements binding.Validator.
+func (d *discordForm) Validate(req *http.Request, errs binding.Errors) binding.Errors {
+	ctx := gitea_context.GetWebContext(req)
+	if len([]rune(d.IconURL)) > 2048 {
+		errs = append(errs, binding.Error{
+			FieldNames: []string{"IconURL"},
+			Message:    ctx.Locale.TrString("repo.settings.discord_icon_url.exceeds_max_length"),
+		})
 	}
+	return errs
+}
+
+func (discordHandler) UnmarshalForm(bind func(any)) forms.WebhookForm {
+	var form discordForm
 	bind(&form)
 
 	return forms.WebhookForm{
@@ -56,7 +76,7 @@ func (discordHandler) UnmarshalForm(bind func(any)) forms.WebhookForm {
 type (
 	// DiscordEmbedFooter for Embed Footer Structure.
 	DiscordEmbedFooter struct {
-		Text string `json:"text"`
+		Text string `json:"text,omitempty"`
 	}
 
 	// DiscordEmbedAuthor for Embed Author Structure
@@ -80,16 +100,16 @@ type (
 		Color       int                 `json:"color"`
 		Footer      DiscordEmbedFooter  `json:"footer"`
 		Author      DiscordEmbedAuthor  `json:"author"`
-		Fields      []DiscordEmbedField `json:"fields"`
+		Fields      []DiscordEmbedField `json:"fields,omitempty"`
 	}
 
 	// DiscordPayload represents
 	DiscordPayload struct {
-		Wait      bool           `json:"wait"`
-		Content   string         `json:"content"`
+		Wait      bool           `json:"-"`
+		Content   string         `json:"-"`
 		Username  string         `json:"username"`
 		AvatarURL string         `json:"avatar_url,omitempty"`
-		TTS       bool           `json:"tts"`
+		TTS       bool           `json:"-"`
 		Embeds    []DiscordEmbed `json:"embeds"`
 	}
 
@@ -182,6 +202,9 @@ func (d discordConvertor) Push(p *api.PushPayload) (DiscordPayload, error) {
 	for i, commit := range p.Commits {
 		// limit the commit message display to just the summary, otherwise it would be hard to read
 		message := strings.TrimRight(strings.SplitN(commit.Message, "\n", 1)[0], "\r")
+
+		// Escaping markdown character
+		message = escapeMarkdown(message)
 
 		// a limit of 50 is set because GitHub does the same
 		if utf8.RuneCountInString(message) > 50 {
@@ -322,6 +345,12 @@ func parseHookPullRequestEventType(event webhook_module.HookEventType) (string, 
 }
 
 func (d discordConvertor) createPayload(s *api.User, title, text, url string, color int) DiscordPayload {
+	if len([]rune(title)) > 256 {
+		title = fmt.Sprintf("%.253s...", title)
+	}
+	if len([]rune(text)) > 4096 {
+		text = fmt.Sprintf("%.4093s...", text)
+	}
 	return DiscordPayload{
 		Username:  d.Username,
 		AvatarURL: d.AvatarURL,
@@ -339,4 +368,41 @@ func (d discordConvertor) createPayload(s *api.User, title, text, url string, co
 			},
 		},
 	}
+}
+
+var orderedListPattern = regexp.MustCompile(`(\d+)\.`)
+
+var markdownPatterns = map[string]*regexp.Regexp{
+	"~": regexp.MustCompile(`\~(.*?)\~`),
+	"*": regexp.MustCompile(`\*(.*?)\*`),
+	"_": regexp.MustCompile(`\_(.*?)\_`),
+}
+
+var markdownToEscape = strings.NewReplacer(
+	"* ", "\\* ",
+	"`", "\\`",
+	"[", "\\[",
+	"]", "\\]",
+	"(", "\\(",
+	")", "\\)",
+	"#", "\\#",
+	"+ ", "\\+ ",
+	"- ", "\\- ",
+	"---", "\\---",
+	"!", "\\!",
+	"|", "\\|",
+	"<", "\\<",
+	">", "\\>",
+)
+
+// Escape Markdown characters
+func escapeMarkdown(input string) string {
+	// Escaping ordered list
+	output := orderedListPattern.ReplaceAllString(input, "$1\\.")
+
+	for char, pattern := range markdownPatterns {
+		output = pattern.ReplaceAllString(output, fmt.Sprintf(`\%s$1\%s`, char, char))
+	}
+
+	return markdownToEscape.Replace(output)
 }

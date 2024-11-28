@@ -101,3 +101,40 @@ func TestRepository_CommitsBetweenIDs(t *testing.T) {
 		assert.Len(t, commits, c.ExpectedCommits, "case %d", i)
 	}
 }
+
+func TestGetTagCommit(t *testing.T) {
+	t.Setenv("GIT_COMMITTER_DATE", "2006-01-01 13:37")
+	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
+
+	clonedPath, err := cloneRepo(t, bareRepo1Path)
+	require.NoError(t, err)
+
+	bareRepo1, err := openRepositoryWithDefaultContext(clonedPath)
+	require.NoError(t, err)
+	defer bareRepo1.Close()
+
+	lTagCommitID := "6fbd69e9823458e6c4a2fc5c0f6bc022b2f2acd1"
+	lTagName := "lightweightTag"
+	bareRepo1.CreateTag(lTagName, lTagCommitID)
+
+	aTagCommitID := "8006ff9adbf0cb94da7dad9e537e53817f9fa5c0"
+	aTagName := "annotatedTag"
+	aTagMessage := "my annotated message"
+	bareRepo1.CreateAnnotatedTag(aTagName, aTagMessage, aTagCommitID)
+
+	aTagID, err := bareRepo1.GetTagCommitID(aTagName)
+	require.NoError(t, err)
+	assert.NotEqualValues(t, aTagCommitID, aTagID)
+
+	lTagID, err := bareRepo1.GetTagCommitID(lTagName)
+	require.NoError(t, err)
+	assert.EqualValues(t, lTagCommitID, lTagID)
+
+	aTag, err := bareRepo1.GetTagCommit(aTagName)
+	require.NoError(t, err)
+	assert.EqualValues(t, aTagCommitID, aTag.ID.String())
+
+	lTag, err := bareRepo1.GetTagCommit(lTagName)
+	require.NoError(t, err)
+	assert.EqualValues(t, lTagCommitID, lTag.ID.String())
+}

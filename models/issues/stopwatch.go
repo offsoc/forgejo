@@ -60,34 +60,19 @@ func getStopwatch(ctx context.Context, userID, issueID int64) (sw *Stopwatch, ex
 	return sw, exists, err
 }
 
-// UserIDCount is a simple coalition of UserID and Count
-type UserStopwatch struct {
-	UserID      int64
-	StopWatches []*Stopwatch
-}
-
 // GetUIDsAndNotificationCounts between the two provided times
-func GetUIDsAndStopwatch(ctx context.Context) ([]*UserStopwatch, error) {
+func GetUIDsAndStopwatch(ctx context.Context) (map[int64][]*Stopwatch, error) {
 	sws := []*Stopwatch{}
 	if err := db.GetEngine(ctx).Where("issue_id != 0").Find(&sws); err != nil {
 		return nil, err
 	}
+	res := map[int64][]*Stopwatch{}
 	if len(sws) == 0 {
-		return []*UserStopwatch{}, nil
+		return res, nil
 	}
 
-	lastUserID := int64(-1)
-	res := []*UserStopwatch{}
 	for _, sw := range sws {
-		if lastUserID == sw.UserID {
-			lastUserStopwatch := res[len(res)-1]
-			lastUserStopwatch.StopWatches = append(lastUserStopwatch.StopWatches, sw)
-		} else {
-			res = append(res, &UserStopwatch{
-				UserID:      sw.UserID,
-				StopWatches: []*Stopwatch{sw},
-			})
-		}
+		res[sw.UserID] = append(res[sw.UserID], sw)
 	}
 	return res, nil
 }

@@ -233,5 +233,8 @@ type swaggerParameterBodies struct {
 	SetUserQuotaGroupsOptions api.SetUserQuotaGroupsOptions
 
 	// in:body
+	NoteOptions api.NoteOptions
+
+	// in:body
 	CreateEditStarListOptions api.CreateEditStarListOptions
 }

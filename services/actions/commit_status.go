@@ -53,7 +53,7 @@ func createCommitStatus(ctx context.Context, job *actions_model.ActionRunJob) er
 			return fmt.Errorf("head commit is missing in event payload")
 		}
 		sha = payload.HeadCommit.ID
-	case webhook_module.HookEventPullRequest, webhook_module.HookEventPullRequestSync:
+	case webhook_module.HookEventPullRequest, webhook_module.HookEventPullRequestSync, webhook_module.HookEventPullRequestLabel, webhook_module.HookEventPullRequestAssign, webhook_module.HookEventPullRequestMilestone:
 		if run.TriggerEvent == actions_module.GithubEventPullRequestTarget {
 			event = "pull_request_target"
 		} else {

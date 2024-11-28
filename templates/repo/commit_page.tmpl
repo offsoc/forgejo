@@ -128,6 +128,9 @@
 											</form>
 										</div>
 									</div>
+									<div id="commit-notes-add-button" class="item">
+										{{ctx.Locale.Tr "repo.diff.git-notes.add"}}
+									</div>
 								</div>
 							</div>
 						{{end}}
@@ -152,11 +155,12 @@
 						{{ctx.AvatarUtils.AvatarByEmail .Commit.Author.Email .Commit.Author.Email 28 "tw-mr-2"}}
 						<strong>{{.Commit.Author.Name}}</strong>
 					{{end}}
-					<span class="text grey tw-ml-2" id="authored-time">{{TimeSince .Commit.Author.When ctx.Locale}}</span>
+					<span class="text grey tw-ml-2" id="authored-time">{{DateUtils.TimeSince .Commit.Author.When}}</span>
 					{{if or (ne .Commit.Committer.Name .Commit.Author.Name) (ne .Commit.Committer.Email .Commit.Author.Email)}}
+						<span class="tw-ml-2">•</span>
 						<span class="text grey tw-mx-2">{{ctx.Locale.Tr "repo.diff.committed_by"}}</span>
 						{{if ne .Verification.CommittingUser.ID 0}}
-							{{ctx.AvatarUtils.Avatar .Verification.CommittingUser 28 "tw-mx-2"}}
+							{{ctx.AvatarUtils.Avatar .Verification.CommittingUser 28 "tw-mr-2"}}
 							<a href="{{.Verification.CommittingUser.HomeLink}}"><strong>{{.Commit.Committer.Name}}</strong></a>
 						{{else}}
 							{{ctx.AvatarUtils.AvatarByEmail .Commit.Committer.Email .Commit.Committer.Name 28 "tw-mr-2"}}
@@ -273,10 +277,60 @@
 				{{else}}
 					<strong>{{.NoteCommit.Author.Name}}</strong>
 				{{end}}
-				<span class="text grey" id="note-authored-time">{{TimeSince .NoteCommit.Author.When ctx.Locale}}</span>
+				<span class="text grey" id="note-authored-time">{{DateUtils.TimeSince .NoteCommit.Author.When}}</span>
+				{{if and ($.Permission.CanWrite $.UnitTypeCode) (not $.Repository.IsArchived) (not .IsDeleted)}}
+					<div class="ui right">
+						<button id="commit-notes-edit-button" class="ui tiny primary button">{{ctx.Locale.Tr "edit"}}</button>
+						<button class="ui tiny button red show-modal" data-modal="#delete-note-modal">{{ctx.Locale.Tr "remove"}}</button>
+					</div>
+					<div class="ui small modal" id="delete-note-modal">
+						<div class="header">
+							{{ctx.Locale.Tr "repo.diff.git-notes.remove-header"}}
+						</div>
+						<div class="content">
+							<p>{{ctx.Locale.Tr "repo.diff.git-notes.remove-body"}}</p>
+							<div class="text right actions">
+								<form action="{{.Link}}/notes/remove" method="post">
+									{{.CsrfTokenHtml}}
+									<button type="button" class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
+									<button type="submit" class="ui red button" href="{{.Link}}/notes/remove">{{ctx.Locale.Tr "remove"}}</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				{{end}}
 			</div>
-			<div class="ui bottom attached info segment git-notes">
+			<div id="commit-notes-display-area" class="ui bottom attached info segment git-notes">
 				<pre class="commit-body">{{.NoteRendered | SanitizeHTML}}</pre>
+			</div>
+			{{if and ($.Permission.CanWrite $.UnitTypeCode) (not $.Repository.IsArchived) (not .IsDeleted)}}
+				<div id="commit-notes-edit-area" class="ui bottom attached info segment git-notes tw-hidden">
+					<form class="ui form" action="{{.Link}}/notes" method="post">
+						{{.CsrfTokenHtml}}
+
+						<div class="field">
+							<textarea name="notes">{{.NoteRendered | SanitizeHTML}}</textarea>
+						</div>
+
+						<div class="field">
+							<button id="notes-save-button" class="ui primary button">{{ctx.Locale.Tr "save"}}</button>
+						</div>
+					</form>
+				</div>
+			{{end}}
+		{{else if and ($.Permission.CanWrite $.UnitTypeCode) (not $.Repository.IsArchived) (not .IsDeleted)}}
+			<div id="commit-notes-add-area" class="ui tw-mt-3 segment tw-hidden">
+				<form class="ui form" action="{{.Link}}/notes" method="post">
+					{{.CsrfTokenHtml}}
+
+					<div class="field">
+						<textarea name="notes"></textarea>
+					</div>
+
+					<div class="field">
+						<button class="ui primary button">{{ctx.Locale.Tr "add"}}</button>
+					</div>
+				</form>
 			</div>
 		{{end}}
 		{{template "repo/diff/box" .}}

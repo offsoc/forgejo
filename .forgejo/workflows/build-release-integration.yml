@@ -22,7 +22,7 @@ on:
 
 jobs:
   release-simulation:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
+    if: vars.ROLE == 'forgejo-coding'
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4

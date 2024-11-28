@@ -45,8 +45,12 @@ func Init(ikm []byte) {
 // This must be a hardcoded string and must not be arbitrarily constructed.
 type Context string
 
-// Used for the `push_mirror` table.
-var ContextPushMirror Context = "pushmirror"
+var (
+	// Used for the `push_mirror` table.
+	ContextPushMirror Context = "pushmirror"
+	// Used for the `two_factor` table.
+	ContextTOTP Context = "totp"
+)
 
 // Derive *the* key for a given context, this is a determistic function. The
 // same key will be provided for the same context.

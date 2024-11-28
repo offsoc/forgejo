@@ -62,8 +62,9 @@ func createRepoAndGetContext(t *testing.T, files []string, deleteMdReadme bool) 
 }
 
 func TestRepoView_FindReadme(t *testing.T) {
-	t.Run("PrioOneLocalizedMdReadme", func(t *testing.T) {
-		onGiteaRun(t, func(t *testing.T, u *url.URL) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		t.Run("PrioOneLocalizedMdReadme", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			ctx, f := createRepoAndGetContext(t, []string{"README.en.md", "README.en.org", "README.org", "README.txt", "README.tex"}, false)
 			defer f()
 
@@ -73,9 +74,8 @@ func TestRepoView_FindReadme(t *testing.T) {
 
 			assert.Equal(t, "README.en.md", file.Name())
 		})
-	})
-	t.Run("PrioTwoMdReadme", func(t *testing.T) {
-		onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		t.Run("PrioTwoMdReadme", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			ctx, f := createRepoAndGetContext(t, []string{"README.en.org", "README.org", "README.txt", "README.tex"}, false)
 			defer f()
 
@@ -85,9 +85,8 @@ func TestRepoView_FindReadme(t *testing.T) {
 
 			assert.Equal(t, "README.md", file.Name())
 		})
-	})
-	t.Run("PrioThreeLocalizedOrgReadme", func(t *testing.T) {
-		onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		t.Run("PrioThreeLocalizedOrgReadme", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			ctx, f := createRepoAndGetContext(t, []string{"README.en.org", "README.org", "README.txt", "README.tex"}, true)
 			defer f()
 
@@ -97,9 +96,8 @@ func TestRepoView_FindReadme(t *testing.T) {
 
 			assert.Equal(t, "README.en.org", file.Name())
 		})
-	})
-	t.Run("PrioFourOrgReadme", func(t *testing.T) {
-		onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		t.Run("PrioFourOrgReadme", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			ctx, f := createRepoAndGetContext(t, []string{"README.org", "README.txt", "README.tex"}, true)
 			defer f()
 
@@ -109,9 +107,8 @@ func TestRepoView_FindReadme(t *testing.T) {
 
 			assert.Equal(t, "README.org", file.Name())
 		})
-	})
-	t.Run("PrioFiveTxtReadme", func(t *testing.T) {
-		onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		t.Run("PrioFiveTxtReadme", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			ctx, f := createRepoAndGetContext(t, []string{"README.txt", "README", "README.tex"}, true)
 			defer f()
 
@@ -121,9 +118,8 @@ func TestRepoView_FindReadme(t *testing.T) {
 
 			assert.Equal(t, "README.txt", file.Name())
 		})
-	})
-	t.Run("PrioSixWithoutExtensionReadme", func(t *testing.T) {
-		onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		t.Run("PrioSixWithoutExtensionReadme", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			ctx, f := createRepoAndGetContext(t, []string{"README", "README.tex"}, true)
 			defer f()
 
@@ -133,9 +129,8 @@ func TestRepoView_FindReadme(t *testing.T) {
 
 			assert.Equal(t, "README", file.Name())
 		})
-	})
-	t.Run("PrioSevenAnyReadme", func(t *testing.T) {
-		onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		t.Run("PrioSevenAnyReadme", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			ctx, f := createRepoAndGetContext(t, []string{"README.tex"}, true)
 			defer f()
 
@@ -145,9 +140,8 @@ func TestRepoView_FindReadme(t *testing.T) {
 
 			assert.Equal(t, "README.tex", file.Name())
 		})
-	})
-	t.Run("DoNotPickReadmeIfNonPresent", func(t *testing.T) {
-		onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		t.Run("DoNotPickReadmeIfNonPresent", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			ctx, f := createRepoAndGetContext(t, []string{}, true)
 			defer f()
 

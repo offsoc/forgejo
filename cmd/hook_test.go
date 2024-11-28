@@ -180,8 +180,15 @@ func TestRunHookUpdate(t *testing.T) {
 	})
 
 	t.Run("Update of internal reference", func(t *testing.T) {
+		defer test.MockVariableValue(&cli.OsExiter, func(code int) {})()
+		defer test.MockVariableValue(&setting.IsProd, false)()
+		finish := captureOutput(t, os.Stderr)
+
 		err := app.Run([]string{"./forgejo", "update", "refs/pull/1/head", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000001"})
-		require.NoError(t, err)
+		out := finish()
+		require.Error(t, err)
+
+		assert.Contains(t, out, "The modification of refs/pull/1/head is skipped as it's an internal reference.")
 	})
 
 	t.Run("Removal of branch", func(t *testing.T) {
