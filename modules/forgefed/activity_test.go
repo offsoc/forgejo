@@ -150,16 +150,67 @@ func Test_LikeUnmarshalJSON(t *testing.T) {
 	}
 }
 
-func Test_UndoUnmarshalJSON(t *testing.T) {
+func Test_UndoLikeMarshalJSON(t *testing.T) {
+	type testPair struct {
+		item    ForgeUndoLike
+		want    []byte
+		wantErr error
+	}
+
+	startTime, _ := time.Parse("2006-Jan-02", "2024-Mar-27")
+	like, _ := NewForgeLike("https://repo.prod.meissa.de/api/v1/activitypub/user-id/1", "https://codeberg.org/api/v1/activitypub/repository-id/1", startTime)
+	tests := map[string]testPair{
+		"empty": {
+			item: ForgeUndoLike{},
+			want: nil,
+		},
+		"valid": {
+			item: ForgeUndoLike{
+				Activity: ap.Activity{
+					StartTime: startTime,
+					Actor:     ap.IRI("https://repo.prod.meissa.de/api/v1/activitypub/user-id/1"),
+					Type:      "Undo",
+					Object:    like,
+				},
+			},
+			want: []byte(`{"type":"Undo",` +
+				`"startTime":"2024-03-27T00:00:00Z",` +
+				`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+				`"object":{` +
+				`"type":"Like",` +
+				`"startTime":"2024-03-27T00:00:00Z",` +
+				`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+				`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`),
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got, err := tt.item.MarshalJSON()
+			if (err != nil || tt.wantErr != nil) && tt.wantErr.Error() != err.Error() {
+				t.Errorf("MarshalJSON() error = \"%v\", wantErr \"%v\"", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MarshalJSON() got = %q\nwant %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 	type testPair struct {
 		item    []byte
 		want    *ForgeUndoLike
 		wantErr error
 	}
 
+	startTime, _ := time.Parse("2006-Jan-02", "2024-Mar-27")
+	like, _ := NewForgeLike("https://repo.prod.meissa.de/api/v1/activitypub/user-id/1", "https://codeberg.org/api/v1/activitypub/repository-id/1", startTime)
+
 	//revive:disable
 	tests := map[string]testPair{
-		"with ID": {
+		"valid": {
 			item: []byte(`{"type":"Undo",` +
 				`"startTime":"2024-03-27T00:00:00Z",` +
 				`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
@@ -170,16 +221,17 @@ func Test_UndoUnmarshalJSON(t *testing.T) {
 				`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`),
 			want: &ForgeUndoLike{
 				Activity: ap.Activity{
-					Actor: ap.IRI("https://repo.prod.meissa.de/api/activitypub/user-id/1"),
-					Type:  "Undo",
-					//Object: ap.IRI("https://codeberg.org/api/activitypub/repository-id/1"),
+					StartTime: startTime,
+					Actor:     ap.IRI("https://repo.prod.meissa.de/api/v1/activitypub/user-id/1"),
+					Type:      "Undo",
+					Object:    like,
 				},
 			},
 			wantErr: nil,
 		},
 		"invalid": {
-			item:    []byte(`{"type":"Invalid","actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1","object":"https://codeberg.org/api/activitypub/repository-id/1"`),
-			want:    &ForgeUndoLike{},
+			item:    []byte(`invalid JSON`),
+			want:    nil,
 			wantErr: fmt.Errorf("cannot parse JSON:"),
 		},
 	}
@@ -188,13 +240,23 @@ func Test_UndoUnmarshalJSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			got := new(ForgeUndoLike)
-			err := got.UnmarshalJSON(test.item)
-			if (err != nil || test.wantErr != nil) && !strings.Contains(err.Error(), test.wantErr.Error()) {
-				t.Errorf("UnmarshalJSON() error = \"%v\", wantErr \"%v\"", err, test.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("UnmarshalJSON() got = %q, want %q, err %q", got, test.want, err.Error())
+			undoLikeErr := got.UnmarshalJSON(test.item)
+			if test.wantErr != nil {
+				if !strings.Contains(undoLikeErr.Error(), test.wantErr.Error()) {
+					t.Errorf("UnmarshalJSON() error = \"%v\", wantErr \"%v\"", undoLikeErr.Error(), test.wantErr)
+					return
+				}
+			} else {
+				if got == nil {
+					t.Errorf("UnmarshalJSON() got nil")
+				} else {
+					// remarshalling due to problems with DeepEqual for struct ForgeUndoLike
+					remarshalled_got, _ := got.MarshalJSON()
+					remarshalled_want, _ := test.want.MarshalJSON()
+					if !reflect.DeepEqual(remarshalled_got, remarshalled_want) {
+						t.Errorf("UnmarshalJSON() got = %q\nwant %q", remarshalled_got, remarshalled_want)
+					}
+				}
 			}
 		})
 	}
