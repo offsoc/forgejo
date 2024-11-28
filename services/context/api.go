@@ -149,6 +149,13 @@ type APIFeatureDisabledError struct {
 	APIError
 }
 
+// APIFeatureDisabledError is a error that is retruned when the given feature is disabled
+// swagger:response featureDisabled
+type swaggerAPIFeatureDisabledError struct {
+	// in:body
+	Body APINotFound `json:"body"`
+}
+
 // APIRepoArchivedError is an error that is raised when an archived repo should be modified
 // swagger:response repoArchivedError
 type APIRepoArchivedError struct {

@@ -20447,6 +20447,7 @@
       "x-go-package": "code.gitea.io/gitea/services/context"
     },
     "APIRepoArchivedError": {
+      "description": "APIRepoArchivedError is an error that is raised when an archived repo should be modified",
       "type": "object",
       "properties": {
         "message": {
@@ -29075,24 +29076,14 @@
     },
     "error": {
       "description": "APIError is error format response",
-      "headers": {
-        "message": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        }
+      "schema": {
+        "$ref": "#/definitions/APIError"
       }
     },
     "featureDisabled": {
       "description": "APIFeatureDisabledError is a error that is retruned when the given feature is disabled",
-      "headers": {
-        "message": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
-        }
+      "schema": {
+        "$ref": "#/definitions/APINotFound"
       }
     },
     "forbidden": {
@@ -29149,10 +29140,15 @@
         "type": "string"
       }
     },
-    "validationError": {
-      "description": "APIValidationError is error format response related to input validation",
-      "schema": {
-        "$ref": "#/definitions/APIValidationError"
+    "unauthorized": {
+      "description": "APIUnauthorizedError is a unauthorized error response",
+      "headers": {
+        "message": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
       }
     },
     "validationError": {
