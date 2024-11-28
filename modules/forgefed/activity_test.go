@@ -378,7 +378,9 @@ func TestActivityValidationUndo(t *testing.T) {
 		`"object":{` +
 		`"type":"Like",` +
 		`"object":""}}`))
-	if sut.Validate()[0] != "object.object should not be empty" {
+	if len(sut.Validate()) < 1 {
+		t.Errorf("validation error expected but not found.")
+	} else if sut.Validate()[0] != "object.object should not be empty" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
 	}
 
