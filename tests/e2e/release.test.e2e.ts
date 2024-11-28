@@ -29,7 +29,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
 
   // Click "New Release"
   await page.goto('/user2/repo2/releases');
-  await page.click('.button.small.primary');
+  await page.click('[data-test-name="new-release-button"]');
 
   // Fill out form and create new release
   await expect(page).toHaveURL('/user2/repo2/releases/new');
@@ -42,7 +42,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
   await page.fill('input[name=attachment-new-exturl-2]', 'https://forgejo.org/');
   await page.click('.remove-rel-attach');
   save_visual(page);
-  await page.click('.button.small.primary');
+  await page.click('[data-test-name="publish-release-button"]');
 
   // Validate release page and click edit
   await expect(page).toHaveURL('/user2/repo2/releases');
@@ -54,7 +54,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
   await expect(page.locator('.download[open] li:nth-of-type(3)')).toContainText('Test');
   await expect(page.locator('.download[open] li:nth-of-type(3) a')).toHaveAttribute('href', 'https://forgejo.org/');
   save_visual(page);
-  await page.locator('.octicon-pencil').first().click();
+  await page.locator('[data-test-name="edit-release-button"]').first().click();
 
   // Validate edit page and edit the release
   await expect(page).toHaveURL('/user2/repo2/releases/edit/2.0');
@@ -69,7 +69,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
   await page.locator('.attachment_edit:visible').nth(2).fill('Test3');
   await page.locator('.attachment_edit:visible').nth(3).fill('https://gitea.com/');
   save_visual(page);
-  await page.click('.button.small.primary');
+  await page.click('[data-test-name="update-release-button"]');
 
   // Validate release page and click edit
   await expect(page).toHaveURL('/user2/repo2/releases');
@@ -79,7 +79,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
   await expect(page.locator('.download[open] li:nth-of-type(4)')).toContainText('Test3');
   await expect(page.locator('.download[open] li:nth-of-type(4) a')).toHaveAttribute('href', 'https://gitea.com/');
   save_visual(page);
-  await page.locator('.octicon-pencil').first().click();
+  await page.locator('[data-test-name="edit-release-button"]').first().click();
 
   // Delete release
   await expect(page).toHaveURL('/user2/repo2/releases/edit/2.0');

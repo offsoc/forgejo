@@ -30,7 +30,7 @@
 							</h4>
 							<div>
 								{{if $.CanCreateRelease}}
-									<a class="muted" data-tooltip-content="{{ctx.Locale.Tr "repo.release.edit"}}" href="{{$.RepoLink}}/releases/edit/{{$release.TagName | PathEscapeSegments}}" rel="nofollow">
+									<a class="muted" data-tooltip-content="{{ctx.Locale.Tr "repo.release.edit"}}" href="{{$.RepoLink}}/releases/edit/{{$release.TagName | PathEscapeSegments}}" rel="nofollow" data-test-name="edit-release-button">
 										{{svg "octicon-pencil"}}
 									</a>
 								{{end}}

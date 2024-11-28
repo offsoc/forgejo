@@ -23,7 +23,7 @@
 				</a>
 			{{end}}
 			{{if and (not .PageIsTagList) .CanCreateRelease}}
-				<a class="ui small primary button" href="{{$.RepoLink}}/releases/new">
+				<a class="ui small primary button" href="{{$.RepoLink}}/releases/new" data-test-name="new-release-button">
 					{{ctx.Locale.Tr "repo.release.new_release"}}
 				</a>
 			{{end}}
