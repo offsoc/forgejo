@@ -2236,7 +2236,7 @@ func GetSummaryCard(ctx *context.Context) {
 	}
 
 	cache := cache.GetCache()
-	cacheKey := fmt.Sprintf("summary_card:issue:%s:%s:%s:%d", ctx.Locale.Language(), issue.Repo.OwnerName, issue.Repo.Name, issue.ID)
+	cacheKey := fmt.Sprintf("summary_card:issue:%s:%d", ctx.Locale.Language(), issue.ID)
 	pngData, ok := cache.Get(cacheKey).([]byte)
 	if ok && pngData != nil && len(pngData) > 0 {
 		ctx.Resp.Header().Set("Content-Type", "image/png")
@@ -2291,7 +2291,7 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 	repoInfo, issueDescription := issueSummary.Split(false, 15)
 
 	repoInfo.SetMargin(10)
-	_, err = repoInfo.DrawText(fmt.Sprintf("%s - #%d", issue.Repo.FullName(), issue.ID), color.Gray{128}, 36, card.Top, card.Left)
+	_, err = repoInfo.DrawText(fmt.Sprintf("%s - #%d", issue.Repo.FullName(), issue.Index), color.Gray{128}, 36, card.Top, card.Left)
 	if err != nil {
 		return nil, err
 	}
