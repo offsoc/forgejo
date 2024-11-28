@@ -240,23 +240,16 @@ func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			got := new(ForgeUndoLike)
-			undoLikeErr := got.UnmarshalJSON(test.item)
-			if test.wantErr != nil {
-				if !strings.Contains(undoLikeErr.Error(), test.wantErr.Error()) {
-					t.Errorf("UnmarshalJSON() error = \"%v\", wantErr \"%v\"", undoLikeErr.Error(), test.wantErr)
-					return
-				}
-			} else {
-				if got == nil {
-					t.Errorf("UnmarshalJSON() got nil")
-				} else {
-					// remarshalling due to problems with DeepEqual for struct ForgeUndoLike
-					remarshalled_got, _ := got.MarshalJSON()
-					remarshalled_want, _ := test.want.MarshalJSON()
-					if !reflect.DeepEqual(remarshalled_got, remarshalled_want) {
-						t.Errorf("UnmarshalJSON() got = %q\nwant %q", remarshalled_got, remarshalled_want)
-					}
-				}
+			err := got.UnmarshalJSON(test.item)
+			if (err != nil || test.wantErr != nil) && !strings.Contains(err.Error(), test.wantErr.Error()) {
+				t.Errorf("UnmarshalJSON() error = \"%v\", wantErr \"%v\"", err, test.wantErr)
+				return
+			}
+			// remarshalling due to problems of DeepEqual for struct ForgeUndoLike
+			remarshalled_got, _ := got.MarshalJSON()
+			remarshalled_want, _ := test.want.MarshalJSON()
+			if !reflect.DeepEqual(remarshalled_got, remarshalled_want) {
+				t.Errorf("UnmarshalJSON() got = %#v\nwant %#v", got, test.want)
 			}
 		})
 	}
