@@ -8,9 +8,6 @@
 			</div>
 			<div class="ui twelve wide column tw-mb-4">
 				{{template "user/overview/header" .}}
-
-				{{template "base/alert" .}}
-
 				{{if eq .TabName "activity"}}
 					{{if eq .SignedUserID .ContextUser.ID}}
 					<p id="visibility-hint">

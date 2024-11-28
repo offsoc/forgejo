@@ -782,12 +782,11 @@ func registerRoutes(m *web.Route) {
 	// ***** END: Admin *****
 
 	m.Group("", func() {
-		m.Group("/{username}", func() {
-			m.Get("", user.UsernameSubRoute)
-			m.Get("/-/starlist/{name}", user.ShowStarList)
-			m.Post("/-/starlist_edit", web.Bind(forms.EditStarListForm{}), user.EditStarListPost)
+		m.Get("/{username}", user.UsernameSubRoute)
+		m.Group("/{username}/-", func() {
+			m.Get("/starlist/{name}", user.ShowStarList)
+			m.Post("/starlist_edit", web.Bind(forms.EditStarListForm{}), user.EditStarListPost)
 		}, context.UserAssignmentWeb())
-		m.Get("/attachments/{uuid}", repo.GetAttachment)
 		m.Methods("GET, OPTIONS", "/attachments/{uuid}", optionsCorsHandler(), repo.GetAttachment)
 	}, ignSignIn)
 

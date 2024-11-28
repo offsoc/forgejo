@@ -175,7 +175,7 @@ func deleteStarList(ctx *context.Context, form forms.EditStarListForm) {
 		return
 	}
 
-	ctx.Flash.Success(ctx.Tr("starlist.delete_success_message", starList.Name))
+	ctx.Flash.Success(ctx.Tr("starlist.delete.success", starList.Name))
 
 	ctx.Redirect(fmt.Sprintf("%s?tab=stars", ctx.ContextUser.HomeLink()))
 }
