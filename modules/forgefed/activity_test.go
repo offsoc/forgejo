@@ -241,8 +241,14 @@ func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			got := new(ForgeUndoLike)
 			err := got.UnmarshalJSON(test.item)
-			if (err != nil || test.wantErr != nil) && !strings.Contains(err.Error(), test.wantErr.Error()) {
-				t.Errorf("UnmarshalJSON() error = \"%v\", wantErr \"%v\"", err, test.wantErr)
+			if test.wantErr != nil {
+				if err == nil {
+					t.Errorf("UnmarshalJSON() error = nil, wantErr \"%v\"", test.wantErr)
+				} else {
+					if !strings.Contains(err.Error(), test.wantErr.Error()) {
+						t.Errorf("UnmarshalJSON() error = \"%v\", wantErr \"%v\"", err, test.wantErr)
+					}
+				}
 				return
 			}
 			// remarshalling due to problems of DeepEqual for struct ForgeUndoLike
