@@ -131,6 +131,16 @@ func DeleteUser(ctx context.Context, u *user_model.User, purge bool) error {
 		return models.ErrDeleteLastAdminUser{UID: u.ID}
 	}
 
+	hasSSHKey, err := db.GetEngine(ctx).Where("owner_id = ? AND type != ?", u.ID, asymkey_model.KeyTypePrincipal).Table("public_key").Exist()
+	if err != nil {
+		return err
+	}
+
+	hasPrincipialSSHKey, err := db.GetEngine(ctx).Where("owner_id = ? AND type = ?", u.ID, asymkey_model.KeyTypePrincipal).Table("public_key").Exist()
+	if err != nil {
+		return err
+	}
+
 	if purge {
 		// Disable the user first
 		// NOTE: This is deliberately not within a transaction as it must disable the user immediately to prevent any further action by the user to be purged.
@@ -260,11 +270,16 @@ func DeleteUser(ctx context.Context, u *user_model.User, purge bool) error {
 	}
 	committer.Close()
 
-	if err = asymkey_model.RewriteAllPublicKeys(ctx); err != nil {
-		return err
+	if hasSSHKey {
+		if err = asymkey_model.RewriteAllPublicKeys(ctx); err != nil {
+			return err
+		}
 	}
-	if err = asymkey_model.RewriteAllPrincipalKeys(ctx); err != nil {
-		return err
+
+	if hasPrincipialSSHKey {
+		if err = asymkey_model.RewriteAllPrincipalKeys(ctx); err != nil {
+			return err
+		}
 	}
 
 	// Note: There are something just cannot be roll back,
