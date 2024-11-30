@@ -5,6 +5,7 @@ package unittest
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -23,8 +24,8 @@ import (
 	"code.gitea.io/gitea/modules/util"
 
 	"github.com/stretchr/testify/require"
-	"xorm.io/xorm"
-	"xorm.io/xorm/names"
+	//	"xorm.io/xorm"
+	//"xorm.io/xorm/names"
 )
 
 // giteaRoot a path to the gitea root
@@ -102,17 +103,100 @@ func MainTest(m *testing.M, testOpts ...*TestOptions) {
 		}
 	}
 
-	if err := CreateTestEngine(opts); err != nil {
-		fatalTestError("Error creating test engine: %v\n", err)
-	}
-
 	setting.AppURL = "https://try.gitea.io/"
 	setting.RunUser = "runuser"
 	setting.SSH.User = "sshuser"
 	setting.SSH.BuiltinServerUser = "builtinuser"
 	setting.SSH.Port = 3000
 	setting.SSH.Domain = "try.gitea.io"
-	setting.Database.Type = "sqlite3"
+	// setting.Database.Type = "sqlite3"
+	setting.Database.Type = "postgres"
+	setting.Database.Host = "172.23.0.3:5432"
+	// setting.Database.Host = "pgsql:5432"
+	setting.Database.Name = "testgitea"
+	setting.Database.User = "postgres"
+	setting.Database.Passwd = "postgres"
+	setting.Database.Schema = "gtestschema"
+	setting.Database.SSLMode = "disable"
+
+	switch {
+	case setting.Database.Type.IsMySQL():
+		connType := "tcp"
+		if len(setting.Database.Host) > 0 && setting.Database.Host[0] == '/' { // looks like a unix socket
+			connType = "unix"
+		}
+
+		db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@%s(%s)/",
+			setting.Database.User, setting.Database.Passwd, connType, setting.Database.Host))
+		defer db.Close()
+		if err != nil {
+			log.Fatal("sql.Open: %v", err)
+		}
+		if _, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", strings.SplitN(setting.Database.Name, "?", 2)[0])); err != nil {
+			log.Fatal("db.Exec: %v", err)
+		}
+	case setting.Database.Type.IsPostgreSQL():
+		var db *sql.DB
+		var err error
+		if setting.Database.Host[0] == '/' {
+			db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@/%s?sslmode=%s&host=%s",
+				setting.Database.User, setting.Database.Passwd, setting.Database.Name, setting.Database.SSLMode, setting.Database.Host))
+		} else {
+			db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s?sslmode=%s",
+				setting.Database.User, setting.Database.Passwd, setting.Database.Host, setting.Database.SSLMode))
+		}
+
+		defer db.Close()
+		if err != nil {
+			log.Fatal("sql.Open: %v", err)
+		}
+		dbrows, err := db.Query(fmt.Sprintf("SELECT 1 FROM pg_database WHERE datname = '%s'", setting.Database.Name))
+		if err != nil {
+			log.Fatalf("db.Query: %v", err)
+		}
+		defer dbrows.Close()
+
+		if !dbrows.Next() {
+			if _, err = db.Exec(fmt.Sprintf("CREATE DATABASE %s", setting.Database.Name)); err != nil {
+				log.Fatal("db.Exec: CREATE DATABASE: %v", err)
+			}
+		}
+		// Check if we need to setup a specific schema
+		if len(setting.Database.Schema) == 0 {
+			break
+		}
+		db.Close()
+
+		if setting.Database.Host[0] == '/' {
+			db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@/%s?sslmode=%s&host=%s",
+				setting.Database.User, setting.Database.Passwd, setting.Database.Name, setting.Database.SSLMode, setting.Database.Host))
+		} else {
+			db, err = sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+				setting.Database.User, setting.Database.Passwd, setting.Database.Host, setting.Database.Name, setting.Database.SSLMode))
+		}
+		// This is a different db object; requires a different Close()
+		defer db.Close()
+		if err != nil {
+			log.Fatal("sql.Open: %v", err)
+		}
+		schrows, err := db.Query(fmt.Sprintf("SELECT 1 FROM information_schema.schemata WHERE schema_name = '%s'", setting.Database.Schema))
+		if err != nil {
+			log.Fatal("db.Query: %v", err)
+		}
+		defer schrows.Close()
+
+		if !schrows.Next() {
+			// Create and setup a DB schema
+			if _, err = db.Exec(fmt.Sprintf("CREATE SCHEMA %s", setting.Database.Schema)); err != nil {
+				log.Fatal("db.Exec: CREATE SCHEMA: %v", err)
+			}
+		}
+
+	}
+
+	if err := CreateTestEngine(opts); err != nil {
+		fatalTestError("Error creating test engine: %v\n", err)
+	}
 	setting.Repository.DefaultBranch = "master" // many test code still assume that default branch is called "master"
 	repoRootPath, err := os.MkdirTemp(os.TempDir(), "repos")
 	if err != nil {
@@ -214,22 +298,13 @@ type FixturesOptions struct {
 
 // CreateTestEngine creates a memory database and loads the fixture data from fixturesDir
 func CreateTestEngine(opts FixturesOptions) error {
-	x, err := xorm.NewEngine("sqlite3", "file::memory:?cache=shared&_txlock=immediate")
+	err := db.InitEngine(context.Background())
 	if err != nil {
-		if strings.Contains(err.Error(), "unknown driver") {
-			return fmt.Errorf(`sqlite3 requires: import _ "github.com/mattn/go-sqlite3" or -tags sqlite,sqlite_unlock_notify%s%w`, "\n", err)
-		}
 		return err
 	}
-	x.SetMapper(names.GonicMapper{})
-	db.SetDefaultEngine(context.Background(), x)
 
 	if err = db.SyncAllTables(); err != nil {
 		return err
-	}
-	switch os.Getenv("GITEA_UNIT_TESTS_LOG_SQL") {
-	case "true", "1":
-		x.ShowSQL(true)
 	}
 
 	return InitFixtures(opts)
