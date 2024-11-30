@@ -18,7 +18,7 @@
     "chart.js": "4.4.5",
     "chartjs-adapter-dayjs-4": "1.0.4",
     "chartjs-plugin-zoom": "2.2.0",
-    "clippie": "4.1.1",
+    "clippie": "4.1.4",
     "css-loader": "7.0.0",
     "dayjs": "1.11.12",
     "dropzone": "6.0.0-beta.2",
