@@ -17,6 +17,9 @@ func TestElasticsearchIndexer(t *testing.T) {
 	// The elasticsearch instance started by testing.yml > test-unit > services > elasticsearch
 	url := "http://elastic:changeme@elasticsearch:9200"
 
+	if os.Getenv("TEST_SKIP_ELASTICSEARCH") == "true" {
+		t.Skip("TEST_SKIP_ELASTICSEARCH='true'")
+	}
 	if os.Getenv("CI") == "" {
 		// Make it possible to run tests against a local elasticsearch instance
 		url = os.Getenv("TEST_ELASTICSEARCH_URL")

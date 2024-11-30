@@ -18,8 +18,8 @@ import (
 )
 
 func TestMinioStorageIterator(t *testing.T) {
-	if os.Getenv("CI") == "" {
-		t.Skip("minioStorage not present outside of CI")
+	if os.Getenv("TEST_SKIP_S3") == "true" || os.Getenv("CI") == "" {
+		t.Skip("TEST_SKIP_S3='true' or CI=''")
 		return
 	}
 	testStorageIterator(t, setting.MinioStorageType, &setting.Storage{
@@ -34,8 +34,8 @@ func TestMinioStorageIterator(t *testing.T) {
 }
 
 func TestVirtualHostMinioStorage(t *testing.T) {
-	if os.Getenv("CI") == "" {
-		t.Skip("minioStorage not present outside of CI")
+	if os.Getenv("TEST_SKIP_S3") == "true" || os.Getenv("CI") == "" {
+		t.Skip("TEST_SKIP_S3='true' or CI=''")
 		return
 	}
 	testStorageIterator(t, setting.MinioStorageType, &setting.Storage{
@@ -85,8 +85,8 @@ func TestMinioStoragePath(t *testing.T) {
 }
 
 func TestS3StorageBadRequest(t *testing.T) {
-	if os.Getenv("CI") == "" {
-		t.Skip("S3Storage not present outside of CI")
+	if os.Getenv("TEST_SKIP_S3") == "true" || os.Getenv("CI") == "" {
+		t.Skip("TEST_SKIP_S3='true' or CI=''")
 		return
 	}
 	cfg := &setting.Storage{

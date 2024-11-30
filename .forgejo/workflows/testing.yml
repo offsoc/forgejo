@@ -178,7 +178,7 @@ jobs:
   test-mysql:
     if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
-    needs: [backend-checks, frontend-checks]
+    needs: [test-unit]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
       options: --tmpfs /tmp:exec,noatime
@@ -201,7 +201,15 @@ jobs:
         with:
           packages: git git-lfs
       - uses: ./.forgejo/workflows-composite/build-backend
-      - run: |
+      - name: test-backend
+        run: |
+          su forgejo -c 'make test-backend test-check'
+        timeout-minutes: 120
+        env:
+          TEST_SKIP_ELASTICSEARCH: 'true'
+          TEST_SKIP_S3: 'true'
+      - name: test-mysql
+        run: |
           su forgejo -c 'make test-mysql-migration test-mysql'
         timeout-minutes: 120
         env:
@@ -209,7 +217,7 @@ jobs:
   test-pgsql:
     if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
-    needs: [backend-checks, frontend-checks]
+    needs: [test-unit]
     container:
       image: 'code.forgejo.org/oci/node:20-bookworm'
       options: --tmpfs /tmp:exec,noatime
@@ -238,7 +246,15 @@ jobs:
         with:
           packages: git git-lfs
       - uses: ./.forgejo/workflows-composite/build-backend
-      - run: |
+      - name: test-backend
+        run: |
+          su forgejo -c 'make test-backend test-check'
+        timeout-minutes: 120
+        env:
+          TEST_SKIP_ELASTICSEARCH: 'true'
+          TEST_SKIP_S3: 'true'
+      - name: test-pgsql
+        run: |
           su forgejo -c 'make test-pgsql-migration test-pgsql'
         timeout-minutes: 120
         env:
