@@ -302,10 +302,21 @@ func GetLatestCommitStatusForPairs(ctx context.Context, repoSHAs []RepoSHA) (map
 		conds = append(conds, builder.Eq{"repo_id": repoSHA.RepoID, "sha": repoSHA.SHA})
 	}
 
-	sess := db.GetEngine(ctx).Table(&CommitStatus{}).
-		Select("MAX(`index`) AS `index`, *").
+	subquery := builder.Dialect(db.BuilderDialect()).
+		Select("context_hash, repo_id, sha, MAX(`index`) AS max_index").
+		From("commit_status").
 		Where(builder.Or(conds...)).
-		GroupBy("context_hash, repo_id, sha").OrderBy("MAX(`index`) DESC")
+		GroupBy("context_hash, repo_id, sha")
+
+	sess := db.GetEngine(ctx).
+		Table(&CommitStatus{}).
+		Alias("c").
+		Join(
+			"INNER",
+			subquery,
+			"c.context_hash = commit_status.context_hash AND c.repo_id = commit_status.repo_id AND c.sha = commit_status.sha AND c.`index` = commit_status.max_index",
+		).
+		OrderBy("c.`index` DESC")
 	err := sess.Find(&results)
 	if err != nil {
 		return nil, err
