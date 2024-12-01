@@ -10,6 +10,7 @@ import (
 	git_model "code.gitea.io/gitea/models/git"
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,12 +20,14 @@ func TestGetLatestCommitStatusForPairs(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	t.Run("Empty", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, nil)
 		require.NoError(t, err)
 		assert.EqualValues(t, map[int64][]*git_model.CommitStatus{}, pairs)
 	})
 
 	t.Run("Repo 1", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{RepoID: 1, SHA: "1234123412341234123412341234123412341234"}})
 		require.NoError(t, err)
 
@@ -70,6 +73,7 @@ func TestGetLatestCommitStatusForPairs(t *testing.T) {
 		}, pairs)
 	})
 	t.Run("Repo 62", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{RepoID: 62, SHA: "774f93df12d14931ea93259ae93418da4482fcc1"}})
 		require.NoError(t, err)
 
@@ -92,6 +96,7 @@ func TestGetLatestCommitStatusForPairs(t *testing.T) {
 	})
 
 	t.Run("Repo 62 non-existent sha", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{RepoID: 62, SHA: "774f93df12d14931ea93259ae93418da4482fcc"}})
 		require.NoError(t, err)
 
@@ -99,6 +104,7 @@ func TestGetLatestCommitStatusForPairs(t *testing.T) {
 	})
 
 	t.Run("SHA with non-existent repo id", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{RepoID: 1, SHA: "774f93df12d14931ea93259ae93418da4482fcc1"}})
 		require.NoError(t, err)
 
@@ -110,12 +116,14 @@ func TestGetLatestCommitStatusForRepoCommitIDs(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	t.Run("Empty", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		repoStatuses, err := git_model.GetLatestCommitStatusForRepoCommitIDs(db.DefaultContext, 62, nil)
 		require.NoError(t, err)
 		assert.EqualValues(t, map[string][]*git_model.CommitStatus{}, repoStatuses)
 	})
 
 	t.Run("Repo 1", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		repoStatuses, err := git_model.GetLatestCommitStatusForRepoCommitIDs(db.DefaultContext, 1, []string{"1234123412341234123412341234123412341234"})
 		require.NoError(t, err)
 		assert.EqualValues(t, map[string][]*git_model.CommitStatus{
@@ -161,6 +169,7 @@ func TestGetLatestCommitStatusForRepoCommitIDs(t *testing.T) {
 	})
 
 	t.Run("Repo 62", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		repoStatuses, err := git_model.GetLatestCommitStatusForRepoCommitIDs(db.DefaultContext, 62, []string{"774f93df12d14931ea93259ae93418da4482fcc1"})
 		require.NoError(t, err)
 		assert.EqualValues(t, map[string][]*git_model.CommitStatus{
@@ -182,12 +191,14 @@ func TestGetLatestCommitStatusForRepoCommitIDs(t *testing.T) {
 	})
 
 	t.Run("Repo 62 non-existent sha", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		repoStatuses, err := git_model.GetLatestCommitStatusForRepoCommitIDs(db.DefaultContext, 62, []string{"774f93df12d14931ea93259ae93418da4482fcc"})
 		require.NoError(t, err)
 		assert.EqualValues(t, map[string][]*git_model.CommitStatus{}, repoStatuses)
 	})
 
 	t.Run("non-existent repo ID", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		repoStatuses, err := git_model.GetLatestCommitStatusForRepoCommitIDs(db.DefaultContext, 1, []string{"774f93df12d14931ea93259ae93418da4482fcc"})
 		require.NoError(t, err)
 		assert.EqualValues(t, map[string][]*git_model.CommitStatus{}, repoStatuses)
