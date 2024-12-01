@@ -25,7 +25,7 @@ func TestGetLatestCommitStatusForPairs(t *testing.T) {
 	})
 
 	t.Run("Repo 1", func(t *testing.T) {
-		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{1, "1234123412341234123412341234123412341234"}})
+		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{RepoID: 1, SHA: "1234123412341234123412341234123412341234"}})
 		require.NoError(t, err)
 
 		assert.EqualValues(t, map[int64][]*git_model.CommitStatus{
@@ -70,7 +70,7 @@ func TestGetLatestCommitStatusForPairs(t *testing.T) {
 		}, pairs)
 	})
 	t.Run("Repo 62", func(t *testing.T) {
-		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{62, "774f93df12d14931ea93259ae93418da4482fcc1"}})
+		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{RepoID: 62, SHA: "774f93df12d14931ea93259ae93418da4482fcc1"}})
 		require.NoError(t, err)
 
 		assert.EqualValues(t, map[int64][]*git_model.CommitStatus{
@@ -92,14 +92,14 @@ func TestGetLatestCommitStatusForPairs(t *testing.T) {
 	})
 
 	t.Run("Repo 62 non-existent sha", func(t *testing.T) {
-		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{62, "774f93df12d14931ea93259ae93418da4482fcc"}})
+		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{RepoID: 62, SHA: "774f93df12d14931ea93259ae93418da4482fcc"}})
 		require.NoError(t, err)
 
 		assert.EqualValues(t, map[int64][]*git_model.CommitStatus{}, pairs)
 	})
 
 	t.Run("SHA with non-existent repo id", func(t *testing.T) {
-		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{1, "774f93df12d14931ea93259ae93418da4482fcc1"}})
+		pairs, err := git_model.GetLatestCommitStatusForPairs(db.DefaultContext, []git_model.RepoSHA{{RepoID: 1, SHA: "774f93df12d14931ea93259ae93418da4482fcc1"}})
 		require.NoError(t, err)
 
 		assert.EqualValues(t, map[int64][]*git_model.CommitStatus{}, pairs)
