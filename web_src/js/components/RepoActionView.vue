@@ -25,7 +25,8 @@ const sfc = {
   data() {
     return {
       // internal state
-      loading: false,
+      loading: null,
+      needLoadingWithLogCursors: null,
       intervalID: null,
       currentJobStepsStates: [],
       artifacts: [],
@@ -114,7 +115,9 @@ const sfc = {
     toggleStepLogs(idx) {
       this.currentJobStepsStates[idx].expanded = !this.currentJobStepsStates[idx].expanded;
       if (this.currentJobStepsStates[idx].expanded) {
-        this.loadJob(); // try to load the data immediately instead of waiting for next timer interval
+        // request data load immediately instead of waiting for next timer interval (which, if the job is done, will
+        // never happen because the interval will have been disabled)
+        this.loadJob();
       }
     },
     // cancel a run
@@ -229,13 +232,16 @@ const sfc = {
       await this.loadJob();
     },
 
-    async fetchJob() {
-      const logCursors = this.currentJobStepsStates.map((it, idx) => {
+    getLogCursors() {
+      return this.currentJobStepsStates.map((it, idx) => {
         // cursor is used to indicate the last position of the logs
         // it's only used by backend, frontend just reads it and passes it back, it and can be any type.
         // for example: make cursor=null means the first time to fetch logs, cursor=eof means no more logs, etc
         return {step: idx, cursor: it.cursor, expanded: it.expanded};
       });
+    },
+
+    async fetchJob(logCursors) {
       const resp = await POST(`${this.actionsURL}/runs/${this.runIndex}/jobs/${this.jobIndex}`, {
         data: {logCursors},
       });
@@ -243,19 +249,41 @@ const sfc = {
     },
 
     async loadJob() {
-      if (this.loading) return;
+      let myLoadingLogCursors = this.getLogCursors();
+      if (this.loading) {
+        // loadJob is already executing; but it's possible that our log cursor request has changed since it started.  If
+        // the interval load is active, that problem would solve itself, but if it isn't (say we're viewing a "done"
+        // job), then the change to the requested cursors may never be loaded.  To address this we set our newest
+        // requested log cursors into a state property and rely on loadJob to retry at the end of its execution if it
+        // notices these have changed.
+        this.needLoadingWithLogCursors = myLoadingLogCursors;
+        return;
+      }
+
       try {
         this.loading = true;
 
         let job, artifacts;
-        try {
-          [job, artifacts] = await Promise.all([
-            this.fetchJob(),
-            this.fetchArtifacts(), // refresh artifacts if upload-artifact step done
-          ]);
-        } catch (err) {
-          if (err instanceof TypeError) return; // avoid network error while unloading page
-          throw err;
+
+        while (true) {
+          try {
+            [job, artifacts] = await Promise.all([
+              this.fetchJob(myLoadingLogCursors),
+              this.fetchArtifacts(), // refresh artifacts if upload-artifact step done
+            ]);
+          } catch (err) {
+            if (err instanceof TypeError) return; // avoid network error while unloading page
+            throw err;
+          }
+
+          // We can be done as long as needLoadingWithLogCursors is null, or the same as what we just loaded.
+          if (this.needLoadingWithLogCursors === null || JSON.stringify(this.needLoadingWithLogCursors) == JSON.stringify(myLoadingLogCursors)) {
+            this.needLoadingWithLogCursors = null;
+            break;
+          }
+
+          // Otherwise we need to retry that.
+          myLoadingLogCursors = this.needLoadingWithLogCursors;
         }
 
         this.artifacts = artifacts['artifacts'] || [];
@@ -279,6 +307,7 @@ const sfc = {
         }
 
         if (this.run.done && this.intervalID) {
+          console.log('clearInterval', this.intervalID);
           clearInterval(this.intervalID);
           this.intervalID = null;
         }
