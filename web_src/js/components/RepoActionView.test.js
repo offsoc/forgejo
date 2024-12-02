@@ -113,7 +113,7 @@ test('load multiple steps on a finished action', async () => {
         json: vi.fn().mockResolvedValue(
           {
             artifacts: [],
-          }
+          },
         ),
       });
     }
@@ -127,11 +127,11 @@ test('load multiple steps on a finished action', async () => {
             step: cursor.step,
             cursor: 0,
             lines: [
-              {index: 1, message: `Step #${cursor.step+1} Log #1`, timestamp: 0},
-              {index: 1, message: `Step #${cursor.step+1} Log #2`, timestamp: 0},
-              {index: 1, message: `Step #${cursor.step+1} Log #3`, timestamp: 0},
+              {index: 1, message: `Step #${cursor.step + 1} Log #1`, timestamp: 0},
+              {index: 1, message: `Step #${cursor.step + 1} Log #2`, timestamp: 0},
+              {index: 1, message: `Step #${cursor.step + 1} Log #3`, timestamp: 0},
             ],
-          }
+          },
         );
       }
     }

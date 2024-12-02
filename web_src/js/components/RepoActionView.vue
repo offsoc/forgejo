@@ -281,7 +281,7 @@ const sfc = {
           }
 
           // We can be done as long as needLoadingWithLogCursors is null, or the same as what we just loaded.
-          if (this.needLoadingWithLogCursors === null || JSON.stringify(this.needLoadingWithLogCursors) == JSON.stringify(myLoadingLogCursors)) {
+          if (this.needLoadingWithLogCursors === null || JSON.stringify(this.needLoadingWithLogCursors) === JSON.stringify(myLoadingLogCursors)) {
             this.needLoadingWithLogCursors = null;
             break;
           }
