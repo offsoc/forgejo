@@ -311,7 +311,6 @@ const sfc = {
         }
 
         if (this.run.done && this.intervalID) {
-          console.log('clearInterval', this.intervalID);
           clearInterval(this.intervalID);
           this.intervalID = null;
         }
