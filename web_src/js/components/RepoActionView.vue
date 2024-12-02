@@ -25,7 +25,7 @@ const sfc = {
   data() {
     return {
       // internal state
-      loading: null,
+      loading: false,
       needLoadingWithLogCursors: null,
       intervalID: null,
       currentJobStepsStates: [],
@@ -262,6 +262,10 @@ const sfc = {
 
       try {
         this.loading = true;
+        // Since no async operations occured since fetching myLoadingLogCursors, we can be sure that we have the most
+        // recent needed log cursors, so we can reset needLoadingWithLogCursors -- it could be stale if exceptions
+        // occurred in previous load attempts.
+        this.needLoadingWithLogCursors = null;
 
         let job, artifacts;
 
