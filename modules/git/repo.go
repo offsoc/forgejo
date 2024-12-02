@@ -64,8 +64,14 @@ func IsRepoURLAccessible(ctx context.Context, url string) bool {
 	return err == nil
 }
 
+type InitRepositoryOptions struct {
+	ObjectFormatName string
+	Branch           string
+	Bare             bool
+}
+
 // InitRepository initializes a new Git repository.
-func InitRepository(ctx context.Context, repoPath string, bare bool, objectFormatName string) error {
+func InitRepository(ctx context.Context, repoPath string, opts InitRepositoryOptions) error {
 	err := os.MkdirAll(repoPath, os.ModePerm)
 	if err != nil {
 		return err
@@ -73,16 +79,24 @@ func InitRepository(ctx context.Context, repoPath string, bare bool, objectForma
 
 	cmd := NewCommand(ctx, "init")
 
-	if !IsValidObjectFormat(objectFormatName) {
-		return fmt.Errorf("invalid object format: %s", objectFormatName)
-	}
-	if SupportHashSha256 {
-		cmd.AddOptionValues("--object-format", objectFormatName)
+	if opts.ObjectFormatName != "" {
+		if !IsValidObjectFormat(opts.ObjectFormatName) {
+			return fmt.Errorf("invalid object format: %s", opts.ObjectFormatName)
+		}
+		if SupportHashSha256 {
+			cmd.AddOptionValues("--object-format", opts.ObjectFormatName)
+		}
 	}
 
-	if bare {
+	if opts.Bare {
 		cmd.AddArguments("--bare")
 	}
+
+	if opts.Branch != "" {
+		cmd = cmd.AddArguments("-b")
+		cmd = cmd.AddDynamicArguments(opts.Branch)
+	}
+
 	_, _, err = cmd.RunStdString(&RunOpts{Dir: repoPath})
 	return err
 }

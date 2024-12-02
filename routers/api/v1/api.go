@@ -73,6 +73,7 @@ import (
 
 	actions_model "code.gitea.io/gitea/models/actions"
 	auth_model "code.gitea.io/gitea/models/auth"
+	gist_model "code.gitea.io/gitea/models/gist"
 	issues_model "code.gitea.io/gitea/models/issues"
 	"code.gitea.io/gitea/models/organization"
 	"code.gitea.io/gitea/models/perm"
@@ -89,6 +90,7 @@ import (
 	"code.gitea.io/gitea/routers/api/shared"
 	"code.gitea.io/gitea/routers/api/v1/activitypub"
 	"code.gitea.io/gitea/routers/api/v1/admin"
+	"code.gitea.io/gitea/routers/api/v1/gist"
 	"code.gitea.io/gitea/routers/api/v1/misc"
 	"code.gitea.io/gitea/routers/api/v1/notify"
 	"code.gitea.io/gitea/routers/api/v1/org"
@@ -375,6 +377,39 @@ func tokenRequiresScopes(requiredScopeCategories ...auth_model.AccessTokenScopeC
 
 		// assign to true so that those searching should only filter public repositories/users/organizations
 		ctx.PublicOnly = publicOnly
+	}
+}
+
+// Assigns a Gist
+func gistAssignment() func(ctx *context.APIContext) {
+	return func(ctx *context.APIContext) {
+		gistUUID := ctx.Params("gistuuid")
+
+		gist, err := gist_model.GetGistByUUID(ctx, gistUUID)
+		if err != nil {
+			if gist_model.IsErrGistNotExist(err) {
+				ctx.NotFound()
+			} else {
+				ctx.ServerError("GetGistByUUID", err)
+			}
+			return
+		}
+
+		if !gist.HasAccess(ctx.Doer) {
+			ctx.NotFound()
+			return
+		}
+
+		ctx.Gist = gist
+	}
+}
+
+// Checks if the Caller is the Owner of the Gist
+func reqGistOwner() func(ctx *context.APIContext) {
+	return func(ctx *context.APIContext) {
+		if !ctx.Gist.IsOwner(ctx.Doer) {
+			ctx.NotFound()
+		}
 	}
 }
 
@@ -879,6 +914,7 @@ func Routes() *web.Route {
 				m.Get("/api", settings.GetGeneralAPISettings)
 				m.Get("/attachment", settings.GetGeneralAttachmentSettings)
 				m.Get("/repository", settings.GetGeneralRepoSettings)
+				m.Get("/gist", settings.GetGistSettings)
 			})
 		})
 
@@ -1581,6 +1617,19 @@ func Routes() *web.Route {
 			})
 			m.Get("/activities/feeds", org.ListTeamActivityFeeds)
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryOrganization), orgAssignment(false, true), reqToken(), reqTeamMembership(), checkTokenPublicOnly())
+
+		m.Group("/gists", func() {
+			m.Get("/search", gist.Search)
+			m.Post("", reqToken(), bind(api.CreateGistOption{}), gist.Create)
+			m.Group("/{gistuuid}", func() {
+				m.Get("", gist.Get)
+				m.Get("/files", gist.GetFiles)
+				m.Group("", func() {
+					m.Delete("", gist.Delete)
+					m.Post("/files", reqToken(), bind(api.UpdateGistFilesOption{}), gist.UpdateFiles)
+				}, reqGistOwner())
+			}, gistAssignment())
+		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryGist))
 
 		m.Group("/admin", func() {
 			m.Group("/cron", func() {

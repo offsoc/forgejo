@@ -95,6 +95,14 @@ func AddChangesWithArgs(repoPath string, globalArgs TrustedCmdArgs, all bool, fi
 	return err
 }
 
+// RemoveFiles removes files from the git repo
+func RemoveFiles(repoPath string, files ...string) error {
+	cmd := NewCommandContextNoGlobals(DefaultContext).AddArguments("rm")
+	cmd.AddDashesAndList(files...)
+	_, _, err := cmd.RunStdString(&RunOpts{Dir: repoPath})
+	return err
+}
+
 // CommitChangesOptions the options when a commit created
 type CommitChangesOptions struct {
 	Committer *Signature

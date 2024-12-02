@@ -84,3 +84,18 @@ func GetGeneralAttachmentSettings(ctx *context.APIContext) {
 		MaxSize:      setting.Attachment.MaxSize,
 	})
 }
+
+// GetGistSettings returns instance's global settings for gist
+func GetGistSettings(ctx *context.APIContext) {
+	// swagger:operation GET /settings/gist settings getGistSettings
+	// ---
+	// summary: Get instance's global settings for gist
+	// produces:
+	// - application/json
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/GistSettings"
+	ctx.JSON(http.StatusOK, api.GistSettings{
+		Enabled: setting.Gist.Enabled,
+	})
+}

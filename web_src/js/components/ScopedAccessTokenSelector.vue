@@ -37,7 +37,8 @@ const sfc = {
         'organization',
         'package',
         'repository',
-        'user');
+        'user',
+        'gist');
       return categories;
     },
   },

@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	gist_model "code.gitea.io/gitea/models/gist"
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	mc "code.gitea.io/gitea/modules/cache"
@@ -62,6 +63,7 @@ type Context struct {
 	Repo    *Repository
 	Org     *Organization
 	Package *Package
+	Gist    *gist_model.Gist
 }
 
 type TemplateContext map[string]any
@@ -197,6 +199,7 @@ func Contexter() func(next http.Handler) http.Handler {
 			ctx.Data["DisableStars"] = setting.Repository.DisableStars
 			ctx.Data["DisableForks"] = setting.Repository.DisableForks
 			ctx.Data["EnableActions"] = setting.Actions.Enabled
+			ctx.Data["EnableGists"] = setting.Gist.Enabled
 
 			ctx.Data["ManifestData"] = setting.ManifestData
 

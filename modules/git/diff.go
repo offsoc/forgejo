@@ -271,12 +271,7 @@ func CutDiffAroundLine(originalDiff io.Reader, line int64, old bool, numbersOfLi
 }
 
 // GetAffectedFiles returns the affected files between two commits
-func GetAffectedFiles(repo *Repository, oldCommitID, newCommitID string, env []string) ([]string, error) {
-	objectFormat, err := repo.GetObjectFormat()
-	if err != nil {
-		return nil, err
-	}
-
+func GetAffectedFiles(ctx context.Context, repoPath string, objectFormat ObjectFormat, oldCommitID, newCommitID string, env []string) ([]string, error) {
 	// If the oldCommitID is empty, then we must assume its a new branch, so diff
 	// against the empty tree. So all changes of this new branch are included.
 	if oldCommitID == objectFormat.EmptyObjectID().String() {
@@ -285,7 +280,7 @@ func GetAffectedFiles(repo *Repository, oldCommitID, newCommitID string, env []s
 
 	stdoutReader, stdoutWriter, err := os.Pipe()
 	if err != nil {
-		log.Error("Unable to create os.Pipe for %s", repo.Path)
+		log.Error("Unable to create os.Pipe for %s", repoPath)
 		return nil, err
 	}
 	defer func() {
@@ -296,10 +291,10 @@ func GetAffectedFiles(repo *Repository, oldCommitID, newCommitID string, env []s
 	affectedFiles := make([]string, 0, 32)
 
 	// Run `git diff --name-only` to get the names of the changed files
-	err = NewCommand(repo.Ctx, "diff", "--name-only").AddDynamicArguments(oldCommitID, newCommitID).
+	err = NewCommand(ctx, "diff", "--name-only").AddDynamicArguments(oldCommitID, newCommitID).
 		Run(&RunOpts{
 			Env:    env,
-			Dir:    repo.Path,
+			Dir:    repoPath,
 			Stdout: stdoutWriter,
 			PipelineFunc: func(ctx context.Context, cancel context.CancelFunc) error {
 				// Close the writer end of the pipe to begin processing
@@ -321,8 +316,25 @@ func GetAffectedFiles(repo *Repository, oldCommitID, newCommitID string, env []s
 			},
 		})
 	if err != nil {
-		log.Error("Unable to get affected files for commits from %s to %s in %s: %v", oldCommitID, newCommitID, repo.Path, err)
+		log.Error("Unable to get affected files for commits from %s to %s in %s: %v", oldCommitID, newCommitID, repoPath, err)
 	}
 
 	return affectedFiles, err
+}
+
+// DiffContainsBinary retruns if a diff contains binary files
+func DiffContainsBinary(ctx context.Context, repoPath string, oldCommitID, newCommitID string) (bool, error) {
+	stdoutText := new(bytes.Buffer)
+	err := NewCommand(ctx, "diff").AddDynamicArguments(oldCommitID, newCommitID).Run(&RunOpts{Dir: repoPath, Stdout: stdoutText})
+	if err != nil {
+		return false, err
+	}
+
+	stdoutBinary := new(bytes.Buffer)
+	err = NewCommand(ctx, "diff", "--binary").AddDynamicArguments(oldCommitID, newCommitID).Run(&RunOpts{Dir: repoPath, Stdout: stdoutBinary})
+	if err != nil {
+		return false, err
+	}
+
+	return bytes.Compare(stdoutText.Bytes(), stdoutBinary.Bytes()) != 0, nil
 }

@@ -1,0 +1,7 @@
+{{if eq .Visibility.String "public"}}
+	<span class="tw-h-fit" data-tooltip-content="{{ctx.Locale.Tr "gist.visibility.public"}}">{{svg "octicon-globe" 24}}</span>
+{{else if eq .Visibility.String "hidden"}}
+	<span data-tooltip-content="{{ctx.Locale.Tr "gist.visibility.hidden"}}">{{svg "octicon-eye-closed" 24}}</span>
+{{else if eq .Visibility.String "private"}}
+	<span data-tooltip-content="{{ctx.Locale.Tr "gist.visibility.private"}}">{{svg "octicon-key" 24}}</span>
+{{end}}

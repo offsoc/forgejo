@@ -1,0 +1,53 @@
+{{template "base/head" .}}
+<div role="main" aria-label="{{.Title}}" class="page-content">
+	<div class="ui container">
+		<div class="tw-flex tw-justify-between tw-mb-3">
+			<h1 class="tw-flex tw-justify-center tw-items-center">
+					{{template "gist/icon" .Gist}}
+				<a class="text primary name" href="{{.Gist.Owner.HomeLink}}">{{.Gist.Owner.Name}}</a> / {{.Gist.Name}}
+			</h1>
+			<div class="tw-text-right tw-align-middle tw-flex tw-justify-center tw-items-center">
+				{{if .Gist.IsOwner .SignedUser}}
+					<a class="ui primary button" href="{{.Gist.Link}}/edit">{{ctx.Locale.Tr "edit"}}</a>
+					<a class="ui primary button red" href="{{.Gist.Link}}/delete">{{ctx.Locale.Tr "remove"}}</a>
+				{{end}}
+				<div class="clone-panel ui action input">
+					{{template "repo/clone_buttons" .}}
+					{{template "repo/clone_script" .}}
+				</div>
+			</div>
+		</div>
+
+		{{if .Gist.Description}}
+			<p>{{.Gist.Description}}</p>
+		{{end}}
+
+		<div class="tw-flex tw-flex-col tw-gap-4">
+			{{range $idx, $file := .GistFiles}}
+				<div id="gist-file-view-{{$idx}}">
+					<div class="gist-file-header ui header top attached tw-flex tw-items-center tw-justify-between">
+						<b>{{.Name}}</b>
+						<div class="file-header-right file-actions tw-flex tw-items-center tw-flex-wrap">
+							<span class="btn-octicon" data-tooltip-content="{{ctx.Locale.Tr "copy_content"}}" data-gist-copy-content="{{$idx}}">{{svg "octicon-copy" 14}}</span>
+							<a class="ui mini basic button" href="{{$.Gist.Link}}/raw/{{PathEscapeSegments .Name}}">{{ctx.Locale.Tr "repo.file_raw"}}</a>
+						</div>
+					</div>
+					<div class="chroma code-view">
+					<table>
+						<tbody>
+							{{range $idx, $code := .HighlightedContent}}
+								{{$line := Eval $idx "+" 1}}
+								<tr>
+									<td id="L{{$line}}" class="lines-num"><span id="L{{$line}}" data-line-number="{{$line}}"></span></td>
+									<td rel="L{{$line}}" class="lines-code chroma"><code class="code-inner">{{$code}}</code></td>
+								</tr>
+							{{end}}
+						</tbody>
+					</table>
+					</div>
+				</div>
+			{{end}}
+		</div>
+	</div>
+</div>
+{{template "base/footer" .}}

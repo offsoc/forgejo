@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strings"
 
+	gist_model "code.gitea.io/gitea/models/gist"
 	issues_model "code.gitea.io/gitea/models/issues"
 	quota_model "code.gitea.io/gitea/models/quota"
 	"code.gitea.io/gitea/models/unit"
@@ -45,6 +46,7 @@ type APIContext struct {
 	Package    *Package
 	QuotaGroup *quota_model.Group
 	QuotaRule  *quota_model.Rule
+	Gist       *gist_model.Gist
 	PublicOnly bool // Whether the request is for a public endpoint
 }
 

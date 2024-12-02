@@ -137,6 +137,11 @@
 					<a class="item" href="{{AppSubUrl}}/org/create">
 						{{svg "octicon-organization"}} {{ctx.Locale.Tr "new_org.link"}}
 					</a>
+					{{if .EnableGists}}
+						<a class="item" href="{{AppSubUrl}}/gists/-/new">
+							{{svg "octicon-logo-gist"}} {{ctx.Locale.Tr "new_gist.link"}}
+						</a>
+					{{end}}
 					{{end}}
 				</div><!-- end content create new menu -->
 			</div><!-- end dropdown menu create new -->

@@ -303,6 +303,10 @@ func runServ(c *cli.Context) error {
 		return nil
 	}
 
+	if results.RepoType == private.RepoTypeGist {
+		repoPath = filepath.Base(strings.TrimSuffix(repoPath, ".git"))
+	}
+
 	var gitcmd *exec.Cmd
 	gitBinPath := filepath.Dir(git.GitExecutable) // e.g. /usr/bin
 	gitBinVerb := filepath.Join(gitBinPath, verb) // e.g. /usr/bin/git-upload-pack
@@ -321,24 +325,28 @@ func runServ(c *cli.Context) error {
 	}
 
 	process.SetSysProcAttribute(gitcmd)
-	gitcmd.Dir = setting.RepoRootPath
+	gitcmd.Dir = results.RootPath
 	gitcmd.Stdout = os.Stdout
 	gitcmd.Stdin = os.Stdin
 	gitcmd.Stderr = os.Stderr
 	gitcmd.Env = append(gitcmd.Env, os.Environ()...)
-	gitcmd.Env = append(gitcmd.Env,
-		repo_module.EnvRepoIsWiki+"="+strconv.FormatBool(results.IsWiki),
-		repo_module.EnvRepoName+"="+results.RepoName,
-		repo_module.EnvRepoUsername+"="+results.OwnerName,
-		repo_module.EnvPusherName+"="+results.UserName,
-		repo_module.EnvPusherEmail+"="+results.UserEmail,
-		repo_module.EnvPusherID+"="+strconv.FormatInt(results.UserID, 10),
-		repo_module.EnvRepoID+"="+strconv.FormatInt(results.RepoID, 10),
-		repo_module.EnvPRID+"="+fmt.Sprintf("%d", 0),
-		repo_module.EnvDeployKeyID+"="+fmt.Sprintf("%d", results.DeployKeyID),
-		repo_module.EnvKeyID+"="+fmt.Sprintf("%d", results.KeyID),
-		repo_module.EnvAppURL+"="+setting.AppURL,
-	)
+
+	if results.RepoType == private.RepoTypeRepo {
+		gitcmd.Env = append(gitcmd.Env,
+			repo_module.EnvRepoIsWiki+"="+strconv.FormatBool(results.IsWiki),
+			repo_module.EnvRepoName+"="+results.RepoName,
+			repo_module.EnvRepoUsername+"="+results.OwnerName,
+			repo_module.EnvPusherName+"="+results.UserName,
+			repo_module.EnvPusherEmail+"="+results.UserEmail,
+			repo_module.EnvPusherID+"="+strconv.FormatInt(results.UserID, 10),
+			repo_module.EnvRepoID+"="+strconv.FormatInt(results.RepoID, 10),
+			repo_module.EnvPRID+"="+fmt.Sprintf("%d", 0),
+			repo_module.EnvDeployKeyID+"="+fmt.Sprintf("%d", results.DeployKeyID),
+			repo_module.EnvKeyID+"="+fmt.Sprintf("%d", results.KeyID),
+			repo_module.EnvAppURL+"="+setting.AppURL,
+		)
+	}
+
 	// to avoid breaking, here only use the minimal environment variables for the "gitea serv" command.
 	// it could be re-considered whether to use the same git.CommonGitCmdEnvs() as "git" command later.
 	gitcmd.Env = append(gitcmd.Env, git.CommonCmdServEnvs()...)

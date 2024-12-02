@@ -14,6 +14,13 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 )
 
+type RepoType int
+
+const (
+	RepoTypeRepo RepoType = iota + 1 // 1，RepoTypeRepo is a normal Repo
+	RepoTypeGist                     // 2，RepoTypeGist is a Gist
+)
+
 // KeyAndOwner is the response from ServNoCommand
 type KeyAndOwner struct {
 	Key   *asymkey_model.PublicKey `json:"key"`
@@ -43,6 +50,8 @@ type ServCommandResults struct {
 	OwnerName   string
 	RepoName    string
 	RepoID      int64
+	RootPath    string
+	RepoType    RepoType
 }
 
 // ServCommand preps for a serv call

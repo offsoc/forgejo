@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	asymkey_model "code.gitea.io/gitea/models/asymkey"
+	gist_model "code.gitea.io/gitea/models/gist"
 	"code.gitea.io/gitea/models/perm"
 	access_model "code.gitea.io/gitea/models/perm/access"
 	repo_model "code.gitea.io/gitea/models/repo"
@@ -75,8 +76,82 @@ func ServNoCommand(ctx *context.PrivateContext) {
 	ctx.JSON(http.StatusOK, &results)
 }
 
-// ServCommand returns information about the provided keyid
-func ServCommand(ctx *context.PrivateContext) {
+// servCommandGist handels ServCommand for Gists
+func servCommandGist(ctx *context.PrivateContext) {
+	mode := perm.AccessMode(ctx.FormInt("mode"))
+	keyID := ctx.ParamsInt64(":keyid")
+	gistUUID := ctx.Params(":repo")
+
+	gist, err := gist_model.GetGistByUUID(ctx, gistUUID)
+	if err != nil {
+		if gist_model.IsErrGistNotExist(err) {
+			ctx.JSON(http.StatusNotFound, private.Response{
+				UserMsg: fmt.Sprintf("Cannot find gist: %s", gistUUID),
+			})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, private.Response{
+				UserMsg: fmt.Sprintf("Error while getting gist: %s", gistUUID),
+			})
+		}
+	}
+
+	key, err := asymkey_model.GetPublicKeyByID(ctx, keyID)
+	if err != nil {
+		if asymkey_model.IsErrKeyNotExist(err) {
+			ctx.JSON(http.StatusNotFound, private.Response{
+				UserMsg: fmt.Sprintf("Cannot find key: %d", keyID),
+			})
+			return
+		}
+		log.Error("Unable to get public key: %d Error: %v", keyID, err)
+		ctx.JSON(http.StatusInternalServerError, private.Response{
+			Err: fmt.Sprintf("Unable to get key: %d  Error: %v", keyID, err),
+		})
+		return
+	}
+
+	user, err := user_model.GetUserByID(ctx, key.OwnerID)
+	if err != nil {
+		if user_model.IsErrUserNotExist(err) {
+			ctx.JSON(http.StatusUnauthorized, private.Response{
+				UserMsg: fmt.Sprintf("Public Key: %d:%s owner %d does not exist.", key.ID, key.Name, key.OwnerID),
+			})
+			return
+		}
+		log.Error("Unable to get owner: %d for public key: %d:%s Error: %v", key.OwnerID, key.ID, key.Name, err)
+		ctx.JSON(http.StatusInternalServerError, private.Response{
+			Err: fmt.Sprintf("Unable to get Owner: %d for Deploy Key: %d:%s.", key.OwnerID, key.ID, key.Name),
+		})
+		return
+	}
+
+	if !gist.HasAccess(user) {
+		ctx.JSON(http.StatusNotFound, private.Response{
+			UserMsg: fmt.Sprintf("Cannot find gist: %s", gistUUID),
+		})
+	}
+
+	if mode > perm.AccessModeRead {
+		if !gist.IsOwner(user) {
+			ctx.JSON(http.StatusNotFound, private.Response{
+				UserMsg: fmt.Sprintf("Not a owner of: %s", gistUUID),
+			})
+		}
+	}
+
+	results := private.ServCommandResults{
+		RepoName:  gistUUID,
+		OwnerName: "gists",
+		KeyID:     keyID,
+		RootPath:  setting.Gist.RootPath,
+		RepoType:  private.RepoTypeGist,
+	}
+
+	ctx.JSON(http.StatusOK, results)
+}
+
+// ServCommandRepo returns information about the provided keyid
+func servCommandRepo(ctx *context.PrivateContext) {
 	keyID := ctx.ParamsInt64(":keyid")
 	ownerName := ctx.Params(":owner")
 	repoName := ctx.Params(":repo")
@@ -87,6 +162,8 @@ func ServCommand(ctx *context.PrivateContext) {
 		RepoName:  repoName,
 		OwnerName: ownerName,
 		KeyID:     keyID,
+		RootPath:  setting.RepoRootPath,
+		RepoType:  private.RepoTypeRepo,
 	}
 
 	// Now because we're not translating things properly let's just default some English strings here
@@ -394,4 +471,12 @@ func ServCommand(ctx *context.PrivateContext) {
 
 	ctx.JSON(http.StatusOK, results)
 	// We will update the keys in a different call.
+}
+
+func ServCommand(ctx *context.PrivateContext) {
+	if ctx.Params(":owner") == "gists" {
+		servCommandGist(ctx)
+	} else {
+		servCommandRepo(ctx)
+	}
 }

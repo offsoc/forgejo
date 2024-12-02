@@ -135,7 +135,7 @@ func doGitInitTestRepository(dstPath string, objectFormat git.ObjectFormat) func
 	return func(t *testing.T) {
 		t.Helper()
 		// Init repository in dstPath
-		require.NoError(t, git.InitRepository(git.DefaultContext, dstPath, false, objectFormat.Name()))
+		require.NoError(t, git.InitRepository(git.DefaultContext, dstPath, git.InitRepositoryOptions{Bare: false, ObjectFormatName: objectFormat.Name()}))
 		// forcibly set default branch to master
 		_, _, err := git.NewCommand(git.DefaultContext, "symbolic-ref", "HEAD", git.BranchPrefix+"master").RunStdString(&git.RunOpts{Dir: dstPath})
 		require.NoError(t, err)

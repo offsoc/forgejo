@@ -1,0 +1,21 @@
+<div class="flex-list">
+	{{range .Gists}}
+		<div class="flex-item">
+			<div class="flex-item-leading">
+				{{template "gist/icon" .}}
+			</div>
+			<div class="flex-item-main">
+				<div class="flex-item-header">
+					<div class="flex-item-title">
+						{{if not $.PageIsProfileGistList}}
+							<a class="text primary name" href="{{.Owner.HomeLink}}">{{.Owner.Name}}</a>/
+						{{end}}
+						<a class="text primary name" href="{{.Link}}">{{.Name}}</a>
+					</div>
+				</div>
+
+				<div class="flex-item-body">{{ctx.Locale.Tr "org.repo_updated" (DateUtils.TimeSince .UpdatedUnix)}}</div>
+			</div>
+		</div>
+	{{end}}
+</div>

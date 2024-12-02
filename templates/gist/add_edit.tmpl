@@ -1,0 +1,84 @@
+{{template "base/head" .}}
+<div role="main" aria-label="{{.Title}}" class="page-content">
+	<div class="ui container column grid">
+		<div class="column">
+			<template id="file-field-template">
+				{{template "gist/file_form" dict "delete" true}}
+			</template>
+			<form class="ui form" action={{if .Gist}}"{{.Gist.Link}}/edit/post"{{else}}"/gists/-/new/post"{{end}} method="POST">
+				<h3 class="tw-text-center ui top attached header">
+					{{if .Gist}}
+						{{ctx.Locale.Tr "gist.edit.edit_header"}}
+					{{else}}
+						{{ctx.Locale.Tr "gist.edit.new_header"}}
+					{{end}}
+				</h3>
+
+				<div class="ui attached segment">
+					{{.CsrfTokenHtml}}
+
+					<div class="field required">
+						<label for="name">{{ctx.Locale.Tr "gist.edit.name"}}</label>
+						<input name="name" {{if .Gist}}value="{{.Gist.Name}}"{{end}} required></input>
+					</div>
+
+					<div class="field">
+						<label for="description">{{ctx.Locale.Tr "gist.edit.description"}}</label>
+						<textarea name="description">{{.Gist.Description}}</textarea>
+					</div>
+
+					<div class="field required">
+						<label>{{ctx.Locale.Tr "gist.edit.visibility"}}</label>
+						<div class="ui selection dropdown">
+							<input type="hidden" name="visibility" value="{{if .Gist}}{{.Gist.Visibility.String}}{{else}}public{{end}}">
+							<div class="text">
+								{{if eq .Gist.Visibility.String "hidden"}}
+									{{ctx.Locale.Tr "gist.visibility.hidden"}}
+								{{else if eq .Gist.Visibility.String "private"}}
+									{{ctx.Locale.Tr "gist.visibility.private"}}
+								{{else}}
+									{{ctx.Locale.Tr "gist.visibility.public"}}
+								{{end}}
+							</div>
+							{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+							<div class="menu">
+								<div class="item{{if or (not .Gist) (eq "" .Gist.Visibility.String "public")}} active selected{{end}}" data-value="public"><p>{{ctx.Locale.Tr "gist.visibility.public"}}</p></div>
+								<div class="item{{if eq "" .Gist.Visibility.String "hidden"}} active selected{{end}}" data-value="hidden"><p>{{ctx.Locale.Tr "gist.visibility.hidden"}}</p></div>
+								<div class="item{{if eq "" .Gist.Visibility.String "private"}} active selected{{end}}" data-value="private"><p>{{ctx.Locale.Tr "gist.visibility.private"}}</p></div>
+							</div>
+						</div>
+					</div>
+
+					<div id="file-field-container">
+						{{if .GistFiles}}
+							{{range $idx, $file := .GistFiles}}
+								{{template "gist/file_form" dict "id" $idx "name" .Name "content" .Content}}
+							{{end}}
+						{{else}}
+							{{template "gist/file_form" dict "id" "0"}}
+						{{end}}
+					</div>
+
+					<br>
+
+					<div class="tw-flex tw-justify-between inline field">
+						<button id="add-gist-file-button" class="ui primary button" type="button">
+							{{ctx.Locale.Tr "gist.edit.add_file"}}
+						</button>
+						<div class="tw-text-right">
+							<button class="ui green button" type="submit">
+								{{if .Gist}}
+									{{ctx.Locale.Tr "save"}}
+								{{else}}
+									{{ctx.Locale.Tr "add"}}
+								{{end}}
+							</button>
+						</div>
+					</div>
+
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+{{template "base/footer" .}}

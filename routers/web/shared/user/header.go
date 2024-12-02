@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"code.gitea.io/gitea/models/db"
+	gist_model "code.gitea.io/gitea/models/gist"
 	"code.gitea.io/gitea/models/organization"
 	packages_model "code.gitea.io/gitea/models/packages"
 	access_model "code.gitea.io/gitea/models/perm/access"
@@ -157,6 +158,13 @@ func LoadHeaderCount(ctx *context.Context) error {
 	ctx.Data["PackageCount"], err = packages_model.CountOwnerPackages(ctx, ctx.ContextUser.ID)
 	if err != nil {
 		return err
+	}
+
+	if setting.Gist.Enabled && !ctx.ContextUser.IsOrganization() {
+		ctx.Data["GistCount"], err = gist_model.CountOwnerGists(ctx, ctx.ContextUser, ctx.Doer)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

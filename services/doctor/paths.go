@@ -75,6 +75,7 @@ func checkConfigurationFiles(ctx context.Context, logger log.Logger, autofix boo
 		{"Custom File Root Path", setting.CustomPath, true, false, false},
 		{"Work directory", setting.AppWorkPath, true, true, false},
 		{"Log Root Path", setting.Log.RootPath, true, true, true},
+		{"Gist Root Path", setting.Gist.RootPath, true, true, true},
 	}
 
 	if !setting.HasBuiltinBindata {

@@ -74,5 +74,7 @@
 @import "./review.css";
 @import "./actions.css";
 
+@import "./gist.css";
+
 @tailwind utilities;
 @import "./helpers.css";

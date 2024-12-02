@@ -101,7 +101,7 @@ func TestGrepSearch(t *testing.T) {
 func TestGrepDashesAreFine(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	err := InitRepository(DefaultContext, tmpDir, false, Sha1ObjectFormat.Name())
+	err := InitRepository(DefaultContext, tmpDir, InitRepositoryOptions{Bare: false, ObjectFormatName: Sha1ObjectFormat.Name()})
 	require.NoError(t, err)
 
 	gitRepo, err := openRepositoryWithDefaultContext(tmpDir)
@@ -126,7 +126,7 @@ func TestGrepDashesAreFine(t *testing.T) {
 func TestGrepNoBinary(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	err := InitRepository(DefaultContext, tmpDir, false, Sha1ObjectFormat.Name())
+	err := InitRepository(DefaultContext, tmpDir, InitRepositoryOptions{Bare: false, ObjectFormatName: Sha1ObjectFormat.Name()})
 	require.NoError(t, err)
 
 	gitRepo, err := openRepositoryWithDefaultContext(tmpDir)
@@ -151,7 +151,7 @@ func TestGrepNoBinary(t *testing.T) {
 func TestGrepLongFiles(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	err := InitRepository(DefaultContext, tmpDir, false, Sha1ObjectFormat.Name())
+	err := InitRepository(DefaultContext, tmpDir, InitRepositoryOptions{Bare: false, ObjectFormatName: Sha1ObjectFormat.Name()})
 	require.NoError(t, err)
 
 	gitRepo, err := openRepositoryWithDefaultContext(tmpDir)
@@ -175,7 +175,7 @@ func TestGrepLongFiles(t *testing.T) {
 func TestGrepRefs(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	err := InitRepository(DefaultContext, tmpDir, false, Sha1ObjectFormat.Name())
+	err := InitRepository(DefaultContext, tmpDir, InitRepositoryOptions{Bare: false, ObjectFormatName: Sha1ObjectFormat.Name()})
 	require.NoError(t, err)
 
 	gitRepo, err := openRepositoryWithDefaultContext(tmpDir)
@@ -205,7 +205,7 @@ func TestGrepRefs(t *testing.T) {
 func TestGrepCanHazRegexOnDemand(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	err := InitRepository(DefaultContext, tmpDir, false, Sha1ObjectFormat.Name())
+	err := InitRepository(DefaultContext, tmpDir, InitRepositoryOptions{Bare: false, ObjectFormatName: Sha1ObjectFormat.Name()})
 	require.NoError(t, err)
 
 	gitRepo, err := openRepositoryWithDefaultContext(tmpDir)

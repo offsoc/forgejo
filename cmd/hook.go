@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -40,6 +41,7 @@ var (
 			subcmdHookUpdate,
 			subcmdHookPostReceive,
 			subcmdHookProcReceive,
+			subcmdHookGistPreReceive,
 		},
 	}
 
@@ -82,6 +84,17 @@ var (
 		Usage:       "Delegate proc-receive Git hook",
 		Description: "This command should only be called by Git",
 		Action:      runHookProcReceive,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name: "debug",
+			},
+		},
+	}
+	subcmdHookGistPreReceive = &cli.Command{
+		Name:        "gist-pre-receive",
+		Usage:       "Delegate Gist pre-receive Git hook",
+		Description: "This command should only be called by Git",
+		Action:      runHookGistPreReceive,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name: "debug",
@@ -790,6 +803,62 @@ func writeDataPktLine(ctx context.Context, out io.Writer, data []byte) error {
 	lr, err = out.Write(data)
 	if err != nil || int(length-4) != lr {
 		return fail(ctx, "Protocol: write error", "Pkt-Line response failed: %v", err)
+	}
+
+	return nil
+}
+
+func checkGistDiff(ctx context.Context, repoPath string, oldCommitID, newCommitID string) error {
+	files, err := git.GetAffectedFiles(ctx, repoPath, git.Sha1ObjectFormat, oldCommitID, newCommitID, os.Environ())
+	if err != nil {
+		return err
+	}
+
+	for _, currentFile := range files {
+		if currentFile != filepath.Base(currentFile) {
+			return fail(ctx, "Gists are not allowed to have directories", "")
+		}
+	}
+
+	hasBinary, err := git.DiffContainsBinary(ctx, repoPath, oldCommitID, newCommitID)
+	if err != nil {
+		return err
+	}
+
+	if hasBinary {
+		return fail(ctx, "Gists are not allowed to have binary files", "")
+	}
+
+	return nil
+}
+
+func runHookGistPreReceive(c *cli.Context) error {
+	repoPath, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		fields := bytes.Fields(scanner.Bytes())
+		if len(fields) != 3 {
+			continue
+		}
+
+		oldCommitID := string(fields[0])
+		newCommitID := string(fields[1])
+		refFullName := git.RefName(fields[2])
+
+		if refFullName.IsBranch() {
+			if refFullName.BranchName() != "main" {
+				return fail(c.Context, "Gists can only have a main branch", "")
+			}
+		}
+
+		err := checkGistDiff(c.Context, repoPath, oldCommitID, newCommitID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

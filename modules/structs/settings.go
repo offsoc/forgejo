@@ -36,3 +36,8 @@ type GeneralAttachmentSettings struct {
 	MaxSize      int64  `json:"max_size"`
 	MaxFiles     int    `json:"max_files"`
 }
+
+// GistSettings contains global Gist settings exposed by API
+type GistSettings struct {
+	Enabled bool `json:"enabled"`
+}

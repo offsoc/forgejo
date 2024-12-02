@@ -19,5 +19,11 @@
 			{{svg "octicon-code"}} {{ctx.Locale.Tr "explore.code"}}
 		</a>
 		{{end}}
+
+		{{if .EnableGists}}
+			<a class="{{if .PageIsExploreGists}}active {{end}}item" href="{{AppSubUrl}}/explore/gists">
+				{{svg "octicon-logo-gist"}} {{ctx.Locale.Tr "explore.gists"}}
+			</a>
+		{{end}}
 	</div>
 </overflow-menu>

@@ -13,6 +13,7 @@ import (
 
 	activities_model "code.gitea.io/gitea/models/activities"
 	"code.gitea.io/gitea/models/db"
+	gist_model "code.gitea.io/gitea/models/gist"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
@@ -168,6 +169,25 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 		ctx.Data["Cards"] = following
 		total = int(numFollowing)
 		ctx.Data["CardsTitle"] = ctx.TrN(total, "user.following.title.one", "user.following.title.few")
+	case "gists":
+		//ctx.Data["PageIsProfileStarList"] = true
+		gists, count, err := gist_model.SearchGist(ctx, ctx.Doer, &gist_model.SearchGistOptions{
+			ListOptions: db.ListOptions{
+				PageSize: pagingNum,
+				Page:     page,
+			},
+			OwnerID: ctx.ContextUser.ID,
+			Keyword: keyword,
+		})
+		if err != nil {
+			ctx.ServerError("SearchGist", err)
+			return
+		}
+
+		ctx.Data["PageIsProfileGistList"] = true
+		ctx.Data["Gists"] = gists
+
+		total = int(count)
 	case "activity":
 		date := ctx.FormString("date")
 		pagingNum = setting.UI.FeedPagingNum

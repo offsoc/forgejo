@@ -519,6 +519,14 @@ func SubmitInstall(ctx *context.Context) {
 		cfg.Section("security").Key("PASSWORD_HASH_ALGO").SetValue(form.PasswordAlgorithm)
 	}
 
+	cfg.Section("gist").Key("ENABLED").SetValue(strconv.FormatBool(setting.Gist.Enabled))
+	cfg.Section("gist").Key("ROOT").SetValue(setting.Gist.RootPath)
+
+	if err = os.MkdirAll(setting.Gist.RootPath, os.ModePerm); err != nil {
+		ctx.RenderWithErr("Make Gists dir", tplInstall, &form)
+		return
+	}
+
 	log.Info("Save settings to custom config file %s", setting.CustomConf)
 
 	err = os.MkdirAll(filepath.Dir(setting.CustomConf), os.ModePerm)

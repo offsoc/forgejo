@@ -94,7 +94,7 @@ func createTemporaryRepoForPR(ctx context.Context, pr *issues_model.PullRequest)
 	baseRepoPath := pr.BaseRepo.RepoPath()
 	headRepoPath := pr.HeadRepo.RepoPath()
 
-	if err := git.InitRepository(ctx, tmpBasePath, false, pr.BaseRepo.ObjectFormatName); err != nil {
+	if err := git.InitRepository(ctx, tmpBasePath, git.InitRepositoryOptions{Bare: false, ObjectFormatName: pr.BaseRepo.ObjectFormatName}); err != nil {
 		log.Error("Unable to init tmpBasePath for %-v: %v", pr, err)
 		cancel()
 		return nil, nil, err

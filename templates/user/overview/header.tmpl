@@ -30,6 +30,15 @@
 				<span hidden test-name="package-count">{{.PackageCount}}</span>
 			</a>
 		{{end}}
+		{{if .EnableGists}}
+			<a href="{{.ContextUser.HomeLink}}?tab=gists" class="{{if .PageIsProfileGistList}}active {{end}}item">
+				{{svg "octicon-logo-gist"}} {{ctx.Locale.Tr "user.gists"}}
+				{{if .GistCount}}
+					<div class="ui small label">{{.GistCount}}</div>
+				{{end}}
+				<span hidden test-name="gist-count">{{.PackageCount}}</span>
+			</a>
+		{{end}}
 		{{if and .IsRepoIndexerEnabled (or .ContextUser.IsIndividual .CanReadCode)}}
 			<a href="{{.ContextUser.HomeLink}}/-/code" class="{{if .IsCodePage}}active {{end}}item">
 				{{svg "octicon-code"}} {{ctx.Locale.Tr "user.code"}}

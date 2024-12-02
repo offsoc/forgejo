@@ -31,6 +31,7 @@ import (
 	"code.gitea.io/gitea/routers/web/events"
 	"code.gitea.io/gitea/routers/web/explore"
 	"code.gitea.io/gitea/routers/web/feed"
+	"code.gitea.io/gitea/routers/web/gist"
 	"code.gitea.io/gitea/routers/web/healthcheck"
 	"code.gitea.io/gitea/routers/web/misc"
 	"code.gitea.io/gitea/routers/web/org"
@@ -473,6 +474,9 @@ func registerRoutes(m *web.Route) {
 			}
 		}, explore.Code)
 		m.Get("/topics/search", explore.TopicSearch)
+		if setting.Gist.Enabled {
+			m.Get("/gists", explore.Gists)
+		}
 	}, ignExploreSignIn)
 	m.Group("/issues", func() {
 		m.Get("", user.Issues)
@@ -1632,7 +1636,9 @@ func registerRoutes(m *web.Route) {
 				})
 			}, ignSignInAndCsrf, lfsServerEnabled)
 
-			gitHTTPRouters(m)
+			m.Group("", func() {
+				gitHTTPRouters(m)
+			}, context.UserAssignmentWeb())
 		})
 	})
 
@@ -1652,6 +1658,26 @@ func registerRoutes(m *web.Route) {
 		m.Post("/purge", user.NotificationPurgePost)
 		m.Get("/new", user.NewAvailable)
 	}, reqSignIn)
+
+	if setting.Gist.Enabled {
+		m.Group("/gists", func() {
+			m.Get("/-/new", reqSignIn, gist.New)
+			m.Post("/-/new/post", reqSignIn, gist.NewPost)
+			m.Group("/{gistuuid}", func() {
+				m.Get("", gist.View)
+				m.Get("/raw/{filename}", gist.Raw)
+				m.Group("", func() {
+					m.Get("/edit", gist.Edit)
+					m.Post("/edit/post", gist.EditPost)
+					m.Get("/delete", gist.Delete)
+				}, reqSignIn, context.RequireGistOwner)
+				gitHTTPRouters(m)
+				m.Group(".git", func() {
+					gitHTTPRouters(m)
+				})
+			}, context.GistAssignment)
+		})
+	}
 
 	if setting.API.EnableSwagger {
 		m.Get("/swagger.v1.json", SwaggerV1Json)

@@ -1591,6 +1591,203 @@
         }
       }
     },
+    "/gists": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "gist"
+        ],
+        "summary": "Create a Gist",
+        "operationId": "createGist",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateGistOption"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/Gist"
+          }
+        }
+      }
+    },
+    "/gists/search": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "gist"
+        ],
+        "summary": "Search for gists",
+        "operationId": "searchGists",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "keyword",
+            "name": "q",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "search only for repos that the user with the given id owns",
+            "name": "owner_id",
+            "in": "query"
+          },
+          {
+            "enum": [
+              "newest",
+              "oldest",
+              "alphabetically",
+              "reversealphabetically"
+            ],
+            "description": "sort gists by attribute",
+            "name": "sort",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "page number of results to return (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "page size of results",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/GistList"
+          }
+        }
+      }
+    },
+    "/gists/{gistuuid}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "gist"
+        ],
+        "summary": "Get a Gist",
+        "operationId": "getGist",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "uuid of the gist",
+            "name": "gistuuid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/Gist"
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "gist"
+        ],
+        "summary": "Deletes a Gist",
+        "operationId": "deletGist",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "uuid of the gist",
+            "name": "gistuuid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          }
+        }
+      }
+    },
+    "/gists/{gistuuid}/files": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "gist"
+        ],
+        "summary": "Get files of a Gist",
+        "operationId": "getGistFiles",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "uuid of the gist",
+            "name": "gistuuid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/GistFiles"
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "gist"
+        ],
+        "summary": "Update files of a Gist",
+        "operationId": "updateGistFiles",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "uuid of the gist",
+            "name": "gistuuid",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UpdateGistFilesOption"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/empty"
+          }
+        }
+      }
+    },
     "/gitignore/templates": {
       "get": {
         "produces": [
@@ -16740,6 +16937,23 @@
         }
       }
     },
+    "/settings/gist": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "settings"
+        ],
+        "summary": "Get instance's global settings for gist",
+        "operationId": "getGistSettings",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/GistSettings"
+          }
+        }
+      }
+    },
     "/settings/repository": {
       "get": {
         "produces": [
@@ -21307,6 +21521,31 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "CreateGistOption": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "x-go-name": "Description"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GistFile"
+          },
+          "x-go-name": "Files"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "visibility": {
+          "type": "string",
+          "x-go-name": "Visibility"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "CreateHookOption": {
       "description": "CreateHookOption options when create a hook",
       "type": "object",
@@ -23623,6 +23862,84 @@
           "description": "include webhooks in template repo",
           "type": "boolean",
           "x-go-name": "Webhooks"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "Gist": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Created"
+        },
+        "description": {
+          "type": "string",
+          "x-go-name": "Description"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "owner": {
+          "$ref": "#/definitions/User"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Updated"
+        },
+        "uuid": {
+          "type": "string",
+          "x-go-name": "UUID"
+        },
+        "visibility": {
+          "type": "string",
+          "x-go-name": "Visibility"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "GistFile": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "GistList": {
+      "type": "object",
+      "properties": {
+        "gists": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Gist"
+          },
+          "x-go-name": "Gists"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "GistSettings": {
+      "description": "GistSettings contains global Gist settings exposed by API",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "x-go-name": "Enabled"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -26983,6 +27300,19 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "UpdateGistFilesOption": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GistFile"
+          },
+          "x-go-name": "Files"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "UpdateRepoAvatarOption": {
       "description": "UpdateRepoAvatarUserOption options when updating the repo avatar",
       "type": "object",
@@ -27732,6 +28062,33 @@
         "$ref": "#/definitions/GeneralUISettings"
       }
     },
+    "Gist": {
+      "description": "Gist",
+      "schema": {
+        "$ref": "#/definitions/Gist"
+      }
+    },
+    "GistFiles": {
+      "description": "GistFiles",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/GistFile"
+        }
+      }
+    },
+    "GistList": {
+      "description": "GistList",
+      "schema": {
+        "$ref": "#/definitions/GistList"
+      }
+    },
+    "GistSettings": {
+      "description": "GistSettings",
+      "schema": {
+        "$ref": "#/definitions/GistSettings"
+      }
+    },
     "GitBlobResponse": {
       "description": "GitBlobResponse",
       "schema": {
@@ -28458,7 +28815,7 @@
     "parameterBodies": {
       "description": "parameterBodies",
       "schema": {
-        "$ref": "#/definitions/NoteOptions"
+        "$ref": "#/definitions/UpdateGistFilesOption"
       }
     },
     "quotaExceeded": {

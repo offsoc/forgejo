@@ -233,7 +233,7 @@ func generateRepoCommit(ctx context.Context, repo, templateRepo, generateRepo *r
 		}
 	}
 
-	if err := git.InitRepository(ctx, tmpDir, false, templateRepo.ObjectFormatName); err != nil {
+	if err := git.InitRepository(ctx, tmpDir, git.InitRepositoryOptions{Bare: false, ObjectFormatName: templateRepo.ObjectFormatName}); err != nil {
 		return err
 	}
 

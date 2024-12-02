@@ -2,6 +2,8 @@
 	<form class="ui form ignore-dirty tw-flex-1">
 		{{if .PageIsExploreUsers}}
 			{{template "shared/search/combo" dict "Value" .Keyword "Placeholder" (ctx.Locale.Tr "search.user_kind")}}
+		{{else if or .PageIsExploreGists .PageIsProfileGistList}}
+			{{template "shared/search/combo" dict "Value" .Keyword "Placeholder" (ctx.Locale.Tr "search.gist_kind")}}
 		{{else}}
 			{{template "shared/search/combo" dict "Value" .Keyword "Placeholder" (ctx.Locale.Tr "search.org_kind")}}
 		{{end}}

@@ -507,7 +507,13 @@ func CheckFileProtection(repo *git.Repository, oldCommitID, newCommitID string, 
 	if len(patterns) == 0 {
 		return nil, nil
 	}
-	affectedFiles, err := git.GetAffectedFiles(repo, oldCommitID, newCommitID, env)
+
+	objectFormat, err := repo.GetObjectFormat()
+	if err != nil {
+		return nil, err
+	}
+
+	affectedFiles, err := git.GetAffectedFiles(repo.Ctx, repo.Path, objectFormat, oldCommitID, newCommitID, env)
 	if err != nil {
 		return nil, err
 	}
@@ -537,7 +543,13 @@ func CheckUnprotectedFiles(repo *git.Repository, oldCommitID, newCommitID string
 	if len(patterns) == 0 {
 		return false, nil
 	}
-	affectedFiles, err := git.GetAffectedFiles(repo, oldCommitID, newCommitID, env)
+
+	objectFormat, err := repo.GetObjectFormat()
+	if err != nil {
+		return false, err
+	}
+
+	affectedFiles, err := git.GetAffectedFiles(repo.Ctx, repo.Path, objectFormat, oldCommitID, newCommitID, env)
 	if err != nil {
 		return false, err
 	}

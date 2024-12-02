@@ -87,6 +87,7 @@ import {initDirAuto} from './modules/dirauto.js';
 import {initRepositorySearch} from './features/repo-search.js';
 import {initColorPickers} from './features/colorpicker.js';
 import {initRepoMilestoneEditor} from './features/repo-milestone.js';
+import {initGist} from './features/gist.ts';
 
 // Init Gitea's Fomantic settings
 initGiteaFomantic();
@@ -190,4 +191,6 @@ onDomReady(() => {
   initPdfViewer();
   initScopedAccessTokenCategories();
   initColorPickers();
+
+  initGist();
 });
