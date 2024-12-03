@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"time"
 
 	"code.gitea.io/gitea/modules/container"
@@ -143,8 +143,7 @@ func (l *LayeredFS) ListFiles(name string, fileMode ...bool) ([]string, error) {
 			}
 		}
 	}
-	files := fileSet.Values()
-	sort.Strings(files)
+	files := slices.Sorted(fileSet.Seq())
 	return files, nil
 }
 
@@ -184,8 +183,7 @@ func listAllFiles(layers []*Layer, name string, fileMode ...bool) ([]string, err
 	if err := list(name); err != nil {
 		return nil, err
 	}
-	files := fileSet.Values()
-	sort.Strings(files)
+	files := slices.Sorted(fileSet.Seq())
 	return files, nil
 }
 
