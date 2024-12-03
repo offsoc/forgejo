@@ -67,7 +67,7 @@
 					<div class="item">
 						{{if not .IsPrimary}}
 							<div class="right floated content">
-								<button class="ui red tiny button delete-button" data-modal-id="delete-email" data-url="{{AppSubUrl}}/user/settings/account/email/delete" data-id="{{.ID}}">
+								<button class="ui danger tiny button delete-button" data-modal-id="delete-email" data-url="{{AppSubUrl}}/user/settings/account/email/delete" data-id="{{.ID}}">
 									{{ctx.Locale.Tr "settings.delete_email"}}
 								</button>
 							</div>
@@ -147,7 +147,7 @@
 					<input id="password-confirmation" name="password" type="password" autocomplete="off" required>
 				</div>
 				<div class="field">
-					<button class="ui red button delete-button" data-modal-id="delete-account" data-type="form" data-form="#delete-form">
+					<button class="ui danger button delete-button" data-modal-id="delete-account" data-type="form" data-form="#delete-form">
 						{{ctx.Locale.Tr "settings.confirm_delete_account"}}
 					</button>
 				</div>

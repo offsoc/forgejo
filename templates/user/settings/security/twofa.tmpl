@@ -13,7 +13,7 @@
 	<form class="ui form" action="{{AppSubUrl}}/user/settings/security/two_factor/disable" method="post" enctype="multipart/form-data" id="disable-form">
 		{{.CsrfTokenHtml}}
 		<p>{{ctx.Locale.Tr "settings.twofa_disable_note"}}</p>
-		<button class="ui red button delete-button" data-modal-id="disable-twofa" data-type="form" data-form="#disable-form">{{ctx.Locale.Tr "settings.twofa_disable"}}</button>
+		<button class="ui danger button delete-button" data-modal-id="disable-twofa" data-type="form" data-form="#disable-form">{{ctx.Locale.Tr "settings.twofa_disable"}}</button>
 	</form>
 	{{else}}
 	{{/* The recovery tip is there as a means of encouraging a user to enroll */}}

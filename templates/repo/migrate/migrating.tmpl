@@ -36,7 +36,7 @@
 								<div class="divider"></div>
 								<div class="item">
 									{{if .Failed}}
-										<button class="ui basic red show-modal button" data-modal="#delete-repo-modal">{{ctx.Locale.Tr "repo.settings.delete"}}</button>
+										<button class="ui basic danger show-modal button" data-modal="#delete-repo-modal">{{ctx.Locale.Tr "repo.settings.delete"}}</button>
 									{{else}}
 										<button class="ui basic show-modal button" data-modal="#cancel-repo-modal">{{ctx.Locale.Tr "cancel"}}</button>
 									{{end}}
@@ -79,7 +79,7 @@
 
 			<div class="text right actions">
 				<button class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
-				<button class="ui red button">{{ctx.Locale.Tr "repo.settings.confirm_delete"}}</button>
+				<button class="ui danger button">{{ctx.Locale.Tr "repo.settings.confirm_delete"}}</button>
 			</div>
 		</form>
 	</div>

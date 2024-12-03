@@ -59,7 +59,7 @@
 				</div>
 				<div class="field">
 					<button class="ui primary button">{{ctx.Locale.Tr "settings.update_avatar"}}</button>
-					<button class="ui red button link-action" data-url="{{.Link}}/avatar/delete">{{ctx.Locale.Tr "settings.delete_current_avatar"}}</button>
+					<button class="ui danger button link-action" data-url="{{.Link}}/avatar/delete">{{ctx.Locale.Tr "settings.delete_current_avatar"}}</button>
 				</div>
 			</form>
 		</div>
@@ -266,7 +266,7 @@
 										{{$.CsrfTokenHtml}}
 										<input type="hidden" name="action" value="push-mirror-remove">
 										<input type="hidden" name="push_mirror_id" value="{{.ID}}">
-										<button class="ui basic red tiny button" data-tooltip-content="{{ctx.Locale.Tr "remove"}}">{{svg "octicon-trash" 14}}</button>
+										<button class="ui basic danger tiny button" data-tooltip-content="{{ctx.Locale.Tr "remove"}}">{{svg "octicon-trash" 14}}</button>
 									</form>
 								</td>
 							</tr>
@@ -457,7 +457,7 @@
 							<div class="flex-item-body">{{ctx.Locale.Tr "repo.settings.convert_desc"}}</div>
 						</div>
 						<div class="flex-item-trailing">
-							<button class="ui basic red show-modal button" data-modal="#convert-mirror-repo-modal">{{ctx.Locale.Tr "repo.settings.convert"}}</button>
+							<button class="ui basic danger show-modal button" data-modal="#convert-mirror-repo-modal">{{ctx.Locale.Tr "repo.settings.convert"}}</button>
 						</div>
 					</div>
 				{{end}}
@@ -468,7 +468,7 @@
 							<div class="flex-item-body">{{ctx.Locale.Tr "repo.settings.convert_fork_desc"}}</div>
 						</div>
 						<div class="flex-item-trailing">
-							<button class="ui basic red show-modal button" data-modal="#convert-fork-repo-modal">{{ctx.Locale.Tr "repo.settings.convert_fork"}}</button>
+							<button class="ui basic danger show-modal button" data-modal="#convert-fork-repo-modal">{{ctx.Locale.Tr "repo.settings.convert_fork"}}</button>
 						</div>
 					</div>
 				{{end}}
@@ -488,10 +488,10 @@
 							<form class="ui form" action="{{.Link}}" method="post">
 								{{.CsrfTokenHtml}}
 								<input type="hidden" name="action" value="cancel_transfer">
-								<button class="ui red button">{{ctx.Locale.Tr "repo.settings.transfer_abort"}}</button>
+								<button class="ui danger button">{{ctx.Locale.Tr "repo.settings.transfer_abort"}}</button>
 							</form>
 						{{else}}
-							<button class="ui basic red show-modal button" data-modal="#transfer-repo-modal">{{ctx.Locale.Tr "repo.settings.transfer.button"}}</button>
+							<button class="ui basic danger show-modal button" data-modal="#transfer-repo-modal">{{ctx.Locale.Tr "repo.settings.transfer.button"}}</button>
 						{{end}}
 					</div>
 				</div>
@@ -503,7 +503,7 @@
 								<div class="flex-item-body">{{ctx.Locale.Tr "repo.settings.wiki_rename_branch_main_desc" .DefaultWikiBranchName}}</div>
 							</div>
 							<div class="flex-item-trailing">
-								<button class="ui basic red show-modal button" data-modal="#rename-wiki-branch-modal">{{ctx.Locale.Tr "repo.settings.wiki_rename_branch_main"}}</button>
+								<button class="ui basic danger show-modal button" data-modal="#rename-wiki-branch-modal">{{ctx.Locale.Tr "repo.settings.wiki_rename_branch_main"}}</button>
 							</div>
 						</div>
 					{{end}}
@@ -513,7 +513,7 @@
 							<div class="flex-item-body">{{ctx.Locale.Tr "repo.settings.wiki_delete_desc"}}</div>
 						</div>
 						<div class="flex-item-trailing">
-							<button class="ui basic red show-modal button" data-modal="#delete-wiki-modal">{{ctx.Locale.Tr "repo.settings.wiki_delete"}}</button>
+							<button class="ui basic danger show-modal button" data-modal="#delete-wiki-modal">{{ctx.Locale.Tr "repo.settings.wiki_delete"}}</button>
 						</div>
 					</div>
 				{{end}}
@@ -523,7 +523,7 @@
 						<div class="flex-item-body">{{ctx.Locale.Tr "repo.settings.delete_desc"}}</div>
 					</div>
 					<div class="flex-item-trailing">
-						<button class="ui basic red show-modal button" data-modal="#delete-repo-modal">{{ctx.Locale.Tr "repo.settings.delete"}}</button>
+						<button class="ui basic danger show-modal button" data-modal="#delete-repo-modal">{{ctx.Locale.Tr "repo.settings.delete"}}</button>
 					</div>
 				</div>
 				{{if not .Repository.IsMirror}}
@@ -538,7 +538,7 @@
 							{{end}}
 						</div>
 						<div class="flex-item-trailing">
-							<button class="ui basic red show-modal button" data-modal="#archive-repo-modal">
+							<button class="ui basic danger show-modal button" data-modal="#archive-repo-modal">
 								{{if .Repository.IsArchived}}
 									{{ctx.Locale.Tr "repo.settings.unarchive.button"}}
 								{{else}}
@@ -580,7 +580,7 @@
 
 					<div class="text right actions">
 						<button class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
-						<button class="ui red button">{{ctx.Locale.Tr "repo.settings.convert_confirm"}}</button>
+						<button class="ui danger button">{{ctx.Locale.Tr "repo.settings.convert_confirm"}}</button>
 					</div>
 				</form>
 			</div>
@@ -611,7 +611,7 @@
 
 					<div class="text right actions">
 						<button class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
-						<button class="ui red button">{{ctx.Locale.Tr "repo.settings.convert_fork_confirm"}}</button>
+						<button class="ui danger button">{{ctx.Locale.Tr "repo.settings.convert_fork_confirm"}}</button>
 					</div>
 				</form>
 			</div>
@@ -647,7 +647,7 @@
 
 				<div class="text right actions">
 					<button class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
-					<button class="ui red button">{{ctx.Locale.Tr "repo.settings.transfer_perform"}}</button>
+					<button class="ui danger button">{{ctx.Locale.Tr "repo.settings.transfer_perform"}}</button>
 				</div>
 			</form>
 		</div>
@@ -681,7 +681,7 @@
 
 				<div class="text right actions">
 					<button class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
-					<button class="ui red button">{{ctx.Locale.Tr "repo.settings.confirm_delete"}}</button>
+					<button class="ui danger button">{{ctx.Locale.Tr "repo.settings.confirm_delete"}}</button>
 				</div>
 			</form>
 		</div>
@@ -713,7 +713,7 @@
 
 				<div class="text right actions">
 					<button class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
-					<button class="ui red button">{{ctx.Locale.Tr "repo.settings.confirm_wiki_delete"}}</button>
+					<button class="ui danger button">{{ctx.Locale.Tr "repo.settings.confirm_wiki_delete"}}</button>
 				</div>
 			</form>
 		</div>
@@ -746,7 +746,7 @@
 
 					<div class="text right actions">
 						<button class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
-						<button class="ui red button">{{ctx.Locale.Tr "repo.settings.confirm_wiki_branch_rename"}}</button>
+						<button class="ui danger button">{{ctx.Locale.Tr "repo.settings.confirm_wiki_branch_rename"}}</button>
 					</div>
 				</form>
 			</div>
@@ -777,7 +777,7 @@
 					<input type="hidden" name="repo_id" value="{{.Repository.ID}}">
 					<div class="text right actions">
 						<button class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
-						<button class="ui red button">
+						<button class="ui danger button">
 							{{if .Repository.IsArchived}}
 								{{ctx.Locale.Tr "repo.settings.unarchive.button"}}
 							{{else}}
