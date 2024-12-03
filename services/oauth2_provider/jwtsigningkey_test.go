@@ -1,7 +1,7 @@
 // Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package oauth2
+package oauth2_provider //nolint
 
 import (
 	"crypto/ecdsa"
