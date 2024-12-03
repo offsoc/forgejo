@@ -5,14 +5,18 @@
 package integration
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	auth_model "code.gitea.io/gitea/models/auth"
+	"code.gitea.io/gitea/models/db"
 	issues_model "code.gitea.io/gitea/models/issues"
 	repo_model "code.gitea.io/gitea/models/repo"
 	unit_model "code.gitea.io/gitea/models/unit"
@@ -114,10 +118,7 @@ func TestRenameReservedUsername(t *testing.T) {
 		"avatar",
 		"avatars",
 		"captcha",
-		"commits",
-		"debug",
 		"devtest",
-		"error",
 		"explore",
 		"favicon.ico",
 		"ghost",
@@ -126,16 +127,12 @@ func TestRenameReservedUsername(t *testing.T) {
 		"manifest.json",
 		"metrics",
 		"milestones",
-		"new",
 		"notifications",
 		"org",
 		"pulls",
-		"raw",
 		"repo",
 		"repo-avatars",
 		"robots.txt",
-		"search",
-		"serviceworker.js",
 		"ssh_info",
 		"swagger.v1.json",
 		"user",
@@ -818,4 +815,196 @@ func TestUserTOTPEnrolled(t *testing.T) {
 
 		assert.True(t, called)
 	})
+}
+
+func TestUserRepos(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	cases := map[string][]string{
+		"alphabetically":        {"repo6", "repo7", "repo8"},
+		"recentupdate":          {"repo7", "repo8", "repo6"},
+		"reversealphabetically": {"repo8", "repo7", "repo6"},
+	}
+
+	session := loginUser(t, "user10")
+	for sortBy, repos := range cases {
+		req := NewRequest(t, "GET", "/user10?sort="+sortBy)
+		resp := session.MakeRequest(t, req, http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		sel := htmlDoc.doc.Find("a.name")
+		assert.Len(t, repos, len(sel.Nodes))
+		for i := 0; i < len(repos); i++ {
+			assert.EqualValues(t, repos[i], strings.TrimSpace(sel.Eq(i).Text()))
+		}
+	}
+}
+
+func TestUserActivate(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.Service.RegisterEmailConfirm, true)()
+
+	called := false
+	code := ""
+	defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+		called = true
+		assert.Len(t, msgs, 1)
+		assert.Equal(t, `"doesnotexist" <doesnotexist@example.com>`, msgs[0].To)
+		assert.EqualValues(t, translation.NewLocale("en-US").Tr("mail.activate_account"), msgs[0].Subject)
+
+		messageDoc := NewHTMLParser(t, bytes.NewBuffer([]byte(msgs[0].Body)))
+		link, ok := messageDoc.Find("a").Attr("href")
+		assert.True(t, ok)
+		u, err := url.Parse(link)
+		require.NoError(t, err)
+		code = u.Query()["code"][0]
+	})()
+
+	session := emptyTestSession(t)
+	req := NewRequestWithValues(t, "POST", "/user/sign_up", map[string]string{
+		"_csrf":     GetCSRF(t, session, "/user/sign_up"),
+		"user_name": "doesnotexist",
+		"email":     "doesnotexist@example.com",
+		"password":  "examplePassword!1",
+		"retype":    "examplePassword!1",
+	})
+	session.MakeRequest(t, req, http.StatusOK)
+	assert.True(t, called)
+
+	queryCode, err := url.QueryUnescape(code)
+	require.NoError(t, err)
+
+	lookupKey, validator, ok := strings.Cut(queryCode, ":")
+	assert.True(t, ok)
+
+	rawValidator, err := hex.DecodeString(validator)
+	require.NoError(t, err)
+
+	authToken, err := auth_model.FindAuthToken(db.DefaultContext, lookupKey, auth_model.UserActivation)
+	require.NoError(t, err)
+	assert.False(t, authToken.IsExpired())
+	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
+
+	req = NewRequest(t, "POST", "/user/activate?code="+code)
+	session.MakeRequest(t, req, http.StatusOK)
+
+	unittest.AssertNotExistsBean(t, &auth_model.AuthorizationToken{ID: authToken.ID})
+	unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "doesnotexist", IsActive: true})
+}
+
+func TestUserPasswordReset(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	called := false
+	code := ""
+	defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+		if called {
+			return
+		}
+		called = true
+
+		assert.Len(t, msgs, 1)
+		assert.Equal(t, user2.EmailTo(), msgs[0].To)
+		assert.EqualValues(t, translation.NewLocale("en-US").Tr("mail.reset_password"), msgs[0].Subject)
+
+		messageDoc := NewHTMLParser(t, bytes.NewBuffer([]byte(msgs[0].Body)))
+		link, ok := messageDoc.Find("a").Attr("href")
+		assert.True(t, ok)
+		u, err := url.Parse(link)
+		require.NoError(t, err)
+		code = u.Query()["code"][0]
+	})()
+
+	session := emptyTestSession(t)
+	req := NewRequestWithValues(t, "POST", "/user/forgot_password", map[string]string{
+		"_csrf": GetCSRF(t, session, "/user/forgot_password"),
+		"email": user2.Email,
+	})
+	session.MakeRequest(t, req, http.StatusOK)
+	assert.True(t, called)
+
+	queryCode, err := url.QueryUnescape(code)
+	require.NoError(t, err)
+
+	lookupKey, validator, ok := strings.Cut(queryCode, ":")
+	assert.True(t, ok)
+
+	rawValidator, err := hex.DecodeString(validator)
+	require.NoError(t, err)
+
+	authToken, err := auth_model.FindAuthToken(db.DefaultContext, lookupKey, auth_model.PasswordReset)
+	require.NoError(t, err)
+	assert.False(t, authToken.IsExpired())
+	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
+
+	req = NewRequestWithValues(t, "POST", "/user/recover_account", map[string]string{
+		"_csrf":    GetCSRF(t, session, "/user/recover_account"),
+		"code":     code,
+		"password": "new_password",
+	})
+	session.MakeRequest(t, req, http.StatusSeeOther)
+
+	unittest.AssertNotExistsBean(t, &auth_model.AuthorizationToken{ID: authToken.ID})
+	assert.True(t, unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2}).ValidatePassword("new_password"))
+}
+
+func TestActivateEmailAddress(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.Service.RegisterEmailConfirm, true)()
+
+	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	called := false
+	code := ""
+	defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+		if called {
+			return
+		}
+		called = true
+
+		assert.Len(t, msgs, 1)
+		assert.Equal(t, "newemail@example.org", msgs[0].To)
+		assert.EqualValues(t, translation.NewLocale("en-US").Tr("mail.activate_email"), msgs[0].Subject)
+
+		messageDoc := NewHTMLParser(t, bytes.NewBuffer([]byte(msgs[0].Body)))
+		link, ok := messageDoc.Find("a").Attr("href")
+		assert.True(t, ok)
+		u, err := url.Parse(link)
+		require.NoError(t, err)
+		code = u.Query()["code"][0]
+	})()
+
+	session := loginUser(t, user2.Name)
+	req := NewRequestWithValues(t, "POST", "/user/settings/account/email", map[string]string{
+		"_csrf": GetCSRF(t, session, "/user/settings"),
+		"email": "newemail@example.org",
+	})
+	session.MakeRequest(t, req, http.StatusSeeOther)
+	assert.True(t, called)
+
+	queryCode, err := url.QueryUnescape(code)
+	require.NoError(t, err)
+
+	lookupKey, validator, ok := strings.Cut(queryCode, ":")
+	assert.True(t, ok)
+
+	rawValidator, err := hex.DecodeString(validator)
+	require.NoError(t, err)
+
+	authToken, err := auth_model.FindAuthToken(db.DefaultContext, lookupKey, auth_model.EmailActivation("newemail@example.org"))
+	require.NoError(t, err)
+	assert.False(t, authToken.IsExpired())
+	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
+
+	req = NewRequestWithValues(t, "POST", "/user/activate_email", map[string]string{
+		"code":  code,
+		"email": "newemail@example.org",
+	})
+	session.MakeRequest(t, req, http.StatusSeeOther)
+
+	unittest.AssertNotExistsBean(t, &auth_model.AuthorizationToken{ID: authToken.ID})
+	unittest.AssertExistsAndLoadBean(t, &user_model.EmailAddress{UID: user2.ID, IsActivated: true, Email: "newemail@example.org"})
 }

@@ -19,6 +19,10 @@ func NewStringUtils() *StringUtils {
 	return &stringUtils
 }
 
+func (su *StringUtils) Make(arr ...string) []string {
+	return arr
+}
+
 func (su *StringUtils) HasPrefix(s any, prefix string) bool {
 	switch v := s.(type) {
 	case string:

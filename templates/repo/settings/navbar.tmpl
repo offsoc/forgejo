@@ -5,7 +5,7 @@
 			{{ctx.Locale.Tr "repo.settings.options"}}
 		</a>
 		<details class="item toggleable-item" {{if .PageIsRepoSettingsUnits}}open{{end}}>
-			<summary class="item{{if .PageIsRepoSettingsUnits}} active{{end}}">{{ctx.Locale.Tr "repo.settings.units.units"}}</summary>
+			<summary {{if .PageIsRepoSettingsUnits}}class="active"{{end}}>{{ctx.Locale.Tr "repo.settings.units.units"}}</summary>
 			<div class="menu">
 				<a class="item" href="{{.RepoLink}}/settings/units#overview">
 					{{ctx.Locale.Tr "repo.settings.units.overview"}}

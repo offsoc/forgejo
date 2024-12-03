@@ -14,6 +14,10 @@
 		{{if .Issue.Content}}
 			<meta property="og:description" content="{{StringUtils.EllipsisString .Issue.Content 300}}">
 		{{end}}
+		<meta property="og:image" content="{{.Issue.SummaryCardURL}}">
+		<meta property="og:image:width" content="{{.Issue.SummaryCardWidth}}">
+		<meta property="og:image:height" content="{{.Issue.SummaryCardHeight}}">
+		<meta property="og:image:alt" content="{{ctx.Locale.Tr "repo.issues.summary_card_alt" .Issue.Title .Repository.FullName}}">
 	{{else if or .PageIsDiff .IsViewFile}}
 		<meta property="og:title" content="{{.Title}}">
 		<meta property="og:url" content="{{AppUrl}}{{.Link}}">
@@ -38,10 +42,12 @@
 		{{end}}
 	{{end}}
 	<meta property="og:type" content="object">
-	{{if (.Repository.AvatarLink ctx)}}
-		<meta property="og:image" content="{{.Repository.AvatarLink ctx}}">
-	{{else}}
-		<meta property="og:image" content="{{.Repository.Owner.AvatarLink ctx}}">
+	{{if not .Issue}}
+		{{if (.Repository.AvatarLink ctx)}}
+			<meta property="og:image" content="{{.Repository.AvatarLink ctx}}">
+		{{else}}
+			<meta property="og:image" content="{{.Repository.Owner.AvatarLink ctx}}">
+		{{end}}
 	{{end}}
 {{else}}
 	<meta property="og:title" content="{{AppDisplayName}}">

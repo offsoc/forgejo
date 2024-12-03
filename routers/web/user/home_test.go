@@ -28,6 +28,7 @@ func TestArchivedIssues(t *testing.T) {
 	ctx, _ := contexttest.MockContext(t, "issues")
 	contexttest.LoadUser(t, ctx, 30)
 	ctx.Req.Form.Set("state", "open")
+	ctx.Req.Form.Set("type", "your_repositories")
 
 	// Assume: User 30 has access to two Repos with Issues, one of the Repos being archived.
 	repos, _, _ := repo_model.GetUserRepositories(db.DefaultContext, &repo_model.SearchRepoOptions{Actor: ctx.Doer})
@@ -73,6 +74,7 @@ func TestPulls(t *testing.T) {
 	ctx, _ := contexttest.MockContext(t, "pulls")
 	contexttest.LoadUser(t, ctx, 2)
 	ctx.Req.Form.Set("state", "open")
+	ctx.Req.Form.Set("type", "your_repositories")
 	Pulls(ctx)
 	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
 

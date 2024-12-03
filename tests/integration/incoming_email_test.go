@@ -4,6 +4,7 @@
 package integration
 
 import (
+	"encoding/base32"
 	"io"
 	"net"
 	"net/smtp"
@@ -73,6 +74,51 @@ func TestIncomingEmail(t *testing.T) {
 		assert.Equal(t, token_service.ReplyHandlerType, ht)
 		assert.Equal(t, user.ID, u.ID)
 		assert.Equal(t, payload, p)
+	})
+
+	tokenEncoding := base32.StdEncoding.WithPadding(base32.NoPadding)
+	t.Run("Deprecated token version", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		payload := []byte{1, 2, 3, 4, 5}
+
+		token, err := token_service.CreateToken(token_service.ReplyHandlerType, user, payload)
+		require.NoError(t, err)
+		assert.NotEmpty(t, token)
+
+		// Set the token to version 1.
+		unencodedToken, err := tokenEncoding.DecodeString(token)
+		require.NoError(t, err)
+		unencodedToken[0] = 1
+		token = tokenEncoding.EncodeToString(unencodedToken)
+
+		ht, u, p, err := token_service.ExtractToken(db.DefaultContext, token)
+		require.ErrorContains(t, err, "unsupported token version: 1")
+		assert.Equal(t, token_service.UnknownHandlerType, ht)
+		assert.Nil(t, u)
+		assert.Nil(t, p)
+	})
+
+	t.Run("MAC check", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		payload := []byte{1, 2, 3, 4, 5}
+
+		token, err := token_service.CreateToken(token_service.ReplyHandlerType, user, payload)
+		require.NoError(t, err)
+		assert.NotEmpty(t, token)
+
+		// Modify the MAC.
+		unencodedToken, err := tokenEncoding.DecodeString(token)
+		require.NoError(t, err)
+		unencodedToken[len(unencodedToken)-1] ^= 0x01
+		token = tokenEncoding.EncodeToString(unencodedToken)
+
+		ht, u, p, err := token_service.ExtractToken(db.DefaultContext, token)
+		require.ErrorContains(t, err, "verification failed")
+		assert.Equal(t, token_service.UnknownHandlerType, ht)
+		assert.Nil(t, u)
+		assert.Nil(t, p)
 	})
 
 	t.Run("Handler", func(t *testing.T) {

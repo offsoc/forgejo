@@ -1,7 +1,7 @@
 contact_links:
   - name: 🔓 Security Reports
     url: mailto:security@forgejo.org
-    about: "Please email <security@forgejo.org> (GPG: `A4676E79`) instead of opening a public issue."
+    about: "Please email <security@forgejo.org> (See https://forgejo.org/.well-known/security.txt)."
   - name: 💬 Matrix Chat Room
     url: https://matrix.to/#/#forgejo-chat:matrix.org
     about: Please ask questions and discuss configuration or deployment problems here.

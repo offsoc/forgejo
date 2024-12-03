@@ -236,7 +236,7 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 	}
 
 	if options.SortBy == "" {
-		options.SortBy = internal.SortByCreatedAsc
+		options.SortBy = internal.SortByScore
 	}
 	sortBy := []elastic.Sorter{
 		parseSortBy(options.SortBy),

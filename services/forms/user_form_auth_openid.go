@@ -9,7 +9,7 @@ import (
 	"code.gitea.io/gitea/modules/web/middleware"
 	"code.gitea.io/gitea/services/context"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 // SignInOpenIDForm form for signing in with OpenID
@@ -27,7 +27,7 @@ func (f *SignInOpenIDForm) Validate(req *http.Request, errs binding.Errors) bind
 // SignUpOpenIDForm form for signin up with OpenID
 type SignUpOpenIDForm struct {
 	UserName string `binding:"Required;Username;MaxSize(40)"`
-	Email    string `binding:"Required;Email;MaxSize(254)"`
+	Email    string `binding:"Required;EmailWithAllowedDomain;MaxSize(254)"`
 }
 
 // Validate validates the fields

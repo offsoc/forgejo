@@ -10,6 +10,7 @@ import (
 
 	activities_model "code.gitea.io/gitea/models/activities"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/routers/api/v1/utils"
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/convert"
@@ -68,12 +69,18 @@ func Search(ctx *context.APIContext) {
 		maxResults = 1
 		users = []*user_model.User{user_model.NewActionsUser()}
 	default:
+		var visible []structs.VisibleType
+		if ctx.PublicOnly {
+			visible = []structs.VisibleType{structs.VisibleTypePublic}
+		}
 		users, maxResults, err = user_model.SearchUsers(ctx, &user_model.SearchUserOptions{
-			Actor:       ctx.Doer,
-			Keyword:     ctx.FormTrim("q"),
-			UID:         uid,
-			Type:        user_model.UserTypeIndividual,
-			ListOptions: listOptions,
+			Actor:         ctx.Doer,
+			Keyword:       ctx.FormTrim("q"),
+			UID:           uid,
+			Type:          user_model.UserTypeIndividual,
+			SearchByEmail: true,
+			Visible:       visible,
+			ListOptions:   listOptions,
 		})
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, map[string]any{
@@ -130,6 +137,10 @@ func GetAuthenticatedUser(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/User"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	ctx.JSON(http.StatusOK, convert.ToUser(ctx, ctx.Doer, ctx.Doer))
 }
@@ -237,6 +248,10 @@ func ListBlockedUsers(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/BlockedUserList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	utils.ListUserBlockedUsers(ctx, ctx.Doer)
 }
@@ -257,6 +272,10 @@ func BlockUser(ctx *context.APIContext) {
 	// responses:
 	//   "204":
 	//     "$ref": "#/responses/empty"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	//   "422":
@@ -286,6 +305,10 @@ func UnblockUser(ctx *context.APIContext) {
 	// responses:
 	//   "204":
 	//     "$ref": "#/responses/empty"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	//   "422":

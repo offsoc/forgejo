@@ -1,7 +1,9 @@
 {{if or .OAuth2Providers .EnableOpenIDSignIn}}
+{{if .EnableInternalSignIn}}
 <div class="divider divider-text">
 	{{ctx.Locale.Tr "sign_in_or"}}
 </div>
+{{end}}
 <div id="oauth2-login-navigator" class="tw-py-1">
 	<div class="tw-flex tw-flex-col tw-justify-center">
 		<div id="oauth2-login-navigator-inner" class="tw-flex tw-flex-col tw-flex-wrap tw-items-center tw-gap-2">

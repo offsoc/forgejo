@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/packages"
 	debian_module "code.gitea.io/gitea/modules/packages/debian"
+	"code.gitea.io/gitea/modules/setting"
 
 	"xorm.io/builder"
 )
@@ -76,25 +77,41 @@ func ExistPackages(ctx context.Context, opts *PackageSearchOptions) (bool, error
 
 // SearchPackages gets the packages matching the search options
 func SearchPackages(ctx context.Context, opts *PackageSearchOptions, iter func(*packages.PackageFileDescriptor)) error {
-	return db.GetEngine(ctx).
-		Table("package_file").
-		Select("package_file.*").
-		Join("INNER", "package_version", "package_version.id = package_file.version_id").
-		Join("INNER", "package", "package.id = package_version.package_id").
-		Where(opts.toCond()).
-		Asc("package.lower_name", "package_version.created_unix").
-		Iterate(new(packages.PackageFile), func(_ int, bean any) error {
-			pf := bean.(*packages.PackageFile)
+	var start int
+	batchSize := setting.Database.IterateBufferSize
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			beans := make([]*packages.PackageFile, 0, batchSize)
 
-			pfd, err := packages.GetPackageFileDescriptor(ctx, pf)
-			if err != nil {
+			if err := db.GetEngine(ctx).
+				Table("package_file").
+				Select("package_file.*").
+				Join("INNER", "package_version", "package_version.id = package_file.version_id").
+				Join("INNER", "package", "package.id = package_version.package_id").
+				Where(opts.toCond()).
+				Asc("package.lower_name", "package_version.created_unix").
+				Limit(batchSize, start).
+				Find(&beans); err != nil {
 				return err
 			}
+			if len(beans) == 0 {
+				return nil
+			}
+			start += len(beans)
 
-			iter(pfd)
+			for _, bean := range beans {
+				pfd, err := packages.GetPackageFileDescriptor(ctx, bean)
+				if err != nil {
+					return err
+				}
 
-			return nil
-		})
+				iter(pfd)
+			}
+		}
+	}
 }
 
 // GetDistributions gets all available distributions

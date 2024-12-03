@@ -1,0 +1,24 @@
+Content-Security-Policy: default-src 'none'
+X-Prev-Page: 
+Set-Cookie: _cfuvid=7GL5tIuTakQp9CVUUSpwUwMYssAGhn7PgI8tTqNnmz0-1725394798686-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+X-Gitlab-Meta: {"correlation_id":"7b65fd9c80614af0ef38989ba51e5c29","version":"1"}
+Gitlab-Lb: haproxy-main-30-lb-gprd
+Etag: W/"8a9c7ac19d2c07896e0e68bc7725d52c"
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000
+Gitlab-Sv: api-gke-us-east1-b
+X-Page: 1
+X-Total: 1
+Cache-Control: max-age=0, private, must-revalidate
+Link: <https://gitlab.com/api/v4/projects/61363672/merge_requests?id=61363672&order_by=created_at&page=1&per_page=1&sort=desc&state=all&view=simple&with_labels_details=false&with_merge_status_recheck=false>; rel="first", <https://gitlab.com/api/v4/projects/61363672/merge_requests?id=61363672&order_by=created_at&page=1&per_page=1&sort=desc&state=all&view=simple&with_labels_details=false&with_merge_status_recheck=false>; rel="last"
+X-Per-Page: 1
+Referrer-Policy: strict-origin-when-cross-origin
+Cf-Cache-Status: MISS
+Content-Type: application/json
+X-Total-Pages: 1
+Vary: Origin, Accept-Encoding
+X-Frame-Options: SAMEORIGIN
+X-Runtime: 0.123283
+X-Next-Page: 
+
+[{"id":324657888,"iid":1,"project_id":61363672,"title":"Test branch","description":"do not merge this PR","state":"opened","created_at":"2024-09-03T07:57:19.866Z","updated_at":"2024-09-03T18:50:21.065Z","web_url":"https://gitlab.com/forgejo/test_repo/-/merge_requests/1"}]

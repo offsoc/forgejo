@@ -9,7 +9,7 @@ import (
 
 	"code.gitea.io/gitea/modules/web/middleware"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 	"github.com/go-chi/chi/v5"
 )
 

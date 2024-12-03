@@ -6,6 +6,7 @@ package integration
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -13,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"code.gitea.io/gitea/models/db"
 	issues_model "code.gitea.io/gitea/models/issues"
 	repo_model "code.gitea.io/gitea/models/repo"
 	unit_model "code.gitea.io/gitea/models/unit"
@@ -134,6 +136,65 @@ func TestCodeOwner(t *testing.T) {
 
 			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadBranch: "user2/codeowner-out-of-date"})
 			unittest.AssertExistsIf(t, true, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 4})
+			unittest.AssertExistsIf(t, false, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 5})
+		})
+		t.Run("From a forked repository", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			session := loginUser(t, "user1")
+
+			r := fmt.Sprintf("%suser1/repo1.git", u.String())
+			remoteURL, _ := url.Parse(r)
+			remoteURL.User = url.UserPassword("user1", userPassword)
+			doGitAddRemote(dstPath, "forked-2", remoteURL)(t)
+
+			err := git.NewCommand(git.DefaultContext, "push", "forked-2", "HEAD:branch").Run(&git.RunOpts{Dir: dstPath})
+			require.NoError(t, err)
+
+			req := NewRequestWithValues(t, "POST", repo.FullName()+"/compare/main...user1/repo1:branch", map[string]string{
+				"_csrf": GetCSRF(t, session, repo.FullName()+"/compare/main...user1/repo1:branch"),
+				"title": "pull request",
+			})
+			session.MakeRequest(t, req, http.StatusOK)
+
+			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadBranch: "branch"})
+			unittest.AssertExistsIf(t, true, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 4})
+		})
+
+		t.Run("Codeowner user with no permission", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			// Make repository private, only user2 (owner of repository) has now access to this repository.
+			repo.IsPrivate = true
+			_, err := db.GetEngine(db.DefaultContext).Cols("is_private").Update(repo)
+			require.NoError(t, err)
+
+			err = os.WriteFile(path.Join(dstPath, "README.md"), []byte("## very sensitive info"), 0o666)
+			require.NoError(t, err)
+
+			err = git.AddChanges(dstPath, true)
+			require.NoError(t, err)
+
+			err = git.CommitChanges(dstPath, git.CommitChangesOptions{
+				Committer: &git.Signature{
+					Email: "user2@example.com",
+					Name:  "user2",
+					When:  time.Now(),
+				},
+				Author: &git.Signature{
+					Email: "user2@example.com",
+					Name:  "user2",
+					When:  time.Now(),
+				},
+				Message: "Add secrets to the README.",
+			})
+			require.NoError(t, err)
+
+			err = git.NewCommand(git.DefaultContext, "push", "origin", "HEAD:refs/for/main", "-o", "topic=codeowner-private").Run(&git.RunOpts{Dir: dstPath})
+			require.NoError(t, err)
+
+			// In CODEOWNERS file the codeowner for README.md is user5, but does not have access to this private repository.
+			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: repo.ID, HeadBranch: "user2/codeowner-private"})
 			unittest.AssertExistsIf(t, false, &issues_model.Review{IssueID: pr.IssueID, Type: issues_model.ReviewTypeRequest, ReviewerID: 5})
 		})
 	})

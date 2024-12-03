@@ -269,6 +269,7 @@ func IsAvailable(ctx context.Context) bool {
 type SearchOptions = internal.SearchOptions
 
 const (
+	SortByScore        = internal.SortByScore
 	SortByCreatedDesc  = internal.SortByCreatedDesc
 	SortByUpdatedDesc  = internal.SortByUpdatedDesc
 	SortByCommentsDesc = internal.SortByCommentsDesc

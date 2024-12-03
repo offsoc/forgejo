@@ -10,7 +10,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/services/auth/source/oauth2"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -67,32 +67,14 @@ func TestNewAccessTokenResponse_OIDCToken(t *testing.T) {
 
 	// Scopes: openid profile email
 	oidcToken = createAndParseToken(t, grants[0])
-	assert.Equal(t, user.Name, oidcToken.Name)
-	assert.Equal(t, user.Name, oidcToken.PreferredUsername)
-	assert.Equal(t, user.HTMLURL(), oidcToken.Profile)
-	assert.Equal(t, user.AvatarLink(db.DefaultContext), oidcToken.Picture)
-	assert.Equal(t, user.Website, oidcToken.Website)
-	assert.Equal(t, user.UpdatedUnix, oidcToken.UpdatedAt)
-	assert.Equal(t, user.Email, oidcToken.Email)
-	assert.Equal(t, user.IsActive, oidcToken.EmailVerified)
-
-	// set DefaultShowFullName to true
-	oldDefaultShowFullName := setting.UI.DefaultShowFullName
-	setting.UI.DefaultShowFullName = true
-	defer func() {
-		setting.UI.DefaultShowFullName = oldDefaultShowFullName
-	}()
-
-	// Scopes: openid profile email
-	oidcToken = createAndParseToken(t, grants[0])
-	assert.Equal(t, user.FullName, oidcToken.Name)
-	assert.Equal(t, user.Name, oidcToken.PreferredUsername)
-	assert.Equal(t, user.HTMLURL(), oidcToken.Profile)
-	assert.Equal(t, user.AvatarLink(db.DefaultContext), oidcToken.Picture)
-	assert.Equal(t, user.Website, oidcToken.Website)
-	assert.Equal(t, user.UpdatedUnix, oidcToken.UpdatedAt)
-	assert.Equal(t, user.Email, oidcToken.Email)
-	assert.Equal(t, user.IsActive, oidcToken.EmailVerified)
+	assert.Equal(t, "User Five", oidcToken.Name)
+	assert.Equal(t, "user5", oidcToken.PreferredUsername)
+	assert.Equal(t, "https://try.gitea.io/user5", oidcToken.Profile)
+	assert.Equal(t, "https://try.gitea.io/assets/img/avatar_default.png", oidcToken.Picture)
+	assert.Equal(t, "", oidcToken.Website)
+	assert.Equal(t, timeutil.TimeStamp(0), oidcToken.UpdatedAt)
+	assert.Equal(t, "user5@example.com", oidcToken.Email)
+	assert.True(t, oidcToken.EmailVerified)
 }
 
 func TestEncodeCodeChallenge(t *testing.T) {

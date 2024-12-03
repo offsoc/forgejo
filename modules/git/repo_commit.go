@@ -22,7 +22,9 @@ func (repo *Repository) GetBranchCommitID(name string) (string, error) {
 	return repo.GetRefCommitID(BranchPrefix + name)
 }
 
-// GetTagCommitID returns last commit ID string of given tag.
+// GetTagCommitID returns last commit ID string of given tag. If the tag is an
+// annotated tag it will return the objectID of that tag instead of the commitID
+// the tag is pointing to. `GetTagCommit` handles annotated tags correctly.
 func (repo *Repository) GetTagCommitID(name string) (string, error) {
 	return repo.GetRefCommitID(TagPrefix + name)
 }

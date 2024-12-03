@@ -97,12 +97,12 @@ func SetExecutablePath(path string) error {
 	}
 
 	if gitVersion.LessThan(versionRequired) {
-		moreHint := "get git: https://git-scm.com/download/"
+		moreHint := "get git: https://git-scm.com/downloads"
 		if runtime.GOOS == "linux" {
 			// there are a lot of CentOS/RHEL users using old git, so we add a special hint for them
 			if _, err = os.Stat("/etc/redhat-release"); err == nil {
 				// ius.io is the recommended official(git-scm.com) method to install git
-				moreHint = "get git: https://git-scm.com/download/linux and https://ius.io"
+				moreHint = "get git: https://git-scm.com/downloads/linux and https://ius.io"
 			}
 		}
 		return fmt.Errorf("installed git version %q is not supported, Gitea requires git version >= %q, %s", gitVersion.Original(), RequiredVersion, moreHint)

@@ -36,7 +36,7 @@
 								</ul>
 							</details>
 							<div class="flex-item-body">
-								<p>{{ctx.Locale.Tr "settings.added_on" (DateTime "short" .CreatedUnix)}} — {{svg "octicon-info"}} {{if .HasUsed}}{{ctx.Locale.Tr "settings.last_used"}} <span {{if .HasRecentActivity}}class="text green"{{end}}>{{DateTime "short" .UpdatedUnix}}</span>{{else}}{{ctx.Locale.Tr "settings.no_activity"}}{{end}}</p>
+								<p>{{ctx.Locale.Tr "settings.added_on" (DateUtils.AbsoluteShort .CreatedUnix)}} — {{svg "octicon-info"}} {{if .HasUsed}}{{ctx.Locale.Tr "settings.last_used"}} <span {{if .HasRecentActivity}}class="text green"{{end}}>{{DateUtils.AbsoluteShort .UpdatedUnix}}</span>{{else}}{{ctx.Locale.Tr "settings.no_activity"}}{{end}}</p>
 							</div>
 						</div>
 						<div class="flex-item-trailing">
@@ -75,7 +75,7 @@
 						{{ctx.Locale.Tr "settings.select_permissions"}}
 					</summary>
 					<p class="activity meta">
-						<p>{{ctx.Locale.Tr "settings.access_token_desc" (HTMLFormat `href="%s/api/swagger" target="_blank"` AppSubUrl) (`href="https://forgejo.org/docs/latest/user/token-scope/" target="_blank"`|SafeHTML)}}</p>
+						<p>{{ctx.Locale.Tr "settings.access_token_desc" (printf "%s/api/swagger" AppSubUrl) "https://forgejo.org/docs/latest/user/token-scope/"}}</p>
 					</p>
 					<div class="scoped-access-token"
 						data-is-admin="{{if .IsAdmin}}true{{else}}false{{end}}"

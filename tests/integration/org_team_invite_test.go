@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
 	"code.gitea.io/gitea/models/unittest"
@@ -293,8 +294,10 @@ func TestOrgTeamEmailInviteRedirectsNewUserWithActivation(t *testing.T) {
 	require.NoError(t, err)
 	session.jar.SetCookies(baseURL, cr.Cookies())
 
-	activateURL := fmt.Sprintf("/user/activate?code=%s", user.GenerateEmailActivateCode("doesnotexist@example.com"))
-	req = NewRequestWithValues(t, "POST", activateURL, map[string]string{
+	code, err := user.GenerateEmailAuthorizationCode(db.DefaultContext, auth.UserActivation)
+	require.NoError(t, err)
+
+	req = NewRequestWithValues(t, "POST", "/user/activate?code="+url.QueryEscape(code), map[string]string{
 		"password": "examplePassword!1",
 	})
 

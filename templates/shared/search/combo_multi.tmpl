@@ -1,0 +1,24 @@
+{{/* Value - value of the search field (for search results page) */}}
+{{/* Disabled (optional) - if search field/button has to be disabled */}}
+{{/* Placeholder (optional) - placeholder text to be used */}}
+{{/* Selected - the currently selected option */}}
+{{/* Options - options available to choose from */}}
+{{/* Tooltip (optional) - a tooltip to be displayed on button hover */}}
+<div class="ui small fluid action input">
+	{{template "shared/search/input" dict "Value" .Value "Disabled" .Disabled "Placeholder" .Placeholder}}
+	<div class="ui small dropdown selection {{if .Disabled}} disabled{{end}}" data-tooltip-content="{{ctx.Locale.Tr "search.type_tooltip"}}">
+		<div class="text">
+			{{ctx.Locale.Tr (printf "search.%s" .Selected)}}
+		</div>
+		<div class="menu" data-test-tag="fuzzy-dropdown">
+			{{range $opt := .Options}}
+				{{$isActive := eq $.Selected $opt}}
+				<label class="{{if $isActive}}active {{end}}item" data-value="{{$opt}}" data-tooltip-content="{{ctx.Locale.Tr (printf "search.%s_tooltip" $opt)}}">
+					<input hidden type="radio" name="mode" value="{{$opt}}"{{if $isActive}} checked{{end}}/>
+					{{ctx.Locale.Tr (printf "search.%s" $opt)}}
+				</label>
+			{{end}}
+		</div>
+	</div>
+	{{template "shared/search/button" dict "Disabled" .Disabled "Tooltip" .Tooltip}}
+</div>

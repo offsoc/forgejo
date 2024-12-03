@@ -6,7 +6,7 @@ package validation
 import (
 	"testing"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 var gitRefNameValidationTestCases = []validationTestCase{

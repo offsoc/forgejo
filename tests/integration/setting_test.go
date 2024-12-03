@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -155,4 +156,24 @@ func TestSettingSecurityAuthSource(t *testing.T) {
 	resp := session.MakeRequest(t, req, http.StatusOK)
 	assert.Contains(t, resp.Body.String(), `gitlab-active`)
 	assert.Contains(t, resp.Body.String(), `gitlab-inactive`)
+}
+
+func TestSettingShowUserEmailSettings(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	// user1: keep_email_private = false, user2: keep_email_private = true
+
+	// user1 can see own visible email
+	session := loginUser(t, "user1")
+	req := NewRequest(t, "GET", "/user/settings")
+	resp := session.MakeRequest(t, req, http.StatusOK)
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	assert.Contains(t, htmlDoc.doc.Find("#signed-user-email").Text(), "user1@example.com")
+
+	// user2 cannot see own hidden email
+	session = loginUser(t, "user2")
+	req = NewRequest(t, "GET", "/user/settings")
+	resp = session.MakeRequest(t, req, http.StatusOK)
+	htmlDoc = NewHTMLParser(t, resp.Body)
+	assert.NotContains(t, htmlDoc.doc.Find("#signed-user-email").Text(), "user2@example.com")
 }

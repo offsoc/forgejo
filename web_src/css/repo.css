@@ -1747,6 +1747,13 @@ td .commit-summary {
   color: inherit;
 }
 
+/* workaround for safari as it does not support 'display: list-item' for summary tags yet
+** see https://codeberg.org/forgejo/forgejo/issues/5259 */
+details.repo-search-result summary::-webkit-details-marker,
+details.repo-search-result summary::marker {
+  display: none;
+}
+
 .search-highlight {
   background: var(--color-primary-alpha-40);
 }
@@ -2249,7 +2256,6 @@ td .commit-summary {
   background: var(--color-box-header);
   border-bottom: 1px solid var(--color-secondary) !important;
   font-weight: var(--font-weight-normal) !important;
-  padding: 0.5rem 1rem;
   margin: 0 !important;
   position: relative;
   color: var(--color-text);
@@ -2258,6 +2264,10 @@ td .commit-summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.timeline .ui.comment-header {
+  padding: 0.5rem 1rem;
 }
 
 .comment-header::before,

@@ -76,6 +76,7 @@ func TestAPIListReleases(t *testing.T) {
 	testFilterByLen(true, url.Values{"draft": {"false"}, "pre-release": {"false"}}, 1, "exclude drafts and pre-releases")
 	testFilterByLen(true, url.Values{"pre-release": {"true"}}, 1, "only get pre-release")
 	testFilterByLen(true, url.Values{"draft": {"true"}, "pre-release": {"true"}}, 0, "there is no pre-release draft")
+	testFilterByLen(true, url.Values{"q": {"release"}}, 3, "keyword")
 }
 
 func createNewReleaseUsingAPI(t *testing.T, token string, owner *user_model.User, repo *repo_model.Repository, name, target, title, desc string) *api.Release {
@@ -212,6 +213,24 @@ func TestAPICreateReleaseToDefaultBranchOnExistingTag(t *testing.T) {
 	require.NoError(t, err)
 
 	createNewReleaseUsingAPI(t, token, owner, repo, "v0.0.1", "", "v0.0.1", "test")
+}
+
+func TestAPICreateReleaseGivenInvalidTarget(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+	session := loginUser(t, owner.LowerName)
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
+
+	urlStr := fmt.Sprintf("/api/v1/repos/%s/%s/releases", owner.Name, repo.Name)
+	req := NewRequestWithJSON(t, "POST", urlStr, &api.CreateReleaseOption{
+		TagName: "i-point-to-an-invalid-target",
+		Title:   "Invalid Target",
+		Target:  "invalid-target",
+	}).AddTokenAuth(token)
+
+	MakeRequest(t, req, http.StatusNotFound)
 }
 
 func TestAPIGetLatestRelease(t *testing.T) {

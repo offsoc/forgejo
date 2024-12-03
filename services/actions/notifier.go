@@ -168,7 +168,7 @@ func (n *actionsNotifier) IssueChangeAssignee(ctx context.Context, doer *user_mo
 		hookEvent = webhook_module.HookEventPullRequestAssign
 	}
 
-	notifyIssueChange(ctx, doer, issue, hookEvent, action)
+	notifyIssueChange(ctx, doer, issue, hookEvent, action, nil)
 }
 
 // IssueChangeMilestone notifies assignee to notifiers
@@ -187,11 +187,11 @@ func (n *actionsNotifier) IssueChangeMilestone(ctx context.Context, doer *user_m
 		hookEvent = webhook_module.HookEventPullRequestMilestone
 	}
 
-	notifyIssueChange(ctx, doer, issue, hookEvent, action)
+	notifyIssueChange(ctx, doer, issue, hookEvent, action, nil)
 }
 
 func (n *actionsNotifier) IssueChangeLabels(ctx context.Context, doer *user_model.User, issue *issues_model.Issue,
-	_, _ []*issues_model.Label,
+	addedLabels, removedLabels []*issues_model.Label,
 ) {
 	ctx = withMethod(ctx, "IssueChangeLabels")
 
@@ -200,10 +200,15 @@ func (n *actionsNotifier) IssueChangeLabels(ctx context.Context, doer *user_mode
 		hookEvent = webhook_module.HookEventPullRequestLabel
 	}
 
-	notifyIssueChange(ctx, doer, issue, hookEvent, api.HookIssueLabelUpdated)
+	for _, added := range addedLabels {
+		notifyIssueChange(ctx, doer, issue, hookEvent, api.HookIssueLabelUpdated, added)
+	}
+	for _, removed := range removedLabels {
+		notifyIssueChange(ctx, doer, issue, hookEvent, api.HookIssueLabelCleared, removed)
+	}
 }
 
-func notifyIssueChange(ctx context.Context, doer *user_model.User, issue *issues_model.Issue, event webhook_module.HookEventType, action api.HookIssueAction) {
+func notifyIssueChange(ctx context.Context, doer *user_model.User, issue *issues_model.Issue, event webhook_module.HookEventType, action api.HookIssueAction, label *issues_model.Label) {
 	var err error
 	if err = issue.LoadRepo(ctx); err != nil {
 		log.Error("LoadRepo: %v", err)
@@ -213,6 +218,11 @@ func notifyIssueChange(ctx context.Context, doer *user_model.User, issue *issues
 	if err = issue.LoadPoster(ctx); err != nil {
 		log.Error("LoadPoster: %v", err)
 		return
+	}
+
+	var apiLabel *api.Label
+	if action == api.HookIssueLabelUpdated || action == api.HookIssueLabelCleared {
+		apiLabel = convert.ToLabel(label, issue.Repo, nil)
 	}
 
 	if issue.IsPull {
@@ -228,6 +238,7 @@ func notifyIssueChange(ctx context.Context, doer *user_model.User, issue *issues
 				PullRequest: convert.ToAPIPullRequest(ctx, issue.PullRequest, nil),
 				Repository:  convert.ToRepo(ctx, issue.Repo, access_model.Permission{AccessMode: perm_model.AccessModeNone}),
 				Sender:      convert.ToUser(ctx, doer, nil),
+				Label:       apiLabel,
 			}).
 			WithPullRequest(issue.PullRequest).
 			Notify(ctx)
@@ -242,6 +253,7 @@ func notifyIssueChange(ctx context.Context, doer *user_model.User, issue *issues
 			Issue:      convert.ToAPIIssue(ctx, doer, issue),
 			Repository: convert.ToRepo(ctx, issue.Repo, permission),
 			Sender:     convert.ToUser(ctx, doer, nil),
+			Label:      apiLabel,
 		}).
 		Notify(ctx)
 }

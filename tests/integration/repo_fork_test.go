@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/routers"
 	repo_service "code.gitea.io/gitea/services/repository"
@@ -235,6 +236,37 @@ func TestRepoForkToOrg(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			testRepoForkLegacyRedirect(t, session, "user2", "repo1")
+		})
+	})
+}
+
+func TestForkListPrivateRepo(t *testing.T) {
+	forkItemSelector := ".tw-flex.tw-items-center.tw-py-2"
+
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		session := loginUser(t, "user5")
+		org23 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 23, Visibility: structs.VisibleTypePrivate})
+
+		testRepoFork(t, session, "user2", "repo1", org23.Name, "repo1")
+
+		t.Run("Anomynous", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			req := NewRequest(t, "GET", "/user2/repo1/forks")
+			resp := MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+
+			htmlDoc.AssertElement(t, forkItemSelector, false)
+		})
+
+		t.Run("Logged in", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			req := NewRequest(t, "GET", "/user2/repo1/forks")
+			resp := session.MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+
+			htmlDoc.AssertElement(t, forkItemSelector, true)
 		})
 	})
 }

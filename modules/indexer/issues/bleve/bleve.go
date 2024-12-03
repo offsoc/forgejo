@@ -35,13 +35,7 @@ func addUnicodeNormalizeTokenFilter(m *mapping.IndexMappingImpl) error {
 	})
 }
 
-const (
-	maxBatchSize = 16
-	// fuzzyDenominator determines the levenshtein distance per each character of a keyword
-	fuzzyDenominator = 4
-	// see https://github.com/blevesearch/bleve/issues/1563#issuecomment-786822311
-	maxFuzziness = 2
-)
+const maxBatchSize = 16
 
 // IndexerData an update to the issue indexer
 type IndexerData internal.IndexerData
@@ -162,16 +156,25 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 	var queries []query.Query
 
 	if options.Keyword != "" {
-		fuzziness := 0
 		if options.IsFuzzyKeyword {
-			fuzziness = min(maxFuzziness, len(options.Keyword)/fuzzyDenominator)
+			fuzziness := 1
+			if kl := len(options.Keyword); kl > 3 {
+				fuzziness = 2
+			} else if kl < 2 {
+				fuzziness = 0
+			}
+			queries = append(queries, bleve.NewDisjunctionQuery([]query.Query{
+				inner_bleve.MatchQuery(options.Keyword, "title", issueIndexerAnalyzer, fuzziness),
+				inner_bleve.MatchQuery(options.Keyword, "content", issueIndexerAnalyzer, fuzziness),
+				inner_bleve.MatchQuery(options.Keyword, "comments", issueIndexerAnalyzer, fuzziness),
+			}...))
+		} else {
+			queries = append(queries, bleve.NewDisjunctionQuery([]query.Query{
+				inner_bleve.MatchPhraseQuery(options.Keyword, "title", issueIndexerAnalyzer, 0),
+				inner_bleve.MatchPhraseQuery(options.Keyword, "content", issueIndexerAnalyzer, 0),
+				inner_bleve.MatchPhraseQuery(options.Keyword, "comments", issueIndexerAnalyzer, 0),
+			}...))
 		}
-
-		queries = append(queries, bleve.NewDisjunctionQuery([]query.Query{
-			inner_bleve.MatchPhraseQuery(options.Keyword, "title", issueIndexerAnalyzer, fuzziness),
-			inner_bleve.MatchPhraseQuery(options.Keyword, "content", issueIndexerAnalyzer, fuzziness),
-			inner_bleve.MatchPhraseQuery(options.Keyword, "comments", issueIndexerAnalyzer, fuzziness),
-		}...))
 	}
 
 	if len(options.RepoIDs) > 0 || options.AllPublic {

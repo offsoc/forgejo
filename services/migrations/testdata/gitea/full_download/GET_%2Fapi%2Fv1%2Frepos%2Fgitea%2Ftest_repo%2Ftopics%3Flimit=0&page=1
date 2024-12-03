@@ -1,0 +1,10 @@
+Vary: Origin
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Total-Count: 4
+Content-Length: 45
+Access-Control-Expose-Headers: X-Total-Count
+Cache-Control: max-age=0, private, must-revalidate, no-transform
+Content-Type: application/json;charset=utf-8
+
+{"topics":["ci","gitea","migration","test"]}

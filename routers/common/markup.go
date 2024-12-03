@@ -18,26 +18,31 @@ import (
 	"mvdan.cc/xurls/v2"
 )
 
+type Renderer struct {
+	Mode, Text, URLPrefix, FilePath, BranchPath string
+	IsWiki                                      bool
+}
+
 // RenderMarkup renders markup text for the /markup and /markdown endpoints
-func RenderMarkup(ctx *context.Base, repo *context.Repository, mode, text, urlPrefix, filePath string, wiki bool) {
+func (re *Renderer) RenderMarkup(ctx *context.Base, repo *context.Repository) {
 	var markupType string
 	relativePath := ""
 
-	if len(text) == 0 {
+	if len(re.Text) == 0 {
 		_, _ = ctx.Write([]byte(""))
 		return
 	}
 
-	switch mode {
+	switch re.Mode {
 	case "markdown":
 		// Raw markdown
 		if err := markdown.RenderRaw(&markup.RenderContext{
 			Ctx: ctx,
 			Links: markup.Links{
 				AbsolutePrefix: true,
-				Base:           urlPrefix,
+				Base:           re.URLPrefix,
 			},
-		}, strings.NewReader(text), ctx.Resp); err != nil {
+		}, strings.NewReader(re.Text), ctx.Resp); err != nil {
 			ctx.Error(http.StatusInternalServerError, err.Error())
 		}
 		return
@@ -50,30 +55,30 @@ func RenderMarkup(ctx *context.Base, repo *context.Repository, mode, text, urlPr
 	case "file":
 		// File as document based on file extension
 		markupType = ""
-		relativePath = filePath
+		relativePath = re.FilePath
 	default:
-		ctx.Error(http.StatusUnprocessableEntity, fmt.Sprintf("Unknown mode: %s", mode))
+		ctx.Error(http.StatusUnprocessableEntity, fmt.Sprintf("Unknown mode: %s", re.Mode))
 		return
 	}
 
-	if !strings.HasPrefix(setting.AppSubURL+"/", urlPrefix) {
+	if !strings.HasPrefix(setting.AppSubURL+"/", re.URLPrefix) {
 		// check if urlPrefix is already set to a URL
 		linkRegex, _ := xurls.StrictMatchingScheme("https?://")
-		m := linkRegex.FindStringIndex(urlPrefix)
+		m := linkRegex.FindStringIndex(re.URLPrefix)
 		if m == nil {
-			urlPrefix = util.URLJoin(setting.AppURL, urlPrefix)
+			re.URLPrefix = util.URLJoin(setting.AppURL, re.URLPrefix)
 		}
 	}
 
 	meta := map[string]string{}
 	if repo != nil && repo.Repository != nil {
-		if mode == "comment" {
+		if re.Mode == "comment" {
 			meta = repo.Repository.ComposeMetas(ctx)
 		} else {
 			meta = repo.Repository.ComposeDocumentMetas(ctx)
 		}
 	}
-	if mode != "comment" {
+	if re.Mode != "comment" {
 		meta["mode"] = "document"
 	}
 
@@ -81,13 +86,14 @@ func RenderMarkup(ctx *context.Base, repo *context.Repository, mode, text, urlPr
 		Ctx: ctx,
 		Links: markup.Links{
 			AbsolutePrefix: true,
-			Base:           urlPrefix,
+			Base:           re.URLPrefix,
+			BranchPath:     re.BranchPath,
 		},
 		Metas:        meta,
-		IsWiki:       wiki,
+		IsWiki:       re.IsWiki,
 		Type:         markupType,
 		RelativePath: relativePath,
-	}, strings.NewReader(text), ctx.Resp); err != nil {
+	}, strings.NewReader(re.Text), ctx.Resp); err != nil {
 		if markup.IsErrUnsupportedRenderExtension(err) {
 			ctx.Error(http.StatusUnprocessableEntity, err.Error())
 		} else {

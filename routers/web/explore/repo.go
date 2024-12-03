@@ -6,7 +6,6 @@ package explore
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
@@ -58,7 +57,7 @@ func RenderRepoSearch(ctx *context.Context, opts *RepoSearchOptions) {
 		orderBy db.SearchOrderBy
 	)
 
-	sortOrder := strings.ToLower(ctx.FormString("sort"))
+	sortOrder := ctx.FormString("sort")
 	if sortOrder == "" {
 		sortOrder = setting.UI.ExploreDefaultSort
 	}
@@ -166,7 +165,9 @@ func RenderRepoSearch(ctx *context.Context, opts *RepoSearchOptions) {
 
 // Repos render explore repositories page
 func Repos(ctx *context.Context) {
-	ctx.Data["UsersIsDisabled"] = setting.Service.Explore.DisableUsersPage
+	ctx.Data["UsersPageIsDisabled"] = setting.Service.Explore.DisableUsersPage
+	ctx.Data["OrganizationsPageIsDisabled"] = setting.Service.Explore.DisableOrganizationsPage
+	ctx.Data["CodePageIsDisabled"] = setting.Service.Explore.DisableCodePage
 	ctx.Data["Title"] = ctx.Tr("explore")
 	ctx.Data["PageIsExplore"] = true
 	ctx.Data["PageIsExploreRepositories"] = true

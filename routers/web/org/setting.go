@@ -93,7 +93,13 @@ func SettingsPost(ctx *context.Context) {
 		ctx.Org.OrgLink = setting.AppSubURL + "/org/" + url.PathEscape(org.Name)
 	}
 
-	if form.Email != "" {
+	if form.Email == "" {
+		err := user_model.DeletePrimaryEmailAddressOfUser(ctx, org.ID)
+		if err != nil {
+			ctx.ServerError("DeletePrimaryEmailAddressOfUser", err)
+			return
+		}
+	} else {
 		if err := user_service.ReplacePrimaryEmailAddress(ctx, org.AsUser(), form.Email); err != nil {
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tplSettingsOptions, &form)

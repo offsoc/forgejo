@@ -56,8 +56,6 @@ func GetTemplateConfig(gitRepo *git.Repository, path string, commit *git.Commit)
 		return GetDefaultTemplateConfig(), nil
 	}
 
-	var err error
-
 	treeEntry, err := commit.GetTreeEntryByPath(path)
 	if err != nil {
 		return GetDefaultTemplateConfig(), err

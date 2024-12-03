@@ -73,6 +73,8 @@ var (
 
 	// EmojiShortCodeRegex find emoji by alias like :smile:
 	EmojiShortCodeRegex = regexp.MustCompile(`:[-+\w]+:`)
+
+	InlineCodeBlockRegex = regexp.MustCompile("`[^`]+`")
 )
 
 // CSS class for action keywords (e.g. "closes: #1")
@@ -243,9 +245,23 @@ func RenderIssueTitle(
 	title string,
 ) (string, error) {
 	return renderProcessString(ctx, []processor{
+		inlineCodeBlockProcessor,
 		issueIndexPatternProcessor,
 		commitCrossReferencePatternProcessor,
 		hashCurrentPatternProcessor,
+		emojiShortCodeProcessor,
+		emojiProcessor,
+	}, title)
+}
+
+// RenderRefIssueTitle to process title on places where an issue is referenced
+func RenderRefIssueTitle(
+	ctx *RenderContext,
+	title string,
+) (string, error) {
+	return renderProcessString(ctx, []processor{
+		inlineCodeBlockProcessor,
+		issueIndexPatternProcessor,
 		emojiShortCodeProcessor,
 		emojiProcessor,
 	}, title)
@@ -438,7 +454,25 @@ func createKeyword(content string) *html.Node {
 	return span
 }
 
-func createEmoji(content, class, name string) *html.Node {
+func createInlineCode(content string) *html.Node {
+	code := &html.Node{
+		Type: html.ElementNode,
+		Data: atom.Code.String(),
+		Attr: []html.Attribute{},
+	}
+
+	code.Attr = append(code.Attr, html.Attribute{Key: "class", Val: "inline-code-block"})
+
+	text := &html.Node{
+		Type: html.TextNode,
+		Data: content,
+	}
+
+	code.AppendChild(text)
+	return code
+}
+
+func createEmoji(content, class, name, alias string) *html.Node {
 	span := &html.Node{
 		Type: html.ElementNode,
 		Data: atom.Span.String(),
@@ -449,6 +483,9 @@ func createEmoji(content, class, name string) *html.Node {
 	}
 	if name != "" {
 		span.Attr = append(span.Attr, html.Attribute{Key: "aria-label", Val: name})
+	}
+	if alias != "" {
+		span.Attr = append(span.Attr, html.Attribute{Key: "data-alias", Val: alias})
 	}
 
 	text := &html.Node{
@@ -468,6 +505,7 @@ func createCustomEmoji(alias string) *html.Node {
 	}
 	span.Attr = append(span.Attr, html.Attribute{Key: "class", Val: "emoji"})
 	span.Attr = append(span.Attr, html.Attribute{Key: "aria-label", Val: alias})
+	span.Attr = append(span.Attr, html.Attribute{Key: "data-alias", Val: alias})
 
 	img := &html.Node{
 		Type:     html.ElementNode,
@@ -1070,6 +1108,21 @@ func filePreviewPatternProcessor(ctx *RenderContext, node *html.Node) {
 	}
 }
 
+func inlineCodeBlockProcessor(ctx *RenderContext, node *html.Node) {
+	start := 0
+	next := node.NextSibling
+	for node != nil && node != next && start < len(node.Data) {
+		m := InlineCodeBlockRegex.FindStringSubmatchIndex(node.Data[start:])
+		if m == nil {
+			return
+		}
+
+		code := node.Data[m[0]+1 : m[1]-1]
+		replaceContent(node, m[0], m[1], createInlineCode(code))
+		node = node.NextSibling.NextSibling
+	}
+}
+
 // emojiShortCodeProcessor for rendering text like :smile: into emoji
 func emojiShortCodeProcessor(ctx *RenderContext, node *html.Node) {
 	start := 0
@@ -1098,7 +1151,7 @@ func emojiShortCodeProcessor(ctx *RenderContext, node *html.Node) {
 			continue
 		}
 
-		replaceContent(node, m[0], m[1], createEmoji(converted.Emoji, "emoji", converted.Description))
+		replaceContent(node, m[0], m[1], createEmoji(converted.Emoji, "emoji", converted.Description, alias))
 		node = node.NextSibling.NextSibling
 		start = 0
 	}
@@ -1120,7 +1173,7 @@ func emojiProcessor(ctx *RenderContext, node *html.Node) {
 		start = m[1]
 		val := emoji.FromCode(codepoint)
 		if val != nil {
-			replaceContent(node, m[0], m[1], createEmoji(codepoint, "emoji", val.Description))
+			replaceContent(node, m[0], m[1], createEmoji(codepoint, "emoji", val.Description, val.Aliases[0]))
 			node = node.NextSibling.NextSibling
 			start = 0
 		}

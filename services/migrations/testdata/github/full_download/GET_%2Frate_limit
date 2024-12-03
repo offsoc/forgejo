@@ -1,0 +1,23 @@
+Cache-Control: no-cache
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+X-Ratelimit-Reset: 1730800941
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+X-Oauth-Scopes: 
+X-Github-Media-Type: github.v3; format=json
+X-Ratelimit-Remaining: 4899
+X-Xss-Protection: 0
+Content-Security-Policy: default-src 'none'
+X-Accepted-Oauth-Scopes: 
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+Vary: Accept-Encoding, Accept, X-Requested-With
+X-Github-Request-Id: C7CC:3118FC:3F6234D:4038C5B:6729E6C0
+X-Github-Api-Version-Selected: 2022-11-28
+X-Ratelimit-Limit: 5000
+X-Ratelimit-Used: 101
+X-Ratelimit-Resource: core
+
+{"resources":{"core":{"limit":5000,"used":101,"remaining":4899,"reset":1730800941},"search":{"limit":30,"used":0,"remaining":30,"reset":1730799356},"graphql":{"limit":5000,"used":162,"remaining":4838,"reset":1730801064},"integration_manifest":{"limit":5000,"used":0,"remaining":5000,"reset":1730802896},"source_import":{"limit":100,"used":0,"remaining":100,"reset":1730799356},"code_scanning_upload":{"limit":1000,"used":0,"remaining":1000,"reset":1730802896},"actions_runner_registration":{"limit":10000,"used":0,"remaining":10000,"reset":1730802896},"scim":{"limit":15000,"used":0,"remaining":15000,"reset":1730802896},"dependency_snapshots":{"limit":100,"used":0,"remaining":100,"reset":1730799356},"audit_log":{"limit":1750,"used":0,"remaining":1750,"reset":1730802896},"audit_log_streaming":{"limit":15,"used":0,"remaining":15,"reset":1730802896},"code_search":{"limit":10,"used":0,"remaining":10,"reset":1730799356}},"rate":{"limit":5000,"used":101,"remaining":4899,"reset":1730800941}}

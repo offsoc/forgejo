@@ -51,7 +51,7 @@
 	<div id="code-comments-{{(index .comments 0).ID}}" class="comment-code-cloud ui segment{{if $resolved}} tw-hidden{{end}}">
 		<div class="ui comments tw-mb-0">
 			{{range .comments}}
-				{{$createdSubStr:= TimeSinceUnix .CreatedUnix ctx.Locale}}
+				{{$createdSubStr:= DateUtils.TimeSince .CreatedUnix}}
 				<div class="comment code-comment tw-pb-4" id="{{.HashTag}}">
 					<div class="content">
 						<div class="header comment-header">
@@ -85,7 +85,7 @@
 							</div>
 						</div>
 						<div class="text comment-content">
-							<div class="render-content markup" {{if or $.Permission.IsAdmin $.HasIssuesOrPullsWritePermission (and $.IsSigned (eq $.SignedUserID .PosterID))}}data-can-edit="true"{{end}}>
+							<div id="issuecomment-{{.ID}}-content" class="render-content markup" {{if or $.Permission.IsAdmin $.HasIssuesOrPullsWritePermission (and $.IsSigned (eq $.SignedUserID .PosterID))}}data-can-edit="true"{{end}}>
 							{{if .RenderedContent}}
 								{{.RenderedContent}}
 							{{else}}

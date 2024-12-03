@@ -19,7 +19,10 @@ import (
 )
 
 func fallbackMailSubject(issue *issues_model.Issue) string {
-	return fmt.Sprintf("[%s] %s (#%d)", issue.Repo.FullName(), issue.Title, issue.Index)
+	if issue.IsPull {
+		return fmt.Sprintf("[%s] %s (PR #%d)", issue.Repo.FullName(), issue.Title, issue.Index)
+	}
+	return fmt.Sprintf("[%s] %s (Issue #%d)", issue.Repo.FullName(), issue.Title, issue.Index)
 }
 
 type mailCommentContext struct {

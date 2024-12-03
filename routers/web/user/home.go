@@ -380,9 +380,11 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	}
 
 	var (
-		viewType   string
-		sortType   = ctx.FormString("sort")
-		filterMode int
+		viewType          string
+		sortType          = ctx.FormString("sort")
+		filterMode        int
+		defaultFilterMode int
+		defaultViewType   string
 	)
 
 	// Default to recently updated, unlike repository issues list
@@ -403,12 +405,22 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 
 	// TODO: distinguish during routing
 
+	// Default to created_by on /pulls and /issues
+	// because it is most relevant to the user in the global context
+	if ctx.Org == nil || ctx.Org.Organization == nil {
+		defaultFilterMode = issues_model.FilterModeCreate
+		defaultViewType = "created_by"
+	} else {
+		// Default to your_repositories on /org/*/pulls and /org/*/issues
+		// because it is the most relevant to the user in the context of an org
+		defaultFilterMode = issues_model.FilterModeYourRepositories
+		defaultViewType = "your_repositories"
+	}
+
 	viewType = ctx.FormString("type")
 	switch viewType {
 	case "assigned":
 		filterMode = issues_model.FilterModeAssign
-	case "created_by":
-		filterMode = issues_model.FilterModeCreate
 	case "mentioned":
 		filterMode = issues_model.FilterModeMention
 	case "review_requested":
@@ -416,10 +428,12 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	case "reviewed_by":
 		filterMode = issues_model.FilterModeReviewed
 	case "your_repositories":
+		filterMode = issues_model.FilterModeYourRepositories
+	case "created_by":
 		fallthrough
 	default:
-		filterMode = issues_model.FilterModeYourRepositories
-		viewType = "your_repositories"
+		filterMode = defaultFilterMode
+		viewType = defaultViewType
 	}
 
 	// --------------------------------------------------------------------------
@@ -448,7 +462,7 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 		User:       ctx.Doer,
 	}
 
-	isFuzzy := ctx.FormBool("fuzzy")
+	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
 
 	// Search all repositories which
 	//

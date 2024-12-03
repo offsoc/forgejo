@@ -90,8 +90,8 @@ loop:
 					return
 				}
 
-				for _, userStopwatches := range usersStopwatches {
-					apiSWs, err := convert.ToStopWatches(ctx, userStopwatches.StopWatches)
+				for uid, stopwatches := range usersStopwatches {
+					apiSWs, err := convert.ToStopWatches(ctx, stopwatches)
 					if err != nil {
 						if !issues_model.IsErrIssueNotExist(err) {
 							log.Error("Unable to APIFormat stopwatches: %v", err)
@@ -103,7 +103,7 @@ loop:
 						log.Error("Unable to marshal stopwatches: %v", err)
 						continue
 					}
-					m.SendMessage(userStopwatches.UserID, &Event{
+					m.SendMessage(uid, &Event{
 						Name: "stopwatches",
 						Data: string(dataBs),
 					})

@@ -22,6 +22,7 @@ import (
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web"
 	shared_user "code.gitea.io/gitea/routers/web/shared/user"
 	"code.gitea.io/gitea/services/context"
@@ -131,7 +132,7 @@ func TeamsAction(ctx *context.Context) {
 		u, err = user_model.GetUserByName(ctx, uname)
 		if err != nil {
 			if user_model.IsErrUserNotExist(err) {
-				if setting.MailService != nil && user_model.ValidateEmail(uname) == nil {
+				if setting.MailService != nil && validation.ValidateEmail(uname) == nil {
 					if err := org_service.CreateTeamInvite(ctx, ctx.Doer, ctx.Org.Team, uname); err != nil {
 						if org_model.IsErrTeamInviteAlreadyExist(err) {
 							ctx.Flash.Error(ctx.Tr("form.duplicate_invite_to_team"))
@@ -507,21 +508,22 @@ func EditTeamPost(ctx *context.Context) {
 			t.IncludesAllRepositories = includesAllRepositories
 		}
 		t.CanCreateOrgRepo = form.CanCreateOrgRepo
+
+		units := make([]*org_model.TeamUnit, 0, len(unitPerms))
+		for tp, perm := range unitPerms {
+			units = append(units, &org_model.TeamUnit{
+				OrgID:      t.OrgID,
+				TeamID:     t.ID,
+				Type:       tp,
+				AccessMode: perm,
+			})
+		}
+		t.Units = units
 	} else {
 		t.CanCreateOrgRepo = true
 	}
 
 	t.Description = form.Description
-	units := make([]*org_model.TeamUnit, 0, len(unitPerms))
-	for tp, perm := range unitPerms {
-		units = append(units, &org_model.TeamUnit{
-			OrgID:      t.OrgID,
-			TeamID:     t.ID,
-			Type:       tp,
-			AccessMode: perm,
-		})
-	}
-	t.Units = units
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplTeamNew)

@@ -14,15 +14,15 @@
 				<legend>{{ctx.Locale.Tr "repo.settings.protect_patterns"}}</legend>
 				<label>{{ctx.Locale.Tr "repo.settings.protect_branch_name_pattern"}}
 					<input name="rule_name" type="text" value="{{.Rule.RuleName}}">
-					<span class="help">{{ctx.Locale.Tr "repo.settings.protect_branch_name_pattern_desc"}}</span>
+					<span class="help">{{ctx.Locale.Tr "repo.settings.protect_branch_name_pattern_desc" "https://github.com/gobwas/glob"}}</span>
 				</label>
 				<label>{{ctx.Locale.Tr "repo.settings.protect_protected_file_patterns"}}
 					<input name="protected_file_patterns" type="text" value="{{.Rule.ProtectedFilePatterns}}">
-					<span class="help">{{ctx.Locale.Tr "repo.settings.protect_protected_file_patterns_desc"}}</span>
+					<span class="help">{{ctx.Locale.Tr "repo.settings.protect_protected_file_patterns_desc" "https://pkg.go.dev/github.com/gobwas/glob#Compile" "github.com/gobwas/glob"}}</span>
 				</label>
 				<label>{{ctx.Locale.Tr "repo.settings.protect_unprotected_file_patterns"}}
 					<input name="unprotected_file_patterns" type="text" value="{{.Rule.UnprotectedFilePatterns}}">
-					<span class="help">{{ctx.Locale.Tr "repo.settings.protect_unprotected_file_patterns_desc"}}</span>
+					<span class="help">{{ctx.Locale.Tr "repo.settings.protect_unprotected_file_patterns_desc" "https://pkg.go.dev/github.com/gobwas/glob#Compile" "github.com/gobwas/glob"}}</span>
 				</label>
 			</fieldset>
 

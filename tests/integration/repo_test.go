@@ -902,7 +902,7 @@ func TestRepoFollowSymlink(t *testing.T) {
 		symlinkURL, ok := htmlDoc.Find(".file-actions .button[data-kind='follow-symlink']").Attr("href")
 		if shouldExist {
 			assert.True(t, ok)
-			assert.EqualValues(t, expectedSymlinkURL, symlinkURL)
+			assert.Equal(t, expectedSymlinkURL, symlinkURL) //nolint:testifylint // false positive https://github.com/Antonboom/testifylint/issues/72#issuecomment-2467548358
 		} else {
 			assert.False(t, ok)
 		}
@@ -1048,6 +1048,42 @@ func TestFileHistoryPager(t *testing.T) {
 	})
 }
 
+func TestRepoIssueSorting(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	t.Run("Dropdown content", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		assert.Equal(t,
+			9,
+			htmlDoc.Find(`.list-header-sort .menu a`).Length(),
+			"Wrong amount of sort options in dropdown")
+
+		menuItemsHTML := htmlDoc.Find(`.list-header-sort .menu`).Text()
+		locale := translation.NewLocale("en-US")
+		for _, key := range []string{
+			"relevance",
+			"latest",
+			"oldest",
+			"recentupdate",
+			"leastupdate",
+			"mostcomment",
+			"leastcomment",
+			"nearduedate",
+			"farduedate",
+		} {
+			assert.Contains(t,
+				menuItemsHTML,
+				locale.Tr("repo.issues.filter_sort."+key),
+				"Sort option %s ('%s') not found in dropdown", key, locale.Tr("repo.issues.filter_sort."+key))
+		}
+	})
+}
+
 func TestRepoIssueFilterLinks(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
@@ -1104,7 +1140,7 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 	t.Run("Fuzzy", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
-		req := NewRequest(t, "GET", "/user2/repo1/issues?fuzzy=true")
+		req := NewRequest(t, "GET", "/user2/repo1/issues?fuzzy=false")
 		resp := MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
@@ -1121,7 +1157,7 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 			assert.Contains(t, href, "&project=")
 			assert.Contains(t, href, "&assignee=")
 			assert.Contains(t, href, "&poster=")
-			assert.Contains(t, href, "&fuzzy=true")
+			assert.Contains(t, href, "&fuzzy=false")
 		})
 		assert.True(t, called)
 	})
@@ -1201,7 +1237,7 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 		assert.True(t, called)
 	})
 
-	t.Run("Miilestone", func(t *testing.T) {
+	t.Run("Milestone", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		req := NewRequest(t, "GET", "/user2/repo1/issues?milestone=1")

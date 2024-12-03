@@ -16,6 +16,9 @@ templates/.* @caesar @crystal @gusted
 ## the issue sidebar was touched by fnetx
 templates/repo/issue/view_content/sidebar.* @fnetx
 
+# Playwright tests
+tests/e2e/.* @fnetx
+
 # Files related to Go development.
 
 # The modules usually don't require much knowledge about Forgejo and could

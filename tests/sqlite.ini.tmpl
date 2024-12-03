@@ -5,6 +5,7 @@ RUN_MODE = prod
 [database]
 DB_TYPE = sqlite3
 PATH    = tests/{{TEST_TYPE}}/gitea-{{TEST_TYPE}}-sqlite/gitea.db
+SQLITE_JOURNAL_MODE = MEMORY
 
 [indexer]
 REPO_INDEXER_ENABLED = true
@@ -113,3 +114,6 @@ RENDER_CONTENT_MODE=sanitized
 
 [actions]
 ENABLED = true
+
+[ui.notification]
+EVENT_SOURCE_UPDATE_TIME = 1s

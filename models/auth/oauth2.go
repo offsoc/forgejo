@@ -657,6 +657,7 @@ func CountOrphanedOAuth2Applications(ctx context.Context) (int64, error) {
 		Table("`oauth2_application`").
 		Join("LEFT", "`user`", "`oauth2_application`.`uid` = `user`.`id`").
 		Where(builder.IsNull{"`user`.id"}).
+		Where(builder.Neq{"uid": 0}). // exclude instance-wide admin applications
 		Where(builder.NotIn("`oauth2_application`.`client_id`", BuiltinApplicationsClientIDs())).
 		Select("COUNT(`oauth2_application`.`id`)").
 		Count()
@@ -668,6 +669,7 @@ func DeleteOrphanedOAuth2Applications(ctx context.Context) (int64, error) {
 		From("`oauth2_application`").
 		Join("LEFT", "`user`", "`oauth2_application`.`uid` = `user`.`id`").
 		Where(builder.IsNull{"`user`.id"}).
+		Where(builder.Neq{"uid": 0}). // exclude instance-wide admin applications
 		Where(builder.NotIn("`oauth2_application`.`client_id`", BuiltinApplicationsClientIDs()))
 
 	b := builder.Delete(builder.In("id", subQuery)).From("`oauth2_application`")

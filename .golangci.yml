@@ -77,6 +77,8 @@ linters-settings:
       - name: unreachable-code
       - name: var-declaration
       - name: var-naming
+      - name: redefines-builtin-id
+        disabled: true
   gofumpt:
     extra-rules: true
   depguard:

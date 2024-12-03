@@ -84,7 +84,7 @@ func TestLTACookie(t *testing.T) {
 	assert.True(t, found)
 	rawValidator, err := hex.DecodeString(validator)
 	require.NoError(t, err)
-	unittest.AssertExistsAndLoadBean(t, &auth.AuthorizationToken{LookupKey: lookupKey, HashedValidator: auth.HashValidator(rawValidator), UID: user.ID})
+	unittest.AssertExistsAndLoadBean(t, &auth.AuthorizationToken{LookupKey: lookupKey, HashedValidator: auth.HashValidator(rawValidator), UID: user.ID, Purpose: auth.LongTermAuthorization})
 
 	// Check if the LTA cookie it provides authentication.
 	// If LTA cookie provides authentication /user/login shouldn't return status 200.
@@ -143,7 +143,7 @@ func TestLTAExpiry(t *testing.T) {
 	assert.True(t, found)
 
 	// Ensure it's not expired.
-	lta := unittest.AssertExistsAndLoadBean(t, &auth.AuthorizationToken{UID: user.ID, LookupKey: lookupKey})
+	lta := unittest.AssertExistsAndLoadBean(t, &auth.AuthorizationToken{UID: user.ID, LookupKey: lookupKey, Purpose: auth.LongTermAuthorization})
 	assert.False(t, lta.IsExpired())
 
 	// Manually stub LTA's expiry.
@@ -151,7 +151,7 @@ func TestLTAExpiry(t *testing.T) {
 	require.NoError(t, err)
 
 	// Ensure it's expired.
-	lta = unittest.AssertExistsAndLoadBean(t, &auth.AuthorizationToken{UID: user.ID, LookupKey: lookupKey})
+	lta = unittest.AssertExistsAndLoadBean(t, &auth.AuthorizationToken{UID: user.ID, LookupKey: lookupKey, Purpose: auth.LongTermAuthorization})
 	assert.True(t, lta.IsExpired())
 
 	// Should return 200 OK, because LTA doesn't provide authorization anymore.
@@ -160,5 +160,5 @@ func TestLTAExpiry(t *testing.T) {
 	session.MakeRequest(t, req, http.StatusOK)
 
 	// Ensure it's deleted.
-	unittest.AssertNotExistsBean(t, &auth.AuthorizationToken{UID: user.ID, LookupKey: lookupKey})
+	unittest.AssertNotExistsBean(t, &auth.AuthorizationToken{UID: user.ID, LookupKey: lookupKey, Purpose: auth.LongTermAuthorization})
 }

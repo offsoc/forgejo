@@ -10,6 +10,7 @@ fieldset legend {
 
 fieldset label {
   display: block;
+  margin-bottom: 0.6em;
 }
 
 fieldset label:has(input[type="text"]),
@@ -19,7 +20,11 @@ fieldset label:has(input[type="number"]) {
 
 fieldset .help {
   font-weight: var(--font-weight-normal);
-  display: block !important; /* overrides another rule in this file, remove when obsolete */
+}
+
+.form fieldset .help { /* overrides other .form .help rules in this file, remove when obsolete */
+  display: block !important;
+  padding-bottom: 0;
 }
 
 fieldset input[type="checkbox"],
@@ -493,20 +498,6 @@ textarea:focus,
   .repository.new.repo .ui.form .selection.dropdown:not(.owner) {
     width: 100% !important;
   }
-}
-
-/* form fields with additional content besides their label, used on login form
- * use like <div class="field"><label/><a/><input/></div> */
-.form-field-content-aside-label {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-.form-field-content-aside-label > *:nth-child(2) {
-  text-align: right;
-  margin-bottom: 4px;
-}
-.form-field-content-aside-label input {
-  grid-column: span 2;
 }
 
 .ui.form .field > .selection.dropdown {

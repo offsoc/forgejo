@@ -1,0 +1,16 @@
+Content-Type: application/json
+Cache-Control: no-cache
+X-Runtime: 0.050861
+Cf-Cache-Status: MISS
+Content-Length: 27
+Strict-Transport-Security: max-age=31536000
+X-Content-Type-Options: nosniff
+Set-Cookie: _cfuvid=dOl9pLwVdWdrfHK2_lQ8ilTg21PZJf8ErnJ6hi2V6LQ-1725394529656-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+Content-Security-Policy: default-src 'none'
+X-Gitlab-Meta: {"correlation_id":"8b1408168090614939be8b301aaf8ec1","version":"1"}
+Referrer-Policy: strict-origin-when-cross-origin
+Gitlab-Lb: haproxy-main-42-lb-gprd
+Vary: Origin, Accept-Encoding
+Gitlab-Sv: api-gke-us-east1-b
+
+{"message":"404 Not found"}

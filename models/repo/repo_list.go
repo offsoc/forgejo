@@ -641,12 +641,9 @@ func AccessibleRepositoryCondition(user *user_model.User, unitType unit.Type) bu
 		// 1. Be able to see all non-private repositories that either:
 		cond = cond.Or(builder.And(
 			builder.Eq{"`repository`.is_private": false},
-			// 2. Aren't in an private organisation or limited organisation if we're not logged in
+			// 2. Aren't in an private organisation/user or limited organisation/user if the doer is not logged in.
 			builder.NotIn("`repository`.owner_id", builder.Select("id").From("`user`").Where(
-				builder.And(
-					builder.Eq{"type": user_model.UserTypeOrganization},
-					builder.In("visibility", orgVisibilityLimit)),
-			))))
+				builder.In("visibility", orgVisibilityLimit)))))
 	}
 
 	if user != nil {

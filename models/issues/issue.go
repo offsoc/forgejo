@@ -411,6 +411,25 @@ func (issue *Issue) HTMLURL() string {
 	return fmt.Sprintf("%s/%s/%d", issue.Repo.HTMLURL(), path, issue.Index)
 }
 
+// SummaryCardURL returns the absolute URL to an image providing a summary of the issue
+func (issue *Issue) SummaryCardURL() string {
+	return fmt.Sprintf("%s/summary-card", issue.HTMLURL())
+}
+
+func (issue *Issue) SummaryCardSize() (int, int) {
+	return 1200, 600
+}
+
+func (issue *Issue) SummaryCardWidth() int {
+	width, _ := issue.SummaryCardSize()
+	return width
+}
+
+func (issue *Issue) SummaryCardHeight() int {
+	_, height := issue.SummaryCardSize()
+	return height
+}
+
 // Link returns the issue's relative URL.
 func (issue *Issue) Link() string {
 	var path string
@@ -875,7 +894,7 @@ func GetPinnedIssues(ctx context.Context, repoID int64, isPull bool) (IssueList,
 	return issues, nil
 }
 
-// IsNewPinnedAllowed returns if a new Issue or Pull request can be pinned
+// IsNewPinAllowed returns if a new Issue or Pull request can be pinned
 func IsNewPinAllowed(ctx context.Context, repoID int64, isPull bool) (bool, error) {
 	var maxPin int
 	_, err := db.GetEngine(ctx).SQL("SELECT COUNT(pin_order) FROM issue WHERE repo_id = ? AND is_pull = ? AND pin_order > 0", repoID, isPull).Get(&maxPin)

@@ -24,6 +24,10 @@ func GetUserSettings(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/UserSettings"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	ctx.JSON(http.StatusOK, convert.User2UserSettings(ctx.Doer))
 }
 
@@ -42,6 +46,10 @@ func UpdateUserSettings(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/UserSettings"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	form := web.GetForm(ctx).(*api.UserSettingsOptions)
 

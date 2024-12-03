@@ -1,0 +1,21 @@
+-
+  id: 1001
+  type: 4
+  reviewer_id: 2
+  issue_id: 3
+  official: true
+  stale: false
+  original_author_id: 0
+  updated_unix: 1000000000
+  created_unix: 1000000000
+
+-
+  id: 1002
+  type: 4
+  reviewer_id: 11
+  issue_id: 3
+  official: true
+  stale: false
+  original_author_id: 0
+  updated_unix: 1000000000
+  created_unix: 1000000000

@@ -35,8 +35,8 @@ func TestGetCommitStatuses(t *testing.T) {
 		SHA:         sha1,
 	})
 	require.NoError(t, err)
-	assert.Equal(t, 5, int(maxResults))
-	assert.Len(t, statuses, 5)
+	assert.EqualValues(t, 6, maxResults)
+	assert.Len(t, statuses, 6)
 
 	assert.Equal(t, "ci/awesomeness", statuses[0].Context)
 	assert.Equal(t, structs.CommitStatusPending, statuses[0].State)
@@ -58,13 +58,17 @@ func TestGetCommitStatuses(t *testing.T) {
 	assert.Equal(t, structs.CommitStatusError, statuses[4].State)
 	assert.Equal(t, "https://try.gitea.io/api/v1/repos/user2/repo1/statuses/1234123412341234123412341234123412341234", statuses[4].APIURL(db.DefaultContext))
 
+	assert.Equal(t, "deploy/awesomeness", statuses[5].Context)
+	assert.Equal(t, structs.CommitStatusPending, statuses[5].State)
+	assert.Equal(t, "https://try.gitea.io/api/v1/repos/user2/repo1/statuses/1234123412341234123412341234123412341234", statuses[5].APIURL(db.DefaultContext))
+
 	statuses, maxResults, err = db.FindAndCount[git_model.CommitStatus](db.DefaultContext, &git_model.CommitStatusOptions{
 		ListOptions: db.ListOptions{Page: 2, PageSize: 50},
 		RepoID:      repo1.ID,
 		SHA:         sha1,
 	})
 	require.NoError(t, err)
-	assert.Equal(t, 5, int(maxResults))
+	assert.EqualValues(t, 6, maxResults)
 	assert.Empty(t, statuses)
 }
 

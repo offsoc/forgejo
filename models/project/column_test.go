@@ -5,7 +5,6 @@ package project
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
@@ -124,5 +123,5 @@ func Test_NewColumn(t *testing.T) {
 		ProjectID: project1.ID,
 	})
 	require.Error(t, err)
-	assert.True(t, strings.Contains(err.Error(), "maximum number of columns reached"))
+	assert.Contains(t, err.Error(), "maximum number of columns reached")
 }

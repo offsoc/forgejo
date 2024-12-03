@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212">
   <style>
-    @keyframes draw-orange{0%{stroke-dashoffset:200}25%{stroke-dashoffset:200;stroke-width:0}50%{stroke-dashoffset:0;stroke-width:25}to{stroke-dashoffset:0}}@keyframes draw-red{0%{stroke-dashoffset:130;stroke-width:0}25%{stroke-dashoffset:0;stroke-width:25}50%,to{stroke-dashoffset:0}}@keyframes red-circle{0%{opacity:0}20%{opacity:0;stroke-width:0}25%{opacity:1;stroke-width:15}to{opacity:1}}@keyframes orange-circle{0%{opacity:0}45%{opacity:0;stroke-width:0}50%{opacity:1;stroke-width:15}to{opacity:1}}@keyframes fade{0%,90%{opacity:1}to{opacity:0}}circle,path{fill:none;stroke:#000;stroke-width:15}path{stroke-width:25}.orange{stroke:#f60}.red{stroke:#d40000}
+    @keyframes draw-orange{0%{stroke-dashoffset:200}25%{stroke-dashoffset:200}50%{stroke-dashoffset:0}to{stroke-dashoffset:0}}@keyframes draw-red{0%{stroke-dashoffset:130}25%{stroke-dashoffset:0}50%,to{stroke-dashoffset:0}}@keyframes red-circle{0%{opacity:0}20%{opacity:0;stroke-width:0}25%{opacity:1;stroke-width:15}to{opacity:1}}@keyframes orange-circle{0%{opacity:0}45%{opacity:0;stroke-width:0}50%{opacity:1;stroke-width:15}to{opacity:1}}@keyframes fade{0%,90%{opacity:1}to{opacity:0}}circle,path{fill:none;stroke:#000;stroke-width:15}path{stroke-width:25}.orange{stroke:#f60}.red{stroke:#d40000}
   </style>
   <g transform="translate(6 6)">
     <g style="animation:fade 2000ms ease-in-out 5ms infinite">

@@ -23,6 +23,7 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/routers/web/explore"
 	user_setting "code.gitea.io/gitea/routers/web/user/setting"
@@ -166,7 +167,7 @@ func NewUserPost(ctx *context.Context) {
 		}
 		if err := password.IsPwned(ctx, form.Password); err != nil {
 			ctx.Data["Err_Password"] = true
-			errMsg := ctx.Tr("auth.password_pwned")
+			errMsg := ctx.Tr("auth.password_pwned", "https://haveibeenpwned.com/Passwords")
 			if password.IsErrIsPwnedRequest(err) {
 				log.Error(err.Error())
 				errMsg = ctx.Tr("auth.password_pwned_err")
@@ -185,7 +186,7 @@ func NewUserPost(ctx *context.Context) {
 		case user_model.IsErrEmailAlreadyUsed(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_been_used"), tplUserNew, &form)
-		case user_model.IsErrEmailInvalid(err), user_model.IsErrEmailCharIsNotSupported(err):
+		case validation.IsErrEmailInvalid(err), validation.IsErrEmailCharIsNotSupported(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tplUserNew, &form)
 		case db.IsErrNameReserved(err):
@@ -203,7 +204,7 @@ func NewUserPost(ctx *context.Context) {
 		return
 	}
 
-	if !user_model.IsEmailDomainAllowed(u.Email) {
+	if !validation.IsEmailDomainAllowed(u.Email) {
 		ctx.Flash.Warning(ctx.Tr("form.email_domain_is_not_allowed", u.Email))
 	}
 
@@ -401,7 +402,7 @@ func EditUserPost(ctx *context.Context) {
 			ctx.RenderWithErr(password.BuildComplexityError(ctx.Locale), tplUserEdit, &form)
 		case errors.Is(err, password.ErrIsPwned):
 			ctx.Data["Err_Password"] = true
-			ctx.RenderWithErr(ctx.Tr("auth.password_pwned"), tplUserEdit, &form)
+			ctx.RenderWithErr(ctx.Tr("auth.password_pwned", "https://haveibeenpwned.com/Passwords"), tplUserEdit, &form)
 		case password.IsErrIsPwnedRequest(err):
 			ctx.Data["Err_Password"] = true
 			ctx.RenderWithErr(ctx.Tr("auth.password_pwned_err"), tplUserEdit, &form)
@@ -414,7 +415,7 @@ func EditUserPost(ctx *context.Context) {
 	if form.Email != "" {
 		if err := user_service.AdminAddOrSetPrimaryEmailAddress(ctx, u, form.Email); err != nil {
 			switch {
-			case user_model.IsErrEmailCharIsNotSupported(err), user_model.IsErrEmailInvalid(err):
+			case validation.IsErrEmailCharIsNotSupported(err), validation.IsErrEmailInvalid(err):
 				ctx.Data["Err_Email"] = true
 				ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tplUserEdit, &form)
 			case user_model.IsErrEmailAlreadyUsed(err):
@@ -425,7 +426,7 @@ func EditUserPost(ctx *context.Context) {
 			}
 			return
 		}
-		if !user_model.IsEmailDomainAllowed(form.Email) {
+		if !validation.IsEmailDomainAllowed(form.Email) {
 			ctx.Flash.Warning(ctx.Tr("form.email_domain_is_not_allowed", form.Email))
 		}
 	}

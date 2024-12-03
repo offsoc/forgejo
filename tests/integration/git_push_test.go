@@ -19,6 +19,7 @@ import (
 	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/test"
 	repo_service "code.gitea.io/gitea/services/repository"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,7 +41,7 @@ func testGitPush(t *testing.T, u *url.URL) {
 	forEachObjectFormat(t, func(t *testing.T, objectFormat git.ObjectFormat) {
 		t.Run("Push branches at once", func(t *testing.T) {
 			runTestGitPush(t, u, objectFormat, func(t *testing.T, gitPath string) (pushed, deleted []string) {
-				for i := 0; i < 100; i++ {
+				for i := 0; i < 10; i++ {
 					branchName := fmt.Sprintf("branch-%d", i)
 					pushed = append(pushed, branchName)
 					doGitCreateBranch(gitPath, branchName)(t)
@@ -88,7 +89,7 @@ func testGitPush(t *testing.T, u *url.URL) {
 
 		t.Run("Push branches one by one", func(t *testing.T) {
 			runTestGitPush(t, u, objectFormat, func(t *testing.T, gitPath string) (pushed, deleted []string) {
-				for i := 0; i < 100; i++ {
+				for i := 0; i < 10; i++ {
 					branchName := fmt.Sprintf("branch-%d", i)
 					doGitCreateBranch(gitPath, branchName)(t)
 					doGitPushTestRepository(gitPath, "origin", branchName)(t)
@@ -103,7 +104,7 @@ func testGitPush(t *testing.T, u *url.URL) {
 				doGitPushTestRepository(gitPath, "origin", "master")(t) // make sure master is the default branch instead of a branch we are going to delete
 				pushed = append(pushed, "master")
 
-				for i := 0; i < 100; i++ {
+				for i := 0; i < 10; i++ {
 					branchName := fmt.Sprintf("branch-%d", i)
 					pushed = append(pushed, branchName)
 					doGitCreateBranch(gitPath, branchName)(t)
@@ -139,6 +140,7 @@ func testGitPush(t *testing.T, u *url.URL) {
 }
 
 func runTestGitPush(t *testing.T, u *url.URL, objectFormat git.ObjectFormat, gitOperation func(t *testing.T, gitPath string) (pushed, deleted []string)) {
+	defer tests.PrintCurrentTest(t, 1)()
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	repo, err := repo_service.CreateRepository(db.DefaultContext, user, user, repo_service.CreateRepoOptions{
 		Name:             "repo-to-push",

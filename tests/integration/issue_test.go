@@ -146,17 +146,19 @@ func TestViewIssuesKeyword(t *testing.T) {
 	assert.EqualValues(t, 0, issuesSelection.Length())
 
 	// should match as 'first' when fuzzy seaeching is enabled
-	req = NewRequestf(t, "GET", "%s/issues?q=%st&fuzzy=true", repo.Link(), keyword)
-	resp = MakeRequest(t, req, http.StatusOK)
-	htmlDoc = NewHTMLParser(t, resp.Body)
-	issuesSelection = getIssuesSelection(t, htmlDoc)
-	assert.EqualValues(t, 1, issuesSelection.Length())
-	issuesSelection.Each(func(_ int, selection *goquery.Selection) {
-		issue := getIssue(t, repo.ID, selection)
-		assert.False(t, issue.IsClosed)
-		assert.False(t, issue.IsPull)
-		assertMatch(t, issue, keyword)
-	})
+	for _, fmt := range []string{"%s/issues?q=%st&fuzzy=true", "%s/issues?q=%st"} {
+		req = NewRequestf(t, "GET", fmt, repo.Link(), keyword)
+		resp = MakeRequest(t, req, http.StatusOK)
+		htmlDoc = NewHTMLParser(t, resp.Body)
+		issuesSelection = getIssuesSelection(t, htmlDoc)
+		assert.EqualValues(t, 1, issuesSelection.Length())
+		issuesSelection.Each(func(_ int, selection *goquery.Selection) {
+			issue := getIssue(t, repo.ID, selection)
+			assert.False(t, issue.IsClosed)
+			assert.False(t, issue.IsPull)
+			assertMatch(t, issue, keyword)
+		})
+	}
 }
 
 func TestViewIssuesSearchOptions(t *testing.T) {
@@ -498,7 +500,7 @@ func TestIssueCommentAttachment(t *testing.T) {
 	link, exists := htmlDoc.doc.Find("#comment-form").Attr("action")
 	assert.True(t, exists, "The template has changed")
 
-	uuid := createAttachment(t, session, repoURL, "image.png", generateImg(), http.StatusOK)
+	uuid := createAttachment(t, session, GetCSRF(t, session, repoURL), repoURL, "image.png", generateImg(), http.StatusOK)
 
 	commentCount := htmlDoc.doc.Find(".comment-list .comment .render-content").Length()
 
@@ -1281,4 +1283,56 @@ func TestIssueLabelList(t *testing.T) {
 		htmlDoc.AssertElement(t, labelListSelector, true)
 		htmlDoc.AssertElement(t, ".labels.list .no-select."+hiddenClass, true)
 	})
+}
+
+func TestIssueUserDashboard(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+	session := loginUser(t, user.Name)
+
+	// assert 'created_by' is the default filter
+	const sel = ".dashboard .ui.list-header.dropdown .ui.menu a.active.item[href^='?type=created_by']"
+
+	for _, path := range []string{"/issues", "/pulls"} {
+		req := NewRequest(t, "GET", path)
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, sel, true)
+	}
+}
+
+func TestIssueOrgDashboard(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+	session := loginUser(t, user.Name)
+
+	// assert 'your_repositories' is the default filter for org dashboards
+	const sel = ".dashboard .ui.list-header.dropdown .ui.menu a.active.item[href^='?type=your_repositories']"
+
+	for _, path := range []string{"/org/org3/issues", "/org/org3/pulls"} {
+		req := NewRequest(t, "GET", path)
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, sel, true)
+	}
+}
+
+func TestIssueCount(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	req := NewRequest(t, "GET", "/user2/repo1/issues")
+	resp := MakeRequest(t, req, http.StatusOK)
+
+	htmlDoc := NewHTMLParser(t, resp.Body)
+
+	openCount := htmlDoc.doc.Find("a[data-test-name='open-issue-count']").Text()
+	assert.Contains(t, openCount, "1\u00a0Open")
+
+	closedCount := htmlDoc.doc.Find("a[data-test-name='closed-issue-count']").Text()
+	assert.Contains(t, closedCount, "1\u00a0Closed")
+
+	allCount := htmlDoc.doc.Find("a[data-test-name='all-issue-count']").Text()
+	assert.Contains(t, allCount, "2\u00a0All")
 }

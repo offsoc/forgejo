@@ -211,6 +211,7 @@ func editFile(ctx *context.Context, isNewFile bool) {
 	ctx.Data["TreeNames"] = treeNames
 	ctx.Data["TreePaths"] = treePaths
 	ctx.Data["BranchLink"] = ctx.Repo.RepoLink + "/src/" + ctx.Repo.BranchNameSubURL()
+	ctx.Data["BranchPath"] = ctx.Repo.BranchNameSubURL()
 	ctx.Data["commit_summary"] = ""
 	ctx.Data["commit_message"] = ""
 	if canCommit {

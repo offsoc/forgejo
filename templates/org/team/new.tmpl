@@ -65,8 +65,8 @@
 											<tr>
 												<th>{{ctx.Locale.Tr "units.unit"}}</th>
 												<th id="access_none">{{ctx.Locale.Tr "org.teams.none_access"}}</th>
-												<th id="access_read">{{ctx.Locale.Tr "org.teams.read_access"}}</th>
-												<th id="access_write">{{ctx.Locale.Tr "org.teams.write_access"}}</th>
+												<th>{{ctx.Locale.Tr "org.teams.read_access"}}</th>
+												<th>{{ctx.Locale.Tr "org.teams.write_access"}}</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -75,25 +75,26 @@
 													<tr>
 														<td>
 															<label {{if $unit.Type.UnitGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
-																{{ctx.Locale.Tr $unit.NameKey}}{{if $unit.Type.UnitGlobalDisabled}} {{ctx.Locale.Tr "org.team_unit_disabled"}}{{end}}
-																<span class="help">{{ctx.Locale.Tr $unit.DescKey}}</span>
+																<span id="help_{{$unit.Type.Value}}_name">{{ctx.Locale.Tr $unit.NameKey}}{{if $unit.Type.UnitGlobalDisabled}} {{ctx.Locale.Tr "org.team_unit_disabled"}}{{end}}</span>
+																<span class="help" id="help_{{$unit.Type.Value}}_r">{{ctx.Locale.Tr (print "repo.permissions." $unit.Name ".read")}}</span>
+																<span class="help" id="help_{{$unit.Type.Value}}_w">{{ctx.Locale.Tr (print "repo.permissions." $unit.Name ".write")}}</span>
 															</label>
 														</td>
 														<td>
 															<label>
-																<input aria-labelledby="access_none" type="radio" name="unit_{{$unit.Type.Value}}" value="0"{{if or ($unit.Type.UnitGlobalDisabled) (eq ($.Team.UnitAccessMode $.Context $unit.Type) 0)}} checked{{end}}>
+																<input aria-labelledby="help_{{$unit.Type.Value}}_name access_none" type="radio" name="unit_{{$unit.Type.Value}}" value="0"{{if or ($unit.Type.UnitGlobalDisabled) (eq ($.Team.UnitAccessMode $.Context $unit.Type) 0)}} checked{{end}}>
 																<span class="only-mobile">{{ctx.Locale.Tr "org.teams.none_access"}}</span>
 															</label>
 														</td>
 														<td>
 															<label>
-																<input aria-labelledby="access_read" type="radio" name="unit_{{$unit.Type.Value}}" value="1"{{if or (eq $.Team.ID 0) (eq ($.Team.UnitAccessMode $.Context $unit.Type) 1)}} checked{{end}} {{if $unit.Type.UnitGlobalDisabled}}disabled{{end}}>
+																<input aria-labelledby="help_{{$unit.Type.Value}}_name help_{{$unit.Type.Value}}_r" type="radio" name="unit_{{$unit.Type.Value}}" value="1"{{if or (eq $.Team.ID 0) (eq ($.Team.UnitAccessMode $.Context $unit.Type) 1)}} checked{{end}} {{if $unit.Type.UnitGlobalDisabled}}disabled{{end}}>
 																<span class="only-mobile">{{ctx.Locale.Tr "org.teams.read_access"}}</span>
 															</label>
 														</td>
 														<td>
 															<label>
-																<input aria-labelledby="access_write" type="radio" name="unit_{{$unit.Type.Value}}" value="2"{{if (ge ($.Team.UnitAccessMode $.Context $unit.Type) 2)}} checked{{end}} {{if $unit.Type.UnitGlobalDisabled}}disabled{{end}}>
+																<input aria-labelledby="help_{{$unit.Type.Value}}_name help_{{$unit.Type.Value}}_w" type="radio" name="unit_{{$unit.Type.Value}}" value="2"{{if (ge ($.Team.UnitAccessMode $.Context $unit.Type) 2)}} checked{{end}} {{if $unit.Type.UnitGlobalDisabled}}disabled{{end}}>
 																<span class="only-mobile">{{ctx.Locale.Tr "org.teams.write_access"}}</span>
 															</label>
 														</td>
@@ -108,7 +109,7 @@
 											<label {{if $unit.Type.UnitGlobalDisabled}}data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
 												<input type="checkbox" name="unit_{{$unit.Type.Value}}" value="1"{{if or (eq $.Team.ID 0) (eq ($.Team.UnitAccessMode $.Context $unit.Type) 1)}} checked{{end}} {{if $unit.Type.UnitGlobalDisabled}}disabled{{end}}>
 													{{ctx.Locale.Tr $unit.NameKey}}{{if $unit.Type.UnitGlobalDisabled}} {{ctx.Locale.Tr "org.team_unit_disabled"}}{{end}}
-												<span class="help">{{ctx.Locale.Tr $unit.DescKey}}</span>
+												<span class="help">{{ctx.Locale.Tr (print "repo.permissions." $unit.Name)}}</span>
 											</label>
 										{{end}}
 									{{end}}

@@ -13,7 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 // Form form binding interface
@@ -143,6 +143,8 @@ func Validate(errs binding.Errors, data map[string]any, f any, l translation.Loc
 				}
 			case validation.ErrInvalidGroupTeamMap:
 				data["ErrorMsg"] = trName + l.TrString("form.invalid_group_team_map_error", errs[0].Message)
+			case validation.ErrEmail:
+				data["ErrorMsg"] = trName + l.TrString("form.email_error")
 			default:
 				msg := errs[0].Classification
 				if msg != "" && errs[0].Message != "" {

@@ -599,6 +599,10 @@ func ListMyTrackedTimes(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/TrackedTimeList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	opts := &issues_model.FindTrackedTimesOptions{
 		ListOptions: utils.GetListOptions(ctx),

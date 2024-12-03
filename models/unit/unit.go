@@ -245,6 +245,7 @@ func (u *Type) CanBeDefault() bool {
 // Unit is a section of one repository
 type Unit struct {
 	Type          Type
+	Name          string
 	NameKey       string
 	URI           string
 	DescKey       string
@@ -272,6 +273,7 @@ func (u Unit) MaxPerm() perm.AccessMode {
 var (
 	UnitCode = Unit{
 		TypeCode,
+		"code",
 		"repo.code",
 		"/",
 		"repo.code.desc",
@@ -281,6 +283,7 @@ var (
 
 	UnitIssues = Unit{
 		TypeIssues,
+		"issues",
 		"repo.issues",
 		"/issues",
 		"repo.issues.desc",
@@ -290,6 +293,7 @@ var (
 
 	UnitExternalTracker = Unit{
 		TypeExternalTracker,
+		"ext_issues",
 		"repo.ext_issues",
 		"/issues",
 		"repo.ext_issues.desc",
@@ -299,6 +303,7 @@ var (
 
 	UnitPullRequests = Unit{
 		TypePullRequests,
+		"pulls",
 		"repo.pulls",
 		"/pulls",
 		"repo.pulls.desc",
@@ -308,6 +313,7 @@ var (
 
 	UnitReleases = Unit{
 		TypeReleases,
+		"releases",
 		"repo.releases",
 		"/releases",
 		"repo.releases.desc",
@@ -317,6 +323,7 @@ var (
 
 	UnitWiki = Unit{
 		TypeWiki,
+		"wiki",
 		"repo.wiki",
 		"/wiki",
 		"repo.wiki.desc",
@@ -326,6 +333,7 @@ var (
 
 	UnitExternalWiki = Unit{
 		TypeExternalWiki,
+		"ext_wiki",
 		"repo.ext_wiki",
 		"/wiki",
 		"repo.ext_wiki.desc",
@@ -335,6 +343,7 @@ var (
 
 	UnitProjects = Unit{
 		TypeProjects,
+		"projects",
 		"repo.projects",
 		"/projects",
 		"repo.projects.desc",
@@ -344,6 +353,7 @@ var (
 
 	UnitPackages = Unit{
 		TypePackages,
+		"packages",
 		"repo.packages",
 		"/packages",
 		"packages.desc",
@@ -353,6 +363,7 @@ var (
 
 	UnitActions = Unit{
 		TypeActions,
+		"actions",
 		"repo.actions",
 		"/actions",
 		"actions.unit.desc",

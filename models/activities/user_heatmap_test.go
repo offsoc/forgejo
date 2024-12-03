@@ -96,6 +96,6 @@ func TestGetUserHeatmapDataByUser(t *testing.T) {
 		// Test JSON rendering
 		jsonData, err := json.Marshal(heatmap)
 		require.NoError(t, err)
-		assert.Equal(t, tc.JSONResult, string(jsonData))
+		assert.JSONEq(t, tc.JSONResult, string(jsonData))
 	}
 }

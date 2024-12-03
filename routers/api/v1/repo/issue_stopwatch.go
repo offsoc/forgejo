@@ -217,6 +217,10 @@ func GetStopwatches(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/StopWatchList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	sws, err := issues_model.GetUserStopwatches(ctx, ctx.Doer.ID, utils.GetListOptions(ctx))
 	if err != nil {

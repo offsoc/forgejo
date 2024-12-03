@@ -1,0 +1,24 @@
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+Etag: W/"dc9d10e1714eadc1507466c7d11d2dd84ae539a378835f8763b9948da44b22e1"
+X-Accepted-Oauth-Scopes: repo
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset
+Access-Control-Allow-Origin: *
+X-Frame-Options: deny
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+X-Github-Api-Version-Selected: 2022-11-28
+X-Ratelimit-Reset: 1730800941
+Content-Type: application/json; charset=utf-8
+X-Github-Media-Type: github.v3; param=squirrel-girl-preview
+X-Ratelimit-Remaining: 4911
+X-Ratelimit-Used: 89
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 0
+Content-Security-Policy: default-src 'none'
+X-Github-Request-Id: C7CC:3118FC:3F60D0F:40375F2:6729E6BB
+Cache-Control: private, max-age=60, s-maxage=60
+X-Oauth-Scopes: 
+X-Ratelimit-Limit: 5000
+X-Ratelimit-Resource: core
+
+[{"id":59496724,"node_id":"MDEzOklzc3VlUmVhY3Rpb241OTQ5NjcyNA==","user":{"login":"lunny","id":81045,"node_id":"MDQ6VXNlcjgxMDQ1","avatar_url":"https://avatars.githubusercontent.com/u/81045?u=99b64f0ca6ef63643c7583ab87dd31c52d28e673&v=4","gravatar_id":"","url":"https://api.github.com/users/lunny","html_url":"https://github.com/lunny","followers_url":"https://api.github.com/users/lunny/followers","following_url":"https://api.github.com/users/lunny/following{/other_user}","gists_url":"https://api.github.com/users/lunny/gists{/gist_id}","starred_url":"https://api.github.com/users/lunny/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/lunny/subscriptions","organizations_url":"https://api.github.com/users/lunny/orgs","repos_url":"https://api.github.com/users/lunny/repos","events_url":"https://api.github.com/users/lunny/events{/privacy}","received_events_url":"https://api.github.com/users/lunny/received_events","type":"User","user_view_type":"public","site_admin":false},"content":"heart","created_at":"2020-01-10T08:31:30Z"},{"id":59496731,"node_id":"MDEzOklzc3VlUmVhY3Rpb241OTQ5NjczMQ==","user":{"login":"lunny","id":81045,"node_id":"MDQ6VXNlcjgxMDQ1","avatar_url":"https://avatars.githubusercontent.com/u/81045?u=99b64f0ca6ef63643c7583ab87dd31c52d28e673&v=4","gravatar_id":"","url":"https://api.github.com/users/lunny","html_url":"https://github.com/lunny","followers_url":"https://api.github.com/users/lunny/followers","following_url":"https://api.github.com/users/lunny/following{/other_user}","gists_url":"https://api.github.com/users/lunny/gists{/gist_id}","starred_url":"https://api.github.com/users/lunny/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/lunny/subscriptions","organizations_url":"https://api.github.com/users/lunny/orgs","repos_url":"https://api.github.com/users/lunny/repos","events_url":"https://api.github.com/users/lunny/events{/privacy}","received_events_url":"https://api.github.com/users/lunny/received_events","type":"User","user_view_type":"public","site_admin":false},"content":"+1","created_at":"2020-01-10T08:31:39Z"}]

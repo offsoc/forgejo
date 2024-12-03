@@ -135,8 +135,8 @@ func testAnswers(baseURLContent, baseURLImages string) []string {
 <p>See commit <a href="/gogits/gogs/commit/65f1bf27bc" rel="nofollow"><code>65f1bf27bc</code></a></p>
 <p>Ideas and codes</p>
 <ul>
-<li>Bezier widget (by <a href="/r-lyeh" rel="nofollow">@r-lyeh</a>) <a href="http://localhost:3000/ocornut/imgui/issues/786" class="ref-issue" rel="nofollow">ocornut/imgui#786</a></li>
-<li>Bezier widget (by <a href="/r-lyeh" rel="nofollow">@r-lyeh</a>) <a href="http://localhost:3000/gogits/gogs/issues/786" class="ref-issue" rel="nofollow">#786</a></li>
+<li>Bezier widget (by <a href="/r-lyeh" class="mention" rel="nofollow">@r-lyeh</a>) <a href="http://localhost:3000/ocornut/imgui/issues/786" class="ref-issue" rel="nofollow">ocornut/imgui#786</a></li>
+<li>Bezier widget (by <a href="/r-lyeh" class="mention" rel="nofollow">@r-lyeh</a>) <a href="http://localhost:3000/gogits/gogs/issues/786" class="ref-issue" rel="nofollow">#786</a></li>
 <li>Node graph editors <a href="https://github.com/ocornut/imgui/issues/306" rel="nofollow">https://github.com/ocornut/imgui/issues/306</a></li>
 <li><a href="` + baseURLContent + `/memory_editor_example" rel="nofollow">Memory Editor</a></li>
 <li><a href="` + baseURLContent + `/plot_var_example" rel="nofollow">Plot var helper</a></li>
@@ -422,7 +422,7 @@ func TestRenderSiblingImages_Issue12925(t *testing.T) {
 
 func TestRenderEmojiInLinks_Issue12331(t *testing.T) {
 	testcase := `[Link with emoji :moon: in text](https://gitea.io)`
-	expected := `<p><a href="https://gitea.io" rel="nofollow">Link with emoji <span class="emoji" aria-label="waxing gibbous moon">🌔</span> in text</a></p>
+	expected := `<p><a href="https://gitea.io" rel="nofollow">Link with emoji <span class="emoji" aria-label="waxing gibbous moon" data-alias="moon">🌔</span> in text</a></p>
 `
 	res, err := markdown.RenderString(&markup.RenderContext{Ctx: git.DefaultContext}, testcase)
 	require.NoError(t, err)
@@ -855,7 +855,7 @@ mail@domain.com
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -882,7 +882,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -911,7 +911,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -940,7 +940,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -969,7 +969,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -998,7 +998,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -1028,7 +1028,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -1058,7 +1058,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -1088,7 +1088,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -1118,7 +1118,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -1149,7 +1149,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>
@@ -1180,7 +1180,7 @@ space</p>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare<br/>
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow">https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb</a><br/>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit<br/>
-<span class="emoji" aria-label="thumbs up">👍</span><br/>
+<span class="emoji" aria-label="thumbs up" data-alias="+1">👍</span><br/>
 <a href="mailto:mail@domain.com" rel="nofollow">mail@domain.com</a><br/>
 @mention-user test<br/>
 #123<br/>

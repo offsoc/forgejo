@@ -1,0 +1,24 @@
+X-Content-Type-Options: nosniff
+X-Runtime: 0.217878
+Etag: W/"5cff9c25fad9db0de0442f8a50af76ed"
+Vary: Origin, Accept-Encoding
+Cf-Cache-Status: MISS
+Strict-Transport-Security: max-age=31536000
+Gitlab-Lb: haproxy-main-11-lb-gprd
+Gitlab-Sv: api-gke-us-east1-d
+Set-Cookie: _cfuvid=0ssSfnfiXaFlJe_DdQ9NOfPlga.fQbgnLjSEwGIfEzk-1725394796812-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+X-Frame-Options: SAMEORIGIN
+X-Prev-Page: 
+Referrer-Policy: strict-origin-when-cross-origin
+X-Next-Page: 2
+X-Page: 1
+X-Gitlab-Meta: {"correlation_id":"379af21d1624cba7375460437671af6c","version":"1"}
+Content-Security-Policy: default-src 'none'
+Link: <https://gitlab.com/api/v4/projects/61363672/issues/2/award_emoji?id=61363672&issue_iid=2&page=2&per_page=2>; rel="next", <https://gitlab.com/api/v4/projects/61363672/issues/2/award_emoji?id=61363672&issue_iid=2&page=1&per_page=2>; rel="first", <https://gitlab.com/api/v4/projects/61363672/issues/2/award_emoji?id=61363672&issue_iid=2&page=3&per_page=2>; rel="last"
+Content-Type: application/json
+X-Per-Page: 2
+X-Total: 6
+X-Total-Pages: 3
+Cache-Control: max-age=0, private, must-revalidate
+
+[{"id":28092934,"name":"thumbsup","user":{"id":548513,"username":"mkobel","name":"Moritz Kobel","state":"active","locked":false,"avatar_url":"https://secure.gravatar.com/avatar/eae1be6324682816aedc885acbf5858719b40956e0278edabe5c0db7cbc95f3b?s=80\u0026d=identicon","web_url":"https://gitlab.com/mkobel"},"created_at":"2024-09-03T14:45:50.310Z","updated_at":"2024-09-03T14:45:50.310Z","awardable_id":152568900,"awardable_type":"Issue","url":null},{"id":28092936,"name":"thumbsdown","user":{"id":548513,"username":"mkobel","name":"Moritz Kobel","state":"active","locked":false,"avatar_url":"https://secure.gravatar.com/avatar/eae1be6324682816aedc885acbf5858719b40956e0278edabe5c0db7cbc95f3b?s=80\u0026d=identicon","web_url":"https://gitlab.com/mkobel"},"created_at":"2024-09-03T14:45:51.174Z","updated_at":"2024-09-03T14:45:51.174Z","awardable_id":152568900,"awardable_type":"Issue","url":null}]

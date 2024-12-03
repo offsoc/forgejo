@@ -140,6 +140,23 @@
   --color-pink-dark-2: #b11d5f;
   --color-brown-dark-2: #a47252;
   --color-black-dark-2: #111827;
+  /* ansi colors used for actions console and console files */
+  --color-ansi-black: #1d2328;
+  --color-ansi-red: #cc4848;
+  --color-ansi-green: #87ab63;
+  --color-ansi-yellow: #cc9903;
+  --color-ansi-blue: #3a8ac6;
+  --color-ansi-magenta: #d22e8b;
+  --color-ansi-cyan: #00918a;
+  --color-ansi-white: var(--color-console-fg-subtle);
+  --color-ansi-bright-black: #424851;
+  --color-ansi-bright-red: #d15a5a;
+  --color-ansi-bright-green: #93b373;
+  --color-ansi-bright-yellow: #eaaf03;
+  --color-ansi-bright-blue: #4e96cc;
+  --color-ansi-bright-magenta: #d74397;
+  --color-ansi-bright-cyan: #00b6ad;
+  --color-ansi-bright-white: var(--color-console-fg);
   /* other colors */
   --color-gold: #b1983b;
   --color-white: #ffffff;

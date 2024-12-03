@@ -96,7 +96,7 @@ func parsePackage(r io.Reader) (*Package, error) {
 			Target             *string  `json:"target"`
 			Kind               string   `json:"kind"`
 			Registry           *string  `json:"registry"`
-			ExplicitNameInToml string   `json:"explicit_name_in_toml"`
+			ExplicitNameInToml *string  `json:"explicit_name_in_toml"`
 		} `json:"deps"`
 		Features      map[string][]string `json:"features"`
 		Authors       []string            `json:"authors"`
@@ -136,8 +136,16 @@ func parsePackage(r io.Reader) (*Package, error) {
 
 	dependencies := make([]*Dependency, 0, len(meta.Deps))
 	for _, dep := range meta.Deps {
+		name := dep.Name
+		packageName := dep.ExplicitNameInToml
+		// If the explicit_name_in_toml field is set, the package is renamed and
+		// should be set accordingly.
+		if dep.ExplicitNameInToml != nil {
+			name = *dep.ExplicitNameInToml
+			packageName = &dep.Name
+		}
 		dependencies = append(dependencies, &Dependency{
-			Name:            dep.Name,
+			Name:            name,
 			Req:             dep.VersionReq,
 			Features:        dep.Features,
 			Optional:        dep.Optional,
@@ -145,6 +153,7 @@ func parsePackage(r io.Reader) (*Package, error) {
 			Target:          dep.Target,
 			Kind:            dep.Kind,
 			Registry:        dep.Registry,
+			Package:         packageName,
 		})
 	}
 

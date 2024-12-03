@@ -3,12 +3,14 @@
 
 .ui.container {
   display: block;
-  max-width: 100%;
+  --container-width: 100%;
+  max-width: var(--container-width);
 }
 
 @media (max-width: 767.98px) {
   .ui.ui.ui.container:not(.fluid) {
-    width: auto;
+    --container-width: auto;
+    width: var(--container-width);
     margin-left: 1em;
     margin-right: 1em;
   }
@@ -16,7 +18,8 @@
 
 @media (min-width: 768px) and (max-width: 991.98px) {
   .ui.ui.ui.container:not(.fluid) {
-    width: 723px;
+    --container-width: 723px;
+    width: var(--container-width);
     margin-left: auto;
     margin-right: auto;
   }
@@ -24,7 +27,8 @@
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
   .ui.ui.ui.container:not(.fluid) {
-    width: 933px;
+    --container-width: 933px;
+    width: var(--container-width);
     margin-left: auto;
     margin-right: auto;
   }
@@ -32,14 +36,16 @@
 
 @media (min-width: 1200px) {
   .ui.ui.ui.container:not(.fluid) {
-    width: 1127px;
+    --container-width: 1127px;
+    width: var(--container-width);
     margin-left: auto;
     margin-right: auto;
   }
 }
 
 .ui.fluid.container {
-  width: 100%;
+  --container-width: 100%;
+  width: var(--container-width);
 }
 
 .ui[class*="center aligned"].container {
@@ -48,7 +54,8 @@
 
 /* overwrite width of containers inside the main page content div (div with class "page-content") */
 .page-content .ui.ui.ui.container:not(.fluid) {
-  width: 1280px;
+  --container-width: 1280px;
+  width: var(--container-width);
   max-width: calc(100% - calc(2 * var(--page-margin-x)));
   margin-left: auto;
   margin-right: auto;

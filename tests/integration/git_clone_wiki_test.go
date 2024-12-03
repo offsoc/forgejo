@@ -13,7 +13,6 @@ import (
 
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,8 +32,6 @@ func assertFileEqual(t *testing.T, p string, content []byte) {
 
 func TestRepoCloneWiki(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		defer tests.PrepareTestEnv(t)()
-
 		dstPath := t.TempDir()
 
 		r := fmt.Sprintf("%suser2/repo1.wiki.git", u.String())

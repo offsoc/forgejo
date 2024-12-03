@@ -95,7 +95,7 @@ func TestUserListIsPublicMember(t *testing.T) {
 func testUserListIsPublicMember(t *testing.T, orgID int64, expected map[int64]bool) {
 	org, err := organization.GetOrgByID(db.DefaultContext, orgID)
 	require.NoError(t, err)
-	_, membersIsPublic, err := org.GetMembers(db.DefaultContext)
+	_, membersIsPublic, err := org.GetMembers(db.DefaultContext, &user_model.User{IsAdmin: true})
 	require.NoError(t, err)
 	assert.Equal(t, expected, membersIsPublic)
 }
@@ -122,7 +122,7 @@ func TestUserListIsUserOrgOwner(t *testing.T) {
 func testUserListIsUserOrgOwner(t *testing.T, orgID int64, expected map[int64]bool) {
 	org, err := organization.GetOrgByID(db.DefaultContext, orgID)
 	require.NoError(t, err)
-	members, _, err := org.GetMembers(db.DefaultContext)
+	members, _, err := org.GetMembers(db.DefaultContext, &user_model.User{IsAdmin: true})
 	require.NoError(t, err)
 	assert.Equal(t, expected, organization.IsUserOrgOwner(db.DefaultContext, members, orgID))
 }

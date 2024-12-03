@@ -26,8 +26,10 @@ func Locale(resp http.ResponseWriter, req *http.Request) translation.Locale {
 		}
 	}
 
-	// Check again in case someone changes the supported language list.
-	if lang != "" && !i18n.DefaultLocales.HasLang(lang) {
+	if lang == "dummy" {
+		changeLang = false
+	} else if lang != "" && !i18n.DefaultLocales.HasLang(lang) {
+		// Check again in case someone changes the supported language list.
 		lang = ""
 		changeLang = false
 	}

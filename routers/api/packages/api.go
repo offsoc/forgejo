@@ -65,6 +65,20 @@ func reqPackageAccess(accessMode perm.AccessMode) func(ctx *context.Context) {
 					ctx.Error(http.StatusUnauthorized, "reqPackageAccess", "user should have specific permission or be a site admin")
 					return
 				}
+
+				// check if scope only applies to public resources
+				publicOnly, err := scope.PublicOnly()
+				if err != nil {
+					ctx.Error(http.StatusForbidden, "tokenRequiresScope", "parsing public resource scope failed: "+err.Error())
+					return
+				}
+
+				if publicOnly {
+					if ctx.Package != nil && ctx.Package.Owner.Visibility.IsPrivate() {
+						ctx.Error(http.StatusForbidden, "reqToken", "token scope is limited to public packages")
+						return
+					}
+				}
 			}
 		}
 
@@ -175,18 +189,20 @@ func CommonRoutes() *web.Route {
 					arch.PushPackage(ctx)
 					return
 				} else if isDelete {
-					if groupLen < 2 {
+					if groupLen < 3 {
 						ctx.Status(http.StatusBadRequest)
 						return
 					}
-					if groupLen == 2 {
+					if groupLen == 3 {
 						ctx.SetParams("group", "")
 						ctx.SetParams("package", pathGroups[0])
 						ctx.SetParams("version", pathGroups[1])
+						ctx.SetParams("arch", pathGroups[2])
 					} else {
-						ctx.SetParams("group", strings.Join(pathGroups[:groupLen-2], "/"))
-						ctx.SetParams("package", pathGroups[groupLen-2])
-						ctx.SetParams("version", pathGroups[groupLen-1])
+						ctx.SetParams("group", strings.Join(pathGroups[:groupLen-3], "/"))
+						ctx.SetParams("package", pathGroups[groupLen-3])
+						ctx.SetParams("version", pathGroups[groupLen-2])
+						ctx.SetParams("arch", pathGroups[groupLen-1])
 					}
 					reqPackageAccess(perm.AccessModeWrite)(ctx)
 					if ctx.Written() {

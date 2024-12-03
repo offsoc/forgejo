@@ -79,25 +79,25 @@ func testSearchRepo(t *testing.T, indexer bool) {
 	}
 
 	testSearch(t, "/user2/glob/search?q=loren&page=1", []string{"a.txt"}, indexer)
-	testSearch(t, "/user2/glob/search?q=loren&page=1&fuzzy=false", []string{"a.txt"}, indexer)
+	testSearch(t, "/user2/glob/search?q=loren&page=1&mode=exact", []string{"a.txt"}, indexer)
 
 	if indexer {
 		// fuzzy search: matches both file3 (x/b.txt) and file1 (a.txt)
 		// when indexer is enabled
-		testSearch(t, "/user2/glob/search?q=file3&page=1", []string{"x/b.txt", "a.txt"}, indexer)
-		testSearch(t, "/user2/glob/search?q=file4&page=1", []string{"x/b.txt", "a.txt"}, indexer)
-		testSearch(t, "/user2/glob/search?q=file5&page=1", []string{"x/b.txt", "a.txt"}, indexer)
+		testSearch(t, "/user2/glob/search?q=file3&mode=fuzzy&page=1", []string{"x/b.txt", "a.txt"}, indexer)
+		testSearch(t, "/user2/glob/search?q=file4&mode=fuzzy&page=1", []string{"x/b.txt", "a.txt"}, indexer)
+		testSearch(t, "/user2/glob/search?q=file5&mode=fuzzy&page=1", []string{"x/b.txt", "a.txt"}, indexer)
 	} else {
 		// fuzzy search: Union/OR of all the keywords
 		// when indexer is disabled
-		testSearch(t, "/user2/glob/search?q=file3+file1&page=1", []string{"a.txt", "x/b.txt"}, indexer)
-		testSearch(t, "/user2/glob/search?q=file4&page=1", []string{}, indexer)
-		testSearch(t, "/user2/glob/search?q=file5&page=1", []string{}, indexer)
+		testSearch(t, "/user2/glob/search?q=file3+file1&mode=union&page=1", []string{"a.txt", "x/b.txt"}, indexer)
+		testSearch(t, "/user2/glob/search?q=file4&mode=union&page=1", []string{}, indexer)
+		testSearch(t, "/user2/glob/search?q=file5&mode=union&page=1", []string{}, indexer)
 	}
 
-	testSearch(t, "/user2/glob/search?q=file3&page=1&fuzzy=false", []string{"x/b.txt"}, indexer)
-	testSearch(t, "/user2/glob/search?q=file4&page=1&fuzzy=false", []string{}, indexer)
-	testSearch(t, "/user2/glob/search?q=file5&page=1&fuzzy=false", []string{}, indexer)
+	testSearch(t, "/user2/glob/search?q=file3&page=1&mode=exact", []string{"x/b.txt"}, indexer)
+	testSearch(t, "/user2/glob/search?q=file4&page=1&mode=exact", []string{}, indexer)
+	testSearch(t, "/user2/glob/search?q=file5&page=1&mode=exact", []string{}, indexer)
 }
 
 func testSearch(t *testing.T, url string, expected []string, indexer bool) {
@@ -113,21 +113,19 @@ func testSearch(t *testing.T, url string, expected []string, indexer bool) {
 	branchDropdown := container.Find(".js-branch-tag-selector")
 	assert.EqualValues(t, indexer, len(branchDropdown.Nodes) == 0)
 
-	// if indexer is disabled "fuzzy" should be displayed as "union"
-	expectedFuzzy := "Fuzzy"
-	if !indexer {
-		expectedFuzzy = "Union"
-	}
+	dropdownOptions := container.
+		Find(".menu[data-test-tag=fuzzy-dropdown]").
+		Find("input[type=radio][name=mode]").
+		Map(func(_ int, sel *goquery.Selection) string {
+			attr, exists := sel.Attr("value")
+			assert.True(t, exists)
+			return attr
+		})
 
-	fuzzyDropdown := container.Find(".ui.dropdown[data-test-tag=fuzzy-dropdown]")
-	actualFuzzyText := fuzzyDropdown.Find(".menu .item[data-value=true]").First().Text()
-	assert.EqualValues(t, expectedFuzzy, actualFuzzyText)
-
-	if fuzzyDropdown.
-		Find("input[name=fuzzy][value=true]").
-		Length() != 0 {
-		actualFuzzyText = fuzzyDropdown.Find("div.text").First().Text()
-		assert.EqualValues(t, expectedFuzzy, actualFuzzyText)
+	if indexer {
+		assert.EqualValues(t, []string{"exact", "fuzzy"}, dropdownOptions)
+	} else {
+		assert.EqualValues(t, []string{"exact", "union", "regexp"}, dropdownOptions)
 	}
 
 	filenames := resultFilenames(t, doc)

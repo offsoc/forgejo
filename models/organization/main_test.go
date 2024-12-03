@@ -11,6 +11,7 @@ import (
 	_ "code.gitea.io/gitea/models"
 	_ "code.gitea.io/gitea/models/actions"
 	_ "code.gitea.io/gitea/models/activities"
+	_ "code.gitea.io/gitea/models/forgefed"
 	_ "code.gitea.io/gitea/models/organization"
 	_ "code.gitea.io/gitea/models/repo"
 	_ "code.gitea.io/gitea/models/user"

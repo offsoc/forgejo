@@ -13,6 +13,7 @@ import (
 	api "code.gitea.io/gitea/modules/structs"
 
 	_ "code.gitea.io/gitea/models/actions"
+	_ "code.gitea.io/gitea/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

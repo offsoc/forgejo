@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -44,6 +45,7 @@ func Test_Cmd_AdminUser(t *testing.T) {
 			},
 		} {
 			t.Run(testCase.name, func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
 				name := "testuser"
 
 				options := []string{"user", "create", "--username", name, "--password", "password", "--email", name + "@example.com"}

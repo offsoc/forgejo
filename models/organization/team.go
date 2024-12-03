@@ -268,3 +268,43 @@ func IncrTeamRepoNum(ctx context.Context, teamID int64) error {
 	_, err := db.GetEngine(ctx).Incr("num_repos").ID(teamID).Update(new(Team))
 	return err
 }
+
+// CountInconsistentOwnerTeams returns the amount of owner teams that have all of
+// their access modes set to "None".
+func CountInconsistentOwnerTeams(ctx context.Context) (int64, error) {
+	return db.GetEngine(ctx).Table("team").
+		Join("INNER", "team_unit", "`team`.id = `team_unit`.team_id").
+		Where("`team`.lower_name = ?", strings.ToLower(OwnerTeamName)).
+		GroupBy("`team_unit`.team_id").
+		Having("SUM(`team_unit`.access_mode) = 0").
+		Count()
+}
+
+// FixInconsistentOwnerTeams fixes inconsistent owner teams that have all of
+// their access modes set to "None", it sets it back to "Owner".
+func FixInconsistentOwnerTeams(ctx context.Context) (int64, error) {
+	teamIDs := []int64{}
+	if err := db.GetEngine(ctx).Table("team").
+		Select("`team`.id").
+		Join("INNER", "team_unit", "`team`.id = `team_unit`.team_id").
+		Where("`team`.lower_name = ?", strings.ToLower(OwnerTeamName)).
+		GroupBy("`team_unit`.team_id").
+		Having("SUM(`team_unit`.access_mode) = 0").
+		Find(&teamIDs); err != nil {
+		return 0, err
+	}
+
+	if err := db.Iterate(ctx, builder.In("team_id", teamIDs), func(ctx context.Context, bean *TeamUnit) error {
+		if bean.Type == unit.TypeExternalTracker || bean.Type == unit.TypeExternalWiki {
+			bean.AccessMode = perm.AccessModeRead
+		} else {
+			bean.AccessMode = perm.AccessModeOwner
+		}
+		_, err := db.GetEngine(ctx).ID(bean.ID).Table("team_unit").Cols("access_mode").Update(bean)
+		return err
+	}); err != nil {
+		return 0, err
+	}
+
+	return int64(len(teamIDs)), nil
+}

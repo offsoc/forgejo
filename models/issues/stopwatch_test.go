@@ -4,12 +4,14 @@
 package issues_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
 	issues_model "code.gitea.io/gitea/models/issues"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
@@ -76,4 +78,42 @@ func TestCreateOrStopIssueStopwatch(t *testing.T) {
 	require.NoError(t, issues_model.CreateOrStopIssueStopwatch(db.DefaultContext, user2, issue2))
 	unittest.AssertNotExistsBean(t, &issues_model.Stopwatch{UserID: 2, IssueID: 2})
 	unittest.AssertExistsAndLoadBean(t, &issues_model.TrackedTime{UserID: 2, IssueID: 2})
+}
+
+func TestGetUIDsAndStopwatch(t *testing.T) {
+	defer unittest.OverrideFixtures(
+		unittest.FixturesOptions{
+			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
+			Base: setting.AppWorkPath,
+			Dirs: []string{"models/issues/TestGetUIDsAndStopwatch/"},
+		},
+	)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	uidStopwatches, err := issues_model.GetUIDsAndStopwatch(db.DefaultContext)
+	require.NoError(t, err)
+	assert.EqualValues(t, map[int64][]*issues_model.Stopwatch{
+		1: {
+			{
+				ID:          1,
+				UserID:      1,
+				IssueID:     1,
+				CreatedUnix: timeutil.TimeStamp(1500988001),
+			},
+			{
+				ID:          3,
+				UserID:      1,
+				IssueID:     2,
+				CreatedUnix: timeutil.TimeStamp(1500988004),
+			},
+		},
+		2: {
+			{
+				ID:          2,
+				UserID:      2,
+				IssueID:     2,
+				CreatedUnix: timeutil.TimeStamp(1500988002),
+			},
+		},
+	}, uidStopwatches)
 }

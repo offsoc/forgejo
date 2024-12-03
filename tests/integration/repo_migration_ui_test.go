@@ -5,26 +5,26 @@ package integration
 
 import (
 	"net/http"
-	"net/url"
 	"testing"
+
+	"code.gitea.io/gitea/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRepoMigrationUI(t *testing.T) {
-	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
-		sessionUser1 := loginUser(t, "user1")
-		// Nothing is tested in plain Git migration form right now
-		testRepoMigrationFormGitHub(t, sessionUser1)
-		testRepoMigrationFormGitea(t, sessionUser1)
-		testRepoMigrationFormGitLab(t, sessionUser1)
-		testRepoMigrationFormGogs(t, sessionUser1)
-		testRepoMigrationFormOneDev(t, sessionUser1)
-		testRepoMigrationFormGitBucket(t, sessionUser1)
-		testRepoMigrationFormCodebase(t, sessionUser1)
-		testRepoMigrationFormForgejo(t, sessionUser1)
-	})
+	defer tests.PrepareTestEnv(t)()
+	sessionUser1 := loginUser(t, "user1")
+	// Nothing is tested in plain Git migration form right now
+	testRepoMigrationFormGitHub(t, sessionUser1)
+	testRepoMigrationFormGitea(t, sessionUser1)
+	testRepoMigrationFormGitLab(t, sessionUser1)
+	testRepoMigrationFormGogs(t, sessionUser1)
+	testRepoMigrationFormOneDev(t, sessionUser1)
+	testRepoMigrationFormGitBucket(t, sessionUser1)
+	testRepoMigrationFormCodebase(t, sessionUser1)
+	testRepoMigrationFormForgejo(t, sessionUser1)
 }
 
 func testRepoMigrationFormGitHub(t *testing.T, session *TestSession) {

@@ -36,3 +36,22 @@ func TestAPICompareBranches(t *testing.T) {
 	assert.Equal(t, 2, apiResp.TotalCommits)
 	assert.Len(t, apiResp.Commits, 2)
 }
+
+func TestAPICompareCommits(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	// Login as User2.
+	session := loginUser(t, user.Name)
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
+
+	req := NewRequestf(t, "GET", "/api/v1/repos/user2/repo20/compare/c8e31bc...8babce9").
+		AddTokenAuth(token)
+	resp := MakeRequest(t, req, http.StatusOK)
+
+	var apiResp *api.Compare
+	DecodeJSON(t, resp, &apiResp)
+
+	assert.Equal(t, 2, apiResp.TotalCommits)
+	assert.Len(t, apiResp.Commits, 2)
+}

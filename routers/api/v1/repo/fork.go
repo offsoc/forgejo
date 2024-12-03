@@ -56,7 +56,7 @@ func ListForks(ctx *context.APIContext) {
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
-	forks, err := repo_model.GetForks(ctx, ctx.Repo.Repository, utils.GetListOptions(ctx))
+	forks, total, err := repo_model.GetForks(ctx, ctx.Repo.Repository, ctx.Doer, utils.GetListOptions(ctx))
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "GetForks", err)
 		return
@@ -71,7 +71,7 @@ func ListForks(ctx *context.APIContext) {
 		apiForks[i] = convert.ToRepo(ctx, fork, permission)
 	}
 
-	ctx.SetTotalCountHeader(int64(ctx.Repo.Repository.NumForks))
+	ctx.SetTotalCountHeader(total)
 	ctx.JSON(http.StatusOK, apiForks)
 }
 

@@ -5,7 +5,6 @@ package e2e
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -21,15 +20,36 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type FileChanges [][]string
+// first entry represents filename
+// the following entries define the full file content over time
+type FileChanges struct {
+	Filename  string
+	CommitMsg string
+	Versions  []string
+}
 
 // put your Git repo declarations in here
 // feel free to amend the helper function below or use the raw variant directly
 func DeclareGitRepos(t *testing.T) func() {
-	var cleanupFunctions []func()
-	cleanupFunctions = append(cleanupFunctions, newRepo(t, 2, "diff-test", FileChanges{
-		{"testfile", "hello", "hallo", "hola", "native", "ubuntu-latest", "- runs-on: ubuntu-latest", "- runs-on: debian-latest"},
-	}))
+	cleanupFunctions := []func(){
+		newRepo(t, 2, "diff-test", []FileChanges{{
+			Filename: "testfile",
+			Versions: []string{"hello", "hallo", "hola", "native", "ubuntu-latest", "- runs-on: ubuntu-latest", "- runs-on: debian-latest"},
+		}}),
+		newRepo(t, 2, "mentions-highlighted", []FileChanges{
+			{
+				Filename:  "history1.md",
+				Versions:  []string{""},
+				CommitMsg: "A commit message which mentions @user2 in the title\nand has some additional text which mentions @user1",
+			},
+			{
+				Filename:  "history2.md",
+				Versions:  []string{""},
+				CommitMsg: "Another commit which mentions @user1 in the title\nand @user2 in the text",
+			},
+		}),
+		// add your repo declarations here
+	}
 
 	return func() {
 		for _, cleanup := range cleanupFunctions {
@@ -38,7 +58,7 @@ func DeclareGitRepos(t *testing.T) func() {
 	}
 }
 
-func newRepo(t *testing.T, userID int64, repoName string, fileChanges FileChanges) func() {
+func newRepo(t *testing.T, userID int64, repoName string, fileChanges []FileChanges) func() {
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: userID})
 	somerepo, _, cleanupFunc := tests.CreateDeclarativeRepo(t, user, repoName,
 		[]unit_model.Type{unit_model.TypeCode, unit_model.TypeIssues}, nil,
@@ -46,19 +66,25 @@ func newRepo(t *testing.T, userID int64, repoName string, fileChanges FileChange
 	)
 
 	for _, file := range fileChanges {
-		changeLen := len(file)
-		for i := 1; i < changeLen; i++ {
-			operation := "create"
-			if i != 1 {
-				operation = "update"
+		for i, version := range file.Versions {
+			operation := "update"
+			if i == 0 {
+				operation = "create"
 			}
+
+			// default to unique commit messages
+			commitMsg := file.CommitMsg
+			if commitMsg == "" {
+				commitMsg = fmt.Sprintf("Patch: %s-%d", file.Filename, i+1)
+			}
+
 			resp, err := files_service.ChangeRepoFiles(git.DefaultContext, somerepo, user, &files_service.ChangeRepoFilesOptions{
 				Files: []*files_service.ChangeRepoFile{{
 					Operation:     operation,
-					TreePath:      file[0],
-					ContentReader: strings.NewReader(file[i]),
+					TreePath:      file.Filename,
+					ContentReader: strings.NewReader(version),
 				}},
-				Message:   fmt.Sprintf("Patch: %s-%s", file[0], strconv.Itoa(i)),
+				Message:   commitMsg,
 				OldBranch: "main",
 				NewBranch: "main",
 				Author: &files_service.IdentityOptions{

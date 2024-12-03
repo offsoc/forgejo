@@ -1,0 +1,26 @@
+Content-Length: 2
+X-Next-Page: 
+X-Per-Page: 1
+X-Runtime: 0.069736
+Link: <https://gitlab.com/api/v4/projects/61363672/merge_requests/1/award_emoji?id=61363672&merge_request_iid=1&page=1&per_page=1>; rel="first", <https://gitlab.com/api/v4/projects/61363672/merge_requests/1/award_emoji?id=61363672&merge_request_iid=1&page=2&per_page=1>; rel="last"
+X-Total-Pages: 2
+X-Content-Type-Options: nosniff
+X-Gitlab-Meta: {"correlation_id":"4a199f75df6e91c7bb25ce7f0ae5ba87","version":"1"}
+Cf-Cache-Status: MISS
+Strict-Transport-Security: max-age=31536000
+Referrer-Policy: strict-origin-when-cross-origin
+X-Prev-Page: 
+Content-Type: application/json
+Etag: W/"4f53cda18c2baa0c0354bb5f9a3ecbe5"
+Set-Cookie: _cfuvid=LKsdyXLErarfZPBo25O7PYiKWcvrF92MfU4i57.1wVw-1725394800092-0.0.1.1-604800000; path=/; domain=.gitlab.com; HttpOnly; Secure; SameSite=None
+Content-Security-Policy: default-src 'none'
+Accept-Ranges: bytes
+X-Frame-Options: SAMEORIGIN
+Gitlab-Lb: haproxy-main-12-lb-gprd
+Gitlab-Sv: api-gke-us-east1-b
+Cache-Control: max-age=0, private, must-revalidate
+Vary: Origin, Accept-Encoding
+X-Page: 3
+X-Total: 2
+
+[]

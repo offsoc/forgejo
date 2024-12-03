@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/emersion/go-imap"
-	"github.com/jhillyerd/enmime"
+	"github.com/jhillyerd/enmime/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
