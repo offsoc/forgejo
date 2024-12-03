@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/web/middleware"
+	"code.gitea.io/gitea/services/actions"
 	"code.gitea.io/gitea/services/oauth2_provider"
 )
 
@@ -85,7 +86,7 @@ func CheckOAuthAccessToken(ctx context.Context, accessToken string) (int64, stri
 		return 0, ""
 	}
 	if token.Kind != oauth2_provider.KindAccessToken {
-		return 0
+		return 0, ""
 	}
 	if token.ExpiresAt.Before(time.Now()) || token.IssuedAt.After(time.Now()) {
 		return 0, ""

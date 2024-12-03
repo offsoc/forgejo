@@ -24,7 +24,7 @@ import (
 	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/oauth2_provider"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 

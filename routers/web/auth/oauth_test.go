@@ -10,7 +10,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/services/oauth2_provider"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -20,7 +20,7 @@ import (
 
 func createAndParseToken(t *testing.T, grant *auth.OAuth2Grant) *oauth2_provider.OIDCToken {
 	signingKey, err := oauth2_provider.CreateJWTSigningKey("HS256", make([]byte, 32))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, signingKey)
 
 	response, terr := oauth2_provider.NewAccessTokenResponse(db.DefaultContext, grant, signingKey, signingKey)

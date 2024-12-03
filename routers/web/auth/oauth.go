@@ -4,6 +4,9 @@
 package auth
 
 import (
+	go_context "context"
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"html"
@@ -20,11 +23,13 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web/middleware"
 	source_service "code.gitea.io/gitea/services/auth/source"
 	"code.gitea.io/gitea/services/auth/source/oauth2"
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/externalaccount"
+	remote_service "code.gitea.io/gitea/services/remote"
 	user_service "code.gitea.io/gitea/services/user"
 
 	"github.com/markbates/goth"
