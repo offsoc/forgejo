@@ -22,10 +22,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/routers/web/auth"
-	forgejo_context "code.gitea.io/gitea/services/context"
+	oauth2_provider "code.gitea.io/gitea/services/oauth2_provider"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/markbates/goth"
@@ -252,8 +249,8 @@ func TestAccessTokenExchangeWithoutPKCE(t *testing.T) {
 		"code":          "authcode",
 	})
 	resp := MakeRequest(t, req, http.StatusBadRequest)
-	parsedError := new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError := new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "failed PKCE code challenge", parsedError.ErrorDescription)
 }
@@ -270,8 +267,8 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 		"code_verifier": "N1Zo9-8Rfwhkt68r1r29ty8YwIraXR8eh_1Qwxg7yQXsonBt",
 	})
 	resp := MakeRequest(t, req, http.StatusBadRequest)
-	parsedError := new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError := new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "cannot load client with client id: '???'", parsedError.ErrorDescription)
 
@@ -285,8 +282,8 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 		"code_verifier": "N1Zo9-8Rfwhkt68r1r29ty8YwIraXR8eh_1Qwxg7yQXsonBt",
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError = new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError = new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "invalid client secret", parsedError.ErrorDescription)
 
@@ -300,8 +297,8 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 		"code_verifier": "N1Zo9-8Rfwhkt68r1r29ty8YwIraXR8eh_1Qwxg7yQXsonBt",
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError = new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError = new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "unexpected redirect URI", parsedError.ErrorDescription)
 
@@ -315,8 +312,8 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 		"code_verifier": "N1Zo9-8Rfwhkt68r1r29ty8YwIraXR8eh_1Qwxg7yQXsonBt",
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError = new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError = new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "client is not authorized", parsedError.ErrorDescription)
 
@@ -330,8 +327,8 @@ func TestAccessTokenExchangeWithInvalidCredentials(t *testing.T) {
 		"code_verifier": "N1Zo9-8Rfwhkt68r1r29ty8YwIraXR8eh_1Qwxg7yQXsonBt",
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError = new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError = new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unsupported_grant_type", string(parsedError.ErrorCode))
 	assert.Equal(t, "Only refresh_token or authorization_code grant type is supported", parsedError.ErrorDescription)
 }
@@ -367,8 +364,8 @@ func TestAccessTokenExchangeWithBasicAuth(t *testing.T) {
 	})
 	req.Header.Add("Authorization", "Basic ZGE3ZGEzYmEtOWExMy00MTY3LTg1NmYtMzg5OWRlMGIwMTM4OmJsYWJsYQ==")
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError := new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError := new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "invalid client secret", parsedError.ErrorDescription)
 
@@ -380,8 +377,8 @@ func TestAccessTokenExchangeWithBasicAuth(t *testing.T) {
 		"code_verifier": "N1Zo9-8Rfwhkt68r1r29ty8YwIraXR8eh_1Qwxg7yQXsonBt",
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError = new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError = new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "cannot load client with client id: ''", parsedError.ErrorDescription)
 
@@ -394,8 +391,8 @@ func TestAccessTokenExchangeWithBasicAuth(t *testing.T) {
 	})
 	req.Header.Add("Authorization", "Basic ZGE3ZGEzYmEtOWExMy00MTY3LTg1NmYtMzg5OWRlMGIwMTM4OjRNSzhOYTZSNTVzbWRDWTBXdUNDdW1aNmhqUlBuR1k1c2FXVlJISGpKaUE9")
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError = new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError = new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_request", string(parsedError.ErrorCode))
 	assert.Equal(t, "client_id in request body inconsistent with Authorization header", parsedError.ErrorDescription)
 
@@ -408,8 +405,8 @@ func TestAccessTokenExchangeWithBasicAuth(t *testing.T) {
 	})
 	req.Header.Add("Authorization", "Basic ZGE3ZGEzYmEtOWExMy00MTY3LTg1NmYtMzg5OWRlMGIwMTM4OjRNSzhOYTZSNTVzbWRDWTBXdUNDdW1aNmhqUlBuR1k1c2FXVlJISGpKaUE9")
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError = new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError = new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_request", string(parsedError.ErrorCode))
 	assert.Equal(t, "client_secret in request body inconsistent with Authorization header", parsedError.ErrorDescription)
 }
@@ -446,8 +443,8 @@ func TestRefreshTokenInvalidation(t *testing.T) {
 		"refresh_token": parsed.RefreshToken,
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError := new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError := new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "invalid_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "invalid empty client secret", parsedError.ErrorDescription)
 
@@ -459,8 +456,8 @@ func TestRefreshTokenInvalidation(t *testing.T) {
 		"refresh_token": "UNEXPECTED",
 	})
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError = new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError = new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "unable to parse refresh token", parsedError.ErrorDescription)
 
@@ -489,8 +486,8 @@ func TestRefreshTokenInvalidation(t *testing.T) {
 	// repeat request should fail
 	req.Body = io.NopCloser(bytes.NewReader(bs))
 	resp = MakeRequest(t, req, http.StatusBadRequest)
-	parsedError = new(auth.AccessTokenError)
-	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
+	parsedError = new(oauth2_provider.AccessTokenError)
+	assert.NoError(t, json.Unmarshal(resp.Body.Bytes(), parsedError))
 	assert.Equal(t, "unauthorized_client", string(parsedError.ErrorCode))
 	assert.Equal(t, "token was already used", parsedError.ErrorDescription)
 }
