@@ -133,10 +133,6 @@ code.gitea.io/gitea/modules/forgefed
 
 code.gitea.io/gitea/modules/git
 	AllowLFSFiltersArgs
-	AddChanges
-	AddChangesWithArgs
-	CommitChanges
-	CommitChangesWithArgs
 	SetUpdateHook
 	openRepositoryWithDefaultContext
 	IsTagExist

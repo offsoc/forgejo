@@ -320,3 +320,8 @@ func IsReadmeFileExtension(name string, ext ...string) (int, bool) {
 
 	return 0, false
 }
+
+// PathContainsDirectory returns if a path contains a directory
+func PathContainsDirectory(path string) bool {
+	return path != filepath.Base(path)
+}

@@ -170,12 +170,12 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 		total = int(numFollowing)
 		ctx.Data["CardsTitle"] = ctx.TrN(total, "user.following.title.one", "user.following.title.few")
 	case "gists":
-		//ctx.Data["PageIsProfileStarList"] = true
-		gists, count, err := gist_model.SearchGist(ctx, ctx.Doer, &gist_model.SearchGistOptions{
+		gists, count, err := gist_model.SearchGist(ctx, &gist_model.SearchGistOptions{
 			ListOptions: db.ListOptions{
 				PageSize: pagingNum,
 				Page:     page,
 			},
+			Actor:   ctx.Doer,
 			OwnerID: ctx.ContextUser.ID,
 			Keyword: keyword,
 		})

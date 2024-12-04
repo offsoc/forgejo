@@ -8,6 +8,7 @@ import (
 
 	gist_model "code.gitea.io/gitea/models/gist"
 	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/routers/api/v1/utils"
 	"code.gitea.io/gitea/services/context"
@@ -47,14 +48,17 @@ func Search(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/GistList"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	opts := &gist_model.SearchGistOptions{
 		ListOptions: utils.GetListOptions(ctx),
+		Actor:       ctx.Doer,
 		Keyword:     ctx.FormTrim("q"),
 		OwnerID:     ctx.FormInt64("uid"),
 		SortOrder:   ctx.FormTrim("sort"),
 	}
 
-	gists, count, err := gist_model.SearchGist(ctx, ctx.Doer, opts)
+	gists, count, err := gist_model.SearchGist(ctx, opts)
 	if err != nil {
 		ctx.ServerError("SearchGist", err)
 		return
@@ -88,6 +92,12 @@ func Create(ctx *context.APIContext) {
 	// responses:
 	//   "201":
 	//     "$ref": "#/responses/Gist"
+	//   "400":
+	//     "$ref": "#/responses/error"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
 	opt := web.GetForm(ctx).(*api.CreateGistOption)
 
 	if len(opt.Files) == 0 {
@@ -96,13 +106,23 @@ func Create(ctx *context.APIContext) {
 	}
 
 	visibility, err := gist_model.GistVisibilityFromName(opt.Visibility)
-	if len(opt.Files) == 0 {
+	if err != nil {
 		ctx.Error(http.StatusBadRequest, "invalid visibility", nil)
+		return
+	}
+
+	if len(opt.Files) == 0 {
+		ctx.Error(http.StatusBadRequest, "no files", nil)
 		return
 	}
 
 	files := make(map[string]string)
 	for _, currentFile := range opt.Files {
+		if util.PathContainsDirectory(currentFile.Name) {
+			ctx.Error(http.StatusBadRequest, "invalid filename", nil)
+			return
+		}
+
 		files[currentFile.Name] = currentFile.Content
 	}
 
@@ -131,6 +151,10 @@ func Get(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/Gist"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
 	ctx.JSON(http.StatusOK, convert.ToGist(ctx, ctx.Gist, ctx.Doer))
 }
 
@@ -150,6 +174,10 @@ func GetFiles(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/GistFiles"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
 	files, err := gist_service.GetFiles(ctx, ctx.Gist)
 	if err != nil {
 		ctx.ServerError("GetFiles", err)
@@ -181,7 +209,22 @@ func UpdateFiles(ctx *context.APIContext) {
 	// responses:
 	//   "204":
 	//     "$ref": "#/responses/empty"
+	//   "400":
+	//     "$ref": "#/responses/error"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
 	opt := web.GetForm(ctx).(*api.UpdateGistFilesOption)
+
+	for _, currentFile := range opt.Files {
+		if util.PathContainsDirectory(currentFile.Name) {
+			ctx.Error(http.StatusBadRequest, "invalid filename", nil)
+			return
+		}
+	}
 
 	err := gist_service.UpdateFiles(ctx, ctx.Gist, ctx.Doer, opt.Files)
 	if err != nil {
@@ -210,6 +253,10 @@ func Delete(ctx *context.APIContext) {
 	// responses:
 	//   "204":
 	//     "$ref": "#/responses/empty"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
 	err := gist_service.DeleteGist(ctx, ctx.Gist)
 	if err != nil {
 		ctx.ServerError("DeleteGist", err)

@@ -219,6 +219,10 @@ func InitTest(requireGitea bool) {
 		}
 	}
 
+	if err := unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/forgejo-gists-meta"), dir); err != nil {
+		log.Fatal("os.CopyDir Gists: %v", err)
+	}
+
 	routers.InitWebInstalled(graceful.GetManager().HammerContext())
 }
 
@@ -271,6 +275,13 @@ func PrepareGitRepoDirectory(t testing.TB) {
 	setting.RepoRootPath, err = os.MkdirTemp(t.TempDir(), "forgejo-repo-rooth")
 	require.NoError(t, err)
 	require.NoError(t, unittest.CopyDir(preparedDir, setting.RepoRootPath))
+}
+
+func PrepareGistRepoDirectory(t testing.TB) {
+	var err error
+	setting.Gist.RootPath, err = os.MkdirTemp(t.TempDir(), "forgejo-gist-root")
+	require.NoError(t, err)
+	require.NoError(t, unittest.CopyDir(preparedDir, setting.Gist.RootPath))
 }
 
 func PrepareArtifactsStorage(t testing.TB) {
@@ -327,6 +338,7 @@ func PrepareTestEnv(t testing.TB, skip ...int) func() {
 
 	// do not add more Prepare* functions here, only call necessary ones in the related test functions
 	PrepareGitRepoDirectory(t)
+	PrepareGistRepoDirectory(t)
 	PrepareLFSStorage(t)
 	PrepareCleanPackageData(t)
 	return deferFn

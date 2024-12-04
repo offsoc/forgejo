@@ -52,7 +52,7 @@
 					<div id="file-field-container">
 						{{if .GistFiles}}
 							{{range $idx, $file := .GistFiles}}
-								{{template "gist/file_form" dict "id" $idx "name" .Name "content" .Content}}
+								{{template "gist/file_form" dict "id" (printf "%d" $idx) "name" .Name "content" .Content}}
 							{{end}}
 						{{else}}
 							{{template "gist/file_form" dict "id" "0"}}
@@ -70,7 +70,7 @@
 								{{if .Gist}}
 									{{ctx.Locale.Tr "save"}}
 								{{else}}
-									{{ctx.Locale.Tr "add"}}
+									{{ctx.Locale.Tr "gist.edit.new_button"}}
 								{{end}}
 							</button>
 						</div>

@@ -323,7 +323,7 @@ func GetAffectedFiles(ctx context.Context, repoPath string, objectFormat ObjectF
 }
 
 // DiffContainsBinary retruns if a diff contains binary files
-func DiffContainsBinary(ctx context.Context, repoPath string, oldCommitID, newCommitID string) (bool, error) {
+func DiffContainsBinary(ctx context.Context, repoPath, oldCommitID, newCommitID string) (bool, error) {
 	stdoutText := new(bytes.Buffer)
 	err := NewCommand(ctx, "diff").AddDynamicArguments(oldCommitID, newCommitID).Run(&RunOpts{Dir: repoPath, Stdout: stdoutText})
 	if err != nil {
@@ -336,5 +336,5 @@ func DiffContainsBinary(ctx context.Context, repoPath string, oldCommitID, newCo
 		return false, err
 	}
 
-	return bytes.Compare(stdoutText.Bytes(), stdoutBinary.Bytes()) != 0, nil
+	return !bytes.Equal(stdoutText.Bytes(), stdoutBinary.Bytes()), nil
 }

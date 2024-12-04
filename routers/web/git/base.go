@@ -8,7 +8,7 @@ import (
 )
 
 type serviceHandlerBase interface {
-	Init(ctx *context.Context) bool
+	Init(ctx *context.Context, isPull, receivePack bool) bool
 	GetRepoPath() string
 	GetEnviron() []string
 }

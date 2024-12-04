@@ -4,6 +4,7 @@
 package git
 
 import (
+	"net/http"
 	"strings"
 
 	gist_model "code.gitea.io/gitea/models/gist"
@@ -14,7 +15,7 @@ type serviceHandlerGist struct {
 	gist *gist_model.Gist
 }
 
-func (h *serviceHandlerGist) Init(ctx *context.Context) bool {
+func (h *serviceHandlerGist) Init(ctx *context.Context, isPull, receivePack bool) bool {
 	gistUUID := strings.TrimSuffix(strings.ToLower(ctx.Params(":gistuuid")), ".git")
 
 	var err error
@@ -22,6 +23,12 @@ func (h *serviceHandlerGist) Init(ctx *context.Context) bool {
 	h.gist, err = gist_model.GetGistByUUID(ctx, gistUUID)
 	if err != nil {
 		if gist_model.IsErrGistNotExist(err) {
+			if !ctx.IsSigned {
+				ctx.Resp.Header().Set("WWW-Authenticate", `Basic realm="Gitea"`)
+				ctx.Error(http.StatusUnauthorized)
+				return false
+			}
+
 			ctx.NotFound("", nil)
 		} else {
 			ctx.ServerError("GetGistByUUID", err)
@@ -30,8 +37,26 @@ func (h *serviceHandlerGist) Init(ctx *context.Context) bool {
 	}
 
 	if !h.gist.HasAccess(ctx.Doer) {
+		if !ctx.IsSigned {
+			ctx.Resp.Header().Set("WWW-Authenticate", `Basic realm="Gitea"`)
+			ctx.Error(http.StatusUnauthorized)
+			return false
+		}
+
 		ctx.NotFound("", nil)
 		return false
+	}
+
+	if !isPull {
+		if !ctx.IsSigned {
+			ctx.Resp.Header().Set("WWW-Authenticate", `Basic realm="Gitea"`)
+			ctx.Error(http.StatusUnauthorized)
+			return false
+		}
+
+		if !h.gist.IsOwner(ctx.Doer) {
+			ctx.PlainText(http.StatusForbidden, "not the owner")
+		}
 	}
 
 	return true

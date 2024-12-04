@@ -1,7 +1,7 @@
 <div {{if .id}}id="file-field-{{.id}}"{{end}} data-template-name="field">
 	<div class="field required">
 		<label {{if .id}}for="file-name-{{.id}}"{{end}} data-template-name="name-label">{{ctx.Locale.Tr "gist.edit.file_name"}}</label>
-		<input {{if .id}}name="file-name-{{.id}}"{{end}} {{if .name}}value="{{.name}}"{{end}} data-template-name="name-input" required></input>
+		<input {{if .id}}name="file-name-{{.id}}"{{end}} {{if .name}}value="{{.name}}"{{end}} data-template-name="name-input" pattern="^[^\/\\]*$" title="{{ctx.Locale.Tr "gist.edit.file_name_title"}}" required></input>
 	</div>
 	<div class="field required">
 		<label {{if .id}}for="file-content-{{.id}}"{{end}} data-template-name="content-label">{{ctx.Locale.Tr "gist.edit.file_content"}}</label>

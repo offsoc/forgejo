@@ -1,5 +1,5 @@
 // Copyright 2024 The Forgejo Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 package gist
 
@@ -20,25 +20,29 @@ import (
 )
 
 const (
-	GIST_BRANCH = "main"
+	GistBranch = "main"
 )
 
 // CreateGist creates a Gist
-func CreateGist(ctx context.Context, owner *user_model.User, name string, description string, visibility gist_model.GistVisibility, files map[string]string) (*gist_model.Gist, error) {
+func CreateGist(ctx context.Context, owner *user_model.User, name, description string, visibility gist_model.GistVisibility, files map[string]string) (*gist_model.Gist, error) {
 	tempDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return nil, err
 	}
 	defer os.RemoveAll(tempDir)
 
-	err = git.InitRepository(ctx, tempDir, git.InitRepositoryOptions{Bare: false, ObjectFormatName: git.Sha1ObjectFormat.Name(), Branch: GIST_BRANCH})
+	err = git.InitRepository(ctx, tempDir, git.InitRepositoryOptions{Bare: false, ObjectFormatName: git.Sha1ObjectFormat.Name(), Branch: GistBranch})
 	if err != nil {
 		return nil, err
 	}
 
 	nameList := make([]string, 0)
 	for name, content := range files {
-		err := os.WriteFile(filepath.Join(tempDir, name), []byte(content), 0644)
+		if util.PathContainsDirectory(name) {
+			return nil, fmt.Errorf("%s contains a directory", name)
+		}
+
+		err := os.WriteFile(filepath.Join(tempDir, name), []byte(content), 0o644)
 		if err != nil {
 			return nil, err
 		}
@@ -77,14 +81,14 @@ func CreateGist(ctx context.Context, owner *user_model.User, name string, descri
 		return nil, err
 	}
 
-	err = git.InitRepository(ctx, gist.GetRepoPath(), git.InitRepositoryOptions{Bare: true, Branch: GIST_BRANCH, ObjectFormatName: git.Sha1ObjectFormat.Name()})
+	err = git.InitRepository(ctx, gist.GetRepoPath(), git.InitRepositoryOptions{Bare: true, Branch: GistBranch, ObjectFormatName: git.Sha1ObjectFormat.Name()})
 	if err != nil {
 		return nil, err
 	}
 
 	cmd := git.NewCommand(ctx, "push", "--set-upstream")
 	cmd.AddDynamicArguments(gist.GetRepoPath())
-	cmd.AddDynamicArguments(GIST_BRANCH)
+	cmd.AddDynamicArguments(GistBranch)
 	_, _, err = cmd.RunStdString(&git.RunOpts{Dir: tempDir})
 	if err != nil {
 		os.RemoveAll(gist.GetRepoPath())
@@ -116,7 +120,7 @@ func GetFiles(ctx context.Context, gist *gist_model.Gist) (GistFiles, error) {
 	}
 	defer repo.Close()
 
-	branch, err := repo.GetBranch(GIST_BRANCH)
+	branch, err := repo.GetBranch(GistBranch)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +167,7 @@ func GetBlob(ctx context.Context, gist *gist_model.Gist, filename string) (*git.
 	}
 	defer repo.Close()
 
-	branch, err := repo.GetBranch(GIST_BRANCH)
+	branch, err := repo.GetBranch(GistBranch)
 	if err != nil {
 		return nil, err
 	}
@@ -178,6 +182,12 @@ func GetBlob(ctx context.Context, gist *gist_model.Gist, filename string) (*git.
 
 // UpdateFiles replaces the files of a Gist
 func UpdateFiles(ctx context.Context, gist *gist_model.Gist, doer *user_model.User, files GistFiles) error {
+	for _, currentFile := range files {
+		if util.PathContainsDirectory(currentFile.Name) {
+			return fmt.Errorf("%s contains a directory", currentFile.Name)
+		}
+	}
+
 	tempDir, err := os.MkdirTemp("", "")
 	if err != nil {
 		return err
@@ -211,7 +221,7 @@ func UpdateFiles(ctx context.Context, gist *gist_model.Gist, doer *user_model.Us
 
 	changedFiles := make([]string, 0)
 	for _, currentFile := range files {
-		err := os.WriteFile(filepath.Join(tempDir, currentFile.Name), []byte(currentFile.Content), 0644)
+		err := os.WriteFile(filepath.Join(tempDir, currentFile.Name), []byte(currentFile.Content), 0o644)
 		if err != nil {
 			return err
 		}

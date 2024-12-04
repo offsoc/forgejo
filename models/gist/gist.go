@@ -6,6 +6,7 @@ package gist
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -17,7 +18,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type GistVisibility int8
+type GistVisibility int8 //revive:disable-line:exported
 
 const (
 	GistVisibilityPublic  GistVisibility = iota + 1 // 1， GistVisibilityPublic the gist can be seen be anyone
@@ -35,6 +36,19 @@ func (visibility GistVisibility) String() string {
 		return "private"
 	default:
 		return "unknown"
+	}
+}
+
+func GistVisibilityFromName(name string) (GistVisibility, error) { //revive:disable-line:exported
+	switch strings.ToLower(name) {
+	case "public":
+		return GistVisibilityPublic, nil
+	case "hidden":
+		return GistVisibilityHidden, nil
+	case "private":
+		return GistVisibilityPrivate, nil
+	default:
+		return 0, fmt.Errorf("%s is not a valid gist visibiklity name", name)
 	}
 }
 
@@ -69,19 +83,6 @@ func init() {
 	db.RegisterModel(new(Gist))
 }
 
-func GistVisibilityFromName(name string) (GistVisibility, error) {
-	switch strings.ToLower(name) {
-	case "public":
-		return GistVisibilityPublic, nil
-	case "hidden":
-		return GistVisibilityHidden, nil
-	case "private":
-		return GistVisibilityPrivate, nil
-	default:
-		return 0, fmt.Errorf("%s is not a valid gist visibiklity name", name)
-	}
-}
-
 // generateUUID generates a random UUID for a Gist
 func generateUUID() string {
 	uuidParts := strings.Split(uuid.New().String(), "-")
@@ -98,7 +99,7 @@ func Create(ctx context.Context, gist *Gist) error {
 // GetGistByUUID finds the Gist with the given UUID
 func GetGistByUUID(ctx context.Context, uuid string) (*Gist, error) {
 	gist := new(Gist)
-	has, err := db.GetEngine(ctx).Where("uuid = ?", uuid).Get(gist)
+	has, err := db.GetEngine(ctx).Where("uuid = ?", strings.ToLower(uuid)).Get(gist)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +118,12 @@ func (gist *Gist) GetRepoPath() string {
 
 // Link returns the Link to the Repo
 func (gist *Gist) Link() string {
-	return fmt.Sprintf("/gists/%s", gist.UUID)
+	return fmt.Sprintf("/gists/%s", url.PathEscape(gist.UUID))
+}
+
+// HTMLURL returns the gist HTML URL
+func (gist *Gist) HTMLURL() string {
+	return fmt.Sprintf("%sgists/%s", setting.AppURL, url.PathEscape(gist.UUID))
 }
 
 // LoadOwner loads the owner field

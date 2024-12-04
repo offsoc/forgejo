@@ -1676,6 +1676,7 @@ func registerRoutes(m *web.Route) {
 					gitHTTPRouters(m)
 				})
 			}, context.GistAssignment)
+			m.Get("/-/sitemap-{idx}.xml", sitemapEnabled, gist.Sitemap)
 		})
 	}
 

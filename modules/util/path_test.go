@@ -211,3 +211,8 @@ func TestCleanPath(t *testing.T) {
 		assert.Equal(t, c.expected, FilePathJoinAbs(c.elems[0], c.elems[1:]...), "case: %v", c.elems)
 	}
 }
+
+func TestPathContainsDirectory(t *testing.T) {
+	assert.True(t, PathContainsDirectory("test/123"))
+	assert.False(t, PathContainsDirectory("test"))
+}

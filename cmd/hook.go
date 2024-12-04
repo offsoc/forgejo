@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -21,6 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/private"
 	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/util"
 
 	"github.com/urfave/cli/v2"
 )
@@ -808,14 +808,14 @@ func writeDataPktLine(ctx context.Context, out io.Writer, data []byte) error {
 	return nil
 }
 
-func checkGistDiff(ctx context.Context, repoPath string, oldCommitID, newCommitID string) error {
+func checkGistDiff(ctx context.Context, repoPath, oldCommitID, newCommitID string) error {
 	files, err := git.GetAffectedFiles(ctx, repoPath, git.Sha1ObjectFormat, oldCommitID, newCommitID, os.Environ())
 	if err != nil {
 		return err
 	}
 
 	for _, currentFile := range files {
-		if currentFile != filepath.Base(currentFile) {
+		if util.PathContainsDirectory(currentFile) {
 			return fail(ctx, "Gists are not allowed to have directories", "")
 		}
 	}

@@ -31,29 +31,13 @@ type serviceHandlerRepo struct {
 	environ []string
 }
 
-func (h *serviceHandlerRepo) Init(ctx *context.Context) bool {
+func (h *serviceHandlerRepo) Init(ctx *context.Context, isPull, receivePack bool) bool {
 	username := ctx.Params(":username")
 	reponame := strings.TrimSuffix(ctx.Params(":reponame"), ".git")
 
 	if ctx.FormString("go-get") == "1" {
 		context.EarlyResponseForGoGetMeta(ctx)
 		return false
-	}
-
-	var isPull, receivePack bool
-	service := ctx.FormString("service")
-	if service == "git-receive-pack" ||
-		strings.HasSuffix(ctx.Req.URL.Path, "git-receive-pack") {
-		isPull = false
-		receivePack = true
-	} else if service == "git-upload-pack" ||
-		strings.HasSuffix(ctx.Req.URL.Path, "git-upload-pack") {
-		isPull = true
-	} else if service == "git-upload-archive" ||
-		strings.HasSuffix(ctx.Req.URL.Path, "git-upload-archive") {
-		isPull = true
-	} else {
-		isPull = ctx.Req.Method == "GET"
 	}
 
 	var accessMode perm.AccessMode

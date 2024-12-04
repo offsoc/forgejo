@@ -161,7 +161,10 @@ func LoadHeaderCount(ctx *context.Context) error {
 	}
 
 	if setting.Gist.Enabled && !ctx.ContextUser.IsOrganization() {
-		ctx.Data["GistCount"], err = gist_model.CountOwnerGists(ctx, ctx.ContextUser, ctx.Doer)
+		ctx.Data["GistCount"], err = gist_model.CountGist(ctx, &gist_model.SearchGistOptions{
+			Actor:   ctx.Doer,
+			OwnerID: ctx.ContextUser.ID,
+		})
 		if err != nil {
 			return err
 		}

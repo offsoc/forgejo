@@ -19,6 +19,7 @@ const (
 func Gists(ctx *context.Context) {
 	opts := new(gist_model.SearchGistOptions)
 
+	opts.Actor = ctx.Doer
 	opts.PageSize = setting.UI.ExplorePagingNum
 
 	opts.Page = ctx.FormInt("page")
@@ -35,7 +36,7 @@ func Gists(ctx *context.Context) {
 
 	opts.Keyword = ctx.FormTrim("q")
 
-	gists, count, err := gist_model.SearchGist(ctx, ctx.Doer, opts)
+	gists, count, err := gist_model.SearchGist(ctx, opts)
 	if err != nil {
 		ctx.ServerError("SearchGist", err)
 		return

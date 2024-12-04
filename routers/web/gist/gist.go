@@ -10,7 +10,9 @@ import (
 
 	gist_model "code.gitea.io/gitea/models/gist"
 	repo_model "code.gitea.io/gitea/models/repo"
+	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/sitemap"
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/routers/common"
 	"code.gitea.io/gitea/services/context"
@@ -75,6 +77,8 @@ func parseGistForm(req *http.Request) (*gistForm, error) {
 
 // New creates a Gist
 func New(ctx *context.Context) {
+	ctx.Data["Title"] = ctx.Tr("gist.edit.new_header")
+
 	ctx.HTML(http.StatusOK, "gist/add_edit")
 }
 
@@ -113,6 +117,10 @@ func View(ctx *context.Context) {
 	if err != nil {
 		ctx.ServerError("HighlightFiles", err)
 		return
+	}
+
+	if ctx.Gist.Visibility == gist_model.GistVisibilityHidden {
+		ctx.Data["AddNoindexHeade"] = true
 	}
 
 	cl := new(repo_model.CloneLink)
@@ -164,6 +172,7 @@ func Edit(ctx *context.Context) {
 
 	ctx.Data["Gist"] = ctx.Gist
 	ctx.Data["GistFiles"] = files
+	ctx.Data["Title"] = ctx.Tr("gist.edit.edit_header")
 
 	ctx.HTML(http.StatusOK, "gist/add_edit")
 }
@@ -209,4 +218,28 @@ func Delete(ctx *context.Context) {
 	}
 
 	ctx.Redirect("/")
+}
+
+// Sitemap renders the Gists Sitemap
+func Sitemap(ctx *context.Context) {
+	opts := new(gist_model.SearchGistOptions)
+	opts.Page = int(ctx.ParamsInt64("idx"))
+	opts.PageSize = setting.UI.SitemapPagingNum
+
+	gists, _, err := gist_model.SearchGist(ctx, opts)
+	if err != nil {
+		log.Error("Failed to get Gists: %v", err)
+		return
+	}
+
+	m := sitemap.NewSitemap()
+	for _, item := range gists {
+		m.Add(sitemap.URL{URL: item.HTMLURL(), LastMod: item.UpdatedUnix.AsTimePtr()})
+	}
+
+	ctx.Resp.Header().Set("Content-Type", "text/xml")
+
+	if _, err := m.WriteTo(ctx.Resp); err != nil {
+		log.Error("Failed writing sitemap: %v", err)
+	}
 }

@@ -19,7 +19,6 @@ import (
 	"sync"
 	"time"
 
-	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
@@ -50,6 +49,22 @@ func CorsHandler() func(next http.Handler) http.Handler {
 
 // httpBase implementation git smart HTTP protocol
 func httpBase(ctx *context.Context) serviceHandlerBase {
+	var isPull, receivePack bool
+	service := ctx.FormString("service")
+	if service == "git-receive-pack" ||
+		strings.HasSuffix(ctx.Req.URL.Path, "git-receive-pack") {
+		isPull = false
+		receivePack = true
+	} else if service == "git-upload-pack" ||
+		strings.HasSuffix(ctx.Req.URL.Path, "git-upload-pack") {
+		isPull = true
+	} else if service == "git-upload-archive" ||
+		strings.HasSuffix(ctx.Req.URL.Path, "git-upload-archive") {
+		isPull = true
+	} else {
+		isPull = ctx.Req.Method == "GET"
+	}
+
 	var handler serviceHandlerBase
 	if ctx.Params(":gistuuid") != "" {
 		handler = new(serviceHandlerGist)
@@ -57,7 +72,7 @@ func httpBase(ctx *context.Context) serviceHandlerBase {
 		handler = new(serviceHandlerRepo)
 	}
 
-	ok := handler.Init(ctx)
+	ok := handler.Init(ctx, isPull, receivePack)
 	if !ok {
 		return nil
 	}
@@ -105,12 +120,6 @@ func dummyInfoRefs(ctx *context.Context) {
 	_, _ = ctx.Write(packetWrite("# service=git-receive-pack\n"))
 	_, _ = ctx.Write([]byte("0000"))
 	_, _ = ctx.Write(infoRefsCache)
-}
-
-type serviceHandler struct {
-	repo    *repo_model.Repository
-	isWiki  bool
-	environ []string
 }
 
 func setHeaderNoCache(ctx *context.Context) {

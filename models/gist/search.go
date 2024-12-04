@@ -14,28 +14,28 @@ import (
 
 type SearchGistOptions struct {
 	db.ListOptions
+	Actor     *user_model.User
 	OwnerID   int64
 	Keyword   string
 	SortOrder string
 }
 
-func SearchGistCondition(doer *user_model.User, opts *SearchGistOptions) builder.Cond {
+// SearchGistByCondition returns Conditions for the given Options
+func SearchGistCondition(opts *SearchGistOptions) builder.Cond {
 	cond := builder.NewCond()
 
-	if doer == nil {
+	if opts.Actor == nil {
 		cond = cond.And(builder.Eq{"gist.visibility": GistVisibilityPublic})
-	} else {
-		if !doer.IsAdmin {
-			ownCond := builder.NewCond()
-			ownCond = ownCond.And(builder.Neq{"gist.visibility": GistVisibilityPublic})
-			ownCond = ownCond.And(builder.Eq{"gist.owner_id": doer.ID})
+	} else if !opts.Actor.IsAdmin {
+		ownCond := builder.NewCond()
+		ownCond = ownCond.And(builder.Neq{"gist.visibility": GistVisibilityPublic})
+		ownCond = ownCond.And(builder.Eq{"gist.owner_id": opts.Actor.ID})
 
-			privateCond := builder.NewCond()
-			privateCond = privateCond.Or(builder.Eq{"gist.visibility": GistVisibilityPublic})
-			privateCond = privateCond.Or(ownCond)
+		privateCond := builder.NewCond()
+		privateCond = privateCond.Or(builder.Eq{"gist.visibility": GistVisibilityPublic})
+		privateCond = privateCond.Or(ownCond)
 
-			cond = cond.And(privateCond)
-		}
+		cond = cond.And(privateCond)
 	}
 
 	if opts.OwnerID != 0 {
@@ -49,18 +49,15 @@ func SearchGistCondition(doer *user_model.User, opts *SearchGistOptions) builder
 	return cond
 }
 
-func SearchGist(ctx context.Context, doer *user_model.User, opts *SearchGistOptions) (GistList, int64, error) {
-	cond := SearchGistCondition(doer, opts)
+// Search Gists find Gists by the given Options
+func SearchGist(ctx context.Context, opts *SearchGistOptions) (GistList, int64, error) {
+	cond := SearchGistCondition(opts)
 
 	sess := db.GetEngine(ctx)
 
-	var err error
-	var count int64
-	if opts.PageSize > 0 {
-		count, err = sess.Where(cond).Count(new(Gist))
-		if err != nil {
-			return nil, 0, err
-		}
+	count, err := sess.Where(cond).Count(new(Gist))
+	if err != nil {
+		return nil, 0, err
 	}
 
 	if opts.SortOrder != "" {
@@ -79,7 +76,11 @@ func SearchGist(ctx context.Context, doer *user_model.User, opts *SearchGistOpti
 
 		if orderBy != "" {
 			sess.OrderBy(orderBy)
+		} else {
+			sess.OrderBy("gist.updated_unix DESC")
 		}
+	} else {
+		sess.OrderBy("gist.updated_unix DESC")
 	}
 
 	sess = sess.Where(cond)
@@ -97,7 +98,8 @@ func SearchGist(ctx context.Context, doer *user_model.User, opts *SearchGistOpti
 	return gistList, count, nil
 }
 
-func CountOwnerGists(ctx context.Context, owner *user_model.User, doer *user_model.User) (int64, error) {
-	cond := SearchGistCondition(doer, &SearchGistOptions{OwnerID: owner.ID})
+// CountGists return a number of all Gists that match the Options
+func CountGist(ctx context.Context, opts *SearchGistOptions) (int64, error) {
+	cond := SearchGistCondition(opts)
 	return db.GetEngine(ctx).Where(cond).Count(new(Gist))
 }

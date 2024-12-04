@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"code.gitea.io/gitea/models/db"
+	gist_model "code.gitea.io/gitea/models/gist"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
@@ -102,6 +103,24 @@ func HomeSitemap(ctx *context.Context) {
 	for i := 0; i < count; i += setting.UI.SitemapPagingNum {
 		m.Add(sitemap.URL{URL: setting.AppURL + "explore/repos/sitemap-" + strconv.Itoa(idx) + ".xml"})
 		idx++
+	}
+
+	if setting.Gist.Enabled {
+		gistCount, err := gist_model.CountGist(ctx, &gist_model.SearchGistOptions{
+			ListOptions: db.ListOptions{
+				PageSize: 1,
+			},
+		})
+		if err != nil {
+			ctx.ServerError("CountGist", err)
+			return
+		}
+
+		idx := 1
+		for i := 0; i < int(gistCount); i += setting.UI.SitemapPagingNum {
+			m.Add(sitemap.URL{URL: setting.AppURL + "gists/-/sitemap-" + strconv.Itoa(idx) + ".xml"})
+			idx++
+		}
 	}
 
 	ctx.Resp.Header().Set("Content-Type", "text/xml")
