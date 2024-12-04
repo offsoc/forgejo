@@ -10,7 +10,7 @@ require (
 	code.forgejo.org/forgejo/reply v1.0.2
 	code.forgejo.org/go-chi/binding v1.0.0
 	code.forgejo.org/go-chi/cache v1.0.0
-	code.forgejo.org/go-chi/captcha v1.0.0
+	code.forgejo.org/go-chi/captcha v1.0.1
 	code.forgejo.org/go-chi/session v1.0.0
 	code.gitea.io/actions-proto-go v0.4.0
 	code.gitea.io/gitea-vet v0.2.3
