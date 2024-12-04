@@ -14,10 +14,10 @@ code.forgejo.org/go-chi/binding v1.0.0 h1:EIDJtk9brK7WsT7rvS/D4cxX8XlnhY3LMy8ex1
 code.forgejo.org/go-chi/binding v1.0.0/go.mod h1:fWwqaHj0H1/KeCpBqdvKunflq8pYfciEHI5v3UUeE2E=
 code.forgejo.org/go-chi/cache v1.0.0 h1:akLfGxNlHcacmtutovNtYFSTMsbdcp5MGjAEsP4pxnE=
 code.forgejo.org/go-chi/cache v1.0.0/go.mod h1:OVlZ/TqDYJ+RUJ+R+J+OLxtlyjo3pbjBeK7LAWAB+Vk=
-code.forgejo.org/go-chi/captcha v1.0.0 h1:ZKVznXrPfruc1RMavCFBEINGxB3RAYr4I+WQAK8+eP0=
-code.forgejo.org/go-chi/captcha v1.0.0/go.mod h1:YLOsiln/arX3egGtxG4QNp49G2CIqP9pqD2VL56obLc=
-code.forgejo.org/go-chi/session v1.0.0 h1:1hjLWHpXkb4vs/g9rk/unhRL4AoKEqVUPJ+opI8UO3Y=
-code.forgejo.org/go-chi/session v1.0.0/go.mod h1:lS76JFHZqGXYJTBHqwZ910UG046hIXAaYIN6J0Lf8sI=
+code.forgejo.org/go-chi/captcha v1.0.1 h1:/oe1fvGOpdyyeGijg3oMYNOYLvEovNvp79Y3gLe3qbk=
+code.forgejo.org/go-chi/captcha v1.0.1/go.mod h1:6EbjSVVa7WoZFENgwK/hLAJZq+HBXtgRsjnIngILC8Y=
+code.forgejo.org/go-chi/session v1.0.1 h1:RNkcJQZJBqlvJoIFXSth87b3kMFZLDBA18VcitD+Z0Y=
+code.forgejo.org/go-chi/session v1.0.1/go.mod h1:y69sjS984wc7k4xyu77yNE5HKeSlBoQW8VSGdsK7RAs=
 code.gitea.io/actions-proto-go v0.4.0 h1:OsPBPhodXuQnsspG1sQ4eRE1PeoZyofd7+i73zCwnsU=
 code.gitea.io/actions-proto-go v0.4.0/go.mod h1:mn7Wkqz6JbnTOHQpot3yDeHx+O5C9EGhMEE+htvHBas=
 code.gitea.io/gitea-vet v0.2.3 h1:gdFmm6WOTM65rE8FUBTRzeQZYzXePKSSB1+r574hWwI=
@@ -320,6 +320,8 @@ github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 h1:au07oEsX2xN0kt
 github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9/go.mod h1:8vg3r2VgvsThLBIFL93Qb5yWzgyZWhEmBwUJWevAkK0=
 github.com/golang-sql/sqlexp v0.1.0 h1:ZCD6MBpcuOVfGVqsEmY5/4FtYiKz6tSyUv9LPEDei6A=
 github.com/golang-sql/sqlexp v0.1.0/go.mod h1:J4ad9Vo8ZCWQ2GMrC4UCQy1JpCbwU9m3EOqtpKwwwHI=
+github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 h1:DACJavvAHhabrF08vX0COfcOBJRhZ8lUbR+ZWIs0Y5g=
+github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0/go.mod h1:E/TSTwGwJL78qG/PmXZO1EjYhfJinVAhrmmHX6Z8B9k=
 github.com/golang/geo v0.0.0-20230421003525-6adc56603217 h1:HKlyj6in2JV6wVkmQ4XmG/EIm+SCYlPZ+V4GWit7Z+I=
 github.com/golang/geo v0.0.0-20230421003525-6adc56603217/go.mod h1:8wI0hitZ3a1IxZfeH3/5I97CI8i5cLGsYe7xNhQGs9U=
 github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da h1:oI5xCqsCo564l8iNU+DwB5epxmsaqB+rhGL0m5jtYqE=
@@ -652,8 +654,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
-github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
+github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOfJA=
+github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8=
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
 github.com/syndtr/goleveldb v1.0.0 h1:fBdIW9lB4Iz0n9khmH8w27SJ3QEJ7+IgjPEwGSZiFdE=

@@ -115,6 +115,12 @@ c=2
 			want:      lines(""),
 			lexerName: "ObjectPascal",
 		},
+		{
+			name:      "test.fs",
+			code:      "module Crypt = let generateCryptTable: array<uint32> =",
+			want:      lines(`<span class="k">module</span> <span class="nn">Crypt</span> <span class="o">=</span> <span class="k">let</span> <span class="nv">generateCryptTable</span><span class="o">:</span> <span class="n">array</span><span class="o">&lt;</span><span class="kt">uint32</span><span class="o">&gt;</span> <span class="o">=</span>`),
+			lexerName: "FSharp",
+		},
 	}
 
 	for _, tt := range tests {

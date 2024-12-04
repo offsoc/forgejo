@@ -1,6 +1,8 @@
 module code.gitea.io/gitea
 
-go 1.23.3
+go 1.23.1
+
+toolchain go1.23.4
 
 require (
 	code.forgejo.org/f3/gof3/v3 v3.7.0
@@ -8,8 +10,8 @@ require (
 	code.forgejo.org/forgejo/reply v1.0.2
 	code.forgejo.org/go-chi/binding v1.0.0
 	code.forgejo.org/go-chi/cache v1.0.0
-	code.forgejo.org/go-chi/captcha v1.0.0
-	code.forgejo.org/go-chi/session v1.0.0
+	code.forgejo.org/go-chi/captcha v1.0.1
+	code.forgejo.org/go-chi/session v1.0.1
 	code.gitea.io/actions-proto-go v0.4.0
 	code.gitea.io/gitea-vet v0.2.3
 	code.gitea.io/sdk/gitea v0.17.1
@@ -45,6 +47,7 @@ require (
 	github.com/go-fed/httpsig v1.1.1-0.20201223112313-55836744818e
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/go-ldap/ldap/v3 v3.4.6
+	github.com/go-openapi/spec v0.20.14
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-swagger/go-swagger v0.30.5
 	github.com/go-testfixtures/testfixtures/v3 v3.12.0
@@ -53,6 +56,7 @@ require (
 	github.com/gogs/chardet v0.0.0-20211120154057-b7413eaefb8f
 	github.com/gogs/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-github/v64 v64.0.0
 	github.com/google/pprof v0.0.0-20241017200806-017d972448fc
 	github.com/google/uuid v1.6.0
@@ -90,7 +94,7 @@ require (
 	github.com/sassoftware/go-rpmutils v0.4.0
 	github.com/sergi/go-diff v1.3.1
 	github.com/shurcooL/vfsgen v0.0.0-20230704071429-0000e147ea92
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/ulikunitz/xz v0.5.12
 	github.com/urfave/cli/v2 v2.27.5
@@ -186,7 +190,6 @@ require (
 	github.com/go-openapi/jsonreference v0.20.4 // indirect
 	github.com/go-openapi/loads v0.21.5 // indirect
 	github.com/go-openapi/runtime v0.26.2 // indirect
-	github.com/go-openapi/spec v0.20.14 // indirect
 	github.com/go-openapi/strfmt v0.22.0 // indirect
 	github.com/go-openapi/swag v0.22.7 // indirect
 	github.com/go-openapi/validate v0.22.6 // indirect

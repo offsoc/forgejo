@@ -231,7 +231,7 @@ func newAccessTokenResponse(ctx go_context.Context, grant *auth.OAuth2Grant, ser
 			Nonce: grant.Nonce,
 		}
 		if grant.ScopeContains("profile") {
-			idToken.Name = user.GetDisplayName()
+			idToken.Name = user.DisplayName()
 			idToken.PreferredUsername = user.Name
 			idToken.Profile = user.HTMLURL()
 			idToken.Picture = user.AvatarLink(ctx)
@@ -305,7 +305,7 @@ func InfoOAuth(ctx *context.Context) {
 
 	response := &userInfoResponse{
 		Sub:      fmt.Sprint(ctx.Doer.ID),
-		Name:     ctx.Doer.FullName,
+		Name:     ctx.Doer.DisplayName(),
 		Username: ctx.Doer.Name,
 		Email:    ctx.Doer.Email,
 		Picture:  ctx.Doer.AvatarLink(ctx),

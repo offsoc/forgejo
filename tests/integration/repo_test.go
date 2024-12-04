@@ -1413,3 +1413,39 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 		assert.True(t, called)
 	})
 }
+
+func TestRepoSubmoduleView(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+		repo, _, f := tests.CreateDeclarativeRepo(t, user2, "", []unit_model.Type{unit_model.TypeCode}, nil, nil)
+		defer f()
+
+		// Clone the repository, add a submodule and push it.
+		dstPath := t.TempDir()
+
+		uClone := *u
+		uClone.Path = repo.FullName()
+		uClone.User = url.UserPassword(user2.Name, userPassword)
+
+		t.Run("Clone", doGitClone(dstPath, &uClone))
+
+		_, _, err := git.NewCommand(git.DefaultContext, "submodule", "add").AddDynamicArguments(u.JoinPath("/user2/repo1").String()).RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		_, _, err = git.NewCommand(git.DefaultContext, "add", "repo1", ".gitmodules").RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		_, _, err = git.NewCommand(git.DefaultContext, "commit", "-m", "add submodule").RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		_, _, err = git.NewCommand(git.DefaultContext, "push").RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		// Check that the submodule entry exist and the link is correct.
+		req := NewRequest(t, "GET", "/"+repo.FullName())
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, fmt.Sprintf(`tr[data-entryname="repo1"] a[href="%s"]`, u.JoinPath("/user2/repo1").String()), true)
+	})
+}
