@@ -11,7 +11,7 @@ require (
 	code.forgejo.org/go-chi/binding v1.0.0
 	code.forgejo.org/go-chi/cache v1.0.0
 	code.forgejo.org/go-chi/captcha v1.0.1
-	code.forgejo.org/go-chi/session v1.0.0
+	code.forgejo.org/go-chi/session v1.0.1
 	code.gitea.io/actions-proto-go v0.4.0
 	code.gitea.io/gitea-vet v0.2.3
 	code.gitea.io/sdk/gitea v0.17.1
