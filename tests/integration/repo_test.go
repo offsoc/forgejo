@@ -1009,16 +1009,29 @@ func TestRepoCodeSearchForm(t *testing.T) {
 		resp := MakeRequest(t, req, http.StatusOK)
 
 		htmlDoc := NewHTMLParser(t, resp.Body)
-		action, exists := htmlDoc.doc.Find("form[data-test-tag=codesearch]").Attr("action")
+		formEl := htmlDoc.doc.Find("form[data-test-tag=codesearch]")
+
+		action, exists := formEl.Attr("action")
 		assert.True(t, exists)
-
 		branchSubURL := "/branch/master"
-
 		if indexer {
 			assert.NotContains(t, action, branchSubURL)
 		} else {
 			assert.Contains(t, action, branchSubURL)
 		}
+
+		filepath, exists := formEl.Find("input[name=path]").Attr("value")
+		assert.True(t, exists)
+		assert.Empty(t, filepath)
+
+		req = NewRequest(t, "GET", "/user2/glob/src/branch/master/x/y")
+		resp = MakeRequest(t, req, http.StatusOK)
+
+		filepath, exists = NewHTMLParser(t, resp.Body).doc.
+			Find("form[data-test-tag=codesearch] input[name=path]").
+			Attr("value")
+		assert.True(t, exists)
+		assert.Equal(t, "x/y", filepath)
 	}
 
 	t.Run("indexer disabled", func(t *testing.T) {

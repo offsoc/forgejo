@@ -1,4 +1,5 @@
 <form class="ui form ignore-dirty">
+	<input type="hidden" name="path" value="{{.CodeSearchPath}}">
 	{{template "shared/search/combo_multi"
 		dict
 			"Value" .Keyword
@@ -14,6 +15,23 @@
 			<p>{{ctx.Locale.Tr "search.code_search_unavailable"}}</p>
 		</div>
 	{{else}}
+		{{if .CodeSearchPath}}
+			<div class="tw-mb-4">
+				<span class="breadcrumb">
+					<a class="section" href="?q={{.Keyword}}&mode={{.CodeSearchMode}}">@</a>
+					{{$href := ""}}
+					{{- range $i, $path := StringUtils.Split .CodeSearchPath "/" -}}
+						{{if eq $i 0}}
+							{{$href = $path}}
+						{{else}}
+							{{$href = StringUtils.Join (StringUtils.Make $href $path) "/"}}
+						{{end}}
+						<span class="breadcrumb-divider">/</span>
+						<span class="section"><a href="?q={{$.Keyword}}&mode={{$.CodeSearchMode}}&path={{$href}}">{{$path}}</a></span>
+					{{- end -}}
+				</span>
+			</div>
+		{{end}}
 		{{if .CodeIndexerDisabled}}
 			<div class="ui message" data-test-tag="grep">
 				<p>{{ctx.Locale.Tr "search.code_search_by_git_grep"}}</p>

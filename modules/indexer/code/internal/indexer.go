@@ -24,6 +24,7 @@ type SearchOptions struct {
 	RepoIDs  []int64
 	Keyword  string
 	Language string
+	Filename string
 
 	IsKeywordFuzzy bool
 
