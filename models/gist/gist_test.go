@@ -43,7 +43,7 @@ func TestGetGistByUUID(t *testing.T) {
 	assert.Equal(t, int64(1), gist.ID)
 
 	gist, err = gist_model.GetGistByUUID(db.DefaultContext, "invalid")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.True(t, gist_model.IsErrGistNotExist(err))
 	assert.Nil(t, gist)
 }
