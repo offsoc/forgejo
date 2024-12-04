@@ -16,6 +16,15 @@ var DATETIMESTRINGS = {
 	"years": (years) => `${years} years ago`,
 };
 
+const ABSOLUTE_DATETIME_FORMAT = new Intl.DateTimeFormat(navigator.language, {
+	year: 'numeric',
+	month: 'short',
+	day: 'numeric',
+	hour: '2-digit',
+	minute: '2-digit',
+	timeZoneName: 'short'
+});
+
 /** Update the displayed text of the given relative-time DOM element with its human-readable, localized relative time string. */
 function UpdateRelativeTime(object) {
 	if (!(object && object.attributes.datetime && object.attributes.datetime.nodeValue)) {
@@ -29,6 +38,8 @@ function UpdateRelativeTime(object) {
 	if (isNaN(milliseconds)) {
 		return;  // Datetime is invalid.
 	}
+
+	object.setAttribute('data-tooltip-content', ABSOLUTE_DATETIME_FORMAT.format(then));
 
 	if (milliseconds < 0) {
 		// Datetime is in the future.
