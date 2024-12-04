@@ -32,7 +32,7 @@ func TestGistVisibilityFromName(t *testing.T) {
 	assert.Equal(t, gist_model.GistVisibilityPrivate, visibility)
 
 	_, err = gist_model.GistVisibilityFromName("invalid")
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestGetGistByUUID(t *testing.T) {
