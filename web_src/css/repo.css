@@ -389,6 +389,11 @@ td .commit-summary {
   cursor: default;
 }
 
+.code-search + #repo-files-table {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 .view-raw {
   display: flex;
   justify-content: center;

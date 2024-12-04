@@ -36,13 +36,15 @@ const (
 	RegExpGrepMode
 )
 
+var GrepSearchOptions = [3]string{"exact", "union", "regexp"}
+
 type GrepOptions struct {
 	RefName           string
 	MaxResultLimit    int
 	MatchesPerFile    int // >= git 2.38
 	ContextLineNumber int
 	Mode              grepMode
-	PathSpec          []setting.Glob
+	Filename          string
 }
 
 func (opts *GrepOptions) ensureDefaults() {
@@ -112,12 +114,38 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 	}
 
 	// pathspec
-	files := make([]string, 0,
-		len(setting.Indexer.IncludePatterns)+
-			len(setting.Indexer.ExcludePatterns)+
-			len(opts.PathSpec))
-	for _, expr := range append(setting.Indexer.IncludePatterns, opts.PathSpec...) {
-		files = append(files, ":"+expr.Pattern())
+	includeLen := len(setting.Indexer.IncludePatterns)
+	if len(opts.Filename) > 0 {
+		includeLen = 1
+	}
+	files := make([]string, 0, len(setting.Indexer.ExcludePatterns)+includeLen)
+	if len(opts.Filename) > 0 && len(setting.Indexer.IncludePatterns) > 0 {
+		// if the both a global include pattern and the per search path is defined
+		// we only include results where the path matches the globally set pattern
+		// (eg, global pattern = "src/**" and path = "node_modules/")
+
+		// FIXME: this is a bit too restrictive, and fails to consider cases where the
+		// gloabally set include pattern refers to a file than a directory
+		// (eg, global pattern = "**.go" and path = "modules/git")
+		exprMatched := false
+		for _, expr := range setting.Indexer.IncludePatterns {
+			if expr.Match(opts.Filename) {
+				files = append(files, ":(literal)"+opts.Filename)
+				exprMatched = true
+				break
+			}
+		}
+		if !exprMatched {
+			log.Warn("git-grep: filepath %s does not match any include pattern", opts.Filename)
+		}
+	} else if len(opts.Filename) > 0 {
+		// if the path is only set we just include results that matches it
+		files = append(files, ":(literal)"+opts.Filename)
+	} else {
+		// otherwise if global include patterns are set include results that strictly match them
+		for _, expr := range setting.Indexer.IncludePatterns {
+			files = append(files, ":"+expr.Pattern())
+		}
 	}
 	for _, expr := range setting.Indexer.ExcludePatterns {
 		files = append(files, ":^"+expr.Pattern())

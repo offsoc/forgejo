@@ -35,6 +35,8 @@ type SearchResultLanguages = internal.SearchResultLanguages
 
 type SearchOptions = internal.SearchOptions
 
+var CodeSearchOptions = [2]string{"exact", "fuzzy"}
+
 func indices(content string, selectionStartIndex, selectionEndIndex int) (int, int) {
 	startIndex := selectionStartIndex
 	numLinesBefore := 0
