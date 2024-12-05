@@ -51,6 +51,19 @@ func TestFindOrgs(t *testing.T) {
 	assert.EqualValues(t, 1, total)
 }
 
+func TestGetOrgsCanCreateRepoByUserID(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	orgs, err := organization.GetOrgsCanCreateRepoByUserID(db.DefaultContext, 2)
+	require.NoError(t, err)
+	assert.Len(t, orgs, 1)
+	assert.EqualValues(t, 3, orgs[0].ID)
+	orgs, err = organization.GetOrgsCanCreateRepoByUserID(db.DefaultContext, 1)
+	require.NoError(t, err)
+	assert.Len(t, orgs, 2)
+	assert.EqualValues(t, 36, orgs[0].ID)
+	assert.EqualValues(t, 35, orgs[1].ID)
+}
+
 func TestGetUserOrgsList(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	orgs, err := organization.GetUserOrgsList(db.DefaultContext, &user_model.User{ID: 4})

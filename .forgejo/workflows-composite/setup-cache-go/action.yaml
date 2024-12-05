@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: MIT
+name: 'Forgejo Actions to setup Go and cache dependencies'
+author: 'Forgejo authors'
+description: |
+  Wrap the setup-go with improved dependency caching.
+inputs:
+  username:
+    description: 'User for which to manage the dependency cache'
+    default: root
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Install zstd for faster caching"
+      run: |
+        apt-get update -qq
+        apt-get -q install -qq -y zstd
+
+    - name: "Set up Go using setup-go"
+      uses: https://code.forgejo.org/actions/setup-go@v5
+      id: go-version
+      with:
+        go-version-file: "go.mod"
+        # do not cache dependencies, we do this manually
+        cache: false
+
+    - name: "Get go environment information"
+      id: go-environment
+      run: |
+        echo "modcache=$(su ${RUN_AS_USER} -c '/opt/hostedtoolcache/go/${GO_VERSION}/x64/bin/go env GOMODCACHE')" >> "$GITHUB_OUTPUT"
+        echo "cache=$(su ${RUN_AS_USER} -c '/opt/hostedtoolcache/go/${GO_VERSION}/x64/bin/go env GOCACHE')" >> "$GITHUB_OUTPUT"
+      env:
+        RUN_AS_USER: ${{ inputs.username }}
+        GO_VERSION: ${{ steps.go-version.outputs.go-version }}
+
+    - name: "Create cache folders with correct permissions (for non-root users)"
+      if: inputs.username != 'root'
+      # when the cache is restored, only the permissions of the last part are restored
+      # so assuming that /home/user exists and we are restoring /home/user/go/pkg/mod,
+      # both folders will have the correct permissions, but
+      # /home/user/go and /home/user/go/pkg might be owned by root
+      run: |
+        su ${RUN_AS_USER} -c 'mkdir -p "${MODCACHE_DIR}" "${CACHE_DIR}"'
+      env:
+        RUN_AS_USER: ${{ inputs.username }}
+        MODCACHE_DIR: ${{ steps.go-environment.outputs.modcache }}
+        CACHE_DIR: ${{ steps.go-environment.outputs.cache }}
+
+    - name: "Restore Go dependencies from cache or mark for later caching"
+      id: cache-deps
+      uses: actions/cache@v4
+      with:
+        key: setup-cache-go-deps-${{ runner.os }}-${{ inputs.username }}-${{ steps.go-version.outputs.go_version }}-${{ hashFiles('go.sum', 'go.mod') }}
+        restore-keys: |
+          setup-cache-go-deps-${{ runner.os }}-${{ inputs.username }}-${{ steps.go-version.outputs.go_version }}-
+          setup-cache-go-deps-${{ runner.os }}-${{ inputs.username }}-
+        path: |
+          ${{ steps.go-environment.outputs.modcache }}
+          ${{ steps.go-environment.outputs.cache }}

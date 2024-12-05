@@ -387,3 +387,33 @@ func TestGetAllBranches(t *testing.T) {
 
 	assert.Equal(t, []string{"branch1", "branch2", "master"}, branches)
 }
+
+func Test_parseSubmoduleContent(t *testing.T) {
+	submoduleFiles := []struct {
+		fileContent  string
+		expectedPath string
+		expectedURL  string
+	}{
+		{
+			fileContent: `[submodule "jakarta-servlet"]
+url = ../../ALP-pool/jakarta-servlet
+path = jakarta-servlet`,
+			expectedPath: "jakarta-servlet",
+			expectedURL:  "../../ALP-pool/jakarta-servlet",
+		},
+		{
+			fileContent: `[submodule "jakarta-servlet"]
+path = jakarta-servlet
+url = ../../ALP-pool/jakarta-servlet`,
+			expectedPath: "jakarta-servlet",
+			expectedURL:  "../../ALP-pool/jakarta-servlet",
+		},
+	}
+	for _, kase := range submoduleFiles {
+		submodule, err := parseSubmoduleContent([]byte(kase.fileContent))
+		require.NoError(t, err)
+		v, ok := submodule.Get(kase.expectedPath)
+		assert.True(t, ok)
+		assert.Equal(t, kase.expectedURL, v)
+	}
+}

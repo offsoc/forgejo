@@ -304,6 +304,10 @@ func Create(ctx *context.APIContext) {
 	//     "$ref": "#/responses/Repository"
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "409":
 	//     description: The repository with the same name already exists.
 	//   "413":

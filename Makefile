@@ -18,7 +18,7 @@ DIST := dist
 DIST_DIRS := $(DIST)/binaries $(DIST)/release
 IMPORT := code.gitea.io/gitea
 
-GO ?= go
+GO ?= $(shell go env GOROOT)/bin/go
 SHASUM ?= shasum -a 256
 HAS_GO := $(shell hash $(GO) > /dev/null 2>&1 && echo yes)
 COMMA := ,
@@ -49,7 +49,7 @@ GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasour
 DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.26.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
 GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.16.2 # renovate: datasource=go
-RENOVATE_NPM_PACKAGE ?= renovate@39.19.1 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
+RENOVATE_NPM_PACKAGE ?= renovate@39.42.4 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
 
 # https://github.com/disposable-email-domains/disposable-email-domains/commits/main/
 DISPOSABLE_EMAILS_SHA ?= 0c27e671231d27cf66370034d7f6818037416989 # renovate: ...
@@ -620,7 +620,7 @@ tidy-check: tidy
 go-licenses: $(GO_LICENSE_FILE)
 
 $(GO_LICENSE_FILE): go.mod go.sum
-	-$(shell $(GO) env GOROOT)/bin/go run $(GO_LICENSES_PACKAGE) save . --force --ignore code.gitea.io/gitea --save_path=$(GO_LICENSE_TMP_DIR) 2>/dev/null
+	-$(GO) run $(GO_LICENSES_PACKAGE) save . --force --ignore code.gitea.io/gitea --save_path=$(GO_LICENSE_TMP_DIR) 2>/dev/null
 	$(GO) run build/generate-go-licenses.go $(GO_LICENSE_TMP_DIR) $(GO_LICENSE_FILE)
 	@rm -rf $(GO_LICENSE_TMP_DIR)
 
@@ -920,7 +920,7 @@ release-docs: | $(DIST_DIRS) docs
 .PHONY: reproduce-build
 reproduce-build:
 # Start building the Dockerfile with the RELEASE_VERSION tag set. GOPROXY is set
-# for convience, because the default of the Dockerfile is `direct` which can be
+# for convenience, because the default of the Dockerfile is `direct` which can be
 # quite slow.
 	@docker build --build-arg="RELEASE_VERSION=$(RELEASE_VERSION)" --build-arg="GOPROXY=$(shell $(GO) env GOPROXY)" --tag "forgejo-reproducibility" .
 	@id=$$(docker create forgejo-reproducibility); \

@@ -65,6 +65,14 @@ func (g *GitHubLegacyCalloutTransformer) Transform(node *ast.Document, reader te
 			attentionParagraph.AppendChild(attentionParagraph, calloutNode)
 			firstParagraph.Parent().InsertBefore(firstParagraph.Parent(), firstParagraph, attentionParagraph)
 			firstParagraph.RemoveChild(firstParagraph, calloutNode)
+
+			// Remove softbreak line if there's one.
+			if firstParagraph.ChildCount() >= 1 {
+				softBreakNode, ok := firstParagraph.FirstChild().(*ast.Text)
+				if ok && softBreakNode.SoftLineBreak() {
+					firstParagraph.RemoveChild(firstParagraph, softBreakNode)
+				}
+			}
 		}
 
 		return ast.WalkContinue, nil

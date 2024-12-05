@@ -1358,6 +1358,8 @@ func Routes() *web.Route {
 					m.Get("/{branch}", reqRepoReader(unit.TypeCode), repo.SyncForkBranchInfo)
 					m.Post("/{branch}", mustNotBeArchived, reqRepoWriter(unit.TypeCode), repo.SyncForkBranch)
 				})
+
+				m.Get("/{ball_type:tarball|zipball|bundle}/*", reqRepoReader(unit.TypeCode), repo.DownloadArchive)
 			}, repoAssignment(), checkTokenPublicOnly())
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository))
 

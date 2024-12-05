@@ -408,18 +408,42 @@ func DeleteWiki(ctx context.Context, repo *repo_model.Repository) error {
 	return nil
 }
 
-func SearchWikiContents(ctx context.Context, repo *repo_model.Repository, keyword string) ([]*git.GrepResult, error) {
+type SearchContentsResult struct {
+	*git.GrepResult
+	Title string
+}
+
+func SearchWikiContents(ctx context.Context, repo *repo_model.Repository, keyword string) ([]SearchContentsResult, error) {
 	gitRepo, err := git.OpenRepository(ctx, repo.WikiPath())
 	if err != nil {
 		return nil, err
 	}
 	defer gitRepo.Close()
 
-	return git.GrepSearch(ctx, gitRepo, keyword, git.GrepOptions{
+	grepRes, err := git.GrepSearch(ctx, gitRepo, keyword, git.GrepOptions{
 		ContextLineNumber: 0,
 		Mode:              git.FixedAnyGrepMode,
 		RefName:           repo.GetWikiBranchName(),
 		MaxResultLimit:    10,
 		MatchesPerFile:    3,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]SearchContentsResult, 0, len(grepRes))
+	for _, entry := range grepRes {
+		wp, err := GitPathToWebPath(entry.Filename)
+		if err != nil {
+			return nil, err
+		}
+		_, title := WebPathToUserTitle(wp)
+
+		res = append(res, SearchContentsResult{
+			GrepResult: entry,
+			Title:      title,
+		})
+	}
+
+	return res, nil
 }

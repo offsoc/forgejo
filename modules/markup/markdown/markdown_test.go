@@ -1356,4 +1356,10 @@ func TestCallout(t *testing.T) {
 	}
 
 	test(">\n0", "<blockquote>\n</blockquote>\n<p>0</p>")
+	test("> **Warning**\n> Bad stuff is brewing here", `<blockquote class="attention-header attention-warning"><p class="attention-title"><strong class="attention-warning">Warning</strong></p>
+<p>Bad stuff is brewing here</p>
+</blockquote>`)
+	test("> [!WARNING]\n> Bad stuff is brewing here", `<blockquote class="attention-header attention-warning"><p class="attention-title"><strong class="attention-warning">Warning</strong></p>
+<p>Bad stuff is brewing here</p>
+</blockquote>`)
 }

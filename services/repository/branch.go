@@ -479,7 +479,7 @@ func DeleteBranch(ctx context.Context, doer *user_model.User, repo *repo_model.R
 	return nil
 }
 
-// DeleteBranchAfterMerge deletes the head branch after a PR was merged assiociated with the head branch.
+// DeleteBranchAfterMerge deletes the head branch after a PR was merged associated with the head branch.
 func DeleteBranchAfterMerge(ctx context.Context, doer *user_model.User, pr *issues_model.PullRequest, headRepo *git.Repository) error {
 	// Don't cleanup when there are other PR's that use this branch as head branch.
 	exist, err := issues_model.HasUnmergedPullRequestsByHeadInfo(ctx, pr.HeadRepoID, pr.HeadBranch)

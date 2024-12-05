@@ -120,7 +120,7 @@ because it might only look at file changes in your latest commit.
 ### Run e2e tests with another database
 
 This approach is not currently used,
-neither in the CI/CD nor by core contributors on their lcoal machines.
+neither in the CI/CD nor by core contributors on their local machines.
 It is still documented for the sake of completeness:
 You can also perform e2e tests using MariaDB/MySQL or PostgreSQL if you want.
 
@@ -161,13 +161,13 @@ make test-e2e-sqlite#example
 > This is not currently used by most Forgejo contributors.
 > Your help to improve the situation and allow for visual testing is appreciated.
 
-Although the main goal of e2e is assertion testing, we have added a framework for visual regress testing. If you are working on front-end features, please use the following:
- - Check out `main`, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1` to generate outputs. This will initially fail, as no screenshots exist. You can run the e2e tests again to assert it passes.
- - Check out your branch, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1`. You should be able to assert you front-end changes don't break any other tests unintentionally.
+Although the main goal of e2e is assertion testing, we have added a framework for visual regression testing. If you are working on front-end features, please use the following:
+ - Check out `main`, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1` to generate outputs. This will initially fail, as no screenshots exist. You can run the e2e tests again to assert that it passes.
+ - Check out your branch, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1`. You should be able to assert that your front-end changes don't break any other tests unintentionally.
 
-VISUAL_TEST=1 will create screenshots in tests/e2e/test-snapshots. The test will fail the first time this is enabled (until we get visual test image persistence figured out), because it will be testing against an empty screenshot folder.
+`VISUAL_TEST=1` will create screenshots in tests/e2e/test-snapshots. The test will fail the first time this is enabled (until we get visual test image persistence figured out), because it will be testing against an empty screenshot folder.
 
-ACCEPT_VISUAL=1 will overwrite the snapshot images with new images.
+`ACCEPT_VISUAL=1` will overwrite the snapshot images with new images.
 
 
 ## Tips and tricks
@@ -267,8 +267,8 @@ Run `make lint-frontend-fix`.
 ### Define new repos
 
 Take a look at `declare_repos_test.go` to see how to add your repositories.
-Feel free to improve the logic used there if you need more advanced functionality
-(it is a simplified version of the code used in the integration tests).
+Feel free to improve the logic used there if you need more advanced functionality,
+it is a simplified version of the code used in the integration tests.
 
 ### Accessibility testing
 
@@ -280,8 +280,7 @@ Take a look at `shared/forms.ts` and some other places for inspiration.
 ### List related files coverage
 
 To speed up the CI pipelines and avoid running expensive tests too often,
-only a selection of tests is run by default,
-based on the changed files.
+only a selection of tests is run by default, based on the changed files.
 
 At the top of each playwright test file,
 list the files or file patterns that are covered by your test.
@@ -297,7 +296,7 @@ you won't detect broken visual appearance and there is little reason to watch CS
 
 However, if your test also checks that an element is correctly positioned
 (e.g. that it does not overflow the page),
-or has accessibiltiy properties (includes colour contrast),
+or has accessibility properties (includes colour contrast),
 also list stylesheets that define the behaviour your test depends on.
 
 Watching the place that generate the selectors you use
@@ -305,8 +304,7 @@ Watching the place that generate the selectors you use
 is a must, to ensure that someone modifying the markup notices that your selectors fail
 (e.g. because an id or class was renamed).
 
-If you are unsure about the exact set of files,
-feel free to ask other contributors.
+If you are unsure about the exact set of files, feel free to ask other contributors.
 
 #### How to specify the patterns?
 
