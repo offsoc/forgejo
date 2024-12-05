@@ -7,7 +7,6 @@ package auth
 import (
 	"context"
 	"net/http"
-	"slices"
 	"strings"
 	"time"
 
@@ -27,72 +26,33 @@ var (
 	_ Method = &OAuth2{}
 )
 
-// grantAdditionalScopes returns valid scopes coming from grant
-func grantAdditionalScopes(grantScopes string) string {
-	// scopes_supported from templates/user/auth/oidc_wellknown.tmpl
-	scopesSupported := []string{
-		"openid",
-		"profile",
-		"email",
-		"groups",
-	}
-
-	var apiTokenScopes []string
-	for _, apiTokenScope := range strings.Split(grantScopes, " ") {
-		if slices.Index(scopesSupported, apiTokenScope) == -1 {
-			apiTokenScopes = append(apiTokenScopes, apiTokenScope)
-		}
-	}
-
-	if len(apiTokenScopes) == 0 {
-		return ""
-	}
-
-	var additionalGrantScopes []string
-	allScopes := auth_model.AccessTokenScope("all")
-
-	for _, apiTokenScope := range apiTokenScopes {
-		grantScope := auth_model.AccessTokenScope(apiTokenScope)
-		if ok, _ := allScopes.HasScope(grantScope); ok {
-			additionalGrantScopes = append(additionalGrantScopes, apiTokenScope)
-		} else if apiTokenScope == "public-only" {
-			additionalGrantScopes = append(additionalGrantScopes, apiTokenScope)
-		}
-	}
-	if len(additionalGrantScopes) > 0 {
-		return strings.Join(additionalGrantScopes, ",")
-	}
-
-	return ""
-}
-
-// CheckOAuthAccessToken returns uid of user from oauth token
-// + non default openid scopes requested
-func CheckOAuthAccessToken(ctx context.Context, accessToken string) (int64, string) {
+// GetOAuthAccessTokenScopeAndUserID returns access token scope and user id
+func GetOAuthAccessTokenScopeAndUserID(ctx context.Context, accessToken string) (auth_model.AccessTokenScope, int64) {
+	var accessTokenScope auth_model.AccessTokenScope
 	if !setting.OAuth2.Enabled {
-		return 0, ""
+		return accessTokenScope, 0
 	}
 	// JWT tokens require a "."
 	if !strings.Contains(accessToken, ".") {
-		return 0, ""
+		return accessTokenScope, 0
 	}
 	token, err := oauth2_provider.ParseToken(accessToken, oauth2_provider.DefaultSigningKey)
 	if err != nil {
 		log.Trace("oauth2.ParseToken: %v", err)
-		return 0, ""
+		return accessTokenScope, 0
 	}
 	var grant *auth_model.OAuth2Grant
 	if grant, err = auth_model.GetOAuth2GrantByID(ctx, token.GrantID); err != nil || grant == nil {
-		return 0, ""
+		return accessTokenScope, 0
 	}
 	if token.Kind != oauth2_provider.KindAccessToken {
-		return 0, ""
+		return accessTokenScope, 0
 	}
 	if token.ExpiresAt.Before(time.Now()) || token.IssuedAt.After(time.Now()) {
-		return 0, ""
+		return accessTokenScope, 0
 	}
-	grantScopes := grantAdditionalScopes(grant.Scope)
-	return grant.UserID, grantScopes
+	accessTokenScope = oauth2_provider.GrantAdditionalScopes(grant.Scope)
+	return accessTokenScope, grant.UserID
 }
 
 // CheckTaskIsRunning verifies that the TaskID corresponds to a running task
@@ -160,14 +120,10 @@ func (o *OAuth2) userIDFromToken(ctx context.Context, tokenSHA string, store Dat
 		}
 
 		// Otherwise, check if this is an OAuth access token
-		uid, grantScopes := CheckOAuthAccessToken(ctx, tokenSHA)
+		accessTokenScope, uid := GetOAuthAccessTokenScopeAndUserID(ctx, tokenSHA)
 		if uid != 0 {
 			store.GetData()["IsApiToken"] = true
-			if grantScopes != "" {
-				store.GetData()["ApiTokenScope"] = auth_model.AccessTokenScope(grantScopes)
-			} else {
-				store.GetData()["ApiTokenScope"] = auth_model.AccessTokenScopeAll // fallback to all
-			}
+			store.GetData()["ApiTokenScope"] = accessTokenScope
 		}
 		return uid
 	}
