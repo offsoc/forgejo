@@ -10,7 +10,7 @@ runs:
         adduser --quiet --comment forgejo --disabled-password forgejo || true
         chown -R forgejo:forgejo .
 
-    - uses: https://codeberg.org/fnetx/setup-cache-go@4b50dd28b1068fa06d433c5fabed3f6f4d4ccddf
+    - uses: ./.forgejo/workflows-composite/setup-cache-go
       with:
         username: forgejo
 

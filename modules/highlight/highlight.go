@@ -137,7 +137,8 @@ func CodeFromLexer(lexer chroma.Lexer, code string) template.HTML {
 // For the case where Enry recognizes the language, but doesn't use the naming
 // that Chroma expects.
 var normalizeEnryToChroma = map[string]string{
-	"F#": "FSharp",
+	"F#":                "FSharp",
+	"Gradle Kotlin DSL": "Kotlin",
 }
 
 // File returns a slice of chroma syntax highlighted HTML lines of code and the matched lexer name

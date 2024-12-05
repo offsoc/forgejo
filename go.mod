@@ -1,6 +1,6 @@
 module code.gitea.io/gitea
 
-go 1.23.1
+go 1.23
 
 toolchain go1.23.4
 
@@ -104,12 +104,12 @@ require (
 	github.com/yuin/goldmark v1.7.8
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	go.uber.org/mock v0.4.0
-	golang.org/x/crypto v0.29.0
-	golang.org/x/image v0.21.0
+	golang.org/x/crypto v0.30.0
+	golang.org/x/image v0.23.0
 	golang.org/x/net v0.31.0
 	golang.org/x/oauth2 v0.23.0
-	golang.org/x/sys v0.27.0
-	golang.org/x/text v0.20.0
+	golang.org/x/sys v0.28.0
+	golang.org/x/text v0.21.0
 	golang.org/x/tools v0.26.0
 	google.golang.org/grpc v1.68.0
 	google.golang.org/protobuf v1.35.1
@@ -284,7 +284,7 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
 	golang.org/x/mod v0.21.0 // indirect
-	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
