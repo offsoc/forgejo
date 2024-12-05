@@ -36,6 +36,7 @@ func Search(ctx *context.APIContext) {
 	// - name: sort
 	//   in: query
 	//   description: sort gists by attribute
+	//   type: string
 	//   enum: [newest, oldest, alphabetically, reversealphabetically]
 	// - name: page
 	//   in: query
@@ -94,6 +95,8 @@ func Create(ctx *context.APIContext) {
 	//     "$ref": "#/responses/Gist"
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 	//   "422":
@@ -211,6 +214,8 @@ func UpdateFiles(ctx *context.APIContext) {
 	//     "$ref": "#/responses/empty"
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
@@ -253,6 +258,8 @@ func Delete(ctx *context.APIContext) {
 	// responses:
 	//   "204":
 	//     "$ref": "#/responses/empty"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 	//   "404":

@@ -14,7 +14,8 @@ type Gist struct {
 	UUID        string `json:"uuid"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Visibility  string `json:"visibility"`
+	// enum: public,hidden,private
+	Visibility string `json:"visibility"`
 	// swagger:strfmt date-time
 	Created time.Time `json:"created_at"`
 	// swagger:strfmt date-time

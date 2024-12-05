@@ -1628,8 +1628,8 @@ func Routes() *web.Route {
 				m.Get("/files", gist.GetFiles)
 				m.Group("", func() {
 					m.Delete("", gist.Delete)
-					m.Post("/files", reqToken(), bind(api.UpdateGistFilesOption{}), gist.UpdateFiles)
-				}, reqGistOwner())
+					m.Post("/files", bind(api.UpdateGistFilesOption{}), gist.UpdateFiles)
+				}, reqToken(), reqGistOwner())
 			}, gistAssignment())
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryGist))
 

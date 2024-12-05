@@ -1620,6 +1620,9 @@
           "400": {
             "$ref": "#/responses/error"
           },
+          "401": {
+            "$ref": "#/responses/unauthorized"
+          },
           "403": {
             "$ref": "#/responses/forbidden"
           },
@@ -1660,6 +1663,7 @@
               "alphabetically",
               "reversealphabetically"
             ],
+            "type": "string",
             "description": "sort gists by attribute",
             "name": "sort",
             "in": "query"
@@ -1743,6 +1747,9 @@
           "204": {
             "$ref": "#/responses/empty"
           },
+          "401": {
+            "$ref": "#/responses/unauthorized"
+          },
           "403": {
             "$ref": "#/responses/forbidden"
           },
@@ -1817,6 +1824,9 @@
           },
           "400": {
             "$ref": "#/responses/error"
+          },
+          "401": {
+            "$ref": "#/responses/unauthorized"
           },
           "403": {
             "$ref": "#/responses/forbidden"
@@ -24299,6 +24309,11 @@
         },
         "visibility": {
           "type": "string",
+          "enum": [
+            "public",
+            "hidden",
+            "private"
+          ],
           "x-go-name": "Visibility"
         }
       },
