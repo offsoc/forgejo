@@ -1654,8 +1654,6 @@ func registerRoutes(m *web.Route) {
 		m.Get("/new", user.NewAvailable)
 	}, reqSignIn)
 
-	m.Get("/relative-time-constants", misc.RelativeTimeConstants)
-
 	if setting.API.EnableSwagger {
 		m.Get("/swagger.v1.json", SwaggerV1Json)
 	}

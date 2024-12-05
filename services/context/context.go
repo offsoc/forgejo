@@ -208,6 +208,21 @@ func Contexter() func(next http.Handler) http.Handler {
 
 			ctx.Data["AllLangs"] = translation.AllLangs()
 
+			ctx.PageData["DATETIMESTRING_FUTURE"] = ctx.Locale.TrString("tool.future")
+			ctx.PageData["DATETIMESTRING_NOW"] = ctx.Locale.TrString("tool.now")
+			ctx.PageData["DATETIMESTRING_1MIN"] = ctx.Locale.TrString("tool.ago_1min")
+			ctx.PageData["DATETIMESTRING_1HOUR"] = ctx.Locale.TrString("tool.ago_1hour")
+			ctx.PageData["DATETIMESTRING_1DAY"] = ctx.Locale.TrString("tool.ago_1day")
+			ctx.PageData["DATETIMESTRING_1WEEK"] = ctx.Locale.TrString("tool.ago_1week")
+			ctx.PageData["DATETIMESTRING_1MONTH"] = ctx.Locale.TrString("tool.ago_1month")
+			ctx.PageData["DATETIMESTRING_1YEAR"] = ctx.Locale.TrString("tool.ago_1year")
+			ctx.PageData["DATETIMESTRING_MINS"] = ctx.Locale.TrString("tool.ago_mins")
+			ctx.PageData["DATETIMESTRING_HOURS"] = ctx.Locale.TrString("tool.ago_hours")
+			ctx.PageData["DATETIMESTRING_DAYS"] = ctx.Locale.TrString("tool.ago_days")
+			ctx.PageData["DATETIMESTRING_WEEKS"] = ctx.Locale.TrString("tool.ago_weeks")
+			ctx.PageData["DATETIMESTRING_MONTH"] = ctx.Locale.TrString("tool.ago_months")
+			ctx.PageData["DATETIMESTRING_YEARS"] = ctx.Locale.TrString("tool.ago_years")
+
 			next.ServeHTTP(ctx.Resp, ctx.Req)
 		})
 	}

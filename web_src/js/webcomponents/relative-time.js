@@ -1,23 +1,4 @@
-import {GET} from '../modules/fetch.js';
-
-// English default values, will be overwritten with translated texts from the server.
-/* eslint-disable-next-line prefer-const */
-let DATETIMESTRINGS = {
-  'future': 'in the future',
-  'now': 'now',
-  '1min': '1 minute ago',
-  'mins': (minutes) => `${minutes} minutes ago`,
-  '1hour': '1 hour ago',
-  'hour': (hours) => `${hours} hours ago`,
-  '1day': 'yesterday',
-  'days': (days) => `${days} days ago`,
-  '1week': 'last week',
-  'weeks': (weeks) => `${weeks} weeks ago`,
-  '1month': 'last month',
-  'months': (months) => `${months} months ago`,
-  '1year': 'last year',
-  'years': (years) => `${years} years ago`,
-};
+const {pageData} = window.config;
 
 const ABSOLUTE_DATETIME_FORMAT = new Intl.DateTimeFormat(navigator.language, {
   year: 'numeric',
@@ -29,8 +10,8 @@ const ABSOLUTE_DATETIME_FORMAT = new Intl.DateTimeFormat(navigator.language, {
 });
 
 /** Update the displayed text of the given relative-time DOM element with its human-readable, localized relative time string. */
-function UpdateRelativeTime(object) {
-  if (!(object && object.attributes.datetime && object.attributes.datetime.nodeValue)) {
+function DoUpdateRelativeTime(object) {
+  if (!(object?.attributes?.datetime?.nodeValue)) {
     return;  // Object does not contain a datetime.
   }
 
@@ -39,68 +20,68 @@ function UpdateRelativeTime(object) {
   const milliseconds = now - then;
 
   if (Number.isNaN(milliseconds)) {
-    return;  // Datetime is invalid.
+    return null;  // Datetime is invalid.
   }
 
   object.setAttribute('data-tooltip-content', ABSOLUTE_DATETIME_FORMAT.format(then));
 
   if (milliseconds < 0) {
     // Datetime is in the future.
-    object.textContent = DATETIMESTRINGS['future'];
-    return;
+    object.textContent = pageData.DATETIMESTRING_FUTURE;
+    return 60 * 1000;
   }
 
   const minutes = Math.floor(milliseconds / 60000);
   if (minutes < 1) {
     // Datetime is very recent.
-    object.textContent = DATETIMESTRINGS['now'];
-    return;
+    object.textContent = pageData.DATETIMESTRING_NOW;
+    return 30 * 1000;
   }
   if (minutes === 1) {
     // Datetime is one minute ago.
-    object.textContent = DATETIMESTRINGS['1min'];
-    return;
+    object.textContent = pageData.DATETIMESTRING_1MIN;
+    return 60 * 1000;
   }
   if (minutes < 60) {
     // Datetime is several minutes but less than an hour ago.
-    object.textContent = DATETIMESTRINGS['mins'](minutes);
-    return;
+    object.textContent = pageData.DATETIMESTRING_MINS.replace('%d', minutes);
+    return 60 * 1000;
   }
 
   const hours = Math.floor(minutes / 60);
   if (hours === 1) {
     // Datetime is one hour ago.
-    object.textContent = DATETIMESTRINGS['1hour'];
-    return;
+    object.textContent = pageData.DATETIMESTRING_1HOUR;
+    return 60 * 60 * 1000;
   }
   if (hours < 24) {
     // Datetime is several hours but less than a day ago.
-    object.textContent = DATETIMESTRINGS['hours'](hours);
-    return;
+    object.textContent = pageData.DATETIMESTRING_HOURS.replace('%d', hours);
+    return 60 * 60 * 1000;
   }
 
   const days = Math.floor(hours / 24);
   if (days === 1) {
     // Datetime is one day ago.
-    object.textContent = DATETIMESTRINGS['1day'];
-    return;
+    object.textContent = pageData.DATETIMESTRING_1DAY;
+    return 24 * 60 * 60 * 1000;
   }
   if (days < 7) {
     // Datetime is several days but less than a week ago.
-    object.textContent = DATETIMESTRINGS['days'](days);
-    return;
+    object.textContent = pageData.DATETIMESTRING_DAYS.replace('%d', days);
+    return 24 * 60 * 60 * 1000;
   }
   if (days < 30) {
     // Datetime is at least one week but less than a month ago.
     const weeks = Math.floor(days / 7);
     if (weeks === 1) {
       // Datetime is one week ago.
-      object.textContent = DATETIMESTRINGS['1week'];
-      return;
+      object.textContent = pageData.DATETIMESTRING_1WEEK;
+      return 7 * 24 * 60 * 60 * 1000;
     }
     // Datetime is several weeks ago (but less than a month).
-    object.textContent = DATETIMESTRINGS['weeks'](weeks);
-    return;
+    object.textContent = pageData.DATETIMESTRING_WEEKS.replace('%d', weeks);
+    return 7 * 24 * 60 * 60 * 1000;
   }
 
   if (days < 365) {
@@ -108,22 +89,29 @@ function UpdateRelativeTime(object) {
     const months = Math.floor(days / 30);
     if (months === 1) {
       // Datetime is one month ago.
-      object.textContent = DATETIMESTRINGS['1month'];
-      return;
+      object.textContent = pageData.DATETIMESTRING_1MONTH;
+      return 30 * 24 * 60 * 60 * 1000;
     }
     // Datetime is several months ago (but less than a year).
-    object.textContent = DATETIMESTRINGS['months'](months);
-    return;
+    object.textContent = pageData.DATETIMESTRING_MONTHS.replace('%d', months);
+    return 30 * 24 * 60 * 60 * 1000;
   }
 
   const years = Math.floor(days / 365);
   if (years === 1) {
     // Datetime is one year ago.
-    object.textContent = DATETIMESTRINGS['1year'];
-    return;
+    object.textContent = pageData.DATETIMESTRING_1YEAR;
+    return 365 * 24 * 60 * 60 * 1000;
   }
   // Datetime is more than a year ago.
-  object.textContent = DATETIMESTRINGS['years'](years);
+  object.textContent = pageData.DATETIMESTRING_YEARS.replace('%d', years);
+  return 365 * 24 * 60 * 60 * 1000;
+}
+
+/** Update the displayed text of one relative-time DOM element with its human-readable, localized relative time string. */
+function UpdateRelativeTime(object) {
+  const next = DoUpdateRelativeTime(object);
+  if (next !== null) setTimeout(() => { UpdateRelativeTime(object) }, next);
 }
 
 /** Update the displayed text of all relative-time DOM elements with their respective human-readable, localized relative time string. */
@@ -131,23 +119,4 @@ function UpdateAllRelativeTimes() {
   for (const object of document.querySelectorAll('relative-time')) UpdateRelativeTime(object);
 }
 
-// Immediately update all relative-time elements and refresh them every 60 seconds.
-async function UpdateAllRelativeTimesFirstTime() {
-  try {
-    const response = await GET('/relative-time-constants');
-    if (response.ok) {
-      const run = await response.text();
-      /* eslint-disable-next-line no-eval */
-      eval(run);
-    } else {
-      console.error('Failed to query relative datetime string, HTTP status code', response.status);
-    }
-  } catch (error) {
-    console.error('Failed to query relative datetime string; error:', error);
-  }
-
-  UpdateAllRelativeTimes();
-  setInterval(UpdateAllRelativeTimes, 60 * 1000);
-}
-
-UpdateAllRelativeTimesFirstTime();
+document.addEventListener('DOMContentLoaded', UpdateAllRelativeTimes);
