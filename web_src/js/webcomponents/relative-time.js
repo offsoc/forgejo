@@ -12,7 +12,7 @@ const ABSOLUTE_DATETIME_FORMAT = new Intl.DateTimeFormat(navigator.language, {
 /** Update the displayed text of the given relative-time DOM element with its human-readable, localized relative time string. */
 function DoUpdateRelativeTime(object) {
   if (!(object?.attributes?.datetime?.nodeValue)) {
-    return;  // Object does not contain a datetime.
+    return null;  // Object does not contain a datetime.
   }
 
   const then = Date.parse(object.attributes.datetime.nodeValue);
