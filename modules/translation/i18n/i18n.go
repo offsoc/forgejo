@@ -11,6 +11,7 @@ import (
 var DefaultLocales = NewLocaleStore()
 
 type Locale interface {
+	Language() string
 	// TrString translates a given key and arguments for a language
 	TrString(trKey string, trArgs ...any) string
 	// TrHTML translates a given key and arguments for a language, string arguments are escaped to HTML
@@ -25,6 +26,8 @@ type LocaleStore interface {
 
 	// SetDefaultLang sets the default language to fall back to
 	SetDefaultLang(lang string)
+	// GetDefaultLang returns the name of the default language to fall back to
+	GetDefaultLang() string
 	// ListLangNameDesc provides paired slices of language names to descriptors
 	ListLangNameDesc() (names, desc []string)
 	// Locale return the locale for the provided language or the default language if not found

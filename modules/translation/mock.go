@@ -38,3 +38,7 @@ func (l MockLocale) TrSize(s int64) ReadableSize {
 func (l MockLocale) PrettyNumber(v any) string {
 	return fmt.Sprint(v)
 }
+
+func (l MockLocale) HasKey(key string) bool {
+	return true
+}

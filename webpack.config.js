@@ -80,6 +80,7 @@ if ('ENABLE_SOURCEMAP' in env) {
 // define which web components we use for Vue to not interpret them as Vue components
 const webComponents = new Set([
   // our own, in web_src/js/webcomponents
+  'i18n',
   'overflow-menu',
   'origin-url',
   'absolute-date',

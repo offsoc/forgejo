@@ -92,6 +92,10 @@ func (store *localeStore) SetDefaultLang(lang string) {
 	store.defaultLang = lang
 }
 
+func (store *localeStore) GetDefaultLang() string {
+	return store.defaultLang
+}
+
 // Locale returns the locale for the lang or the default language
 func (store *localeStore) Locale(lang string) (Locale, bool) {
 	l, found := store.localeMap[lang]
@@ -108,6 +112,10 @@ func (store *localeStore) Locale(lang string) (Locale, bool) {
 
 func (store *localeStore) Close() error {
 	return nil
+}
+
+func (l *locale) Language() string {
+	return l.langName
 }
 
 func (l *locale) TrString(trKey string, trArgs ...any) string {

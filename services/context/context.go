@@ -121,6 +121,21 @@ func NewWebContext(base *Base, render Render, session session.Store) *Context {
 	return ctx
 }
 
+func (ctx *Context) AddPluralStringsToPageData(keys []string) {
+	for _, key := range keys {
+		array := strings.Split(ctx.Locale.TrString(key), "|")
+		for i := range array {
+			array[i] = strings.TrimSpace(array[i])
+		}
+
+		if ctx.Locale.HasKey(key) {
+			ctx.PageData["PLURALSTRINGS_LANG"].(map[string][]string)[key] = array
+		} else {
+			ctx.PageData["PLURALSTRINGS_FALLBACK"].(map[string][]string)[key] = array
+		}
+	}
+}
+
 // Contexter initializes a classic context for a request.
 func Contexter() func(next http.Handler) http.Handler {
 	rnd := templates.HTMLRenderer()
@@ -208,20 +223,23 @@ func Contexter() func(next http.Handler) http.Handler {
 
 			ctx.Data["AllLangs"] = translation.AllLangs()
 
+			ctx.PageData["PLURAL_RULE_LANG"] = translation.GetPluralRule(ctx.Locale)
+			ctx.PageData["PLURAL_RULE_FALLBACK"] = translation.GetDefaultPluralRule()
+			ctx.PageData["PLURALSTRINGS_LANG"] = map[string][]string{}
+			ctx.PageData["PLURALSTRINGS_FALLBACK"] = map[string][]string{}
+
+			ctx.AddPluralStringsToPageData([]string{"tool.ago_mins", "tool.ago_hours", "tool.ago_days", "tool.ago_weeks", "tool.ago_months", "tool.ago_years"})
+
 			ctx.PageData["DATETIMESTRING_FUTURE"] = ctx.Locale.TrString("tool.future")
 			ctx.PageData["DATETIMESTRING_NOW"] = ctx.Locale.TrString("tool.now")
-			ctx.PageData["DATETIMESTRING_1MIN"] = ctx.Locale.TrString("tool.ago_1min")
-			ctx.PageData["DATETIMESTRING_1HOUR"] = ctx.Locale.TrString("tool.ago_1hour")
 			ctx.PageData["DATETIMESTRING_1DAY"] = ctx.Locale.TrString("tool.ago_1day")
 			ctx.PageData["DATETIMESTRING_1WEEK"] = ctx.Locale.TrString("tool.ago_1week")
 			ctx.PageData["DATETIMESTRING_1MONTH"] = ctx.Locale.TrString("tool.ago_1month")
 			ctx.PageData["DATETIMESTRING_1YEAR"] = ctx.Locale.TrString("tool.ago_1year")
-			ctx.PageData["DATETIMESTRING_MINS"] = ctx.Locale.TrString("tool.ago_mins")
-			ctx.PageData["DATETIMESTRING_HOURS"] = ctx.Locale.TrString("tool.ago_hours")
-			ctx.PageData["DATETIMESTRING_DAYS"] = ctx.Locale.TrString("tool.ago_days")
-			ctx.PageData["DATETIMESTRING_WEEKS"] = ctx.Locale.TrString("tool.ago_weeks")
-			ctx.PageData["DATETIMESTRING_MONTH"] = ctx.Locale.TrString("tool.ago_months")
-			ctx.PageData["DATETIMESTRING_YEARS"] = ctx.Locale.TrString("tool.ago_years")
+			ctx.PageData["DATETIMESTRING_2DAY"] = ctx.Locale.TrString("tool.ago_2days")
+			ctx.PageData["DATETIMESTRING_2WEEK"] = ctx.Locale.TrString("tool.ago_2weeks")
+			ctx.PageData["DATETIMESTRING_2MONTH"] = ctx.Locale.TrString("tool.ago_2months")
+			ctx.PageData["DATETIMESTRING_2YEAR"] = ctx.Locale.TrString("tool.ago_2years")
 
 			next.ServeHTTP(ctx.Resp, ctx.Req)
 		})

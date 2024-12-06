@@ -37,6 +37,8 @@ type Locale interface {
 	TrSize(size int64) ReadableSize
 
 	PrettyNumber(v any) string
+
+	HasKey(trKey string) bool
 }
 
 // LangType represents a lang type
@@ -304,6 +306,14 @@ func (l *locale) PrettyNumber(v any) string {
 		}
 	}
 	return l.msgPrinter.Sprintf("%v", number.Decimal(v))
+}
+
+func GetPluralRule(l Locale) int {
+	return GetPluralRuleImpl(l.Language())
+}
+
+func GetDefaultPluralRule() int {
+	return GetPluralRuleImpl(i18n.DefaultLocales.GetDefaultLang())
 }
 
 func init() {

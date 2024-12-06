@@ -15,6 +15,10 @@ type KeyLocale struct{}
 
 var _ Locale = (*KeyLocale)(nil)
 
+func (k *KeyLocale) Language() string {
+	return "dummy"
+}
+
 // HasKey implements Locale.
 func (k *KeyLocale) HasKey(trKey string) bool {
 	return true
