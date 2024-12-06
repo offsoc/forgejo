@@ -246,6 +246,7 @@ code.gitea.io/gitea/modules/translation
 	MockLocale.TrN
 	MockLocale.TrSize
 	MockLocale.PrettyNumber
+	MockLocale.HasKey
 
 code.gitea.io/gitea/modules/util
 	OptionalArg
