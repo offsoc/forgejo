@@ -1,6 +1,10 @@
 // Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
+// Some useful links:
+// https://www.unicode.org/cldr/cldr-aux/charts/22/supplemental/language_plural_rules.html
+// https://www.gnu.org/software/gettext/manual/gettext.html#index-ngettext
+
 package translation
 
 import (
@@ -33,7 +37,7 @@ func GetPluralRuleImpl(langName string) int {
 	case "en", "de", "nds", "nl", "sv", "da", "no", "nn", "nb", "fo", "es", "it", "el", "bg", "fi", "et", "he", "id", "eo", "hu", "tr":
 		return PluralRuleDefault
 
-	case "fr", "pt":
+	case "fil", "fr", "pt":
 		return PluralRuleFrench
 
 	case "lv":
@@ -56,6 +60,9 @@ func GetPluralRuleImpl(langName string) int {
 
 	case "cs", "sk":
 		return PluralRuleCzech
+
+	case "fa", "ja", "ko", "zh":
+		return PluralRuleOne
 
 	default:
 		break
