@@ -14,7 +14,7 @@ jobs:
 
       secrets.RELEASE_NOTES_ASSISTANT_TOKEN != '' &&
 
-      github.event_name == 'pull_request_target' &&
+      github.event_name == 'pull_request' &&
       contains(github.event.pull_request.labels.*.name, 'worth a release-note') &&
       (
         github.event.action == 'label_updated' ||
