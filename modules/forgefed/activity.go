@@ -4,10 +4,8 @@
 package forgefed
 
 import (
-	"fmt"
-	"time"
-
 	"code.gitea.io/gitea/modules/validation"
+	"time"
 
 	ap "github.com/go-ap/activitypub"
 )
@@ -40,21 +38,18 @@ func NewForgeUndoLike(actorIRI, objectIRI string, startTime time.Time) (ForgeUnd
 	result := ForgeUndoLike{}
 	result.Type = ap.UndoType
 	result.Actor = ap.IRI(actorIRI) // That's us, a User
-	result.Object, _ = NewForgeLike(actorIRI, objectIRI, startTime)
+	like, _ := NewForgeLike(actorIRI, objectIRI, startTime)
+	result.Object = &like.Activity
 	result.StartTime = startTime
-	/*if valid, err := validation.IsValid(result); !valid {
+	if valid, err := validation.IsValid(result); !valid {
 		return ForgeUndoLike{}, err
-	}*/
+	}
 	return result, nil
 }
 
 func (like ForgeLike) MarshalJSON() ([]byte, error) {
 	return like.Activity.MarshalJSON()
 }
-
-// func (like ForgeLike) MarshalJSON() ([]byte, error) {
-// 	return like.Activity.MarshalJSON()
-// }
 
 func (like *ForgeLike) UnmarshalJSON(data []byte) error {
 	return like.Activity.UnmarshalJSON(data)
@@ -72,19 +67,22 @@ func (like ForgeLike) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(string(like.Type), "type")...)
 	result = append(result, validation.ValidateOneOf(string(like.Type), []any{"Like"}, "type")...)
+
 	if like.Actor == nil {
 		result = append(result, "Actor should not be nil.")
 	} else {
 		result = append(result, validation.ValidateNotEmpty(like.Actor.GetID().String(), "actor")...)
 	}
+
+	result = append(result, validation.ValidateNotEmpty(like.StartTime.String(), "startTime")...)
+	if like.StartTime.IsZero() {
+		result = append(result, "StartTime was invalid.")
+	}
+
 	if like.Object == nil {
 		result = append(result, "Object should not be nil.")
 	} else {
 		result = append(result, validation.ValidateNotEmpty(like.Object.GetID().String(), "object")...)
-	}
-	result = append(result, validation.ValidateNotEmpty(like.StartTime.String(), "startTime")...)
-	if like.StartTime.IsZero() {
-		result = append(result, "StartTime was invalid.")
 	}
 
 	return result
@@ -97,30 +95,36 @@ func (undo ForgeUndoLike) Validate() []string {
 
 	if undo.Actor == nil {
 		result = append(result, "Actor should not be nil.")
-	}
-
-	fmt.Printf("pre ausgabe %v", undo)
-
-	if undo.Object == nil {
-		result = append(result, "Object should not be nil.")
 	} else {
-		result = append(result, validation.ValidateNotEmpty(string(undo.Object.GetType()), "object.type")...)
-		result = append(result, validation.ValidateOneOf(string(undo.Object.GetType()), []any{"Like"}, "object.type")...)
+		result = append(result, validation.ValidateNotEmpty(undo.Actor.GetID().String(), "actor")...)
 	}
-
-	/*
-			} else {
-			result = append(result, "Object.type should not be empty")
-			//result = append(result, validation.ValidateNotEmpty(undo.Object.GetID().String(), "object")...)
-			//fmt.Printf("inner ausgabe %v", undo.Object)
-		}
-		fmt.Printf("post ausgabe %v", undo.Object)
-	*/
 
 	result = append(result, validation.ValidateNotEmpty(undo.StartTime.String(), "startTime")...)
 	if undo.StartTime.IsZero() {
 		result = append(result, "StartTime was invalid.")
 	}
-	fmt.Printf("result %v\n", result)
+
+	// validate the referenced Activity i.e. the inner Object - which is a Like-Activity but without start time
+	if undo.Object == nil {
+		result = append(result, "object should not be empty.")
+	} else if activity, ok := undo.Object.(*ap.Activity); !ok {
+		result = append(result, "object is not of type Activity")
+	} else {
+
+		result = append(result, validation.ValidateNotEmpty(string(activity.Type), "type")...)
+		result = append(result, validation.ValidateOneOf(string(activity.Type), []any{"Like"}, "type")...)
+
+		if activity.Actor == nil {
+			result = append(result, "Object.Actor should not be nil.")
+		} else {
+			result = append(result, validation.ValidateNotEmpty(activity.Actor.GetID().String(), "actor")...)
+		}
+
+		if activity.Object == nil {
+			result = append(result, "Object.Object should not be nil.")
+		} else {
+			result = append(result, validation.ValidateNotEmpty(activity.Object.GetID().String(), "object")...)
+		}
+	}
 	return result
 }

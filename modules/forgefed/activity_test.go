@@ -261,7 +261,25 @@ func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 	}
 }
 
-func TestActivityValidation(t *testing.T) {
+func getValidationError(subject validation.Validateable, expectedError string) *string {
+	errors := subject.Validate()
+	if len(errors) < 1 {
+		val := "Validation error should have been returned, but was not."
+		return &val
+	} else {
+		var err = errors[0]
+		if err != expectedError {
+			val := fmt.Sprintf("Validation error should be [%v] but was: %v\n", expectedError, err)
+			return &val
+		}
+	}
+	return nil
+}
+
+func Test_ForgeLikeValidation(t *testing.T) {
+
+	// Successful
+
 	sut := new(ForgeLike)
 	sut.UnmarshalJSON([]byte(`{"type":"Like",
 	"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
@@ -271,124 +289,139 @@ func TestActivityValidation(t *testing.T) {
 		t.Errorf("sut expected to be valid: %v\n", sut.Validate())
 	}
 
+	// Errors
+
 	sut.UnmarshalJSON([]byte(`{"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
 	"object":"https://codeberg.org/api/activitypub/repository-id/1",
 	"startTime": "2014-12-31T23:00:00-08:00"}`))
-	if sut.Validate()[0] != "type should not be empty" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+	if err := getValidationError(sut, "type should not be empty"); err != nil {
+		t.Error(err)
 	}
 
 	sut.UnmarshalJSON([]byte(`{"type":"bad-type",
 		"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
 	"object":"https://codeberg.org/api/activitypub/repository-id/1",
 	"startTime": "2014-12-31T23:00:00-08:00"}`))
-	if sut.Validate()[0] != "Value bad-type is not contained in allowed values [Like]" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+	if err := getValidationError(sut, "Value bad-type is not contained in allowed values [Like]"); err != nil {
+		t.Error(err)
 	}
 
 	sut.UnmarshalJSON([]byte(`{"type":"Like",
 		"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
 	"object":"https://codeberg.org/api/activitypub/repository-id/1",
 	"startTime": "not a date"}`))
-	if sut.Validate()[0] != "StartTime was invalid." {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate())
+	if err := getValidationError(sut, "StartTime was invalid."); err != nil {
+		t.Error(err)
 	}
 
 	sut.UnmarshalJSON([]byte(`{"type":"Wrong",
 		"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
 	"object":"https://codeberg.org/api/activitypub/repository-id/1",
 	"startTime": "2014-12-31T23:00:00-08:00"}`))
-	if sut.Validate()[0] != "Value Wrong is not contained in allowed values [Like]" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate())
+	if err := getValidationError(sut, "Value Wrong is not contained in allowed values [Like]"); err != nil {
+		t.Error(err)
 	}
 }
 
 func TestActivityValidationUndo(t *testing.T) {
 	sut := new(ForgeUndoLike)
-	sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
+
+	// Success
+
+	_ = sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
 		`"startTime":"2024-03-27T00:00:00Z",` +
 		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
 		`"object":{` +
-		`"type":"Like",` +
-		`"startTime":"2024-03-27T00:00:00Z",` +
-		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-		`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
+		`  "type":"Like",` +
+		`  "actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+		`  "object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
 	if res, _ := validation.IsValid(sut); !res {
 		t.Errorf("sut expected to be valid: %v\n", sut.Validate())
 	}
 
-	sut.UnmarshalJSON([]byte(`{"startTime":"2024-03-27T00:00:00Z",` +
+	// Errors
+
+	_ = sut.UnmarshalJSON([]byte(`{"startTime":"2024-03-27T00:00:00Z",` +
 		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
 		`"object":{` +
-		`"type":"Like",` +
-		`"startTime":"2024-03-27T00:00:00Z",` +
-		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-		`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
-	if sut.Validate()[0] != "type should not be empty" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+		`  "type":"Like",` +
+		`  "startTime":"2024-03-27T00:00:00Z",` +
+		`  "actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+		`  "object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
+	if err := getValidationError(sut, "type should not be empty"); err != nil {
+		t.Error(*err)
 	}
 
-	sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
+	_ = sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
 		`"startTime":"2024-03-27T00:00:00Z",` +
 		`"object":{` +
-		`"type":"Like",` +
-		`"startTime":"2024-03-27T00:00:00Z",` +
-		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-		`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
-	if sut.Validate()[0] != "Actor should not be nil." {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+		`  "type":"Like",` +
+		`  "startTime":"2024-03-27T00:00:00Z",` +
+		`  "actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+		`  "object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
+	if err := getValidationError(sut, "Actor should not be nil."); err != nil {
+		t.Error(*err)
 	}
 
-	sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
+	_ = sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
 		`"startTime":"2024-03-27T00:00:00Z",` +
 		`"actor":"string",` +
 		`"object":{` +
-		`"type":"Like",` +
-		`"startTime":"2024-03-27T00:00:00Z",` +
-		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-		`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
-	if sut.Validate()[0] != "Actor should not be nil." {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+		`  "type":"Like",` +
+		`  "startTime":"2024-03-27T00:00:00Z",` +
+		`  "actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+		`  "object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
+	if err := getValidationError(sut, "Actor should not be nil."); err != nil {
+		t.Error(*err)
 	}
 
-	sut.UnmarshalJSON([]byte(`{` +
+	_ = sut.UnmarshalJSON([]byte(`{` +
 		`"type":"Undo",` +
 		`"startTime":"2024-03-27T00:00:00Z",` +
 		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1"` +
 		`}`))
-	if sut.Validate()[0] != "Object should not be nil." {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+	if err := getValidationError(sut, "object should not be empty."); err != nil {
+		t.Error(*err)
 	}
 
-	sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
+	_ = sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
 		`"startTime":"2024-03-27T00:00:00Z",` +
 		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
 		`"object":{` +
-		`"startTime":"2024-03-27T00:00:00Z",` +
-		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
-		`"object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
-	if sut.Validate()[0] != "object.type should not be empty" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+		`  "startTime":"2024-03-27T00:00:00Z",` +
+		`  "actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+		`  "object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
+	// Without type object is not parsed as Activity
+	if err := getValidationError(sut, "object is not of type Activity"); err != nil {
+		t.Error(*err)
 	}
 
-	sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
+	_ = sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
 		`"startTime":"2024-03-27T00:00:00Z",` +
 		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
 		`"object":{` +
-		`"type":"Like",` +
-		`"object":""}}`))
-	if len(sut.Validate()) < 1 {
-		t.Errorf("validation error expected but not found.")
-	} else if sut.Validate()[0] != "object.object should not be empty" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+		`  "type":"Like",` +
+		`  "object":""}}`))
+	if err := getValidationError(sut, "Object.Actor should not be nil."); err != nil {
+		t.Error(*err)
 	}
 
+	_ = sut.UnmarshalJSON([]byte(`{"type":"Undo",` +
+		`"startTime":"2024-03-27T00:00:00Z",` +
+		`"actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",` +
+		`"object":{` +
+		`  "type":"Like",` +
+		`  "startTime":"2024-03-27T00:00:00Z",` +
+		`  "actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1"}}`))
+	if err := getValidationError(sut, "Object.Object should not be nil."); err != nil {
+		t.Error(*err)
+	}
 }
 
 func TestActivityValidation_Attack(t *testing.T) {
 	sut := new(ForgeLike)
 	sut.UnmarshalJSON([]byte(`{rubbish}`))
 	if len(sut.Validate()) != 5 {
-		t.Errorf("5 validateion errors expected but was: %v\n", len(sut.Validate()))
+		t.Errorf("5 validation errors expected but was: %v\n", len(sut.Validate()))
 	}
 }
