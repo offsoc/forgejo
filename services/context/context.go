@@ -231,16 +231,13 @@ func Contexter() func(next http.Handler) http.Handler {
 			ctx.AddPluralStringsToPageData([]string{"tool.ago_mins", "tool.ago_hours", "tool.ago_days", "tool.ago_weeks", "tool.ago_months", "tool.ago_years"})
 
 			ctx.PageData["DATETIMESTRINGS"] = map[string]string{
-				"FUTURE":      ctx.Locale.TrString("tool.future"),
-				"NOW":         ctx.Locale.TrString("tool.now"),
-				"AGO_1DAY":    ctx.Locale.TrString("tool.ago_1day"),
-				"AGO_1WEEK":   ctx.Locale.TrString("tool.ago_1week"),
-				"AGO_1MONTH":  ctx.Locale.TrString("tool.ago_1month"),
-				"AGO_1YEAR":   ctx.Locale.TrString("tool.ago_1year"),
-				"AGO_2DAYS":   ctx.Locale.TrString("tool.ago_2days"),
-				"AGO_2WEEKS":  ctx.Locale.TrString("tool.ago_2weeks"),
-				"AGO_2MONTHS": ctx.Locale.TrString("tool.ago_2months"),
-				"AGO_2YEARS":  ctx.Locale.TrString("tool.ago_2years"),
+				"FUTURE": ctx.Locale.TrString("tool.future"),
+				"NOW":    ctx.Locale.TrString("tool.now"),
+			}
+			for _, key := range []string{"tool.ago_1day", "tool.ago_1week", "tool.ago_1month", "tool.ago_1year", "tool.ago_2days", "tool.ago_2weeks", "tool.ago_2months", "tool.ago_2years"} {
+				if ctx.Locale.HasKey(key) {
+					ctx.PageData["DATETIMESTRINGS"].(map[string]string)[key] = ctx.Locale.TrString(key)
+				}
 			}
 
 			next.ServeHTTP(ctx.Resp, ctx.Req)

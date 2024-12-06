@@ -16,9 +16,13 @@ const PLURAL_RULES = [
   function (n) { return n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5 },         // [11] Arabic 6-form
 ];
 
-/** Look up the correct localized plural form for amount `n` for the string with the translation key `key`. */
-export function GetPluralizedString(key, n) {
+/**
+ * Look up the correct localized plural form for amount `n` for the string with the translation key `key`.
+ * If the current language does not contain a translation for this key, returns the text in the default language,
+ * or `null` if `suppress_fallback` is set to `true`.
+ */
+export function GetPluralizedString(key, n, suppress_fallback) {
   const result = pageData.PLURALSTRINGS_LANG[key]?.[PLURAL_RULES[pageData.PLURAL_RULE_LANG](n)];
-  if (result) return result;
+  if (result || suppress_fallback) return result;
   return pageData.PLURALSTRINGS_FALLBACK[key][PLURAL_RULES[pageData.PLURAL_RULE_FALLBACK](n)];
 }
