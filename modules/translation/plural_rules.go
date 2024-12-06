@@ -4,6 +4,8 @@
 // Some useful links:
 // https://www.unicode.org/cldr/cldr-aux/charts/22/supplemental/language_plural_rules.html
 // https://www.gnu.org/software/gettext/manual/gettext.html#index-ngettext
+// https://translate.codeberg.org/languages/$LANGUAGE_CODE/#information
+// Note that in some cases there is ambiguity about the correct form for a given language. In this case, ask the locale's translators.
 
 package translation
 
@@ -34,10 +36,10 @@ func GetPluralRuleImpl(langName string) int {
 
 	/* When adding a new language not in the list, add its plural rule definition here. */
 	switch langName {
-	case "en", "de", "nds", "nl", "sv", "da", "no", "nn", "nb", "fo", "es", "it", "el", "bg", "fi", "et", "he", "id", "eo", "hu", "tr":
+	case "en", "de", "nds", "nl", "sv", "da", "no", "nn", "nb", "fo", "es", "it", "el", "bg", "bn", "ca", "fi", "et", "gl", "he", "id", "is", "eo", "hu", "ml", "tr":
 		return PluralRuleDefault
 
-	case "fil", "fr", "pt":
+	case "fil", "fr", "hi", "pt", "si":
 		return PluralRuleFrench
 
 	case "lv":
@@ -55,13 +57,13 @@ func GetPluralRuleImpl(langName string) int {
 	case "ar":
 		return PluralRuleArabic
 
-	case "ru", "uk", "be", "sr", "hr":
+	case "ru", "uk", "be", "bs", "sr", "hr":
 		return PluralRuleRussian
 
 	case "cs", "sk":
 		return PluralRuleCzech
 
-	case "fa", "ja", "ko", "zh":
+	case "fa", "ja", "ko", "vi", "yi", "zh":
 		return PluralRuleOne
 
 	default:
