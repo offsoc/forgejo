@@ -28,14 +28,14 @@ function DoUpdateRelativeTime(object) {
 
   if (milliseconds < 0) {
     // Datetime is in the future.
-    object.textContent = pageData.DATETIMESTRING_FUTURE;
+    object.textContent = pageData.DATETIMESTRINGS.FUTURE;
     return 60 * 1000;
   }
 
   const minutes = Math.floor(milliseconds / 60000);
   if (minutes < 1) {
     // Datetime is very recent.
-    object.textContent = pageData.DATETIMESTRING_NOW;
+    object.textContent = pageData.DATETIMESTRINGS.NOW;
     return 30 * 1000;
   }
   if (minutes < 60) {
@@ -56,10 +56,10 @@ function DoUpdateRelativeTime(object) {
     if (days < 7) {
       if (days === 1) {
         // Datetime is one day ago.
-        object.textContent = pageData.DATETIMESTRING_1DAY;
+        object.textContent = pageData.DATETIMESTRINGS.AGO_1DAY;
       } else if (days === 2) {
         // Datetime is two days ago.
-        object.textContent = pageData.DATETIMESTRING_2DAYS;
+        object.textContent = pageData.DATETIMESTRINGS.AGO_2DAYS;
       } else {
         // Datetime is several days but less than a week ago.
         object.textContent = GetPluralizedString('tool.ago_days', days).replace('%d', days);
@@ -72,10 +72,10 @@ function DoUpdateRelativeTime(object) {
       const weeks = Math.floor(days / 7);
       if (weeks === 1) {
         // Datetime is one week ago.
-        object.textContent = pageData.DATETIMESTRING_1WEEK;
+        object.textContent = pageData.DATETIMESTRINGS.AGO_1WEEK;
       } else if (weeks === 2) {
         // Datetime is two week ago.
-        object.textContent = pageData.DATETIMESTRING_2WEEKS;
+        object.textContent = pageData.DATETIMESTRINGS.AGO_2WEEKS;
       } else {
         // Datetime is several weeks ago (but less than a month).
         object.textContent = GetPluralizedString('tool.ago_weeks', weeks).replace('%d', weeks);
@@ -87,10 +87,10 @@ function DoUpdateRelativeTime(object) {
     const months = Math.floor(days / 30);
     if (months === 1) {
       // Datetime is one month ago.
-      object.textContent = pageData.DATETIMESTRING_1MONTH;
+      object.textContent = pageData.DATETIMESTRINGS.AGO_1MONTH;
     } else if (months === 2) {
       // Datetime is two months ago.
-      object.textContent = pageData.DATETIMESTRING_2MONTHS;
+      object.textContent = pageData.DATETIMESTRINGS.AGO_2MONTHS;
     } else {
       // Datetime is several months ago (but less than a year).
       object.textContent = GetPluralizedString('tool.ago_months', months).replace('%d', months);
@@ -101,10 +101,10 @@ function DoUpdateRelativeTime(object) {
   const years = Math.floor(days / 365);
   if (years === 1) {
     // Datetime is one year ago.
-    object.textContent = pageData.DATETIMESTRING_1YEAR;
+    object.textContent = pageData.DATETIMESTRINGS.AGO_1YEAR;
   } else if (years === 2) {
     // Datetime is two year ago.
-    object.textContent = pageData.DATETIMESTRING_2YEARS;
+    object.textContent = pageData.DATETIMESTRINGS.AGO_2YEARS;
   } else {
     // Datetime is more than a year ago.
     object.textContent = GetPluralizedString('tool.ago_years', years).replace('%d', years);
