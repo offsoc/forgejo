@@ -235,6 +235,8 @@ func Contexter() func(next http.Handler) http.Handler {
 				"NOW":    ctx.Locale.TrString("tool.now"),
 			}
 			for _, key := range []string{"tool.ago_1day", "tool.ago_1week", "tool.ago_1month", "tool.ago_1year", "tool.ago_2days", "tool.ago_2weeks", "tool.ago_2months", "tool.ago_2years"} {
+				// These keys are used for special-casing some time words. We only add keys that are actually translated, so that we
+				// can fall back to the generic pluralized time word in the correct language if the special case is untranslated.
 				if ctx.Locale.HasKey(key) {
 					ctx.PageData["DATETIMESTRINGS"].(map[string]string)[key] = ctx.Locale.TrString(key)
 				}

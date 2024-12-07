@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 // Some useful links:
-// https://www.unicode.org/cldr/cldr-aux/charts/22/supplemental/language_plural_rules.html
+// https://www.unicode.org/cldr/charts/46/supplemental/language_plural_rules.html
 // https://www.gnu.org/software/gettext/manual/gettext.html#index-ngettext
 // https://translate.codeberg.org/languages/$LANGUAGE_CODE/#information
 // Note that in some cases there is ambiguity about the correct form for a given language. In this case, ask the locale's translators.
