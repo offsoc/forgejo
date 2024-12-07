@@ -705,6 +705,10 @@ test-e2e-sqlite: playwright e2e.sqlite.test generate-ini-sqlite
 test-e2e-sqlite\#%: playwright e2e.sqlite.test generate-ini-sqlite
 	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTESTCOMPILEDRUNPREFIX) ./e2e.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e/$*
 
+.PHONY: test-e2e-sqlite-chromium\#%
+test-e2e-sqlite-chromium\#%: playwright e2e.sqlite.test generate-ini-sqlite
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini PLAYWRIGHT_PROJECT=chromium $(GOTESTCOMPILEDRUNPREFIX) ./e2e.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e/$*
+
 .PHONY: test-e2e-sqlite-firefox\#%
 test-e2e-sqlite-firefox\#%: playwright e2e.sqlite.test generate-ini-sqlite
 	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini PLAYWRIGHT_PROJECT=firefox $(GOTESTCOMPILEDRUNPREFIX) ./e2e.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX) -test.run TestE2e/$*
