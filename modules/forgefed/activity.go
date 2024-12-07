@@ -20,8 +20,8 @@ type ForgeLike struct {
 func NewForgeLike(actorIRI, objectIRI string, startTime time.Time) (ForgeLike, error) {
 	result := ForgeLike{}
 	result.Type = ap.LikeType
-	result.Actor = ap.IRI(actorIRI)   // That's us, a User
-	result.Object = ap.IRI(objectIRI) // That's them, a Repository
+	result.Actor = ap.IRI(actorIRI)   // User who triggered the Like
+	result.Object = ap.IRI(objectIRI) // Repository which is liked
 	result.StartTime = startTime
 	if valid, err := validation.IsValid(result); !valid {
 		return ForgeLike{}, err
@@ -37,10 +37,15 @@ type ForgeUndoLike struct {
 func NewForgeUndoLike(actorIRI, objectIRI string, startTime time.Time) (ForgeUndoLike, error) {
 	result := ForgeUndoLike{}
 	result.Type = ap.UndoType
-	result.Actor = ap.IRI(actorIRI) // That's us, a User
-	like, _ := NewForgeLike(actorIRI, objectIRI, startTime)
-	result.Object = &like.Activity
+	result.Actor = ap.IRI(actorIRI) // User who triggered the UndoLike (must be same as User who triggered the initial Like)
 	result.StartTime = startTime
+
+	like := ap.Activity{} // The Like, which should be undone
+	like.Type = ap.LikeType
+	like.Actor = ap.IRI(actorIRI)   // User of the Like which should be undone
+	like.Object = ap.IRI(objectIRI) // Repository of the Like which should be undone
+	result.Object = &like
+
 	if valid, err := validation.IsValid(result); !valid {
 		return ForgeUndoLike{}, err
 	}
