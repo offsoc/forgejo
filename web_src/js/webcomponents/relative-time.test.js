@@ -160,7 +160,7 @@ test('CalculateRelativeTimes', () => {
   // Timezone tests
   mock.setAttribute('datetime', '2024-10-27T01:01:00-05:00');
   expect(DoUpdateRelativeTime(mock, now)).toEqual(ONE_MINUTE);
-  expect(mock.textContent).toEqual('future');
+  expect(mock.textContent).toEqual('in future');
 
   mock.setAttribute('datetime', '2024-10-27T05:05:25+02:00');
   expect(DoUpdateRelativeTime(mock, now)).toEqual(HALF_MINUTE);
