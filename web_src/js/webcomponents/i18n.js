@@ -1,6 +1,6 @@
 const {pageData} = window.config;
 
-/** A list of plural rules for all languages. `pageData.PLURAL_RULE_LANG` and `pageData.PLURAL_RULE_FALLBACK` are indices into this list (defined in localestore.go). */
+/** A list of plural rules for all languages. `pageData.PLURAL_RULE_LANG` and `pageData.PLURAL_RULE_FALLBACK` are indices into this list (defined in plural_rules.go). */
 const PLURAL_RULES = [
   function (n) { return n === 1 ? 0 : 1 },  // [ 0] Common 2-form, e.g. English, German
   function (n) { return n <= 1 ? 0 : 1 },   // [ 1] French 2-form

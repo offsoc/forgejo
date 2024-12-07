@@ -36,7 +36,7 @@ func GetPluralRuleImpl(langName string) int {
 
 	/* When adding a new language not in the list, add its plural rule definition here. */
 	switch langName {
-	case "en", "de", "nds", "nl", "sv", "da", "no", "nn", "nb", "fo", "es", "it", "el", "bg", "bn", "ca", "fi", "et", "gl", "he", "id", "is", "eo", "hu", "ml", "tr":
+	case "bg", "bn", "ca", "da", "de", "el", "en", "eo", "es", "et", "fi", "fo", "fy", "gl", "he", "hu", "id", "is", "it", "ml", "nb", "nds", "nl", "nn", "no", "sv", "tr":
 		return PluralRuleDefault
 
 	case "fil", "fr", "hi", "pt", "si":
@@ -57,7 +57,7 @@ func GetPluralRuleImpl(langName string) int {
 	case "ar":
 		return PluralRuleArabic
 
-	case "ru", "uk", "be", "bs", "sr", "hr":
+	case "be", "bs", "hr", "ru", "sr", "uk":
 		return PluralRuleRussian
 
 	case "cs", "sk":

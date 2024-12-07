@@ -1,6 +1,14 @@
 import {GetPluralizedString} from './i18n.js';
 const {pageData} = window.config;
 
+export const HALF_MINUTE = 30 * 1000;
+export const ONE_MINUTE = 60 * 1000;
+export const ONE_HOUR = 60 * ONE_MINUTE;
+export const ONE_DAY = 24 * ONE_HOUR;
+export const ONE_WEEK = 7 * ONE_DAY;
+export const ONE_MONTH = 30 * ONE_DAY;
+export const ONE_YEAR = 365 * ONE_DAY;
+
 const ABSOLUTE_DATETIME_FORMAT = new Intl.DateTimeFormat(navigator.language, {
   year: 'numeric',
   month: 'short',
@@ -18,13 +26,14 @@ function GetPluralizedStringOrFallback(key, n, unit) {
 }
 
 /** Update the displayed text of the given relative-time DOM element with its human-readable, localized relative time string. */
-function DoUpdateRelativeTime(object) {
-  if (!(object?.attributes?.datetime?.nodeValue)) {
+export function DoUpdateRelativeTime(object, now) {
+  const absoluteTime = object.getAttribute('datetime');
+  if (!absoluteTime) {
     return null;  // Object does not contain a datetime.
   }
 
-  const then = Date.parse(object.attributes.datetime.nodeValue);
-  const now = Date.now();
+  const then = Date.parse(absoluteTime);
+  if (!now) now = Date.now();
   const milliseconds = now - then;
 
   if (Number.isNaN(milliseconds)) {
@@ -36,26 +45,26 @@ function DoUpdateRelativeTime(object) {
   if (milliseconds < 0) {
     // Datetime is in the future.
     object.textContent = pageData.DATETIMESTRINGS.FUTURE;
-    return 60 * 1000;
+    return ONE_MINUTE;
   }
 
   const minutes = Math.floor(milliseconds / 60000);
   if (minutes < 1) {
     // Datetime is very recent.
     object.textContent = pageData.DATETIMESTRINGS.NOW;
-    return 30 * 1000;
+    return HALF_MINUTE;
   }
   if (minutes < 60) {
     // Datetime is one or more minutes but less than an hour ago.
     object.textContent = GetPluralizedStringOrFallback('tool.ago_mins', minutes, 'minute');
-    return 60 * 1000;
+    return ONE_MINUTE;
   }
 
   const hours = Math.floor(minutes / 60);
   if (hours < 24) {
     // Datetime is one or more hours but less than a day ago.
     object.textContent = GetPluralizedStringOrFallback('tool.ago_hours', hours, 'hour');
-    return 60 * 60 * 1000;
+    return ONE_HOUR;
   }
 
   const days = Math.floor(hours / 24);
@@ -71,7 +80,7 @@ function DoUpdateRelativeTime(object) {
         // Datetime is several days but less than a week ago.
         object.textContent = GetPluralizedStringOrFallback('tool.ago_days', days, 'day');
       }
-      return 24 * 60 * 60 * 1000;
+      return ONE_DAY;
     }
 
     if (days < 30) {
@@ -87,7 +96,7 @@ function DoUpdateRelativeTime(object) {
         // Datetime is several weeks ago (but less than a month).
         object.textContent = GetPluralizedStringOrFallback('tool.ago_weeks', weeks, 'week');
       }
-      return 7 * 24 * 60 * 60 * 1000;
+      return ONE_WEEK;
     }
 
     // Datetime is at least one month but less than a year ago.
@@ -102,7 +111,7 @@ function DoUpdateRelativeTime(object) {
       // Datetime is several months ago (but less than a year).
       object.textContent = GetPluralizedStringOrFallback('tool.ago_months', months, 'month');
     }
-    return 30 * 24 * 60 * 60 * 1000;
+    return ONE_MONTH;
   }
 
   const years = Math.floor(days / 365);
@@ -116,7 +125,7 @@ function DoUpdateRelativeTime(object) {
     // Datetime is more than a year ago.
     object.textContent = GetPluralizedStringOrFallback('tool.ago_years', years, 'year');
   }
-  return 365 * 24 * 60 * 60 * 1000;
+  return ONE_YEAR;
 }
 
 /** Update the displayed text of one relative-time DOM element with its human-readable, localized relative time string. */
