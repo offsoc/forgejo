@@ -556,3 +556,32 @@ func TestPullCreatePrFromBaseToFork(t *testing.T) {
 		assert.Regexp(t, "^/user1/repo1/pulls/[0-9]*$", url)
 	})
 }
+
+func TestPullCreatePrFromForkToFork(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		sessionFork1 := loginUser(t, "user1")
+		testRepoFork(t, sessionFork1, "user2", "repo1", "user1", "repo1")
+		// createUser(db.DefaultContext, t, &user_model.User{Name: "user3", LowerName: "user3"})
+		sessionFork3 := loginUser(t, "user30")
+		testRepoFork(t, sessionFork3, "user2", "repo1", "user30", "repo1")
+
+		// Edit fork 3
+		testEditFile(t, sessionFork3, "user30", "repo1", "master", "README.md", "Hello, World (Edited)\n")
+
+		// Check that the PR button is enabled
+		req := NewRequest(t, "GET", path.Join("user1", "repo1", "pulls"))
+		resp := sessionFork3.MakeRequest(t, req, http.StatusOK)
+
+		// Check that the button to create PRs is enabled
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		link, exists := htmlDoc.doc.Find(".new-pr-button").Attr("href")
+		assert.True(t, exists, "The template has changed")
+		assert.Regexp(t, "^/user1/repo1/compare/.*$", link)
+
+		// Create a PR
+		resp = testPullCreateDirectly(t, sessionFork3, "user1", "repo1", "master", "user30", "repo1", "master", "This is a pull title")
+		// check the redirected URL
+		url := test.RedirectURL(resp)
+		assert.Regexp(t, "^/user1/repo1/pulls/[0-9]*$", url)
+	})
+}

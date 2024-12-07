@@ -729,9 +729,13 @@ func RepoAssignment(ctx *Context) context.CancelFunc {
 	}
 	ctx.Data["BranchName"] = ctx.Repo.BranchName
 
-	// People who have push access or have forked repository can propose a new pull request.
+	// People can propose a new pull request if they have either
+	// - push access to the repository
+	// - have a fork of the repository
+	// - the repository is a fork of a base repository and the user has a fork of the same base repository
 	canPush := ctx.Repo.CanWrite(unit_model.TypeCode) ||
-		(ctx.IsSigned && repo_model.HasForkedRepo(ctx, ctx.Doer.ID, ctx.Repo.Repository.ID))
+		(ctx.IsSigned && repo_model.HasForkedRepo(ctx, ctx.Doer.ID, ctx.Repo.Repository.ID)) ||
+		(repo.BaseRepo != nil && ctx.IsSigned && repo_model.HasForkedRepo(ctx, ctx.Doer.ID, repo.BaseRepo.ID))
 	canCompare := false
 
 	// Pull request is allowed if this is a fork repository
