@@ -40,7 +40,7 @@ func NewForgeUndoLike(actorIRI, objectIRI string, startTime time.Time) (ForgeUnd
 	result.Actor = ap.IRI(actorIRI) // User who triggered the UndoLike (must be same as User who triggered the initial Like)
 	result.StartTime = startTime
 
-	like := ap.Activity{} // The Like, which should be undone
+	like := ap.Activity{} // The Like, which should be undone (similar to struct Like, but without start date)
 	like.Type = ap.LikeType
 	like.Actor = ap.IRI(actorIRI)   // User of the Like which should be undone
 	like.Object = ap.IRI(objectIRI) // Repository of the Like which should be undone
