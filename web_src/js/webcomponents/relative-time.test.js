@@ -3,24 +3,24 @@ import {DoUpdateRelativeTime, HALF_MINUTE, ONE_MINUTE, ONE_HOUR, ONE_DAY, ONE_WE
 test('CalculateRelativeTimes', () => {
   window.config.pageData.PLURAL_RULE_LANG = 0;
   window.config.pageData.DATETIMESTRINGS = {
-    'FUTURE': 'future',
+    'FUTURE': 'in future',
     'NOW': 'now',
-    'tool.ago_1day': 'yesterday',
-    'tool.ago_1week': 'last week',
-    'tool.ago_1month': 'last month',
-    'tool.ago_1year': 'last year',
-    'tool.ago_2days': 'two days ago',
-    'tool.ago_2weeks': 'two weeks ago',
-    'tool.ago_2months': 'two months ago',
-    'tool.ago_2years': 'two years ago',
+    'relativetime.1day': 'yesterday',
+    'relativetime.1week': 'last week',
+    'relativetime.1month': 'last month',
+    'relativetime.1year': 'last year',
+    'relativetime.2days': 'two days ago',
+    'relativetime.2weeks': 'two weeks ago',
+    'relativetime.2months': 'two months ago',
+    'relativetime.2years': 'two years ago',
   };
   window.config.pageData.PLURALSTRINGS_LANG = {
-    'tool.ago_mins': ['%d minute ago', '%d minutes ago'],
-    'tool.ago_hours': ['%d hour ago', '%d hours ago'],
-    'tool.ago_days': ['%d day ago', '%d days ago'],
-    'tool.ago_weeks': ['%d week ago', '%d weeks ago'],
-    'tool.ago_months': ['%d month ago', '%d months ago'],
-    'tool.ago_years': ['%d year ago', '%d years ago'],
+    'relativetime.mins': ['%d minute ago', '%d minutes ago'],
+    'relativetime.hours': ['%d hour ago', '%d hours ago'],
+    'relativetime.days': ['%d day ago', '%d days ago'],
+    'relativetime.weeks': ['%d week ago', '%d weeks ago'],
+    'relativetime.months': ['%d month ago', '%d months ago'],
+    'relativetime.years': ['%d year ago', '%d years ago'],
   };
   const mock = document.createElement('relative-time');
 
@@ -31,7 +31,7 @@ test('CalculateRelativeTimes', () => {
 
   mock.setAttribute('datetime', '2024-10-27T04:05:40+01:00');
   expect(DoUpdateRelativeTime(mock, now)).toEqual(ONE_MINUTE);
-  expect(mock.textContent).toEqual('future');
+  expect(mock.textContent).toEqual('in future');
 
   mock.setAttribute('datetime', '2024-10-27T04:05:10+01:00');
   expect(DoUpdateRelativeTime(mock, now)).toEqual(HALF_MINUTE);

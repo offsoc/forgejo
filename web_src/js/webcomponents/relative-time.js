@@ -56,29 +56,29 @@ export function DoUpdateRelativeTime(object, now) {
   }
   if (minutes < 60) {
     // Datetime is one or more minutes but less than an hour ago.
-    object.textContent = GetPluralizedStringOrFallback('tool.ago_mins', minutes, 'minute');
+    object.textContent = GetPluralizedStringOrFallback('relativetime.mins', minutes, 'minute');
     return ONE_MINUTE;
   }
 
   const hours = Math.floor(minutes / 60);
   if (hours < 24) {
     // Datetime is one or more hours but less than a day ago.
-    object.textContent = GetPluralizedStringOrFallback('tool.ago_hours', hours, 'hour');
+    object.textContent = GetPluralizedStringOrFallback('relativetime.hours', hours, 'hour');
     return ONE_HOUR;
   }
 
   const days = Math.floor(hours / 24);
   if (days < 365) {
     if (days < 7) {
-      if (days === 1 && pageData.DATETIMESTRINGS['tool.ago_1day']) {
+      if (days === 1 && pageData.DATETIMESTRINGS['relativetime.1day']) {
         // Datetime is one day ago.
-        object.textContent = pageData.DATETIMESTRINGS['tool.ago_1day'];
-      } else if (days === 2 && pageData.DATETIMESTRINGS['tool.ago_2days']) {
+        object.textContent = pageData.DATETIMESTRINGS['relativetime.1day'];
+      } else if (days === 2 && pageData.DATETIMESTRINGS['relativetime.2days']) {
         // Datetime is two days ago.
-        object.textContent = pageData.DATETIMESTRINGS['tool.ago_2days'];
+        object.textContent = pageData.DATETIMESTRINGS['relativetime.2days'];
       } else {
         // Datetime is several days but less than a week ago.
-        object.textContent = GetPluralizedStringOrFallback('tool.ago_days', days, 'day');
+        object.textContent = GetPluralizedStringOrFallback('relativetime.days', days, 'day');
       }
       return ONE_DAY;
     }
@@ -86,44 +86,44 @@ export function DoUpdateRelativeTime(object, now) {
     if (days < 30) {
       // Datetime is at least one week but less than a month ago.
       const weeks = Math.floor(days / 7);
-      if (weeks === 1 && pageData.DATETIMESTRINGS['tool.ago_1week']) {
+      if (weeks === 1 && pageData.DATETIMESTRINGS['relativetime.1week']) {
         // Datetime is one week ago.
-        object.textContent = pageData.DATETIMESTRINGS['tool.ago_1week'];
-      } else if (weeks === 2 && pageData.DATETIMESTRINGS['tool.ago_2weeks']) {
+        object.textContent = pageData.DATETIMESTRINGS['relativetime.1week'];
+      } else if (weeks === 2 && pageData.DATETIMESTRINGS['relativetime.2weeks']) {
         // Datetime is two week ago.
-        object.textContent = pageData.DATETIMESTRINGS['tool.ago_2weeks'];
+        object.textContent = pageData.DATETIMESTRINGS['relativetime.2weeks'];
       } else {
         // Datetime is several weeks ago (but less than a month).
-        object.textContent = GetPluralizedStringOrFallback('tool.ago_weeks', weeks, 'week');
+        object.textContent = GetPluralizedStringOrFallback('relativetime.weeks', weeks, 'week');
       }
       return ONE_WEEK;
     }
 
     // Datetime is at least one month but less than a year ago.
     const months = Math.floor(days / 30);
-    if (months === 1 && pageData.DATETIMESTRINGS['tool.ago_1month']) {
+    if (months === 1 && pageData.DATETIMESTRINGS['relativetime.1month']) {
       // Datetime is one month ago.
-      object.textContent = pageData.DATETIMESTRINGS['tool.ago_1month'];
-    } else if (months === 2 && pageData.DATETIMESTRINGS['tool.ago_2months']) {
+      object.textContent = pageData.DATETIMESTRINGS['relativetime.1month'];
+    } else if (months === 2 && pageData.DATETIMESTRINGS['relativetime.2months']) {
       // Datetime is two months ago.
-      object.textContent = pageData.DATETIMESTRINGS['tool.ago_2months'];
+      object.textContent = pageData.DATETIMESTRINGS['relativetime.2months'];
     } else {
       // Datetime is several months ago (but less than a year).
-      object.textContent = GetPluralizedStringOrFallback('tool.ago_months', months, 'month');
+      object.textContent = GetPluralizedStringOrFallback('relativetime.months', months, 'month');
     }
     return ONE_MONTH;
   }
 
   const years = Math.floor(days / 365);
-  if (years === 1 && pageData.DATETIMESTRINGS['tool.ago_1year']) {
+  if (years === 1 && pageData.DATETIMESTRINGS['relativetime.1year']) {
     // Datetime is one year ago.
-    object.textContent = pageData.DATETIMESTRINGS['tool.ago_1year'];
-  } else if (years === 2 && pageData.DATETIMESTRINGS['tool.ago_2years']) {
+    object.textContent = pageData.DATETIMESTRINGS['relativetime.1year'];
+  } else if (years === 2 && pageData.DATETIMESTRINGS['relativetime.2years']) {
     // Datetime is two year ago.
-    object.textContent = pageData.DATETIMESTRINGS['tool.ago_2years'];
+    object.textContent = pageData.DATETIMESTRINGS['relativetime.2years'];
   } else {
     // Datetime is more than a year ago.
-    object.textContent = GetPluralizedStringOrFallback('tool.ago_years', years, 'year');
+    object.textContent = GetPluralizedStringOrFallback('relativetime.years', years, 'year');
   }
   return ONE_YEAR;
 }

@@ -228,13 +228,13 @@ func Contexter() func(next http.Handler) http.Handler {
 			ctx.PageData["PLURALSTRINGS_LANG"] = map[string][]string{}
 			ctx.PageData["PLURALSTRINGS_FALLBACK"] = map[string][]string{}
 
-			ctx.AddPluralStringsToPageData([]string{"tool.ago_mins", "tool.ago_hours", "tool.ago_days", "tool.ago_weeks", "tool.ago_months", "tool.ago_years"})
+			ctx.AddPluralStringsToPageData([]string{"relativetime.mins", "relativetime.hours", "relativetime.days", "relativetime.weeks", "relativetime.months", "relativetime.years"})
 
 			ctx.PageData["DATETIMESTRINGS"] = map[string]string{
-				"FUTURE": ctx.Locale.TrString("tool.future"),
-				"NOW":    ctx.Locale.TrString("tool.now"),
+				"FUTURE": ctx.Locale.TrString("relativetime.future"),
+				"NOW":    ctx.Locale.TrString("relativetime.now"),
 			}
-			for _, key := range []string{"tool.ago_1day", "tool.ago_1week", "tool.ago_1month", "tool.ago_1year", "tool.ago_2days", "tool.ago_2weeks", "tool.ago_2months", "tool.ago_2years"} {
+			for _, key := range []string{"relativetime.1day", "relativetime.1week", "relativetime.1month", "relativetime.1year", "relativetime.2days", "relativetime.2weeks", "relativetime.2months", "relativetime.2years"} {
 				// These keys are used for special-casing some time words. We only add keys that are actually translated, so that we
 				// can fall back to the generic pluralized time word in the correct language if the special case is untranslated.
 				if ctx.Locale.HasKey(key) {
