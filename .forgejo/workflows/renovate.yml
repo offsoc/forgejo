@@ -23,7 +23,7 @@ jobs:
   renovate:
     if: vars.ROLE == 'forgejo-coding' && secrets.RENOVATE_TOKEN != ''
 
-    runs-on: docker-runner-one
+    runs-on: docker
     container:
       image: code.forgejo.org/forgejo-contrib/renovate:39.42.4
 

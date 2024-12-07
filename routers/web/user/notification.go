@@ -111,20 +111,26 @@ func getNotifications(ctx *context.Context) {
 		return
 	}
 
-	statuses := []activities_model.NotificationStatus{status, activities_model.NotificationStatusPinned}
-	nls, err := db.Find[activities_model.Notification](ctx, activities_model.FindNotificationOptions{
-		ListOptions: db.ListOptions{
-			PageSize: perPage,
-			Page:     page,
-		},
-		UserID: ctx.Doer.ID,
-		Status: statuses,
-	})
-	if err != nil {
-		ctx.ServerError("db.Find[activities_model.Notification]", err)
-		return
+	sess := db.GetEngine(ctx).Table("notification")
+	if setting.Database.Type.IsMySQL() {
+		sess = sess.IndexHint("USE", "", "IDX_notification_user_id")
+	}
+	sess.Where("user_id = ?", ctx.Doer.ID).
+		And("status = ? OR status = ?", status, activities_model.NotificationStatusPinned).
+		OrderBy("notification.updated_unix DESC")
+
+	if perPage > 0 {
+		if page == 0 {
+			page = 1
+		}
+		sess.Limit(perPage, (page-1)*perPage)
 	}
 
+	nls := make([]*activities_model.Notification, 0, perPage)
+	if err := sess.Find(&nls); err != nil {
+		ctx.ServerError("FindNotifications", err)
+		return
+	}
 	notifications := activities_model.NotificationList(nls)
 
 	failCount := 0
