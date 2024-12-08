@@ -22,7 +22,7 @@ func (k *KeyLocale) HasKey(trKey string) bool {
 
 // TrHTML implements Locale.
 func (k *KeyLocale) TrHTML(trKey string, trArgs ...any) template.HTML {
-	return template.HTML(k.TrString(trKey, PrepareArgsForHTML(trArgs...)))
+	return template.HTML(k.TrString(trKey, PrepareArgsForHTML(trArgs...)...))
 }
 
 // TrString implements Locale.
@@ -32,8 +32,7 @@ func (k *KeyLocale) TrString(trKey string, trArgs ...any) string {
 
 // TrPluralString implements Locale.
 func (k *KeyLocale) TrPluralString(trKey string, count any, allowFallbackToDefaultLang bool, trArgs ...any) (template.HTML, error) {
-	args := PrepareArgsForHTML(trArgs...)
-	return template.HTML(FormatDummy(trKey, args...)), nil
+	return template.HTML(FormatDummy(trKey, PrepareArgsForHTML(trArgs...)...)), nil
 }
 
 func FormatDummy(trKey string, args ...any) string {

@@ -8,7 +8,7 @@ import (
 	"io"
 )
 
-type PluralFormRule func(int) int
+type PluralFormRule func(int64) int
 
 const (
 	PluralFormZero = iota

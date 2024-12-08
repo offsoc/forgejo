@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var MockPluralRule PluralFormRule = func(n int) int {
+var MockPluralRule PluralFormRule = func(n int64) int {
 	if n == 0 {
 		return PluralFormZero
 	}

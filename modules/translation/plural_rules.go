@@ -77,7 +77,7 @@ func GetPluralRuleImpl(langName string) int {
 
 var PluralRules = []i18n.PluralFormRule{
 	// [ 0] Common 2-form, e.g. English, German
-	func(n int) int {
+	func(n int64) int {
 		if n == 1 {
 			return i18n.PluralFormOne
 		}
@@ -85,7 +85,7 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [ 1] French 2-form
-	func(n int) int {
+	func(n int64) int {
 		if n == 0 || n == 1 {
 			return i18n.PluralFormOne
 		}
@@ -93,12 +93,12 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [ 2] One-Form
-	func(n int) int {
+	func(n int64) int {
 		return i18n.PluralFormOther
 	},
 
 	// [ 3] Latvian 3-form
-	func(n int) int {
+	func(n int64) int {
 		if n == 0 {
 			return i18n.PluralFormZero
 		}
@@ -109,7 +109,7 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [ 4] Irish 3-form
-	func(n int) int {
+	func(n int64) int {
 		if n == 1 {
 			return i18n.PluralFormOne
 		}
@@ -120,7 +120,7 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [ 5] Romanian 3-form
-	func(n int) int {
+	func(n int64) int {
 		if n == 1 {
 			return i18n.PluralFormOne
 		}
@@ -131,7 +131,7 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [ 6] Lithunian 3-form
-	func(n int) int {
+	func(n int64) int {
 		if n%10 == 1 && n%100 != 11 {
 			return i18n.PluralFormOne
 		}
@@ -142,7 +142,7 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [ 7] Russian 3-form
-	func(n int) int {
+	func(n int64) int {
 		if n%10 == 1 && n%100 != 11 {
 			return i18n.PluralFormOne
 		}
@@ -153,7 +153,7 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [ 8] Czech 3-form
-	func(n int) int {
+	func(n int64) int {
 		if n == 1 {
 			return i18n.PluralFormOne
 		}
@@ -164,7 +164,7 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [ 9] Polish 3-form
-	func(n int) int {
+	func(n int64) int {
 		if n == 1 {
 			return i18n.PluralFormOne
 		}
@@ -175,7 +175,7 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [10] Slovenian 4-form
-	func(n int) int {
+	func(n int64) int {
 		if n%100 == 1 {
 			return i18n.PluralFormOne
 		}
@@ -189,7 +189,7 @@ var PluralRules = []i18n.PluralFormRule{
 	},
 
 	// [11] Arabic 6-form
-	func(n int) int {
+	func(n int64) int {
 		if n == 0 {
 			return i18n.PluralFormZero
 		}

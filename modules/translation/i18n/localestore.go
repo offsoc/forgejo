@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/util"
 
 	goi18n "github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -122,7 +123,14 @@ func (l *locale) LookupPlural(trKey string, count any) string {
 		return ""
 	}
 
-	pluralForm := (*l.pluralRule)(count.(int))
+	n, err := util.ToInt64(count)
+	if err != nil {
+		log.Error("Invalid plural count '%s'", count)
+		return ""
+	}
+
+	pluralForm := (*l.pluralRule)(n)
+
 	switch pluralForm {
 	case PluralFormZero:
 		return msg.Zero
@@ -242,7 +250,7 @@ func PrepareArgsForHTML(trArgs ...any) []any {
 }
 
 func (l *locale) TrHTML(trKey string, trArgs ...any) template.HTML {
-	return template.HTML(l.TrString(trKey, PrepareArgsForHTML(trArgs...)))
+	return template.HTML(l.TrString(trKey, PrepareArgsForHTML(trArgs...)...))
 }
 
 func (l *locale) TrPluralString(trKey string, count any, allowFallbackToDefaultLang bool, trArgs ...any) (template.HTML, error) {
