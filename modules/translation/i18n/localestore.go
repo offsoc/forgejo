@@ -4,11 +4,11 @@
 package i18n
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"slices"
 
+	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 

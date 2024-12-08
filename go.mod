@@ -82,6 +82,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.78
 	github.com/msteinert/pam v1.2.0
 	github.com/nektos/act v0.2.52
+	github.com/nicksnyder/go-i18n/v2 v2.4.1
 	github.com/niklasfasching/go-org v1.7.0
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/opencontainers/go-digest v1.0.0
@@ -238,7 +239,6 @@ require (
 	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450 // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nicksnyder/go-i18n/v2 v2.4.1 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect

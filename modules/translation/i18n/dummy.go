@@ -31,7 +31,7 @@ func (k *KeyLocale) TrString(trKey string, trArgs ...any) string {
 }
 
 // TrPluralString implements Locale.
-func (l *KeyLocale) TrPluralString(trKey string, count any, allowFallbackToDefaultLang bool, trArgs ...any) (template.HTML, error) {
+func (k *KeyLocale) TrPluralString(trKey string, count any, allowFallbackToDefaultLang bool, trArgs ...any) (template.HTML, error) {
 	args := PrepareArgsForHTML(trArgs...)
 	return template.HTML(FormatDummy(trKey, args...)), nil
 }

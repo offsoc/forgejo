@@ -89,18 +89,19 @@ commits = fallback value for commits
 	assert.Equal(t, "lots of commits", result)
 
 	result2, err := lang2.TrPluralString("section.commits", 1, false)
+	require.NoError(t, err)
 	assert.EqualValues(t, "one commit", result2)
 
 	result2, err = lang2.TrPluralString("section.commits", 3, true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, "some commits", result2)
 
 	result2, err = lang2.TrPluralString("section.commits", 8, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.EqualValues(t, "lots of commits", result2)
 
 	result2, err = lang2.TrPluralString("section.commits", 0, true)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.EqualValues(t, "", result2)
 
 	langs, descs := ls.ListLangNameDesc()
