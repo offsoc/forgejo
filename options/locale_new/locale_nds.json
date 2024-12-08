@@ -1,0 +1,20 @@
+{
+	"repo.watch": "Beluren",
+	"repo.unwatch": "Nich mehr beluren",
+	"repo.issues.num_comments": {
+		"one": "%d Kommentaar",
+		"other": "%d Kommentaren"
+	},
+	"repo.issues.num_reviews": {
+		"one": "%d Nakieken",
+		"other": "%d Nakiekens"
+	},
+	"repo.issues.num_participants": {
+		"one": "%d Mitmaker",
+		"other": "%d Mitmakers"
+	},
+	"repo.pulls.num_conflicting_files": {
+		"one": "%d unverdragelk Datei",
+		"other": "%d unverdragelk Dateien"
+	}
+}

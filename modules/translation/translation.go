@@ -32,7 +32,12 @@ type Locale interface {
 	TrString(string, ...any) string
 
 	Tr(key string, args ...any) template.HTML
+	// New-style pluralized strings
+	TrPluralString(trKey string, count any, allowFallbackToDefaultLang bool, trArgs ...any) (template.HTML, error)
+	// Old-style pseudo-pluralized strings, deprecated
 	TrN(cnt any, key1, keyN string, args ...any) template.HTML
+
+	TrPluralStringWithFallback(count any, newstyleKey, oldstyleKey1, oldstyleKeyN string, trArgs ...any) template.HTML
 
 	TrSize(size int64) ReadableSize
 
@@ -100,8 +105,17 @@ func InitLocales(ctx context.Context) {
 			}
 
 			key := "locale_" + setting.Langs[i] + ".ini"
-			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], localeDataBase, localeData[key]); err != nil {
-				log.Error("Failed to set messages to %s: %v", setting.Langs[i], err)
+			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], &PluralRules[GetPluralRuleImpl(setting.Langs[i])], localeDataBase, localeData[key]); err != nil {
+				log.Error("Failed to set old-style messages to %s: %v", setting.Langs[i], err)
+			}
+
+			key = "locale_new/locale_" + setting.Langs[i] + ".json"
+			if bytes, err := options.AssetFS().ReadFile(key); err == nil {
+				if err = i18n.DefaultLocales.AddToLocaleFromJSON(setting.Langs[i], bytes); err != nil {
+					log.Error("Failed to add new-style messages to %s: %v", setting.Langs[i], err)
+				}
+			} else {
+				log.Error("Failed to open new-style messages for %s: %v", setting.Langs[i], err)
 			}
 		}
 		if len(setting.Langs) != 0 {
@@ -292,6 +306,15 @@ func (l *locale) TrSize(s int64) ReadableSize {
 	numberVal = l.PrettyNumber(numberVal)
 	unitVal = l.TrString("munits.data." + strings.ToLower(unitVal))
 	return ReadableSize{numberVal, unitVal}
+}
+
+func (l *locale) TrPluralStringWithFallback(count any, newstyleKey, oldstyleKey1, oldstyleKeyN string, trArgs ...any) template.HTML {
+	result, err := l.TrPluralString(newstyleKey, count, false, trArgs...)
+	if err == nil {
+		return result
+	}
+	log.Warn("no new-style string for key %s in language %s, falling back to old-style", newstyleKey, l.Language())
+	return l.TrN(count, oldstyleKey1, oldstyleKeyN, trArgs...)
 }
 
 func (l *locale) PrettyNumber(v any) string {

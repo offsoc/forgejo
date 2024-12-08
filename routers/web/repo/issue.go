@@ -2361,14 +2361,16 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 		}
 		_, err = issueStats.DrawText(
 			fmt.Sprintf("%s, %s, %s",
-				ctx.Locale.TrN(
+				ctx.Locale.TrPluralStringWithFallback(
 					issue.NumComments,
+					"repo.issues.num_comments",
 					"repo.issues.num_comments_1",
 					"repo.issues.num_comments",
 					issue.NumComments,
 				),
-				ctx.Locale.TrN(
+				ctx.Locale.TrPluralStringWithFallback(
 					len(reviews),
+					"repo.issues.num_reviews",
 					"repo.issues.num_reviews_one",
 					"repo.issues.num_reviews_few",
 					len(reviews),
@@ -2379,8 +2381,9 @@ func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Car
 	} else {
 		_, err = issueStats.DrawText(
 			fmt.Sprintf("%s, %s",
-				ctx.Locale.TrN(
+				ctx.Locale.TrPluralStringWithFallback(
 					issue.NumComments,
+					"repo.issues.num_comments",
 					"repo.issues.num_comments_1",
 					"repo.issues.num_comments",
 					issue.NumComments,

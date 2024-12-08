@@ -1,0 +1,40 @@
+{
+	"repo.watch": "Watch",
+	"repo.unwatch": "Unwatch",
+	"repo.issues.num_comments": {
+		"one": "%d comment",
+		"other": "%d comments"
+	},
+	"repo.issues.num_reviews": {
+		"one": "%d review",
+		"other": "%d reviews"
+	},
+	"repo.issues.num_participants": {
+		"one": "%d participant",
+		"other": "%d participants"
+	},
+	"repo.pulls.num_conflicting_files": {
+		"one": "%d conflicting file",
+		"other": "%d conflicting files"
+	},
+	"repo.pulls.approve_count": {
+		"one": "%d approval",
+		"other": "%d approvals"
+	},
+	"repo.pulls.reject_count": {
+		"one": "%d change request",
+		"other": "%d change requests"
+	},
+	"repo.pulls.waiting_count": {
+		"one": "%d waiting review",
+		"other": "%d waiting reviews"
+	},
+	"repo.pulls.title_desc": {
+		"one": "wants to merge %[1]d commit from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>",
+		"other": "wants to merge %[1]d commits from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>"
+	},
+	"repo.pulls.merged_title_desc": {
+		"one": "merged %[1]d commit from <code>%[2]s</code> into <code>%[3]s</code> %[4]s",
+		"other": "merged %[1]d commits from <code>%[2]s</code> into <code>%[3]s</code> %[4]s"
+	}
+}

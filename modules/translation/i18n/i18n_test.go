@@ -12,6 +12,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var MockPluralRule PluralFormRule = func(n int) int {
+	if n == 0 {
+		return PluralFormZero
+	}
+	if n == 1 {
+		return PluralFormOne
+	}
+	if n >= 2 && n <= 4 {
+		return PluralFormFew
+	}
+	return PluralFormOther
+}
+
 func TestLocaleStore(t *testing.T) {
 	testData1 := []byte(`
 .dot.name = Dot Name
@@ -27,11 +40,24 @@ fmt = %[2]s %[1]s
 
 [section]
 sub = Changed Sub String
+commits = fallback value for commits
+`)
+
+	testDataJSON := []byte(`
+{
+	"section.json": "the JSON is %s",
+	"section.commits": {
+		"one": "one commit",
+		"few": "some commits",
+		"other": "lots of commits"
+	}
+}
 `)
 
 	ls := NewLocaleStore()
-	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", testData1, nil))
-	require.NoError(t, ls.AddLocaleByIni("lang2", "Lang2", testData2, nil))
+	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", nil, testData1, nil))
+	require.NoError(t, ls.AddLocaleByIni("lang2", "Lang2", &MockPluralRule, testData2, nil))
+	require.NoError(t, ls.AddToLocaleFromJSON("lang2", testDataJSON))
 	ls.SetDefaultLang("lang1")
 
 	lang1, _ := ls.Locale("lang1")
@@ -56,6 +82,27 @@ sub = Changed Sub String
 	result2 := lang2.TrHTML("section.mixed", "a&b")
 	assert.EqualValues(t, `test value; <span style="color: red; background: none;">a&amp;b</span>`, result2)
 
+	result = lang2.TrString("section.json", "valid")
+	assert.Equal(t, "the JSON is valid", result)
+
+	result = lang2.TrString("section.commits")
+	assert.Equal(t, "lots of commits", result)
+
+	result2, err := lang2.TrPluralString("section.commits", 1, false)
+	assert.EqualValues(t, "one commit", result2)
+
+	result2, err = lang2.TrPluralString("section.commits", 3, true)
+	assert.Nil(t, err)
+	assert.EqualValues(t, "some commits", result2)
+
+	result2, err = lang2.TrPluralString("section.commits", 8, false)
+	assert.Nil(t, err)
+	assert.EqualValues(t, "lots of commits", result2)
+
+	result2, err = lang2.TrPluralString("section.commits", 0, true)
+	assert.NotNil(t, err)
+	assert.EqualValues(t, "", result2)
+
 	langs, descs := ls.ListLangNameDesc()
 	assert.ElementsMatch(t, []string{"lang1", "lang2"}, langs)
 	assert.ElementsMatch(t, []string{"Lang1", "Lang2"}, descs)
@@ -77,7 +124,7 @@ c=22
 `)
 
 	ls := NewLocaleStore()
-	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", testData1, testData2))
+	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", &MockPluralRule, testData1, testData2))
 	lang1, _ := ls.Locale("lang1")
 	assert.Equal(t, "11", lang1.TrString("a"))
 	assert.Equal(t, "21", lang1.TrString("b"))
@@ -118,7 +165,7 @@ func (e *errorPointerReceiver) Error() string {
 
 func TestLocaleWithTemplate(t *testing.T) {
 	ls := NewLocaleStore()
-	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", []byte(`key=<a>%s</a>`), nil))
+	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", &MockPluralRule, []byte(`key=<a>%s</a>`), nil))
 	lang1, _ := ls.Locale("lang1")
 
 	tmpl := template.New("test").Funcs(template.FuncMap{"tr": lang1.TrHTML})
@@ -181,7 +228,7 @@ func TestLocaleStoreQuirks(t *testing.T) {
 
 	for _, testData := range testDataList {
 		ls := NewLocaleStore()
-		err := ls.AddLocaleByIni("lang1", "Lang1", []byte("a="+testData.in), nil)
+		err := ls.AddLocaleByIni("lang1", "Lang1", nil, []byte("a="+testData.in), nil)
 		lang1, _ := ls.Locale("lang1")
 		require.NoError(t, err, testData.hint)
 		assert.Equal(t, testData.out, lang1.TrString("a"), testData.hint)

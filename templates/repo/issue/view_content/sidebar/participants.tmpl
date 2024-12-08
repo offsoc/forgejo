@@ -1,4 +1,4 @@
-<span class="text"><strong>{{ctx.Locale.TrN .NumParticipants "repo.issues.num_participants_one" "repo.issues.num_participants_few" .NumParticipants}}</strong></span>
+<span class="text"><strong>{{ctx.Locale.TrPluralStringWithFallback .NumParticipants "repo.issues.num_participants" "repo.issues.num_participants_one" "repo.issues.num_participants_few" .NumParticipants}}</strong></span>
 <div class="ui list tw-flex tw-flex-wrap">
 	{{range .Participants}}
 		<a {{if gt .ID 0}}href="{{.HomeLink}}"{{end}} data-tooltip-content="{{.GetDisplayName}}">
