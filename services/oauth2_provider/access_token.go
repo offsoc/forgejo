@@ -88,7 +88,7 @@ func GrantAdditionalScopes(grantScopes string) auth.AccessTokenScope {
 		}
 	}
 
-	// since version 1.22, access tokens grant full access to the API
+	// prior to Forgejo v9, access tokens grant full access to the API
 	// with this access is reduced only if additional scopes are provided
 	if len(accessScopes) > 0 {
 		accessTokenScope := auth.AccessTokenScope(strings.Join(accessScopes, ","))
@@ -96,8 +96,10 @@ func GrantAdditionalScopes(grantScopes string) auth.AccessTokenScope {
 			return normalizedAccessTokenScope
 		}
 		// TODO: if there are invalid access scopes (err != nil),
-		// then it is treated as "all", maybe in the future we should make it stricter to return an error
-		// at the moment, to avoid breaking 1.22 behavior, invalid tokens are also treated as "all"
+		// then it is treated as "all", maybe in the future
+		// we should make it stricter to return an error
+		// at the moment, to avoid breaking the behavior prior to Forgejo v9,
+		// invalid tokens are also treated as "all"
 	}
 	// fallback, empty access scope is treated as "all" access
 	return auth.AccessTokenScopeAll
@@ -197,8 +199,8 @@ func NewAccessTokenResponse(ctx context.Context, grant *auth.OAuth2Grant, server
 		if grant.ScopeContains("groups") {
 			accessTokenScope := GrantAdditionalScopes(grant.Scope)
 
-			// since version 1.22 does not verify if groups should be public-only,
-			// onlyPublicGroups will be set only if 'public-only' is included in a valid scope
+			// prior to Forgejo v9, there was no verification for whether groups should be public-only.
+			// onlyPublicGroups will be set if 'public-only' is included in a valid scope.
 			onlyPublicGroups, _ := accessTokenScope.PublicOnly()
 
 			groups, err := GetOAuthGroupsForUser(ctx, user, onlyPublicGroups)
