@@ -1232,17 +1232,17 @@ func Forks(ctx *context.Context) {
 		page = 1
 	}
 
-	pager := context.NewPagination(ctx.Repo.Repository.NumForks, setting.MaxForksPerPage, page, 5)
-	ctx.Data["Page"] = pager
-
-	forks, err := repo_model.GetForks(ctx, ctx.Repo.Repository, db.ListOptions{
-		Page:     pager.Paginater.Current(),
+	forks, total, err := repo_model.GetForks(ctx, ctx.Repo.Repository, ctx.Doer, db.ListOptions{
+		Page:     page,
 		PageSize: setting.MaxForksPerPage,
 	})
 	if err != nil {
 		ctx.ServerError("GetForks", err)
 		return
 	}
+
+	pager := context.NewPagination(int(total), setting.MaxForksPerPage, page, 5)
+	ctx.Data["Page"] = pager
 
 	for _, fork := range forks {
 		if err = fork.LoadOwner(ctx); err != nil {

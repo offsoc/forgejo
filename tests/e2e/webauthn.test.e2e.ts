@@ -30,7 +30,6 @@ test('WebAuthn register & login flow', async ({browser, request}, workerInfo) =>
       transport: 'usb',
       automaticPresenceSimulation: true,
       isUserVerified: true,
-      backupEligibility: true, // TODO: this doesn't seem to be available?!
     },
   });
 

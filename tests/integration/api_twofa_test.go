@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/tests"
 
 	"github.com/pquerna/otp/totp"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -37,9 +38,8 @@ func TestAPITwoFactor(t *testing.T) {
 	tfa := &auth_model.TwoFactor{
 		UID: user.ID,
 	}
-	require.NoError(t, tfa.SetSecret(otpKey.Secret()))
 
-	require.NoError(t, auth_model.NewTwoFactor(db.DefaultContext, tfa))
+	require.NoError(t, auth_model.NewTwoFactor(db.DefaultContext, tfa, otpKey.Secret()))
 
 	req = NewRequest(t, "GET", "/api/v1/user").
 		AddBasicAuth(user.Name)
@@ -57,4 +57,25 @@ func TestAPITwoFactor(t *testing.T) {
 		AddBasicAuth(user.Name)
 	req.Header.Set("X-Forgejo-OTP", passcode)
 	MakeRequest(t, req, http.StatusOK)
+}
+
+func TestAPIWebAuthn(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 32})
+	unittest.AssertExistsAndLoadBean(t, &auth_model.WebAuthnCredential{UserID: user.ID})
+
+	req := NewRequest(t, "GET", "/api/v1/user")
+	req.SetBasicAuth(user.Name, "notpassword")
+
+	resp := MakeRequest(t, req, http.StatusUnauthorized)
+
+	type userResponse struct {
+		Message string `json:"message"`
+	}
+	var userParsed userResponse
+
+	DecodeJSON(t, resp, &userParsed)
+
+	assert.EqualValues(t, "Basic authorization is not allowed while having security keys enrolled", userParsed.Message)
 }

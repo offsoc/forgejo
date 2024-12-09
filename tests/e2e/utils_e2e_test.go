@@ -8,6 +8,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"regexp"
 	"testing"
 	"time"
 
@@ -16,6 +18,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 )
+
+var rootPathRe = regexp.MustCompile("\\[repository\\]\nROOT\\s=\\s.*")
 
 func onForgejoRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare ...bool) {
 	if len(prepare) == 0 || prepare[0] {
@@ -37,7 +41,13 @@ func onForgejoRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare .
 	require.NoError(t, err)
 	u.Host = listener.Addr().String()
 
+	// Override repository root in config.
+	conf, err := os.ReadFile(setting.CustomConf)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(setting.CustomConf, rootPathRe.ReplaceAll(conf, []byte("[repository]\nROOT = "+setting.RepoRootPath)), 0o644))
+
 	defer func() {
+		require.NoError(t, os.WriteFile(setting.CustomConf, conf, 0o644))
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 		s.Shutdown(ctx)
 		cancel()

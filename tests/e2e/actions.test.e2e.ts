@@ -20,7 +20,6 @@ const workflow_trigger_notification_text = 'This workflow has a workflow_dispatc
 
 test('workflow dispatch present', async ({browser}, workerInfo) => {
   const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  /** @type {import('@playwright/test').Page} */
   const page = await context.newPage();
 
   await page.goto('/user2/test_workflows/actions?workflow=test-dispatch.yml&actor=0&status=0');
@@ -40,7 +39,6 @@ test('workflow dispatch error: missing inputs', async ({browser}, workerInfo) =>
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari; see https://codeberg.org/forgejo/forgejo/pulls/3334#issuecomment-2033383');
 
   const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  /** @type {import('@playwright/test').Page} */
   const page = await context.newPage();
 
   await page.goto('/user2/test_workflows/actions?workflow=test-dispatch.yml&actor=0&status=0');
@@ -62,14 +60,13 @@ test('workflow dispatch success', async ({browser}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari; see https://codeberg.org/forgejo/forgejo/pulls/3334#issuecomment-2033383');
 
   const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  /** @type {import('@playwright/test').Page} */
   const page = await context.newPage();
 
   await page.goto('/user2/test_workflows/actions?workflow=test-dispatch.yml&actor=0&status=0');
 
   await page.locator('#workflow_dispatch_dropdown>button').click();
 
-  await page.type('input[name="inputs[string2]"]', 'abc');
+  await page.fill('input[name="inputs[string2]"]', 'abc');
   await page.locator('#workflow-dispatch-submit').click();
 
   await expect(page.getByText('Workflow run was successfully requested.')).toBeVisible();

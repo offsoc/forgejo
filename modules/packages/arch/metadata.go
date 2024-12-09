@@ -4,6 +4,7 @@
 package arch
 
 import (
+	"archive/tar"
 	"bufio"
 	"bytes"
 	"encoding/hex"
@@ -25,7 +26,9 @@ import (
 // https://man.archlinux.org/man/PKGBUILD.5
 
 const (
-	PropertyDescription  = "arch.description"
+	PropertyDescription = "arch.description"
+	PropertyFiles       = "arch.files"
+
 	PropertyArch         = "arch.architecture"
 	PropertyDistribution = "arch.distribution"
 
@@ -85,6 +88,8 @@ type FileMetadata struct {
 	Packager       string `json:"packager"`
 	Arch           string `json:"arch"`
 	PgpSigned      string `json:"pgp"`
+
+	Files []string `json:"files,omitempty"`
 }
 
 // ParsePackage Function that receives arch package archive data and returns it's metadata.
@@ -127,6 +132,8 @@ func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
 	var pkg *Package
 	var mTree bool
 
+	files := make([]string, 0)
+
 	for {
 		f, err := tarball.Read()
 		if err == io.EOF {
@@ -135,6 +142,11 @@ func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
 		if err != nil {
 			return nil, err
 		}
+		// ref:https://gitlab.archlinux.org/pacman/pacman/-/blob/91546004903eea5d5267d59898a6029ba1d64031/lib/libalpm/add.c#L529-L533
+		if !strings.HasPrefix(f.Name(), ".") {
+			files = append(files, (f.Header.(*tar.Header)).Name)
+		}
+
 		switch f.Name() {
 		case ".PKGINFO":
 			pkg, err = ParsePackageInfo(tarballType, f)
@@ -155,7 +167,7 @@ func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
 	if !mTree {
 		return nil, util.NewInvalidArgumentErrorf(".MTREE file not found")
 	}
-
+	pkg.FileMetadata.Files = files
 	pkg.FileMetadata.CompressedSize = r.Size()
 	pkg.FileMetadata.MD5 = hex.EncodeToString(md5)
 	pkg.FileMetadata.SHA256 = hex.EncodeToString(sha256)
@@ -336,6 +348,15 @@ func (p *Package) Desc() string {
 		if entries[i+1] != "" {
 			_, _ = fmt.Fprintf(&buf, "%%%s%%\n%s\n\n", entries[i], entries[i+1])
 		}
+	}
+	return buf.String()
+}
+
+func (p *Package) Files() string {
+	var buf bytes.Buffer
+	buf.WriteString("%FILES%\n")
+	for _, item := range p.FileMetadata.Files {
+		_, _ = fmt.Fprintf(&buf, "%s\n", item)
 	}
 	return buf.String()
 }

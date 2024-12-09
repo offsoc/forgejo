@@ -220,11 +220,6 @@ func EnrollTwoFactorPost(ctx *context.Context) {
 	t = &auth.TwoFactor{
 		UID: ctx.Doer.ID,
 	}
-	err = t.SetSecret(secret)
-	if err != nil {
-		ctx.ServerError("SettingsTwoFactor: Failed to set secret", err)
-		return
-	}
 	token, err := t.GenerateScratchToken()
 	if err != nil {
 		ctx.ServerError("SettingsTwoFactor: Failed to generate scratch token", err)
@@ -251,7 +246,7 @@ func EnrollTwoFactorPost(ctx *context.Context) {
 		return
 	}
 
-	if err = auth.NewTwoFactor(ctx, t); err != nil {
+	if err = auth.NewTwoFactor(ctx, t, secret); err != nil {
 		// FIXME: We need to handle a unique constraint fail here it's entirely possible that another request has beaten us.
 		// If there is a unique constraint fail we should just tolerate the error
 		ctx.ServerError("SettingsTwoFactor: Failed to save two factor", err)

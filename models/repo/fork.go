@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"code.gitea.io/gitea/models/db"
+	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 
 	"xorm.io/builder"
@@ -54,9 +55,9 @@ func GetUserFork(ctx context.Context, repoID, userID int64) (*Repository, error)
 	return &forkedRepo, nil
 }
 
-// GetForks returns all the forks of the repository
-func GetForks(ctx context.Context, repo *Repository, listOptions db.ListOptions) ([]*Repository, error) {
-	sess := db.GetEngine(ctx)
+// GetForks returns all the forks of the repository that are visible to the user.
+func GetForks(ctx context.Context, repo *Repository, user *user_model.User, listOptions db.ListOptions) ([]*Repository, int64, error) {
+	sess := db.GetEngine(ctx).Where(AccessibleRepositoryCondition(user, unit.TypeInvalid))
 
 	var forks []*Repository
 	if listOptions.Page == 0 {
@@ -66,7 +67,8 @@ func GetForks(ctx context.Context, repo *Repository, listOptions db.ListOptions)
 		sess = db.SetSessionPagination(sess, &listOptions)
 	}
 
-	return forks, sess.Find(&forks, &Repository{ForkID: repo.ID})
+	count, err := sess.FindAndCount(&forks, &Repository{ForkID: repo.ID})
+	return forks, count, err
 }
 
 // IncrementRepoForkNum increment repository fork number

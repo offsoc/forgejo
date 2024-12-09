@@ -288,16 +288,12 @@ func GetLatestCommitStatus(ctx context.Context, repoID int64, sha string, listOp
 
 // GetLatestCommitStatusForPairs returns all statuses with a unique context for a given list of repo-sha pairs
 func GetLatestCommitStatusForPairs(ctx context.Context, repoSHAs []RepoSHA) (map[int64][]*CommitStatus, error) {
-	type result struct {
-		Index  int64
-		RepoID int64
-		SHA    string
-	}
+	results := []*CommitStatus{}
+	repoStatuses := make(map[int64][]*CommitStatus)
 
-	results := make([]result, 0, len(repoSHAs))
-
-	getBase := func() *xorm.Session {
-		return db.GetEngine(ctx).Table(&CommitStatus{})
+	if len(repoSHAs) == 0 {
+		// Avoid performing query when there will be no query conditions added.
+		return repoStatuses, nil
 	}
 
 	// Create a disjunction of conditions for each repoID and SHA pair
@@ -305,38 +301,30 @@ func GetLatestCommitStatusForPairs(ctx context.Context, repoSHAs []RepoSHA) (map
 	for _, repoSHA := range repoSHAs {
 		conds = append(conds, builder.Eq{"repo_id": repoSHA.RepoID, "sha": repoSHA.SHA})
 	}
-	sess := getBase().Where(builder.Or(conds...)).
-		Select("max( `index` ) as `index`, repo_id, sha").
-		GroupBy("context_hash, repo_id, sha").OrderBy("max( `index` ) desc")
 
+	subquery := builder.Dialect(db.BuilderDialect()).
+		Select("context_hash, repo_id, sha, MAX(`index`) AS max_index").
+		From("commit_status").
+		Where(builder.Or(conds...)).
+		GroupBy("context_hash, repo_id, sha")
+
+	sess := db.GetEngine(ctx).
+		Table(&CommitStatus{}).
+		Alias("c").
+		Join(
+			"INNER",
+			subquery,
+			"c.context_hash = commit_status.context_hash AND c.repo_id = commit_status.repo_id AND c.sha = commit_status.sha AND c.`index` = commit_status.max_index",
+		).
+		OrderBy("c.`index` DESC")
 	err := sess.Find(&results)
 	if err != nil {
 		return nil, err
 	}
 
-	repoStatuses := make(map[int64][]*CommitStatus)
-
-	if len(results) > 0 {
-		statuses := make([]*CommitStatus, 0, len(results))
-
-		conds = make([]builder.Cond, 0, len(results))
-		for _, result := range results {
-			cond := builder.Eq{
-				"`index`": result.Index,
-				"repo_id": result.RepoID,
-				"sha":     result.SHA,
-			}
-			conds = append(conds, cond)
-		}
-		err = getBase().Where(builder.Or(conds...)).Find(&statuses)
-		if err != nil {
-			return nil, err
-		}
-
-		// Group the statuses by repo ID
-		for _, status := range statuses {
-			repoStatuses[status.RepoID] = append(repoStatuses[status.RepoID], status)
-		}
+	// Group the statuses by repo ID
+	for _, status := range results {
+		repoStatuses[status.RepoID] = append(repoStatuses[status.RepoID], status)
 	}
 
 	return repoStatuses, nil
@@ -347,6 +335,12 @@ func GetLatestCommitStatusForRepoCommitIDs(ctx context.Context, repoID int64, co
 	type result struct {
 		Index int64
 		SHA   string
+	}
+	repoStatuses := make(map[string][]*CommitStatus)
+
+	if len(commitIDs) == 0 {
+		// Avoid performing query when there will be no `sha` query conditions added.
+		return repoStatuses, nil
 	}
 
 	getBase := func() *xorm.Session {
@@ -366,8 +360,6 @@ func GetLatestCommitStatusForRepoCommitIDs(ctx context.Context, repoID int64, co
 	if err != nil {
 		return nil, err
 	}
-
-	repoStatuses := make(map[string][]*CommitStatus)
 
 	if len(results) > 0 {
 		statuses := make([]*CommitStatus, 0, len(results))

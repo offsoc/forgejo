@@ -271,6 +271,7 @@ func GetRunnerByID(ctx context.Context, id int64) (*ActionRunner, error) {
 // UpdateRunner updates runner's information.
 func UpdateRunner(ctx context.Context, r *ActionRunner, cols ...string) error {
 	e := db.GetEngine(ctx)
+	r.Name, _ = util.SplitStringAtByteN(r.Name, 255)
 	var err error
 	if len(cols) == 0 {
 		_, err = e.ID(r.ID).AllCols().Update(r)
@@ -312,6 +313,7 @@ func CreateRunner(ctx context.Context, t *ActionRunner) error {
 		// Remove OwnerID to avoid confusion; it's not worth returning an error here.
 		t.OwnerID = 0
 	}
+	t.Name, _ = util.SplitStringAtByteN(t.Name, 255)
 	return db.Insert(ctx, t)
 }
 

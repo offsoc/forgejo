@@ -1,0 +1,21 @@
+-
+  id: 1001
+  org_id: 3
+  lower_name: no_code
+  name: no_code
+  authorize: 1 # read
+  num_repos: 1
+  num_members: 1
+  includes_all_repositories: false
+  can_create_org_repo: false
+
+-
+  id: 1002
+  org_id: 3
+  lower_name: read_code
+  name: no_code
+  authorize: 1 # read
+  num_repos: 1
+  num_members: 1
+  includes_all_repositories: false
+  can_create_org_repo: false

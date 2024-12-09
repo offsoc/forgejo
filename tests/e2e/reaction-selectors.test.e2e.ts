@@ -3,14 +3,14 @@
 // routers/web/repo/issue.go
 // @watch end
 
-import {expect} from '@playwright/test';
+import {expect, type Locator} from '@playwright/test';
 import {test, login_user, load_logged_in_context} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
 });
 
-const assertReactionCounts = (comment, counts) =>
+const assertReactionCounts = (comment: Locator, counts: unknown) =>
   expect(async () => {
     await expect(comment.locator('.reactions')).toBeVisible();
 
@@ -29,7 +29,7 @@ const assertReactionCounts = (comment, counts) =>
     return expect(reactions).toStrictEqual(counts);
   }).toPass();
 
-async function toggleReaction(menu, reaction) {
+async function toggleReaction(menu: Locator, reaction: string) {
   await menu.evaluateAll((menus) => menus[0].focus());
   await menu.locator('.add-reaction').click();
   await menu.locator(`[role=menuitem][data-reaction-content="${reaction}"]`).click();

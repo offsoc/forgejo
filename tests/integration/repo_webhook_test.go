@@ -316,6 +316,7 @@ func assertInput(t testing.TB, form *goquery.Selection, name string) string {
 
 func testWebhookForms(name string, session *TestSession, validFields map[string]string, invalidPatches ...map[string]string) func(t *testing.T) {
 	return func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 		t.Run("repo1", func(t *testing.T) {
 			testWebhookFormsShared(t, "/user2/repo1/settings/hooks", name, session, validFields, invalidPatches...)
 		})

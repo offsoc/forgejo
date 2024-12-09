@@ -177,10 +177,11 @@ func ViewPackageVersion(ctx *context.Context) {
 	ctx.Data["Title"] = pd.Package.Name
 	ctx.Data["IsPackagesPage"] = true
 	ctx.Data["PackageDescriptor"] = pd
+	ctx.Data["PackageRegistryHost"] = setting.Packages.RegistryHost
 
 	switch pd.Package.Type {
 	case packages_model.TypeContainer:
-		ctx.Data["RegistryHost"] = setting.Packages.RegistryHost
+
 	case packages_model.TypeAlpine:
 		branches := make(container.Set[string])
 		repositories := make(container.Set[string])
@@ -203,7 +204,6 @@ func ViewPackageVersion(ctx *context.Context) {
 		ctx.Data["Repositories"] = util.Sorted(repositories.Values())
 		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
 	case packages_model.TypeArch:
-		ctx.Data["RegistryHost"] = setting.Packages.RegistryHost
 		ctx.Data["SignMail"] = fmt.Sprintf("%s@noreply.%s", ctx.Package.Owner.Name, setting.Packages.RegistryHost)
 		groups := make(container.Set[string])
 		for _, f := range pd.Files {

@@ -91,6 +91,10 @@ func ListUserTeams(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/TeamList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	teams, count, err := organization.SearchTeam(ctx, &organization.SearchTeamOptions{
 		ListOptions: utils.GetListOptions(ctx),
