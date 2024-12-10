@@ -344,8 +344,8 @@ func TestValidatePackageSpec(t *testing.T) {
 	})
 }
 
-func TestDescString(t *testing.T) {
-	const pkgdesc = `%FILENAME%
+func TestDescAndFileString(t *testing.T) {
+	const pkgDesc = `%FILENAME%
 zstd-1.5.5-1-x86_64.pkg.tar.zst
 
 %NAME%
@@ -417,6 +417,12 @@ dummy6
 
 `
 
+	const pkgFiles = `%FILES%
+usr/
+usr/bin/
+usr/bin/zstd
+`
+
 	md := &Package{
 		CompressType: "zst",
 		Name:         "zstd",
@@ -441,7 +447,9 @@ dummy6
 			BuildDate:      1681646714,
 			Packager:       "Jelle van der Waa <jelle@archlinux.org>",
 			Arch:           "x86_64",
+			Files:          []string{"usr/", "usr/bin/", "usr/bin/zstd"},
 		},
 	}
-	require.Equal(t, pkgdesc, md.Desc())
+	require.Equal(t, pkgDesc, md.Desc())
+	require.Equal(t, pkgFiles, md.Files())
 }

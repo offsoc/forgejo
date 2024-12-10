@@ -14,7 +14,7 @@
 #  - after it is merged, double check it works by setting the
 #    run-end-to-end-test on a pull request (any pull request will do)
 #
-name: end-to-end
+name: issue-labels
 
 on:
   push:
@@ -25,24 +25,6 @@ on:
       - labeled
 
 jobs:
-  info:
-    if: vars.ROLE == 'forgejo-coding'
-    runs-on: docker
-    container:
-      image: code.forgejo.org/oci/node:20-bookworm
-    steps:
-      - name: event
-        run: |
-          echo github.event.pull_request.head.repo.fork = ${{ github.event.pull_request.head.repo.fork }}
-          echo github.event.action = ${{ github.event.action }}
-          echo github.event.label
-          cat <<'EOF'
-          ${{ toJSON(github.event.label) }}
-          EOF
-          cat <<'EOF'
-          ${{ toJSON(github.event) }}
-          EOF
-
   cascade:
     if: >
       vars.ROLE == 'forgejo-coding' && (

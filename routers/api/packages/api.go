@@ -153,66 +153,10 @@ func CommonRoutes() *web.Route {
 			})
 		}, reqPackageAccess(perm.AccessModeRead))
 		r.Group("/arch", func() {
-			r.Group("/repository.key", func() {
-				r.Head("", arch.GetRepositoryKey)
-				r.Get("", arch.GetRepositoryKey)
-			})
-
-			r.Methods("HEAD,GET,PUT,DELETE", "*", func(ctx *context.Context) {
-				pathGroups := strings.Split(strings.Trim(ctx.Params("*"), "/"), "/")
-				groupLen := len(pathGroups)
-				isGetHead := ctx.Req.Method == "HEAD" || ctx.Req.Method == "GET"
-				isPut := ctx.Req.Method == "PUT"
-				isDelete := ctx.Req.Method == "DELETE"
-				if isGetHead {
-					if groupLen < 2 {
-						ctx.Status(http.StatusNotFound)
-						return
-					}
-					if groupLen == 2 {
-						ctx.SetParams("group", "")
-						ctx.SetParams("arch", pathGroups[0])
-						ctx.SetParams("file", pathGroups[1])
-					} else {
-						ctx.SetParams("group", strings.Join(pathGroups[:groupLen-2], "/"))
-						ctx.SetParams("arch", pathGroups[groupLen-2])
-						ctx.SetParams("file", pathGroups[groupLen-1])
-					}
-					arch.GetPackageOrDB(ctx)
-					return
-				} else if isPut {
-					ctx.SetParams("group", strings.Join(pathGroups, "/"))
-					reqPackageAccess(perm.AccessModeWrite)(ctx)
-					if ctx.Written() {
-						return
-					}
-					arch.PushPackage(ctx)
-					return
-				} else if isDelete {
-					if groupLen < 3 {
-						ctx.Status(http.StatusBadRequest)
-						return
-					}
-					if groupLen == 3 {
-						ctx.SetParams("group", "")
-						ctx.SetParams("package", pathGroups[0])
-						ctx.SetParams("version", pathGroups[1])
-						ctx.SetParams("arch", pathGroups[2])
-					} else {
-						ctx.SetParams("group", strings.Join(pathGroups[:groupLen-3], "/"))
-						ctx.SetParams("package", pathGroups[groupLen-3])
-						ctx.SetParams("version", pathGroups[groupLen-2])
-						ctx.SetParams("arch", pathGroups[groupLen-1])
-					}
-					reqPackageAccess(perm.AccessModeWrite)(ctx)
-					if ctx.Written() {
-						return
-					}
-					arch.RemovePackage(ctx)
-					return
-				}
-				ctx.Status(http.StatusNotFound)
-			})
+			r.Methods("HEAD,GET", "/repository.key", arch.GetRepositoryKey)
+			r.Methods("HEAD,GET", "*", arch.GetPackageOrDB)
+			r.Methods("PUT", "*", reqPackageAccess(perm.AccessModeWrite), arch.PushPackage)
+			r.Methods("DELETE", "*", reqPackageAccess(perm.AccessModeWrite), arch.RemovePackage)
 		}, reqPackageAccess(perm.AccessModeRead))
 		r.Group("/cargo", func() {
 			r.Group("/api/v1/crates", func() {
@@ -693,40 +637,46 @@ func CommonRoutes() *web.Route {
 			}, reqPackageAccess(perm.AccessModeWrite))
 		}, reqPackageAccess(perm.AccessModeRead))
 		r.Group("/swift", func() {
-			r.Group("/{scope}/{name}", func() {
-				r.Group("", func() {
-					r.Get("", swift.EnumeratePackageVersions)
-					r.Get(".json", swift.EnumeratePackageVersions)
-				}, swift.CheckAcceptMediaType(swift.AcceptJSON))
-				r.Group("/{version}", func() {
-					r.Get("/Package.swift", swift.CheckAcceptMediaType(swift.AcceptSwift), swift.DownloadManifest)
-					r.Put("", reqPackageAccess(perm.AccessModeWrite), swift.CheckAcceptMediaType(swift.AcceptJSON), enforcePackagesQuota(), swift.UploadPackageFile)
-					r.Get("", func(ctx *context.Context) {
-						// Can't use normal routes here: https://github.com/go-chi/chi/issues/781
+			r.Group("", func() { // Needs to be unauthenticated.
+				r.Post("", swift.CheckAuthenticate)
+				r.Post("/login", swift.CheckAuthenticate)
+			})
+			r.Group("", func() {
+				r.Group("/{scope}/{name}", func() {
+					r.Group("", func() {
+						r.Get("", swift.EnumeratePackageVersions)
+						r.Get(".json", swift.EnumeratePackageVersions)
+					}, swift.CheckAcceptMediaType(swift.AcceptJSON))
+					r.Group("/{version}", func() {
+						r.Get("/Package.swift", swift.CheckAcceptMediaType(swift.AcceptSwift), swift.DownloadManifest)
+						r.Put("", reqPackageAccess(perm.AccessModeWrite), swift.CheckAcceptMediaType(swift.AcceptJSON), enforcePackagesQuota(), swift.UploadPackageFile)
+						r.Get("", func(ctx *context.Context) {
+							// Can't use normal routes here: https://github.com/go-chi/chi/issues/781
 
-						version := ctx.Params("version")
-						if strings.HasSuffix(version, ".zip") {
-							swift.CheckAcceptMediaType(swift.AcceptZip)(ctx)
-							if ctx.Written() {
-								return
+							version := ctx.Params("version")
+							if strings.HasSuffix(version, ".zip") {
+								swift.CheckAcceptMediaType(swift.AcceptZip)(ctx)
+								if ctx.Written() {
+									return
+								}
+								ctx.SetParams("version", version[:len(version)-4])
+								swift.DownloadPackageFile(ctx)
+							} else {
+								swift.CheckAcceptMediaType(swift.AcceptJSON)(ctx)
+								if ctx.Written() {
+									return
+								}
+								if strings.HasSuffix(version, ".json") {
+									ctx.SetParams("version", version[:len(version)-5])
+								}
+								swift.PackageVersionMetadata(ctx)
 							}
-							ctx.SetParams("version", version[:len(version)-4])
-							swift.DownloadPackageFile(ctx)
-						} else {
-							swift.CheckAcceptMediaType(swift.AcceptJSON)(ctx)
-							if ctx.Written() {
-								return
-							}
-							if strings.HasSuffix(version, ".json") {
-								ctx.SetParams("version", version[:len(version)-5])
-							}
-							swift.PackageVersionMetadata(ctx)
-						}
+						})
 					})
 				})
-			})
-			r.Get("/identifiers", swift.CheckAcceptMediaType(swift.AcceptJSON), swift.LookupPackageIdentifiers)
-		}, reqPackageAccess(perm.AccessModeRead))
+				r.Get("/identifiers", swift.CheckAcceptMediaType(swift.AcceptJSON), swift.LookupPackageIdentifiers)
+			}, reqPackageAccess(perm.AccessModeRead))
+		})
 		r.Group("/vagrant", func() {
 			r.Group("/authenticate", func() {
 				r.Get("", vagrant.CheckAuthenticate)

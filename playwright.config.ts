@@ -65,6 +65,7 @@ export default {
       /* Project-specific settings. */
       use: {
         ...devices['Desktop Chrome'],
+        permissions: ['clipboard-read', 'clipboard-write'],
       },
     },
 
@@ -87,6 +88,7 @@ export default {
       name: 'Mobile Chrome',
       use: {
         ...devices['Pixel 5'],
+        permissions: ['clipboard-read', 'clipboard-write'],
       },
     },
     {

@@ -22,6 +22,8 @@
 #    `backport/v1.21` label on a merged pull request that can be backported
 #    without conflict.
 #
+name: issue-labels
+
 on:
   pull_request_target:
     types:

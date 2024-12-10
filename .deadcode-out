@@ -15,7 +15,6 @@ code.gitea.io/gitea/models
 	ErrUpdateTaskNotExist.Unwrap
 	IsErrSHANotFound
 	IsErrMergeDivergingFastForwardOnly
-	GetYamlFixturesAccess
 
 code.gitea.io/gitea/models/actions
 	ScheduleList.GetUserIDs
