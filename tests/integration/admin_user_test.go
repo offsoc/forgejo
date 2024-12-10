@@ -9,9 +9,11 @@ import (
 	"strconv"
 	"testing"
 
+	auth_model "code.gitea.io/gitea/models/auth"
 	issues_model "code.gitea.io/gitea/models/issues"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -88,4 +90,34 @@ func TestAdminDeleteUser(t *testing.T) {
 
 	assertUserDeleted(t, userID, true)
 	unittest.CheckConsistencyFor(t, &user_model.User{})
+}
+
+func TestAdminViewUsersSorted(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	session := loginUser(t, "user1")
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadAdmin)
+
+	variations := [][]string{
+		{"alphabetically", "the_34-user.with.all.allowedChars", "user1", "user10", "user11"},
+		{"reversealphabetically", "user9", "user8", "user5", "user40"},
+		{"newest", "user40", "user39", "user38", "user37"},
+		{"oldest", "user1", "user2", "user4", "user5"},
+		{"recentupdate", "user2", "user1", "user40", "user39"},
+		{"leastupdate", "user4", "user5", "user8", "user9"},
+	}
+
+	for _, variation := range variations {
+		sortType := variation[0]
+		req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/admin/users?sort=%s&limit=4", sortType)).AddTokenAuth(token)
+		resp := session.MakeRequest(t, req, http.StatusOK)
+
+		var users []api.User
+		DecodeJSON(t, resp, &users)
+		assert.Len(t, users, 4)
+		for i, user := range users {
+			// +1 because the first element is the sort type
+			assert.Equalf(t, variation[i+1], user.UserName, "Sort type: %s, index %d", sortType, i+1)
+		}
+	}
 }

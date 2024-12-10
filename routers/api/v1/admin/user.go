@@ -415,6 +415,11 @@ func SearchUsers(ctx *context.APIContext) {
 	//   in: query
 	//   description: user's login name to search for
 	//   type: string
+	// - name: sort
+	//   in: query
+	//   description: sort order of results
+	//   type: string
+	//   enum: [oldest, newest, alphabetically, reversealphabetically, recentupdate, leastupdate]
 	// - name: page
 	//   in: query
 	//   description: page number of results to return (1-based)
@@ -431,12 +436,32 @@ func SearchUsers(ctx *context.APIContext) {
 
 	listOptions := utils.GetListOptions(ctx)
 
+	sort := ctx.FormString("sort")
+	var orderBy db.SearchOrderBy
+
+	switch sort {
+	case "oldest":
+		orderBy = db.SearchOrderByOldest
+	case "newest":
+		orderBy = db.SearchOrderByNewest
+	case "alphabetically":
+		orderBy = db.SearchOrderByAlphabetically
+	case "reversealphabetically":
+		orderBy = db.SearchOrderByAlphabeticallyReverse
+	case "recentupdate":
+		orderBy = db.SearchOrderByRecentUpdated
+	case "leastupdate":
+		orderBy = db.SearchOrderByLeastUpdated
+	default:
+		orderBy = db.SearchOrderByAlphabetically
+	}
+
 	users, maxResults, err := user_model.SearchUsers(ctx, &user_model.SearchUserOptions{
 		Actor:       ctx.Doer,
 		Type:        user_model.UserTypeIndividual,
 		LoginName:   ctx.FormTrim("login_name"),
 		SourceID:    ctx.FormInt64("source_id"),
-		OrderBy:     db.SearchOrderByAlphabetically,
+		OrderBy:     orderBy,
 		ListOptions: listOptions,
 	})
 	if err != nil {
