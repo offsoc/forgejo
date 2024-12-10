@@ -771,11 +771,11 @@ func TestGetInactiveUsers(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	// all inactive users
-	// user1's createdunix is 1730468968
+	// user1's createdunix is 1672578000
 	users, err := user_model.GetInactiveUsers(db.DefaultContext, 0)
 	require.NoError(t, err)
 	assert.Len(t, users, 1)
-	interval := time.Now().Unix() - 1730468968 + 3600*24
+	interval := time.Now().Unix() - 1672578000 + 3600*24
 	users, err = user_model.GetInactiveUsers(db.DefaultContext, time.Duration(interval*int64(time.Second)))
 	require.NoError(t, err)
 	require.Empty(t, users)
