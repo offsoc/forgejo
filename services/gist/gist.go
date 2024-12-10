@@ -26,7 +26,7 @@ const (
 
 // SetupGistHook creates the Gist Hook
 func SetupGistHook(path string) error {
-	err := os.Mkdir(filepath.Join(path, "hooks"), 0750)
+	err := os.Mkdir(filepath.Join(path, "hooks"), 0o750)
 	if err != nil && !os.IsExist(err) {
 		return err
 	}
