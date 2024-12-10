@@ -57,6 +57,21 @@ func (err ErrUserOwnPackages) Error() string {
 	return fmt.Sprintf("user still has ownership of packages [uid: %d]", err.UID)
 }
 
+// ErrUserOwnGists notifies that the user (still) owns the gists.
+type ErrUserOwnGists struct {
+	UID int64
+}
+
+// IsErrUserOwnGists checks if an error is an ErrErrUserOwnGists.
+func IsErrUserOwnGists(err error) bool {
+	_, ok := err.(ErrUserOwnGists)
+	return ok
+}
+
+func (err ErrUserOwnGists) Error() string {
+	return fmt.Sprintf("user still has ownership of gists [uid: %d]", err.UID)
+}
+
 // ErrDeleteLastAdminUser represents a "DeleteLastAdminUser" kind of error.
 type ErrDeleteLastAdminUser struct {
 	UID int64

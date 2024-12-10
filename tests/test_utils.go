@@ -34,6 +34,7 @@ import (
 	"code.gitea.io/gitea/modules/testlogger"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/routers"
+	gist_service "code.gitea.io/gitea/services/gist"
 	repo_service "code.gitea.io/gitea/services/repository"
 	files_service "code.gitea.io/gitea/services/repository/files"
 	wiki_service "code.gitea.io/gitea/services/wiki"
@@ -219,10 +220,6 @@ func InitTest(requireGitea bool) {
 		}
 	}
 
-	if err := unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/forgejo-gists-meta"), dir); err != nil {
-		log.Fatal("os.CopyDir Gists: %v", err)
-	}
-
 	routers.InitWebInstalled(graceful.GetManager().HammerContext())
 }
 
@@ -270,18 +267,25 @@ func cancelProcesses(t testing.TB, delay time.Duration) {
 	t.Logf("PrepareTestEnv: all processes cancelled within %s", time.Since(start))
 }
 
-func PrepareGitRepoDirectory(t testing.TB) {
+func PrepareGitRepoDirectory(t testing.TB, tempDir string) {
 	var err error
-	setting.RepoRootPath, err = os.MkdirTemp(t.TempDir(), "forgejo-repo-rooth")
+	setting.RepoRootPath, err = os.MkdirTemp(tempDir, "forgejo-repo-rooth")
 	require.NoError(t, err)
 	require.NoError(t, unittest.CopyDir(preparedDir, setting.RepoRootPath))
 }
 
-func PrepareGistRepoDirectory(t testing.TB) {
+func PrepareGistRepoDirectory(t testing.TB, tempDir string) {
 	var err error
-	setting.Gist.RootPath, err = os.MkdirTemp(t.TempDir(), "forgejo-gist-root")
+	setting.Gist.RootPath, err = os.MkdirTemp(tempDir, "forgejo-gist-root")
 	require.NoError(t, err)
-	require.NoError(t, unittest.CopyDir(preparedDir, setting.Gist.RootPath))
+	require.NoError(t, unittest.CopyDir(path.Join(filepath.Dir(setting.AppPath), "tests/forgejo-gists-meta"), setting.Gist.RootPath))
+
+	dirs, err := os.ReadDir(setting.Gist.RootPath)
+	require.NoError(t, err)
+
+	for _, currentDir := range dirs {
+		require.NoError(t, gist_service.SetupGistHook(filepath.Join(setting.Gist.RootPath, currentDir.Name())))
+	}
 }
 
 func PrepareArtifactsStorage(t testing.TB) {
@@ -336,9 +340,11 @@ func PrepareTestEnv(t testing.TB, skip ...int) func() {
 	// load database fixtures
 	require.NoError(t, unittest.LoadFixtures())
 
+	tempDir := t.TempDir()
+
 	// do not add more Prepare* functions here, only call necessary ones in the related test functions
-	PrepareGitRepoDirectory(t)
-	PrepareGistRepoDirectory(t)
+	PrepareGitRepoDirectory(t, tempDir)
+	PrepareGistRepoDirectory(t, tempDir)
 	PrepareLFSStorage(t)
 	PrepareCleanPackageData(t)
 	return deferFn

@@ -385,6 +385,13 @@ func registerRoutes(m *web.Route) {
 		}
 	}
 
+	gistsEnabled := func(ctx *context.Context) {
+		if !setting.Gist.Enabled {
+			ctx.Error(http.StatusForbidden)
+			return
+		}
+	}
+
 	feedEnabled := func(ctx *context.Context) {
 		if !setting.Other.EnableFeed {
 			ctx.Error(http.StatusNotFound)
@@ -474,9 +481,7 @@ func registerRoutes(m *web.Route) {
 			}
 		}, explore.Code)
 		m.Get("/topics/search", explore.TopicSearch)
-		if setting.Gist.Enabled {
-			m.Get("/gists", explore.Gists)
-		}
+		m.Get("/gists", gistsEnabled, explore.Gists)
 	}, ignExploreSignIn)
 	m.Group("/issues", func() {
 		m.Get("", user.Issues)
@@ -737,6 +742,11 @@ func registerRoutes(m *web.Route) {
 			m.Post("/delete", admin.DeletePackageVersion)
 			m.Post("/cleanup", admin.CleanupExpiredData)
 		}, packagesEnabled)
+
+		m.Group("/gists", func() {
+			m.Get("", admin.Gists)
+			m.Post("/delete", admin.DeleteGist)
+		}, gistsEnabled)
 
 		m.Group("/hooks", func() {
 			m.Get("", admin.DefaultOrSystemWebhooks)
@@ -1660,26 +1670,24 @@ func registerRoutes(m *web.Route) {
 		m.Get("/new", user.NewAvailable)
 	}, reqSignIn)
 
-	if setting.Gist.Enabled {
-		m.Group("/gists", func() {
-			m.Get("/-/new", reqSignIn, gist.New)
-			m.Post("/-/new/post", reqSignIn, gist.NewPost)
-			m.Group("/{gistuuid}", func() {
-				m.Get("", gist.View)
-				m.Get("/raw/{filename}", gist.Raw)
-				m.Group("", func() {
-					m.Get("/edit", gist.Edit)
-					m.Post("/edit/post", gist.EditPost)
-					m.Get("/delete", gist.Delete)
-				}, reqSignIn, context.RequireGistOwner)
+	m.Group("/gists", func() {
+		m.Get("/-/new", reqSignIn, gist.New)
+		m.Post("/-/new/post", reqSignIn, gist.NewPost)
+		m.Group("/{gistuuid}", func() {
+			m.Get("", gist.View)
+			m.Get("/raw/{filename}", gist.Raw)
+			m.Group("", func() {
+				m.Get("/edit", gist.Edit)
+				m.Post("/edit/post", gist.EditPost)
+				m.Post("/delete", gist.Delete)
+			}, reqSignIn, context.RequireGistOwner)
+			gitHTTPRouters(m)
+			m.Group(".git", func() {
 				gitHTTPRouters(m)
-				m.Group(".git", func() {
-					gitHTTPRouters(m)
-				})
-			}, context.GistAssignment)
-			m.Get("/-/sitemap-{idx}.xml", sitemapEnabled, gist.Sitemap)
-		})
-	}
+			})
+		}, context.GistAssignment)
+		m.Get("/-/sitemap-{idx}.xml", sitemapEnabled, gist.Sitemap)
+	}, gistsEnabled)
 
 	if setting.API.EnableSwagger {
 		m.Get("/swagger.v1.json", SwaggerV1Json)

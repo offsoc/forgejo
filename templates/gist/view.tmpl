@@ -9,7 +9,7 @@
 			<div class="tw-text-right tw-align-middle tw-flex tw-justify-center tw-items-center">
 				{{if .Gist.IsOwner .SignedUser}}
 					<a class="ui primary button" href="{{.Gist.Link}}/edit">{{ctx.Locale.Tr "edit"}}</a>
-					<a class="ui primary button red" href="{{.Gist.Link}}/delete">{{ctx.Locale.Tr "remove"}}</a>
+					<button class="ui primary button red show-modal" data-modal="#delete-gist-modal">{{ctx.Locale.Tr "remove"}}</button>
 				{{end}}
 				<div class="clone-panel ui action input">
 					{{template "repo/clone_buttons" .}}
@@ -51,3 +51,21 @@
 	</div>
 </div>
 {{template "base/footer" .}}
+
+{{if .Gist.IsOwner .SignedUser}}
+	<div class="ui small modal" id="delete-gist-modal">
+		<div class="header">
+			{{ctx.Locale.Tr "gist.delete"}}
+		</div>
+		<p>{{ctx.Locale.Tr "gist.delete.notice" .Gist.Name}}</p>
+		<div class="content">
+			<div class="text right actions">
+				<form action="{{.Gist.Link}}/delete" method="post">
+					{{.CsrfTokenHtml}}
+					<button type="button" class="ui cancel button">{{ctx.Locale.Tr "settings.cancel"}}</button>
+					<button type="submit" class="ui primary button red">{{ctx.Locale.Tr "remove"}}</button>
+				</form>
+			</div>
+		</div>
+	</div>
+{{end}}

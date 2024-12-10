@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAPISearchGists(t *testing.T) {
+func TestAPIGistsSearch(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
 	req := NewRequest(t, "GET", "/api/v1/gists/search")
@@ -23,11 +23,16 @@ func TestAPISearchGists(t *testing.T) {
 	var gists api.GistList
 	DecodeJSON(t, resp, &gists)
 
-	assert.Len(t, gists.Gists, 1)
-	assert.Equal(t, int64(1), gists.Gists[0].ID)
+	assert.Len(t, gists.Gists, 2)
+
+	assert.Equal(t, int64(4), gists.Gists[0].ID)
+	assert.Equal(t, int64(3), gists.Gists[0].Owner.ID)
+
+	assert.Equal(t, int64(1), gists.Gists[1].ID)
+	assert.Equal(t, int64(2), gists.Gists[1].Owner.ID)
 }
 
-func TestAPICreateGist(t *testing.T) {
+func TestAPIGistsCreate(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
 	session := loginUser(t, "user2")
@@ -54,9 +59,25 @@ func TestAPICreateGist(t *testing.T) {
 	assert.Equal(t, "New Gist", gist.Name)
 	assert.Equal(t, "public", gist.Visibility)
 	assert.Equal(t, "New Description", gist.Description)
+	assert.Equal(t, int64(2), gist.Owner.ID)
 }
 
-func TestAPIGistFiles(t *testing.T) {
+func TestAPIGistsGet(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	req := NewRequest(t, "GET", "/api/v1/gists/df852aec")
+	resp := MakeRequest(t, req, http.StatusOK)
+
+	var gist api.Gist
+	DecodeJSON(t, resp, &gist)
+
+	assert.Equal(t, "PublicGist", gist.Name)
+	assert.Equal(t, "This is a Description", gist.Description)
+	assert.Equal(t, "public", gist.Visibility)
+	assert.Equal(t, int64(2), gist.Owner.ID)
+}
+
+func TestAPIGistsFiles(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
 	session := loginUser(t, "user2")
@@ -93,7 +114,7 @@ func TestAPIGistFiles(t *testing.T) {
 	assert.Equal(t, "New text", files[0].Content)
 }
 
-func TestAPIDeleteGist(t *testing.T) {
+func TestAPIGistsDelete(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
 	session := loginUser(t, "user2")

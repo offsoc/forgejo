@@ -111,6 +111,12 @@ func GetGistByUUID(ctx context.Context, uuid string) (*Gist, error) {
 	return gist, nil
 }
 
+// CountOwnerGists retruns how many Gists a User Owns
+// Note: This function does not check if the caller has permission to view the Gists
+func CountOwnerGists(ctx context.Context, ownerID int64) (int64, error) {
+	return db.GetEngine(ctx).Where("owner_id = ?", ownerID).Count(new(Gist))
+}
+
 // GetRepoPath returns the Path to the Gist Repo
 func (gist *Gist) GetRepoPath() string {
 	return filepath.Join(setting.Gist.RootPath, fmt.Sprintf("%s.git", gist.UUID))

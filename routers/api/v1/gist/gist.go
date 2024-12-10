@@ -158,6 +158,12 @@ func Get(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	err := ctx.Gist.LoadOwner(ctx)
+	if err != nil {
+		ctx.ServerError("LoadOwner", err)
+		return
+	}
+
 	ctx.JSON(http.StatusOK, convert.ToGist(ctx, ctx.Gist, ctx.Doer))
 }
 

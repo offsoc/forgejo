@@ -26,7 +26,7 @@
 				</a>
 			</div>
 		</details>
-		<details class="item toggleable-item" {{if or .PageIsAdminRepositories (and .EnablePackages .PageIsAdminPackages)}}open{{end}}>
+		<details class="item toggleable-item" {{if or .PageIsAdminRepositories (and .EnablePackages .PageIsAdminPackages) (and .EnableGists .PageIsAdminGists)}}open{{end}}>
 			<summary>{{ctx.Locale.Tr "admin.assets"}}</summary>
 			<div class="menu">
 				{{if .EnablePackages}}
@@ -37,6 +37,11 @@
 				<a class="{{if .PageIsAdminRepositories}}active {{end}}item" href="{{AppSubUrl}}/admin/repos">
 					{{ctx.Locale.Tr "admin.repositories"}}
 				</a>
+				{{if .EnableGists}}
+					<a class="{{if .PageIsAdminGists}}active {{end}}item" href="{{AppSubUrl}}/admin/gists">
+						{{ctx.Locale.Tr "admin.gists.title"}}
+					</a>
+				{{end}}
 			</div>
 		</details>
 		<!-- Webhooks and OAuth can be both disabled here, so add this if statement to display different ui -->

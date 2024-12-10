@@ -1,0 +1,50 @@
+{{template "admin/layout_head" (dict "ctxData" . "pageClass" "admin")}}
+	<div class="admin-setting-content">
+		<h4 class="ui top attached header">
+			{{ctx.Locale.Tr "admin.gists.gist_manage_panel"}} ({{ctx.Locale.Tr "admin.total" .Total}})
+		</h4>
+		<div class="ui attached segment">
+			{{template "explore/search" .}}
+		</div>
+		<div class="ui attached table segment">
+			<table class="ui very basic striped table unstackable">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>{{ctx.Locale.Tr "admin.gists.owner"}}</th>
+						<th>{{ctx.Locale.Tr "admin.gists.name"}}</th>
+						<th>{{ctx.Locale.Tr "admin.gists.updated"}}</th>
+						<th>{{ctx.Locale.Tr "admin.gists.created"}}</th>
+						<th>{{ctx.Locale.Tr "admin.notices.op"}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{range .Gists}}
+						<tr>
+							<td>{{.ID}}</td>
+							<td><a class="tw-break-anywhere" href="{{.Owner.HomeLink}}">{{.Owner.Name}}</a></td>
+							<td><a class="tw-break-anywhere" href="{{.Link}}">{{.Name}}</a></td>
+							<td>{{DateUtils.AbsoluteShort .UpdatedUnix}}</td>
+							<td>{{DateUtils.AbsoluteShort .CreatedUnix}}</td>
+							<td><a class="delete-button" href="" data-url="{{$.Link}}/delete?page={{$.Page.Paginater.Current}}&sort={{$.SortType}}" data-id="{{.UUID}}" data-name="{{.Name}}">{{svg "octicon-trash"}}</a></td>
+						</tr>
+					{{end}}
+				</tbody>
+			</table>
+		</div>
+
+		{{template "base/paginate" .}}
+	</div>
+
+<div class="ui g-modal-confirm delete modal">
+	<div class="header">
+		{{svg "octicon-trash"}}
+		{{ctx.Locale.Tr "gist.delete"}}
+	</div>
+	<div class="content">
+		{{ctx.Locale.Tr "gist.delete.notice" (`<span class="name"></span>`|SafeHTML)}}
+	</div>
+	{{template "base/modal_actions_confirm" .}}
+</div>
+
+{{template "admin/layout_footer" .}}

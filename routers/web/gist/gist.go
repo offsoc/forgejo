@@ -217,6 +217,8 @@ func Delete(ctx *context.Context) {
 		return
 	}
 
+	ctx.Flash.Success(ctx.Tr("gist.delete.success"))
+
 	ctx.Redirect("/")
 }
 

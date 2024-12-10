@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/models"
 	asymkey_model "code.gitea.io/gitea/models/asymkey"
 	"code.gitea.io/gitea/models/db"
+	gist_model "code.gitea.io/gitea/models/gist"
 	"code.gitea.io/gitea/models/organization"
 	packages_model "code.gitea.io/gitea/models/packages"
 	repo_model "code.gitea.io/gitea/models/repo"
@@ -25,6 +26,7 @@ import (
 	"code.gitea.io/gitea/modules/storage"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/services/agit"
+	gist_service "code.gitea.io/gitea/services/gist"
 	org_service "code.gitea.io/gitea/services/org"
 	"code.gitea.io/gitea/services/packages"
 	container_service "code.gitea.io/gitea/services/packages/container"
@@ -176,6 +178,12 @@ func DeleteUser(ctx context.Context, u *user_model.User, purge bool) error {
 			return err
 		}
 
+		// Delete all gists belonging to this user
+		err = gist_service.DeleteOwnerGists(ctx, u)
+		if err != nil {
+			return err
+		}
+
 		// Remove from Organizations and delete last owner organizations
 		// Now this is not within a transaction because there are internal transactions within the DeleteOrganization
 		// BUT: the db will still be consistent even if a number of organizations memberships and organizations have already been deleted
@@ -259,6 +267,15 @@ func DeleteUser(ctx context.Context, u *user_model.User, purge bool) error {
 		return fmt.Errorf("HasOwnerPackages: %w", err)
 	} else if ownsPackages {
 		return models.ErrUserOwnPackages{UID: u.ID}
+	}
+
+	// Check ownership of gists.
+	gistCount, err := gist_model.CountOwnerGists(ctx, u.ID)
+	if err != nil {
+		return fmt.Errorf("CountOwnerGists: %w", err)
+	}
+	if gistCount != 0 {
+		return models.ErrUserOwnGists{UID: u.ID}
 	}
 
 	if err := deleteUser(ctx, u, purge); err != nil {

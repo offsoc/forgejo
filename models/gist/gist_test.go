@@ -48,6 +48,14 @@ func TestGetGistByUUID(t *testing.T) {
 	assert.Nil(t, gist)
 }
 
+func TestCountOwnerGists(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	count, err := gist_model.CountOwnerGists(db.DefaultContext, 2)
+	require.NoError(t, err)
+	assert.Equal(t, int64(3), count)
+}
+
 func TestGistGetRepoPath(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 

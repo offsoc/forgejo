@@ -27,7 +27,8 @@ type GistList struct {
 }
 
 type CreateGistOption struct {
-	Name        string      `json:"name" binding:"Required;AlphaDashDot;MaxSize(100)"`
+	Name string `json:"name" binding:"Required;MaxSize(100)"`
+	// enum: public,hidden,private
 	Visibility  string      `json:"visibility" binding:"Required"`
 	Description string      `json:"description"`
 	Files       []*GistFile `json:"files" binding:"Required"`
