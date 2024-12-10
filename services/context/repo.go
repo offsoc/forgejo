@@ -734,8 +734,7 @@ func RepoAssignment(ctx *Context) context.CancelFunc {
 	// - have a fork of the repository
 	// - the repository is a fork of a base repository and the user has a fork of the same base repository
 	canPush := ctx.Repo.CanWrite(unit_model.TypeCode) ||
-		(ctx.IsSigned && repo_model.HasForkedRepo(ctx, ctx.Doer.ID, ctx.Repo.Repository.ID)) ||
-		(repo.BaseRepo != nil && ctx.IsSigned && repo_model.HasForkedRepo(ctx, ctx.Doer.ID, repo.BaseRepo.ID))
+		(ctx.IsSigned && repo_model.HasForkedRepo(ctx, ctx.Doer.ID, ctx.Repo.Repository))
 	canCompare := false
 
 	// Pull request is allowed if this is a fork repository

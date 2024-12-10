@@ -60,7 +60,7 @@ func ForkRepositoryIfNotExists(ctx context.Context, doer, owner *user_model.User
 		}
 	}
 
-	forkedRepo, err := repo_model.GetUserFork(ctx, opts.BaseRepo.ID, owner.ID)
+	forkedRepo, err := repo_model.GetUserFork(ctx, opts.BaseRepo, owner.ID)
 	if err != nil {
 		return nil, err
 	}

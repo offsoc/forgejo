@@ -22,11 +22,17 @@ func GetRepositoriesByForkID(ctx context.Context, forkID int64) ([]*Repository, 
 }
 
 // GetForkedRepo checks if given user has already forked a repository with given ID.
-func GetForkedRepo(ctx context.Context, ownerID, repoID int64) *Repository {
+func GetForkedRepo(ctx context.Context, ownerID int64, baseRepo *Repository) *Repository {
 	repo := new(Repository)
-	has, _ := db.GetEngine(ctx).
-		Where("owner_id=? AND fork_id=?", ownerID, repoID).
-		Get(repo)
+	query := db.GetEngine(ctx).Where("owner_id=?", ownerID)
+	if baseRepo.IsFork {
+		query = query.
+			And("fork_id=? OR fork_id=?", baseRepo.ID, baseRepo.ForkID)
+	} else {
+		query = query.
+			And("fork_id=?", baseRepo.ID)
+	}
+	has, _ := query.Get(repo)
 	if has {
 		return repo
 	}
@@ -34,18 +40,31 @@ func GetForkedRepo(ctx context.Context, ownerID, repoID int64) *Repository {
 }
 
 // HasForkedRepo checks if given user has already forked a repository with given ID.
-func HasForkedRepo(ctx context.Context, ownerID, repoID int64) bool {
-	has, _ := db.GetEngine(ctx).
+func HasForkedRepo(ctx context.Context, ownerID int64, baseRepo *Repository) bool {
+	query := db.GetEngine(ctx).
 		Table("repository").
-		Where("owner_id=? AND fork_id=?", ownerID, repoID).
-		Exist()
+		Where("owner_id=?", ownerID)
+	if baseRepo.IsFork {
+		query = query.And("fork_id=? OR fork_id=?", baseRepo.ID, baseRepo.ForkID)
+	} else {
+		query = query.And("fork_id=?", baseRepo.ID)
+	}
+	has, _ := query.Exist()
 	return has
 }
 
-// GetUserFork return user forked repository from this repository, if not forked return nil
-func GetUserFork(ctx context.Context, repoID, userID int64) (*Repository, error) {
+// GetUserFork return user forked repository from this repository, if not forked return nil.
+// If that repository is itself a fork, the id of its base repository should be supplied,
+// so that forks of this base repository are considered too.
+func GetUserFork(ctx context.Context, repo *Repository, userID int64) (*Repository, error) {
 	var forkedRepo Repository
-	has, err := db.GetEngine(ctx).Where("fork_id = ?", repoID).And("owner_id = ?", userID).Get(&forkedRepo)
+	query := db.GetEngine(ctx).Where("owner_id = ?", userID)
+	if repo.IsFork {
+		query = query.And("fork_id = ? OR fork_id = ?", repo.ID, repo.ForkID)
+	} else {
+		query = query.And("fork_id = ?", repo.ID)
+	}
+	has, err := query.Get(&forkedRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +123,7 @@ func GetForksByUserAndOrgs(ctx context.Context, user *user_model.User, repo *Rep
 	if user == nil {
 		return repoList, nil
 	}
-	forkedRepo, err := GetUserFork(ctx, repo.ID, user.ID)
+	forkedRepo, err := GetUserFork(ctx, repo, user.ID)
 	if err != nil {
 		return repoList, err
 	}

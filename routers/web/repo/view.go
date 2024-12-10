@@ -1076,7 +1076,7 @@ func renderHomeCode(ctx *context.Context) {
 		// If this is not a fork, check if the signed in user has a fork, and
 		// check branches there.
 		if !ctx.Repo.Repository.IsFork {
-			repo := repo_model.GetForkedRepo(ctx, ctx.Doer.ID, ctx.Repo.Repository.ID)
+			repo := repo_model.GetForkedRepo(ctx, ctx.Doer.ID, ctx.Repo.Repository)
 			if repo != nil {
 				baseBranches, err := git_model.FindRecentlyPushedNewBranches(ctx, repo.ID, ctx.Doer.ID, repo.DefaultBranch)
 				if err != nil {
