@@ -76,7 +76,7 @@ func init() {
 	db.RegisterModel(new(StarListRepos))
 }
 
-// GetStarListByID returne the star list for the given ID.
+// GetStarListByID returns the star list for the given ID.
 // If the ID do not exists, it returns a ErrStarListNotFound error.
 func GetStarListByID(ctx context.Context, id int64) (*StarList, error) {
 	var starList StarList
@@ -93,7 +93,7 @@ func GetStarListByID(ctx context.Context, id int64) (*StarList, error) {
 	return &starList, nil
 }
 
-// GetStarListByID returne the star list of the given user with the given name.
+// GetStarListByID returns the star list of the given user with the given name.
 // If the name do not exists, it returns a ErrStarListNotFound error.
 func GetStarListByName(ctx context.Context, userID int64, name string) (*StarList, error) {
 	var starList StarList
@@ -110,7 +110,7 @@ func GetStarListByName(ctx context.Context, userID int64, name string) (*StarLis
 	return &starList, nil
 }
 
-// GetStarListsByUserID retruns all star lists for the given user
+// GetStarListsByUserID returns all star lists for the given user
 func GetStarListsByUserID(ctx context.Context, userID int64, includePrivate bool) (StarListSlice, error) {
 	cond := builder.NewCond().And(builder.Eq{"user_id": userID})
 
@@ -209,7 +209,7 @@ func (starList *StarList) LoadRepoIDs(ctx context.Context) error {
 	return nil
 }
 
-// Retruns if the list contains the given repo id.
+// Returns true if the list contains the given repo id.
 // This function needs the repo ids loaded to work.
 func (starList *StarList) ContainsRepoID(repoID int64) bool {
 	return slices.Contains(*starList.RepoIDs, repoID)

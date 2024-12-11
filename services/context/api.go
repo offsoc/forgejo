@@ -107,7 +107,7 @@ type APIUnauthorizedError struct {
 
 // APIUnauthorizedError is a unauthorized error response
 // swagger:response unauthorized
-type swaggerAPInauthorizedError struct {
+type swaggerAPUnauthorizedError struct {
 	// in:body
 	Body APIUnauthorizedError `json:"body"`
 }
@@ -161,13 +161,11 @@ type swaggerAPIFeatureDisabledError struct {
 	Body APINotFound `json:"body"`
 }
 
-// APIRepoArchivedError is an error that is raised when an archived repo should be modified
-// swagger:response repoArchivedError
 type APIRepoArchivedError struct {
 	APIError
 }
 
-// APIRepoArchivedError is an error that is raised when an archived repo should be modified
+// APIRepoArchivedError is an error that is raised when the modified repo is archived and cannot be modified
 // swagger:response repoArchivedError
 type swaggerAPIRepoArchivedError struct {
 	// in:body
