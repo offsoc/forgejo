@@ -17,7 +17,7 @@ import (
 func TestAPIGistsSearch(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	req := NewRequest(t, "GET", "/api/v1/gists/search")
+	req := NewRequest(t, "GET", "/api/v1/gists/search?sort=alphabetically")
 	resp := MakeRequest(t, req, http.StatusOK)
 
 	var gists api.GistList

@@ -17,6 +17,9 @@ import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
+
+	// This import is needed, so the table is created
+	_ "code.gitea.io/gitea/models/gist"
 )
 
 var fixturesLoader *testfixtures.Loader
