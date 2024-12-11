@@ -18,7 +18,6 @@ import (
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 
-	// This import is needed, so the table is created
 	_ "code.gitea.io/gitea/models/gist"
 )
 
