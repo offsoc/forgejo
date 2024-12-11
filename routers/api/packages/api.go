@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/routers/api/packages/alpine"
+	"code.gitea.io/gitea/routers/api/packages/alt"
 	"code.gitea.io/gitea/routers/api/packages/arch"
 	"code.gitea.io/gitea/routers/api/packages/cargo"
 	"code.gitea.io/gitea/routers/api/packages/chef"
@@ -617,6 +618,73 @@ func CommonRoutes() *web.Route {
 							return
 						}
 						rpm.DeletePackageFile(ctx)
+					}
+					return
+				}
+
+				ctx.Status(http.StatusNotFound)
+			})
+		}, reqPackageAccess(perm.AccessModeRead))
+		r.Group("/alt", func() {
+
+			var (
+				repoPattern     = regexp.MustCompile(`\A(.*?)\.repo\z`)
+				uploadPattern   = regexp.MustCompile(`\A(.*?)/upload\z`)
+				baseRepoPattern = regexp.MustCompile(`(\S+)\.repo/(\S+)\/base/(\S+)`)
+				rpmsRepoPattern = regexp.MustCompile(`(\S+)\.repo/(\S+)\.(\S+)\/([a-zA-Z0-9_-]+)-([\d.]+-[a-zA-Z0-9_-]+)\.(\S+)\.rpm`)
+			)
+
+			r.Methods("HEAD,GET,PUT,DELETE", "*", func(ctx *context.Context) {
+				path := ctx.Params("*")
+				isGetHead := ctx.Req.Method == "HEAD" || ctx.Req.Method == "GET"
+				isPut := ctx.Req.Method == "PUT"
+				isDelete := ctx.Req.Method == "DELETE"
+
+				m := repoPattern.FindStringSubmatch(path)
+				if len(m) == 2 && isGetHead {
+					ctx.SetParams("group", strings.Trim(m[1], "/"))
+					return
+				}
+
+				m = baseRepoPattern.FindStringSubmatch(path)
+				if len(m) == 4 {
+					if strings.Trim(m[1], "/") != "alt" {
+						ctx.SetParams("group", strings.Trim(m[1], "/"))
+					}
+					ctx.SetParams("filename", m[3])
+					if isGetHead {
+						alt.GetRepositoryFile(ctx, m[2])
+					}
+				}
+
+				m = uploadPattern.FindStringSubmatch(path)
+				if len(m) == 2 && isPut {
+					reqPackageAccess(perm.AccessModeWrite)(ctx)
+					if ctx.Written() {
+						return
+					}
+					ctx.SetParams("group", strings.Trim(m[1], "/"))
+					alt.UploadPackageFile(ctx)
+					return
+				}
+
+				m = rpmsRepoPattern.FindStringSubmatch(path)
+				if len(m) == 7 && (isGetHead || isDelete) {
+
+					if strings.Trim(m[1], "/") != "alt" {
+						ctx.SetParams("group", strings.Trim(m[1], "/"))
+					}
+					ctx.SetParams("name", m[4])
+					ctx.SetParams("version", m[5])
+					ctx.SetParams("architecture", m[6])
+					if isGetHead {
+						alt.DownloadPackageFile(ctx)
+					} else {
+						reqPackageAccess(perm.AccessModeWrite)(ctx)
+						if ctx.Written() {
+							return
+						}
+						alt.DeletePackageFile(ctx)
 					}
 					return
 				}

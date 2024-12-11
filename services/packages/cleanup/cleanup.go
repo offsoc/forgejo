@@ -21,6 +21,7 @@ import (
 	container_service "code.gitea.io/gitea/services/packages/container"
 	debian_service "code.gitea.io/gitea/services/packages/debian"
 	rpm_service "code.gitea.io/gitea/services/packages/rpm"
+	alt_service "code.gitea.io/gitea/services/packages/alt"
 )
 
 // Task method to execute cleanup rules and cleanup expired package data
@@ -136,6 +137,10 @@ func ExecuteCleanupRules(outerCtx context.Context) error {
 			} else if pcr.Type == packages_model.TypeArch {
 				if err := arch_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: arch.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
+				}
+			} else if pcr.Type == packages_model.TypeAlt {
+				if err := alt_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
+					return fmt.Errorf("CleanupRule [%d]: alt.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
 			}
 		}

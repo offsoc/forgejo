@@ -51,6 +51,7 @@ const (
 	TypePub       Type = "pub"
 	TypePyPI      Type = "pypi"
 	TypeRpm       Type = "rpm"
+	TypeAlt       Type = "alt"
 	TypeRubyGems  Type = "rubygems"
 	TypeSwift     Type = "swift"
 	TypeVagrant   Type = "vagrant"
@@ -76,6 +77,7 @@ var TypeList = []Type{
 	TypePub,
 	TypePyPI,
 	TypeRpm,
+	TypeAlt,
 	TypeRubyGems,
 	TypeSwift,
 	TypeVagrant,
@@ -122,6 +124,8 @@ func (pt Type) Name() string {
 		return "PyPI"
 	case TypeRpm:
 		return "RPM"
+	case TypeAlt:
+		return "Alt"
 	case TypeRubyGems:
 		return "RubyGems"
 	case TypeSwift:
@@ -173,6 +177,8 @@ func (pt Type) SVGName() string {
 		return "gitea-python"
 	case TypeRpm:
 		return "gitea-rpm"
+	case TypeAlt:
+		return "gitea-alt"
 	case TypeRubyGems:
 		return "gitea-rubygems"
 	case TypeSwift:

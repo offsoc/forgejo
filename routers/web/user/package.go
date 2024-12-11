@@ -22,6 +22,7 @@ import (
 	arch_model "code.gitea.io/gitea/modules/packages/arch"
 	debian_module "code.gitea.io/gitea/modules/packages/debian"
 	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
+	alt_module "code.gitea.io/gitea/modules/packages/alt"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
@@ -250,6 +251,23 @@ func ViewPackageVersion(ctx *context.Context) {
 			}
 		}
 
+		ctx.Data["Groups"] = util.Sorted(groups.Values())
+		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
+	case packages_model.TypeAlt:
+		groups := make(container.Set[string])
+		architectures := make(container.Set[string])
+
+		for _, f := range pd.Files {
+			for _, pp := range f.Properties {
+				switch pp.Name {
+				case alt_module.PropertyGroup:
+					groups.Add(pp.Value)
+				case alt_module.PropertyArchitecture:
+					architectures.Add(pp.Value)
+				}
+			}
+		}
+		
 		ctx.Data["Groups"] = util.Sorted(groups.Values())
 		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
 	}
