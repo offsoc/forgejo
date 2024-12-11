@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"code.gitea.io/gitea/models"
 	asymkey_model "code.gitea.io/gitea/models/asymkey"
@@ -430,12 +431,17 @@ func SearchUsers(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 
 	listOptions := utils.GetListOptions(ctx)
+	intSource, err := strconv.ParseInt(ctx.FormString("source_id"), 10, 64)
+	var sourceID optional.Option[int64]
+	if sourceID = optional.Some(intSource); err != nil {
+		sourceID = optional.None[int64]()
+	}
 
 	users, maxResults, err := user_model.SearchUsers(ctx, &user_model.SearchUserOptions{
 		Actor:       ctx.Doer,
 		Type:        user_model.UserTypeIndividual,
 		LoginName:   ctx.FormTrim("login_name"),
-		SourceID:    ctx.FormInt64("source_id"),
+		SourceID:    sourceID,
 		OrderBy:     db.SearchOrderByAlphabetically,
 		ListOptions: listOptions,
 	})

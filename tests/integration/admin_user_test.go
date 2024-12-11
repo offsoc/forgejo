@@ -4,14 +4,17 @@
 package integration
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
 
+	auth_model "code.gitea.io/gitea/models/auth"
 	issues_model "code.gitea.io/gitea/models/issues"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -88,4 +91,44 @@ func TestAdminDeleteUser(t *testing.T) {
 
 	assertUserDeleted(t, userID, true)
 	unittest.CheckConsistencyFor(t, &user_model.User{})
+}
+
+func TestSourceId(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	testUser23 := &user_model.User{
+		Name:        "ausersourceid23",
+		LoginName:   "ausersourceid23",
+		Email:       "ausersourceid23@example.com",
+		Passwd:      "ausersourceid23password",
+		Type:        user_model.UserTypeIndividual,
+		LoginType:   auth_model.Plain,
+		LoginSource: 23,
+	}
+	defer createUser(context.Background(), t, testUser23)()
+
+	session := loginUser(t, "user1")
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadAdmin)
+
+	// Our new user start with 'a' so it should be the first one
+	req := NewRequest(t, "GET", "/api/v1/admin/users?limit=1").AddTokenAuth(token)
+	resp := session.MakeRequest(t, req, http.StatusOK)
+	var users []api.User
+	DecodeJSON(t, resp, &users)
+	assert.Len(t, users, 1)
+	assert.Equal(t, "ausersourceid23", users[0].UserName)
+
+	// Now our new user should not be in the list, because we filter by source_id 0
+	req = NewRequest(t, "GET", "/api/v1/admin/users?limit=1&source_id=0").AddTokenAuth(token)
+	resp = session.MakeRequest(t, req, http.StatusOK)
+	DecodeJSON(t, resp, &users)
+	assert.Len(t, users, 1)
+	assert.Equal(t, "the_34-user.with.all.allowedChars", users[0].UserName)
+
+	// Now our new user should be in the list, because we filter by source_id 23
+	req = NewRequest(t, "GET", "/api/v1/admin/users?limit=1&source_id=23").AddTokenAuth(token)
+	resp = session.MakeRequest(t, req, http.StatusOK)
+	DecodeJSON(t, resp, &users)
+	assert.Len(t, users, 1)
+	assert.Equal(t, "ausersourceid23", users[0].UserName)
 }
