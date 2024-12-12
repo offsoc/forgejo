@@ -433,8 +433,10 @@ func SearchUsers(ctx *context.APIContext) {
 	listOptions := utils.GetListOptions(ctx)
 	intSource, err := strconv.ParseInt(ctx.FormString("source_id"), 10, 64)
 	var sourceID optional.Option[int64]
-	if sourceID = optional.Some(intSource); err != nil {
+	if ctx.FormString("source_id") == "" || err != nil {
 		sourceID = optional.None[int64]()
+	} else {
+		sourceID = optional.Some(intSource)
 	}
 
 	users, maxResults, err := user_model.SearchUsers(ctx, &user_model.SearchUserOptions{
