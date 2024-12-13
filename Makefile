@@ -48,7 +48,7 @@ GO_LICENSES_PACKAGE ?= github.com/google/go-licenses@v1.6.0 # renovate: datasour
 GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasource=go
 DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.28.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
-GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.16.2 # renovate: datasource=go
+GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.17.0 # renovate: datasource=go
 RENOVATE_NPM_PACKAGE ?= renovate@39.57.4 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
 
 # https://github.com/disposable-email-domains/disposable-email-domains/commits/main/
