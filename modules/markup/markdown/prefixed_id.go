@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"code.gitea.io/gitea/modules/container"
+	"code.gitea.io/gitea/modules/markup"
 	"code.gitea.io/gitea/modules/markup/common"
 	"code.gitea.io/gitea/modules/util"
 
@@ -33,8 +34,8 @@ func (p *prefixedIDs) GenerateWithDefault(value, dft []byte) []byte {
 	if len(result) == 0 {
 		result = dft
 	}
-	if !bytes.HasPrefix(result, []byte("user-content-")) {
-		result = append([]byte("user-content-"), result...)
+	if !bytes.HasPrefix(result, []byte(markup.MarkdownIDPrefix)) {
+		result = append([]byte(markup.MarkdownIDPrefix), result...)
 	}
 	if p.values.Add(util.UnsafeBytesToString(result)) {
 		return result

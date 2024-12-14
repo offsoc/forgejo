@@ -142,9 +142,9 @@ func testAnswers(baseURLContent, baseURLImages string) []string {
 <li><a href="` + baseURLContent + `/plot_var_example" rel="nofollow">Plot var helper</a></li>
 </ul>
 `,
-		`<h2 id="user-content-what-is-wine-staging">What is Wine Staging?</h2>
+		`<h2 id="~what-is-wine-staging">What is Wine Staging?</h2>
 <p><strong>Wine Staging</strong> on website <a href="http://wine-staging.com" rel="nofollow">wine-staging.com</a>.</p>
-<h2 id="user-content-quick-links">Quick Links</h2>
+<h2 id="~quick-links">Quick Links</h2>
 <p>Here are some links to the most important topics. You can find the full list of pages at the sidebar.</p>
 <table>
 <thead>
@@ -168,15 +168,15 @@ func testAnswers(baseURLContent, baseURLImages string) []string {
 <li>Perform a test run by hitting the Run! button.<br/>
 <a href="` + baseURLImages + `/images/2.png" rel="nofollow"><img src="` + baseURLImages + `/images/2.png" title="2.png" alt="images/2.png"/></a></li>
 </ol>
-<h2 id="user-content-custom-id">More tests</h2>
+<h2 id="~custom-id">More tests</h2>
 <p>(from <a href="https://www.markdownguide.org/extended-syntax/" rel="nofollow">https://www.markdownguide.org/extended-syntax/</a>)</p>
-<h3 id="user-content-checkboxes">Checkboxes</h3>
+<h3 id="~checkboxes">Checkboxes</h3>
 <ul>
 <li class="task-list-item"><input type="checkbox" disabled="" data-source-position="434"/>unchecked</li>
 <li class="task-list-item"><input type="checkbox" disabled="" data-source-position="450" checked=""/>checked</li>
 <li class="task-list-item"><input type="checkbox" disabled="" data-source-position="464"/>still unchecked</li>
 </ul>
-<h3 id="user-content-definition-list">Definition list</h3>
+<h3 id="~definition-list">Definition list</h3>
 <dl>
 <dt>First Term</dt>
 <dd>This is the definition of the first term.</dd>
@@ -184,19 +184,19 @@ func testAnswers(baseURLContent, baseURLImages string) []string {
 <dd>This is one definition of the second term.</dd>
 <dd>This is another definition of the second term.</dd>
 </dl>
-<h3 id="user-content-footnotes">Footnotes</h3>
-<p>Here is a simple footnote,<sup id="fnref:user-content-1"><a href="#fn:user-content-1" rel="nofollow">1</a></sup> and here is a longer one.<sup id="fnref:user-content-bignote"><a href="#fn:user-content-bignote" rel="nofollow">2</a></sup></p>
+<h3 id="~footnotes">Footnotes</h3>
+<p>Here is a simple footnote,<sup id="fnref:~1"><a href="#fn:~1" rel="nofollow">1</a></sup> and here is a longer one.<sup id="fnref:~bignote"><a href="#fn:~bignote" rel="nofollow">2</a></sup></p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-1">
-<p>This is the first footnote. <a href="#fnref:user-content-1" rel="nofollow">↩︎</a></p>
+<li id="fn:~1">
+<p>This is the first footnote. <a href="#fnref:~1" rel="nofollow">↩︎</a></p>
 </li>
-<li id="fn:user-content-bignote">
+<li id="fn:~bignote">
 <p>Here is one with multiple paragraphs and code.</p>
 <p>Indent paragraphs to include them in the footnote.</p>
 <p><code>{ my code }</code></p>
-<p>Add as many paragraphs as you like. <a href="#fnref:user-content-bignote" rel="nofollow">↩︎</a></p>
+<p>Add as many paragraphs as you like. <a href="#fnref:~bignote" rel="nofollow">↩︎</a></p>
 </li>
 </ol>
 </div>
@@ -578,12 +578,12 @@ func TestFootnote(t *testing.T) {
 		{
 			`Citation needed[^0].
 [^0]: Source`,
-			`<p>Citation needed<sup id="fnref:user-content-0"><a href="#fn:user-content-0" rel="nofollow">1</a></sup>.</p>
+			`<p>Citation needed<sup id="fnref:~0"><a href="#fn:~0" rel="nofollow">1</a></sup>.</p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-0">
-<p>Source <a href="#fnref:user-content-0" rel="nofollow">↩︎</a></p>
+<li id="fn:~0">
+<p>Source <a href="#fnref:~0" rel="nofollow">↩︎</a></p>
 </li>
 </ol>
 </div>
@@ -597,12 +597,12 @@ func TestFootnote(t *testing.T) {
 		{
 			`Citation needed[^1], Citation needed twice[^3]
 [^3]: Source`,
-			`<p>Citation needed[^1], Citation needed twice<sup id="fnref:user-content-3"><a href="#fn:user-content-3" rel="nofollow">1</a></sup></p>
+			`<p>Citation needed[^1], Citation needed twice<sup id="fnref:~3"><a href="#fn:~3" rel="nofollow">1</a></sup></p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-3">
-<p>Source <a href="#fnref:user-content-3" rel="nofollow">↩︎</a></p>
+<li id="fn:~3">
+<p>Source <a href="#fnref:~3" rel="nofollow">↩︎</a></p>
 </li>
 </ol>
 </div>
@@ -618,12 +618,12 @@ func TestFootnote(t *testing.T) {
 			`Citation needed[^0]
 [^0]: Source 1
 [^0]: Source 2`,
-			`<p>Citation needed<sup id="fnref:user-content-0"><a href="#fn:user-content-0" rel="nofollow">1</a></sup></p>
+			`<p>Citation needed<sup id="fnref:~0"><a href="#fn:~0" rel="nofollow">1</a></sup></p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-0">
-<p>Source 1 <a href="#fnref:user-content-0" rel="nofollow">↩︎</a></p>
+<li id="fn:~0">
+<p>Source 1 <a href="#fnref:~0" rel="nofollow">↩︎</a></p>
 </li>
 </ol>
 </div>
@@ -632,12 +632,12 @@ func TestFootnote(t *testing.T) {
 		{
 			`Citation needed![^0]
 [^0]: Source`,
-			`<p>Citation needed<sup id="fnref:user-content-0"><a href="#fn:user-content-0" rel="nofollow">1</a></sup></p>
+			`<p>Citation needed<sup id="fnref:~0"><a href="#fn:~0" rel="nofollow">1</a></sup></p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-0">
-<p>Source <a href="#fnref:user-content-0" rel="nofollow">↩︎</a></p>
+<li id="fn:~0">
+<p>Source <a href="#fnref:~0" rel="nofollow">↩︎</a></p>
 </li>
 </ol>
 </div>
@@ -657,15 +657,15 @@ func TestFootnote(t *testing.T) {
 			`Citation needed[^0]
 [^0]: Source with citation needed[^1]
 [^1]: Source`,
-			`<p>Citation needed<sup id="fnref:user-content-0"><a href="#fn:user-content-0" rel="nofollow">1</a></sup></p>
+			`<p>Citation needed<sup id="fnref:~0"><a href="#fn:~0" rel="nofollow">1</a></sup></p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-0">
-<p>Source with citation needed<sup id="fnref:user-content-1"><a href="#fn:user-content-1" rel="nofollow">2</a></sup> <a href="#fnref:user-content-0" rel="nofollow">↩︎</a></p>
+<li id="fn:~0">
+<p>Source with citation needed<sup id="fnref:~1"><a href="#fn:~1" rel="nofollow">2</a></sup> <a href="#fnref:~0" rel="nofollow">↩︎</a></p>
 </li>
-<li id="fn:user-content-1">
-<p>Source <a href="#fnref:user-content-1" rel="nofollow">↩︎</a></p>
+<li id="fn:~1">
+<p>Source <a href="#fnref:~1" rel="nofollow">↩︎</a></p>
 </li>
 </ol>
 </div>
@@ -674,12 +674,12 @@ func TestFootnote(t *testing.T) {
 		{
 			`Citation needed[^#]
 [^#]: Source`,
-			`<p>Citation needed<sup id="fnref:user-content-1"><a href="#fn:user-content-1" rel="nofollow">1</a></sup></p>
+			`<p>Citation needed<sup id="fnref:~1"><a href="#fn:~1" rel="nofollow">1</a></sup></p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-1">
-<p>Source <a href="#fnref:user-content-1" rel="nofollow">↩︎</a></p>
+<li id="fn:~1">
+<p>Source <a href="#fnref:~1" rel="nofollow">↩︎</a></p>
 </li>
 </ol>
 </div>
@@ -696,12 +696,12 @@ func TestFootnote(t *testing.T) {
 			`[^0]: Source
 
 Citation needed[^0].`,
-			`<p>Citation needed<sup id="fnref:user-content-0"><a href="#fn:user-content-0" rel="nofollow">1</a></sup>.</p>
+			`<p>Citation needed<sup id="fnref:~0"><a href="#fn:~0" rel="nofollow">1</a></sup>.</p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-0">
-<p>Source <a href="#fnref:user-content-0" rel="nofollow">↩︎</a></p>
+<li id="fn:~0">
+<p>Source <a href="#fnref:~0" rel="nofollow">↩︎</a></p>
 </li>
 </ol>
 </div>
@@ -736,12 +736,12 @@ Citation needed[^0].`,
 		{
 			`Citation needed[^Source here 0 # 9-3]
 [^Source here 0 # 9-3]: Source`,
-			`<p>Citation needed<sup id="fnref:user-content-source-here-0-9-3"><a href="#fn:user-content-source-here-0-9-3" rel="nofollow">1</a></sup></p>
+			`<p>Citation needed<sup id="fnref:~source-here-0-9-3"><a href="#fn:~source-here-0-9-3" rel="nofollow">1</a></sup></p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-source-here-0-9-3">
-<p>Source <a href="#fnref:user-content-source-here-0-9-3" rel="nofollow">↩︎</a></p>
+<li id="fn:~source-here-0-9-3">
+<p>Source <a href="#fnref:~source-here-0-9-3" rel="nofollow">↩︎</a></p>
 </li>
 </ol>
 </div>
@@ -750,12 +750,12 @@ Citation needed[^0].`,
 		{
 			`Citation needed[^0]
 [^0]:`,
-			`<p>Citation needed<sup id="fnref:user-content-0"><a href="#fn:user-content-0" rel="nofollow">1</a></sup></p>
+			`<p>Citation needed<sup id="fnref:~0"><a href="#fn:~0" rel="nofollow">1</a></sup></p>
 <div>
 <hr/>
 <ol>
-<li id="fn:user-content-0">
- <a href="#fnref:user-content-0" rel="nofollow">↩︎</a></li>
+<li id="fn:~0">
+ <a href="#fnref:~0" rel="nofollow">↩︎</a></li>
 </ol>
 </div>
 `,
@@ -1249,9 +1249,9 @@ include_toc: true
 </table>
 </details><details><summary>toc</summary><ul>
 <li>
-<a href="#user-content-header" rel="nofollow">Header</a></li>
+<a href="#~header" rel="nofollow">Header</a></li>
 </ul>
-</details><h2 id="user-content-header">Header</h2>`)
+</details><h2 id="~header">Header</h2>`)
 
 	test(`---
 key: value
@@ -1308,9 +1308,9 @@ gitea:
 </table>
 </details><details><summary>toc</summary><ul>
 <li>
-<a href="#user-content-another-header" rel="nofollow">Another header</a></li>
+<a href="#~another-header" rel="nofollow">Another header</a></li>
 </ul>
-</details><h1 id="user-content-another-header">Another header</h1>`)
+</details><h1 id="~another-header">Another header</h1>`)
 
 	test(`---
 gitea:

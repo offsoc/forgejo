@@ -68,8 +68,8 @@ var (
 	//   https://html.spec.whatwg.org/multipage/input.html#e-mail-state-(type%3Demail)
 	emailRegex = regexp.MustCompile("(?:\\s|^|\\(|\\[)([a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9]{2,}(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+)(?:\\s|$|\\)|\\]|;|,|\\?|!|\\.(\\s|$))")
 
-	// blackfriday extensions create IDs like fn:user-content-footnote
-	blackfridayExtRegex = regexp.MustCompile(`[^:]*:user-content-`)
+	// blackfriday extensions create IDs like fn:~footnote
+	blackfridayExtRegex = regexp.MustCompile(`[^:]*:~`)
 
 	// EmojiShortCodeRegex find emoji by alias like :smile:
 	EmojiShortCodeRegex = regexp.MustCompile(`:[-+\w]+:`)
@@ -79,6 +79,9 @@ var (
 
 // CSS class for action keywords (e.g. "closes: #1")
 const keywordClass = "issue-keyword"
+
+// Used to prefix id attributes to make markdown element not collide with ids used in the application
+const MarkdownIDPrefix = "~"
 
 // IsLink reports whether link fits valid format.
 func IsLink(link []byte) bool {
@@ -359,17 +362,17 @@ func postProcess(ctx *RenderContext, procs []processor, input io.Reader, output 
 }
 
 func visitNode(ctx *RenderContext, procs []processor, node *html.Node) {
-	// Add user-content- to IDs and "#" links if they don't already have them
+	// Add ~ prefix to IDs and "#" links if they don't already have them
 	for idx, attr := range node.Attr {
 		val := strings.TrimPrefix(attr.Val, "#")
-		notHasPrefix := !(strings.HasPrefix(val, "user-content-") || blackfridayExtRegex.MatchString(val))
+		notHasPrefix := !(strings.HasPrefix(val, MarkdownIDPrefix) || blackfridayExtRegex.MatchString(val))
 
 		if attr.Key == "id" && notHasPrefix {
-			node.Attr[idx].Val = "user-content-" + attr.Val
+			node.Attr[idx].Val = MarkdownIDPrefix + attr.Val
 		}
 
 		if attr.Key == "href" && strings.HasPrefix(attr.Val, "#") && notHasPrefix {
-			node.Attr[idx].Val = "#user-content-" + val
+			node.Attr[idx].Val = "#" + MarkdownIDPrefix + val
 		}
 
 		if attr.Key == "class" && attr.Val == "emoji" {

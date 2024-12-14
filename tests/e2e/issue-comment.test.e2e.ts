@@ -104,7 +104,7 @@ test('Quote reply', async ({browser}, workerInfo) => {
 
   await page.evaluate(() => {
     const range = new Range();
-    range.setStart(document.querySelector('#issuecomment-1001-content #user-content-lorem-ipsum').childNodes[1], 6);
+    range.setStart(document.querySelector('#issuecomment-1001-content #~lorem-ipsum').childNodes[1], 6);
     range.setEnd(document.querySelector('#issuecomment-1001-content p').childNodes[1].childNodes[0], 7);
 
     const selection = window.getSelection();

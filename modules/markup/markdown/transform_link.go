@@ -40,7 +40,7 @@ func (g *ASTTransformer) transformLink(ctx *markup.RenderContext, v *ast.Link) {
 		link = []byte(giteautil.URLJoin(base, string(link)))
 	}
 	if len(link) > 0 && link[0] == '#' {
-		link = []byte("#user-content-" + string(link)[1:])
+		link = []byte("#" + markup.MarkdownIDPrefix + string(link)[1:])
 	}
 	v.Destination = link
 }
