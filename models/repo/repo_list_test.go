@@ -64,7 +64,7 @@ func getTestCases() []struct {
 		{
 			name:  "PublicRepositoriesOfUser",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 15, Collaborate: optional.Some(false)},
-			count: 2,
+			count: 3,
 		},
 		{
 			name:  "PublicRepositoriesOfUser2",
@@ -79,7 +79,7 @@ func getTestCases() []struct {
 		{
 			name:  "PublicAndPrivateRepositoriesOfUser",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 15, Private: true, Collaborate: optional.Some(false)},
-			count: 4,
+			count: 5,
 		},
 		{
 			name:  "PublicAndPrivateRepositoriesOfUser2",
@@ -94,7 +94,7 @@ func getTestCases() []struct {
 		{
 			name:  "PublicRepositoriesOfUserIncludingCollaborative",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 15},
-			count: 5,
+			count: 6,
 		},
 		{
 			name:  "PublicRepositoriesOfUser2IncludingCollaborative",
@@ -109,7 +109,7 @@ func getTestCases() []struct {
 		{
 			name:  "PublicAndPrivateRepositoriesOfUserIncludingCollaborative",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 15, Private: true},
-			count: 9,
+			count: 10,
 		},
 		{
 			name:  "PublicAndPrivateRepositoriesOfUser2IncludingCollaborative",
@@ -144,12 +144,12 @@ func getTestCases() []struct {
 		{
 			name:  "AllPublic/PublicRepositoriesOfUserIncludingCollaborative",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 15, AllPublic: true, Template: optional.Some(false)},
-			count: 35,
+			count: 36,
 		},
 		{
 			name:  "AllPublic/PublicAndPrivateRepositoriesOfUserIncludingCollaborative",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 15, Private: true, AllPublic: true, AllLimited: true, Template: optional.Some(false)},
-			count: 40,
+			count: 41,
 		},
 		{
 			name:  "AllPublic/PublicAndPrivateRepositoriesOfUserIncludingCollaborativeByName",
@@ -164,7 +164,7 @@ func getTestCases() []struct {
 		{
 			name:  "AllPublic/PublicRepositoriesOfOrganization",
 			opts:  &repo_model.SearchRepoOptions{ListOptions: db.ListOptions{Page: 1, PageSize: 10}, OwnerID: 17, AllPublic: true, Collaborate: optional.Some(false), Template: optional.Some(false)},
-			count: 35,
+			count: 36,
 		},
 		{
 			name:  "AllTemplates",
@@ -428,15 +428,15 @@ func TestSearchRepositoryIDsByCondition(t *testing.T) {
 	}{
 		{
 			user:    nil,
-			repoIDs: []int64{1, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 1059},
+			repoIDs: []int64{1, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 63, 1059},
 		},
 		{
 			user:    unittest.AssertExistsAndLoadBean(t, &user.User{ID: 4}),
-			repoIDs: []int64{1, 3, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 38, 40, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 1001, 1059},
+			repoIDs: []int64{1, 3, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 38, 40, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 63, 1001, 1059},
 		},
 		{
 			user:    unittest.AssertExistsAndLoadBean(t, &user.User{ID: 5}),
-			repoIDs: []int64{1, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 38, 40, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 1001, 1059},
+			repoIDs: []int64{1, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 38, 40, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 63, 1001, 1059},
 		},
 	}
 
