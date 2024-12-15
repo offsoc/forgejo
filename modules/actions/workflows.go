@@ -24,6 +24,7 @@ type DetectedWorkflow struct {
 	EntryName    string
 	TriggerEvent *jobparser.Event
 	Content      []byte
+	ParsingError *string
 }
 
 func init() {
@@ -122,6 +123,16 @@ func DetectWorkflows(
 		events, err := GetEventsFromContent(content)
 		if err != nil {
 			log.Warn("ignore invalid workflow %q: %v", entry.Name(), err)
+			errorMessage := err.Error()
+			dwf := &DetectedWorkflow{
+				EntryName: entry.Name(),
+				TriggerEvent: &jobparser.Event{
+					Name: triggedEvent.Event(),
+				},
+				Content:      content,
+				ParsingError: &errorMessage,
+			}
+			workflows = append(workflows, dwf)
 			continue
 		}
 		for _, evt := range events {
