@@ -173,7 +173,7 @@ tasks:
 		p := &api.PushPayload{
 			Ref: "refs/heads/main",
 			HeadCommit: &api.PayloadCommit{
-				ID:      "b0404943256a1f5a50c3726f4378756b4c1e5704",
+				ID:      "165ddc03f1b820bb9d8b9ce66293c0fa095b154c",
 				Message: "replace simple with complex",
 			},
 			Repo: repo,
@@ -186,7 +186,7 @@ tasks:
 		require.NoError(t, err)
 
 		assert.Equal(t, `sources:
-    - http://localhost:3000/testdata/repo.git#b0404943256a1f5a50c3726f4378756b4c1e5704
+    - http://localhost:3000/testdata/repo.git#165ddc03f1b820bb9d8b9ce66293c0fa095b154c
 environment:
     BUILD_SUBMITTER: forgejo
     BUILD_SUBMITTER_URL: https://example.forgejo.org/
