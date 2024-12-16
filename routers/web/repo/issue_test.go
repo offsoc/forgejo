@@ -370,7 +370,16 @@ func TestCombineLabelComments(t *testing.T) {
 			issue := issues_model.Issue{
 				Comments: kase.beforeCombined,
 			}
-			combineLabelComments(&issue)
+
+			var prev, cur *issues_model.Comment
+			for i := 0; i < len(issue.Comments); i++ {
+				cur = issue.Comments[i]
+				if i > 0 {
+					prev = issue.Comments[i-1]
+				}
+
+				combineLabelComments(&issue, &i, prev, cur)
+			}
 			assert.EqualValues(t, kase.afterCombined, issue.Comments)
 		})
 	}
@@ -799,7 +808,15 @@ func TestCombineReviewRequests(t *testing.T) {
 			issue := issues_model.Issue{
 				Comments: testCase.beforeCombined,
 			}
-			combineRequestReviewComments(&issue)
+
+			var prev, cur *issues_model.Comment
+			for i := 0; i < len(issue.Comments); i++ {
+				cur = issue.Comments[i]
+				if i > 0 {
+					prev = issue.Comments[i-1]
+				}
+				combineRequestReviewComments(&issue, &i, prev, cur)
+			}
 			assert.EqualValues(t, testCase.afterCombined[0], issue.Comments[0])
 		})
 	}
