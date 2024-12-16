@@ -4003,15 +4003,11 @@ func combineRequestReviewComments(issue *issues_model.Issue, ind *int, prev *iss
 
 // combineCommentsHistory combines nearby elements in the history as one
 func combineCommentsHistory(issue *issues_model.Issue) {
-	var prev, cur *issues_model.Comment
+	var prev *issues_model.Comment
 	for i := 0; i < len(issue.Comments); i++ {
-		cur = issue.Comments[i]
-		if i > 0 {
-			prev = issue.Comments[i-1]
-		}
-
-		combineLabelComments(issue, &i, prev, cur)
-		combineRequestReviewComments(issue, &i, prev, cur)
+		combineLabelComments(issue, &i, prev, issue.Comments[i])
+		combineRequestReviewComments(issue, &i, prev, issue.Comments[i])
+		prev = issue.Comments[i]
 	}
 }
 
