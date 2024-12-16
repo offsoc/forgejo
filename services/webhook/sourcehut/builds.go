@@ -287,6 +287,12 @@ func (pc sourcehutConvertor) buildManifest(repo *api.Repository, commitID, gitRe
 	source := repo.CloneURL + "#" + commitID
 	found := false
 	for i, s := range manifest.Sources {
+		if s == strings.TrimPrefix(repo.SSHURL, "ssh://") {
+			source = strings.TrimPrefix(repo.SSHURL, "ssh://")
+			manifest.Sources[i] = source
+			found = true
+			break
+		}
 		if s == repo.CloneURL {
 			manifest.Sources[i] = source
 			found = true
