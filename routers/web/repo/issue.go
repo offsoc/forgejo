@@ -4007,7 +4007,34 @@ func combineCommentsHistory(issue *issues_model.Issue) {
 	for i := 0; i < len(issue.Comments); i++ {
 		combineLabelComments(issue, &i, prev, issue.Comments[i])
 		combineRequestReviewComments(issue, &i, prev, issue.Comments[i])
+		combineOpenCloseComments(issue, &i, prev, issue.Comments[i])
 		prev = issue.Comments[i]
+	}
+}
+
+func combineOpenCloseComments(issue *issues_model.Issue, ind *int, prev *issues_model.Comment, cur *issues_model.Comment) {
+	if *ind == 0 || cur == nil || prev == nil {
+		return
+	}
+
+	if (cur.CreatedUnix - prev.CreatedUnix) < 60 {
+		cancelComments := false
+		if (prev.Type == issues_model.CommentTypeClose) && (cur.Type == issues_model.CommentTypeReopen) {
+			cancelComments = true
+		}
+
+		if (prev.Type == issues_model.CommentTypeReopen) && (cur.Type == issues_model.CommentTypeClose) {
+			cancelComments = true
+		}
+
+		if cancelComments {
+			issue.Comments = append(issue.Comments[:*ind-1], issue.Comments[*ind+1:]...)
+			if *ind > 1 {
+				*ind -= 2
+			} else {
+				*ind--
+			}
+		}
 	}
 }
 
