@@ -7,6 +7,7 @@ import (
 	"archive/tar"
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -19,7 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
 
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archives"
 )
 
 // Arch Linux Packages
@@ -93,7 +94,7 @@ type FileMetadata struct {
 }
 
 // ParsePackage Function that receives arch package archive data and returns it's metadata.
-func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
+func ParsePackage(ctx context.Context, r *packages.HashedBuffer) (*Package, error) {
 	md5, _, sha256, _ := r.Sums()
 	_, err := r.Seek(0, io.SeekStart)
 	if err != nil {
@@ -109,39 +110,36 @@ func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
 		return nil, err
 	}
 
-	var tarball archiver.Reader
+	var tarball archives.Extraction
 	var tarballType string
 	if bytes.Equal(header[:len(magicZSTD)], magicZSTD) {
 		tarballType = "zst"
-		tarball = archiver.NewTarZstd()
+		tarball = archives.CompressedArchive{
+			Compression: archives.Zstd{},
+			Extraction:  archives.Tar{},
+		}
 	} else if bytes.Equal(header[:len(magicXZ)], magicXZ) {
 		tarballType = "xz"
-		tarball = archiver.NewTarXz()
+		tarball = archives.CompressedArchive{
+			Compression: archives.Xz{},
+			Extraction:  archives.Tar{},
+		}
 	} else if bytes.Equal(header[:len(magicGZ)], magicGZ) {
 		tarballType = "gz"
-		tarball = archiver.NewTarGz()
+		tarball = archives.CompressedArchive{
+			Compression: archives.Gz{},
+			Extraction:  archives.Tar{},
+		}
 	} else {
 		return nil, errors.New("not supported compression")
 	}
-	err = tarball.Open(r, 0)
-	if err != nil {
-		return nil, err
-	}
-	defer tarball.Close()
 
 	var pkg *Package
 	var mTree bool
 
 	files := make([]string, 0)
 
-	for {
-		f, err := tarball.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
+	if err := tarball.Extract(ctx, r, func(ctx context.Context, f archives.FileInfo) error {
 		// ref:https://gitlab.archlinux.org/pacman/pacman/-/blob/91546004903eea5d5267d59898a6029ba1d64031/lib/libalpm/add.c#L529-L533
 		if !strings.HasPrefix(f.Name(), ".") {
 			files = append(files, (f.Header.(*tar.Header)).Name)
@@ -149,15 +147,22 @@ func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
 
 		switch f.Name() {
 		case ".PKGINFO":
-			pkg, err = ParsePackageInfo(tarballType, f)
+			r, err := f.Open()
 			if err != nil {
-				_ = f.Close()
-				return nil, err
+				return err
+			}
+			defer r.Close()
+
+			pkg, err = ParsePackageInfo(tarballType, r)
+			if err != nil {
+				return err
 			}
 		case ".MTREE":
 			mTree = true
 		}
-		_ = f.Close()
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 
 	if pkg == nil {

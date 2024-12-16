@@ -6,7 +6,7 @@ package cmd
 
 import (
 	"fmt"
-	"io"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -21,36 +21,60 @@ import (
 	"code.gitea.io/gitea/modules/util"
 
 	"code.forgejo.org/go-chi/session"
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archives"
 	"github.com/urfave/cli/v2"
 )
 
-func addReader(w archiver.Writer, r io.ReadCloser, info os.FileInfo, customName string, verbose bool) error {
+func addReader(jobs chan archives.ArchiveAsyncJob, r fs.File, info os.FileInfo, customName string, verbose bool) error {
 	if verbose {
 		log.Info("Adding file %s", customName)
 	}
 
-	return w.Write(archiver.File{
-		FileInfo: archiver.FileInfo{
-			FileInfo:   info,
-			CustomName: customName,
+	result := make(chan error)
+	jobs <- archives.ArchiveAsyncJob{
+		File: archives.FileInfo{
+			FileInfo:      info,
+			NameInArchive: customName,
+			Open: func() (fs.File, error) {
+				return r, nil
+			},
 		},
-		ReadCloser: r,
-	})
+		Result: result,
+	}
+	return <-result
 }
 
-func addFile(w archiver.Writer, filePath, absPath string, verbose bool) error {
+func addFile(jobs chan archives.ArchiveAsyncJob, filePath, absPath string, verbose bool) error {
+	if verbose {
+		log.Info("Adding file %s", filePath)
+	}
+
 	file, err := os.Open(absPath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	fileInfo, err := file.Stat()
+	stat, err := file.Stat()
 	if err != nil {
 		return err
 	}
 
-	return addReader(w, file, fileInfo, filePath, verbose)
+	result := make(chan error)
+	jobs <- archives.ArchiveAsyncJob{
+		File: archives.FileInfo{
+			NameInArchive: filePath,
+			FileInfo:      stat,
+			Open: func() (fs.File, error) {
+				file, err := os.Open(absPath)
+				if err != nil {
+					return nil, err
+				}
+				return file, nil
+			},
+		},
+		Result: result,
+	}
+	return <-result
 }
 
 func isSubdir(upper, lower string) (bool, error) {
@@ -236,6 +260,10 @@ func runDump(ctx *cli.Context) error {
 			fatal("Unable to open %s: %v", fileName, err)
 		}
 	}
+	if err := os.Chmod(fileName, 0o600); err != nil {
+		fatal("Can't change file access permissions mask to 0600: %v", err)
+	}
+
 	defer file.Close()
 
 	absFileName, err := filepath.Abs(fileName)
@@ -243,27 +271,32 @@ func runDump(ctx *cli.Context) error {
 		return err
 	}
 
-	var iface any
+	var iface archives.Format
 	if fileName == "-" {
-		iface, err = archiver.ByExtension(fmt.Sprintf(".%s", outType))
+		iface, _, err = archives.Identify(stdCtx, fmt.Sprintf(".%s", outType), nil)
 	} else {
-		iface, err = archiver.ByExtension(fileName)
+		iface, _, err = archives.Identify(stdCtx, fileName, nil)
 	}
 	if err != nil {
 		fatal("Unable to get archiver for extension: %v", err)
 	}
 
-	w, _ := iface.(archiver.Writer)
-	if err := w.Create(file); err != nil {
-		fatal("Creating archiver.Writer failed: %v", err)
+	w, ok := iface.(archives.ArchiverAsync)
+	if !ok {
+		fatal("Format cannot be used to archive: %T", iface)
 	}
-	defer w.Close()
+
+	jobs := make(chan archives.ArchiveAsyncJob)
+	done := make(chan error)
+	go func() {
+		done <- w.ArchiveAsync(stdCtx, file, jobs)
+	}()
 
 	if ctx.IsSet("skip-repository") && ctx.Bool("skip-repository") {
 		log.Info("Skip dumping local repositories")
 	} else {
 		log.Info("Dumping local repositories... %s", setting.RepoRootPath)
-		if err := addRecursiveExclude(w, "repos", setting.RepoRootPath, []string{absFileName}, verbose); err != nil {
+		if err := addRecursiveExclude(jobs, "repos", setting.RepoRootPath, []string{absFileName}, verbose); err != nil {
 			fatal("Failed to include repositories: %v", err)
 		}
 
@@ -277,7 +310,7 @@ func runDump(ctx *cli.Context) error {
 				return err
 			}
 
-			return addReader(w, object, info, path.Join("data", "lfs", objPath), verbose)
+			return addReader(jobs, object, info, path.Join("data", "lfs", objPath), verbose)
 		}); err != nil {
 			fatal("Failed to dump LFS objects: %v", err)
 		}
@@ -310,13 +343,13 @@ func runDump(ctx *cli.Context) error {
 		fatal("Failed to dump database: %v", err)
 	}
 
-	if err := addFile(w, "forgejo-db.sql", dbDump.Name(), verbose); err != nil {
+	if err := addFile(jobs, "forgejo-db.sql", dbDump.Name(), verbose); err != nil {
 		fatal("Failed to include forgejo-db.sql: %v", err)
 	}
 
 	if len(setting.CustomConf) > 0 {
 		log.Info("Adding custom configuration file from %s", setting.CustomConf)
-		if err := addFile(w, "app.ini", setting.CustomConf, verbose); err != nil {
+		if err := addFile(jobs, "app.ini", setting.CustomConf, verbose); err != nil {
 			fatal("Failed to include specified app.ini: %v", err)
 		}
 	}
@@ -327,7 +360,7 @@ func runDump(ctx *cli.Context) error {
 		customDir, err := os.Stat(setting.CustomPath)
 		if err == nil && customDir.IsDir() {
 			if is, _ := isSubdir(setting.AppDataPath, setting.CustomPath); !is {
-				if err := addRecursiveExclude(w, "custom", setting.CustomPath, []string{absFileName}, verbose); err != nil {
+				if err := addRecursiveExclude(jobs, "custom", setting.CustomPath, []string{absFileName}, verbose); err != nil {
 					fatal("Failed to include custom: %v", err)
 				}
 			} else {
@@ -365,7 +398,7 @@ func runDump(ctx *cli.Context) error {
 		excludes = append(excludes, setting.Packages.Storage.Path)
 		excludes = append(excludes, setting.Log.RootPath)
 		excludes = append(excludes, absFileName)
-		if err := addRecursiveExclude(w, "data", setting.AppDataPath, excludes, verbose); err != nil {
+		if err := addRecursiveExclude(jobs, "data", setting.AppDataPath, excludes, verbose); err != nil {
 			fatal("Failed to include data directory: %v", err)
 		}
 	}
@@ -378,7 +411,7 @@ func runDump(ctx *cli.Context) error {
 			return err
 		}
 
-		return addReader(w, object, info, path.Join("data", "attachments", objPath), verbose)
+		return addReader(jobs, object, info, path.Join("data", "attachments", objPath), verbose)
 	}); err != nil {
 		fatal("Failed to dump attachments: %v", err)
 	}
@@ -393,7 +426,7 @@ func runDump(ctx *cli.Context) error {
 			return err
 		}
 
-		return addReader(w, object, info, path.Join("data", "packages", objPath), verbose)
+		return addReader(jobs, object, info, path.Join("data", "packages", objPath), verbose)
 	}); err != nil {
 		fatal("Failed to dump packages: %v", err)
 	}
@@ -409,21 +442,21 @@ func runDump(ctx *cli.Context) error {
 			log.Error("Unable to check if %s exists. Error: %v", setting.Log.RootPath, err)
 		}
 		if isExist {
-			if err := addRecursiveExclude(w, "log", setting.Log.RootPath, []string{absFileName}, verbose); err != nil {
+			if err := addRecursiveExclude(jobs, "log", setting.Log.RootPath, []string{absFileName}, verbose); err != nil {
 				fatal("Failed to include log: %v", err)
 			}
 		}
 	}
 
-	if fileName != "-" {
-		if err = w.Close(); err != nil {
+	// Indicate we're done.
+	close(jobs)
+	if err := <-done; err != nil {
+		// Don't leave residue if archive failed.
+		if fileName != "-" {
 			_ = util.Remove(fileName)
-			fatal("Failed to save %s: %v", fileName, err)
 		}
 
-		if err := os.Chmod(fileName, 0o600); err != nil {
-			log.Info("Can't change file access permissions mask to 0600: %v", err)
-		}
+		fatal("Archive failed: %v", err)
 	}
 
 	if fileName != "-" {
@@ -436,7 +469,7 @@ func runDump(ctx *cli.Context) error {
 }
 
 // addRecursiveExclude zips absPath to specified insidePath inside writer excluding excludeAbsPath
-func addRecursiveExclude(w archiver.Writer, insidePath, absPath string, excludeAbsPath []string, verbose bool) error {
+func addRecursiveExclude(jobs chan archives.ArchiveAsyncJob, insidePath, absPath string, excludeAbsPath []string, verbose bool) error {
 	absPath, err := filepath.Abs(absPath)
 	if err != nil {
 		return err
@@ -461,10 +494,10 @@ func addRecursiveExclude(w archiver.Writer, insidePath, absPath string, excludeA
 		}
 
 		if file.IsDir() {
-			if err := addFile(w, currentInsidePath, currentAbsPath, false); err != nil {
+			if err := addFile(jobs, currentInsidePath, currentAbsPath, false); err != nil {
 				return err
 			}
-			if err = addRecursiveExclude(w, currentInsidePath, currentAbsPath, excludeAbsPath, verbose); err != nil {
+			if err = addRecursiveExclude(jobs, currentInsidePath, currentAbsPath, excludeAbsPath, verbose); err != nil {
 				return err
 			}
 		} else {
@@ -482,7 +515,7 @@ func addRecursiveExclude(w archiver.Writer, insidePath, absPath string, excludeA
 				shouldAdd = targetStat.Mode().IsRegular()
 			}
 			if shouldAdd {
-				if err = addFile(w, currentInsidePath, currentAbsPath, verbose); err != nil {
+				if err = addFile(jobs, currentInsidePath, currentAbsPath, verbose); err != nil {
 					return err
 				}
 			}

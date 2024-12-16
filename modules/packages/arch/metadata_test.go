@@ -5,7 +5,9 @@ package arch
 
 import (
 	"bytes"
+	"context"
 	"errors"
+	fslib "io/fs"
 	"os"
 	"strings"
 	"testing"
@@ -14,7 +16,7 @@ import (
 
 	"code.gitea.io/gitea/modules/packages"
 
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archives"
 	"github.com/stretchr/testify/require"
 )
 
@@ -45,9 +47,6 @@ arch = x86_64
 	pfile, err := fs.Open("pkginfo")
 	require.NoError(t, err)
 
-	parcname, err := archiver.NameInArchive(pinf, ".PKGINFO", ".PKGINFO")
-	require.NoError(t, err)
-
 	// Test .MTREE file
 	minf, err := fs.Stat("mtree")
 	require.NoError(t, err)
@@ -55,39 +54,37 @@ arch = x86_64
 	mfile, err := fs.Open("mtree")
 	require.NoError(t, err)
 
-	marcname, err := archiver.NameInArchive(minf, ".MTREE", ".MTREE")
-	require.NoError(t, err)
-
 	t.Run("normal archive", func(t *testing.T) {
 		var buf bytes.Buffer
 
-		archive := archiver.NewTarZstd()
-		archive.Create(&buf)
-
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   pinf,
-				CustomName: parcname,
+		archive := archives.CompressedArchive{
+			Compression: archives.Zstd{},
+			Archival:    archives.Tar{},
+		}
+		err = archive.Archive(context.TODO(), &buf, []archives.FileInfo{
+			{
+				FileInfo:      pinf,
+				NameInArchive: ".PKGINFO",
+				Open: func() (fslib.File, error) {
+					return pfile, nil
+				},
 			},
-			ReadCloser: pfile,
-		})
-		require.NoError(t, errors.Join(pfile.Close(), err))
-
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   minf,
-				CustomName: marcname,
+			{
+				FileInfo:      minf,
+				NameInArchive: ".MTREE",
+				Open: func() (fslib.File, error) {
+					return mfile, nil
+				},
 			},
-			ReadCloser: mfile,
 		})
-		require.NoError(t, errors.Join(mfile.Close(), archive.Close(), err))
+		require.NoError(t, errors.Join(mfile.Close(), err))
 
 		reader, err := packages.CreateHashedBufferFromReader(&buf)
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer reader.Close()
-		_, err = ParsePackage(reader)
+		_, err = ParsePackage(context.TODO(), reader)
 
 		require.NoError(t, err)
 	})
@@ -95,15 +92,18 @@ arch = x86_64
 	t.Run("missing .PKGINFO", func(t *testing.T) {
 		var buf bytes.Buffer
 
-		archive := archiver.NewTarZstd()
-		archive.Create(&buf)
-		require.NoError(t, archive.Close())
+		archive := archives.CompressedArchive{
+			Compression: archives.Zstd{},
+			Archival:    archives.Tar{},
+		}
+
+		require.NoError(t, archive.Archive(context.TODO(), &buf, nil))
 
 		reader, err := packages.CreateHashedBufferFromReader(&buf)
 		require.NoError(t, err)
 
 		defer reader.Close()
-		_, err = ParsePackage(reader)
+		_, err = ParsePackage(context.TODO(), reader)
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), ".PKGINFO file not found")
@@ -115,22 +115,26 @@ arch = x86_64
 		pfile, err := fs.Open("pkginfo")
 		require.NoError(t, err)
 
-		archive := archiver.NewTarZstd()
-		archive.Create(&buf)
+		archive := archives.CompressedArchive{
+			Compression: archives.Zstd{},
+			Archival:    archives.Tar{},
+		}
 
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   pinf,
-				CustomName: parcname,
+		err = archive.Archive(context.TODO(), &buf, []archives.FileInfo{
+			{
+				FileInfo:      pinf,
+				NameInArchive: ".PKGINFO",
+				Open: func() (fslib.File, error) {
+					return pfile, nil
+				},
 			},
-			ReadCloser: pfile,
 		})
-		require.NoError(t, errors.Join(pfile.Close(), archive.Close(), err))
+		require.NoError(t, errors.Join(pfile.Close(), err))
 		reader, err := packages.CreateHashedBufferFromReader(&buf)
 		require.NoError(t, err)
 
 		defer reader.Close()
-		_, err = ParsePackage(reader)
+		_, err = ParsePackage(context.TODO(), reader)
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), ".MTREE file not found")

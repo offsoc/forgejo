@@ -78,7 +78,7 @@ func PushPackage(ctx *context.Context) {
 	}
 	defer buf.Close()
 
-	p, err := arch_module.ParsePackage(buf)
+	p, err := arch_module.ParsePackage(ctx, buf)
 	if err != nil {
 		apiError(ctx, http.StatusBadRequest, err)
 		return

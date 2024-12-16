@@ -4,11 +4,10 @@
 package cmd
 
 import (
-	"io"
 	"os"
 	"testing"
 
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archives"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,26 +16,28 @@ type mockArchiver struct {
 	addedFiles []string
 }
 
-func (mockArchiver) Create(out io.Writer) error {
-	return nil
+func (m *mockArchiver) Run(jobs chan archives.ArchiveAsyncJob) {
+	for job := range jobs {
+		m.addedFiles = append(m.addedFiles, job.File.NameInArchive)
+		job.Result <- nil
+	}
 }
 
-func (m *mockArchiver) Write(f archiver.File) error {
-	m.addedFiles = append(m.addedFiles, f.Name())
-	return nil
-}
-
-func (mockArchiver) Close() error {
-	return nil
+func newMock() (chan archives.ArchiveAsyncJob, *mockArchiver) {
+	jobs := make(chan archives.ArchiveAsyncJob)
+	archiver := &mockArchiver{}
+	go archiver.Run(jobs)
+	return jobs, archiver
 }
 
 func TestAddRecursiveExclude(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		dir := t.TempDir()
-		archiver := &mockArchiver{}
+		jobs, archiver := newMock()
 
-		err := addRecursiveExclude(archiver, "", dir, []string{}, false)
+		err := addRecursiveExclude(jobs, "", dir, []string{}, false)
 		require.NoError(t, err)
+		close(jobs)
 		assert.Empty(t, archiver.addedFiles)
 	})
 
@@ -46,19 +47,21 @@ func TestAddRecursiveExclude(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Run("No exclude", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			jobs, archiver := newMock()
 
-			err = addRecursiveExclude(archiver, "", dir, nil, false)
+			err = addRecursiveExclude(jobs, "", dir, nil, false)
 			require.NoError(t, err)
+			close(jobs)
 			assert.Len(t, archiver.addedFiles, 1)
 			assert.Contains(t, archiver.addedFiles, "example")
 		})
 
 		t.Run("With exclude", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			jobs, archiver := newMock()
 
-			err = addRecursiveExclude(archiver, "", dir, []string{dir + "/example"}, false)
+			err = addRecursiveExclude(jobs, "", dir, []string{dir + "/example"}, false)
 			require.NoError(t, err)
+			close(jobs)
 			assert.Empty(t, archiver.addedFiles)
 		})
 	})
@@ -73,10 +76,11 @@ func TestAddRecursiveExclude(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Run("No exclude", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			jobs, archiver := newMock()
 
-			err = addRecursiveExclude(archiver, "", dir, nil, false)
+			err = addRecursiveExclude(jobs, "", dir, nil, false)
 			require.NoError(t, err)
+			close(jobs)
 			assert.Len(t, archiver.addedFiles, 5)
 			assert.Contains(t, archiver.addedFiles, "deep")
 			assert.Contains(t, archiver.addedFiles, "deep/nested")
@@ -86,28 +90,31 @@ func TestAddRecursiveExclude(t *testing.T) {
 		})
 
 		t.Run("Exclude first directory", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			jobs, archiver := newMock()
 
-			err = addRecursiveExclude(archiver, "", dir, []string{dir + "/deep"}, false)
+			err = addRecursiveExclude(jobs, "", dir, []string{dir + "/deep"}, false)
 			require.NoError(t, err)
+			close(jobs)
 			assert.Empty(t, archiver.addedFiles)
 		})
 
 		t.Run("Exclude nested directory", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			jobs, archiver := newMock()
 
-			err = addRecursiveExclude(archiver, "", dir, []string{dir + "/deep/nested/folder"}, false)
+			err = addRecursiveExclude(jobs, "", dir, []string{dir + "/deep/nested/folder"}, false)
 			require.NoError(t, err)
+			close(jobs)
 			assert.Len(t, archiver.addedFiles, 2)
 			assert.Contains(t, archiver.addedFiles, "deep")
 			assert.Contains(t, archiver.addedFiles, "deep/nested")
 		})
 
 		t.Run("Exclude file", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			jobs, archiver := newMock()
 
-			err = addRecursiveExclude(archiver, "", dir, []string{dir + "/deep/nested/folder/example"}, false)
+			err = addRecursiveExclude(jobs, "", dir, []string{dir + "/deep/nested/folder/example"}, false)
 			require.NoError(t, err)
+			close(jobs)
 			assert.Len(t, archiver.addedFiles, 4)
 			assert.Contains(t, archiver.addedFiles, "deep")
 			assert.Contains(t, archiver.addedFiles, "deep/nested")
