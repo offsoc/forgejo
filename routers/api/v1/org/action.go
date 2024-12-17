@@ -189,6 +189,31 @@ func (Action) GetRegistrationToken(ctx *context.APIContext) {
 	shared.GetRegistrationToken(ctx, ctx.Org.Organization.ID, 0)
 }
 
+// SearchActionRunJobs return a list of actions jobs filtered by the provided parameters
+func (Action) SearchActionRunJobs(ctx *context.APIContext) {
+	// swagger:operation GET /orgs/{org}/actions/runners/jobs organization orgSearchRunJobs
+	// ---
+	// summary: Search for organization's action jobs according filter conditions
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: org
+	//   in: path
+	//   description: name of the organization
+	//   type: string
+	//   required: true
+	// - name: labels
+	//   in: query
+	//   description: a comma separated list of run job labels to search for
+	//   type: string
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/RunJobList"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	shared.GetActionRunJobs(ctx, ctx.Org.Organization.ID, 0)
+}
+
 // ListVariables list org-level variables
 func (Action) ListVariables(ctx *context.APIContext) {
 	// swagger:operation GET /orgs/{org}/actions/variables organization getOrgVariablesList
