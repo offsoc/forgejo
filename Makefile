@@ -360,7 +360,7 @@ ifneq "$(TAGS)" "$(shell cat $(TAGS_EVIDENCE) 2>/dev/null)"
 TAGS_PREREQ := $(TAGS_EVIDENCE)
 endif
 
-OAPI_CODEGEN_PACKAGE ?= github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.12.4
+OAPI_CODEGEN_PACKAGE ?= github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1
 KIN_OPENAPI_CODEGEN_PACKAGE ?= github.com/getkin/kin-openapi/cmd/validate@v0.114.0
 FORGEJO_API_SERVER = routers/api/forgejo/v1/generated.go
 
