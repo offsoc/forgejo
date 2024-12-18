@@ -41,7 +41,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
   await page.fill('input[name=attachment-new-name-2]', 'Test');
   await page.fill('input[name=attachment-new-exturl-2]', 'https://forgejo.org/');
   await page.click('.remove-rel-attach');
-  save_visual(page);
+  await save_visual(page);
   await page.click('.button.small.primary');
 
   // Validate release page and click edit
@@ -53,7 +53,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
   await expect(page.locator('.download[open] li:nth-of-type(2) a')).toHaveAttribute('href', '/user2/repo2/archive/2.0.tar.gz');
   await expect(page.locator('.download[open] li:nth-of-type(3)')).toContainText('Test');
   await expect(page.locator('.download[open] li:nth-of-type(3) a')).toHaveAttribute('href', 'https://forgejo.org/');
-  save_visual(page);
+  await save_visual(page);
   await page.locator('.octicon-pencil').first().click();
 
   // Validate edit page and edit the release
@@ -68,7 +68,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
   await expect(page.locator('.attachment_edit:visible')).toHaveCount(4);
   await page.locator('.attachment_edit:visible').nth(2).fill('Test3');
   await page.locator('.attachment_edit:visible').nth(3).fill('https://gitea.com/');
-  save_visual(page);
+  await save_visual(page);
   await page.click('.button.small.primary');
 
   // Validate release page and click edit
@@ -78,7 +78,7 @@ test('External Release Attachments', async ({browser, isMobile}, workerInfo) => 
   await expect(page.locator('.download[open] li:nth-of-type(3) a')).toHaveAttribute('href', 'https://gitea.io/');
   await expect(page.locator('.download[open] li:nth-of-type(4)')).toContainText('Test3');
   await expect(page.locator('.download[open] li:nth-of-type(4) a')).toHaveAttribute('href', 'https://gitea.com/');
-  save_visual(page);
+  await save_visual(page);
   await page.locator('.octicon-pencil').first().click();
 
   // Delete release

@@ -4,6 +4,15 @@ export const test = baseTest.extend({
   context: async ({browser}, use) => {
     return use(await test_context(browser));
   },
+  // see https://playwright.dev/docs/test-fixtures#adding-global-beforeeachaftereach-hooks
+  forEachTest: [async ({page}, use) => {
+    await use();
+    // some tests create a new page which is not yet available here
+    // only operate on tests that make the URL available
+    if (page.url() !== 'about:blank') {
+      await save_visual(page);
+    }
+  }, {auto: true}],
 });
 
 async function test_context(browser: Browser, options?: BrowserContextOptions) {
@@ -66,14 +75,28 @@ export async function save_visual(page: Page) {
   // Optionally include visual testing
   if (process.env.VISUAL_TEST) {
     await page.waitForLoadState('domcontentloaded');
-    // Mock page/version string
-    await page.locator('footer div.ui.left').evaluate((node) => node.innerHTML = 'MOCK');
+    // Mock/replace dynamic content which can have different size (and thus cannot simply be masked below)
+    await page.locator('footer .left-links').evaluate((node) => node.innerHTML = 'MOCK');
+    // replace timestamps in repos to mask them later down
+    await page.locator('.flex-item-body > relative-time').filter({hasText: /now|minute/}).evaluateAll((nodes) => {
+      for (const node of nodes) node.outerHTML = 'relative time in repo';
+    });
+    await page.locator('relative-time').evaluateAll((nodes) => {
+      for (const node of nodes) node.outerHTML = 'time element';
+    });
+    // used for instance for security keys
+    await page.locator('absolute-date').evaluateAll((nodes) => {
+      for (const node of nodes) node.outerHTML = 'time element';
+    });
     await expect(page).toHaveScreenshot({
       fullPage: true,
       timeout: 20000,
       mask: [
-        page.locator('.secondary-nav span>img.ui.avatar'),
-        page.locator('.ui.dropdown.jump.item span>img.ui.avatar'),
+        page.locator('.ui.avatar'),
+        page.locator('.sha'),
+        page.locator('#repo_migrating'),
+        // update order of recently created repos is not fully deterministic
+        page.locator('.flex-item-main').filter({hasText: 'relative time in repo'}),
       ],
     });
   }

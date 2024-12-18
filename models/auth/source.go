@@ -216,7 +216,7 @@ func CreateSource(ctx context.Context, source *Source) error {
 		return ErrSourceAlreadyExist{source.Name}
 	}
 	// Synchronization is only available with LDAP for now
-	if !source.IsLDAP() && !source.IsOAuth2() {
+	if !source.IsLDAP() {
 		source.IsSyncEnabled = false
 	}
 

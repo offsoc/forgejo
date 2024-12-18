@@ -5,7 +5,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, load_logged_in_context, login_user} from './utils_e2e.ts';
+import {test, save_visual, load_logged_in_context, login_user} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -40,6 +40,7 @@ test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
   // Check for the image preview via the expected attribute
   const preview = page.locator('div[data-tab="preview"] p[dir="auto"] a');
   await expect(preview).toHaveAttribute('href', 'http://localhost:3003/user2/repo1/media/branch/master/assets/logo.svg');
+  await save_visual(page);
 });
 
 test('markdown indentation', async ({browser}, workerInfo) => {
@@ -224,6 +225,7 @@ test('markdown insert table', async ({browser}, workerInfo) => {
 
   const newTableModal = page.locator('div[data-markdown-table-modal-id="0"]');
   await expect(newTableModal).toBeVisible();
+  await save_visual(page);
 
   await newTableModal.locator('input[name="table-rows"]').fill('3');
   await newTableModal.locator('input[name="table-columns"]').fill('2');
@@ -234,4 +236,5 @@ test('markdown insert table', async ({browser}, workerInfo) => {
 
   const textarea = page.locator('textarea[name=content]');
   await expect(textarea).toHaveValue('| Header  | Header  |\n|---------|---------|\n| Content | Content |\n| Content | Content |\n| Content | Content |\n');
+  await save_visual(page);
 });

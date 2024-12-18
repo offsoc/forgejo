@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"net/url"
@@ -25,6 +26,7 @@ import (
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/storage"
+	"code.gitea.io/gitea/modules/templates"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
@@ -108,16 +110,17 @@ type ViewRequest struct {
 type ViewResponse struct {
 	State struct {
 		Run struct {
-			Link              string     `json:"link"`
-			Title             string     `json:"title"`
-			Status            string     `json:"status"`
-			CanCancel         bool       `json:"canCancel"`
-			CanApprove        bool       `json:"canApprove"` // the run needs an approval and the doer has permission to approve
-			CanRerun          bool       `json:"canRerun"`
-			CanDeleteArtifact bool       `json:"canDeleteArtifact"`
-			Done              bool       `json:"done"`
-			Jobs              []*ViewJob `json:"jobs"`
-			Commit            ViewCommit `json:"commit"`
+			Link              string        `json:"link"`
+			Title             string        `json:"title"`
+			TitleHTML         template.HTML `json:"titleHTML"`
+			Status            string        `json:"status"`
+			CanCancel         bool          `json:"canCancel"`
+			CanApprove        bool          `json:"canApprove"` // the run needs an approval and the doer has permission to approve
+			CanRerun          bool          `json:"canRerun"`
+			CanDeleteArtifact bool          `json:"canDeleteArtifact"`
+			Done              bool          `json:"done"`
+			Jobs              []*ViewJob    `json:"jobs"`
+			Commit            ViewCommit    `json:"commit"`
 		} `json:"run"`
 		CurrentJob struct {
 			Title  string         `json:"title"`
@@ -194,7 +197,10 @@ func ViewPost(ctx *context_module.Context) {
 
 	resp := &ViewResponse{}
 
+	metas := ctx.Repo.Repository.ComposeMetas(ctx)
+
 	resp.State.Run.Title = run.Title
+	resp.State.Run.TitleHTML = templates.RenderCommitMessage(ctx, run.Title, metas)
 	resp.State.Run.Link = run.Link()
 	resp.State.Run.CanCancel = !run.Status.IsDone() && ctx.Repo.CanWrite(unit.TypeActions)
 	resp.State.Run.CanApprove = run.NeedApproval && ctx.Repo.CanWrite(unit.TypeActions)

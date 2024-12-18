@@ -925,16 +925,6 @@ td .commit-summary {
   border-radius: var(--border-radius);
 }
 
-@media (max-width: 767.98px) {
-  .repository.view.issue .comment-list .comment .content .form .button {
-    width: 100%;
-    margin: 0;
-  }
-  .repository.view.issue .comment-list .comment .content .form .button:not(:last-child) {
-    margin-bottom: 1rem;
-  }
-}
-
 .repository.view.issue .comment-list .comment .merge-section {
   background-color: var(--color-box-body);
 }

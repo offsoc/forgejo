@@ -41,7 +41,7 @@ jobs:
         with:
           fetch-depth: '0'
           show-progress: 'false'
-      - uses: actions/cascading-pr@v2
+      - uses: https://code.forgejo.org/actions/cascading-pr@v2.1.1
         with:
           origin-url: ${{ env.GITHUB_SERVER_URL }}
           origin-repo: ${{ github.repository }}

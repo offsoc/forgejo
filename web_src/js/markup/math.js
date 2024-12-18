@@ -11,7 +11,7 @@ export async function renderMath() {
   if (!els.length) return;
 
   const [{default: katex}] = await Promise.all([
-    import(/* webpackChunkName: "katex" */'katex'),
+    import(/* webpackChunkName: "katex" */'katex/dist/katex.js'),
     import(/* webpackChunkName: "katex" */'katex/dist/katex.css'),
   ]);
 

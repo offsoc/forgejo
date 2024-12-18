@@ -4,31 +4,31 @@ A minor or major Forgejo release is published every [three months](https://forge
 
 A [patch or minor release](https://semver.org/spec/v2.0.0.html) (e.g. upgrading from v7.0.0 to v7.0.1 or v7.1.0) does not require manual intervention. But [major releases](https://semver.org/spec/v2.0.0.html#spec-item-8) where the first version number changes (e.g. upgrading from v1.21 to v7.0) contain breaking changes and the release notes explain how to deal with them.
 
-The release notes of each release [are available in the corresponding milestone](https://codeberg.org/forgejo/forgejo/milestones), starting with [Forgejo 7.0.7](https://codeberg.org/forgejo/forgejo/milestone/7683) and [Forgejo 8.0.1](https://codeberg.org/forgejo/forgejo/milestone/7682).
+The release notes of each release [are available in the release-notes-published directory of this repository](release-notes-published), starting with [Forgejo 7.0.7](release-notes-published/7.0.7.md) and [Forgejo 8.0.1](release-notes-published/8.0.1.md).
 
 ## 9.0.2
 
-The Forgejo v9.0.2 release notes are [available in the v9.0.2 milestone](https://codeberg.org/forgejo/forgejo/milestone/8610).
+See the [Forgejo 9.0.2 release notes](release-notes-published/9.0.2.md).
 
 ## 9.0.1
 
-The Forgejo v9.0.1 release notes are [available in the v9.0.1 milestone](https://codeberg.org/forgejo/forgejo/milestone/8544).
+See the [Forgejo 9.0.1 release notes](release-notes-published/9.0.1.md).
 
 ## 9.0.0
 
-The Forgejo v9.0.0 release notes are [available in the v9.0.0 milestone](https://codeberg.org/forgejo/forgejo/milestone/7235).
+See the [Forgejo 9.0.0 release notes](release-notes-published/9.0.0.md).
 
 ## 8.0.3
 
-The Forgejo v8.0.3 release notes are [available in the v8.0.3 milestone](https://codeberg.org/forgejo/forgejo/milestone/8231).
+See the [Forgejo 8.0.3 release notes](release-notes-published/8.0.3.md).
 
 ## 8.0.2
 
-The Forgejo v8.0.2 release notes are [available in the v8.0.2 milestone](https://codeberg.org/forgejo/forgejo/milestone/7728).
+See the [Forgejo 8.0.2 release notes](release-notes-published/8.0.2.md).
 
 ## 8.0.1
 
-The Forgejo v8.0.1 release notes are [available in the v8.0.1 milestone](https://codeberg.org/forgejo/forgejo/milestone/7682).
+See the [Forgejo 8.0.1 release notes](release-notes-published/8.0.1.md).
 
 ## 8.0.0
 
@@ -169,23 +169,23 @@ A [companion blog post](https://forgejo.org/2024-07-release-v8-0/) provides addi
 
 ## 7.0.11
 
-The Forgejo v7.0.11 release notes are [available in the v7.0.11 milestone](https://codeberg.org/forgejo/forgejo/milestone/8609).
+See the [Forgejo 7.0.11 release notes](release-notes-published/7.0.11.md).
 
 ## 7.0.10
 
-The Forgejo v7.0.10 release notes are [available in the v7.0.10 milestone](https://codeberg.org/forgejo/forgejo/milestone/8286).
+See the [Forgejo 7.0.10 release notes](release-notes-published/7.0.10.md).
 
 ## 7.0.9
 
-The Forgejo v7.0.9 release notes are [available in the v7.0.9 milestone](https://codeberg.org/forgejo/forgejo/milestone/8232).
+See the [Forgejo 7.0.9 release notes](release-notes-published/7.0.9.md).
 
 ## 7.0.8
 
-The Forgejo v7.0.8 release notes are [available in the v7.0.8 milestone](https://codeberg.org/forgejo/forgejo/milestone/7729).
+See the [Forgejo 7.0.8 release notes](release-notes-published/7.0.8.md).
 
 ## 7.0.7
 
-The Forgejo v7.0.7 release notes are [available in the v7.0.7 milestone](https://codeberg.org/forgejo/forgejo/milestone/7683).
+See the [Forgejo 7.0.7 release notes](release-notes-published/7.0.7.md).
 
 ## 7.0.6
 

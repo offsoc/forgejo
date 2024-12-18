@@ -158,7 +158,7 @@ jobs:
 
       - name: build container & release
         if: ${{ secrets.TOKEN != '' }}
-        uses: https://code.forgejo.org/forgejo/forgejo-build-publish/build@v5.1.1
+        uses: https://code.forgejo.org/forgejo/forgejo-build-publish/build@v5.2.1
         with:
           forgejo: "${{ env.GITHUB_SERVER_URL }}"
           owner: "${{ env.GITHUB_REPOSITORY_OWNER }}"
@@ -177,7 +177,7 @@ jobs:
 
       - name: build rootless container
         if: ${{ secrets.TOKEN != '' }}
-        uses: https://code.forgejo.org/forgejo/forgejo-build-publish/build@v5.1.1
+        uses: https://code.forgejo.org/forgejo/forgejo-build-publish/build@v5.2.1
         with:
           forgejo: "${{ env.GITHUB_SERVER_URL }}"
           owner: "${{ env.GITHUB_REPOSITORY_OWNER }}"
@@ -195,7 +195,7 @@ jobs:
 
       - name: end-to-end tests
         if: ${{ secrets.TOKEN != '' && vars.ROLE == 'forgejo-integration' && vars.SKIP_END_TO_END != 'true' }}
-        uses: https://code.forgejo.org/actions/cascading-pr@v2
+        uses: https://code.forgejo.org/actions/cascading-pr@v2.2.0
         with:
           origin-url: ${{ env.GITHUB_SERVER_URL }}
           origin-repo: ${{ github.repository }}

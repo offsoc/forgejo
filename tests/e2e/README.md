@@ -155,20 +155,6 @@ For SQLite:
 make test-e2e-sqlite#example
 ```
 
-### Visual testing
-
-> **Warning**
-> This is not currently used by most Forgejo contributors.
-> Your help to improve the situation and allow for visual testing is appreciated.
-
-Although the main goal of e2e is assertion testing, we have added a framework for visual regression testing. If you are working on front-end features, please use the following:
- - Check out `main`, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1` to generate outputs. This will initially fail, as no screenshots exist. You can run the e2e tests again to assert that it passes.
- - Check out your branch, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1`. You should be able to assert that your front-end changes don't break any other tests unintentionally.
-
-`VISUAL_TEST=1` will create screenshots in tests/e2e/test-snapshots. The test will fail the first time this is enabled (until we get visual test image persistence figured out), because it will be testing against an empty screenshot folder.
-
-`ACCEPT_VISUAL=1` will overwrite the snapshot images with new images.
-
 
 ## Tips and tricks
 
@@ -215,6 +201,41 @@ you can alternatively use:
 ~~~js
 await page.waitForURL('**/target.html');
 ~~~
+
+### Visual testing
+
+Due to size and frequent updates, we do not host screenshots in the Forgejo repository.
+However, it is good practice to ensure that your test is capable of generating relevant and stable screenshots.
+Forgejo is regularly tested against visual regressions in a dedicated repository which contains the screenshots:
+https://code.forgejo.org/forgejo/visual-browser-testing/
+
+For tests that consume only the `page`,
+screenshots are automatically created at the end of each test.
+
+If your test visits different relevant screens or pages during the test,
+or creates a custom `page` from context
+(e.g. for tests that require a signed-in user)
+calling `await save_visual(page);` explicitly in relevant positions is encouraged.
+
+Please confirm locally that your screenshots are stable by performing several runs of your test.
+When screenshots are available and reproducible,
+check in your test without the screenshots.
+
+When your screenshots differ between runs,
+for example because dynamic elements (e.g. timestamps, commit hashes etc)
+change between runs,
+mask these elements in the `save_visual` function in `utils_e2e.ts`.
+
+#### Working with screenshots
+
+The following environment variables control visual testing:
+
+`VISUAL_TEST=1` will create screenshots in tests/e2e/test-snapshots.
+  The test will fail the first time,
+  because the screenshots are not included with Forgejo.
+  Subsequent runs will comopare against your local copy of the screenshots.
+
+`ACCEPT_VISUAL=1` will overwrite the snapshot images with new images.
 
 ### Only sign in if necessary
 
