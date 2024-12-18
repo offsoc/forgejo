@@ -33,4 +33,7 @@ func TestSet(t *testing.T) {
 	assert.False(t, s.Contains("key1"))
 	assert.True(t, s.Contains("key6"))
 	assert.True(t, s.Contains("key7"))
+
+	assert.True(t, s.IsSubset([]string{"key6", "key7"}))
+	assert.False(t, s.IsSubset([]string{"key1"}))
 }

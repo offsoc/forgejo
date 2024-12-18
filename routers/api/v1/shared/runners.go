@@ -8,7 +8,6 @@ import (
 	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/structs"
 	"errors"
-	"log"
 	"net/http"
 	"strings"
 
@@ -44,7 +43,6 @@ type RunJobList struct {
 
 func GetActionRunJobs(ctx *context.APIContext, ownerID int64, repoID int64) {
 	labels := strings.Split(ctx.FormTrim("labels"), ",")
-	log.Printf("labels: %v", labels)
 
 	total, err := db.Find[actions_model.ActionRunJob](ctx, &actions_model.FindTaskOptions{
 		Status:  []actions_model.Status{actions_model.StatusWaiting, actions_model.StatusRunning},
@@ -65,7 +63,9 @@ func GetActionRunJobs(ctx *context.APIContext, ownerID int64, repoID int64) {
 func fromRunJobModelToResponse(job []*actions_model.ActionRunJob, labels []string) []*structs.ActionRunJob {
 	var res []*structs.ActionRunJob
 	for i := range job {
-		if len(labels) > 0 && isSubset(labels, job[i].RunsOn) {
+		labelSet := make(container.Set[string])
+		labelSet.AddMultiple(labels...)
+		if len(labels) > 0 && labelSet.IsSubset(job[i].RunsOn) {
 			res = append(res, &structs.ActionRunJob{
 				ID:      job[i].ID,
 				RepoID:  job[i].RepoID,
@@ -79,18 +79,4 @@ func fromRunJobModelToResponse(job []*actions_model.ActionRunJob, labels []strin
 		}
 	}
 	return res
-}
-
-func isSubset(set, subset []string) bool {
-	m := make(container.Set[string], len(set))
-	for _, v := range set {
-		m.Add(v)
-	}
-
-	for _, v := range subset {
-		if !m.Contains(v) {
-			return false
-		}
-	}
-	return true
 }

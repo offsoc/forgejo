@@ -29,6 +29,15 @@ func (s Set[T]) AddMultiple(values ...T) {
 	}
 }
 
+func (s Set[T]) IsSubset(subset []T) bool {
+	for _, v := range subset {
+		if !s.Contains(v) {
+			return false
+		}
+	}
+	return true
+}
+
 // Contains determines whether a set contains the specified element.
 // Returns true if the set contains the specified element; otherwise, false.
 func (s Set[T]) Contains(value T) bool {
