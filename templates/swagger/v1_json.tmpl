@@ -21,7 +21,7 @@
     },
     "version": "{{AppVer | JSEscape}}"
   },
-  "basePath": "/api/v1",
+  "basePath": "{{AppSubUrl | JSEscape}}/api/v1",
   "paths": {
     "/activitypub/actor": {
       "get": {
@@ -28870,12 +28870,10 @@
     },
     "RunJobList": {
       "description": "RunJobList is a list of action run jobs",
-      "headers": {
-        "jobs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ActionRunJob"
-          }
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ActionRunJob"
         }
       }
     },
