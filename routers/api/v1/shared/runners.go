@@ -41,7 +41,7 @@ type RunJobList struct {
 	Jobs []*structs.ActionRunJob `json:"jobs,omitempty"`
 }
 
-func GetActionRunJobs(ctx *context.APIContext, ownerID int64, repoID int64) {
+func GetActionRunJobs(ctx *context.APIContext, ownerID, repoID int64) {
 	labels := strings.Split(ctx.FormTrim("labels"), ",")
 
 	total, err := db.Find[actions_model.ActionRunJob](ctx, &actions_model.FindTaskOptions{
