@@ -30,6 +30,6 @@ func TestAPISearchActionJobs_UserRunner(t *testing.T) {
 	var jobs shared.RunJobList
 	DecodeJSON(t, res, &jobs)
 
-	assert.EqualValues(t, 1, len(jobs.Body))
+	assert.Len(t, jobs.Body, 1)
 	assert.EqualValues(t, job.ID, jobs.Body[0].ID)
 }
