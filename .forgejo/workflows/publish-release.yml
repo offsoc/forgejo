@@ -42,14 +42,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: copy & sign
-        uses: https://code.forgejo.org/forgejo/forgejo-build-publish/publish@v5
+        uses: https://code.forgejo.org/forgejo/forgejo-build-publish/publish@v5.2.1
         with:
           from-forgejo: ${{ vars.FORGEJO }}
           to-forgejo: ${{ vars.FORGEJO }}
           from-owner: ${{ vars.FROM_OWNER }}
           to-owner: ${{ vars.TO_OWNER }}
           repo: ${{ vars.REPO }}
-          release-notes: "See https://codeberg.org/forgejo/forgejo/src/branch/forgejo/RELEASE-NOTES.md#{ANCHOR}"
+          release-notes: "See https://codeberg.org/forgejo/forgejo/src/branch/forgejo/release-notes-published/{VERSION}.md"
           ref-name: ${{ github.ref_name }}
           sha: ${{ github.sha }}
           from-token: ${{ secrets.TOKEN }}
