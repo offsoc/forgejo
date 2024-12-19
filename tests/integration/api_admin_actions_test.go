@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/routers/api/v1/shared"
 	"code.gitea.io/gitea/tests"
+
 	"github.com/stretchr/testify/assert"
 )
 

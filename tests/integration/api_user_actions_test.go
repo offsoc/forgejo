@@ -1,15 +1,17 @@
 package integration
 
 import (
+	"fmt"
+	"net/http"
+	"testing"
+
 	actions_model "code.gitea.io/gitea/models/actions"
 	auth_model "code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/unittest"
 	"code.gitea.io/gitea/routers/api/v1/shared"
 	"code.gitea.io/gitea/tests"
-	"fmt"
+
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
 )
 
 func TestAPISearchActionJobs_UserRunner(t *testing.T) {
