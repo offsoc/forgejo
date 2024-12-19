@@ -509,7 +509,7 @@ func (Action) GetRegistrationToken(ctx *context.APIContext) {
 
 // SearchActionRunJobs return a list of actions jobs filtered by the provided parameters
 func (Action) SearchActionRunJobs(ctx *context.APIContext) {
-	// swagger:operation GET /orgs/{owner}/{repo}/actions/runners/jobs repository repoSearchRunJobs
+	// swagger:operation GET /repos/{owner}/{repo}/actions/runners/jobs repository repoSearchRunJobs
 	// ---
 	// summary: Search for repository's action jobs according filter conditions
 	// produces:

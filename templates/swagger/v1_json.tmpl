@@ -4043,48 +4043,6 @@
         }
       }
     },
-    "/orgs/{owner}/{repo}/actions/runners/jobs": {
-      "get": {
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "repository"
-        ],
-        "summary": "Search for repository's action jobs according filter conditions",
-        "operationId": "repoSearchRunJobs",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "owner of the repo",
-            "name": "owner",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "name of the repo",
-            "name": "repo",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "a comma separated list of run job labels to search for",
-            "name": "labels",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/RunJobList"
-          },
-          "403": {
-            "$ref": "#/responses/forbidden"
-          }
-        }
-      }
-    },
     "/packages/{owner}": {
       "get": {
         "produces": [
@@ -4740,6 +4698,48 @@
           },
           "422": {
             "$ref": "#/responses/validationError"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/actions/runners/jobs": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "repository"
+        ],
+        "summary": "Search for repository's action jobs according filter conditions",
+        "operationId": "repoSearchRunJobs",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the repo",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repo",
+            "name": "repo",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "a comma separated list of run job labels to search for",
+            "name": "labels",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/RunJobList"
+          },
+          "403": {
+            "$ref": "#/responses/forbidden"
           }
         }
       }
