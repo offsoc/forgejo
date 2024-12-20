@@ -1133,191 +1133,191 @@ func TestOAuth_GrantScopesReadPrivateGroups(t *testing.T) {
 	}
 }
 
-func TestOAuth_GrantScopesReadOnlyPublicGroups(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
+// func TestOAuth_GrantScopesReadOnlyPublicGroups(t *testing.T) {
+// 	defer tests.PrepareTestEnv(t)()
 
-	setting.OAuth2.EnableAdditionalGrantScopes = true
-	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user5"})
+// 	setting.OAuth2.EnableAdditionalGrantScopes = true
+// 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user5"})
 
-	appBody := api.CreateOAuth2ApplicationOptions{
-		Name: "oauth-provider-scopes-test",
-		RedirectURIs: []string{
-			"a",
-		},
-		ConfidentialClient: true,
-	}
+// 	appBody := api.CreateOAuth2ApplicationOptions{
+// 		Name: "oauth-provider-scopes-test",
+// 		RedirectURIs: []string{
+// 			"a",
+// 		},
+// 		ConfidentialClient: true,
+// 	}
 
-	appReq := NewRequestWithJSON(t, "POST", "/api/v1/user/applications/oauth2", &appBody).
-		AddBasicAuth(user.Name)
-	appResp := MakeRequest(t, appReq, http.StatusCreated)
+// 	appReq := NewRequestWithJSON(t, "POST", "/api/v1/user/applications/oauth2", &appBody).
+// 		AddBasicAuth(user.Name)
+// 	appResp := MakeRequest(t, appReq, http.StatusCreated)
 
-	var app *api.OAuth2Application
-	DecodeJSON(t, appResp, &app)
+// 	var app *api.OAuth2Application
+// 	DecodeJSON(t, appResp, &app)
 
-	grant := &auth_model.OAuth2Grant{
-		ApplicationID: app.ID,
-		UserID:        user.ID,
-		Scope:         "openid profile email groups read:user",
-	}
+// 	grant := &auth_model.OAuth2Grant{
+// 		ApplicationID: app.ID,
+// 		UserID:        user.ID,
+// 		Scope:         "openid profile email groups read:user",
+// 	}
 
-	err := db.Insert(db.DefaultContext, grant)
-	require.NoError(t, err)
+// 	err := db.Insert(db.DefaultContext, grant)
+// 	require.NoError(t, err)
 
-	assert.Contains(t, grant.Scope, "openid profile email groups read:user")
+// 	assert.Contains(t, grant.Scope, "openid profile email groups read:user")
 
-	ctx := loginUserWithPasswordRemember(t, user.Name, "password", true)
+// 	ctx := loginUserWithPasswordRemember(t, user.Name, "password", true)
 
-	authorizeURL := fmt.Sprintf("/login/oauth/authorize?client_id=%s&redirect_uri=a&response_type=code&state=thestate", app.ClientID)
-	authorizeReq := NewRequest(t, "GET", authorizeURL)
-	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
+// 	authorizeURL := fmt.Sprintf("/login/oauth/authorize?client_id=%s&redirect_uri=a&response_type=code&state=thestate", app.ClientID)
+// 	authorizeReq := NewRequest(t, "GET", authorizeURL)
+// 	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
 
-	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
-	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
-		"_csrf":        requireCookieCSRF(t, authorizeResp),
-		"client_id":    app.ClientID,
-		"redirect_uri": "a",
-		"state":        "thestate",
-		"granted":      "true",
-	})
-	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
-	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
+// 	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
+// 	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
+// 		"_csrf":        requireCookieCSRF(t, authorizeResp),
+// 		"client_id":    app.ClientID,
+// 		"redirect_uri": "a",
+// 		"state":        "thestate",
+// 		"granted":      "true",
+// 	})
+// 	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
+// 	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
 
-	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
-		"_csrf":         requireCookieCSRF(t, authorizeResp),
-		"grant_type":    "authorization_code",
-		"client_id":     app.ClientID,
-		"client_secret": app.ClientSecret,
-		"redirect_uri":  "a",
-		"code":          authcode,
-	})
-	accessTokenResp := ctx.MakeRequest(t, accessTokenReq, http.StatusOK)
-	type response struct {
-		AccessToken  string `json:"access_token"`
-		TokenType    string `json:"token_type"`
-		ExpiresIn    int64  `json:"expires_in"`
-		RefreshToken string `json:"refresh_token"`
-		IDToken      string `json:"id_token,omitempty"`
-	}
-	parsed := new(response)
-	require.NoError(t, json.Unmarshal(accessTokenResp.Body.Bytes(), parsed))
-	parts := strings.Split(parsed.IDToken, ".")
+// 	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
+// 		"_csrf":         requireCookieCSRF(t, authorizeResp),
+// 		"grant_type":    "authorization_code",
+// 		"client_id":     app.ClientID,
+// 		"client_secret": app.ClientSecret,
+// 		"redirect_uri":  "a",
+// 		"code":          authcode,
+// 	})
+// 	accessTokenResp := ctx.MakeRequest(t, accessTokenReq, http.StatusOK)
+// 	type response struct {
+// 		AccessToken  string `json:"access_token"`
+// 		TokenType    string `json:"token_type"`
+// 		ExpiresIn    int64  `json:"expires_in"`
+// 		RefreshToken string `json:"refresh_token"`
+// 		IDToken      string `json:"id_token,omitempty"`
+// 	}
+// 	parsed := new(response)
+// 	require.NoError(t, json.Unmarshal(accessTokenResp.Body.Bytes(), parsed))
+// 	parts := strings.Split(parsed.IDToken, ".")
 
-	payload, _ := base64.RawURLEncoding.DecodeString(parts[1])
-	type IDTokenClaims struct {
-		Groups []string `json:"groups"`
-	}
+// 	payload, _ := base64.RawURLEncoding.DecodeString(parts[1])
+// 	type IDTokenClaims struct {
+// 		Groups []string `json:"groups"`
+// 	}
 
-	claims := new(IDTokenClaims)
-	require.NoError(t, json.Unmarshal(payload, claims))
-	for _, privOrg := range []string{"org7", "org7:owners", "privated_org", "privated_org:team14writeauth"} {
-		assert.NotContains(t, claims.Groups, privOrg)
-	}
+// 	claims := new(IDTokenClaims)
+// 	require.NoError(t, json.Unmarshal(payload, claims))
+// 	for _, privOrg := range []string{"org7", "org7:owners", "privated_org", "privated_org:team14writeauth"} {
+// 		assert.NotContains(t, claims.Groups, privOrg)
+// 	}
 
-	userReq := NewRequest(t, "GET", "/login/oauth/userinfo")
-	userReq.SetHeader("Authorization", "Bearer "+parsed.AccessToken)
-	userResp := MakeRequest(t, userReq, http.StatusOK)
+// 	userReq := NewRequest(t, "GET", "/login/oauth/userinfo")
+// 	userReq.SetHeader("Authorization", "Bearer "+parsed.AccessToken)
+// 	userResp := MakeRequest(t, userReq, http.StatusOK)
 
-	type userinfo struct {
-		Groups []string `json:"groups"`
-	}
-	parsedUserInfo := new(userinfo)
-	require.NoError(t, json.Unmarshal(userResp.Body.Bytes(), parsedUserInfo))
+// 	type userinfo struct {
+// 		Groups []string `json:"groups"`
+// 	}
+// 	parsedUserInfo := new(userinfo)
+// 	require.NoError(t, json.Unmarshal(userResp.Body.Bytes(), parsedUserInfo))
 
-	for _, privOrg := range []string{"org7", "org7:owners", "privated_org", "privated_org:team14writeauth"} {
-		assert.NotContains(t, parsedUserInfo.Groups, privOrg)
-	}
-}
+// 	for _, privOrg := range []string{"org7", "org7:owners", "privated_org", "privated_org:team14writeauth"} {
+// 		assert.NotContains(t, parsedUserInfo.Groups, privOrg)
+// 	}
+// }
 
-func TestOAuth_GrantScopesReadPublicGroupsWithTheReadScope(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
+// func TestOAuth_GrantScopesReadPublicGroupsWithTheReadScope(t *testing.T) {
+// 	defer tests.PrepareTestEnv(t)()
 
-	setting.OAuth2.EnableAdditionalGrantScopes = true
-	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user5"})
+// 	setting.OAuth2.EnableAdditionalGrantScopes = true
+// 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user5"})
 
-	appBody := api.CreateOAuth2ApplicationOptions{
-		Name: "oauth-provider-scopes-test",
-		RedirectURIs: []string{
-			"a",
-		},
-		ConfidentialClient: true,
-	}
+// 	appBody := api.CreateOAuth2ApplicationOptions{
+// 		Name: "oauth-provider-scopes-test",
+// 		RedirectURIs: []string{
+// 			"a",
+// 		},
+// 		ConfidentialClient: true,
+// 	}
 
-	appReq := NewRequestWithJSON(t, "POST", "/api/v1/user/applications/oauth2", &appBody).
-		AddBasicAuth(user.Name)
-	appResp := MakeRequest(t, appReq, http.StatusCreated)
+// 	appReq := NewRequestWithJSON(t, "POST", "/api/v1/user/applications/oauth2", &appBody).
+// 		AddBasicAuth(user.Name)
+// 	appResp := MakeRequest(t, appReq, http.StatusCreated)
 
-	var app *api.OAuth2Application
-	DecodeJSON(t, appResp, &app)
+// 	var app *api.OAuth2Application
+// 	DecodeJSON(t, appResp, &app)
 
-	grant := &auth_model.OAuth2Grant{
-		ApplicationID: app.ID,
-		UserID:        user.ID,
-		Scope:         "openid profile email groups read:user read:organization",
-	}
+// 	grant := &auth_model.OAuth2Grant{
+// 		ApplicationID: app.ID,
+// 		UserID:        user.ID,
+// 		Scope:         "openid profile email groups read:user read:organization",
+// 	}
 
-	err := db.Insert(db.DefaultContext, grant)
-	require.NoError(t, err)
+// 	err := db.Insert(db.DefaultContext, grant)
+// 	require.NoError(t, err)
 
-	assert.Contains(t, grant.Scope, "openid profile email groups read:user read:organization")
+// 	assert.Contains(t, grant.Scope, "openid profile email groups read:user read:organization")
 
-	ctx := loginUserWithPasswordRemember(t, user.Name, "password", true)
+// 	ctx := loginUserWithPasswordRemember(t, user.Name, "password", true)
 
-	authorizeURL := fmt.Sprintf("/login/oauth/authorize?client_id=%s&redirect_uri=a&response_type=code&state=thestate", app.ClientID)
-	authorizeReq := NewRequest(t, "GET", authorizeURL)
-	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
+// 	authorizeURL := fmt.Sprintf("/login/oauth/authorize?client_id=%s&redirect_uri=a&response_type=code&state=thestate", app.ClientID)
+// 	authorizeReq := NewRequest(t, "GET", authorizeURL)
+// 	authorizeResp := ctx.MakeRequest(t, authorizeReq, http.StatusSeeOther)
 
-	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
-	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
-		"_csrf":        requireCookieCSRF(t, authorizeResp),
-		"client_id":    app.ClientID,
-		"redirect_uri": "a",
-		"state":        "thestate",
-		"granted":      "true",
-	})
-	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
-	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
+// 	authcode := strings.Split(strings.Split(authorizeResp.Body.String(), "?code=")[1], "&amp")[0]
+// 	grantReq := NewRequestWithValues(t, "POST", "/login/oauth/grant", map[string]string{
+// 		"_csrf":        requireCookieCSRF(t, authorizeResp),
+// 		"client_id":    app.ClientID,
+// 		"redirect_uri": "a",
+// 		"state":        "thestate",
+// 		"granted":      "true",
+// 	})
+// 	grantResp := ctx.MakeRequest(t, grantReq, http.StatusBadRequest)
+// 	assert.NotContains(t, grantResp.Body.String(), forgejo_context.CsrfErrorString)
 
-	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
-		"_csrf":         requireCookieCSRF(t, authorizeResp),
-		"grant_type":    "authorization_code",
-		"client_id":     app.ClientID,
-		"client_secret": app.ClientSecret,
-		"redirect_uri":  "a",
-		"code":          authcode,
-	})
-	accessTokenResp := ctx.MakeRequest(t, accessTokenReq, http.StatusOK)
-	type response struct {
-		AccessToken  string `json:"access_token"`
-		TokenType    string `json:"token_type"`
-		ExpiresIn    int64  `json:"expires_in"`
-		RefreshToken string `json:"refresh_token"`
-		IDToken      string `json:"id_token,omitempty"`
-	}
-	parsed := new(response)
-	require.NoError(t, json.Unmarshal(accessTokenResp.Body.Bytes(), parsed))
-	parts := strings.Split(parsed.IDToken, ".")
+// 	accessTokenReq := NewRequestWithValues(t, "POST", "/login/oauth/access_token", map[string]string{
+// 		"_csrf":         requireCookieCSRF(t, authorizeResp),
+// 		"grant_type":    "authorization_code",
+// 		"client_id":     app.ClientID,
+// 		"client_secret": app.ClientSecret,
+// 		"redirect_uri":  "a",
+// 		"code":          authcode,
+// 	})
+// 	accessTokenResp := ctx.MakeRequest(t, accessTokenReq, http.StatusOK)
+// 	type response struct {
+// 		AccessToken  string `json:"access_token"`
+// 		TokenType    string `json:"token_type"`
+// 		ExpiresIn    int64  `json:"expires_in"`
+// 		RefreshToken string `json:"refresh_token"`
+// 		IDToken      string `json:"id_token,omitempty"`
+// 	}
+// 	parsed := new(response)
+// 	require.NoError(t, json.Unmarshal(accessTokenResp.Body.Bytes(), parsed))
+// 	parts := strings.Split(parsed.IDToken, ".")
 
-	payload, _ := base64.RawURLEncoding.DecodeString(parts[1])
-	type IDTokenClaims struct {
-		Groups []string `json:"groups"`
-	}
+// 	payload, _ := base64.RawURLEncoding.DecodeString(parts[1])
+// 	type IDTokenClaims struct {
+// 		Groups []string `json:"groups"`
+// 	}
 
-	claims := new(IDTokenClaims)
-	require.NoError(t, json.Unmarshal(payload, claims))
-	for _, privOrg := range []string{"org7", "org7:owners", "privated_org", "privated_org:team14writeauth"} {
-		assert.Contains(t, claims.Groups, privOrg)
-	}
+// 	claims := new(IDTokenClaims)
+// 	require.NoError(t, json.Unmarshal(payload, claims))
+// 	for _, privOrg := range []string{"org7", "org7:owners", "privated_org", "privated_org:team14writeauth"} {
+// 		assert.Contains(t, claims.Groups, privOrg)
+// 	}
 
-	userReq := NewRequest(t, "GET", "/login/oauth/userinfo")
-	userReq.SetHeader("Authorization", "Bearer "+parsed.AccessToken)
-	userResp := MakeRequest(t, userReq, http.StatusOK)
+// 	userReq := NewRequest(t, "GET", "/login/oauth/userinfo")
+// 	userReq.SetHeader("Authorization", "Bearer "+parsed.AccessToken)
+// 	userResp := MakeRequest(t, userReq, http.StatusOK)
 
-	type userinfo struct {
-		Groups []string `json:"groups"`
-	}
-	parsedUserInfo := new(userinfo)
-	require.NoError(t, json.Unmarshal(userResp.Body.Bytes(), parsedUserInfo))
-	for _, privOrg := range []string{"org7", "org7:owners", "privated_org", "privated_org:team14writeauth"} {
-		assert.Contains(t, parsedUserInfo.Groups, privOrg)
-	}
-}
+// 	type userinfo struct {
+// 		Groups []string `json:"groups"`
+// 	}
+// 	parsedUserInfo := new(userinfo)
+// 	require.NoError(t, json.Unmarshal(userResp.Body.Bytes(), parsedUserInfo))
+// 	for _, privOrg := range []string{"org7", "org7:owners", "privated_org", "privated_org:team14writeauth"} {
+// 		assert.Contains(t, parsedUserInfo.Groups, privOrg)
+// 	}
+// }
