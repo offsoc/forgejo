@@ -2013,15 +2013,27 @@ details.repo-search-result summary::marker {
   box-shadow: none;
 }
 
+.repository .repository-summary .repository-menu {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 0 0.5em;
+}
+
+@media (max-width: 767.98px) {
+  .repository .repository-summary .repository-menu {
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .repository .repository-summary .segment.sub-menu {
   border: none;
   display: flex;
   align-items: center;
   padding: 0;
-  overflow: hidden;
 }
 
-.repository .repository-summary .sub-menu .item {
+.repository .repository-summary .item {
   flex: 1;
   height: 30px;
   line-height: var(--line-height-default);
@@ -2029,7 +2041,6 @@ details.repo-search-result summary::marker {
   align-items: center;
   justify-content: center;
   gap: 0.25em;
-  padding: 0 0.5em; /* make the UI look better for narrow (mobile) view */
   text-decoration: none;
 }
 
