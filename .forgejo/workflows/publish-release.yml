@@ -36,7 +36,7 @@ on:
 
 jobs:
   publish:
-    runs-on: self-hosted
+    runs-on: lxc-bookworm
     if: vars.DOER != '' && vars.FORGEJO != '' && vars.TO_OWNER != '' && vars.FROM_OWNER != '' && secrets.TOKEN != ''
     steps:
       - uses: actions/checkout@v4

@@ -23,7 +23,7 @@ on:
 
 jobs:
   release:
-    runs-on: self-hosted
+    runs-on: lxc-bookworm
     # root is used for testing, allow it
     if: vars.ROLE == 'forgejo-integration' || github.repository_owner == 'root'
     steps:

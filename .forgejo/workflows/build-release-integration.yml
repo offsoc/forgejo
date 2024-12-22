@@ -23,7 +23,7 @@ on:
 jobs:
   release-simulation:
     if: vars.ROLE == 'forgejo-coding'
-    runs-on: self-hosted
+    runs-on: lxc-bookworm
     steps:
       - uses: actions/checkout@v4
 
