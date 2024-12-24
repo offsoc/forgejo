@@ -81,7 +81,7 @@
 			<input name="pulls_allow_rebase_update" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebaseUpdate)}}checked{{end}}>
 			{{ctx.Locale.Tr "repo.settings.pulls.allow_rebase_update"}}
 		</label>
-		<fieldset>
+		<div class="field">
 			<label>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.default.title"}}</label>
 			<div class="ui dropdown selection">
 				<select name="pulls_default_update_style">
@@ -102,7 +102,7 @@
 				</div>
 			</div>
 			<span class="help">{{ctx.Locale.Tr "repo.settings.default_update_style_desc"}}</span>
-		</fieldset>
+		</div>
 		<label>
 			<input name="default_allow_maintainer_edit" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultAllowMaintainerEdit)}}checked{{end}}>
 			{{ctx.Locale.Tr "repo.settings.pulls.default_allow_edits_from_maintainers"}}
