@@ -95,12 +95,6 @@
 		</div>
 		<div class="field">
 			<div class="ui checkbox">
-				<input name="default_allow_maintainer_edit" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultAllowMaintainerEdit)}}checked{{end}}>
-				<label>{{ctx.Locale.Tr "repo.settings.pulls.default_allow_edits_from_maintainers"}}</label>
-			</div>
-		</div>
-		<div class="field">
-			<div class="ui checkbox">
 				<input name="pulls_allow_rebase_update" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebaseUpdate)}}checked{{end}}>
 				<label>{{ctx.Locale.Tr "repo.settings.pulls.allow_rebase_update"}}</label>
 			</div>
@@ -126,6 +120,12 @@
 					<div class="item" data-value="merge">{{ctx.Locale.Tr "repo.pulls.update_branch"}}</div>
 					<div class="item" data-value="rebase">{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}</div>
 				</div>
+			</div>
+		</div>
+		<div class="field">
+			<div class="ui checkbox">
+				<input name="default_allow_maintainer_edit" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultAllowMaintainerEdit)}}checked{{end}}>
+				<label>{{ctx.Locale.Tr "repo.settings.pulls.default_allow_edits_from_maintainers"}}</label>
 			</div>
 		</div>
 		<div class="field">
