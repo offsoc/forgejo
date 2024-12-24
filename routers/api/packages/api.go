@@ -648,6 +648,7 @@ func CommonRoutes() *web.Route {
 					if isGetHead {
 						alt.GetRepositoryFile(ctx, m[2])
 					}
+					return
 				}
 
 				m = uploadPattern.FindStringSubmatch(path)
