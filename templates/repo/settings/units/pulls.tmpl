@@ -39,7 +39,7 @@
 		</label>
 
 		<div class="field">
-			<p>{{ctx.Locale.Tr "repo.settings.default_merge_style_desc"}}</p>
+			<label>{{ctx.Locale.Tr "repo.settings.default_merge_style_desc"}}</label>
 			<div class="ui dropdown selection">
 				<select name="pulls_default_merge_style">
 					<option value="merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}</option>
@@ -82,7 +82,7 @@
 			{{ctx.Locale.Tr "repo.settings.pulls.allow_rebase_update"}}
 		</label>
 		<fieldset>
-			<p>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.default.title"}}</p>
+			<label>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.default.title"}}</label>
 			<div class="ui dropdown selection">
 				<select name="pulls_default_update_style">
 					<option value="merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.update_branch"}}</option>
