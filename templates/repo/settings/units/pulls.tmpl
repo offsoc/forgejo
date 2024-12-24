@@ -12,9 +12,7 @@
 		</div>
 	</div>
 	<div class="field{{if not $pullRequestEnabled}} disabled{{end}}" id="pull_box">
-		<div class="field">
-			<p>{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}</p>
-		</div>
+		<h5>{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}</h5>
 		<div class="field">
 			<div class="ui checkbox">
 				<input name="pulls_allow_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowMerge)}}checked{{end}}>
