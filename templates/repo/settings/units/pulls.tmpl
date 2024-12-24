@@ -12,7 +12,7 @@
 		</div>
 	</div>
 	<fieldset class="{{if not $pullRequestEnabled}}disabled{{end}}" id="pull_box">
-		<h5>{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}</h5>
+		<legend>{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}</legend>
 		<label>
 			<input name="pulls_allow_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowMerge)}}checked{{end}}>
 			{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}
@@ -76,7 +76,7 @@
 		</div>
 	</fieldset>
 	<fieldset>
-		<h5>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.title"}}</h5>
+		<legend>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.title"}}</legend>
 		<label>
 			<input name="pulls_allow_rebase_update" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebaseUpdate)}}checked{{end}}>
 			{{ctx.Locale.Tr "repo.settings.pulls.allow_rebase_update"}}
