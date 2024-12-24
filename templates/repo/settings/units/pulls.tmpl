@@ -100,9 +100,6 @@
 			</div>
 		</div>
 		<div class="field">
-			<p>
-				{{ctx.Locale.Tr "repo.settings.default_update_style_desc"}}
-			</p>
 			<div class="ui dropdown selection">
 				<select name="pulls_default_update_style">
 					<option value="merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.update_branch"}}</option>
@@ -121,6 +118,7 @@
 					<div class="item" data-value="rebase">{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}</div>
 				</div>
 			</div>
+			<p class="help">{{ctx.Locale.Tr "repo.settings.default_update_style_desc"}}</p>
 		</div>
 		<div class="field">
 			<div class="ui checkbox">
