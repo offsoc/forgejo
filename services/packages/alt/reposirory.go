@@ -197,7 +197,7 @@ type RPMHdrIndex struct {
     Count  uint32
 }
 
-/*Building of pkglist index tags*/
+// https://refspecs.linuxbase.org/LSB_4.0.0/LSB-Core-generic/LSB-Core-generic/pkgformat.html
 func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, pfs []*packages_model.PackageFile, c packageCache, group string) (map[string][]interface{}, error) {
 	
 	architectures := []string{}
@@ -870,7 +870,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 	return repoDataListByArch, nil
 }
 
-
+// https://www.altlinux.org/APT_в_ALT_Linux/CreateRepository
 func buildRelease(ctx context.Context, pv *packages_model.PackageVersion, pfs []*packages_model.PackageFile, c packageCache, group string, pkglist map[string][]interface{}) ([]interface{}, error) {
 
 	var buf bytes.Buffer

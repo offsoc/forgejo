@@ -215,7 +215,6 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/keybase/go-crypto v0.0.0-20200123153347-de78d2cb44f4 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/larzconwell/bzip2 v0.0.0-20160405040150-ecf7a0ddeda1 // indirect
 	github.com/libdns/libdns v0.2.2 // indirect
