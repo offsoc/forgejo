@@ -8,7 +8,7 @@ import "xorm.io/xorm"
 func AddHashBlake2bToPackageBlob(x *xorm.Engine) error {
 	type PackageBlob struct {
 		ID      int64  `xorm:"pk autoincr"`
-		HashBlake2b string `xorm:"NOT NULL"`
+		HashBlake2b string
 	}
 	return x.Sync(&PackageBlob{})
 }
