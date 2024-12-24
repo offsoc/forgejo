@@ -5,21 +5,16 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, save_visual, load_logged_in_context, login_user} from './utils_e2e.ts';
+import {adjustKeyMapping, save_visual, test} from './_test-setup.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
-test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
+test('Markdown image preview behaviour', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari;');
-
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
 
   // Editing the root README.md file for image preview
   const editPath = '/user2/repo1/src/branch/master/README.md';
 
-  const page = await context.newPage();
   const response = await page.goto(editPath, {waitUntil: 'domcontentloaded'});
   expect(response?.status()).toBe(200);
 
@@ -43,12 +38,9 @@ test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
   await save_visual(page);
 });
 
-test('markdown indentation', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-
+test('markdown indentation', async ({page}, workerInfo) => {
   const initText = `* first\n* second\n* third\n* last`;
 
-  const page = await context.newPage();
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 
@@ -61,7 +53,7 @@ test('markdown indentation', async ({browser}, workerInfo) => {
 
   // Indent, then unindent first line
   await textarea.focus();
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(0, 0));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(0, 0));
   await indent.click();
   await expect(textarea).toHaveValue(`${tab}* first\n* second\n* third\n* last`);
   await unindent.click();
@@ -77,7 +69,7 @@ test('markdown indentation', async ({browser}, workerInfo) => {
 
   // Subsequently, select a chunk of 2nd and 3rd line and indent both, preserving the cursor position in relation to text
   await textarea.focus();
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('cond'), it.value.indexOf('hird')));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('cond'), it.value.indexOf('hird')));
   await indent.click();
   const lines23 = `* first\n${tab}${tab}* second\n${tab}* third\n* last`;
   await expect(textarea).toHaveValue(lines23);
@@ -92,8 +84,8 @@ test('markdown indentation', async ({browser}, workerInfo) => {
 
   // Indent and unindent with cursor at the end of the line
   await textarea.focus();
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('cond'), it.value.indexOf('cond')));
-  await textarea.press('End');
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('cond'), it.value.indexOf('cond')));
+  await textarea.press(adjustKeyMapping('End', workerInfo));
   await indent.click();
   await expect(textarea).toHaveValue(`* first\n${tab}* second\n* third\n* last`);
   await unindent.click();
@@ -101,7 +93,7 @@ test('markdown indentation', async ({browser}, workerInfo) => {
 
   // Check that Tab does work after input
   await textarea.focus();
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Shift+Enter'); // Avoid triggering the prefix continuation feature
   await textarea.pressSequentially('* least');
   await indent.click();
@@ -110,18 +102,15 @@ test('markdown indentation', async ({browser}, workerInfo) => {
   // Check that partial indents are cleared
   await textarea.focus();
   await textarea.fill(initText);
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('* second'), it.value.indexOf('* second')));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('* second'), it.value.indexOf('* second')));
   await textarea.pressSequentially('  ');
   await unindent.click();
   await expect(textarea).toHaveValue(initText);
 });
 
-test('markdown list continuation', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-
+test('markdown list continuation', async ({page}, workerInfo) => {
   const initText = `* first\n* second\n* third\n* last`;
 
-  const page = await context.newPage();
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 
@@ -131,8 +120,8 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
   await textarea.fill(initText);
 
   // Test continuation of '* ' prefix
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('cond'), it.value.indexOf('cond')));
-  await textarea.press('End');
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('cond'), it.value.indexOf('cond')));
+  await textarea.press(adjustKeyMapping('End', workerInfo));
   await textarea.press('Enter');
   await textarea.pressSequentially('middle');
   await expect(textarea).toHaveValue(`* first\n* second\n* middle\n* third\n* last`);
@@ -144,7 +133,7 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
   await expect(textarea).toHaveValue(`* first\n* second\n${tab}* middle\n${tab}* muddle\n* third\n* last`);
 
   // Test breaking in the middle of a line
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.lastIndexOf('ddle'), it.value.lastIndexOf('ddle')));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.lastIndexOf('ddle'), it.value.lastIndexOf('ddle')));
   await textarea.pressSequentially('tate');
   await textarea.press('Enter');
   await textarea.pressSequentially('me');
@@ -152,7 +141,7 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
 
   // Test not triggering when Shift held
   await textarea.fill(initText);
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Shift+Enter');
   await textarea.press('Enter');
   await textarea.pressSequentially('...but not least');
@@ -160,28 +149,28 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
 
   // Test continuation of ordered list
   await textarea.fill(`1. one\n2. two`);
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
   await textarea.pressSequentially('three');
   await expect(textarea).toHaveValue(`1. one\n2. two\n3. three`);
 
   // Test continuation of alternative ordered list syntax
   await textarea.fill(`1) one\n2) two`);
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
   await textarea.pressSequentially('three');
   await expect(textarea).toHaveValue(`1) one\n2) two\n3) three`);
 
   // Test continuation of blockquote
   await textarea.fill(`> knowledge is power`);
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
   await textarea.pressSequentially('france is bacon');
   await expect(textarea).toHaveValue(`> knowledge is power\n> france is bacon`);
 
   // Test continuation of checklists
   await textarea.fill(`- [ ] have a problem\n- [x] create a solution`);
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
+  await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
   await textarea.pressSequentially('write a test');
   await expect(textarea).toHaveValue(`- [ ] have a problem\n- [x] create a solution\n- [ ] write a test`);
@@ -206,17 +195,14 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
   ];
   for (const prefix of prefixes) {
     await textarea.fill(`${prefix}one`);
-    await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
+    await textarea.evaluate((it: HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
     await textarea.press('Enter');
     await textarea.pressSequentially('two');
     await expect(textarea).toHaveValue(`${prefix}one\n${prefix}two`);
   }
 });
 
-test('markdown insert table', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-
-  const page = await context.newPage();
+test('markdown insert table', async ({page}) => {
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 

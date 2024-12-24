@@ -7,16 +7,13 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, save_visual, login_user, login} from './utils_e2e.ts';
+import {save_visual, test, waitForClickAndResponse} from './_test-setup.ts';
 import {validate_form} from './shared/forms.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
-test('repo webhook settings', async ({browser}, workerInfo) => {
-  test.skip(workerInfo.project.name === 'Mobile Safari', 'Cannot get it to work - as usual');
-  const page = await login({browser}, workerInfo);
+test('repo webhook settings', async ({page}, workerInfo) => {
+  test.skip(workerInfo.project.name === 'Mobile Safari', 'Please read before starting to fixing it https://codeberg.org/forgejo/forgejo/pulls/6362');
   const response = await page.goto('/user2/repo1/settings/hooks/forgejo/new');
   expect(response?.status()).toBe(200);
 
@@ -35,9 +32,8 @@ test('repo webhook settings', async ({browser}, workerInfo) => {
 });
 
 test.describe('repo branch protection settings', () => {
-  test('form', async ({browser}, workerInfo) => {
-    test.skip(workerInfo.project.name === 'Mobile Safari', 'Cannot get it to work - as usual');
-    const page = await login({browser}, workerInfo);
+  test('form', async ({page}, workerInfo) => {
+    test.skip(workerInfo.project.name === 'Mobile Safari', 'Please read before starting to fixing it https://codeberg.org/forgejo/forgejo/pulls/6362');
     const response = await page.goto('/user2/repo1/settings/branches/edit');
     expect(response?.status()).toBe(200);
 
@@ -47,23 +43,27 @@ test.describe('repo branch protection settings', () => {
     await expect(page.locator('h4')).toContainText('new');
     await page.locator('input[name="rule_name"]').fill('testrule');
     await save_visual(page);
-    await page.getByText('Save rule').click();
-    // verify header is in edit mode
-    await page.waitForLoadState('domcontentloaded');
+    await waitForClickAndResponse(page, page.getByText('Save rule'), '/user2/repo1/settings/branches');
     await save_visual(page);
-    await page.getByText('Edit').click();
+    const editBtn = page.getByRole('link', {name: 'Edit'});
+    await editBtn.scrollIntoViewIfNeeded();
+    await waitForClickAndResponse(page, editBtn, '/user2/repo1/settings/branches/edit');
     await expect(page.locator('h4')).toContainText('Protection rules for branch');
     await save_visual(page);
   });
 
-  test.afterEach(async ({browser}, workerInfo) => {
-    const page = await login({browser}, workerInfo);
-    // delete the rule for the next test
-    await page.goto('/user2/repo1/settings/branches/');
-    await page.waitForLoadState('domcontentloaded');
-    test.skip(await page.getByText('Delete rule').isHidden(), 'Nothing to delete at this time');
-    await page.getByText('Delete rule').click();
-    await page.getByText('Yes').click();
-    await page.waitForLoadState('load');
+  // good first reason to split up the e2e into its own suites
+  // this ensures a clean state as tests share same data state
+  test.beforeEach(async ({page}, workerInfo) => {
+    test.skip(workerInfo.project.name === 'Mobile Safari', 'Please read before starting to fixing it https://codeberg.org/forgejo/forgejo/pulls/6362');
+
+    await page.goto('/user2/repo1/settings/branches/', {waitUntil: 'domcontentloaded'});
+
+    const exitingRule = page.getByText('Delete rule');
+    if (await exitingRule.isVisible()) {
+      await exitingRule.scrollIntoViewIfNeeded();
+      await exitingRule.click();
+      await waitForClickAndResponse(page, '.modals .actions .ok', '/user2/repo1/settings/branches');
+    }
   });
 });

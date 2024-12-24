@@ -4,7 +4,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test} from './utils_e2e.ts';
+import {test} from './_test-setup.ts';
 
 for (const searchTerm of ['space', 'consectetur']) {
   for (const width of [null, 2560, 4000]) {

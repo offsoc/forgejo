@@ -5,7 +5,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test} from './utils_e2e.ts';
+import {test} from './_test-setup.ts';
 
 test('Commit graph overflow', async ({page}) => {
   await page.goto('/user2/diff-test/graph');

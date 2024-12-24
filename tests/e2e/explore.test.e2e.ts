@@ -7,9 +7,11 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test} from './utils_e2e.ts';
+import {adjustKeyMapping, test} from './_test-setup.ts';
 
-test('Explore view taborder', async ({page}) => {
+test('Explore view taborder', async ({page}, workerInfo) => {
+  const tabKey = adjustKeyMapping('Tab', workerInfo);
+
   await page.goto('/explore/repos');
 
   const l1 = page.locator('[href="https://forgejo.org"]');
@@ -20,7 +22,7 @@ test('Explore view taborder', async ({page}) => {
   const exp = 15; // 0b1111 = four passing tests
 
   for (let i = 0; i < 150; i++) {
-    await page.keyboard.press('Tab');
+    await page.keyboard.press(tabKey);
     if (await l1.evaluate((node) => document.activeElement === node)) {
       res |= 1;
       continue;

@@ -1,9 +1,45 @@
-import {expect, test as baseTest, type Browser, type BrowserContextOptions, type APIRequestContext, type TestInfo, type Page} from '@playwright/test';
+import {
+  type Browser,
+  type BrowserContextOptions,
+  expect,
+  type Locator,
+  type Page,
+  test as baseTest,
+  type TestInfo,
+  type WorkerInfo,
+} from '@playwright/test';
+import * as path from 'node:path';
 
-export const test = baseTest.extend({
-  context: async ({browser}, use) => {
-    return use(await test_context(browser));
+const AUTH_PATH = 'tests/e2e/.auth';
+
+type AuthScope = 'logout' | 'shared' | 'webauthn';
+
+export type TestOptions = {
+  forEachTest: void
+  user: string | null;
+  authScope: AuthScope;
+};
+
+export const test = baseTest.extend<TestOptions>({
+  context: async ({browser, user, authScope, contextOptions, context}, use, {project}) => {
+    if (user && authScope) {
+      const browserName = project.name.toLowerCase().replace(' ', '-');
+      contextOptions.storageState = path.join(AUTH_PATH, `state-${browserName}-${user}-${authScope}.json`);
+    } else {
+      // if no user is given, ensure to have clean state
+      contextOptions.storageState = {cookies: [], origins: []};
+    }
+
+    context = await browser.newContext(contextOptions);
+
+    context.on('page', (page) => {
+      page.on('pageerror', (err) => expect(err).toBeUndefined());
+    });
+
+    return use(context);
   },
+  user: null,
+  authScope: 'shared',
   // see https://playwright.dev/docs/test-fixtures#adding-global-beforeeachaftereach-hooks
   forEachTest: [async ({page}, use) => {
     await use();
@@ -56,21 +92,6 @@ export async function login_user(browser: Browser, workerInfo: TestInfo, user: s
   return context;
 }
 
-export async function load_logged_in_context(browser: Browser, workerInfo: TestInfo, user: string) {
-  try {
-    return await test_context(browser, {storageState: `${ARTIFACTS_PATH}/state-${user}-${workerInfo.workerIndex}.json`});
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      throw new Error(`Could not find state for '${user}'. Did you call login_user(browser, workerInfo, '${user}') in test.beforeAll()?`);
-    }
-  }
-}
-
-export async function login({browser}: {browser: Browser}, workerInfo: TestInfo) {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  return await context?.newPage();
-}
-
 export async function save_visual(page: Page) {
   // Optionally include visual testing
   if (process.env.VISUAL_TEST) {
@@ -102,23 +123,47 @@ export async function save_visual(page: Page) {
   }
 }
 
-// Create a temporary user and login to that user and store session info.
-// This should ideally run on a per test basis.
-export async function create_temp_user(browser: Browser, workerInfo: TestInfo, request: APIRequestContext) {
-  const username = globalThis.crypto.randomUUID();
-  const newUser = await request.post(`/api/v1/admin/users`, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${btoa(`user1:${LOGIN_PASSWORD}`)}`,
-    },
-    data: {
-      username,
-      email: `${username}@host.invalid`,
-      password: LOGIN_PASSWORD,
-      must_change_password: false,
-    },
-  });
-  expect(newUser.ok()).toBeTruthy();
+/**
+ * Maps key inputs to specific platform and browser engine adjustments.
+ * @param key - The name of the key to map (e.g., 'Tab', 'End').
+ * @param workerInfo - Information about the current test worker, including project details like browser engine and platform.
+ * @returns The adjusted key mapping based on the platform and browser engine.
+ */
+export const adjustKeyMapping = (key: string, workerInfo: WorkerInfo): string => {
+  const isOsDarwin = process.platform === 'darwin';
+  const isEngineWebKit = ['Mobile Safari', 'webkit'].includes(workerInfo.project.name);
 
-  return {context: await login_user(browser, workerInfo, username), username};
-}
+  switch (key) {
+    case 'Tab': {
+      // Adjust Tab key mapping for macOS with WebKit browsers
+      // when "Press tab to highlight each item on a webpage" is not enabled.
+      // Ref: https://github.com/microsoft/playwright/issues/5609
+      return isOsDarwin && isEngineWebKit ? 'Alt+Tab' : 'Tab';
+    }
+    case 'End': {
+      // Adjust End key mapping for macOS.
+      return isOsDarwin ? 'Alt+ArrowRight' : 'End';
+    }
+  }
+
+  return key;
+};
+
+/**
+ * Waits for a specific network response and ensures the page is idle before proceeding.
+ * @param page - The Playwright Page instance.
+ * @param locator - The locator for the element to click.
+ * @param expectedUrlSubstring - Partial URL string to match the desired response.
+ */
+export const waitForClickAndResponse = async (page: Page, locator: Locator | string, expectedUrlSubstring: string) => {
+  const element: Locator = typeof locator === 'string' ? page.locator(locator) : locator;
+
+  await element.scrollIntoViewIfNeeded();
+
+  await Promise.all([
+    page.waitForResponse((response) => response.url().includes(expectedUrlSubstring) && response.ok()),
+    element.click(),
+  ]);
+
+  await page.waitForLoadState('domcontentloaded');
+};

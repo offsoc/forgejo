@@ -5,15 +5,23 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
+	"code.gitea.io/gitea/models/auth"
+	"code.gitea.io/gitea/models/unittest"
+	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/require"
@@ -25,6 +33,8 @@ func onForgejoRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare .
 	if len(prepare) == 0 || prepare[0] {
 		defer tests.PrepareTestEnv(t, 1)()
 	}
+	createSessions(t)
+
 	s := http.Server{
 		Handler: testE2eWebRoutes,
 	}
@@ -63,4 +73,90 @@ func onForgejoRun(t *testing.T, callback func(*testing.T, *url.URL), prepare ...
 	onForgejoRunTB(t, func(t testing.TB, u *url.URL) {
 		callback(t.(*testing.T), u)
 	}, prepare...)
+}
+
+func createSessions(t testing.TB) {
+	t.Helper()
+	// copied from playwright.config.ts
+	browsers := []string{
+		"chromium",
+		"firefox",
+		"webkit",
+		"Mobile Chrome",
+		"Mobile Safari",
+	}
+	scopes := []string{
+		"shared",
+		"logout",
+	}
+	// TODO to decouple tests each project (browser) must have its own user
+	users := []string{
+		"user1",
+		"user2",
+		"user12",
+		"user40", // dedicated for webauthn.test.e2e.ts
+	}
+
+	authState := filepath.Join(filepath.Dir(setting.AppPath), "tests", "e2e", ".auth")
+	err := os.RemoveAll(authState)
+	require.NoError(t, err)
+
+	err = os.MkdirAll(authState, os.ModePerm)
+	require.NoError(t, err)
+
+	for _, user := range users {
+		u := unittest.AssertExistsAndLoadBean(t, &user_model.User{LowerName: strings.ToLower(user)})
+		for _, browser := range browsers {
+			for _, scope := range scopes {
+				state := strings.ReplaceAll(strings.ToLower(fmt.Sprintf("state-%s-%s-%s.json", browser, user, scope)), " ", "-")
+				createSession(t, filepath.Join(authState, state), u)
+			}
+		}
+	}
+}
+
+func createSession(t testing.TB, fileName string, user *user_model.User) {
+	type Cookie struct {
+		Name     string `json:"name"`
+		Value    string `json:"value"`
+		Domain   string `json:"domain"`
+		Path     string `json:"path"`
+		Expires  int    `json:"expires"`
+		HTTPOnly bool   `json:"httpOnly"`
+		Secure   bool   `json:"secure"`
+		SameSite string `json:"sameSite"`
+	}
+
+	type BrowserState struct {
+		Cookies []Cookie `json:"cookies"`
+		Origins []string `json:"origins"`
+	}
+
+	oneMonth := time.Hour * 24 * 30
+	expire := timeutil.TimeStampNow().AddDuration(oneMonth)
+
+	lookup, validator, err := auth.GenerateAuthToken(context.TODO(), user.ID, expire, auth.LongTermAuthorization)
+	require.NoError(t, err)
+
+	state := BrowserState{
+		Cookies: []Cookie{
+			{
+				Name:     setting.CookieRememberName,
+				Value:    fmt.Sprintf("%s:%s", lookup, validator),
+				Domain:   setting.Domain,
+				Path:     "/",
+				Expires:  int(expire),
+				HTTPOnly: true,
+				Secure:   false,
+				SameSite: "Lax",
+			},
+		},
+		Origins: []string{},
+	}
+
+	jsonData, err := json.Marshal(state)
+	require.NoError(t, err)
+
+	err = os.WriteFile(fileName, jsonData, 0o644)
+	require.NoError(t, err)
 }

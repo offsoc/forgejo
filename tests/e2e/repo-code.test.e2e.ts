@@ -5,12 +5,10 @@
 // @watch end
 
 import {expect, type Page} from '@playwright/test';
-import {test, save_visual, login_user, login} from './utils_e2e.ts';
+import {save_visual, test} from './_test-setup.ts';
 import {accessibilityCheck} from './shared/accessibility.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
 async function assertSelectedLines(page: Page, nums: string[]) {
   const pageAssertions = async () => {
@@ -81,8 +79,7 @@ test('Readable diff', async ({page}, workerInfo) => {
   }
 });
 
-test('Username highlighted in commits', async ({browser}, workerInfo) => {
-  const page = await login({browser}, workerInfo);
+test('Username highlighted in commits', async ({page}) => {
   await page.goto('/user2/mentions-highlighted/commits/branch/main');
   // check first commit
   await page.getByRole('link', {name: 'A commit message which'}).click();

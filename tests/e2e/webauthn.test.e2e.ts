@@ -8,12 +8,15 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, save_visual, create_temp_user, login_user} from './utils_e2e.ts';
+import {save_visual, test} from './_test-setup.ts';
+import {LoginPage} from './ui/LoginPage.ts';
 
-test('WebAuthn register & login flow', async ({browser, request}, workerInfo) => {
-  test.skip(workerInfo.project.name !== 'chromium', 'Uses Chrome protocol');
-  const {context, username} = await create_temp_user(browser, workerInfo, request);
-  const page = await context.newPage();
+const user = 'user40';
+
+test.use({user});
+
+test('WebAuthn register & login flow', async ({page, browser}, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium', 'Uses Chrome protocol');
 
   // Register a security key.
   let response = await page.goto('/user/settings/security');
@@ -37,31 +40,38 @@ test('WebAuthn register & login flow', async ({browser, request}, workerInfo) =>
   await save_visual(page);
   await page.getByText('Add security key').click();
 
-  // Logout.
-  await expect(async () => {
-    await page.locator('div[aria-label="Profile and settings…"]').click();
-    await page.getByText('Sign Out').click();
-  }).toPass();
-  await page.waitForURL(`${workerInfo.project.use.baseURL}/`);
+  await test.step('logout', async () => {
+    await expect(async () => {
+      await page.locator('div[aria-label="Profile and settings…"]').click();
+      await page.getByText('Sign Out').click();
+    }).toPass();
+    await page.waitForURL(`${testInfo.project.use.baseURL}/`);
+  });
 
-  // Login.
-  response = await page.goto('/user/login');
-  expect(response?.status()).toBe(200);
+  await test.step('login', async () => {
+    response = await page.goto('/user/login');
+    expect(response?.status()).toBe(200);
+    await page.getByLabel('Username or email address').fill(user);
+    await page.getByLabel('Password').fill('password');
+    await page.getByRole('button', {name: 'Sign in'}).click();
+    await page.waitForURL(`${testInfo.project.use.baseURL}/user/webauthn`);
+    await page.waitForURL(`${testInfo.project.use.baseURL}/`);
+  });
 
-  await page.getByLabel('Username or email address').fill(username);
-  await page.getByLabel('Password').fill('password');
-  await page.getByRole('button', {name: 'Sign in'}).click();
-  await page.waitForURL(`${workerInfo.project.use.baseURL}/user/webauthn`);
-  await page.waitForURL(`${workerInfo.project.use.baseURL}/`);
-
-  // Cleanup.
-  response = await page.goto('/user/settings/security');
-  expect(response?.status()).toBe(200);
-  await page.getByRole('button', {name: 'Remove'}).click();
-  await save_visual(page);
-  await page.getByRole('button', {name: 'Yes'}).click();
-  await page.waitForLoadState();
+  await test.step('remove passkey', async () => {
+    response = await page.goto('/user/settings/security');
+    expect(response?.status()).toBe(200);
+    await page.getByRole('button', {name: 'Remove'}).click();
+    await save_visual(page);
+    await page.getByRole('button', {name: 'Yes'}).click();
+    await page.waitForLoadState();
+  });
 
   // verify the user can login without a key
-  await login_user(browser, workerInfo, username);
+  await test.step('Use can login without a passkey', async () => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    const login = new LoginPage(page, testInfo);
+    login.login(user, 'password');
+  });
 });

@@ -8,7 +8,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test} from './utils_e2e.ts';
+import {test} from './_test-setup.ts';
 
 test('copy src file path to clipboard', async ({page}, workerInfo) => {
   test.skip(['Mobile Safari', 'webkit'].includes(workerInfo.project.name), 'Apple clipboard API addon - starting at just $499!');
