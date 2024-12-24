@@ -628,7 +628,6 @@ func CommonRoutes() *web.Route {
 		r.Group("/alt", func() {
 
 			var (
-				repoPattern     = regexp.MustCompile(`\A(.*?)\.repo\z`)
 				uploadPattern   = regexp.MustCompile(`\A(.*?)/upload\z`)
 				baseRepoPattern = regexp.MustCompile(`(\S+)\.repo/(\S+)\/base/(\S+)`)
 				rpmsRepoPattern = regexp.MustCompile(`(\S+)\.repo/(\S+)\.(\S+)\/([a-zA-Z0-9_-]+)-([\d.]+-[a-zA-Z0-9_-]+)\.(\S+)\.rpm`)
@@ -640,13 +639,7 @@ func CommonRoutes() *web.Route {
 				isPut := ctx.Req.Method == "PUT"
 				isDelete := ctx.Req.Method == "DELETE"
 
-				m := repoPattern.FindStringSubmatch(path)
-				if len(m) == 2 && isGetHead {
-					ctx.SetParams("group", strings.Trim(m[1], "/"))
-					return
-				}
-
-				m = baseRepoPattern.FindStringSubmatch(path)
+				m := baseRepoPattern.FindStringSubmatch(path)
 				if len(m) == 4 {
 					if strings.Trim(m[1], "/") != "alt" {
 						ctx.SetParams("group", strings.Trim(m[1], "/"))
