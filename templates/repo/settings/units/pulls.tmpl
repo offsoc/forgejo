@@ -88,9 +88,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="field">
-			<p>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.title"}}</p>
-		</div>
+		<h5>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.title"}}</h5>
 		<div class="field">
 			<div class="ui checkbox">
 				<input name="pulls_allow_rebase_update" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebaseUpdate)}}checked{{end}}>
