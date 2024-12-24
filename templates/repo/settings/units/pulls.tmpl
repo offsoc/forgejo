@@ -14,9 +14,7 @@
 	</div>
 	<div class="field{{if not $pullRequestEnabled}} disabled{{end}}" id="pull_box">
 		<div class="field">
-			<p>
-				{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}
-			</p>
+			<p>{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}</p>
 		</div>
 		<div class="field">
 			<div class="ui checkbox">
@@ -92,6 +90,9 @@
 					<div class="item" data-value="fast-forward-only">{{ctx.Locale.Tr "repo.pulls.fast_forward_only_merge_pull_request"}}</div>
 				</div>
 			</div>
+		</div>
+		<div class="field">
+			<p>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.title"}}</p>
 		</div>
 		<div class="field">
 			<div class="ui checkbox">
