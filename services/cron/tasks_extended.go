@@ -65,6 +65,16 @@ func registerGarbageCollectRepositories() {
 	})
 }
 
+func registerWriteCommitGraphs() {
+	RegisterTaskFatal("write_commit_graphs", &BaseConfig{
+		Enabled:    false,
+		RunAtStart: false,
+		Schedule:   "@annually",
+	}, func(ctx context.Context, _ *user_model.User, config Config) error {
+		return repo_service.WriteCommitGraphs(ctx)
+	})
+}
+
 func registerRewriteAllPublicKeys() {
 	RegisterTaskFatal("resync_all_sshkeys", &BaseConfig{
 		Enabled:    false,
@@ -229,6 +239,7 @@ func initExtendedTasks() {
 	registerDeleteInactiveUsers()
 	registerDeleteRepositoryArchives()
 	registerGarbageCollectRepositories()
+	registerWriteCommitGraphs()
 	registerRewriteAllPublicKeys()
 	registerRewriteAllPrincipalKeys()
 	registerRepositoryUpdateHook()

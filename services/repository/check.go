@@ -200,3 +200,28 @@ func ReinitMissingRepositories(ctx context.Context) error {
 	}
 	return nil
 }
+
+// WriteCommitGraphs writes the git commit-graph for all repositories.
+func WriteCommitGraphs(ctx context.Context) error {
+	log.Trace("Doing: WriteCommitGraphs")
+
+	if err := db.Iterate(
+		ctx,
+		builder.Gt{"id": 0},
+		func(ctx context.Context, repo *repo_model.Repository) error {
+			select {
+			case <-ctx.Done():
+				return db.ErrCancelledf("before WriteCommitGraph of %s", repo.FullName())
+			default:
+			}
+			// we can ignore the error here because it will be logged in WriteCommitGraph
+			_ = git.WriteCommitGraph(ctx, repo.RepoPath())
+			return nil
+		},
+	); err != nil {
+		return err
+	}
+
+	log.Trace("Finished: WriteCommitGraphs")
+	return nil
+}
