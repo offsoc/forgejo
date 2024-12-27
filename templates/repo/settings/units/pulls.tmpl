@@ -5,16 +5,18 @@
 	{{$pullRequestEnabled := .Repository.UnitEnabled $.Context $.UnitTypePullRequests}}
 	{{$pullRequestGlobalDisabled := .UnitTypePullRequests.UnitGlobalDisabled}}
 	{{$prUnit := .Repository.MustGetUnit $.Context $.UnitTypePullRequests}}
-	<div class="inline field">
+	<div class="field">
 		<div class="ui checkbox{{if $pullRequestGlobalDisabled}} disabled{{end}}"{{if $pullRequestGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
 			<input class="enable-system" name="enable_pulls" type="checkbox" data-target="#pull_box" {{if $pullRequestEnabled}}checked{{end}}>
 			<label>{{ctx.Locale.Tr "repo.settings.pulls_desc"}}</label>
 		</div>
 	</div>
-	<label>
-		<input name="pulls_ignore_whitespace" type="checkbox" {{if and $pullRequestEnabled ($prUnit.PullRequestsConfig.IgnoreWhitespaceConflicts)}}checked{{end}}>
-		{{ctx.Locale.Tr "repo.settings.pulls.ignore_whitespace"}}
-	</label>
+	<fieldset>
+		<label>
+			<input name="pulls_ignore_whitespace" type="checkbox" {{if and $pullRequestEnabled ($prUnit.PullRequestsConfig.IgnoreWhitespaceConflicts)}}checked{{end}}>
+			{{ctx.Locale.Tr "repo.settings.pulls.ignore_whitespace"}}
+		</label>
+	</fieldset>
 	<fieldset class="{{if not $pullRequestEnabled}}disabled{{end}}" id="pull_box">
 		<legend>{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}</legend>
 		<label>
