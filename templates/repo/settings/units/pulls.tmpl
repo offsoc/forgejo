@@ -11,6 +11,10 @@
 			<label>{{ctx.Locale.Tr "repo.settings.pulls_desc"}}</label>
 		</div>
 	</div>
+	<label>
+		<input name="pulls_ignore_whitespace" type="checkbox" {{if and $pullRequestEnabled ($prUnit.PullRequestsConfig.IgnoreWhitespaceConflicts)}}checked{{end}}>
+		{{ctx.Locale.Tr "repo.settings.pulls.ignore_whitespace"}}
+	</label>
 	<fieldset class="{{if not $pullRequestEnabled}}disabled{{end}}" id="pull_box">
 		<legend>{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}</legend>
 		<label>
@@ -114,10 +118,6 @@
 		<label>
 			<input name="default_delete_branch_after_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultDeleteBranchAfterMerge)}}checked{{end}}>
 			{{ctx.Locale.Tr "repo.settings.pulls.default_delete_branch_after_merge"}}
-		</label>
-		<label>
-			<input name="pulls_ignore_whitespace" type="checkbox" {{if and $pullRequestEnabled ($prUnit.PullRequestsConfig.IgnoreWhitespaceConflicts)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.settings.pulls.ignore_whitespace"}}
 		</label>
 	</fieldset>
 
