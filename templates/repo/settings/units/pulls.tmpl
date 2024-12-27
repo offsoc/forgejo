@@ -37,6 +37,10 @@
 			<input name="pulls_allow_manual_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowManualMerge)}}checked{{end}}>
 			{{ctx.Locale.Tr "repo.pulls.merge_manually"}}
 		</label>
+		<label>
+			<input name="enable_autodetect_manual_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AutodetectManualMerge)}}checked{{end}}>
+			{{ctx.Locale.Tr "repo.settings.pulls.enable_autodetect_manual_merge"}}
+		</label>
 
 		<div class="field">
 			<label id="pulls-merge-styles-default-title">{{ctx.Locale.Tr "repo.settings.default_merge_style_desc"}}</label>
@@ -110,10 +114,6 @@
 		<label>
 			<input name="default_delete_branch_after_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultDeleteBranchAfterMerge)}}checked{{end}}>
 			{{ctx.Locale.Tr "repo.settings.pulls.default_delete_branch_after_merge"}}
-		</label>
-		<label>
-			<input name="enable_autodetect_manual_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AutodetectManualMerge)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.settings.pulls.enable_autodetect_manual_merge"}}
 		</label>
 		<label>
 			<input name="pulls_ignore_whitespace" type="checkbox" {{if and $pullRequestEnabled ($prUnit.PullRequestsConfig.IgnoreWhitespaceConflicts)}}checked{{end}}>
