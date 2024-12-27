@@ -113,6 +113,9 @@
 			</div>
 			<span class="help">{{ctx.Locale.Tr "repo.settings.default_update_style_desc"}}</span>
 		</div>
+	</fieldset>
+	<fieldset {{if not $pullRequestEnabled}}disabled{{end}}>
+		<legend>{{ctx.Locale.Tr "repo.settings.pulls.defaults.title"}}</legend>
 		<label>
 			<input name="default_allow_maintainer_edit" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultAllowMaintainerEdit)}}checked{{end}}>
 			{{ctx.Locale.Tr "repo.settings.pulls.default_allow_edits_from_maintainers"}}
