@@ -336,6 +336,10 @@ func TestRecentlyPushed(t *testing.T) {
 				[]repo_model.RepoUnit{{
 					RepoID: repo.ID,
 					Type:   unit_model.TypePullRequests,
+					Config: &repo_model.PullRequestsConfig{
+						AllowMerge:  true,
+						AllowSquash: true,
+					},
 				}},
 				nil)
 			require.NoError(t, err)
@@ -526,6 +530,37 @@ func TestRecentlyPushed(t *testing.T) {
 			htmlDoc.AssertElement(t, ".ui.message", true)
 			link, _ := htmlDoc.Find(".ui.message a[href*='/src/branch/']").Attr("href")
 			assert.Equal(t, "/user1/repo1/src/branch/recent-push", link)
+		})
+
+		// Test that visiting the base repo does not show any banner if
+		// the branches have corresponding PRs (open or merged)
+		t.Run("branches with merged or open PRs are not shown", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			respChildPR := testPullCreateDirectly(t, session, "user2", "repo1", "master", "user1", "repo1", "recent-push", "Child Pull Request")
+			elemChildPR := strings.Split(test.RedirectURL(respChildPR), "/")
+			assert.EqualValues(t, "user2", elemChildPR[1])
+			assert.EqualValues(t, "repo1", elemChildPR[2])
+			assert.EqualValues(t, "pulls", elemChildPR[3])
+			session2 := loginUser(t, "user2")
+			// Merge the PR from the fork
+			testPullMerge(t, session2, elemChildPR[1], elemChildPR[2], elemChildPR[4], repo_model.MergeStyleSquash, false)
+
+			respBasePR := testPullCreate(t, session, "user2", "repo1", true, "master", "recent-push-base", "Base Pull Request")
+			elemBasePR := strings.Split(test.RedirectURL(respBasePR), "/")
+			assert.EqualValues(t, "pulls", elemBasePR[3])
+			// Leave the PR from the base repo open (it conflicts with the PR from the fork anyway)
+
+			// Count recently pushed branches on the base repo
+			req := NewRequest(t, "GET", "/user2/repo1")
+			resp := session.MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+
+			messages := htmlDoc.Find(".ui.message")
+
+			// None of the branches should be shown, as they have either already been merged already,
+			// or have an open PR, so it doesn't make sense to make a new PR for any of them.
+			assert.Equal(t, 0, messages.Length())
 		})
 	})
 }

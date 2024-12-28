@@ -4,8 +4,8 @@
 package integration
 
 import (
+	"image"
 	"net/http"
-	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/modules/setting"
@@ -13,6 +13,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOpenGraphProperties(t *testing.T) {
@@ -43,7 +44,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "User Thirty",
 				"og:url":       setting.AppURL + "user30",
 				"og:type":      "profile",
-				"og:image":     "http://localhost:3003/assets/img/avatar_default.png",
+				"og:image":     setting.AppURL + "assets/img/avatar_default.png",
 				"og:site_name": siteName,
 			},
 		},
@@ -55,7 +56,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:url":         setting.AppURL + "the_34-user.with.all.allowedChars",
 				"og:description": "some [commonmark](https://commonmark.org/)!",
 				"og:type":        "profile",
-				"og:image":       "http://localhost:3003/assets/img/avatar_default.png",
+				"og:image":       setting.AppURL + "assets/img/avatar_default.png",
 				"og:site_name":   siteName,
 			},
 		},
@@ -63,24 +64,30 @@ func TestOpenGraphProperties(t *testing.T) {
 			name: "issue",
 			url:  "/user2/repo1/issues/1",
 			expected: map[string]string{
-				"og:title":       "issue1",
-				"og:url":         setting.AppURL + "user2/repo1/issues/1",
-				"og:description": "content for the first issue",
-				"og:type":        "object",
-				"og:image":       "http://localhost:3003/avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
-				"og:site_name":   siteName,
+				"og:title":        "issue1",
+				"og:url":          setting.AppURL + "user2/repo1/issues/1",
+				"og:description":  "content for the first issue",
+				"og:type":         "object",
+				"og:image":        setting.AppURL + "user2/repo1/issues/1/summary-card",
+				"og:image:alt":    "Summary card of an issue titled \"issue1\" in repository user2/repo1",
+				"og:image:width":  "1200",
+				"og:image:height": "600",
+				"og:site_name":    siteName,
 			},
 		},
 		{
 			name: "pull request",
 			url:  "/user2/repo1/pulls/2",
 			expected: map[string]string{
-				"og:title":       "issue2",
-				"og:url":         setting.AppURL + "user2/repo1/pulls/2",
-				"og:description": "content for the second issue",
-				"og:type":        "object",
-				"og:image":       "http://localhost:3003/avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
-				"og:site_name":   siteName,
+				"og:title":        "issue2",
+				"og:url":          setting.AppURL + "user2/repo1/pulls/2",
+				"og:description":  "content for the second issue",
+				"og:type":         "object",
+				"og:image":        setting.AppURL + "user2/repo1/pulls/2/summary-card",
+				"og:image:alt":    "Summary card of an issue titled \"issue2\" in repository user2/repo1",
+				"og:image:width":  "1200",
+				"og:image:height": "600",
+				"og:site_name":    siteName,
 			},
 		},
 		{
@@ -90,7 +97,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "repo49/test/test.txt at master",
 				"og:url":       setting.AppURL + "/user27/repo49/src/branch/master/test/test.txt",
 				"og:type":      "object",
-				"og:image":     "http://localhost:3003/assets/img/avatar_default.png",
+				"og:image":     setting.AppURL + "assets/img/avatar_default.png",
 				"og:site_name": siteName,
 			},
 		},
@@ -101,7 +108,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "Page With Spaced Name",
 				"og:url":       setting.AppURL + "/user2/repo1/wiki/Page-With-Spaced-Name",
 				"og:type":      "object",
-				"og:image":     "http://localhost:3003/avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
+				"og:image":     setting.AppURL + "avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
 				"og:site_name": siteName,
 			},
 		},
@@ -112,7 +119,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:title":     "repo1",
 				"og:url":       setting.AppURL + "user2/repo1",
 				"og:type":      "object",
-				"og:image":     "http://localhost:3003/avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
+				"og:image":     setting.AppURL + "avatars/ab53a2911ddf9b4817ac01ddcd3d975f",
 				"og:site_name": siteName,
 			},
 		},
@@ -124,7 +131,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				"og:url":         setting.AppURL + "user27/repo49",
 				"og:description": "A wonderful repository with more than just a README.md",
 				"og:type":        "object",
-				"og:image":       "http://localhost:3003/assets/img/avatar_default.png",
+				"og:image":       setting.AppURL + "assets/img/avatar_default.png",
 				"og:site_name":   siteName,
 			},
 		},
@@ -132,6 +139,8 @@ func TestOpenGraphProperties(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
 			req := NewRequest(t, "GET", tc.url)
 			resp := MakeRequest(t, req, http.StatusOK)
 			doc := NewHTMLParser(t, resp.Body)
@@ -142,14 +151,44 @@ func TestOpenGraphProperties(t *testing.T) {
 				assert.True(t, foundProp)
 				content, foundContent := selection.Attr("content")
 				assert.True(t, foundContent, "opengraph meta tag without a content property")
-				if prop == "og:image" {
-					content = strings.ReplaceAll(content, "http://localhost:3001", "http://localhost:3003")
-					content = strings.ReplaceAll(content, "http://localhost:3002", "http://localhost:3003")
-				}
 				foundProps[prop] = content
 			})
 
 			assert.EqualValues(t, tc.expected, foundProps, "mismatching opengraph properties")
+		})
+	}
+}
+
+func TestOpenGraphSummaryCard(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	cases := []struct {
+		name string
+		url  string
+	}{
+		{
+			name: "issue",
+			url:  "/user2/repo1/issues/1/summary-card",
+		},
+		{
+			name: "pull request",
+			url:  "/user2/repo1/pulls/2/summary-card",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			req := NewRequest(t, "GET", tc.url)
+			resp := MakeRequest(t, req, http.StatusOK)
+
+			assert.Equal(t, "image/png", resp.Header().Get("Content-Type"))
+			img, imgType, err := image.Decode(resp.Body)
+			require.NoError(t, err)
+			assert.Equal(t, "png", imgType)
+			assert.Equal(t, 1200, img.Bounds().Dx())
+			assert.Equal(t, 600, img.Bounds().Dy())
 		})
 	}
 }

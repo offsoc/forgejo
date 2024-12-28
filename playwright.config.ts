@@ -65,6 +65,7 @@ export default {
       /* Project-specific settings. */
       use: {
         ...devices['Desktop Chrome'],
+        permissions: ['clipboard-read', 'clipboard-write'],
       },
     },
 
@@ -87,6 +88,7 @@ export default {
       name: 'Mobile Chrome',
       use: {
         ...devices['Pixel 5'],
+        permissions: ['clipboard-read', 'clipboard-write'],
       },
     },
     {
@@ -101,4 +103,5 @@ export default {
   outputDir: 'tests/e2e/test-artifacts/',
   /* Folder for explicit snapshots for visual testing */
   snapshotDir: 'tests/e2e/test-snapshots/',
+  snapshotPathTemplate: '{snapshotDir}/snapshots/{testFilePath}/{projectName}_{arg}{ext}',
 } satisfies PlaywrightTestConfig;

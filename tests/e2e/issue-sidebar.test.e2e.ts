@@ -7,7 +7,7 @@
 /* eslint playwright/expect-expect: ["error", { "assertFunctionNames": ["check_wip"] }] */
 
 import {expect, type Page} from '@playwright/test';
-import {test, login_user, login} from './utils_e2e.ts';
+import {test, save_visual, login_user, login} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -203,6 +203,7 @@ test('New Issue: Assignees', async ({browser}, workerInfo) => {
   await page.locator('.select-assignees .menu .item').filter({hasText: 'user4'}).click();
   await page.locator('.select-assignees.dropdown').click();
   await expect(assigneesList.filter({hasText: 'user4'})).toBeVisible();
+  await save_visual(page);
 
   // remove user4
   await page.locator('.select-assignees.dropdown').click();
@@ -220,6 +221,7 @@ test('New Issue: Assignees', async ({browser}, workerInfo) => {
   await page.fill('.select-assignees .menu .search input', '');
   await page.locator('.select-assignees.dropdown .no-select.item').click();
   await expect(page.locator('.select-assign-me')).toBeVisible();
+  await save_visual(page);
 });
 
 test('Issue: Milestone', async ({browser}, workerInfo) => {
@@ -256,14 +258,17 @@ test('New Issue: Milestone', async ({browser}, workerInfo) => {
   const selectedMilestone = page.locator('.issue-content-right .select-milestone.list');
   const milestoneDropdown = page.locator('.issue-content-right .select-milestone.dropdown');
   await expect(selectedMilestone).toContainText('No milestone');
+  await save_visual(page);
 
   // Add milestone.
   await milestoneDropdown.click();
   await page.getByRole('option', {name: 'milestone1'}).click();
   await expect(selectedMilestone).toContainText('milestone1');
+  await save_visual(page);
 
   // Clear milestone.
   await milestoneDropdown.click();
   await page.getByText('Clear milestone', {exact: true}).click();
   await expect(selectedMilestone).toContainText('No milestone');
+  await save_visual(page);
 });

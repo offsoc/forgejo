@@ -7,6 +7,7 @@ package integration
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"testing"
@@ -14,9 +15,11 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/translation"
+	files_service "code.gitea.io/gitea/services/repository/files"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -76,10 +79,14 @@ func testRepoGenerate(t *testing.T, session *TestSession, templateID, templateOw
 	// Step4: check the existence of the generated repo
 	req = NewRequestf(t, "GET", "/%s/%s", generateOwner.Name, generateRepoName)
 	session.MakeRequest(t, req, http.StatusOK)
+}
 
-	// Step5: check substituted values in Readme
-	req = NewRequestf(t, "GET", "/%s/%s/raw/branch/master/README.md", generateOwner.Name, generateRepoName)
-	resp = session.MakeRequest(t, req, http.StatusOK)
+func testRepoGenerateWithFixture(t *testing.T, session *TestSession, templateID, templateOwnerName, templateRepoName string, user, generateOwner *user_model.User, generateRepoName string) {
+	testRepoGenerate(t, session, templateID, templateOwnerName, templateRepoName, user, generateOwner, generateRepoName)
+
+	// check substituted values in Readme
+	req := NewRequestf(t, "GET", "/%s/%s/raw/branch/master/README.md", generateOwner.Name, generateRepoName)
+	resp := session.MakeRequest(t, req, http.StatusOK)
 	body := fmt.Sprintf(`# %s Readme
 Owner: %s
 Link: /%s/%s
@@ -125,7 +132,7 @@ func TestRepoGenerate(t *testing.T) {
 	session := loginUser(t, userName)
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: userName})
 
-	testRepoGenerate(t, session, "44", "user27", "template1", user, user, "generated1")
+	testRepoGenerateWithFixture(t, session, "44", "user27", "template1", user, user, "generated1")
 }
 
 func TestRepoGenerateToOrg(t *testing.T) {
@@ -135,7 +142,7 @@ func TestRepoGenerateToOrg(t *testing.T) {
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: userName})
 	org := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "org3"})
 
-	testRepoGenerate(t, session, "44", "user27", "template1", user, org, "generated2")
+	testRepoGenerateWithFixture(t, session, "44", "user27", "template1", user, org, "generated2")
 }
 
 func TestRepoCreateFormTrimSpace(t *testing.T) {
@@ -152,4 +159,67 @@ func TestRepoCreateFormTrimSpace(t *testing.T) {
 
 	assert.EqualValues(t, "/user2/spaced-name", test.RedirectURL(resp))
 	unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: 2, Name: "spaced-name"})
+}
+
+func TestRepoGenerateTemplating(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		input := `# $REPO_NAME
+	This is a Repo By $REPO_OWNER
+	ThisIsThe${REPO_NAME}InAnInlineWay`
+		expected := `# %s
+	This is a Repo By %s
+	ThisIsThe%sInAnInlineWay`
+		templateName := "my_template"
+		generatedName := "my_generated"
+
+		userName := "user1"
+		session := loginUser(t, userName)
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: userName})
+
+		template, _, f := tests.CreateDeclarativeRepoWithOptions(t, user, tests.DeclarativeRepoOptions{
+			Name:       optional.Some(templateName),
+			IsTemplate: optional.Some(true),
+			Files: optional.Some([]*files_service.ChangeRepoFile{
+				{
+					Operation:     "create",
+					TreePath:      ".forgejo/template",
+					ContentReader: strings.NewReader("Readme.md"),
+				},
+				{
+					Operation:     "create",
+					TreePath:      "Readme.md",
+					ContentReader: strings.NewReader(input),
+				},
+			}),
+		})
+		defer f()
+
+		// The repo.TemplateID field is not initalized. Luckly the ID field holds the expected value
+		templateID := strconv.FormatInt(template.ID, 10)
+
+		testRepoGenerate(
+			t,
+			session,
+			templateID,
+			user.Name,
+			templateName,
+			user,
+			user,
+			generatedName,
+		)
+
+		req := NewRequestf(
+			t,
+			"GET", "/%s/%s/raw/branch/%s/Readme.md",
+			user.Name,
+			generatedName,
+			template.DefaultBranch,
+		)
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		body := fmt.Sprintf(expected,
+			generatedName,
+			user.Name,
+			generatedName)
+		assert.Equal(t, body, resp.Body.String())
+	})
 }

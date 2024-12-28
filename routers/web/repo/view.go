@@ -39,6 +39,7 @@ import (
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/highlight"
+	code_indexer "code.gitea.io/gitea/modules/indexer/code"
 	"code.gitea.io/gitea/modules/lfs"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/markup"
@@ -1152,6 +1153,12 @@ PostRecentBranchCheck:
 	ctx.Data["TreeNames"] = treeNames
 	ctx.Data["BranchLink"] = branchLink
 	ctx.Data["CodeIndexerDisabled"] = !setting.Indexer.RepoIndexerEnabled
+	if setting.Indexer.RepoIndexerEnabled {
+		ctx.Data["CodeIndexerUnavailable"] = !code_indexer.IsAvailable(ctx)
+		ctx.Data["CodeSearchOptions"] = code_indexer.CodeSearchOptions
+	} else {
+		ctx.Data["CodeSearchOptions"] = git.GrepSearchOptions
+	}
 	ctx.HTML(http.StatusOK, tplRepoHome)
 }
 

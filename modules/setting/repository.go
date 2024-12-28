@@ -88,6 +88,7 @@ var (
 			DefaultMergeMessageAllAuthors            bool
 			DefaultMergeMessageMaxApprovers          int
 			DefaultMergeMessageOfficialApproversOnly bool
+			DefaultUpdateStyle                       string
 			PopulateSquashCommentWithCommitMessages  bool
 			AddCoCommitterTrailers                   bool
 			TestConflictingPatchesWithGitApply       bool
@@ -218,6 +219,7 @@ var (
 			DefaultMergeMessageAllAuthors            bool
 			DefaultMergeMessageMaxApprovers          int
 			DefaultMergeMessageOfficialApproversOnly bool
+			DefaultUpdateStyle                       string
 			PopulateSquashCommentWithCommitMessages  bool
 			AddCoCommitterTrailers                   bool
 			TestConflictingPatchesWithGitApply       bool
@@ -234,6 +236,7 @@ var (
 			DefaultMergeMessageAllAuthors:            false,
 			DefaultMergeMessageMaxApprovers:          10,
 			DefaultMergeMessageOfficialApproversOnly: true,
+			DefaultUpdateStyle:                       "merge",
 			PopulateSquashCommentWithCommitMessages:  false,
 			AddCoCommitterTrailers:                   true,
 			RetargetChildrenOnMerge:                  true,

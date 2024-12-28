@@ -5,7 +5,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, login} from './utils_e2e.ts';
+import {test, save_visual, login_user, login} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -66,6 +66,7 @@ test('Always focus edit tab first on edit', async ({browser}, workerInfo) => {
 
   await expect(editTab).toHaveClass(/active/);
   await expect(previewTab).not.toHaveClass(/active/);
+  await save_visual(page);
 });
 
 test('Quote reply', async ({browser}, workerInfo) => {

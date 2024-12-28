@@ -395,20 +395,20 @@ func parseSubmoduleContent(bs []byte) (*ObjectCache, error) {
 	return submoduleCache, nil
 }
 
-// GetSubModule get the sub module according entryname
-func (c *Commit) GetSubModule(entryname string) (*SubModule, error) {
+// GetSubModule returns the URL to the submodule according entryname
+func (c *Commit) GetSubModule(entryname string) (string, error) {
 	modules, err := c.GetSubModules()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if modules != nil {
 		module, has := modules.Get(entryname)
 		if has {
-			return module.(*SubModule), nil
+			return module.(string), nil
 		}
 	}
-	return nil, nil
+	return "", nil
 }
 
 // GetBranchName gets the closest branch name (as returned by 'git name-rev --name-only')

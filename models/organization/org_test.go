@@ -9,7 +9,9 @@ import (
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
+	"code.gitea.io/gitea/models/perm"
 	repo_model "code.gitea.io/gitea/models/repo"
+	"code.gitea.io/gitea/models/unit"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/structs"
@@ -481,4 +483,36 @@ func TestCreateOrganization4(t *testing.T) {
 	require.Error(t, err)
 	assert.True(t, db.IsErrNameReserved(err))
 	unittest.CheckConsistencyFor(t, &organization.Organization{}, &organization.Team{})
+}
+
+func TestUnitPermission(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	publicOrg := &organization.Organization{ID: 1001, Visibility: structs.VisibleTypePublic}
+	limitedOrg := &organization.Organization{ID: 1001, Visibility: structs.VisibleTypeLimited}
+	privateOrg := &organization.Organization{ID: 1001, Visibility: structs.VisibleTypePrivate}
+	user := &user_model.User{ID: 1001}
+	t.Run("Anonymous", func(t *testing.T) {
+		t.Run("Public", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeRead, publicOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
+		})
+		t.Run("Limited", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeNone, limitedOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
+		})
+		t.Run("Private", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeNone, privateOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
+		})
+	})
+
+	t.Run("Logged in", func(t *testing.T) {
+		t.Run("Public", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeRead, publicOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
+		})
+		t.Run("Limited", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeRead, limitedOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
+		})
+		t.Run("Private", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeNone, privateOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
+		})
+	})
 }

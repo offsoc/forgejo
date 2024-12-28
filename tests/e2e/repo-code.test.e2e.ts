@@ -5,7 +5,7 @@
 // @watch end
 
 import {expect, type Page} from '@playwright/test';
-import {test, login_user, login} from './utils_e2e.ts';
+import {test, save_visual, login_user, login} from './utils_e2e.ts';
 import {accessibilityCheck} from './shared/accessibility.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
@@ -89,10 +89,12 @@ test('Username highlighted in commits', async ({browser}, workerInfo) => {
   await expect(page.getByRole('link', {name: '@user2'})).toHaveCSS('background-color', /(.*)/);
   await expect(page.getByRole('link', {name: '@user1'})).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   await accessibilityCheck({page}, ['.commit-header'], [], []);
+  await save_visual(page);
   // check second commit
   await page.goto('/user2/mentions-highlighted/commits/branch/main');
   await page.locator('tbody').getByRole('link', {name: 'Another commit which mentions'}).click();
   await expect(page.getByRole('link', {name: '@user2'})).toHaveCSS('background-color', /(.*)/);
   await expect(page.getByRole('link', {name: '@user1'})).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   await accessibilityCheck({page}, ['.commit-header'], [], []);
+  await save_visual(page);
 });

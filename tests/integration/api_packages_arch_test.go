@@ -223,8 +223,14 @@ HMhNSS1IzUsBcpJAPFAwwUXSM0u4BjoaR8EoGAWjgGQAAILFeyQADAAA
 
 		t.Run(fmt.Sprintf("RepositoryDB[%s]", group), func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
-			req := NewRequest(t, "GET", rootURL+"/repository.key")
-			respPub := MakeRequest(t, req, http.StatusOK)
+			req := NewRequest(t, "GET", groupURL+"/x86_64/base.db.tar.gz")
+			MakeRequest(t, req, http.StatusOK)
+
+			req = NewRequest(t, "GET", groupURL+"/x86_64/base.files")
+			MakeRequest(t, req, http.StatusOK)
+
+			req = NewRequest(t, "GET", groupURL+"/x86_64/base.files.tar.gz")
+			MakeRequest(t, req, http.StatusOK)
 
 			req = NewRequest(t, "GET", groupURL+"/x86_64/base.db")
 			respPkg := MakeRequest(t, req, http.StatusOK)
@@ -232,23 +238,32 @@ HMhNSS1IzUsBcpJAPFAwwUXSM0u4BjoaR8EoGAWjgGQAAILFeyQADAAA
 			req = NewRequest(t, "GET", groupURL+"/x86_64/base.db.sig")
 			respSig := MakeRequest(t, req, http.StatusOK)
 
+			req = NewRequest(t, "GET", rootURL+"/repository.key")
+			respPub := MakeRequest(t, req, http.StatusOK)
+
 			if err := gpgVerify(respPub.Body.Bytes(), respSig.Body.Bytes(), respPkg.Body.Bytes()); err != nil {
 				t.Fatal(err)
 			}
 			files, err := listTarGzFiles(respPkg.Body.Bytes())
 			require.NoError(t, err)
-			require.Len(t, files, 1)
+			require.Len(t, files, 2)
 			for s, d := range files {
-				name := getProperty(string(d.Data), "NAME")
-				ver := getProperty(string(d.Data), "VERSION")
-				require.Equal(t, name+"-"+ver+"/desc", s)
-				fn := getProperty(string(d.Data), "FILENAME")
-				pgp := getProperty(string(d.Data), "PGPSIG")
-				req = NewRequest(t, "GET", groupURL+"/x86_64/"+fn+".sig")
-				respSig := MakeRequest(t, req, http.StatusOK)
-				decodeString, err := base64.StdEncoding.DecodeString(pgp)
-				require.NoError(t, err)
-				require.Equal(t, respSig.Body.Bytes(), decodeString)
+				if strings.HasSuffix(s, "/desc") {
+					name := getProperty(string(d.Data), "NAME")
+					ver := getProperty(string(d.Data), "VERSION")
+					require.Equal(t, name+"-"+ver+"/desc", s)
+					fn := getProperty(string(d.Data), "FILENAME")
+					pgp := getProperty(string(d.Data), "PGPSIG")
+					req = NewRequest(t, "GET", groupURL+"/x86_64/"+fn+".sig")
+					respSig := MakeRequest(t, req, http.StatusOK)
+					decodeString, err := base64.StdEncoding.DecodeString(pgp)
+					require.NoError(t, err)
+					require.Equal(t, respSig.Body.Bytes(), decodeString)
+				} else if strings.HasSuffix(s, "/files") {
+					require.True(t, strings.HasPrefix(string(d.Data), "%FILES%"))
+				} else {
+					require.Failf(t, "unknown item", "fileName:%s", s)
+				}
 			}
 		})
 
@@ -275,7 +290,7 @@ HMhNSS1IzUsBcpJAPFAwwUXSM0u4BjoaR8EoGAWjgGQAAILFeyQADAAA
 			respPkg := MakeRequest(t, req, http.StatusOK)
 			files, err := listTarGzFiles(respPkg.Body.Bytes())
 			require.NoError(t, err)
-			require.Len(t, files, 1)
+			require.Len(t, files, 2)
 
 			req = NewRequestWithBody(t, "DELETE", groupURL+"/test2/1.0.0-1/any", nil).
 				AddBasicAuth(user.Name)
@@ -347,7 +362,7 @@ HMhNSS1IzUsBcpJAPFAwwUXSM0u4BjoaR8EoGAWjgGQAAILFeyQADAAA
 
 		files, err := listTarGzFiles(respPkg.Body.Bytes())
 		require.NoError(t, err)
-		require.Len(t, files, 1)
+		require.Len(t, files, 2)
 
 		req = NewRequestWithBody(t, "PUT", rootURL, bytes.NewReader(pkgs["otherXZ"])).
 			AddBasicAuth(user.Name)
@@ -358,7 +373,7 @@ HMhNSS1IzUsBcpJAPFAwwUXSM0u4BjoaR8EoGAWjgGQAAILFeyQADAAA
 
 		files, err = listTarGzFiles(respPkg.Body.Bytes())
 		require.NoError(t, err)
-		require.Len(t, files, 2)
+		require.Len(t, files, 4)
 	})
 }
 

@@ -46,7 +46,7 @@ func (url defaultActionsURL) URL() string {
 }
 
 const (
-	defaultActionsURLForgejo = "https://code.forgejo.org"
+	defaultActionsURLForgejo = "https://data.forgejo.org"
 	defaultActionsURLGitHub  = "github" // https://github.com
 	defaultActionsURLSelf    = "self"   // the root URL of the self-hosted instance
 )

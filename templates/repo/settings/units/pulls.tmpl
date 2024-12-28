@@ -106,6 +106,29 @@
 			</div>
 		</div>
 		<div class="field">
+			<p>
+				{{ctx.Locale.Tr "repo.settings.default_update_style_desc"}}
+			</p>
+			<div class="ui dropdown selection">
+				<select name="pulls_default_update_style">
+					<option value="merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.update_branch"}}</option>
+					<option value="rebase" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "rebase")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}</option>
+				</select>{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+				<div class="default text">
+					{{if (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "merge")}}
+						{{ctx.Locale.Tr "repo.pulls.update_branch"}}
+					{{end}}
+					{{if (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "rebase")}}
+						{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}
+					{{end}}
+				</div>
+				<div class="menu">
+					<div class="item" data-value="merge">{{ctx.Locale.Tr "repo.pulls.update_branch"}}</div>
+					<div class="item" data-value="rebase">{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}</div>
+				</div>
+			</div>
+		</div>
+		<div class="field">
 			<div class="ui checkbox">
 				<input name="default_delete_branch_after_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultDeleteBranchAfterMerge)}}checked{{end}}>
 				<label>{{ctx.Locale.Tr "repo.settings.pulls.default_delete_branch_after_merge"}}</label>

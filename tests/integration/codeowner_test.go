@@ -169,7 +169,7 @@ func TestCodeOwner(t *testing.T) {
 			_, err := db.GetEngine(db.DefaultContext).Cols("is_private").Update(repo)
 			require.NoError(t, err)
 
-			err = os.WriteFile(path.Join(dstPath, "README.md"), []byte("## very senstive info"), 0o666)
+			err = os.WriteFile(path.Join(dstPath, "README.md"), []byte("## very sensitive info"), 0o666)
 			require.NoError(t, err)
 
 			err = git.AddChanges(dstPath, true)

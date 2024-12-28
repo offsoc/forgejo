@@ -189,7 +189,7 @@ class ComboMarkdownEditor {
     const newTableModal = document.querySelector(`div[data-markdown-table-modal-id="${elementId}"]`);
     const form = newTableModal.querySelector('div[data-selector-name="form"]');
 
-    // Vaildate input fields
+    // Validate input fields
     for (const currentInput of form.querySelectorAll('input')) {
       if (!currentInput.checkValidity()) {
         currentInput.reportValidity();

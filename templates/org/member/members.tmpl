@@ -15,7 +15,7 @@
 						<div class="flex-item-title">
 							{{template "shared/user/name" .}}
 							{{if not $isPublic}}
-								<span class="ui basic tiny label">{{ctx.Locale.Tr "org.members.private"}}</span>
+								<span class="ui label">{{ctx.Locale.Tr "org.members.private"}}</span>
 							{{end}}
 						</div>
 						{{if not $.PublicOnly}}

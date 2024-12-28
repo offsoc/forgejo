@@ -10,6 +10,7 @@
 		{{end}}
 	</h4>
 	<div class="ui attached segment">
+		{{if .EnableInternalSignIn}}
 		<form class="ui form" action="{{.SignInLink}}" method="post">
 			{{.CsrfTokenHtml}}
 			<div class="required field {{if and (.Err_UserName) (or (not .LinkAccountMode) (and .LinkAccountMode .LinkAccountModeSignIn))}}error{{end}}">
@@ -43,6 +44,7 @@
 				</button>
 			</div>
 		</form>
+		{{end}}
 
 		{{template "user/auth/oauth_container" .}}
 	</div>

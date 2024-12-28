@@ -362,6 +362,10 @@ func prepareMigrationTasks() []*migration {
 		newMigration(300, "Add force-push branch protection support", v1_23.AddForcePushBranchProtection),
 		newMigration(301, "Add skip_secondary_authorization option to oauth2 application table", v1_23.AddSkipSecondaryAuthColumnToOAuth2ApplicationTable),
 		newMigration(302, "Add index to action_task stopped log_expired", v1_23.AddIndexToActionTaskStoppedLogExpired),
+
+		// Migration to Forgejo v10
+		newMigration(303, "Gitea last drop", v1_23.GiteaLastDrop),
+		newMigration(304, "Migrate `secret` column to store keying material", forgejo_migrations.MigrateTwoFactorToKeying),
 	}
 	return preparedMigrations
 }

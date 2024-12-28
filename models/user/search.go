@@ -24,8 +24,8 @@ type SearchUserOptions struct {
 	Keyword       string
 	Type          UserType
 	UID           int64
-	LoginName     string // this option should be used only for admin user
-	SourceID      int64  // this option should be used only for admin user
+	LoginName     string                 // this option should be used only for admin user
+	SourceID      optional.Option[int64] // this option should be used only for admin user
 	OrderBy       db.SearchOrderBy
 	Visible       []structs.VisibleType
 	Actor         *User // The user doing the search
@@ -98,8 +98,8 @@ func (opts *SearchUserOptions) toSearchQueryBase(ctx context.Context) *xorm.Sess
 		cond = cond.And(builder.Eq{"id": opts.UID})
 	}
 
-	if opts.SourceID > 0 {
-		cond = cond.And(builder.Eq{"login_source": opts.SourceID})
+	if opts.SourceID.Has() {
+		cond = cond.And(builder.Eq{"login_source": opts.SourceID.Value()})
 	}
 	if opts.LoginName != "" {
 		cond = cond.And(builder.Eq{"login_name": opts.LoginName})

@@ -189,6 +189,7 @@ type RepoUnitSettingForm struct {
 	PullsAllowFastForwardOnly             bool
 	PullsAllowManualMerge                 bool
 	PullsDefaultMergeStyle                string
+	PullsDefaultUpdateStyle               string
 	EnableAutodetectManualMerge           bool
 	PullsAllowRebaseUpdate                bool
 	DefaultDeleteBranchAfterMerge         bool

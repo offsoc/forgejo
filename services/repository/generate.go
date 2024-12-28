@@ -126,24 +126,32 @@ func (gt *GiteaTemplate) Globs() []glob.Glob {
 }
 
 func checkGiteaTemplate(tmpDir string) (*GiteaTemplate, error) {
-	gtPath := filepath.Join(tmpDir, ".gitea", "template")
-	if _, err := os.Stat(gtPath); os.IsNotExist(err) {
-		return nil, nil
-	} else if err != nil {
-		return nil, err
+	configDirs := []string{".forgejo", ".gitea"}
+	var templateFilePath string
+
+	for _, dir := range configDirs {
+		candidatePath := filepath.Join(tmpDir, dir, "template")
+		if _, err := os.Stat(candidatePath); err == nil {
+			templateFilePath = candidatePath
+			break
+		} else if !os.IsNotExist(err) {
+			return nil, err
+		}
 	}
 
-	content, err := os.ReadFile(gtPath)
+	if templateFilePath == "" {
+		return nil, nil
+	}
+
+	content, err := os.ReadFile(templateFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	gt := &GiteaTemplate{
-		Path:    gtPath,
+	return &GiteaTemplate{
+		Path:    templateFilePath,
 		Content: content,
-	}
-
-	return gt, nil
+	}, nil
 }
 
 func generateRepoCommit(ctx context.Context, repo, templateRepo, generateRepo *repo_model.Repository, tmpDir string) error {

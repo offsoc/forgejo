@@ -164,6 +164,7 @@ func SignIn(ctx *context.Context) {
 	ctx.Data["PageIsSignIn"] = true
 	ctx.Data["PageIsLogin"] = true
 	ctx.Data["EnableSSPI"] = auth.IsSSPIEnabled(ctx)
+	ctx.Data["EnableInternalSignIn"] = setting.Service.EnableInternalSignIn
 
 	if setting.Service.EnableCaptcha && setting.Service.RequireCaptchaForLogin {
 		context.SetCaptchaData(ctx)
@@ -187,6 +188,13 @@ func SignInPost(ctx *context.Context) {
 	ctx.Data["PageIsSignIn"] = true
 	ctx.Data["PageIsLogin"] = true
 	ctx.Data["EnableSSPI"] = auth.IsSSPIEnabled(ctx)
+	ctx.Data["EnableInternalSignIn"] = setting.Service.EnableInternalSignIn
+
+	// Permission denied if EnableInternalSignIn is false
+	if !setting.Service.EnableInternalSignIn {
+		ctx.Error(http.StatusForbidden)
+		return
+	}
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplSignIn)
@@ -591,8 +599,10 @@ func handleUserCreated(ctx *context.Context, u *user_model.User, gothUser *goth.
 	notify_service.NewUserSignUp(ctx, u)
 	// update external user information
 	if gothUser != nil {
-		if err := externalaccount.EnsureLinkExternalToUser(ctx, u, *gothUser); err != nil {
-			log.Error("EnsureLinkExternalToUser failed: %v", err)
+		if err := externalaccount.UpdateExternalUser(ctx, u, *gothUser); err != nil {
+			if !errors.Is(err, util.ErrNotExist) {
+				log.Error("UpdateExternalUser failed: %v", err)
+			}
 		}
 	}
 

@@ -121,6 +121,12 @@ c=2
 			want:      lines(`<span class="k">module</span> <span class="nn">Crypt</span> <span class="o">=</span> <span class="k">let</span> <span class="nv">generateCryptTable</span><span class="o">:</span> <span class="n">array</span><span class="o">&lt;</span><span class="kt">uint32</span><span class="o">&gt;</span> <span class="o">=</span>`),
 			lexerName: "FSharp",
 		},
+		{
+			name:      "test.gradle.kts",
+			code:      "@file:Suppress(\"UnstableApiUsage\")",
+			want:      lines("<span class=\"nd\">@file</span><span class=\"p\">:</span><span class=\"n\">Suppress</span><span class=\"p\">(</span><span class=\"s2\">&#34;</span><span class=\"s2\">UnstableApiUsage</span><span class=\"s2\">&#34;</span><span class=\"p\">)</span>"),
+			lexerName: "Kotlin",
+		},
 	}
 
 	for _, tt := range tests {

@@ -245,8 +245,7 @@ func TestLDAPUserSync(t *testing.T) {
 	}
 	defer tests.PrepareTestEnv(t)()
 	addAuthSourceLDAP(t, "", "", "", "")
-	err := auth.SyncExternalUsers(context.Background(), true)
-	require.NoError(t, err)
+	auth.SyncExternalUsers(context.Background(), true)
 
 	// Check if users exists
 	for _, gitLDAPUser := range gitLDAPUsers {

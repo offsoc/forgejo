@@ -3,7 +3,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, load_logged_in_context} from './utils_e2e.ts';
+import {test, login_user, save_visual, load_logged_in_context} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -20,4 +20,5 @@ test('Correct link and tooltip', async ({browser}, workerInfo) => {
   await page.waitForLoadState('networkidle'); // eslint-disable-line playwright/no-networkidle
   await expect(repoStatus).toHaveAttribute('href', '/user2/test_workflows/actions', {timeout: 10000});
   await expect(repoStatus).toHaveAttribute('data-tooltip-content', /^(Error|Failure)$/);
+  await save_visual(page);
 });
