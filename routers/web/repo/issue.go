@@ -1918,6 +1918,21 @@ func ViewIssue(ctx *context.Context) {
 
 		ctx.Data["MergeStyle"] = mergeStyle
 
+		var updateStyle repo_model.UpdateStyle
+		// Check correct values and select default
+		if ms, ok := ctx.Data["UpdateStyle"].(repo_model.UpdateStyle); !ok ||
+			!prConfig.IsUpdateStyleAllowed(ms) {
+			defaultUpdateStyle := prConfig.GetDefaultUpdateStyle()
+			if prConfig.IsUpdateStyleAllowed(defaultUpdateStyle) && !ok {
+				updateStyle = defaultUpdateStyle
+			} else if prConfig.AllowMerge {
+				updateStyle = repo_model.UpdateStyleMerge
+			} else if prConfig.AllowRebase {
+				updateStyle = repo_model.UpdateStyleRebase
+			}
+		}
+		ctx.Data["UpdateStyle"] = updateStyle
+
 		defaultMergeMessage, defaultMergeBody, err := pull_service.GetDefaultMergeMessage(ctx, ctx.Repo.GitRepo, pull, mergeStyle)
 		if err != nil {
 			ctx.ServerError("GetDefaultMergeMessage", err)

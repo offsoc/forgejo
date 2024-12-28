@@ -586,6 +586,7 @@ var (
 	reservedUsernames = []string{
 		".",
 		"..",
+		"-", // used by certain web routes
 		".well-known",
 
 		"api",     // gitea api

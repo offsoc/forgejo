@@ -225,22 +225,44 @@ func createDB(ctx context.Context, ownerID int64, group, arch string) (*packages
 			if err != nil {
 				return nil, err
 			}
-			if len(pps) >= 1 {
-				meta := []byte(pps[0].Value)
+			if len(pps) == 0 {
+				continue
+			}
+			pkgDesc := []byte(pps[0].Value)
+			header := &tar.Header{
+				Name: pkg.Name + "-" + ver.Version + "/desc",
+				Size: int64(len(pkgDesc)),
+				Mode: int64(os.ModePerm),
+			}
+			if err = tw.WriteHeader(header); err != nil {
+				return nil, err
+			}
+			if _, err := tw.Write(pkgDesc); err != nil {
+				return nil, err
+			}
+
+			pfs, err := packages_model.GetPropertiesByName(
+				ctx, packages_model.PropertyTypeFile, pf.ID, arch_module.PropertyFiles,
+			)
+			if err != nil {
+				return nil, err
+			}
+			if len(pfs) >= 1 {
+				pkgFiles := []byte(pfs[0].Value)
 				header := &tar.Header{
-					Name: pkg.Name + "-" + ver.Version + "/desc",
-					Size: int64(len(meta)),
+					Name: pkg.Name + "-" + ver.Version + "/files",
+					Size: int64(len(pkgFiles)),
 					Mode: int64(os.ModePerm),
 				}
 				if err = tw.WriteHeader(header); err != nil {
 					return nil, err
 				}
-				if _, err := tw.Write(meta); err != nil {
+				if _, err := tw.Write(pkgFiles); err != nil {
 					return nil, err
 				}
-				count++
-				break
 			}
+			count++
+			break
 		}
 	}
 	if count == 0 {

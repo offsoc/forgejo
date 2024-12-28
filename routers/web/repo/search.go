@@ -54,6 +54,7 @@ func Search(ctx *context.Context) {
 	language := ctx.FormTrim("l")
 	keyword := ctx.FormTrim("q")
 
+	path := ctx.FormTrim("path")
 	mode := ExactSearchMode
 	if modeStr := ctx.FormString("mode"); len(modeStr) > 0 {
 		mode = searchModeFromString(modeStr)
@@ -63,6 +64,7 @@ func Search(ctx *context.Context) {
 
 	ctx.Data["Keyword"] = keyword
 	ctx.Data["Language"] = language
+	ctx.Data["CodeSearchPath"] = path
 	ctx.Data["CodeSearchMode"] = mode.String()
 	ctx.Data["PageIsViewCode"] = true
 
@@ -86,6 +88,7 @@ func Search(ctx *context.Context) {
 			Keyword:        keyword,
 			IsKeywordFuzzy: mode == FuzzySearchMode,
 			Language:       language,
+			Filename:       path,
 			Paginator: &db.ListOptions{
 				Page:     page,
 				PageSize: setting.UI.RepoSearchPagingNum,
@@ -100,11 +103,12 @@ func Search(ctx *context.Context) {
 		} else {
 			ctx.Data["CodeIndexerUnavailable"] = !code_indexer.IsAvailable(ctx)
 		}
-		ctx.Data["CodeSearchOptions"] = []string{"exact", "fuzzy"}
+		ctx.Data["CodeSearchOptions"] = code_indexer.CodeSearchOptions
 	} else {
 		grepOpt := git.GrepOptions{
 			ContextLineNumber: 1,
 			RefName:           ctx.Repo.RefName,
+			Filename:          path,
 		}
 		switch mode {
 		case FuzzySearchMode:
@@ -130,10 +134,12 @@ func Search(ctx *context.Context) {
 				// UpdatedUnix: not supported yet
 				// Language:    not supported yet
 				// Color:       not supported yet
-				Lines: code_indexer.HighlightSearchResultCode(r.Filename, r.LineNumbers, r.HighlightedRanges, strings.Join(r.LineCodes, "\n")),
+				Lines: code_indexer.HighlightSearchResultCode(
+					r.Filename, r.LineNumbers, r.HighlightedRanges,
+					strings.Join(r.LineCodes, "\n")),
 			})
 		}
-		ctx.Data["CodeSearchOptions"] = []string{"exact", "union", "regexp"}
+		ctx.Data["CodeSearchOptions"] = git.GrepSearchOptions
 	}
 
 	ctx.Data["CodeIndexerDisabled"] = !setting.Indexer.RepoIndexerEnabled

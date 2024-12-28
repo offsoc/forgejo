@@ -16,12 +16,12 @@ jobs:
     if: vars.ROLE == 'forgejo-coding'
     runs-on: docker
     container:
-      image: 'code.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:20-bookworm'
     steps:
       - name: Debug output
         run: |
           cat <<'EOF'
-          ${{ toJSON(github.event) }}
+          ${{ toJSON(github) }}
           EOF
       - name: Missing test label
         if: >

@@ -9,11 +9,11 @@ jobs:
     if: vars.ROLE == 'forgejo-coding'
     runs-on: docker
     container:
-      image: 'code.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:20-bookworm'
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@v4
+      - uses: https://data.forgejo.org/actions/checkout@v4
 
-      - uses: https://code.forgejo.org/actions/setup-go@v5
+      - uses: https://data.forgejo.org/actions/setup-go@v5
         with:
           go-version-file: "go.mod"
           cache: false

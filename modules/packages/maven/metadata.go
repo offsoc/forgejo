@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"io"
 
+	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
 
 	"golang.org/x/net/html/charset"
@@ -49,7 +50,15 @@ type pomStruct struct {
 		Version    string `xml:"version"`
 		Scope      string `xml:"scope"`
 	} `xml:"dependencies>dependency"`
+	Parent struct {
+		GroupID      string `xml:"groupId"`
+		ArtifactID   string `xml:"artifactId"`
+		Version      string `xml:"version"`
+		RelativePath string `xml:"relativePath"`
+	} `xml:"parent"`
 }
+
+var ErrNoGroupID = util.NewInvalidArgumentErrorf("group ID is missing")
 
 // ParsePackageMetaData parses the metadata of a pom file
 func ParsePackageMetaData(r io.Reader) (*Metadata, error) {
@@ -63,6 +72,17 @@ func ParsePackageMetaData(r io.Reader) (*Metadata, error) {
 
 	if !validation.IsValidURL(pom.URL) {
 		pom.URL = ""
+	}
+
+	groupID := pom.GroupID
+
+	if groupID == "" {
+		// If a project inherits from a parent project, the groupId element is optional.
+		// Refer to: https://maven.apache.org/pom.html#Inheritance
+		if pom.Parent.GroupID == "" {
+			return nil, ErrNoGroupID
+		}
+		groupID = pom.Parent.GroupID
 	}
 
 	licenses := make([]string, 0, len(pom.Licenses))
@@ -82,7 +102,7 @@ func ParsePackageMetaData(r io.Reader) (*Metadata, error) {
 	}
 
 	return &Metadata{
-		GroupID:      pom.GroupID,
+		GroupID:      groupID,
 		ArtifactID:   pom.ArtifactID,
 		Name:         pom.Name,
 		Description:  pom.Description,

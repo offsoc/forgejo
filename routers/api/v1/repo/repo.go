@@ -937,6 +937,7 @@ func updateRepoUnits(ctx *context.APIContext, opts api.EditRepoOption) error {
 					AllowRebaseUpdate:             true,
 					DefaultDeleteBranchAfterMerge: false,
 					DefaultMergeStyle:             repo_model.MergeStyleMerge,
+					DefaultUpdateStyle:            repo_model.UpdateStyleMerge,
 					DefaultAllowMaintainerEdit:    false,
 				}
 			} else {
@@ -975,6 +976,9 @@ func updateRepoUnits(ctx *context.APIContext, opts api.EditRepoOption) error {
 			}
 			if opts.DefaultMergeStyle != nil {
 				config.DefaultMergeStyle = repo_model.MergeStyle(*opts.DefaultMergeStyle)
+			}
+			if opts.DefaultUpdateStyle != nil {
+				config.DefaultUpdateStyle = repo_model.UpdateStyle(*opts.DefaultUpdateStyle)
 			}
 			if opts.DefaultAllowMaintainerEdit != nil {
 				config.DefaultAllowMaintainerEdit = *opts.DefaultAllowMaintainerEdit

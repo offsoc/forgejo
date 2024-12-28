@@ -34,10 +34,11 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 		err := index(git.DefaultContext, indexer, repoID)
 		require.NoError(t, err)
 		keywords := []struct {
-			RepoIDs []int64
-			Keyword string
-			IDs     []int64
-			Langs   int
+			RepoIDs  []int64
+			Keyword  string
+			IDs      []int64
+			Langs    int
+			Filename string
 		}{
 			{
 				RepoIDs: nil,
@@ -50,6 +51,20 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 				Keyword: "Description",
 				IDs:     []int64{},
 				Langs:   0,
+			},
+			{
+				RepoIDs:  nil,
+				Keyword:  "Description",
+				IDs:      []int64{},
+				Langs:    0,
+				Filename: "NOT-README.md",
+			},
+			{
+				RepoIDs:  nil,
+				Keyword:  "Description",
+				IDs:      []int64{repoID},
+				Langs:    1,
+				Filename: "README.md",
 			},
 			{
 				RepoIDs: nil,
@@ -86,6 +101,7 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 						Page:     1,
 						PageSize: 10,
 					},
+					Filename:       kw.Filename,
 					IsKeywordFuzzy: true,
 				})
 				require.NoError(t, err)

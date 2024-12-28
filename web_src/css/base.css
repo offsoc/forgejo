@@ -250,6 +250,20 @@ h1.error-code {
   gap: 0.5rem;
 }
 
+.button-sequence {
+  display: flex;
+  flex-flow: wrap;
+  gap: 0.5em;
+}
+
+.button-sequence.right {
+  justify-content: end;
+}
+
+.button-sequence .ui.button {
+  margin: 0 !important;
+}
+
 .button-row .ui.button {
   margin-right: 0;
 }
