@@ -20860,7 +20860,6 @@
       "x-go-package": "code.gitea.io/gitea/services/context"
     },
     "APIRepoArchivedError": {
-      "description": "APIRepoArchivedError is an error that is raised when an archived repo should be modified",
       "type": "object",
       "properties": {
         "message": {
@@ -29581,7 +29580,7 @@
       "description": "APIRedirect is a redirect response"
     },
     "repoArchivedError": {
-      "description": "APIRepoArchivedError is an error that is raised when an archived repo should be modified",
+      "description": "APIRepoArchivedError is an error that is raised when the modified repo is archived and cannot be modified",
       "schema": {
         "$ref": "#/definitions/APIRepoArchivedError"
       }

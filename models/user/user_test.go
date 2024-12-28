@@ -679,6 +679,7 @@ func TestIsSameUser(t *testing.T) {
 	assert.False(t, user1.IsSameUser(nil))
 	assert.False(t, user1.IsSameUser(user4))
 	assert.True(t, user1.IsSameUser(user1))
+	assert.True(t, user1.IsSameUser(&user_model.User{ID: user1.ID, Name: "Test"}))
 }
 
 func TestDisabledUserFeatures(t *testing.T) {
