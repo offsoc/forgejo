@@ -39,7 +39,6 @@ test.describe('Actions: authenticated user', () => {
   });
 
   test('workflow dispatch error: missing inputs', async ({page}, testInfo) => {
-    // test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari; see https://codeberg.org/forgejo/forgejo/pulls/3334#issuecomment-2033383');
     const action = new ActionsPage(page, testInfo);
     await action.goto('user2', 'test_workflows', 'workflow=test-dispatch.yml&actor=0&status=0');
     await action.workflowTriggerButton.click();
@@ -56,7 +55,6 @@ test.describe('Actions: authenticated user', () => {
   });
 
   test('workflow dispatch success', async ({page}, testInfo) => {
-    // test.skip(testInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari; see https://codeberg.org/forgejo/forgejo/pulls/3334#issuecomment-2033383');
     const action = new ActionsPage(page, testInfo);
     await action.goto('user2', 'test_workflows', 'workflow=test-dispatch.yml&actor=0&status=0');
 

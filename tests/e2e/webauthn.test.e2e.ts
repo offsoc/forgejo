@@ -8,14 +8,14 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {save_visual, test} from './_test-setup.ts';
+import {test, save_visual, test_context} from './_test-setup.ts';
 import {LoginPage} from './ui/LoginPage.ts';
 
 const user = 'user40';
 
 test.use({user});
 
-test('WebAuthn register & login flow', async ({page, browser}, testInfo) => {
+test('WebAuthn register & login flow', async ({browser, page}, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Uses Chrome protocol');
 
   // Register a security key.
@@ -58,7 +58,7 @@ test('WebAuthn register & login flow', async ({page, browser}, testInfo) => {
     await page.waitForURL(`${testInfo.project.use.baseURL}/`);
   });
 
-  await test.step('remove passkey', async () => {
+  await test.step('remove webauthn', async () => {
     response = await page.goto('/user/settings/security');
     expect(response?.status()).toBe(200);
     await page.getByRole('button', {name: 'Remove'}).click();
@@ -67,11 +67,12 @@ test('WebAuthn register & login flow', async ({page, browser}, testInfo) => {
     await page.waitForLoadState();
   });
 
-  // verify the user can login without a key
-  await test.step('Use can login without a passkey', async () => {
-    const ctx = await browser.newContext();
+  // verify the user can log in without a key
+  await test.step('User can login without webauthn', async () => {
+    const ctx = await test_context(browser);
     const page = await ctx.newPage();
     const login = new LoginPage(page, testInfo);
-    login.login(user, 'password');
+    await login.goto();
+    await login.login(user, 'password');
   });
 });

@@ -5,7 +5,6 @@ import {
   type Locator,
   type Page,
   test as baseTest,
-  type TestInfo,
   type WorkerInfo,
 } from '@playwright/test';
 import * as path from 'node:path';
@@ -21,7 +20,7 @@ export type TestOptions = {
 };
 
 export const test = baseTest.extend<TestOptions>({
-  context: async ({browser, user, authScope, contextOptions, context}, use, {project}) => {
+  context: async ({browser, user, authScope, contextOptions}, use, {project}) => {
     if (user && authScope) {
       const browserName = project.name.toLowerCase().replace(' ', '-');
       contextOptions.storageState = path.join(AUTH_PATH, `state-${browserName}-${user}-${authScope}.json`);
@@ -30,13 +29,7 @@ export const test = baseTest.extend<TestOptions>({
       contextOptions.storageState = {cookies: [], origins: []};
     }
 
-    context = await browser.newContext(contextOptions);
-
-    context.on('page', (page) => {
-      page.on('pageerror', (err) => expect(err).toBeUndefined());
-    });
-
-    return use(context);
+    return use(await test_context(browser, contextOptions));
   },
   user: null,
   authScope: 'shared',
@@ -51,43 +44,12 @@ export const test = baseTest.extend<TestOptions>({
   }, {auto: true}],
 });
 
-async function test_context(browser: Browser, options?: BrowserContextOptions) {
+export async function test_context(browser: Browser, options?: BrowserContextOptions) {
   const context = await browser.newContext(options);
 
   context.on('page', (page) => {
     page.on('pageerror', (err) => expect(err).toBeUndefined());
   });
-
-  return context;
-}
-
-const ARTIFACTS_PATH = `tests/e2e/test-artifacts`;
-const LOGIN_PASSWORD = 'password';
-
-// log in user and store session info. This should generally be
-//  run in test.beforeAll(), then the session can be loaded in tests.
-export async function login_user(browser: Browser, workerInfo: TestInfo, user: string) {
-  test.setTimeout(60000);
-  // Set up a new context
-  const context = await test_context(browser);
-  const page = await context.newPage();
-
-  // Route to login page
-  // Note: this could probably be done more quickly with a POST
-  const response = await page.goto('/user/login');
-  expect(response?.status()).toBe(200); // Status OK
-
-  // Fill out form
-  await page.fill('input[name=user_name]', user);
-  await page.fill('input[name=password]', LOGIN_PASSWORD);
-  await page.click('form button.ui.primary.button:visible');
-
-  await page.waitForLoadState();
-
-  expect(page.url(), {message: `Failed to login user ${user}`}).toBe(`${workerInfo.project.use.baseURL}/`);
-
-  // Save state
-  await context.storageState({path: `${ARTIFACTS_PATH}/state-${user}-${workerInfo.workerIndex}.json`});
 
   return context;
 }

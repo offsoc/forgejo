@@ -3,7 +3,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {save_visual, test} from './_test-setup.ts';
+import {save_visual, test, test_context} from './_test-setup.ts';
 
 test.describe('Migration progress page', () => {
   test.use({user: 'user2'});
@@ -29,7 +29,7 @@ test.describe('Migration progress page', () => {
 
     // page screenshot of unauthedPage is checked automatically after the test
     await test.step('migration should have failed', async () => {
-      const ctx = await browser.newContext();
+      const ctx = await test_context(browser);
       const unauthenticated = await ctx.newPage();
       expect((await unauthenticated.goto(repoUrl))?.status(), 'public migration page should be accessible').toBe(200);
       await expect(unauthenticated.locator('#repo_migrating_progress')).toBeVisible();

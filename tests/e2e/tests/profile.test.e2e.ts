@@ -5,7 +5,7 @@
 // @watch end
 
 import {ProfilePage} from '../ui/ProfilePage.ts';
-import {test} from '../_test-setup.ts';
+import {save_visual, test} from '../_test-setup.ts';
 
 /* eslint playwright/expect-expect: ["error", { "assertFunctionNames": ["verifyCanFollow", "verifyCanUnfollow"] }] */
 test.describe('Profile Actions', () => {
@@ -40,6 +40,7 @@ test.describe('Profile Actions', () => {
     await test.step(`Ensure test user can block ${testUser}`, async () => {
       await profile.verifyUserBlocked();
       await profile.blockUser();
+      await save_visual(page);
       await profile.blockConfirm();
       await profile.verifyUserUnblocked();
     });
@@ -48,6 +49,7 @@ test.describe('Profile Actions', () => {
       await profile.verifyCanFollow();
       await profile.followUser();
       await profile.flashMessageToContain('You cannot follow this user because you have blocked this user or this user has blocked you.');
+      await save_visual(page);
     });
 
     await test.step(`Ensure test user can unblock ${testUser}`, async () => {
