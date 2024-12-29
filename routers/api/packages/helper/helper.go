@@ -4,6 +4,7 @@
 package helper
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +13,9 @@ import (
 	packages_model "code.gitea.io/gitea/models/packages"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/services/context"
+	packages_service "code.gitea.io/gitea/services/packages"
 )
 
 // LogAndProcessError logs an error and calls a custom callback with the processed error message.
@@ -60,4 +63,28 @@ func ServePackageFile(ctx *context.Context, s io.ReadSeekCloser, u *url.URL, pf 
 	}
 
 	ctx.ServeContent(s, opts)
+}
+
+// Handles a ApiError
+func ApiError(ctx *context.Context, status int, obj any) {
+	LogAndProcessError(ctx, status, obj, func(message string) {
+		ctx.PlainText(status, message)
+	})
+}
+
+// Handles the errors that occur during a package upload
+func PackageUploadError(ctx *context.Context, err error) {
+	if errors.Is(err, util.ErrInvalidArgument) || err == io.EOF {
+		ApiError(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	switch err {
+	case packages_service.ErrQuotaTotalCount, packages_service.ErrQuotaTypeSize, packages_service.ErrQuotaTotalSize:
+		ApiError(ctx, http.StatusForbidden, err)
+	case packages_model.ErrDuplicatePackageVersion, packages_model.ErrDuplicatePackageFile:
+		ApiError(ctx, http.StatusConflict, err)
+	default:
+		ApiError(ctx, http.StatusInternalServerError, err)
+	}
 }

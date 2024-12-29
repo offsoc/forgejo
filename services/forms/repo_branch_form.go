@@ -4,6 +4,7 @@
 package forms
 
 import (
+	"mime/multipart"
 	"net/http"
 
 	"code.gitea.io/gitea/modules/web/middleware"
@@ -35,4 +36,33 @@ type RenameBranchForm struct {
 func (f *RenameBranchForm) Validate(req *http.Request, errs binding.Errors) binding.Errors {
 	ctx := context.GetValidateContext(req)
 	return middleware.Validate(errs, ctx.Data, f, ctx.Locale)
+}
+
+type PackageUploadAlpineForm struct {
+	Repo       string
+	Branch     string
+	Repository string
+	File       *multipart.FileHeader
+}
+
+type PackageUploadDebianForm struct {
+	Repo         string
+	Distribution string
+	Component    string
+	File         *multipart.FileHeader
+}
+
+type PackageUploadGenericForm struct {
+	Repo     string
+	Name     string
+	Version  string
+	Filename string
+	File     *multipart.FileHeader
+}
+
+type PackageUploadRpmForm struct {
+	Repo  string
+	Group string
+	Sign  bool
+	File  *multipart.FileHeader
 }

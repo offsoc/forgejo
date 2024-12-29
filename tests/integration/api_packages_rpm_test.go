@@ -10,6 +10,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -459,4 +460,28 @@ gpgkey=%sapi/packages/%s/rpm/repository.key`,
 			})
 		})
 	}
+
+	t.Run("UploadWeb", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		session := loginUser(t, user.Name)
+
+		body := bytes.Buffer{}
+
+		writer := multipart.NewWriter(&body)
+		require.NoError(t, writer.WriteField("_csrf", GetCSRF(t, session, fmt.Sprintf("%s/-/packages/upload/rpm", user.HomeLink()))))
+		require.NoError(t, writer.WriteField("repo", "repo1"))
+
+		formFile, err := writer.CreateFormFile("file", "test.rpm")
+		require.NoError(t, err)
+		_, err = formFile.Write(content)
+		require.NoError(t, err)
+
+		require.NoError(t, writer.Close())
+
+		req := NewRequestWithBody(t, "POST", fmt.Sprintf("%s/-/packages/upload/rpm/upload", user.HomeLink()), &body).
+			SetHeader("Content-Type", writer.FormDataContentType())
+		resp := session.MakeRequest(t, req, http.StatusSeeOther)
+		assert.Equal(t, fmt.Sprintf("%s/-/packages/rpm/%s", user.HomeLink(), packageName), resp.Header().Get("Location"))
+	})
 }

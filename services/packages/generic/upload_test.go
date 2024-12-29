@@ -1,10 +1,13 @@
 // Copyright 2024 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-package generic
+package generic_test
 
 import (
 	"testing"
+
+	generic_packages_service "code.gitea.io/gitea/services/packages/generic"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +23,7 @@ func TestValidatePackageName(t *testing.T) {
 		"a/b",
 	}
 	for _, name := range bad {
-		assert.False(t, isValidPackageName(name), "bad=%q", name)
+		assert.False(t, generic_packages_service.IsValidPackageName(name), "bad=%q", name)
 	}
 
 	good := []string{
@@ -31,7 +34,7 @@ func TestValidatePackageName(t *testing.T) {
 		"c.d+",
 	}
 	for _, name := range good {
-		assert.True(t, isValidPackageName(name), "good=%q", name)
+		assert.True(t, generic_packages_service.IsValidPackageName(name), "good=%q", name)
 	}
 }
 
@@ -46,7 +49,7 @@ func TestValidateFileName(t *testing.T) {
 		"a ",
 	}
 	for _, name := range bad {
-		assert.False(t, isValidFileName(name), "bad=%q", name)
+		assert.False(t, generic_packages_service.IsValidFileName(name), "bad=%q", name)
 	}
 
 	good := []string{
@@ -60,6 +63,6 @@ func TestValidateFileName(t *testing.T) {
 		`-_+=:;.()[]{}~!@#$%^& aA1`,
 	}
 	for _, name := range good {
-		assert.True(t, isValidFileName(name), "good=%q", name)
+		assert.True(t, generic_packages_service.IsValidFileName(name), "good=%q", name)
 	}
 }

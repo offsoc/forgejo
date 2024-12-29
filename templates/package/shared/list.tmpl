@@ -11,6 +11,17 @@
 			{{end}}
 		</select>
 		{{template "shared/search/button"}}
+		{{if .ShowPackageUploadButton}}
+			<div class="ui green button dropdown jump">
+				<span class="text">{{ctx.Locale.Tr "upload"}}</span>
+				{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+				<div class="menu">
+					{{range $type := .AllowedUploadTypes}}
+						<a class="item" href="{{$.PackageUploadUrl}}{{$type}}{{if $.PackageUploadRepo}}?repo={{$.PackageUploadRepo}}{{end}}">{{$type.Name}}</a>
+					{{end}}
+				</div>
+			</div>
+		{{end}}
 	</div>
 </form>
 {{end}}
@@ -48,6 +59,17 @@
 					<p>{{ctx.Locale.Tr "packages.empty.repo" $packagesUrl}}</p>
 				{{end}}
 				<p>{{ctx.Locale.Tr "packages.empty.documentation" "https://forgejo.org/docs/latest/user/packages/"}}</p>
+				{{if .ShowPackageUploadButton}}
+					<div class="ui green button dropdown jump">
+						<span class="text">{{ctx.Locale.Tr "upload"}}</span>
+						{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+						<div class="menu">
+							{{range $type := .AllowedUploadTypes}}
+								<a class="item" href="{{$.PackageUploadUrl}}{{$type}}{{if $.PackageUploadRepo}}?repo={{$.PackageUploadRepo}}{{end}}">{{$type.Name}}</a>
+							{{end}}
+						</div>
+					</div>
+				{{end}}
 			</div>
 		{{else}}
 			<p class="tw-py-4">{{ctx.Locale.Tr "packages.filter.no_result"}}</p>
