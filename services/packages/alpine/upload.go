@@ -111,7 +111,7 @@ func UploadPackage(ctx context.Context, branch, repository string, reader io.Rea
 		}
 
 		return pv, nil
-	} else {
-		return createOrAddToExisting(ctx, pck, branch, repository, pck.FileMetadata.Architecture, buf, fileMetadataRaw, owner, doer)
 	}
+
+	return createOrAddToExisting(ctx, pck, branch, repository, pck.FileMetadata.Architecture, buf, fileMetadataRaw, owner, doer)
 }

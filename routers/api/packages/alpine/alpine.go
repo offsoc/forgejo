@@ -23,25 +23,25 @@ import (
 func GetRepositoryKey(ctx *context.Context) {
 	_, pub, err := alpine_packages_service.GetOrCreateKeyPair(ctx, ctx.Package.Owner.ID)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	pubPem, _ := pem.Decode([]byte(pub))
 	if pubPem == nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, "failed to decode private key pem")
+		helper.APIError(ctx, http.StatusInternalServerError, "failed to decode private key pem")
 		return
 	}
 
 	pubKey, err := x509.ParsePKIXPublicKey(pubPem.Bytes)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	fingerprint, err := util.CreatePublicKeyFingerprint(pubKey)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -54,7 +54,7 @@ func GetRepositoryKey(ctx *context.Context) {
 func GetRepositoryFile(ctx *context.Context) {
 	pv, err := alpine_packages_service.GetOrCreateRepositoryVersion(ctx, ctx.Package.Owner.ID)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -68,9 +68,9 @@ func GetRepositoryFile(ctx *context.Context) {
 	)
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -82,13 +82,13 @@ func UploadPackageFile(ctx *context.Context) {
 	branch := strings.TrimSpace(ctx.Params("branch"))
 	repository := strings.TrimSpace(ctx.Params("repository"))
 	if branch == "" || repository == "" {
-		helper.ApiError(ctx, http.StatusBadRequest, "invalid branch or repository")
+		helper.APIError(ctx, http.StatusBadRequest, "invalid branch or repository")
 		return
 	}
 
 	upload, needToClose, err := ctx.UploadStream()
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 	if needToClose {
@@ -118,20 +118,20 @@ func DownloadPackageFile(ctx *context.Context) {
 
 	pfs, _, err := packages_model.SearchFiles(ctx, opts)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 	if len(pfs) == 0 {
-		helper.ApiError(ctx, http.StatusNotFound, nil)
+		helper.APIError(ctx, http.StatusNotFound, nil)
 		return
 	}
 
 	s, u, pf, err := packages_service.GetPackageFileStream(ctx, pfs[0])
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -149,25 +149,25 @@ func DeletePackageFile(ctx *context.Context) {
 		CompositeKey: fmt.Sprintf("%s|%s|%s", branch, repository, architecture),
 	})
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 	if len(pfs) != 1 {
-		helper.ApiError(ctx, http.StatusNotFound, nil)
+		helper.APIError(ctx, http.StatusNotFound, nil)
 		return
 	}
 
 	if err := packages_service.RemovePackageFileAndVersionIfUnreferenced(ctx, ctx.Doer, pfs[0]); err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
 
 	if err := alpine_packages_service.BuildSpecificRepositoryFiles(ctx, ctx.Package.Owner.ID, branch, repository, architecture); err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 

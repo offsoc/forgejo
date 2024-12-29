@@ -44,7 +44,7 @@ gpgkey=`+url+`/repository.key`)
 func GetRepositoryKey(ctx *context.Context) {
 	_, pub, err := rpm_packages_service.GetOrCreateKeyPair(ctx, ctx.Package.Owner.ID)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -57,7 +57,7 @@ func GetRepositoryKey(ctx *context.Context) {
 func CheckRepositoryFileExistence(ctx *context.Context) {
 	pv, err := rpm_packages_service.GetOrCreateRepositoryVersion(ctx, ctx.Package.Owner.ID)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -66,7 +66,7 @@ func CheckRepositoryFileExistence(ctx *context.Context) {
 		if errors.Is(err, util.ErrNotExist) {
 			ctx.Status(http.StatusNotFound)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -82,7 +82,7 @@ func CheckRepositoryFileExistence(ctx *context.Context) {
 func GetRepositoryFile(ctx *context.Context) {
 	pv, err := rpm_packages_service.GetOrCreateRepositoryVersion(ctx, ctx.Package.Owner.ID)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -96,9 +96,9 @@ func GetRepositoryFile(ctx *context.Context) {
 	)
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -109,7 +109,7 @@ func GetRepositoryFile(ctx *context.Context) {
 func UploadPackageFile(ctx *context.Context) {
 	upload, needToClose, err := ctx.UploadStream()
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 	if needToClose {
@@ -147,9 +147,9 @@ func DownloadPackageFile(ctx *context.Context) {
 	)
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -209,9 +209,9 @@ func DeletePackageFile(webctx *context.Context) {
 	})
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			helper.ApiError(webctx, http.StatusNotFound, err)
+			helper.APIError(webctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(webctx, http.StatusInternalServerError, err)
+			helper.APIError(webctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -221,7 +221,7 @@ func DeletePackageFile(webctx *context.Context) {
 	}
 
 	if err := rpm_packages_service.BuildSpecificRepositoryFiles(webctx, webctx.Package.Owner.ID, group); err != nil {
-		helper.ApiError(webctx, http.StatusInternalServerError, err)
+		helper.APIError(webctx, http.StatusInternalServerError, err)
 		return
 	}
 

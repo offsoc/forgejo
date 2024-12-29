@@ -23,7 +23,7 @@ import (
 func GetRepositoryKey(ctx *context.Context) {
 	_, pub, err := debian_packages_service.GetOrCreateKeyPair(ctx, ctx.Package.Owner.ID)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -38,7 +38,7 @@ func GetRepositoryKey(ctx *context.Context) {
 func GetRepositoryFile(ctx *context.Context) {
 	pv, err := debian_packages_service.GetOrCreateRepositoryVersion(ctx, ctx.Package.Owner.ID)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -60,9 +60,9 @@ func GetRepositoryFile(ctx *context.Context) {
 	)
 	if err != nil {
 		if err == packages_model.ErrPackageNotExist || err == packages_model.ErrPackageFileNotExist {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -74,7 +74,7 @@ func GetRepositoryFile(ctx *context.Context) {
 func GetRepositoryFileByHash(ctx *context.Context) {
 	pv, err := debian_packages_service.GetOrCreateRepositoryVersion(ctx, ctx.Package.Owner.ID)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -89,20 +89,20 @@ func GetRepositoryFileByHash(ctx *context.Context) {
 		HashAlgorithm: algorithm,
 	})
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 	if len(pfs) != 1 {
-		helper.ApiError(ctx, http.StatusNotFound, nil)
+		helper.APIError(ctx, http.StatusNotFound, nil)
 		return
 	}
 
 	s, u, pf, err := packages_service.GetPackageFileStream(ctx, pfs[0])
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -114,13 +114,13 @@ func UploadPackageFile(ctx *context.Context) {
 	distribution := strings.TrimSpace(ctx.Params("distribution"))
 	component := strings.TrimSpace(ctx.Params("component"))
 	if distribution == "" || component == "" {
-		helper.ApiError(ctx, http.StatusBadRequest, "invalid distribution or component")
+		helper.APIError(ctx, http.StatusBadRequest, "invalid distribution or component")
 		return
 	}
 
 	upload, needToClose, err := ctx.UploadStream()
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 	if needToClose {
@@ -155,9 +155,9 @@ func DownloadPackageFile(ctx *context.Context) {
 	)
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -219,9 +219,9 @@ func DeletePackageFile(ctx *context.Context) {
 	})
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 		} else {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -231,7 +231,7 @@ func DeletePackageFile(ctx *context.Context) {
 	}
 
 	if err := debian_packages_service.BuildSpecificRepositoryFiles(ctx, ctx.Package.Owner.ID, distribution, component, architecture); err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 

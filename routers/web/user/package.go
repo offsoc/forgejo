@@ -539,8 +539,7 @@ func UploadPackage(ctx *context.Context) {
 	ctx.Data["PackageUploadRepo"] = ctx.FormString("repo")
 	ctx.Data["Title"] = ctx.Tr("packages.upload.title", packageType.Name())
 
-	switch *packageType {
-	case packages_model.TypeRpm:
+	if *packageType == packages_model.TypeRpm {
 		ctx.Data["ShowRpmSignCheckBox"] = !setting.Packages.DefaultRPMSignEnabled
 	}
 

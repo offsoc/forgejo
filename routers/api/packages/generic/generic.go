@@ -29,10 +29,10 @@ func DownloadPackageFile(ctx *context.Context) {
 	)
 	if err != nil {
 		if err == packages_model.ErrPackageNotExist || err == packages_model.ErrPackageFileNotExist {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 			return
 		}
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -48,7 +48,7 @@ func UploadPackage(ctx *context.Context) {
 
 	reader, needToClose, err := ctx.UploadStream()
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 	if needToClose {
@@ -78,10 +78,10 @@ func DeletePackage(ctx *context.Context) {
 	)
 	if err != nil {
 		if err == packages_model.ErrPackageNotExist {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 			return
 		}
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -105,27 +105,27 @@ func DeletePackageFile(ctx *context.Context) {
 	}()
 	if err != nil {
 		if err == packages_model.ErrPackageNotExist || err == packages_model.ErrPackageFileNotExist {
-			helper.ApiError(ctx, http.StatusNotFound, err)
+			helper.APIError(ctx, http.StatusNotFound, err)
 			return
 		}
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	pfs, err := packages_model.GetFilesByVersionID(ctx, pv.ID)
 	if err != nil {
-		helper.ApiError(ctx, http.StatusInternalServerError, err)
+		helper.APIError(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	if len(pfs) == 1 {
 		if err := packages_service.RemovePackageVersion(ctx, ctx.Doer, pv); err != nil {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 			return
 		}
 	} else {
 		if err := packages_service.DeletePackageFile(ctx, pf); err != nil {
-			helper.ApiError(ctx, http.StatusInternalServerError, err)
+			helper.APIError(ctx, http.StatusInternalServerError, err)
 			return
 		}
 	}
