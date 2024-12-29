@@ -105,6 +105,7 @@ export async function save_visual(page: Page) {
         page.locator('#repo_migrating'),
         // update order of recently created repos is not fully deterministic
         page.locator('.flex-item-main').filter({hasText: 'relative time in repo'}),
+        page.locator('#activity-feed'),
         // dynamic IDs in fixed-size inputs
         page.locator('input[value*="dyn-id-"]'),
       ],
