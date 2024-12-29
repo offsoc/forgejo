@@ -9,23 +9,17 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, save_visual, load_logged_in_context} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 import {validate_form} from './shared/forms.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
 test.describe.configure({
   timeout: 30000,
 });
 
-test('External Release Attachments', async ({browser, isMobile}, workerInfo) => {
+test('External Release Attachments', async ({page, isMobile}) => {
   test.skip(isMobile);
-
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  /** @type {import('@playwright/test').Page} */
-  const page = await context.newPage();
 
   // Click "New Release"
   await page.goto('/user2/repo2/releases');

@@ -5,13 +5,11 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, save_visual, login_user, load_logged_in_context} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
-test('Follow actions', async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  const page = await context.newPage();
+test.use({user: 'user2'});
 
+test('Follow actions', async ({page}) => {
   await page.goto('/user1');
 
   // Check if following and then unfollowing works.
