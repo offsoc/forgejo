@@ -1,0 +1,17 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "one": "fusionó %[1]d commit de <code>%[2]s</code> en <code>%[3]s</code> %[4]s",
+        "other": "fusionó %[1]d commits de <code>%[2]s</code> en <code>%[3]s</code> %[4]s"
+      },
+      "title_desc": {
+        "one": "quiere fusionar %[1]d commit de <code>%[2]s</code> en <code id=\"%[4]s\">%[3]s</code>",
+        "other": "quiere fusionar %[1]d commits de <code>%[2]s</code> en <code id=\"%[4]s\">%[3]s</code>"
+      }
+    }
+  },
+  "search": {
+    "milestone_kind": "Buscar hitos…"
+  }
+}

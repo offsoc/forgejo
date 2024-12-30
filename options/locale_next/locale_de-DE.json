@@ -1,0 +1,17 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "one": "hat %[1]d Commit von <code>%[2]s</code> nach <code>%[3]s</code> %[4]s zusammengeführt",
+        "other": "hat %[1]d Commits von <code>%[2]s</code> nach <code>%[3]s</code> %[4]s zusammengeführt"
+      },
+      "title_desc": {
+        "one": "möchte %[1]d Commit von <code>%[2]s</code> nach <code id=\"%[4]s\">%[3]s</code> zusammenführen",
+        "other": "möchte %[1]d Commits von <code>%[2]s</code> nach <code id=\"%[4]s\">%[3]s</code> zusammenführen"
+      }
+    }
+  },
+  "search": {
+    "milestone_kind": "Meilensteine suchen …"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "other": "于 %[4]s 将 %[1]d 次代码提交从 <code>%[2]s</code>合并至 <code>%[3]s</code>"
+      },
+      "title_desc": {
+        "other": "请求将 %[1]d 次代码提交从 <code>%[2]s</code> 合并至 <code id=\"%[4]s\">%[3]s</code>"
+      }
+    }
+  },
+  "search": {
+    "milestone_kind": "搜索里程碑…"
+  }
+}
