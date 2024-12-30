@@ -85,6 +85,8 @@ var Service = struct {
 	DefaultOrgMemberVisible                 bool
 	UserDeleteWithCommentsMaxTime           time.Duration
 	ValidSiteURLSchemes                     []string
+	UsernameCooldownPeriod                  int64
+	MaxUserRedirects                        int64
 
 	// OpenID settings
 	EnableOpenIDSignIn bool
@@ -257,6 +259,14 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 		}
 	}
 	Service.ValidSiteURLSchemes = schemes
+	Service.UsernameCooldownPeriod = sec.Key("USERNAME_COOLDOWN_PERIOD").MustInt64(0)
+
+	// Only set a default if USERNAME_COOLDOWN_PERIOD's feature is active.
+	maxUserRedirectsDefault := int64(0)
+	if Service.UsernameCooldownPeriod > 0 {
+		maxUserRedirectsDefault = 5
+	}
+	Service.MaxUserRedirects = sec.Key("MAX_USER_REDIRECTS").MustInt64(maxUserRedirectsDefault)
 
 	mustMapSetting(rootCfg, "service.explore", &Service.Explore)
 
