@@ -1,0 +1,13 @@
+-
+  name: git-lfs
+  limit: 512
+  subjects: [6]
+
+-
+  name: "all:assets"
+  limit: -1
+  subjects: [7]
+
+- name: "Multi subjects"
+  limit: 5000000000
+  subjects: [8,6]

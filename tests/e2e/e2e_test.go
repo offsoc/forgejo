@@ -37,6 +37,7 @@ func TestMain(m *testing.M) {
 	defer cancel()
 
 	tests.InitTest(true)
+	setting.Quota.Enabled = true
 	initChangedFiles()
 	testE2eWebRoutes = routers.NormalRoutes()
 

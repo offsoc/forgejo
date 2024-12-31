@@ -4,6 +4,7 @@
 package quota_test
 
 import (
+	"math"
 	"testing"
 
 	quota_model "code.gitea.io/gitea/models/quota"
@@ -36,9 +37,10 @@ func TestQuotaGroupAllRulesMustPass(t *testing.T) {
 
 	// Within a group, *all* rules must pass. Thus, if we have a deny-all rule,
 	// and an unlimited rule, that will always fail.
-	ok, has := group.Evaluate(used, quota_model.LimitSubjectSizeAll)
+	ok, has, limit := group.Evaluate(used, quota_model.LimitSubjectSizeAll)
 	assert.True(t, has)
 	assert.False(t, ok)
+	assert.EqualValues(t, 0, limit)
 }
 
 func TestQuotaGroupRuleScenario1(t *testing.T) {
@@ -66,21 +68,25 @@ func TestQuotaGroupRuleScenario1(t *testing.T) {
 	used.Size.Assets.Packages.All = 256
 	used.Size.Git.LFS = 16
 
-	ok, has := group.Evaluate(used, quota_model.LimitSubjectSizeAssetsAttachmentsReleases)
+	ok, has, limit := group.Evaluate(used, quota_model.LimitSubjectSizeAssetsAttachmentsReleases)
 	assert.True(t, has, "size:assets:attachments:releases is covered")
 	assert.True(t, ok, "size:assets:attachments:releases passes")
+	assert.EqualValues(t, 1024, limit)
 
-	ok, has = group.Evaluate(used, quota_model.LimitSubjectSizeAssetsPackagesAll)
+	ok, has, limit = group.Evaluate(used, quota_model.LimitSubjectSizeAssetsPackagesAll)
 	assert.True(t, has, "size:assets:packages:all is covered")
 	assert.True(t, ok, "size:assets:packages:all passes")
+	assert.EqualValues(t, 1024, limit)
 
-	ok, has = group.Evaluate(used, quota_model.LimitSubjectSizeGitLFS)
+	ok, has, limit = group.Evaluate(used, quota_model.LimitSubjectSizeGitLFS)
 	assert.True(t, has, "size:git:lfs is covered")
 	assert.False(t, ok, "size:git:lfs fails")
+	assert.EqualValues(t, 0, limit)
 
-	ok, has = group.Evaluate(used, quota_model.LimitSubjectSizeAll)
+	ok, has, limit = group.Evaluate(used, quota_model.LimitSubjectSizeAll)
 	assert.True(t, has, "size:all is covered")
 	assert.False(t, ok, "size:all fails")
+	assert.EqualValues(t, 0, limit)
 }
 
 func TestQuotaGroupRuleCombination(t *testing.T) {
@@ -109,23 +115,27 @@ func TestQuotaGroupRuleCombination(t *testing.T) {
 	}
 
 	// Git LFS isn't covered by any rule
-	_, has := group.Evaluate(used, quota_model.LimitSubjectSizeGitLFS)
+	_, has, limit := group.Evaluate(used, quota_model.LimitSubjectSizeGitLFS)
 	assert.False(t, has)
+	assert.EqualValues(t, math.MaxInt, limit)
 
 	// repos:all is covered, and is passing
-	ok, has := group.Evaluate(used, quota_model.LimitSubjectSizeReposAll)
+	ok, has, limit := group.Evaluate(used, quota_model.LimitSubjectSizeReposAll)
 	assert.True(t, has)
 	assert.True(t, ok)
+	assert.EqualValues(t, 4096, limit)
 
 	// packages:all is covered, and is failing
-	ok, has = group.Evaluate(used, quota_model.LimitSubjectSizeAssetsPackagesAll)
+	ok, has, limit = group.Evaluate(used, quota_model.LimitSubjectSizeAssetsPackagesAll)
 	assert.True(t, has)
 	assert.False(t, ok)
+	assert.EqualValues(t, 0, limit)
 
 	// size:all is covered, and is failing (due to packages:all being over quota)
-	ok, has = group.Evaluate(used, quota_model.LimitSubjectSizeAll)
+	ok, has, limit = group.Evaluate(used, quota_model.LimitSubjectSizeAll)
 	assert.True(t, has, "size:all should be covered")
 	assert.False(t, ok, "size:all should fail")
+	assert.EqualValues(t, 0, limit)
 }
 
 func TestQuotaGroupListsRequireOnlyOnePassing(t *testing.T) {
@@ -159,8 +169,9 @@ func TestQuotaGroupListsRequireOnlyOnePassing(t *testing.T) {
 	used.Size.Repos.Public = 1024
 
 	// In a group list, if any group passes, the entire evaluation passes.
-	ok := groups.Evaluate(used, quota_model.LimitSubjectSizeAll)
+	ok, limit := groups.Evaluate(used, quota_model.LimitSubjectSizeAll)
 	assert.True(t, ok)
+	assert.EqualValues(t, -1, limit)
 }
 
 func TestQuotaGroupListAllFailing(t *testing.T) {
@@ -193,8 +204,9 @@ func TestQuotaGroupListAllFailing(t *testing.T) {
 	used := quota_model.Used{}
 	used.Size.Repos.Public = 2048
 
-	ok := groups.Evaluate(used, quota_model.LimitSubjectSizeAll)
+	ok, limit := groups.Evaluate(used, quota_model.LimitSubjectSizeAll)
 	assert.False(t, ok)
+	assert.EqualValues(t, 0, limit)
 }
 
 func TestQuotaGroupListEmpty(t *testing.T) {
@@ -203,6 +215,7 @@ func TestQuotaGroupListEmpty(t *testing.T) {
 	used := quota_model.Used{}
 	used.Size.Repos.Public = 2048
 
-	ok := groups.Evaluate(used, quota_model.LimitSubjectSizeAll)
+	ok, limit := groups.Evaluate(used, quota_model.LimitSubjectSizeAll)
 	assert.True(t, ok)
+	assert.EqualValues(t, -1, limit)
 }
