@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@citation-js/core": "0.7.14",
-    "@citation-js/plugin-bibtex": "0.7.16",
+    "@citation-js/plugin-bibtex": "0.7.17",
     "@citation-js/plugin-software-formats": "0.6.1",
     "@github/markdown-toolbar-element": "2.2.3",
     "@github/quote-selection": "2.1.0",
