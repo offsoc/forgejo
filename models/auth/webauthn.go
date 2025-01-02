@@ -52,10 +52,10 @@ type WebAuthnCredential struct {
 	AAGUID          []byte
 	SignCount       uint32 `xorm:"BIGINT"`
 	CloneWarning    bool
-	BackupEligible  bool `XORM:"NOT NULL DEFAULT false"`
-	BackupState     bool `XORM:"NOT NULL DEFAULT false"`
+	BackupEligible  bool `xorm:"NOT NULL DEFAULT false"`
+	BackupState     bool `xorm:"NOT NULL DEFAULT false"`
 	// If legacy is set to true, backup_eligible and backup_state isn't set.
-	Legacy      bool               `XORM:"NOT NULL DEFAULT true"`
+	Legacy      bool               `xorm:"NOT NULL DEFAULT true"`
 	CreatedUnix timeutil.TimeStamp `xorm:"INDEX created"`
 	UpdatedUnix timeutil.TimeStamp `xorm:"INDEX updated"`
 }

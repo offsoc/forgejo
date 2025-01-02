@@ -7,6 +7,9 @@ export async function validate_form({page}: {page: Page}, scope: 'form' | 'field
     'span[data-tooltip-content',
     // exclude weird non-semantic HTML disabled content
     '.disabled',
+    // legacy dropdowns don't use semantic HTML yet,
+    // avoid using these where possible
+    '.ui.dropdown',
   ];
   await accessibilityCheck({page}, [scope], excludedElements, []);
 

@@ -11,6 +11,19 @@ test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
 });
 
+test('Menu accessibility', async ({browser}, workerInfo) => {
+  const page = await login({browser}, workerInfo);
+  await page.goto('/user2/repo1/issues/1');
+  await expect(page.getByLabel('user2 reacted eyes. Remove eyes')).toBeVisible();
+  await expect(page.getByLabel('reacted laugh. Remove laugh')).toBeVisible();
+  await expect(page.locator('#issue-1').getByLabel('Comment menu')).toBeVisible();
+  await expect(page.locator('#issue-1').getByRole('heading').getByLabel('Add reaction')).toBeVisible();
+  page.getByLabel('reacted laugh. Remove').click();
+  await expect(page.getByLabel('user1 reacted laugh. Add laugh')).toBeVisible();
+  page.getByLabel('user1 reacted laugh.').click();
+  await expect(page.getByLabel('user1, user2 reacted laugh. Remove laugh')).toBeVisible();
+});
+
 test('Hyperlink paste behaviour', async ({browser}, workerInfo) => {
   test.skip(['Mobile Safari', 'Mobile Chrome', 'webkit'].includes(workerInfo.project.name), 'Mobile clients seem to have very weird behaviour with this test, which I cannot confirm with real usage');
   const page = await login({browser}, workerInfo);

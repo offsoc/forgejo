@@ -691,6 +691,117 @@ func TestSignInOAuthCallbackRedirectToEscaping(t *testing.T) {
 	assert.Equal(t, "/login/oauth/authorize?redirect_uri=https://translate.example.org", test.RedirectURL(resp))
 }
 
+func setupMockOIDCServer() *httptest.Server {
+	var mockServer *httptest.Server
+	mockServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/.well-known/openid-configuration":
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{
+				"issuer": "` + mockServer.URL + `",
+				"authorization_endpoint": "` + mockServer.URL + `/authorize",
+				"token_endpoint": "` + mockServer.URL + `/token",
+				"userinfo_endpoint": "` + mockServer.URL + `/userinfo"
+			}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	return mockServer
+}
+
+func TestSignInOauthCallbackSyncSSHKeys(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	mockServer := setupMockOIDCServer()
+	defer mockServer.Close()
+
+	sourceName := "oidc"
+	authPayload := authSourcePayloadOpenIDConnect(sourceName, mockServer.URL+"/")
+	authPayload["oauth2_attribute_ssh_public_key"] = "sshpubkey"
+	authSource := addAuthSource(t, authPayload)
+
+	userID := "5678"
+	user := &user_model.User{
+		Name:        "oidc.user",
+		Email:       "oidc.user@example.com",
+		Passwd:      "oidc.userpassword",
+		Type:        user_model.UserTypeIndividual,
+		LoginType:   auth_model.OAuth2,
+		LoginSource: authSource.ID,
+		LoginName:   userID,
+		IsActive:    true,
+	}
+	defer createUser(context.Background(), t, user)()
+
+	for _, tt := range []struct {
+		name          string
+		rawData       map[string]any
+		parsedKeySets []string
+	}{
+		{
+			name: "Add keys",
+			rawData: map[string]any{
+				"sshpubkey": []any{
+					"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINDRDoephkaFELacrNNe2fqAwedhRB1MKOpLEHlPuczO nocomment",
+				},
+			},
+			parsedKeySets: []string{
+				"SHA256:X/mW7JUQ8J8yhrKBbZ/pJni8qx7zPA1DTFsi8ftpDwg",
+			},
+		},
+		{
+			name: "Update keys",
+			rawData: map[string]any{
+				"sshpubkey": []any{
+					"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMLLMOLFMouSJmzOASKKv178d+7op4utSxcugF9tVVch nocomment",
+					"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGyDh9sg1IGQGa0U363wcGXrDlGBhZI3UHvS7we/0d+T nocomment",
+				},
+			},
+			parsedKeySets: []string{
+				"SHA256:gsyG4JNmY5XoLBK5lSzuwD3EXcaDBiDKBkqDkpQTH6Q",
+				"SHA256:bbEKB1Qpumgk6QrgiN6t/kIvtUZvIQ8rqQBz8yYPzYw",
+			},
+		},
+		{
+			name: "Remove keys",
+			rawData: map[string]any{
+				"sshpubkey": []any{},
+			},
+			parsedKeySets: []string{},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			defer mockCompleteUserAuth(func(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+				return goth.User{
+					Provider: sourceName,
+					UserID:   userID,
+					Email:    user.Email,
+					RawData:  tt.rawData,
+				}, nil
+			})()
+
+			session := emptyTestSession(t)
+
+			req := NewRequest(t, "GET", fmt.Sprintf("/user/oauth2/%s/callback?code=XYZ&state=XYZ", sourceName))
+			resp := session.MakeRequest(t, req, http.StatusSeeOther)
+			assert.Equal(t, "/", test.RedirectURL(resp))
+
+			req = NewRequest(t, "GET", "/user/settings/keys")
+			resp = session.MakeRequest(t, req, http.StatusOK)
+
+			htmlDoc := NewHTMLParser(t, resp.Body)
+			divs := htmlDoc.doc.Find("#keys-ssh .flex-item .flex-item-body:not(:last-child)")
+
+			syncedKeys := make([]string, divs.Length())
+			for i := 0; i < divs.Length(); i++ {
+				syncedKeys[i] = strings.TrimSpace(divs.Eq(i).Text())
+			}
+
+			assert.ElementsMatch(t, tt.parsedKeySets, syncedKeys, "Unequal number of keys")
+		})
+	}
+}
+
 func TestSignUpViaOAuthWithMissingFields(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	// enable auto-creation of accounts via OAuth2

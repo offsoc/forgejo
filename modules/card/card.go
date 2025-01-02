@@ -5,6 +5,7 @@ package card
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/color"
 	"io"
@@ -35,11 +36,18 @@ type Card struct {
 	Img    *image.RGBA
 	Font   *truetype.Font
 	Margin int
+	Width  int
+	Height int
 }
 
 var fontCache = sync.OnceValues(func() (*truetype.Font, error) {
 	return truetype.Parse(goregular.TTF)
 })
+
+// DefaultSize returns the default size for a card
+func DefaultSize() (int, int) {
+	return 1200, 600
+}
 
 // NewCard creates a new card with the given dimensions in pixels
 func NewCard(width, height int) (*Card, error) {
@@ -55,6 +63,8 @@ func NewCard(width, height int) (*Card, error) {
 		Img:    img,
 		Font:   font,
 		Margin: 0,
+		Width:  width,
+		Height: height,
 	}, nil
 }
 
@@ -67,14 +77,14 @@ func (c *Card) Split(vertical bool, percentage int) (*Card, *Card) {
 		mid := (bounds.Dx() * percentage / 100) + bounds.Min.X
 		subleft := c.Img.SubImage(image.Rect(bounds.Min.X, bounds.Min.Y, mid, bounds.Max.Y)).(*image.RGBA)
 		subright := c.Img.SubImage(image.Rect(mid, bounds.Min.Y, bounds.Max.X, bounds.Max.Y)).(*image.RGBA)
-		return &Card{Img: subleft, Font: c.Font},
-			&Card{Img: subright, Font: c.Font}
+		return &Card{Img: subleft, Font: c.Font, Width: subleft.Bounds().Dx(), Height: subleft.Bounds().Dy()},
+			&Card{Img: subright, Font: c.Font, Width: subright.Bounds().Dx(), Height: subright.Bounds().Dy()}
 	}
 	mid := (bounds.Dy() * percentage / 100) + bounds.Min.Y
 	subtop := c.Img.SubImage(image.Rect(bounds.Min.X, bounds.Min.Y, bounds.Max.X, mid)).(*image.RGBA)
 	subbottom := c.Img.SubImage(image.Rect(bounds.Min.X, mid, bounds.Max.X, bounds.Max.Y)).(*image.RGBA)
-	return &Card{Img: subtop, Font: c.Font},
-		&Card{Img: subbottom, Font: c.Font}
+	return &Card{Img: subtop, Font: c.Font, Width: subtop.Bounds().Dx(), Height: subtop.Bounds().Dy()},
+		&Card{Img: subbottom, Font: c.Font, Width: subbottom.Bounds().Dx(), Height: subbottom.Bounds().Dy()}
 }
 
 // SetMargin sets the margins for the card
@@ -244,9 +254,14 @@ func (c *Card) fetchExternalImage(url string) (image.Image, bool) {
 		},
 	}
 
+	// Go expects a absolute URL, so we must change a relative to an absolute one
+	if !strings.Contains(url, "://") {
+		url = fmt.Sprintf("%s%s", setting.AppURL, strings.TrimPrefix(url, "/"))
+	}
+
 	resp, err := client.Get(url)
 	if err != nil {
-		log.Warn("error when fetching external image from %s: %w", url, err)
+		log.Warn("error when fetching external image from %s: %v", url, err)
 		return nil, false
 	}
 	defer resp.Body.Close()
@@ -320,4 +335,9 @@ func (c *Card) DrawExternalImage(url string) {
 		image = fallbackImage()
 	}
 	c.DrawImage(image)
+}
+
+// DrawRect draws a rect with the given color
+func (c *Card) DrawRect(startX, startY, endX, endY int, color color.Color) {
+	draw.Draw(c.Img, image.Rect(startX, startY, endX, endY), &image.Uniform{color}, image.Point{}, draw.Src)
 }
