@@ -227,9 +227,9 @@ func TestMigrateWithReleases(t *testing.T) {
 				assert.EqualValues(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
 				// Step 6: check the repo was created and load the repo
 				migratedRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName})
-				// Step 7: check if the wiki is enabled
+				// Step 7: check if releases are enabled
 				if !migratedRepo.UnitEnabled(context.TODO(), unit.TypeReleases) {
-					t.Errorf("Expected wiki to be enabled in the migrated repo. Wiki is disabled")
+					t.Errorf("Expected releases to be enabled. Releases are disabled")
 				}
 			})
 		}
