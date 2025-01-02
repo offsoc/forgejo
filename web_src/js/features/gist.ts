@@ -74,9 +74,16 @@ function initGistCopyContent() {
   }
 }
 
+function initGistFileDeleteButtons() {
+  for (const elem of document.querySelectorAll('#edit-gist-form > * button[data-template-name="delete-button"]')) {
+    elem.addEventListener('click', deleteFileButtonClicked);
+  }
+}
+
 export function initGist() {
   initAddGistFileButton();
   initGistCopyContent();
+  initGistFileDeleteButtons();
 
   if (window.location.pathname.startsWith('/gists')) {
     initRepoCloneLink();

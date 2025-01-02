@@ -120,7 +120,7 @@ func View(ctx *context.Context) {
 	}
 
 	if ctx.Gist.Visibility == gist_model.GistVisibilityHidden {
-		ctx.Data["AddNoindexHeade"] = true
+		ctx.Data["AddNoIndexHeader"] = true
 	}
 
 	cl := new(repo_model.CloneLink)

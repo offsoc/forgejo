@@ -14,11 +14,11 @@ import (
 	"code.gitea.io/gitea/modules/auth/password/hash"
 	"code.gitea.io/gitea/modules/setting"
 
+	_ "code.gitea.io/gitea/models/gist" // This import is needed to make gists fixtures work
+
 	"github.com/go-testfixtures/testfixtures/v3"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
-
-	_ "code.gitea.io/gitea/models/gist"
 )
 
 var fixturesLoader *testfixtures.Loader

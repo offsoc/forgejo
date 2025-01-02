@@ -5,7 +5,7 @@
 			<template id="file-field-template">
 				{{template "gist/file_form" dict "delete" true}}
 			</template>
-			<form class="ui form" action={{if .Gist}}"{{.Gist.Link}}/edit/post"{{else}}"/gists/-/new/post"{{end}} method="POST">
+			<form id="edit-gist-form" class="ui form" action={{if .Gist}}"{{.Gist.Link}}/edit/post"{{else}}"/gists/-/new/post"{{end}} method="POST">
 				<h3 class="tw-text-center ui top attached header">
 					{{if .Gist}}
 						{{ctx.Locale.Tr "gist.edit.edit_header"}}
@@ -52,7 +52,7 @@
 					<div id="file-field-container">
 						{{if .GistFiles}}
 							{{range $idx, $file := .GistFiles}}
-								{{template "gist/file_form" dict "id" (printf "%d" $idx) "name" .Name "content" .Content}}
+								{{template "gist/file_form" dict "id" (printf "%d" $idx) "name" .Name "content" .Content "delete" (ne $idx 0)}}
 							{{end}}
 						{{else}}
 							{{template "gist/file_form" dict "id" "0"}}
@@ -66,7 +66,7 @@
 							{{ctx.Locale.Tr "gist.edit.add_file"}}
 						</button>
 						<div class="tw-text-right">
-							<button class="ui green button" type="submit">
+							<button id="submit-gist-button" class="ui green button" type="submit">
 								{{if .Gist}}
 									{{ctx.Locale.Tr "save"}}
 								{{else}}
