@@ -27,7 +27,7 @@ test('Create Gist', async ({browser}, workerInfo) => {
 
   await page.locator('#submit-gist-button').click();
 
-  await page.waitForSelector('#repo-clone-https');
+  await page.locator('#repo-clone-https').waitFor();
 
   await expect(page.getByText('file1.txt')).toBeVisible();
   await expect(page.getByText('file2.txt')).toBeVisible();
@@ -38,11 +38,11 @@ test('Edit Gist', async ({browser}, workerInfo) => {
   const response = await page.goto('/gists/dec037f3/edit');
   expect(response?.status()).toBe(200);
 
-  await expect(page.locator('input[name="file-name-1"]')).toBeVisible()
+  await expect(page.locator('input[name="file-name-1"]')).toBeVisible();
   await expect(page.locator('textarea[name="file-content-1"]')).toBeVisible();
 
   await page.locator('button[data-file-id="1"]').click();
 
-  await expect(page.locator('input[name="file-name-1"]')).not.toBeVisible();
-  await expect(page.locator('textarea[name="file-content-1"]')).not.toBeVisible();
+  await expect(page.locator('input[name="file-name-1"]')).toBeHidden();
+  await expect(page.locator('textarea[name="file-content-1"]')).toBeHidden();
 });

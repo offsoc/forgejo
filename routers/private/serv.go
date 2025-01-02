@@ -76,7 +76,7 @@ func ServNoCommand(ctx *context.PrivateContext) {
 	ctx.JSON(http.StatusOK, &results)
 }
 
-// servCommandGist handels ServCommand for Gists
+// servCommandGist handles ServCommand for Gists
 func servCommandGist(ctx *context.PrivateContext) {
 	mode := perm.AccessMode(ctx.FormInt("mode"))
 	keyID := ctx.ParamsInt64(":keyid")
