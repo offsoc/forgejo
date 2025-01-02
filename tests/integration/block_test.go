@@ -147,6 +147,20 @@ func TestBlockUserFromOrganization(t *testing.T) {
 			session.MakeRequest(t, req, http.StatusInternalServerError)
 		})
 	})
+
+	t.Run("Block the doer", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequestWithValues(t, "POST", org.OrganisationLink()+"/settings/blocked_users/block", map[string]string{
+			"_csrf": GetCSRF(t, session, org.OrganisationLink()+"/settings/blocked_users"),
+			"uname": doer.Name,
+		})
+		session.MakeRequest(t, req, http.StatusSeeOther)
+		assert.False(t, unittest.BeanExists(t, &user_model.BlockedUser{BlockID: doer.ID, UserID: org.ID}))
+		flashCookie := session.GetCookie(forgejo_context.CookieNameFlash)
+		assert.NotNil(t, flashCookie)
+		assert.EqualValues(t, "error%3DYou%2Bcannot%2Bblock%2Byourself.", flashCookie.Value)
+	})
 }
 
 // TestBlockActions ensures that certain actions cannot be performed as a doer

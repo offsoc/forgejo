@@ -43,7 +43,7 @@ func assertRepoCreateForm(t *testing.T, htmlDoc *HTMLDoc, owner *user_model.User
 	// the template menu is loaded client-side, so don't assert the option exists
 	assert.Equal(t, templateID, htmlDoc.GetInputValueByName("repo_template"), "Unexpected repo_template selection")
 
-	for _, name := range []string{"issue_labels", "gitignores", "license", "readme", "object_format_name"} {
+	for _, name := range []string{"issue_labels", "gitignores", "license", "object_format_name"} {
 		htmlDoc.AssertDropdownHasOptions(t, name)
 	}
 }

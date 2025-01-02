@@ -197,6 +197,7 @@ func parseOAuth2Config(form forms.AuthenticationForm) *oauth2.Source {
 		CustomURLMapping:              customURLMapping,
 		IconURL:                       form.Oauth2IconURL,
 		Scopes:                        scopes,
+		AttributeSSHPublicKey:         form.Oauth2AttributeSSHPublicKey,
 		RequiredClaimName:             form.Oauth2RequiredClaimName,
 		RequiredClaimValue:            form.Oauth2RequiredClaimValue,
 		SkipLocalTwoFA:                form.SkipLocalTwoFA,

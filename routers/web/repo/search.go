@@ -67,6 +67,12 @@ func Search(ctx *context.Context) {
 	ctx.Data["CodeSearchPath"] = path
 	ctx.Data["CodeSearchMode"] = mode.String()
 	ctx.Data["PageIsViewCode"] = true
+	ctx.Data["CodeIndexerDisabled"] = !setting.Indexer.RepoIndexerEnabled
+	if setting.Indexer.RepoIndexerEnabled {
+		ctx.Data["CodeSearchOptions"] = code_indexer.CodeSearchOptions
+	} else {
+		ctx.Data["CodeSearchOptions"] = git.GrepSearchOptions
+	}
 
 	if keyword == "" {
 		ctx.HTML(http.StatusOK, tplSearch)
@@ -103,7 +109,6 @@ func Search(ctx *context.Context) {
 		} else {
 			ctx.Data["CodeIndexerUnavailable"] = !code_indexer.IsAvailable(ctx)
 		}
-		ctx.Data["CodeSearchOptions"] = code_indexer.CodeSearchOptions
 	} else {
 		grepOpt := git.GrepOptions{
 			ContextLineNumber: 1,
@@ -139,10 +144,8 @@ func Search(ctx *context.Context) {
 					strings.Join(r.LineCodes, "\n")),
 			})
 		}
-		ctx.Data["CodeSearchOptions"] = git.GrepSearchOptions
 	}
 
-	ctx.Data["CodeIndexerDisabled"] = !setting.Indexer.RepoIndexerEnabled
 	ctx.Data["Repo"] = ctx.Repo.Repository
 	ctx.Data["SourcePath"] = ctx.Repo.Repository.Link()
 	ctx.Data["SearchResults"] = searchResults

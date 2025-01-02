@@ -1,4 +1,25 @@
 {{- /* og:description - a one to two sentence description of your object, maybe it only needs at most 300 bytes */ -}}
+{{if .OpenGraphTitle}}
+	<meta property="og:title" content="{{.OpenGraphTitle}}">
+{{end}}
+{{if .OpenGraphDescription}}
+	<meta property="og:description" content="{{.OpenGraphDescription}}">
+{{end}}
+{{if .OpenGraphURL}}
+	<meta property="og:url" content="{{.OpenGraphURL}}">
+{{end}}
+{{if .OpenGraphImageURL}}
+	<meta property="og:image" content="{{.OpenGraphImageURL}}">
+	{{if .OpenGraphImageWidth}}
+		<meta property="og:image:width" content="{{.OpenGraphImageWidth}}">
+	{{end}}
+	{{if .OpenGraphImageHeight}}
+		<meta property="og:image:height" content="{{.OpenGraphImageHeight}}">
+	{{end}}
+	{{if .OpenGraphImageAltText}}
+		<meta property="og:image:alt" content="{{.OpenGraphImageAltText}}">
+	{{end}}
+{{end}}
 {{if .PageIsUserProfile}}
 	<meta property="og:title" content="{{.ContextUser.DisplayName}}">
 	<meta property="og:type" content="profile">
@@ -14,10 +35,6 @@
 		{{if .Issue.Content}}
 			<meta property="og:description" content="{{StringUtils.EllipsisString .Issue.Content 300}}">
 		{{end}}
-		<meta property="og:image" content="{{.Issue.SummaryCardURL}}">
-		<meta property="og:image:width" content="{{.Issue.SummaryCardWidth}}">
-		<meta property="og:image:height" content="{{.Issue.SummaryCardHeight}}">
-		<meta property="og:image:alt" content="{{ctx.Locale.Tr "repo.issues.summary_card_alt" .Issue.Title .Repository.FullName}}">
 	{{else if or .PageIsDiff .IsViewFile}}
 		<meta property="og:title" content="{{.Title}}">
 		<meta property="og:url" content="{{AppUrl}}{{.Link}}">
@@ -35,14 +52,18 @@
 			<meta property="og:description" content="{{StringUtils.EllipsisString .Repository.Description 300}}">
 		{{end}}
 	{{else}}
-		<meta property="og:title" content="{{.Repository.Name}}">
-		<meta property="og:url" content="{{.Repository.HTMLURL}}">
-		{{if .Repository.Description}}
+		{{if not .OpenGraphTitle}}
+			<meta property="og:title" content="{{.Repository.Name}}">
+		{{end}}
+		{{if not .OpenGraphURL}}
+			<meta property="og:url" content="{{.Repository.HTMLURL}}">
+		{{end}}
+		{{if and (.Repository.Description) (not .OpenGraphDescription)}}
 			<meta property="og:description" content="{{StringUtils.EllipsisString .Repository.Description 300}}">
 		{{end}}
 	{{end}}
 	<meta property="og:type" content="object">
-	{{if not .Issue}}
+	{{if and (not .Issue) (not .OpenGraphImageURL)}}
 		{{if (.Repository.AvatarLink ctx)}}
 			<meta property="og:image" content="{{.Repository.AvatarLink ctx}}">
 		{{else}}

@@ -10,9 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"image"
-	"image/color"
-	"image/png"
 	"math/big"
 	"net/http"
 	"net/url"
@@ -34,8 +31,6 @@ import (
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/card"
 	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/emoji"
 	"code.gitea.io/gitea/modules/git"
@@ -47,7 +42,6 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/templates"
 	"code.gitea.io/gitea/modules/templates/vars"
@@ -2076,6 +2070,8 @@ func ViewIssue(ctx *context.Context) {
 	ctx.Data["RefEndName"] = git.RefName(issue.Ref).ShortName()
 	ctx.Data["NewPinAllowed"] = pinAllowed
 	ctx.Data["PinEnabled"] = setting.Repository.Issue.MaxPinned != 0
+	ctx.Data["OpenGraphImageURL"] = issue.SummaryCardURL()
+	ctx.Data["OpenGraphImageAltText"] = ctx.Tr("repo.issues.summary_card_alt", issue.Title, issue.Repo.FullName())
 
 	prepareHiddenCommentType(ctx)
 	if ctx.Written() {
@@ -2231,222 +2227,6 @@ func GetIssueInfo(ctx *context.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, convert.ToIssue(ctx, ctx.Doer, issue))
-}
-
-// GetSummaryCard get an issue of a repository
-func GetSummaryCard(ctx *context.Context) {
-	issue, err := issues_model.GetIssueWithAttrsByIndex(ctx, ctx.Repo.Repository.ID, ctx.ParamsInt64(":index"))
-	if err != nil {
-		if issues_model.IsErrIssueNotExist(err) {
-			ctx.Error(http.StatusNotFound)
-		} else {
-			ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err.Error())
-		}
-		return
-	}
-
-	if !ctx.Repo.CanReadIssuesOrPulls(issue.IsPull) {
-		ctx.Error(http.StatusNotFound)
-		return
-	}
-
-	cache := cache.GetCache()
-	cacheKey := fmt.Sprintf("summary_card:issue:%s:%d", ctx.Locale.Language(), issue.ID)
-	pngData, ok := cache.Get(cacheKey).([]byte)
-	if ok && pngData != nil && len(pngData) > 0 {
-		ctx.Resp.Header().Set("Content-Type", "image/png")
-		ctx.Resp.WriteHeader(http.StatusOK)
-		_, err = ctx.Resp.Write(pngData)
-		if err != nil {
-			ctx.ServerError("GetSummaryCard", err)
-		}
-		return
-	}
-
-	card, err := drawSummaryCard(ctx, issue)
-	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
-		return
-	}
-
-	// Encode image, store in cache
-	var imageBuffer bytes.Buffer
-	err = png.Encode(&imageBuffer, card.Img)
-	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
-		return
-	}
-	imageBytes := imageBuffer.Bytes()
-	err = cache.Put(cacheKey, imageBytes, setting.CacheService.TTLSeconds())
-	if err != nil {
-		// don't abort serving the image if we just had a cache storage failure
-		log.Warn("failed to cache issue summary card: %v", err)
-	}
-
-	// Finish the uncached image response
-	ctx.Resp.Header().Set("Content-Type", "image/png")
-	ctx.Resp.WriteHeader(http.StatusOK)
-	_, err = ctx.Resp.Write(imageBytes)
-	if err != nil {
-		ctx.ServerError("GetSummaryCard", err)
-		return
-	}
-}
-
-func drawSummaryCard(ctx *context.Context, issue *issues_model.Issue) (*card.Card, error) {
-	width, height := issue.SummaryCardSize()
-	mainCard, err := card.NewCard(width, height)
-	if err != nil {
-		return nil, err
-	}
-
-	mainCard.SetMargin(60)
-	topSection, bottomSection := mainCard.Split(false, 75)
-	issueSummary, issueIcon := topSection.Split(true, 80)
-	repoInfo, issueDescription := issueSummary.Split(false, 15)
-
-	repoInfo.SetMargin(10)
-	_, err = repoInfo.DrawText(fmt.Sprintf("%s - #%d", issue.Repo.FullName(), issue.Index), color.Gray{128}, 36, card.Top, card.Left)
-	if err != nil {
-		return nil, err
-	}
-
-	issueDescription.SetMargin(10)
-	_, err = issueDescription.DrawText(issue.Title, color.Black, 56, card.Top, card.Left)
-	if err != nil {
-		return nil, err
-	}
-
-	issueIcon.SetMargin(10)
-
-	repoAvatarPath := issue.Repo.CustomAvatarRelativePath()
-	if repoAvatarPath != "" {
-		repoAvatarFile, err := storage.RepoAvatars.Open(repoAvatarPath)
-		if err != nil {
-			return nil, err
-		}
-		repoAvatarImage, _, err := image.Decode(repoAvatarFile)
-		if err != nil {
-			return nil, err
-		}
-		issueIcon.DrawImage(repoAvatarImage)
-	} else {
-		// If the repo didn't have an avatar, fallback to the repo owner's avatar for the right-hand-side icon
-		err = issue.Repo.LoadOwner(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if issue.Repo.Owner != nil {
-			err = drawUser(ctx, issueIcon, issue.Repo.Owner)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	issueStats, issueAttribution := bottomSection.Split(false, 50)
-
-	var state string
-	if issue.IsPull && issue.PullRequest.HasMerged {
-		if issue.PullRequest.Status == 3 {
-			state = ctx.Locale.TrString("repo.pulls.manually_merged")
-		} else {
-			state = ctx.Locale.TrString("repo.pulls.merged")
-		}
-	} else if issue.IsClosed {
-		state = ctx.Locale.TrString("repo.issues.closed_title")
-	} else if issue.IsPull {
-		if issue.PullRequest.IsWorkInProgress(ctx) {
-			state = ctx.Locale.TrString("repo.issues.draft_title")
-		} else {
-			state = ctx.Locale.TrString("repo.issues.open_title")
-		}
-	} else {
-		state = ctx.Locale.TrString("repo.issues.open_title")
-	}
-	state = strings.ToLower(state)
-
-	issueStats.SetMargin(10)
-	if issue.IsPull {
-		reviews := map[int64]bool{}
-		for _, comment := range issue.Comments {
-			if comment.Review != nil {
-				reviews[comment.Review.ID] = true
-			}
-		}
-		_, err = issueStats.DrawText(
-			fmt.Sprintf("%s, %s, %s",
-				ctx.Locale.TrN(
-					issue.NumComments,
-					"repo.issues.num_comments_1",
-					"repo.issues.num_comments",
-					issue.NumComments,
-				),
-				ctx.Locale.TrN(
-					len(reviews),
-					"repo.issues.num_reviews_one",
-					"repo.issues.num_reviews_few",
-					len(reviews),
-				),
-				state,
-			),
-			color.Gray{128}, 36, card.Top, card.Left)
-	} else {
-		_, err = issueStats.DrawText(
-			fmt.Sprintf("%s, %s",
-				ctx.Locale.TrN(
-					issue.NumComments,
-					"repo.issues.num_comments_1",
-					"repo.issues.num_comments",
-					issue.NumComments,
-				),
-				state,
-			),
-			color.Gray{128}, 36, card.Top, card.Left)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	issueAttributionIcon, issueAttributionText := issueAttribution.Split(true, 8)
-	issueAttributionText.SetMargin(5)
-	_, err = issueAttributionText.DrawText(
-		fmt.Sprintf(
-			"%s - %s",
-			issue.Poster.Name,
-			issue.Created.AsTime().Format("2006-01-02"),
-		),
-		color.Gray{128}, 36, card.Middle, card.Left)
-	if err != nil {
-		return nil, err
-	}
-	err = drawUser(ctx, issueAttributionIcon, issue.Poster)
-	if err != nil {
-		return nil, err
-	}
-
-	return mainCard, nil
-}
-
-func drawUser(ctx *context.Context, card *card.Card, user *user_model.User) error {
-	if user.UseCustomAvatar {
-		posterAvatarPath := user.CustomAvatarRelativePath()
-		if posterAvatarPath != "" {
-			userAvatarFile, err := storage.Avatars.Open(user.CustomAvatarRelativePath())
-			if err != nil {
-				return err
-			}
-			userAvatarImage, _, err := image.Decode(userAvatarFile)
-			if err != nil {
-				return err
-			}
-			card.DrawImage(userAvatarImage)
-		}
-	} else {
-		posterAvatarLink := user.AvatarLinkWithSize(ctx, 256)
-		card.DrawExternalImage(posterAvatarLink)
-	}
-	return nil
 }
 
 // UpdateIssueTitle change issue's title

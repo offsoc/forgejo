@@ -4,10 +4,6 @@
   user-select: none;
 }
 
-.repository .owner.dropdown {
-  min-width: 40% !important;
-}
-
 .repository .unicode-escaped .escaped-code-point[data-escaped]::before {
   visibility: visible;
   content: attr(data-escaped);
@@ -2016,7 +2012,7 @@ details.repo-search-result summary::marker {
 .repository .repository-summary .repository-menu {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  padding: 0 0.5em;
+  padding: 0;
 }
 
 @media (max-width: 767.98px) {
@@ -2042,10 +2038,12 @@ details.repo-search-result summary::marker {
   justify-content: center;
   gap: 0.25em;
   text-decoration: none;
+  border-radius: var(--border-radius);
 }
 
-.repository .repository-summary .sub-menu .item.active {
+.repository .repository-summary .item.active {
   background: var(--color-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .repository .repository-summary .segment.language-stats {
@@ -2855,7 +2853,6 @@ tbody.commit-list {
   }
   .commits-table .commits-table-left {
     align-items: initial !important;
-    margin-bottom: 6px;
   }
   .commits-table .commits-table-right form > div:nth-child(1) {
     order: 1; /* the "commit search" input */
