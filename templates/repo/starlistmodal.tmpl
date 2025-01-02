@@ -10,7 +10,7 @@
 				<div class="field">
 					<div class="ui checkbox">
 						<label for="star-list-id-input">{{.Name}}</label>
-						<input id="star-list-id-input" "name="star_list_id" value="{{.ID}}" type="checkbox" {{if .ContainsRepoID $.Repository.ID}}checked{{end}}>
+						<input id="star-list-id-input" name="star_list_id" value="{{.ID}}" type="checkbox" {{if .ContainsRepoID $.Repository.ID}}checked{{end}}>
 					</div>
 				</div>
 			{{end}}
