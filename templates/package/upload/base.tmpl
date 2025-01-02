@@ -1,9 +1,23 @@
-{{if eq $.PackageUploadType.String "alpine"}}
-	{{template "package/upload/alpine" .}}
-{{else if eq $.PackageUploadType.String "debian"}}
-	{{template "package/upload/debian" .}}
-{{else if eq $.PackageUploadType.String "generic"}}
-	{{template "package/upload/generic" .}}
-{{else if eq $.PackageUploadType.String "rpm"}}
-	{{template "package/upload/rpm" .}}
-{{end}}
+<div class="ui tw-mt-2">
+	<h1>{{.Title}}</h1>
+	{{template "base/alert" .}}
+	<form class="ui form" action="{{.Link}}/upload" method="post" enctype="multipart/form-data">
+		{{.CsrfTokenHtml}}
+
+		<input name="repo" type="hidden" value="{{.PackageUploadRepo}}">
+
+		{{if eq $.PackageUploadType.String "alpine"}}
+			{{template "package/upload/alpine" .}}
+		{{else if eq $.PackageUploadType.String "debian"}}
+			{{template "package/upload/debian" .}}
+		{{else if eq $.PackageUploadType.String "generic"}}
+			{{template "package/upload/generic" .}}
+		{{else if eq $.PackageUploadType.String "rpm"}}
+			{{template "package/upload/rpm" .}}
+		{{end}}
+
+		<div class="field">
+			<button class="ui green button">{{ctx.Locale.Tr "upload"}}</button>
+		</div>
+	</form>
+</div>
