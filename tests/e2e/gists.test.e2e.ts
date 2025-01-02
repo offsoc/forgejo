@@ -4,6 +4,7 @@
 // @watch end
 
 import {test, login_user, login} from './utils_e2e.ts';
+import {validate_form} from './shared/forms.ts';
 import {expect} from '@playwright/test';
 
 test.beforeAll(async ({browser}, workerInfo) => {
@@ -14,6 +15,8 @@ test('Create Gist', async ({browser}, workerInfo) => {
   const page = await login({browser}, workerInfo);
   const response = await page.goto('/gists/-/new');
   expect(response?.status()).toBe(200);
+
+  await validate_form({page});
 
   await page.locator('input[name="name"]').fill('NewGist');
 

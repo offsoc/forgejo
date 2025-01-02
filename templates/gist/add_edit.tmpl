@@ -18,13 +18,13 @@
 					{{.CsrfTokenHtml}}
 
 					<div class="field required">
-						<label for="name">{{ctx.Locale.Tr "gist.edit.name"}}</label>
-						<input name="name" {{if .Gist}}value="{{.Gist.Name}}"{{end}} required></input>
+						<label for="name-input">{{ctx.Locale.Tr "gist.edit.name"}}</label>
+						<input id="name-input" name="name" {{if .Gist}}value="{{.Gist.Name}}"{{end}} required></input>
 					</div>
 
 					<div class="field">
-						<label for="description">{{ctx.Locale.Tr "gist.edit.description"}}</label>
-						<textarea name="description">{{.Gist.Description}}</textarea>
+						<label for="description-textarea">{{ctx.Locale.Tr "gist.edit.description"}}</label>
+						<textarea id="description-textarea" name="description">{{.Gist.Description}}</textarea>
 					</div>
 
 					<div class="field required">
