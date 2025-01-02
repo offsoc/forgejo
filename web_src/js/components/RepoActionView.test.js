@@ -103,3 +103,115 @@ test('processes ##[group] and ##[endgroup]', async () => {
   // Check if after the log list exists another log line
   expect(wrapper.get('.job-log-list + .job-log-line > .log-msg').text()).toEqual('A line outside the group');
 });
+
+test('load multiple steps on a finished action', async () => {
+  Object.defineProperty(document.documentElement, 'lang', {value: 'en'});
+  vi.spyOn(global, 'fetch').mockImplementation((url, opts) => {
+    if (url.endsWith('/artifacts')) {
+      return Promise.resolve({
+        ok: true,
+        json: vi.fn().mockResolvedValue(
+          {
+            artifacts: [],
+          },
+        ),
+      });
+    }
+
+    const postBody = JSON.parse(opts.body);
+    const stepsLog_value = [];
+    for (const cursor of postBody.logCursors) {
+      if (cursor.expanded) {
+        stepsLog_value.push(
+          {
+            step: cursor.step,
+            cursor: 0,
+            lines: [
+              {index: 1, message: `Step #${cursor.step + 1} Log #1`, timestamp: 0},
+              {index: 1, message: `Step #${cursor.step + 1} Log #2`, timestamp: 0},
+              {index: 1, message: `Step #${cursor.step + 1} Log #3`, timestamp: 0},
+            ],
+          },
+        );
+      }
+    }
+    const jobs_value = {
+      state: {
+        run: {
+          status: 'success',
+          commit: {
+            pusher: {},
+          },
+        },
+        currentJob: {
+          steps: [
+            {
+              summary: 'Test Step #1',
+              duration: '1s',
+              status: 'success',
+            },
+            {
+              summary: 'Test Step #2',
+              duration: '1s',
+              status: 'success',
+            },
+          ],
+        },
+      },
+      logs: {
+        stepsLog: opts.body?.includes('"cursor":null') ? stepsLog_value : [],
+      },
+    };
+
+    return Promise.resolve({
+      ok: true,
+      json: vi.fn().mockResolvedValue(
+        jobs_value,
+      ),
+    });
+  });
+
+  const wrapper = mount(RepoActionView, {
+    props: {
+      actionsURL: 'https://example.com/example-org/example-repo/actions',
+      runIndex: '1',
+      jobIndex: '2',
+      locale: {
+        approve: '',
+        cancel: '',
+        rerun: '',
+        artifactsTitle: '',
+        areYouSure: '',
+        confirmDeleteArtifact: '',
+        rerun_all: '',
+        showTimeStamps: '',
+        showLogSeconds: '',
+        showFullScreen: '',
+        downloadLogs: '',
+        status: {
+          unknown: '',
+          waiting: '',
+          running: '',
+          success: '',
+          failure: '',
+          cancelled: '',
+          skipped: '',
+          blocked: '',
+        },
+      },
+    },
+  });
+  await flushPromises();
+  // Click on both steps to start their log loading in fast succession...
+  await wrapper.get('.job-step-section:nth-of-type(1) .job-step-summary').trigger('click');
+  await wrapper.get('.job-step-section:nth-of-type(2) .job-step-summary').trigger('click');
+  await flushPromises();
+
+  // Verify both step's logs were loaded
+  expect(wrapper.get('.job-step-section:nth-of-type(1) .job-log-line:nth-of-type(1) .log-msg').text()).toEqual('Step #1 Log #1');
+  expect(wrapper.get('.job-step-section:nth-of-type(1) .job-log-line:nth-of-type(2) .log-msg').text()).toEqual('Step #1 Log #2');
+  expect(wrapper.get('.job-step-section:nth-of-type(1) .job-log-line:nth-of-type(3) .log-msg').text()).toEqual('Step #1 Log #3');
+  expect(wrapper.get('.job-step-section:nth-of-type(2) .job-log-line:nth-of-type(1) .log-msg').text()).toEqual('Step #2 Log #1');
+  expect(wrapper.get('.job-step-section:nth-of-type(2) .job-log-line:nth-of-type(2) .log-msg').text()).toEqual('Step #2 Log #2');
+  expect(wrapper.get('.job-step-section:nth-of-type(2) .job-log-line:nth-of-type(3) .log-msg').text()).toEqual('Step #2 Log #3');
+});

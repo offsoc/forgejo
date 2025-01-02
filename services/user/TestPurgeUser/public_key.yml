@@ -1,0 +1,11 @@
+-
+  id: 1001
+  owner_id: 2
+  name: user2@localhost
+  fingerprint: "SHA256:7s+isLFauDv7QSbhAd0Z4OGIYJlQQ4YMtOH9LdjCZL8"
+  content: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHAv3EOUcaK918Fk9d7mWuVS7oQamif/PNwqnAf/Z34G user2@localhost"
+  mode: 2
+  type: 3
+  created_unix: 1733363453
+  updated_unix: 1733363453
+  login_source_id: 0

@@ -103,7 +103,10 @@ function switchTitleToTooltip(target) {
       }
     }
     target.setAttribute('data-tooltip-content', title);
-    target.setAttribute('aria-label', title);
+    // only replace if not explicitly set
+    if (target.getAttribute('aria-label') !== null) {
+      target.setAttribute('aria-label', title);
+    }
     // keep the attribute, in case there are some other "[title]" selectors
     // and to prevent infinite loop with <relative-time> which will re-add
     // title if it is absent

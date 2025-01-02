@@ -5,11 +5,14 @@ package user
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
 	"code.gitea.io/gitea/models"
+	asymkey_model "code.gitea.io/gitea/models/asymkey"
 	"code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
@@ -17,6 +20,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
@@ -63,20 +67,61 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestPurgeUser(t *testing.T) {
-	test := func(userID int64) {
+	defer unittest.OverrideFixtures(
+		unittest.FixturesOptions{
+			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
+			Base: setting.AppWorkPath,
+			Dirs: []string{"services/user/TestPurgeUser/"},
+		},
+	)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+	defer test.MockVariableValue(&setting.SSH.RootPath, t.TempDir())()
+	defer test.MockVariableValue(&setting.SSH.CreateAuthorizedKeysFile, true)()
+	defer test.MockVariableValue(&setting.SSH.CreateAuthorizedPrincipalsFile, true)()
+	defer test.MockVariableValue(&setting.SSH.StartBuiltinServer, false)()
+	require.NoError(t, asymkey_model.RewriteAllPublicKeys(db.DefaultContext))
+	require.NoError(t, asymkey_model.RewriteAllPrincipalKeys(db.DefaultContext))
+
+	test := func(userID int64, modifySSHKey bool) {
 		require.NoError(t, unittest.PrepareTestDatabase())
 		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: userID})
 
-		err := DeleteUser(db.DefaultContext, user, true)
+		fAuthorizedKeys, err := os.Open(filepath.Join(setting.SSH.RootPath, "authorized_keys"))
 		require.NoError(t, err)
+		authorizedKeysStatBefore, err := fAuthorizedKeys.Stat()
+		require.NoError(t, err)
+		fAuthorizedPrincipals, err := os.Open(filepath.Join(setting.SSH.RootPath, "authorized_principals"))
+		require.NoError(t, err)
+		authorizedPrincipalsBefore, err := fAuthorizedPrincipals.Stat()
+		require.NoError(t, err)
+
+		require.NoError(t, DeleteUser(db.DefaultContext, user, true))
 
 		unittest.AssertNotExistsBean(t, &user_model.User{ID: userID})
 		unittest.CheckConsistencyFor(t, &user_model.User{}, &repo_model.Repository{})
+
+		fAuthorizedKeys, err = os.Open(filepath.Join(setting.SSH.RootPath, "authorized_keys"))
+		require.NoError(t, err)
+		fAuthorizedPrincipals, err = os.Open(filepath.Join(setting.SSH.RootPath, "authorized_principals"))
+		require.NoError(t, err)
+
+		authorizedKeysStatAfter, err := fAuthorizedKeys.Stat()
+		require.NoError(t, err)
+		authorizedPrincipalsAfter, err := fAuthorizedPrincipals.Stat()
+		require.NoError(t, err)
+
+		if modifySSHKey {
+			assert.Greater(t, authorizedKeysStatAfter.ModTime(), authorizedKeysStatBefore.ModTime())
+			assert.Greater(t, authorizedPrincipalsAfter.ModTime(), authorizedPrincipalsBefore.ModTime())
+		} else {
+			assert.Equal(t, authorizedKeysStatAfter.ModTime(), authorizedKeysStatBefore.ModTime())
+			assert.Equal(t, authorizedPrincipalsAfter.ModTime(), authorizedPrincipalsBefore.ModTime())
+		}
 	}
-	test(2)
-	test(4)
-	test(8)
-	test(11)
+	test(2, true)
+	test(4, false)
+	test(8, false)
+	test(11, false)
 
 	org := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 3})
 	require.Error(t, DeleteUser(db.DefaultContext, org, false))

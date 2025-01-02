@@ -6,9 +6,12 @@ package integration
 import (
 	"net/http"
 	"testing"
+
+	"code.gitea.io/gitea/tests"
 )
 
 func TestEasyMDESwitch(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	session := loginUser(t, "user2")
 	testEasyMDESwitch(t, session, "user2/glob/issues/1", false)
 	testEasyMDESwitch(t, session, "user2/glob/issues/new", false)

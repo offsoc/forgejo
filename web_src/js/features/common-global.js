@@ -357,7 +357,7 @@ export function initGlobalLinkActions() {
   });
 }
 
-function initGlobalShowModal() {
+export function initGlobalShowModal() {
   // A ".show-modal" button will show a modal dialog defined by its "data-modal" attribute.
   // Each "data-modal-{target}" attribute will be filled to target element's value or text-content.
   // * First, try to query '#target'

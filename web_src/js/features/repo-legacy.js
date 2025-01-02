@@ -29,6 +29,7 @@ import {attachRefIssueContextPopup} from './contextpopup.js';
 import {POST, GET} from '../modules/fetch.js';
 import {MarkdownQuote} from '@github/quote-selection';
 import {toAbsoluteUrl} from '../utils.js';
+import {initGlobalShowModal} from './common-global.js';
 
 const {csrfToken} = window.config;
 
@@ -464,12 +465,14 @@ async function onEditContent(event) {
     comboMarkdownEditor = await initComboMarkdownEditor(editContentZone.querySelector('.combo-markdown-editor'));
     comboMarkdownEditor.attachedDropzoneInst = await setupDropzone(editContentZone.querySelector('.dropzone'));
     editContentZone.addEventListener('ce-quick-submit', saveAndRefresh);
-    editContentZone.querySelector('.cancel.button').addEventListener('click', cancelAndReset);
-    editContentZone.querySelector('.save.button').addEventListener('click', saveAndRefresh);
+    editContentZone.querySelector('button[data-button-name="cancel-edit"]').addEventListener('click', cancelAndReset);
+    editContentZone.querySelector('button[data-button-name="save-edit"]').addEventListener('click', saveAndRefresh);
   } else {
     const tabEditor = editContentZone.querySelector('.combo-markdown-editor').querySelector('.tabular.menu > a[data-tab-for=markdown-writer]');
     tabEditor?.click();
   }
+
+  initGlobalShowModal();
 
   // Show write/preview tab and copy raw content as needed
   showElem(editContentZone);

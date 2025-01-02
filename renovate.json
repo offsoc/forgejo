@@ -9,8 +9,8 @@
   "baseBranches": [
     "$default",
     "/^v7\\.\\d+/forgejo$/",
-    "/^v9\\.\\d+/forgejo$/",
-    "/^v10\\.\\d+/forgejo$/"
+    "/^v10\\.\\d+/forgejo$/",
+    "/^v11\\.\\d+/forgejo$/"
   ],
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
   "prConcurrentLimit": 10,
@@ -144,8 +144,9 @@
     },
     {
       "description": "Automerge some packages when CI succeeds",
-      "extends": ["packages:linters", "packages:test"],
+      "extends": ["packages:linters", "packages:test", "schedule:monthly"],
       "matchPackageNames": [
+        "@axe-core/playwright",
         "@eslint-community/**",
         "@playwright/**",
         "@stoplight/spectral-cli",

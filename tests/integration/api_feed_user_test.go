@@ -109,4 +109,24 @@ func TestFeed(t *testing.T) {
 			})
 		})
 	})
+
+	t.Run("View permission", func(t *testing.T) {
+		t.Run("Anomynous", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+			req := NewRequest(t, "GET", "/org3/repo3/rss/branch/master")
+			MakeRequest(t, req, http.StatusNotFound)
+		})
+		t.Run("No code permission", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+			session := loginUser(t, "user8")
+			req := NewRequest(t, "GET", "/org3/repo3/rss/branch/master")
+			session.MakeRequest(t, req, http.StatusNotFound)
+		})
+		t.Run("With code permission", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+			session := loginUser(t, "user9")
+			req := NewRequest(t, "GET", "/org3/repo3/rss/branch/master")
+			session.MakeRequest(t, req, http.StatusOK)
+		})
+	})
 }

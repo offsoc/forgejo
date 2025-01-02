@@ -53,6 +53,12 @@ func BlockedUsersBlock(ctx *context.Context) {
 		return
 	}
 
+	if u.ID == ctx.Doer.ID {
+		ctx.Flash.Error(ctx.Tr("settings.user_block_yourself"))
+		ctx.Redirect(ctx.Org.OrgLink + "/settings/blocked_users")
+		return
+	}
+
 	if err := user_service.BlockUser(ctx, ctx.Org.Organization.ID, u.ID); err != nil {
 		ctx.ServerError("BlockUser", err)
 		return

@@ -15,7 +15,6 @@ code.gitea.io/gitea/models
 	ErrUpdateTaskNotExist.Unwrap
 	IsErrSHANotFound
 	IsErrMergeDivergingFastForwardOnly
-	GetYamlFixturesAccess
 
 code.gitea.io/gitea/models/actions
 	ScheduleList.GetUserIDs
@@ -289,9 +288,6 @@ code.gitea.io/gitea/services/pull
 
 code.gitea.io/gitea/services/repository
 	IsErrForkAlreadyExist
-
-code.gitea.io/gitea/services/repository/archiver
-	ArchiveRepository
 
 code.gitea.io/gitea/services/repository/files
 	ContentType.String

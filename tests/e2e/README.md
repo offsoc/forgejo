@@ -120,7 +120,7 @@ because it might only look at file changes in your latest commit.
 ### Run e2e tests with another database
 
 This approach is not currently used,
-neither in the CI/CD nor by core contributors on their lcoal machines.
+neither in the CI/CD nor by core contributors on their local machines.
 It is still documented for the sake of completeness:
 You can also perform e2e tests using MariaDB/MySQL or PostgreSQL if you want.
 
@@ -155,25 +155,110 @@ For SQLite:
 make test-e2e-sqlite#example
 ```
 
-### Visual testing
-
-> **Warning**
-> This is not currently used by most Forgejo contributors.
-> Your help to improve the situation and allow for visual testing is appreciated.
-
-Although the main goal of e2e is assertion testing, we have added a framework for visual regress testing. If you are working on front-end features, please use the following:
- - Check out `main`, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1` to generate outputs. This will initially fail, as no screenshots exist. You can run the e2e tests again to assert it passes.
- - Check out your branch, `make clean frontend`, and run e2e tests with `VISUAL_TEST=1`. You should be able to assert you front-end changes don't break any other tests unintentionally.
-
-VISUAL_TEST=1 will create screenshots in tests/e2e/test-snapshots. The test will fail the first time this is enabled (until we get visual test image persistence figured out), because it will be testing against an empty screenshot folder.
-
-ACCEPT_VISUAL=1 will overwrite the snapshot images with new images.
-
 
 ## Tips and tricks
 
 If you know noteworthy tests that can act as an inspiration for new tests,
 please add some details here.
+
+### Understanding and waiting for page loads
+
+[Waiting for a load state](https://playwright.dev/docs/api/class-frame#frame-wait-for-load-state)
+sound like a convenient way to ensure the page was loaded,
+but it only works once and consecutive calls to it
+(e.g. after clicking a button which should reload a page)
+return immediately without waiting for *another* load event.
+
+If you match something which is on both the old and the new page,
+you might succeed before the page was reloaded,
+although the code using a `waitForLoadState` might intuitively suggest
+the page was changed before.
+
+Interacting with the page before the reload
+(e.g. by opening a dropdown)
+might then race and result in flaky tests,
+depending on the speed of the hardware running the test.
+
+A possible way to test that an interaction worked is by checking for a known change first.
+For example:
+
+- you submit a form and you want to check that the content persisted
+- checking for the content directly would succeed even without a page reload
+- check for a success message first (will wait until it appears), then verify the content
+
+Alternatively, if you know the backend request that will be made before the reload,
+you can explicitly wait for it:
+
+~~~js
+const submitted = page.waitForResponse('/my/backend/post/request');
+await page.locator('button').first().click(); // perform your interaction
+await submitted;
+~~~
+
+If the page redirects to another URL,
+you can alternatively use:
+
+~~~js
+await page.waitForURL('**/target.html');
+~~~
+
+### Visual testing
+
+Due to size and frequent updates, we do not host screenshots in the Forgejo repository.
+However, it is good practice to ensure that your test is capable of generating relevant and stable screenshots.
+Forgejo is regularly tested against visual regressions in a dedicated repository which contains the screenshots:
+https://code.forgejo.org/forgejo/visual-browser-testing/
+
+For tests that consume only the `page`,
+screenshots are automatically created at the end of each test.
+
+If your test visits different relevant screens or pages during the test,
+or creates a custom `page` from context
+(e.g. for tests that require a signed-in user)
+calling `await save_visual(page);` explicitly in relevant positions is encouraged.
+
+Please confirm locally that your screenshots are stable by performing several runs of your test.
+When screenshots are available and reproducible,
+check in your test without the screenshots.
+
+When your screenshots differ between runs,
+for example because dynamic elements (e.g. timestamps, commit hashes etc)
+change between runs,
+mask these elements in the `save_visual` function in `utils_e2e.ts`.
+
+#### Working with screenshots
+
+The following environment variables control visual testing:
+
+`VISUAL_TEST=1` will create screenshots in tests/e2e/test-snapshots.
+  The test will fail the first time,
+  because the screenshots are not included with Forgejo.
+  Subsequent runs will comopare against your local copy of the screenshots.
+
+`ACCEPT_VISUAL=1` will overwrite the snapshot images with new images.
+
+### Only sign in if necessary
+
+Signing in takes time and is actually executed step-by-step.
+If your test does not rely on a user account, skip this step.
+
+~~~js
+test('For anyone', async ({page}) => {
+  await page.goto('/somepage');
+~~~
+
+If you need a user account, you can use something like:
+
+~~~js
+import {test, login_user, login} from './utils_e2e.ts';
+
+test.beforeAll(async ({browser}, workerInfo) => {
+  await login_user(browser, workerInfo, 'user2'); // or another user
+});
+
+test('For signed users only', async ({browser}, workerInfo) => {
+  const page = await login({browser}, workerInfo);
+~~~
 
 ### Run tests very selectively
 
@@ -203,8 +288,8 @@ Run `make lint-frontend-fix`.
 ### Define new repos
 
 Take a look at `declare_repos_test.go` to see how to add your repositories.
-Feel free to improve the logic used there if you need more advanced functionality
-(it is a simplified version of the code used in the integration tests).
+Feel free to improve the logic used there if you need more advanced functionality,
+it is a simplified version of the code used in the integration tests.
 
 ### Accessibility testing
 
@@ -216,8 +301,7 @@ Take a look at `shared/forms.ts` and some other places for inspiration.
 ### List related files coverage
 
 To speed up the CI pipelines and avoid running expensive tests too often,
-only a selection of tests is run by default,
-based on the changed files.
+only a selection of tests is run by default, based on the changed files.
 
 At the top of each playwright test file,
 list the files or file patterns that are covered by your test.
@@ -233,7 +317,7 @@ you won't detect broken visual appearance and there is little reason to watch CS
 
 However, if your test also checks that an element is correctly positioned
 (e.g. that it does not overflow the page),
-or has accessibiltiy properties (includes colour contrast),
+or has accessibility properties (includes colour contrast),
 also list stylesheets that define the behaviour your test depends on.
 
 Watching the place that generate the selectors you use
@@ -241,8 +325,7 @@ Watching the place that generate the selectors you use
 is a must, to ensure that someone modifying the markup notices that your selectors fail
 (e.g. because an id or class was renamed).
 
-If you are unsure about the exact set of files,
-feel free to ask other contributors.
+If you are unsure about the exact set of files, feel free to ask other contributors.
 
 #### How to specify the patterns?
 
@@ -264,3 +347,27 @@ and a set of files with a certain ending:
 
 The patterns are evaluated on a "first-match" basis.
 Under the hood, [gobwas/glob](https://github.com/gobwas/glob) is used.
+
+## Grouped retry for interactions
+
+Sometimes, it can be necessary to retry certain interactions together.
+Consider the following procedure:
+
+1. click to open a dropdown
+2. interact with content in the dropdown
+
+When for some reason the dropdown does not open,
+for example because of it taking time to initialize after page load,
+the click will succeed,
+but the depending interaction won't,
+although playwright repeatedly tries to find the content.
+
+You can [group statements using toPass]()https://playwright.dev/docs/test-assertions#expecttopass).
+This code retries the dropdown click until the second item is found.
+
+~~~js
+await expect(async () => {
+  await page.locator('.dropdown').click();
+  await page.locator('.dropdown .item').first().click();
+}).toPass();
+~~~

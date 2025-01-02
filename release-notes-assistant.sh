@@ -7,6 +7,7 @@ label_bug=bug
 label_feature=feature
 label_ui=forgejo/ui
 label_breaking=breaking
+label_security=security
 label_localization=forgejo/i18n
 
 payload=$(mktemp)
@@ -17,32 +18,47 @@ function test_main() {
   set -ex
   PS4='${BASH_SOURCE[0]}:$LINENO: ${FUNCNAME[0]}:  '
 
+  test_payload_labels $label_worth $label_breaking $label_security $label_bug
+  test "$(categorize)" = 'AA Breaking security bug fixes'
+
+  test_payload_labels $label_worth $label_security $label_bug
+  test "$(categorize)" = 'AB Security bug fixes'
+
+  test_payload_labels $label_worth $label_breaking $label_security $label_feature
+  test "$(categorize)" = 'AC Breaking security features'
+
+  test_payload_labels $label_worth $label_security $label_feature
+  test "$(categorize)" = 'AD Security features'
+
+  test_payload_labels $label_worth $label_security
+  test "$(categorize)" = 'ZA Security changes without a feature or bug label'
+
   test_payload_labels $label_worth $label_breaking $label_feature
-  test "$(categorize)" = 'AA Breaking features'
+  test "$(categorize)" = 'BA Breaking features'
 
   test_payload_labels $label_worth $label_breaking $label_bug
-  test "$(categorize)" = 'AB Breaking bug fixes'
+  test "$(categorize)" = 'BB Breaking bug fixes'
 
   test_payload_labels $label_worth $label_breaking
-  test "$(categorize)" = 'ZC Breaking changes without a feature or bug label'
+  test "$(categorize)" = 'ZB Breaking changes without a feature or bug label'
 
   test_payload_labels $label_worth $label_ui $label_feature
-  test "$(categorize)" = 'BA User Interface features'
+  test "$(categorize)" = 'CA User Interface features'
 
   test_payload_labels $label_worth $label_ui $label_bug
-  test "$(categorize)" = 'BB User Interface bug fixes'
+  test "$(categorize)" = 'CB User Interface bug fixes'
 
   test_payload_labels $label_worth $label_ui
-  test "$(categorize)" = 'ZD User Interface changes without a feature or bug label'
-
-  test_payload_labels $label_worth $label_feature
-  test "$(categorize)" = 'CA Features'
-
-  test_payload_labels $label_worth $label_bug
-  test "$(categorize)" = 'CB Bug fixes'
+  test "$(categorize)" = 'ZC User Interface changes without a feature or bug label'
 
   test_payload_labels $label_worth $label_localization
   test "$(categorize)" = 'DA Localization'
+
+  test_payload_labels $label_worth $label_feature
+  test "$(categorize)" = 'EA Features'
+
+  test_payload_labels $label_worth $label_bug
+  test "$(categorize)" = 'EB Bug fixes'
 
   test_payload_labels $label_worth
   test "$(categorize)" = 'ZE Other changes without a feature or bug label'
@@ -50,17 +66,23 @@ function test_main() {
   test_payload_labels
   test "$(categorize)" = 'ZF Included for completeness but not worth a release note'
 
+  test_payload_draft "fix(security)!: breaking security bug fix"
+  test "$(categorize)" = 'AA Breaking security bug fixes'
+
+  test_payload_draft "fix(security): security bug fix"
+  test "$(categorize)" = 'AB Security bug fixes'
+
   test_payload_draft "feat!: breaking feature"
-  test "$(categorize)" = 'AA Breaking features'
+  test "$(categorize)" = 'BA Breaking features'
 
   test_payload_draft "fix!: breaking bug fix"
-  test "$(categorize)" = 'AB Breaking bug fixes'
+  test "$(categorize)" = 'BB Breaking bug fixes'
 
   test_payload_draft "feat: feature"
-  test "$(categorize)" = 'CA Features'
+  test "$(categorize)" = 'EA Features'
 
   test_payload_draft "fix: bug fix"
-  test "$(categorize)" = 'CB Bug fixes'
+  test "$(categorize)" = 'EB Bug fixes'
 
   test_payload_draft "something with no prefix"
   test "$(categorize)" = 'ZE Other changes without a feature or bug label'
@@ -109,6 +131,7 @@ function categorize() {
   is_feature=false
   is_localization=false
   is_breaking=false
+  is_security=false
 
   #
   # first try to figure out the category from the labels
@@ -122,6 +145,12 @@ function categorize() {
     ;;
   *$label_localization*)
     is_localization=true
+    ;;
+  esac
+
+  case "$labels" in
+  *$label_security*)
+    is_security=true
     ;;
   esac
 
@@ -143,6 +172,15 @@ function categorize() {
   if ! $is_bug && ! $is_feature; then
     draft="$(jq --raw-output .Draft <$payload)"
     case "$draft" in
+    fix\(security\)!:*)
+      is_bug=true
+      is_breaking=true
+      is_security=true
+      ;;
+    fix\(security\):*)
+      is_bug=true
+      is_security=true
+      ;;
     fix!:*)
       is_bug=true
       is_breaking=true
@@ -171,29 +209,45 @@ function categorize() {
     fi
   fi
 
-  if $is_breaking; then
-    if $is_feature; then
-      echo -n AA Breaking features
-    elif $is_bug; then
-      echo -n AB Breaking bug fixes
+  if $is_security; then
+    if $is_bug; then
+      if $is_breaking; then
+        echo -n AA Breaking security bug fixes
+      else
+        echo -n AB Security bug fixes
+      fi
+    elif $is_feature; then
+      if $is_breaking; then
+        echo -n AC Breaking security features
+      else
+        echo -n AD Security features
+      fi
     else
-      echo -n ZC Breaking changes without a feature or bug label
+      echo -n ZA Security changes without a feature or bug label
+    fi
+  elif $is_breaking; then
+    if $is_feature; then
+      echo -n BA Breaking features
+    elif $is_bug; then
+      echo -n BB Breaking bug fixes
+    else
+      echo -n ZB Breaking changes without a feature or bug label
     fi
   elif $is_ui; then
     if $is_feature; then
-      echo -n BA User Interface features
+      echo -n CA User Interface features
     elif $is_bug; then
-      echo -n BB User Interface bug fixes
+      echo -n CB User Interface bug fixes
     else
-      echo -n ZD User Interface changes without a feature or bug label
+      echo -n ZC User Interface changes without a feature or bug label
     fi
   elif $is_localization; then
     echo -n DA Localization
   else
     if $is_feature; then
-      echo -n CA Features
+      echo -n EA Features
     elif $is_bug; then
-      echo -n CB Bug fixes
+      echo -n EB Bug fixes
     else
       echo -n ZE Other changes without a feature or bug label
     fi

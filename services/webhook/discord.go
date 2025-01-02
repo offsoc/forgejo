@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -202,6 +203,9 @@ func (d discordConvertor) Push(p *api.PushPayload) (DiscordPayload, error) {
 		// limit the commit message display to just the summary, otherwise it would be hard to read
 		message := strings.TrimRight(strings.SplitN(commit.Message, "\n", 1)[0], "\r")
 
+		// Escaping markdown character
+		message = escapeMarkdown(message)
+
 		// a limit of 50 is set because GitHub does the same
 		if utf8.RuneCountInString(message) > 50 {
 			message = fmt.Sprintf("%.47s...", message)
@@ -364,4 +368,41 @@ func (d discordConvertor) createPayload(s *api.User, title, text, url string, co
 			},
 		},
 	}
+}
+
+var orderedListPattern = regexp.MustCompile(`(\d+)\.`)
+
+var markdownPatterns = map[string]*regexp.Regexp{
+	"~": regexp.MustCompile(`\~(.*?)\~`),
+	"*": regexp.MustCompile(`\*(.*?)\*`),
+	"_": regexp.MustCompile(`\_(.*?)\_`),
+}
+
+var markdownToEscape = strings.NewReplacer(
+	"* ", "\\* ",
+	"`", "\\`",
+	"[", "\\[",
+	"]", "\\]",
+	"(", "\\(",
+	")", "\\)",
+	"#", "\\#",
+	"+ ", "\\+ ",
+	"- ", "\\- ",
+	"---", "\\---",
+	"!", "\\!",
+	"|", "\\|",
+	"<", "\\<",
+	">", "\\>",
+)
+
+// Escape Markdown characters
+func escapeMarkdown(input string) string {
+	// Escaping ordered list
+	output := orderedListPattern.ReplaceAllString(input, "$1\\.")
+
+	for char, pattern := range markdownPatterns {
+		output = pattern.ReplaceAllString(output, fmt.Sprintf(`\%s$1\%s`, char, char))
+	}
+
+	return markdownToEscape.Replace(output)
 }

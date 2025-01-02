@@ -5,11 +5,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, save_visual} from './utils_e2e.ts';
-
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+import {test} from './utils_e2e.ts';
 
 test('Load Homepage', async ({page}) => {
   const response = await page.goto('/');
@@ -21,17 +17,15 @@ test('Load Homepage', async ({page}) => {
 test('Register Form', async ({page}, workerInfo) => {
   const response = await page.goto('/user/sign_up');
   expect(response?.status()).toBe(200); // Status OK
-  await page.type('input[name=user_name]', `e2e-test-${workerInfo.workerIndex}`);
-  await page.type('input[name=email]', `e2e-test-${workerInfo.workerIndex}@test.com`);
-  await page.type('input[name=password]', 'test123test123');
-  await page.type('input[name=retype]', 'test123test123');
+  await page.fill('input[name=user_name]', `e2e-test-${workerInfo.workerIndex}`);
+  await page.fill('input[name=email]', `e2e-test-${workerInfo.workerIndex}@test.com`);
+  await page.fill('input[name=password]', 'test123test123');
+  await page.fill('input[name=retype]', 'test123test123');
   await page.click('form button.ui.primary.button:visible');
   // Make sure we routed to the home page. Else login failed.
   expect(page.url()).toBe(`${workerInfo.project.use.baseURL}/`);
   await expect(page.locator('.secondary-nav span>img.ui.avatar')).toBeVisible();
   await expect(page.locator('.ui.positive.message.flash-success')).toHaveText('Account was successfully created. Welcome!');
-
-  save_visual(page);
 });
 
 // eslint-disable-next-line playwright/no-skipped-test

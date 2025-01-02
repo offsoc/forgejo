@@ -23,3 +23,11 @@
   redirect_uris: '["http://127.0.0.1", "https://127.0.0.1"]'
   created_unix: 1712358091
   updated_unix: 1712358091
+-
+  id: 1003
+  uid: 0
+  name: "Global Auth source that should be kept"
+  client_id: "2f3467c1-7b3b-463d-ab04-2ae2b2712826"
+  redirect_uris: '["http://example.com/globalapp", "https://example.com/globalapp"]'
+  created_unix: 1732387292
+  updated_unix: 1732387292

@@ -8,7 +8,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, create_temp_user} from './utils_e2e.ts';
+import {test, save_visual, create_temp_user, login_user} from './utils_e2e.ts';
 
 test('WebAuthn register & login flow', async ({browser, request}, workerInfo) => {
   test.skip(workerInfo.project.name !== 'chromium', 'Uses Chrome protocol');
@@ -30,16 +30,18 @@ test('WebAuthn register & login flow', async ({browser, request}, workerInfo) =>
       transport: 'usb',
       automaticPresenceSimulation: true,
       isUserVerified: true,
-      backupEligibility: true, // TODO: this doesn't seem to be available?!
     },
   });
 
   await page.locator('input#nickname').fill('Testing Security Key');
+  await save_visual(page);
   await page.getByText('Add security key').click();
 
   // Logout.
-  await page.locator('div[aria-label="Profile and settings…"]').click();
-  await page.getByText('Sign Out').click();
+  await expect(async () => {
+    await page.locator('div[aria-label="Profile and settings…"]').click();
+    await page.getByText('Sign Out').click();
+  }).toPass();
   await page.waitForURL(`${workerInfo.project.use.baseURL}/`);
 
   // Login.
@@ -56,6 +58,10 @@ test('WebAuthn register & login flow', async ({browser, request}, workerInfo) =>
   response = await page.goto('/user/settings/security');
   expect(response?.status()).toBe(200);
   await page.getByRole('button', {name: 'Remove'}).click();
+  await save_visual(page);
   await page.getByRole('button', {name: 'Yes'}).click();
-  await page.waitForURL(`${workerInfo.project.use.baseURL}/user/settings/security`);
+  await page.waitForLoadState();
+
+  // verify the user can login without a key
+  await login_user(browser, workerInfo, username);
 });

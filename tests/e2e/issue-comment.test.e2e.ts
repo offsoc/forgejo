@@ -5,10 +5,23 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, login} from './utils_e2e.ts';
+import {test, save_visual, login_user, login} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
+});
+
+test('Menu accessibility', async ({browser}, workerInfo) => {
+  const page = await login({browser}, workerInfo);
+  await page.goto('/user2/repo1/issues/1');
+  await expect(page.getByLabel('user2 reacted eyes. Remove eyes')).toBeVisible();
+  await expect(page.getByLabel('reacted laugh. Remove laugh')).toBeVisible();
+  await expect(page.locator('#issue-1').getByLabel('Comment menu')).toBeVisible();
+  await expect(page.locator('#issue-1').getByRole('heading').getByLabel('Add reaction')).toBeVisible();
+  page.getByLabel('reacted laugh. Remove').click();
+  await expect(page.getByLabel('user1 reacted laugh. Add laugh')).toBeVisible();
+  page.getByLabel('user1 reacted laugh.').click();
+  await expect(page.getByLabel('user1, user2 reacted laugh. Remove laugh')).toBeVisible();
 });
 
 test('Hyperlink paste behaviour', async ({browser}, workerInfo) => {
@@ -56,7 +69,7 @@ test('Always focus edit tab first on edit', async ({browser}, workerInfo) => {
   await page.locator('#issue-1 .comment-container a[data-tab-for=markdown-previewer]').click();
   await page.click('#issue-1 .comment-container .save');
 
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState();
 
   // Edit again and assert that edit tab should be active (and not preview tab)
   await page.click('#issue-1 .comment-container .context-menu');
@@ -66,6 +79,7 @@ test('Always focus edit tab first on edit', async ({browser}, workerInfo) => {
 
   await expect(editTab).toHaveClass(/active/);
   await expect(previewTab).not.toHaveClass(/active/);
+  await save_visual(page);
 });
 
 test('Quote reply', async ({browser}, workerInfo) => {

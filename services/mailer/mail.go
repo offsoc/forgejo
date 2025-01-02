@@ -70,7 +70,7 @@ func SendTestMail(email string) error {
 }
 
 // sendUserMail sends a mail to the user
-func sendUserMail(language string, u *user_model.User, tpl base.TplName, code, subject, info string) {
+func sendUserMail(language string, u *user_model.User, tpl base.TplName, code, subject, info string) error {
 	locale := translation.NewLocale(language)
 	data := map[string]any{
 		"locale":            locale,
@@ -84,47 +84,66 @@ func sendUserMail(language string, u *user_model.User, tpl base.TplName, code, s
 	var content bytes.Buffer
 
 	if err := bodyTemplates.ExecuteTemplate(&content, string(tpl), data); err != nil {
-		log.Error("Template: %v", err)
-		return
+		return err
 	}
 
 	msg := NewMessage(u.EmailTo(), subject, content.String())
 	msg.Info = fmt.Sprintf("UID: %d, %s", u.ID, info)
 
 	SendAsync(msg)
+	return nil
 }
 
 // SendActivateAccountMail sends an activation mail to the user (new user registration)
-func SendActivateAccountMail(locale translation.Locale, u *user_model.User) {
+func SendActivateAccountMail(ctx context.Context, u *user_model.User) error {
 	if setting.MailService == nil {
 		// No mail service configured
-		return
+		return nil
 	}
-	sendUserMail(locale.Language(), u, mailAuthActivate, u.GenerateEmailActivateCode(u.Email), locale.TrString("mail.activate_account"), "activate account")
+
+	locale := translation.NewLocale(u.Language)
+	code, err := u.GenerateEmailAuthorizationCode(ctx, auth_model.UserActivation)
+	if err != nil {
+		return err
+	}
+
+	return sendUserMail(locale.Language(), u, mailAuthActivate, code, locale.TrString("mail.activate_account"), "activate account")
 }
 
 // SendResetPasswordMail sends a password reset mail to the user
-func SendResetPasswordMail(u *user_model.User) {
+func SendResetPasswordMail(ctx context.Context, u *user_model.User) error {
 	if setting.MailService == nil {
 		// No mail service configured
-		return
+		return nil
 	}
+
 	locale := translation.NewLocale(u.Language)
-	sendUserMail(u.Language, u, mailAuthResetPassword, u.GenerateEmailActivateCode(u.Email), locale.TrString("mail.reset_password"), "recover account")
+	code, err := u.GenerateEmailAuthorizationCode(ctx, auth_model.PasswordReset)
+	if err != nil {
+		return err
+	}
+
+	return sendUserMail(u.Language, u, mailAuthResetPassword, code, locale.TrString("mail.reset_password"), "recover account")
 }
 
 // SendActivateEmailMail sends confirmation email to confirm new email address
-func SendActivateEmailMail(u *user_model.User, email string) {
+func SendActivateEmailMail(ctx context.Context, u *user_model.User, email string) error {
 	if setting.MailService == nil {
 		// No mail service configured
-		return
+		return nil
 	}
+
 	locale := translation.NewLocale(u.Language)
+	code, err := u.GenerateEmailAuthorizationCode(ctx, auth_model.EmailActivation(email))
+	if err != nil {
+		return err
+	}
+
 	data := map[string]any{
 		"locale":          locale,
 		"DisplayName":     u.DisplayName(),
 		"ActiveCodeLives": timeutil.MinutesToFriendly(setting.Service.ActiveCodeLives, locale),
-		"Code":            u.GenerateEmailActivateCode(email),
+		"Code":            code,
 		"Email":           email,
 		"Language":        locale.Language(),
 	}
@@ -132,14 +151,14 @@ func SendActivateEmailMail(u *user_model.User, email string) {
 	var content bytes.Buffer
 
 	if err := bodyTemplates.ExecuteTemplate(&content, string(mailAuthActivateEmail), data); err != nil {
-		log.Error("Template: %v", err)
-		return
+		return err
 	}
 
 	msg := NewMessage(email, locale.TrString("mail.activate_email"), content.String())
 	msg.Info = fmt.Sprintf("UID: %d, activate email", u.ID)
 
 	SendAsync(msg)
+	return nil
 }
 
 // SendRegisterNotifyMail triggers a notify e-mail by admin created a account.

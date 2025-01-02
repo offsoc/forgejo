@@ -159,6 +159,7 @@ type PullRequestsConfig struct {
 	AllowRebaseUpdate             bool
 	DefaultDeleteBranchAfterMerge bool
 	DefaultMergeStyle             MergeStyle
+	DefaultUpdateStyle            UpdateStyle
 	DefaultAllowMaintainerEdit    bool
 }
 
@@ -195,6 +196,25 @@ func (cfg *PullRequestsConfig) GetDefaultMergeStyle() MergeStyle {
 	}
 
 	return MergeStyleMerge
+}
+
+// IsUpdateStyleAllowed returns if update style is allowed
+func (cfg *PullRequestsConfig) IsUpdateStyleAllowed(updateStyle UpdateStyle) bool {
+	return updateStyle == UpdateStyleMerge ||
+		updateStyle == UpdateStyleRebase && cfg.AllowRebaseUpdate
+}
+
+// GetDefaultUpdateStyle returns the default update style for this pull request
+func (cfg *PullRequestsConfig) GetDefaultUpdateStyle() UpdateStyle {
+	if len(cfg.DefaultUpdateStyle) != 0 {
+		return cfg.DefaultUpdateStyle
+	}
+
+	if setting.Repository.PullRequest.DefaultUpdateStyle != "" {
+		return UpdateStyle(setting.Repository.PullRequest.DefaultUpdateStyle)
+	}
+
+	return UpdateStyleMerge
 }
 
 type ActionsConfig struct {

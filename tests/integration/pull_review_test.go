@@ -5,6 +5,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -19,6 +20,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/gitrepo"
+	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/test"
 	issue_service "code.gitea.io/gitea/services/issue"
 	repo_service "code.gitea.io/gitea/services/repository"
@@ -60,6 +62,74 @@ func loadComment(t *testing.T, commentID string) *issues_model.Comment {
 	id, err := strconv.ParseInt(commentID, 10, 64)
 	require.NoError(t, err)
 	return unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: id})
+}
+
+func TestPullView_SelfReviewNotification(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
+		user1Session := loginUser(t, "user1")
+		user2Session := loginUser(t, "user2")
+
+		user1csrf := GetCSRF(t, user1Session, "/")
+		oldUser1NotificationCount := getUserNotificationCount(t, user1Session, user1csrf)
+
+		user2csrf := GetCSRF(t, user2Session, "/")
+		oldUser2NotificationCount := getUserNotificationCount(t, user2Session, user2csrf)
+
+		user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+		repo, _, f := tests.CreateDeclarativeRepo(t, user2, "test_reviewer", nil, nil, []*files_service.ChangeRepoFile{
+			{
+				Operation:     "create",
+				TreePath:      "CODEOWNERS",
+				ContentReader: strings.NewReader("README.md @user5\n"),
+			},
+		})
+		defer f()
+
+		// we need to add user1 as collaborator so it can be added as reviewer
+		err := repo_module.AddCollaborator(db.DefaultContext, repo, user1)
+		require.NoError(t, err)
+
+		// create a new branch to prepare for pull request
+		_, err = files_service.ChangeRepoFiles(db.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
+			NewBranch: "codeowner-basebranch",
+			Files: []*files_service.ChangeRepoFile{
+				{
+					Operation:     "update",
+					TreePath:      "README.md",
+					ContentReader: strings.NewReader("# This is a new project\n"),
+				},
+			},
+		})
+		require.NoError(t, err)
+
+		// Create a pull request.
+		resp := testPullCreate(t, user2Session, "user2", "test_reviewer", false, repo.DefaultBranch, "codeowner-basebranch", "Test Pull Request")
+		prURL := test.RedirectURL(resp)
+		elem := strings.Split(prURL, "/")
+		assert.EqualValues(t, "pulls", elem[3])
+
+		req := NewRequest(t, http.MethodGet, prURL)
+		resp = MakeRequest(t, req, http.StatusOK)
+		doc := NewHTMLParser(t, resp.Body)
+		attributeFilter := fmt.Sprintf("[data-update-url='/%s/%s/issues/request_review']", user2.Name, repo.Name)
+		issueID, ok := doc.Find(attributeFilter).Attr("data-issue-id")
+		assert.True(t, ok, "doc must contain data-issue-id")
+
+		user1csrf = GetCSRF(t, user1Session, "/")
+		testAssignReviewer(t, user1Session, user1csrf, user2.Name, repo.Name, issueID, "1", http.StatusOK)
+
+		// both user notification should keep the same notification count since
+		// user2 added itself as reviewer.
+		user1csrf = GetCSRF(t, user1Session, "/")
+		notificationCount := getUserNotificationCount(t, user1Session, user1csrf)
+		assert.Equal(t, oldUser1NotificationCount, notificationCount)
+
+		user2csrf = GetCSRF(t, user2Session, "/")
+		notificationCount = getUserNotificationCount(t, user2Session, user2csrf)
+		assert.Equal(t, oldUser2NotificationCount, notificationCount)
+	})
 }
 
 func TestPullView_ResolveInvalidatedReviewComment(t *testing.T) {
@@ -474,6 +544,28 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 	})
 }
 
+func testNofiticationCount(t *testing.T, session *TestSession, csrf string, expectedSubmitStatus int) *httptest.ResponseRecorder {
+	options := map[string]string{
+		"_csrf": csrf,
+	}
+
+	req := NewRequestWithValues(t, "GET", "/", options)
+	return session.MakeRequest(t, req, expectedSubmitStatus)
+}
+
+func testAssignReviewer(t *testing.T, session *TestSession, csrf, owner, repo, pullID, reviewer string, expectedSubmitStatus int) *httptest.ResponseRecorder {
+	options := map[string]string{
+		"_csrf":     csrf,
+		"action":    "attach",
+		"issue_ids": pullID,
+		"id":        reviewer,
+	}
+
+	submitURL := path.Join(owner, repo, "issues", "request_review")
+	req := NewRequestWithValues(t, "POST", submitURL, options)
+	return session.MakeRequest(t, req, expectedSubmitStatus)
+}
+
 func testSubmitReview(t *testing.T, session *TestSession, csrf, owner, repo, pullNumber, commitID, reviewType string, expectedSubmitStatus int) *httptest.ResponseRecorder {
 	options := map[string]string{
 		"_csrf":     csrf,
@@ -501,4 +593,10 @@ func testIssueClose(t *testing.T, session *TestSession, owner, repo, issueNumber
 
 	req = NewRequestWithValues(t, "POST", closeURL, options)
 	return session.MakeRequest(t, req, http.StatusOK)
+}
+
+func getUserNotificationCount(t *testing.T, session *TestSession, csrf string) string {
+	resp := testNofiticationCount(t, session, csrf, http.StatusOK)
+	doc := NewHTMLParser(t, resp.Body)
+	return doc.Find(`.notification_count`).Text()
 }

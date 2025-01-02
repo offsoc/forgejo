@@ -27,6 +27,10 @@ func ListEmails(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/EmailList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	emails, err := user_model.GetEmailAddresses(ctx, ctx.Doer.ID)
 	if err != nil {
@@ -55,6 +59,10 @@ func AddEmail(ctx *context.APIContext) {
 	// responses:
 	//   '201':
 	//     "$ref": "#/responses/EmailList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 
@@ -112,6 +120,10 @@ func DeleteEmail(ctx *context.APIContext) {
 	// responses:
 	//   "204":
 	//     "$ref": "#/responses/empty"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 

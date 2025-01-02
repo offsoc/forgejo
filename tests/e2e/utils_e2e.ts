@@ -4,6 +4,15 @@ export const test = baseTest.extend({
   context: async ({browser}, use) => {
     return use(await test_context(browser));
   },
+  // see https://playwright.dev/docs/test-fixtures#adding-global-beforeeachaftereach-hooks
+  forEachTest: [async ({page}, use) => {
+    await use();
+    // some tests create a new page which is not yet available here
+    // only operate on tests that make the URL available
+    if (page.url() !== 'about:blank') {
+      await save_visual(page);
+    }
+  }, {auto: true}],
 });
 
 async function test_context(browser: Browser, options?: BrowserContextOptions) {
@@ -33,11 +42,11 @@ export async function login_user(browser: Browser, workerInfo: TestInfo, user: s
   expect(response?.status()).toBe(200); // Status OK
 
   // Fill out form
-  await page.type('input[name=user_name]', user);
-  await page.type('input[name=password]', LOGIN_PASSWORD);
+  await page.fill('input[name=user_name]', user);
+  await page.fill('input[name=password]', LOGIN_PASSWORD);
   await page.click('form button.ui.primary.button:visible');
 
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState();
 
   expect(page.url(), {message: `Failed to login user ${user}`}).toBe(`${workerInfo.project.use.baseURL}/`);
 
@@ -48,15 +57,13 @@ export async function login_user(browser: Browser, workerInfo: TestInfo, user: s
 }
 
 export async function load_logged_in_context(browser: Browser, workerInfo: TestInfo, user: string) {
-  let context;
   try {
-    context = await test_context(browser, {storageState: `${ARTIFACTS_PATH}/state-${user}-${workerInfo.workerIndex}.json`});
+    return await test_context(browser, {storageState: `${ARTIFACTS_PATH}/state-${user}-${workerInfo.workerIndex}.json`});
   } catch (err) {
     if (err.code === 'ENOENT') {
       throw new Error(`Could not find state for '${user}'. Did you call login_user(browser, workerInfo, '${user}') in test.beforeAll()?`);
     }
   }
-  return context;
 }
 
 export async function login({browser}: {browser: Browser}, workerInfo: TestInfo) {
@@ -67,15 +74,40 @@ export async function login({browser}: {browser: Browser}, workerInfo: TestInfo)
 export async function save_visual(page: Page) {
   // Optionally include visual testing
   if (process.env.VISUAL_TEST) {
-    await page.waitForLoadState('networkidle');
-    // Mock page/version string
-    await page.locator('footer div.ui.left').evaluate((node) => node.innerHTML = 'MOCK');
+    await page.waitForLoadState('domcontentloaded');
+    // Mock/replace dynamic content which can have different size (and thus cannot simply be masked below)
+    await page.locator('footer .left-links').evaluate((node) => node.innerHTML = 'MOCK');
+    // replace timestamps in repos to mask them later down
+    await page.locator('.flex-item-body > relative-time').filter({hasText: /now|minute/}).evaluateAll((nodes) => {
+      for (const node of nodes) node.outerHTML = 'relative time in repo';
+    });
+    // dynamically generated UUIDs
+    await page.getByText('dyn-id-').evaluateAll((nodes) => {
+      for (const node of nodes) node.innerHTML = node.innerHTML.replaceAll(/dyn-id-[a-f0-9-]+/g, 'dynamic-id');
+    });
+    // repeat above, work around https://github.com/microsoft/playwright/issues/34152
+    await page.getByText('dyn-id-').evaluateAll((nodes) => {
+      for (const node of nodes) node.innerHTML = node.innerHTML.replaceAll(/dyn-id-[a-f0-9-]+/g, 'dynamic-id');
+    });
+    await page.locator('relative-time').evaluateAll((nodes) => {
+      for (const node of nodes) node.outerHTML = 'time element';
+    });
+    // used for instance for security keys
+    await page.locator('absolute-date').evaluateAll((nodes) => {
+      for (const node of nodes) node.outerHTML = 'time element';
+    });
     await expect(page).toHaveScreenshot({
       fullPage: true,
       timeout: 20000,
       mask: [
-        page.locator('.secondary-nav span>img.ui.avatar'),
-        page.locator('.ui.dropdown.jump.item span>img.ui.avatar'),
+        page.locator('.ui.avatar'),
+        page.locator('.sha'),
+        page.locator('#repo_migrating'),
+        // update order of recently created repos is not fully deterministic
+        page.locator('.flex-item-main').filter({hasText: 'relative time in repo'}),
+        page.locator('#activity-feed'),
+        // dynamic IDs in fixed-size inputs
+        page.locator('input[value*="dyn-id-"]'),
       ],
     });
   }
@@ -100,4 +132,9 @@ export async function create_temp_user(browser: Browser, workerInfo: TestInfo, r
   expect(newUser.ok()).toBeTruthy();
 
   return {context: await login_user(browser, workerInfo, username), username};
+}
+
+// returns a random string with a pattern that can be filtered for screenshots automatically
+export function dynamic_id() {
+  return `dyn-id-${globalThis.crypto.randomUUID()}`;
 }

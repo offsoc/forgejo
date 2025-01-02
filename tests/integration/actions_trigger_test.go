@@ -302,12 +302,11 @@ jobs:
 			},
 		} {
 			t.Run(testCase.onType, func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
 				defer func() {
 					// cleanup leftovers, start from scratch
-					_, err = db.DeleteByBean(db.DefaultContext, actions_model.ActionRun{RepoID: baseRepo.ID})
-					require.NoError(t, err)
-					_, err = db.DeleteByBean(db.DefaultContext, actions_model.ActionRunJob{RepoID: baseRepo.ID})
-					require.NoError(t, err)
+					unittest.AssertSuccessfulDelete(t, &actions_model.ActionRun{RepoID: baseRepo.ID})
+					unittest.AssertSuccessfulDelete(t, &actions_model.ActionRunJob{RepoID: baseRepo.ID})
 				}()
 
 				// trigger the onType event

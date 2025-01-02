@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -39,8 +40,8 @@ import (
 )
 
 const (
-	littleSize = 1024              // 1ko
-	bigSize    = 128 * 1024 * 1024 // 128Mo
+	littleSize = 1024             // 1KiB
+	bigSize    = 32 * 1024 * 1024 // 32MiB
 )
 
 func TestGit(t *testing.T) {
@@ -299,53 +300,26 @@ func lockFileTest(t *testing.T, filename, repoPath string) {
 	require.NoError(t, err)
 }
 
-func doCommitAndPush(t *testing.T, size int, repoPath, prefix string) string {
-	name, err := generateCommitWithNewData(size, repoPath, "user2@example.com", "User Two", prefix)
-	require.NoError(t, err)
-	_, _, err = git.NewCommand(git.DefaultContext, "push", "origin", "master").RunStdString(&git.RunOpts{Dir: repoPath}) // Push
+func doCommitAndPush(t *testing.T, size int64, repoPath, prefix string) string {
+	name := generateCommitWithNewData(t, size, repoPath, "user2@example.com", "User Two", prefix)
+	_, _, err := git.NewCommand(git.DefaultContext, "push", "origin", "master").RunStdString(&git.RunOpts{Dir: repoPath}) // Push
 	require.NoError(t, err)
 	return name
 }
 
-func generateCommitWithNewData(size int, repoPath, email, fullName, prefix string) (string, error) {
-	// Generate random file
-	bufSize := 4 * 1024
-	if bufSize > size {
-		bufSize = size
-	}
-
-	buffer := make([]byte, bufSize)
-
+func generateCommitWithNewData(t *testing.T, size int64, repoPath, email, fullName, prefix string) string {
+	t.Helper()
 	tmpFile, err := os.CreateTemp(repoPath, prefix)
-	if err != nil {
-		return "", err
-	}
+	require.NoError(t, err)
 	defer tmpFile.Close()
-	written := 0
-	for written < size {
-		n := size - written
-		if n > bufSize {
-			n = bufSize
-		}
-		_, err := rand.Read(buffer[:n])
-		if err != nil {
-			return "", err
-		}
-		n, err = tmpFile.Write(buffer[:n])
-		if err != nil {
-			return "", err
-		}
-		written += n
-	}
+	_, err = io.CopyN(tmpFile, rand.Reader, size)
+	require.NoError(t, err)
 
 	// Commit
 	// Now here we should explicitly allow lfs filters to run
 	globalArgs := git.AllowLFSFiltersArgs()
-	err = git.AddChangesWithArgs(repoPath, globalArgs, false, filepath.Base(tmpFile.Name()))
-	if err != nil {
-		return "", err
-	}
-	err = git.CommitChangesWithArgs(repoPath, globalArgs, git.CommitChangesOptions{
+	require.NoError(t, git.AddChangesWithArgs(repoPath, globalArgs, false, filepath.Base(tmpFile.Name())))
+	require.NoError(t, git.CommitChangesWithArgs(repoPath, globalArgs, git.CommitChangesOptions{
 		Committer: &git.Signature{
 			Email: email,
 			Name:  fullName,
@@ -357,8 +331,8 @@ func generateCommitWithNewData(size int, repoPath, email, fullName, prefix strin
 			When:  time.Now(),
 		},
 		Message: fmt.Sprintf("Testing commit @ %v", time.Now()),
-	})
-	return filepath.Base(tmpFile.Name()), err
+	}))
+	return filepath.Base(tmpFile.Name())
 }
 
 func doBranchProtect(baseCtx *APITestContext, dstPath string) func(t *testing.T) {
@@ -370,6 +344,7 @@ func doBranchProtect(baseCtx *APITestContext, dstPath string) func(t *testing.T)
 		ctx := NewAPITestContext(t, baseCtx.Username, baseCtx.Reponame, auth_model.AccessTokenScopeWriteRepository)
 
 		t.Run("PushToNewProtectedBranch", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			t.Run("CreateBranchProtected", doGitCreateBranch(dstPath, "before-create-1"))
 			t.Run("ProtectProtectedBranch", doProtectBranch(ctx, "before-create-1", parameterProtectBranch{
 				"enable_push":     "all",
@@ -378,8 +353,7 @@ func doBranchProtect(baseCtx *APITestContext, dstPath string) func(t *testing.T)
 			t.Run("PushProtectedBranch", doGitPushTestRepository(dstPath, "origin", "before-create-1"))
 
 			t.Run("GenerateCommit", func(t *testing.T) {
-				_, err := generateCommitWithNewData(littleSize, dstPath, "user2@example.com", "User Two", "protected-file-data-")
-				require.NoError(t, err)
+				generateCommitWithNewData(t, littleSize, dstPath, "user2@example.com", "User Two", "protected-file-data-")
 			})
 
 			t.Run("ProtectProtectedBranch", doProtectBranch(ctx, "before-create-2", parameterProtectBranch{
@@ -392,11 +366,11 @@ func doBranchProtect(baseCtx *APITestContext, dstPath string) func(t *testing.T)
 		})
 
 		t.Run("FailToPushToProtectedBranch", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			t.Run("ProtectProtectedBranch", doProtectBranch(ctx, "protected"))
 			t.Run("Create modified-protected-branch", doGitCheckoutBranch(dstPath, "-b", "modified-protected-branch", "protected"))
 			t.Run("GenerateCommit", func(t *testing.T) {
-				_, err := generateCommitWithNewData(littleSize, dstPath, "user2@example.com", "User Two", "branch-data-file-")
-				require.NoError(t, err)
+				generateCommitWithNewData(t, littleSize, dstPath, "user2@example.com", "User Two", "branch-data-file-")
 			})
 
 			doGitPushTestRepositoryFail(dstPath, "origin", "modified-protected-branch:protected")(t)
@@ -405,10 +379,10 @@ func doBranchProtect(baseCtx *APITestContext, dstPath string) func(t *testing.T)
 		t.Run("PushToUnprotectedBranch", doGitPushTestRepository(dstPath, "origin", "modified-protected-branch:unprotected"))
 
 		t.Run("FailToPushProtectedFilesToProtectedBranch", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			t.Run("Create modified-protected-file-protected-branch", doGitCheckoutBranch(dstPath, "-b", "modified-protected-file-protected-branch", "protected"))
 			t.Run("GenerateCommit", func(t *testing.T) {
-				_, err := generateCommitWithNewData(littleSize, dstPath, "user2@example.com", "User Two", "protected-file-")
-				require.NoError(t, err)
+				generateCommitWithNewData(t, littleSize, dstPath, "user2@example.com", "User Two", "protected-file-")
 			})
 
 			t.Run("ProtectedFilePathsApplyToAdmins", doProtectBranch(ctx, "protected"))
@@ -419,13 +393,13 @@ func doBranchProtect(baseCtx *APITestContext, dstPath string) func(t *testing.T)
 		})
 
 		t.Run("PushUnprotectedFilesToProtectedBranch", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			t.Run("Create modified-unprotected-file-protected-branch", doGitCheckoutBranch(dstPath, "-b", "modified-unprotected-file-protected-branch", "protected"))
 			t.Run("UnprotectedFilePaths", doProtectBranch(ctx, "protected", parameterProtectBranch{
 				"unprotected_file_patterns": "unprotected-file-*",
 			}))
 			t.Run("GenerateCommit", func(t *testing.T) {
-				_, err := generateCommitWithNewData(littleSize, dstPath, "user2@example.com", "User Two", "unprotected-file-")
-				require.NoError(t, err)
+				generateCommitWithNewData(t, littleSize, dstPath, "user2@example.com", "User Two", "unprotected-file-")
 			})
 			doGitPushTestRepository(dstPath, "origin", "modified-unprotected-file-protected-branch:protected")(t)
 			doGitCheckoutBranch(dstPath, "protected")(t)
@@ -441,19 +415,19 @@ func doBranchProtect(baseCtx *APITestContext, dstPath string) func(t *testing.T)
 		}))
 
 		t.Run("WhitelistedUserFailToForcePushToProtectedBranch", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			t.Run("Create toforce", doGitCheckoutBranch(dstPath, "-b", "toforce", "master"))
 			t.Run("GenerateCommit", func(t *testing.T) {
-				_, err := generateCommitWithNewData(littleSize, dstPath, "user2@example.com", "User Two", "branch-data-file-")
-				require.NoError(t, err)
+				generateCommitWithNewData(t, littleSize, dstPath, "user2@example.com", "User Two", "branch-data-file-")
 			})
 			doGitPushTestRepositoryFail(dstPath, "-f", "origin", "toforce:protected")(t)
 		})
 
 		t.Run("WhitelistedUserPushToProtectedBranch", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			t.Run("Create topush", doGitCheckoutBranch(dstPath, "-b", "topush", "protected"))
 			t.Run("GenerateCommit", func(t *testing.T) {
-				_, err := generateCommitWithNewData(littleSize, dstPath, "user2@example.com", "User Two", "branch-data-file-")
-				require.NoError(t, err)
+				generateCommitWithNewData(t, littleSize, dstPath, "user2@example.com", "User Two", "branch-data-file-")
 			})
 			doGitPushTestRepository(dstPath, "origin", "topush:protected")(t)
 		})
@@ -693,8 +667,7 @@ func doAutoPRMerge(baseCtx *APITestContext, dstPath string) func(t *testing.T) {
 		t.Run("CheckoutProtected", doGitCheckoutBranch(dstPath, "protected"))
 		t.Run("PullProtected", doGitPull(dstPath, "origin", "protected"))
 		t.Run("GenerateCommit", func(t *testing.T) {
-			_, err := generateCommitWithNewData(littleSize, dstPath, "user2@example.com", "User Two", "branch-data-file-")
-			require.NoError(t, err)
+			generateCommitWithNewData(t, littleSize, dstPath, "user2@example.com", "User Two", "branch-data-file-")
 		})
 		t.Run("PushToUnprotectedBranch", doGitPushTestRepository(dstPath, "origin", "protected:unprotected3"))
 		var pr api.PullRequest

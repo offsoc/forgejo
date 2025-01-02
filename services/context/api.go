@@ -99,6 +99,17 @@ type swaggerAPIInvalidTopicsError struct {
 // swagger:response empty
 type APIEmpty struct{}
 
+type APIUnauthorizedError struct {
+	APIError
+}
+
+// APIUnauthorizedError is a unauthorized error response
+// swagger:response unauthorized
+type swaggerAPUnauthorizedError struct {
+	// in:body
+	Body APIUnauthorizedError `json:"body"`
+}
+
 type APIForbiddenError struct {
 	APIError
 }

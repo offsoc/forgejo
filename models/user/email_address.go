@@ -8,10 +8,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
@@ -141,6 +139,38 @@ func GetPrimaryEmailAddressOfUser(ctx context.Context, uid int64) (*EmailAddress
 	return ea, nil
 }
 
+// Deletes the primary email address of the user
+// This is only allowed if the user is a organization
+func DeletePrimaryEmailAddressOfUser(ctx context.Context, uid int64) error {
+	user, err := GetUserByID(ctx, uid)
+	if err != nil {
+		return err
+	}
+
+	if user.Type != UserTypeOrganization {
+		return fmt.Errorf("%s is not a organization", user.Name)
+	}
+
+	ctx, committer, err := db.TxContext(ctx)
+	if err != nil {
+		return err
+	}
+	defer committer.Close()
+
+	_, err = db.GetEngine(ctx).Exec("DELETE FROM email_address WHERE uid = ? AND is_primary = true", uid)
+	if err != nil {
+		return err
+	}
+
+	user.Email = ""
+	err = UpdateUserCols(ctx, user, "email")
+	if err != nil {
+		return err
+	}
+
+	return committer.Commit()
+}
+
 // GetEmailAddresses returns all email addresses belongs to given user.
 func GetEmailAddresses(ctx context.Context, uid int64) ([]*EmailAddress, error) {
 	emails := make([]*EmailAddress, 0, 5)
@@ -244,23 +274,6 @@ func updateActivation(ctx context.Context, email *EmailAddress, activate bool) e
 		return err
 	}
 	return UpdateUserCols(ctx, user, "rands")
-}
-
-// VerifyActiveEmailCode verifies active email code when active account
-func VerifyActiveEmailCode(ctx context.Context, code, email string) *EmailAddress {
-	if user := GetVerifyUser(ctx, code); user != nil {
-		// time limit code
-		prefix := code[:base.TimeLimitCodeLength]
-		data := fmt.Sprintf("%d%s%s%s%s", user.ID, email, user.LowerName, user.Passwd, user.Rands)
-
-		if base.VerifyTimeLimitCode(time.Now(), data, setting.Service.ActiveCodeLives, prefix) {
-			emailAddress := &EmailAddress{UID: user.ID, Email: email}
-			if has, _ := db.GetEngine(ctx).Get(emailAddress); has {
-				return emailAddress
-			}
-		}
-	}
-	return nil
 }
 
 // SearchEmailOrderBy is used to sort the results from SearchEmails()

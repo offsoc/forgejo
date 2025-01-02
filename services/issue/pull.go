@@ -10,6 +10,8 @@ import (
 
 	issues_model "code.gitea.io/gitea/models/issues"
 	org_model "code.gitea.io/gitea/models/organization"
+	access_model "code.gitea.io/gitea/models/perm/access"
+	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
@@ -117,7 +119,11 @@ func PullRequestCodeOwnersReview(ctx context.Context, issue *issues_model.Issue,
 	}
 
 	for _, u := range uniqUsers {
-		if u.ID != issue.Poster.ID {
+		permission, err := access_model.GetUserRepoPermission(ctx, issue.Repo, u)
+		if err != nil {
+			return nil, fmt.Errorf("GetUserRepoPermission: %w", err)
+		}
+		if u.ID != issue.Poster.ID && permission.CanRead(unit.TypePullRequests) {
 			comment, err := issues_model.AddReviewRequest(ctx, issue, u, issue.Poster)
 			if err != nil {
 				log.Warn("Failed add assignee user: %s to PR review: %s#%d, error: %s", u.Name, pr.BaseRepo.Name, pr.ID, err)

@@ -29,6 +29,15 @@ const (
 	MergeStyleRebaseUpdate MergeStyle = "rebase-update-only"
 )
 
+type UpdateStyle string
+
+const (
+	// UpdateStyleMerge create merge commit to update
+	UpdateStyleMerge UpdateStyle = "merge"
+	// UpdateStyleRebase rebase to update
+	UpdateStyleRebase UpdateStyle = "rebase"
+)
+
 // UpdateDefaultBranch updates the default branch
 func UpdateDefaultBranch(ctx context.Context, repo *Repository) error {
 	_, err := db.GetEngine(ctx).ID(repo.ID).Cols("default_branch").Update(repo)
