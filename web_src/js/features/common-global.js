@@ -464,7 +464,7 @@ Mismatched ROOT_URL config causes wrong URL links for web UI/mail content/webhoo
 }
 
 export function initComboMarkdownEditorGlobal() {
-  const markdownEditors = document.getElementsByClassName('combo-markdown-editor-init');
+  const markdownEditors = document.querySelectorAll('[data-combo-markdown-editor-init]');
 
   for (const currentEditor of markdownEditors) {
     if (currentEditor.querySelector('markdown-toolbar') === null) {

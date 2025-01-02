@@ -60,9 +60,18 @@
 						<input name="pronouns" value="{{.SignedUser.Pronouns}}" maxlength="50">
 					</label>
 
-					<label {{if .Err_Biography}}class="field error"{{end}}>
+					<label {{if .Err_Biography}}class="field error"{{end}} data-combo-markdown-editor-init>
 						{{ctx.Locale.Tr "user.user_bio"}}
-						<textarea name="biography" rows="2" placeholder="{{ctx.Locale.Tr "settings.biography_placeholder"}}" maxlength="255">{{.SignedUser.Description}}</textarea>
+						{{template "shared/combomarkdowneditor" (dict
+							"MarkdownPreviewUrl" (printf "%s/-/markup" .SignedUser.HomeLink)
+							"MarkdownPreviewContext" .SignedUser.HomeLink
+							"MarkdownPreviewMode" "markdown"
+							"TextareaName" "biography"
+							"TextareaContent" .SignedUser.Description
+							"TextareaPlaceholder" (ctx.Locale.Tr "settings.biography_placeholder")
+							"TextareaMaxLength" 255
+							"HideRepoButtons" true
+						)}}
 					</label>
 
 					<label {{if .Err_Website}}class="field error"{{end}}>

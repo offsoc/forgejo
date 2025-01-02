@@ -22,7 +22,7 @@
 							<label for="email">{{ctx.Locale.Tr "org.settings.email"}}</label>
 							<input id="email" name="email" type="email" value="{{.Org.Email}}" maxlength="255">
 						</div>
-						<div class="field combo-markdown-editor-init {{if .Err_Description}}error{{end}}">
+						<div class="field {{if .Err_Description}}error{{end}}" data-combo-markdown-editor-init>
 							<label for="description">{{ctx.Locale.Tr "org.org_desc"}}</label>
 							{{template "shared/combomarkdowneditor" (dict
 								"MarkdownPreviewUrl" (printf "%s/-/markup" .Org.HomeLink)
