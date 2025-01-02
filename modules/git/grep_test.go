@@ -89,6 +89,20 @@ func TestGrepSearch(t *testing.T) {
 		},
 	}, res)
 
+	res, err = GrepSearch(context.Background(), repo, "world", GrepOptions{
+		MatchesPerFile: 1,
+		Filename:       "java-hello/",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, []*GrepResult{
+		{
+			Filename:          "java-hello/main.java",
+			LineNumbers:       []int{1},
+			LineCodes:         []string{"public class HelloWorld"},
+			HighlightedRanges: [][3]int{{0, 18, 23}},
+		},
+	}, res)
+
 	res, err = GrepSearch(context.Background(), repo, "no-such-content", GrepOptions{})
 	require.NoError(t, err)
 	assert.Empty(t, res)

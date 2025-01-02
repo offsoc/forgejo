@@ -20,10 +20,13 @@ import (
 
 	actions_model "code.gitea.io/gitea/models/actions"
 	"code.gitea.io/gitea/models/db"
+	git_model "code.gitea.io/gitea/models/git"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
 	"code.gitea.io/gitea/modules/actions"
 	"code.gitea.io/gitea/modules/base"
+	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/storage"
 	"code.gitea.io/gitea/modules/templates"
@@ -157,8 +160,9 @@ type ViewUser struct {
 }
 
 type ViewBranch struct {
-	Name string `json:"name"`
-	Link string `json:"link"`
+	Name      string `json:"name"`
+	Link      string `json:"link"`
+	IsDeleted bool   `json:"isDeleted"`
 }
 
 type ViewJobStep struct {
@@ -227,6 +231,16 @@ func ViewPost(ctx *context_module.Context) {
 		Name: run.PrettyRef(),
 		Link: run.RefLink(),
 	}
+	refName := git.RefName(run.Ref)
+	if refName.IsBranch() {
+		b, err := git_model.GetBranch(ctx, ctx.Repo.Repository.ID, refName.ShortName())
+		if err != nil && !git_model.IsErrBranchNotExist(err) {
+			log.Error("GetBranch: %v", err)
+		} else if git_model.IsErrBranchNotExist(err) || (b != nil && b.IsDeleted) {
+			branch.IsDeleted = true
+		}
+	}
+
 	resp.State.Run.Commit = ViewCommit{
 		LocaleCommit:   ctx.Locale.TrString("actions.runs.commit"),
 		LocalePushedBy: ctx.Locale.TrString("actions.runs.pushed_by"),

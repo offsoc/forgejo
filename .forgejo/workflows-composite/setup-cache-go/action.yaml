@@ -17,7 +17,7 @@ runs:
         apt-get -q install -qq -y zstd
 
     - name: "Set up Go using setup-go"
-      uses: https://code.forgejo.org/actions/setup-go@v5
+      uses: https://data.forgejo.org/actions/setup-go@v5
       id: go-version
       with:
         go-version-file: "go.mod"

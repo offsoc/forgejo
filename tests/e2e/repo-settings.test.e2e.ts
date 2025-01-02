@@ -7,7 +7,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, login} from './utils_e2e.ts';
+import {test, save_visual, login_user, login} from './utils_e2e.ts';
 import {validate_form} from './shared/forms.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
@@ -25,11 +25,13 @@ test('repo webhook settings', async ({browser}, workerInfo) => {
 
   // check accessibility including the custom events (now visible) part
   await validate_form({page}, 'fieldset');
+  await save_visual(page);
 
   await page.locator('input[name="events"][value="push_only"]').click();
   await expect(page.locator('.hide-unless-checked')).toBeHidden();
   await page.locator('input[name="events"][value="send_everything"]').click();
   await expect(page.locator('.hide-unless-checked')).toBeHidden();
+  await save_visual(page);
 });
 
 test.describe('repo branch protection settings', () => {
@@ -44,11 +46,14 @@ test.describe('repo branch protection settings', () => {
     // verify header is new
     await expect(page.locator('h4')).toContainText('new');
     await page.locator('input[name="rule_name"]').fill('testrule');
+    await save_visual(page);
     await page.getByText('Save rule').click();
     // verify header is in edit mode
     await page.waitForLoadState('domcontentloaded');
+    await save_visual(page);
     await page.getByText('Edit').click();
     await expect(page.locator('h4')).toContainText('Protection rules for branch');
+    await save_visual(page);
   });
 
   test.afterEach(async ({browser}, workerInfo) => {

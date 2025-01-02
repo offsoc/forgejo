@@ -1,0 +1,56 @@
+<label>
+	<input name="auto_init" type="checkbox" {{if .auto_init}}checked{{end}}>
+	{{ctx.Locale.Tr "repo.auto_init"}}
+	<span class="help">{{ctx.Locale.Tr "repo.auto_init_description"}}</span>
+</label>
+
+<div class="hide-unless-checked">
+	<label>
+		.gitignore
+		<div class="ui multiple search selection dropdown">
+			<input type="hidden" name="gitignores" value="{{.gitignores}}">
+			<div class="default text">{{ctx.Locale.Tr "repo.repo_gitignore_helper"}}</div>
+			<div class="menu">
+				{{range .Gitignores}}
+					<div class="item" data-value="{{.}}">{{.}}</div>
+				{{end}}
+			</div>
+		</div>
+		<span class="help">{{ctx.Locale.Tr "repo.repo_gitignore_helper_desc"}}</span>
+	</label>
+
+	<label>
+		{{ctx.Locale.Tr "repo.license"}}
+		<div class="ui search selection dropdown">
+			<input type="hidden" name="license" value="{{.license}}">
+			<div class="default text">{{ctx.Locale.Tr "repo.license_helper"}}</div>
+			<div class="menu">
+				<div class="item" data-value="">{{ctx.Locale.Tr "repo.license_helper"}}</div>
+				{{range .Licenses}}
+					<div class="item" data-value="{{.}}">{{.}}</div>
+				{{end}}
+			</div>
+		</div>
+		<span class="help">{{ctx.Locale.Tr "repo.license_helper_desc" "https://choosealicense.com/"}}</span>
+	</label>
+
+	{{$supportedReadmesLength := len .Readmes}}
+	{{/* Only offer README selection if there is an actual choice */}}
+	{{if ge $supportedReadmesLength 2}}
+		<label>
+			{{ctx.Locale.Tr "repo.readme"}}
+			<div class="ui selection dropdown">
+				<input type="hidden" name="readme" value="{{.readme}}">
+				<div class="default text">{{ctx.Locale.Tr "repo.readme_helper"}}</div>
+				<div class="menu">
+					{{range .Readmes}}
+						<div class="item" data-value="{{.}}">{{.}}</div>
+					{{end}}
+				</div>
+			</div>
+			<span class="help">{{ctx.Locale.Tr "repo.readme_helper_desc"}}</span>
+		</label>
+	{{else}}
+		<input type="hidden" name="readme" value="Default">
+	{{end}}
+</div>

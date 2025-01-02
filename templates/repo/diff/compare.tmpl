@@ -215,6 +215,10 @@
 						{{ctx.Locale.Tr "repo.archive.title_date" (DateUtils.AbsoluteLong .Repository.ArchivedUnix)}}
 					{{end}}
 				</div>
+			{{else}}
+				<div class="ui warning message tw-mb-4">
+					{{ctx.Locale.Tr "repo.pulls.sign_in_require" .SignInLink}}
+				</div>
 			{{end}}
 			{{if $.IsSigned}}
 				<div class="pullrequest-form {{if not .Flash}}tw-hidden{{end}}">

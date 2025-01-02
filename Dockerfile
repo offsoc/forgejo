@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM code.forgejo.org/oci/xx AS xx
 
-FROM --platform=$BUILDPLATFORM code.forgejo.org/oci/golang:1.23-alpine3.20 as build-env
+FROM --platform=$BUILDPLATFORM code.forgejo.org/oci/golang:1.23-alpine3.21 as build-env
 
 ARG GOPROXY
 ENV GOPROXY=${GOPROXY:-direct}
@@ -51,7 +51,7 @@ RUN chmod 755 /tmp/local/usr/bin/entrypoint \
               /go/src/code.gitea.io/gitea/environment-to-ini
 RUN chmod 644 /go/src/code.gitea.io/gitea/contrib/autocompletion/bash_autocomplete
 
-FROM code.forgejo.org/oci/alpine:3.20
+FROM code.forgejo.org/oci/alpine:3.21
 ARG RELEASE_VERSION
 LABEL maintainer="contact@forgejo.org" \
       org.opencontainers.image.authors="Forgejo" \
@@ -98,7 +98,7 @@ ENV GITEA_CUSTOM=/data/gitea
 VOLUME ["/data"]
 
 ENTRYPOINT ["/usr/bin/entrypoint"]
-CMD ["/bin/s6-svscan", "/etc/s6"]
+CMD ["/usr/bin/s6-svscan", "/etc/s6"]
 
 COPY --from=build-env /tmp/local /
 RUN cd /usr/local/bin ; ln -s gitea forgejo

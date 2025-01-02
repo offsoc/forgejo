@@ -4,7 +4,7 @@
 // @watch end
 
 import {expect, type Locator} from '@playwright/test';
-import {test, login_user, load_logged_in_context} from './utils_e2e.ts';
+import {test, save_visual, login_user, load_logged_in_context} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -66,4 +66,5 @@ test('Reaction Selectors', async ({browser}, workerInfo) => {
 
   await toggleReaction(topPicker, 'laugh');
   await assertReactionCounts(comment, {'laugh': 2});
+  await save_visual(page);
 });

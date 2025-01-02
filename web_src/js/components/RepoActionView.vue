@@ -444,7 +444,8 @@ export function initRepositoryActionView() {
         {{ run.commit.localePushedBy }}
         <a class="muted" :href="run.commit.pusher.link">{{ run.commit.pusher.displayName }}</a>
         <span class="ui label tw-max-w-full" v-if="run.commit.shortSHA">
-          <a class="gt-ellipsis" :href="run.commit.branch.link">{{ run.commit.branch.name }}</a>
+          <span v-if="run.commit.branch.isDeleted" class="gt-ellipsis tw-line-through" :data-tooltip-content="run.commit.branch.name">{{ run.commit.branch.name }}</span>
+          <a v-else class="gt-ellipsis" :href="run.commit.branch.link" :data-tooltip-content="run.commit.branch.name">{{ run.commit.branch.name }}</a>
         </span>
       </div>
       <div class="action-summary">
@@ -569,11 +570,13 @@ export function initRepositoryActionView() {
 
 .action-info-summary-title {
   display: flex;
+  align-items: center;
+  gap: 0.5em;
 }
 
 .action-info-summary-title-text {
   font-size: 20px;
-  margin: 0 0 0 8px;
+  margin: 0;
   flex: 1;
   overflow-wrap: anywhere;
 }

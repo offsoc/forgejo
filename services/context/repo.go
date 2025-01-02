@@ -25,6 +25,7 @@ import (
 	unit_model "code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/cache"
+	"code.gitea.io/gitea/modules/card"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
 	code_indexer "code.gitea.io/gitea/modules/indexer/code"
@@ -631,6 +632,12 @@ func RepoAssignment(ctx *Context) context.CancelFunc {
 		ctx.Data["IsWatchingRepo"] = repo_model.IsWatching(ctx, ctx.Doer.ID, repo.ID)
 		ctx.Data["IsStaringRepo"] = repo_model.IsStaring(ctx, ctx.Doer.ID, repo.ID)
 	}
+
+	cardWidth, cardHeight := card.DefaultSize()
+	ctx.Data["OpenGraphImageURL"] = repo.SummaryCardURL()
+	ctx.Data["OpenGraphImageWidth"] = cardWidth
+	ctx.Data["OpenGraphImageHeight"] = cardHeight
+	ctx.Data["OpenGraphImageAltText"] = ctx.Tr("repo.summary_card_alt", repo.FullName())
 
 	if repo.IsFork {
 		RetrieveBaseRepo(ctx, repo)

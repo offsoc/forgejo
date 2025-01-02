@@ -4,10 +4,6 @@
   user-select: none;
 }
 
-.repository .owner.dropdown {
-  min-width: 40% !important;
-}
-
 .repository .unicode-escaped .escaped-code-point[data-escaped]::before {
   visibility: visible;
   content: attr(data-escaped);
@@ -387,6 +383,11 @@ td .commit-summary {
   color: inherit;
   opacity: var(--opacity-disabled);
   cursor: default;
+}
+
+.code-search + #repo-files-table {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .view-raw {
@@ -923,16 +924,6 @@ td .commit-summary {
 .repository.view.issue .comment-list .comment .comment-container {
   border: 1px solid var(--color-secondary);
   border-radius: var(--border-radius);
-}
-
-@media (max-width: 767.98px) {
-  .repository.view.issue .comment-list .comment .content .form .button {
-    width: 100%;
-    margin: 0;
-  }
-  .repository.view.issue .comment-list .comment .content .form .button:not(:last-child) {
-    margin-bottom: 1rem;
-  }
 }
 
 .repository.view.issue .comment-list .comment .merge-section {
@@ -2018,15 +2009,27 @@ details.repo-search-result summary::marker {
   box-shadow: none;
 }
 
+.repository .repository-summary .repository-menu {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 0;
+}
+
+@media (max-width: 767.98px) {
+  .repository .repository-summary .repository-menu {
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .repository .repository-summary .segment.sub-menu {
   border: none;
   display: flex;
   align-items: center;
   padding: 0;
-  overflow: hidden;
 }
 
-.repository .repository-summary .sub-menu .item {
+.repository .repository-summary .item {
   flex: 1;
   height: 30px;
   line-height: var(--line-height-default);
@@ -2034,12 +2037,13 @@ details.repo-search-result summary::marker {
   align-items: center;
   justify-content: center;
   gap: 0.25em;
-  padding: 0 0.5em; /* make the UI look better for narrow (mobile) view */
   text-decoration: none;
+  border-radius: var(--border-radius);
 }
 
-.repository .repository-summary .sub-menu .item.active {
+.repository .repository-summary .item.active {
   background: var(--color-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .repository .repository-summary .segment.language-stats {
@@ -2849,7 +2853,6 @@ tbody.commit-list {
   }
   .commits-table .commits-table-left {
     align-items: initial !important;
-    margin-bottom: 6px;
   }
   .commits-table .commits-table-right form > div:nth-child(1) {
     order: 1; /* the "commit search" input */

@@ -103,4 +103,5 @@ export default {
   outputDir: 'tests/e2e/test-artifacts/',
   /* Folder for explicit snapshots for visual testing */
   snapshotDir: 'tests/e2e/test-snapshots/',
+  snapshotPathTemplate: '{snapshotDir}/snapshots/{testFilePath}/{projectName}_{arg}{ext}',
 } satisfies PlaywrightTestConfig;
