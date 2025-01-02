@@ -411,6 +411,11 @@ func (issue *Issue) HTMLURL() string {
 	return fmt.Sprintf("%s/%s/%d", issue.Repo.HTMLURL(), path, issue.Index)
 }
 
+// SummaryCardURL returns the absolute URL to an image providing a summary of the issue
+func (issue *Issue) SummaryCardURL() string {
+	return fmt.Sprintf("%s/summary-card", issue.HTMLURL())
+}
+
 // Link returns the issue's relative URL.
 func (issue *Issue) Link() string {
 	var path string
@@ -644,7 +649,7 @@ func (issue *Issue) BlockedByDependencies(ctx context.Context, opts db.ListOptio
 		Where("issue_id = ?", issue.ID).
 		// sort by repo id then created date, with the issues of the same repo at the beginning of the list
 		OrderBy("CASE WHEN issue.repo_id = ? THEN 0 ELSE issue.repo_id END, issue.created_unix DESC", issue.RepoID)
-	if opts.Page != 0 {
+	if opts.Page > 0 {
 		sess = db.SetSessionPagination(sess, &opts)
 	}
 	err = sess.Find(&issueDeps)

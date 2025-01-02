@@ -1,5 +1,6 @@
 <script>
 import {SvgIcon} from '../svg.js';
+import dayjs from 'dayjs';
 import {
   Chart,
   Title,
@@ -22,6 +23,7 @@ import {chartJsColors} from '../utils/color.js';
 import {sleep} from '../utils.js';
 import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 import $ from 'jquery';
+import {pathEscapeSegments} from '../utils/url.js';
 
 const customEventListener = {
   id: 'customEventListener',
@@ -61,6 +63,10 @@ export default {
       type: String,
       required: true,
     },
+    repoDefaultBranchName: {
+      type: String,
+      required: true,
+    },
   },
   data: () => ({
     isLoading: false,
@@ -94,6 +100,15 @@ export default {
         .filter((contributor) => contributor[criteria] !== 0)
         .sort((a, b) => a[criteria] > b[criteria] ? -1 : a[criteria] === b[criteria] ? 0 : 1)
         .slice(0, 100);
+    },
+
+    getContributorSearchQuery(contributorEmail) {
+      const min = dayjs(this.xAxisMin).format('YYYY-MM-DD');
+      const max = dayjs(this.xAxisMax).format('YYYY-MM-DD');
+      const params = new URLSearchParams({
+        'q': `after:${min}, before:${max}, author:${contributorEmail}`,
+      });
+      return `${this.repoLink}/commits/branch/${pathEscapeSegments(this.repoDefaultBranchName)}/search?${params.toString()}`;
     },
 
     async fetchGraphData() {
@@ -163,7 +178,7 @@ export default {
         // for details.
         user.max_contribution_type += 1;
 
-        filteredData[key] = {...user, weeks: filteredWeeks};
+        filteredData[key] = {...user, weeks: filteredWeeks, email: key};
       }
 
       return filteredData;
@@ -376,7 +391,7 @@ export default {
         <div class="ui top attached header tw-flex tw-flex-1">
           <b class="ui right">#{{ index + 1 }}</b>
           <a :href="contributor.home_link">
-            <img class="ui avatar tw-align-middle" height="40" width="40" :src="contributor.avatar_link">
+            <img class="ui avatar tw-align-middle" height="40" width="40" :src="contributor.avatar_link" alt="">
           </a>
           <div class="tw-ml-2">
             <a v-if="contributor.home_link !== ''" :href="contributor.home_link"><h4>{{ contributor.name }}</h4></a>
@@ -384,7 +399,11 @@ export default {
               {{ contributor.name }}
             </h4>
             <p class="tw-text-12 tw-flex tw-gap-1">
-              <strong v-if="contributor.total_commits">{{ contributor.total_commits.toLocaleString() }} {{ locale.contributionType.commits }}</strong>
+              <strong v-if="contributor.total_commits">
+                <a class="silenced" :href="getContributorSearchQuery(contributor.email)">
+                  {{ contributor.total_commits.toLocaleString() }} {{ locale.contributionType.commits }}
+                </a>
+              </strong>
               <strong v-if="contributor.total_additions" class="text green">{{ contributor.total_additions.toLocaleString() }}++ </strong>
               <strong v-if="contributor.total_deletions" class="text red">
                 {{ contributor.total_deletions.toLocaleString() }}--</strong>

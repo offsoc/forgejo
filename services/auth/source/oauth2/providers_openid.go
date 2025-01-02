@@ -51,6 +51,10 @@ func (o *OpenIDProvider) CustomURLSettings() *CustomURLSettings {
 	return nil
 }
 
+func (o *OpenIDProvider) CanProvideSSHKeys() bool {
+	return true
+}
+
 var _ GothProvider = &OpenIDProvider{}
 
 func init() {

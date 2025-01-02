@@ -9,7 +9,7 @@
 					{{template "shared/user/name" .}}
 				</div>
 				<div class="flex-item-body">
-					<span>{{ctx.Locale.Tr "settings.blocked_since" (DateTime "short" .CreatedUnix)}}</span>
+					<span>{{ctx.Locale.Tr "settings.blocked_since" (DateUtils.AbsoluteShort .CreatedUnix)}}</span>
 				</div>
 			</div>
 			<div class="flex-item-trailing">

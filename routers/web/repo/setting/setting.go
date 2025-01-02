@@ -262,6 +262,7 @@ func UnitsPost(ctx *context.Context) {
 				AllowRebaseUpdate:             form.PullsAllowRebaseUpdate,
 				DefaultDeleteBranchAfterMerge: form.DefaultDeleteBranchAfterMerge,
 				DefaultMergeStyle:             repo_model.MergeStyle(form.PullsDefaultMergeStyle),
+				DefaultUpdateStyle:            repo_model.UpdateStyle(form.PullsDefaultUpdateStyle),
 				DefaultAllowMaintainerEdit:    form.DefaultAllowMaintainerEdit,
 			},
 		})

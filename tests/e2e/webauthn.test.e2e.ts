@@ -8,7 +8,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, create_temp_user, login_user} from './utils_e2e.ts';
+import {test, save_visual, create_temp_user, login_user} from './utils_e2e.ts';
 
 test('WebAuthn register & login flow', async ({browser, request}, workerInfo) => {
   test.skip(workerInfo.project.name !== 'chromium', 'Uses Chrome protocol');
@@ -34,6 +34,7 @@ test('WebAuthn register & login flow', async ({browser, request}, workerInfo) =>
   });
 
   await page.locator('input#nickname').fill('Testing Security Key');
+  await save_visual(page);
   await page.getByText('Add security key').click();
 
   // Logout.
@@ -57,6 +58,7 @@ test('WebAuthn register & login flow', async ({browser, request}, workerInfo) =>
   response = await page.goto('/user/settings/security');
   expect(response?.status()).toBe(200);
   await page.getByRole('button', {name: 'Remove'}).click();
+  await save_visual(page);
   await page.getByRole('button', {name: 'Yes'}).click();
   await page.waitForLoadState();
 

@@ -23,13 +23,13 @@ jobs:
   renovate:
     if: vars.ROLE == 'forgejo-coding' && secrets.RENOVATE_TOKEN != ''
 
-    runs-on: docker-runner-one
+    runs-on: docker
     container:
-      image: code.forgejo.org/forgejo-contrib/renovate:39.19.1
+      image: data.forgejo.org/forgejo-contrib/renovate:39.69.2
 
     steps:
       - name: Load renovate repo cache
-        uses: https://code.forgejo.org/actions/cache/restore@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
+        uses: https://data.forgejo.org/actions/cache/restore@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
         with:
           path: |
             .tmp/cache/renovate/repository
@@ -62,7 +62,7 @@ jobs:
 
       - name: Save renovate repo cache
         if: always() && env.RENOVATE_DRY_RUN != 'full'
-        uses: https://code.forgejo.org/actions/cache/save@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
+        uses: https://data.forgejo.org/actions/cache/save@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
         with:
           path: |
             .tmp/cache/renovate/repository

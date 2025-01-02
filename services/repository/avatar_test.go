@@ -29,7 +29,7 @@ func TestUploadAvatar(t *testing.T) {
 
 	err := UploadAvatar(db.DefaultContext, repo, buff.Bytes())
 	require.NoError(t, err)
-	assert.Equal(t, avatar.HashAvatar(10, buff.Bytes()), repo.Avatar)
+	assert.Equal(t, avatar.HashAvatar(repo.ID, buff.Bytes()), repo.Avatar)
 }
 
 func TestUploadBigAvatar(t *testing.T) {
@@ -61,4 +61,28 @@ func TestDeleteAvatar(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "", repo.Avatar)
+}
+
+func TestTemplateGenerateAvatar(t *testing.T) {
+	// Generate image
+	myImage := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	var buff bytes.Buffer
+	png.Encode(&buff, myImage)
+
+	require.NoError(t, unittest.PrepareTestDatabase())
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 10})
+
+	// Upload Avatar
+	err := UploadAvatar(db.DefaultContext, repo, buff.Bytes())
+	require.NoError(t, err)
+	assert.Equal(t, avatar.HashAvatar(repo.ID, buff.Bytes()), repo.Avatar)
+
+	// Generate the Avatar for Another Repo
+	genRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 11})
+	err = generateAvatar(db.DefaultContext, repo, genRepo)
+	require.NoError(t, err)
+	assert.Equal(t, avatar.HashAvatar(genRepo.ID, buff.Bytes()), genRepo.Avatar)
+
+	// Make sure The 2 Hashes are not the same
+	assert.NotEqual(t, repo.Avatar, genRepo.Avatar)
 }

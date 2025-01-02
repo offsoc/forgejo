@@ -106,7 +106,7 @@
 				</div>
 			{{end}}
 		</div>
-		<div class="code-comment-buttons tw-flex tw-items-center tw-flex-wrap tw-mt-2 tw-mb-1 tw-mx-2">
+		<div class="tw-flex tw-items-center tw-flex-wrap tw-mt-2 tw-mb-1 tw-mx-2">
 			<div class="tw-flex-1">
 				{{if $resolved}}
 					<div class="ui grey text">
@@ -115,7 +115,7 @@
 					</div>
 				{{end}}
 			</div>
-			<div class="code-comment-buttons-buttons button-row">
+			<div class="right button-sequence">
 				{{if and $.CanMarkConversation $isNotPending}}
 					<button class="ui tiny basic button resolve-conversation" data-origin="timeline" data-action="{{if not $resolved}}Resolve{{else}}UnResolve{{end}}" data-comment-id="{{(index .comments 0).ID}}" data-update-url="{{$.RepoLink}}/issues/resolve_conversation">
 						{{if $resolved}}

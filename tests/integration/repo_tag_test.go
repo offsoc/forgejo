@@ -140,7 +140,7 @@ func TestSyncRepoTags(t *testing.T) {
 
 			doGitClone(dstPath, u)(t)
 
-			_, _, err := git.NewCommand(git.DefaultContext, "tag", "v2", "-m", "this is an annoted tag").RunStdString(&git.RunOpts{Dir: dstPath})
+			_, _, err := git.NewCommand(git.DefaultContext, "tag", "v2", "-m", "this is an annotated tag").RunStdString(&git.RunOpts{Dir: dstPath})
 			require.NoError(t, err)
 
 			_, _, err = git.NewCommand(git.DefaultContext, "push", "--tags").RunStdString(&git.RunOpts{Dir: dstPath})
@@ -152,10 +152,10 @@ func TestSyncRepoTags(t *testing.T) {
 				resp := MakeRequest(t, req, http.StatusOK)
 				htmlDoc := NewHTMLParser(t, resp.Body)
 				tagsTab := htmlDoc.Find(".release-list-title")
-				assert.Contains(t, tagsTab.Text(), "this is an annoted tag")
+				assert.Contains(t, tagsTab.Text(), "this is an annotated tag")
 			}
 
-			// Make sure `SyncRepoTags` doesn't modify annoted tags.
+			// Make sure `SyncRepoTags` doesn't modify annotated tags.
 			testTag(t)
 			require.NoError(t, repo_module.SyncRepoTags(git.DefaultContext, repo.ID))
 			testTag(t)

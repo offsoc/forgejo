@@ -10,6 +10,16 @@ runs:
         adduser --quiet --comment forgejo --disabled-password forgejo || true
         chown -R forgejo:forgejo .
 
-    - uses: https://codeberg.org/fnetx/setup-cache-go@b2214eaf6fb44c7e8512c0f462a2c3ec31f86a73
+    - uses: ./.forgejo/workflows-composite/setup-cache-go
       with:
         username: forgejo
+
+    - name: validate go version
+      run: |
+        set -ex
+        toolchain=$(grep -oP '(?<=toolchain ).+' go.mod)
+        version=$(go version | cut -d' ' -f3)
+        if [ "$toolchain" != "$version" ]; then
+          echo "go version mismatch: $toolchain <> $version"
+          exit 1
+        fi

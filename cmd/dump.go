@@ -133,12 +133,12 @@ It can be used for backup and capture Forgejo server image to send to maintainer
 		&cli.BoolFlag{
 			Name:    "skip-repository",
 			Aliases: []string{"R"},
-			Usage:   "Skip the repository dumping",
+			Usage:   "Skip repositories",
 		},
 		&cli.BoolFlag{
 			Name:    "skip-log",
 			Aliases: []string{"L"},
-			Usage:   "Skip the log dumping",
+			Usage:   "Skip logs",
 		},
 		&cli.BoolFlag{
 			Name:  "skip-custom-dir",
@@ -159,6 +159,10 @@ It can be used for backup and capture Forgejo server image to send to maintainer
 		&cli.BoolFlag{
 			Name:  "skip-index",
 			Usage: "Skip bleve index data",
+		},
+		&cli.BoolFlag{
+			Name:  "skip-repo-archives",
+			Usage: "Skip repository archives",
 		},
 		&cli.GenericFlag{
 			Name:  "type",
@@ -233,7 +237,7 @@ func runDump(ctx *cli.Context) error {
 	if file == nil {
 		file, err = os.Create(fileName)
 		if err != nil {
-			fatal("Unable to open %s: %v", fileName, err)
+			fatal("Failed to open %s: %v", fileName, err)
 		}
 	}
 	defer file.Close()
@@ -250,7 +254,7 @@ func runDump(ctx *cli.Context) error {
 		iface, err = archiver.ByExtension(fileName)
 	}
 	if err != nil {
-		fatal("Unable to get archiver for extension: %v", err)
+		fatal("Failed to get archiver for extension: %v", err)
 	}
 
 	w, _ := iface.(archiver.Writer)
@@ -260,7 +264,7 @@ func runDump(ctx *cli.Context) error {
 	defer w.Close()
 
 	if ctx.IsSet("skip-repository") && ctx.Bool("skip-repository") {
-		log.Info("Skip dumping local repositories")
+		log.Info("Skipping local repositories")
 	} else {
 		log.Info("Dumping local repositories... %s", setting.RepoRootPath)
 		if err := addRecursiveExclude(w, "repos", setting.RepoRootPath, []string{absFileName}, verbose); err != nil {
@@ -268,9 +272,9 @@ func runDump(ctx *cli.Context) error {
 		}
 
 		if ctx.IsSet("skip-lfs-data") && ctx.Bool("skip-lfs-data") {
-			log.Info("Skip dumping LFS data")
+			log.Info("Skipping LFS data")
 		} else if !setting.LFS.StartServer {
-			log.Info("LFS isn't enabled. Skip dumping LFS data")
+			log.Info("LFS not enabled - skipping")
 		} else if err := storage.LFS.IterateObjects("", func(objPath string, object storage.Object) error {
 			info, err := object.Stat()
 			if err != nil {
@@ -295,7 +299,7 @@ func runDump(ctx *cli.Context) error {
 	defer func() {
 		_ = dbDump.Close()
 		if err := util.Remove(dbDump.Name()); err != nil {
-			log.Warn("Unable to remove temporary file: %s: Error: %v", dbDump.Name(), err)
+			log.Warn("Failed to remove temporary file: %s: Error: %v", dbDump.Name(), err)
 		}
 	}()
 
@@ -331,16 +335,16 @@ func runDump(ctx *cli.Context) error {
 					fatal("Failed to include custom: %v", err)
 				}
 			} else {
-				log.Info("Custom dir %s is inside data dir %s, skipped", setting.CustomPath, setting.AppDataPath)
+				log.Info("Custom dir %s is inside data dir %s, skipping", setting.CustomPath, setting.AppDataPath)
 			}
 		} else {
-			log.Info("Custom dir %s doesn't exist, skipped", setting.CustomPath)
+			log.Info("Custom dir %s does not exist, skipping", setting.CustomPath)
 		}
 	}
 
 	isExist, err := util.IsExist(setting.AppDataPath)
 	if err != nil {
-		log.Error("Unable to check if %s exists. Error: %v", setting.AppDataPath, err)
+		log.Error("Failed to check if %s exists: %v", setting.AppDataPath, err)
 	}
 	if isExist {
 		log.Info("Packing data directory...%s", setting.AppDataPath)
@@ -355,8 +359,14 @@ func runDump(ctx *cli.Context) error {
 		}
 
 		if ctx.IsSet("skip-index") && ctx.Bool("skip-index") {
+			log.Info("Skipping bleve index data")
 			excludes = append(excludes, setting.Indexer.RepoPath)
 			excludes = append(excludes, setting.Indexer.IssuePath)
+		}
+
+		if ctx.IsSet("skip-repo-archives") && ctx.Bool("skip-repo-archives") {
+			log.Info("Skipping repository archives data")
+			excludes = append(excludes, setting.RepoArchive.Storage.Path)
 		}
 
 		excludes = append(excludes, setting.RepoRootPath)
@@ -371,7 +381,7 @@ func runDump(ctx *cli.Context) error {
 	}
 
 	if ctx.IsSet("skip-attachment-data") && ctx.Bool("skip-attachment-data") {
-		log.Info("Skip dumping attachment data")
+		log.Info("Skipping attachment data")
 	} else if err := storage.Attachments.IterateObjects("", func(objPath string, object storage.Object) error {
 		info, err := object.Stat()
 		if err != nil {
@@ -384,9 +394,9 @@ func runDump(ctx *cli.Context) error {
 	}
 
 	if ctx.IsSet("skip-package-data") && ctx.Bool("skip-package-data") {
-		log.Info("Skip dumping package data")
+		log.Info("Skipping package data")
 	} else if !setting.Packages.Enabled {
-		log.Info("Packages isn't enabled. Skip dumping package data")
+		log.Info("Package registry not enabled - skipping")
 	} else if err := storage.Packages.IterateObjects("", func(objPath string, object storage.Object) error {
 		info, err := object.Stat()
 		if err != nil {
@@ -402,11 +412,11 @@ func runDump(ctx *cli.Context) error {
 	// ensuring that it's clear the dump is skipped whether the directory's initialized
 	// yet or not.
 	if ctx.IsSet("skip-log") && ctx.Bool("skip-log") {
-		log.Info("Skip dumping log files")
+		log.Info("Skipping log files")
 	} else {
 		isExist, err := util.IsExist(setting.Log.RootPath)
 		if err != nil {
-			log.Error("Unable to check if %s exists. Error: %v", setting.Log.RootPath, err)
+			log.Error("Failed to check if %s exists: %v", setting.Log.RootPath, err)
 		}
 		if isExist {
 			if err := addRecursiveExclude(w, "log", setting.Log.RootPath, []string{absFileName}, verbose); err != nil {
@@ -456,7 +466,7 @@ func addRecursiveExclude(w archiver.Writer, insidePath, absPath string, excludeA
 		currentInsidePath := path.Join(insidePath, file.Name())
 
 		if util.SliceContainsString(excludeAbsPath, currentAbsPath) {
-			log.Debug("Skipping %q because matched an excluded path.", currentAbsPath)
+			log.Debug("Skipping %q (matched an excluded path)", currentAbsPath)
 			continue
 		}
 

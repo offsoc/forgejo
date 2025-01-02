@@ -29,9 +29,9 @@ func TestWikiSearchContent(t *testing.T) {
 		return el.Text()
 	})
 	assert.Equal(t, []string{
-		"Home.md",
-		"Page-With-Spaced-Name.md",
-		"Unescaped File.md",
+		"Home",
+		"Page With Spaced Name",
+		"Unescaped File",
 	}, res)
 }
 

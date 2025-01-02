@@ -38,9 +38,8 @@ func TestAPITwoFactor(t *testing.T) {
 	tfa := &auth_model.TwoFactor{
 		UID: user.ID,
 	}
-	require.NoError(t, tfa.SetSecret(otpKey.Secret()))
 
-	require.NoError(t, auth_model.NewTwoFactor(db.DefaultContext, tfa))
+	require.NoError(t, auth_model.NewTwoFactor(db.DefaultContext, tfa, otpKey.Secret()))
 
 	req = NewRequest(t, "GET", "/api/v1/user").
 		AddBasicAuth(user.Name)

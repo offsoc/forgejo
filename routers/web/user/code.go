@@ -39,6 +39,7 @@ func CodeSearch(ctx *context.Context) {
 
 	language := ctx.FormTrim("l")
 	keyword := ctx.FormTrim("q")
+	path := ctx.FormTrim("path")
 
 	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
 	if mode := ctx.FormTrim("mode"); len(mode) > 0 {
@@ -88,6 +89,7 @@ func CodeSearch(ctx *context.Context) {
 			Keyword:        keyword,
 			IsKeywordFuzzy: isFuzzy,
 			Language:       language,
+			Filename:       path,
 			Paginator: &db.ListOptions{
 				Page:     page,
 				PageSize: setting.UI.RepoSearchPagingNum,

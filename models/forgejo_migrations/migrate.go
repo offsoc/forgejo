@@ -86,6 +86,8 @@ var migrations = []*Migration{
 	NewMigration("Add `delete_branch_after_merge` to `auto_merge` table", AddDeleteBranchAfterMergeToAutoMerge),
 	// v24 -> v25
 	NewMigration("Add `purpose` column to `forgejo_auth_token` table", AddPurposeToForgejoAuthToken),
+	// v25 -> v26
+	NewMigration("Migrate `secret` column to store keying material", MigrateTwoFactorToKeying),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.

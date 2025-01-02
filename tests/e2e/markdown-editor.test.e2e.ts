@@ -5,10 +5,42 @@
 // @watch end
 
 import {expect, type Page, type Locator} from '@playwright/test';
-import {test, load_logged_in_context, login_user} from './utils_e2e.ts';
+import {test, save_visual, load_logged_in_context, login_user} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
+});
+
+test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
+  test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari;');
+
+  const context = await load_logged_in_context(browser, workerInfo, 'user2');
+
+  // Editing the root README.md file for image preview
+  const editPath = '/user2/repo1/src/branch/master/README.md';
+
+  const page = await context.newPage();
+  const response = await page.goto(editPath, {waitUntil: 'domcontentloaded'});
+  expect(response?.status()).toBe(200);
+
+  // Click 'Edit file' tab
+  await page.locator('[data-tooltip-content="Edit file"]').click();
+
+  // This yields the monaco editor
+  const editor = page.getByRole('presentation').nth(0);
+  await editor.click();
+  // Clear all the content
+  await page.keyboard.press('ControlOrMeta+KeyA');
+  // Add the image
+  await page.keyboard.type('![Logo of Forgejo](./assets/logo.svg "Logo of Forgejo")');
+
+  // Click 'Preview' tab
+  await page.locator('a[data-tab="preview"]').click();
+
+  // Check for the image preview via the expected attribute
+  const preview = page.locator('div[data-tab="preview"] p[dir="auto"] a');
+  await expect(preview).toHaveAttribute('href', 'http://localhost:3003/user2/repo1/media/branch/master/assets/logo.svg');
+  await save_visual(page);
 });
 
 test('markdown indentation', async ({browser}, workerInfo) => {
@@ -193,6 +225,7 @@ test('markdown insert table', async ({browser}, workerInfo) => {
 
   const newTableModal = page.locator('div[data-markdown-table-modal-id="0"]');
   await expect(newTableModal).toBeVisible();
+  await save_visual(page);
 
   await newTableModal.locator('input[name="table-rows"]').fill('3');
   await newTableModal.locator('input[name="table-columns"]').fill('2');
@@ -203,6 +236,47 @@ test('markdown insert table', async ({browser}, workerInfo) => {
 
   const textarea = page.locator('textarea[name=content]');
   await expect(textarea).toHaveValue('| Header  | Header  |\n|---------|---------|\n| Content | Content |\n| Content | Content |\n| Content | Content |\n');
+  await save_visual(page);
+});
+
+async function testSingleMarkdownEditor(elem: Locator) {
+  await elem.locator('textarea').fill('**Hello**');
+
+  await elem.locator('a[data-tab-for="markdown-previewer"]').click();
+
+  const preview = await elem.locator('div[data-tab-panel="markdown-previewer"] > p').innerHTML();
+
+  expect(preview).toBe('<strong>Hello</strong>');
+}
+
+async function testMarkdownEditorPage(page: Page, url: string) {
+  const response = await page.goto(url);
+  expect(response?.status()).toBe(200);
+
+  const markdownEditors = await page.locator('.combo-markdown-editor-init').all();
+  expect(markdownEditors.length).toBeGreaterThanOrEqual(1);
+
+  for (const elem of markdownEditors) {
+    await testSingleMarkdownEditor(elem);
+  }
+}
+
+/* eslint playwright/expect-expect: ["error", { "assertFunctionNames": ["testMarkdownEditorPage"] }] */
+test('markdown editor init', async ({browser}, workerInfo) => {
+  const context = await load_logged_in_context(browser, workerInfo, 'user2');
+
+  const page = await context.newPage();
+
+  await testMarkdownEditorPage(page, '/user/settings');
+  await testMarkdownEditorPage(page, '/org/org3/settings');
+  await testMarkdownEditorPage(page, '/user2/-/projects/new');
+  await testMarkdownEditorPage(page, '/user2/-/projects/7/edit');
+  await testMarkdownEditorPage(page, '/user2/repo1/projects/new');
+  await testMarkdownEditorPage(page, '/user2/repo1/projects/1/edit');
+  await testMarkdownEditorPage(page, '/user2/repo1/releases/new');
+  await testMarkdownEditorPage(page, '/user2/repo1/releases/edit/v1.0');
+  await testMarkdownEditorPage(page, '/user2/repo1/milestones/new');
+  await testMarkdownEditorPage(page, '/user2/repo1/milestones/1/edit');
 });
 
 async function testSingleMarkdownEditor(elem: Locator) {

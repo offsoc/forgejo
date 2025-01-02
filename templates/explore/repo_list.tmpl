@@ -13,20 +13,20 @@
 						<a class="text primary name" href="{{.Link}}">{{.Name}}</a>
 						<span class="label-list">
 							{{if .IsArchived}}
-								<span class="ui basic label">{{ctx.Locale.Tr "repo.desc.archived"}}</span>
+								<span class="ui label">{{ctx.Locale.Tr "repo.desc.archived"}}</span>
 							{{end}}
 							{{if .IsPrivate}}
-								<span class="ui basic label">{{ctx.Locale.Tr "repo.desc.private"}}</span>
+								<span class="ui label">{{ctx.Locale.Tr "repo.desc.private"}}</span>
 							{{else}}
 								{{if .Owner.Visibility.IsPrivate}}
-									<span class="ui basic label">{{ctx.Locale.Tr "repo.desc.internal"}}</span>
+									<span class="ui label">{{ctx.Locale.Tr "repo.desc.internal"}}</span>
 								{{end}}
 							{{end}}
 							{{if .IsTemplate}}
-								<span class="ui basic label">{{ctx.Locale.Tr "repo.desc.template"}}</span>
+								<span class="ui label">{{ctx.Locale.Tr "repo.desc.template"}}</span>
 							{{end}}
 							{{if eq .ObjectFormatName "sha256"}}
-								<span class="ui basic label">{{ctx.Locale.Tr "repo.desc.sha256"}}</span>
+								<span class="ui label">{{ctx.Locale.Tr "repo.desc.sha256"}}</span>
 							{{end}}
 						</span>
 					</div>

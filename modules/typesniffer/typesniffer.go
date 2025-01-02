@@ -108,7 +108,7 @@ func DetectContentType(data []byte) SniffedType {
 		}
 	}
 
-	// AVIF is unsuported by http.DetectContentType
+	// AVIF is unsupported by http.DetectContentType
 	// Signature taken from https://stackoverflow.com/a/68322450
 	if bytes.Index(data, []byte("ftypavif")) == 4 {
 		ct = AvifMimeType

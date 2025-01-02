@@ -10,7 +10,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, load_logged_in_context} from './utils_e2e.ts';
+import {test, login_user, save_visual, load_logged_in_context} from './utils_e2e.ts';
 
 test.beforeAll(async ({browser}, workerInfo) => {
   await login_user(browser, workerInfo, 'user2');
@@ -33,6 +33,7 @@ test('workflow dispatch present', async ({browser}, workerInfo) => {
   await expect(menu).toBeHidden();
   await run_workflow_btn.click();
   await expect(menu).toBeVisible();
+  await save_visual(page);
 });
 
 test('workflow dispatch error: missing inputs', async ({browser}, workerInfo) => {
@@ -54,6 +55,7 @@ test('workflow dispatch error: missing inputs', async ({browser}, workerInfo) =>
   await page.locator('#workflow-dispatch-submit').click();
 
   await expect(page.getByText('Require value for input "String w/o. default".')).toBeVisible();
+  await save_visual(page);
 });
 
 test('workflow dispatch success', async ({browser}, workerInfo) => {
@@ -67,11 +69,13 @@ test('workflow dispatch success', async ({browser}, workerInfo) => {
   await page.locator('#workflow_dispatch_dropdown>button').click();
 
   await page.fill('input[name="inputs[string2]"]', 'abc');
+  await save_visual(page);
   await page.locator('#workflow-dispatch-submit').click();
 
   await expect(page.getByText('Workflow run was successfully requested.')).toBeVisible();
 
   await expect(page.locator('.run-list>:first-child .run-list-meta', {hasText: 'now'})).toBeVisible();
+  await save_visual(page);
 });
 
 test('workflow dispatch box not available for unauthenticated users', async ({page}) => {

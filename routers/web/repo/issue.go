@@ -1912,6 +1912,21 @@ func ViewIssue(ctx *context.Context) {
 
 		ctx.Data["MergeStyle"] = mergeStyle
 
+		var updateStyle repo_model.UpdateStyle
+		// Check correct values and select default
+		if ms, ok := ctx.Data["UpdateStyle"].(repo_model.UpdateStyle); !ok ||
+			!prConfig.IsUpdateStyleAllowed(ms) {
+			defaultUpdateStyle := prConfig.GetDefaultUpdateStyle()
+			if prConfig.IsUpdateStyleAllowed(defaultUpdateStyle) && !ok {
+				updateStyle = defaultUpdateStyle
+			} else if prConfig.AllowMerge {
+				updateStyle = repo_model.UpdateStyleMerge
+			} else if prConfig.AllowRebase {
+				updateStyle = repo_model.UpdateStyleRebase
+			}
+		}
+		ctx.Data["UpdateStyle"] = updateStyle
+
 		defaultMergeMessage, defaultMergeBody, err := pull_service.GetDefaultMergeMessage(ctx, ctx.Repo.GitRepo, pull, mergeStyle)
 		if err != nil {
 			ctx.ServerError("GetDefaultMergeMessage", err)
@@ -2055,6 +2070,8 @@ func ViewIssue(ctx *context.Context) {
 	ctx.Data["RefEndName"] = git.RefName(issue.Ref).ShortName()
 	ctx.Data["NewPinAllowed"] = pinAllowed
 	ctx.Data["PinEnabled"] = setting.Repository.Issue.MaxPinned != 0
+	ctx.Data["OpenGraphImageURL"] = issue.SummaryCardURL()
+	ctx.Data["OpenGraphImageAltText"] = ctx.Tr("repo.issues.summary_card_alt", issue.Title, issue.Repo.FullName())
 
 	prepareHiddenCommentType(ctx)
 	if ctx.Written() {
@@ -3778,7 +3795,7 @@ func combineRequestReviewComments(issue *issues_model.Issue) {
 			}
 		}
 
-		// Propoagate creation time.
+		// Propagate creation time.
 		prev.CreatedUnix = cur.CreatedUnix
 
 		// Remove the current comment since it has been combined to prev comment

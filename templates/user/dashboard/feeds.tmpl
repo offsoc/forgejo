@@ -37,6 +37,9 @@
 					{{else if .GetOpType.InActions "merge_pull_request"}}
 						{{$index := index .GetIssueInfos 0}}
 						{{ctx.Locale.Tr "action.merge_pull_request" (printf "%s/pulls/%s" (.GetRepoLink ctx) $index) $index (.ShortRepoPath ctx)}}
+					{{else if .GetOpType.InActions "auto_merge_pull_request"}}
+						{{$index := index .GetIssueInfos 0}}
+						{{ctx.Locale.Tr "action.auto_merge_pull_request" (printf "%s/pulls/%s" (.GetRepoLink ctx) $index) $index (.ShortRepoPath ctx)}}
 					{{else if .GetOpType.InActions "close_issue"}}
 						{{$index := index .GetIssueInfos 0}}
 						{{ctx.Locale.Tr "action.close_issue" (printf "%s/issues/%s" (.GetRepoLink ctx) $index) $index (.ShortRepoPath ctx)}}
