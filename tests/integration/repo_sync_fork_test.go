@@ -74,25 +74,25 @@ func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
 }
 
 func TestAPIRepoSyncForkDefault(t *testing.T) {
-	onGiteaRun(t, func(*testing.T, *url.URL) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		syncForkTest(t, "SyncForkDefault", "sync_fork", false)
 	})
 }
 
 func TestAPIRepoSyncForkBranch(t *testing.T) {
-	onGiteaRun(t, func(*testing.T, *url.URL) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		syncForkTest(t, "SyncForkBranch", "sync_fork/master", false)
 	})
 }
 
 func TestWebRepoSyncForkBranch(t *testing.T) {
-	onGiteaRun(t, func(*testing.T, *url.URL) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		syncForkTest(t, "SyncForkBranch", "sync_fork/master", true)
 	})
 }
 
 func TestWebRepoSyncForkHomepage(t *testing.T) {
-	onGiteaRun(t, func(*testing.T, *url.URL) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		forkName := "SyncForkHomepage"
 		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 20})
 
@@ -112,6 +112,6 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 
 		resp := session.MakeRequest(t, NewRequestf(t, "GET", "/%s/%s", user.Name, forkName), http.StatusOK)
 
-		assert.Contains(t, resp.Body.String(), "This branch is 1 commit behind <a href='http://localhost:3003/user2/repo1/src/branch/master'>user2/repo1:master</a>")
+		assert.Contains(t, resp.Body.String(), fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/master'>user2/repo1:master</a>", u.Port()))
 	})
 }
