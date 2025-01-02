@@ -51,6 +51,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/routers/web/feed"
 	"code.gitea.io/gitea/services/context"
+	funding_service "code.gitea.io/gitea/services/funding"
 	issue_service "code.gitea.io/gitea/services/issue"
 	files_service "code.gitea.io/gitea/services/repository/files"
 
@@ -441,6 +442,11 @@ func renderFile(ctx *context.Context, entry *git.TreeEntry) {
 			if len(warnings) > 0 {
 				ctx.Data["FileWarning"] = strings.Join(warnings, "\n")
 			}
+		}
+	} else if funding_service.IsFundingConfig(ctx.Repo.TreePath) {
+		_, fundingErr := funding_service.GetFundingFromPath(ctx.Repo.Repository, ctx.Repo.TreePath, ctx.Repo.Commit)
+		if fundingErr != nil {
+			ctx.Data["FileError"] = strings.TrimSpace(fundingErr.Error())
 		}
 	}
 

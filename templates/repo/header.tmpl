@@ -60,6 +60,13 @@
 						{{svg "octicon-rss" 16}}
 					</a>
 					{{end}}
+					{{if $.Funding}}
+						<div class="ui labeled button">
+							<button class="ui compact small basic show-modal button" data-modal="#funding-modal">
+								{{svg "octicon-heart"}}{{ctx.Locale.Tr "sponsor.button_text"}}
+							</button>
+						</div>
+					{{end}}
 					{{template "repo/watch_unwatch" $}}
 					{{if not $.DisableStars}}
 					{{template "repo/star_unstar" $}}
@@ -199,3 +206,9 @@
 	</overflow-menu>
 	<div class="ui tabs divider"></div>
 </div>
+
+{{if .Funding}}
+	<div class="ui small modal" id="funding-modal">
+		{{template "shared/funding" .}}
+	</div>
+{{end}}

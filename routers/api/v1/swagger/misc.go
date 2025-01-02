@@ -69,3 +69,10 @@ type swaggerResponseBoolean struct {
 	// in:body
 	Body bool `json:"body"`
 }
+
+// ConfigValidation
+// swagger:response ConfigValidation
+type swaggerConfigValidation struct {
+	// in:body
+	Body api.ConfigValidation `json:"body"`
+}

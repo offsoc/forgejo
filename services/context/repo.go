@@ -35,6 +35,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 	asymkey_service "code.gitea.io/gitea/services/asymkey"
+	funding_service "code.gitea.io/gitea/services/funding"
 
 	"github.com/editorconfig/editorconfig-core-go/v2"
 )
@@ -697,6 +698,8 @@ func RepoAssignment(ctx *Context) context.CancelFunc {
 		ctx.Data["BranchName"] = ctx.Repo.Repository.DefaultBranch
 		return cancel
 	}
+
+	ctx.Data["Funding"], _ = funding_service.GetFundingFromDefaultBranch(ctx, ctx.Repo.Repository)
 
 	branchOpts := git_model.FindBranchOptions{
 		RepoID:          ctx.Repo.Repository.ID,
