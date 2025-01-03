@@ -77,6 +77,7 @@ func CompareDiff(ctx *context.APIContext) {
 	files := ctx.FormString("files") == "" || ctx.FormBool("files")
 
 	apiCommits := make([]*api.Commit, 0, len(ci.Commits))
+	apiFiles := []*api.CommitAffectedFiles{}
 	userCache := make(map[string]*user_model.User)
 	for i := 0; i < len(ci.Commits); i++ {
 		apiCommit, err := convert.ToCommit(ctx, ctx.Repo.Repository, ctx.Repo.GitRepo, ci.Commits[i], userCache,
@@ -90,10 +91,12 @@ func CompareDiff(ctx *context.APIContext) {
 			return
 		}
 		apiCommits = append(apiCommits, apiCommit)
+		apiFiles = append(apiFiles, apiCommit.Files...)
 	}
 
 	ctx.JSON(http.StatusOK, &api.Compare{
 		TotalCommits: len(ci.Commits),
 		Commits:      apiCommits,
+		Files:        apiFiles,
 	})
 }
