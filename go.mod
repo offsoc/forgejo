@@ -113,7 +113,7 @@ require (
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/yaml.v3 v3.0.1
-	mvdan.cc/xurls/v2 v2.5.0
+	mvdan.cc/xurls/v2 v2.6.0
 	xorm.io/builder v0.3.13
 	xorm.io/xorm v1.3.9
 )
