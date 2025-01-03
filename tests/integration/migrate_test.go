@@ -5,7 +5,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -145,13 +144,10 @@ func TestMigrateWithWiki(t *testing.T) {
 				// Check form title
 				title := htmlDoc.doc.Find("title").Text()
 				assert.Contains(t, title, translation.NewLocale("en-US").TrString("new_migrate.title"))
-				// Get the link of migration button
-				link, exists := htmlDoc.doc.Find(`form.ui.form[action^="/repo/migrate"]`).Attr("action")
-				assert.True(t, exists, "The template has changed")
 				// Step 4: submit the migration to only migrate issues
 				migratedRepoName := "otherrepo-" + s.svc.Name()
-				req = NewRequestWithValues(t, "POST", link, map[string]string{
-					"_csrf":       htmlDoc.GetCSRF(),
+				req = NewRequestWithValues(t, "POST", "/repo/migrate", map[string]string{
+					"_csrf":       GetCSRF(t, session, "/repo/migrate"),
 					"service":     fmt.Sprintf("%d", s.svc),
 					"clone_addr":  fmt.Sprintf("%s%s/%s", u, ownerName, repoName),
 					"auth_token":  token,
@@ -167,9 +163,7 @@ func TestMigrateWithWiki(t *testing.T) {
 				// Step 6: check the repo was created and load the repo
 				migratedRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName})
 				// Step 7: check if the wiki is enabled
-				if !migratedRepo.UnitEnabled(context.TODO(), unit.TypeWiki) {
-					t.Errorf("Expected wiki to be enabled in the migrated repo. Wiki is disabled")
-				}
+				assert.True(t, migratedRepo.UnitEnabled(db.DefaultContext, unit.TypeWiki))
 			})
 		}
 	})
@@ -206,13 +200,10 @@ func TestMigrateWithReleases(t *testing.T) {
 				// Check form title
 				title := htmlDoc.doc.Find("title").Text()
 				assert.Contains(t, title, translation.NewLocale("en-US").TrString("new_migrate.title"))
-				// Get the link of migration button
-				link, exists := htmlDoc.doc.Find(`form.ui.form[action^="/repo/migrate"]`).Attr("action")
-				assert.True(t, exists, "The template has changed")
 				// Step 4: submit the migration to only migrate issues
 				migratedRepoName := "otherrepo-" + s.svc.Name()
-				req = NewRequestWithValues(t, "POST", link, map[string]string{
-					"_csrf":       htmlDoc.GetCSRF(),
+				req = NewRequestWithValues(t, "POST", "/repo/migrate", map[string]string{
+					"_csrf":       GetCSRF(t, session, "/repo/migrate"),
 					"service":     fmt.Sprintf("%d", s.svc),
 					"clone_addr":  fmt.Sprintf("%s%s/%s", u, ownerName, repoName),
 					"auth_token":  token,
@@ -228,9 +219,7 @@ func TestMigrateWithReleases(t *testing.T) {
 				// Step 6: check the repo was created and load the repo
 				migratedRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName})
 				// Step 7: check if releases are enabled
-				if !migratedRepo.UnitEnabled(context.TODO(), unit.TypeReleases) {
-					t.Errorf("Expected releases to be enabled. Releases are disabled")
-				}
+				assert.True(t, migratedRepo.UnitEnabled(db.DefaultContext, unit.TypeReleases))
 			})
 		}
 	})
