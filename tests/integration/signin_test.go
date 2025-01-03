@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -97,6 +98,9 @@ func TestSigninWithRememberMe(t *testing.T) {
 
 func TestDisableSignin(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
+	// Mock alternative auth ways as enabled
+	defer test.MockVariableValue(&setting.Service.EnableOpenIDSignIn, true)()
+	defer test.MockVariableValue(&setting.Service.EnableOpenIDSignUp, true)()
 	t.Run("Disabled", func(t *testing.T) {
 		defer test.MockVariableValue(&setting.Service.EnableInternalSignIn, false)()
 
@@ -107,6 +111,7 @@ func TestDisableSignin(t *testing.T) {
 			resp := MakeRequest(t, req, http.StatusOK)
 			htmlDoc := NewHTMLParser(t, resp.Body)
 			htmlDoc.AssertElement(t, "form[action='/user/login']", false)
+			htmlDoc.AssertElement(t, ".divider-text", false)
 		})
 
 		t.Run("Signin", func(t *testing.T) {
@@ -126,6 +131,7 @@ func TestDisableSignin(t *testing.T) {
 			resp := MakeRequest(t, req, http.StatusOK)
 			htmlDoc := NewHTMLParser(t, resp.Body)
 			htmlDoc.AssertElement(t, "form[action='/user/login']", true)
+			htmlDoc.AssertElement(t, ".divider-text", true)
 		})
 
 		t.Run("Signin", func(t *testing.T) {
