@@ -1,5 +1,5 @@
 .switch {
-	display: grid;
+  display: grid;
   grid-auto-flow: column;
   align-items: center;
   background: var(--color-menu);
