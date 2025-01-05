@@ -160,6 +160,7 @@ func (g *GiteaDownloader) GetRepoInfo() (*base.Repository, error) {
 		CloneURL:      repo.CloneURL,
 		OriginalURL:   repo.HTMLURL,
 		DefaultBranch: repo.DefaultBranch,
+		Website:       repo.Website,
 	}, nil
 }
 
