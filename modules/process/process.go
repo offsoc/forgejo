@@ -5,12 +5,14 @@ package process
 
 import (
 	"context"
+	"runtime/trace"
 	"time"
 )
 
 var (
 	SystemProcessType  = "system"
 	RequestProcessType = "request"
+	GitProcessType     = "git"
 	NormalProcessType  = "normal"
 	NoneProcessType    = "none"
 )
@@ -23,6 +25,7 @@ type process struct {
 	Start       time.Time
 	Cancel      context.CancelFunc
 	Type        string
+	TraceTrask  *trace.Task
 }
 
 // ToProcess converts a process to a externally usable Process

@@ -6,6 +6,7 @@ package common
 import (
 	"fmt"
 	"net/http"
+	"runtime/trace"
 	"strings"
 
 	"code.gitea.io/gitea/modules/cache"
@@ -43,6 +44,8 @@ func ProtocolMiddlewares() (handlers []any) {
 		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 			ctx, _, finished := process.GetManager().AddTypedContext(req.Context(), fmt.Sprintf("%s: %s", req.Method, req.RequestURI), process.RequestProcessType, true)
 			defer finished()
+			trace.Log(ctx, "method", req.Method)
+			trace.Log(ctx, "url", req.RequestURI)
 			next.ServeHTTP(context.WrapResponseWriter(resp), req.WithContext(cache.WithCacheContext(ctx)))
 		})
 	})
