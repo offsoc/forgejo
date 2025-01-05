@@ -5,16 +5,13 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, save_visual, login_user, login} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 import {validate_form} from './shared/forms.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
-test('org team settings', async ({browser}, workerInfo) => {
+test('org team settings', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Cannot get it to work - as usual');
-  const page = await login({browser}, workerInfo);
   const response = await page.goto('/org/org3/teams/team1/edit');
   expect(response?.status()).toBe(200);
 
