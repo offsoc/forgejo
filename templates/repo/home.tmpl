@@ -6,15 +6,10 @@
 		{{template "repo/code/recently_pushed_new_branches" .}}
 		{{if and (not .HideRepoInfo) (not .IsBlame)}}
 		<div class="repo-description">
-			<div id="repo-desc" class="tw-break-anywhere tw-text-16 tw-flex tw-flex-col">
+			<div id="repo-desc" class="tw-break-anywhere tw-text-16">
 				{{$description := .Repository.DescriptionHTML $.Context}}
 				{{if $description}}<span class="description">{{$description | RenderCodeBlock}}</span>{{else}}<span class="no-description text-italic">{{ctx.Locale.Tr "repo.no_desc"}}</span>{{end}}
-				{{if .Repository.Website}}
-				<div class="tw-flex tw-items-center tw-gap-1 tw-mt-2">
-					{{svg "octicon-link"}}
-					<a class="link" href="{{.Repository.Website}}">{{.Repository.Website}}</a>
-				</div>
-				{{end}}
+				{{if .Repository.Website}}<a class="link" href="{{.Repository.Website}}">{{.Repository.Website}}</a>{{end}}
 			</div>
 		</div>
 		<div class="tw-flex tw-items-center tw-flex-wrap tw-gap-2 tw-my-2" id="repo-topics">
