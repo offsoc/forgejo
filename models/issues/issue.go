@@ -416,20 +416,6 @@ func (issue *Issue) SummaryCardURL() string {
 	return fmt.Sprintf("%s/summary-card", issue.HTMLURL())
 }
 
-func (issue *Issue) SummaryCardSize() (int, int) {
-	return 1200, 600
-}
-
-func (issue *Issue) SummaryCardWidth() int {
-	width, _ := issue.SummaryCardSize()
-	return width
-}
-
-func (issue *Issue) SummaryCardHeight() int {
-	_, height := issue.SummaryCardSize()
-	return height
-}
-
 // Link returns the issue's relative URL.
 func (issue *Issue) Link() string {
 	var path string

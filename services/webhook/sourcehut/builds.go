@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"io"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -189,11 +190,11 @@ func (pc sourcehutConvertor) Package(_ *api.PackagePayload) (graphqlPayload[buil
 	return graphqlPayload[buildsVariables]{}, shared.ErrPayloadTypeNotSupported
 }
 
-// mustBuildManifest adjusts the manifest to submit to the builds service
+// newPayload opens and adjusts the manifest to submit to the builds service
 //
 // in case of an error the Error field will be set, to be visible by the end-user under recent deliveries
 func (pc sourcehutConvertor) newPayload(repo *api.Repository, commitID, ref, note string, trusted bool) (graphqlPayload[buildsVariables], error) {
-	manifest, err := pc.buildManifest(repo, commitID, ref)
+	manifest, err := pc.constructManifest(repo, commitID, ref)
 	if err != nil {
 		if len(manifest) == 0 {
 			return graphqlPayload[buildsVariables]{}, err
@@ -238,9 +239,9 @@ func (pc sourcehutConvertor) newPayload(repo *api.Repository, commitID, ref, not
 	}, nil
 }
 
-// buildManifest adjusts the manifest to submit to the builds service
+// constructManifest opens and adjusts the manifest to submit to the builds service
 // in case of an error the []byte might contain an error that can be displayed to the user
-func (pc sourcehutConvertor) buildManifest(repo *api.Repository, commitID, gitRef string) ([]byte, error) {
+func (pc sourcehutConvertor) constructManifest(repo *api.Repository, commitID, gitRef string) ([]byte, error) {
 	gitRepo, err := gitrepo.OpenRepository(pc.ctx, repo)
 	if err != nil {
 		msg := "could not open repository"
@@ -265,6 +266,10 @@ func (pc sourcehutConvertor) buildManifest(repo *api.Repository, commitID, gitRe
 	}
 	defer r.Close()
 
+	return adjustManifest(repo, commitID, gitRef, r, pc.meta.ManifestPath)
+}
+
+func adjustManifest(repo *api.Repository, commitID, gitRef string, r io.Reader, path string) ([]byte, error) {
 	// reference: https://man.sr.ht/builds.sr.ht/manifest.md
 	var manifest struct {
 		Sources     []string          `yaml:"sources"`
@@ -273,7 +278,7 @@ func (pc sourcehutConvertor) buildManifest(repo *api.Repository, commitID, gitRe
 		Rest map[string]yaml.Node `yaml:",inline"`
 	}
 	if err := yaml.NewDecoder(r).Decode(&manifest); err != nil {
-		msg := fmt.Sprintf("could not decode manifest %q", pc.meta.ManifestPath)
+		msg := fmt.Sprintf("could not decode manifest %q", path)
 		return []byte(msg), fmt.Errorf(msg+": %w", err)
 	}
 
@@ -284,16 +289,21 @@ func (pc sourcehutConvertor) buildManifest(repo *api.Repository, commitID, gitRe
 	manifest.Environment["BUILD_SUBMITTER_URL"] = setting.AppURL
 	manifest.Environment["GIT_REF"] = gitRef
 
-	source := repo.CloneURL + "#" + commitID
 	found := false
 	for i, s := range manifest.Sources {
-		if s == repo.CloneURL {
-			manifest.Sources[i] = source
+		if s == repo.CloneURL || s == repo.SSHURL {
+			manifest.Sources[i] = s + "#" + commitID
 			found = true
 			break
 		}
 	}
 	if !found {
+		source := repo.CloneURL
+		if repo.Private || setting.Repository.DisableHTTPGit {
+			// default to ssh for private repos or when git clone is disabled over http
+			source = repo.SSHURL
+		}
+		source += "#" + commitID
 		manifest.Sources = append(manifest.Sources, source)
 	}
 

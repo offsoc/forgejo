@@ -59,9 +59,9 @@ func initRemoveTags() {
 	oldnew := []string{}
 	for _, el := range []string{
 		"email@example.com", "correu@example.com", "epasts@domens.lv", "email@exemplo.com", "eposta@ornek.com", "email@példa.hu", "email@esempio.it",
-		"user", "utente", "lietotājs", "gebruiker", "usuário", "Benutzer", "Bruker",
+		"user", "utente", "lietotājs", "gebruiker", "usuário", "Benutzer", "Bruker", "bruger",
 		"server", "servidor", "kiszolgáló", "serveris",
-		"label", "etichetta", "etiķete", "rótulo", "Label", "utilizador",
+		"label", "etichetta", "etiķete", "rótulo", "Label", "utilizador", "etiket", "iezīme",
 	} {
 		oldnew = append(oldnew, "<"+el+">", "REPLACED-TAG")
 	}

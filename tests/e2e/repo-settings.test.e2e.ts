@@ -7,16 +7,13 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, save_visual, login_user, login} from './utils_e2e.ts';
+import {test, save_visual} from './utils_e2e.ts';
 import {validate_form} from './shared/forms.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
-test('repo webhook settings', async ({browser}, workerInfo) => {
+test('repo webhook settings', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Cannot get it to work - as usual');
-  const page = await login({browser}, workerInfo);
   const response = await page.goto('/user2/repo1/settings/hooks/forgejo/new');
   expect(response?.status()).toBe(200);
 
@@ -35,9 +32,8 @@ test('repo webhook settings', async ({browser}, workerInfo) => {
 });
 
 test.describe('repo branch protection settings', () => {
-  test('form', async ({browser}, workerInfo) => {
-    test.skip(workerInfo.project.name === 'Mobile Safari', 'Cannot get it to work - as usual');
-    const page = await login({browser}, workerInfo);
+  test('form', async ({page}, {project}) => {
+    test.skip(project.name === 'Mobile Safari', 'Cannot get it to work - as usual');
     const response = await page.goto('/user2/repo1/settings/branches/edit');
     expect(response?.status()).toBe(200);
 
@@ -56,8 +52,7 @@ test.describe('repo branch protection settings', () => {
     await save_visual(page);
   });
 
-  test.afterEach(async ({browser}, workerInfo) => {
-    const page = await login({browser}, workerInfo);
+  test.afterEach(async ({page}) => {
     // delete the rule for the next test
     await page.goto('/user2/repo1/settings/branches/');
     await page.waitForLoadState('domcontentloaded');

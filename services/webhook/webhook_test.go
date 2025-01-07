@@ -10,9 +10,12 @@ import (
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
+	user_model "code.gitea.io/gitea/models/user"
 	webhook_model "code.gitea.io/gitea/models/webhook"
+	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"code.gitea.io/gitea/services/convert"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -97,4 +100,12 @@ func TestPrepareWebhooksBranchFilterNoMatch(t *testing.T) {
 			unittest.AssertNotExistsBean(t, &webhook_model.HookTask{HookID: w.ID})
 		})
 	}
+}
+
+func TestWebhookUserMail(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	setting.Service.NoReplyAddress = "no-reply.com"
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+	assert.Equal(t, user.GetPlaceholderEmail(), convert.ToUser(db.DefaultContext, user, nil).Email)
+	assert.Equal(t, user.Email, convert.ToUser(db.DefaultContext, user, user).Email)
 }

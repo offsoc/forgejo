@@ -419,6 +419,10 @@ func Diff(ctx *context.Context) {
 		}
 	}
 
+	ctx.Data["OpenGraphTitle"] = commit.Summary() + " · " + base.ShortSha(commitID)
+	ctx.Data["OpenGraphURL"] = fmt.Sprintf("%s/commit/%s", ctx.Repo.Repository.HTMLURL(), commitID)
+	_, ctx.Data["OpenGraphDescription"], _ = strings.Cut(commit.Message(), "\n")
+
 	ctx.HTML(http.StatusOK, tplCommitPage)
 }
 

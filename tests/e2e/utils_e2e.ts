@@ -1,9 +1,31 @@
 import {expect, test as baseTest, type Browser, type BrowserContextOptions, type APIRequestContext, type TestInfo, type Page} from '@playwright/test';
 
-export const test = baseTest.extend({
-  context: async ({browser}, use) => {
-    return use(await test_context(browser));
+import * as path from 'node:path';
+
+const AUTH_PATH = 'tests/e2e/.auth';
+
+type AuthScope = 'logout' | 'shared' | 'webauthn';
+
+export type TestOptions = {
+  forEachTest: void
+  user: string | null;
+  authScope: AuthScope;
+};
+
+export const test = baseTest.extend<TestOptions>({
+  context: async ({browser, user, authScope, contextOptions}, use, {project}) => {
+    if (user && authScope) {
+      const browserName = project.name.toLowerCase().replace(' ', '-');
+      contextOptions.storageState = path.join(AUTH_PATH, `state-${browserName}-${user}-${authScope}.json`);
+    } else {
+      // if no user is given, ensure to have clean state
+      contextOptions.storageState = {cookies: [], origins: []};
+    }
+
+    return use(await test_context(browser, contextOptions));
   },
+  user: null,
+  authScope: 'shared',
   // see https://playwright.dev/docs/test-fixtures#adding-global-beforeeachaftereach-hooks
   forEachTest: [async ({page}, use) => {
     await use();
@@ -15,7 +37,7 @@ export const test = baseTest.extend({
   }, {auto: true}],
 });
 
-async function test_context(browser: Browser, options?: BrowserContextOptions) {
+export async function test_context(browser: Browser, options?: BrowserContextOptions) {
   const context = await browser.newContext(options);
 
   context.on('page', (page) => {
@@ -81,6 +103,14 @@ export async function save_visual(page: Page) {
     await page.locator('.flex-item-body > relative-time').filter({hasText: /now|minute/}).evaluateAll((nodes) => {
       for (const node of nodes) node.outerHTML = 'relative time in repo';
     });
+    // dynamically generated UUIDs
+    await page.getByText('dyn-id-').evaluateAll((nodes) => {
+      for (const node of nodes) node.innerHTML = node.innerHTML.replaceAll(/dyn-id-[a-f0-9-]+/g, 'dynamic-id');
+    });
+    // repeat above, work around https://github.com/microsoft/playwright/issues/34152
+    await page.getByText('dyn-id-').evaluateAll((nodes) => {
+      for (const node of nodes) node.innerHTML = node.innerHTML.replaceAll(/dyn-id-[a-f0-9-]+/g, 'dynamic-id');
+    });
     await page.locator('relative-time').evaluateAll((nodes) => {
       for (const node of nodes) node.outerHTML = 'time element';
     });
@@ -97,6 +127,9 @@ export async function save_visual(page: Page) {
         page.locator('#repo_migrating'),
         // update order of recently created repos is not fully deterministic
         page.locator('.flex-item-main').filter({hasText: 'relative time in repo'}),
+        page.locator('#activity-feed'),
+        // dynamic IDs in fixed-size inputs
+        page.locator('input[value*="dyn-id-"]'),
       ],
     });
   }
@@ -121,4 +154,9 @@ export async function create_temp_user(browser: Browser, workerInfo: TestInfo, r
   expect(newUser.ok()).toBeTruthy();
 
   return {context: await login_user(browser, workerInfo, username), username};
+}
+
+// returns a random string with a pattern that can be filtered for screenshots automatically
+export function dynamic_id() {
+  return `dyn-id-${globalThis.crypto.randomUUID()}`;
 }

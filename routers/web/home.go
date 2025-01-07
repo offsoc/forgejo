@@ -61,6 +61,9 @@ func Home(ctx *context.Context) {
 
 	ctx.Data["PageIsHome"] = true
 	ctx.Data["IsRepoIndexerEnabled"] = setting.Indexer.RepoIndexerEnabled
+
+	ctx.Data["OpenGraphDescription"] = setting.UI.Meta.Description
+
 	ctx.HTML(http.StatusOK, tplHome)
 }
 

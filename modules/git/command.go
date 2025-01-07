@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"runtime/trace"
 	"strings"
 	"time"
 
@@ -317,12 +318,13 @@ func (c *Command) Run(opts *RunOpts) error {
 	var finished context.CancelFunc
 
 	if opts.UseContextTimeout {
-		ctx, cancel, finished = process.GetManager().AddContext(c.parentContext, desc)
+		ctx, cancel, finished = process.GetManager().AddTypedContext(c.parentContext, desc, process.GitProcessType, true)
 	} else {
-		ctx, cancel, finished = process.GetManager().AddContextTimeout(c.parentContext, timeout, desc)
+		ctx, cancel, finished = process.GetManager().AddTypedContextTimeout(c.parentContext, timeout, desc, process.GitProcessType, true)
 	}
 	defer finished()
 
+	trace.Log(ctx, "command", desc)
 	startTime := time.Now()
 
 	cmd := exec.CommandContext(ctx, c.prog, c.args...)

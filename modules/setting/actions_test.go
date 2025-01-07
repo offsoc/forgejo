@@ -117,7 +117,7 @@ func Test_getDefaultActionsURLForActions(t *testing.T) {
 			iniStr: `
 [actions]
 `,
-			wantURL: "https://code.forgejo.org",
+			wantURL: "https://data.forgejo.org",
 		},
 		{
 			name: "github",

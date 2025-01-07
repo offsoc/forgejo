@@ -103,6 +103,10 @@ func NewFuncMap() template.FuncMap {
 		"AppVer": func() string {
 			return setting.AppVer
 		},
+		"AppVerNoMetadata": func() string {
+			version, _, _ := strings.Cut(setting.AppVer, "+")
+			return version
+		},
 		"AppDomain": func() string { // documented in mail-templates.md
 			return setting.Domain
 		},

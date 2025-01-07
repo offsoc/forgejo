@@ -36,11 +36,13 @@
 				</thead>
 				<tbody>
 					{{range .PackageDescriptor.Metadata.Manifests}}
-					<tr>
+						{{if ne .Platform "unknown/unknown"}}
+						<tr>
 						<td><a href="{{$.PackageDescriptor.PackageWebLink}}/{{PathEscape .Digest}}">{{.Digest}}</a></td>
 						<td>{{.Platform}}</td>
 						<td>{{ctx.Locale.TrSize .Size}}</td>
-					</tr>
+						</tr>
+						{{end}}
 					{{end}}
 				</tbody>
 			</table>

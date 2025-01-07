@@ -17,6 +17,7 @@ import (
 	"sort"
 	"strings"
 
+	asymkey_model "code.gitea.io/gitea/models/asymkey"
 	"code.gitea.io/gitea/models/auth"
 	org_model "code.gitea.io/gitea/models/organization"
 	user_model "code.gitea.io/gitea/models/user"
@@ -1183,8 +1184,62 @@ func updateAvatarIfNeed(ctx *context.Context, url string, u *user_model.User) {
 	}
 }
 
+func getSSHKeys(source *oauth2.Source, gothUser *goth.User) ([]string, error) {
+	key := source.AttributeSSHPublicKey
+	value, exists := gothUser.RawData[key]
+	if !exists {
+		return []string{}, nil
+	}
+
+	rawSlice, ok := value.([]any)
+	if !ok {
+		return nil, fmt.Errorf("unexpected type for SSH public key, expected []interface{} but got %T", value)
+	}
+
+	sshKeys := make([]string, 0, len(rawSlice))
+	for i, v := range rawSlice {
+		str, ok := v.(string)
+		if !ok {
+			return nil, fmt.Errorf("unexpected element type at index %d in SSH public key array, expected string but got %T", i, v)
+		}
+		sshKeys = append(sshKeys, str)
+	}
+
+	return sshKeys, nil
+}
+
+func updateSSHPubIfNeed(
+	ctx *context.Context,
+	authSource *auth.Source,
+	fetchedUser *goth.User,
+	user *user_model.User,
+) error {
+	oauth2Source := authSource.Cfg.(*oauth2.Source)
+
+	if oauth2Source.ProvidesSSHKeys() {
+		sshKeys, err := getSSHKeys(oauth2Source, fetchedUser)
+		if err != nil {
+			return err
+		}
+
+		if asymkey_model.SynchronizePublicKeys(ctx, user, authSource, sshKeys) {
+			err = asymkey_model.RewriteAllPublicKeys(ctx)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func handleOAuth2SignIn(ctx *context.Context, source *auth.Source, u *user_model.User, gothUser goth.User) {
 	updateAvatarIfNeed(ctx, gothUser.AvatarURL, u)
+	err := updateSSHPubIfNeed(ctx, source, &gothUser, u)
+	if err != nil {
+		ctx.ServerError("updateSSHPubIfNeed", err)
+		return
+	}
 
 	needs2FA := false
 	if !source.Cfg.(*oauth2.Source).SkipLocalTwoFA {

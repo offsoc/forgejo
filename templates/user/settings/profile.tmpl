@@ -4,126 +4,121 @@
 			{{ctx.Locale.Tr "settings.public_profile"}}
 		</h4>
 		<div class="ui attached segment">
-			<p>{{ctx.Locale.Tr "settings.profile_desc"}}</p>
 			<form class="ui form" action="{{.Link}}" method="post">
 				{{.CsrfTokenHtml}}
-				<div class="required field {{if .Err_Name}}error{{end}}">
-					<label for="username">{{ctx.Locale.Tr "username"}}
-						<span class="text red tw-hidden" id="name-change-prompt"> {{ctx.Locale.Tr "settings.change_username_prompt"}}</span>
-						<span class="text red tw-hidden" id="name-change-redirect-prompt"> {{ctx.Locale.Tr "settings.change_username_redirect_prompt"}}</span>
+				<fieldset>
+					<legend>{{ctx.Locale.Tr "settings.profile_desc"}}</legend>
+					<label {{if .Err_Name}}class="field error"{{end}}>
+						{{ctx.Locale.Tr "username"}}
+						<input name="name" value="{{.SignedUser.Name}}" data-name="{{.SignedUser.Name}}" autofocus required {{if or (not .SignedUser.IsLocal) .IsReverseProxy}}disabled{{end}} maxlength="40">
+						{{if or (not .SignedUser.IsLocal) .IsReverseProxy}}
+							<span class="help">{{ctx.Locale.Tr "settings.password_username_disabled"}}</span>
+						{{else}}
+							<span class="help">
+								{{ctx.Locale.Tr "settings.change_username_prompt"}}
+								{{ctx.Locale.Tr "settings.change_username_redirect_prompt"}}
+							</span>
+						{{end}}
 					</label>
-					<input id="username" name="name" value="{{.SignedUser.Name}}" data-name="{{.SignedUser.Name}}" autofocus required {{if or (not .SignedUser.IsLocal) .IsReverseProxy}}disabled{{end}} maxlength="40">
-					{{if or (not .SignedUser.IsLocal) .IsReverseProxy}}
-					<p class="help text blue">{{ctx.Locale.Tr "settings.password_username_disabled"}}</p>
-					{{end}}
-				</div>
-				<div class="field {{if .Err_FullName}}error{{end}}">
-					<label for="full_name">{{ctx.Locale.Tr "settings.full_name"}}</label>
-					<input id="full_name" name="full_name" value="{{.SignedUser.FullName}}" maxlength="100">
-				</div>
-				<div class="inline field">
-					<span class="inline field"><label for="pronouns">{{ctx.Locale.Tr "settings.pronouns"}}</label></span>
-					<div id="pronouns-dropdown" style="display: none" class="ui selection dropdown">
-						<input type="hidden" value="{{.SignedUser.Pronouns}}">
-						<div class="text">
-							{{if .PronounsAreCustom}}
-								{{ctx.Locale.Tr "settings.pronouns_custom"}}
-							{{else if eq "" .SignedUser.Pronouns}}
-								{{ctx.Locale.Tr "settings.pronouns_unspecified"}}
-							{{else}}
-								{{.SignedUser.Pronouns}}
-							{{end}}
-						</div>
-						{{svg "octicon-triangle-down" 14 "dropdown icon"}}
-						<div class="menu">
-							<div class="item{{if eq "" .SignedUser.Pronouns}} active selected{{end}}" data-value=""><p>{{ctx.Locale.Tr "settings.pronouns_unspecified"}}</p></div>
-							<div class="item{{if eq "he/him" .SignedUser.Pronouns}} active selected{{end}}" data-value="he/him">he/him</div>
-							<div class="item{{if eq "she/her" .SignedUser.Pronouns}} active selected{{end}}" data-value="she/her">she/her</div>
-							<div class="item{{if eq "they/them" .SignedUser.Pronouns}} active selected{{end}}" data-value="they/them">they/them</div>
-							<div class="item{{if eq "it/its" .SignedUser.Pronouns}} active selected{{end}}" data-value="it/its">it/its</div>
-							<div class="item{{if eq "any pronouns" .SignedUser.Pronouns}} active selected{{end}}" data-value="any pronouns">any pronouns</div>
-							{{if .PronounsAreCustom}}
-								<div class="item active selected" data-value="{{.SignedUser.Pronouns}}"><p>{{ctx.Locale.Tr "settings.pronouns_custom"}}</p></div>
-							{{else}}
-								<div class="item" data-value="!"><i>{{ctx.Locale.Tr "settings.pronouns_custom"}}</i></div>
-							{{end}}
-						</div>
-					</div>
-					<input id="pronouns-custom" name="pronouns" value="{{.SignedUser.Pronouns}}" maxlength="50">
-				</div>
-				{{if not .SignedUser.KeepEmailPrivate}}
-					<div class="field">
-						<label>{{ctx.Locale.Tr "email"}}</label>
-						<p id="signed-user-email">{{.SignedUser.Email}}</p>
-					</div>
-				{{end}}
-				<div class="field {{if .Err_Biography}}error{{end}}">
-					<label for="biography">{{ctx.Locale.Tr "user.user_bio"}}</label>
-					<textarea id="biography" name="biography" rows="2" placeholder="{{ctx.Locale.Tr "settings.biography_placeholder"}}" maxlength="255">{{.SignedUser.Description}}</textarea>
-				</div>
-				<div class="field {{if .Err_Website}}error{{end}}">
-					<label for="website">{{ctx.Locale.Tr "settings.website"}}</label>
-					<input id="website" name="website" type="url" value="{{.SignedUser.Website}}" maxlength="255">
-				</div>
-				<div class="field">
-					<label for="location">{{ctx.Locale.Tr "settings.location"}}</label>
-					<input id="location" name="location" placeholder="{{ctx.Locale.Tr "settings.location_placeholder"}}" value="{{.SignedUser.Location}}" maxlength="50">
-				</div>
 
-				<div class="divider"></div>
-				<!-- private block -->
+					<label {{if .Err_FullName}}class="field error"{{end}}>
+						{{ctx.Locale.Tr "settings.full_name"}}
+						<input name="full_name" value="{{.SignedUser.FullName}}" maxlength="100">
+					</label>
 
-				<div class="field" id="privacy-user-settings">
-					<label><strong>{{ctx.Locale.Tr "settings.privacy"}}</strong></label>
-				</div>
-
-				<div class="inline field {{if .Err_Visibility}}error{{end}}">
-					<span class="inline required field" id="visibility-setting"><label>{{ctx.Locale.Tr "settings.visibility"}}</label></span>
-					<div class="ui selection type dropdown">
-						{{if .SignedUser.Visibility.IsPublic}}<input type="hidden" id="visibility" name="visibility" value="0">{{end}}
-						{{if .SignedUser.Visibility.IsLimited}}<input type="hidden" id="visibility" name="visibility" value="1">{{end}}
-						{{if .SignedUser.Visibility.IsPrivate}}<input type="hidden" id="visibility" name="visibility" value="2">{{end}}
-						<div class="text">
-							{{if .SignedUser.Visibility.IsPublic}}{{ctx.Locale.Tr "settings.visibility.public"}}{{end}}
-							{{if .SignedUser.Visibility.IsLimited}}{{ctx.Locale.Tr "settings.visibility.limited"}}{{end}}
-							{{if .SignedUser.Visibility.IsPrivate}}{{ctx.Locale.Tr "settings.visibility.private"}}{{end}}
-						</div>
-						{{svg "octicon-triangle-down" 14 "dropdown icon"}}
-						<div class="menu">
-							{{range $mode := .AllowedUserVisibilityModes}}
-								{{if $mode.IsPublic}}
-									<div class="item" data-tooltip-content="{{ctx.Locale.Tr "settings.visibility.public_tooltip"}}" data-value="0">{{ctx.Locale.Tr "settings.visibility.public"}}</div>
-								{{else if $mode.IsLimited}}
-									<div class="item" data-tooltip-content="{{ctx.Locale.Tr "settings.visibility.limited_tooltip"}}" data-value="1">{{ctx.Locale.Tr "settings.visibility.limited"}}</div>
-								{{else if $mode.IsPrivate}}
-									<div class="item" data-tooltip-content="{{ctx.Locale.Tr "settings.visibility.private_tooltip"}}" data-value="2">{{ctx.Locale.Tr "settings.visibility.private"}}</div>
+					<label id="label-pronouns" class="tw-hidden">
+						{{ctx.Locale.Tr "settings.pronouns"}}
+						<div id="pronouns-dropdown" class="ui selection dropdown" aria-labelledby="label-pronouns">
+							<input type="hidden" value="{{.SignedUser.Pronouns}}">
+							<div class="text">
+								{{if .PronounsAreCustom}}
+									{{ctx.Locale.Tr "settings.pronouns_custom"}}
+								{{else if eq "" .SignedUser.Pronouns}}
+									{{ctx.Locale.Tr "settings.pronouns_unspecified"}}
+								{{else}}
+									{{.SignedUser.Pronouns}}
 								{{end}}
-							{{end}}
+							</div>
+							{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+							<div class="menu">
+								<div class="item{{if eq "" .SignedUser.Pronouns}} active selected{{end}}" data-value=""><p>{{ctx.Locale.Tr "settings.pronouns_unspecified"}}</p></div>
+								<div class="item{{if eq "he/him" .SignedUser.Pronouns}} active selected{{end}}" data-value="he/him">he/him</div>
+								<div class="item{{if eq "she/her" .SignedUser.Pronouns}} active selected{{end}}" data-value="she/her">she/her</div>
+								<div class="item{{if eq "they/them" .SignedUser.Pronouns}} active selected{{end}}" data-value="they/them">they/them</div>
+								<div class="item{{if eq "it/its" .SignedUser.Pronouns}} active selected{{end}}" data-value="it/its">it/its</div>
+								<div class="item{{if eq "any pronouns" .SignedUser.Pronouns}} active selected{{end}}" data-value="any pronouns">any pronouns</div>
+								{{if .PronounsAreCustom}}
+									<div class="item active selected" data-value="{{.SignedUser.Pronouns}}">{{ctx.Locale.Tr "settings.pronouns_custom"}}</div>
+								{{else}}
+									<div class="item" data-value="!"><i>{{ctx.Locale.Tr "settings.pronouns_custom"}}</i></div>
+								{{end}}
+							</div>
 						</div>
-					</div>
-				</div>
+					</label>
+					<label id="label-pronouns-custom">
+						{{ctx.Locale.Tr "settings.pronouns_custom_label"}}
+						<input name="pronouns" value="{{.SignedUser.Pronouns}}" maxlength="50">
+					</label>
 
-				<div class="field">
-					<div class="ui checkbox">
-						<label>{{ctx.Locale.Tr "settings.keep_email_private"}}</label>
+					<label {{if .Err_Biography}}class="field error"{{end}}>
+						{{ctx.Locale.Tr "user.user_bio"}}
+						<textarea name="biography" rows="2" placeholder="{{ctx.Locale.Tr "settings.biography_placeholder"}}" maxlength="255">{{.SignedUser.Description}}</textarea>
+					</label>
+
+					<label {{if .Err_Website}}class="field error"{{end}}>
+						{{ctx.Locale.Tr "settings.website"}}
+						<input name="website" type="url" value="{{.SignedUser.Website}}" maxlength="255">
+					</label>
+
+					<label>
+						{{ctx.Locale.Tr "settings.location"}}
+						<input name="location" placeholder="{{ctx.Locale.Tr "settings.location_placeholder"}}" value="{{.SignedUser.Location}}" maxlength="50">
+					</label>
+				</fieldset>
+
+				<fieldset>
+					<legend id="privacy-user-settings">{{ctx.Locale.Tr "settings.privacy"}}</legend>
+
+					<label id="visibility-setting" {{if .Err_Visibility}}class="field error"{{end}}>
+						{{ctx.Locale.Tr "settings.visibility"}}
+						<div class="ui selection type dropdown" aria-labelledby="visibility-setting">
+							{{if .SignedUser.Visibility.IsPublic}}<input type="hidden" id="visibility" name="visibility" value="0">{{end}}
+							{{if .SignedUser.Visibility.IsLimited}}<input type="hidden" id="visibility" name="visibility" value="1">{{end}}
+							{{if .SignedUser.Visibility.IsPrivate}}<input type="hidden" id="visibility" name="visibility" value="2">{{end}}
+							<div class="text">
+								{{if .SignedUser.Visibility.IsPublic}}{{ctx.Locale.Tr "settings.visibility.public"}}{{end}}
+								{{if .SignedUser.Visibility.IsLimited}}{{ctx.Locale.Tr "settings.visibility.limited"}}{{end}}
+								{{if .SignedUser.Visibility.IsPrivate}}{{ctx.Locale.Tr "settings.visibility.private"}}{{end}}
+							</div>
+							{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+							<div class="menu">
+								{{range $mode := .AllowedUserVisibilityModes}}
+									{{if $mode.IsPublic}}
+										<div class="item" data-tooltip-content="{{ctx.Locale.Tr "settings.visibility.public_tooltip"}}" data-value="0">{{ctx.Locale.Tr "settings.visibility.public"}}</div>
+									{{else if $mode.IsLimited}}
+										<div class="item" data-tooltip-content="{{ctx.Locale.Tr "settings.visibility.limited_tooltip"}}" data-value="1">{{ctx.Locale.Tr "settings.visibility.limited"}}</div>
+									{{else if $mode.IsPrivate}}
+										<div class="item" data-tooltip-content="{{ctx.Locale.Tr "settings.visibility.private_tooltip"}}" data-value="2">{{ctx.Locale.Tr "settings.visibility.private"}}</div>
+									{{end}}
+								{{end}}
+							</div>
+						</div>
+					</label>
+
+					<label>
 						<input name="keep_email_private" type="checkbox" {{if .SignedUser.KeepEmailPrivate}}checked{{end}}>
-					</div>
-					<span class="help tw-block">{{ctx.Locale.Tr "settings.keep_email_private_popup" .SignedUser.GetPlaceholderEmail}}</span>
-				</div>
+						{{ctx.Locale.Tr "settings.keep_email_private"}}
+						<span class="help">{{ctx.Locale.Tr "settings.keep_email_private_popup" .SignedUser.GetPlaceholderEmail}}</span>
+					</label>
 
-				<div class="field">
-					<div class="ui checkbox" id="keep-activity-private">
-						<label>{{ctx.Locale.Tr "settings.keep_activity_private"}}</label>
+					<label id="keep-activity-private">
 						<input name="keep_activity_private" type="checkbox" {{if .SignedUser.KeepActivityPrivate}}checked{{end}}>
-					</div>
-					<span class="help tw-block">{{ctx.Locale.Tr "settings.keep_activity_private.description" (printf "/%s?tab=activity" .SignedUser.Name)}}</span>
-				</div>
+						{{ctx.Locale.Tr "settings.keep_activity_private"}}
+						<span class="help">{{ctx.Locale.Tr "settings.keep_activity_private.description" (printf "/%s?tab=activity" .SignedUser.Name)}}</span>
+					</label>
+				</fieldset>
 
-				<div class="divider"></div>
-
-				<div class="field">
-					<button class="ui primary button">{{ctx.Locale.Tr "settings.update_profile"}}</button>
-				</div>
+				<button class="ui primary button">{{ctx.Locale.Tr "settings.update_profile"}}</button>
 			</form>
 		</div>
 

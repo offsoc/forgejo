@@ -101,6 +101,7 @@ func innerToRepo(ctx context.Context, repo *repo_model.Repository, permissionInR
 	allowRebaseUpdate := false
 	defaultDeleteBranchAfterMerge := false
 	defaultMergeStyle := repo_model.MergeStyleMerge
+	defaultUpdateStyle := repo_model.UpdateStyleMerge
 	defaultAllowMaintainerEdit := false
 	if unit, err := repo.GetUnit(ctx, unit_model.TypePullRequests); err == nil {
 		config := unit.PullRequestsConfig()
@@ -114,6 +115,7 @@ func innerToRepo(ctx context.Context, repo *repo_model.Repository, permissionInR
 		allowRebaseUpdate = config.AllowRebaseUpdate
 		defaultDeleteBranchAfterMerge = config.DefaultDeleteBranchAfterMerge
 		defaultMergeStyle = config.GetDefaultMergeStyle()
+		defaultUpdateStyle = config.GetDefaultUpdateStyle()
 		defaultAllowMaintainerEdit = config.DefaultAllowMaintainerEdit
 	}
 	hasProjects := false
@@ -231,6 +233,7 @@ func innerToRepo(ctx context.Context, repo *repo_model.Repository, permissionInR
 		AllowRebaseUpdate:             allowRebaseUpdate,
 		DefaultDeleteBranchAfterMerge: defaultDeleteBranchAfterMerge,
 		DefaultMergeStyle:             string(defaultMergeStyle),
+		DefaultUpdateStyle:            string(defaultUpdateStyle),
 		DefaultAllowMaintainerEdit:    defaultAllowMaintainerEdit,
 		AvatarURL:                     repo.AvatarLink(ctx),
 		Internal:                      !repo.IsPrivate && repo.Owner.Visibility == api.VisibleTypePrivate,

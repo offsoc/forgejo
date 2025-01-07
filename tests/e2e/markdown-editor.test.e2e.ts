@@ -5,21 +5,16 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, save_visual, load_logged_in_context, login_user} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
-test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
+test('Markdown image preview behaviour', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari;');
-
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
 
   // Editing the root README.md file for image preview
   const editPath = '/user2/repo1/src/branch/master/README.md';
 
-  const page = await context.newPage();
   const response = await page.goto(editPath, {waitUntil: 'domcontentloaded'});
   expect(response?.status()).toBe(200);
 
@@ -43,12 +38,9 @@ test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
   await save_visual(page);
 });
 
-test('markdown indentation', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-
+test('markdown indentation', async ({page}) => {
   const initText = `* first\n* second\n* third\n* last`;
 
-  const page = await context.newPage();
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 
@@ -116,12 +108,9 @@ test('markdown indentation', async ({browser}, workerInfo) => {
   await expect(textarea).toHaveValue(initText);
 });
 
-test('markdown list continuation', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-
+test('markdown list continuation', async ({page}) => {
   const initText = `* first\n* second\n* third\n* last`;
 
-  const page = await context.newPage();
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 
@@ -213,10 +202,7 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
   }
 });
 
-test('markdown insert table', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-
-  const page = await context.newPage();
+test('markdown insert table', async ({page}) => {
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 

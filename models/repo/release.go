@@ -97,13 +97,11 @@ func init() {
 
 // LoadAttributes load repo and publisher attributes for a release
 func (r *Release) LoadAttributes(ctx context.Context) error {
-	var err error
-	if r.Repo == nil {
-		r.Repo, err = GetRepositoryByID(ctx, r.RepoID)
-		if err != nil {
-			return err
-		}
+	err := r.LoadRepo(ctx)
+	if err != nil {
+		return err
 	}
+
 	if r.Publisher == nil {
 		r.Publisher, err = user_model.GetUserByID(ctx, r.PublisherID)
 		if err != nil {
@@ -123,11 +121,42 @@ func (r *Release) LoadAttributes(ctx context.Context) error {
 	return GetReleaseAttachments(ctx, r)
 }
 
+// LoadRepo load repo attribute for release
+func (r *Release) LoadRepo(ctx context.Context) error {
+	if r.Repo != nil {
+		return nil
+	}
+
+	var err error
+	r.Repo, err = GetRepositoryByID(ctx, r.RepoID)
+
+	return err
+}
+
 // LoadArchiveDownloadCount loads the download count for the source archives
 func (r *Release) LoadArchiveDownloadCount(ctx context.Context) error {
 	var err error
 	r.ArchiveDownloadCount, err = GetArchiveDownloadCount(ctx, r.RepoID, r.ID)
 	return err
+}
+
+// GetTotalDownloadCount returns the summary of all dowload count of files attached to the release
+func (r *Release) GetTotalDownloadCount(ctx context.Context) (int64, error) {
+	var archiveCount int64
+	if !r.HideArchiveLinks {
+		_, err := db.GetEngine(ctx).SQL("SELECT SUM(count) FROM repo_archive_download_count WHERE release_id = ?", r.ID).Get(&archiveCount)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	var attachmentCount int64
+	_, err := db.GetEngine(ctx).SQL("SELECT SUM(download_count) FROM attachment WHERE release_id = ?", r.ID).Get(&attachmentCount)
+	if err != nil {
+		return 0, err
+	}
+
+	return archiveCount + attachmentCount, nil
 }
 
 // APIURL the api url for a release. release must have attributes loaded
@@ -158,6 +187,20 @@ func (r *Release) APIUploadURL() string {
 // Link the relative url for a release on the web UI. release must have attributes loaded
 func (r *Release) Link() string {
 	return r.Repo.Link() + "/releases/tag/" + util.PathEscapeSegments(r.TagName)
+}
+
+// SummaryCardURL returns the absolute URL to an image providing a summary of the release
+func (r *Release) SummaryCardURL() string {
+	return fmt.Sprintf("%s/releases/summary-card/%s", r.Repo.HTMLURL(), util.PathEscapeSegments(r.TagName))
+}
+
+// DisplayName retruns the name of the release
+func (r *Release) DisplayName() string {
+	if r.IsTag && r.Title == "" {
+		return r.TagName
+	}
+
+	return r.Title
 }
 
 // IsReleaseExist returns true if release with given tag name already exists.

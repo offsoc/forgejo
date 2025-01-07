@@ -13,9 +13,9 @@ jobs:
     if: vars.ROLE == 'forgejo-coding' && github.event.pull_request.merged
     runs-on: docker
     container:
-      image: 'code.forgejo.org/oci/ci:1'
+      image: 'data.forgejo.org/oci/ci:1'
     steps:
-      - uses: https://code.forgejo.org/forgejo/set-milestone@v1.0.0
+      - uses: https://data.forgejo.org/forgejo/set-milestone@v1.0.0
         with:
           forgejo: https://codeberg.org
           repository: forgejo/forgejo

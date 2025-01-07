@@ -14,6 +14,12 @@
 #  secrets.CASCADE_DESTINATION_TOKEN: <generated from code.forgejo.org/forgejo-ci> scope read:user, write:repository, write:issue
 #  vars.CASCADE_DESTINATION_DOER: forgejo-ci
 #
+#  vars.SKIP_END_TO_END: `true` or `false`
+#    It must be `false` (or absent) so https://code.forgejo.org/forgejo/end-to-end is run
+#    with the newly built release.
+#    It must be set to `true` when a release is missing, for instance because it was
+#    removed and failed to upload.
+#
 on:
   push:
     tags: 'v[0-9]+.[0-9]+.*'
@@ -23,7 +29,7 @@ on:
 
 jobs:
   release:
-    runs-on: self-hosted
+    runs-on: lxc-bookworm
     # root is used for testing, allow it
     if: vars.ROLE == 'forgejo-integration' || github.repository_owner == 'root'
     steps:
@@ -37,11 +43,11 @@ jobs:
           repository="${{ github.repository }}"
           echo "value=${repository##*/}" >> "$GITHUB_OUTPUT"
 
-      - uses: https://code.forgejo.org/actions/setup-node@v4
+      - uses: https://data.forgejo.org/actions/setup-node@v4
         with:
           node-version: 20
 
-      - uses: https://code.forgejo.org/actions/setup-go@v5
+      - uses: https://data.forgejo.org/actions/setup-go@v5
         with:
           go-version-file: "go.mod"
 
@@ -87,7 +93,7 @@ jobs:
 
       - name: cache node_modules
         id: node
-        uses: https://code.forgejo.org/actions/cache@v4
+        uses: https://data.forgejo.org/actions/cache@v4
         with:
           path: |
             node_modules
@@ -158,7 +164,7 @@ jobs:
 
       - name: build container & release
         if: ${{ secrets.TOKEN != '' }}
-        uses: https://code.forgejo.org/forgejo/forgejo-build-publish/build@v5.2.1
+        uses: https://data.forgejo.org/forgejo/forgejo-build-publish/build@v5.3.0
         with:
           forgejo: "${{ env.GITHUB_SERVER_URL }}"
           owner: "${{ env.GITHUB_REPOSITORY_OWNER }}"
@@ -177,7 +183,7 @@ jobs:
 
       - name: build rootless container
         if: ${{ secrets.TOKEN != '' }}
-        uses: https://code.forgejo.org/forgejo/forgejo-build-publish/build@v5.2.1
+        uses: https://data.forgejo.org/forgejo/forgejo-build-publish/build@v5.3.0
         with:
           forgejo: "${{ env.GITHUB_SERVER_URL }}"
           owner: "${{ env.GITHUB_REPOSITORY_OWNER }}"
@@ -195,7 +201,7 @@ jobs:
 
       - name: end-to-end tests
         if: ${{ secrets.TOKEN != '' && vars.ROLE == 'forgejo-integration' && vars.SKIP_END_TO_END != 'true' }}
-        uses: https://code.forgejo.org/actions/cascading-pr@v2.2.0
+        uses: https://data.forgejo.org/actions/cascading-pr@v2.2.0
         with:
           origin-url: ${{ env.GITHUB_SERVER_URL }}
           origin-repo: ${{ github.repository }}

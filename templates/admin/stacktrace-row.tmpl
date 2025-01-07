@@ -7,6 +7,8 @@
 				{{svg "octicon-cpu" 16}}
 			{{else if eq .Process.Type "normal"}}
 				{{svg "octicon-terminal" 16}}
+			{{else if eq .Process.Type "git"}}
+				{{svg "octicon-git-branch" 16}}
 			{{else}}
 				{{svg "octicon-code" 16}}
 			{{end}}
