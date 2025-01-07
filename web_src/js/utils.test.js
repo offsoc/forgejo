@@ -6,9 +6,6 @@ import {
 } from './utils.js';
 
 afterEach(() => {
-  // Reset head and body sections of the document
-  document.documentElement.innerHTML = '<head></head><body></body>';
-
   // Remove 'lang' and 'style' attributes of html tag
   document.documentElement.removeAttribute('lang');
   document.documentElement.removeAttribute('style');
@@ -173,7 +170,7 @@ test('serializeXml', () => {
   const tagName = 'item';
   const node = document.createElement(tagName);
   node.textContent = textStr;
-  expect(serializeXml(node)).toEqual(`<${tagName}>${textStr}</${tagName}>`);
+  expect(serializeXml(node)).toEqual(`<${tagName} xmlns="http://www.w3.org/1999/xhtml">${textStr}</${tagName}>`);
 });
 
 test('sleep', async () => {
