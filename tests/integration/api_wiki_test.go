@@ -224,6 +224,29 @@ func TestAPIListWikiPages(t *testing.T) {
 				Message: "add unescaped file\n",
 			},
 		},
+		{
+			Title:   "XSS",
+			HTMLURL: meta[5].HTMLURL,
+			SubURL:  "XSS",
+			LastCommit: &api.WikiCommit{
+				ID: "f54f5a6b7c4f83b606600e43186165854f189530",
+				Author: &api.CommitUser{
+					Identity: api.Identity{
+						Name:  "Gusted<script class=\"evil\">alert('Oh no!');</script>",
+						Email: "valid@example.org",
+					},
+					Date: "2024-01-31T00:00:00Z",
+				},
+				Committer: &api.CommitUser{
+					Identity: api.Identity{
+						Name:  "Gusted<script class=\"evil\">alert('Oh no!');</script>",
+						Email: "valid@example.org",
+					},
+					Date: "2024-01-31T00:00:00Z",
+				},
+				Message: "Yay XSS",
+			},
+		},
 	}
 
 	assert.Equal(t, dummymeta, meta)
