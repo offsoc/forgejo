@@ -72,7 +72,8 @@ func WebAuthnLoginAssertion(ctx *context.Context) {
 		return
 	}
 
-	assertion, sessionData, err := wa.WebAuthn.BeginLogin((*wa.User)(user))
+	assertion, sessionData, err := wa.WebAuthn.BeginLogin((*wa.User)(user),
+		webauthn.WithUserVerification(protocol.VerificationPreferred))
 	if err != nil {
 		ctx.ServerError("webauthn.BeginLogin", err)
 		return

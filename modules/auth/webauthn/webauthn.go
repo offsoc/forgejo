@@ -31,7 +31,7 @@ func Init() {
 			RPID:          setting.Domain,
 			RPOrigins:     []string{appURL},
 			AuthenticatorSelection: protocol.AuthenticatorSelection{
-				UserVerification: "discouraged",
+				UserVerification: protocol.VerificationDiscouraged,
 			},
 			AttestationPreference: protocol.PreferDirectAttestation,
 		},
