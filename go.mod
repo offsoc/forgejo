@@ -96,10 +96,10 @@ require (
 	github.com/ulikunitz/xz v0.5.12
 	github.com/urfave/cli/v2 v2.27.5
 	github.com/valyala/fastjson v1.6.4
-	github.com/xanzy/go-gitlab v0.109.0
 	github.com/yohcop/openid-go v1.0.1
 	github.com/yuin/goldmark v1.7.8
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
+	gitlab.com/gitlab-org/api/client-go v0.116.0
 	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.32.0
 	golang.org/x/image v0.23.0
@@ -254,7 +254,6 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
-	gitlab.com/gitlab-org/api/client-go v0.116.0 // indirect
 	go.etcd.io/bbolt v1.3.9 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.31.0 // indirect
