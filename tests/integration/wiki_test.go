@@ -61,7 +61,7 @@ func Test_RepoWikiPages(t *testing.T) {
 
 	doc := NewHTMLParser(t, resp.Body)
 	expectedPagePaths := []string{
-		"Home", "Long-Page", "Page-With-Image", "Page-With-Spaced-Name", "Unescaped-File",
+		"Home", "Long-Page", "Page-With-Image", "Page-With-Spaced-Name", "Unescaped-File", "XSS",
 	}
 	doc.Find("tr").Each(func(i int, s *goquery.Selection) {
 		firstAnchor := s.Find("a").First()
