@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"code.gitea.io/gitea/models/db"
+	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 
@@ -69,6 +70,18 @@ func (job *ActionRunJob) LoadAttributes(ctx context.Context) error {
 	}
 
 	return job.Run.LoadAttributes(ctx)
+}
+
+func (job *ActionRunJob) ItRunsOn(labels []string) bool {
+	if len(labels) < 1 {
+		return false
+	}
+	labelSet := make(container.Set[string])
+	labelSet.AddMultiple(labels...)
+	if labelSet.IsSubset(job.RunsOn) {
+		return true
+	}
+	return false
 }
 
 func GetRunJobByID(ctx context.Context, id int64) (*ActionRunJob, error) {

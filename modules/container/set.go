@@ -30,9 +30,6 @@ func (s Set[T]) AddMultiple(values ...T) {
 }
 
 func (s Set[T]) IsSubset(subset []T) bool {
-	if len(subset) < 1 {
-		return false
-	}
 	for _, v := range subset {
 		if !s.Contains(v) {
 			return false

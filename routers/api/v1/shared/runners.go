@@ -10,7 +10,6 @@ import (
 
 	actions_model "code.gitea.io/gitea/models/actions"
 	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/services/context"
@@ -64,9 +63,7 @@ func GetActionRunJobs(ctx *context.APIContext, ownerID, repoID int64) {
 func fromRunJobModelToResponse(job []*actions_model.ActionRunJob, labels []string) []*structs.ActionRunJob {
 	var res []*structs.ActionRunJob
 	for i := range job {
-		labelSet := make(container.Set[string])
-		labelSet.AddMultiple(labels...)
-		if len(labels) > 0 && labelSet.IsSubset(job[i].RunsOn) {
+		if job[i].ItRunsOn(labels) {
 			res = append(res, &structs.ActionRunJob{
 				ID:      job[i].ID,
 				RepoID:  job[i].RepoID,

@@ -37,5 +37,5 @@ func TestSet(t *testing.T) {
 	assert.True(t, s.IsSubset([]string{"key6", "key7"}))
 	assert.False(t, s.IsSubset([]string{"key1"}))
 
-	assert.False(t, s.IsSubset([]string{}))
+	assert.True(t, s.IsSubset([]string{}))
 }

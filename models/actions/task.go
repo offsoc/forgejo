@@ -12,7 +12,6 @@ import (
 	auth_model "code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
@@ -245,9 +244,7 @@ func CreateTaskForRunner(ctx context.Context, runner *ActionRunner) (*ActionTask
 	var job *ActionRunJob
 	log.Trace("runner labels: %v", runner.AgentLabels)
 	for _, v := range jobs {
-		labels := make(container.Set[string])
-		labels.AddMultiple(runner.AgentLabels...)
-		if labels.IsSubset(v.RunsOn) {
+		if v.ItRunsOn(runner.AgentLabels) {
 			job = v
 			break
 		}
