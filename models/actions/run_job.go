@@ -78,10 +78,7 @@ func (job *ActionRunJob) ItRunsOn(labels []string) bool {
 	}
 	labelSet := make(container.Set[string])
 	labelSet.AddMultiple(labels...)
-	if labelSet.IsSubset(job.RunsOn) {
-		return true
-	}
-	return false
+	return labelSet.IsSubset(job.RunsOn)
 }
 
 func GetRunJobByID(ctx context.Context, id int64) (*ActionRunJob, error) {
