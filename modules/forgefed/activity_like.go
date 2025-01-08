@@ -29,6 +29,7 @@ func NewForgeLike(actorIRI, objectIRI string, startTime time.Time) (ForgeLike, e
 	return result, nil
 }
 
+/*
 type ForgeUndoLike struct {
 	// swagger:ignore
 	ap.Activity
@@ -51,6 +52,7 @@ func NewForgeUndoLike(actorIRI, objectIRI string, startTime time.Time) (ForgeUnd
 	}
 	return result, nil
 }
+*/
 
 func (like ForgeLike) MarshalJSON() ([]byte, error) {
 	return like.Activity.MarshalJSON()
@@ -60,9 +62,11 @@ func (like *ForgeLike) UnmarshalJSON(data []byte) error {
 	return like.Activity.UnmarshalJSON(data)
 }
 
+/*
 func (undo *ForgeUndoLike) UnmarshalJSON(data []byte) error {
 	return undo.Activity.UnmarshalJSON(data)
 }
+*/
 
 func (like ForgeLike) IsNewer(compareTo time.Time) bool {
 	return like.StartTime.After(compareTo)
@@ -93,6 +97,7 @@ func (like ForgeLike) Validate() []string {
 	return result
 }
 
+/*
 func (undo ForgeUndoLike) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(string(undo.Type), "type")...)
@@ -133,3 +138,4 @@ func (undo ForgeUndoLike) Validate() []string {
 	}
 	return result
 }
+*/
