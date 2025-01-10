@@ -21,7 +21,7 @@ const (
 	marshaledSizeSHA1    = 96
 	marshaledSizeSHA256  = 108
 	marshaledSizeSHA512  = 204
-	marshaledSizeBlake2b = 128
+	marshaledSizeBlake2b = 213
 
 	marshaledSize = marshaledSizeMD5 + marshaledSizeSHA1 + marshaledSizeSHA256 + marshaledSizeSHA512 + marshaledSizeBlake2b
 )
@@ -115,12 +115,12 @@ func (h *MultiHasher) UnmarshalBinary(b []byte) error {
 	}
 
 	b = b[marshaledSizeSHA256:]
-	if err := h.blake2b.(encoding.BinaryUnmarshaler).UnmarshalBinary(b[:marshaledSizeBlake2b]); err != nil {
+	if err := h.sha512.(encoding.BinaryUnmarshaler).UnmarshalBinary(b[:marshaledSizeSHA512]); err != nil {
 		return err
 	}
 
-	b = b[marshaledSizeBlake2b:]
-	return h.sha512.(encoding.BinaryUnmarshaler).UnmarshalBinary(b[:marshaledSizeSHA512])
+	b = b[marshaledSizeSHA512:]
+	return h.blake2b.(encoding.BinaryUnmarshaler).UnmarshalBinary(b[:marshaledSizeBlake2b])
 }
 
 // Write implements io.Writer

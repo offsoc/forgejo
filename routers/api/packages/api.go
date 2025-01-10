@@ -663,7 +663,6 @@ func CommonRoutes() *web.Route {
 
 				m = rpmsRepoPattern.FindStringSubmatch(path)
 				if len(m) == 7 && (isGetHead || isDelete) {
-
 					if strings.Trim(m[1], "/") != "alt" {
 						ctx.SetParams("group", strings.Trim(m[1], "/"))
 					}

@@ -270,6 +270,9 @@ code.gitea.io/gitea/modules/zstd
 	Writer.Write
 	Writer.Close
 
+code.gitea.io/gitea/routers/api/packages/alt
+	CheckRepositoryFileExistence
+
 code.gitea.io/gitea/routers/web
 	NotFound
 

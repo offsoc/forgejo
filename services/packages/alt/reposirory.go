@@ -175,7 +175,7 @@ func BuildSpecificRepositoryFiles(ctx context.Context, ownerID int64, group stri
 		return err
 	}
 
-	_, err = buildRelease(ctx, pv, pfs, cache, group, pkglist)
+	err = buildRelease(ctx, pv, pfs, cache, group, pkglist)
 	if err != nil {
 		return err
 	}
@@ -214,8 +214,6 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 	orderedHeaders := []*RPMHeader{}
 
 	for i := range architectures {
-
-		hdr := &RPMHeader{}
 		headersWithIndexes := make(map[*RPMHeader]map[*RPMHdrIndex][]any)
 		headersWithPtrs := make(map[*RPMHeader][]*RPMHdrIndex)
 		indexPtrs := []*RPMHdrIndex{}
@@ -225,7 +223,6 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 			pd := c[pf]
 
 			if pd.FileMetadata.Architecture == architectures[i] {
-
 				var requireNames []any
 				var requireVersions []any
 				var requireFlags []any
@@ -335,7 +332,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				}
 
 				/*Header*/
-				hdr = &RPMHeader{
+				hdr := &RPMHeader{
 					Magic:    [4]byte{0x8E, 0xAD, 0xE8, 0x01},
 					Reserved: [4]byte{0, 0, 0, 0},
 					NIndex:   binary.BigEndian.Uint32([]byte{0, 0, 0, 0}),
@@ -360,7 +357,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				versionInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 233}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &versionInd)
@@ -371,7 +368,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				summaryInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 236}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 9}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &summaryInd)
@@ -382,7 +379,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				descriptionInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 237}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 9}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &descriptionInd)
@@ -393,7 +390,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				releaseInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 234}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &releaseInd)
@@ -401,25 +398,12 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				hdr.NIndex++
 				hdr.HSize += uint32(len(pd.FileMetadata.Release) + 1)
 
-				/* Align to 4-bytes to add a 4-byte element. */
-				padding := uint32((4 - (hdr.HSize % 4)) % 4)
-				if padding == 4 {
-					padding = 0
-				}
-				hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(padding)})
-				for i := uint32(0); i < padding; i++ {
-					for _, elem := range indexes[&releaseInd] {
-						switch v := elem.(type) {
-						case string:
-							indexes[&releaseInd][len(indexes[&releaseInd])-1] = v + "\x00"
-						}
-					}
-				}
+				alignPadding(hdr, indexes, &releaseInd)
 
 				sizeInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 241}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &sizeInd)
@@ -430,7 +414,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				buildTimeInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 238}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &buildTimeInd)
@@ -441,7 +425,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				licenseInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 246}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &licenseInd)
@@ -452,7 +436,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				packagerInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 247}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &packagerInd)
@@ -463,7 +447,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				groupInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 248}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &groupInd)
@@ -474,7 +458,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				urlInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 252}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &urlInd)
@@ -483,60 +467,17 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				hdr.HSize += uint32(len(pd.VersionMetadata.ProjectURL) + 1)
 
 				if len(changeLogNames) != 0 && len(changeLogTexts) != 0 && len(changeLogTimes) != 0 {
-					/* Align to 4-bytes to add a 4-byte element. */
-					padding = uint32((4 - (hdr.HSize % 4)) % 4)
-					if padding == 4 {
-						padding = 0
-					}
-					hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(padding)})
+					alignPadding(hdr, indexes, &urlInd)
 
-					for i := uint32(0); i < padding; i++ {
-						for _, elem := range indexes[&urlInd] {
-							switch v := elem.(type) {
-							case string:
-								indexes[&urlInd][len(indexes[&urlInd])-1] = v + "\x00"
-							}
-						}
-					}
-
-					changeLogTimesInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x38}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(changeLogTimes)),
-					}
-					indexPtrs = append(indexPtrs, &changeLogTimesInd)
-					indexes[&changeLogTimesInd] = changeLogTimes
-					hdr.NIndex++
-					hdr.HSize += uint32(changeLogTimesSize)
-
-					changeLogNamesInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x39}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(changeLogNames)),
-					}
-					indexPtrs = append(indexPtrs, &changeLogNamesInd)
-					indexes[&changeLogNamesInd] = changeLogNames
-					hdr.NIndex++
-					hdr.HSize += uint32(changeLogNamesSize)
-
-					changeLogTextsInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x3A}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(changeLogTexts)),
-					}
-					indexPtrs = append(indexPtrs, &changeLogTextsInd)
-					indexes[&changeLogTextsInd] = changeLogTexts
-					hdr.NIndex++
-					hdr.HSize += uint32(changeLogTextsSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x38}, []byte{0, 0, 0, 4}, changeLogTimes, changeLogTimesSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x39}, []byte{0, 0, 0, 8}, changeLogNames, changeLogNamesSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x3A}, []byte{0, 0, 0, 8}, changeLogTexts, changeLogTextsSize)
 				}
 
 				archInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 254}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &archInd)
@@ -545,60 +486,17 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				hdr.HSize += uint32(len(pd.FileMetadata.Architecture) + 1)
 
 				if len(provideNames) != 0 && len(provideVersions) != 0 && len(provideFlags) != 0 {
-					/* Align to 4-bytes to add a 4-byte element. */
-					padding = uint32((4 - (hdr.HSize % 4)) % 4)
-					if padding == 4 {
-						padding = 0
-					}
-					hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(padding)})
+					alignPadding(hdr, indexes, &archInd)
 
-					for i := uint32(0); i < padding; i++ {
-						for _, elem := range indexes[&archInd] {
-							switch v := elem.(type) {
-							case string:
-								indexes[&archInd][len(indexes[&archInd])-1] = v + "\x00"
-							}
-						}
-					}
-
-					provideFlagsInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x58}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(provideFlags)),
-					}
-					indexPtrs = append(indexPtrs, &provideFlagsInd)
-					indexes[&provideFlagsInd] = provideFlags
-					hdr.NIndex++
-					hdr.HSize += uint32(provideFlagsSize)
-
-					provideNameInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x17}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(provideNames)),
-					}
-					indexPtrs = append(indexPtrs, &provideNameInd)
-					indexes[&provideNameInd] = provideNames
-					hdr.NIndex++
-					hdr.HSize += uint32(provideNamesSize)
-
-					provideVersionInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x59}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(provideVersions)),
-					}
-					indexPtrs = append(indexPtrs, &provideVersionInd)
-					indexes[&provideVersionInd] = provideVersions
-					hdr.NIndex++
-					hdr.HSize += uint32(provideVersionsSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x58}, []byte{0, 0, 0, 4}, provideFlags, provideFlagsSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x17}, []byte{0, 0, 0, 8}, provideNames, provideNamesSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x59}, []byte{0, 0, 0, 8}, provideVersions, provideVersionsSize)
 				}
 
 				sourceRpmInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x14}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &sourceRpmInd)
@@ -607,61 +505,18 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(len(pd.FileMetadata.SourceRpm) + 1)})
 
 				if len(requireNames) != 0 && len(requireVersions) != 0 && len(requireFlags) != 0 {
-					/* Align to 4-bytes to add a 4-byte element. */
-					padding = uint32((4 - (hdr.HSize % 4)) % 4)
-					if padding == 4 {
-						padding = 0
-					}
-					hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(padding)})
+					alignPadding(hdr, indexes, &sourceRpmInd)
 
-					for i := uint32(0); i < padding; i++ {
-						for _, elem := range indexes[&sourceRpmInd] {
-							switch v := elem.(type) {
-							case string:
-								indexes[&sourceRpmInd][len(indexes[&sourceRpmInd])-1] = v + "\x00"
-							}
-						}
-					}
-
-					requireFlagsInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x18}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(requireFlags)),
-					}
-					indexPtrs = append(indexPtrs, &requireFlagsInd)
-					indexes[&requireFlagsInd] = requireFlags
-					hdr.NIndex++
-					hdr.HSize += uint32(requireFlagsSize)
-
-					requireNameInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0, 0, 4, 25}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(requireNames)),
-					}
-					indexPtrs = append(indexPtrs, &requireNameInd)
-					indexes[&requireNameInd] = requireNames
-					hdr.NIndex++
-					hdr.HSize += uint32(requireNamesSize)
-
-					requireVersionInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x1A}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(requireVersions)),
-					}
-					indexPtrs = append(indexPtrs, &requireVersionInd)
-					indexes[&requireVersionInd] = requireVersions
-					hdr.NIndex++
-					hdr.HSize += uint32(requireVersionsSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x18}, []byte{0, 0, 0, 4}, requireFlags, requireFlagsSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0, 0, 4, 25}, []byte{0, 0, 0, 8}, requireNames, requireNamesSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x1A}, []byte{0, 0, 0, 8}, requireVersions, requireVersionsSize)
 				}
 
 				if len(baseNames) != 0 {
 					baseNamesInd := RPMHdrIndex{
 						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x5D}),
 						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
+						Offset: hdr.HSize,
 						Count:  uint32(len(baseNames)),
 					}
 					indexPtrs = append(indexPtrs, &baseNamesInd)
@@ -674,7 +529,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 					dirnamesInd := RPMHdrIndex{
 						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x5E}),
 						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
+						Offset: hdr.HSize,
 						Count:  uint32(len(dirNames)),
 					}
 					indexPtrs = append(indexPtrs, &dirnamesInd)
@@ -686,7 +541,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				filenameInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x40}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &filenameInd)
@@ -694,26 +549,12 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				hdr.NIndex++
 				hdr.HSize += uint32(len(pf.Name) + 1)
 
-				/* Align to 4-bytes to add a 4-byte element. */
-				padding = uint32((4 - (hdr.HSize % 4)) % 4)
-				if padding == 4 {
-					padding = 0
-				}
-				hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(padding)})
-
-				for i := uint32(0); i < padding; i++ {
-					for _, elem := range indexes[&filenameInd] {
-						switch v := elem.(type) {
-						case string:
-							indexes[&filenameInd][len(indexes[&filenameInd])-1] = v + "\x00"
-						}
-					}
-				}
+				alignPadding(hdr, indexes, &filenameInd)
 
 				filesizeInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x41}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &filesizeInd)
@@ -724,7 +565,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				md5Ind := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x45}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &md5Ind)
@@ -735,7 +576,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				blake2bInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x49}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &blake2bInd)
@@ -744,61 +585,17 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				hdr.HSize += uint32(len(pd.Blob.HashBlake2b) + 1)
 
 				if len(conflictNames) != 0 && len(conflictVersions) != 0 && len(conflictFlags) != 0 {
+					alignPadding(hdr, indexes, &blake2bInd)
 
-					/* Align to 4-bytes to add a 4-byte element. */
-					padding = uint32((4 - (hdr.HSize % 4)) % 4)
-					if padding == 4 {
-						padding = 0
-					}
-					hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(padding)})
-
-					for i := uint32(0); i < padding; i++ {
-						for _, elem := range indexes[&blake2bInd] {
-							switch v := elem.(type) {
-							case string:
-								indexes[&blake2bInd][len(indexes[&blake2bInd])-1] = v + "\x00"
-							}
-						}
-					}
-
-					conflictFlagsInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x1D}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(conflictFlags)),
-					}
-					indexPtrs = append(indexPtrs, &conflictFlagsInd)
-					indexes[&conflictFlagsInd] = conflictFlags
-					hdr.NIndex++
-					hdr.HSize += uint32(conflictFlagsSize)
-
-					conflictNamesInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x1E}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(conflictNames)),
-					}
-					indexPtrs = append(indexPtrs, &conflictNamesInd)
-					indexes[&conflictNamesInd] = conflictNames
-					hdr.NIndex++
-					hdr.HSize += uint32(conflictNamesSize)
-
-					conflictVersionsInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x1F}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(conflictVersions)),
-					}
-					indexPtrs = append(indexPtrs, &conflictVersionsInd)
-					indexes[&conflictVersionsInd] = conflictVersions
-					hdr.NIndex++
-					hdr.HSize += uint32(conflictVersionsSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x1D}, []byte{0, 0, 0, 4}, conflictFlags, conflictFlagsSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x1E}, []byte{0, 0, 0, 8}, conflictNames, conflictNamesSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x1F}, []byte{0, 0, 0, 8}, conflictVersions, conflictVersionsSize)
 				}
 
 				directoryInd := RPMHdrIndex{
 					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x4A}),
 					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: uint32(hdr.HSize),
+					Offset: hdr.HSize,
 					Count:  1,
 				}
 				indexPtrs = append(indexPtrs, &directoryInd)
@@ -807,54 +604,11 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 				hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(len("RPMS.classic") + 1)})
 
 				if len(obsoleteNames) != 0 && len(obsoleteVersions) != 0 && len(obsoleteFlags) != 0 {
-					/* Align to 4-bytes to add a 4-byte element. */
-					padding = uint32((4 - (hdr.HSize % 4)) % 4)
-					if padding == 4 {
-						padding = 0
-					}
-					hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(padding)})
+					alignPadding(hdr, indexes, &directoryInd)
 
-					for i := uint32(0); i < padding; i++ {
-						for _, elem := range indexes[&directoryInd] {
-							switch v := elem.(type) {
-							case string:
-								indexes[&directoryInd][len(indexes[&directoryInd])-1] = v + "\x00"
-							}
-						}
-					}
-
-					obsoleteFlagsInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x5A}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(obsoleteFlags)),
-					}
-					indexPtrs = append(indexPtrs, &obsoleteFlagsInd)
-					indexes[&obsoleteFlagsInd] = obsoleteFlags
-					hdr.NIndex++
-					hdr.HSize += uint32(obsoleteFlagsSize)
-
-					obsoleteNamesInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x42}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(obsoleteNames)),
-					}
-					indexPtrs = append(indexPtrs, &obsoleteNamesInd)
-					indexes[&obsoleteNamesInd] = obsoleteNames
-					hdr.NIndex++
-					hdr.HSize += uint32(obsoleteNamesSize)
-
-					obsoleteVersionsInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x5B}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: uint32(hdr.HSize),
-						Count:  uint32(len(obsoleteVersions)),
-					}
-					indexPtrs = append(indexPtrs, &obsoleteVersionsInd)
-					indexes[&obsoleteVersionsInd] = obsoleteVersions
-					hdr.NIndex++
-					hdr.HSize += uint32(obsoleteVersionsSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x5A}, []byte{0, 0, 0, 4}, obsoleteFlags, obsoleteFlagsSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x42}, []byte{0, 0, 0, 8}, obsoleteNames, obsoleteNamesSize)
+					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x5B}, []byte{0, 0, 0, 8}, obsoleteVersions, obsoleteVersionsSize)
 				}
 
 				headersWithIndexes[hdr] = indexes
@@ -862,7 +616,6 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 
 				indexPtrs = []*RPMHdrIndex{}
 				indexes = make(map[*RPMHdrIndex][]any)
-				hdr = &RPMHeader{}
 			}
 		}
 
@@ -881,8 +634,38 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 	return repoDataListByArch, nil
 }
 
+func alignPadding(hdr *RPMHeader, indexes map[*RPMHdrIndex][]any, lastIndex *RPMHdrIndex) {
+	/* Align to 4-bytes to add a 4-byte element. */
+	padding := (4 - (hdr.HSize % 4)) % 4
+	if padding == 4 {
+		padding = 0
+	}
+	hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(padding)})
+
+	for i := uint32(0); i < padding; i++ {
+		for _, elem := range indexes[lastIndex] {
+			if str, ok := elem.(string); ok {
+				indexes[lastIndex][len(indexes[lastIndex])-1] = str + "\x00"
+			}
+		}
+	}
+}
+
+func addRPMHdrIndex(hdr *RPMHeader, indexPtrs *[]*RPMHdrIndex, indexes map[*RPMHdrIndex][]any, tag, typeByte []byte, data []any, dataSize int) {
+	index := RPMHdrIndex{
+		Tag:    binary.BigEndian.Uint32(tag),
+		Type:   binary.BigEndian.Uint32(typeByte),
+		Offset: hdr.HSize,
+		Count:  uint32(len(data)),
+	}
+	*indexPtrs = append(*indexPtrs, &index)
+	indexes[&index] = data
+	hdr.NIndex++
+	hdr.HSize += uint32(dataSize)
+}
+
 // https://www.altlinux.org/APT_в_ALT_Linux/CreateRepository
-func buildRelease(ctx context.Context, pv *packages_model.PackageVersion, pfs []*packages_model.PackageFile, c packageCache, group string, pkglist map[string][]any) ([]any, error) {
+func buildRelease(ctx context.Context, pv *packages_model.PackageVersion, pfs []*packages_model.PackageFile, c packageCache, group string, pkglist map[string][]any) error {
 	var buf bytes.Buffer
 
 	architectures := []string{}
@@ -895,10 +678,9 @@ func buildRelease(ctx context.Context, pv *packages_model.PackageVersion, pfs []
 	}
 
 	for i := range architectures {
-
 		archive := "Alt Linux Team"
 		component := "classic"
-		version := strconv.FormatInt(int64(time.Now().Unix()), 10)
+		version := strconv.FormatInt(time.Now().Unix(), 10)
 		architectures := architectures[i]
 		origin := "Alt Linux Team"
 		label := setting.AppName
@@ -908,13 +690,13 @@ func buildRelease(ctx context.Context, pv *packages_model.PackageVersion, pfs []
 		buf.WriteString(data + "\n")
 		fileInfo, err := addReleaseAsFileToRepo(ctx, pv, "release.classic", buf.String(), group, architectures)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		buf.Truncate(0)
+		buf.Reset()
 
 		origin = setting.AppName
 		suite := "Sisyphus"
-		codename := strconv.FormatInt(int64(time.Now().Unix()), 10)
+		codename := strconv.FormatInt(time.Now().Unix(), 10)
 		date := time.Now().UTC().Format(time.RFC1123)
 
 		var md5Sum string
@@ -932,13 +714,11 @@ func buildRelease(ctx context.Context, pv *packages_model.PackageVersion, pfs []
 		buf.WriteString(data + "\n")
 		_, err = addReleaseAsFileToRepo(ctx, pv, "release", buf.String(), group, architectures)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		buf.Truncate(0)
-
+		buf.Reset()
 	}
-
-	return nil, nil
+	return nil
 }
 
 func addReleaseAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersion, filename, obj, group, arch string) ([]string, error) {

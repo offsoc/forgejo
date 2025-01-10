@@ -76,6 +76,6 @@ func (b *HashedBuffer) Write(p []byte) (int, error) {
 }
 
 // Sums gets the MD5, SHA1, SHA256, SHA512 and BLAKE2B checksums of the data
-func (b *HashedBuffer) Sums() (hashMD5, hashSHA1, hashSHA256, hashSHA512, HashBlake2b []byte) {
+func (b *HashedBuffer) Sums() (hashMD5, hashSHA1, hashSHA256, hashSHA512, hashBlake2b []byte) {
 	return b.hash.Sums()
 }
