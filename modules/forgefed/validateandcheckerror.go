@@ -5,14 +5,7 @@ package forgefed
 
 import (
 	"fmt"
-	// "reflect"
-	// "strings"
-	// "testing"
-	// "time"
-
 	"code.gitea.io/gitea/modules/validation"
-
-	//ap "github.com/go-ap/activitypub"
 )
 
 // Validates the subject and checks if expectedError occurred.
