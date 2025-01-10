@@ -16,12 +16,12 @@ import (
 	packages_module "code.gitea.io/gitea/modules/packages"
 	packages_service "code.gitea.io/gitea/services/packages"
 	alpine_service "code.gitea.io/gitea/services/packages/alpine"
+	alt_service "code.gitea.io/gitea/services/packages/alt"
 	arch_service "code.gitea.io/gitea/services/packages/arch"
 	cargo_service "code.gitea.io/gitea/services/packages/cargo"
 	container_service "code.gitea.io/gitea/services/packages/container"
 	debian_service "code.gitea.io/gitea/services/packages/debian"
 	rpm_service "code.gitea.io/gitea/services/packages/rpm"
-	alt_service "code.gitea.io/gitea/services/packages/alt"
 )
 
 // Task method to execute cleanup rules and cleanup expired package data

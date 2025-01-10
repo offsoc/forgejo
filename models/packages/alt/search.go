@@ -10,13 +10,11 @@ import (
 	alt_module "code.gitea.io/gitea/modules/packages/alt"
 )
 
-
 type PackageSearchOptions struct {
 	OwnerID      int64
 	GroupID      int64
 	Architecture string
 }
-
 
 // GetGroups gets all available groups
 func GetGroups(ctx context.Context, ownerID int64) ([]string, error) {

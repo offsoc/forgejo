@@ -626,7 +626,6 @@ func CommonRoutes() *web.Route {
 			})
 		}, reqPackageAccess(perm.AccessModeRead))
 		r.Group("/alt", func() {
-
 			var (
 				uploadPattern   = regexp.MustCompile(`\A(.*?)/upload\z`)
 				baseRepoPattern = regexp.MustCompile(`(\S+)\.repo/(\S+)\/base/(\S+)`)

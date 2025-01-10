@@ -247,12 +247,12 @@ func NewPackageBlob(hsr packages_module.HashedSizeReader) *packages_model.Packag
 	hashMD5, hashSHA1, hashSHA256, hashSHA512, hashBlake2b := hsr.Sums()
 
 	return &packages_model.PackageBlob{
-		Size:       hsr.Size(),
-		HashMD5:    hex.EncodeToString(hashMD5),
-		HashSHA1:   hex.EncodeToString(hashSHA1),
-		HashSHA256: hex.EncodeToString(hashSHA256),
-		HashSHA512: hex.EncodeToString(hashSHA512),
-		HashBlake2b:hex.EncodeToString(hashBlake2b),
+		Size:        hsr.Size(),
+		HashMD5:     hex.EncodeToString(hashMD5),
+		HashSHA1:    hex.EncodeToString(hashSHA1),
+		HashSHA256:  hex.EncodeToString(hashSHA256),
+		HashSHA512:  hex.EncodeToString(hashSHA512),
+		HashBlake2b: hex.EncodeToString(hashBlake2b),
 	}
 }
 

@@ -19,10 +19,10 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/optional"
 	alpine_module "code.gitea.io/gitea/modules/packages/alpine"
+	alt_module "code.gitea.io/gitea/modules/packages/alt"
 	arch_model "code.gitea.io/gitea/modules/packages/arch"
 	debian_module "code.gitea.io/gitea/modules/packages/debian"
 	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
-	alt_module "code.gitea.io/gitea/modules/packages/alt"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
@@ -267,7 +267,7 @@ func ViewPackageVersion(ctx *context.Context) {
 				}
 			}
 		}
-		
+
 		ctx.Data["Groups"] = util.Sorted(groups.Values())
 		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
 	}

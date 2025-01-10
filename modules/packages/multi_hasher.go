@@ -8,18 +8,19 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
-	"golang.org/x/crypto/blake2b"
 	"encoding"
 	"errors"
 	"hash"
 	"io"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 const (
-	marshaledSizeMD5    = 92
-	marshaledSizeSHA1   = 96
-	marshaledSizeSHA256 = 108
-	marshaledSizeSHA512 = 204
+	marshaledSizeMD5     = 92
+	marshaledSizeSHA1    = 96
+	marshaledSizeSHA256  = 108
+	marshaledSizeSHA512  = 204
 	marshaledSizeBlake2b = 128
 
 	marshaledSize = marshaledSizeMD5 + marshaledSizeSHA1 + marshaledSizeSHA256 + marshaledSizeSHA512 + marshaledSizeBlake2b
@@ -32,10 +33,10 @@ type HashSummer interface {
 
 // MultiHasher calculates multiple checksums
 type MultiHasher struct {
-	md5    hash.Hash
-	sha1   hash.Hash
-	sha256 hash.Hash
-	sha512 hash.Hash
+	md5     hash.Hash
+	sha1    hash.Hash
+	sha256  hash.Hash
+	sha512  hash.Hash
 	blake2b hash.Hash
 
 	combinedWriter io.Writer
