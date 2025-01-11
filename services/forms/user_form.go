@@ -215,15 +215,16 @@ func (f *IntrospectTokenForm) Validate(req *http.Request, errs binding.Errors) b
 
 // UpdateProfileForm form for updating profile
 type UpdateProfileForm struct {
-	Name                string `binding:"Username;MaxSize(40)"`
-	FullName            string `binding:"MaxSize(100)"`
-	KeepEmailPrivate    bool
-	Website             string `binding:"ValidSiteUrl;MaxSize(255)"`
-	Location            string `binding:"MaxSize(50)"`
-	Pronouns            string `binding:"MaxSize(50)"`
-	Biography           string `binding:"MaxSize(255)"`
-	Visibility          structs.VisibleType
-	KeepActivityPrivate bool
+	Name                 string `binding:"Username;MaxSize(40)"`
+	FullName             string `binding:"MaxSize(100)"`
+	KeepEmailPrivate     bool
+	Website              string `binding:"ValidSiteUrl;MaxSize(255)"`
+	Location             string `binding:"MaxSize(50)"`
+	Pronouns             string `binding:"MaxSize(50)"`
+	Biography            string `binding:"MaxSize(255)"`
+	Visibility           structs.VisibleType
+	KeepActivityPrivate  bool
+	FediverseCreatorName string
 }
 
 // Validate validates the fields

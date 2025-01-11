@@ -54,17 +54,18 @@ func UpdateUserSettings(ctx *context.APIContext) {
 	form := web.GetForm(ctx).(*api.UserSettingsOptions)
 
 	opts := &user_service.UpdateOptions{
-		FullName:            optional.FromPtr(form.FullName),
-		Description:         optional.FromPtr(form.Description),
-		Pronouns:            optional.FromPtr(form.Pronouns),
-		Website:             optional.FromPtr(form.Website),
-		Location:            optional.FromPtr(form.Location),
-		Language:            optional.FromPtr(form.Language),
-		Theme:               optional.FromPtr(form.Theme),
-		DiffViewStyle:       optional.FromPtr(form.DiffViewStyle),
-		KeepEmailPrivate:    optional.FromPtr(form.HideEmail),
-		KeepActivityPrivate: optional.FromPtr(form.HideActivity),
-		EnableRepoUnitHints: optional.FromPtr(form.EnableRepoUnitHints),
+		FullName:             optional.FromPtr(form.FullName),
+		Description:          optional.FromPtr(form.Description),
+		Pronouns:             optional.FromPtr(form.Pronouns),
+		Website:              optional.FromPtr(form.Website),
+		Location:             optional.FromPtr(form.Location),
+		Language:             optional.FromPtr(form.Language),
+		Theme:                optional.FromPtr(form.Theme),
+		DiffViewStyle:        optional.FromPtr(form.DiffViewStyle),
+		KeepEmailPrivate:     optional.FromPtr(form.HideEmail),
+		KeepActivityPrivate:  optional.FromPtr(form.HideActivity),
+		EnableRepoUnitHints:  optional.FromPtr(form.EnableRepoUnitHints),
+		FediverseCreatorName: optional.FromPtr(form.FediverseCreatorName),
 	}
 	if err := user_service.UpdateUser(ctx, ctx.Doer, opts); err != nil {
 		ctx.InternalServerError(err)

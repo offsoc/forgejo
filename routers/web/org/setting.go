@@ -112,6 +112,7 @@ func SettingsPost(ctx *context.Context) {
 		Description:               optional.Some(form.Description),
 		Website:                   optional.Some(form.Website),
 		Location:                  optional.Some(form.Location),
+		FediverseCreatorName:      optional.Some(form.FediverseCreatorName),
 		Visibility:                optional.Some(form.Visibility),
 		RepoAdminChangeTeamAccess: optional.Some(form.RepoAdminChangeTeamAccess),
 	}

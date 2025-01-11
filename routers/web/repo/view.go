@@ -1163,6 +1163,8 @@ PostRecentBranchCheck:
 	} else {
 		ctx.Data["CodeSearchOptions"] = git.GrepSearchOptions
 	}
+	ctx.Data["FediverseCreator"] = ctx.Repo.Owner.FediverseCreatorName
+
 	ctx.HTML(http.StatusOK, tplRepoHome)
 }
 

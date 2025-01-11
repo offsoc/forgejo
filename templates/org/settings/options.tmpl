@@ -36,6 +36,13 @@
 						</div>
 
 						<div class="divider"></div>
+						<div class="field">
+							<label for="fediverse_creator_name">{{ctx.Locale.Tr "org.settings.fediverse_creator_name"}}</label>
+							<span class="help">{{ctx.Locale.Tr "org.settings.fediverse_creator_name.description"}}</span>
+							<input id="fediverse_creator_name" name="fediverse_creator_name"  value="{{.Org.FediverseCreatorName}}">
+						</div>
+
+						<div class="divider"></div>
 						<div class="field" id="visibility_box">
 							<label for="visibility">{{ctx.Locale.Tr "org.settings.visibility"}}</label>
 							<div class="field">

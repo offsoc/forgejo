@@ -270,6 +270,7 @@ func Create(ctx *context.APIContext) {
 		Type:                      user_model.UserTypeOrganization,
 		Visibility:                visibility,
 		RepoAdminChangeTeamAccess: form.RepoAdminChangeTeamAccess,
+		FediverseCreatorName:      form.FediverseCreatorName,
 	}
 	if err := organization.CreateOrganization(ctx, org, ctx.Doer); err != nil {
 		if user_model.IsErrUserAlreadyExist(err) ||
@@ -377,6 +378,7 @@ func Edit(ctx *context.APIContext) {
 		Location:                  optional.Some(form.Location),
 		Visibility:                optional.FromNonDefault(api.VisibilityModes[form.Visibility]),
 		RepoAdminChangeTeamAccess: optional.FromPtr(form.RepoAdminChangeTeamAccess),
+		FediverseCreatorName:      optional.FromPtr(form.FediverseCreatorName),
 	}
 	if err := user_service.UpdateUser(ctx, ctx.Org.Organization.AsUser(), opts); err != nil {
 		ctx.Error(http.StatusInternalServerError, "UpdateUser", err)

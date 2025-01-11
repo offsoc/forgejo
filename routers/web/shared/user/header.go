@@ -32,6 +32,7 @@ func prepareContextForCommonProfile(ctx *context.Context) {
 	ctx.Data["IsRepoIndexerEnabled"] = setting.Indexer.RepoIndexerEnabled
 	ctx.Data["EnableFeed"] = setting.Other.EnableFeed
 	ctx.Data["FeedURL"] = ctx.ContextUser.HomeLink()
+	ctx.Data["FediverseCreator"] = ctx.ContextUser.FediverseCreatorName
 }
 
 // PrepareContextForProfileBigAvatar set the context for big avatar view on the profile page

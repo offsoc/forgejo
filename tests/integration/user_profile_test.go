@@ -65,3 +65,28 @@ func TestUserProfile(t *testing.T) {
 		checkReadme(t, "readme.org does not render", "README.org", 0)
 	})
 }
+
+func UserProfileFediverseCreator(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	t.Run("Exists", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		resp := MakeRequest(t, NewRequest(t, "GET", "/user2"), http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		value, exists := htmlDoc.Find(`meta[name="fediverse:creator"]`).Attr("content")
+		assert.True(t, exists)
+		assert.Equal(t, "@user2@example.com", value)
+	})
+
+	t.Run("NotExists", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		resp := MakeRequest(t, NewRequest(t, "GET", "/user12"), http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, `meta[name="fediverse:creator"]`, false)
+	})
+}

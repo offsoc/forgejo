@@ -15,6 +15,7 @@ type Organization struct {
 	Location                  string `json:"location"`
 	Visibility                string `json:"visibility"`
 	RepoAdminChangeTeamAccess bool   `json:"repo_admin_change_team_access"`
+	FediverseCreatorName      string `json:"fediverse_creator_name"`
 	// deprecated
 	UserName string `json:"username"`
 }
@@ -41,17 +42,19 @@ type CreateOrgOption struct {
 	// enum: ["public", "limited", "private"]
 	Visibility                string `json:"visibility" binding:"In(,public,limited,private)"`
 	RepoAdminChangeTeamAccess bool   `json:"repo_admin_change_team_access"`
+	FediverseCreatorName      string `json:"fediverse_creator_name"`
 }
 
 // TODO: make EditOrgOption fields optional after https://gitea.com/go-chi/binding/pulls/5 got merged
 
 // EditOrgOption options for editing an organization
 type EditOrgOption struct {
-	FullName    string  `json:"full_name" binding:"MaxSize(100)"`
-	Email       *string `json:"email" binding:"MaxSize(255)"`
-	Description string  `json:"description" binding:"MaxSize(255)"`
-	Website     string  `json:"website" binding:"ValidUrl;MaxSize(255)"`
-	Location    string  `json:"location" binding:"MaxSize(50)"`
+	FullName             string  `json:"full_name" binding:"MaxSize(100)"`
+	Email                *string `json:"email" binding:"MaxSize(255)"`
+	Description          string  `json:"description" binding:"MaxSize(255)"`
+	Website              string  `json:"website" binding:"ValidUrl;MaxSize(255)"`
+	Location             string  `json:"location" binding:"MaxSize(50)"`
+	FediverseCreatorName *string `json:"fediverse_creator_name"`
 	// possible values are `public`, `limited` or `private`
 	// enum: ["public", "limited", "private"]
 	Visibility                string `json:"visibility" binding:"In(,public,limited,private)"`

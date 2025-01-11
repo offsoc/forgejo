@@ -9,14 +9,17 @@
 	<meta name="description" content="{{if .Repository}}{{.Repository.Name}}{{if .Repository.Description}} - {{.Repository.Description}}{{end}}{{else}}{{MetaDescription}}{{end}}">
 	<meta name="keywords" content="{{MetaKeywords}}">
 	<meta name="referrer" content="no-referrer">
-{{if .GoGetImport}}
-	<meta name="go-import" content="{{.GoGetImport}} git {{.RepoCloneLink.HTTPS}}">
-	<meta name="go-source" content="{{.GoGetImport}} _ {{.GoDocDirectory}} {{.GoDocFile}}">
-{{end}}
-{{if and .EnableFeed .FeedURL}}
-	<link rel="alternate" type="application/atom+xml" title="" href="{{.FeedURL}}.atom">
-	<link rel="alternate" type="application/rss+xml" title="" href="{{.FeedURL}}.rss">
-{{end}}
+	{{if .FediverseCreator}}
+		<meta name="fediverse:creator" content="{{.FediverseCreator}}">
+	{{end}}
+	{{if .GoGetImport}}
+		<meta name="go-import" content="{{.GoGetImport}} git {{.RepoCloneLink.HTTPS}}">
+		<meta name="go-source" content="{{.GoGetImport}} _ {{.GoDocDirectory}} {{.GoDocFile}}">
+	{{end}}
+	{{if and .EnableFeed .FeedURL}}
+		<link rel="alternate" type="application/atom+xml" title="" href="{{.FeedURL}}.atom">
+		<link rel="alternate" type="application/rss+xml" title="" href="{{.FeedURL}}.rss">
+	{{end}}
 	<link rel="icon" href="{{AssetUrlPrefix}}/img/favicon.svg" type="image/svg+xml">
 	<link rel="alternate icon" href="{{AssetUrlPrefix}}/img/favicon.png" type="image/png">
 	{{template "base/head_script" .}}

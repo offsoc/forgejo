@@ -1462,3 +1462,28 @@ func TestRepoSubmoduleView(t *testing.T) {
 		htmlDoc.AssertElement(t, fmt.Sprintf(`tr[data-entryname="repo1"] a[href="%s"]`, u.JoinPath("/user2/repo1").String()), true)
 	})
 }
+
+func TestRepoFediverseCreator(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	t.Run("Exists", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		resp := MakeRequest(t, NewRequest(t, "GET", "/user2/repo1"), http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		value, exists := htmlDoc.Find(`meta[name="fediverse:creator"]`).Attr("content")
+		assert.True(t, exists)
+		assert.Equal(t, "@user2@example.com", value)
+	})
+
+	t.Run("NotExists", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		resp := MakeRequest(t, NewRequest(t, "GET", "/user12/repo10"), http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, `meta[name="fediverse:creator"]`, false)
+	})
+}

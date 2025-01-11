@@ -88,6 +88,8 @@ var migrations = []*Migration{
 	NewMigration("Add `purpose` column to `forgejo_auth_token` table", AddPurposeToForgejoAuthToken),
 	// v25 -> v26
 	NewMigration("Migrate `secret` column to store keying material", MigrateTwoFactorToKeying),
+	// v26 -> v27
+	NewMigration("Add `fediverse_creator_name` column to `user` table", AddFediverseCreatorNameToUser),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.

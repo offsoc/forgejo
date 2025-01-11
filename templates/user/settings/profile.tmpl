@@ -118,6 +118,16 @@
 					</label>
 				</fieldset>
 
+				<fieldset>
+					<legend id="fediverse-creator-user-settings">{{ctx.Locale.Tr "settings.fediverse_creator"}}</legend>
+
+					<label>
+						{{ctx.Locale.Tr "settings.fediverse_creator_name"}}
+						<span class="help">{{ctx.Locale.Tr "settings.fediverse_creator_name.description"}}</span>
+						<input name="fediverse_creator_name" value="{{.SignedUser.FediverseCreatorName}}">
+					</label>
+				</fieldset>
+
 				<button class="ui primary button">{{ctx.Locale.Tr "settings.update_profile"}}</button>
 			</form>
 		</div>

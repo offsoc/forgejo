@@ -155,6 +155,9 @@ type User struct {
 	Theme               string `xorm:"NOT NULL DEFAULT ''"`
 	KeepActivityPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	EnableRepoUnitHints bool   `xorm:"NOT NULL DEFAULT true"`
+
+	// Fediverse
+	FediverseCreatorName string `xorm:"NOT NULL DEFAULT ''"`
 }
 
 func init() {

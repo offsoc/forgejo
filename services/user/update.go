@@ -40,6 +40,7 @@ type UpdateOptions struct {
 	SetLastLogin                 bool
 	RepoAdminChangeTeamAccess    optional.Option[bool]
 	EnableRepoUnitHints          optional.Option[bool]
+	FediverseCreatorName         optional.Option[string]
 }
 
 func UpdateUser(ctx context.Context, u *user_model.User, opts *UpdateOptions) error {
@@ -163,6 +164,12 @@ func UpdateUser(ctx context.Context, u *user_model.User, opts *UpdateOptions) er
 		u.EmailNotificationsPreference = opts.EmailNotificationsPreference.Value()
 
 		cols = append(cols, "email_notifications_preference")
+	}
+
+	if opts.FediverseCreatorName.Has() {
+		u.FediverseCreatorName = opts.FediverseCreatorName.Value()
+
+		cols = append(cols, "fediverse_creator_name")
 	}
 
 	if opts.SetLastLogin {

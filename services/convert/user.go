@@ -48,18 +48,19 @@ func ToUserWithAccessMode(ctx context.Context, user *user_model.User, accessMode
 // signed shall only be set if requester is logged in. authed shall only be set if user is site admin or user himself
 func toUser(ctx context.Context, user *user_model.User, signed, authed bool) *api.User {
 	result := &api.User{
-		ID:          user.ID,
-		UserName:    user.Name,
-		FullName:    user.FullName,
-		Email:       user.GetPlaceholderEmail(),
-		AvatarURL:   user.AvatarLink(ctx),
-		HTMLURL:     user.HTMLURL(),
-		Created:     user.CreatedUnix.AsTime(),
-		Restricted:  user.IsRestricted,
-		Location:    user.Location,
-		Pronouns:    user.Pronouns,
-		Website:     user.Website,
-		Description: user.Description,
+		ID:                   user.ID,
+		UserName:             user.Name,
+		FullName:             user.FullName,
+		Email:                user.GetPlaceholderEmail(),
+		AvatarURL:            user.AvatarLink(ctx),
+		HTMLURL:              user.HTMLURL(),
+		Created:              user.CreatedUnix.AsTime(),
+		Restricted:           user.IsRestricted,
+		Location:             user.Location,
+		Pronouns:             user.Pronouns,
+		Website:              user.Website,
+		Description:          user.Description,
+		FediverseCreatorName: user.FediverseCreatorName,
 		// counter's
 		Followers:    user.NumFollowers,
 		Following:    user.NumFollowing,
@@ -89,17 +90,18 @@ func toUser(ctx context.Context, user *user_model.User, signed, authed bool) *ap
 // User2UserSettings return UserSettings based on a user
 func User2UserSettings(user *user_model.User) api.UserSettings {
 	return api.UserSettings{
-		FullName:            user.FullName,
-		Website:             user.Website,
-		Location:            user.Location,
-		Pronouns:            user.Pronouns,
-		Language:            user.Language,
-		Description:         user.Description,
-		Theme:               user.Theme,
-		HideEmail:           user.KeepEmailPrivate,
-		HideActivity:        user.KeepActivityPrivate,
-		DiffViewStyle:       user.DiffViewStyle,
-		EnableRepoUnitHints: user.EnableRepoUnitHints,
+		FullName:             user.FullName,
+		Website:              user.Website,
+		Location:             user.Location,
+		Pronouns:             user.Pronouns,
+		Language:             user.Language,
+		Description:          user.Description,
+		Theme:                user.Theme,
+		HideEmail:            user.KeepEmailPrivate,
+		HideActivity:         user.KeepActivityPrivate,
+		DiffViewStyle:        user.DiffViewStyle,
+		EnableRepoUnitHints:  user.EnableRepoUnitHints,
+		FediverseCreatorName: user.FediverseCreatorName,
 	}
 }
 

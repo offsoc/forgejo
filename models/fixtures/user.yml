@@ -75,6 +75,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  fediverse_creator_name: "@user2@example.com"
   created_unix: 1672578010
 
 -
