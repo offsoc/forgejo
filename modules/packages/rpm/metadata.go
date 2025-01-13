@@ -6,8 +6,8 @@ package rpm
 import (
 	"fmt"
 	"io"
-	"strings"
 	"reflect"
+	"strings"
 
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/validation"
@@ -211,7 +211,7 @@ func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int, flag
 			e := &Entry{
 				Name: names[i],
 			}
-		
+
 			flags := flags[i]
 			if (flags&rpmutils.RPMSENSE_GREATER) != 0 && (flags&rpmutils.RPMSENSE_EQUAL) != 0 {
 				e.Flags = "GE"
@@ -224,11 +224,11 @@ func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int, flag
 			} else if (flags & rpmutils.RPMSENSE_EQUAL) != 0 {
 				e.Flags = "EQ"
 			}
-		
+
 			version := versions[i]
 			if version != "" {
 				parts := strings.Split(version, "-")
-		
+
 				versionParts := strings.Split(parts[0], ":")
 				if len(versionParts) == 2 {
 					e.Version = versionParts[1]
@@ -237,7 +237,7 @@ func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int, flag
 					e.Version = versionParts[0]
 					e.Epoch = "0"
 				}
-		
+
 				if len(parts) > 1 {
 					e.Release = parts[1]
 				}
@@ -253,7 +253,7 @@ func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int, flag
 				},
 				Flags: uint32(flags[i]),
 			}
-		e.Version = versions[i]
+			e.Version = versions[i]
 		}
 		for _, alt := range altEntries {
 			entries = append(entries, &alt.Entry)

@@ -29,30 +29,6 @@ func apiError(ctx *context.Context, status int, obj any) {
 	})
 }
 
-func CheckRepositoryFileExistence(ctx *context.Context) {
-	pv, err := alt_service.GetOrCreateRepositoryVersion(ctx, ctx.Package.Owner.ID)
-	if err != nil {
-		apiError(ctx, http.StatusInternalServerError, err)
-		return
-	}
-
-	pf, err := packages_model.GetFileForVersionByName(ctx, pv.ID, ctx.Params("filename"), ctx.Params("group"))
-	if err != nil {
-		if errors.Is(err, util.ErrNotExist) {
-			ctx.Status(http.StatusNotFound)
-		} else {
-			apiError(ctx, http.StatusInternalServerError, err)
-		}
-		return
-	}
-
-	ctx.SetServeHeaders(&context.ServeHeaderOptions{
-		Filename:     pf.Name,
-		LastModified: pf.CreatedUnix.AsLocalTime(),
-	})
-	ctx.Status(http.StatusOK)
-}
-
 // Gets a pre-generated repository metadata file
 func GetRepositoryFile(ctx *context.Context, arch string) {
 	pv, err := alt_service.GetOrCreateRepositoryVersion(ctx, ctx.Package.Owner.ID)
