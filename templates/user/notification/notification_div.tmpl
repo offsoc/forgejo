@@ -2,7 +2,7 @@
 	<div class="ui container">
 		{{$notificationUnreadCount := call .NotificationUnreadCount}}
 		<div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-			<div class="ui secondary partial menu">
+			<div class="switch">
 				<a class="{{if eq .Status 1}}active {{end}}item" href="{{AppSubUrl}}/notifications?q=unread">
 					{{ctx.Locale.Tr "notification.unread"}}
 					<div class="notifications-unread-count ui label {{if not $notificationUnreadCount}}tw-hidden{{end}}">{{$notificationUnreadCount}}</div>

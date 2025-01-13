@@ -2,7 +2,7 @@
 <div role="main" aria-label="{{.Title}}" class="page-content user notification">
 	<div class="ui container">
 		<div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-			<div class="ui secondary partial menu">
+			<div class="switch">
 				<a href="{{AppSubUrl}}/notifications/subscriptions" class="{{if eq .Status 1}}active {{end}}item">
 					{{ctx.Locale.Tr "notification.subscriptions"}}
 				</a>
