@@ -17,7 +17,9 @@ func Test_parseRemoteUpdateOutput(t *testing.T) {
  - [deleted]         (none)     -> tag1
  + f895a1e...957a993 test2      -> origin/test2  (forced update)
    957a993..a87ba5f  test3      -> origin/test3
-`
+ * [new ref]         refs/pull/27/merge     -> refs/pull/27/merge
+ * [new ref]         refs/pull/516/head  -> refs/pull/516/head
+ `
 	results := parseRemoteUpdateOutput(output, "origin")
 	assert.Len(t, results, 6)
 	assert.EqualValues(t, "refs/tags/v0.1.8", results[0].refName.String())
