@@ -5,125 +5,127 @@
 	{{$pullRequestEnabled := .Repository.UnitEnabled $.Context $.UnitTypePullRequests}}
 	{{$pullRequestGlobalDisabled := .UnitTypePullRequests.UnitGlobalDisabled}}
 	{{$prUnit := .Repository.MustGetUnit $.Context $.UnitTypePullRequests}}
-	<div class="field">
-		<div class="ui checkbox{{if $pullRequestGlobalDisabled}} disabled{{end}}"{{if $pullRequestGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
-			<input class="enable-system" name="enable_pulls" type="checkbox" data-target="#pull_box" {{if $pullRequestEnabled}}checked{{end}}>
-			<label>{{ctx.Locale.Tr "repo.settings.pulls_desc"}}</label>
-		</div>
-	</div>
 	<fieldset>
-		<label>
-			<input name="pulls_ignore_whitespace" type="checkbox" {{if and $pullRequestEnabled ($prUnit.PullRequestsConfig.IgnoreWhitespaceConflicts)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.settings.pulls.ignore_whitespace"}}
+		<label {{if $pullRequestGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+			<input name="enable_pulls" type="checkbox" {{if $pullRequestEnabled}}checked{{end}}>
+			{{ctx.Locale.Tr "repo.settings.pulls_desc"}}
 		</label>
-	</fieldset>
-	<fieldset {{if not $pullRequestEnabled}}disabled{{end}} id="pull_box">
-		<legend>{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}</legend>
-		<label>
-			<input name="pulls_allow_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowMerge)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}
-		</label>
-		<label>
-			<input name="pulls_allow_rebase" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebase)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.pulls.rebase_merge_pull_request"}}
-		</label>
-		<label>
-			<input name="pulls_allow_rebase_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebaseMerge)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.pulls.rebase_merge_commit_pull_request"}}
-		</label>
-		<label>
-			<input name="pulls_allow_squash" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowSquash)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.pulls.squash_merge_pull_request"}}
-		</label>
-		<label>
-			<input name="pulls_allow_fast_forward_only" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowFastForwardOnly)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.pulls.fast_forward_only_merge_pull_request"}}
-		</label>
-		<label>
-			<input name="pulls_allow_manual_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowManualMerge)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.pulls.merge_manually"}}
-		</label>
-		<label>
-			<input name="enable_autodetect_manual_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AutodetectManualMerge)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.settings.pulls.enable_autodetect_manual_merge"}}
-		</label>
+		<div class="hide-unless-checked">
+			<fieldset>
+				<label>
+					<input name="pulls_ignore_whitespace" type="checkbox" {{if and $pullRequestEnabled ($prUnit.PullRequestsConfig.IgnoreWhitespaceConflicts)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.settings.pulls.ignore_whitespace"}}
+				</label>
+			</fieldset>
+			<fieldset>
+				<legend>{{ctx.Locale.Tr "repo.settings.merge_style_desc"}}</legend>
+				<label>
+					<input name="pulls_allow_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowMerge)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}
+				</label>
+				<label>
+					<input name="pulls_allow_rebase" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebase)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.pulls.rebase_merge_pull_request"}}
+				</label>
+				<label>
+					<input name="pulls_allow_rebase_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebaseMerge)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.pulls.rebase_merge_commit_pull_request"}}
+				</label>
+				<label>
+					<input name="pulls_allow_squash" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowSquash)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.pulls.squash_merge_pull_request"}}
+				</label>
+				<label>
+					<input name="pulls_allow_fast_forward_only" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowFastForwardOnly)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.pulls.fast_forward_only_merge_pull_request"}}
+				</label>
+				<label>
+					<input name="pulls_allow_manual_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowManualMerge)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.pulls.merge_manually"}}
+				</label>
+				<label>
+					<input name="enable_autodetect_manual_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AutodetectManualMerge)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.settings.pulls.enable_autodetect_manual_merge"}}
+				</label>
 
-		<div class="field">
-			<label id="pulls-merge-styles-default-title">{{ctx.Locale.Tr "repo.settings.default_merge_style_desc"}}</label>
-			<div class="ui dropdown selection">
-				<select name="pulls_default_merge_style" aria-labelledby="pulls-merge-styles-default-title">
-					<option value="merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}</option>
-					<option value="rebase" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "rebase")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.rebase_merge_pull_request"}}</option>
-					<option value="rebase-merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "rebase-merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.rebase_merge_commit_pull_request"}}</option>
-					<option value="squash" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "squash")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.squash_merge_pull_request"}}</option>
-					<option value="fast-forward-only" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "fast-forward-only")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.fast_forward_only_merge_pull_request"}}</option>
-				</select>{{svg "octicon-triangle-down" 14 "dropdown icon"}}
-				<div class="default text">
-					{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "merge")}}
-						{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}
-					{{end}}
-					{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "rebase")}}
-						{{ctx.Locale.Tr "repo.pulls.rebase_merge_pull_request"}}
-					{{end}}
-					{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "rebase-merge")}}
-						{{ctx.Locale.Tr "repo.pulls.rebase_merge_commit_pull_request"}}
-					{{end}}
-					{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "squash")}}
-						{{ctx.Locale.Tr "repo.pulls.squash_merge_pull_request"}}
-					{{end}}
-					{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "fast-forward-only")}}
-						{{ctx.Locale.Tr "repo.pulls.fast_forward_only_merge_pull_request"}}
-					{{end}}
+				<div class="field">
+					<label id="pulls-merge-styles-default-title">{{ctx.Locale.Tr "repo.settings.default_merge_style_desc"}}</label>
+					<div class="ui dropdown selection">
+						<select name="pulls_default_merge_style" aria-labelledby="pulls-merge-styles-default-title">
+							<option value="merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}</option>
+							<option value="rebase" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "rebase")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.rebase_merge_pull_request"}}</option>
+							<option value="rebase-merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "rebase-merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.rebase_merge_commit_pull_request"}}</option>
+							<option value="squash" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "squash")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.squash_merge_pull_request"}}</option>
+							<option value="fast-forward-only" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "fast-forward-only")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.fast_forward_only_merge_pull_request"}}</option>
+						</select>{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+						<div class="default text">
+							{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "merge")}}
+								{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}
+							{{end}}
+							{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "rebase")}}
+								{{ctx.Locale.Tr "repo.pulls.rebase_merge_pull_request"}}
+							{{end}}
+							{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "rebase-merge")}}
+								{{ctx.Locale.Tr "repo.pulls.rebase_merge_commit_pull_request"}}
+							{{end}}
+							{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "squash")}}
+								{{ctx.Locale.Tr "repo.pulls.squash_merge_pull_request"}}
+							{{end}}
+							{{if (eq $prUnit.PullRequestsConfig.DefaultMergeStyle "fast-forward-only")}}
+								{{ctx.Locale.Tr "repo.pulls.fast_forward_only_merge_pull_request"}}
+							{{end}}
+						</div>
+						<div class="menu">
+							<div class="item" data-value="merge">{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}</div>
+							<div class="item" data-value="rebase">{{ctx.Locale.Tr "repo.pulls.rebase_merge_pull_request"}}</div>
+							<div class="item" data-value="rebase-merge">{{ctx.Locale.Tr "repo.pulls.rebase_merge_commit_pull_request"}}</div>
+							<div class="item" data-value="squash">{{ctx.Locale.Tr "repo.pulls.squash_merge_pull_request"}}</div>
+							<div class="item" data-value="fast-forward-only">{{ctx.Locale.Tr "repo.pulls.fast_forward_only_merge_pull_request"}}</div>
+						</div>
+					</div>
 				</div>
-				<div class="menu">
-					<div class="item" data-value="merge">{{ctx.Locale.Tr "repo.pulls.merge_pull_request"}}</div>
-					<div class="item" data-value="rebase">{{ctx.Locale.Tr "repo.pulls.rebase_merge_pull_request"}}</div>
-					<div class="item" data-value="rebase-merge">{{ctx.Locale.Tr "repo.pulls.rebase_merge_commit_pull_request"}}</div>
-					<div class="item" data-value="squash">{{ctx.Locale.Tr "repo.pulls.squash_merge_pull_request"}}</div>
-					<div class="item" data-value="fast-forward-only">{{ctx.Locale.Tr "repo.pulls.fast_forward_only_merge_pull_request"}}</div>
+			</fieldset>
+			<fieldset>
+				<legend>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.title"}}</legend>
+				<label>
+					<input name="pulls_allow_rebase_update" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebaseUpdate)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.settings.pulls.allow_rebase_update"}}
+				</label>
+				<div class="field">
+					<label id="pulls-update-styles-default-title">{{ctx.Locale.Tr "repo.settings.pulls.update_styles.default.title"}}</label>
+					<div class="ui dropdown selection">
+						<select name="pulls_default_update_style" aria-labelledby="pulls-update-styles-default-title">
+							<option value="merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.update_branch"}}</option>
+							<option value="rebase" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "rebase")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}</option>
+						</select>{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+						<div class="default text">
+							{{if (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "merge")}}
+								{{ctx.Locale.Tr "repo.pulls.update_branch"}}
+							{{end}}
+							{{if (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "rebase")}}
+								{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}
+							{{end}}
+						</div>
+						<div class="menu">
+							<div class="item" data-value="merge">{{ctx.Locale.Tr "repo.pulls.update_branch"}}</div>
+							<div class="item" data-value="rebase">{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}</div>
+						</div>
+					</div>
+					<span class="help">{{ctx.Locale.Tr "repo.settings.default_update_style_desc"}}</span>
 				</div>
-			</div>
+			</fieldset>
+			<fieldset>
+				<legend>{{ctx.Locale.Tr "repo.settings.pulls.defaults.title"}}</legend>
+				<label>
+					<input name="default_allow_maintainer_edit" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultAllowMaintainerEdit)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.settings.pulls.default_allow_edits_from_maintainers"}}
+				</label>
+				<label>
+					<input name="default_delete_branch_after_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultDeleteBranchAfterMerge)}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.settings.pulls.default_delete_branch_after_merge"}}
+				</label>
+			</fieldset>
 		</div>
-	</fieldset>
-	<fieldset {{if not $pullRequestEnabled}}disabled{{end}}>
-		<legend>{{ctx.Locale.Tr "repo.settings.pulls.update_styles.title"}}</legend>
-		<label>
-			<input name="pulls_allow_rebase_update" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.AllowRebaseUpdate)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.settings.pulls.allow_rebase_update"}}
-		</label>
-		<div class="field">
-			<label id="pulls-update-styles-default-title">{{ctx.Locale.Tr "repo.settings.pulls.update_styles.default.title"}}</label>
-			<div class="ui dropdown selection">
-				<select name="pulls_default_update_style" aria-labelledby="pulls-update-styles-default-title">
-					<option value="merge" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "merge")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.update_branch"}}</option>
-					<option value="rebase" {{if or (not $pullRequestEnabled) (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "rebase")}}selected{{end}}>{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}</option>
-				</select>{{svg "octicon-triangle-down" 14 "dropdown icon"}}
-				<div class="default text">
-					{{if (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "merge")}}
-						{{ctx.Locale.Tr "repo.pulls.update_branch"}}
-					{{end}}
-					{{if (eq $prUnit.PullRequestsConfig.DefaultUpdateStyle "rebase")}}
-						{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}
-					{{end}}
-				</div>
-				<div class="menu">
-					<div class="item" data-value="merge">{{ctx.Locale.Tr "repo.pulls.update_branch"}}</div>
-					<div class="item" data-value="rebase">{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}</div>
-				</div>
-			</div>
-			<span class="help">{{ctx.Locale.Tr "repo.settings.default_update_style_desc"}}</span>
-		</div>
-	</fieldset>
-	<fieldset {{if not $pullRequestEnabled}}disabled{{end}}>
-		<legend>{{ctx.Locale.Tr "repo.settings.pulls.defaults.title"}}</legend>
-		<label>
-			<input name="default_allow_maintainer_edit" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultAllowMaintainerEdit)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.settings.pulls.default_allow_edits_from_maintainers"}}
-		</label>
-		<label>
-			<input name="default_delete_branch_after_merge" type="checkbox" {{if or (not $pullRequestEnabled) ($prUnit.PullRequestsConfig.DefaultDeleteBranchAfterMerge)}}checked{{end}}>
-			{{ctx.Locale.Tr "repo.settings.pulls.default_delete_branch_after_merge"}}
-		</label>
 	</fieldset>
 
 	<div class="divider"></div>
