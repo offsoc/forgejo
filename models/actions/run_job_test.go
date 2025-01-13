@@ -22,4 +22,8 @@ func TestActionRunJob_ItRunsOn(t *testing.T) {
 	agentLabels = []string{"ubuntu"}
 
 	assert.False(t, actionJob.ItRunsOn(agentLabels))
+
+	actionJob.RunsOn = []string{}
+
+	assert.False(t, actionJob.ItRunsOn(agentLabels))
 }

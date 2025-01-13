@@ -73,7 +73,7 @@ func (job *ActionRunJob) LoadAttributes(ctx context.Context) error {
 }
 
 func (job *ActionRunJob) ItRunsOn(labels []string) bool {
-	if len(labels) < 1 {
+	if len(labels) == 0 || len(job.RunsOn) == 0 {
 		return false
 	}
 	labelSet := make(container.Set[string])
