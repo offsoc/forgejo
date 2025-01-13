@@ -14,7 +14,7 @@ import (
 	packages_model "code.gitea.io/gitea/models/packages"
 	"code.gitea.io/gitea/modules/json"
 	packages_module "code.gitea.io/gitea/modules/packages"
-	alt_module "code.gitea.io/gitea/modules/packages/alt"
+	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/routers/api/packages/helper"
 	"code.gitea.io/gitea/services/context"
@@ -98,7 +98,7 @@ func UploadPackageFile(ctx *context.Context) {
 	}
 	defer buf.Close()
 
-	pck, err := alt_module.ParsePackage(buf)
+	pck, err := rpm_module.ParsePackage(buf, "alt")
 	if err != nil {
 		if errors.Is(err, util.ErrInvalidArgument) {
 			apiError(ctx, http.StatusBadRequest, err)
@@ -139,9 +139,9 @@ func UploadPackageFile(ctx *context.Context) {
 			Data:    buf,
 			IsLead:  true,
 			Properties: map[string]string{
-				alt_module.PropertyGroup:        group,
-				alt_module.PropertyArchitecture: pck.FileMetadata.Architecture,
-				alt_module.PropertyMetadata:     string(fileMetadataRaw),
+				rpm_module.PropertyGroup:        group,
+				rpm_module.PropertyArchitecture: pck.FileMetadata.Architecture,
+				rpm_module.PropertyMetadata:     string(fileMetadataRaw),
 			},
 		},
 	)

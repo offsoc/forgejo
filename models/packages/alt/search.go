@@ -7,7 +7,7 @@ import (
 	"context"
 
 	packages_model "code.gitea.io/gitea/models/packages"
-	alt_module "code.gitea.io/gitea/modules/packages/alt"
+	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
 )
 
 type PackageSearchOptions struct {
@@ -23,7 +23,7 @@ func GetGroups(ctx context.Context, ownerID int64) ([]string, error) {
 		packages_model.TypeAlt,
 		ownerID,
 		packages_model.PropertyTypeFile,
-		alt_module.PropertyGroup,
+		rpm_module.PropertyGroup,
 		nil,
 	)
 }

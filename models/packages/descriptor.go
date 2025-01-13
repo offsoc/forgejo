@@ -13,7 +13,6 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/packages/alpine"
-	"code.gitea.io/gitea/modules/packages/alt"
 	"code.gitea.io/gitea/modules/packages/arch"
 	"code.gitea.io/gitea/modules/packages/cargo"
 	"code.gitea.io/gitea/modules/packages/chef"
@@ -189,7 +188,7 @@ func GetPackageDescriptor(ctx context.Context, pv *PackageVersion) (*PackageDesc
 	case TypeRpm:
 		metadata = &rpm.VersionMetadata{}
 	case TypeAlt:
-		metadata = &alt.VersionMetadata{}
+		metadata = &rpm.VersionMetadata{}
 	case TypeRubyGems:
 		metadata = &rubygems.Metadata{}
 	case TypeSwift:

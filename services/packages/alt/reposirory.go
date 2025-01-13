@@ -22,7 +22,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/json"
 	packages_module "code.gitea.io/gitea/modules/packages"
-	alt_module "code.gitea.io/gitea/modules/packages/alt"
+	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
 	"code.gitea.io/gitea/modules/setting"
 	packages_service "code.gitea.io/gitea/services/packages"
 
@@ -33,7 +33,7 @@ import (
 // GetOrCreateRepositoryVersion gets or creates the internal repository package
 // The RPM registry needs multiple metadata files which are stored in this package.
 func GetOrCreateRepositoryVersion(ctx context.Context, ownerID int64) (*packages_model.PackageVersion, error) {
-	return packages_service.GetOrCreateInternalPackageVersion(ctx, ownerID, packages_model.TypeAlt, alt_module.RepositoryPackage, alt_module.RepositoryVersion)
+	return packages_service.GetOrCreateInternalPackageVersion(ctx, ownerID, packages_model.TypeAlt, rpm_module.RepositoryPackage, rpm_module.RepositoryVersion)
 }
 
 // BuildAllRepositoryFiles (re)builds all repository files for every available group
@@ -94,8 +94,8 @@ type packageData struct {
 	Package         *packages_model.Package
 	Version         *packages_model.PackageVersion
 	Blob            *packages_model.PackageBlob
-	VersionMetadata *alt_module.VersionMetadata
-	FileMetadata    *alt_module.FileMetadata
+	VersionMetadata *rpm_module.VersionMetadata
+	FileMetadata    *rpm_module.FileMetadata
 }
 
 type packageCache = map[*packages_model.PackageFile]*packageData
@@ -147,7 +147,7 @@ func BuildSpecificRepositoryFiles(ctx context.Context, ownerID int64, group stri
 		if err != nil {
 			return err
 		}
-		pps, err := packages_model.GetPropertiesByName(ctx, packages_model.PropertyTypeFile, pf.ID, alt_module.PropertyMetadata)
+		pps, err := packages_model.GetPropertiesByName(ctx, packages_model.PropertyTypeFile, pf.ID, rpm_module.PropertyMetadata)
 		if err != nil {
 			return err
 		}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"reflect"
 
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/validation"
@@ -85,6 +86,11 @@ type Entry struct {
 	Release string `json:"release,omitempty" xml:"rel,attr,omitempty"`
 }
 
+type AltEntry struct {
+	Entry
+	Flags uint32 `json:"flags,omitempty" xml:"flags,attr,omitempty"`
+}
+
 type File struct {
 	Path         string `json:"path" xml:",chardata"`
 	Type         string `json:"type,omitempty" xml:"type,attr,omitempty"`
@@ -98,7 +104,7 @@ type Changelog struct {
 }
 
 // ParsePackage parses the RPM package file
-func ParsePackage(r io.Reader) (*Package, error) {
+func ParsePackage(r io.Reader, repoType string) (*Package, error) {
 	rpm, err := rpmutils.ReadRpm(r)
 	if err != nil {
 		return nil, err
@@ -112,6 +118,15 @@ func ParsePackage(r io.Reader) (*Package, error) {
 	version := fmt.Sprintf("%s-%s", nevra.Version, nevra.Release)
 	if nevra.Epoch != "" && nevra.Epoch != "0" {
 		version = fmt.Sprintf("%s-%s", nevra.Epoch, version)
+	}
+
+	var flagsType reflect.Type
+	if repoType == "rpm" {
+		flagsType = reflect.TypeOf("")
+	} else if repoType == "alt" {
+		flagsType = reflect.TypeOf(0)
+	} else {
+		return nil, fmt.Errorf("unsupported repoType: %s", repoType)
 	}
 
 	p := &Package{
@@ -138,10 +153,10 @@ func ParsePackage(r io.Reader) (*Package, error) {
 			InstalledSize: getUInt64(rpm.Header, rpmutils.SIZE),
 			ArchiveSize:   getUInt64(rpm.Header, rpmutils.SIG_PAYLOADSIZE),
 
-			Provides:   getEntries(rpm.Header, rpmutils.PROVIDENAME, rpmutils.PROVIDEVERSION, rpmutils.PROVIDEFLAGS),
-			Requires:   getEntries(rpm.Header, rpmutils.REQUIRENAME, rpmutils.REQUIREVERSION, rpmutils.REQUIREFLAGS),
-			Conflicts:  getEntries(rpm.Header, rpmutils.CONFLICTNAME, rpmutils.CONFLICTVERSION, rpmutils.CONFLICTFLAGS),
-			Obsoletes:  getEntries(rpm.Header, rpmutils.OBSOLETENAME, rpmutils.OBSOLETEVERSION, rpmutils.OBSOLETEFLAGS),
+			Provides:   getEntries(rpm.Header, rpmutils.PROVIDENAME, rpmutils.PROVIDEVERSION, rpmutils.PROVIDEFLAGS, flagsType),
+			Requires:   getEntries(rpm.Header, rpmutils.REQUIRENAME, rpmutils.REQUIREVERSION, rpmutils.REQUIREFLAGS, flagsType),
+			Conflicts:  getEntries(rpm.Header, rpmutils.CONFLICTNAME, rpmutils.CONFLICTVERSION, rpmutils.CONFLICTFLAGS, flagsType),
+			Obsoletes:  getEntries(rpm.Header, rpmutils.OBSOLETENAME, rpmutils.OBSOLETEVERSION, rpmutils.OBSOLETEFLAGS, flagsType),
 			Files:      getFiles(rpm.Header),
 			Changelogs: getChangelogs(rpm.Header),
 		},
@@ -170,7 +185,7 @@ func getUInt64(h *rpmutils.RpmHeader, tag int) uint64 {
 	return values[0]
 }
 
-func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int) []*Entry {
+func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int, flagsType reflect.Type) []*Entry {
 	names, err := h.GetStrings(namesTag)
 	if err != nil || len(names) == 0 {
 		return nil
@@ -187,44 +202,62 @@ func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int) []*E
 		return nil
 	}
 
-	entries := make([]*Entry, 0, len(names))
-	for i := range names {
-		e := &Entry{
-			Name: names[i],
-		}
+	var entries []*Entry
 
-		flags := flags[i]
-		if (flags&rpmutils.RPMSENSE_GREATER) != 0 && (flags&rpmutils.RPMSENSE_EQUAL) != 0 {
-			e.Flags = "GE"
-		} else if (flags&rpmutils.RPMSENSE_LESS) != 0 && (flags&rpmutils.RPMSENSE_EQUAL) != 0 {
-			e.Flags = "LE"
-		} else if (flags & rpmutils.RPMSENSE_GREATER) != 0 {
-			e.Flags = "GT"
-		} else if (flags & rpmutils.RPMSENSE_LESS) != 0 {
-			e.Flags = "LT"
-		} else if (flags & rpmutils.RPMSENSE_EQUAL) != 0 {
-			e.Flags = "EQ"
-		}
-
-		version := versions[i]
-		if version != "" {
-			parts := strings.Split(version, "-")
-
-			versionParts := strings.Split(parts[0], ":")
-			if len(versionParts) == 2 {
-				e.Version = versionParts[1]
-				e.Epoch = versionParts[0]
-			} else {
-				e.Version = versionParts[0]
-				e.Epoch = "0"
+	switch flagsType.Kind() {
+	case reflect.String:
+		entries = make([]*Entry, 0, len(names))
+		for i := range names {
+			e := &Entry{
+				Name: names[i],
 			}
-
-			if len(parts) > 1 {
-				e.Release = parts[1]
+		
+			flags := flags[i]
+			if (flags&rpmutils.RPMSENSE_GREATER) != 0 && (flags&rpmutils.RPMSENSE_EQUAL) != 0 {
+				e.Flags = "GE"
+			} else if (flags&rpmutils.RPMSENSE_LESS) != 0 && (flags&rpmutils.RPMSENSE_EQUAL) != 0 {
+				e.Flags = "LE"
+			} else if (flags & rpmutils.RPMSENSE_GREATER) != 0 {
+				e.Flags = "GT"
+			} else if (flags & rpmutils.RPMSENSE_LESS) != 0 {
+				e.Flags = "LT"
+			} else if (flags & rpmutils.RPMSENSE_EQUAL) != 0 {
+				e.Flags = "EQ"
 			}
+		
+			version := versions[i]
+			if version != "" {
+				parts := strings.Split(version, "-")
+		
+				versionParts := strings.Split(parts[0], ":")
+				if len(versionParts) == 2 {
+					e.Version = versionParts[1]
+					e.Epoch = versionParts[0]
+				} else {
+					e.Version = versionParts[0]
+					e.Epoch = "0"
+				}
+		
+				if len(parts) > 1 {
+					e.Release = parts[1]
+				}
+			}
+			entries = append(entries, e)
 		}
-
-		entries = append(entries, e)
+	case reflect.Int:
+		altEntries := make([]*AltEntry, 0, len(names))
+		for i := range names {
+			e := &AltEntry{
+				Entry: Entry{
+					Name: names[i],
+				},
+				Flags: uint32(flags[i]),
+			}
+		e.Version = versions[i]
+		}
+		for _, alt := range altEntries {
+			entries = append(entries, &alt.Entry)
+		}
 	}
 	return entries
 }

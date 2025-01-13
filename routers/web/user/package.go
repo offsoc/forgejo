@@ -19,7 +19,6 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/optional"
 	alpine_module "code.gitea.io/gitea/modules/packages/alpine"
-	alt_module "code.gitea.io/gitea/modules/packages/alt"
 	arch_model "code.gitea.io/gitea/modules/packages/arch"
 	debian_module "code.gitea.io/gitea/modules/packages/debian"
 	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
@@ -260,9 +259,9 @@ func ViewPackageVersion(ctx *context.Context) {
 		for _, f := range pd.Files {
 			for _, pp := range f.Properties {
 				switch pp.Name {
-				case alt_module.PropertyGroup:
+				case rpm_module.PropertyGroup:
 					groups.Add(pp.Value)
-				case alt_module.PropertyArchitecture:
+				case rpm_module.PropertyArchitecture:
 					architectures.Add(pp.Value)
 				}
 			}
