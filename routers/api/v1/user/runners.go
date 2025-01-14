@@ -44,6 +44,8 @@ func SearchActionRunJobs(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/RunJobList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 	shared.GetActionRunJobs(ctx, ctx.Doer.ID, 0)
