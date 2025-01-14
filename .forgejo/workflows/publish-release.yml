@@ -61,14 +61,14 @@ jobs:
 
       - name: get trigger mirror issue
         id: mirror
-        uses: https://data.forgejo.org/infrastructure/issue-action/get@v1.1.0
+        uses: https://data.forgejo.org/infrastructure/issue-action/get@v1.3.0
         with:
           forgejo: https://code.forgejo.org
           repository: forgejo/forgejo
           labels: mirror-trigger
 
       - name: trigger the mirror
-        uses: https://data.forgejo.org/infrastructure/issue-action/set@v1.1.0
+        uses: https://data.forgejo.org/infrastructure/issue-action/set@v1.3.0
         with:
           forgejo: https://code.forgejo.org
           repository: forgejo/forgejo
