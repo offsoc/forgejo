@@ -234,7 +234,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 					if entry != nil {
 						requireNames = append(requireNames, entry.Name)
 						requireVersions = append(requireVersions, entry.Version)
-						requireFlags = append(requireFlags, entry.Flags)
+						requireFlags = append(requireFlags, entry.AltFlags)
 						requireNamesSize += len(entry.Name) + 1
 						requireVersionsSize += len(entry.Version) + 1
 						requireFlagsSize += 4
@@ -252,7 +252,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 					if entry != nil {
 						conflictNames = append(conflictNames, entry.Name)
 						conflictVersions = append(conflictVersions, entry.Version)
-						conflictFlags = append(conflictFlags, entry.Flags)
+						conflictFlags = append(conflictFlags, entry.AltFlags)
 						conflictNamesSize += len(entry.Name) + 1
 						conflictVersionsSize += len(entry.Version) + 1
 						conflictFlagsSize += 4
@@ -288,7 +288,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 					if entry != nil {
 						provideNames = append(provideNames, entry.Name)
 						provideVersions = append(provideVersions, entry.Version)
-						provideFlags = append(provideFlags, entry.Flags)
+						provideFlags = append(provideFlags, entry.AltFlags)
 						provideNamesSize += len(entry.Name) + 1
 						provideVersionsSize += len(entry.Version) + 1
 						provideFlagsSize += 4
@@ -306,7 +306,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 					if entry != nil {
 						obsoleteNames = append(obsoleteNames, entry.Name)
 						obsoleteVersions = append(obsoleteVersions, entry.Version)
-						obsoleteFlags = append(obsoleteFlags, entry.Flags)
+						obsoleteFlags = append(obsoleteFlags, entry.AltFlags)
 						obsoleteNamesSize += len(entry.Name) + 1
 						obsoleteVersionsSize += len(entry.Version) + 1
 						obsoleteFlagsSize += 4

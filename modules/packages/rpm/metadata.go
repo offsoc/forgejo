@@ -6,7 +6,6 @@ package rpm
 import (
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 
 	"code.gitea.io/gitea/modules/timeutil"
@@ -79,16 +78,12 @@ type FileMetadata struct {
 }
 
 type Entry struct {
-	Name    string `json:"name" xml:"name,attr"`
-	Flags   string `json:"flags,omitempty" xml:"flags,attr,omitempty"`
-	Version string `json:"version,omitempty" xml:"ver,attr,omitempty"`
-	Epoch   string `json:"epoch,omitempty" xml:"epoch,attr,omitempty"`
-	Release string `json:"release,omitempty" xml:"rel,attr,omitempty"`
-}
-
-type AltEntry struct {
-	Entry
-	Flags uint32 `json:"flags,omitempty" xml:"flags,attr,omitempty"`
+	Name     string `json:"name" xml:"name,attr"`
+	Flags    string `json:"flags,omitempty" xml:"flags,attr,omitempty"`
+	AltFlags uint32 `json:"alt_flags,omitempty" xml:"alt_flags,attr,omitempty"`
+	Version  string `json:"version,omitempty" xml:"ver,attr,omitempty"`
+	Epoch    string `json:"epoch,omitempty" xml:"epoch,attr,omitempty"`
+	Release  string `json:"release,omitempty" xml:"rel,attr,omitempty"`
 }
 
 type File struct {
@@ -120,15 +115,6 @@ func ParsePackage(r io.Reader, repoType string) (*Package, error) {
 		version = fmt.Sprintf("%s-%s", nevra.Epoch, version)
 	}
 
-	var flagsType reflect.Type
-	if repoType == "rpm" {
-		flagsType = reflect.TypeOf("")
-	} else if repoType == "alt" {
-		flagsType = reflect.TypeOf(0)
-	} else {
-		return nil, fmt.Errorf("unsupported repoType: %s", repoType)
-	}
-
 	p := &Package{
 		Name:    nevra.Name,
 		Version: version,
@@ -153,10 +139,10 @@ func ParsePackage(r io.Reader, repoType string) (*Package, error) {
 			InstalledSize: getUInt64(rpm.Header, rpmutils.SIZE),
 			ArchiveSize:   getUInt64(rpm.Header, rpmutils.SIG_PAYLOADSIZE),
 
-			Provides:   getEntries(rpm.Header, rpmutils.PROVIDENAME, rpmutils.PROVIDEVERSION, rpmutils.PROVIDEFLAGS, flagsType),
-			Requires:   getEntries(rpm.Header, rpmutils.REQUIRENAME, rpmutils.REQUIREVERSION, rpmutils.REQUIREFLAGS, flagsType),
-			Conflicts:  getEntries(rpm.Header, rpmutils.CONFLICTNAME, rpmutils.CONFLICTVERSION, rpmutils.CONFLICTFLAGS, flagsType),
-			Obsoletes:  getEntries(rpm.Header, rpmutils.OBSOLETENAME, rpmutils.OBSOLETEVERSION, rpmutils.OBSOLETEFLAGS, flagsType),
+			Provides:   getEntries(rpm.Header, rpmutils.PROVIDENAME, rpmutils.PROVIDEVERSION, rpmutils.PROVIDEFLAGS, repoType),
+			Requires:   getEntries(rpm.Header, rpmutils.REQUIRENAME, rpmutils.REQUIREVERSION, rpmutils.REQUIREFLAGS, repoType),
+			Conflicts:  getEntries(rpm.Header, rpmutils.CONFLICTNAME, rpmutils.CONFLICTVERSION, rpmutils.CONFLICTFLAGS, repoType),
+			Obsoletes:  getEntries(rpm.Header, rpmutils.OBSOLETENAME, rpmutils.OBSOLETEVERSION, rpmutils.OBSOLETEFLAGS, repoType),
 			Files:      getFiles(rpm.Header),
 			Changelogs: getChangelogs(rpm.Header),
 		},
@@ -185,7 +171,7 @@ func getUInt64(h *rpmutils.RpmHeader, tag int) uint64 {
 	return values[0]
 }
 
-func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int, flagsType reflect.Type) []*Entry {
+func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int, repoType string) []*Entry {
 	names, err := h.GetStrings(namesTag)
 	if err != nil || len(names) == 0 {
 		return nil
@@ -202,11 +188,10 @@ func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int, flag
 		return nil
 	}
 
-	var entries []*Entry
+	entries := make([]*Entry, 0, len(names))
 
-	switch flagsType.Kind() {
-	case reflect.String:
-		entries = make([]*Entry, 0, len(names))
+	switch repoType {
+	case "rpm":
 		for i := range names {
 			e := &Entry{
 				Name: names[i],
@@ -244,19 +229,13 @@ func getEntries(h *rpmutils.RpmHeader, namesTag, versionsTag, flagsTag int, flag
 			}
 			entries = append(entries, e)
 		}
-	case reflect.Int:
-		altEntries := make([]*AltEntry, 0, len(names))
+	case "alt":
 		for i := range names {
-			e := &AltEntry{
-				Entry: Entry{
-					Name: names[i],
-				},
-				Flags: uint32(flags[i]),
+			e := &Entry{
+				AltFlags: uint32(flags[i]),
 			}
 			e.Version = versions[i]
-		}
-		for _, alt := range altEntries {
-			entries = append(entries, &alt.Entry)
+			entries = append(entries, e)
 		}
 	}
 	return entries

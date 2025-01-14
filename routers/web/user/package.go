@@ -235,24 +235,7 @@ func ViewPackageVersion(ctx *context.Context) {
 		ctx.Data["Distributions"] = util.Sorted(distributions.Values())
 		ctx.Data["Components"] = util.Sorted(components.Values())
 		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
-	case packages_model.TypeRpm:
-		groups := make(container.Set[string])
-		architectures := make(container.Set[string])
-
-		for _, f := range pd.Files {
-			for _, pp := range f.Properties {
-				switch pp.Name {
-				case rpm_module.PropertyGroup:
-					groups.Add(pp.Value)
-				case rpm_module.PropertyArchitecture:
-					architectures.Add(pp.Value)
-				}
-			}
-		}
-
-		ctx.Data["Groups"] = util.Sorted(groups.Values())
-		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
-	case packages_model.TypeAlt:
+	case packages_model.TypeRpm, packages_model.TypeAlt:
 		groups := make(container.Set[string])
 		architectures := make(container.Set[string])
 
