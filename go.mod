@@ -69,6 +69,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/klauspost/compress v1.17.11
 	github.com/klauspost/cpuid/v2 v2.2.9
+	github.com/larzconwell/bzip2 v0.0.0-20160405040150-ecf7a0ddeda1
 	github.com/lib/pq v1.10.9
 	github.com/markbates/goth v1.80.0
 	github.com/mattn/go-isatty v0.0.20
@@ -216,7 +217,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
-	github.com/larzconwell/bzip2 v0.0.0-20160405040150-ecf7a0ddeda1 // indirect
 	github.com/libdns/libdns v0.2.2 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/markbates/going v1.0.3 // indirect
