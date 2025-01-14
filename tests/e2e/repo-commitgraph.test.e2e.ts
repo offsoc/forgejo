@@ -5,7 +5,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
 test('Commit graph overflow', async ({page}) => {
   await page.goto('/user2/diff-test/graph');
@@ -28,4 +28,5 @@ test('Switch branch', async ({page}) => {
   await expect(page.locator('#loading-indicator')).toBeHidden();
   await expect(page.locator('#rel-container')).toBeVisible();
   await expect(page.locator('#rev-container')).toBeVisible();
+  await save_visual(page);
 });

@@ -5,7 +5,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
 test('Load Homepage', async ({page}) => {
   const response = await page.goto('/');
@@ -26,6 +26,7 @@ test('Register Form', async ({page}, workerInfo) => {
   expect(page.url()).toBe(`${workerInfo.project.use.baseURL}/`);
   await expect(page.locator('.secondary-nav span>img.ui.avatar')).toBeVisible();
   await expect(page.locator('.ui.positive.message.flash-success')).toHaveText('Account was successfully created. Welcome!');
+  await save_visual(page);
 });
 
 // eslint-disable-next-line playwright/no-skipped-test

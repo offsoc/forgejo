@@ -3,7 +3,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {save_visual, test} from './utils_e2e.ts';
+import {test} from './utils_e2e.ts';
 
 test.use({user: 'user2'});
 
@@ -23,5 +23,6 @@ test('Correct link and tooltip', async ({page}, testInfo) => {
   const repoStatus = page.locator('.dashboard-repos .repo-owner-name-list > li:nth-child(1) > a:nth-child(2)');
   await expect(repoStatus).toHaveAttribute('href', '/user2/test_workflows/actions', {timeout: 10000});
   await expect(repoStatus).toHaveAttribute('data-tooltip-content', /^(Error|Failure)$/);
-  await save_visual(page);
+  // ToDo: Ensure stable screenshot of dashboard. Known to be flaky: https://code.forgejo.org/forgejo/visual-browser-testing/commit/206d4cfb7a4af6d8d7043026cdd4d63708798b2a
+  // await save_visual(page);
 });

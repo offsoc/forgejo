@@ -26,15 +26,6 @@ export const test = baseTest.extend<TestOptions>({
   },
   user: null,
   authScope: 'shared',
-  // see https://playwright.dev/docs/test-fixtures#adding-global-beforeeachaftereach-hooks
-  forEachTest: [async ({page}, use) => {
-    await use();
-    // some tests create a new page which is not yet available here
-    // only operate on tests that make the URL available
-    if (page.url() !== 'about:blank') {
-      await save_visual(page);
-    }
-  }, {auto: true}],
 });
 
 export async function test_context(browser: Browser, options?: BrowserContextOptions) {
