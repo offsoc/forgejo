@@ -26,7 +26,6 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	packages_service "code.gitea.io/gitea/services/packages"
 
-	"github.com/larzconwell/bzip2"
 	"github.com/ulikunitz/xz"
 )
 
@@ -619,7 +618,7 @@ func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, p
 			}
 		}
 
-		files := []string{"pkglist.classic", "pkglist.classic.xz", "pkglist.classic.bz2"}
+		files := []string{"pkglist.classic", "pkglist.classic.xz"}
 		for file := range files {
 			fileInfo, err := addPkglistAsFileToRepo(ctx, pv, files[file], headersWithIndexes, headersWithPtrs, orderedHeaders, group, architectures[i])
 			if err != nil {
@@ -838,14 +837,6 @@ func addPkglistAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersi
 		if _, err := w.Write(xzContent); err != nil {
 			return nil, err
 		}
-	} else if len(parts) == 3 && parts[len(parts)-1] == "bz2" {
-		bz2Content, err := compressBZ2(buf.Bytes())
-		if err != nil {
-			return nil, err
-		}
-		if _, err := w.Write(bz2Content); err != nil {
-			return nil, err
-		}
 	} else {
 		if _, err := w.Write(buf.Bytes()); err != nil {
 			return nil, err
@@ -927,19 +918,4 @@ func compressXZ(data []byte) ([]byte, error) {
 	}
 
 	return xzContent.Bytes(), nil
-}
-
-func compressBZ2(data []byte) ([]byte, error) {
-	var bz2Content bytes.Buffer
-	bz2Writer := bzip2.NewWriter(&bz2Content)
-	defer bz2Writer.Close()
-
-	if _, err := bz2Writer.Write(data); err != nil {
-		return nil, err
-	}
-	if err := bz2Writer.Close(); err != nil {
-		return nil, err
-	}
-
-	return bz2Content.Bytes(), nil
 }

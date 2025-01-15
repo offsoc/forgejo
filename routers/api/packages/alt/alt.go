@@ -9,12 +9,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"code.gitea.io/gitea/models/db"
 	packages_model "code.gitea.io/gitea/models/packages"
 	"code.gitea.io/gitea/modules/json"
 	packages_module "code.gitea.io/gitea/modules/packages"
 	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/routers/api/packages/helper"
 	"code.gitea.io/gitea/services/context"
@@ -27,6 +29,22 @@ func apiError(ctx *context.Context, status int, obj any) {
 	helper.LogAndProcessError(ctx, status, obj, func(message string) {
 		ctx.PlainText(status, message)
 	})
+}
+
+func GetRepositoryConfig(ctx *context.Context) {
+	group := ctx.Params("group")
+
+	var groupParts []string
+	if group != "" {
+		groupParts = strings.Split(group, "/")
+	}
+
+	url := fmt.Sprintf("%sapi/packages/%s/alt", setting.AppURL, ctx.Package.Owner.Name)
+
+	ctx.PlainText(http.StatusOK, `[gitea-`+strings.Join(append([]string{ctx.Package.Owner.LowerName}, groupParts...), "-")+`]
+name=`+strings.Join(append([]string{ctx.Package.Owner.Name, setting.AppName}, groupParts...), " - ")+`
+baseurl=`+strings.Join(append([]string{url}, groupParts...), "/")+`
+enabled=1`)
 }
 
 // Gets a pre-generated repository metadata file
