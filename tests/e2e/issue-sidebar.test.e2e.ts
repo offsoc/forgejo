@@ -7,14 +7,13 @@
 /* eslint playwright/expect-expect: ["error", { "assertFunctionNames": ["check_wip"] }] */
 
 import {expect, type Page} from '@playwright/test';
-import {test, save_visual, login_user, login} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
 test.describe('Pull: Toggle WIP', () => {
   const prTitle = 'pull5';
+
   async function toggle_wip_to({page}, should: boolean) {
     await page.waitForLoadState('domcontentloaded');
     if (should) {
@@ -39,8 +38,7 @@ test.describe('Pull: Toggle WIP', () => {
     }
   }
 
-  test.beforeEach(async ({browser}, workerInfo) => {
-    const page = await login({browser}, workerInfo);
+  test.beforeEach(async ({page}) => {
     const response = await page.goto('/user2/repo1/pulls/5');
     expect(response?.status()).toBe(200); // Status OK
     // ensure original title
@@ -50,9 +48,8 @@ test.describe('Pull: Toggle WIP', () => {
     await check_wip({page}, false);
   });
 
-  test('simple toggle', async ({browser}, workerInfo) => {
+  test('simple toggle', async ({page}, workerInfo) => {
     test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
-    const page = await login({browser}, workerInfo);
     await page.goto('/user2/repo1/pulls/5');
     // toggle to WIP
     await toggle_wip_to({page}, true);
@@ -62,9 +59,8 @@ test.describe('Pull: Toggle WIP', () => {
     await check_wip({page}, false);
   });
 
-  test('manual edit', async ({browser}, workerInfo) => {
+  test('manual edit', async ({page}, workerInfo) => {
     test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
-    const page = await login({browser}, workerInfo);
     await page.goto('/user2/repo1/pulls/5');
     // manually edit title to another prefix
     await page.locator('#issue-title-edit-show').click();
@@ -76,9 +72,8 @@ test.describe('Pull: Toggle WIP', () => {
     await check_wip({page}, false);
   });
 
-  test('maximum title length', async ({browser}, workerInfo) => {
+  test('maximum title length', async ({page}, workerInfo) => {
     test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
-    const page = await login({browser}, workerInfo);
     await page.goto('/user2/repo1/pulls/5');
     // check maximum title length is handled gracefully
     const maxLenStr = prTitle + 'a'.repeat(240);
@@ -96,17 +91,16 @@ test.describe('Pull: Toggle WIP', () => {
   });
 });
 
-test('Issue: Labels', async ({browser}, workerInfo) => {
+test('Issue: Labels', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
 
-  async function submitLabels({page}: {page: Page}) {
+  async function submitLabels({page}: { page: Page }) {
     const submitted = page.waitForResponse('/user2/repo1/issues/labels');
     await page.locator('textarea').first().click(); // close via unrelated element
     await submitted;
     await page.waitForLoadState();
   }
 
-  const page = await login({browser}, workerInfo);
   // select label list in sidebar only
   const labelList = page.locator('.issue-content-right .labels-list a');
   const response = await page.goto('/user2/repo1/issues/1');
@@ -144,9 +138,8 @@ test('Issue: Labels', async ({browser}, workerInfo) => {
   await expect(labelList.filter({hasText: 'label1'})).toBeVisible();
 });
 
-test('Issue: Assignees', async ({browser}, workerInfo) => {
+test('Issue: Assignees', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
-  const page = await login({browser}, workerInfo);
   // select label list in sidebar only
   const assigneesList = page.locator('.issue-content-right .assignees.list .selected .item a');
 
@@ -182,9 +175,8 @@ test('Issue: Assignees', async ({browser}, workerInfo) => {
   await expect(page.locator('.ui.assignees.list .item.no-select')).toBeHidden();
 });
 
-test('New Issue: Assignees', async ({browser}, workerInfo) => {
+test('New Issue: Assignees', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
-  const page = await login({browser}, workerInfo);
   // select label list in sidebar only
   const assigneesList = page.locator('.issue-content-right .assignees.list .selected .item');
 
@@ -224,9 +216,8 @@ test('New Issue: Assignees', async ({browser}, workerInfo) => {
   await save_visual(page);
 });
 
-test('Issue: Milestone', async ({browser}, workerInfo) => {
+test('Issue: Milestone', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
-  const page = await login({browser}, workerInfo);
 
   const response = await page.goto('/user2/repo1/issues/1');
   expect(response?.status()).toBe(200);
@@ -248,9 +239,8 @@ test('Issue: Milestone', async ({browser}, workerInfo) => {
   await expect(page.locator('.timeline-item.event').last()).toContainText('user2 removed this from the milestone1 milestone');
 });
 
-test('New Issue: Milestone', async ({browser}, workerInfo) => {
+test('New Issue: Milestone', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Unable to get tests working on Safari Mobile, see https://codeberg.org/forgejo/forgejo/pulls/3445#issuecomment-1789636');
-  const page = await login({browser}, workerInfo);
 
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);

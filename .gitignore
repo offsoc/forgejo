@@ -72,6 +72,7 @@ cpu.out
 /tests/e2e/reports
 /tests/e2e/test-artifacts
 /tests/e2e/test-snapshots
+/tests/e2e/.auth
 /tests/*.ini
 /tests/**/*.git/**/*.sample
 /node_modules

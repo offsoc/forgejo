@@ -4,15 +4,12 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, dynamic_id, save_visual, login_user, login} from './utils_e2e.ts';
+import {test, dynamic_id, save_visual} from './utils_e2e.ts';
 import {validate_form} from './shared/forms.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
-test('New repo: invalid', async ({browser}, workerInfo) => {
-  const page = await login({browser}, workerInfo);
+test('New repo: invalid', async ({page}) => {
   const response = await page.goto('/repo/create');
   expect(response?.status()).toBe(200);
   // check that relevant form content is hidden or available
@@ -28,8 +25,7 @@ test('New repo: invalid', async ({browser}, workerInfo) => {
   await save_visual(page);
 });
 
-test('New repo: initialize', async ({browser}, workerInfo) => {
-  const page = await login({browser}, workerInfo);
+test('New repo: initialize', async ({page}, workerInfo) => {
   const response = await page.goto('/repo/create');
   expect(response?.status()).toBe(200);
   // check that relevant form content is hidden or available
@@ -62,8 +58,7 @@ test('New repo: initialize', async ({browser}, workerInfo) => {
   await save_visual(page);
 });
 
-test('New repo: initialize later', async ({browser}, workerInfo) => {
-  const page = await login({browser}, workerInfo);
+test('New repo: initialize later', async ({page}) => {
   const response = await page.goto('/repo/create');
   expect(response?.status()).toBe(200);
 
@@ -97,9 +92,8 @@ test('New repo: initialize later', async ({browser}, workerInfo) => {
   await save_visual(page);
 });
 
-test('New repo: from template', async ({browser}, workerInfo) => {
+test('New repo: from template', async ({page}, workerInfo) => {
   test.skip(['Mobile Safari', 'webkit'].includes(workerInfo.project.name), 'WebKit browsers seem to have CORS issues with localhost here.');
-  const page = await login({browser}, workerInfo);
   const response = await page.goto('/repo/create');
   expect(response?.status()).toBe(200);
 
@@ -114,8 +108,7 @@ test('New repo: from template', async ({browser}, workerInfo) => {
   await save_visual(page);
 });
 
-test('New repo: label set', async ({browser}, workerInfo) => {
-  const page = await login({browser}, workerInfo);
+test('New repo: label set', async ({page}) => {
   await page.goto('/repo/create');
 
   const reponame = dynamic_id();

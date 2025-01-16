@@ -1,9 +1,31 @@
 import {expect, test as baseTest, type Browser, type BrowserContextOptions, type APIRequestContext, type TestInfo, type Page} from '@playwright/test';
 
-export const test = baseTest.extend({
-  context: async ({browser}, use) => {
-    return use(await test_context(browser));
+import * as path from 'node:path';
+
+const AUTH_PATH = 'tests/e2e/.auth';
+
+type AuthScope = 'logout' | 'shared' | 'webauthn';
+
+export type TestOptions = {
+  forEachTest: void
+  user: string | null;
+  authScope: AuthScope;
+};
+
+export const test = baseTest.extend<TestOptions>({
+  context: async ({browser, user, authScope, contextOptions}, use, {project}) => {
+    if (user && authScope) {
+      const browserName = project.name.toLowerCase().replace(' ', '-');
+      contextOptions.storageState = path.join(AUTH_PATH, `state-${browserName}-${user}-${authScope}.json`);
+    } else {
+      // if no user is given, ensure to have clean state
+      contextOptions.storageState = {cookies: [], origins: []};
+    }
+
+    return use(await test_context(browser, contextOptions));
   },
+  user: null,
+  authScope: 'shared',
   // see https://playwright.dev/docs/test-fixtures#adding-global-beforeeachaftereach-hooks
   forEachTest: [async ({page}, use) => {
     await use();
@@ -15,7 +37,7 @@ export const test = baseTest.extend({
   }, {auto: true}],
 });
 
-async function test_context(browser: Browser, options?: BrowserContextOptions) {
+export async function test_context(browser: Browser, options?: BrowserContextOptions) {
   const context = await browser.newContext(options);
 
   context.on('page', (page) => {
