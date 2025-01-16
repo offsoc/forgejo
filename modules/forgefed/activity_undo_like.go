@@ -12,20 +12,19 @@ import (
 )
 
 type ForgeUndoLike struct {
-	// swagger:ignore
 	ap.Activity
 }
 
 func NewForgeUndoLike(actorIRI, objectIRI string, startTime time.Time) (ForgeUndoLike, error) {
 	result := ForgeUndoLike{}
 	result.Type = ap.UndoType
-	result.Actor = ap.IRI(actorIRI) // User who triggered the UndoLike (must be same as User who triggered the initial Like)
+	result.Actor = ap.IRI(actorIRI)
 	result.StartTime = startTime
 
-	like := ap.Activity{} // The Like, which should be undone (similar to struct Like, but without start date)
+	like := ap.Activity{}
 	like.Type = ap.LikeType
-	like.Actor = ap.IRI(actorIRI)   // User of the Like which should be undone
-	like.Object = ap.IRI(objectIRI) // Repository of the Like which should be undone
+	like.Actor = ap.IRI(actorIRI)
+	like.Object = ap.IRI(objectIRI)
 	result.Object = &like
 
 	if valid, err := validation.IsValid(result); !valid {
@@ -54,7 +53,6 @@ func (undo ForgeUndoLike) Validate() []string {
 			result = append(result, "StartTime was invalid.")
 		}
 	
-		// validate the referenced Activity i.e. the inner Object - which is a Like-Activity but without start time
 		if undo.Object == nil {
 			result = append(result, "object should not be empty.")
 		} else if activity, ok := undo.Object.(*ap.Activity); !ok {

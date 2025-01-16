@@ -102,7 +102,6 @@ func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 	startTime, _ := time.Parse("2006-Jan-02", "2024-Mar-27")
 	like, _ := NewForgeLike("https://repo.prod.meissa.de/api/v1/activitypub/user-id/1", "https://codeberg.org/api/v1/activitypub/repository-id/1", startTime)
 
-	//revive:disable
 	tests := map[string]testPair{
 		"valid": {
 			item: []byte(`{"type":"Undo",` +
@@ -129,7 +128,6 @@ func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 			wantErr: fmt.Errorf("cannot parse JSON:"),
 		},
 	}
-	//revive:enable
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -145,7 +143,6 @@ func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 				}
 				return
 			}
-			// remarshalling due to problems of DeepEqual for struct ForgeUndoLike
 			remarshalled_got, _ := got.MarshalJSON()
 			remarshalled_want, _ := test.want.MarshalJSON()
 			if !reflect.DeepEqual(remarshalled_got, remarshalled_want) {
@@ -158,8 +155,6 @@ func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 func TestActivityValidationUndo(t *testing.T) {
 	sut := new(ForgeUndoLike)
 
-	// Success
-
 	_ = sut.UnmarshalJSON([]byte(`
 		{"type":"Undo",
 		 "startTime":"2024-03-27T00:00:00Z",
@@ -171,8 +166,6 @@ func TestActivityValidationUndo(t *testing.T) {
 	if res, _ := validation.IsValid(sut); !res {
 		t.Errorf("sut expected to be valid: %v\n", sut.Validate())
 	}
-
-	// Errors
 
 	_ = sut.UnmarshalJSON([]byte(`
 		{"startTime":"2024-03-27T00:00:00Z",
@@ -226,7 +219,6 @@ func TestActivityValidationUndo(t *testing.T) {
 		  "startTime":"2024-03-27T00:00:00Z",
 		  "actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1",
 		  "object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}}`))
-	// object is not parsed as Activity as type is missing
 	if err := validateAndCheckError(sut, "object is not of type Activity"); err != nil {
 		t.Error(*err)
 	}

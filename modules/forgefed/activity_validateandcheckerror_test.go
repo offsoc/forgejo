@@ -8,8 +8,6 @@ import (
 	"code.gitea.io/gitea/modules/validation"
 )
 
-// Validates the subject and checks if expectedError occurred.
-// If expectedError occurred, then nil is returned else a string is returned with detailed information.
 func validateAndCheckError(subject validation.Validateable, expectedError string) *string {
 	errors := subject.Validate()
 	if len(errors) < 1 {
