@@ -193,11 +193,12 @@ func renderViewPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) {
 		pageName = "Home"
 	}
 
-	_, displayName := wiki_service.WebPathToUserTitle(pageName)
+	dir, displayName := wiki_service.WebPathToUserTitle(pageName)
 	ctx.Data["PageURL"] = wiki_service.WebPathToURLPath(pageName)
 	ctx.Data["old_title"] = displayName
 	ctx.Data["Title"] = displayName
 	ctx.Data["title"] = displayName
+	ctx.Data["dir"] = dir
 
 	isSideBar := pageName == "_Sidebar"
 	isFooter := pageName == "_Footer"
@@ -342,11 +343,12 @@ func renderRevisionPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) 
 		pageName = "Home"
 	}
 
-	_, displayName := wiki_service.WebPathToUserTitle(pageName)
+	dir, displayName := wiki_service.WebPathToUserTitle(pageName)
 	ctx.Data["PageURL"] = wiki_service.WebPathToURLPath(pageName)
 	ctx.Data["old_title"] = displayName
 	ctx.Data["Title"] = displayName
 	ctx.Data["title"] = displayName
+	ctx.Data["dir"] = dir
 
 	ctx.Data["Username"] = ctx.Repo.Owner.Name
 	ctx.Data["Reponame"] = ctx.Repo.Repository.Name
