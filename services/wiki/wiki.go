@@ -9,7 +9,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
+	"unsafe"
 
 	repo_model "code.gitea.io/gitea/models/repo"
 	system_model "code.gitea.io/gitea/models/system"
@@ -446,4 +448,101 @@ func SearchWikiContents(ctx context.Context, repo *repo_model.Repository, keywor
 	}
 
 	return res, nil
+}
+
+type Page struct {
+	DisplayName string
+	GitPath     string
+	SubURL      string
+	Commit      *git.Commit
+}
+
+// ListWikiPages returns a list of all pages in a wiki
+// This takes a sorter interface compatible to the old sorters
+func ListWikiPages(
+	ctx context.Context,
+	commit *git.Commit,
+	sorter func(s1, s2 string) bool,
+) ([]Page, error) {
+	entries, err := commit.ListEntriesRecursiveFast()
+	if err != nil {
+		return nil, err
+	}
+
+	dirPages := make(map[string][]string, 0)
+	for _, entry := range entries {
+		if !entry.IsRegular() {
+			continue
+		}
+		dir, name := fullpathToDirAndFile(entry.Name())
+		subPages, exists := dirPages[dir]
+		if !exists {
+			subPages = make([]string, 0)
+		}
+		dirPages[dir] = append(subPages, name)
+	}
+
+	pages := make([]Page, 0)
+	for dir := range dirPages {
+		currentDirPages := dirPages[dir]
+
+		dirCommits, err := git.GetLastCommitForPaths(ctx, commit, dir, currentDirPages)
+		if err != nil {
+			log.Error("Failed to read Subdir commit! dir: %s err: %s", dir, err)
+			continue
+		}
+
+		for _, page := range currentDirPages {
+			fullPath := dirAndFileToFullpath(dir, page)
+			subURL := fullpathToSubURL(fullPath)
+			displayName := fullpathToDisplayName(fullPath)
+
+			pages = append(pages, Page{
+				DisplayName: displayName,
+				SubURL:      subURL,
+				GitPath:     fullPath,
+				Commit:      dirCommits[page],
+			})
+		}
+	}
+
+	slices.SortFunc(pages, func(s1, s2 Page) int {
+		if s1.DisplayName == s2.DisplayName {
+			return 0
+		}
+		res := sorter(s1.DisplayName, s2.DisplayName)
+		// This is about 2 times faster than a normal if statement
+		// On Wikis with a lot of Pages this will have a big impact
+		// The Only way to get even faster would be taking a sort-
+		// function compatible with slices.SortFuc
+		// Allternatively Pagination should be added to the Wiki view, or a Tree like structure should be shown, which does on demand loading
+		return int(*(*byte)(unsafe.Pointer(&res)))*-2 + 1
+	})
+
+	return pages, nil
+}
+
+func fullpathToDisplayName(fullpath string) string {
+	return fullpathToSubURL(fullpath)
+}
+
+func fullpathToSubURL(fullpath string) string {
+	subURL, _ := strings.CutPrefix(fullpath, "/")
+	subURL, _ = strings.CutSuffix(subURL, ".md")
+	return subURL
+}
+
+func dirAndFileToFullpath(dir, file string) string {
+	if dir != "" {
+		return fmt.Sprintf("%s/%s", dir, file)
+	}
+	return file
+}
+
+func fullpathToDirAndFile(path string) (string, string) {
+	index := strings.LastIndex(path, "/")
+	if index == -1 {
+		return "", path
+	}
+	return path[:index], path[index+1:]
 }
