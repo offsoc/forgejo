@@ -5,13 +5,14 @@ package npm
 
 import (
 	"bytes"
-	"code.gitea.io/gitea/modules/log"
 	std_ctx "context"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
+
+	"code.gitea.io/gitea/modules/log"
 
 	"code.gitea.io/gitea/models/db"
 	packages_model "code.gitea.io/gitea/models/packages"
@@ -33,7 +34,7 @@ import (
 // errInvalidTagName indicates an invalid tag name
 var errInvalidTagName = errors.New("The tag name is invalid")
 
-var npmRegistryUrl = "https://registry.npmjs.org/"
+var npmRegistryURL = "https://registry.npmjs.org/"
 
 func apiError(ctx *context.Context, status int, obj any) {
 	helper.LogAndProcessError(ctx, status, obj, func(message string) {
@@ -64,8 +65,7 @@ func PackageMetadata(ctx *context.Context) {
 		return
 	}
 	if len(pvs) == 0 {
-		// todo log out the error
-		fmt.Println("No packages found locally")
+		//log.Info("No packages found locally")
 		return
 	}
 
@@ -117,7 +117,7 @@ func DownloadPackageFile(ctx *context.Context) {
 func DownloadPackageFileFromNpmRegistry(w http.ResponseWriter, ctx *context.Context) {
 	packageName := packageNameFromParams(ctx)
 	filename := ctx.Params("filename")
-	forwardGetRequest(npmRegistryUrl+packageName+"/-/"+filename, w, ctx)
+	forwardGetRequest(npmRegistryURL+packageName+"/-/"+filename, w, ctx)
 	// todo cache the package
 }
 
@@ -165,7 +165,7 @@ func DownloadPackageFileByName(ctx *context.Context) {
 
 func DownloadPackageFileByNameFromNpmRegistry(w http.ResponseWriter, ctx *context.Context) {
 	filename := ctx.Params("filename")
-	forwardGetRequest(npmRegistryUrl+packageNameFromParams(ctx)+"/-/"+filename, w, ctx)
+	forwardGetRequest(npmRegistryURL+packageNameFromParams(ctx)+"/-/"+filename, w, ctx)
 	// todo cache the package
 }
 
@@ -481,7 +481,7 @@ func PackageSearch(ctx *context.Context) {
 
 func PackageMetadataFromNpmRegistry(w http.ResponseWriter, ctx *context.Context) {
 	packageName := packageNameFromParams(ctx)
-	forwardGetRequest(npmRegistryUrl+packageName, w, ctx)
+	forwardGetRequest(npmRegistryURL+packageName, w, ctx)
 }
 
 func forwardGetRequest(url string, w http.ResponseWriter, ctx *context.Context) {
