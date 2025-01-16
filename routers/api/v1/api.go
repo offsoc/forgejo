@@ -822,6 +822,7 @@ func Routes() *web.Route {
 
 			m.Group("/runners", func() {
 				m.Get("/registration-token", reqToken(), reqChecker, act.GetRegistrationToken)
+				m.Get("/jobs", reqToken(), reqChecker, act.SearchActionRunJobs)
 			})
 		})
 	}
@@ -975,6 +976,7 @@ func Routes() *web.Route {
 
 				m.Group("/runners", func() {
 					m.Get("/registration-token", reqToken(), user.GetRegistrationToken)
+					m.Get("/jobs", reqToken(), user.SearchActionRunJobs)
 				})
 			})
 
@@ -1631,6 +1633,7 @@ func Routes() *web.Route {
 			})
 			m.Group("/runners", func() {
 				m.Get("/registration-token", admin.GetRegistrationToken)
+				m.Get("/jobs", admin.SearchActionRunJobs)
 			})
 			if setting.Quota.Enabled {
 				m.Group("/quota", func() {

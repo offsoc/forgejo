@@ -48,7 +48,7 @@ func (o *issue) ToFormat() f3.Interface {
 		return o.NewFormat()
 	}
 
-	var milestone *f3.Reference
+	milestone := &f3.Reference{}
 	if o.forgejoIssue.Milestone != nil {
 		milestone = f3_tree.NewIssueMilestoneReference(o.forgejoIssue.Milestone.ID)
 	}
@@ -82,9 +82,11 @@ func (o *issue) ToFormat() f3.Interface {
 func (o *issue) FromFormat(content f3.Interface) {
 	issue := content.(*f3.Issue)
 	var milestone *issues_model.Milestone
+	var milestoneID int64
 	if issue.Milestone != nil {
+		milestoneID = issue.Milestone.GetIDAsInt()
 		milestone = &issues_model.Milestone{
-			ID: issue.Milestone.GetIDAsInt(),
+			ID: milestoneID,
 		}
 	}
 	o.forgejoIssue = &issues_model.Issue{
@@ -95,6 +97,7 @@ func (o *issue) FromFormat(content f3.Interface) {
 			ID: issue.PosterID.GetIDAsInt(),
 		},
 		Content:     issue.Content,
+		MilestoneID: milestoneID,
 		Milestone:   milestone,
 		IsClosed:    issue.State == f3.IssueStateClosed,
 		CreatedUnix: timeutil.TimeStamp(issue.Created.Unix()),
@@ -134,7 +137,7 @@ func (o *issue) Get(ctx context.Context) bool {
 		panic(fmt.Errorf("issue %v %w", id, err))
 	}
 	if err := issue.LoadAttributes(ctx); err != nil {
-		panic(err)
+		panic(fmt.Errorf("LoadAttributes %v %w", id, err))
 	}
 
 	o.forgejoIssue = issue
@@ -144,10 +147,66 @@ func (o *issue) Get(ctx context.Context) bool {
 func (o *issue) Patch(ctx context.Context) {
 	node := o.GetNode()
 	project := f3_tree.GetProjectID(o.GetNode())
-	id := node.GetID().Int64()
-	o.Trace("repo_id = %d, index = %d", project, id)
-	if _, err := db.GetEngine(ctx).Where("`repo_id` = ? AND `index` = ?", project, id).Cols("name", "content", "is_closed").Update(o.forgejoIssue); err != nil {
+	index := node.GetID().Int64()
+	id := getIssueID(ctx, project, index)
+	o.Trace("id = %d, repo_id = %d, index = %d, assignees = %v", id, project, index, o.forgejoIssue.Assignees)
+	if _, err := db.GetEngine(ctx).Where("`id` = ?", id).Cols("name", "content", "is_closed", "milestone_id", "is_locked").Update(o.forgejoIssue); err != nil {
 		panic(fmt.Errorf("%v %v", o.forgejoIssue, err))
+	}
+
+	updateIssueAssignees(ctx, id, o.forgejoIssue.Assignees)
+	updateIssueLabels(ctx, id, o.forgejoIssue.Labels)
+}
+
+func getIssueID(ctx context.Context, repoID, index int64) int64 {
+	var id int64
+	if _, err := db.GetEngine(ctx).Select("id").Table("issue").Where("`repo_id` = ? AND `index` = ?", repoID, index).Get(&id); err != nil {
+		panic(fmt.Errorf("%v %v: %w", repoID, index, err))
+	}
+	return id
+}
+
+func updateIssueAssignees(ctx context.Context, issueID int64, assignees []*user_model.User) {
+	sess := db.GetEngine(ctx)
+
+	if _, err := sess.Where("issue_id = ?", issueID).Delete(new(issues_model.IssueAssignees)); err != nil {
+		panic(fmt.Errorf("delete IssueAssignees %v %w", issueID, err))
+	}
+
+	issueAssignees := make([]issues_model.IssueAssignees, 0, len(assignees))
+	for _, assignee := range assignees {
+		issueAssignees = append(issueAssignees, issues_model.IssueAssignees{
+			IssueID:    issueID,
+			AssigneeID: assignee.ID,
+		})
+	}
+
+	if len(issueAssignees) > 0 {
+		if _, err := sess.Insert(issueAssignees); err != nil {
+			panic(fmt.Errorf("Insert %v %w", issueID, err))
+		}
+	}
+}
+
+func updateIssueLabels(ctx context.Context, issueID int64, labels []*issues_model.Label) {
+	sess := db.GetEngine(ctx)
+
+	if _, err := sess.Where("issue_id = ?", issueID).Delete(new(issues_model.IssueLabel)); err != nil {
+		panic(fmt.Errorf("delete IssueLabel %v %w", issueID, err))
+	}
+
+	issueLabels := make([]issues_model.IssueLabel, 0, len(labels))
+	for _, label := range labels {
+		issueLabels = append(issueLabels, issues_model.IssueLabel{
+			IssueID: issueID,
+			LabelID: label.ID,
+		})
+	}
+
+	if len(issueLabels) > 0 {
+		if _, err := sess.Insert(issueLabels); err != nil {
+			panic(fmt.Errorf("Insert %v %w", issueID, err))
+		}
 	}
 }
 
@@ -156,17 +215,6 @@ func (o *issue) Put(ctx context.Context) generic.NodeID {
 	o.Trace("%s", node.GetID())
 
 	o.forgejoIssue.RepoID = f3_tree.GetProjectID(o.GetNode())
-	makeLabels := func(issueID int64) []issues_model.IssueLabel {
-		labels := make([]issues_model.IssueLabel, 0, len(o.forgejoIssue.Labels))
-		for _, label := range o.forgejoIssue.Labels {
-			o.Trace("%d with label %d", issueID, label.ID)
-			labels = append(labels, issues_model.IssueLabel{
-				IssueID: issueID,
-				LabelID: label.ID,
-			})
-		}
-		return labels
-	}
 
 	idx, err := db.GetNextResourceIndex(ctx, "issue_index", o.forgejoIssue.RepoID)
 	if err != nil {
@@ -180,31 +228,8 @@ func (o *issue) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 
-	labels := makeLabels(o.forgejoIssue.ID)
-	if len(labels) > 0 {
-		if _, err := sess.Insert(labels); err != nil {
-			panic(err)
-		}
-	}
-
-	makeAssignees := func(issueID int64) []issues_model.IssueAssignees {
-		assignees := make([]issues_model.IssueAssignees, 0, len(o.forgejoIssue.Assignees))
-		for _, assignee := range o.forgejoIssue.Assignees {
-			o.Trace("%d with assignee %d", issueID, assignee.ID)
-			assignees = append(assignees, issues_model.IssueAssignees{
-				IssueID:    issueID,
-				AssigneeID: assignee.ID,
-			})
-		}
-		return assignees
-	}
-
-	assignees := makeAssignees(o.forgejoIssue.ID)
-	if len(assignees) > 0 {
-		if _, err := sess.Insert(assignees); err != nil {
-			panic(err)
-		}
-	}
+	updateIssueAssignees(ctx, o.forgejoIssue.ID, o.forgejoIssue.Assignees)
+	updateIssueLabels(ctx, o.forgejoIssue.ID, o.forgejoIssue.Labels)
 
 	o.Trace("issue created %d/%d", o.forgejoIssue.ID, o.forgejoIssue.Index)
 	return generic.NewNodeID(o.forgejoIssue.Index)

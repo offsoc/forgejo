@@ -25,4 +25,6 @@ type API interface {
 	UpdateVariable(*context.APIContext)
 	// GetRegistrationToken get registration token
 	GetRegistrationToken(*context.APIContext)
+	// SearchActionRunJobs get pending Action run jobs
+	SearchActionRunJobs(*context.APIContext)
 }

@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: copy & sign
-        uses: https://data.forgejo.org/forgejo/forgejo-build-publish/publish@v5.3.0
+        uses: https://data.forgejo.org/forgejo/forgejo-build-publish/publish@v5.3.1
         with:
           from-forgejo: ${{ vars.FORGEJO }}
           to-forgejo: ${{ vars.FORGEJO }}
@@ -61,14 +61,14 @@ jobs:
 
       - name: get trigger mirror issue
         id: mirror
-        uses: https://data.forgejo.org/infrastructure/issue-action/get@v1.1.0
+        uses: https://data.forgejo.org/infrastructure/issue-action/get@v1.3.0
         with:
           forgejo: https://code.forgejo.org
           repository: forgejo/forgejo
           labels: mirror-trigger
 
       - name: trigger the mirror
-        uses: https://data.forgejo.org/infrastructure/issue-action/set@v1.1.0
+        uses: https://data.forgejo.org/infrastructure/issue-action/set@v1.3.0
         with:
           forgejo: https://code.forgejo.org
           repository: forgejo/forgejo
