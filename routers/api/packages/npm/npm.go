@@ -65,7 +65,7 @@ func PackageMetadata(ctx *context.Context) {
 		return
 	}
 	if len(pvs) == 0 {
-		//log.Info("No packages found locally")
+		log.Info("No packages found locally")
 		return
 	}
 
