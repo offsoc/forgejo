@@ -71,4 +71,5 @@ test('workflow dispatch box not available for unauthenticated users', async ({pa
   await page.goto('/user2/test_workflows/actions?workflow=test-dispatch.yml&actor=0&status=0');
 
   await expect(page.locator('body')).not.toContainText(workflow_trigger_notification_text);
+  await save_visual(page);
 });

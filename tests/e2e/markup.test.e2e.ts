@@ -3,7 +3,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
 test('markup with #xyz-mode-only', async ({page}) => {
   const response = await page.goto('/user2/repo1/issues/1');
@@ -13,4 +13,5 @@ test('markup with #xyz-mode-only', async ({page}) => {
   await expect(comment).toBeVisible();
   await expect(comment.locator('[src$="#gh-light-mode-only"]')).toBeVisible();
   await expect(comment.locator('[src$="#gh-dark-mode-only"]')).toBeHidden();
+  await save_visual(page);
 });

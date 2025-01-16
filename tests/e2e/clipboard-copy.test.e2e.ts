@@ -8,7 +8,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
 test('copy src file path to clipboard', async ({page}, workerInfo) => {
   test.skip(['Mobile Safari', 'webkit'].includes(workerInfo.project.name), 'Apple clipboard API addon - starting at just $499!');
@@ -19,6 +19,7 @@ test('copy src file path to clipboard', async ({page}, workerInfo) => {
   await page.click('[data-clipboard-text]');
   const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
   expect(clipboardText).toContain('README.md');
+  await save_visual(page);
 });
 
 test('copy diff file path to clipboard', async ({page}, workerInfo) => {
@@ -30,4 +31,6 @@ test('copy diff file path to clipboard', async ({page}, workerInfo) => {
   await page.click('[data-clipboard-text]');
   const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
   expect(clipboardText).toContain('README.md');
+  await expect(page.getByText('Copied')).toBeVisible();
+  await save_visual(page);
 });
