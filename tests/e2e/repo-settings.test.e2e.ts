@@ -62,3 +62,18 @@ test.describe('repo branch protection settings', () => {
     await page.waitForLoadState('load');
   });
 });
+
+test('repo settings - units - pulls', async ({page}/*, workerInfo*/) => {
+  //test.skip(workerInfo.project.name === 'Mobile Safari', 'Cannot get it to work - as usual');
+  const response = await page.goto('/user2/repo1/settings/units#pulls');
+  expect(response?.status()).toBe(200);
+
+  await validate_form({page}, 'fieldset');
+  await save_visual(page);
+
+  await page.locator('input[name="enable_pulls"]').click();
+  await expect(page.locator('.hide-unless-checked')).toBeHidden();
+  await page.locator('input[name="enable_pulls"]').click();
+  await expect(page.locator('.hide-unless-checked')).toBeHidden();
+  await save_visual(page);
+});
