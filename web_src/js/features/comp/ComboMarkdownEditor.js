@@ -99,6 +99,8 @@ class ComboMarkdownEditor {
         e.target._shiftDown = true;
       }
       if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        // Prevent special line break handling if currently a text expander popup is open
+        if (this.textarea.hasAttribute('aria-expanded')) return;
         if (!this.breakLine()) return; // Nothing changed, let the default handler work.
         this.options?.onContentChanged?.(this, e);
         e.preventDefault();

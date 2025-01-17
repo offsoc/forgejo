@@ -224,3 +224,29 @@ test('markdown insert table', async ({page}) => {
   await expect(textarea).toHaveValue('| Header  | Header  |\n|---------|---------|\n| Content | Content |\n| Content | Content |\n| Content | Content |\n');
   await save_visual(page);
 });
+
+test('text expander has higher prio then prefix continuation', async ({page}) => {
+  const response = await page.goto('/user2/repo1/issues/new');
+  expect(response?.status()).toBe(200);
+
+  const textarea = page.locator('textarea[name=content]');
+  const initText = `* first`;
+  await textarea.fill(initText);
+  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('rst'), it.value.indexOf('rst')));
+  await textarea.press('End');
+
+  // Test emoji completion
+  await textarea.press('Enter');
+  await textarea.pressSequentially(':smile_c');
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`* first\n* 😸`);
+
+  // Test username completion
+  await textarea.press('Enter');
+  await textarea.pressSequentially('@user');
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`* first\n* 😸\n* @user2 `);
+
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`* first\n* 😸\n* @user2 \n* `);
+});
