@@ -63,8 +63,7 @@ test.describe('repo branch protection settings', () => {
   });
 });
 
-test('repo settings - units - pulls', async ({page}/* , workerInfo*/) => {
-  // test.skip(workerInfo.project.name === 'Mobile Safari', 'Cannot get it to work - as usual');
+test('repo settings - units - pulls', async ({page}) => {
   const response = await page.goto('/user2/repo1/settings/units#pulls');
   expect(response?.status()).toBe(200);
 
