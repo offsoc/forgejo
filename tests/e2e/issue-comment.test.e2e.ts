@@ -77,6 +77,27 @@ test('Always focus edit tab first on edit', async ({page}) => {
   await save_visual(page);
 });
 
+test('Reset content of comment edit field on cancel', async ({page}) => {
+  const response = await page.goto('/user2/repo1/issues/1');
+  expect(response?.status()).toBe(200);
+
+  const editorTextarea = page.locator('[id="_combo_markdown_editor_1"]');
+
+  // Change the content of the edit field
+  await page.click('#issue-1 .comment-container .context-menu');
+  await page.click('#issue-1 .comment-container .menu>.edit-content');
+  await expect(editorTextarea).toHaveValue('content for the first issue');
+  await editorTextarea.fill('some random string');
+  await expect(editorTextarea).toHaveValue('some random string');
+  await page.click('#issue-1 .comment-container .edit .cancel');
+
+  // Edit again and assert that the edit field should be reset to the initial content
+  await page.click('#issue-1 .comment-container .context-menu');
+  await page.click('#issue-1 .comment-container .menu>.edit-content');
+  await expect(editorTextarea).toHaveValue('content for the first issue');
+  await save_visual(page);
+});
+
 test('Quote reply', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name !== 'firefox', 'Uses Firefox specific selection quirks');
   const response = await page.goto('/user2/repo1/issues/1');
