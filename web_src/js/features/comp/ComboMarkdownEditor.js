@@ -409,13 +409,27 @@ class ComboMarkdownEditor {
     // Find the beginning of the current line.
     const lineStart = Math.max(0, value.lastIndexOf('\n', start - 1) + 1);
     // Find the end and extract the line.
-    const lineEnd = value.indexOf('\n', start);
-    const line = value.slice(lineStart, lineEnd === -1 ? value.length : lineEnd);
+    const nextLF = value.indexOf('\n', start);
+    const lineEnd = nextLF === -1 ? value.length : nextLF;
+    const line = value.slice(lineStart, lineEnd);
     // Match any whitespace at the start + any repeatable prefix + exactly one space after.
-    const prefix = line.match(/^\s*((\d+)[.)]\s|[-*+]\s+(\[[ x]\]\s?)?|(>\s+)+)?/);
+    const prefix = line.match(/^\s*((\d+)[.)]\s|[-*+]\s{1,4}\[[ x]\]\s?|[-*+]\s|(>\s?)+)?/);
 
     // Defer to browser if we can't do anything more useful, or if the cursor is inside the prefix.
-    if (!prefix || !prefix[0].length || lineStart + prefix[0].length > start) return false;
+    if (!prefix) return false;
+    const prefixLength = prefix[0].length;
+    if (!prefixLength || lineStart + prefixLength > start) return false;
+    // If the prefix is just indentation (which should always be an even number of spaces or tabs), check if a single whitespace is added to the end of the line.
+    // If this is the case do not leave the indentation and continue with the prefix.
+    if ((prefixLength % 2 === 1 && /^ +$/.test(prefix[0])) || /^\t+ $/.test(prefix[0])) {
+      prefix[0] = prefix[0].slice(0, prefixLength - 1);
+    } else if (prefixLength === lineEnd - lineStart) {
+      this.textarea.setSelectionRange(lineStart, lineEnd);
+      if (!document.execCommand('insertText', false, '\n')) {
+        this.textarea.setRangeText('\n');
+      }
+      return true;
+    }
 
     // Insert newline + prefix.
     let text = `\n${prefix[0]}`;

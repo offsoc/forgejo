@@ -109,7 +109,7 @@ test('markdown indentation', async ({page}) => {
 });
 
 test('markdown list continuation', async ({page}) => {
-  const initText = `* first\n* second\n* third\n* last`;
+  const initText = `* first\n* second`;
 
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
@@ -119,25 +119,20 @@ test('markdown list continuation', async ({page}) => {
   const indent = page.locator('button[data-md-action="indent"]');
   await textarea.fill(initText);
 
-  // Test continuation of '* ' prefix
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('cond'), it.value.indexOf('cond')));
+  // Test continuation of '    * ' prefix
+  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('rst'), it.value.indexOf('rst')));
+  await indent.click();
   await textarea.press('End');
   await textarea.press('Enter');
-  await textarea.pressSequentially('middle');
-  await expect(textarea).toHaveValue(`* first\n* second\n* middle\n* third\n* last`);
-
-  // Test continuation of '    * ' prefix
-  await indent.click();
-  await textarea.press('Enter');
   await textarea.pressSequentially('muddle');
-  await expect(textarea).toHaveValue(`* first\n* second\n${tab}* middle\n${tab}* muddle\n* third\n* last`);
+  await expect(textarea).toHaveValue(`${tab}* first\n${tab}* muddle\n* second`);
 
   // Test breaking in the middle of a line
   await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.lastIndexOf('ddle'), it.value.lastIndexOf('ddle')));
   await textarea.pressSequentially('tate');
   await textarea.press('Enter');
   await textarea.pressSequentially('me');
-  await expect(textarea).toHaveValue(`* first\n* second\n${tab}* middle\n${tab}* mutate\n${tab}* meddle\n* third\n* last`);
+  await expect(textarea).toHaveValue(`${tab}* first\n${tab}* mutate\n${tab}* meddle\n* second`);
 
   // Test not triggering when Shift held
   await textarea.fill(initText);
@@ -145,35 +140,36 @@ test('markdown list continuation', async ({page}) => {
   await textarea.press('Shift+Enter');
   await textarea.press('Enter');
   await textarea.pressSequentially('...but not least');
-  await expect(textarea).toHaveValue(`* first\n* second\n* third\n* last\n\n...but not least`);
+  await expect(textarea).toHaveValue(`* first\n* second\n\n...but not least`);
 
   // Test continuation of ordered list
-  await textarea.fill(`1. one\n2. two`);
+  await textarea.fill(`1. one`);
   await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
+  await textarea.pressSequentially(' ');
+  await textarea.press('Enter');
   await textarea.pressSequentially('three');
-  await expect(textarea).toHaveValue(`1. one\n2. two\n3. three`);
+  await textarea.press('Enter');
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`1. one\n2.  \n3. three\n\n`);
 
   // Test continuation of alternative ordered list syntax
-  await textarea.fill(`1) one\n2) two`);
+  await textarea.fill(`1) one`);
   await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
+  await textarea.press('Enter');
+  await textarea.pressSequentially(' ');
   await textarea.press('Enter');
   await textarea.pressSequentially('three');
-  await expect(textarea).toHaveValue(`1) one\n2) two\n3) three`);
-
-  // Test continuation of blockquote
-  await textarea.fill(`> knowledge is power`);
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
-  await textarea.pressSequentially('france is bacon');
-  await expect(textarea).toHaveValue(`> knowledge is power\n> france is bacon`);
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`1) one\n2)  \n3) three\n\n`);
 
   // Test continuation of checklists
-  await textarea.fill(`- [ ] have a problem\n- [x] create a solution`);
+  await textarea.fill(`- [ ]have a problem\n- [x]create a solution`);
   await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
   await textarea.pressSequentially('write a test');
-  await expect(textarea).toHaveValue(`- [ ] have a problem\n- [x] create a solution\n- [ ] write a test`);
+  await expect(textarea).toHaveValue(`- [ ]have a problem\n- [x]create a solution\n- [ ]write a test`);
 
   // Test all conceivable syntax (except ordered lists)
   const prefixes = [
@@ -189,7 +185,6 @@ test('markdown list continuation', async ({page}) => {
     '> ',
     '> > ',
     '- [ ] ',
-    '- [ ]', // This does seem to render, so allow.
     '* [ ] ',
     '+ [ ] ',
   ];
@@ -197,8 +192,12 @@ test('markdown list continuation', async ({page}) => {
     await textarea.fill(`${prefix}one`);
     await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
     await textarea.press('Enter');
+    await textarea.pressSequentially(' ');
+    await textarea.press('Enter');
     await textarea.pressSequentially('two');
-    await expect(textarea).toHaveValue(`${prefix}one\n${prefix}two`);
+    await textarea.press('Enter');
+    await textarea.press('Enter');
+    await expect(textarea).toHaveValue(`${prefix}one\n${prefix} \n${prefix}two\n\n`);
   }
 });
 
