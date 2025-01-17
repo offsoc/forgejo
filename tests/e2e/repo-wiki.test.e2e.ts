@@ -4,7 +4,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
 for (const searchTerm of ['space', 'consectetur']) {
   for (const width of [null, 2560, 4000]) {
@@ -23,6 +23,7 @@ for (const searchTerm of ['space', 'consectetur']) {
       await page.getByPlaceholder('Search wiki').dispatchEvent('keyup');
       // timeout is necessary because HTMX search could be slow
       await expect(page.locator('#wiki-search a[href]')).toBeInViewport({ratio: 1});
+      await save_visual(page);
     });
   }
 }
@@ -36,4 +37,5 @@ test(`Search results show titles (and not file names)`, async ({page}, workerInf
   // so we manually "type" the last letter
   await page.getByPlaceholder('Search wiki').dispatchEvent('keyup');
   await expect(page.locator('#wiki-search a[href] b')).toHaveText('Page With Spaced Name');
+  await save_visual(page);
 });

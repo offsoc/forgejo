@@ -49,6 +49,7 @@ test('Line Range Selection', async ({page}) => {
   // out-of-bounds end line
   await page.goto(`${filePath}#L1-L100`);
   await assertSelectedLines(page, ['1', '2', '3']);
+  await save_visual(page);
 });
 
 test('Readable diff', async ({page}, workerInfo) => {
@@ -75,6 +76,7 @@ test('Readable diff', async ({page}, workerInfo) => {
       await expect(page.getByText(thisDiff.added, {exact: true})).toHaveCSS('background-color', 'rgb(134, 239, 172)');
     }
   }
+  await save_visual(page);
 });
 
 test.describe('As authenticated user', () => {

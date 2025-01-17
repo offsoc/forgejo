@@ -21,7 +21,6 @@ test('Migration Progress Page', async ({page, browser}, workerInfo) => {
   await form.locator('button.primary').click({timeout: 5000});
   await expect(page).toHaveURL('user2/invalidrepo');
   await save_visual(page);
-  // page screenshot of unauthenticatedPage is checked automatically after the test
 
   const ctx = await test_context(browser);
   const unauthenticatedPage = await ctx.newPage();
@@ -37,4 +36,6 @@ test('Migration Progress Page', async ({page, browser}, workerInfo) => {
   await save_visual(page);
   await deleteModal.getByRole('button', {name: 'Delete repository'}).click();
   await expect(page).toHaveURL('/');
+  // checked last to preserve the order of screenshots from first run
+  await save_visual(unauthenticatedPage);
 });
