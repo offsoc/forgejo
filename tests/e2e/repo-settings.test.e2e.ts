@@ -69,11 +69,12 @@ test('repo settings - units - pulls', async ({page}/* , workerInfo*/) => {
   expect(response?.status()).toBe(200);
 
   await validate_form({page}, 'fieldset');
-  await save_visual(page);
 
   await page.locator('input[name="enable_pulls"]').click();
   await expect(page.locator('.hide-unless-checked')).toBeHidden();
+  await save_visual(page);
+
   await page.locator('input[name="enable_pulls"]').click();
-  await expect(page.locator('.hide-unless-checked')).toBeHidden();
+  await expect(page.locator('.hide-unless-checked')).toBeVisible();
   await save_visual(page);
 });
