@@ -1,0 +1,14 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "one": "сля %[1]d подаване от <code>%[2]s</code> в <code>%[3]s</code> %[4]s",
+        "other": "сля %[1]d подавания от <code>%[2]s</code> в <code>%[3]s</code> %[4]s"
+      },
+      "title_desc": {
+        "one": "иска да слее %[1]d подаване от <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>",
+        "other": "иска да слее %[1]d подавания от <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "other": "%[1]d کامیت ادغام شده از <code>%[2]s</code> به <code>%[3]s</code> %[4]s"
+      },
+      "title_desc": {
+        "other": "قصد ادغام %[1]d تغییر را از <code>%[2]s</code> به <code id=\"%[4]s\">%[3]s</code> دارد"
+      }
+    }
+  }
+}

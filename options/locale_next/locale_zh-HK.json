@@ -1,0 +1,9 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "other": "於 %[4]s 將 %[1]d 次代碼提交從 <code>%[2]s</code>合併至 <code>%[3]s</code>"
+      }
+    }
+  }
+}

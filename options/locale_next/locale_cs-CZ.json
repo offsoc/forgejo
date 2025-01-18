@@ -1,0 +1,17 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "one": "sloučil %[1]d commit z <code>%[2]s</code> do <code>%[3]s</code> %[4]s",
+        "other": "sloučil %[1]d commity z větve <code>%[2]s</code> do větve <code>%[3]s</code> před %[4]s"
+      },
+      "title_desc": {
+        "one": "žádá o sloučení %[1]d commitu z <code>%[2]s</code> do <code id=\"%[4]s\">%[3]s</code>",
+        "other": "chce sloučit %[1]d commity z větve <code>%[2]s</code> do <code id=\"%[4]s\">%[3]s</code>"
+      }
+    }
+  },
+  "search": {
+    "milestone_kind": "Hledat milníky..."
+  }
+}

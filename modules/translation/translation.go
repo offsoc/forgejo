@@ -32,6 +32,9 @@ type Locale interface {
 	TrString(string, ...any) string
 
 	Tr(key string, args ...any) template.HTML
+	// New-style pluralized strings
+	TrPluralString(count any, trKey string, trArgs ...any) template.HTML
+	// Old-style pseudo-pluralized strings, deprecated
 	TrN(cnt any, key1, keyN string, args ...any) template.HTML
 
 	TrSize(size int64) ReadableSize
@@ -100,8 +103,17 @@ func InitLocales(ctx context.Context) {
 			}
 
 			key := "locale_" + setting.Langs[i] + ".ini"
-			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], localeDataBase, localeData[key]); err != nil {
-				log.Error("Failed to set messages to %s: %v", setting.Langs[i], err)
+			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], PluralRules[GetPluralRuleImpl(setting.Langs[i])], localeDataBase, localeData[key]); err != nil {
+				log.Error("Failed to set old-style messages to %s: %v", setting.Langs[i], err)
+			}
+
+			key = "locale_next/locale_" + setting.Langs[i] + ".json"
+			if bytes, err := options.AssetFS().ReadFile(key); err == nil {
+				if err = i18n.DefaultLocales.AddToLocaleFromJSON(setting.Langs[i], bytes); err != nil {
+					log.Error("Failed to add new-style messages to %s: %v", setting.Langs[i], err)
+				}
+			} else {
+				log.Error("Failed to open new-style messages for %s: %v", setting.Langs[i], err)
 			}
 		}
 		if len(setting.Langs) != 0 {

@@ -1,0 +1,17 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "one": "об'єднав %[1]d коміт з <code>%[2]s</code> в <code>%[3]s</code> %[4]s",
+        "many": "об'єднав %[1]d комітів з <code>%[2]s</code> в <code>%[3]s</code> %[4]s"
+      },
+      "title_desc": {
+        "one": "хоче об'єднати %[1]d коміт з <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>",
+        "many": "хоче об'єднати %[1]d комітів з <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>"
+      }
+    }
+  },
+  "search": {
+    "milestone_kind": "Шукати віхи..."
+  }
+}

@@ -8,11 +8,28 @@ import (
 	"io"
 )
 
+type (
+	PluralFormIndex uint8
+	PluralFormRule  func(int64) PluralFormIndex
+)
+
+const (
+	PluralFormZero PluralFormIndex = iota
+	PluralFormOne
+	PluralFormTwo
+	PluralFormFew
+	PluralFormMany
+	PluralFormOther
+)
+
 var DefaultLocales = NewLocaleStore()
 
 type Locale interface {
 	// TrString translates a given key and arguments for a language
 	TrString(trKey string, trArgs ...any) string
+	// TrPluralString translates a given pluralized key and arguments for a language.
+	// This function returns an error if new-style support for the given key is not available.
+	TrPluralString(count any, trKey string, trArgs ...any) template.HTML
 	// TrHTML translates a given key and arguments for a language, string arguments are escaped to HTML
 	TrHTML(trKey string, trArgs ...any) template.HTML
 	// HasKey reports if a locale has a translation for a given key
@@ -31,8 +48,10 @@ type LocaleStore interface {
 	Locale(langName string) (Locale, bool)
 	// HasLang returns whether a given language is present in the store
 	HasLang(langName string) bool
-	// AddLocaleByIni adds a new language to the store
-	AddLocaleByIni(langName, langDesc string, source, moreSource []byte) error
+	// AddLocaleByIni adds a new old-style language to the store
+	AddLocaleByIni(langName, langDesc string, pluralRule PluralFormRule, source, moreSource []byte) error
+	// AddLocaleByJSON adds new-style content to an existing language to the store
+	AddToLocaleFromJSON(langName string, source []byte) error
 }
 
 // ResetDefaultLocales resets the current default locales

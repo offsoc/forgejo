@@ -63,10 +63,10 @@
 					{{$mergedStr:= DateUtils.TimeSince .Issue.PullRequest.MergedUnix}}
 					{{if .Issue.OriginalAuthor}}
 						{{.Issue.OriginalAuthor}}
-						<span class="pull-desc">{{ctx.Locale.TrN .NumCommits "repo.pulls.merged_title_desc_one" "repo.pulls.merged_title_desc_few" .NumCommits $headHref $baseHref $mergedStr}}</span>
+						<span class="pull-desc">{{ctx.Locale.TrPluralString .NumCommits "repo.pulls.merged_title_desc" .NumCommits $headHref $baseHref $mergedStr}}</span>
 					{{else}}
 						<a {{if gt .Issue.PullRequest.Merger.ID 0}}href="{{.Issue.PullRequest.Merger.HomeLink}}"{{end}}>{{.Issue.PullRequest.Merger.GetDisplayName}}</a>
-						<span class="pull-desc">{{ctx.Locale.TrN .NumCommits "repo.pulls.merged_title_desc_one" "repo.pulls.merged_title_desc_few" .NumCommits $headHref $baseHref $mergedStr}}</span>
+						<span class="pull-desc">{{ctx.Locale.TrPluralString .NumCommits "repo.pulls.merged_title_desc" .NumCommits $headHref $baseHref $mergedStr}}</span>
 					{{end}}
 					{{if .MadeUsingAGit}}
 						{{/* TODO: Move documentation link to the instructions at the bottom of the PR, show instructions when clicking label */}}
@@ -79,11 +79,11 @@
 					{{end}}
 				{{else}}
 					{{if .Issue.OriginalAuthor}}
-						<span id="pull-desc-display" class="pull-desc">{{.Issue.OriginalAuthor}} {{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref "branch_target"}}</span>
+						<span id="pull-desc-display" class="pull-desc">{{.Issue.OriginalAuthor}} {{ctx.Locale.TrPluralString .NumCommits "repo.pulls.title_desc" .NumCommits $headHref $baseHref "branch_target"}}</span>
 					{{else}}
 						<span id="pull-desc-display" class="pull-desc">
 							<a {{if gt .Issue.Poster.ID 0}}href="{{.Issue.Poster.HomeLink}}"{{end}}>{{.Issue.Poster.GetDisplayName}}</a>
-							{{ctx.Locale.TrN .NumCommits "repo.pulls.title_desc_one" "repo.pulls.title_desc_few" .NumCommits $headHref $baseHref "branch_target"}}
+							{{ctx.Locale.TrPluralString .NumCommits "repo.pulls.title_desc" .NumCommits $headHref $baseHref "branch_target"}}
 						</span>
 					{{end}}
 					{{if .MadeUsingAGit}}

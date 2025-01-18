@@ -1,0 +1,15 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "other": "yhdistetty %[1]d committia lähteestä <code>%[2]s</code> kohteeseen <code>%[3]s</code> %[4]s"
+      },
+      "title_desc": {
+        "other": "haluaa yhdistää %[1]d committia lähteestä <code>%[2]s</code> kohteeseen <code id=\"%[4]s\">%[3]s</code>"
+      }
+    }
+  },
+  "search": {
+    "milestone_kind": "Etsi merkkipaaluja..."
+  }
+}

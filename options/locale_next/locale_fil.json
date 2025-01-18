@@ -1,0 +1,17 @@
+{
+  "repo": {
+    "pulls": {
+      "merged_title_desc": {
+        "one": "isinali ang %[1]d commit mula<code>%[2]s</code> patungong <code>%[3]s</code> %[4]s",
+        "other": "isinali ang %[1]d mga commit mula sa <code>%[2]s</code> patungong <code>%[3]s</code> %[4]s"
+      },
+      "title_desc": {
+        "one": "hinihiling na isama ang %[1]d commit mula <code>%[2]s</code> patungong <code id=\"%[4]s\">%[3]s</code>",
+        "other": "hiniling na isama ang %[1]d mga commit mula sa <code>%[2]s</code> patungong <code id=\"%[4]s\">%[3]s</code>"
+      }
+    }
+  },
+  "search": {
+    "milestone_kind": "Maghanap ng mga milestone…"
+  }
+}
