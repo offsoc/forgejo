@@ -1,12 +1,8 @@
 {
-  "repo": {
-    "pulls": {
-      "merged_title_desc": {
-        "other": "commit %[1]d telah digabungkan dari <code>%[2]s</code> menjadi <code>%[3]s</code> %[4]s"
-      },
-      "title_desc": {
-        "other": "ingin menggabungkan komit %[1]d dari <code>%[2]s</code> menuju <code id=\"%[4]s\">%[3]s</code>"
-      }
-    }
-  }
+	"repo.pulls.merged_title_desc": {
+		"other": "commit %[1]d telah digabungkan dari <code>%[2]s</code> menjadi <code>%[3]s</code> %[4]s"
+	},
+	"repo.pulls.title_desc": {
+		"other": "ingin menggabungkan komit %[1]d dari <code>%[2]s</code> menuju <code id=\"%[4]s\">%[3]s</code>"
+	}
 }
