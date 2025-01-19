@@ -65,7 +65,7 @@ func assertWikiNotExists(t *testing.T, repo *repo_model.Repository, wikiName wik
 }
 
 func assertPagesMetas(t *testing.T, expectedNames []string, metas any) {
-	pageMetas, ok := metas.([]PageMeta)
+	pageMetas, ok := metas.([]wiki_service.PageMeta)
 	if !assert.True(t, ok) {
 		return
 	}

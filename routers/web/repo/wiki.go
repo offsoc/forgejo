@@ -141,50 +141,24 @@ func wikiContentsByName(ctx *context.Context, commit *git.Commit, wikiName wiki_
 
 func renderViewPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) {
 	wikiRepo, commit, err := findWikiRepoCommit(ctx)
-	if err != nil {
+	defer func() {
 		if wikiRepo != nil {
 			wikiRepo.Close()
 		}
+	}()
+	if err != nil {
 		if !git.IsErrNotExist(err) {
 			ctx.ServerError("GetBranchCommit", err)
 		}
 		return nil, nil
 	}
 
-	// Get page list.
-	entries, err := commit.ListEntries()
+	pages, err := wiki_service.ListWikiPages(gocontext.Context(ctx), commit)
 	if err != nil {
-		if wikiRepo != nil {
-			wikiRepo.Close()
-		}
-		ctx.ServerError("ListEntries", err)
+		ctx.ServerError("ListWikiPages", err)
 		return nil, nil
 	}
-	pages := make([]PageMeta, 0, len(entries))
-	for _, entry := range entries {
-		if !entry.IsRegular() {
-			continue
-		}
-		wikiName, err := wiki_service.GitPathToPath(entry.Name())
-		if err != nil {
-			if repo_model.IsErrWikiInvalidFileName(err) {
-				continue
-			}
-			if wikiRepo != nil {
-				wikiRepo.Close()
-			}
-			ctx.ServerError("WikiFilenameToName", err)
-			return nil, nil
-		} else if wikiName.IsSidebar() || wikiName.IsFooter() {
-			continue
-		}
-		_, displayName := wikiName.DisplayName()
-		pages = append(pages, PageMeta{
-			Name:         displayName,
-			SubURL:       wikiName.URLPath(),
-			GitEntryName: entry.Name(),
-		})
-	}
+
 	ctx.Data["Pages"] = pages
 
 	// get requested page name
@@ -590,59 +564,24 @@ func WikiPages(ctx *context.Context) {
 	ctx.Data["CanWriteWiki"] = ctx.Repo.CanWrite(unit.TypeWiki) && !ctx.Repo.Repository.IsArchived
 
 	wikiRepo, commit, err := findWikiRepoCommit(ctx)
-	if err != nil {
-		if wikiRepo != nil {
-			wikiRepo.Close()
-		}
-		return
-	}
 	defer func() {
 		if wikiRepo != nil {
 			wikiRepo.Close()
 		}
 	}()
-
-	treePath := "" // To support list sub folders' pages in the future
-	tree, err := commit.SubTree(treePath)
 	if err != nil {
-		ctx.ServerError("SubTree", err)
-		return
-	}
-
-	allEntries, err := tree.ListEntries()
-	if err != nil {
-		ctx.ServerError("ListEntries", err)
-		return
-	}
-	allEntries.CustomSort(base.NaturalSortLess)
-
-	entries, _, err := allEntries.GetCommitsInfo(gocontext.Context(ctx), commit, treePath)
-	if err != nil {
-		ctx.ServerError("GetCommitsInfo", err)
-		return
-	}
-
-	pages := make([]PageMeta, 0, len(entries))
-	for _, entry := range entries {
-		if !entry.Entry.IsRegular() {
-			continue
+		if !git.IsErrNotExist(err) {
+			ctx.ServerError("GetBranchCommit", err)
 		}
-		wikiName, err := wiki_service.GitPathToPath(entry.Entry.Name())
-		if err != nil {
-			if repo_model.IsErrWikiInvalidFileName(err) {
-				continue
-			}
-			ctx.ServerError("WikiFilenameToName", err)
-			return
-		}
-		_, displayName := wikiName.DisplayName()
-		pages = append(pages, PageMeta{
-			Name:         displayName,
-			SubURL:       wikiName.URLPath(),
-			GitEntryName: entry.Entry.Name(),
-			UpdatedUnix:  timeutil.TimeStamp(entry.Commit.Author.When.Unix()),
-		})
+		return
 	}
+
+	pages, err := wiki_service.ListWikiPages(gocontext.Context(ctx), commit)
+	if err != nil {
+		ctx.ServerError("ListWikiPages", err)
+		return
+	}
+
 	ctx.Data["Pages"] = pages
 
 	ctx.HTML(http.StatusOK, tplWikiPages)

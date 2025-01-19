@@ -314,22 +314,22 @@ func ListWikiPages(ctx *context.APIContext) {
 	skip := (page - 1) * limit
 	max := page * limit
 
-	entries, err := commit.ListEntries()
+	entries, err := wiki_service.ListWikiPages(ctx, commit)
 	if err != nil {
-		ctx.ServerError("ListEntries", err)
+		ctx.ServerError("ListWikiPages", err)
 		return
 	}
 	pages := make([]*api.WikiPageMetaData, 0, len(entries))
 	for i, entry := range entries {
-		if i < skip || i >= max || !entry.IsRegular() {
+		if i < skip || i >= max {
 			continue
 		}
-		c, err := wikiRepo.GetCommitByPath(entry.Name())
+		c, err := wikiRepo.GetCommitByPath(entry.GitEntryName)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, "GetCommit", err)
 			return
 		}
-		wikiName, err := wiki_service.GitPathToPath(entry.Name())
+		wikiName, err := wiki_service.GitPathToPath(entry.GitEntryName)
 		if err != nil {
 			if repo_model.IsErrWikiInvalidFileName(err) {
 				continue

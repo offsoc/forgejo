@@ -15,11 +15,13 @@ import (
 	system_model "code.gitea.io/gitea/models/system"
 	"code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/log"
 	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/sync"
+	"code.gitea.io/gitea/modules/timeutil"
 	asymkey_service "code.gitea.io/gitea/services/asymkey"
 	repo_service "code.gitea.io/gitea/services/repository"
 )
@@ -446,4 +448,42 @@ func SearchWikiContents(ctx context.Context, repo *repo_model.Repository, keywor
 	}
 
 	return res, nil
+}
+
+type PageMeta struct {
+	Name         string
+	SubURL       string
+	GitEntryName string
+	UpdatedUnix  timeutil.TimeStamp
+}
+
+func ListWikiPages(ctx context.Context, commit *git.Commit) ([]PageMeta, error) {
+	// Get page list.
+	entries, err := commit.ListEntries()
+	if err != nil {
+		return nil, err
+	}
+	entries.CustomSort(base.NaturalSortLess)
+	pages := make([]PageMeta, 0, len(entries))
+	for _, entry := range entries {
+		if !entry.IsRegular() {
+			continue
+		}
+		wikiName, err := GitPathToPath(entry.Name())
+		if err != nil {
+			if repo_model.IsErrWikiInvalidFileName(err) {
+				continue
+			}
+			return nil, err
+		} else if wikiName.IsSidebar() || wikiName.IsFooter() {
+			continue
+		}
+		_, displayName := wikiName.DisplayName()
+		pages = append(pages, PageMeta{
+			Name:         displayName,
+			SubURL:       wikiName.URLPath(),
+			GitEntryName: entry.Name(),
+		})
+	}
+	return pages, nil
 }
