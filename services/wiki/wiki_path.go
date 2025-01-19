@@ -37,12 +37,125 @@ import (
 //   * This problem should have been 99% fixed, but it needs more tests.
 // * The old wiki code's behavior is always using %2F, instead of subdirectory, so there are a lot of legacy "%2F" files in user wikis.
 
-type WebPath string
+type (
+	WebPath string
+	GitPath string
+	URLPath string
+)
+
+type Path struct {
+	file WebPath
+}
+
+func WebPathToPath(web WebPath) Path {
+	return Path{
+		file: web,
+	}
+}
+
+func RequestToPath(req string) Path {
+	s := util.PathJoinRelX(req)
+	// The old wiki code's behavior is always using %2F, instead of subdirectory.
+	s = strings.ReplaceAll(s, "/", "%2F")
+	return Path{
+		file: WebPath(s),
+	}
+}
+
+func TitleToPath(title string) Path {
+	// TODO: no support for subdirectory, because the old wiki code's behavior is always using %2F, instead of subdirectory.
+	// So we do not add the support for writing slashes in title at the moment.
+	title = strings.TrimSpace(title)
+	title = util.PathJoinRelX(escapeSegToWeb(title, false))
+	if title == "" || title == "." {
+		title = "unnamed"
+	}
+	return Path{
+		WebPath(title),
+	}
+}
+
+func GitPathToPath(g GitPath) (*Path, error) {
+	gitPath := string(g)
+	if !strings.HasSuffix(gitPath, ".md") {
+		return nil, repo_model.ErrWikiInvalidFileName{FileName: gitPath}
+	}
+	gitPath = strings.TrimSuffix(gitPath, ".md")
+	a := strings.Split(gitPath, "/")
+	for i := range a {
+		shouldAddDashMarker := hasDashMarker(a[i])
+		s, err := unescapeSegment(a[i])
+		if err != nil {
+			return nil, err
+		}
+		a[i] = s
+		a[i] = escapeSegToWeb(a[i], shouldAddDashMarker)
+	}
+	return &Path{
+		file: WebPath(strings.Join(a, "/")),
+	}, nil
+}
+
+func (w Path) DisplayName() (dir, display string) {
+	dir = path.Dir(string(w.file))
+	display = path.Base(string(w.file))
+	if strings.HasSuffix(display, ".md") {
+		display = strings.TrimSuffix(display, ".md")
+		display, _ = url.PathUnescape(display)
+	}
+	display, _ = unescapeSegment(display)
+	return dir, display
+}
+
+func (w Path) WebPath() WebPath {
+	return w.file
+}
+
+func (w Path) GitPath() GitPath {
+	if strings.HasSuffix(string(w.file), ".md") {
+		ret, _ := url.PathUnescape(string(w.file))
+		return GitPath(util.PathJoinRelX(ret))
+	}
+
+	a := strings.Split(string(w.file), "/")
+	for i := range a {
+		shouldAddDashMarker := hasDashMarker(a[i])
+		a[i], _ = unescapeSegment(a[i])
+		a[i] = escapeSegToWeb(a[i], shouldAddDashMarker)
+		a[i] = strings.ReplaceAll(a[i], "%20", " ") // space is safe to be kept in git path
+		a[i] = strings.ReplaceAll(a[i], "+", " ")
+	}
+	return GitPath(strings.Join(a, "/") + ".md")
+}
+
+func (w Path) URLPath() URLPath {
+	return URLPath(w.file)
+}
+
+func WebPathSegments(s WebPath) []string {
+	a := strings.Split(string(s), "/")
+	for i := range a {
+		a[i], _ = unescapeSegment(a[i])
+	}
+	return a
+}
+
+// ToWikiPageMetaData converts meta information to a WikiPageMetaData
+func ToWikiPageMetaData(wikiPath Path, lastCommit *git.Commit, repo *repo_model.Repository) *api.WikiPageMetaData {
+	subURL := string(wikiPath.WebPath())
+	_, title := wikiPath.DisplayName()
+	return &api.WikiPageMetaData{
+		Title:      title,
+		HTMLURL:    util.URLJoin(repo.HTMLURL(), "wiki", subURL),
+		SubURL:     subURL,
+		LastCommit: convert.ToWikiCommit(lastCommit),
+	}
+}
 
 var reservedWikiNames = []string{"_pages", "_new", "_edit", "raw"}
 
-func validateWebPath(name WebPath) error {
-	for _, s := range WebPathSegments(name) {
+func validateWebPath(name Path) error {
+	for _, s := range WebPathSegments(name.WebPath()) {
 		if util.SliceContainsString(reservedWikiNames, s) {
 			return repo_model.ErrWikiReservedName{Title: s}
 		}
@@ -83,90 +196,4 @@ func escapeSegToWeb(s string, hadDashMarker bool) string {
 	}
 	s = url.QueryEscape(s)
 	return s
-}
-
-func WebPathSegments(s WebPath) []string {
-	a := strings.Split(string(s), "/")
-	for i := range a {
-		a[i], _ = unescapeSegment(a[i])
-	}
-	return a
-}
-
-func WebPathToGitPath(s WebPath) string {
-	if strings.HasSuffix(string(s), ".md") {
-		ret, _ := url.PathUnescape(string(s))
-		return util.PathJoinRelX(ret)
-	}
-
-	a := strings.Split(string(s), "/")
-	for i := range a {
-		shouldAddDashMarker := hasDashMarker(a[i])
-		a[i], _ = unescapeSegment(a[i])
-		a[i] = escapeSegToWeb(a[i], shouldAddDashMarker)
-		a[i] = strings.ReplaceAll(a[i], "%20", " ") // space is safe to be kept in git path
-		a[i] = strings.ReplaceAll(a[i], "+", " ")
-	}
-	return strings.Join(a, "/") + ".md"
-}
-
-func GitPathToWebPath(s string) (wp WebPath, err error) {
-	if !strings.HasSuffix(s, ".md") {
-		return "", repo_model.ErrWikiInvalidFileName{FileName: s}
-	}
-	s = strings.TrimSuffix(s, ".md")
-	a := strings.Split(s, "/")
-	for i := range a {
-		shouldAddDashMarker := hasDashMarker(a[i])
-		if a[i], err = unescapeSegment(a[i]); err != nil {
-			return "", err
-		}
-		a[i] = escapeSegToWeb(a[i], shouldAddDashMarker)
-	}
-	return WebPath(strings.Join(a, "/")), nil
-}
-
-func WebPathToUserTitle(s WebPath) (dir, display string) {
-	dir = path.Dir(string(s))
-	display = path.Base(string(s))
-	if strings.HasSuffix(display, ".md") {
-		display = strings.TrimSuffix(display, ".md")
-		display, _ = url.PathUnescape(display)
-	}
-	display, _ = unescapeSegment(display)
-	return dir, display
-}
-
-func WebPathToURLPath(s WebPath) string {
-	return string(s)
-}
-
-func WebPathFromRequest(s string) WebPath {
-	s = util.PathJoinRelX(s)
-	// The old wiki code's behavior is always using %2F, instead of subdirectory.
-	s = strings.ReplaceAll(s, "/", "%2F")
-	return WebPath(s)
-}
-
-func UserTitleToWebPath(base, title string) WebPath {
-	// TODO: no support for subdirectory, because the old wiki code's behavior is always using %2F, instead of subdirectory.
-	// So we do not add the support for writing slashes in title at the moment.
-	title = strings.TrimSpace(title)
-	title = util.PathJoinRelX(base, escapeSegToWeb(title, false))
-	if title == "" || title == "." {
-		title = "unnamed"
-	}
-	return WebPath(title)
-}
-
-// ToWikiPageMetaData converts meta information to a WikiPageMetaData
-func ToWikiPageMetaData(wikiName WebPath, lastCommit *git.Commit, repo *repo_model.Repository) *api.WikiPageMetaData {
-	subURL := string(wikiName)
-	_, title := WebPathToUserTitle(wikiName)
-	return &api.WikiPageMetaData{
-		Title:      title,
-		HTMLURL:    util.URLJoin(repo.HTMLURL(), "wiki", subURL),
-		SubURL:     subURL,
-		LastCommit: convert.ToWikiCommit(lastCommit),
-	}
 }
