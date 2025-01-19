@@ -10,6 +10,7 @@ import (
 	"net/url"
 
 	repo_model "code.gitea.io/gitea/models/repo"
+	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/setting"
@@ -65,7 +66,7 @@ func NewWikiPage(ctx *context.APIContext) {
 		return
 	}
 
-	wikiName := wiki_service.UserTitleToWebPath("", form.Title)
+	wikiName := wiki_service.FilepathToWebPath("", form.Title)
 
 	if len(form.Message) == 0 {
 		form.Message = fmt.Sprintf("Add %q", form.Title)
@@ -141,7 +142,7 @@ func EditWikiPage(ctx *context.APIContext) {
 	form := web.GetForm(ctx).(*api.CreateWikiPageOptions)
 
 	oldWikiName := wiki_service.WebPathFromRequest(ctx.PathParamRaw(":pageName"))
-	newWikiName := wiki_service.UserTitleToWebPath("", form.Title)
+	newWikiName := wiki_service.FilepathToWebPath("", form.Title)
 
 	if len(newWikiName) == 0 {
 		newWikiName = oldWikiName
@@ -314,33 +315,30 @@ func ListWikiPages(ctx *context.APIContext) {
 	skip := (page - 1) * limit
 	max := page * limit
 
-	entries, err := commit.ListEntries()
+	pagesData, err := wiki_service.ListWikiPages(ctx, commit, base.NaturalSortLess)
 	if err != nil {
-		ctx.ServerError("ListEntries", err)
+		ctx.ServerError("WikiListPages", err)
 		return
 	}
-	pages := make([]*api.WikiPageMetaData, 0, len(entries))
-	for i, entry := range entries {
-		if i < skip || i >= max || !entry.IsRegular() {
+
+	pages := make([]*api.WikiPageMetaData, 0, len(pagesData))
+	for i, page := range pagesData {
+		if i < skip || i >= max {
 			continue
 		}
-		c, err := wikiRepo.GetCommitByPath(entry.Name())
-		if err != nil {
+		if page.Commit == nil {
 			ctx.Error(http.StatusInternalServerError, "GetCommit", err)
 			return
 		}
-		wikiName, err := wiki_service.GitPathToWebPath(entry.Name())
+		wikiName, err := wiki_service.GitPathToWebPath(page.GitPath)
 		if err != nil {
-			if repo_model.IsErrWikiInvalidFileName(err) {
-				continue
-			}
 			ctx.Error(http.StatusInternalServerError, "WikiFilenameToName", err)
 			return
 		}
-		pages = append(pages, wiki_service.ToWikiPageMetaData(wikiName, c, ctx.Repo.Repository))
+		pages = append(pages, wiki_service.ToWikiPageMetaData(wikiName, page.Commit, ctx.Repo.Repository))
 	}
 
-	ctx.SetTotalCountHeader(int64(len(entries)))
+	ctx.SetTotalCountHeader(int64(len(pagesData)))
 	ctx.JSON(http.StatusOK, pages)
 }
 

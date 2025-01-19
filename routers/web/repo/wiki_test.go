@@ -33,10 +33,10 @@ func wikiEntry(t *testing.T, repo *repo_model.Repository, wikiName wiki_service.
 	defer wikiRepo.Close()
 	commit, err := wikiRepo.GetBranchCommit("master")
 	require.NoError(t, err)
-	entries, err := commit.ListEntries()
+	entries, err := commit.ListEntriesRecursiveFast()
 	require.NoError(t, err)
 	for _, entry := range entries {
-		if entry.Name() == wiki_service.WebPathToGitPath(wikiName) {
+		if entry.GetSubJumpablePathName()+entry.Name() == wiki_service.WebPathToGitPath(wikiName) {
 			return entry
 		}
 	}
@@ -86,7 +86,7 @@ func TestWiki(t *testing.T) {
 	Wiki(ctx)
 	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
 	assert.EqualValues(t, "Home", ctx.Data["Title"])
-	assertPagesMetas(t, []string{"Home", "Long Page", "Page With Image", "Page With Spaced Name", "Unescaped File", "XSS"}, ctx.Data["Pages"])
+	assertPagesMetas(t, []string{"Home", "Long-Page", "Page-With-Image", "Page-With-Spaced-Name", "Unescaped File", "XSS"}, ctx.Data["Pages"])
 }
 
 func TestWikiPages(t *testing.T) {
@@ -96,7 +96,7 @@ func TestWikiPages(t *testing.T) {
 	contexttest.LoadRepo(t, ctx, 1)
 	WikiPages(ctx)
 	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
-	assertPagesMetas(t, []string{"Home", "Long Page", "Page With Image", "Page With Spaced Name", "Unescaped File", "XSS"}, ctx.Data["Pages"])
+	assertPagesMetas(t, []string{"Home", "Long-Page", "Page-With-Image", "Page-With-Spaced-Name", "Unescaped File", "XSS"}, ctx.Data["Pages"])
 }
 
 func TestNewWiki(t *testing.T) {
@@ -127,8 +127,10 @@ func TestNewWikiPost(t *testing.T) {
 		})
 		NewWikiPost(ctx)
 		assert.EqualValues(t, http.StatusSeeOther, ctx.Resp.Status())
-		assertWikiExists(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title))
-		assert.Equal(t, content, wikiContent(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title)))
+		sanitzied, err := wiki_service.SanitizeWikiPath(title)
+		require.NoError(t, err)
+		assertWikiExists(t, ctx.Repo.Repository, wiki_service.WebPath(sanitzied))
+		assert.Equal(t, content, wikiContent(t, ctx.Repo.Repository, wiki_service.WebPath(sanitzied)))
 	}
 }
 
@@ -163,9 +165,21 @@ func TestEditWiki(t *testing.T) {
 }
 
 func TestEditWikiPost(t *testing.T) {
-	for _, title := range []string{
-		"Home",
-		"New/<page>",
+	for _, page := range []struct {
+		in           string
+		expectedDir  string
+		expectedFile string
+	}{
+		{
+			in:           "Home",
+			expectedDir:  "",
+			expectedFile: "Home",
+		},
+		{
+			in:           "New/<page>",
+			expectedDir:  "New",
+			expectedFile: "<page>",
+		},
 	} {
 		unittest.PrepareTestEnv(t)
 		ctx, _ := contexttest.MockContext(t, "user2/repo1/wiki/Home?action=_new")
@@ -173,15 +187,15 @@ func TestEditWikiPost(t *testing.T) {
 		contexttest.LoadUser(t, ctx, 2)
 		contexttest.LoadRepo(t, ctx, 1)
 		web.SetForm(ctx, &forms.NewWikiForm{
-			Title:   title,
+			Title:   page.in,
 			Content: content,
 			Message: message,
 		})
 		EditWikiPost(ctx)
 		assert.EqualValues(t, http.StatusSeeOther, ctx.Resp.Status())
-		assertWikiExists(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title))
-		assert.Equal(t, content, wikiContent(t, ctx.Repo.Repository, wiki_service.UserTitleToWebPath("", title)))
-		if title != "Home" {
+		assertWikiExists(t, ctx.Repo.Repository, wiki_service.FilepathToWebPath("", page.in))
+		assert.Equal(t, content, wikiContent(t, ctx.Repo.Repository, wiki_service.FilepathToWebPath(page.expectedDir, page.expectedFile)))
+		if page.expectedFile != "Home" {
 			assertWikiNotExists(t, ctx.Repo.Repository, "Home")
 		}
 	}

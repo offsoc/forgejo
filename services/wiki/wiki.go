@@ -9,7 +9,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
+	"unsafe"
 
 	repo_model "code.gitea.io/gitea/models/repo"
 	system_model "code.gitea.io/gitea/models/system"
@@ -100,16 +102,19 @@ func NormalizeWikiBranch(ctx context.Context, repo *repo_model.Repository, to st
 // return: existence, prepared file path with name, error
 func prepareGitPath(gitRepo *git.Repository, branch string, wikiPath WebPath) (bool, string, error) {
 	unescaped := string(wikiPath) + ".md"
-	gitPath := WebPathToGitPath(wikiPath)
+	gitPath, err := SanitizeWikiPath(string(wikiPath))
+	if err != nil {
+		return false, string(gitPath), err
+	}
 
 	// Look for both files
-	filesInIndex, err := gitRepo.LsTree(branch, unescaped, gitPath)
+	filesInIndex, err := gitRepo.LsTree(branch, unescaped, string(gitPath))
 	if err != nil {
 		if strings.Contains(err.Error(), "Not a valid object name "+branch) {
-			return false, gitPath, nil
+			return false, string(gitPath), nil
 		}
 		log.Error("%v", err)
-		return false, gitPath, err
+		return false, string(gitPath), err
 	}
 
 	foundEscaped := false
@@ -118,13 +123,13 @@ func prepareGitPath(gitRepo *git.Repository, branch string, wikiPath WebPath) (b
 		case unescaped:
 			// if we find the unescaped file return it
 			return true, unescaped, nil
-		case gitPath:
+		case string(gitPath):
 			foundEscaped = true
 		}
 	}
 
 	// If not return whether the escaped file exists, and the escaped filename to keep backwards compatibility.
-	return foundEscaped, gitPath, nil
+	return foundEscaped, string(gitPath), nil
 }
 
 // updateWikiPage adds a new page or edits an existing page in repository wiki.
@@ -134,7 +139,12 @@ func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 		return err
 	}
 
-	if err = validateWebPath(newWikiName); err != nil {
+	sanitizedWikiPath, err := SanitizeWikiPath(string(newWikiName))
+	if err != nil {
+		return err
+	}
+	sanitizedWikiPath += ".md"
+	if err = validateWebPath(WebPath(sanitizedWikiPath)); err != nil {
 		return err
 	}
 	wikiWorkingPool.CheckIn(fmt.Sprint(repo.ID))
@@ -184,7 +194,7 @@ func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 		}
 	}
 
-	isWikiExist, newWikiPath, err := prepareGitPath(gitRepo, repo.GetWikiBranchName(), newWikiName)
+	isWikiExist, newWikiPath, err := prepareGitPath(gitRepo, repo.GetWikiBranchName(), WebPath(sanitizedWikiPath))
 	if err != nil {
 		return err
 	}
@@ -199,7 +209,7 @@ func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 		// avoid check existence again if wiki name is not changed since gitRepo.LsFiles(...) is not free.
 		isOldWikiExist := true
 		oldWikiPath := newWikiPath
-		if oldWikiName != newWikiName {
+		if oldWikiName != WebPath(sanitizedWikiPath) {
 			isOldWikiExist, oldWikiPath, err = prepareGitPath(gitRepo, repo.GetWikiBranchName(), oldWikiName)
 			if err != nil {
 				return err
@@ -239,7 +249,6 @@ func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 	}
 
 	committer := doer.NewGitSig()
-
 	sign, signingKey, signer, _ := asymkey_service.SignWikiCommit(ctx, repo, doer)
 	if sign {
 		commitTreeOpts.KeyID = signingKey
@@ -258,7 +267,6 @@ func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 		log.Error("CommitTree failed: %v", err)
 		return err
 	}
-
 	if err := git.Push(gitRepo.Ctx, basePath, git.PushOptions{
 		Remote: DefaultRemote,
 		Branch: fmt.Sprintf("%s:%s%s", commitHash.String(), git.BranchPrefix, repo.GetWikiBranchName()),
@@ -433,17 +441,120 @@ func SearchWikiContents(ctx context.Context, repo *repo_model.Repository, keywor
 
 	res := make([]SearchContentsResult, 0, len(grepRes))
 	for _, entry := range grepRes {
-		wp, err := GitPathToWebPath(entry.Filename)
+		dispplayName, err := fullpathToDisplayName(entry.Filename)
 		if err != nil {
-			return nil, err
+			continue
 		}
-		_, title := WebPathToUserTitle(wp)
-
 		res = append(res, SearchContentsResult{
 			GrepResult: entry,
-			Title:      title,
+			Title:      dispplayName,
 		})
 	}
 
 	return res, nil
+}
+
+type Page struct {
+	DisplayName string
+	GitPath     string
+	SubURL      string
+	Commit      *git.Commit
+}
+
+// ListWikiPages returns a list of all pages in a wiki
+// This takes a sorter interface compatible to the old sorters
+// TODO: Display/return an error, if a reserved name is in the pages.
+// this can happen if a user pushes such a file directly per git
+func ListWikiPages(
+	ctx context.Context,
+	commit *git.Commit,
+	sorter func(s1, s2 string) bool,
+) ([]Page, error) {
+	entries, err := commit.ListEntriesRecursiveFast()
+	if err != nil {
+		return nil, err
+	}
+
+	dirPages := make(map[string][]string, 0)
+	for _, entry := range entries {
+		if !entry.IsRegular() || !strings.HasSuffix(entry.Name(), ".md") {
+			continue
+		}
+		dir, name := pathToDirAndFile(entry.Name())
+		subPages, exists := dirPages[dir]
+		if !exists {
+			subPages = make([]string, 0)
+		}
+		dirPages[dir] = append(subPages, name)
+	}
+
+	pages := make([]Page, 0)
+	for dir := range dirPages {
+		currentDirPages := dirPages[dir]
+
+		dirCommits, err := git.GetLastCommitForPaths(ctx, commit, dir, currentDirPages)
+		if err != nil {
+			log.Error("Failed to read Subdir commit! dir: %s err: %s", dir, err)
+			continue
+		}
+
+		for _, page := range currentDirPages {
+			fullPath := dirAndFileToFullpath(dir, page)
+			subURL, err := fullpathToSubURL(fullPath)
+			if err != nil {
+				continue
+			}
+			displayName, err := fullpathToDisplayName(fullPath)
+			if err != nil {
+				continue
+			}
+
+			pages = append(pages, Page{
+				DisplayName: displayName,
+				SubURL:      subURL,
+				GitPath:     fullPath,
+				Commit:      dirCommits[page],
+			})
+		}
+	}
+
+	slices.SortFunc(pages, func(s1, s2 Page) int {
+		if s1.DisplayName == s2.DisplayName {
+			return 0
+		}
+		res := sorter(s1.DisplayName, s2.DisplayName)
+		// This is about 2 times faster than a normal if statement
+		// On Wikis with a lot of Pages this will have a big impact
+		// The Only way to get even faster would be taking a sort-
+		// function compatible with slices.SortFuc
+		// Allternatively Pagination should be added to the Wiki view, or a Tree like structure should be shown, which does on demand loading
+		return int(*(*byte)(unsafe.Pointer(&res)))*-2 + 1
+	})
+
+	return pages, nil
+}
+
+func fullpathToDisplayName(fullpath string) (string, error) {
+	return fullpathToSubURL(fullpath)
+}
+
+func fullpathToSubURL(fullpath string) (string, error) {
+	subURL, _ := strings.CutPrefix(fullpath, "/")
+	subURL, _ = strings.CutSuffix(subURL, ".md")
+	return subURL, nil
+}
+
+func dirAndFileToFullpath(dir, file string) string {
+	if dir != "" {
+		return fmt.Sprintf("%s/%s", dir, file)
+	}
+	return file
+}
+
+func pathToDirAndFile(path string) (string, string) {
+	index := strings.LastIndex(path, "/")
+	if index == -1 {
+		return "", path
+	}
+	return path[:index], path[index+1:]
 }

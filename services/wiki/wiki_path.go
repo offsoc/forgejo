@@ -42,6 +42,9 @@ type WebPath string
 var reservedWikiNames = []string{"_pages", "_new", "_edit", "raw"}
 
 func validateWebPath(name WebPath) error {
+	if strings.Contains(string(name), "?") {
+		return repo_model.ErrWikiInvalidFileName{FileName: string(name)}
+	}
 	for _, s := range WebPathSegments(name) {
 		if util.SliceContainsString(reservedWikiNames, s) {
 			return repo_model.ErrWikiReservedName{Title: s}
@@ -143,20 +146,41 @@ func WebPathToURLPath(s WebPath) string {
 
 func WebPathFromRequest(s string) WebPath {
 	s = util.PathJoinRelX(s)
-	// The old wiki code's behavior is always using %2F, instead of subdirectory.
 	s = strings.ReplaceAll(s, "/", "%2F")
 	return WebPath(s)
 }
 
-func UserTitleToWebPath(base, title string) WebPath {
-	// TODO: no support for subdirectory, because the old wiki code's behavior is always using %2F, instead of subdirectory.
-	// So we do not add the support for writing slashes in title at the moment.
-	title = strings.TrimSpace(title)
-	title = util.PathJoinRelX(base, escapeSegToWeb(title, false))
-	if title == "" || title == "." {
-		title = "unnamed"
+func FilepathToWebPath(base, filepath string) WebPath {
+	filepath = strings.TrimSpace(filepath)
+	filepath = util.PathJoinRelX(base, escapeSegToWeb(filepath, false))
+	if filepath == "" || filepath == "." {
+		filepath = "unnamed"
 	}
-	return WebPath(title)
+	return WebPath(filepath)
+}
+
+type WikiPath string
+
+func SanitizeWikiPath(path string) (WikiPath, error) {
+	path, _ = strings.CutPrefix(path, "/")
+	parts := strings.Split(path, "/")
+	cleanParts := make([]string, len(parts))
+
+	for i, part := range parts {
+		part := strings.Trim(part, " ")
+		if part == "" {
+			return "", repo_model.ErrWikiInvalidFileName{FileName: "empty segment"}
+		}
+		if part == "." || part == ".." {
+			return "", repo_model.ErrWikiInvalidFileName{FileName: "path navigation"}
+		}
+		if strings.Contains(part, "?") {
+			return "", repo_model.ErrWikiInvalidFileName{FileName: "querry injection"}
+		}
+		cleanParts[i] = part
+	}
+
+	return WikiPath(strings.Join(cleanParts, "/")), nil
 }
 
 // ToWikiPageMetaData converts meta information to a WikiPageMetaData
