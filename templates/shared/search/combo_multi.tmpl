@@ -7,6 +7,7 @@
 <div class="ui small fluid action input">
 	{{template "shared/search/input" dict "Value" .Value "Disabled" .Disabled "Placeholder" .Placeholder}}
 	<div class="ui small dropdown selection {{if .Disabled}} disabled{{end}}" data-tooltip-content="{{ctx.Locale.Tr "search.type_tooltip"}}">
+		{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 		<div class="text">
 			{{ctx.Locale.Tr (printf "search.%s" .Selected)}}
 		</div>
