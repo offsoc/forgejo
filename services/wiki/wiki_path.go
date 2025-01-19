@@ -37,14 +37,24 @@ import (
 //   * This problem should have been 99% fixed, but it needs more tests.
 // * The old wiki code's behavior is always using %2F, instead of subdirectory, so there are a lot of legacy "%2F" files in user wikis.
 
-type (
-	WebPath string
-	GitPath string
-	URLPath string
-)
+type WebPath string
 
 type Path struct {
 	file WebPath
+}
+
+var reservedWikiPaths = []string{"_pages", "_new", "_edit", "raw"}
+
+func HomePath() Path {
+	return Path{file: "Home"}
+}
+
+func SidebarPath() Path {
+	return Path{file: "_Sidebar"}
+}
+
+func FooterPath() Path {
+	return Path{file: "_Footer"}
 }
 
 func WebPathToPath(web WebPath) Path {
@@ -75,8 +85,7 @@ func TitleToPath(title string) Path {
 	}
 }
 
-func GitPathToPath(g GitPath) (*Path, error) {
-	gitPath := string(g)
+func GitPathToPath(gitPath string) (*Path, error) {
 	if !strings.HasSuffix(gitPath, ".md") {
 		return nil, repo_model.ErrWikiInvalidFileName{FileName: gitPath}
 	}
@@ -96,6 +105,22 @@ func GitPathToPath(g GitPath) (*Path, error) {
 	}, nil
 }
 
+func (w Path) IsEmpty() bool {
+	return len(w.file) == 0
+}
+
+func (w Path) IsHome() bool {
+	return w.file == "Home"
+}
+
+func (w Path) IsSidebar() bool {
+	return w.file == "_Sidebar"
+}
+
+func (w Path) IsFooter() bool {
+	return w.file == "_Footer"
+}
+
 func (w Path) DisplayName() (dir, display string) {
 	dir = path.Dir(string(w.file))
 	display = path.Base(string(w.file))
@@ -111,10 +136,10 @@ func (w Path) WebPath() WebPath {
 	return w.file
 }
 
-func (w Path) GitPath() GitPath {
+func (w Path) GitPath() string {
 	if strings.HasSuffix(string(w.file), ".md") {
 		ret, _ := url.PathUnescape(string(w.file))
-		return GitPath(util.PathJoinRelX(ret))
+		return util.PathJoinRelX(ret)
 	}
 
 	a := strings.Split(string(w.file), "/")
@@ -125,11 +150,11 @@ func (w Path) GitPath() GitPath {
 		a[i] = strings.ReplaceAll(a[i], "%20", " ") // space is safe to be kept in git path
 		a[i] = strings.ReplaceAll(a[i], "+", " ")
 	}
-	return GitPath(strings.Join(a, "/") + ".md")
+	return strings.Join(a, "/") + ".md"
 }
 
-func (w Path) URLPath() URLPath {
-	return URLPath(w.file)
+func (w Path) URLPath() string {
+	return string(w.file)
 }
 
 func WebPathSegments(s WebPath) []string {
@@ -152,11 +177,9 @@ func ToWikiPageMetaData(wikiPath Path, lastCommit *git.Commit, repo *repo_model.
 	}
 }
 
-var reservedWikiNames = []string{"_pages", "_new", "_edit", "raw"}
-
 func validateWebPath(name Path) error {
 	for _, s := range WebPathSegments(name.WebPath()) {
-		if util.SliceContainsString(reservedWikiNames, s) {
+		if util.SliceContainsString(reservedWikiPaths, s) {
 			return repo_model.ErrWikiReservedName{Title: s}
 		}
 	}

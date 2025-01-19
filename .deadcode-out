@@ -301,3 +301,6 @@ code.gitea.io/gitea/services/repository/files
 code.gitea.io/gitea/services/webhook
 	NewNotifier
 
+code.gitea.io/gitea/services/wiki
+	WebPathToPath
+
