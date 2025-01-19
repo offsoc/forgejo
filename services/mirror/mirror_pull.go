@@ -187,7 +187,6 @@ func parseRemoteUpdateOutput(output, remoteName string) []*mirrorSyncResult {
 				newCommitID: shas[1],
 			})
 
-		case strings.HasPrefix(lines[i], " * [new ref]"): // new reference - nothing to do
 		default:
 			log.Warn("parseRemoteUpdateOutput: unexpected update line %q", lines[i])
 		}
