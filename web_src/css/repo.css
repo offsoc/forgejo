@@ -1709,26 +1709,6 @@ td .commit-summary {
   max-width: initial; /* remove fomantic over 100% width */
 }
 
-.repository .diff-stats {
-  clear: both;
-  margin-bottom: 5px;
-  max-height: 200px;
-  height: fit-content;
-  overflow: auto;
-  padding-left: 0;
-}
-
-.repository .diff-stats li {
-  list-style: none;
-  padding-bottom: 4px;
-  margin-bottom: 4px;
-  padding-left: 6px;
-}
-
-.repository .diff-stats li + li {
-  border-top: 1px solid var(--color-secondary);
-}
-
 .repository .repo-search-result {
   padding-top: 10px;
   padding-bottom: 10px;
@@ -1837,10 +1817,6 @@ details.repo-search-result summary::marker {
   box-shadow: none;
   background-color: var(--color-success-bg);
   color: var(--color-success-text);
-}
-
-.repository .ui.attached.isSigned.isVerified.message .pull-right {
-  color: var(--color-text);
 }
 
 .repository .ui.attached.isSigned.isVerified.message .ui.text {
