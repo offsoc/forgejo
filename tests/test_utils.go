@@ -457,7 +457,7 @@ func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts
 		require.NoError(t, err)
 
 		// Add a new wiki page
-		err = wiki_service.AddWikiPage(db.DefaultContext, owner, repo, wiki_service.WebPathToPath("Home"), "Welcome to the wiki!", "Add a Home page")
+		err = wiki_service.AddWikiPage(db.DefaultContext, owner, repo, wiki_service.HomePath(), "Welcome to the wiki!", "Add a Home page")
 		require.NoError(t, err)
 	}
 

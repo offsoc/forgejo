@@ -129,14 +129,14 @@ func wikiContentsByEntry(ctx *context.Context, entry *git.TreeEntry) []byte {
 // indicating whether the page exists. Writes to ctx if an error occurs.
 func wikiContentsByName(ctx *context.Context, commit *git.Commit, wikiName wiki_service.Path) ([]byte, *git.TreeEntry, string, bool) {
 	gitFilename := wikiName.GitPath()
-	entry, err := findEntryForFile(commit, string(gitFilename))
+	entry, err := findEntryForFile(commit, gitFilename)
 	if err != nil && !git.IsErrNotExist(err) {
 		ctx.ServerError("findEntryForFile", err)
 		return nil, nil, "", false
 	} else if entry == nil {
 		return nil, nil, "", true
 	}
-	return wikiContentsByEntry(ctx, entry), entry, string(gitFilename), false
+	return wikiContentsByEntry(ctx, entry), entry, gitFilename, false
 }
 
 func renderViewPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) {
@@ -165,7 +165,7 @@ func renderViewPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) {
 		if !entry.IsRegular() {
 			continue
 		}
-		wikiName, err := wiki_service.GitPathToPath(wiki_service.GitPath(entry.Name()))
+		wikiName, err := wiki_service.GitPathToPath(entry.Name())
 		if err != nil {
 			if repo_model.IsErrWikiInvalidFileName(err) {
 				continue
@@ -175,13 +175,13 @@ func renderViewPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) {
 			}
 			ctx.ServerError("WikiFilenameToName", err)
 			return nil, nil
-		} else if wikiName.WebPath() == "_Sidebar" || wikiName.WebPath() == "_Footer" {
+		} else if wikiName.IsSidebar() || wikiName.IsFooter() {
 			continue
 		}
 		_, displayName := wikiName.DisplayName()
 		pages = append(pages, PageMeta{
 			Name:         displayName,
-			SubURL:       string(wikiName.URLPath()),
+			SubURL:       wikiName.URLPath(),
 			GitEntryName: entry.Name(),
 		})
 	}
@@ -189,8 +189,8 @@ func renderViewPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) {
 
 	// get requested page name
 	pageName := wiki_service.RequestToPath(ctx.PathParamRaw("*"))
-	if len(pageName.WebPath()) == 0 {
-		pageName = wiki_service.WebPathToPath("Home")
+	if pageName.IsEmpty() {
+		pageName = wiki_service.HomePath()
 	}
 
 	_, displayName := pageName.DisplayName()
@@ -199,8 +199,8 @@ func renderViewPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) {
 	ctx.Data["Title"] = displayName
 	ctx.Data["title"] = displayName
 
-	isSideBar := pageName.WebPath() == "_Sidebar"
-	isFooter := pageName.WebPath() == "_Footer"
+	isSideBar := pageName.IsSidebar()
+	isFooter := pageName.IsFooter()
 
 	// lookup filename in wiki - get filecontent, gitTree entry , real filename
 	data, entry, pageFilename, noEntry := wikiContentsByName(ctx, commit, pageName)
@@ -216,7 +216,7 @@ func renderViewPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) {
 
 	var sidebarContent []byte
 	if !isSideBar {
-		sidebarContent, _, _, _ = wikiContentsByName(ctx, commit, wiki_service.WebPathToPath("_Sidebar"))
+		sidebarContent, _, _, _ = wikiContentsByName(ctx, commit, wiki_service.SidebarPath())
 		if ctx.Written() {
 			if wikiRepo != nil {
 				wikiRepo.Close()
@@ -229,7 +229,7 @@ func renderViewPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) {
 
 	var footerContent []byte
 	if !isFooter {
-		footerContent, _, _, _ = wikiContentsByName(ctx, commit, wiki_service.WebPathToPath("_Footer"))
+		footerContent, _, _, _ = wikiContentsByName(ctx, commit, wiki_service.FooterPath())
 		if ctx.Written() {
 			if wikiRepo != nil {
 				wikiRepo.Close()
@@ -338,8 +338,8 @@ func renderRevisionPage(ctx *context.Context) (*git.Repository, *git.TreeEntry) 
 
 	// get requested pagename
 	pageName := wiki_service.RequestToPath(ctx.PathParamRaw("*"))
-	if len(pageName.WebPath()) == 0 {
-		pageName = wiki_service.WebPathToPath("Home")
+	if pageName.IsEmpty() {
+		pageName = wiki_service.HomePath()
 	}
 
 	_, displayName := pageName.DisplayName()
@@ -422,8 +422,8 @@ func renderEditPage(ctx *context.Context) {
 
 	// get requested pagename
 	pageName := wiki_service.RequestToPath(ctx.PathParamRaw("*"))
-	if len(pageName.WebPath()) == 0 {
-		pageName = wiki_service.WebPathToPath("Home")
+	if pageName.IsEmpty() {
+		pageName = wiki_service.HomePath()
 	}
 
 	_, displayName := pageName.DisplayName()
@@ -627,7 +627,7 @@ func WikiPages(ctx *context.Context) {
 		if !entry.Entry.IsRegular() {
 			continue
 		}
-		wikiName, err := wiki_service.GitPathToPath(wiki_service.GitPath(entry.Entry.Name()))
+		wikiName, err := wiki_service.GitPathToPath(entry.Entry.Name())
 		if err != nil {
 			if repo_model.IsErrWikiInvalidFileName(err) {
 				continue
@@ -638,7 +638,7 @@ func WikiPages(ctx *context.Context) {
 		_, displayName := wikiName.DisplayName()
 		pages = append(pages, PageMeta{
 			Name:         displayName,
-			SubURL:       string(wikiName.URLPath()),
+			SubURL:       wikiName.URLPath(),
 			GitEntryName: entry.Entry.Name(),
 			UpdatedUnix:  timeutil.TimeStamp(entry.Commit.Author.When.Unix()),
 		})
@@ -671,7 +671,7 @@ func WikiRaw(ctx *context.Context) {
 	var entry *git.TreeEntry
 	if commit != nil {
 		// Try to find a file with that name
-		entry, err = findEntryForFile(commit, string(providedGitPath))
+		entry, err = findEntryForFile(commit, providedGitPath)
 		if err != nil && !git.IsErrNotExist(err) {
 			ctx.ServerError("findFile", err)
 			return
@@ -679,8 +679,8 @@ func WikiRaw(ctx *context.Context) {
 
 		if entry == nil {
 			// Try to find a wiki page with that name
-			providedGitPath = wiki_service.GitPath(strings.TrimSuffix(string(providedGitPath), ".md"))
-			entry, err = findEntryForFile(commit, string(providedGitPath))
+			providedGitPath = strings.TrimSuffix(providedGitPath, ".md")
+			entry, err = findEntryForFile(commit, providedGitPath)
 			if err != nil && !git.IsErrNotExist(err) {
 				ctx.ServerError("findFile", err)
 				return
@@ -746,9 +746,9 @@ func NewWikiPost(ctx *context.Context) {
 		return
 	}
 
-	notify_service.NewWikiPage(ctx, ctx.Doer, ctx.Repo.Repository, string(wikiName.WebPath()), form.Message)
+	notify_service.NewWikiPage(ctx, ctx.Doer, ctx.Repo.Repository, wikiName.GitPath(), form.Message)
 
-	ctx.Redirect(ctx.Repo.RepoLink + "/wiki/" + string(wikiName.URLPath()))
+	ctx.Redirect(ctx.Repo.RepoLink + "/wiki/" + wikiName.URLPath())
 }
 
 // EditWiki render wiki modify page
@@ -790,16 +790,16 @@ func EditWikiPost(ctx *context.Context) {
 		return
 	}
 
-	notify_service.EditWikiPage(ctx, ctx.Doer, ctx.Repo.Repository, string(newWikiName.WebPath()), form.Message)
+	notify_service.EditWikiPage(ctx, ctx.Doer, ctx.Repo.Repository, newWikiName.GitPath(), form.Message)
 
-	ctx.Redirect(ctx.Repo.RepoLink + "/wiki/" + string(newWikiName.URLPath()))
+	ctx.Redirect(ctx.Repo.RepoLink + "/wiki/" + newWikiName.URLPath())
 }
 
 // DeleteWikiPagePost delete wiki page
 func DeleteWikiPagePost(ctx *context.Context) {
 	wikiName := wiki_service.RequestToPath(ctx.PathParamRaw("*"))
-	if len(wikiName.WebPath()) == 0 {
-		wikiName = wiki_service.WebPathToPath("Home")
+	if wikiName.IsEmpty() {
+		wikiName = wiki_service.HomePath()
 	}
 
 	if err := wiki_service.DeleteWikiPage(ctx, ctx.Doer, ctx.Repo.Repository, wikiName); err != nil {
@@ -807,7 +807,7 @@ func DeleteWikiPagePost(ctx *context.Context) {
 		return
 	}
 
-	notify_service.DeleteWikiPage(ctx, ctx.Doer, ctx.Repo.Repository, string(wikiName.WebPath()))
+	notify_service.DeleteWikiPage(ctx, ctx.Doer, ctx.Repo.Repository, wikiName.GitPath())
 
 	ctx.JSONRedirect(ctx.Repo.RepoLink + "/wiki/")
 }
