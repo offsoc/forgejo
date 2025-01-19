@@ -20,7 +20,7 @@ require (
 	gitea.com/lunny/levelqueue v0.4.2-0.20230414023320-3c0159fe0fe4
 	github.com/42wim/sshsig v0.0.0-20211121163825-841cf5bbc121
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358
-	github.com/ProtonMail/go-crypto v1.0.0
+	github.com/ProtonMail/go-crypto v1.1.3
 	github.com/PuerkitoBio/goquery v1.10.0
 	github.com/SaveTheRbtz/zstd-seekable-format-go/pkg v0.7.2
 	github.com/alecthomas/chroma/v2 v2.14.0
@@ -37,7 +37,7 @@ require (
 	github.com/emersion/go-imap v1.2.1
 	github.com/felixge/fgprof v0.9.5
 	github.com/fsnotify/fsnotify v1.8.0
-	github.com/gliderlabs/ssh v0.3.7
+	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-ap/activitypub v0.0.0-20231114162308-e219254dc5c9
 	github.com/go-ap/jsonld v0.0.0-20221030091449-f2a191312c73
 	github.com/go-chi/chi/v5 v5.1.0
@@ -45,7 +45,7 @@ require (
 	github.com/go-co-op/gocron v1.37.0
 	github.com/go-enry/go-enry/v2 v2.9.1
 	github.com/go-fed/httpsig v1.1.1-0.20201223112313-55836744818e
-	github.com/go-git/go-git/v5 v5.11.0
+	github.com/go-git/go-git/v5 v5.13.0
 	github.com/go-ldap/ldap/v3 v3.4.6
 	github.com/go-openapi/spec v0.20.14
 	github.com/go-sql-driver/mysql v1.8.1
@@ -92,7 +92,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1
 	github.com/sassoftware/go-rpmutils v0.4.0
-	github.com/sergi/go-diff v1.3.1
+	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3
 	github.com/shurcooL/vfsgen v0.0.0-20230704071429-0000e147ea92
 	github.com/stretchr/testify v1.10.0
 	github.com/syndtr/goleveldb v1.0.0
@@ -106,7 +106,7 @@ require (
 	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.31.0
 	golang.org/x/image v0.23.0
-	golang.org/x/net v0.32.0
+	golang.org/x/net v0.33.0
 	golang.org/x/oauth2 v0.23.0
 	golang.org/x/sync v0.10.0
 	golang.org/x/sys v0.28.0
@@ -166,7 +166,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudflare/circl v1.3.8 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
-	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
+	github.com/cyphar/filepath-securejoin v0.2.5 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
@@ -182,7 +182,7 @@ require (
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
-	github.com/go-git/go-billy/v5 v5.5.0 // indirect
+	github.com/go-git/go-billy/v5 v5.6.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-openapi/analysis v0.22.2 // indirect
 	github.com/go-openapi/errors v0.21.0 // indirect
@@ -262,7 +262,7 @@ require (
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/shurcooL/httpfs v0.0.0-20230704072500-f1e31cf0ba5c // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/skeema/knownhosts v1.2.1 // indirect
+	github.com/skeema/knownhosts v1.3.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
@@ -283,7 +283,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
+	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
