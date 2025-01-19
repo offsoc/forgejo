@@ -98,12 +98,12 @@ func NormalizeWikiBranch(ctx context.Context, repo *repo_model.Repository, to st
 
 // prepareGitPath try to find a suitable file path with file name by the given raw wiki name.
 // return: existence, prepared file path with name, error
-func prepareGitPath(gitRepo *git.Repository, branch string, wikiPath WebPath) (bool, string, error) {
-	unescaped := string(wikiPath) + ".md"
-	gitPath := WebPathToGitPath(wikiPath)
+func prepareGitPath(gitRepo *git.Repository, branch string, wikiPath Path) (bool, GitPath, error) {
+	unescaped := string(wikiPath.WebPath()) + ".md"
+	gitPath := wikiPath.GitPath()
 
 	// Look for both files
-	filesInIndex, err := gitRepo.LsTree(branch, unescaped, gitPath)
+	filesInIndex, err := gitRepo.LsTree(branch, unescaped, string(gitPath))
 	if err != nil {
 		if strings.Contains(err.Error(), "Not a valid object name "+branch) {
 			return false, gitPath, nil
@@ -117,8 +117,8 @@ func prepareGitPath(gitRepo *git.Repository, branch string, wikiPath WebPath) (b
 		switch filename {
 		case unescaped:
 			// if we find the unescaped file return it
-			return true, unescaped, nil
-		case gitPath:
+			return true, GitPath(unescaped), nil
+		case string(gitPath):
 			foundEscaped = true
 		}
 	}
@@ -128,7 +128,7 @@ func prepareGitPath(gitRepo *git.Repository, branch string, wikiPath WebPath) (b
 }
 
 // updateWikiPage adds a new page or edits an existing page in repository wiki.
-func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, oldWikiName, newWikiName WebPath, content, message string, isNew bool) (err error) {
+func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, oldWikiName, newWikiName Path, content, message string, isNew bool) (err error) {
 	err = repo.MustNotBeArchived()
 	if err != nil {
 		return err
@@ -192,7 +192,7 @@ func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 	if isNew {
 		if isWikiExist {
 			return repo_model.ErrWikiAlreadyExist{
-				Title: newWikiPath,
+				Title: string(newWikiPath),
 			}
 		}
 	} else {
@@ -207,7 +207,7 @@ func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 		}
 
 		if isOldWikiExist {
-			err := gitRepo.RemoveFilesFromIndex(oldWikiPath)
+			err := gitRepo.RemoveFilesFromIndex(string(oldWikiPath))
 			if err != nil {
 				log.Error("RemoveFilesFromIndex failed: %v", err)
 				return err
@@ -223,7 +223,7 @@ func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 		return err
 	}
 
-	if err := gitRepo.AddObjectToIndex("100644", objectHash, newWikiPath); err != nil {
+	if err := gitRepo.AddObjectToIndex("100644", objectHash, string(newWikiPath)); err != nil {
 		log.Error("AddObjectToIndex failed: %v", err)
 		return err
 	}
@@ -281,18 +281,18 @@ func updateWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 }
 
 // AddWikiPage adds a new wiki page with a given wikiPath.
-func AddWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, wikiName WebPath, content, message string) error {
-	return updateWikiPage(ctx, doer, repo, "", wikiName, content, message, true)
+func AddWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, wikiName Path, content, message string) error {
+	return updateWikiPage(ctx, doer, repo, WebPathToPath(""), wikiName, content, message, true)
 }
 
 // EditWikiPage updates a wiki page identified by its wikiPath,
 // optionally also changing wikiPath.
-func EditWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, oldWikiName, newWikiName WebPath, content, message string) error {
+func EditWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, oldWikiName, newWikiName Path, content, message string) error {
 	return updateWikiPage(ctx, doer, repo, oldWikiName, newWikiName, content, message, false)
 }
 
 // DeleteWikiPage deletes a wiki page identified by its path.
-func DeleteWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, wikiName WebPath) (err error) {
+func DeleteWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, wikiName Path) (err error) {
 	err = repo.MustNotBeArchived()
 	if err != nil {
 		return err
@@ -341,7 +341,7 @@ func DeleteWikiPage(ctx context.Context, doer *user_model.User, repo *repo_model
 		return err
 	}
 	if found {
-		err := gitRepo.RemoveFilesFromIndex(wikiPath)
+		err := gitRepo.RemoveFilesFromIndex(string(wikiPath))
 		if err != nil {
 			return err
 		}
@@ -433,11 +433,11 @@ func SearchWikiContents(ctx context.Context, repo *repo_model.Repository, keywor
 
 	res := make([]SearchContentsResult, 0, len(grepRes))
 	for _, entry := range grepRes {
-		wp, err := GitPathToWebPath(entry.Filename)
+		wp, err := GitPathToPath(GitPath(entry.Filename))
 		if err != nil {
 			return nil, err
 		}
-		_, title := WebPathToUserTitle(wp)
+		_, title := wp.DisplayName()
 
 		res = append(res, SearchContentsResult{
 			GrepResult: entry,

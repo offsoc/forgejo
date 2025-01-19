@@ -31,7 +31,7 @@ func TestWebPathSegments(t *testing.T) {
 
 func TestUserTitleToWebPath(t *testing.T) {
 	type test struct {
-		Expected  string
+		Expected  WebPath
 		UserTitle string
 	}
 	for _, test := range []test{
@@ -45,7 +45,7 @@ func TestUserTitleToWebPath(t *testing.T) {
 		{"a%2Fb", "a/b"},
 		{"a%25b", "a%b"},
 	} {
-		assert.EqualValues(t, test.Expected, UserTitleToWebPath("", test.UserTitle))
+		assert.EqualValues(t, test.Expected, TitleToPath(test.UserTitle).WebPath())
 	}
 }
 
@@ -62,15 +62,15 @@ func TestWebPathToDisplayName(t *testing.T) {
 		{"2000-01-02 meeting", "2000-01-02+meeting.-.md"},
 		{"a b", "a%20b.md"},
 	} {
-		_, displayName := WebPathToUserTitle(test.WebPath)
+		_, displayName := WebPathToPath(test.WebPath).DisplayName()
 		assert.EqualValues(t, test.Expected, displayName)
 	}
 }
 
 func TestWebPathToGitPath(t *testing.T) {
 	type test struct {
-		Expected string
-		WikiName WebPath
+		Expected GitPath
+		WebPath  WebPath
 	}
 	for _, test := range []test{
 		{"wiki-name.md", "wiki%20name"},
@@ -80,14 +80,14 @@ func TestWebPathToGitPath(t *testing.T) {
 		{"2000-01-02-meeting.md", "2000-01-02+meeting"},
 		{"2000-01-02 meeting.-.md", "2000-01-02%20meeting.-"},
 	} {
-		assert.EqualValues(t, test.Expected, WebPathToGitPath(test.WikiName))
+		assert.EqualValues(t, test.Expected, WebPathToPath(test.WebPath).GitPath())
 	}
 }
 
 func TestGitPathToWebPath(t *testing.T) {
 	type test struct {
-		Expected string
-		Filename string
+		Expected WebPath
+		Filename GitPath
 	}
 	for _, test := range []test{
 		{"hello-world", "hello-world.md"}, // this shouldn't happen, because it should always have a ".-" suffix
@@ -96,19 +96,19 @@ func TestGitPathToWebPath(t *testing.T) {
 		{"hello+world.-", "hello world.-.md"},
 		{"symbols-%2F", "symbols %2F.md"},
 	} {
-		name, err := GitPathToWebPath(test.Filename)
+		wikiPath, err := GitPathToPath(test.Filename)
 		require.NoError(t, err)
-		assert.EqualValues(t, test.Expected, name)
+		assert.EqualValues(t, test.Expected, wikiPath.WebPath())
 	}
-	for _, badFilename := range []string{
+	for _, badFilename := range []GitPath{
 		"nofileextension",
 		"wrongfileextension.txt",
 	} {
-		_, err := GitPathToWebPath(badFilename)
+		_, err := GitPathToPath(badFilename)
 		require.Error(t, err)
 		assert.True(t, repo_model.IsErrWikiInvalidFileName(err))
 	}
-	_, err := GitPathToWebPath("badescaping%%.md")
+	_, err := GitPathToPath("badescaping%%.md")
 	require.Error(t, err)
 	assert.False(t, repo_model.IsErrWikiInvalidFileName(err))
 }
@@ -127,12 +127,15 @@ func TestUserWebGitPathConsistency(t *testing.T) {
 		if userTitle == "" || userTitle == "." || userTitle == ".." {
 			continue
 		}
-		webPath := UserTitleToWebPath("", userTitle)
-		gitPath := WebPathToGitPath(webPath)
+		wikiPath := TitleToPath(userTitle)
+		webPath := wikiPath.WebPath()
+		gitPath := wikiPath.GitPath()
 
-		webPath1, _ := GitPathToWebPath(gitPath)
-		_, userTitle1 := WebPathToUserTitle(webPath1)
-		gitPath1 := WebPathToGitPath(webPath1)
+		wikiPath1, err := GitPathToPath(gitPath)
+		require.NoError(t, err)
+		webPath1 := wikiPath1.WebPath()
+		_, userTitle1 := WebPathToPath(webPath1).DisplayName()
+		gitPath1 := WebPathToPath(webPath1).GitPath()
 
 		assert.EqualValues(t, userTitle, userTitle1, "UserTitle for userTitle: %q", userTitle)
 		assert.EqualValues(t, webPath, webPath1, "WebPath for userTitle: %q", userTitle)
@@ -163,8 +166,8 @@ func TestRepository_AddWikiPage(t *testing.T) {
 		"Here's a <tag> and a/slash",
 	} {
 		t.Run("test wiki exist: "+userTitle, func(t *testing.T) {
-			webPath := UserTitleToWebPath("", userTitle)
-			require.NoError(t, AddWikiPage(git.DefaultContext, doer, repo, webPath, wikiContent, commitMsg))
+			wikiPath := TitleToPath(userTitle)
+			require.NoError(t, AddWikiPage(git.DefaultContext, doer, repo, wikiPath, wikiContent, commitMsg))
 			// Now need to show that the page has been added:
 			gitRepo, err := gitrepo.OpenWikiRepository(git.DefaultContext, repo)
 			require.NoError(t, err)
@@ -172,8 +175,8 @@ func TestRepository_AddWikiPage(t *testing.T) {
 			defer gitRepo.Close()
 			masterTree, err := gitRepo.GetTree("master")
 			require.NoError(t, err)
-			gitPath := WebPathToGitPath(webPath)
-			entry, err := masterTree.GetTreeEntryByPath(gitPath)
+			gitPath := wikiPath.GitPath()
+			entry, err := masterTree.GetTreeEntryByPath(string(gitPath))
 			require.NoError(t, err)
 			assert.EqualValues(t, gitPath, entry.Name(), "%s not added correctly", userTitle)
 		})
@@ -182,7 +185,7 @@ func TestRepository_AddWikiPage(t *testing.T) {
 	t.Run("check wiki already exist", func(t *testing.T) {
 		t.Parallel()
 		// test for already-existing wiki name
-		err := AddWikiPage(git.DefaultContext, doer, repo, "Home", wikiContent, commitMsg)
+		err := AddWikiPage(git.DefaultContext, doer, repo, TitleToPath("Home"), wikiContent, commitMsg)
 		require.Error(t, err)
 		assert.True(t, repo_model.IsErrWikiAlreadyExist(err))
 	})
@@ -190,7 +193,7 @@ func TestRepository_AddWikiPage(t *testing.T) {
 	t.Run("check wiki reserved name", func(t *testing.T) {
 		t.Parallel()
 		// test for reserved wiki name
-		err := AddWikiPage(git.DefaultContext, doer, repo, "_edit", wikiContent, commitMsg)
+		err := AddWikiPage(git.DefaultContext, doer, repo, TitleToPath("_edit"), wikiContent, commitMsg)
 		require.Error(t, err)
 		assert.True(t, repo_model.IsErrWikiReservedName(err))
 	})
@@ -208,17 +211,17 @@ func TestRepository_EditWikiPage(t *testing.T) {
 		"New home",
 		"New/name/with/slashes",
 	} {
-		webPath := UserTitleToWebPath("", newWikiName)
+		wikiPath := TitleToPath(newWikiName)
 		unittest.PrepareTestEnv(t)
-		require.NoError(t, EditWikiPage(git.DefaultContext, doer, repo, "Home", webPath, newWikiContent, commitMsg))
+		require.NoError(t, EditWikiPage(git.DefaultContext, doer, repo, TitleToPath("Home"), wikiPath, newWikiContent, commitMsg))
 
 		// Now need to show that the page has been added:
 		gitRepo, err := gitrepo.OpenWikiRepository(git.DefaultContext, repo)
 		require.NoError(t, err)
 		masterTree, err := gitRepo.GetTree("master")
 		require.NoError(t, err)
-		gitPath := WebPathToGitPath(webPath)
-		entry, err := masterTree.GetTreeEntryByPath(gitPath)
+		gitPath := wikiPath.GitPath()
+		entry, err := masterTree.GetTreeEntryByPath(string(gitPath))
 		require.NoError(t, err)
 		assert.EqualValues(t, gitPath, entry.Name(), "%s not edited correctly", newWikiName)
 
@@ -234,7 +237,7 @@ func TestRepository_DeleteWikiPage(t *testing.T) {
 	unittest.PrepareTestEnv(t)
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
-	require.NoError(t, DeleteWikiPage(git.DefaultContext, doer, repo, "Home"))
+	require.NoError(t, DeleteWikiPage(git.DefaultContext, doer, repo, TitleToPath("Home")))
 
 	// Now need to show that the page has been added:
 	gitRepo, err := gitrepo.OpenWikiRepository(git.DefaultContext, repo)
@@ -242,8 +245,8 @@ func TestRepository_DeleteWikiPage(t *testing.T) {
 	defer gitRepo.Close()
 	masterTree, err := gitRepo.GetTree("master")
 	require.NoError(t, err)
-	gitPath := WebPathToGitPath("Home")
-	_, err = masterTree.GetTreeEntryByPath(gitPath)
+	gitPath := WebPathToPath("Home").GitPath()
+	_, err = masterTree.GetTreeEntryByPath(string(gitPath))
 	require.Error(t, err)
 }
 
@@ -276,8 +279,8 @@ func TestPrepareWikiFileName(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			webPath := UserTitleToWebPath("", tt.arg)
-			existence, newWikiPath, err := prepareGitPath(gitRepo, "master", webPath)
+			wikiPath := TitleToPath(tt.arg)
+			existence, newWikiPath, err := prepareGitPath(gitRepo, "master", wikiPath)
 			if (err != nil) != tt.wantErr {
 				require.NoError(t, err)
 				return
@@ -308,20 +311,20 @@ func TestPrepareWikiFileName_FirstPage(t *testing.T) {
 
 	defer gitRepo.Close()
 
-	existence, newWikiPath, err := prepareGitPath(gitRepo, "master", "Home")
+	existence, newWikiPath, err := prepareGitPath(gitRepo, "master", TitleToPath("Home"))
 	assert.False(t, existence)
 	require.NoError(t, err)
 	assert.EqualValues(t, "Home.md", newWikiPath)
 }
 
 func TestWebPathConversion(t *testing.T) {
-	assert.Equal(t, "path/wiki", WebPathToURLPath(WebPath("path/wiki")))
-	assert.Equal(t, "wiki", WebPathToURLPath(WebPath("wiki")))
-	assert.Equal(t, "", WebPathToURLPath(WebPath("")))
+	assert.Equal(t, "path/wiki", string(WebPathToPath("path/wiki").URLPath()))
+	assert.Equal(t, "wiki", string(WebPathToPath("wiki").URLPath()))
+	assert.Equal(t, "", string(WebPathToPath("").URLPath()))
 }
 
 func TestWebPathFromRequest(t *testing.T) {
-	assert.Equal(t, WebPath("a%2Fb"), WebPathFromRequest("a/b"))
-	assert.Equal(t, WebPath("a"), WebPathFromRequest("a"))
-	assert.Equal(t, WebPath("b"), WebPathFromRequest("a/../b"))
+	assert.Equal(t, WebPath("a%2Fb"), RequestToPath("a/b").WebPath())
+	assert.Equal(t, WebPath("a"), RequestToPath("a").WebPath())
+	assert.Equal(t, WebPath("b"), RequestToPath("a/../b").WebPath())
 }
