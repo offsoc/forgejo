@@ -151,6 +151,7 @@ func (g *GogsDownloader) GetRepoInfo() (*base.Repository, error) {
 		CloneURL:      gr.CloneURL,
 		OriginalURL:   gr.HTMLURL,
 		DefaultBranch: gr.DefaultBranch,
+		Website:       gr.Website,
 	}, nil
 }
 
