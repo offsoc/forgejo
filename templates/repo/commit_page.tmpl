@@ -128,9 +128,11 @@
 											</form>
 										</div>
 									</div>
-									<div id="commit-notes-add-button" class="item">
-										{{ctx.Locale.Tr "repo.diff.git-notes.add"}}
-									</div>
+									{{if not .NoteRendered}}
+										<div id="commit-notes-add-button" class="item">
+											{{ctx.Locale.Tr "repo.diff.git-notes.add"}}
+										</div>
+									{{end}}
 								</div>
 							</div>
 						{{end}}

@@ -82,6 +82,7 @@ func TestE2e(t *testing.T) {
 
 	runArgs := []string{"npx", "playwright", "test"}
 
+	_, testVisual := os.LookupEnv("VISUAL_TEST")
 	// To update snapshot outputs
 	if _, set := os.LookupEnv("ACCEPT_VISUAL"); set {
 		runArgs = append(runArgs, "--update-snapshots")
@@ -105,6 +106,10 @@ func TestE2e(t *testing.T) {
 			onForgejoRun(t, func(*testing.T, *url.URL) {
 				defer DeclareGitRepos(t)()
 				thisTest := runArgs
+				// when all tests are run, use unique artifacts directories per test to preserve artifacts from other tests
+				if testVisual {
+					thisTest = append(thisTest, "--output=tests/e2e/test-artifacts/"+testname)
+				}
 				thisTest = append(thisTest, path)
 				cmd := exec.Command(runArgs[0], thisTest...)
 				cmd.Env = os.Environ()
@@ -114,7 +119,7 @@ func TestE2e(t *testing.T) {
 				cmd.Stderr = os.Stderr
 
 				err := cmd.Run()
-				if err != nil {
+				if err != nil && !testVisual {
 					log.Fatal("Playwright Failed: %s", err)
 				}
 			})
