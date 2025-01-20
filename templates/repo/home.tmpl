@@ -58,18 +58,6 @@
 		<div class="repo-button-row">
 			<div class="tw-flex tw-items-center tw-gap-y-2">
 				{{template "repo/branch_dropdown" dict "root" . "ContainerClasses" "tw-mr-1"}}
-				{{if and .CanCompareOrPull .IsViewBranch (not .Repository.IsArchived)}}
-					{{$cmpBranch := ""}}
-					{{if ne .Repository.ID .BaseRepo.ID}}
-						{{$cmpBranch = printf "%s/%s:" (.Repository.OwnerName|PathEscape) (.Repository.Name|PathEscape)}}
-					{{end}}
-					{{$cmpBranch = print $cmpBranch (.BranchName|PathEscapeSegments)}}
-					{{$compareLink := printf "%s/compare/%s...%s" .BaseRepo.Link (.BaseRepo.DefaultBranch|PathEscapeSegments) $cmpBranch}}
-					<a id="new-pull-request" role="button" class="ui compact basic button" href="{{$compareLink}}"
-						data-tooltip-content="{{if .PullRequestCtx.Allowed}}{{ctx.Locale.Tr "repo.pulls.compare_changes"}}{{else}}{{ctx.Locale.Tr "action.compare_branch"}}{{end}}">
-						{{svg "octicon-git-pull-request"}}
-					</a>
-				{{end}}
 				<!-- Show go to file and breadcrumbs if not on home page -->
 				{{if $isHomepage}}
 					<a href="{{.Repository.Link}}/find/{{.BranchNameSubURL}}" class="ui compact basic button">{{ctx.Locale.Tr "repo.find_file.go_to_file"}}</a>

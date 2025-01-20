@@ -31,12 +31,12 @@ import (
 )
 
 func testPullCreate(t *testing.T, session *TestSession, user, repo string, toSelf bool, targetBranch, sourceBranch, title string) *httptest.ResponseRecorder {
-	req := NewRequest(t, "GET", path.Join(user, repo))
+	req := NewRequest(t, "GET", path.Join(user, repo, "pulls"))
 	resp := session.MakeRequest(t, req, http.StatusOK)
 
 	// Click the PR button to create a pull
 	htmlDoc := NewHTMLParser(t, resp.Body)
-	link, exists := htmlDoc.doc.Find("#new-pull-request").Attr("href")
+	link, exists := htmlDoc.doc.Find(".new-pr-button").Attr("href")
 	assert.True(t, exists, "The template has changed")
 
 	targetUser := strings.Split(link, "/")[1]
@@ -158,12 +158,12 @@ func TestPullCreateWithPullTemplate(t *testing.T) {
 		testPullPreview := func(t *testing.T, session *TestSession, user, repo, message string) {
 			t.Helper()
 
-			req := NewRequest(t, "GET", path.Join(user, repo))
+			req := NewRequest(t, "GET", path.Join(user, repo, "pulls"))
 			resp := session.MakeRequest(t, req, http.StatusOK)
 
 			// Click the PR button to create a pull
 			htmlDoc := NewHTMLParser(t, resp.Body)
-			link, exists := htmlDoc.doc.Find("#new-pull-request").Attr("href")
+			link, exists := htmlDoc.doc.Find(".new-pr-button").Attr("href")
 			assert.True(t, exists, "The template has changed")
 
 			// Load the pull request preview
