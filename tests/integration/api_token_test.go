@@ -30,6 +30,23 @@ func TestAPICreateAndDeleteToken(t *testing.T) {
 	deleteAPIAccessToken(t, newAccessToken, user)
 }
 
+func TestAPIGetTokens(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+
+	// with basic auth...
+	req := NewRequest(t, "GET", "/api/v1/users/user2/tokens").
+		AddBasicAuth(user.Name)
+	MakeRequest(t, req, http.StatusOK)
+
+	// ... or with a token.
+	newAccessToken := createAPIAccessTokenWithoutCleanUp(t, "test-key-1", user, []auth_model.AccessTokenScope{auth_model.AccessTokenScopeAll})
+	req = NewRequest(t, "GET", "/api/v1/users/user2/tokens").
+		AddTokenAuth(newAccessToken.Token)
+	MakeRequest(t, req, http.StatusOK)
+	deleteAPIAccessToken(t, newAccessToken, user)
+}
+
 // TestAPIDeleteMissingToken ensures that error is thrown when token not found
 func TestAPIDeleteMissingToken(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
