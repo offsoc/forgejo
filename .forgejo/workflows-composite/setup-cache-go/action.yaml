@@ -28,8 +28,8 @@ runs:
       id: go-environment
       run: |
         export GOROOT="$(go env GOROOT)"
-        echo "modcache=$(su ${RUN_AS_USER} -c '${GOROOT}/go env GOMODCACHE')" >> "$GITHUB_OUTPUT"
-        echo "cache=$(su ${RUN_AS_USER} -c '${GOROOT}/go env GOCACHE')" >> "$GITHUB_OUTPUT"
+        echo "modcache=$(su ${RUN_AS_USER} -c '${GOROOT}/bin/go env GOMODCACHE')" >> "$GITHUB_OUTPUT"
+        echo "cache=$(su ${RUN_AS_USER} -c '${GOROOT}/bin/go env GOCACHE')" >> "$GITHUB_OUTPUT"
       env:
         RUN_AS_USER: ${{ inputs.username }}
         GO_VERSION: ${{ steps.go-version.outputs.go-version }}
