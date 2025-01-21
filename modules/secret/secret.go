@@ -47,7 +47,7 @@ func AesDecrypt(key, text []byte) ([]byte, error) {
 	cfb.XORKeyStream(text, text)
 	data, err := base64.StdEncoding.DecodeString(string(text))
 	if err != nil {
-		return nil, fmt.Errorf("AesDecrypt invalid decrypted base64 string: %w", err)
+		return nil, fmt.Errorf("AesDecrypt invalid decrypted base64 string: %w - it can be caused by a change of the [security].SECRET_KEY setting or a database corruption - `forgejo doctor check --run check-db-consistency --fix` will get rid of orphaned rows found in the `two_factor` table and may fix this problem if they are the one with the invalid content", err)
 	}
 	return data, nil
 }

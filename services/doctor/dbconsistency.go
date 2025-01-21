@@ -246,6 +246,9 @@ func checkDBConsistency(ctx context.Context, logger log.Logger, autofix bool) er
 		// find authorization tokens without existing user
 		genericOrphanCheck("Authorization token without existing User",
 			"forgejo_auth_token", "user", "forgejo_auth_token.uid=`user`.id"),
+		// find two_factor without existing user
+		genericOrphanCheck("Orphaned TwoFactor without existing User",
+			"two_factor", "user", "`two_factor`.uid=`user`.id"),
 	)
 
 	for _, c := range consistencyChecks {
