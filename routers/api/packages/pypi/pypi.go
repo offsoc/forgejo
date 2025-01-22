@@ -121,7 +121,7 @@ func UploadPackageFile(ctx *context.Context) {
 	}
 	defer buf.Close()
 
-	_, _, hashSHA256, _ := buf.Sums()
+	_, _, hashSHA256, _, _ := buf.Sums()
 
 	if !strings.EqualFold(ctx.Req.FormValue("sha256_digest"), hex.EncodeToString(hashSHA256)) {
 		apiError(ctx, http.StatusBadRequest, "hash mismatch")

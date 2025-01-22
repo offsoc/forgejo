@@ -187,6 +187,8 @@ func GetPackageDescriptor(ctx context.Context, pv *PackageVersion) (*PackageDesc
 		metadata = &pypi.Metadata{}
 	case TypeRpm:
 		metadata = &rpm.VersionMetadata{}
+	case TypeAlt:
+		metadata = &rpm.VersionMetadata{}
 	case TypeRubyGems:
 		metadata = &rubygems.Metadata{}
 	case TypeSwift:

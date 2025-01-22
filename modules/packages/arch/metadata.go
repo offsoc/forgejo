@@ -94,7 +94,7 @@ type FileMetadata struct {
 
 // ParsePackage Function that receives arch package archive data and returns it's metadata.
 func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
-	md5, _, sha256, _ := r.Sums()
+	md5, _, sha256, _, _ := r.Sums()
 	_, err := r.Seek(0, io.SeekStart)
 	if err != nil {
 		return nil, err
