@@ -2775,6 +2775,25 @@ tbody.commit-list {
   padding: 1.5rem;
 }
 
+.migrate-entry {
+  transition: all 0.1s ease-in-out;
+  box-shadow: none !important;
+  border: 1px solid var(--color-secondary);
+  border-radius: 25px;
+  color: var(--color-text) !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
+.migrate-entry:hover {
+  transform: scale(105%);
+  box-shadow: 0 0.5rem 1rem var(--color-shadow) !important;
+}
+
+.migrate-entry .description {
+  text-wrap: balance;
+}
+
 @media (max-width: 1500px) {
   .migrate-entries {
     grid-template-columns: repeat(3, 1fr);
@@ -2798,25 +2817,6 @@ tbody.commit-list {
     padding: 1rem;
     height: 128px;
   }
-}
-
-.migrate-entry {
-  transition: all 0.1s ease-in-out;
-  box-shadow: none !important;
-  border: 1px solid var(--color-secondary);
-  border-radius: 25px;
-  color: var(--color-text) !important;
-  width: auto !important;
-  margin: 0 !important;
-}
-
-.migrate-entry:hover {
-  transform: scale(105%);
-  box-shadow: 0 0.5rem 1rem var(--color-shadow) !important;
-}
-
-.migrate-entry .description {
-  text-wrap: balance;
 }
 
 .commits-table .commits-table-right form {
