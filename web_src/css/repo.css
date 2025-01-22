@@ -2830,8 +2830,10 @@ tbody.commit-list {
     flex-direction: row;
   }
   .migrate-entry svg {
-    padding: 1rem;
-    height: 128px;
+    padding: 1.5rem;
+    height: 100%;
+    width: 100%;
+    max-width: 128px;
   }
 }
 
