@@ -2776,6 +2776,8 @@ tbody.commit-list {
 }
 
 .migrate-entry {
+  display: flex;
+  flex-direction: column;
   transition: all 0.1s ease-in-out;
   box-shadow: none !important;
   border: 1px solid var(--color-secondary);
@@ -2788,6 +2790,10 @@ tbody.commit-list {
 .migrate-entry:hover {
   transform: scale(105%);
   box-shadow: 0 0.5rem 1rem var(--color-shadow) !important;
+}
+
+.migrate-entry .content {
+  padding: 1em;
 }
 
 .migrate-entry .description {
@@ -2810,7 +2816,7 @@ tbody.commit-list {
   .migrate-entries {
     grid-template-columns: repeat(1, 1fr);
   }
-  .ui.cards > .card.migrate-entry {
+  .migrate-entry {
     flex-direction: row;
   }
   .migrate-entry svg {
