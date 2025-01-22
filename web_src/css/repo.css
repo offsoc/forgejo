@@ -2781,8 +2781,8 @@ tbody.commit-list {
   margin: 0 !important;
   width: auto !important;
   color: var(--color-text) !important;
-  background: var(--color-card);
-  border: 1px solid var(--color-secondary);
+  background: var(--color-box-body);
+  border: 1px solid var(--color-input-card-border);
   border-radius: 25px;
   box-shadow: none !important;
   transition: all 0.1s ease-in-out;
@@ -2791,6 +2791,13 @@ tbody.commit-list {
 .migrate-entry:hover {
   transform: scale(105%);
   box-shadow: 0 0.5rem 1rem var(--color-shadow) !important;
+}
+
+.migrate-entry .logo {
+  background: var(--color-card);
+  border-radius: 25px;
+  width: 100%;
+  text-align: center;
 }
 
 .migrate-entry .header {
