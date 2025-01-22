@@ -2783,6 +2783,7 @@ tbody.commit-list {
   border: 1px solid var(--color-secondary);
   border-radius: 25px;
   color: var(--color-text) !important;
+  background: var(--color-card);
   width: auto !important;
   margin: 0 !important;
 }
@@ -2792,11 +2793,20 @@ tbody.commit-list {
   box-shadow: 0 0.5rem 1rem var(--color-shadow) !important;
 }
 
+.migrate-entry .header {
+  font-weight: var(--font-weight-medium);
+  font-size: 1.28571429em;
+  margin-top: -.21425em;
+  line-height: 1.28571429;
+}
+
 .migrate-entry .content {
+  margin-top: .5em;
   padding: 1em;
 }
 
 .migrate-entry .description {
+  margin-top: .5em;
   text-wrap: balance;
 }
 
