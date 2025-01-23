@@ -11,15 +11,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"regexp"
-	"slices"
-	"strconv"
-	"strings"
+	"path"
 	"time"
 
 	packages_model "code.gitea.io/gitea/models/packages"
 	alt_model "code.gitea.io/gitea/models/packages/alt"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/json"
 	packages_module "code.gitea.io/gitea/modules/packages"
 	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
@@ -196,444 +194,482 @@ type RPMHdrIndex struct {
 	Count  uint32
 }
 
+type indexWithData struct {
+	index *RPMHdrIndex
+	data  []any
+}
+
+type headerWithIndexes struct {
+	header  *RPMHeader
+	indexes []indexWithData
+}
+
 // https://refspecs.linuxbase.org/LSB_4.0.0/LSB-Core-generic/LSB-Core-generic/pkgformat.html
-func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, pfs []*packages_model.PackageFile, c packageCache, group string) (map[string][]any, error) {
-	architectures := []string{}
+func buildPackageLists(ctx context.Context, pv *packages_model.PackageVersion, pfs []*packages_model.PackageFile, c packageCache, group string) (map[string][]*repoData, error) {
+	packagesByArch := map[string][]*packages_model.PackageFile{}
 
 	for _, pf := range pfs {
 		pd := c[pf]
 
-		if !slices.Contains(architectures, pd.FileMetadata.Architecture) {
-			architectures = append(architectures, pd.FileMetadata.Architecture)
+		packageArch := pd.FileMetadata.Architecture
+		if packages, ok := packagesByArch[packageArch]; ok {
+			packagesByArch[packageArch] = append(packages, pf)
+		} else {
+			packagesByArch[packageArch] = []*packages_model.PackageFile{pf}
 		}
 	}
 
-	repoDataListByArch := make(map[string][]any)
-	repoDataList := []any{}
-	orderedHeaders := []*RPMHeader{}
+	repoDataListByArch := make(map[string][]*repoData)
 
-	for i := range architectures {
-		headersWithIndexes := make(map[*RPMHeader]map[*RPMHdrIndex][]any)
-		headersWithPtrs := make(map[*RPMHeader][]*RPMHdrIndex)
-		indexPtrs := []*RPMHdrIndex{}
-		indexes := make(map[*RPMHdrIndex][]any)
+	for architecture, pfs := range packagesByArch {
+		repoDataList := []*repoData{}
+		orderedHeaders := []headerWithIndexes{}
 
 		for _, pf := range pfs {
 			pd := c[pf]
 
-			if pd.FileMetadata.Architecture == architectures[i] {
-				var requireNames []any
-				var requireVersions []any
-				var requireFlags []any
-				requireNamesSize := 0
-				requireVersionsSize := 0
-				requireFlagsSize := 0
+			var requireNames []any
+			var requireVersions []any
+			var requireFlags []any
+			requireNamesSize := 0
+			requireVersionsSize := 0
+			requireFlagsSize := 0
 
-				for _, entry := range pd.FileMetadata.Requires {
-					if entry != nil {
-						requireNames = append(requireNames, entry.Name)
-						requireVersions = append(requireVersions, entry.Version)
-						requireFlags = append(requireFlags, entry.AltFlags)
-						requireNamesSize += len(entry.Name) + 1
-						requireVersionsSize += len(entry.Version) + 1
-						requireFlagsSize += 4
-					}
+			for _, entry := range pd.FileMetadata.Requires {
+				if entry != nil {
+					requireNames = append(requireNames, entry.Name)
+					requireVersions = append(requireVersions, entry.Version)
+					requireFlags = append(requireFlags, entry.AltFlags)
+					requireNamesSize += len(entry.Name) + 1
+					requireVersionsSize += len(entry.Version) + 1
+					requireFlagsSize += 4
 				}
-
-				var conflictNames []any
-				var conflictVersions []any
-				var conflictFlags []any
-				conflictNamesSize := 0
-				conflictVersionsSize := 0
-				conflictFlagsSize := 0
-
-				for _, entry := range pd.FileMetadata.Conflicts {
-					if entry != nil {
-						conflictNames = append(conflictNames, entry.Name)
-						conflictVersions = append(conflictVersions, entry.Version)
-						conflictFlags = append(conflictFlags, entry.AltFlags)
-						conflictNamesSize += len(entry.Name) + 1
-						conflictVersionsSize += len(entry.Version) + 1
-						conflictFlagsSize += 4
-					}
-				}
-
-				var baseNames []any
-				var dirNames []any
-				baseNamesSize := 0
-				dirNamesSize := 0
-
-				for _, entry := range pd.FileMetadata.Files {
-					if entry != nil {
-						re := regexp.MustCompile(`(.*?/)([^/]*)$`)
-						matches := re.FindStringSubmatch(entry.Path)
-						if len(matches) == 3 {
-							baseNames = append(baseNames, matches[2])
-							dirNames = append(dirNames, matches[1])
-							baseNamesSize += len(matches[2]) + 1
-							dirNamesSize += len(matches[1]) + 1
-						}
-					}
-				}
-
-				var provideNames []any
-				var provideVersions []any
-				var provideFlags []any
-				provideNamesSize := 0
-				provideVersionsSize := 0
-				provideFlagsSize := 0
-
-				for _, entry := range pd.FileMetadata.Provides {
-					if entry != nil {
-						provideNames = append(provideNames, entry.Name)
-						provideVersions = append(provideVersions, entry.Version)
-						provideFlags = append(provideFlags, entry.AltFlags)
-						provideNamesSize += len(entry.Name) + 1
-						provideVersionsSize += len(entry.Version) + 1
-						provideFlagsSize += 4
-					}
-				}
-
-				var obsoleteNames []any
-				var obsoleteVersions []any
-				var obsoleteFlags []any
-				obsoleteNamesSize := 0
-				obsoleteVersionsSize := 0
-				obsoleteFlagsSize := 0
-
-				for _, entry := range pd.FileMetadata.Obsoletes {
-					if entry != nil {
-						obsoleteNames = append(obsoleteNames, entry.Name)
-						obsoleteVersions = append(obsoleteVersions, entry.Version)
-						obsoleteFlags = append(obsoleteFlags, entry.AltFlags)
-						obsoleteNamesSize += len(entry.Name) + 1
-						obsoleteVersionsSize += len(entry.Version) + 1
-						obsoleteFlagsSize += 4
-					}
-				}
-
-				var changeLogTimes []any
-				var changeLogNames []any
-				var changeLogTexts []any
-				changeLogTimesSize := 0
-				changeLogNamesSize := 0
-				changeLogTextsSize := 0
-
-				for _, entry := range pd.FileMetadata.Changelogs {
-					if entry != nil {
-						changeLogNames = append(changeLogNames, entry.Author)
-						changeLogTexts = append(changeLogTexts, entry.Text)
-						changeLogTimes = append(changeLogTimes, uint32(int64(entry.Date)))
-						changeLogNamesSize += len(entry.Author) + 1
-						changeLogTextsSize += len(entry.Text) + 1
-						changeLogTimesSize += 4
-					}
-				}
-
-				/*Header*/
-				hdr := &RPMHeader{
-					Magic:    [4]byte{0x8E, 0xAD, 0xE8, 0x01},
-					Reserved: [4]byte{0, 0, 0, 0},
-					NIndex:   binary.BigEndian.Uint32([]byte{0, 0, 0, 0}),
-					HSize:    binary.BigEndian.Uint32([]byte{0, 0, 0, 0}),
-				}
-				orderedHeaders = append(orderedHeaders, hdr)
-
-				/*Tags: */
-
-				nameInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 232}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: 0,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &nameInd)
-				indexes[&nameInd] = append(indexes[&nameInd], pd.Package.Name)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.Package.Name) + 1)
-
-				// Индекс для версии пакета
-				versionInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 233}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &versionInd)
-				indexes[&versionInd] = append(indexes[&versionInd], pd.FileMetadata.Version)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.FileMetadata.Version) + 1)
-
-				summaryInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 236}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 9}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &summaryInd)
-				indexes[&summaryInd] = append(indexes[&summaryInd], pd.VersionMetadata.Summary)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.VersionMetadata.Summary) + 1)
-
-				descriptionInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 237}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 9}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &descriptionInd)
-				indexes[&descriptionInd] = append(indexes[&descriptionInd], pd.VersionMetadata.Description)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.VersionMetadata.Description) + 1)
-
-				releaseInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 234}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &releaseInd)
-				indexes[&releaseInd] = append(indexes[&releaseInd], pd.FileMetadata.Release)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.FileMetadata.Release) + 1)
-
-				alignPadding(hdr, indexes, &releaseInd)
-
-				sizeInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 241}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &sizeInd)
-				indexes[&sizeInd] = append(indexes[&sizeInd], int32(pd.FileMetadata.InstalledSize))
-				hdr.NIndex++
-				hdr.HSize += 4
-
-				buildTimeInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 238}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &buildTimeInd)
-				indexes[&buildTimeInd] = append(indexes[&buildTimeInd], int32(pd.FileMetadata.BuildTime))
-				hdr.NIndex++
-				hdr.HSize += 4
-
-				licenseInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 246}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &licenseInd)
-				indexes[&licenseInd] = append(indexes[&licenseInd], pd.VersionMetadata.License)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.VersionMetadata.License) + 1)
-
-				packagerInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 247}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &packagerInd)
-				indexes[&packagerInd] = append(indexes[&packagerInd], pd.FileMetadata.Packager)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.FileMetadata.Packager) + 1)
-
-				groupInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 248}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &groupInd)
-				indexes[&groupInd] = append(indexes[&groupInd], pd.FileMetadata.Group)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.FileMetadata.Group) + 1)
-
-				urlInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 252}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &urlInd)
-				indexes[&urlInd] = append(indexes[&urlInd], pd.VersionMetadata.ProjectURL)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.VersionMetadata.ProjectURL) + 1)
-
-				if len(changeLogNames) != 0 && len(changeLogTexts) != 0 && len(changeLogTimes) != 0 {
-					alignPadding(hdr, indexes, &urlInd)
-
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x38}, []byte{0, 0, 0, 4}, changeLogTimes, changeLogTimesSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x39}, []byte{0, 0, 0, 8}, changeLogNames, changeLogNamesSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x3A}, []byte{0, 0, 0, 8}, changeLogTexts, changeLogTextsSize)
-				}
-
-				archInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 254}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &archInd)
-				indexes[&archInd] = append(indexes[&archInd], pd.FileMetadata.Architecture)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.FileMetadata.Architecture) + 1)
-
-				if len(provideNames) != 0 && len(provideVersions) != 0 && len(provideFlags) != 0 {
-					alignPadding(hdr, indexes, &archInd)
-
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x58}, []byte{0, 0, 0, 4}, provideFlags, provideFlagsSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x17}, []byte{0, 0, 0, 8}, provideNames, provideNamesSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x59}, []byte{0, 0, 0, 8}, provideVersions, provideVersionsSize)
-				}
-
-				sourceRpmInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x14}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &sourceRpmInd)
-				indexes[&sourceRpmInd] = append(indexes[&sourceRpmInd], pd.FileMetadata.SourceRpm)
-				hdr.NIndex++
-				hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(len(pd.FileMetadata.SourceRpm) + 1)})
-
-				if len(requireNames) != 0 && len(requireVersions) != 0 && len(requireFlags) != 0 {
-					alignPadding(hdr, indexes, &sourceRpmInd)
-
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x18}, []byte{0, 0, 0, 4}, requireFlags, requireFlagsSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0, 0, 4, 25}, []byte{0, 0, 0, 8}, requireNames, requireNamesSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x1A}, []byte{0, 0, 0, 8}, requireVersions, requireVersionsSize)
-				}
-
-				if len(baseNames) != 0 {
-					baseNamesInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x5D}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: hdr.HSize,
-						Count:  uint32(len(baseNames)),
-					}
-					indexPtrs = append(indexPtrs, &baseNamesInd)
-					indexes[&baseNamesInd] = baseNames
-					hdr.NIndex++
-					hdr.HSize += uint32(baseNamesSize)
-				}
-
-				if len(dirNames) != 0 {
-					dirnamesInd := RPMHdrIndex{
-						Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x5E}),
-						Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 8}),
-						Offset: hdr.HSize,
-						Count:  uint32(len(dirNames)),
-					}
-					indexPtrs = append(indexPtrs, &dirnamesInd)
-					indexes[&dirnamesInd] = dirNames
-					hdr.NIndex++
-					hdr.HSize += uint32(dirNamesSize)
-				}
-
-				filenameInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x40}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &filenameInd)
-				indexes[&filenameInd] = append(indexes[&filenameInd], pf.Name)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pf.Name) + 1)
-
-				alignPadding(hdr, indexes, &filenameInd)
-
-				filesizeInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x41}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 4}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &filesizeInd)
-				indexes[&filesizeInd] = append(indexes[&filesizeInd], int32(pd.Blob.Size))
-				hdr.NIndex++
-				hdr.HSize += 4
-
-				md5Ind := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x45}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &md5Ind)
-				indexes[&md5Ind] = append(indexes[&md5Ind], pd.Blob.HashMD5)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.Blob.HashMD5) + 1)
-
-				blake2bInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x49}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &blake2bInd)
-				indexes[&blake2bInd] = append(indexes[&blake2bInd], pd.Blob.HashBlake2b)
-				hdr.NIndex++
-				hdr.HSize += uint32(len(pd.Blob.HashBlake2b) + 1)
-
-				if len(conflictNames) != 0 && len(conflictVersions) != 0 && len(conflictFlags) != 0 {
-					alignPadding(hdr, indexes, &blake2bInd)
-
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x1D}, []byte{0, 0, 0, 4}, conflictFlags, conflictFlagsSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x1E}, []byte{0, 0, 0, 8}, conflictNames, conflictNamesSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x1F}, []byte{0, 0, 0, 8}, conflictVersions, conflictVersionsSize)
-				}
-
-				directoryInd := RPMHdrIndex{
-					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x4A}),
-					Type:   binary.BigEndian.Uint32([]byte{0, 0, 0, 6}),
-					Offset: hdr.HSize,
-					Count:  1,
-				}
-				indexPtrs = append(indexPtrs, &directoryInd)
-				indexes[&directoryInd] = append(indexes[&directoryInd], "RPMS.classic")
-				hdr.NIndex++
-				hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(len("RPMS.classic") + 1)})
-
-				if len(obsoleteNames) != 0 && len(obsoleteVersions) != 0 && len(obsoleteFlags) != 0 {
-					alignPadding(hdr, indexes, &directoryInd)
-
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x5A}, []byte{0, 0, 0, 4}, obsoleteFlags, obsoleteFlagsSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x42}, []byte{0, 0, 0, 8}, obsoleteNames, obsoleteNamesSize)
-					addRPMHdrIndex(hdr, &indexPtrs, indexes, []byte{0x00, 0x00, 0x04, 0x5B}, []byte{0, 0, 0, 8}, obsoleteVersions, obsoleteVersionsSize)
-				}
-
-				headersWithIndexes[hdr] = indexes
-				headersWithPtrs[hdr] = indexPtrs
-
-				indexPtrs = []*RPMHdrIndex{}
-				indexes = make(map[*RPMHdrIndex][]any)
 			}
+
+			var conflictNames []any
+			var conflictVersions []any
+			var conflictFlags []any
+			conflictNamesSize := 0
+			conflictVersionsSize := 0
+			conflictFlagsSize := 0
+
+			for _, entry := range pd.FileMetadata.Conflicts {
+				if entry != nil {
+					conflictNames = append(conflictNames, entry.Name)
+					conflictVersions = append(conflictVersions, entry.Version)
+					conflictFlags = append(conflictFlags, entry.AltFlags)
+					conflictNamesSize += len(entry.Name) + 1
+					conflictVersionsSize += len(entry.Version) + 1
+					conflictFlagsSize += 4
+				}
+			}
+
+			var baseNames []any
+			var dirNames []any
+			baseNamesSize := 0
+			dirNamesSize := 0
+
+			for _, entry := range pd.FileMetadata.Files {
+				if entry != nil {
+					dir, file := path.Split(entry.Path)
+
+					baseNames = append(baseNames, file)
+					dirNames = append(dirNames, dir)
+					baseNamesSize += len(file) + 1
+					dirNamesSize += len(dir) + 1
+				}
+			}
+
+			var provideNames []any
+			var provideVersions []any
+			var provideFlags []any
+			provideNamesSize := 0
+			provideVersionsSize := 0
+			provideFlagsSize := 0
+
+			for _, entry := range pd.FileMetadata.Provides {
+				if entry != nil {
+					provideNames = append(provideNames, entry.Name)
+					provideVersions = append(provideVersions, entry.Version)
+					provideFlags = append(provideFlags, entry.AltFlags)
+					provideNamesSize += len(entry.Name) + 1
+					provideVersionsSize += len(entry.Version) + 1
+					provideFlagsSize += 4
+				}
+			}
+
+			var obsoleteNames []any
+			var obsoleteVersions []any
+			var obsoleteFlags []any
+			obsoleteNamesSize := 0
+			obsoleteVersionsSize := 0
+			obsoleteFlagsSize := 0
+
+			for _, entry := range pd.FileMetadata.Obsoletes {
+				if entry != nil {
+					obsoleteNames = append(obsoleteNames, entry.Name)
+					obsoleteVersions = append(obsoleteVersions, entry.Version)
+					obsoleteFlags = append(obsoleteFlags, entry.AltFlags)
+					obsoleteNamesSize += len(entry.Name) + 1
+					obsoleteVersionsSize += len(entry.Version) + 1
+					obsoleteFlagsSize += 4
+				}
+			}
+
+			var changeLogTimes []any
+			var changeLogNames []any
+			var changeLogTexts []any
+			changeLogTimesSize := 0
+			changeLogNamesSize := 0
+			changeLogTextsSize := 0
+
+			for _, entry := range pd.FileMetadata.Changelogs {
+				if entry != nil {
+					changeLogNames = append(changeLogNames, entry.Author)
+					changeLogTexts = append(changeLogTexts, entry.Text)
+					changeLogTimes = append(changeLogTimes, uint32(int64(entry.Date)))
+					changeLogNamesSize += len(entry.Author) + 1
+					changeLogTextsSize += len(entry.Text) + 1
+					changeLogTimesSize += 4
+				}
+			}
+
+			/*Header*/
+			hdr := &RPMHeader{
+				Magic:    [4]byte{0x8E, 0xAD, 0xE8, 0x01},
+				Reserved: [4]byte{0, 0, 0, 0},
+				NIndex:   binary.BigEndian.Uint32([]byte{0, 0, 0, 0}),
+				HSize:    binary.BigEndian.Uint32([]byte{0, 0, 0, 0}),
+			}
+			orderedHeader := headerWithIndexes{hdr, []indexWithData{}}
+
+			/*Tags: */
+			nameInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 232}),
+				Type:   6,
+				Offset: 0,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &nameInd,
+				data:  []any{pd.Package.Name},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.Package.Name) + 1)
+
+			// Индекс для версии пакета
+			versionInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 233}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &versionInd,
+				data:  []any{pd.FileMetadata.Version},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.FileMetadata.Version) + 1)
+
+			summaryInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 236}),
+				Type:   9,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &summaryInd,
+				data:  []any{pd.VersionMetadata.Summary},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.VersionMetadata.Summary) + 1)
+
+			descriptionInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 237}),
+				Type:   9,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &descriptionInd,
+				data:  []any{pd.VersionMetadata.Description},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.VersionMetadata.Description) + 1)
+
+			releaseInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 234}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &releaseInd,
+				data:  []any{pd.FileMetadata.Release},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.FileMetadata.Release) + 1)
+
+			alignPadding(hdr, orderedHeader.indexes)
+
+			sizeInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 241}),
+				Type:   4,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &sizeInd,
+				data:  []any{int32(pd.FileMetadata.InstalledSize)},
+			})
+			hdr.NIndex++
+			hdr.HSize += 4
+
+			buildTimeInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 238}),
+				Type:   4,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &buildTimeInd,
+				data:  []any{int32(pd.FileMetadata.BuildTime)},
+			})
+			hdr.NIndex++
+			hdr.HSize += 4
+
+			licenseInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 246}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &licenseInd,
+				data:  []any{pd.VersionMetadata.License},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.VersionMetadata.License) + 1)
+
+			packagerInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 247}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &packagerInd,
+				data:  []any{pd.FileMetadata.Packager},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.FileMetadata.Packager) + 1)
+
+			groupInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 248}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &groupInd,
+				data:  []any{pd.FileMetadata.Group},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.FileMetadata.Group) + 1)
+
+			urlInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 252}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &urlInd,
+				data:  []any{pd.VersionMetadata.ProjectURL},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.VersionMetadata.ProjectURL) + 1)
+
+			if len(changeLogNames) != 0 && len(changeLogTexts) != 0 && len(changeLogTimes) != 0 {
+				alignPadding(hdr, orderedHeader.indexes)
+
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x38}, 4, changeLogTimes, changeLogTimesSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x39}, 8, changeLogNames, changeLogNamesSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x3A}, 8, changeLogTexts, changeLogTextsSize)
+			}
+
+			archInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0, 0, 3, 254}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &archInd,
+				data:  []any{pd.FileMetadata.Architecture},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.FileMetadata.Architecture) + 1)
+
+			if len(provideNames) != 0 && len(provideVersions) != 0 && len(provideFlags) != 0 {
+				alignPadding(hdr, orderedHeader.indexes)
+
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x58}, 4, provideFlags, provideFlagsSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x17}, 8, provideNames, provideNamesSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x59}, 8, provideVersions, provideVersionsSize)
+			}
+
+			sourceRpmInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x14}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &sourceRpmInd,
+				data:  []any{pd.FileMetadata.SourceRpm},
+			})
+			hdr.NIndex++
+			hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(len(pd.FileMetadata.SourceRpm) + 1)})
+
+			if len(requireNames) != 0 && len(requireVersions) != 0 && len(requireFlags) != 0 {
+				alignPadding(hdr, orderedHeader.indexes)
+
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x18}, 4, requireFlags, requireFlagsSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0, 0, 4, 25}, 8, requireNames, requireNamesSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x1A}, 8, requireVersions, requireVersionsSize)
+			}
+
+			if len(baseNames) != 0 {
+				baseNamesInd := RPMHdrIndex{
+					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x5D}),
+					Type:   8,
+					Offset: hdr.HSize,
+					Count:  uint32(len(baseNames)),
+				}
+				orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+					index: &baseNamesInd,
+					data:  baseNames,
+				})
+				hdr.NIndex++
+				hdr.HSize += uint32(baseNamesSize)
+			}
+
+			if len(dirNames) != 0 {
+				dirnamesInd := RPMHdrIndex{
+					Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x00, 0x04, 0x5E}),
+					Type:   8,
+					Offset: hdr.HSize,
+					Count:  uint32(len(dirNames)),
+				}
+				orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+					index: &dirnamesInd,
+					data:  dirNames,
+				})
+				hdr.NIndex++
+				hdr.HSize += uint32(dirNamesSize)
+			}
+
+			filenameInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x40}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &filenameInd,
+				data:  []any{pf.Name},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pf.Name) + 1)
+
+			alignPadding(hdr, orderedHeader.indexes)
+
+			filesizeInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x41}),
+				Type:   4,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &filesizeInd,
+				data:  []any{int32(pd.Blob.Size)},
+			})
+			hdr.NIndex++
+			hdr.HSize += 4
+
+			md5Ind := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x45}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &md5Ind,
+				data:  []any{pd.Blob.HashMD5},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.Blob.HashMD5) + 1)
+
+			blake2bInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x49}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &blake2bInd,
+				data:  []any{pd.Blob.HashBlake2b},
+			})
+			hdr.NIndex++
+			hdr.HSize += uint32(len(pd.Blob.HashBlake2b) + 1)
+
+			if len(conflictNames) != 0 && len(conflictVersions) != 0 && len(conflictFlags) != 0 {
+				alignPadding(hdr, orderedHeader.indexes)
+
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x1D}, 4, conflictFlags, conflictFlagsSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x1E}, 8, conflictNames, conflictNamesSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x1F}, 8, conflictVersions, conflictVersionsSize)
+			}
+
+			directoryInd := RPMHdrIndex{
+				Tag:    binary.BigEndian.Uint32([]byte{0x00, 0x0F, 0x42, 0x4A}),
+				Type:   6,
+				Offset: hdr.HSize,
+				Count:  1,
+			}
+			orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+				index: &directoryInd,
+				data:  []any{"RPMS.classic"},
+			})
+			hdr.NIndex++
+			hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(len("RPMS.classic") + 1)})
+
+			if len(obsoleteNames) != 0 && len(obsoleteVersions) != 0 && len(obsoleteFlags) != 0 {
+				alignPadding(hdr, orderedHeader.indexes)
+
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x5A}, 4, obsoleteFlags, obsoleteFlagsSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x42}, 8, obsoleteNames, obsoleteNamesSize)
+				addRPMHdrIndex(&orderedHeader, []byte{0x00, 0x00, 0x04, 0x5B}, 8, obsoleteVersions, obsoleteVersionsSize)
+			}
+
+			orderedHeaders = append(orderedHeaders, orderedHeader)
 		}
 
 		files := []string{"pkglist.classic", "pkglist.classic.xz"}
 		for file := range files {
-			fileInfo, err := addPkglistAsFileToRepo(ctx, pv, files[file], headersWithIndexes, headersWithPtrs, orderedHeaders, group, architectures[i])
+			fileInfo, err := addPkglistAsFileToRepo(ctx, pv, files[file], orderedHeaders, group, architecture)
 			if err != nil {
 				return nil, err
 			}
 			repoDataList = append(repoDataList, fileInfo)
-			repoDataListByArch[architectures[i]] = repoDataList
 		}
-		repoDataList = []any{}
-		orderedHeaders = []*RPMHeader{}
+		repoDataListByArch[architecture] = repoDataList
 	}
 	return repoDataListByArch, nil
 }
 
-func alignPadding(hdr *RPMHeader, indexes map[*RPMHdrIndex][]any, lastIndex *RPMHdrIndex) {
+func alignPadding(hdr *RPMHeader, indexes []indexWithData) {
 	/* Align to 4-bytes to add a 4-byte element. */
 	padding := (4 - (hdr.HSize % 4)) % 4
 	if padding == 4 {
@@ -641,86 +677,92 @@ func alignPadding(hdr *RPMHeader, indexes map[*RPMHdrIndex][]any, lastIndex *RPM
 	}
 	hdr.HSize += binary.BigEndian.Uint32([]byte{0, 0, 0, uint8(padding)})
 
+	lastIndex := len(indexes) - 1
 	for i := uint32(0); i < padding; i++ {
-		for _, elem := range indexes[lastIndex] {
+		for _, elem := range indexes[lastIndex].data {
 			if str, ok := elem.(string); ok {
-				indexes[lastIndex][len(indexes[lastIndex])-1] = str + "\x00"
+				indexes[lastIndex].data[len(indexes[lastIndex].data)-1] = str + "\x00"
 			}
 		}
 	}
 }
 
-func addRPMHdrIndex(hdr *RPMHeader, indexPtrs *[]*RPMHdrIndex, indexes map[*RPMHdrIndex][]any, tag, typeByte []byte, data []any, dataSize int) {
+func addRPMHdrIndex(orderedHeader *headerWithIndexes, tag []byte, typeVal uint32, data []any, dataSize int) {
 	index := RPMHdrIndex{
 		Tag:    binary.BigEndian.Uint32(tag),
-		Type:   binary.BigEndian.Uint32(typeByte),
-		Offset: hdr.HSize,
+		Type:   typeVal,
+		Offset: orderedHeader.header.HSize,
 		Count:  uint32(len(data)),
 	}
-	*indexPtrs = append(*indexPtrs, &index)
-	indexes[&index] = data
-	hdr.NIndex++
-	hdr.HSize += uint32(dataSize)
+	orderedHeader.indexes = append(orderedHeader.indexes, indexWithData{
+		index: &index,
+		data:  data,
+	})
+	orderedHeader.header.NIndex++
+	orderedHeader.header.HSize += uint32(dataSize)
 }
 
 // https://www.altlinux.org/APT_в_ALT_Linux/CreateRepository
-func buildRelease(ctx context.Context, pv *packages_model.PackageVersion, pfs []*packages_model.PackageFile, c packageCache, group string, pkglist map[string][]any) error {
-	var buf bytes.Buffer
-
-	architectures := []string{}
+func buildRelease(ctx context.Context, pv *packages_model.PackageVersion, pfs []*packages_model.PackageFile, c packageCache, group string, pkglist map[string][]*repoData) error {
+	architectures := make(container.Set[string])
 
 	for _, pf := range pfs {
 		pd := c[pf]
-		if !slices.Contains(architectures, pd.FileMetadata.Architecture) {
-			architectures = append(architectures, pd.FileMetadata.Architecture)
-		}
+		architectures.Add(pd.FileMetadata.Architecture)
 	}
 
-	for i := range architectures {
-		archive := "Alt Linux Team"
-		component := "classic"
-		version := strconv.FormatInt(time.Now().Unix(), 10)
-		architectures := architectures[i]
-		origin := "Alt Linux Team"
+	for architecture := range architectures {
+		version := time.Now().Unix()
 		label := setting.AppName
-		notautomatic := "false"
-		data := fmt.Sprintf("Archive: %s\nComponent: %s\nVersion: %s\nOrigin: %s\nLabel: %s\nArchitecture: %s\nNotAutomatic: %s",
-			archive, component, version, origin, label, architectures, notautomatic)
-		buf.WriteString(data + "\n")
-		fileInfo, err := addReleaseAsFileToRepo(ctx, pv, "release.classic", buf.String(), group, architectures)
+		data := fmt.Sprintf(`Archive: Alt Linux Team
+Component: classic
+Version: %d
+Origin: Alt Linux Team
+Label: %s
+Architecture: %s
+NotAutomatic: false
+`,
+			version, label, architecture)
+		fileInfo, err := addReleaseAsFileToRepo(ctx, pv, "release.classic", data, group, architecture)
 		if err != nil {
 			return err
 		}
-		buf.Reset()
 
-		origin = setting.AppName
-		suite := "Sisyphus"
-		codename := strconv.FormatInt(time.Now().Unix(), 10)
+		origin := setting.AppName
+		codename := time.Now().Unix()
 		date := time.Now().UTC().Format(time.RFC1123)
 
 		var md5Sum string
 		var blake2b string
 
-		for _, pkglistByArch := range pkglist[architectures] {
-			md5Sum += fmt.Sprintf(" %s %s %s\n", pkglistByArch.([]string)[2], pkglistByArch.([]string)[4], "base/"+pkglistByArch.([]string)[0])
-			blake2b += fmt.Sprintf(" %s %s %s\n", pkglistByArch.([]string)[3], pkglistByArch.([]string)[4], "base/"+pkglistByArch.([]string)[0])
+		for _, pkglistByArch := range pkglist[architecture] {
+			md5Sum += fmt.Sprintf(" %s %d %s\n", pkglistByArch.MD5Checksum.Value, pkglistByArch.Size, "base/"+pkglistByArch.Type)
+			blake2b += fmt.Sprintf(" %s %d %s\n", pkglistByArch.Blake2bHash.Value, pkglistByArch.Size, "base/"+pkglistByArch.Type)
 		}
-		md5Sum += fmt.Sprintf(" %s %s %s\n", fileInfo[2], fileInfo[4], "base/"+fileInfo[0])
-		blake2b += fmt.Sprintf(" %s %s %s\n", fileInfo[3], fileInfo[4], "base/"+fileInfo[0])
+		md5Sum += fmt.Sprintf(" %s %d %s\n", fileInfo.MD5Checksum.Value, fileInfo.Size, "base/"+fileInfo.Type)
+		blake2b += fmt.Sprintf(" %s %d %s\n", fileInfo.Blake2bHash.Value, fileInfo.Size, "base/"+fileInfo.Type)
 
-		data = fmt.Sprintf("Origin: %s\nLabel: %s\nSuite: %s\nCodename: %s\nDate: %s\nArchitectures: %s\nMD5Sum:\n%sBLAKE2b:\n%s\n",
-			origin, label, suite, codename, date, architectures, md5Sum, blake2b)
-		buf.WriteString(data + "\n")
-		_, err = addReleaseAsFileToRepo(ctx, pv, "release", buf.String(), group, architectures)
+		data = fmt.Sprintf(`Origin: %s
+Label: %s
+Suite: Sisyphus
+Codename: %d
+Date: %s
+Architectures: %s
+MD5Sum:
+%sBLAKE2b:
+%s
+
+`,
+			origin, label, codename, date, architecture, md5Sum, blake2b)
+		_, err = addReleaseAsFileToRepo(ctx, pv, "release", data, group, architecture)
 		if err != nil {
 			return err
 		}
-		buf.Reset()
 	}
 	return nil
 }
 
-func addReleaseAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersion, filename, obj, group, arch string) ([]string, error) {
+func addReleaseAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersion, filename, obj, group, arch string) (*repoData, error) {
 	content, _ := packages_module.NewHashedBuffer()
 	defer content.Close()
 
@@ -755,7 +797,7 @@ func addReleaseAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersi
 		group = "alt"
 	}
 
-	repoData := &repoData{
+	return &repoData{
 		Type: filename,
 		Checksum: repoChecksum{
 			Type:  "sha256",
@@ -777,20 +819,10 @@ func addReleaseAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersi
 			Href: group + ".repo/" + arch + "/base/" + filename,
 		},
 		Size: content.Size(),
-		/* Unused values:
-		Timestamp: time.Now().Unix(),
-		OpenSize:  content.Size(), */
-	}
-
-	data := []string{
-		repoData.Type, repoData.Checksum.Value,
-		repoData.MD5Checksum.Value, repoData.Blake2bHash.Value, strconv.Itoa(int(repoData.Size)),
-	}
-
-	return data, nil
+	}, nil
 }
 
-func addPkglistAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersion, filename string, headersWithIndexes map[*RPMHeader]map[*RPMHdrIndex][]any, headersWithPtrs map[*RPMHeader][]*RPMHdrIndex, orderedHeaders []*RPMHeader, group, arch string) ([]string, error) {
+func addPkglistAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersion, filename string, orderedHeaders []headerWithIndexes, group, arch string) (*repoData, error) {
 	content, _ := packages_module.NewHashedBuffer()
 	defer content.Close()
 
@@ -799,20 +831,18 @@ func addPkglistAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersi
 	buf := &bytes.Buffer{}
 
 	for _, hdr := range orderedHeaders {
-		if err := binary.Write(buf, binary.BigEndian, hdr); err != nil {
+		if err := binary.Write(buf, binary.BigEndian, *hdr.header); err != nil {
 			return nil, err
 		}
 
-		for _, indexPtr := range headersWithPtrs[hdr] {
-			index := *indexPtr
-
-			if err := binary.Write(buf, binary.BigEndian, index); err != nil {
+		for _, index := range hdr.indexes {
+			if err := binary.Write(buf, binary.BigEndian, *index.index); err != nil {
 				return nil, err
 			}
 		}
 
-		for _, indexPtr := range headersWithPtrs[hdr] {
-			for _, indexValue := range headersWithIndexes[hdr][indexPtr] {
+		for _, index := range hdr.indexes {
+			for _, indexValue := range index.data {
 				switch v := indexValue.(type) {
 				case string:
 					if _, err := buf.WriteString(v + "\x00"); err != nil {
@@ -827,9 +857,7 @@ func addPkglistAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersi
 		}
 	}
 
-	parts := strings.Split(filename, ".")
-
-	if len(parts) == 3 && parts[len(parts)-1] == "xz" {
+	if path.Ext(filename) == ".xz" {
 		xzContent, err := compressXZ(buf.Bytes())
 		if err != nil {
 			return nil, err
@@ -867,7 +895,7 @@ func addPkglistAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersi
 		group = "alt"
 	}
 
-	repoData := &repoData{
+	return &repoData{
 		Type: filename,
 		Checksum: repoChecksum{
 			Type:  "sha256",
@@ -889,17 +917,7 @@ func addPkglistAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersi
 			Href: group + ".repo/" + arch + "/base/" + filename,
 		},
 		Size: content.Size(),
-		/* Unused values:
-		Timestamp: time.Now().Unix(),
-		OpenSize:  content.Size(), */
-	}
-
-	data := []string{
-		repoData.Type, repoData.Checksum.Value,
-		repoData.MD5Checksum.Value, repoData.Blake2bHash.Value, strconv.Itoa(int(repoData.Size)),
-	}
-
-	return data, nil
+	}, nil
 }
 
 func compressXZ(data []byte) ([]byte, error) {
@@ -908,12 +926,10 @@ func compressXZ(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer xzWriter.Close()
 
-	if _, err := xzWriter.Write(data); err != nil {
-		return nil, err
-	}
-	if err := xzWriter.Close(); err != nil {
+	_, err = xzWriter.Write(data)
+	xzWriter.Close()
+	if err != nil {
 		return nil, err
 	}
 
