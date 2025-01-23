@@ -235,7 +235,7 @@ func ViewPackageVersion(ctx *context.Context) {
 		ctx.Data["Distributions"] = util.Sorted(distributions.Values())
 		ctx.Data["Components"] = util.Sorted(components.Values())
 		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
-	case packages_model.TypeRpm:
+	case packages_model.TypeRpm, packages_model.TypeAlt:
 		groups := make(container.Set[string])
 		architectures := make(container.Set[string])
 

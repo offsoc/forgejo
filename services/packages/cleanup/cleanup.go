@@ -16,6 +16,7 @@ import (
 	packages_module "code.gitea.io/gitea/modules/packages"
 	packages_service "code.gitea.io/gitea/services/packages"
 	alpine_service "code.gitea.io/gitea/services/packages/alpine"
+	alt_service "code.gitea.io/gitea/services/packages/alt"
 	arch_service "code.gitea.io/gitea/services/packages/arch"
 	cargo_service "code.gitea.io/gitea/services/packages/cargo"
 	container_service "code.gitea.io/gitea/services/packages/container"
@@ -136,6 +137,10 @@ func ExecuteCleanupRules(outerCtx context.Context) error {
 			} else if pcr.Type == packages_model.TypeArch {
 				if err := arch_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: arch.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
+				}
+			} else if pcr.Type == packages_model.TypeAlt {
+				if err := alt_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
+					return fmt.Errorf("CleanupRule [%d]: alt.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
 			}
 		}

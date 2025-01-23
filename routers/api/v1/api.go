@@ -908,9 +908,9 @@ func Routes() *web.Route {
 				m.Get("/repos", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), reqExploreSignIn(), user.ListUserRepos)
 				m.Group("/tokens", func() {
 					m.Combo("").Get(user.ListAccessTokens).
-						Post(bind(api.CreateAccessTokenOption{}), reqToken(), user.CreateAccessToken)
-					m.Combo("/{id}").Delete(reqToken(), user.DeleteAccessToken)
-				}, reqSelfOrAdmin(), reqBasicOrRevProxyAuth())
+						Post(bind(api.CreateAccessTokenOption{}), reqBasicOrRevProxyAuth(), reqToken(), user.CreateAccessToken)
+					m.Combo("/{id}").Delete(reqBasicOrRevProxyAuth(), reqToken(), user.DeleteAccessToken)
+				}, reqSelfOrAdmin())
 
 				m.Get("/activities/feeds", user.ListUserActivityFeeds)
 			}, context.UserAssignmentAPI(), checkTokenPublicOnly(), individualPermsChecker)
