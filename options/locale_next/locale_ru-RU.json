@@ -1,19 +1,11 @@
 {
-    "repo": {
-        "pulls": {
-            "merged_title_desc": {
-                "one": "слит %[1]d коммит из <code>%[2]s</code> в <code>%[3]s</code> %[4]s",
-                "few": "слито %[1]d коммит(ов) из <code>%[2]s</code> в <code>%[3]s</code> %[4]s",
-                "many": ""
-            },
-            "title_desc": {
-                "one": "хочет влить %[1]d коммит из <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>",
-                "few": "хочет влить %[1]d коммита из <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>",
-                "many": "хочет влить %[1]d коммитов из <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>"
-            }
-        }
-    },
-    "search": {
-        "milestone_kind": "Найти этапы..."
-    }
+	"repo.pulls.merged_title_desc": {
+		"one": "слит %[1]d коммит из <code>%[2]s</code> в <code>%[3]s</code> %[4]s",
+		"many": "слито %[1]d коммит(ов) из <code>%[2]s</code> в <code>%[3]s</code> %[4]s"
+	},
+	"repo.pulls.title_desc": {
+		"one": "хочет влить %[1]d коммит из <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>",
+		"many": "хочет влить %[1]d коммит(ов) из <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>"
+	},
+	"search.milestone_kind": "Найти этапы..."
 }
