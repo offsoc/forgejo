@@ -715,7 +715,7 @@ func TestDisabledUserFeatures(t *testing.T) {
 	// no features should be disabled with a plain login type
 	assert.LessOrEqual(t, user.LoginType, auth.Plain)
 	assert.Empty(t, user_model.DisabledFeaturesWithLoginType(user).Values())
-	for _, f := range testValues.Values() {
+	for f := range testValues.Seq() {
 		assert.False(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
 
@@ -724,7 +724,7 @@ func TestDisabledUserFeatures(t *testing.T) {
 
 	// all features should be disabled
 	assert.NotEmpty(t, user_model.DisabledFeaturesWithLoginType(user).Values())
-	for _, f := range testValues.Values() {
+	for f := range testValues.Seq() {
 		assert.True(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
 }

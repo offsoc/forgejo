@@ -4,7 +4,6 @@
 package util
 
 import (
-	"cmp"
 	"slices"
 	"strings"
 )
@@ -45,13 +44,6 @@ func SliceSortedEqual[T comparable](s1, s2 []T) bool {
 // SliceRemoveAll removes all the target elements from the slice.
 func SliceRemoveAll[T comparable](slice []T, target T) []T {
 	return slices.DeleteFunc(slice, func(t T) bool { return t == target })
-}
-
-// Sorted returns the sorted slice
-// Note: The parameter is sorted inline.
-func Sorted[S ~[]E, E cmp.Ordered](values S) S {
-	slices.Sort(values)
-	return values
 }
 
 // TODO: Replace with "maps.Values" once available, current it only in golang.org/x/exp/maps but not in standard library
