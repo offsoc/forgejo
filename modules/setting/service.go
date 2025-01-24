@@ -85,8 +85,10 @@ var Service = struct {
 	DefaultOrgMemberVisible                 bool
 	UserDeleteWithCommentsMaxTime           time.Duration
 	ValidSiteURLSchemes                     []string
+	UsernameCooldownPeriod                  int64
+	MaxUserRedirects                        int64
 	LandingPageInfoEnabled                  bool
-
+		
 	// OpenID settings
 	EnableOpenIDSignIn bool
 	EnableOpenIDSignUp bool
@@ -206,11 +208,10 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 	Service.DefaultUserIsRestricted = sec.Key("DEFAULT_USER_IS_RESTRICTED").MustBool(false)
 	Service.AllowDotsInUsernames = sec.Key("ALLOW_DOTS_IN_USERNAMES").MustBool(true)
 	Service.EnableTimetracking = sec.Key("ENABLE_TIMETRACKING").MustBool(true)
-	Service.LandingPageInfoEnabled = sec.Key("ENABLE_LANDING_PAGE_INFO").MustBool(true)
-
 	if Service.EnableTimetracking {
 		Service.DefaultEnableTimetracking = sec.Key("DEFAULT_ENABLE_TIMETRACKING").MustBool(true)
 	}
+	Service.LandingPageInfoEnabled = sec.Key("ENABLE_LANDING_PAGE_INFO").MustBool(true)
 	Service.DefaultEnableDependencies = sec.Key("DEFAULT_ENABLE_DEPENDENCIES").MustBool(true)
 	Service.AllowCrossRepositoryDependencies = sec.Key("ALLOW_CROSS_REPOSITORY_DEPENDENCIES").MustBool(true)
 	Service.DefaultAllowOnlyContributorsToTrackTime = sec.Key("DEFAULT_ALLOW_ONLY_CONTRIBUTORS_TO_TRACK_TIME").MustBool(true)
@@ -260,6 +261,14 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 		}
 	}
 	Service.ValidSiteURLSchemes = schemes
+	Service.UsernameCooldownPeriod = sec.Key("USERNAME_COOLDOWN_PERIOD").MustInt64(0)
+
+	// Only set a default if USERNAME_COOLDOWN_PERIOD's feature is active.
+	maxUserRedirectsDefault := int64(0)
+	if Service.UsernameCooldownPeriod > 0 {
+		maxUserRedirectsDefault = 5
+	}
+	Service.MaxUserRedirects = sec.Key("MAX_USER_REDIRECTS").MustInt64(maxUserRedirectsDefault)
 
 	mustMapSetting(rootCfg, "service.explore", &Service.Explore)
 
