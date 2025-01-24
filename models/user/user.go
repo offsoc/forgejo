@@ -669,6 +669,18 @@ func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefa
 		return err
 	}
 
+	// Check if the new username can be claimed.
+	// Skip this check if done by an admin.
+	if !createdByAdmin {
+		if ok, expireTime, err := CanClaimUsername(ctx, u.Name, -1); err != nil {
+			return err
+		} else if !ok {
+			return ErrCooldownPeriod{
+				ExpireTime: expireTime,
+			}
+		}
+	}
+
 	// set system defaults
 	u.KeepEmailPrivate = setting.Service.DefaultKeepEmailPrivate
 	u.Visibility = setting.Service.DefaultUserVisibilityMode

@@ -6,14 +6,18 @@
 				<div class="ui attached segment">
 					<form class="ui form" action="{{.Link}}" method="post">
 						{{.CsrfTokenHtml}}
-						<div class="required field {{if .Err_Name}}error{{end}}">
-							<label for="org_name">{{ctx.Locale.Tr "org.org_name_holder"}}
-								<span class="text red tw-hidden" id="org-name-change-prompt">
-									<br>{{ctx.Locale.Tr "org.settings.change_orgname_prompt"}}<br>{{ctx.Locale.Tr "org.settings.change_orgname_redirect_prompt"}}
-								</span>
-							</label>
+						<label {{if .Err_Name}}class="field error"{{end}}>
+							{{ctx.Locale.Tr "org.org_name_holder"}}
 							<input id="org_name" name="name" value="{{.Org.Name}}" data-org-name="{{.Org.Name}}" autofocus required maxlength="40">
-						</div>
+							<span class="help">
+								{{ctx.Locale.Tr "org.settings.change_orgname_prompt"}}
+								{{if gt .CooldownPeriod 0}}
+									{{ctx.Locale.TrN .CooldownPeriod "org.settings.change_orgname_redirect_prompt.with_cooldown.one" "org.settings.change_orgname_redirect_prompt.with_cooldown.few" .CooldownPeriod}}</span>
+								{{else}}
+									{{ctx.Locale.Tr "org.settings.change_orgname_redirect_prompt"}}
+								{{end}}
+							</span>
+						</label>
 						<div class="field {{if .Err_FullName}}error{{end}}">
 							<label for="full_name">{{ctx.Locale.Tr "org.org_full_name_holder"}}</label>
 							<input id="full_name" name="full_name" value="{{.Org.FullName}}" maxlength="100">

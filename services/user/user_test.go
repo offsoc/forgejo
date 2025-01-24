@@ -199,6 +199,29 @@ func TestRenameUser(t *testing.T) {
 
 		unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, OwnerName: user.Name})
 	})
+
+	t.Run("Keep N redirects", func(t *testing.T) {
+		defer test.MockProtect(&setting.Service.MaxUserRedirects)()
+		// Start clean
+		unittest.AssertSuccessfulDelete(t, &user_model.Redirect{RedirectUserID: user.ID})
+
+		setting.Service.MaxUserRedirects = 1
+
+		require.NoError(t, RenameUser(db.DefaultContext, user, "redirect-1"))
+		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "user_rename"})
+
+		// The granularity of created_unix is a second.
+		time.Sleep(time.Second)
+		require.NoError(t, RenameUser(db.DefaultContext, user, "redirect-2"))
+		unittest.AssertExistsIf(t, false, &user_model.Redirect{LowerName: "user_rename"})
+		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "redirect-1"})
+
+		setting.Service.MaxUserRedirects = 2
+		time.Sleep(time.Second)
+		require.NoError(t, RenameUser(db.DefaultContext, user, "redirect-3"))
+		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "redirect-1"})
+		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "redirect-2"})
+	})
 }
 
 func TestCreateUser_Issue5882(t *testing.T) {
