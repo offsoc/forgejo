@@ -24,7 +24,7 @@ func init() {
 	db.RegisterModel(new(RepoArchiveDownloadCount))
 }
 
-// CountArchiveDownload adds one download the the given archive
+// CountArchiveDownload adds one download the given archive
 func CountArchiveDownload(ctx context.Context, repoID, releaseID int64, tp git.ArchiveType) error {
 	updateCount, err := db.GetEngine(ctx).Where("repo_id = ?", repoID).And("release_id = ?", releaseID).And("`type` = ?", tp).Incr("count").Update(new(RepoArchiveDownloadCount))
 	if err != nil {
