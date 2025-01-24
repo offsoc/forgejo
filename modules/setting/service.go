@@ -87,7 +87,8 @@ var Service = struct {
 	ValidSiteURLSchemes                     []string
 	UsernameCooldownPeriod                  int64
 	MaxUserRedirects                        int64
-
+	SignInForgottenPasswordEnabled          bool
+	
 	// OpenID settings
 	EnableOpenIDSignIn bool
 	EnableOpenIDSignUp bool
@@ -215,6 +216,7 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 	if Service.EnableTimetracking {
 		Service.DefaultEnableTimetracking = sec.Key("DEFAULT_ENABLE_TIMETRACKING").MustBool(true)
 	}
+	Service.SignInForgottenPasswordEnabled = sec.Key("SIGNIN_FORGOTTEN_PASSWORD_ENABLED").MustBool(true)	
 	Service.DefaultEnableDependencies = sec.Key("DEFAULT_ENABLE_DEPENDENCIES").MustBool(true)
 	Service.AllowCrossRepositoryDependencies = sec.Key("ALLOW_CROSS_REPOSITORY_DEPENDENCIES").MustBool(true)
 	Service.DefaultAllowOnlyContributorsToTrackTime = sec.Key("DEFAULT_ALLOW_ONLY_CONTRIBUTORS_TO_TRACK_TIME").MustBool(true)
