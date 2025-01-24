@@ -85,6 +85,7 @@ var Service = struct {
 	DefaultOrgMemberVisible                 bool
 	UserDeleteWithCommentsMaxTime           time.Duration
 	ValidSiteURLSchemes                     []string
+	LandingPageInfoEnabled                  bool
 
 	// OpenID settings
 	EnableOpenIDSignIn bool
@@ -205,6 +206,8 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 	Service.DefaultUserIsRestricted = sec.Key("DEFAULT_USER_IS_RESTRICTED").MustBool(false)
 	Service.AllowDotsInUsernames = sec.Key("ALLOW_DOTS_IN_USERNAMES").MustBool(true)
 	Service.EnableTimetracking = sec.Key("ENABLE_TIMETRACKING").MustBool(true)
+	Service.LandingPageInfoEnabled = sec.Key("ENABLE_LANDING_PAGE_INFO").MustBool(true)
+
 	if Service.EnableTimetracking {
 		Service.DefaultEnableTimetracking = sec.Key("DEFAULT_ENABLE_TIMETRACKING").MustBool(true)
 	}
