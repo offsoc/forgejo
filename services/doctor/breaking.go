@@ -10,6 +10,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/validation"
 
 	"xorm.io/builder"
@@ -30,6 +31,8 @@ func iterateUserAccounts(ctx context.Context, each func(*user.User) error) error
 // addresses would be currently facing a error due to their invalid email address.
 // Ref: https://github.com/go-gitea/gitea/pull/19085 & https://github.com/go-gitea/gitea/pull/17688
 func checkUserEmail(ctx context.Context, logger log.Logger, _ bool) error {
+	setting.LoadServiceSetting()
+
 	// We could use quirky SQL to get all users that start without a [a-zA-Z0-9], but that would mean
 	// DB provider-specific SQL and only works _now_. So instead we iterate through all user accounts
 	// and use the validation.ValidateEmail function to be future-proof.
@@ -61,6 +64,8 @@ func checkUserEmail(ctx context.Context, logger log.Logger, _ bool) error {
 // are allowed for various reasons. This check helps with detecting users that, according
 // to our reserved names, don't have a valid username.
 func checkUserName(ctx context.Context, logger log.Logger, _ bool) error {
+	setting.LoadServiceSetting()
+
 	var invalidUserCount int64
 	if err := iterateUserAccounts(ctx, func(u *user.User) error {
 		if err := user.IsUsableUsername(u.Name); err != nil {
