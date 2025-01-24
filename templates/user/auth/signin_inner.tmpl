@@ -60,7 +60,7 @@
 				<br>
 			</div>
 			{{end}}
-			{{if .DisablePassword}}
+			{{if not .DisablePassword}}
 			<div class="field">
 				<a href="{{AppSubUrl}}/user/forgot_password">{{ctx.Locale.Tr "auth.forgot_password"}}</a>
 			</div>
