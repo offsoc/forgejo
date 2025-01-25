@@ -711,7 +711,7 @@ func buildRelease(ctx context.Context, pv *packages_model.PackageVersion, pfs []
 		architectures.Add(pd.FileMetadata.Architecture)
 	}
 
-	for architecture := range architectures {
+	for architecture := range architectures.Seq() {
 		version := time.Now().Unix()
 		label := setting.AppName
 		data := fmt.Sprintf(`Archive: Alt Linux Team
