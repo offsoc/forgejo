@@ -252,12 +252,8 @@ func UpdateRunner(ctx context.Context, r *ActionRunner, cols ...string) error {
 }
 
 // DeleteRunner deletes a runner by given ID.
-func DeleteRunner(ctx context.Context, id int64) error {
-	if _, err := GetRunnerByID(ctx, id); err != nil {
-		return err
-	}
-
-	_, err := db.DeleteByID[ActionRunner](ctx, id)
+func DeleteRunner(ctx context.Context, r *ActionRunner) error {
+	_, err := db.DeleteByID[ActionRunner](ctx, r.ID)
 	return err
 }
 
