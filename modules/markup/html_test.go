@@ -1026,4 +1026,107 @@ func TestRender_FilePreview(t *testing.T) {
 			localMetas,
 		)
 	})
+
+	commitFileURL := util.URLJoin(markup.TestRepoURL, "src", "commit", "c9913120ed2c1e27c1d7752ecdb7a504dc7cf6be", "path", "to", "file.md")
+
+	t.Run("rendered file with ?display=source", func(t *testing.T) {
+		testRender(
+			commitFileURL+"?display=source"+"#L1-L2",
+			`<p></p>`+
+				`<div class="file-preview-box">`+
+				`<div class="header">`+
+				`<div>`+
+				`<a href="http://localhost:3000/gogits/gogs/src/commit/c9913120ed2c1e27c1d7752ecdb7a504dc7cf6be/path/to/file.md?display=source#L1-L2" class="muted" rel="nofollow">path/to/file.md</a>`+
+				`</div>`+
+				`<span class="text small grey">`+
+				`Lines 1 to 2 in <a href="http://localhost:3000/gogits/gogs/src/commit/c9913120ed2c1e27c1d7752ecdb7a504dc7cf6be" class="text black" rel="nofollow">c991312</a>`+
+				`</span>`+
+				`</div>`+
+				`<div class="ui table">`+
+				`<table class="file-preview">`+
+				`<tbody>`+
+				`<tr>`+
+				`<td class="lines-num"><span data-line-number="1"></span></td>`+
+				`<td class="lines-code chroma"><code class="code-inner"><span class="gh"># A`+"\n"+`</span></code></td>`+
+				`</tr>`+
+				`<tr>`+
+				`<td class="lines-num"><span data-line-number="2"></span></td>`+
+				`<td class="lines-code chroma"><code class="code-inner"><span class="gh"></span>B`+"\n"+`</code></td>`+
+				`</tr>`+
+				`</tbody>`+
+				`</table>`+
+				`</div>`+
+				`</div>`+
+				`<p></p>`,
+			localMetas,
+		)
+	})
+
+	t.Run("rendered file without ?display=source", func(t *testing.T) {
+		testRender(
+			commitFileURL+"#L1-L2",
+			`<p></p>`+
+				`<div class="file-preview-box">`+
+				`<div class="header">`+
+				`<div>`+
+				`<a href="http://localhost:3000/gogits/gogs/src/commit/c9913120ed2c1e27c1d7752ecdb7a504dc7cf6be/path/to/file.md?display=source#L1-L2" class="muted" rel="nofollow">path/to/file.md</a>`+
+				`</div>`+
+				`<span class="text small grey">`+
+				`Lines 1 to 2 in <a href="http://localhost:3000/gogits/gogs/src/commit/c9913120ed2c1e27c1d7752ecdb7a504dc7cf6be" class="text black" rel="nofollow">c991312</a>`+
+				`</span>`+
+				`</div>`+
+				`<div class="ui table">`+
+				`<table class="file-preview">`+
+				`<tbody>`+
+				`<tr>`+
+				`<td class="lines-num"><span data-line-number="1"></span></td>`+
+				`<td class="lines-code chroma"><code class="code-inner"><span class="gh"># A`+"\n"+`</span></code></td>`+
+				`</tr>`+
+				`<tr>`+
+				`<td class="lines-num"><span data-line-number="2"></span></td>`+
+				`<td class="lines-code chroma"><code class="code-inner"><span class="gh"></span>B`+"\n"+`</code></td>`+
+				`</tr>`+
+				`</tbody>`+
+				`</table>`+
+				`</div>`+
+				`</div>`+
+				`<p></p>`,
+			localMetas,
+		)
+	})
+
+	commitFileURL = util.URLJoin(markup.TestRepoURL, "src", "commit", "190d9492934af498c3f669d6a2431dc5459e5b20", "path", "to", "file.go")
+
+	t.Run("normal file with ?display=source", func(t *testing.T) {
+		testRender(
+			commitFileURL+"?display=source"+"#L2-L3",
+			`<p></p>`+
+				`<div class="file-preview-box">`+
+				`<div class="header">`+
+				`<div>`+
+				`<a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go?display=source#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
+				`</div>`+
+				`<span class="text small grey">`+
+				`Lines 2 to 3 in <a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
+				`</span>`+
+				`</div>`+
+				`<div class="ui table">`+
+				`<table class="file-preview">`+
+				`<tbody>`+
+				`<tr>`+
+				`<td class="lines-num"><span data-line-number="2"></span></td>`+
+				`<td class="lines-code chroma"><code class="code-inner"><span class="nx">B</span>`+"\n"+`</code></td>`+
+				`</tr>`+
+				`<tr>`+
+				`<td class="lines-num"><span data-line-number="3"></span></td>`+
+				`<td class="lines-code chroma"><code class="code-inner"><span class="nx">C</span>`+"\n"+`</code></td>`+
+				`</tr>`+
+				`</tbody>`+
+				`</table>`+
+				`</div>`+
+				`</div>`+
+				`<p></p>`,
+			localMetas,
+		)
+	})
 }
