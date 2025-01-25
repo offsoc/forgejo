@@ -1,0 +1,31 @@
+-
+  id: 1001
+  uuid: "43b5d4d3-401b-42f9-94df-a9d45b447b82"
+  name: "User runner"
+  owner_id: 2
+  repo_id: 0
+  deleted: 0
+
+-
+  id: 1002
+  uuid: "bdc77f4f-2b2b-442d-bd44-e808f4306347"
+  name: "Organisation runner"
+  owner_id: 3
+  repo_id: 0
+  deleted: 0
+
+-
+  id: 1003
+  uuid: "9268bc8c-efbf-4dbe-aeb5-945733cdd098"
+  name: "Repository runner"
+  owner_id: 0
+  repo_id: 1
+  deleted: 0
+
+-
+  id: 1004
+  uuid: "fb857e63-c0ce-4571-a6c9-fde26c128073"
+  name: "Global runner"
+  owner_id: 0
+  repo_id: 0
+  deleted: 0
