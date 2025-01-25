@@ -195,7 +195,7 @@ func serveInstalled(ctx *cli.Context) error {
 	publicFilesSet.Remove(".well-known")
 	publicFilesSet.Remove("assets")
 	publicFilesSet.Remove("robots.txt")
-	for _, fn := range publicFilesSet.Values() {
+	for fn := range publicFilesSet.Seq() {
 		log.Error("Found legacy public asset %q in CustomPath. Please move it to %s/public/assets/%s", fn, setting.CustomPath, fn)
 	}
 	if _, err := os.Stat(filepath.Join(setting.CustomPath, "robots.txt")); err == nil {
