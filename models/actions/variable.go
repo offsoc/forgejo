@@ -69,10 +69,6 @@ func (opts FindVariablesOpts) ToConds() builder.Cond {
 	return cond
 }
 
-func FindVariables(ctx context.Context, opts FindVariablesOpts) ([]*ActionVariable, error) {
-	return db.Find[ActionVariable](ctx, opts)
-}
-
 func UpdateVariable(ctx context.Context, variable *ActionVariable) (bool, error) {
 	count, err := db.GetEngine(ctx).ID(variable.ID).Where("owner_id = ? AND repo_id = ?", variable.OwnerID, variable.RepoID).Cols("name", "data").
 		Update(&ActionVariable{

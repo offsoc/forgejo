@@ -49,39 +49,6 @@ func UpdateVariable(ctx context.Context, variableID, ownerID, repoID int64, name
 	})
 }
 
-func DeleteVariableByName(ctx context.Context, ownerID, repoID int64, name string) error {
-	if err := secret_service.ValidateName(name); err != nil {
-		return err
-	}
-
-	if err := envNameCIRegexMatch(name); err != nil {
-		return err
-	}
-
-	v, err := GetVariable(ctx, actions_model.FindVariablesOpts{
-		OwnerID: ownerID,
-		RepoID:  repoID,
-		Name:    name,
-	})
-	if err != nil {
-		return err
-	}
-
-	_, err = actions_model.DeleteVariable(ctx, v.ID, ownerID, repoID)
-	return err
-}
-
-func GetVariable(ctx context.Context, opts actions_model.FindVariablesOpts) (*actions_model.ActionVariable, error) {
-	vars, err := actions_model.FindVariables(ctx, opts)
-	if err != nil {
-		return nil, err
-	}
-	if len(vars) != 1 {
-		return nil, util.NewNotExistErrorf("variable not found")
-	}
-	return vars[0], nil
-}
-
 // some regular expression of `variables` and `secrets`
 // reference to:
 // https://docs.github.com/en/actions/learn-github-actions/variables#naming-conventions-for-configuration-variables

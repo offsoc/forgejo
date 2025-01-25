@@ -22,7 +22,6 @@ package "code.gitea.io/gitea/models/actions"
 	func (ScheduleList).GetRepoIDs
 	func (ScheduleList).LoadTriggerUser
 	func (ScheduleList).LoadRepos
-	func GetVariableByID
 
 package "code.gitea.io/gitea/models/asymkey"
 	func (ErrGPGKeyAccessDenied).Error
