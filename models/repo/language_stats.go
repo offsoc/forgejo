@@ -4,9 +4,10 @@
 package repo
 
 import (
+	"cmp"
 	"context"
 	"math"
-	"sort"
+	"slices"
 	"strings"
 
 	"code.gitea.io/gitea/models/db"
@@ -67,34 +68,37 @@ func (stats LanguageStatList) getLanguagePercentages() map[string]float32 {
 	return langPerc
 }
 
-// Rounds to 1 decimal point, target should be the expected sum of percs
+// Use the quota method to round the percentages to one decimal place while
+// keeping the sum of the percentages at 100%.
 func roundByLargestRemainder(percs map[string]float32, target float32) {
+	// Tracks the difference between the sum of percentage and 100%.
 	leftToDistribute := int(target * 10)
 
-	keys := make([]string, 0, len(percs))
+	type key struct {
+		language  string
+		remainder float64
+	}
+	keys := make([]key, 0, len(percs))
 
 	for k, v := range percs {
-		percs[k] = v * 10
-		floored := math.Floor(float64(percs[k]))
+		floored, frac := math.Modf(float64(v * 10))
+		percs[k] = float32(floored)
 		leftToDistribute -= int(floored)
-		keys = append(keys, k)
+		keys = append(keys, key{language: k, remainder: frac})
 	}
 
-	// Sort the keys by the largest remainder
-	sort.SliceStable(keys, func(i, j int) bool {
-		_, remainderI := math.Modf(float64(percs[keys[i]]))
-		_, remainderJ := math.Modf(float64(percs[keys[j]]))
-		return remainderI > remainderJ
+	// Sort the fractional part in an ascending order.
+	slices.SortFunc(keys, func(b, a key) int {
+		return cmp.Compare(a.remainder, b.remainder)
 	})
 
-	// Increment the values in order of largest remainder
+	// As long as the sum of 100% is not reached, add 0.1% percentage.
 	for _, k := range keys {
-		percs[k] = float32(math.Floor(float64(percs[k])))
 		if leftToDistribute > 0 {
-			percs[k]++
+			percs[k.language]++
 			leftToDistribute--
 		}
-		percs[k] /= 10
+		percs[k.language] /= 10
 	}
 }
 
