@@ -140,10 +140,6 @@ func CompileEmailGlobList(sec ConfigSection, keys ...string) (globs []glob.Glob)
 	return globs
 }
 
-// LoadServiceSetting loads the service settings
-func LoadServiceSetting() {
-	loadServiceFrom(CfgProvider)
-}
 
 func loadServiceFrom(rootCfg ConfigProvider) {
 	sec := rootCfg.Section("service")
