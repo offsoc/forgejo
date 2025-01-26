@@ -131,7 +131,7 @@ func TestAmbiguousCharacterDetection(t *testing.T) {
 	})
 }
 
-func TestInHistoryButton(t *testing.T) {
+func TestCommitListActions(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 		session := loginUser(t, user2.Name)
@@ -164,6 +164,7 @@ func TestInHistoryButton(t *testing.T) {
 			htmlDoc.AssertElement(t, fmt.Sprintf(".commit-list a[href^='/%s/src/commit/']", repo.FullName()), false)
 		})
 
+		fileDiffSelector := fmt.Sprintf(".commit-list a[href='/%s/commit/%s?files=test.sh']", repo.FullName(), commitID)
 		t.Run("Commit list", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
@@ -172,6 +173,7 @@ func TestInHistoryButton(t *testing.T) {
 			htmlDoc := NewHTMLParser(t, resp.Body)
 
 			htmlDoc.AssertElement(t, fmt.Sprintf(".commit-list a[href='/%s/src/commit/%s']", repo.FullName(), commitID), true)
+			htmlDoc.AssertElement(t, fileDiffSelector, false)
 		})
 
 		t.Run("File history", func(t *testing.T) {
@@ -182,6 +184,7 @@ func TestInHistoryButton(t *testing.T) {
 			htmlDoc := NewHTMLParser(t, resp.Body)
 
 			htmlDoc.AssertElement(t, fmt.Sprintf(".commit-list a[href='/%s/src/commit/%s/test.sh']", repo.FullName(), commitID), true)
+			htmlDoc.AssertElement(t, fileDiffSelector, true)
 		})
 	})
 }
