@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"regexp"
 	"slices"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -242,7 +241,9 @@ func Milestones(ctx *context.Context) {
 		ctx.ServerError("SearchRepositoryByCondition", err)
 		return
 	}
-	sort.Sort(showRepos)
+	slices.SortFunc(showRepos, func(a, b *repo_model.Repository) int {
+		return strings.Compare(a.FullName(), b.FullName())
+	})
 
 	for i := 0; i < len(milestones); {
 		for _, repo := range showRepos {
