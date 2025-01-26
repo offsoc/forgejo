@@ -87,8 +87,7 @@ var Service = struct {
 	ValidSiteURLSchemes                     []string
 	UsernameCooldownPeriod                  int64
 	MaxUserRedirects                        int64
-	LandingPageInfoEnabled                  bool
-		
+
 	// OpenID settings
 	EnableOpenIDSignIn bool
 	EnableOpenIDSignUp bool
@@ -139,6 +138,11 @@ func CompileEmailGlobList(sec ConfigSection, keys ...string) (globs []glob.Glob)
 		}
 	}
 	return globs
+}
+
+// LoadServiceSetting loads the service settings
+func LoadServiceSetting() {
+	loadServiceFrom(CfgProvider)
 }
 
 func loadServiceFrom(rootCfg ConfigProvider) {
@@ -211,7 +215,6 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 	if Service.EnableTimetracking {
 		Service.DefaultEnableTimetracking = sec.Key("DEFAULT_ENABLE_TIMETRACKING").MustBool(true)
 	}
-	Service.LandingPageInfoEnabled = sec.Key("ENABLE_LANDING_PAGE_INFO").MustBool(true)
 	Service.DefaultEnableDependencies = sec.Key("DEFAULT_ENABLE_DEPENDENCIES").MustBool(true)
 	Service.AllowCrossRepositoryDependencies = sec.Key("ALLOW_CROSS_REPOSITORY_DEPENDENCIES").MustBool(true)
 	Service.DefaultAllowOnlyContributorsToTrackTime = sec.Key("DEFAULT_ALLOW_ONLY_CONTRIBUTORS_TO_TRACK_TIME").MustBool(true)
