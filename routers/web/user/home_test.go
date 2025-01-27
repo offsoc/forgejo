@@ -98,6 +98,8 @@ func TestMilestones(t *testing.T) {
 	assert.EqualValues(t, 1, ctx.Data["Total"])
 	assert.Len(t, ctx.Data["Milestones"], 1)
 	assert.Len(t, ctx.Data["Repos"], 2) // both repo 42 and 1 have milestones and both are owned by user 2
+	assert.EqualValues(t, "user2/glob", ctx.Data["Repos"].(repo_model.RepositoryList)[0].FullName())
+	assert.EqualValues(t, "user2/repo1", ctx.Data["Repos"].(repo_model.RepositoryList)[1].FullName())
 }
 
 func TestMilestonesForSpecificRepo(t *testing.T) {

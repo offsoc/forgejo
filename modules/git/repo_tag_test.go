@@ -6,6 +6,7 @@ package git
 import (
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,9 +31,11 @@ func TestRepository_GetTags(t *testing.T) {
 	assert.EqualValues(t, "signed-tag", tags[0].Name)
 	assert.EqualValues(t, "36f97d9a96457e2bab511db30fe2db03893ebc64", tags[0].ID.String())
 	assert.EqualValues(t, "tag", tags[0].Type)
+	assert.EqualValues(t, time.Date(2022, time.November, 13, 16, 40, 20, 0, time.FixedZone("", 3600)), tags[0].Tagger.When)
 	assert.EqualValues(t, "test", tags[1].Name)
 	assert.EqualValues(t, "3ad28a9149a2864384548f3d17ed7f38014c9e8a", tags[1].ID.String())
 	assert.EqualValues(t, "tag", tags[1].Type)
+	assert.EqualValues(t, time.Date(2018, time.June, 16, 20, 13, 18, 0, time.FixedZone("", -25200)), tags[1].Tagger.When)
 }
 
 func TestRepository_GetTag(t *testing.T) {
