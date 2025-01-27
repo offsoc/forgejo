@@ -88,7 +88,7 @@ var Service = struct {
 	UsernameCooldownPeriod                  int64
 	MaxUserRedirects                        int64
 	LandingPageInfoEnabled                  bool
-		
+
 	// OpenID settings
 	EnableOpenIDSignIn bool
 	EnableOpenIDSignUp bool
