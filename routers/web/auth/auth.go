@@ -173,7 +173,6 @@ func SignIn(ctx *context.Context) {
 
 	ctx.Data["SignInForgottenPasswordEnabled"] = setting.Service.SignInForgottenPasswordEnabled
 
-
 	ctx.HTML(http.StatusOK, tplSignIn)
 }
 
