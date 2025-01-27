@@ -9,6 +9,7 @@ import (
 	"code.gitea.io/gitea/modules/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDisplayNameDefault(t *testing.T) {
@@ -33,4 +34,42 @@ func TestDisplayNameCustomFormat(t *testing.T) {
 	defer test.MockVariableValue(&AppDisplayNameFormat, "{APP_NAME} - {APP_SLOGAN}")()
 	displayName := generateDisplayName()
 	assert.Equal(t, "Forgejo - Beyond coding. We Forge.", displayName)
+}
+
+func TestMaxUserRedirectsDefault(t *testing.T) {
+	iniStr := ``
+	cfg, err := NewConfigProviderFromData(iniStr)
+	require.NoError(t, err)
+	loadServiceFrom(cfg)
+
+	assert.EqualValues(t, 0, Service.UsernameCooldownPeriod)
+	assert.EqualValues(t, 0, Service.MaxUserRedirects)
+
+	iniStr = `[service]
+MAX_USER_REDIRECTS = 8`
+	cfg, err = NewConfigProviderFromData(iniStr)
+	require.NoError(t, err)
+	loadServiceFrom(cfg)
+
+	assert.EqualValues(t, 0, Service.UsernameCooldownPeriod)
+	assert.EqualValues(t, 8, Service.MaxUserRedirects)
+
+	iniStr = `[service]
+USERNAME_COOLDOWN_PERIOD = 3`
+	cfg, err = NewConfigProviderFromData(iniStr)
+	require.NoError(t, err)
+	loadServiceFrom(cfg)
+
+	assert.EqualValues(t, 3, Service.UsernameCooldownPeriod)
+	assert.EqualValues(t, 5, Service.MaxUserRedirects)
+
+	iniStr = `[service]
+USERNAME_COOLDOWN_PERIOD = 3
+MAX_USER_REDIRECTS = 8`
+	cfg, err = NewConfigProviderFromData(iniStr)
+	require.NoError(t, err)
+	loadServiceFrom(cfg)
+
+	assert.EqualValues(t, 3, Service.UsernameCooldownPeriod)
+	assert.EqualValues(t, 8, Service.MaxUserRedirects)
 }

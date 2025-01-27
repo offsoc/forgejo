@@ -393,6 +393,31 @@ func TestCreateUserWithoutCustomTimestamps(t *testing.T) {
 	assert.LessOrEqual(t, fetched.UpdatedUnix, timestampEnd)
 }
 
+func TestCreateUserClaimingUsername(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	defer test.MockVariableValue(&setting.Service.UsernameCooldownPeriod, 1)()
+
+	_, err := db.GetEngine(db.DefaultContext).NoAutoTime().Insert(&user_model.Redirect{RedirectUserID: 1, LowerName: "redirecting", CreatedUnix: timeutil.TimeStampNow()})
+	require.NoError(t, err)
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	user.Name = "redirecting"
+	user.LowerName = strings.ToLower(user.Name)
+	user.ID = 0
+	user.Email = "unique@example.com"
+
+	t.Run("Normal creation", func(t *testing.T) {
+		err = user_model.CreateUser(db.DefaultContext, user)
+		assert.True(t, user_model.IsErrCooldownPeriod(err))
+	})
+
+	t.Run("Creation as admin", func(t *testing.T) {
+		err = user_model.AdminCreateUser(db.DefaultContext, user)
+		require.NoError(t, err)
+	})
+}
+
 func TestGetUserIDsByNames(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
@@ -690,7 +715,7 @@ func TestDisabledUserFeatures(t *testing.T) {
 	// no features should be disabled with a plain login type
 	assert.LessOrEqual(t, user.LoginType, auth.Plain)
 	assert.Empty(t, user_model.DisabledFeaturesWithLoginType(user).Values())
-	for _, f := range testValues.Values() {
+	for f := range testValues.Seq() {
 		assert.False(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
 
@@ -699,7 +724,7 @@ func TestDisabledUserFeatures(t *testing.T) {
 
 	// all features should be disabled
 	assert.NotEmpty(t, user_model.DisabledFeaturesWithLoginType(user).Values())
-	for _, f := range testValues.Values() {
+	for f := range testValues.Seq() {
 		assert.True(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
 }

@@ -290,7 +290,7 @@ func (f *UpdateThemeForm) Validate(req *http.Request, errs binding.Errors) bindi
 	return middleware.Validate(errs, ctx.Data, f, ctx.Locale)
 }
 
-// IsThemeExists checks if the theme is a theme available in the config.
+// IsThemeExists checks if the theme is available in the config.
 func (f UpdateThemeForm) IsThemeExists() bool {
 	var exists bool
 

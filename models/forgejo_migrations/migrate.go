@@ -90,6 +90,8 @@ var migrations = []*Migration{
 	NewMigration("Migrate `secret` column to store keying material", MigrateTwoFactorToKeying),
 	// v26 -> v27
 	NewMigration("Add `hash_blake2b` column to `package_blob` table", AddHashBlake2bToPackageBlob),
+	// v27 -> v28
+	NewMigration("Add `created_unix` column to `user_redirect` table", AddCreatedUnixToRedirect),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.
