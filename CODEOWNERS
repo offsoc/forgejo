@@ -33,8 +33,9 @@ models/.* @gusted
 # for code that lives in here.
 routers/.* @gusted
 
-# Let new strings be checked by the translation team.
-options/locale/locale_en-US.ini @0ko
+# Let locale changes be checked by the translation team.
+options/locale/.* @0ko
+options/locale_next/.* @0ko
 
 # Personal interest
 .*/webhook.* @oliverpool

@@ -5,7 +5,6 @@ package git
 
 import (
 	"bytes"
-	"sort"
 	"strings"
 
 	api "code.gitea.io/gitea/modules/structs"
@@ -106,24 +105,4 @@ l:
 	}
 
 	return tag, nil
-}
-
-type tagSorter []*Tag
-
-func (ts tagSorter) Len() int {
-	return len([]*Tag(ts))
-}
-
-func (ts tagSorter) Less(i, j int) bool {
-	return []*Tag(ts)[i].Tagger.When.After([]*Tag(ts)[j].Tagger.When)
-}
-
-func (ts tagSorter) Swap(i, j int) {
-	[]*Tag(ts)[i], []*Tag(ts)[j] = []*Tag(ts)[j], []*Tag(ts)[i]
-}
-
-// sortTagsByTime
-func sortTagsByTime(tags []*Tag) {
-	sorter := tagSorter(tags)
-	sort.Sort(sorter)
 }
