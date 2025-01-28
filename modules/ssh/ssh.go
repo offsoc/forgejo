@@ -11,7 +11,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"os"
@@ -32,10 +31,6 @@ import (
 	"github.com/gliderlabs/ssh"
 	gossh "golang.org/x/crypto/ssh"
 )
-
-type contextKey string
-
-const giteaKeyID = contextKey("gitea-key-id")
 
 func getExitStatusFromError(err error) int {
 	if err == nil {
@@ -62,7 +57,7 @@ func getExitStatusFromError(err error) int {
 }
 
 func sessionHandler(session ssh.Session) {
-	keyID := fmt.Sprintf("%d", session.Context().Value(giteaKeyID).(int64))
+	keyID := session.ConnPermissions().Extensions["forgejo-key-id"]
 
 	command := session.RawCommand()
 
@@ -238,7 +233,10 @@ func publicKeyHandler(ctx ssh.Context, key ssh.PublicKey) bool {
 			if log.IsDebug() { // <- FingerprintSHA256 is kinda expensive so only calculate it if necessary
 				log.Debug("Successfully authenticated: %s Certificate Fingerprint: %s Principal: %s", ctx.RemoteAddr(), gossh.FingerprintSHA256(key), principal)
 			}
-			ctx.SetValue(giteaKeyID, pkey.ID)
+			if ctx.Permissions().Extensions == nil {
+				ctx.Permissions().Extensions = map[string]string{}
+			}
+			ctx.Permissions().Extensions["forgejo-key-id"] = strconv.FormatInt(pkey.ID, 10)
 
 			return true
 		}
@@ -266,7 +264,10 @@ func publicKeyHandler(ctx ssh.Context, key ssh.PublicKey) bool {
 	if log.IsDebug() { // <- FingerprintSHA256 is kinda expensive so only calculate it if necessary
 		log.Debug("Successfully authenticated: %s Public Key Fingerprint: %s", ctx.RemoteAddr(), gossh.FingerprintSHA256(key))
 	}
-	ctx.SetValue(giteaKeyID, pkey.ID)
+	if ctx.Permissions().Extensions == nil {
+		ctx.Permissions().Extensions = map[string]string{}
+	}
+	ctx.Permissions().Extensions["forgejo-key-id"] = strconv.FormatInt(pkey.ID, 10)
 
 	return true
 }

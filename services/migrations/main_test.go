@@ -219,6 +219,7 @@ func assertRepositoryEqual(t *testing.T, expected, actual *base.Repository) {
 	assert.Equal(t, expected.CloneURL, actual.CloneURL)
 	assert.Equal(t, expected.OriginalURL, actual.OriginalURL)
 	assert.Equal(t, expected.DefaultBranch, actual.DefaultBranch)
+	assert.Equal(t, expected.Website, actual.Website)
 }
 
 func assertReviewEqual(t *testing.T, expected, actual *base.Review) {

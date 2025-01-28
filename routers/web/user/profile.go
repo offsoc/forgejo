@@ -63,6 +63,12 @@ func userProfile(ctx *context.Context) {
 	ctx.Data["Title"] = ctx.ContextUser.DisplayName()
 	ctx.Data["PageIsUserProfile"] = true
 
+	ctx.Data["OpenGraphTitle"] = ctx.ContextUser.DisplayName()
+	ctx.Data["OpenGraphType"] = "profile"
+	ctx.Data["OpenGraphImageURL"] = ctx.ContextUser.AvatarLink(ctx)
+	ctx.Data["OpenGraphURL"] = ctx.ContextUser.HTMLURL()
+	ctx.Data["OpenGraphDescription"] = ctx.ContextUser.Description
+
 	// prepare heatmap data
 	if setting.Service.EnableUserHeatmap {
 		data, err := activities_model.GetUserHeatmapDataByUser(ctx, ctx.ContextUser, ctx.Doer)

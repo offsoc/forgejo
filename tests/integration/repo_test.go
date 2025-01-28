@@ -902,7 +902,7 @@ func TestRepoFollowSymlink(t *testing.T) {
 		symlinkURL, ok := htmlDoc.Find(".file-actions .button[data-kind='follow-symlink']").Attr("href")
 		if shouldExist {
 			assert.True(t, ok)
-			assert.EqualValues(t, expectedSymlinkURL, symlinkURL)
+			assert.Equal(t, expectedSymlinkURL, symlinkURL)
 		} else {
 			assert.False(t, ok)
 		}
@@ -1009,16 +1009,29 @@ func TestRepoCodeSearchForm(t *testing.T) {
 		resp := MakeRequest(t, req, http.StatusOK)
 
 		htmlDoc := NewHTMLParser(t, resp.Body)
-		action, exists := htmlDoc.doc.Find("form[data-test-tag=codesearch]").Attr("action")
+		formEl := htmlDoc.doc.Find("form[data-test-tag=codesearch]")
+
+		action, exists := formEl.Attr("action")
 		assert.True(t, exists)
-
 		branchSubURL := "/branch/master"
-
 		if indexer {
 			assert.NotContains(t, action, branchSubURL)
 		} else {
 			assert.Contains(t, action, branchSubURL)
 		}
+
+		filepath, exists := formEl.Find("input[name=path]").Attr("value")
+		assert.True(t, exists)
+		assert.Empty(t, filepath)
+
+		req = NewRequest(t, "GET", "/user2/glob/src/branch/master/x/y")
+		resp = MakeRequest(t, req, http.StatusOK)
+
+		filepath, exists = NewHTMLParser(t, resp.Body).doc.
+			Find("form[data-test-tag=codesearch] input[name=path]").
+			Attr("value")
+		assert.True(t, exists)
+		assert.Equal(t, "x/y", filepath)
 	}
 
 	t.Run("indexer disabled", func(t *testing.T) {
@@ -1045,6 +1058,42 @@ func TestFileHistoryPager(t *testing.T) {
 
 		req := NewRequest(t, "GET", "/user2/repo1/commits/branch/master/README.md?page=9999")
 		MakeRequest(t, req, http.StatusNotFound)
+	})
+}
+
+func TestRepoIssueSorting(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	t.Run("Dropdown content", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		assert.Equal(t,
+			9,
+			htmlDoc.Find(`.list-header-sort .menu a`).Length(),
+			"Wrong amount of sort options in dropdown")
+
+		menuItemsHTML := htmlDoc.Find(`.list-header-sort .menu`).Text()
+		locale := translation.NewLocale("en-US")
+		for _, key := range []string{
+			"relevance",
+			"latest",
+			"oldest",
+			"recentupdate",
+			"leastupdate",
+			"mostcomment",
+			"leastcomment",
+			"nearduedate",
+			"farduedate",
+		} {
+			assert.Contains(t,
+				menuItemsHTML,
+				locale.Tr("repo.issues.filter_sort."+key),
+				"Sort option %s ('%s') not found in dropdown", key, locale.Tr("repo.issues.filter_sort."+key))
+		}
 	})
 }
 
@@ -1104,7 +1153,7 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 	t.Run("Fuzzy", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
-		req := NewRequest(t, "GET", "/user2/repo1/issues?fuzzy=true")
+		req := NewRequest(t, "GET", "/user2/repo1/issues?fuzzy=false")
 		resp := MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
@@ -1121,7 +1170,7 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 			assert.Contains(t, href, "&project=")
 			assert.Contains(t, href, "&assignee=")
 			assert.Contains(t, href, "&poster=")
-			assert.Contains(t, href, "&fuzzy=true")
+			assert.Contains(t, href, "&fuzzy=false")
 		})
 		assert.True(t, called)
 	})
@@ -1201,7 +1250,7 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 		assert.True(t, called)
 	})
 
-	t.Run("Miilestone", func(t *testing.T) {
+	t.Run("Milestone", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		req := NewRequest(t, "GET", "/user2/repo1/issues?milestone=1")
@@ -1375,5 +1424,41 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 			assert.Contains(t, href, "&archived=true")
 		})
 		assert.True(t, called)
+	})
+}
+
+func TestRepoSubmoduleView(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+		repo, _, f := tests.CreateDeclarativeRepo(t, user2, "", []unit_model.Type{unit_model.TypeCode}, nil, nil)
+		defer f()
+
+		// Clone the repository, add a submodule and push it.
+		dstPath := t.TempDir()
+
+		uClone := *u
+		uClone.Path = repo.FullName()
+		uClone.User = url.UserPassword(user2.Name, userPassword)
+
+		t.Run("Clone", doGitClone(dstPath, &uClone))
+
+		_, _, err := git.NewCommand(git.DefaultContext, "submodule", "add").AddDynamicArguments(u.JoinPath("/user2/repo1").String()).RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		_, _, err = git.NewCommand(git.DefaultContext, "add", "repo1", ".gitmodules").RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		_, _, err = git.NewCommand(git.DefaultContext, "commit", "-m", "add submodule").RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		_, _, err = git.NewCommand(git.DefaultContext, "push").RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		// Check that the submodule entry exist and the link is correct.
+		req := NewRequest(t, "GET", "/"+repo.FullName())
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, fmt.Sprintf(`tr[data-entryname="repo1"] a[href="%s"]`, u.JoinPath("/user2/repo1").String()), true)
 	})
 }

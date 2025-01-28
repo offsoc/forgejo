@@ -7,6 +7,7 @@
   target_url: https://example.com/builds/
   description: My awesome CI-service
   context: ci/awesomeness
+  context_hash: c65f4d64a3b14a3eced0c9b36799e66e1bd5ced7
   creator_id: 2
 
 -
@@ -18,6 +19,7 @@
   target_url: https://example.com/coverage/
   description: My awesome Coverage service
   context: cov/awesomeness
+  context_hash: 3929ac7bccd3fa1bf9b38ddedb77973b1b9a8cfe
   creator_id: 2
 
 -
@@ -29,6 +31,7 @@
   target_url: https://example.com/coverage/
   description: My awesome Coverage service
   context: cov/awesomeness
+  context_hash: 3929ac7bccd3fa1bf9b38ddedb77973b1b9a8cfe
   creator_id: 2
 
 -
@@ -40,6 +43,7 @@
   target_url: https://example.com/builds/
   description: My awesome CI-service
   context: ci/awesomeness
+  context_hash: c65f4d64a3b14a3eced0c9b36799e66e1bd5ced7
   creator_id: 2
 
 -
@@ -51,15 +55,41 @@
   target_url: https://example.com/builds/
   description: My awesome deploy service
   context: deploy/awesomeness
+  context_hash: ae9547713a6665fc4261d0756904932085a41cf2
   creator_id: 2
 
 -
   id: 6
-  index: 6
+  index: 1
   repo_id: 62
   state: "failure"
   sha: "774f93df12d14931ea93259ae93418da4482fcc1"
   target_url: "/user2/test_workflows/actions"
   description: My awesome deploy service
   context: deploy/awesomeness
+  context_hash: ae9547713a6665fc4261d0756904932085a41cf2
+  creator_id: 2
+
+-
+  id: 7
+  index: 6
+  repo_id: 1
+  state: "pending"
+  sha: "1234123412341234123412341234123412341234"
+  target_url: https://example.com/builds/
+  description: My awesome deploy service
+  context: deploy/awesomeness
+  context_hash: ae9547713a6665fc4261d0756904932085a41cf2
+  creator_id: 2
+
+-
+  id: 8
+  index: 2
+  repo_id: 62
+  state: "error"
+  sha: "774f93df12d14931ea93259ae93418da4482fcc1"
+  target_url: "/user2/test_workflows/actions"
+  description: "My awesome deploy service - v2"
+  context: deploy/awesomeness
+  context_hash: ae9547713a6665fc4261d0756904932085a41cf2
   creator_id: 2

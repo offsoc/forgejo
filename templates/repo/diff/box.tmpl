@@ -85,7 +85,6 @@
 			diffFileInfo.files.push(...diffDataFiles);
 			window.config.pageData.diffFileInfo = diffFileInfo;
 		</script>
-		<div id="diff-file-list"></div>
 	{{end}}
 	<div id="diff-container">
 		{{if $showFileTree}}
@@ -130,7 +129,7 @@
 								</div>
 								<span class="file tw-flex tw-items-center tw-font-mono tw-flex-1"><a class="muted file-link" title="{{if $file.IsRenamed}}{{$file.OldName}} → {{end}}{{$file.Name}}" href="#diff-{{$file.NameHash}}">{{if $file.IsRenamed}}{{$file.OldName}} → {{end}}{{$file.Name}}</a>
 									{{if .IsLFSFile}} ({{ctx.Locale.Tr "repo.stored_lfs"}}){{end}}
-									<button class="btn interact-fg tw-p-2" data-clipboard-text="{{$file.Name}}" data-tooltip-content="{{ctx.Locale.Tr "copy_generic"}}" aria-label="{{ctx.Locale.Tr "copy_generic"}}">{{svg "octicon-copy" 14}}</button>
+										<button class="btn interact-fg tw-p-2" data-clipboard-text="{{$file.Name}}" data-tooltip-content="{{ctx.Locale.Tr "copy_path"}}">{{svg "octicon-copy" 14}}</button>
 									{{if $file.IsGenerated}}
 										<span class="ui label">{{ctx.Locale.Tr "repo.diff.generated"}}</span>
 									{{end}}
@@ -248,8 +247,8 @@
 					</div>
 				{{end}}
 				<div class="text right edit buttons">
-					<button class="ui cancel button">{{ctx.Locale.Tr "repo.issues.cancel"}}</button>
-					<button class="ui primary save button">{{ctx.Locale.Tr "repo.issues.save"}}</button>
+					<button class="ui cancel button" data-button-name="cancel-edit">{{ctx.Locale.Tr "repo.issues.cancel"}}</button>
+					<button class="ui primary save button" data-button-name="save-edit">{{ctx.Locale.Tr "repo.issues.save"}}</button>
 				</div>
 			</div>
 		</template>

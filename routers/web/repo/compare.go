@@ -51,6 +51,7 @@ const (
 func setCompareContext(ctx *context.Context, before, head *git.Commit, headOwner, headName string) {
 	ctx.Data["BeforeCommit"] = before
 	ctx.Data["HeadCommit"] = head
+	ctx.Data["SignInLink"] = setting.AppSubURL + "/user/login?redirect_to=" + url.QueryEscape(ctx.Data["Link"].(string))
 
 	ctx.Data["GetBlobByPathForCommit"] = func(commit *git.Commit, path string) *git.Blob {
 		if commit == nil {
@@ -230,6 +231,13 @@ func ParseCompareInfo(ctx *context.Context) *common.CompareInfo {
 	if infoPath == "" {
 		infos = []string{baseRepo.DefaultBranch, baseRepo.DefaultBranch}
 	} else {
+		infoPath, isDiff := strings.CutSuffix(infoPath, ".diff")
+		ctx.Data["ComparingDiff"] = isDiff
+		if !isDiff {
+			var isPatch bool
+			infoPath, isPatch = strings.CutSuffix(infoPath, ".patch")
+			ctx.Data["ComparingPatch"] = isPatch
+		}
 		infos = strings.SplitN(infoPath, "...", 2)
 		if len(infos) != 2 {
 			if infos = strings.SplitN(infoPath, "..", 2); len(infos) == 2 {
@@ -611,6 +619,8 @@ func PrepareCompareDiff(
 		maxLines, maxFiles = -1, -1
 	}
 
+	fileOnly := ctx.FormBool("file-only")
+
 	diff, err := gitdiff.GetDiff(ctx, ci.HeadGitRepo,
 		&gitdiff.DiffOptions{
 			BeforeCommitID:     beforeCommitID,
@@ -621,6 +631,7 @@ func PrepareCompareDiff(
 			MaxFiles:           maxFiles,
 			WhitespaceBehavior: whitespaceBehavior,
 			DirectComparison:   ci.DirectComparison,
+			FileOnly:           fileOnly,
 		}, ctx.FormStrings("files")...)
 	if err != nil {
 		ctx.ServerError("GetDiffRangeWithWhitespaceBehavior", err)
@@ -713,6 +724,22 @@ func CompareDiff(ctx *context.Context) {
 		return
 	}
 
+	if ctx.Data["ComparingDiff"] != nil && ctx.Data["ComparingDiff"].(bool) {
+		err := git.GetRepoRawDiffForFile(ci.HeadGitRepo, ci.BaseBranch, ci.HeadBranch, git.RawDiffNormal, "", ctx.Resp)
+		if err != nil {
+			ctx.ServerError("ComparingDiff", err)
+			return
+		}
+	}
+
+	if ctx.Data["ComparingPatch"] != nil && ctx.Data["ComparingPatch"].(bool) {
+		err := git.GetRepoRawDiffForFile(ci.HeadGitRepo, ci.BaseBranch, ci.HeadBranch, git.RawDiffPatch, "", ctx.Resp)
+		if err != nil {
+			ctx.ServerError("ComparingPatch", err)
+			return
+		}
+	}
+
 	ctx.Data["PullRequestWorkInProgressPrefixes"] = setting.Repository.PullRequest.WorkInProgressPrefixes
 	ctx.Data["DirectComparison"] = ci.DirectComparison
 	ctx.Data["OtherCompareSeparator"] = ".."
@@ -798,7 +825,8 @@ func CompareDiff(ctx *context.Context) {
 	if ci.DirectComparison {
 		separator = ".."
 	}
-	ctx.Data["Title"] = "Comparing " + base.ShortSha(beforeCommitID) + separator + base.ShortSha(afterCommitID)
+	ctx.Data["Comparing"] = base.ShortSha(beforeCommitID) + separator + base.ShortSha(afterCommitID)
+	ctx.Data["Title"] = "Comparing " + ctx.Data["Comparing"].(string)
 
 	ctx.Data["IsDiffCompare"] = true
 	_, templateErrs := setTemplateIfExists(ctx, pullRequestTemplateKey, pullRequestTemplateCandidates)

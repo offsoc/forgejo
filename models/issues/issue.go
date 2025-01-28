@@ -268,6 +268,9 @@ func (issue *Issue) loadCommentsByType(ctx context.Context, tp CommentType) (err
 		IssueID: issue.ID,
 		Type:    tp,
 	})
+	for _, comment := range issue.Comments {
+		comment.Issue = issue
+	}
 	return err
 }
 
@@ -409,6 +412,11 @@ func (issue *Issue) HTMLURL() string {
 		path = "issues"
 	}
 	return fmt.Sprintf("%s/%s/%d", issue.Repo.HTMLURL(), path, issue.Index)
+}
+
+// SummaryCardURL returns the absolute URL to an image providing a summary of the issue
+func (issue *Issue) SummaryCardURL() string {
+	return fmt.Sprintf("%s/summary-card", issue.HTMLURL())
 }
 
 // Link returns the issue's relative URL.
@@ -644,7 +652,7 @@ func (issue *Issue) BlockedByDependencies(ctx context.Context, opts db.ListOptio
 		Where("issue_id = ?", issue.ID).
 		// sort by repo id then created date, with the issues of the same repo at the beginning of the list
 		OrderBy("CASE WHEN issue.repo_id = ? THEN 0 ELSE issue.repo_id END, issue.created_unix DESC", issue.RepoID)
-	if opts.Page != 0 {
+	if opts.Page > 0 {
 		sess = db.SetSessionPagination(sess, &opts)
 	}
 	err = sess.Find(&issueDeps)
@@ -875,7 +883,7 @@ func GetPinnedIssues(ctx context.Context, repoID int64, isPull bool) (IssueList,
 	return issues, nil
 }
 
-// IsNewPinnedAllowed returns if a new Issue or Pull request can be pinned
+// IsNewPinAllowed returns if a new Issue or Pull request can be pinned
 func IsNewPinAllowed(ctx context.Context, repoID int64, isPull bool) (bool, error) {
 	var maxPin int
 	_, err := db.GetEngine(ctx).SQL("SELECT COUNT(pin_order) FROM issue WHERE repo_id = ? AND is_pull = ? AND pin_order > 0", repoID, isPull).Get(&maxPin)

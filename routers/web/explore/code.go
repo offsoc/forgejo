@@ -21,12 +21,13 @@ const (
 
 // Code render explore code page
 func Code(ctx *context.Context) {
-	if !setting.Indexer.RepoIndexerEnabled {
+	if !setting.Indexer.RepoIndexerEnabled || setting.Service.Explore.DisableCodePage {
 		ctx.Redirect(setting.AppSubURL + "/explore")
 		return
 	}
 
-	ctx.Data["UsersIsDisabled"] = setting.Service.Explore.DisableUsersPage
+	ctx.Data["UsersPageIsDisabled"] = setting.Service.Explore.DisableUsersPage
+	ctx.Data["OrganizationsPageIsDisabled"] = setting.Service.Explore.DisableOrganizationsPage
 	ctx.Data["IsRepoIndexerEnabled"] = setting.Indexer.RepoIndexerEnabled
 	ctx.Data["Title"] = ctx.Tr("explore")
 	ctx.Data["PageIsExplore"] = true
@@ -34,6 +35,7 @@ func Code(ctx *context.Context) {
 
 	language := ctx.FormTrim("l")
 	keyword := ctx.FormTrim("q")
+	path := ctx.FormTrim("path")
 
 	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
 	if mode := ctx.FormTrim("mode"); len(mode) > 0 {
@@ -90,6 +92,7 @@ func Code(ctx *context.Context) {
 			Keyword:        keyword,
 			IsKeywordFuzzy: isFuzzy,
 			Language:       language,
+			Filename:       path,
 			Paginator: &db.ListOptions{
 				Page:     page,
 				PageSize: setting.UI.RepoSearchPagingNum,

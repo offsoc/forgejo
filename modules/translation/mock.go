@@ -31,6 +31,10 @@ func (l MockLocale) TrN(cnt any, key1, keyN string, args ...any) template.HTML {
 	return template.HTML(key1)
 }
 
+func (l MockLocale) TrPluralString(count any, trKey string, trArgs ...any) template.HTML {
+	return template.HTML(trKey)
+}
+
 func (l MockLocale) TrSize(s int64) ReadableSize {
 	return ReadableSize{fmt.Sprint(s), ""}
 }

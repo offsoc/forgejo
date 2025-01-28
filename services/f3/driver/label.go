@@ -7,6 +7,7 @@ package driver
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"code.gitea.io/gitea/models/db"
 	issues_model "code.gitea.io/gitea/models/issues"
@@ -45,7 +46,7 @@ func (o *label) ToFormat() f3.Interface {
 	return &f3.Label{
 		Common:      f3.NewCommon(fmt.Sprintf("%d", o.forgejoLabel.ID)),
 		Name:        o.forgejoLabel.Name,
-		Color:       o.forgejoLabel.Color,
+		Color:       strings.TrimPrefix(o.forgejoLabel.Color, "#"),
 		Description: o.forgejoLabel.Description,
 	}
 }
@@ -56,7 +57,7 @@ func (o *label) FromFormat(content f3.Interface) {
 		ID:          f3_util.ParseInt(label.GetID()),
 		Name:        label.Name,
 		Description: label.Description,
-		Color:       label.Color,
+		Color:       "#" + label.Color,
 	}
 }
 

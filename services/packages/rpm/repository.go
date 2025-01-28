@@ -622,7 +622,7 @@ func addDataAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersion,
 		return nil, err
 	}
 
-	_, _, hashSHA256, _ := content.Sums()
+	_, _, hashSHA256, _, _ := content.Sums()
 
 	return &repoData{
 		Type: filetype,

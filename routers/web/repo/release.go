@@ -168,6 +168,10 @@ func Releases(ctx *context.Context) {
 	// Disable the showCreateNewBranch form in the dropdown on this page.
 	ctx.Data["CanCreateBranch"] = false
 	ctx.Data["HideBranchesInDropdown"] = true
+	ctx.Data["ShowReleaseSearch"] = true
+
+	keyword := ctx.FormTrim("q")
+	ctx.Data["Keyword"] = keyword
 
 	listOptions := db.ListOptions{
 		Page:     ctx.FormInt("page"),
@@ -188,6 +192,7 @@ func Releases(ctx *context.Context) {
 		// only show draft releases for users who can write, read-only users shouldn't see draft releases.
 		IncludeDrafts: writeAccess,
 		RepoID:        ctx.Repo.Repository.ID,
+		Keyword:       keyword,
 	})
 	if err != nil {
 		ctx.ServerError("getReleaseInfos", err)
@@ -258,6 +263,10 @@ func TagsList(ctx *context.Context) {
 	ctx.Data["CanCreateBranch"] = false
 	ctx.Data["HideBranchesInDropdown"] = true
 	ctx.Data["CanCreateRelease"] = ctx.Repo.CanWrite(unit.TypeReleases) && !ctx.Repo.Repository.IsArchived
+	ctx.Data["ShowReleaseSearch"] = true
+
+	keyword := ctx.FormTrim("q")
+	ctx.Data["Keyword"] = keyword
 
 	listOptions := db.ListOptions{
 		Page:     ctx.FormInt("page"),
@@ -278,6 +287,7 @@ func TagsList(ctx *context.Context) {
 		IncludeTags:   true,
 		HasSha1:       optional.Some(true),
 		RepoID:        ctx.Repo.Repository.ID,
+		Keyword:       keyword,
 	}
 
 	releases, err := db.Find[repo_model.Release](ctx, opts)
@@ -355,11 +365,7 @@ func SingleRelease(ctx *context.Context) {
 	addVerifyTagToContext(ctx)
 
 	ctx.Data["PageIsSingleTag"] = release.IsTag
-	if release.IsTag {
-		ctx.Data["Title"] = release.TagName
-	} else {
-		ctx.Data["Title"] = release.Title
-	}
+	ctx.Data["Title"] = release.DisplayName()
 
 	err = release.LoadArchiveDownloadCount(ctx)
 	if err != nil {
@@ -368,6 +374,13 @@ func SingleRelease(ctx *context.Context) {
 	}
 
 	ctx.Data["Releases"] = releases
+
+	ctx.Data["OpenGraphTitle"] = fmt.Sprintf("%s - %s", release.DisplayName(), release.Repo.FullName())
+	ctx.Data["OpenGraphDescription"] = base.EllipsisString(release.Note, 300)
+	ctx.Data["OpenGraphURL"] = release.HTMLURL()
+	ctx.Data["OpenGraphImageURL"] = release.SummaryCardURL()
+	ctx.Data["OpenGraphImageAltText"] = ctx.Tr("repo.release.summary_card_alt", release.DisplayName(), release.Repo.FullName())
+
 	ctx.HTML(http.StatusOK, tplReleasesList)
 }
 

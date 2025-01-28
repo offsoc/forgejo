@@ -244,14 +244,15 @@ func addFileToPackageWrapper(ctx context.Context, fn func(ctx context.Context) (
 
 // NewPackageBlob creates a package blob instance
 func NewPackageBlob(hsr packages_module.HashedSizeReader) *packages_model.PackageBlob {
-	hashMD5, hashSHA1, hashSHA256, hashSHA512 := hsr.Sums()
+	hashMD5, hashSHA1, hashSHA256, hashSHA512, hashBlake2b := hsr.Sums()
 
 	return &packages_model.PackageBlob{
-		Size:       hsr.Size(),
-		HashMD5:    hex.EncodeToString(hashMD5),
-		HashSHA1:   hex.EncodeToString(hashSHA1),
-		HashSHA256: hex.EncodeToString(hashSHA256),
-		HashSHA512: hex.EncodeToString(hashSHA512),
+		Size:        hsr.Size(),
+		HashMD5:     hex.EncodeToString(hashMD5),
+		HashSHA1:    hex.EncodeToString(hashSHA1),
+		HashSHA256:  hex.EncodeToString(hashSHA256),
+		HashSHA512:  hex.EncodeToString(hashSHA512),
+		HashBlake2b: hex.EncodeToString(hashBlake2b),
 	}
 }
 
@@ -395,6 +396,8 @@ func CheckSizeQuotaExceeded(ctx context.Context, doer, owner *user_model.User, p
 		typeSpecificSize = setting.Packages.LimitSizePyPI
 	case packages_model.TypeRpm:
 		typeSpecificSize = setting.Packages.LimitSizeRpm
+	case packages_model.TypeAlt:
+		typeSpecificSize = setting.Packages.LimitSizeAlt
 	case packages_model.TypeRubyGems:
 		typeSpecificSize = setting.Packages.LimitSizeRubyGems
 	case packages_model.TypeSwift:
@@ -602,12 +605,12 @@ func GetPackageFileStream(ctx context.Context, pf *packages_model.PackageFile) (
 		return nil, nil, nil, err
 	}
 
-	return GetPackageBlobStream(ctx, pf, pb)
+	return GetPackageBlobStream(ctx, pf, pb, nil)
 }
 
 // GetPackageBlobStream returns the content of the specific package blob
 // If the storage supports direct serving and it's enabled, only the direct serving url is returned.
-func GetPackageBlobStream(ctx context.Context, pf *packages_model.PackageFile, pb *packages_model.PackageBlob) (io.ReadSeekCloser, *url.URL, *packages_model.PackageFile, error) {
+func GetPackageBlobStream(ctx context.Context, pf *packages_model.PackageFile, pb *packages_model.PackageBlob, serveDirectReqParams url.Values) (io.ReadSeekCloser, *url.URL, *packages_model.PackageFile, error) {
 	key := packages_module.BlobHash256Key(pb.HashSHA256)
 
 	cs := packages_module.NewContentStore()
@@ -617,7 +620,7 @@ func GetPackageBlobStream(ctx context.Context, pf *packages_model.PackageFile, p
 	var err error
 
 	if cs.ShouldServeDirect() {
-		u, err = cs.GetServeDirectURL(key, pf.Name)
+		u, err = cs.GetServeDirectURL(key, pf.Name, serveDirectReqParams)
 		if err != nil && !errors.Is(err, storage.ErrURLNotSupported) {
 			log.Error("Error getting serve direct url: %v", err)
 		}

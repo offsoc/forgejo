@@ -15,7 +15,6 @@ code.gitea.io/gitea/models
 	ErrUpdateTaskNotExist.Unwrap
 	IsErrSHANotFound
 	IsErrMergeDivergingFastForwardOnly
-	GetYamlFixturesAccess
 
 code.gitea.io/gitea/models/actions
 	ScheduleList.GetUserIDs
@@ -137,9 +136,6 @@ code.gitea.io/gitea/modules/git
 	AddChangesWithArgs
 	CommitChanges
 	CommitChangesWithArgs
-	IsErrExecTimeout
-	ErrExecTimeout.Error
-	ErrUnsupportedVersion.Error
 	SetUpdateHook
 	openRepositoryWithDefaultContext
 	IsTagExist
@@ -172,6 +168,9 @@ code.gitea.io/gitea/modules/json
 	StdJSON.NewEncoder
 	StdJSON.NewDecoder
 	StdJSON.Indent
+
+code.gitea.io/gitea/modules/log
+	NewEventWriterBuffer
 
 code.gitea.io/gitea/modules/markup
 	GetRendererByType
@@ -247,8 +246,12 @@ code.gitea.io/gitea/modules/translation
 	MockLocale.TrString
 	MockLocale.Tr
 	MockLocale.TrN
+	MockLocale.TrPluralString
 	MockLocale.TrSize
 	MockLocale.PrettyNumber
+
+code.gitea.io/gitea/modules/util
+	OptionalArg
 
 code.gitea.io/gitea/modules/util/filebuffer
 	CreateFromReader
@@ -288,9 +291,6 @@ code.gitea.io/gitea/services/pull
 
 code.gitea.io/gitea/services/repository
 	IsErrForkAlreadyExist
-
-code.gitea.io/gitea/services/repository/archiver
-	ArchiveRepository
 
 code.gitea.io/gitea/services/repository/files
 	ContentType.String

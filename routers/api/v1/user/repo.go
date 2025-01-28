@@ -106,6 +106,10 @@ func ListMyRepos(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/RepositoryList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "422":
 	//     "$ref": "#/responses/validationError"
 
@@ -130,7 +134,6 @@ func ListMyRepos(ctx *context.APIContext) {
 		return
 	}
 
-	var err error
 	repos, count, err := repo_model.SearchRepository(ctx, opts)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "SearchRepository", err)

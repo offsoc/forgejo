@@ -28,6 +28,7 @@ func TestOrgRepos(t *testing.T) {
 		users = []string{"user1", "user2"}
 		cases = map[string][]string{
 			"alphabetically":        {"repo21", "repo3", "repo5"},
+			"recentupdate":          {"repo21", "repo5", "repo3"},
 			"reversealphabetically": {"repo5", "repo3", "repo21"},
 		}
 	)

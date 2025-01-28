@@ -8,7 +8,6 @@
 package e2e
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/url"
@@ -41,16 +40,11 @@ func TestMain(m *testing.M) {
 	initChangedFiles()
 	testE2eWebRoutes = routers.NormalRoutes()
 
-	os.Unsetenv("GIT_AUTHOR_NAME")
-	os.Unsetenv("GIT_AUTHOR_EMAIL")
-	os.Unsetenv("GIT_AUTHOR_DATE")
-	os.Unsetenv("GIT_COMMITTER_NAME")
-	os.Unsetenv("GIT_COMMITTER_EMAIL")
-	os.Unsetenv("GIT_COMMITTER_DATE")
-
 	err := unittest.InitFixtures(
 		unittest.FixturesOptions{
-			Dir: filepath.Join(filepath.Dir(setting.AppPath), "models/fixtures/"),
+			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
+			Base: setting.AppWorkPath,
+			Dirs: []string{"tests/e2e/fixtures/"},
 		},
 	)
 	if err != nil {
@@ -78,7 +72,7 @@ func TestMain(m *testing.M) {
 // TestE2e should be the only test e2e necessary. It will collect all "*.test.e2e.js" files in this directory and build a test for each.
 func TestE2e(t *testing.T) {
 	// Find the paths of all e2e test files in test directory.
-	searchGlob := filepath.Join(filepath.Dir(setting.AppPath), "tests", "e2e", "*.test.e2e.js")
+	searchGlob := filepath.Join(filepath.Dir(setting.AppPath), "tests", "e2e", "*.test.e2e.ts")
 	paths, err := filepath.Glob(searchGlob)
 	if err != nil {
 		t.Fatal(err)
@@ -88,6 +82,7 @@ func TestE2e(t *testing.T) {
 
 	runArgs := []string{"npx", "playwright", "test"}
 
+	_, testVisual := os.LookupEnv("VISUAL_TEST")
 	// To update snapshot outputs
 	if _, set := os.LookupEnv("ACCEPT_VISUAL"); set {
 		runArgs = append(runArgs, "--update-snapshots")
@@ -111,24 +106,22 @@ func TestE2e(t *testing.T) {
 			onForgejoRun(t, func(*testing.T, *url.URL) {
 				defer DeclareGitRepos(t)()
 				thisTest := runArgs
+				// when all tests are run, use unique artifacts directories per test to preserve artifacts from other tests
+				if testVisual {
+					thisTest = append(thisTest, "--output=tests/e2e/test-artifacts/"+testname)
+				}
 				thisTest = append(thisTest, path)
 				cmd := exec.Command(runArgs[0], thisTest...)
 				cmd.Env = os.Environ()
 				cmd.Env = append(cmd.Env, fmt.Sprintf("GITEA_URL=%s", setting.AppURL))
 
-				var stdout, stderr bytes.Buffer
-				cmd.Stdout = &stdout
-				cmd.Stderr = &stderr
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
 
 				err := cmd.Run()
-				if err != nil {
-					// Currently colored output is conflicting. Using Printf until that is resolved.
-					fmt.Printf("%v", stdout.String())
-					fmt.Printf("%v", stderr.String())
+				if err != nil && !testVisual {
 					log.Fatal("Playwright Failed: %s", err)
 				}
-
-				fmt.Printf("%v", stdout.String())
 			})
 		})
 	}

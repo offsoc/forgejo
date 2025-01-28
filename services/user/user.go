@@ -33,6 +33,19 @@ import (
 
 // RenameUser renames a user
 func RenameUser(ctx context.Context, u *user_model.User, newUserName string) error {
+	return renameUser(ctx, u, newUserName, false)
+}
+
+// RenameUser renames a user as an admin.
+func AdminRenameUser(ctx context.Context, u *user_model.User, newUserName string) error {
+	return renameUser(ctx, u, newUserName, true)
+}
+
+func renameUser(ctx context.Context, u *user_model.User, newUserName string, doerIsAdmin bool) error {
+	if newUserName == u.Name {
+		return nil
+	}
+
 	// Non-local users are not allowed to change their username.
 	if !u.IsOrganization() && !u.IsLocal() {
 		return user_model.ErrUserIsNotLocal{
@@ -41,12 +54,19 @@ func RenameUser(ctx context.Context, u *user_model.User, newUserName string) err
 		}
 	}
 
-	if newUserName == u.Name {
-		return nil
-	}
-
 	if err := user_model.IsUsableUsername(newUserName); err != nil {
 		return err
+	}
+
+	// Check if the new username can be claimed.
+	if !doerIsAdmin {
+		if ok, expireTime, err := user_model.CanClaimUsername(ctx, newUserName, u.ID); err != nil {
+			return err
+		} else if !ok {
+			return user_model.ErrCooldownPeriod{
+				ExpireTime: expireTime,
+			}
+		}
 	}
 
 	onlyCapitalization := strings.EqualFold(newUserName, u.Name)
@@ -83,6 +103,12 @@ func RenameUser(ctx context.Context, u *user_model.User, newUserName string) err
 
 	if err = user_model.NewUserRedirect(ctx, u.ID, oldUserName, newUserName); err != nil {
 		return err
+	}
+
+	if setting.Service.MaxUserRedirects > 0 {
+		if err := user_model.LimitUserRedirects(ctx, u.ID, setting.Service.MaxUserRedirects); err != nil {
+			return err
+		}
 	}
 
 	if err := agit.UserNameChanged(ctx, u, newUserName); err != nil {
@@ -129,6 +155,16 @@ func DeleteUser(ctx context.Context, u *user_model.User, purge bool) error {
 
 	if user_model.IsLastAdminUser(ctx, u) {
 		return models.ErrDeleteLastAdminUser{UID: u.ID}
+	}
+
+	hasSSHKey, err := db.GetEngine(ctx).Where("owner_id = ? AND type != ?", u.ID, asymkey_model.KeyTypePrincipal).Table("public_key").Exist()
+	if err != nil {
+		return err
+	}
+
+	hasPrincipialSSHKey, err := db.GetEngine(ctx).Where("owner_id = ? AND type = ?", u.ID, asymkey_model.KeyTypePrincipal).Table("public_key").Exist()
+	if err != nil {
+		return err
 	}
 
 	if purge {
@@ -260,11 +296,16 @@ func DeleteUser(ctx context.Context, u *user_model.User, purge bool) error {
 	}
 	committer.Close()
 
-	if err = asymkey_model.RewriteAllPublicKeys(ctx); err != nil {
-		return err
+	if hasSSHKey {
+		if err = asymkey_model.RewriteAllPublicKeys(ctx); err != nil {
+			return err
+		}
 	}
-	if err = asymkey_model.RewriteAllPrincipalKeys(ctx); err != nil {
-		return err
+
+	if hasPrincipialSSHKey {
+		if err = asymkey_model.RewriteAllPrincipalKeys(ctx); err != nil {
+			return err
+		}
 	}
 
 	// Note: There are something just cannot be roll back,
@@ -306,6 +347,7 @@ func DeleteInactiveUsers(ctx context.Context, olderThan time.Duration) error {
 			// Ignore users that were set inactive by admin.
 			if models.IsErrUserOwnRepos(err) || models.IsErrUserHasOrgs(err) ||
 				models.IsErrUserOwnPackages(err) || models.IsErrDeleteLastAdminUser(err) {
+				log.Warn("Inactive user %q has repositories, organizations or packages, skipping deletion: %v", u.Name, err)
 				continue
 			}
 			return err

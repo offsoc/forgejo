@@ -103,7 +103,7 @@ import (
 
 	_ "code.gitea.io/gitea/routers/api/v1/swagger" // for swagger generation
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 )
 
 func sudo() func(ctx *context.APIContext) {
@@ -395,8 +395,16 @@ func reqToken() func(ctx *context.APIContext) {
 
 func reqExploreSignIn() func(ctx *context.APIContext) {
 	return func(ctx *context.APIContext) {
-		if setting.Service.Explore.RequireSigninView && !ctx.IsSigned {
+		if (setting.Service.RequireSignInView || setting.Service.Explore.RequireSigninView) && !ctx.IsSigned {
 			ctx.Error(http.StatusUnauthorized, "reqExploreSignIn", "you must be signed in to search for users")
+		}
+	}
+}
+
+func reqUsersExploreEnabled() func(ctx *context.APIContext) {
+	return func(ctx *context.APIContext) {
+		if setting.Service.Explore.DisableUsersPage {
+			ctx.NotFound()
 		}
 	}
 }
@@ -814,6 +822,7 @@ func Routes() *web.Route {
 
 			m.Group("/runners", func() {
 				m.Get("/registration-token", reqToken(), reqChecker, act.GetRegistrationToken)
+				m.Get("/jobs", reqToken(), reqChecker, act.SearchActionRunJobs)
 			})
 		})
 	}
@@ -887,7 +896,7 @@ func Routes() *web.Route {
 
 		// Users (requires user scope)
 		m.Group("/users", func() {
-			m.Get("/search", reqExploreSignIn(), user.Search)
+			m.Get("/search", reqExploreSignIn(), reqUsersExploreEnabled(), user.Search)
 
 			m.Group("/{username}", func() {
 				m.Get("", reqExploreSignIn(), user.GetInfo)
@@ -899,9 +908,9 @@ func Routes() *web.Route {
 				m.Get("/repos", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), reqExploreSignIn(), user.ListUserRepos)
 				m.Group("/tokens", func() {
 					m.Combo("").Get(user.ListAccessTokens).
-						Post(bind(api.CreateAccessTokenOption{}), reqToken(), user.CreateAccessToken)
-					m.Combo("/{id}").Delete(reqToken(), user.DeleteAccessToken)
-				}, reqSelfOrAdmin(), reqBasicOrRevProxyAuth())
+						Post(bind(api.CreateAccessTokenOption{}), reqBasicOrRevProxyAuth(), reqToken(), user.CreateAccessToken)
+					m.Combo("/{id}").Delete(reqBasicOrRevProxyAuth(), reqToken(), user.DeleteAccessToken)
+				}, reqSelfOrAdmin())
 
 				m.Get("/activities/feeds", user.ListUserActivityFeeds)
 			}, context.UserAssignmentAPI(), checkTokenPublicOnly(), individualPermsChecker)
@@ -967,6 +976,7 @@ func Routes() *web.Route {
 
 				m.Group("/runners", func() {
 					m.Get("/registration-token", reqToken(), user.GetRegistrationToken)
+					m.Get("/jobs", reqToken(), user.SearchActionRunJobs)
 				})
 			})
 
@@ -1145,6 +1155,7 @@ func Routes() *web.Route {
 					m.Get("/*", repo.GetBranch)
 					m.Delete("/*", reqToken(), reqRepoWriter(unit.TypeCode), mustNotBeArchived, repo.DeleteBranch)
 					m.Post("", reqToken(), reqRepoWriter(unit.TypeCode), mustNotBeArchived, bind(api.CreateBranchRepoOption{}), context.EnforceQuotaAPI(quota_model.LimitSubjectSizeGitAll, context.QuotaTargetRepo), repo.CreateBranch)
+					m.Patch("/*", reqToken(), reqRepoWriter(unit.TypeCode), mustNotBeArchived, bind(api.UpdateBranchRepoOption{}), repo.UpdateBranch)
 				}, context.ReferencesGitRepo(), reqRepoReader(unit.TypeCode))
 				m.Group("/branch_protections", func() {
 					m.Get("", repo.ListBranchProtections)
@@ -1308,7 +1319,11 @@ func Routes() *web.Route {
 					m.Get("/trees/{sha}", repo.GetTree)
 					m.Get("/blobs/{sha}", repo.GetBlob)
 					m.Get("/tags/{sha}", repo.GetAnnotatedTag)
-					m.Get("/notes/{sha}", repo.GetNote)
+					m.Group("/notes/{sha}", func() {
+						m.Get("", repo.GetNote)
+						m.Post("", reqToken(), reqRepoWriter(unit.TypeCode), bind(api.NoteOptions{}), repo.SetNote)
+						m.Delete("", reqToken(), reqRepoWriter(unit.TypeCode), repo.RemoveNote)
+					})
 				}, context.ReferencesGitRepo(true), reqRepoReader(unit.TypeCode))
 				m.Post("/diffpatch", reqRepoWriter(unit.TypeCode), reqToken(), bind(api.ApplyDiffPatchFileOptions{}), mustNotBeArchived, context.EnforceQuotaAPI(quota_model.LimitSubjectSizeReposAll, context.QuotaTargetRepo), repo.ApplyDiffPatch)
 				m.Group("/contents", func() {
@@ -1340,6 +1355,8 @@ func Routes() *web.Route {
 					m.Post("", bind(api.UpdateRepoAvatarOption{}), repo.UpdateAvatar)
 					m.Delete("", repo.DeleteAvatar)
 				}, reqAdmin(), reqToken())
+
+				m.Get("/{ball_type:tarball|zipball|bundle}/*", reqRepoReader(unit.TypeCode), repo.DownloadArchive)
 			}, repoAssignment(), checkTokenPublicOnly())
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository))
 
@@ -1616,6 +1633,7 @@ func Routes() *web.Route {
 			})
 			m.Group("/runners", func() {
 				m.Get("/registration-token", admin.GetRegistrationToken)
+				m.Get("/jobs", admin.SearchActionRunJobs)
 			})
 			if setting.Quota.Enabled {
 				m.Group("/quota", func() {

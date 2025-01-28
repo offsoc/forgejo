@@ -64,7 +64,10 @@ func GetRepoRawDiffForFile(repo *Repository, startCommit, endCommit string, diff
 		} else if commit.ParentCount() == 0 {
 			cmd.AddArguments("show").AddDynamicArguments(endCommit).AddDashesAndList(files...)
 		} else {
-			c, _ := commit.Parent(0)
+			c, err := commit.Parent(0)
+			if err != nil {
+				return err
+			}
 			cmd.AddArguments("diff", "-M").AddDynamicArguments(c.ID.String(), endCommit).AddDashesAndList(files...)
 		}
 	case RawDiffPatch:
@@ -74,7 +77,10 @@ func GetRepoRawDiffForFile(repo *Repository, startCommit, endCommit string, diff
 		} else if commit.ParentCount() == 0 {
 			cmd.AddArguments("format-patch", "--no-signature", "--stdout", "--root").AddDynamicArguments(endCommit).AddDashesAndList(files...)
 		} else {
-			c, _ := commit.Parent(0)
+			c, err := commit.Parent(0)
+			if err != nil {
+				return err
+			}
 			query := fmt.Sprintf("%s...%s", endCommit, c.ID.String())
 			cmd.AddArguments("format-patch", "--no-signature", "--stdout").AddDynamicArguments(query).AddDashesAndList(files...)
 		}
@@ -272,6 +278,17 @@ func CutDiffAroundLine(originalDiff io.Reader, line int64, old bool, numbersOfLi
 
 // GetAffectedFiles returns the affected files between two commits
 func GetAffectedFiles(repo *Repository, oldCommitID, newCommitID string, env []string) ([]string, error) {
+	objectFormat, err := repo.GetObjectFormat()
+	if err != nil {
+		return nil, err
+	}
+
+	// If the oldCommitID is empty, then we must assume its a new branch, so diff
+	// against the empty tree. So all changes of this new branch are included.
+	if oldCommitID == objectFormat.EmptyObjectID().String() {
+		oldCommitID = objectFormat.EmptyTree().String()
+	}
+
 	stdoutReader, stdoutWriter, err := os.Pipe()
 	if err != nil {
 		log.Error("Unable to create os.Pipe for %s", repo.Path)

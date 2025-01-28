@@ -47,6 +47,12 @@ func Home(ctx *context.Context) {
 	ctx.Data["PageIsUserProfile"] = true
 	ctx.Data["Title"] = org.DisplayName()
 
+	ctx.Data["OpenGraphTitle"] = ctx.ContextUser.DisplayName()
+	ctx.Data["OpenGraphType"] = "profile"
+	ctx.Data["OpenGraphImageURL"] = ctx.ContextUser.AvatarLink(ctx)
+	ctx.Data["OpenGraphURL"] = ctx.ContextUser.HTMLURL()
+	ctx.Data["OpenGraphDescription"] = ctx.ContextUser.Description
+
 	var orderBy db.SearchOrderBy
 	sortOrder := ctx.FormString("sort")
 	if _, ok := repo_model.OrderByFlatMap[sortOrder]; !ok {
@@ -110,10 +116,12 @@ func Home(ctx *context.Context) {
 	}
 
 	opts := &organization.FindOrgMembersOpts{
-		OrgID:       org.ID,
-		PublicOnly:  ctx.Org.PublicMemberOnly,
-		ListOptions: db.ListOptions{Page: 1, PageSize: 25},
+		Doer:         ctx.Doer,
+		OrgID:        org.ID,
+		IsDoerMember: ctx.Org.IsMember,
+		ListOptions:  db.ListOptions{Page: 1, PageSize: 25},
 	}
+
 	members, _, err := organization.FindOrgMembers(ctx, opts)
 	if err != nil {
 		ctx.ServerError("FindOrgMembers", err)

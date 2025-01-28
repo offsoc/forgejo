@@ -4,11 +4,14 @@
 package organization_test
 
 import (
+	"sort"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/organization"
+	"code.gitea.io/gitea/models/perm"
 	repo_model "code.gitea.io/gitea/models/repo"
+	"code.gitea.io/gitea/models/unit"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/structs"
@@ -104,7 +107,7 @@ func TestUser_GetTeams(t *testing.T) {
 func TestUser_GetMembers(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	org := unittest.AssertExistsAndLoadBean(t, &organization.Organization{ID: 3})
-	members, _, err := org.GetMembers(db.DefaultContext)
+	members, _, err := org.GetMembers(db.DefaultContext, &user_model.User{IsAdmin: true})
 	require.NoError(t, err)
 	if assert.Len(t, members, 3) {
 		assert.Equal(t, int64(2), members[0].ID)
@@ -126,15 +129,6 @@ func TestGetOrgByName(t *testing.T) {
 
 	_, err = organization.GetOrgByName(db.DefaultContext, "") // corner case
 	assert.True(t, organization.IsErrOrgNotExist(err))
-}
-
-func TestCountOrganizations(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-	expected, err := db.GetEngine(db.DefaultContext).Where("type=?", user_model.UserTypeOrganization).Count(&organization.Organization{})
-	require.NoError(t, err)
-	cnt, err := db.Count[organization.Organization](db.DefaultContext, organization.FindOrgOptions{IncludePrivate: true})
-	require.NoError(t, err)
-	assert.Equal(t, expected, cnt)
 }
 
 func TestIsOrganizationOwner(t *testing.T) {
@@ -181,67 +175,45 @@ func TestIsPublicMembership(t *testing.T) {
 	test(unittest.NonexistentID, unittest.NonexistentID, false)
 }
 
-func TestFindOrgs(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-
-	orgs, err := db.Find[organization.Organization](db.DefaultContext, organization.FindOrgOptions{
-		UserID:         4,
-		IncludePrivate: true,
-	})
-	require.NoError(t, err)
-	if assert.Len(t, orgs, 1) {
-		assert.EqualValues(t, 3, orgs[0].ID)
-	}
-
-	orgs, err = db.Find[organization.Organization](db.DefaultContext, organization.FindOrgOptions{
-		UserID:         4,
-		IncludePrivate: false,
-	})
-	require.NoError(t, err)
-	assert.Empty(t, orgs)
-
-	total, err := db.Count[organization.Organization](db.DefaultContext, organization.FindOrgOptions{
-		UserID:         4,
-		IncludePrivate: true,
-	})
-	require.NoError(t, err)
-	assert.EqualValues(t, 1, total)
-}
-
 func TestGetOrgUsersByOrgID(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
-	orgUsers, err := organization.GetOrgUsersByOrgID(db.DefaultContext, &organization.FindOrgMembersOpts{
-		ListOptions: db.ListOptions{},
-		OrgID:       3,
-		PublicOnly:  false,
-	})
-	require.NoError(t, err)
-	if assert.Len(t, orgUsers, 3) {
-		assert.Equal(t, organization.OrgUser{
-			ID:       orgUsers[0].ID,
-			OrgID:    3,
-			UID:      2,
-			IsPublic: true,
-		}, *orgUsers[0])
-		assert.Equal(t, organization.OrgUser{
-			ID:       orgUsers[1].ID,
-			OrgID:    3,
-			UID:      4,
-			IsPublic: false,
-		}, *orgUsers[1])
-		assert.Equal(t, organization.OrgUser{
-			ID:       orgUsers[2].ID,
-			OrgID:    3,
-			UID:      28,
-			IsPublic: true,
-		}, *orgUsers[2])
+	opts := &organization.FindOrgMembersOpts{
+		Doer:  &user_model.User{IsAdmin: true},
+		OrgID: 3,
 	}
+	assert.False(t, opts.PublicOnly())
+	orgUsers, err := organization.GetOrgUsersByOrgID(db.DefaultContext, opts)
+	require.NoError(t, err)
+	sort.Slice(orgUsers, func(i, j int) bool {
+		return orgUsers[i].ID < orgUsers[j].ID
+	})
+	assert.EqualValues(t, []*organization.OrgUser{{
+		ID:       1,
+		OrgID:    3,
+		UID:      2,
+		IsPublic: true,
+	}, {
+		ID:       2,
+		OrgID:    3,
+		UID:      4,
+		IsPublic: false,
+	}, {
+		ID:       9,
+		OrgID:    3,
+		UID:      28,
+		IsPublic: true,
+	}}, orgUsers)
+
+	opts = &organization.FindOrgMembersOpts{OrgID: 3}
+	assert.True(t, opts.PublicOnly())
+	orgUsers, err = organization.GetOrgUsersByOrgID(db.DefaultContext, opts)
+	require.NoError(t, err)
+	assert.Len(t, orgUsers, 2)
 
 	orgUsers, err = organization.GetOrgUsersByOrgID(db.DefaultContext, &organization.FindOrgMembersOpts{
 		ListOptions: db.ListOptions{},
 		OrgID:       unittest.NonexistentID,
-		PublicOnly:  false,
 	})
 	require.NoError(t, err)
 	assert.Empty(t, orgUsers)
@@ -299,8 +271,8 @@ func TestAccessibleReposEnv_RepoIDs(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, expectedRepoIDs, repoIDs)
 	}
-	testSuccess(2, []int64{3, 5, 32})
-	testSuccess(4, []int64{3, 32})
+	testSuccess(2, []int64{32, 5, 3})
+	testSuccess(4, []int64{32, 3})
 }
 
 func TestAccessibleReposEnv_Repos(t *testing.T) {
@@ -318,8 +290,8 @@ func TestAccessibleReposEnv_Repos(t *testing.T) {
 		}
 		assert.Equal(t, expectedRepos, repos)
 	}
-	testSuccess(2, []int64{3, 5, 32})
-	testSuccess(4, []int64{3, 32})
+	testSuccess(2, []int64{32, 5, 3})
+	testSuccess(4, []int64{32, 3})
 }
 
 func TestAccessibleReposEnv_MirrorRepos(t *testing.T) {
@@ -511,4 +483,36 @@ func TestCreateOrganization4(t *testing.T) {
 	require.Error(t, err)
 	assert.True(t, db.IsErrNameReserved(err))
 	unittest.CheckConsistencyFor(t, &organization.Organization{}, &organization.Team{})
+}
+
+func TestUnitPermission(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	publicOrg := &organization.Organization{ID: 1001, Visibility: structs.VisibleTypePublic}
+	limitedOrg := &organization.Organization{ID: 1001, Visibility: structs.VisibleTypeLimited}
+	privateOrg := &organization.Organization{ID: 1001, Visibility: structs.VisibleTypePrivate}
+	user := &user_model.User{ID: 1001}
+	t.Run("Anonymous", func(t *testing.T) {
+		t.Run("Public", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeRead, publicOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
+		})
+		t.Run("Limited", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeNone, limitedOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
+		})
+		t.Run("Private", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeNone, privateOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
+		})
+	})
+
+	t.Run("Logged in", func(t *testing.T) {
+		t.Run("Public", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeRead, publicOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
+		})
+		t.Run("Limited", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeRead, limitedOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
+		})
+		t.Run("Private", func(t *testing.T) {
+			assert.EqualValues(t, perm.AccessModeNone, privateOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
+		})
+	})
 }

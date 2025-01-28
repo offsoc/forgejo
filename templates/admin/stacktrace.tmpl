@@ -8,11 +8,12 @@
 				<a class="{{if eq .ShowGoroutineList "stacktrace"}}active {{end}}item" href="?show=stacktrace">{{ctx.Locale.Tr "admin.monitor.stacktrace"}}</a>
 			</div>
 		</div>
-		<form target="_blank" action="{{AppSubUrl}}/admin/monitor/diagnosis" class="ui form">
-			<div class="ui inline field">
-				<button class="ui primary small button">{{ctx.Locale.Tr "admin.monitor.download_diagnosis_report"}}</button>
-				<input name="seconds" size="3" maxlength="3" value="10"> {{ctx.Locale.Tr "tool.raw_seconds"}}
-			</div>
+		<form target="_blank" action="{{AppSubUrl}}/admin/monitor/diagnosis" class="ui form tw-flex tw-gap-3">
+			<label class="tw-flex tw-gap-2 tw-items-center tw-whitespace-nowrap">
+				{{ctx.Locale.Tr "admin.monitor.duration"}}
+				<input type="number" name="seconds" max="300" min="0" value="10">
+			</label>
+			<button class="ui primary small button">{{ctx.Locale.Tr "admin.monitor.download_diagnosis_report"}}</button>
 		</form>
 	</div>
 

@@ -105,6 +105,7 @@ func (g *GiteaLocalUploader) CreateRepo(repo *base.Repository, opts base.Migrate
 		r, err = repo_service.CreateRepositoryDirectly(g.ctx, g.doer, owner, repo_service.CreateRepoOptions{
 			Name:           g.repoName,
 			Description:    repo.Description,
+			Website:        repo.Website,
 			OriginalURL:    repo.OriginalURL,
 			GitServiceType: opts.GitServiceType,
 			IsPrivate:      opts.Private || setting.Repository.ForcePrivate,
@@ -119,20 +120,17 @@ func (g *GiteaLocalUploader) CreateRepo(repo *base.Repository, opts base.Migrate
 	}
 	r.DefaultBranch = repo.DefaultBranch
 	r.Description = repo.Description
+	r.Website = repo.Website
 
 	r, err = repo_service.MigrateRepositoryGitData(g.ctx, owner, r, base.MigrateOptions{
-		RepoName:       g.repoName,
-		Description:    repo.Description,
-		OriginalURL:    repo.OriginalURL,
-		GitServiceType: opts.GitServiceType,
-		Mirror:         repo.IsMirror,
+		CloneAddr:      repo.CloneURL, // SECURITY: we will assume that this has already been checked
 		LFS:            opts.LFS,
 		LFSEndpoint:    opts.LFSEndpoint,
-		CloneAddr:      repo.CloneURL, // SECURITY: we will assume that this has already been checked
-		Private:        repo.IsPrivate,
-		Wiki:           opts.Wiki,
-		Releases:       opts.Releases, // if didn't get releases, then sync them from tags
+		Mirror:         repo.IsMirror,
 		MirrorInterval: opts.MirrorInterval,
+		Releases:       opts.Releases, // if didn't get releases, then sync them from tags
+		RepoName:       g.repoName,
+		Wiki:           opts.Wiki,
 	}, NewMigrationHTTPTransport())
 
 	g.sameApp = strings.HasPrefix(repo.OriginalURL, setting.AppURL)
@@ -760,10 +758,15 @@ func (g *GiteaLocalUploader) newPullRequest(pr *base.PullRequest) (*issues_model
 		pr.Updated = pr.Created
 	}
 
+	prTitle := pr.Title
+	if pr.IsDraft && !issues_model.HasWorkInProgressPrefix(pr.Title) {
+		prTitle = fmt.Sprintf("%s %s", setting.Repository.PullRequest.WorkInProgressPrefixes[0], pr.Title)
+	}
+
 	issue := issues_model.Issue{
 		RepoID:      g.repo.ID,
 		Repo:        g.repo,
-		Title:       pr.Title,
+		Title:       prTitle,
 		Index:       pr.Number,
 		Content:     pr.Content,
 		MilestoneID: milestoneID,

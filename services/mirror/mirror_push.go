@@ -172,7 +172,7 @@ func runPushSync(ctx context.Context, m *repo_model.PushMirror) error {
 
 		// OpenSSH isn't very intuitive when you want to specify a specific keypair.
 		// Therefore, we need to create a temporary file that stores the private key, so that OpenSSH can use it.
-		// We delete the the temporary file afterwards.
+		// We delete the temporary file afterwards.
 		privateKeyPath := ""
 		if m.PublicKey != "" {
 			f, err := os.CreateTemp(os.TempDir(), m.RemoteName)

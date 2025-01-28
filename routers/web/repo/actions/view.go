@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"net/url"
@@ -19,12 +20,16 @@ import (
 
 	actions_model "code.gitea.io/gitea/models/actions"
 	"code.gitea.io/gitea/models/db"
+	git_model "code.gitea.io/gitea/models/git"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
 	"code.gitea.io/gitea/modules/actions"
 	"code.gitea.io/gitea/modules/base"
+	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/storage"
+	"code.gitea.io/gitea/modules/templates"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
@@ -108,16 +113,17 @@ type ViewRequest struct {
 type ViewResponse struct {
 	State struct {
 		Run struct {
-			Link              string     `json:"link"`
-			Title             string     `json:"title"`
-			Status            string     `json:"status"`
-			CanCancel         bool       `json:"canCancel"`
-			CanApprove        bool       `json:"canApprove"` // the run needs an approval and the doer has permission to approve
-			CanRerun          bool       `json:"canRerun"`
-			CanDeleteArtifact bool       `json:"canDeleteArtifact"`
-			Done              bool       `json:"done"`
-			Jobs              []*ViewJob `json:"jobs"`
-			Commit            ViewCommit `json:"commit"`
+			Link              string        `json:"link"`
+			Title             string        `json:"title"`
+			TitleHTML         template.HTML `json:"titleHTML"`
+			Status            string        `json:"status"`
+			CanCancel         bool          `json:"canCancel"`
+			CanApprove        bool          `json:"canApprove"` // the run needs an approval and the doer has permission to approve
+			CanRerun          bool          `json:"canRerun"`
+			CanDeleteArtifact bool          `json:"canDeleteArtifact"`
+			Done              bool          `json:"done"`
+			Jobs              []*ViewJob    `json:"jobs"`
+			Commit            ViewCommit    `json:"commit"`
 		} `json:"run"`
 		CurrentJob struct {
 			Title  string         `json:"title"`
@@ -154,8 +160,9 @@ type ViewUser struct {
 }
 
 type ViewBranch struct {
-	Name string `json:"name"`
-	Link string `json:"link"`
+	Name      string `json:"name"`
+	Link      string `json:"link"`
+	IsDeleted bool   `json:"isDeleted"`
 }
 
 type ViewJobStep struct {
@@ -194,7 +201,10 @@ func ViewPost(ctx *context_module.Context) {
 
 	resp := &ViewResponse{}
 
+	metas := ctx.Repo.Repository.ComposeMetas(ctx)
+
 	resp.State.Run.Title = run.Title
+	resp.State.Run.TitleHTML = templates.RenderCommitMessage(ctx, run.Title, metas)
 	resp.State.Run.Link = run.Link()
 	resp.State.Run.CanCancel = !run.Status.IsDone() && ctx.Repo.CanWrite(unit.TypeActions)
 	resp.State.Run.CanApprove = run.NeedApproval && ctx.Repo.CanWrite(unit.TypeActions)
@@ -221,6 +231,16 @@ func ViewPost(ctx *context_module.Context) {
 		Name: run.PrettyRef(),
 		Link: run.RefLink(),
 	}
+	refName := git.RefName(run.Ref)
+	if refName.IsBranch() {
+		b, err := git_model.GetBranch(ctx, ctx.Repo.Repository.ID, refName.ShortName())
+		if err != nil && !git_model.IsErrBranchNotExist(err) {
+			log.Error("GetBranch: %v", err)
+		} else if git_model.IsErrBranchNotExist(err) || (b != nil && b.IsDeleted) {
+			branch.IsDeleted = true
+		}
+	}
+
 	resp.State.Run.Commit = ViewCommit{
 		LocaleCommit:   ctx.Locale.TrString("actions.runs.commit"),
 		LocalePushedBy: ctx.Locale.TrString("actions.runs.pushed_by"),
@@ -307,7 +327,6 @@ func ViewPost(ctx *context_module.Context) {
 			if validCursor {
 				length := step.LogLength - cursor.Cursor
 				offset := task.LogIndexes[index]
-				var err error
 				logRows, err := actions.ReadLogs(ctx, task.LogInStorage, task.LogFilename, offset, length)
 				if err != nil {
 					ctx.Error(http.StatusInternalServerError, err.Error())
@@ -689,7 +708,8 @@ func ArtifactsDownloadView(ctx *context_module.Context) {
 	if len(artifacts) == 1 && artifacts[0].ArtifactName+".zip" == artifacts[0].ArtifactPath && artifacts[0].ContentEncoding == "application/zip" {
 		art := artifacts[0]
 		if setting.Actions.ArtifactStorage.MinioConfig.ServeDirect {
-			u, err := storage.ActionsArtifacts.URL(art.StoragePath, art.ArtifactPath)
+			u, err := storage.ActionsArtifacts.URL(art.StoragePath, art.ArtifactPath, nil)
+
 			if u != nil && err == nil {
 				ctx.Redirect(u.String())
 				return

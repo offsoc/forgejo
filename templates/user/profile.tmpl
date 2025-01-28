@@ -14,13 +14,17 @@
 						{{if .ContextUser.KeepActivityPrivate}}
 							{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_private" "/user/settings#keep-activity-private"}}
 						{{else}}
-							{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_public" "/user/settings#keep-activity-private"}}
+							{{if eq .ContextUser.Visibility 2}}
+								{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_private_profile" "/user/settings#visibility-setting"}}
+							{{else}}
+								{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_public" "/user/settings#keep-activity-private"}}
+							{{end}}
 						{{end}}
 					</p>
 					{{else}}
 						{{if .IsAdmin}}
 						<div id="visibility-hint" class="ui info message">
-							{{if .ContextUser.KeepActivityPrivate}}
+							{{if or .ContextUser.KeepActivityPrivate (eq .ContextUser.Visibility 2)}}
 								{{ctx.Locale.Tr "user.public_activity.visibility_hint.admin_private"}}
 							{{else}}
 								{{ctx.Locale.Tr "user.public_activity.visibility_hint.admin_public"}}

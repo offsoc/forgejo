@@ -45,6 +45,11 @@ func (f *GithubDownloaderV3Factory) New(ctx context.Context, opts base.MigrateOp
 		return nil, err
 	}
 
+	// some users are using the github redirect url for migration
+	if u.Host == "www.github.com" {
+		u.Host = "github.com"
+	}
+
 	baseURL := u.Scheme + "://" + u.Host
 	fields := strings.Split(u.Path, "/")
 	oldOwner := fields[1]
@@ -215,6 +220,7 @@ func (g *GithubDownloaderV3) GetRepoInfo() (*base.Repository, error) {
 		OriginalURL:   gr.GetHTMLURL(),
 		CloneURL:      gr.GetCloneURL(),
 		DefaultBranch: gr.GetDefaultBranch(),
+		Website:       gr.GetHomepage(),
 	}, nil
 }
 
@@ -737,6 +743,7 @@ func (g *GithubDownloaderV3) GetPullRequests(page, perPage int) ([]*base.PullReq
 			PatchURL:     pr.GetPatchURL(), // see below for SECURITY related issues here
 			Reactions:    reactions,
 			ForeignIndex: int64(*pr.Number),
+			IsDraft:      pr.GetDraft(),
 		})
 
 		// SECURITY: Ensure that the PR is safe

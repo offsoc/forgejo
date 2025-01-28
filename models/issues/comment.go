@@ -194,6 +194,20 @@ func (t CommentType) HasMailReplySupport() bool {
 	return false
 }
 
+func (t CommentType) CountedAsConversation() bool {
+	for _, ct := range ConversationCountedCommentType() {
+		if t == ct {
+			return true
+		}
+	}
+	return false
+}
+
+// ConversationCountedCommentType returns the comment types that are counted as a conversation
+func ConversationCountedCommentType() []CommentType {
+	return []CommentType{CommentTypeComment, CommentTypeReview}
+}
+
 // RoleInRepo presents the user's participation in the repo
 type RoleInRepo string
 
@@ -222,43 +236,51 @@ func (r RoleInRepo) LocaleHelper(lang translation.Locale) string {
 	return lang.TrString("repo.issues.role." + string(r) + "_helper")
 }
 
+type RequestReviewTarget interface {
+	ID() int64
+	Name() string
+	Type() string
+}
+
 // Comment represents a comment in commit and issue page.
 type Comment struct {
-	ID               int64            `xorm:"pk autoincr"`
-	Type             CommentType      `xorm:"INDEX"`
-	PosterID         int64            `xorm:"INDEX"`
-	Poster           *user_model.User `xorm:"-"`
-	OriginalAuthor   string
-	OriginalAuthorID int64
-	IssueID          int64  `xorm:"INDEX"`
-	Issue            *Issue `xorm:"-"`
-	LabelID          int64
-	Label            *Label   `xorm:"-"`
-	AddedLabels      []*Label `xorm:"-"`
-	RemovedLabels    []*Label `xorm:"-"`
-	OldProjectID     int64
-	ProjectID        int64
-	OldProject       *project_model.Project `xorm:"-"`
-	Project          *project_model.Project `xorm:"-"`
-	OldMilestoneID   int64
-	MilestoneID      int64
-	OldMilestone     *Milestone `xorm:"-"`
-	Milestone        *Milestone `xorm:"-"`
-	TimeID           int64
-	Time             *TrackedTime `xorm:"-"`
-	AssigneeID       int64
-	RemovedAssignee  bool
-	Assignee         *user_model.User   `xorm:"-"`
-	AssigneeTeamID   int64              `xorm:"NOT NULL DEFAULT 0"`
-	AssigneeTeam     *organization.Team `xorm:"-"`
-	ResolveDoerID    int64
-	ResolveDoer      *user_model.User `xorm:"-"`
-	OldTitle         string
-	NewTitle         string
-	OldRef           string
-	NewRef           string
-	DependentIssueID int64  `xorm:"index"` // This is used by issue_service.deleteIssue
-	DependentIssue   *Issue `xorm:"-"`
+	ID                   int64            `xorm:"pk autoincr"`
+	Type                 CommentType      `xorm:"INDEX"`
+	PosterID             int64            `xorm:"INDEX"`
+	Poster               *user_model.User `xorm:"-"`
+	OriginalAuthor       string
+	OriginalAuthorID     int64
+	IssueID              int64  `xorm:"INDEX"`
+	Issue                *Issue `xorm:"-"`
+	LabelID              int64
+	Label                *Label                `xorm:"-"`
+	AddedLabels          []*Label              `xorm:"-"`
+	RemovedLabels        []*Label              `xorm:"-"`
+	AddedRequestReview   []RequestReviewTarget `xorm:"-"`
+	RemovedRequestReview []RequestReviewTarget `xorm:"-"`
+	OldProjectID         int64
+	ProjectID            int64
+	OldProject           *project_model.Project `xorm:"-"`
+	Project              *project_model.Project `xorm:"-"`
+	OldMilestoneID       int64
+	MilestoneID          int64
+	OldMilestone         *Milestone `xorm:"-"`
+	Milestone            *Milestone `xorm:"-"`
+	TimeID               int64
+	Time                 *TrackedTime `xorm:"-"`
+	AssigneeID           int64
+	RemovedAssignee      bool
+	Assignee             *user_model.User   `xorm:"-"`
+	AssigneeTeamID       int64              `xorm:"NOT NULL DEFAULT 0"`
+	AssigneeTeam         *organization.Team `xorm:"-"`
+	ResolveDoerID        int64
+	ResolveDoer          *user_model.User `xorm:"-"`
+	OldTitle             string
+	NewTitle             string
+	OldRef               string
+	NewRef               string
+	DependentIssueID     int64  `xorm:"index"` // This is used by issue_service.deleteIssue
+	DependentIssue       *Issue `xorm:"-"`
 
 	CommitID        int64
 	Line            int64 // - previous line / + proposed line
@@ -879,7 +901,7 @@ func updateCommentInfos(ctx context.Context, opts *CreateCommentOptions, comment
 		}
 		fallthrough
 	case CommentTypeComment:
-		if _, err = db.Exec(ctx, "UPDATE `issue` SET num_comments=num_comments+1 WHERE id=?", opts.Issue.ID); err != nil {
+		if err := UpdateIssueNumComments(ctx, opts.Issue.ID); err != nil {
 			return err
 		}
 		fallthrough
@@ -1094,7 +1116,7 @@ func FindComments(ctx context.Context, opts *FindCommentsOptions) (CommentList, 
 		sess.Join("INNER", "issue", "issue.id = comment.issue_id")
 	}
 
-	if opts.Page != 0 {
+	if opts.Page > 0 {
 		sess = db.SetSessionPagination(sess, opts)
 	}
 
@@ -1174,8 +1196,8 @@ func DeleteComment(ctx context.Context, comment *Comment) error {
 		return err
 	}
 
-	if comment.Type == CommentTypeComment {
-		if _, err := e.ID(comment.IssueID).Decr("num_comments").Update(new(Issue)); err != nil {
+	if comment.Type.CountedAsConversation() {
+		if err := UpdateIssueNumComments(ctx, comment.IssueID); err != nil {
 			return err
 		}
 	}
@@ -1292,6 +1314,21 @@ func (c *Comment) HasOriginalAuthor() bool {
 	return c.OriginalAuthor != "" && c.OriginalAuthorID != 0
 }
 
+func UpdateIssueNumCommentsBuilder(issueID int64) *builder.Builder {
+	subQuery := builder.Select("COUNT(*)").From("`comment`").Where(
+		builder.Eq{"issue_id": issueID}.And(
+			builder.In("`type`", ConversationCountedCommentType()),
+		))
+
+	return builder.Update(builder.Eq{"num_comments": subQuery}).
+		From("`issue`").Where(builder.Eq{"id": issueID})
+}
+
+func UpdateIssueNumComments(ctx context.Context, issueID int64) error {
+	_, err := db.GetEngine(ctx).Exec(UpdateIssueNumCommentsBuilder(issueID))
+	return err
+}
+
 // InsertIssueComments inserts many comments of issues.
 func InsertIssueComments(ctx context.Context, comments []*Comment) error {
 	if len(comments) == 0 {
@@ -1324,8 +1361,7 @@ func InsertIssueComments(ctx context.Context, comments []*Comment) error {
 	}
 
 	for _, issueID := range issueIDs {
-		if _, err := db.Exec(ctx, "UPDATE issue set num_comments = (SELECT count(*) FROM comment WHERE issue_id = ? AND `type`=?) WHERE id = ?",
-			issueID, CommentTypeComment, issueID); err != nil {
+		if err := UpdateIssueNumComments(ctx, issueID); err != nil {
 			return err
 		}
 	}

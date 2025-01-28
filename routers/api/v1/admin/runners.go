@@ -24,3 +24,23 @@ func GetRegistrationToken(ctx *context.APIContext) {
 
 	shared.GetRegistrationToken(ctx, 0, 0)
 }
+
+// SearchActionRunJobs return a list of actions jobs filtered by the provided parameters
+func SearchActionRunJobs(ctx *context.APIContext) {
+	// swagger:operation GET /admin/runners/jobs admin adminSearchRunJobs
+	// ---
+	// summary: Search action jobs according filter conditions
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: labels
+	//   in: query
+	//   description: a comma separated list of run job labels to search for
+	//   type: string
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/RunJobList"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	shared.GetActionRunJobs(ctx, 0, 0)
+}

@@ -1,0 +1,47 @@
+<label id="repo_owner_label" {{if .Err_Owner}}class="field error"{{end}}>
+	{{ctx.Locale.Tr "repo.owner"}}
+	<div class="ui selection required dropdown" aria-labelledby="repo_owner_label">
+		{{/* uid id is used by the repo-template code */}}
+		<input type="hidden" id="uid" name="uid" value="{{.ContextUser.ID}}" required>
+		<span class="text truncated-item-container" title="{{.ContextUser.Name}}">
+			{{ctx.AvatarUtils.Avatar .ContextUser 28 "mini"}}
+			<span class="truncated-item-name">{{.ContextUser.ShortName 40}}</span>
+		</span>
+		{{svg "octicon-triangle-down" 14 "dropdown icon"}}
+		<div class="menu">
+			<div class="item truncated-item-container" data-value="{{.SignedUser.ID}}" title="{{.SignedUser.Name}}">
+				{{ctx.AvatarUtils.Avatar .SignedUser 28 "mini"}}
+				<span class="truncated-item-name">{{.SignedUser.ShortName 40}}</span>
+			</div>
+			{{range .Orgs}}
+				<div class="item truncated-item-container" data-value="{{.ID}}" title="{{.Name}}">
+					{{ctx.AvatarUtils.Avatar . 28 "mini"}}
+					<span class="truncated-item-name">{{.ShortName 40}}</span>
+				</div>
+			{{end}}
+		</div>
+	</div>
+	<span class="help">{{ctx.Locale.Tr "repo.owner_helper"}}</span>
+</label>
+<label {{if .Err_RepoName}}class="field error"{{end}}>
+	{{ctx.Locale.Tr "repo.repo_name"}}
+	<input name="repo_name" value="{{.repo_name}}" required maxlength="100">
+	<span class="help">{{ctx.Locale.Tr "repo.repo_name_helper"}}</span>
+</label>
+<label>
+	<input name="private" type="checkbox"
+		{{if .IsForcedPrivate}}
+			checked disabled
+		{{else}}
+			{{if .private}}checked{{end}}
+		{{end}}>
+		{{ctx.Locale.Tr "repo.visibility_helper"}}
+		{{if .IsForcedPrivate}}
+			<span class="help">{{ctx.Locale.Tr "repo.visibility_helper_forced"}}</span>
+		{{end}}
+		<span class="help">{{ctx.Locale.Tr "repo.visibility_description"}}</span>
+</label>
+<label {{if .Err_Description}}class="field error"{{end}}>
+	{{ctx.Locale.Tr "repo.repo_desc"}}
+	<textarea rows="2" name="description" placeholder="{{ctx.Locale.Tr "repo.repo_desc_helper"}}" maxlength="2048">{{.description}}</textarea>
+</label>

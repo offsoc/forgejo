@@ -78,6 +78,7 @@ func testSearchRepo(t *testing.T, indexer bool) {
 		code_indexer.UpdateRepoIndexer(repo)
 	}
 
+	testSearch(t, "/user2/glob/search?q=", []string{}, indexer)
 	testSearch(t, "/user2/glob/search?q=loren&page=1", []string{"a.txt"}, indexer)
 	testSearch(t, "/user2/glob/search?q=loren&page=1&mode=exact", []string{"a.txt"}, indexer)
 

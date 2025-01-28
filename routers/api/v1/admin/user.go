@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"code.gitea.io/gitea/models"
 	asymkey_model "code.gitea.io/gitea/models/asymkey"
@@ -20,6 +21,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/timeutil"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/routers/api/v1/user"
 	"code.gitea.io/gitea/routers/api/v1/utils"
@@ -138,8 +140,8 @@ func CreateUser(ctx *context.APIContext) {
 			user_model.IsErrEmailAlreadyUsed(err) ||
 			db.IsErrNameReserved(err) ||
 			db.IsErrNameCharsNotAllowed(err) ||
-			user_model.IsErrEmailCharIsNotSupported(err) ||
-			user_model.IsErrEmailInvalid(err) ||
+			validation.IsErrEmailCharIsNotSupported(err) ||
+			validation.IsErrEmailInvalid(err) ||
 			db.IsErrNamePatternNotAllowed(err) {
 			ctx.Error(http.StatusUnprocessableEntity, "", err)
 		} else {
@@ -148,7 +150,7 @@ func CreateUser(ctx *context.APIContext) {
 		return
 	}
 
-	if !user_model.IsEmailDomainAllowed(u.Email) {
+	if !validation.IsEmailDomainAllowed(u.Email) {
 		ctx.Resp.Header().Add("X-Gitea-Warning", fmt.Sprintf("the domain of user email %s conflicts with EMAIL_DOMAIN_ALLOWLIST or EMAIL_DOMAIN_BLOCKLIST", u.Email))
 	}
 
@@ -224,7 +226,7 @@ func EditUser(ctx *context.APIContext) {
 	if form.Email != nil {
 		if err := user_service.AdminAddOrSetPrimaryEmailAddress(ctx, ctx.ContextUser, *form.Email); err != nil {
 			switch {
-			case user_model.IsErrEmailCharIsNotSupported(err), user_model.IsErrEmailInvalid(err):
+			case validation.IsErrEmailCharIsNotSupported(err), validation.IsErrEmailInvalid(err):
 				ctx.Error(http.StatusBadRequest, "EmailInvalid", err)
 			case user_model.IsErrEmailAlreadyUsed(err):
 				ctx.Error(http.StatusBadRequest, "EmailUsed", err)
@@ -234,7 +236,7 @@ func EditUser(ctx *context.APIContext) {
 			return
 		}
 
-		if !user_model.IsEmailDomainAllowed(*form.Email) {
+		if !validation.IsEmailDomainAllowed(*form.Email) {
 			ctx.Resp.Header().Add("X-Gitea-Warning", fmt.Sprintf("the domain of user email %s conflicts with EMAIL_DOMAIN_ALLOWLIST or EMAIL_DOMAIN_BLOCKLIST", *form.Email))
 		}
 	}
@@ -414,6 +416,11 @@ func SearchUsers(ctx *context.APIContext) {
 	//   in: query
 	//   description: user's login name to search for
 	//   type: string
+	// - name: sort
+	//   in: query
+	//   description: sort order of results
+	//   type: string
+	//   enum: [oldest, newest, alphabetically, reversealphabetically, recentupdate, leastupdate]
 	// - name: page
 	//   in: query
 	//   description: page number of results to return (1-based)
@@ -430,12 +437,40 @@ func SearchUsers(ctx *context.APIContext) {
 
 	listOptions := utils.GetListOptions(ctx)
 
+	sort := ctx.FormString("sort")
+	var orderBy db.SearchOrderBy
+
+	switch sort {
+	case "oldest":
+		orderBy = db.SearchOrderByOldest
+	case "newest":
+		orderBy = db.SearchOrderByNewest
+	case "alphabetically":
+		orderBy = db.SearchOrderByAlphabetically
+	case "reversealphabetically":
+		orderBy = db.SearchOrderByAlphabeticallyReverse
+	case "recentupdate":
+		orderBy = db.SearchOrderByRecentUpdated
+	case "leastupdate":
+		orderBy = db.SearchOrderByLeastUpdated
+	default:
+		orderBy = db.SearchOrderByAlphabetically
+	}
+
+	intSource, err := strconv.ParseInt(ctx.FormString("source_id"), 10, 64)
+	var sourceID optional.Option[int64]
+	if ctx.FormString("source_id") == "" || err != nil {
+		sourceID = optional.None[int64]()
+	} else {
+		sourceID = optional.Some(intSource)
+	}
+
 	users, maxResults, err := user_model.SearchUsers(ctx, &user_model.SearchUserOptions{
 		Actor:       ctx.Doer,
 		Type:        user_model.UserTypeIndividual,
 		LoginName:   ctx.FormTrim("login_name"),
-		SourceID:    ctx.FormInt64("source_id"),
-		OrderBy:     db.SearchOrderByAlphabetically,
+		SourceID:    sourceID,
+		OrderBy:     orderBy,
 		ListOptions: listOptions,
 	})
 	if err != nil {
@@ -488,7 +523,7 @@ func RenameUser(ctx *context.APIContext) {
 	newName := web.GetForm(ctx).(*api.RenameUserOption).NewName
 
 	// Check if user name has been changed
-	if err := user_service.RenameUser(ctx, ctx.ContextUser, newName); err != nil {
+	if err := user_service.AdminRenameUser(ctx, ctx.ContextUser, newName); err != nil {
 		switch {
 		case user_model.IsErrUserAlreadyExist(err):
 			ctx.Error(http.StatusUnprocessableEntity, "", ctx.Tr("form.username_been_taken"))

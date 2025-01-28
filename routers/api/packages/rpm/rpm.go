@@ -149,7 +149,7 @@ func UploadPackageFile(ctx *context.Context) {
 		buf = signedBuf
 	}
 
-	pck, err := rpm_module.ParsePackage(buf)
+	pck, err := rpm_module.ParsePackage(buf, "rpm")
 	if err != nil {
 		if errors.Is(err, util.ErrInvalidArgument) {
 			apiError(ctx, http.StatusBadRequest, err)

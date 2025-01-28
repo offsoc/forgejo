@@ -22,6 +22,8 @@
 #    `backport/v1.21` label on a merged pull request that can be backported
 #    without conflict.
 #
+name: issue-labels
+
 on:
   pull_request_target:
     types:
@@ -31,21 +33,21 @@ on:
 jobs:
   backporting:
     if: >
-      !startsWith(vars.ROLE, 'forgejo-') && (
+      ( vars.ROLE == 'forgejo-coding' ) && (
         github.event.pull_request.merged
         &&
         contains(toJSON(github.event.pull_request.labels), 'backport/v')
       )
     runs-on: docker
     container:
-      image: 'code.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:20-bookworm'
     steps:
       - name: event info
         run: |
           cat <<'EOF'
           ${{ toJSON(github) }}
           EOF
-      - uses: https://code.forgejo.org/actions/git-backporting@v4.8.2
+      - uses: https://data.forgejo.org/actions/git-backporting@v4.8.4
         with:
           target-branch-pattern: "^backport/(?<target>(v.*))$"
           strategy: ort

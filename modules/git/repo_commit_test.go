@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -99,5 +102,100 @@ func TestRepository_CommitsBetweenIDs(t *testing.T) {
 		commits, err := bareRepo1.CommitsBetweenIDs(c.NewID, c.OldID)
 		require.NoError(t, err)
 		assert.Len(t, commits, c.ExpectedCommits, "case %d", i)
+	}
+}
+
+func TestGetTagCommit(t *testing.T) {
+	t.Setenv("GIT_COMMITTER_DATE", "2006-01-01 13:37")
+	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
+
+	clonedPath, err := cloneRepo(t, bareRepo1Path)
+	require.NoError(t, err)
+
+	bareRepo1, err := openRepositoryWithDefaultContext(clonedPath)
+	require.NoError(t, err)
+	defer bareRepo1.Close()
+
+	lTagCommitID := "6fbd69e9823458e6c4a2fc5c0f6bc022b2f2acd1"
+	lTagName := "lightweightTag"
+	bareRepo1.CreateTag(lTagName, lTagCommitID)
+
+	aTagCommitID := "8006ff9adbf0cb94da7dad9e537e53817f9fa5c0"
+	aTagName := "annotatedTag"
+	aTagMessage := "my annotated message"
+	bareRepo1.CreateAnnotatedTag(aTagName, aTagMessage, aTagCommitID)
+
+	aTagID, err := bareRepo1.GetTagCommitID(aTagName)
+	require.NoError(t, err)
+	assert.NotEqualValues(t, aTagCommitID, aTagID)
+
+	lTagID, err := bareRepo1.GetTagCommitID(lTagName)
+	require.NoError(t, err)
+	assert.EqualValues(t, lTagCommitID, lTagID)
+
+	aTag, err := bareRepo1.GetTagCommit(aTagName)
+	require.NoError(t, err)
+	assert.EqualValues(t, aTagCommitID, aTag.ID.String())
+
+	lTag, err := bareRepo1.GetTagCommit(lTagName)
+	require.NoError(t, err)
+	assert.EqualValues(t, lTagCommitID, lTag.ID.String())
+}
+
+func TestCommitsByRange(t *testing.T) {
+	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
+	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
+	require.NoError(t, err)
+	defer bareRepo1.Close()
+
+	baseCommit, err := bareRepo1.GetBranchCommit("master")
+	require.NoError(t, err)
+
+	testCases := []struct {
+		Page                int
+		ExpectedCommitCount int
+	}{
+		{1, 3},
+		{2, 3},
+		{3, 1},
+		{4, 0},
+	}
+	for _, testCase := range testCases {
+		commits, err := baseCommit.CommitsByRange(testCase.Page, 3, "")
+		require.NoError(t, err)
+		assert.Len(t, commits, testCase.ExpectedCommitCount, "page: %d", testCase.Page)
+	}
+}
+
+func TestCommitsByFileAndRange(t *testing.T) {
+	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
+	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
+	require.NoError(t, err)
+	defer bareRepo1.Close()
+	defer test.MockVariableValue(&setting.Git.CommitsRangeSize, 2)()
+
+	testCases := []struct {
+		File                string
+		Page                int
+		ExpectedCommitCount int
+	}{
+		{"file1.txt", 1, 1},
+		{"file2.txt", 1, 1},
+		{"file*.txt", 1, 2},
+		{"foo", 1, 2},
+		{"foo", 2, 1},
+		{"foo", 3, 0},
+		{"f*", 1, 2},
+		{"f*", 2, 2},
+		{"f*", 3, 1},
+	}
+	for _, testCase := range testCases {
+		commits, err := bareRepo1.CommitsByFileAndRange(CommitsByFileAndRangeOptions{
+			Revision: "master",
+			File:     testCase.File,
+			Page:     testCase.Page,
+		})
+		require.NoError(t, err)
+		assert.Len(t, commits, testCase.ExpectedCommitCount, "file: '%s', page: %d", testCase.File, testCase.Page)
 	}
 }

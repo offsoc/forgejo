@@ -221,7 +221,7 @@ function initRepoDiffShowMore() {
 
 export function initRepoDiffView() {
   initRepoDiffConversationForm();
-  if (!$('#diff-file-list').length) return;
+  if (!$('#diff-file-boxes').length) return;
   initDiffFileTree();
   initDiffCommitSelect();
   initRepoDiffShowMore();

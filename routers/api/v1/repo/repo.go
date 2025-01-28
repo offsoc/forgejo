@@ -21,7 +21,6 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	unit_model "code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/label"
 	"code.gitea.io/gitea/modules/log"
@@ -203,7 +202,6 @@ func Search(ctx *context.APIContext) {
 		}
 	}
 
-	var err error
 	repos, count, err := repo_model.SearchRepository(ctx, opts)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, api.SearchError{
@@ -306,6 +304,10 @@ func Create(ctx *context.APIContext) {
 	//     "$ref": "#/responses/Repository"
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "409":
 	//     description: The repository with the same name already exists.
 	//   "413":
@@ -748,10 +750,8 @@ func updateBasicProperties(ctx *context.APIContext, opts api.EditRepoOption) err
 	if opts.DefaultBranch != nil && repo.DefaultBranch != *opts.DefaultBranch && (repo.IsEmpty || ctx.Repo.GitRepo.IsBranchExist(*opts.DefaultBranch)) {
 		if !repo.IsEmpty {
 			if err := gitrepo.SetDefaultBranch(ctx, ctx.Repo.Repository, *opts.DefaultBranch); err != nil {
-				if !git.IsErrUnsupportedVersion(err) {
-					ctx.Error(http.StatusInternalServerError, "SetDefaultBranch", err)
-					return err
-				}
+				ctx.Error(http.StatusInternalServerError, "SetDefaultBranch", err)
+				return err
 			}
 		}
 		repo.DefaultBranch = *opts.DefaultBranch
@@ -937,6 +937,7 @@ func updateRepoUnits(ctx *context.APIContext, opts api.EditRepoOption) error {
 					AllowRebaseUpdate:             true,
 					DefaultDeleteBranchAfterMerge: false,
 					DefaultMergeStyle:             repo_model.MergeStyleMerge,
+					DefaultUpdateStyle:            repo_model.UpdateStyleMerge,
 					DefaultAllowMaintainerEdit:    false,
 				}
 			} else {
@@ -975,6 +976,9 @@ func updateRepoUnits(ctx *context.APIContext, opts api.EditRepoOption) error {
 			}
 			if opts.DefaultMergeStyle != nil {
 				config.DefaultMergeStyle = repo_model.MergeStyle(*opts.DefaultMergeStyle)
+			}
+			if opts.DefaultUpdateStyle != nil {
+				config.DefaultUpdateStyle = repo_model.UpdateStyle(*opts.DefaultUpdateStyle)
 			}
 			if opts.DefaultAllowMaintainerEdit != nil {
 				config.DefaultAllowMaintainerEdit = *opts.DefaultAllowMaintainerEdit

@@ -111,9 +111,7 @@ func NewIssueLabel(ctx context.Context, issue *Issue, label *Label, doer *user_m
 		return err
 	}
 
-	issue.isLabelsLoaded = false
-	issue.Labels = nil
-	if err = issue.LoadLabels(ctx); err != nil {
+	if err = issue.ReloadLabels(ctx); err != nil {
 		return err
 	}
 
@@ -161,10 +159,7 @@ func NewIssueLabels(ctx context.Context, issue *Issue, labels []*Label, doer *us
 		return err
 	}
 
-	// reload all labels
-	issue.isLabelsLoaded = false
-	issue.Labels = nil
-	if err = issue.LoadLabels(ctx); err != nil {
+	if err = issue.ReloadLabels(ctx); err != nil {
 		return err
 	}
 
@@ -205,8 +200,7 @@ func DeleteIssueLabel(ctx context.Context, issue *Issue, label *Label, doer *use
 		return err
 	}
 
-	issue.Labels = nil
-	return issue.LoadLabels(ctx)
+	return issue.ReloadLabels(ctx)
 }
 
 // DeleteLabelsByRepoID  deletes labels of some repository
@@ -326,14 +320,23 @@ func FixIssueLabelWithOutsideLabels(ctx context.Context) (int64, error) {
 	return res.RowsAffected()
 }
 
-// LoadLabels loads labels
+// LoadLabels only if they are not already set
 func (issue *Issue) LoadLabels(ctx context.Context) (err error) {
-	if !issue.isLabelsLoaded && issue.Labels == nil && issue.ID != 0 {
+	if !issue.isLabelsLoaded && issue.Labels == nil {
+		if err := issue.ReloadLabels(ctx); err != nil {
+			return err
+		}
+		issue.isLabelsLoaded = true
+	}
+	return nil
+}
+
+func (issue *Issue) ReloadLabels(ctx context.Context) (err error) {
+	if issue.ID != 0 {
 		issue.Labels, err = GetLabelsByIssueID(ctx, issue.ID)
 		if err != nil {
 			return fmt.Errorf("getLabelsByIssueID [%d]: %w", issue.ID, err)
 		}
-		issue.isLabelsLoaded = true
 	}
 	return nil
 }
@@ -496,8 +499,7 @@ func ReplaceIssueLabels(ctx context.Context, issue *Issue, labels []*Label, doer
 		}
 	}
 
-	issue.Labels = nil
-	if err = issue.LoadLabels(ctx); err != nil {
+	if err = issue.ReloadLabels(ctx); err != nil {
 		return err
 	}
 

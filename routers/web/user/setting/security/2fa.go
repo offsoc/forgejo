@@ -34,8 +34,9 @@ func RegenerateScratchTwoFactor(ctx *context.Context) {
 		if auth.IsErrTwoFactorNotEnrolled(err) {
 			ctx.Flash.Error(ctx.Tr("settings.twofa_not_enrolled"))
 			ctx.Redirect(setting.AppSubURL + "/user/settings/security")
+		} else {
+			ctx.ServerError("SettingsTwoFactor: Failed to GetTwoFactorByUID", err)
 		}
-		ctx.ServerError("SettingsTwoFactor: Failed to GetTwoFactorByUID", err)
 		return
 	}
 
@@ -64,8 +65,9 @@ func DisableTwoFactor(ctx *context.Context) {
 		if auth.IsErrTwoFactorNotEnrolled(err) {
 			ctx.Flash.Error(ctx.Tr("settings.twofa_not_enrolled"))
 			ctx.Redirect(setting.AppSubURL + "/user/settings/security")
+		} else {
+			ctx.ServerError("SettingsTwoFactor: Failed to GetTwoFactorByUID", err)
 		}
-		ctx.ServerError("SettingsTwoFactor: Failed to GetTwoFactorByUID", err)
 		return
 	}
 
@@ -74,8 +76,9 @@ func DisableTwoFactor(ctx *context.Context) {
 			// There is a potential DB race here - we must have been disabled by another request in the intervening period
 			ctx.Flash.Success(ctx.Tr("settings.twofa_disabled"))
 			ctx.Redirect(setting.AppSubURL + "/user/settings/security")
+		} else {
+			ctx.ServerError("SettingsTwoFactor: Failed to DeleteTwoFactorByID", err)
 		}
-		ctx.ServerError("SettingsTwoFactor: Failed to DeleteTwoFactorByID", err)
 		return
 	}
 
@@ -217,11 +220,6 @@ func EnrollTwoFactorPost(ctx *context.Context) {
 	t = &auth.TwoFactor{
 		UID: ctx.Doer.ID,
 	}
-	err = t.SetSecret(secret)
-	if err != nil {
-		ctx.ServerError("SettingsTwoFactor: Failed to set secret", err)
-		return
-	}
 	token, err := t.GenerateScratchToken()
 	if err != nil {
 		ctx.ServerError("SettingsTwoFactor: Failed to generate scratch token", err)
@@ -248,7 +246,7 @@ func EnrollTwoFactorPost(ctx *context.Context) {
 		return
 	}
 
-	if err = auth.NewTwoFactor(ctx, t); err != nil {
+	if err = auth.NewTwoFactor(ctx, t, secret); err != nil {
 		// FIXME: We need to handle a unique constraint fail here it's entirely possible that another request has beaten us.
 		// If there is a unique constraint fail we should just tolerate the error
 		ctx.ServerError("SettingsTwoFactor: Failed to save two factor", err)

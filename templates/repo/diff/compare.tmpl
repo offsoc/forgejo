@@ -212,8 +212,12 @@
 					{{if .Repository.ArchivedUnix.IsZero}}
 						{{ctx.Locale.Tr "repo.archive.title"}}
 					{{else}}
-						{{ctx.Locale.Tr "repo.archive.title_date" (DateTime "long" .Repository.ArchivedUnix)}}
+						{{ctx.Locale.Tr "repo.archive.title_date" (DateUtils.AbsoluteLong .Repository.ArchivedUnix)}}
 					{{end}}
+				</div>
+			{{else}}
+				<div class="ui warning message tw-mb-4">
+					{{ctx.Locale.Tr "repo.pulls.sign_in_require" .SignInLink}}
 				</div>
 			{{end}}
 			{{if $.IsSigned}}

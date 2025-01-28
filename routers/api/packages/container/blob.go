@@ -193,7 +193,7 @@ func deleteBlob(ctx context.Context, ownerID int64, image, digest string) error 
 }
 
 func digestFromHashSummer(h packages_module.HashSummer) string {
-	_, _, hashSHA256, _ := h.Sums()
+	_, _, hashSHA256, _, _ := h.Sums()
 	return "sha256:" + hex.EncodeToString(hashSHA256)
 }
 

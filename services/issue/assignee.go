@@ -72,7 +72,8 @@ func ReviewRequest(ctx context.Context, issue *issues_model.Issue, doer, reviewe
 		return nil, err
 	}
 
-	if comment != nil {
+	// don't notify if the user is requesting itself as reviewer
+	if comment != nil && doer.ID != reviewer.ID {
 		notify_service.PullRequestReviewRequest(ctx, doer, issue, reviewer, isAdd, comment)
 	}
 

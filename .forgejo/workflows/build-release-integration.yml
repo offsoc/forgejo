@@ -22,13 +22,13 @@ on:
 
 jobs:
   release-simulation:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
-    runs-on: self-hosted
+    if: vars.ROLE == 'forgejo-coding'
+    runs-on: lxc-bookworm
     steps:
       - uses: actions/checkout@v4
 
       - id: forgejo
-        uses: https://code.forgejo.org/actions/setup-forgejo@v1
+        uses: https://data.forgejo.org/actions/setup-forgejo@v2.0.4
         with:
           user: root
           password: admin1234

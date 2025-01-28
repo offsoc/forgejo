@@ -10,8 +10,9 @@ import (
 
 	"code.gitea.io/gitea/modules/auth"
 	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/util"
 
-	"gitea.com/go-chi/binding"
+	"code.forgejo.org/go-chi/binding"
 	"github.com/gobwas/glob"
 )
 
@@ -26,11 +27,14 @@ const (
 	ErrUsername = "UsernameError"
 	// ErrInvalidGroupTeamMap is returned when a group team mapping is invalid
 	ErrInvalidGroupTeamMap = "InvalidGroupTeamMap"
+	// ErrEmail is returned when an email address is invalid
+	ErrEmail = "Email"
 )
 
 // AddBindingRules adds additional binding rules
 func AddBindingRules() {
 	addGitRefNameBindingRule()
+	addValidURLListBindingRule()
 	addValidURLBindingRule()
 	addValidSiteURLBindingRule()
 	addGlobPatternRule()
@@ -38,13 +42,14 @@ func AddBindingRules() {
 	addGlobOrRegexPatternRule()
 	addUsernamePatternRule()
 	addValidGroupTeamMapRule()
+	addEmailBindingRules()
 }
 
 func addGitRefNameBindingRule() {
 	// Git refname validation rule
 	binding.AddRule(&binding.Rule{
 		IsMatch: func(rule string) bool {
-			return strings.HasPrefix(rule, "GitRefName")
+			return rule == "GitRefName"
 		},
 		IsValid: func(errs binding.Errors, name string, val any) (bool, binding.Errors) {
 			str := fmt.Sprintf("%v", val)
@@ -58,11 +63,38 @@ func addGitRefNameBindingRule() {
 	})
 }
 
+func addValidURLListBindingRule() {
+	// URL validation rule
+	binding.AddRule(&binding.Rule{
+		IsMatch: func(rule string) bool {
+			return rule == "ValidUrlList"
+		},
+		IsValid: func(errs binding.Errors, name string, val any) (bool, binding.Errors) {
+			str := fmt.Sprintf("%v", val)
+			if len(str) == 0 {
+				errs.Add([]string{name}, binding.ERR_URL, "Url")
+				return false, errs
+			}
+
+			ok := true
+			urls := util.SplitTrimSpace(str, "\n")
+			for _, u := range urls {
+				if !IsValidURL(u) {
+					ok = false
+					errs.Add([]string{name}, binding.ERR_URL, u)
+				}
+			}
+
+			return ok, errs
+		},
+	})
+}
+
 func addValidURLBindingRule() {
 	// URL validation rule
 	binding.AddRule(&binding.Rule{
 		IsMatch: func(rule string) bool {
-			return strings.HasPrefix(rule, "ValidUrl")
+			return rule == "ValidUrl"
 		},
 		IsValid: func(errs binding.Errors, name string, val any) (bool, binding.Errors) {
 			str := fmt.Sprintf("%v", val)
@@ -80,7 +112,7 @@ func addValidSiteURLBindingRule() {
 	// URL validation rule
 	binding.AddRule(&binding.Rule{
 		IsMatch: func(rule string) bool {
-			return strings.HasPrefix(rule, "ValidSiteUrl")
+			return rule == "ValidSiteUrl"
 		},
 		IsValid: func(errs binding.Errors, name string, val any) (bool, binding.Errors) {
 			str := fmt.Sprintf("%v", val)
@@ -171,7 +203,7 @@ func addUsernamePatternRule() {
 func addValidGroupTeamMapRule() {
 	binding.AddRule(&binding.Rule{
 		IsMatch: func(rule string) bool {
-			return strings.HasPrefix(rule, "ValidGroupTeamMap")
+			return rule == "ValidGroupTeamMap"
 		},
 		IsValid: func(errs binding.Errors, name string, val any) (bool, binding.Errors) {
 			_, err := auth.UnmarshalGroupTeamMapping(fmt.Sprintf("%v", val))
@@ -180,6 +212,34 @@ func addValidGroupTeamMapRule() {
 				return false, errs
 			}
 
+			return true, errs
+		},
+	})
+}
+
+func addEmailBindingRules() {
+	binding.AddRule(&binding.Rule{
+		IsMatch: func(rule string) bool {
+			return strings.HasPrefix(rule, "EmailWithAllowedDomain")
+		},
+		IsValid: func(errs binding.Errors, name string, val any) (bool, binding.Errors) {
+			if err := ValidateEmail(fmt.Sprintf("%v", val)); err != nil {
+				errs.Add([]string{name}, ErrEmail, err.Error())
+				return false, errs
+			}
+			return true, errs
+		},
+	})
+
+	binding.AddRule(&binding.Rule{
+		IsMatch: func(rule string) bool {
+			return strings.HasPrefix(rule, "EmailForAdmin")
+		},
+		IsValid: func(errs binding.Errors, name string, val any) (bool, binding.Errors) {
+			if err := ValidateEmailForAdmin(fmt.Sprintf("%v", val)); err != nil {
+				errs.Add([]string{name}, ErrEmail, err.Error())
+				return false, errs
+			}
 			return true, errs
 		},
 	})

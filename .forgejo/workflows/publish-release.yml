@@ -36,20 +36,20 @@ on:
 
 jobs:
   publish:
-    runs-on: self-hosted
+    runs-on: lxc-bookworm
     if: vars.DOER != '' && vars.FORGEJO != '' && vars.TO_OWNER != '' && vars.FROM_OWNER != '' && secrets.TOKEN != ''
     steps:
       - uses: actions/checkout@v4
 
       - name: copy & sign
-        uses: https://code.forgejo.org/forgejo/forgejo-build-publish/publish@v5
+        uses: https://data.forgejo.org/forgejo/forgejo-build-publish/publish@v5.3.1
         with:
           from-forgejo: ${{ vars.FORGEJO }}
           to-forgejo: ${{ vars.FORGEJO }}
           from-owner: ${{ vars.FROM_OWNER }}
           to-owner: ${{ vars.TO_OWNER }}
           repo: ${{ vars.REPO }}
-          release-notes: "See https://codeberg.org/forgejo/forgejo/src/branch/forgejo/RELEASE-NOTES.md#{ANCHOR}"
+          release-notes: "See https://codeberg.org/forgejo/forgejo/src/branch/forgejo/release-notes-published/{VERSION}.md"
           ref-name: ${{ github.ref_name }}
           sha: ${{ github.sha }}
           from-token: ${{ secrets.TOKEN }}
@@ -59,30 +59,28 @@ jobs:
           gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
           verbose: ${{ vars.VERBOSE }}
 
-      - name: upgrade v*.next.forgejo.org
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get update -qq
-          apt-get -q install -y -qq curl
-          version="${{ github.ref_name }}"
-          version=${version##*v}
-          major=$(echo $version | sed -E -e 's/^([0-9]+).*/\1/')
-          # https://forgejo.org/docs/next/developer/infrastructure
-          curl -o /dev/null -sS https://v$major.next.forgejo.org/.well-known/wakeup-on-logs/forgejo-v$major
+      - name: get trigger mirror issue
+        id: mirror
+        uses: https://data.forgejo.org/infrastructure/issue-action/get@v1.3.0
+        with:
+          forgejo: https://code.forgejo.org
+          repository: forgejo/forgejo
+          labels: mirror-trigger
 
-      - name: set up go for the DNS update below
-        if: vars.ROLE == 'forgejo-experimental' && secrets.OVH_APP_KEY != ''
-        uses: https://code.forgejo.org/actions/setup-go@v5
+      - name: trigger the mirror
+        uses: https://data.forgejo.org/infrastructure/issue-action/set@v1.3.0
         with:
-          go-version-file: "go.mod"
-      - name: update the _release.experimental DNS record
-        if: vars.ROLE == 'forgejo-experimental' && secrets.OVH_APP_KEY != ''
-        uses: https://code.forgejo.org/actions/ovh-dns-update@v1
+          forgejo: https://code.forgejo.org
+          repository: forgejo/forgejo
+          token: ${{ secrets.LABEL_ISSUE_FORGEJO_MIRROR_TOKEN }}
+          numbers: ${{ steps.mirror.outputs.numbers }}
+          label-wait-if-exists: 3600
+          label: trigger
+
+      - name: upgrade v*.next.forgejo.org
+        uses: https://data.forgejo.org/infrastructure/next-digest@v1.1.0
         with:
-          subdomain: _release.experimental
-          domain: forgejo.com # there is a CNAME from .org to .com (for security reasons)
-          record-id: 5283602601
-          value: v=${{ github.ref_name }}
-          ovh-app-key: ${{ secrets.OVH_APP_KEY }}
-          ovh-app-secret: ${{ secrets.OVH_APP_SECRET }}
-          ovh-consumer-key: ${{ secrets.OVH_CON_KEY }}
+          url: https://placeholder:${{ secrets.TOKEN_NEXT_DIGEST }}@code.forgejo.org/infrastructure/next-digest
+          ref_name: '${{ github.ref_name }}'
+          image: 'codeberg.org/forgejo-experimental/forgejo'
+          tag_suffix: '-rootless'

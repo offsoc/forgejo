@@ -4,6 +4,7 @@
 package integration
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -16,6 +17,9 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/setting"
+	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/test"
 	pull_service "code.gitea.io/gitea/services/pull"
 	repo_service "code.gitea.io/gitea/services/repository"
 	files_service "code.gitea.io/gitea/services/repository/files"
@@ -81,6 +85,102 @@ func TestAPIPullUpdateByRebase(t *testing.T) {
 		assert.EqualValues(t, 0, diffCount.Behind)
 		assert.EqualValues(t, 1, diffCount.Ahead)
 	})
+}
+
+func TestAPIViewUpdateSettings(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
+		defer tests.PrepareTestEnv(t)()
+		// Create PR to test
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+		org26 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 26})
+		pr := createOutdatedPR(t, user, org26)
+
+		// Test GetDiverging
+		diffCount, err := pull_service.GetDiverging(git.DefaultContext, pr)
+		require.NoError(t, err)
+		assert.EqualValues(t, 1, diffCount.Behind)
+		assert.EqualValues(t, 1, diffCount.Ahead)
+		require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
+		require.NoError(t, pr.LoadIssue(db.DefaultContext))
+
+		session := loginUser(t, "user2")
+		token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeAll)
+
+		defaultUpdateStyle := "rebase"
+		editOption := api.EditRepoOption{
+			DefaultUpdateStyle: &defaultUpdateStyle,
+		}
+
+		req := NewRequestWithJSON(t, "PATCH", fmt.Sprintf("/api/v1/repos/%s/%s", pr.BaseRepo.OwnerName, pr.BaseRepo.Name), editOption).AddTokenAuth(token)
+		session.MakeRequest(t, req, http.StatusOK)
+		assertViewPullUpdate(t, pr, session, "rebase", true)
+
+		defaultUpdateStyle = "merge"
+		req = NewRequestWithJSON(t, "PATCH", fmt.Sprintf("/api/v1/repos/%s/%s", pr.BaseRepo.OwnerName, pr.BaseRepo.Name), editOption).AddTokenAuth(token)
+		session.MakeRequest(t, req, http.StatusOK)
+		assertViewPullUpdate(t, pr, session, "merge", true)
+	})
+}
+
+func TestViewPullUpdateByMerge(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
+		testViewPullUpdate(t, "merge")
+	})
+}
+
+func TestViewPullUpdateByRebase(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
+		testViewPullUpdate(t, "rebase")
+	})
+}
+
+func testViewPullUpdate(t *testing.T, updateStyle string) {
+	defer test.MockVariableValue(&setting.Repository.PullRequest.DefaultUpdateStyle, updateStyle)()
+	defer tests.PrepareTestEnv(t)()
+	// Create PR to test
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	org26 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 26})
+	pr := createOutdatedPR(t, user, org26)
+
+	// Test GetDiverging
+	diffCount, err := pull_service.GetDiverging(git.DefaultContext, pr)
+	require.NoError(t, err)
+	assert.EqualValues(t, 1, diffCount.Behind)
+	assert.EqualValues(t, 1, diffCount.Ahead)
+	require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
+	require.NoError(t, pr.LoadIssue(db.DefaultContext))
+
+	session := loginUser(t, "user2")
+	assertViewPullUpdate(t, pr, session, updateStyle, true)
+}
+
+func assertViewPullUpdate(t *testing.T, pr *issues_model.PullRequest, session *TestSession, expectedStyle string, dropdownExpected bool) {
+	req := NewRequest(t, "GET", fmt.Sprintf("%s/%s/pulls/%d", pr.BaseRepo.OwnerName, pr.BaseRepo.Name, pr.Issue.Index))
+	resp := session.MakeRequest(t, req, http.StatusOK)
+
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	// Verify that URL of the update button is shown correctly.
+	var mainExpectedURL string
+	mergeExpectedURL := fmt.Sprintf("/%s/%s/pulls/%d/update?style=merge", pr.BaseRepo.OwnerName, pr.BaseRepo.Name, pr.Issue.Index)
+	rebaseExpectedURL := fmt.Sprintf("/%s/%s/pulls/%d/update?style=rebase", pr.BaseRepo.OwnerName, pr.BaseRepo.Name, pr.Issue.Index)
+	if expectedStyle == "rebase" {
+		mainExpectedURL = rebaseExpectedURL
+		if dropdownExpected {
+			htmlDoc.AssertElement(t, fmt.Sprintf(".update-button .dropdown .menu .item[data-do=\"%s\"]:not(.active.selected)", mergeExpectedURL), true)
+			htmlDoc.AssertElement(t, fmt.Sprintf(".update-button .dropdown .menu .active.selected.item[data-do=\"%s\"]", rebaseExpectedURL), true)
+		}
+	} else {
+		mainExpectedURL = mergeExpectedURL
+		if dropdownExpected {
+			htmlDoc.AssertElement(t, fmt.Sprintf(".update-button .dropdown .menu .active.selected.item[data-do=\"%s\"]", mergeExpectedURL), true)
+			htmlDoc.AssertElement(t, fmt.Sprintf(".update-button .dropdown .menu .item[data-do=\"%s\"]:not(.active.selected)", rebaseExpectedURL), true)
+		}
+	}
+	if dropdownExpected {
+		htmlDoc.AssertElement(t, fmt.Sprintf(".update-button .button[data-do=\"%s\"]", mainExpectedURL), true)
+	} else {
+		htmlDoc.AssertElement(t, fmt.Sprintf("form[action=\"%s\"]", mainExpectedURL), true)
+	}
 }
 
 func createOutdatedPR(t *testing.T, actor, forkOrg *user_model.User) *issues_model.PullRequest {

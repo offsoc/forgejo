@@ -1,6 +1,6 @@
 {{if and (not .HideRepoInfo) (not .IsBlame)}}
 <div class="ui segments repository-summary tw-mt-1 tw-mb-0">
-	<div class="ui segment sub-menu repository-menu">
+	<div class="ui segment repository-menu">
 		{{if and (.Permission.CanRead $.UnitTypeCode) (not .IsEmptyRepo)}}
 			<a class="item muted {{if .PageIsCommits}}active{{end}}" href="{{.RepoLink}}/commits/{{.BranchNameSubURL}}">
 				{{svg "octicon-history"}} {{ctx.Locale.TrN .CommitsCount "repo.n_commit_one" "repo.n_commit_few" (printf "<b>%d</b>" .CommitsCount | SafeHTML)}}
@@ -13,7 +13,7 @@
 					{{svg "octicon-tag"}} {{ctx.Locale.TrN .NumTags "repo.n_tag_one" "repo.n_tag_few" (printf "<b>%d</b>" .NumTags | SafeHTML)}}
 				</a>
 			{{end}}
-			<span class="item not-mobile" {{if not (eq .Repository.Size 0)}}data-tooltip-content="{{.Repository.SizeDetailsString ctx.Locale}}"{{end}}>
+			<span class="item" {{if not (eq .Repository.Size 0)}}data-tooltip-content="{{.Repository.SizeDetailsString ctx.Locale}}"{{end}}>
 				{{$fileSizeFields :=  ctx.Locale.TrSize .Repository.Size}}
 				{{svg "octicon-database"}} <b>{{$fileSizeFields.PrettyNumber}}</b> {{$fileSizeFields.TranslatedUnit}}
 			</span>

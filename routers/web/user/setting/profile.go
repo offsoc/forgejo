@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"time"
 
 	"code.gitea.io/gitea/models/avatars"
 	"code.gitea.io/gitea/models/db"
@@ -51,6 +52,7 @@ func Profile(ctx *context.Context) {
 	ctx.Data["AllowedUserVisibilityModes"] = setting.Service.AllowedUserVisibilityModesSlice.ToVisibleTypeSlice()
 	ctx.Data["DisableGravatar"] = setting.Config().Picture.DisableGravatar.Value(ctx)
 	ctx.Data["PronounsAreCustom"] = !slices.Contains(recognisedPronouns, ctx.Doer.Pronouns)
+	ctx.Data["CooldownPeriod"] = setting.Service.UsernameCooldownPeriod
 
 	ctx.HTML(http.StatusOK, tplSettingsProfile)
 }
@@ -62,6 +64,7 @@ func ProfilePost(ctx *context.Context) {
 	ctx.Data["AllowedUserVisibilityModes"] = setting.Service.AllowedUserVisibilityModesSlice.ToVisibleTypeSlice()
 	ctx.Data["DisableGravatar"] = setting.Config().Picture.DisableGravatar.Value(ctx)
 	ctx.Data["PronounsAreCustom"] = !slices.Contains(recognisedPronouns, ctx.Doer.Pronouns)
+	ctx.Data["CooldownPeriod"] = setting.Service.UsernameCooldownPeriod
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplSettingsProfile)
@@ -77,6 +80,8 @@ func ProfilePost(ctx *context.Context) {
 				ctx.Flash.Error(ctx.Tr("form.username_change_not_local_user"))
 			case user_model.IsErrUserAlreadyExist(err):
 				ctx.Flash.Error(ctx.Tr("form.username_been_taken"))
+			case user_model.IsErrCooldownPeriod(err):
+				ctx.Flash.Error(ctx.Tr("form.username_claiming_cooldown", err.(user_model.ErrCooldownPeriod).ExpireTime.Format(time.RFC1123Z)))
 			case db.IsErrNameReserved(err):
 				ctx.Flash.Error(ctx.Tr("user.form.name_reserved", form.Name))
 			case db.IsErrNamePatternNotAllowed(err):

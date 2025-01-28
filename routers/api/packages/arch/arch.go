@@ -26,7 +26,7 @@ import (
 
 var (
 	archPkgOrSig = regexp.MustCompile(`^.*\.pkg\.tar\.\w+(\.sig)*$`)
-	archDBOrSig  = regexp.MustCompile(`^.*.db(\.tar\.gz)*(\.sig)*$`)
+	archDBOrSig  = regexp.MustCompile(`^.*.(db|files)(\.tar\.gz)*(\.sig)*$`)
 
 	locker = sync.NewExclusivePool()
 )
@@ -59,7 +59,7 @@ func GetRepositoryKey(ctx *context.Context) {
 }
 
 func PushPackage(ctx *context.Context) {
-	group := ctx.Params("group")
+	group := strings.Trim(ctx.Params("*"), "/")
 	releaser := refreshLocker(ctx, group)
 	defer releaser()
 	upload, needToClose, err := ctx.UploadStream()
@@ -115,6 +115,7 @@ func PushPackage(ctx *context.Context) {
 
 	properties := map[string]string{
 		arch_module.PropertyDescription:  p.Desc(),
+		arch_module.PropertyFiles:        p.Files(),
 		arch_module.PropertyArch:         p.FileMetadata.Arch,
 		arch_module.PropertyDistribution: group,
 	}
@@ -173,15 +174,31 @@ func PushPackage(ctx *context.Context) {
 		apiError(ctx, http.StatusInternalServerError, err)
 		return
 	}
+	if p.FileMetadata.Arch == "any" {
+		if err = arch_service.BuildCustomRepositoryFiles(ctx, ctx.Package.Owner.ID, group); err != nil {
+			apiError(ctx, http.StatusInternalServerError, err)
+			return
+		}
+	}
 	ctx.Status(http.StatusCreated)
 }
 
 func GetPackageOrDB(ctx *context.Context) {
-	var (
-		file  = ctx.Params("file")
-		group = ctx.Params("group")
-		arch  = ctx.Params("arch")
-	)
+	pathGroups := strings.Split(strings.Trim(ctx.Params("*"), "/"), "/")
+	groupLen := len(pathGroups)
+	if groupLen < 2 {
+		ctx.Status(http.StatusNotFound)
+		return
+	}
+	var file, group, arch string
+	if groupLen == 2 {
+		arch = pathGroups[0]
+		file = pathGroups[1]
+	} else {
+		group = strings.Join(pathGroups[:groupLen-2], "/")
+		arch = pathGroups[groupLen-2]
+		file = pathGroups[groupLen-1]
+	}
 	if archPkgOrSig.MatchString(file) {
 		pkg, u, pf, err := arch_service.GetPackageFile(ctx, group, file, ctx.Package.Owner.ID)
 		if err != nil {
@@ -197,8 +214,7 @@ func GetPackageOrDB(ctx *context.Context) {
 	}
 
 	if archDBOrSig.MatchString(file) {
-		pkg, u, pf, err := arch_service.GetPackageDBFile(ctx, group, arch, ctx.Package.Owner.ID,
-			strings.HasSuffix(file, ".sig"))
+		pkg, u, pf, err := arch_service.GetPackageDBFile(ctx, ctx.Package.Owner.ID, group, arch, strings.HasSuffix(file, ".sig"))
 		if err != nil {
 			if errors.Is(err, util.ErrNotExist) {
 				apiError(ctx, http.StatusNotFound, err)
@@ -215,12 +231,23 @@ func GetPackageOrDB(ctx *context.Context) {
 }
 
 func RemovePackage(ctx *context.Context) {
-	var (
-		group   = ctx.Params("group")
-		pkg     = ctx.Params("package")
-		ver     = ctx.Params("version")
-		pkgArch = ctx.Params("arch")
-	)
+	pathGroups := strings.Split(strings.Trim(ctx.Params("*"), "/"), "/")
+	groupLen := len(pathGroups)
+	if groupLen < 3 {
+		ctx.Status(http.StatusBadRequest)
+		return
+	}
+	var group, pkg, ver, pkgArch string
+	if groupLen == 3 {
+		pkg = pathGroups[0]
+		ver = pathGroups[1]
+		pkgArch = pathGroups[2]
+	} else {
+		group = strings.Join(pathGroups[:groupLen-3], "/")
+		pkg = pathGroups[groupLen-3]
+		ver = pathGroups[groupLen-2]
+		pkgArch = pathGroups[groupLen-1]
+	}
 	releaser := refreshLocker(ctx, group)
 	defer releaser()
 	pv, err := packages_model.GetVersionByNameAndVersion(

@@ -1,0 +1,9 @@
+- id: 1001
+  user_id: 2
+  op_type: 10 # close issue
+  act_user_id: 2
+  comment_id: 1001
+  repo_id: 1 # public
+  is_private: false
+  created_unix: 1680454039
+  content: '1|This is a very long text, so lets scream together: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…'

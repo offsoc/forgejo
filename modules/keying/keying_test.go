@@ -15,7 +15,7 @@ import (
 )
 
 func TestKeying(t *testing.T) {
-	t.Run("Not initalized", func(t *testing.T) {
+	t.Run("Not initialized", func(t *testing.T) {
 		assert.Panics(t, func() {
 			keying.DeriveKey(keying.Context("TESTING"))
 		})
@@ -25,7 +25,7 @@ func TestKeying(t *testing.T) {
 		keying.Init([]byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07})
 	})
 
-	t.Run("Context seperation", func(t *testing.T) {
+	t.Run("Context separation", func(t *testing.T) {
 		key1 := keying.DeriveKey(keying.Context("TESTING"))
 		key2 := keying.DeriveKey(keying.Context("TESTING2"))
 
@@ -49,20 +49,20 @@ func TestKeying(t *testing.T) {
 		cipherText = key.Encrypt(plainText, []byte{0x05, 0x06})
 		cipherText2 := key.Encrypt(plainText, []byte{0x05, 0x06})
 
-		// Ensure ciphertexts don't have an determistic output.
+		// Ensure ciphertexts don't have an deterministic output.
 		assert.NotEqualValues(t, cipherText, cipherText2)
 	})
 
 	t.Run("Decrypt", func(t *testing.T) {
 		key := keying.DeriveKey(context)
 
-		t.Run("Succesful", func(t *testing.T) {
+		t.Run("Successful", func(t *testing.T) {
 			convertedPlainText, err := key.Decrypt(cipherText, []byte{0x05, 0x06})
 			require.NoError(t, err)
 			assert.EqualValues(t, plainText, convertedPlainText)
 		})
 
-		t.Run("Not enougn additional data", func(t *testing.T) {
+		t.Run("Not enough additional data", func(t *testing.T) {
 			plainText, err := key.Decrypt(cipherText, []byte{0x05})
 			require.Error(t, err)
 			assert.Empty(t, plainText)

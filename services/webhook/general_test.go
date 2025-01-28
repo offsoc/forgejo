@@ -72,6 +72,10 @@ func pushTestMultilineCommitMessagePayload() *api.PushPayload {
 	return pushTestPayloadWithCommitMessage("This is a commit summary ⚠️⚠️⚠️⚠️ containing 你好 ⚠️⚠️️\n\nThis is the message body.")
 }
 
+func pushTestEscapeCommitMessagePayload() *api.PushPayload {
+	return pushTestPayloadWithCommitMessage("# conflicts\n# - some/conflicting/file.txt")
+}
+
 func pushTestPayloadWithCommitMessage(message string) *api.PushPayload {
 	commit := &api.PayloadCommit{
 		ID:      "2020558fe2e34debb818a514715839cabd25e778",

@@ -135,3 +135,13 @@ func TestDetectContentTypeOgg(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, st.IsVideo())
 }
+
+func TestDetectContentTypeAvif(t *testing.T) {
+	avifImage, err := hex.DecodeString("000000206674797061766966")
+	require.NoError(t, err)
+
+	st, err := DetectContentTypeFromReader(bytes.NewReader(avifImage))
+	require.NoError(t, err)
+
+	assert.True(t, st.IsImage())
+}
