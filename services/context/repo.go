@@ -937,6 +937,9 @@ func getRefName(ctx *Base, repo *Repository, pathType RepoRefType) string {
 // of repository reference
 func RepoRefByType(refType RepoRefType, ignoreNotExistErr ...bool) func(*Context) context.CancelFunc {
 	return func(ctx *Context) (cancel context.CancelFunc) {
+		if ctx.Repo.Repository.IsBeingCreated() {
+			return nil // no git repo, so do nothing
+		}
 		// Empty repository does not have reference information.
 		if ctx.Repo.Repository.IsEmpty {
 			// assume the user is viewing the (non-existent) default branch
