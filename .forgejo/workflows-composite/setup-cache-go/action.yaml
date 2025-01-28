@@ -49,7 +49,7 @@ runs:
 
     - name: "Restore Go dependencies from cache or mark for later caching"
       id: cache-deps
-      uses: actions/cache@v4
+      uses: https://data.forgejo.org/actions/cache@v4
       with:
         key: setup-cache-go-deps-${{ runner.os }}-${{ inputs.username }}-${{ steps.go-version.outputs.go_version }}-${{ hashFiles('go.sum', 'go.mod') }}
         restore-keys: |
