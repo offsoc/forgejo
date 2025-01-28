@@ -225,9 +225,9 @@ func (l *locale) TrString(trKey string, trArgs ...any) string {
 		format = msg
 	} else {
 		// First fallback: old-style translation
-		idx, ok := l.store.trKeyToIdxMap[trKey]
+		idx, foundIndex := l.store.trKeyToIdxMap[trKey]
 		found := false
-		if ok {
+		if foundIndex {
 			if msg, ok := l.idxToMsgMap[idx]; ok {
 				format = msg // use the found translation
 				found = true
@@ -239,7 +239,7 @@ func (l *locale) TrString(trKey string, trArgs ...any) string {
 			if defaultLang, ok := l.store.localeMap[l.store.defaultLang]; ok {
 				if msg := defaultLang.LookupNewStyleMessage(trKey); msg != "" {
 					format = msg
-				} else {
+				} else if foundIndex {
 					// Third fallback: old-style default language
 					if msg, ok := defaultLang.idxToMsgMap[idx]; ok {
 						format = msg
