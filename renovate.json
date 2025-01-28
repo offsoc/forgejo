@@ -62,6 +62,7 @@
       "description": "Group nodejs packages",
       "matchPackageNames": [
         "code.forgejo.org/oci/node",
+        "data.forgejo.org/oci/node",
         "docker.io/library/node",
         "docker.io/node",
         "node"
