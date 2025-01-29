@@ -125,6 +125,19 @@ func Projects(ctx *context.Context) {
 	ctx.Data["IsProjectsPage"] = true
 	ctx.Data["SortType"] = sortType
 
+	numOpenIssues, err := issues_model.NumIssuesInProjects(ctx, projects, ctx.Doer, ctx.Org.Organization, optional.Some(false))
+	if err != nil {
+		ctx.ServerError("NumIssuesInProjects", err)
+		return
+	}
+	numClosedIssues, err := issues_model.NumIssuesInProjects(ctx, projects, ctx.Doer, ctx.Org.Organization, optional.Some(true))
+	if err != nil {
+		ctx.ServerError("NumIssuesInProjects", err)
+		return
+	}
+	ctx.Data["NumOpenIssuesInProject"] = numOpenIssues
+	ctx.Data["NumClosedIssuesInProject"] = numClosedIssues
+
 	ctx.HTML(http.StatusOK, tplProjects)
 }
 
@@ -310,7 +323,7 @@ func ViewProject(ctx *context.Context) {
 		return
 	}
 
-	issuesMap, err := issues_model.LoadIssuesFromColumnList(ctx, columns)
+	issuesMap, err := issues_model.LoadIssuesFromColumnList(ctx, columns, ctx.Doer, nil, optional.None[bool]())
 	if err != nil {
 		ctx.ServerError("LoadIssuesOfColumns", err)
 		return
