@@ -518,7 +518,7 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 			resp := testPullCreate(t, user1Session, "user1", "repo1", false, "master", "a-test-branch", "This is a pull title")
 			elem := strings.Split(test.RedirectURL(resp), "/")
 			assert.EqualValues(t, "pulls", elem[3])
-			testIssueClose(t, user1Session, elem[1], elem[2], elem[4])
+			testIssueClose(t, user1Session, elem[1], elem[2], elem[4], true)
 
 			// Get the commit SHA
 			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{
@@ -579,8 +579,12 @@ func testSubmitReview(t *testing.T, session *TestSession, csrf, owner, repo, pul
 	return session.MakeRequest(t, req, expectedSubmitStatus)
 }
 
-func testIssueClose(t *testing.T, session *TestSession, owner, repo, issueNumber string) *httptest.ResponseRecorder {
-	req := NewRequest(t, "GET", path.Join(owner, repo, "pulls", issueNumber))
+func testIssueClose(t *testing.T, session *TestSession, owner, repo, issueNumber string, isPull bool) *httptest.ResponseRecorder {
+	issueType := "issues"
+	if isPull {
+		issueType = "pulls"
+	}
+	req := NewRequest(t, "GET", path.Join(owner, repo, issueType, issueNumber))
 	resp := session.MakeRequest(t, req, http.StatusOK)
 
 	htmlDoc := NewHTMLParser(t, resp.Body)
