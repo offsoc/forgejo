@@ -81,16 +81,12 @@ code.gitea.io/gitea/models/repo
 	WatchRepoMode
 
 code.gitea.io/gitea/models/user
-	ErrUserInactive.Error
-	ErrUserInactive.Unwrap
 	IsErrExternalLoginUserAlreadyExist
 	IsErrExternalLoginUserNotExist
 	NewFederatedUser
 	IsErrUserSettingIsNotExist
 	GetUserAllSettings
 	DeleteUserSetting
-	GetUserEmailsByNames
-	GetUserNamesByIDs
 
 code.gitea.io/gitea/modules/activitypub
 	NewContext
