@@ -103,9 +103,6 @@ const sfc = {
     const el = document.getElementById('dashboard-repo-list');
     this.changeReposFilter(this.reposFilter);
     $(el).find('.dropdown').dropdown();
-    nextTick(() => {
-      this.$refs.search.focus();
-    });
 
     this.textArchivedFilterTitles = {
       'archived': this.textShowOnlyArchived,
