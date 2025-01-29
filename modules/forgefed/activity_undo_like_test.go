@@ -125,7 +125,7 @@ func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 		"invalid": {
 			item:    []byte(`invalid JSON`),
 			want:    nil,
-			wantErr: fmt.Errorf("cannot parse JSON:"),
+			wantErr: fmt.Errorf("cannot parse JSON"),
 		},
 	}
 
@@ -136,16 +136,14 @@ func Test_UndoLikeUnmarshalJSON(t *testing.T) {
 			if test.wantErr != nil {
 				if err == nil {
 					t.Errorf("UnmarshalJSON() error = nil, wantErr \"%v\"", test.wantErr)
-				} else {
-					if !strings.Contains(err.Error(), test.wantErr.Error()) {
-						t.Errorf("UnmarshalJSON() error = \"%v\", wantErr \"%v\"", err, test.wantErr)
-					}
+				} else if !strings.Contains(err.Error(), test.wantErr.Error()) {
+					t.Errorf("UnmarshalJSON() error = \"%v\", wantErr \"%v\"", err, test.wantErr)
 				}
 				return
 			}
-			remarshalled_got, _ := got.MarshalJSON()
-			remarshalled_want, _ := test.want.MarshalJSON()
-			if !reflect.DeepEqual(remarshalled_got, remarshalled_want) {
+			remarshalledgot, _ := got.MarshalJSON()
+			remarshalledwant, _ := test.want.MarshalJSON()
+			if !reflect.DeepEqual(remarshalledgot, remarshalledwant) {
 				t.Errorf("UnmarshalJSON() got = %#v\nwant %#v", got, test.want)
 			}
 		})

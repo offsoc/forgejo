@@ -4,8 +4,9 @@
 package forgefed
 
 import (
-	"code.gitea.io/gitea/modules/validation"
 	"time"
+
+	"code.gitea.io/gitea/modules/validation"
 
 	ap "github.com/go-ap/activitypub"
 )

@@ -36,46 +36,42 @@ func NewForgeUndoLike(actorIRI, objectIRI string, startTime time.Time) (ForgeUnd
 func (undo *ForgeUndoLike) UnmarshalJSON(data []byte) error {
 	return undo.Activity.UnmarshalJSON(data)
 }
-	
-func (undo ForgeUndoLike) Validate() []string {
-		var result []string
-		result = append(result, validation.ValidateNotEmpty(string(undo.Type), "type")...)
-		result = append(result, validation.ValidateOneOf(string(undo.Type), []any{"Undo"}, "type")...)
-	
-		if undo.Actor == nil {
-			result = append(result, "Actor should not be nil.")
-		} else {
-			result = append(result, validation.ValidateNotEmpty(undo.Actor.GetID().String(), "actor")...)
-		}
-	
-		result = append(result, validation.ValidateNotEmpty(undo.StartTime.String(), "startTime")...)
-		if undo.StartTime.IsZero() {
-			result = append(result, "StartTime was invalid.")
-		}
-	
-		if undo.Object == nil {
-			result = append(result, "object should not be empty.")
-		} else if activity, ok := undo.Object.(*ap.Activity); !ok {
-			result = append(result, "object is not of type Activity")
-		} else {
-	
-			result = append(result, validation.ValidateNotEmpty(string(activity.Type), "type")...)
-			result = append(result, validation.ValidateOneOf(string(activity.Type), []any{"Like"}, "type")...)
-	
-			if activity.Actor == nil {
-				result = append(result, "Object.Actor should not be nil.")
-			} else {
-				result = append(result, validation.ValidateNotEmpty(activity.Actor.GetID().String(), "actor")...)
-			}
-	
-			if activity.Object == nil {
-				result = append(result, "Object.Object should not be nil.")
-			} else {
-				result = append(result, validation.ValidateNotEmpty(activity.Object.GetID().String(), "object")...)
-			}
-		}
-		return result
-	}
-	
 
-	
+func (undo ForgeUndoLike) Validate() []string {
+	var result []string
+	result = append(result, validation.ValidateNotEmpty(string(undo.Type), "type")...)
+	result = append(result, validation.ValidateOneOf(string(undo.Type), []any{"Undo"}, "type")...)
+
+	if undo.Actor == nil {
+		result = append(result, "Actor should not be nil.")
+	} else {
+		result = append(result, validation.ValidateNotEmpty(undo.Actor.GetID().String(), "actor")...)
+	}
+
+	result = append(result, validation.ValidateNotEmpty(undo.StartTime.String(), "startTime")...)
+	if undo.StartTime.IsZero() {
+		result = append(result, "StartTime was invalid.")
+	}
+
+	if undo.Object == nil {
+		result = append(result, "object should not be empty.")
+	} else if activity, ok := undo.Object.(*ap.Activity); !ok {
+		result = append(result, "object is not of type Activity")
+	} else {
+		result = append(result, validation.ValidateNotEmpty(string(activity.Type), "type")...)
+		result = append(result, validation.ValidateOneOf(string(activity.Type), []any{"Like"}, "type")...)
+
+		if activity.Actor == nil {
+			result = append(result, "Object.Actor should not be nil.")
+		} else {
+			result = append(result, validation.ValidateNotEmpty(activity.Actor.GetID().String(), "actor")...)
+		}
+
+		if activity.Object == nil {
+			result = append(result, "Object.Object should not be nil.")
+		} else {
+			result = append(result, validation.ValidateNotEmpty(activity.Object.GetID().String(), "object")...)
+		}
+	}
+	return result
+}

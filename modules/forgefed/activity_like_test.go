@@ -99,7 +99,7 @@ func Test_LikeUnmarshalJSON(t *testing.T) {
 		"invalid": {
 			item:    []byte(`{"type":"Invalid","actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1","object":"https://codeberg.org/api/activitypub/repository-id/1"`),
 			want:    &ForgeLike{},
-			wantErr: fmt.Errorf("cannot parse JSON:"),
+			wantErr: fmt.Errorf("cannot parse JSON"),
 		},
 	}
 
@@ -119,7 +119,6 @@ func Test_LikeUnmarshalJSON(t *testing.T) {
 }
 
 func Test_ForgeLikeValidation(t *testing.T) {
-
 	// Successful
 
 	sut := new(ForgeLike)
