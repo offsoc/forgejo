@@ -1043,22 +1043,6 @@ func GetUserByName(ctx context.Context, name string) (*User, error) {
 	return u, nil
 }
 
-// GetUserEmailsByNames returns a list of e-mails corresponds to names of users
-// that have their email notifications set to enabled or onmention.
-func GetUserEmailsByNames(ctx context.Context, names []string) []string {
-	mails := make([]string, 0, len(names))
-	for _, name := range names {
-		u, err := GetUserByName(ctx, name)
-		if err != nil {
-			continue
-		}
-		if u.IsMailable() && u.EmailNotificationsPreference != EmailNotificationsDisabled {
-			mails = append(mails, u.Email)
-		}
-	}
-	return mails
-}
-
 // GetMaileableUsersByIDs gets users from ids, but only if they can receive mails
 func GetMaileableUsersByIDs(ctx context.Context, ids []int64, isMention bool) ([]*User, error) {
 	if len(ids) == 0 {
@@ -1083,17 +1067,6 @@ func GetMaileableUsersByIDs(ctx context.Context, ids []int64, isMention bool) ([
 		And("`is_active` = ?", true).
 		In("`email_notifications_preference`", EmailNotificationsEnabled, EmailNotificationsAndYourOwn).
 		Find(&ous)
-}
-
-// GetUserNamesByIDs returns usernames for all resolved users from a list of Ids.
-func GetUserNamesByIDs(ctx context.Context, ids []int64) ([]string, error) {
-	unames := make([]string, 0, len(ids))
-	err := db.GetEngine(ctx).In("id", ids).
-		Table("user").
-		Asc("name").
-		Cols("name").
-		Find(&unames)
-	return unames, err
 }
 
 // GetUserNameByID returns username for the id

@@ -102,16 +102,6 @@ func TestGetUserByName(t *testing.T) {
 	}
 }
 
-func TestGetUserEmailsByNames(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-
-	// ignore none active user email
-	assert.ElementsMatch(t, []string{"user8@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "user9"}))
-	assert.ElementsMatch(t, []string{"user8@example.com", "user5@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "user5"}))
-
-	assert.ElementsMatch(t, []string{"user8@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "org7"}))
-}
-
 func TestCanCreateOrganization(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
