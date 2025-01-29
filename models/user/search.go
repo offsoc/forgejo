@@ -40,6 +40,7 @@ type SearchUserOptions struct {
 	IsProhibitLogin    optional.Option[bool]
 	IncludeReserved    bool
 
+	Load2FAStatus     bool
 	ExtraParamStrings map[string]string
 }
 
