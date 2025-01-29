@@ -1462,3 +1462,15 @@ func TestRepoSubmoduleView(t *testing.T) {
 		htmlDoc.AssertElement(t, fmt.Sprintf(`tr[data-entryname="repo1"] a[href="%s"]`, u.JoinPath("/user2/repo1").String()), true)
 	})
 }
+
+func TestBlameDirectory(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	// Ensure directory exists.
+	req := NewRequest(t, "GET", "/user2/repo59/src/branch/master/deep")
+	MakeRequest(t, req, http.StatusOK)
+
+	// Blame is not allowed
+	req = NewRequest(t, "GET", "/user2/repo59/blame/branch/master/deep")
+	MakeRequest(t, req, http.StatusNotFound)
+}
