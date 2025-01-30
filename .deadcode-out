@@ -50,7 +50,6 @@ code.gitea.io/gitea/models/git
 code.gitea.io/gitea/models/issues
 	IsErrUnknownDependencyType
 	IsErrIssueWasClosed
-	ChangeMilestoneStatus
 
 code.gitea.io/gitea/models/organization
 	GetTeamNamesByID
