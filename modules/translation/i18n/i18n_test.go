@@ -158,6 +158,7 @@ commits = fallback value for commits
 
 	found := lang1.HasKey("no-such")
 	assert.False(t, found)
+	assert.EqualValues(t, "no-such", lang1.TrString("no-such"))
 	require.NoError(t, ls.Close())
 }
 

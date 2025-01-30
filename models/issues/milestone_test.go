@@ -298,17 +298,16 @@ func TestNewMilestone(t *testing.T) {
 	unittest.CheckConsistencyFor(t, &repo_model.Repository{ID: milestone.RepoID}, &issues_model.Milestone{})
 }
 
-func TestChangeMilestoneStatus(t *testing.T) {
+func TestChangeMilestoneStatusByRepoIDAndID(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
-	milestone := unittest.AssertExistsAndLoadBean(t, &issues_model.Milestone{ID: 1})
 
-	require.NoError(t, issues_model.ChangeMilestoneStatus(db.DefaultContext, milestone, true))
-	unittest.AssertExistsAndLoadBean(t, &issues_model.Milestone{ID: 1}, "is_closed=1")
-	unittest.CheckConsistencyFor(t, &repo_model.Repository{ID: milestone.RepoID}, &issues_model.Milestone{})
+	require.NoError(t, issues_model.ChangeMilestoneStatusByRepoIDAndID(db.DefaultContext, 1, 1, true))
+	unittest.AssertExistsAndLoadBean(t, &issues_model.Milestone{ID: 1, IsClosed: true})
+	unittest.CheckConsistencyFor(t, &repo_model.Repository{ID: 1}, &issues_model.Milestone{})
 
-	require.NoError(t, issues_model.ChangeMilestoneStatus(db.DefaultContext, milestone, false))
+	require.NoError(t, issues_model.ChangeMilestoneStatusByRepoIDAndID(db.DefaultContext, 1, 1, false))
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Milestone{ID: 1}, "is_closed=0")
-	unittest.CheckConsistencyFor(t, &repo_model.Repository{ID: milestone.RepoID}, &issues_model.Milestone{})
+	unittest.CheckConsistencyFor(t, &repo_model.Repository{ID: 1}, &issues_model.Milestone{})
 }
 
 func TestDeleteMilestoneByRepoID(t *testing.T) {
