@@ -67,10 +67,6 @@ code.gitea.io/gitea/models/project
 code.gitea.io/gitea/models/repo
 	DeleteAttachmentsByIssue
 	FindReposMapByIDs
-	IsErrTopicNotExist
-	ErrTopicNotExist.Error
-	ErrTopicNotExist.Unwrap
-	GetTopicByName
 	WatchRepoMode
 
 code.gitea.io/gitea/models/user
