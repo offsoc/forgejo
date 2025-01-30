@@ -25,7 +25,6 @@ code.gitea.io/gitea/models/actions
 code.gitea.io/gitea/models/asymkey
 	ErrGPGKeyAccessDenied.Error
 	ErrGPGKeyAccessDenied.Unwrap
-	HasDeployKey
 
 code.gitea.io/gitea/models/auth
 	GetSourceByName
