@@ -7,8 +7,10 @@
 	{{$isCodeGlobalDisabled := .UnitTypeCode.UnitGlobalDisabled}}
 	<div>
 		<div class="ui checkbox">
-			<input name="enable_code" type="checkbox"{{if $isCodeEnabled}} checked{{end}}>
-			<label><strong>{{ctx.Locale.Tr "repo.code"}}</strong></label>
+			<label>
+			    <input name="enable_code" type="checkbox"{{if $isCodeEnabled}} checked{{end}}>
+				<strong>{{ctx.Locale.Tr "repo.code"}}</strong>
+			</label>
 		</div>
 	</div>
 	<span class="help">{{ctx.Locale.Tr "repo.code.desc"}}</span>
@@ -17,8 +19,10 @@
 	{{$isProjectsGlobalDisabled := .UnitTypeProjects.UnitGlobalDisabled}}
 	<div>
 		<div class="ui checkbox">
-			<input name="enable_projects" type="checkbox"{{if $isProjectsEnabled}} checked{{end}}>
-			<label><strong>{{ctx.Locale.Tr "repo.projects"}}</strong></label>
+			<label>
+			    <input name="enable_projects" type="checkbox"{{if $isProjectsEnabled}} checked{{end}}>
+				<strong>{{ctx.Locale.Tr "repo.projects"}}</strong>
+			</label>
 		</div>
 	</div>
 	<span class="help">{{ctx.Locale.Tr "repo.settings.projects_desc"}}</span>
@@ -27,8 +31,10 @@
 	{{$isReleasesGlobalDisabled := .UnitTypeReleases.UnitGlobalDisabled}}
 	<div>
 		<div class="ui checkbox">
-			<input name="enable_releases" type="checkbox"{{if $isReleasesEnabled}} checked{{end}}>
-			<label><strong>{{ctx.Locale.Tr "repo.releases"}}</strong></label>
+			<label>
+			    <input name="enable_releases" type="checkbox"{{if $isReleasesEnabled}} checked{{end}}>
+				<strong>{{ctx.Locale.Tr "repo.releases"}}</strong>
+			</label>
 		</div>
 	</div>
 	<span class="help">{{ctx.Locale.Tr "repo.settings.releases_desc"}}</span>
@@ -38,8 +44,10 @@
 	{{$isPackagesGlobalDisabled := .UnitTypePackages.UnitGlobalDisabled}}
 	<div>
 		<div class="ui checkbox">
-			<input name="enable_packages" type="checkbox"{{if $isPackagesEnabled}} checked{{end}}>
-			<label><strong>{{ctx.Locale.Tr "repo.packages"}}</strong></label>
+			<label>
+			    <input name="enable_packages" type="checkbox"{{if $isPackagesEnabled}} checked{{end}}>
+				<strong>{{ctx.Locale.Tr "repo.packages"}}</strong>
+			</label>
 		</div>
 	</div>
 	<span class="help">{{ctx.Locale.Tr "repo.settings.packages_desc"}}</span>
@@ -50,8 +58,10 @@
 		{{$isActionsGlobalDisabled := .UnitTypeActions.UnitGlobalDisabled}}
 		<div>
 			<div class="ui checkbox">
-				<input name="enable_actions" type="checkbox"{{if $isActionsEnabled}} checked{{end}}>
-				<label><strong>{{ctx.Locale.Tr "repo.actions"}}</strong></label>
+				<label>
+				    <input name="enable_actions" type="checkbox"{{if $isActionsEnabled}} checked{{end}}>
+					<strong>{{ctx.Locale.Tr "repo.actions"}}</strong>
+				</label>
 			</div>
 		</div>
 		<span class="help">{{ctx.Locale.Tr "repo.settings.actions_desc"}}</span>
