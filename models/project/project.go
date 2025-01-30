@@ -368,21 +368,6 @@ func ChangeProjectStatusByRepoIDAndID(ctx context.Context, repoID, projectID int
 	return committer.Commit()
 }
 
-// ChangeProjectStatus toggle a project between opened and closed
-func ChangeProjectStatus(ctx context.Context, p *Project, isClosed bool) error {
-	ctx, committer, err := db.TxContext(ctx)
-	if err != nil {
-		return err
-	}
-	defer committer.Close()
-
-	if err := changeProjectStatus(ctx, p, isClosed); err != nil {
-		return err
-	}
-
-	return committer.Commit()
-}
-
 func changeProjectStatus(ctx context.Context, p *Project, isClosed bool) error {
 	p.IsClosed = isClosed
 	p.ClosedDateUnix = timeutil.TimeStampNow()
