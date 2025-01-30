@@ -1129,4 +1129,35 @@ func TestRender_FilePreview(t *testing.T) {
 			localMetas,
 		)
 	})
+
+	commitFileURL = util.URLJoin(markup.TestRepoURL, "src", "commit", "eeb243c3395e1921c5d90e73bd739827251fc99d", "path", "to", "file%20%23.txt")
+
+	t.Run("file with strange characters in name", func(t *testing.T) {
+		testRender(
+			commitFileURL+"#L1",
+			`<p></p>`+
+				`<div class="file-preview-box">`+
+				`<div class="header">`+
+				`<div>`+
+				`<a href="http://localhost:3000/gogits/gogs/src/commit/eeb243c3395e1921c5d90e73bd739827251fc99d/path/to/file%20%23.txt#L1" class="muted" rel="nofollow">path/to/file #.txt</a>`+
+				`</div>`+
+				`<span class="text small grey">`+
+				`Line 1 in <a href="http://localhost:3000/gogits/gogs/src/commit/eeb243c3395e1921c5d90e73bd739827251fc99d" class="text black" rel="nofollow">eeb243c</a>`+
+				`</span>`+
+				`</div>`+
+				`<div class="ui table">`+
+				`<table class="file-preview">`+
+				`<tbody>`+
+				`<tr>`+
+				`<td class="lines-num"><span data-line-number="1"></span></td>`+
+				`<td class="lines-code chroma"><code class="code-inner">A`+"\n"+`</code></td>`+
+				`</tr>`+
+				`</tbody>`+
+				`</table>`+
+				`</div>`+
+				`</div>`+
+				`<p></p>`,
+			localMetas,
+		)
+	})
 }
