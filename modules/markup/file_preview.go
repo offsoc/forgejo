@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"html/template"
 	"io"
+	"net/url"
 	"regexp"
 	"slices"
 	"strconv"
@@ -82,6 +83,10 @@ func newFilePreview(ctx *RenderContext, node *html.Node, locale translation.Loca
 		filePath = strings.TrimSuffix(filePath, "?display=source")
 	} else if Type(filePath) != "" {
 		urlFullSource = node.Data[m[0]:m[6]] + filePath + "?display=source#" + node.Data[m[8]:m[1]]
+	}
+	filePath, err := url.QueryUnescape(filePath)
+	if err != nil {
+		return nil
 	}
 	hash := node.Data[m[8]:m[9]]
 
