@@ -38,7 +38,8 @@ func TestAdminViewUsers(t *testing.T) {
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
 		// 6th column is the 2FA column.
-		htmlDoc.AssertElement(t, ".admin-setting-content table tbody tr td:nth-child(6) .octicon-check", true)
+		// One user that has TOTP and another user that has WebAuthn.
+		assert.EqualValues(t, 2, htmlDoc.Find(".admin-setting-content table tbody tr td:nth-child(6) .octicon-check").Length())
 	})
 
 	t.Run("Normal user", func(t *testing.T) {
