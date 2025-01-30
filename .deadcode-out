@@ -65,7 +65,6 @@ code.gitea.io/gitea/models/project
 	ChangeProjectStatus
 
 code.gitea.io/gitea/models/repo
-	DeleteAttachmentsByIssue
 	WatchRepoMode
 
 code.gitea.io/gitea/models/user
