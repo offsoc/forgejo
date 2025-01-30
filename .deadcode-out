@@ -61,7 +61,6 @@ code.gitea.io/gitea/models/perm/access
 	GetRepoWriters
 
 code.gitea.io/gitea/models/project
-	UpdateColumnSorting
 	ChangeProjectStatus
 
 code.gitea.io/gitea/models/repo
