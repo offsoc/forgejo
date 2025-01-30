@@ -303,11 +303,7 @@ func DeleteGPGKey(ctx *context.APIContext) {
 	}
 
 	if err := asymkey_model.DeleteGPGKey(ctx, ctx.Doer, ctx.ParamsInt64(":id")); err != nil {
-		if asymkey_model.IsErrGPGKeyAccessDenied(err) {
-			ctx.Error(http.StatusForbidden, "", "You do not have access to this key")
-		} else {
-			ctx.Error(http.StatusInternalServerError, "DeleteGPGKey", err)
-		}
+		ctx.Error(http.StatusInternalServerError, "DeleteGPGKey", err)
 		return
 	}
 
@@ -317,8 +313,6 @@ func DeleteGPGKey(ctx *context.APIContext) {
 // HandleAddGPGKeyError handle add GPGKey error
 func HandleAddGPGKeyError(ctx *context.APIContext, err error, token string) {
 	switch {
-	case asymkey_model.IsErrGPGKeyAccessDenied(err):
-		ctx.Error(http.StatusUnprocessableEntity, "GPGKeyAccessDenied", "You do not have access to this GPG key")
 	case asymkey_model.IsErrGPGKeyIDAlreadyUsed(err):
 		ctx.Error(http.StatusUnprocessableEntity, "GPGKeyIDAlreadyUsed", "A key with the same id already exists")
 	case asymkey_model.IsErrGPGKeyParsing(err):
