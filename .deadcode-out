@@ -233,9 +233,6 @@ code.gitea.io/gitea/modules/web
 	RouteMock
 	RouteMockReset
 
-code.gitea.io/gitea/modules/web/middleware
-	DeleteLocaleCookie
-
 code.gitea.io/gitea/modules/zstd
 	NewWriter
 	Writer.Write
