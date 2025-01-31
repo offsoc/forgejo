@@ -253,9 +253,6 @@ code.gitea.io/gitea/services/context
 code.gitea.io/gitea/services/convert
 	ToSecret
 
-code.gitea.io/gitea/services/forms
-	DeadlineForm.Validate
-
 code.gitea.io/gitea/services/pull
 	IsCommitStatusContextSuccess
 
