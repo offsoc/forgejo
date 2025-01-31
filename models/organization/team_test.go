@@ -188,20 +188,6 @@ func TestHasTeamRepo(t *testing.T) {
 	test(2, 5, false)
 }
 
-func TestUsersInTeamsCount(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-
-	test := func(teamIDs, userIDs []int64, expected int64) {
-		count, err := organization.UsersInTeamsCount(db.DefaultContext, teamIDs, userIDs)
-		require.NoError(t, err)
-		assert.Equal(t, expected, count)
-	}
-
-	test([]int64{2}, []int64{1, 2, 3, 4}, 1)          // only userid 2
-	test([]int64{1, 2, 3, 4, 5}, []int64{2, 5}, 2)    // userid 2,4
-	test([]int64{1, 2, 3, 4, 5}, []int64{2, 3, 5}, 3) // userid 2,4,5
-}
-
 func TestInconsistentOwnerTeam(t *testing.T) {
 	defer unittest.OverrideFixtures(
 		unittest.FixturesOptions{

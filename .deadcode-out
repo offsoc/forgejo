@@ -45,7 +45,6 @@ code.gitea.io/gitea/models/organization
 	GetTeamNamesByID
 	UpdateTeamUnits
 	SearchMembersOptions.ToConds
-	UsersInTeamsCount
 
 code.gitea.io/gitea/models/perm/access
 	GetRepoWriters

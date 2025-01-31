@@ -76,14 +76,3 @@ func GetTeamMembers(ctx context.Context, opts *SearchMembersOptions) ([]*user_mo
 func IsUserInTeams(ctx context.Context, userID int64, teamIDs []int64) (bool, error) {
 	return db.GetEngine(ctx).Where("uid=?", userID).In("team_id", teamIDs).Exist(new(TeamUser))
 }
-
-// UsersInTeamsCount counts the number of users which are in userIDs and teamIDs
-func UsersInTeamsCount(ctx context.Context, userIDs, teamIDs []int64) (int64, error) {
-	var ids []int64
-	if err := db.GetEngine(ctx).In("uid", userIDs).In("team_id", teamIDs).
-		Table("team_user").
-		Cols("uid").GroupBy("uid").Find(&ids); err != nil {
-		return 0, err
-	}
-	return int64(len(ids)), nil
-}
