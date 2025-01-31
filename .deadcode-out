@@ -42,7 +42,6 @@ code.gitea.io/gitea/models/issues
 	IsErrIssueWasClosed
 
 code.gitea.io/gitea/models/organization
-	GetTeamNamesByID
 	UpdateTeamUnits
 	SearchMembersOptions.ToConds
 
