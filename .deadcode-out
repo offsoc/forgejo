@@ -10,9 +10,6 @@ code.gitea.io/gitea/cmd/forgejo
 	ContextSetStdin
 
 code.gitea.io/gitea/models
-	IsErrUpdateTaskNotExist
-	ErrUpdateTaskNotExist.Error
-	ErrUpdateTaskNotExist.Unwrap
 	IsErrSHANotFound
 	IsErrMergeDivergingFastForwardOnly
 
