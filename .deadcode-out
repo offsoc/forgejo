@@ -42,7 +42,6 @@ code.gitea.io/gitea/models/issues
 	IsErrIssueWasClosed
 
 code.gitea.io/gitea/models/organization
-	UpdateTeamUnits
 	SearchMembersOptions.ToConds
 
 code.gitea.io/gitea/models/perm/access
