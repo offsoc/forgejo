@@ -23,7 +23,6 @@ code.gitea.io/gitea/models/actions
 	ScheduleList.LoadRepos
 
 code.gitea.io/gitea/models/auth
-	GetSourceByName
 	WebAuthnCredentials
 
 code.gitea.io/gitea/models/db
