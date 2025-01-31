@@ -142,10 +142,6 @@ code.gitea.io/gitea/modules/markup/console
 	RenderString
 
 code.gitea.io/gitea/modules/markup/markdown
-	IsDetails
-	IsSummary
-	IsTaskCheckBoxListItem
-	IsIcon
 	RenderRawString
 
 code.gitea.io/gitea/modules/markup/markdown/math
