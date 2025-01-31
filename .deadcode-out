@@ -83,9 +83,6 @@ code.gitea.io/gitea/modules/cache
 	WithNoCacheContext
 	RemoveContextData
 
-code.gitea.io/gitea/modules/charset
-	BreakWriter.Write
-
 code.gitea.io/gitea/modules/emoji
 	ReplaceCodes
 
