@@ -119,8 +119,6 @@ code.gitea.io/gitea/modules/git
 	openRepositoryWithDefaultContext
 	IsTagExist
 	ToEntryMode
-	LimitedReaderCloser.Read
-	LimitedReaderCloser.Close
 
 code.gitea.io/gitea/modules/gitgraph
 	Parser.Reset
