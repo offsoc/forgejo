@@ -201,10 +201,6 @@ code.gitea.io/gitea/modules/setting
 	GitConfigType.GetOption
 	InitLoggersForTest
 
-code.gitea.io/gitea/modules/storage
-	ErrInvalidConfiguration.Error
-	IsErrInvalidConfiguration
-
 code.gitea.io/gitea/modules/structs
 	ParseCreateHook
 	ParsePushHook
