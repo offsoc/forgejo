@@ -141,26 +141,6 @@ func (p *CreatePayload) JSONPayload() ([]byte, error) {
 	return json.MarshalIndent(p, "", "  ")
 }
 
-// ParseCreateHook parses create event hook content.
-func ParseCreateHook(raw []byte) (*CreatePayload, error) {
-	hook := new(CreatePayload)
-	if err := json.Unmarshal(raw, hook); err != nil {
-		return nil, err
-	}
-
-	// it is possible the JSON was parsed, however,
-	// was not from Gogs (maybe was from Bitbucket)
-	// So we'll check to be sure certain key fields
-	// were populated
-	switch {
-	case hook.Repo == nil:
-		return nil, ErrInvalidReceiveHook
-	case len(hook.Ref) == 0:
-		return nil, ErrInvalidReceiveHook
-	}
-	return hook, nil
-}
-
 // ________         .__          __
 // \______ \   ____ |  |   _____/  |_  ____
 //  |    |  \_/ __ \|  | _/ __ \   __\/ __ \

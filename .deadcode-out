@@ -199,7 +199,6 @@ code.gitea.io/gitea/modules/setting
 	InitLoggersForTest
 
 code.gitea.io/gitea/modules/structs
-	ParseCreateHook
 	ParsePushHook
 
 code.gitea.io/gitea/modules/sync
