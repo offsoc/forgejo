@@ -272,22 +272,6 @@ func (p *PushPayload) JSONPayload() ([]byte, error) {
 	return json.MarshalIndent(p, "", "  ")
 }
 
-// ParsePushHook parses push event hook content.
-func ParsePushHook(raw []byte) (*PushPayload, error) {
-	hook := new(PushPayload)
-	if err := json.Unmarshal(raw, hook); err != nil {
-		return nil, err
-	}
-
-	switch {
-	case hook.Repo == nil:
-		return nil, ErrInvalidReceiveHook
-	case len(hook.Ref) == 0:
-		return nil, ErrInvalidReceiveHook
-	}
-	return hook, nil
-}
-
 // Branch returns branch name from a payload
 func (p *PushPayload) Branch() string {
 	return strings.ReplaceAll(p.Ref, "refs/heads/", "")

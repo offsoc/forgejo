@@ -198,9 +198,6 @@ code.gitea.io/gitea/modules/setting
 	GitConfigType.GetOption
 	InitLoggersForTest
 
-code.gitea.io/gitea/modules/structs
-	ParsePushHook
-
 code.gitea.io/gitea/modules/sync
 	StatusTable.Start
 	StatusTable.IsRunning
