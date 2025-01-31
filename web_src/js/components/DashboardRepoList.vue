@@ -1,5 +1,5 @@
 <script>
-import {createApp, nextTick} from 'vue';
+import {createApp} from 'vue';
 import $ from 'jquery';
 import {SvgIcon} from '../svg.js';
 import {GET} from '../modules/fetch.js';
@@ -103,9 +103,6 @@ const sfc = {
     const el = document.getElementById('dashboard-repo-list');
     this.changeReposFilter(this.reposFilter);
     $(el).find('.dropdown').dropdown();
-    nextTick(() => {
-      this.$refs.search.focus();
-    });
 
     this.textArchivedFilterTitles = {
       'archived': this.textShowOnlyArchived,
