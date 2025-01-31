@@ -104,7 +104,6 @@ code.gitea.io/gitea/modules/git
 	CommitChangesWithArgs
 	SetUpdateHook
 	openRepositoryWithDefaultContext
-	IsTagExist
 	ToEntryMode
 
 code.gitea.io/gitea/modules/gitgraph
