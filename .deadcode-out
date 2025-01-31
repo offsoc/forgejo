@@ -176,9 +176,6 @@ code.gitea.io/gitea/modules/markup/mdstripper
 code.gitea.io/gitea/modules/markup/orgmode
 	RenderString
 
-code.gitea.io/gitea/modules/private
-	ActionsRunnerRegister
-
 code.gitea.io/gitea/modules/process
 	Manager.ExecTimeout
 
