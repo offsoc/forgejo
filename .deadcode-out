@@ -144,10 +144,6 @@ code.gitea.io/gitea/modules/markup/console
 code.gitea.io/gitea/modules/markup/markdown
 	RenderRawString
 
-code.gitea.io/gitea/modules/markup/markdown/math
-	WithInlineDollarParser
-	WithBlockDollarParser
-
 code.gitea.io/gitea/modules/markup/mdstripper
 	stripRenderer.AddOptions
 	StripMarkdown
