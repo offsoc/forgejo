@@ -218,9 +218,6 @@ code.gitea.io/gitea/routers/web/org
 code.gitea.io/gitea/services/context
 	GetPrivateContext
 
-code.gitea.io/gitea/services/pull
-	IsCommitStatusContextSuccess
-
 code.gitea.io/gitea/services/repository
 	IsErrForkAlreadyExist
 
