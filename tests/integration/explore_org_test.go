@@ -14,11 +14,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExploreUser(t *testing.T) {
+func TestExploreOrg(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
 	// Set the default sort order
-	defer test.MockVariableValue(&setting.UI.ExploreDefaultSort, "reversealphabetically")()
+	defer test.MockVariableValue(&setting.UI.ExploreDefaultSort, "alphabetically")()
 
 	cases := []struct{ sortOrder, expected string }{
 		{"", "?sort=" + setting.UI.ExploreDefaultSort + "&q="},
@@ -28,7 +28,7 @@ func TestExploreUser(t *testing.T) {
 		{"reversealphabetically", "?sort=reversealphabetically&q="},
 	}
 	for _, c := range cases {
-		req := NewRequest(t, "GET", "/explore/users?sort="+c.sortOrder)
+		req := NewRequest(t, "GET", "/explore/organizations?sort="+c.sortOrder)
 		resp := MakeRequest(t, req, http.StatusOK)
 		h := NewHTMLParser(t, resp.Body)
 		href, _ := h.Find(`.ui.dropdown .menu a.active.item[href^="?sort="]`).Attr("href")
@@ -37,10 +37,10 @@ func TestExploreUser(t *testing.T) {
 
 	// these sort orders shouldn't be supported, to avoid leaking user activity
 	cases404 := []string{
-		"/explore/users?sort=lastlogin",
-		"/explore/users?sort=reverselastlogin",
-		"/explore/users?sort=leastupdate",
-		"/explore/users?sort=reverseleastupdate",
+		"/explore/organizations?sort=mostMembers",
+		"/explore/organizations?sort=leastGroups",
+		"/explore/organizations?sort=leastupdate",
+		"/explore/organizations?sort=reverseleastupdate",
 	}
 	for _, c := range cases404 {
 		req := NewRequest(t, "GET", c).SetHeader("Accept", "text/html")
