@@ -16,12 +16,6 @@ code.gitea.io/gitea/models
 	IsErrSHANotFound
 	IsErrMergeDivergingFastForwardOnly
 
-code.gitea.io/gitea/models/actions
-	ScheduleList.GetUserIDs
-	ScheduleList.GetRepoIDs
-	ScheduleList.LoadTriggerUser
-	ScheduleList.LoadRepos
-
 code.gitea.io/gitea/models/auth
 	WebAuthnCredentials
 
