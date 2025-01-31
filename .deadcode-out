@@ -223,7 +223,6 @@ code.gitea.io/gitea/services/repository
 
 code.gitea.io/gitea/services/repository/files
 	ContentType.String
-	GetFileResponseFromCommit
 
 code.gitea.io/gitea/services/webhook
 	NewNotifier
