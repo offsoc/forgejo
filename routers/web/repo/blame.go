@@ -56,6 +56,11 @@ func RefBlame(ctx *context.Context) {
 		HandleGitError(ctx, "Repo.Commit.GetTreeEntryByPath", err)
 		return
 	}
+	if entry.IsDir() {
+		ctx.NotFound("Cannot blame directory", nil)
+		return
+	}
+
 	blob := entry.Blob()
 
 	ctx.Data["PageIsViewCode"] = true

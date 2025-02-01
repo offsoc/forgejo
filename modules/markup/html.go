@@ -759,9 +759,6 @@ func shortLinkProcessor(ctx *RenderContext, node *html.Node) {
 				title = path.Base(name)
 			}
 			alt := props["alt"]
-			if alt == "" {
-				alt = name
-			}
 
 			// make the childNode an image - if we can, we also place the alt
 			childNode.Type = html.ElementNode
@@ -771,9 +768,6 @@ func shortLinkProcessor(ctx *RenderContext, node *html.Node) {
 				{Key: "src", Val: link},
 				{Key: "title", Val: title},
 				{Key: "alt", Val: alt},
-			}
-			if alt == "" {
-				childNode.Attr = childNode.Attr[:2]
 			}
 		} else {
 			if !absoluteLink {
