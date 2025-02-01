@@ -6,6 +6,7 @@ package user
 import (
 	"fmt"
 	"net/http"
+	"slices"
 
 	"code.gitea.io/gitea/models/db"
 	org_model "code.gitea.io/gitea/models/organization"
@@ -23,7 +24,6 @@ import (
 	debian_module "code.gitea.io/gitea/modules/packages/debian"
 	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
 	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
 	packages_helper "code.gitea.io/gitea/routers/api/packages/helper"
 	shared_user "code.gitea.io/gitea/routers/web/shared/user"
@@ -200,9 +200,9 @@ func ViewPackageVersion(ctx *context.Context) {
 			}
 		}
 
-		ctx.Data["Branches"] = util.Sorted(branches.Values())
-		ctx.Data["Repositories"] = util.Sorted(repositories.Values())
-		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
+		ctx.Data["Branches"] = slices.Sorted(branches.Seq())
+		ctx.Data["Repositories"] = slices.Sorted(repositories.Seq())
+		ctx.Data["Architectures"] = slices.Sorted(architectures.Seq())
 	case packages_model.TypeArch:
 		ctx.Data["SignMail"] = fmt.Sprintf("%s@noreply.%s", ctx.Package.Owner.Name, setting.Packages.RegistryHost)
 		groups := make(container.Set[string])
@@ -213,7 +213,7 @@ func ViewPackageVersion(ctx *context.Context) {
 				}
 			}
 		}
-		ctx.Data["Groups"] = util.Sorted(groups.Values())
+		ctx.Data["Groups"] = slices.Sorted(groups.Seq())
 	case packages_model.TypeDebian:
 		distributions := make(container.Set[string])
 		components := make(container.Set[string])
@@ -232,9 +232,9 @@ func ViewPackageVersion(ctx *context.Context) {
 			}
 		}
 
-		ctx.Data["Distributions"] = util.Sorted(distributions.Values())
-		ctx.Data["Components"] = util.Sorted(components.Values())
-		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
+		ctx.Data["Distributions"] = slices.Sorted(distributions.Seq())
+		ctx.Data["Components"] = slices.Sorted(components.Seq())
+		ctx.Data["Architectures"] = slices.Sorted(architectures.Seq())
 	case packages_model.TypeRpm, packages_model.TypeAlt:
 		groups := make(container.Set[string])
 		architectures := make(container.Set[string])
@@ -250,8 +250,8 @@ func ViewPackageVersion(ctx *context.Context) {
 			}
 		}
 
-		ctx.Data["Groups"] = util.Sorted(groups.Values())
-		ctx.Data["Architectures"] = util.Sorted(architectures.Values())
+		ctx.Data["Groups"] = slices.Sorted(groups.Seq())
+		ctx.Data["Architectures"] = slices.Sorted(architectures.Seq())
 	}
 
 	var (

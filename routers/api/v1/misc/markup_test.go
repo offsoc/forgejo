@@ -112,7 +112,7 @@ Here are some links to the most important topics. You can find the full list of 
 <h2 id="user-content-quick-links">Quick Links</h2>
 <p>Here are some links to the most important topics. You can find the full list of pages at the sidebar.</p>
 <p><a href="` + FullURL + `wiki/Configuration" rel="nofollow">Configuration</a>
-<a href="` + FullURL + `wiki/raw/images/icon-bug.png" rel="nofollow"><img src="` + FullURL + `wiki/raw/images/icon-bug.png" title="icon-bug.png" alt="images/icon-bug.png"/></a></p>
+<a href="` + FullURL + `wiki/raw/images/icon-bug.png" rel="nofollow"><img src="` + FullURL + `wiki/raw/images/icon-bug.png" title="icon-bug.png" alt=""/></a></p>
 `,
 	}
 

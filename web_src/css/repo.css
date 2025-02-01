@@ -2022,13 +2022,14 @@ details.repo-search-result summary::marker {
   font-weight: var(--font-weight-medium);
 }
 
-.repository .repository-summary .segment.language-stats {
+.repository .repository-summary #language-stats-bar {
   display: flex;
   gap: 2px;
   padding: 0;
   height: 10px;
   white-space: nowrap;
-  border-radius: 0 0 3px 3px !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
   overflow: hidden;
 }
 

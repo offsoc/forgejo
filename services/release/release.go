@@ -372,7 +372,7 @@ func UpdateRelease(ctx context.Context, doer *user_model.User, gitRepo *git.Repo
 		return err
 	}
 
-	for _, uuid := range delAttachmentUUIDs.Values() {
+	for uuid := range delAttachmentUUIDs.Seq() {
 		if err := storage.Attachments.Delete(repo_model.AttachmentRelativePath(uuid)); err != nil {
 			// Even delete files failed, but the attachments has been removed from database, so we
 			// should not return error but only record the error on logs.

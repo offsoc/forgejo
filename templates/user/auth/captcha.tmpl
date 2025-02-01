@@ -1,7 +1,7 @@
 {{if .EnableCaptcha}}{{if eq .CaptchaType "image"}}
 	<div class="inline field tw-text-center">
 		<input type="hidden" name="img-captcha-id" value="{{.Captcha}}">
-		<img style="transform: scaleX(-1)" onclick="this.src=`{{AppSubUrl}}/captcha/{{.Captcha}}.png?reload=${Date.now()}`" class="captcha-img" src="{{AppSubUrl}}/captcha/{{.Captcha}}.png">
+		<img style="transform: scaleX(-1)" onclick="this.src=`{{AppSubUrl}}/captcha/{{.Captcha}}.png?reload=${Date.now()}`" class="captcha-img" src="{{AppSubUrl}}/captcha/{{.Captcha}}.png" alt="{{ctx.Locale.Tr "captcha"}}">
 	</div>
 	<div class="required field {{if .Err_Captcha}}error{{end}}">
 		<label for="captcha">{{ctx.Locale.Tr "captcha"}}</label>

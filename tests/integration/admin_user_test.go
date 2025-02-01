@@ -26,13 +26,36 @@ import (
 func TestAdminViewUsers(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	session := loginUser(t, "user1")
-	req := NewRequest(t, "GET", "/admin/users")
-	session.MakeRequest(t, req, http.StatusOK)
+	t.Run("Admin user", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 
-	session = loginUser(t, "user2")
-	req = NewRequest(t, "GET", "/admin/users")
-	session.MakeRequest(t, req, http.StatusForbidden)
+		session := loginUser(t, "user1")
+		req := NewRequest(t, "GET", "/admin/users")
+		session.MakeRequest(t, req, http.StatusOK)
+
+		req = NewRequest(t, "GET", "/admin/users?status_filter[is_2fa_enabled]=1")
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		// 6th column is the 2FA column.
+		// One user that has TOTP and another user that has WebAuthn.
+		assert.EqualValues(t, 2, htmlDoc.Find(".admin-setting-content table tbody tr td:nth-child(6) .octicon-check").Length())
+	})
+
+	t.Run("Normal user", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		session := loginUser(t, "user2")
+		req := NewRequest(t, "GET", "/admin/users")
+		session.MakeRequest(t, req, http.StatusForbidden)
+	})
+
+	t.Run("Anonymous user", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/admin/users")
+		MakeRequest(t, req, http.StatusSeeOther)
+	})
 }
 
 func TestAdminViewUser(t *testing.T) {

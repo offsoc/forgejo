@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"testing"
 
+	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -15,8 +17,11 @@ import (
 func TestExploreUser(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
+	// Set the default sort order
+	defer test.MockVariableValue(&setting.UI.ExploreDefaultSort, "reversealphabetically")()
+
 	cases := []struct{ sortOrder, expected string }{
-		{"", "?sort=newest&q="},
+		{"", "?sort=" + setting.UI.ExploreDefaultSort + "&q="},
 		{"newest", "?sort=newest&q="},
 		{"oldest", "?sort=oldest&q="},
 		{"alphabetically", "?sort=alphabetically&q="},

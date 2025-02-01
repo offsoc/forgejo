@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 
 	"code.gitea.io/gitea/modules/git/foreachref"
@@ -153,7 +154,9 @@ func (repo *Repository) GetTagInfos(page, pageSize int) ([]*Tag, int, error) {
 		return nil, 0, fmt.Errorf("GetTagInfos: parse output: %w", err)
 	}
 
-	sortTagsByTime(tags)
+	slices.SortFunc(tags, func(b, a *Tag) int {
+		return a.Tagger.When.Compare(b.Tagger.When)
+	})
 	tagsTotal := len(tags)
 	if page != 0 {
 		tags = util.PaginateSlice(tags, page, pageSize).([]*Tag)

@@ -3,6 +3,11 @@
 
 package container
 
+import (
+	"iter"
+	"maps"
+)
+
 type Set[T comparable] map[T]struct{}
 
 // SetOf creates a set and adds the specified elements to it.
@@ -62,4 +67,10 @@ func (s Set[T]) Values() []T {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Seq returns a iterator over the elements in the set.
+// It returns a single-use iterator.
+func (s Set[T]) Seq() iter.Seq[T] {
+	return maps.Keys(s)
 }

@@ -22,11 +22,6 @@ code.gitea.io/gitea/models/actions
 	ScheduleList.LoadTriggerUser
 	ScheduleList.LoadRepos
 
-code.gitea.io/gitea/models/asymkey
-	ErrGPGKeyAccessDenied.Error
-	ErrGPGKeyAccessDenied.Unwrap
-	HasDeployKey
-
 code.gitea.io/gitea/models/auth
 	GetSourceByName
 	WebAuthnCredentials
@@ -54,9 +49,7 @@ code.gitea.io/gitea/models/git
 
 code.gitea.io/gitea/models/issues
 	IsErrUnknownDependencyType
-	ErrNewIssueInsert.Error
 	IsErrIssueWasClosed
-	ChangeMilestoneStatus
 
 code.gitea.io/gitea/models/organization
 	GetTeamNamesByID
@@ -81,16 +74,12 @@ code.gitea.io/gitea/models/repo
 	WatchRepoMode
 
 code.gitea.io/gitea/models/user
-	ErrUserInactive.Error
-	ErrUserInactive.Unwrap
 	IsErrExternalLoginUserAlreadyExist
 	IsErrExternalLoginUserNotExist
 	NewFederatedUser
 	IsErrUserSettingIsNotExist
 	GetUserAllSettings
 	DeleteUserSetting
-	GetUserEmailsByNames
-	GetUserNamesByIDs
 
 code.gitea.io/gitea/modules/activitypub
 	NewContext
