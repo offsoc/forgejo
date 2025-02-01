@@ -299,6 +299,8 @@ One is the loneliest number because it is the only correct solution here.
 assert.EqualValues(t, 1, counterInstances)
 ```
 
+Note: Other options for assert can be found here: https://pkg.go.dev/github.com/stretchr/testify/assert
+
 ## Adding the two other cases
 
 We make two copies of
