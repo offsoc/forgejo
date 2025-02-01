@@ -87,7 +87,7 @@
     "globals": "15.14.0",
     "happy-dom": "16.8.1",
     "license-checker-rseidelsohn": "4.4.2",
-    "markdownlint-cli": "0.43.0",
+    "markdownlint-cli": "0.44.0",
     "postcss-html": "1.8.0",
     "stylelint": "16.12.0",
     "stylelint-declaration-block-no-ignored-properties": "2.8.0",
