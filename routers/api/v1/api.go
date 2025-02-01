@@ -1505,6 +1505,7 @@ func Routes() *web.Route {
 			m.Combo("").Get(org.Get).
 				Patch(reqToken(), reqOrgOwnership(), bind(api.EditOrgOption{}), org.Edit).
 				Delete(reqToken(), reqOrgOwnership(), org.Delete)
+			m.Post("/rename", reqToken(), reqOrgOwnership(), bind(api.RenameOrgOption{}), org.Rename)
 			m.Combo("/repos").Get(user.ListOrgRepos).
 				Post(reqToken(), bind(api.CreateRepoOption{}), context.EnforceQuotaAPI(quota_model.LimitSubjectSizeReposAll, context.QuotaTargetOrg), repo.CreateOrgRepo)
 			m.Group("/members", func() {
