@@ -91,7 +91,7 @@
 						{{range $push.Commits}}
 							{{$commitLink := printf "%s/commit/%s" $repoLink .Sha1}}
 							<div class="flex-text-block">
-								<img class="ui avatar" src="{{$push.AvatarLink $.Context .AuthorEmail}}" title="{{.AuthorName}}" width="16" height="16">
+								<img class="ui avatar" src="{{$push.AvatarLink $.Context .AuthorEmail}}" alt="" title="{{.AuthorName}}" width="16" height="16">
 								<a class="ui sha label" href="{{$commitLink}}">{{ShortSha .Sha1}}</a>
 								<span class="text truncate">
 									{{RenderCommitMessage $.Context .Message ($repo.ComposeMetas ctx)}}
