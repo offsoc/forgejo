@@ -353,3 +353,8 @@ Check if everything works during the real test:
 make test-sqlite
 ```
 
+```
+=== TestDisableForgottenPasswordTrue (tests/integration/disable_forgotten_password_test.go:15)
+=== TestDisableForgottenPasswordDefault (tests/integration/disable_forgotten_password_test.go:35)
+=== TestDisableForgottenPasswordFalse (tests/integration/disable_forgotten_password_test.go:54)
+```
