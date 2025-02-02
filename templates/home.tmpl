@@ -11,8 +11,6 @@
 			</div>
 		</div>
 	</div>
-	{{if .LandingPageInfoEnabled}}
-		{{template "info/landing-page-info" .}}
-	{{end}}
+	{{template "landing-page-info/landing-page-info" .}}
 </div>
 {{template "base/footer" .}}
