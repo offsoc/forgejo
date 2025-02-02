@@ -38,14 +38,18 @@ func GenerateRandomAvatar(ctx context.Context, u *User) error {
 
 	u.Avatar = avatars.HashEmail(seed)
 
-	// Don't share the images so that we can delete them easily
-	if err := storage.SaveFrom(storage.Avatars, u.CustomAvatarRelativePath(), func(w io.Writer) error {
-		if err := png.Encode(w, img); err != nil {
-			log.Error("Encode: %v", err)
+	_, err = storage.Avatars.Stat(u.CustomAvatarRelativePath())
+	if err != nil {
+		// If unable to Stat the avatar file (usually it means non-existing), then try to save a new one
+		// Don't share the images so that we can delete them easily
+		if err := storage.SaveFrom(storage.Avatars, u.CustomAvatarRelativePath(), func(w io.Writer) error {
+			if err := png.Encode(w, img); err != nil {
+				log.Error("Encode: %v", err)
+			}
+			return nil
+		}); err != nil {
+			return fmt.Errorf("failed to save avatar %s: %w", u.CustomAvatarRelativePath(), err)
 		}
-		return err
-	}); err != nil {
-		return fmt.Errorf("Failed to create dir %s: %w", u.CustomAvatarRelativePath(), err)
 	}
 
 	if _, err := db.GetEngine(ctx).ID(u.ID).Cols("avatar").Update(u); err != nil {
