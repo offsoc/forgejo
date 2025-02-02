@@ -58,7 +58,7 @@ func Home(ctx *context.Context) {
 		ctx.Redirect(setting.AppSubURL + "/user/login")
 		return
 	}
-	
+
 	ctx.Data["PageIsHome"] = true
 	ctx.Data["IsRepoIndexerEnabled"] = setting.Indexer.RepoIndexerEnabled
 
