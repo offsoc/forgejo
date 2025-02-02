@@ -159,7 +159,7 @@ SIGNIN_FORGOTTEN_PASSWORD_ENABLED
 ```
 to true.
 
-As you can see, the test doesn't include the processing of the actual processing of the value entered into the app.ini. We start your test after modules/setting/service.go did this:
+As you can see, the test doesn't include the processing of the actual parameter of SIGNIN_FORGOTTEN_PASSWORD_ENABLED in the app.ini. We start your test after modules/setting/service.go processed it this:
 
 ```
 Service.SignInForgottenPasswordEnabled = sec.Key("SIGNIN_FORGOTTEN_PASSWORD_ENABLED").MustBool(true)
@@ -170,7 +170,7 @@ In the case SignInForgottenPasswordEnabled doesn't exist in modules/setting/serv
 
 ## Get the page 
 
-Our parameter changes elements on the /user/login page. Thus we want to see what happens there and we need to grep it:
+Our parameter SIGNIN_FORGOTTEN_PASSWORD_ENABLED enables and disables the "Forgotten Password?" link on the /user/login page. Thus we want to inverstigate what happens at /user/login page and we need to grep that webpage:
 
 ```
 req := NewRequest(t, "GET", "/user/login/")
@@ -182,7 +182,7 @@ Note: You can add "fmt" to the import section and then use e.g.
 ```
 fmt.Printf("XXXXX %+v\n",resp)
 ```
-to "visually" inspect what is going on (here the variable resp). I add the tag XXXXX because this help to visually find the output as well as allow to search for it easily. Or %T to see the type of a variable:
+to "visually" inspect what is going on (here the variable resp). We add the tag XXXXX because this help to visually find the output as well as allow to search for it easily. Or %T to see the type of a variable:
 ```
 parser := NewHTMLParser(t, resp.Body)
 fmt.Printf("XXXXX %T\n",parser)
