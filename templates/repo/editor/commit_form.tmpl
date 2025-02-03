@@ -67,7 +67,7 @@
 			{{end}}
 		</div>
 		<div class="field {{if .Err_CommitMailID}}error{{end}}">
-			<label for="commit_mail_id">Commit email</label>
+			<label for="commit_mail_id">{{ctx.Locale.Tr "repo.editor.commit_email"}}</label>
 			<select class="ui selection dropdown" name="commit_mail_id">
 			{{range .CommitMails}}
 				<option{{if eq $.DefaultCommitMail .Email}} selected="selected"{{end}} value="{{.ID}}">{{.Email}}</option>

@@ -39,7 +39,11 @@ func Organizations(ctx *context.Context) {
 	)
 	sortOrder := ctx.FormString("sort")
 	if sortOrder == "" {
-		sortOrder = "newest"
+		if supportedSortOrders.Contains(setting.UI.ExploreDefaultSort) {
+			sortOrder = setting.UI.ExploreDefaultSort
+		} else {
+			sortOrder = "newest"
+		}
 		ctx.SetFormString("sort", sortOrder)
 	}
 

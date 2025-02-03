@@ -251,21 +251,6 @@ func ChangeMilestoneStatusByRepoIDAndID(ctx context.Context, repoID, milestoneID
 	return committer.Commit()
 }
 
-// ChangeMilestoneStatus changes the milestone open/closed status.
-func ChangeMilestoneStatus(ctx context.Context, m *Milestone, isClosed bool) (err error) {
-	ctx, committer, err := db.TxContext(ctx)
-	if err != nil {
-		return err
-	}
-	defer committer.Close()
-
-	if err := changeMilestoneStatus(ctx, m, isClosed); err != nil {
-		return err
-	}
-
-	return committer.Commit()
-}
-
 func changeMilestoneStatus(ctx context.Context, m *Milestone, isClosed bool) error {
 	m.IsClosed = isClosed
 	if isClosed {

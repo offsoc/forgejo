@@ -1,4 +1,5 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -362,6 +363,8 @@ func TestPullView_CodeOwner(t *testing.T) {
 		defer f()
 
 		t.Run("First Pull Request", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
 			// create a new branch to prepare for pull request
 			_, err := files_service.ChangeRepoFiles(db.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
 				NewBranch: "codeowner-basebranch",
@@ -409,6 +412,8 @@ func TestPullView_CodeOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Run("Second Pull Request", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
 			// create a new branch to prepare for pull request
 			_, err = files_service.ChangeRepoFiles(db.DefaultContext, repo, user2, &files_service.ChangeRepoFilesOptions{
 				NewBranch: "codeowner-basebranch2",
@@ -431,6 +436,8 @@ func TestPullView_CodeOwner(t *testing.T) {
 		})
 
 		t.Run("Forked Repo Pull Request", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
 			user5 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 5})
 			forkedRepo, err := repo_service.ForkRepositoryAndUpdates(db.DefaultContext, user2, user5, repo_service.ForkRepoOptions{
 				BaseRepo: repo,
@@ -483,6 +490,8 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 		defer baseGitRepo.Close()
 
 		t.Run("Submit approve/reject review on merged PR", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
 			// Create a merged PR (made by user1) in the upstream repo1.
 			testEditFile(t, user1Session, "user1", "repo1", "master", "README.md", "Hello, World (Edited)\n")
 			resp := testPullCreate(t, user1Session, "user1", "repo1", false, "master", "master", "This is a pull title")
@@ -513,12 +522,14 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 		})
 
 		t.Run("Submit approve/reject review on closed PR", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
 			// Created a closed PR (made by user1) in the upstream repo1.
 			testEditFileToNewBranch(t, user1Session, "user1", "repo1", "master", "a-test-branch", "README.md", "Hello, World (Edited...again)\n")
 			resp := testPullCreate(t, user1Session, "user1", "repo1", false, "master", "a-test-branch", "This is a pull title")
 			elem := strings.Split(test.RedirectURL(resp), "/")
 			assert.EqualValues(t, "pulls", elem[3])
-			testIssueClose(t, user1Session, elem[1], elem[2], elem[4])
+			testIssueClose(t, user1Session, elem[1], elem[2], elem[4], true)
 
 			// Get the commit SHA
 			pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{
@@ -540,6 +551,41 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 
 			// Submit a reject review on the PR.
 			testSubmitReview(t, user2Session, htmlDoc.GetCSRF(), "user2", "repo1", elem[4], sha, "reject", http.StatusOK)
+		})
+	})
+}
+
+func TestPullReviewInArchivedRepo(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
+		session := loginUser(t, "user2")
+
+		// Open a PR
+		testEditFileToNewBranch(t, session, "user2", "repo1", "master", "for-pr", "README.md", "Hi!\n")
+		resp := testPullCreate(t, session, "user2", "repo1", true, "master", "for-pr", "PR title")
+		elem := strings.Split(test.RedirectURL(resp), "/")
+
+		t.Run("Review box normally", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			// The "Finish review button" must be available
+			resp = session.MakeRequest(t, NewRequest(t, "GET", path.Join(elem[1], elem[2], "pulls", elem[4], "files")), http.StatusOK)
+			button := NewHTMLParser(t, resp.Body).Find("#review-box button")
+			assert.False(t, button.HasClass("disabled"))
+		})
+
+		t.Run("Review box in archived repo", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			// Archive the repo
+			resp = session.MakeRequest(t, NewRequestWithValues(t, "POST", path.Join(elem[1], elem[2], "settings"), map[string]string{
+				"_csrf":  GetCSRF(t, session, path.Join(elem[1], elem[2], "settings")),
+				"action": "archive",
+			}), http.StatusSeeOther)
+
+			// The "Finish review button" must be disabled
+			resp = session.MakeRequest(t, NewRequest(t, "GET", path.Join(elem[1], elem[2], "pulls", elem[4], "files")), http.StatusOK)
+			button := NewHTMLParser(t, resp.Body).Find("#review-box button")
+			assert.True(t, button.HasClass("disabled"))
 		})
 	})
 }
@@ -579,8 +625,12 @@ func testSubmitReview(t *testing.T, session *TestSession, csrf, owner, repo, pul
 	return session.MakeRequest(t, req, expectedSubmitStatus)
 }
 
-func testIssueClose(t *testing.T, session *TestSession, owner, repo, issueNumber string) *httptest.ResponseRecorder {
-	req := NewRequest(t, "GET", path.Join(owner, repo, "pulls", issueNumber))
+func testIssueClose(t *testing.T, session *TestSession, owner, repo, issueNumber string, isPull bool) *httptest.ResponseRecorder {
+	issueType := "issues"
+	if isPull {
+		issueType = "pulls"
+	}
+	req := NewRequest(t, "GET", path.Join(owner, repo, issueType, issueNumber))
 	resp := session.MakeRequest(t, req, http.StatusOK)
 
 	htmlDoc := NewHTMLParser(t, resp.Body)
