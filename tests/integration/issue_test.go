@@ -1336,3 +1336,46 @@ func TestIssueCount(t *testing.T) {
 	allCount := htmlDoc.doc.Find("a[data-test-name='all-issue-count']").Text()
 	assert.Contains(t, allCount, "2\u00a0All")
 }
+
+func TestIssuePostersSearch(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	type userSearchInfo struct {
+		UserID   int64  `json:"user_id"`
+		UserName string `json:"username"`
+	}
+
+	type userSearchResponse struct {
+		Results []*userSearchInfo `json:"results"`
+	}
+
+	t.Run("Name search", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.UI.DefaultShowFullName, false)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues/posters?q=USer2")
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		var data userSearchResponse
+		DecodeJSON(t, resp, &data)
+
+		assert.Len(t, data.Results, 1)
+		assert.EqualValues(t, "user2", data.Results[0].UserName)
+		assert.EqualValues(t, 2, data.Results[0].UserID)
+	})
+
+	t.Run("Full name search", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.UI.DefaultShowFullName, true)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues/posters?q=OnE")
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		var data userSearchResponse
+		DecodeJSON(t, resp, &data)
+
+		assert.Len(t, data.Results, 1)
+		assert.EqualValues(t, "user1", data.Results[0].UserName)
+		assert.EqualValues(t, 1, data.Results[0].UserID)
+	})
+}
