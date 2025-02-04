@@ -166,9 +166,9 @@ func GetReviewers(ctx context.Context, repo *Repository, doerID, posterID int64)
 // If isShowFullName is set to true, also include full name prefix search
 func GetIssuePostersWithSearch(ctx context.Context, repo *Repository, isPull bool, search string, isShowFullName bool) ([]*user_model.User, error) {
 	users := make([]*user_model.User, 0, 30)
-	var prefixCond builder.Cond = builder.Like{"name", search + "%"}
+	prefixCond := db.BuildCaseInsensitiveLike("name", search+"%")
 	if isShowFullName {
-		prefixCond = prefixCond.Or(builder.Like{"full_name", "%" + search + "%"})
+		prefixCond = db.BuildCaseInsensitiveLike("full_name", "%"+search+"%")
 	}
 
 	cond := builder.In("`user`.id",
