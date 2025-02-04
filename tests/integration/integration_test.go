@@ -298,9 +298,7 @@ func addAuthSource(t *testing.T, payload map[string]string) *auth.Source {
 	payload["_csrf"] = GetCSRF(t, session, "/admin/auths/new")
 	req := NewRequestWithValues(t, "POST", "/admin/auths/new", payload)
 	session.MakeRequest(t, req, http.StatusSeeOther)
-	source, err := auth.GetSourceByName(context.Background(), payload["name"])
-	require.NoError(t, err)
-	return source
+	return unittest.AssertExistsAndLoadBean(t, &auth.Source{Name: payload["name"]})
 }
 
 func authSourcePayloadOAuth2(name string) map[string]string {
@@ -358,9 +356,7 @@ func createRemoteAuthSource(t *testing.T, name, url, matchingSource string) *aut
 			MatchingSource: matchingSource,
 		},
 	}))
-	source, err := auth.GetSourceByName(context.Background(), name)
-	require.NoError(t, err)
-	return source
+	return unittest.AssertExistsAndLoadBean(t, &auth.Source{Name: name})
 }
 
 func createUser(ctx context.Context, t testing.TB, user *user_model.User) func() {

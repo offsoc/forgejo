@@ -99,6 +99,29 @@ func TestAPIOrgCreate(t *testing.T) {
 	assert.EqualValues(t, "user1", users[0].UserName)
 }
 
+func TestAPIOrgRename(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	token := getUserToken(t, "user1", auth_model.AccessTokenScopeWriteOrganization)
+
+	org := api.CreateOrgOption{
+		UserName:    "user1_org",
+		FullName:    "User1's organization",
+		Description: "This organization created by user1",
+		Website:     "https://try.gitea.io",
+		Location:    "Shanghai",
+		Visibility:  "limited",
+	}
+	req := NewRequestWithJSON(t, "POST", "/api/v1/orgs", &org).
+		AddTokenAuth(token)
+	MakeRequest(t, req, http.StatusCreated)
+
+	req = NewRequestWithJSON(t, "POST", "/api/v1/orgs/user1_org/rename", &api.RenameOrgOption{
+		NewName: "renamed_org",
+	}).AddTokenAuth(token)
+	MakeRequest(t, req, http.StatusNoContent)
+	unittest.AssertExistsAndLoadBean(t, &org_model.Organization{Name: "renamed_org"})
+}
+
 func TestAPIOrgEdit(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	session := loginUser(t, "user1")

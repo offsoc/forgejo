@@ -14,6 +14,8 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
+
+	"xorm.io/builder"
 )
 
 // ActionSchedule represents a schedule of a workflow file
@@ -139,4 +141,26 @@ func CleanRepoScheduleTasks(ctx context.Context, repo *repo_model.Repository, ca
 		}
 	}
 	return nil
+}
+
+type FindScheduleOptions struct {
+	db.ListOptions
+	RepoID  int64
+	OwnerID int64
+}
+
+func (opts FindScheduleOptions) ToConds() builder.Cond {
+	cond := builder.NewCond()
+	if opts.RepoID > 0 {
+		cond = cond.And(builder.Eq{"repo_id": opts.RepoID})
+	}
+	if opts.OwnerID > 0 {
+		cond = cond.And(builder.Eq{"owner_id": opts.OwnerID})
+	}
+
+	return cond
+}
+
+func (opts FindScheduleOptions) ToOrders() string {
+	return "`id` DESC"
 }
