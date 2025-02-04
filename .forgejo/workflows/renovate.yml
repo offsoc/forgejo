@@ -18,6 +18,9 @@ on:
 env:
   RENOVATE_DRY_RUN: ${{ (github.event_name != 'schedule' && github.ref_name != github.event.repository.default_branch) && 'full' || '' }}
   RENOVATE_REPOSITORIES: ${{ github.repository }}
+  # fix because 10.0.0-58-7e1df53+gitea-1.22.0 < 10.0.0 for semver
+  # and codeberg api returns such versions from `git describe --tags`
+  RENOVATE_X_PLATFORM_VERSION: 10.0.0+gitea-1.22.0
 
 jobs:
   renovate:
@@ -25,7 +28,7 @@ jobs:
 
     runs-on: docker
     container:
-      image: data.forgejo.org/renovate/renovate:39.156.1
+      image: data.forgejo.org/renovate/renovate:39.158.2
 
     steps:
       - name: Load renovate repo cache
