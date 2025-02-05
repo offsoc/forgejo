@@ -47,6 +47,7 @@ var (
 		LimitSizeSwift        int64
 		LimitSizeVagrant      int64
 		DefaultRPMSignEnabled bool
+		AllowOverwrite        bool
 	}{
 		Enabled:              true,
 		LimitTotalOwnerCount: -1,
@@ -108,6 +109,7 @@ func loadPackagesFrom(rootCfg ConfigProvider) (err error) {
 	Packages.LimitSizeVagrant = mustBytes(sec, "LIMIT_SIZE_VAGRANT")
 	Packages.DefaultRPMSignEnabled = sec.Key("DEFAULT_RPM_SIGN_ENABLED").MustBool(false)
 	Packages.LimitSizeAlt = mustBytes(sec, "LIMIT_SIZE_ALT")
+	Packages.AllowOverwrite = sec.Key("ALLOW_OVERWRITE").MustBool(false)
 	return nil
 }
 

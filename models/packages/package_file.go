@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"code.gitea.io/gitea/models/db"
+	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 
@@ -57,6 +59,13 @@ func TryInsertFile(ctx context.Context, pf *PackageFile) (*PackageFile, error) {
 		return nil, err
 	}
 	if has {
+		if setting.Packages.AllowOverwrite {
+			log.Trace("Overwriting existing version of package")
+			if _, err = e.ID(existing.ID).Update(pf); err != nil {
+				return nil, err
+			}
+			return pf, nil
+		}
 		return existing, ErrDuplicatePackageFile
 	}
 	if _, err = e.Insert(pf); err != nil {
