@@ -2782,8 +2782,8 @@ tbody.commit-list {
   width: auto !important;
   color: var(--color-text) !important;
   background: var(--color-card);
-  border: 1px solid var(--color-secondary);
-  border-radius: 25px;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-large);
   box-shadow: none !important;
   transition: all 0.1s ease-in-out;
 }
@@ -2801,8 +2801,12 @@ tbody.commit-list {
 }
 
 .migrate-entry .content {
+  width: 100%;
   margin-top: .5em;
   padding: 1em;
+  border-top: 1px solid var(--color-card-border);
+  border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
+  background: var(--color-card-secondary);
 }
 
 .migrate-entry .description {
