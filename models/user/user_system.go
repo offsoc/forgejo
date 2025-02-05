@@ -1,4 +1,5 @@
 // Copyright 2022 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package user
@@ -94,4 +95,8 @@ func NewAPActorUser() *User {
 func APActorUserAPActorID() string {
 	path, _ := url.JoinPath(setting.AppURL, "/api/v1/activitypub/actor")
 	return path
+}
+
+func (u *User) IsAPActor() bool {
+	return u != nil && u.ID == APActorUserID
 }

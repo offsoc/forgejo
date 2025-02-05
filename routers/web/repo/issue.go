@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2018 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repo
@@ -1308,17 +1309,23 @@ func NewIssuePost(ctx *context.Context) {
 func roleDescriptor(ctx stdCtx.Context, repo *repo_model.Repository, poster *user_model.User, issue *issues_model.Issue, hasOriginalAuthor bool) (issues_model.RoleDescriptor, error) {
 	roleDescriptor := issues_model.RoleDescriptor{}
 
+	// Migrated comment with no associated local user
 	if hasOriginalAuthor {
 		return roleDescriptor, nil
 	}
+
+	// Special user that can't have associated contributions and permissions in the repo.
+	if poster.IsGhost() || poster.IsActions() || poster.IsAPActor() {
+		return roleDescriptor, nil
+	}
+
+	// If the poster is the actual poster of the issue, enable Poster role.
+	roleDescriptor.IsPoster = issue.IsPoster(poster.ID)
 
 	perm, err := access_model.GetUserRepoPermission(ctx, repo, poster)
 	if err != nil {
 		return roleDescriptor, err
 	}
-
-	// If the poster is the actual poster of the issue, enable Poster role.
-	roleDescriptor.IsPoster = issue.IsPoster(poster.ID)
 
 	// Check if the poster is owner of the repo.
 	if perm.IsOwner() {

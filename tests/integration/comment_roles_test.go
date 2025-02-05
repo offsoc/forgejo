@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestIssuesCommentLabels is a test for user (role) labels in comment headers in PRs and issues.
-func TestIssuesCommentLabels(t *testing.T) {
+// TestCommentRoles is a test for role labels of normal users in comment headers in PRs and issues.
+func TestCommentRoles(t *testing.T) {
 	user := "user2"
 	repo := "repo1"
 
