@@ -2802,14 +2802,21 @@ tbody.commit-list {
   width: 100%;
   margin-top: .5em;
   padding: 1em;
-  border-top: 1px solid var(--color-card-border);
-  border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
-  background: var(--color-card-secondary);
+  flex: 1;
 }
 
 .migrate-entry .description {
   margin-top: .5em;
   text-wrap: balance;
+}
+
+/* Desktop-only decorations */
+@media (min-width: 501px) {
+  .migrate-entry .content {
+    border-top: 1px solid var(--color-card-border);
+    border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
+    background: var(--color-card-secondary);
+  }
 }
 
 @media (max-width: 1500px) {
@@ -2824,6 +2831,7 @@ tbody.commit-list {
   }
 }
 
+/* Smartphone layout */
 @media (max-width: 500px) {
   .migrate-entries {
     grid-template-columns: repeat(1, 1fr);
