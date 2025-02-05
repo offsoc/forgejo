@@ -2778,8 +2778,6 @@ tbody.commit-list {
 .migrate-entry {
   display: flex;
   flex-direction: column;
-  margin: 0;
-  width: auto;
   color: var(--color-text);
   background: var(--color-card);
   border: 1px solid var(--color-card-border);
@@ -2790,6 +2788,7 @@ tbody.commit-list {
 .migrate-entry:hover {
   transform: scale(105%);
   box-shadow: 0 0.5rem 1rem var(--color-shadow);
+  color: var(--color-text);
 }
 
 .migrate-entry .header {
