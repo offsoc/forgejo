@@ -2167,6 +2167,15 @@ details.repo-search-result summary::marker {
   background: var(--color-box-body);
 }
 
+.user-cards .list .card,
+.user-cards .list .card .content,
+.user-cards .list .card .name,
+.user-cards .list .card .meta {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .user-cards .list .card .avatar {
   width: 48px;
   height: 48px;
