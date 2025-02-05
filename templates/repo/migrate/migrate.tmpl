@@ -6,7 +6,7 @@
 			{{template "repo/migrate/helper" .}}
 			<div class="migrate-entries">
 				{{range .Services}}
-					<a class="migrate-entry tw-flex tw-items-center" href="{{AppSubUrl}}/repo/migrate?service_type={{.}}&org={{$.Org}}&mirror={{$.Mirror}}">
+					<a class="migrate-entry tw-items-center" href="{{AppSubUrl}}/repo/migrate?service_type={{.}}&org={{$.Org}}&mirror={{$.Mirror}}">
 						{{if eq .Name "github"}}
 							{{svg "octicon-mark-github" 184}}
 						{{else if eq .Name "gitlab"}}
