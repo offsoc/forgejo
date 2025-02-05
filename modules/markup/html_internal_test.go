@@ -1,4 +1,5 @@
 // Copyright 2018 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors.
 // SPDX-License-Identifier: MIT
 
 package markup
@@ -391,7 +392,7 @@ func TestRender_FullIssueURLs(t *testing.T) {
 		`<a href="http://localhost:3000/testOrg/testOrgRepo/pulls/2/commits" class="ref-issue">testOrg/testOrgRepo#2/commits</a>`)
 }
 
-func TestRegExp_sha1CurrentPattern(t *testing.T) {
+func TestRegExp_hashCurrentPattern(t *testing.T) {
 	trueTestCases := []string{
 		"d8a994ef243349f321568f9e36d5c3f444b99cae",
 		"abcdefabcdefabcdefabcdefabcdefabcdefabcd",
@@ -399,6 +400,13 @@ func TestRegExp_sha1CurrentPattern(t *testing.T) {
 		"[abcdefabcdefabcdefabcdefabcdefabcdefabcd]",
 		"abcdefabcdefabcdefabcdefabcdefabcdefabcd.",
 		"abcdefabcdefabcdefabcdefabcdefabcdefabcd:",
+		"d8a994ef243349f321568f9e36d5c3f444b99cae12424fa123391042fbae2319",
+		"abcdefd?",
+		"abcdefd!",
+		"!abcd3ef",
+		":abcd3ef",
+		".abcd3ef",
+		" (abcd3ef). ",
 	}
 	falseTestCases := []string{
 		"test",
@@ -406,6 +414,8 @@ func TestRegExp_sha1CurrentPattern(t *testing.T) {
 		"e59ff077-2d03-4e6b-964d-63fbaea81f",
 		"abcdefghijklmnopqrstuvwxyzabcdefghijklmn",
 		"abcdefghijklmnopqrstuvwxyzabcdefghijklmO",
+		"commit/abcdefd",
+		"abcd3ef...defabcd",
 	}
 
 	for _, testCase := range trueTestCases {
