@@ -1,0 +1,9 @@
+-
+  id: 1001
+  repo_id: 2
+  type: forgejo
+  url: http://www.example.com/blåhaj
+  http_method: POST
+  content_type: 1 # json
+  events: '{"send_everything":true,"branch_filter":"{master*,main*}"}'
+  is_active: true
