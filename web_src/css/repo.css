@@ -444,10 +444,6 @@ td .commit-summary {
   overflow: auto;
 }
 
-.repository.file.list .non-diff-file-content .asciicast {
-  padding: 0 !important;
-}
-
 .non-diff-file-content .pdfobject {
   border-radius: 0 0 var(--border-radius) var(--border-radius);
 }
