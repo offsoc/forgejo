@@ -2156,7 +2156,7 @@ details.repo-search-result summary::marker {
   }
 }
 
-.user-cards .list .card {
+.user-cards .card {
   display: flex;
   flex-direction: row;
   width: 100%;
@@ -2167,28 +2167,28 @@ details.repo-search-result summary::marker {
   background: var(--color-box-body);
 }
 
-.user-cards .list .card,
-.user-cards .list .card .content,
-.user-cards .list .card .name,
-.user-cards .list .card .meta {
+.user-cards .card,
+.user-cards .card .content,
+.user-cards .card .name,
+.user-cards .card .meta {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.user-cards .list .card .avatar {
+.user-cards .card .avatar {
   width: 48px;
   height: 48px;
   margin-right: 14px;
 }
 
-.user-cards .list .card .name {
+.user-cards .card .name {
   margin-top: 0;
   margin-bottom: 0;
   font-weight: var(--font-weight-normal);
 }
 
-.user-cards .list .card .meta {
+.user-cards .card .meta {
   margin-top: 5px;
 }
 
