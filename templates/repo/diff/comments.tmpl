@@ -42,10 +42,6 @@
 						<div class="ui label yellow pending-label" data-tooltip-content="{{ctx.Locale.Tr "repo.issues.review.pending.tooltip" (ctx.Locale.Tr "repo.diff.review") (ctx.Locale.Tr "repo.diff.review.approve") (ctx.Locale.Tr "repo.diff.review.comment") (ctx.Locale.Tr "repo.diff.review.reject")}}">
 						{{ctx.Locale.Tr "repo.issues.review.pending"}}
 						</div>
-					{{else}}
-						<div class="ui label">
-						{{ctx.Locale.Tr "repo.issues.review.review"}}
-						</div>
 					{{end}}
 				{{end}}
 				{{template "repo/issue/view_content/add_reaction" dict "ctxData" $.root "ActionURL" (printf "%s/comments/%d/reactions" $.root.RepoLink .ID)}}
