@@ -19,7 +19,7 @@ runs:
         set -ex
         toolchain=$(grep -oP '(?<=toolchain ).+' go.mod)
         version=$(go version | cut -d' ' -f3)
-        if [ "$toolchain" != "$version" ]; then
-          echo "go version mismatch: $toolchain <> $version"
+        if dpkg --compare-versions ${version#go} lt ${toolchain#go}; then
+          echo "go version too low: $toolchain >= $version"
           exit 1
         fi
