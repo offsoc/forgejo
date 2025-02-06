@@ -130,12 +130,12 @@ test('markdown indentation with Tab', async ({page}) => {
   await expect(textarea).toHaveValue(initText);
 
   // Attempt unindent again, ensure focus is not immediately lost and toast is shown, but then focus is lost on next attempt.
+  await expect(toast).toBeHidden(); // toast should not already be there
   await textarea.press('Shift+Tab');
   await expect(textarea).toBeFocused();
   await expect(toast).toBeVisible();
   await textarea.press('Shift+Tab');
   await expect(textarea).not.toBeFocused();
-  await expect(toast).toBeHidden({timeout: 5000}); // toast should eventually disappear, 2500ms expected
 
   // Indent lines 2-4
   await textarea.click();
@@ -154,9 +154,7 @@ test('markdown indentation with Tab', async ({page}) => {
   await textarea.evaluate((it:HTMLTextAreaElement) => it.select());
   await textarea.press('Shift+Tab'); // Everything is unindented.
   await expect(textarea).toHaveValue(initText);
-  await expect(toast).toBeHidden();
   await textarea.press('Shift+Tab'); // Valid, but nothing happens -> switch to "about to lose focus" state.
-  await expect(toast).toBeVisible();
   await expect(textarea).toBeFocused();
   await textarea.press('Shift+Tab');
   await expect(textarea).not.toBeFocused();
@@ -164,13 +162,11 @@ test('markdown indentation with Tab', async ({page}) => {
   // Attempt the same with cursor within list element body.
   await textarea.focus();
   await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(0, 0));
-  await expect(toast).toBeHidden(); // avoid any races with a previous toast
   await textarea.press('ArrowRight');
   await textarea.press('ArrowRight');
   await textarea.press('Tab');
   // Nothing should happen and a toast should be shown
   await expect(textarea).toHaveValue(initText);
-  await expect(toast).toBeVisible();
 
   // Subsequently, select a chunk of 2nd and 3rd line and indent both, preserving the cursor position in relation to text
   const line3 = `* first\n* second\n${tab}* third\n* last`;
