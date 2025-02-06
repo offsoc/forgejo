@@ -1,4 +1,5 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -11,6 +12,7 @@ import (
 	"testing"
 
 	auth_model "code.gitea.io/gitea/models/auth"
+	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/perm"
 	unit_model "code.gitea.io/gitea/models/unit"
 	"code.gitea.io/gitea/models/unittest"
@@ -102,37 +104,49 @@ func TestGitHTTPSameStatusCodeForGetAndHeadRequests(t *testing.T) {
 		"objects/info/packs",
 	}
 
+	repo, _, f := tests.CreateDeclarativeRepo(t, owner, "get-and-head-requests", []unit_model.Type{unit_model.TypeCode}, nil, nil)
+	defer f()
+
 	for _, user := range users {
 		t.Run("User="+user.Name, func(t *testing.T) {
-			var session *TestSession
+			session := emptyTestSession(t)
 			if user.User != nil {
 				session = loginUser(t, user.User.Name)
-			} else {
-				session = emptyTestSession(t)
 			}
-			for _, isCollaborator := range []bool{true, false} {
+			for _, isCollaborator := range []bool{false, true} {
+				// Adding the owner of the repository or anonymous as a collaborator makes no sense
+				if (user.User == nil || user.User == owner) && isCollaborator {
+					continue
+				}
 				t.Run("IsCollaborator="+strconv.FormatBool(isCollaborator), func(t *testing.T) {
-					if (user.User == nil || user.User == owner) && isCollaborator {
-						// Adding the owner of the repository or anonymous as a collaborator makes no sense
-						t.Skip()
-					}
-					repo, _, f := tests.CreateDeclarativeRepo(t, owner, "get-and-head-requests", []unit_model.Type{unit_model.TypeCode}, nil, nil)
-					defer f()
 					if isCollaborator {
 						testCtx := NewAPITestContext(t, owner.Name, repo.Name, auth_model.AccessTokenScopeWriteRepository)
 						doAPIAddCollaborator(testCtx, user.Name, perm.AccessModeRead)(t)
 					}
-					for _, repoIsPrivate := range []bool{true, false} {
+					for _, repoIsPrivate := range []bool{false, true} {
 						t.Run("repo.IsPrivate="+strconv.FormatBool(repoIsPrivate), func(t *testing.T) {
 							repo.IsPrivate = repoIsPrivate
+							_, err := db.GetEngine(db.DefaultContext).Cols("is_private").Update(repo)
+							require.NoError(t, err)
 							for _, endpoint := range endpoints {
 								t.Run("Endpoint="+endpoint, func(t *testing.T) {
-									// Given the other parameters check that the endpoint returns the same status code for both GET and HEAD
+									defer tests.PrintCurrentTest(t)()
+									// Given the other parameters check that the endpoint returns the same status
+									// code for both GET and HEAD
 									getReq := NewRequestf(t, "GET", "%s/%s", repo.Link(), endpoint)
 									getResp := session.MakeRequest(t, getReq, NoExpectedStatus)
 									headReq := NewRequestf(t, "HEAD", "%s/%s", repo.Link(), endpoint)
 									headResp := session.MakeRequest(t, headReq, NoExpectedStatus)
 									require.Equal(t, getResp.Result().StatusCode, headResp.Result().StatusCode)
+									if user.User == nil && endpoint == "HEAD" {
+										// Sanity check: anonymous requests for the HEAD endpoint should result in a 401
+										// for private repositories and a 200 for public ones
+										if repo.IsPrivate {
+											require.Equal(t, 401, headResp.Result().StatusCode)
+										} else {
+											require.Equal(t, 200, headResp.Result().StatusCode)
+										}
+									}
 								})
 							}
 						})
