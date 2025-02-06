@@ -5,10 +5,10 @@
 package integration
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
 	"testing"
 
 	auth_model "code.gitea.io/gitea/models/auth"
@@ -85,74 +85,120 @@ func TestGitHTTPSameStatusCodeForGetAndHeadRequests(t *testing.T) {
 	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
-	users := []struct {
-		Name string
-		User *user_model.User
-	}{
-		{Name: "Owner", User: owner},
-		{Name: "User2", User: user2},
-		{Name: "Anonymous", User: nil},
+	type caseType struct {
+		User               *user_model.User
+		IsCollaborator     bool
+		RepoIsPrivate      bool
+		Endpoint           string
+		ExpectedStatusCode int
+	}
+	cases := []caseType{
+		{owner, false, false, "HEAD", 200},
+		{owner, false, false, "git-receive-pack", 405},
+		{owner, false, false, "git-upload-pack", 405},
+		{owner, false, false, "info/refs", 200},
+		{owner, false, false, "objects/info/alternates", 404},
+		{owner, false, false, "objects/info/http-alternates", 404},
+		{owner, false, false, "objects/info/packs", 200},
+		{owner, false, true, "HEAD", 200},
+		{owner, false, true, "git-receive-pack", 405},
+		{owner, false, true, "git-upload-pack", 405},
+		{owner, false, true, "info/refs", 200},
+		{owner, false, true, "objects/info/alternates", 404},
+		{owner, false, true, "objects/info/http-alternates", 404},
+		{owner, false, true, "objects/info/packs", 200},
+		{user2, false, false, "HEAD", 200},
+		{user2, false, false, "git-receive-pack", 405},
+		{user2, false, false, "git-upload-pack", 405},
+		{user2, false, false, "info/refs", 200},
+		{user2, false, false, "objects/info/alternates", 404},
+		{user2, false, false, "objects/info/http-alternates", 404},
+		{user2, false, false, "objects/info/packs", 200},
+		{user2, false, true, "HEAD", 404},
+		{user2, false, true, "git-receive-pack", 405},
+		{user2, false, true, "git-upload-pack", 405},
+		{user2, false, true, "info/refs", 404},
+		{user2, false, true, "objects/info/alternates", 404},
+		{user2, false, true, "objects/info/http-alternates", 404},
+		{user2, false, true, "objects/info/packs", 404},
+		// user2 with IsCollaborator=true must come after IsCollaborator=false, because
+		// the addition as a collaborator is not reset
+		{user2, true, false, "HEAD", 200},
+		{user2, true, false, "git-receive-pack", 405},
+		{user2, true, false, "git-upload-pack", 405},
+		{user2, true, false, "info/refs", 200},
+		{user2, true, false, "objects/info/alternates", 404},
+		{user2, true, false, "objects/info/http-alternates", 404},
+		{user2, true, false, "objects/info/packs", 200},
+		{user2, true, true, "HEAD", 200},
+		{user2, true, true, "git-receive-pack", 405},
+		{user2, true, true, "git-upload-pack", 405},
+		{user2, true, true, "info/refs", 200},
+		{user2, true, true, "objects/info/alternates", 404},
+		{user2, true, true, "objects/info/http-alternates", 404},
+		{user2, true, true, "objects/info/packs", 200},
+		{nil, false, false, "HEAD", 200},
+		{nil, false, false, "git-receive-pack", 405},
+		{nil, false, false, "git-upload-pack", 405},
+		{nil, false, false, "info/refs", 200},
+		{nil, false, false, "objects/info/alternates", 404},
+		{nil, false, false, "objects/info/http-alternates", 404},
+		{nil, false, false, "objects/info/packs", 200},
+		{nil, false, true, "HEAD", 401},
+		{nil, false, true, "git-receive-pack", 405},
+		{nil, false, true, "git-upload-pack", 405},
+		{nil, false, true, "info/refs", 401},
+		{nil, false, true, "objects/info/alternates", 401},
+		{nil, false, true, "objects/info/http-alternates", 401},
+		{nil, false, true, "objects/info/packs", 401},
 	}
 
-	endpoints := []string{
-		"HEAD",
-		"git-receive-pack",
-		"git-upload-pack",
-		"info/refs",
-		"objects/info/alternates",
-		"objects/info/http-alternates",
-		"objects/info/packs",
+	caseToTestName := func(c caseType) string {
+		var user string
+		if c.User == nil {
+			user = "nil"
+		} else if c.User == owner {
+			user = "owner"
+		} else {
+			user = c.User.Name
+		}
+		return fmt.Sprintf(
+			"User=%s,IsCollaborator=%t,RepoIsPrivate=%t,Endpoint=%s,ExpectedStatusCode=%d",
+			user,
+			c.IsCollaborator,
+			c.RepoIsPrivate,
+			c.Endpoint,
+			c.ExpectedStatusCode,
+		)
 	}
 
 	repo, _, f := tests.CreateDeclarativeRepo(t, owner, "get-and-head-requests", []unit_model.Type{unit_model.TypeCode}, nil, nil)
 	defer f()
 
-	for _, user := range users {
-		t.Run("User="+user.Name, func(t *testing.T) {
+	for _, c := range cases {
+		t.Run(caseToTestName(c), func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
 			session := emptyTestSession(t)
-			if user.User != nil {
-				session = loginUser(t, user.User.Name)
+			if c.User != nil {
+				session = loginUser(t, c.User.Name)
 			}
-			for _, isCollaborator := range []bool{false, true} {
-				// Adding the owner of the repository or anonymous as a collaborator makes no sense
-				if (user.User == nil || user.User == owner) && isCollaborator {
-					continue
-				}
-				t.Run("IsCollaborator="+strconv.FormatBool(isCollaborator), func(t *testing.T) {
-					if isCollaborator {
-						testCtx := NewAPITestContext(t, owner.Name, repo.Name, auth_model.AccessTokenScopeWriteRepository)
-						doAPIAddCollaborator(testCtx, user.Name, perm.AccessModeRead)(t)
-					}
-					for _, repoIsPrivate := range []bool{false, true} {
-						t.Run("repo.IsPrivate="+strconv.FormatBool(repoIsPrivate), func(t *testing.T) {
-							repo.IsPrivate = repoIsPrivate
-							_, err := db.GetEngine(db.DefaultContext).Cols("is_private").Update(repo)
-							require.NoError(t, err)
-							for _, endpoint := range endpoints {
-								t.Run("Endpoint="+endpoint, func(t *testing.T) {
-									defer tests.PrintCurrentTest(t)()
-									// Given the other parameters check that the endpoint returns the same status
-									// code for both GET and HEAD
-									getReq := NewRequestf(t, "GET", "%s/%s", repo.Link(), endpoint)
-									getResp := session.MakeRequest(t, getReq, NoExpectedStatus)
-									headReq := NewRequestf(t, "HEAD", "%s/%s", repo.Link(), endpoint)
-									headResp := session.MakeRequest(t, headReq, NoExpectedStatus)
-									require.Equal(t, getResp.Result().StatusCode, headResp.Result().StatusCode)
-									if user.User == nil && endpoint == "HEAD" {
-										// Sanity check: anonymous requests for the HEAD endpoint should result in a 401
-										// for private repositories and a 200 for public ones
-										if repo.IsPrivate {
-											require.Equal(t, 401, headResp.Result().StatusCode)
-										} else {
-											require.Equal(t, 200, headResp.Result().StatusCode)
-										}
-									}
-								})
-							}
-						})
-					}
-				})
+			if c.IsCollaborator {
+				testCtx := NewAPITestContext(t, owner.Name, repo.Name, auth_model.AccessTokenScopeWriteRepository)
+				doAPIAddCollaborator(testCtx, c.User.Name, perm.AccessModeRead)(t)
 			}
+			repo.IsPrivate = c.RepoIsPrivate
+			_, err := db.GetEngine(db.DefaultContext).Cols("is_private").Update(repo)
+			require.NoError(t, err)
+
+			// Given the test parameters check that the endpoint returns the same status
+			// code for both GET and HEAD, which needs to equal the test cases expected
+			// status code
+			getReq := NewRequestf(t, "GET", "%s/%s", repo.Link(), c.Endpoint)
+			getResp := session.MakeRequest(t, getReq, NoExpectedStatus)
+			headReq := NewRequestf(t, "HEAD", "%s/%s", repo.Link(), c.Endpoint)
+			headResp := session.MakeRequest(t, headReq, NoExpectedStatus)
+			require.Equal(t, getResp.Result().StatusCode, headResp.Result().StatusCode)
+			require.Equal(t, c.ExpectedStatusCode, headResp.Result().StatusCode)
 		})
 	}
 }
