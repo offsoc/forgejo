@@ -3,6 +3,11 @@ import {svg} from '../svg.js';
 import Toastify from 'toastify-js'; // don't use "async import", because when network error occurs, the "async import" also fails and nothing is shown
 
 const levels = {
+  hint: {
+    icon: 'octicon-light-bulb',
+    background: 'var(--color-black-light)',
+    duration: 2500,
+  },
   info: {
     icon: 'octicon-check',
     background: 'var(--color-green)',
@@ -40,6 +45,10 @@ function showToast(message, level, {gravity, position, duration, useHtmlBody, ..
   toast.showToast();
   toast.toastElement.querySelector('.toast-close').addEventListener('click', () => toast.hideToast());
   return toast;
+}
+
+export function showHintToast(message, opts) {
+  return showToast(message, 'hint', opts);
 }
 
 export function showInfoToast(message, opts) {
