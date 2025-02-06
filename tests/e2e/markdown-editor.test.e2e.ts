@@ -194,6 +194,58 @@ test('markdown indentation with Tab', async ({page}) => {
   await expect(textarea).toHaveValue(initText);
 });
 
+test('markdown block quote indentation', async ({page}) => {
+  const initText = `> first\n> second\n> third\n> last`;
+
+  const response = await page.goto('/user2/repo1/issues/new');
+  expect(response?.status()).toBe(200);
+
+  const textarea = page.locator('textarea[name=content]');
+  const toast = page.locator('.toastify');
+
+  await textarea.fill(initText);
+
+  await textarea.click(); // Tab handling is disabled until pointer event or input.
+
+  // Indent, then unindent first line twice (quotes can quote quotes!)
+  await textarea.focus();
+  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(0, 0));
+  await textarea.press('Tab');
+  await expect(textarea).toHaveValue(`> > first\n> second\n> third\n> last`);
+  await textarea.press('Tab');
+  await expect(textarea).toHaveValue(`> > > first\n> second\n> third\n> last`);
+  await textarea.press('Shift+Tab');
+  await textarea.press('Shift+Tab');
+  await expect(textarea).toHaveValue(initText);
+
+  // Attempt unindent again.
+  await expect(toast).toBeHidden(); // toast should not already be there
+  await textarea.press('Shift+Tab');
+  // Nothing happens - quote should not stop being a quote
+  await expect(textarea).toHaveValue(initText);
+  // Focus is not immediately lost and toast is shown,
+  await expect(textarea).toBeFocused();
+  await expect(toast).toBeVisible();
+  // Focus is lost on next attempt,
+  await textarea.press('Shift+Tab');
+  await expect(textarea).not.toBeFocused();
+
+  // Indent lines 2-4
+  await textarea.click();
+  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('\n') + 1, it.value.length));
+  await textarea.press('Tab');
+  await expect(textarea).toHaveValue(`> first\n> > second\n> > third\n> > last`);
+
+  // Select all and unindent, then lose focus.
+  await textarea.evaluate((it:HTMLTextAreaElement) => it.select());
+  await textarea.press('Shift+Tab'); // Everything is unindented.
+  await expect(textarea).toHaveValue(initText);
+  await textarea.press('Shift+Tab'); // Valid, but nothing happens -> switch to "about to lose focus" state.
+  await expect(textarea).toBeFocused();
+  await textarea.press('Shift+Tab');
+  await expect(textarea).not.toBeFocused();
+});
+
 test('markdown list continuation', async ({page}) => {
   const initText = `* first\n* second`;
 

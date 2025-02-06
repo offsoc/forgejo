@@ -399,8 +399,8 @@ class ComboMarkdownEditor {
   indentSelection(unindent, validOnly) {
     // Indent with 4 spaces, unindent 4 spaces or fewer or a lost tab.
     const indentPrefix = '    ';
-    const unindentRegex = /^( {1,4}|\t)/;
-    const indentLevel = /\s{4}|\t/g;
+    const unindentRegex = /^( {1,4}|\t|> {0,4})/;
+    const indentLevel = / {4}|\t|> /g;
 
     const value = this.textarea.value;
     const lines = value.split('\n');
@@ -416,28 +416,26 @@ class ComboMarkdownEditor {
     // Index of the first line included in the selection (or containing the cursor)
     let firstLineIdx = 0;
 
+    // Find all the lines in selection beforehand so we know the full set before we start changing.
+    const linePositions = [];
     for (const [i, line] of lines.entries()) {
       lineEnd = lineStart + line.length + 1;
       if (lineEnd <= start) {
         lineStart = lineEnd;
         continue;
       }
-
-      const updated = unindent ? line.replace(unindentRegex, '') : indentPrefix + line;
-      changedLines.push(updated);
-      const move = updated.length - line.length;
-
+      linePositions.push([lineStart, line]);
       if (start >= lineStart && start < lineEnd) {
         firstLineIdx = i;
         editStart = lineStart;
-        newStart = Math.max(start + move, lineStart);
       }
-
-      newEnd += move;
       editEnd = lineEnd - 1;
+      if (lineEnd >= end) break;
       lineStart = lineEnd;
-      if (lineStart > end) break;
     }
+
+    // Block quotes need to be nested/unnested instead of whitespace added/removed. However, only do this if the *whole* selection is in a quote.
+    const isQuote = linePositions.every(([_, line]) => line[0] === '>');
 
     const line = lines[firstLineIdx];
     // If there's no indent to remove, do nothing
@@ -445,10 +443,10 @@ class ComboMarkdownEditor {
       return false;
     }
 
-    // If there is no selection and this is an ambiguous command (Tab handling), only (un)indent if already in a code/list/quote.
+    // If there is no selection and this is an ambiguous command (Tab handling), only (un)indent if already in a code/list.
     if (!unindent && validOnly && start === end) {
-      // Only allow adding indent if cursor within the leading whitespace.
-      if (editStart !== start && /\S/.test(line.slice(0, start - editStart))) {
+      // Only allow adding indent if cursor within the leading whitespace / quote prefix.
+      if (editStart !== start && !/^[\s>]*$/.test(line.slice(0, start - editStart))) {
         return false;
       }
       // Check there's any indentation or prefix at all.
@@ -457,7 +455,19 @@ class ComboMarkdownEditor {
       // Check that the line isn't already indented in relation to parent.
       const levels = line.match(indentLevel)?.length ?? 0;
       const parentLevels = !firstLineIdx ? 0 : lines[firstLineIdx - 1].match(indentLevel)?.length ?? 0;
-      if (levels - parentLevels > 0) return false;
+      // Quotes can *begin* multiple levels in, so just allow whatever for now.
+      if (levels - parentLevels > 0 && !isQuote) return false;
+    }
+
+    // Apply indentation changes to lines.
+    for (const [i, [lineStart, line]] of linePositions.entries()) {
+      const updated = isQuote ?
+        (unindent ? line.replace(/^>\s{0,4}>/, '>') : `> ${line}`) :
+        (unindent ? line.replace(unindentRegex, '') : indentPrefix + line);
+      changedLines.push(updated);
+      const move = updated.length - line.length;
+      if (i === 0) newStart = Math.max(start + move, lineStart);
+      newEnd += move;
     }
 
     // Update changed lines whole.
