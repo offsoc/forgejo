@@ -19,6 +19,7 @@ test('copy src file path to clipboard', async ({page}, workerInfo) => {
   await page.click('[data-clipboard-text]');
   const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
   expect(clipboardText).toContain('README.md');
+  await expect(page.getByText('Copied')).toBeVisible();
   await save_visual(page);
 });
 
