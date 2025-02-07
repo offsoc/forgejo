@@ -17149,6 +17149,29 @@
         }
       }
     },
+    "/signing-key.ssh": {
+      "get": {
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "miscellaneous"
+        ],
+        "summary": "Get default signing-key.ssh",
+        "operationId": "getSSHSigningKey",
+        "responses": {
+          "200": {
+            "description": "SSH public key in OpenSSH authorized key format",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
     "/teams/{id}": {
       "get": {
         "produces": [
