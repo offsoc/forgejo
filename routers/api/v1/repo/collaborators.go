@@ -282,11 +282,6 @@ func GetRepoPermissions(ctx *context.APIContext) {
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 
-	if !ctx.Doer.IsAdmin && ctx.Doer.LoginName != ctx.Params(":collaborator") && !ctx.IsUserRepoAdmin() {
-		ctx.Error(http.StatusForbidden, "User", "Only admins can query all permissions, repo admins can query all repo permissions, collaborators can query only their own")
-		return
-	}
-
 	collaborator, err := user_model.GetUserByName(ctx, ctx.Params(":collaborator"))
 	if err != nil {
 		if user_model.IsErrUserNotExist(err) {
@@ -294,6 +289,15 @@ func GetRepoPermissions(ctx *context.APIContext) {
 		} else {
 			ctx.Error(http.StatusInternalServerError, "GetUserByName", err)
 		}
+		return
+	}
+
+	// Only allow the request in any of the following situations:
+	// - The user is the instance admin.
+	// - The user is the repository admin.
+	// - The user is querying the permissiosn of themselves.
+	if !ctx.IsUserSiteAdmin() && ctx.Doer.ID != collaborator.ID && !ctx.IsUserRepoAdmin() {
+		ctx.Error(http.StatusForbidden, "User", "Only admins can query all permissions, repo admins can query all repo permissions, collaborators can query only their own")
 		return
 	}
 
