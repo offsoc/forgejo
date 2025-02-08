@@ -82,6 +82,7 @@ func IsCollaborator(ctx *context.APIContext) {
 	// swagger:operation GET /repos/{owner}/{repo}/collaborators/{collaborator} repository repoCheckCollaborator
 	// ---
 	// summary: Check if a user is a collaborator of a repository
+	// description: If the user is a collaborator, return 204. If the user is not a collaborator, return 404.
 	// produces:
 	// - application/json
 	// parameters:
