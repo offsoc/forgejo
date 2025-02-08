@@ -179,7 +179,7 @@ func RunnerDeletePost(ctx *context.Context) {
 		ctx.ServerError("getRunnersCtx", err)
 		return
 	}
-	actions_shared.RunnerDeletePost(ctx, ctx.ParamsInt64(":runnerid"), rCtx.RedirectLink, rCtx.RedirectLink+url.PathEscape(ctx.Params(":runnerid")))
+	actions_shared.RunnerDeletePost(ctx, ctx.ParamsInt64(":runnerid"), rCtx.OwnerID, rCtx.RepoID, rCtx.RedirectLink, rCtx.RedirectLink+url.PathEscape(ctx.Params(":runnerid")))
 }
 
 func RedirectToDefaultSetting(ctx *context.Context) {
