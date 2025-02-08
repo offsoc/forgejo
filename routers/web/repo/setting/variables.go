@@ -127,7 +127,7 @@ func VariableUpdate(ctx *context.Context) {
 		return
 	}
 
-	shared.UpdateVariable(ctx, vCtx.RedirectLink)
+	shared.UpdateVariable(ctx, vCtx.OwnerID, vCtx.RepoID, vCtx.RedirectLink)
 }
 
 func VariableDelete(ctx *context.Context) {
@@ -136,5 +136,5 @@ func VariableDelete(ctx *context.Context) {
 		ctx.ServerError("getVariablesCtx", err)
 		return
 	}
-	shared.DeleteVariable(ctx, vCtx.RedirectLink)
+	shared.DeleteVariable(ctx, vCtx.OwnerID, vCtx.RepoID, vCtx.RedirectLink)
 }

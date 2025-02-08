@@ -236,3 +236,8 @@ func TestToPointer(t *testing.T) {
 	val123 := 123
 	assert.NotSame(t, &val123, ToPointer(val123))
 }
+
+func TestReserveLineBreakForTextarea(t *testing.T) {
+	assert.Equal(t, "test\ndata", ReserveLineBreakForTextarea("test\r\ndata"))
+	assert.Equal(t, "test\ndata\n", ReserveLineBreakForTextarea("test\r\ndata\r\n"))
+}
