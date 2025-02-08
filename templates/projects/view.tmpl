@@ -70,7 +70,7 @@
 				<div class="project-column-header{{if $canWriteProject}} tw-cursor-grab{{end}}">
 					<div class="ui large label project-column-title tw-py-1">
 						<div class="ui small circular grey label project-column-issue-count">
-							{{.NumIssues ctx}}
+							{{len (index $.IssuesMap .ID)}}
 						</div>
 						<span class="project-column-title-label">{{.Title}}</span>
 					</div>
