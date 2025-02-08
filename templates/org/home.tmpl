@@ -23,7 +23,7 @@
 				{{if .CanCreateOrgRepo}}
 					<div class="center aligned">
 						<a class="ui primary button tw-mb-1" href="{{AppSubUrl}}/repo/create?org={{.Org.ID}}">{{ctx.Locale.Tr "new_repo.link"}}</a>
-						{{if not .DisableNewPullMirrors}}
+						{{if not .DisableMigrations}}
 							<a class="ui primary button tw-mb-1" href="{{AppSubUrl}}/repo/migrate?org={{.Org.ID}}&mirror=1">{{ctx.Locale.Tr "new_migrate.link"}}</a>
 						{{end}}
 					</div>
