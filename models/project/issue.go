@@ -34,20 +34,6 @@ func deleteProjectIssuesByProjectID(ctx context.Context, projectID int64) error 
 	return err
 }
 
-// NumIssues return counter of all issues assigned to a project
-func (p *Project) NumIssues(ctx context.Context) int {
-	c, err := db.GetEngine(ctx).Table("project_issue").
-		Where("project_id=?", p.ID).
-		GroupBy("issue_id").
-		Cols("issue_id").
-		Count()
-	if err != nil {
-		log.Error("NumIssues: %v", err)
-		return 0
-	}
-	return int(c)
-}
-
 // NumClosedIssues return counter of closed issues assigned to a project
 func (p *Project) NumClosedIssues(ctx context.Context) int {
 	c, err := db.GetEngine(ctx).Table("project_issue").
