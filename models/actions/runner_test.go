@@ -34,7 +34,7 @@ func TestDeleteRunner(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	before := unittest.AssertExistsAndLoadBean(t, &ActionRunner{ID: recordID})
 
-	err := DeleteRunner(db.DefaultContext, recordID)
+	err := DeleteRunner(db.DefaultContext, &ActionRunner{ID: recordID})
 	require.NoError(t, err)
 
 	var after ActionRunner
