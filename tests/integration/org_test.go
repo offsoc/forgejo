@@ -15,7 +15,9 @@ import (
 	"code.gitea.io/gitea/models/unit"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -265,4 +267,33 @@ func TestOwnerTeamUnit(t *testing.T) {
 	session.MakeRequest(t, req, http.StatusOK)
 
 	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{TeamID: 1, Type: unit.TypeIssues, AccessMode: perm.AccessModeOwner})
+}
+
+func TestOrgNewMigrationButton(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	migrateSelector := `a[href^="/repo/migrate?org="]`
+
+	session := loginUser(t, "user2")
+	t.Run("Migration disabled", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.Repository.DisableMigrations, true)()
+
+		req := NewRequest(t, "GET", "/org3")
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		htmlDoc.AssertElement(t, migrateSelector, false)
+	})
+
+	t.Run("Migration enabled", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.Repository.DisableMigrations, false)()
+
+		req := NewRequest(t, "GET", "/org3")
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		htmlDoc.AssertElement(t, migrateSelector, true)
+	})
 }
