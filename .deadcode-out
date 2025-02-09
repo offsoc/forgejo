@@ -103,9 +103,6 @@ code.gitea.io/gitea/modules/git
 	openRepositoryWithDefaultContext
 	ToEntryMode
 
-code.gitea.io/gitea/modules/gitgraph
-	Parser.Reset
-
 code.gitea.io/gitea/modules/gitrepo
 	GetBranchCommitID
 	GetWikiDefaultBranch
@@ -223,6 +220,9 @@ code.gitea.io/gitea/services/repository
 
 code.gitea.io/gitea/services/repository/files
 	ContentType.String
+
+code.gitea.io/gitea/services/repository/gitgraph
+	Parser.Reset
 
 code.gitea.io/gitea/services/webhook
 	NewNotifier
