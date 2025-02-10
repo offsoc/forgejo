@@ -1374,12 +1374,13 @@ table th[data-sortt-desc] .svg {
 }
 
 .ui.tabular.menu .active.item,
-.ui.secondary.pointing.menu .active.item,
-.resize-for-semibold::before {
+.ui.secondary.pointing.menu .active.item {
   font-weight: var(--font-weight-semibold);
 }
 
-.resize-for-semibold::before {
+/* Bold horizontal menu items are wider so enlargen regular items for visual consistency */
+.overflow-menu-items .item span::before {
+  font-weight: var(--font-weight-semibold);
   content: attr(data-text);
   visibility: hidden;
   display: block;

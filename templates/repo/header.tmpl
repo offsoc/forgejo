@@ -92,7 +92,7 @@
 
 				{{if .Permission.CanRead $.UnitTypeIssues}}
 					<a class="{{if .PageIsIssueList}}active {{end}}item" href="{{.RepoLink}}/issues">
-						{{svg "octicon-issue-opened"}} {{ctx.Locale.Tr "repo.issues"}}
+						{{svg "octicon-issue-opened"}} <span data-text="{{ctx.Locale.Tr "repo.issues"}}">{{ctx.Locale.Tr "repo.issues"}}</span>
 						{{if .Repository.NumOpenIssues}}
 							<span class="ui small label">{{CountFmt .Repository.NumOpenIssues}}</span>
 						{{end}}
@@ -101,13 +101,13 @@
 
 				{{if .Permission.CanRead $.UnitTypeExternalTracker}}
 					<a class="{{if .PageIsIssueList}}active {{end}}item" href="{{.RepoExternalIssuesLink}}" target="_blank" rel="noopener noreferrer">
-						{{svg "octicon-link-external"}} {{ctx.Locale.Tr "repo.issues"}}
+						{{svg "octicon-link-external"}} <span data-text="{{ctx.Locale.Tr "repo.issues"}}">{{ctx.Locale.Tr "repo.issues"}}</span>
 					</a>
 				{{end}}
 
 				{{if and .Repository.CanEnablePulls (.Permission.CanRead $.UnitTypePullRequests)}}
 					<a class="{{if .PageIsPullList}}active {{end}}item" href="{{.RepoLink}}/pulls">
-						{{svg "octicon-git-pull-request"}} {{ctx.Locale.Tr "repo.pulls"}}
+						{{svg "octicon-git-pull-request"}} <span data-text="{{ctx.Locale.Tr "repo.pulls"}}">{{ctx.Locale.Tr "repo.pulls"}}</span>
 						{{if .Repository.NumOpenPulls}}
 							<span class="ui small label">{{CountFmt .Repository.NumOpenPulls}}</span>
 						{{end}}
@@ -116,7 +116,7 @@
 
 				{{if and (not .UnitProjectsGlobalDisabled) (.Permission.CanRead $.UnitTypeProjects)}}
 					<a href="{{.RepoLink}}/projects" class="{{if .IsProjectsPage}}active {{end}}item">
-						{{svg "octicon-project"}} {{ctx.Locale.Tr "repo.project"}}
+						{{svg "octicon-project"}} <span data-text="{{ctx.Locale.Tr "repo.project"}}">{{ctx.Locale.Tr "repo.project"}}</span>
 						{{if .Repository.NumOpenProjects}}
 							<span class="ui small label">{{CountFmt .Repository.NumOpenProjects}}</span>
 						{{end}}
@@ -125,7 +125,7 @@
 
 				{{if and (.Permission.CanRead $.UnitTypeReleases) (not .IsEmptyRepo)}}
 					<a class="{{if or .PageIsReleaseList .PageIsTagList}}active {{end}}item" href="{{.RepoLink}}/releases">
-						{{svg "octicon-tag"}} {{ctx.Locale.Tr "repo.releases"}}
+						{{svg "octicon-tag"}} <span data-text="{{ctx.Locale.Tr "repo.releases"}}">{{ctx.Locale.Tr "repo.releases"}}</span>
 						{{if .NumReleases}}
 							<span class="ui small label">{{CountFmt .NumReleases}}</span>
 						{{end}}
@@ -134,7 +134,7 @@
 
 				{{if .Permission.CanRead $.UnitTypePackages}}
 					<a href="{{.RepoLink}}/packages" class="{{if .IsPackagesPage}}active {{end}}item">
-						{{svg "octicon-package"}} {{ctx.Locale.Tr "packages.title"}}
+						{{svg "octicon-package"}} <span data-text="{{ctx.Locale.Tr "packages.title"}}">{{ctx.Locale.Tr "packages.title"}}</span>
 						{{if .NumPackages}}
 							<span class="ui small label">{{CountFmt .NumPackages}}</span>
 						{{end}}
@@ -143,25 +143,25 @@
 
 				{{if .Permission.CanRead $.UnitTypeWiki}}
 					<a class="{{if .PageIsWiki}}active {{end}}item" href="{{.RepoLink}}/wiki">
-						{{svg "octicon-book"}} {{ctx.Locale.Tr "repo.wiki"}}
+						{{svg "octicon-book"}} <span data-text="{{ctx.Locale.Tr "repo.wiki"}}">{{ctx.Locale.Tr "repo.wiki"}}</span>
 					</a>
 				{{end}}
 
 				{{if .Permission.CanRead $.UnitTypeExternalWiki}}
 					<a class="item" href="{{(.Repository.MustGetUnit $.Context $.UnitTypeExternalWiki).ExternalWikiConfig.ExternalWikiURL}}" target="_blank" rel="noopener noreferrer">
-						{{svg "octicon-link-external"}} {{ctx.Locale.Tr "repo.wiki"}}
+						{{svg "octicon-link-external"}} <span data-text="{{ctx.Locale.Tr "repo.wiki"}}">{{ctx.Locale.Tr "repo.wiki"}}</span>
 					</a>
 				{{end}}
 
 				{{if and (.Permission.CanReadAny $.UnitTypeCode $.UnitTypePullRequests $.UnitTypeIssues $.UnitTypeReleases)}}
 					<a class="{{if .PageIsActivity}}active {{end}}item" href="{{.RepoLink}}/activity">
-						{{svg "octicon-pulse"}} {{ctx.Locale.Tr "repo.activity"}}
+						{{svg "octicon-pulse"}} <span data-text="{{ctx.Locale.Tr "repo.activity"}}">{{ctx.Locale.Tr "repo.activity"}}</span>
 					</a>
 				{{end}}
 
 				{{if and .EnableActions (not .UnitActionsGlobalDisabled) (.Permission.CanRead $.UnitTypeActions)}}
 					<a class="{{if .PageIsActions}}active {{end}}item" href="{{.RepoLink}}/actions">
-						{{svg "octicon-play"}} {{ctx.Locale.Tr "actions.actions"}}
+						{{svg "octicon-play"}} <span data-text="{{ctx.Locale.Tr "actions.actions"}}">{{ctx.Locale.Tr "actions.actions"}}</span>
 						{{if .Repository.NumOpenActionRuns}}
 							<span class="ui small label">{{CountFmt .Repository.NumOpenActionRuns}}</span>
 						{{end}}
@@ -172,7 +172,7 @@
 
 				{{if and RepoFlagsEnabled .SignedUser.IsAdmin}}
 					<a class="{{if .IsRepoFlagsPage}}active {{end}}item" href="{{.RepoLink}}/flags">
-						{{svg "octicon-milestone"}} {{ctx.Locale.Tr "repo.admin.manage_flags"}}
+						{{svg "octicon-milestone"}} <span data-text="{{ctx.Locale.Tr "repo.admin.manage_flags"}}">{{ctx.Locale.Tr "repo.admin.manage_flags"}}</span>
 					</a>
 				{{end}}
 
@@ -181,18 +181,18 @@
 					{{if and .SignedUser.EnableRepoUnitHints (not (.Repository.AllUnitsEnabled ctx))}}
 						{{$highlightSettings = false}}
 						<a class="{{if .PageIsRepoSettingsUnits}}active {{end}}item" href="{{.RepoLink}}/settings/units">
-							{{svg "octicon-plus"}} {{ctx.Locale.Tr "repo.settings.units.add_more"}}
+							{{svg "octicon-plus"}} <span data-text="{{ctx.Locale.Tr "repo.settings.units.add_more"}}">{{ctx.Locale.Tr "repo.settings.units.add_more"}}</span>
 						</a>
 					{{end}}
 					<a id="settings-btn" class="{{if and .PageIsRepoSettings (or $highlightSettings (not .PageIsRepoSettingsUnits))}}active {{end}}right item" href="{{.RepoLink}}/settings">
-						{{svg "octicon-tools"}} {{ctx.Locale.Tr "repo.settings"}}
+						{{svg "octicon-tools"}} <span data-text="{{ctx.Locale.Tr "repo.settings"}}">{{ctx.Locale.Tr "repo.settings"}}</span>
 					</a>
 				{{end}}
 			</div>
 		{{else if .Permission.IsAdmin}}
 			<div class="overflow-menu-items">
 				<a id="settings-btn" class="{{if .PageIsRepoSettings}}active {{end}}right item" href="{{.RepoLink}}/settings">
-					{{svg "octicon-tools"}} {{ctx.Locale.Tr "repo.settings"}}
+					{{svg "octicon-tools"}} <span data-text="{{ctx.Locale.Tr "repo.settings"}}">{{ctx.Locale.Tr "repo.settings"}}</span>
 				</a>
 			</div>
 		{{end}}
