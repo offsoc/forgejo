@@ -8667,6 +8667,12 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/unprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -8720,6 +8726,12 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "423": {
+            "$ref": "#/responses/repoArchivedError"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       },
@@ -8760,8 +8772,8 @@
           "403": {
             "$ref": "#/responses/forbidden"
           },
-          "404": {
-            "$ref": "#/responses/notFound"
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       },
@@ -8821,8 +8833,8 @@
           "404": {
             "$ref": "#/responses/notFound"
           },
-          "423": {
-            "$ref": "#/responses/repoArchivedError"
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -9959,6 +9971,12 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/unprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       },
@@ -10017,6 +10035,9 @@
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -10067,8 +10088,8 @@
           "403": {
             "$ref": "#/responses/forbidden"
           },
-          "404": {
-            "$ref": "#/responses/notFound"
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       },
@@ -10135,6 +10156,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -11386,6 +11410,12 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/unprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -20453,6 +20483,20 @@
       },
       "x-go-package": "code.gitea.io/gitea/services/context"
     },
+    "APIInternalServerError": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/services/context"
+    },
     "APIInvalidTopicsError": {
       "type": "object",
       "properties": {
@@ -20506,6 +20550,20 @@
       "x-go-package": "code.gitea.io/gitea/services/context"
     },
     "APIUnauthorizedError": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/services/context"
+    },
+    "APIUnprocessableEntity": {
       "type": "object",
       "properties": {
         "message": {
@@ -29165,6 +29223,12 @@
         "$ref": "#/definitions/APIForbiddenError"
       }
     },
+    "internalServerError": {
+      "description": "APIInternalServerError is an error that is raised when an internal server error occurs",
+      "schema": {
+        "$ref": "#/definitions/APIInternalServerError"
+      }
+    },
     "invalidTopicsError": {
       "description": "APIInvalidTopicsError is error format response to invalid topics",
       "schema": {
@@ -29217,6 +29281,12 @@
       "description": "APIUnauthorizedError is a unauthorized error response",
       "schema": {
         "$ref": "#/definitions/APIUnauthorizedError"
+      }
+    },
+    "unprocessableEntity": {
+      "description": "APIUnprocessableEntity is an error that is raised when an entity is unprocessable",
+      "schema": {
+        "$ref": "#/definitions/APIUnprocessableEntity"
       }
     },
     "validationError": {
