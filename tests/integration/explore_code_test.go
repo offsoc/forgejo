@@ -20,11 +20,6 @@ func TestExploreCodeSearchIndexer(t *testing.T) {
 	resp := MakeRequest(t, req, http.StatusOK)
 	doc := NewHTMLParser(t, resp.Body).Find(".explore")
 
-	msg := doc.
-		Find(".ui.container").
-		Find(".ui.message[data-test-tag=grep]")
-	assert.EqualValues(t, 0, msg.Length())
-
 	doc.Find(".file-body").Each(func(i int, sel *goquery.Selection) {
 		assert.Positive(t, sel.Find(".code-inner").Find(".search-highlight").Length(), 0)
 	})

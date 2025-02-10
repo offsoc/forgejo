@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json" //nolint:depguard
 	"fmt"
 	"html"
 	"io/fs"
@@ -26,6 +27,8 @@ var (
 
 	// Matches href="", href="#", href="%s", href="#%s", href="%[1]s" and href="#%[1]s".
 	placeHolderRegex = regexp.MustCompile(`href="#?(%s|%\[\d\]s)?"`)
+
+	dmp = diffmatchpatch.New()
 )
 
 func initBlueMondayPolicy() {
@@ -59,9 +62,9 @@ func initRemoveTags() {
 	oldnew := []string{}
 	for _, el := range []string{
 		"email@example.com", "correu@example.com", "epasts@domens.lv", "email@exemplo.com", "eposta@ornek.com", "email@példa.hu", "email@esempio.it",
-		"user", "utente", "lietotājs", "gebruiker", "usuário", "Benutzer", "Bruker", "bruger",
+		"user", "utente", "lietotājs", "gebruiker", "usuário", "Benutzer", "Bruker", "bruger", "użytkownik",
 		"server", "servidor", "kiszolgáló", "serveris",
-		"label", "etichetta", "etiķete", "rótulo", "Label", "utilizador", "etiket", "iezīme",
+		"label", "etichetta", "etiķete", "rótulo", "Label", "utilizador", "etiket", "iezīme", "etykieta",
 	} {
 		oldnew = append(oldnew, "<"+el+">", "REPLACED-TAG")
 	}
@@ -79,6 +82,21 @@ func preprocessTranslationValue(value string) string {
 	return value
 }
 
+func checkValue(trKey, value string) []string {
+	keyValue := preprocessTranslationValue(value)
+
+	if html.UnescapeString(policy.Sanitize(keyValue)) == keyValue {
+		return nil
+	}
+
+	// Create a nice diff of the difference.
+	diffs := dmp.DiffMain(keyValue, html.UnescapeString(policy.Sanitize(keyValue)), false)
+	diffs = dmp.DiffCleanupSemantic(diffs)
+	diffs = dmp.DiffCleanupEfficiency(diffs)
+
+	return []string{trKey + ": " + dmp.DiffPrettyText(diffs)}
+}
+
 func checkLocaleContent(localeContent []byte) []string {
 	// Same configuration as Forgejo uses.
 	cfg := ini.Empty(ini.LoadOptions{
@@ -90,9 +108,7 @@ func checkLocaleContent(localeContent []byte) []string {
 		panic(err)
 	}
 
-	dmp := diffmatchpatch.New()
 	errors := []string{}
-
 	for _, section := range cfg.Sections() {
 		for _, key := range section.Keys() {
 			var trKey string
@@ -102,16 +118,27 @@ func checkLocaleContent(localeContent []byte) []string {
 				trKey = section.Name() + "." + key.Name()
 			}
 
-			keyValue := preprocessTranslationValue(key.Value())
+			errors = append(errors, checkValue(trKey, key.Value())...)
+		}
+	}
+	return errors
+}
 
-			if html.UnescapeString(policy.Sanitize(keyValue)) != keyValue {
-				// Create a nice diff of the difference.
-				diffs := dmp.DiffMain(keyValue, html.UnescapeString(policy.Sanitize(keyValue)), false)
-				diffs = dmp.DiffCleanupSemantic(diffs)
-				diffs = dmp.DiffCleanupEfficiency(diffs)
+func checkLocaleNextContent(data map[string]any, trKey ...string) []string {
+	errors := []string{}
+	for key, value := range data {
+		currentKey := key
+		if len(trKey) == 1 {
+			currentKey = trKey[0] + "." + key
+		}
 
-				errors = append(errors, trKey+": "+dmp.DiffPrettyText(diffs))
-			}
+		switch value := value.(type) {
+		case string:
+			errors = append(errors, checkValue(currentKey, value)...)
+		case map[string]any:
+			errors = append(errors, checkLocaleNextContent(value, currentKey)...)
+		default:
+			panic(fmt.Sprintf("Unexpected type during linting locale next: %s - %T", currentKey, value))
 		}
 	}
 	return errors
@@ -127,6 +154,7 @@ func main() {
 		panic(err)
 	}
 
+	// Safety check that we are not reading the wrong directory.
 	if !slices.ContainsFunc(localeFiles, func(e fs.DirEntry) bool { return strings.HasSuffix(e.Name(), ".ini") }) {
 		fmt.Println("No locale files found")
 		os.Exit(1)
@@ -144,6 +172,38 @@ func main() {
 		}
 
 		if err := checkLocaleContent(localeContent); len(err) > 0 {
+			fmt.Println(localeFile.Name())
+			fmt.Println(strings.Join(err, "\n"))
+			fmt.Println()
+			exitCode = 1
+		}
+	}
+
+	// Check the locale next.
+	localeDir = filepath.Join("options", "locale_next")
+	localeFiles, err = os.ReadDir(localeDir)
+	if err != nil {
+		panic(err)
+	}
+
+	// Safety check that we are not reading the wrong directory.
+	if !slices.ContainsFunc(localeFiles, func(e fs.DirEntry) bool { return strings.HasSuffix(e.Name(), ".json") }) {
+		fmt.Println("No locale_next files found")
+		os.Exit(1)
+	}
+
+	for _, localeFile := range localeFiles {
+		localeContent, err := os.ReadFile(filepath.Join(localeDir, localeFile.Name()))
+		if err != nil {
+			panic(err)
+		}
+
+		var localeData map[string]any
+		if err := json.Unmarshal(localeContent, &localeData); err != nil {
+			panic(err)
+		}
+
+		if err := checkLocaleNextContent(localeData); len(err) > 0 {
 			fmt.Println(localeFile.Name())
 			fmt.Println(strings.Join(err, "\n"))
 			fmt.Println()

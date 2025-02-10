@@ -28,7 +28,9 @@ test('External Release Attachments', async ({page, isMobile}) => {
   // Fill out form and create new release
   await expect(page).toHaveURL('/user2/repo2/releases/new');
   await validate_form({page}, 'fieldset');
-  await page.fill('input[name=tag_name]', '2.0');
+  const textarea = page.locator('input[name=tag_name]');
+  await textarea.pressSequentially('2.0');
+  await expect(page.locator('input[name=title]')).toHaveAttribute('placeholder', '2.0');
   await page.fill('input[name=title]', '2.0');
   await page.click('#add-external-link');
   await page.click('#add-external-link');

@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/repository"
+	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
 	notify_service "code.gitea.io/gitea/services/notify"
 )
@@ -319,6 +320,10 @@ func (*actionNotifier) NotifyPullRevieweDismiss(ctx context.Context, doer *user_
 }
 
 func (a *actionNotifier) PushCommits(ctx context.Context, pusher *user_model.User, repo *repo_model.Repository, opts *repository.PushUpdateOptions, commits *repository.PushCommits) {
+	if len(commits.Commits) > setting.UI.FeedMaxCommitNum {
+		commits.Commits = commits.Commits[:setting.UI.FeedMaxCommitNum]
+	}
+
 	data, err := json.Marshal(commits)
 	if err != nil {
 		log.Error("Marshal: %v", err)
@@ -390,6 +395,10 @@ func (a *actionNotifier) DeleteRef(ctx context.Context, doer *user_model.User, r
 }
 
 func (a *actionNotifier) SyncPushCommits(ctx context.Context, pusher *user_model.User, repo *repo_model.Repository, opts *repository.PushUpdateOptions, commits *repository.PushCommits) {
+	if len(commits.Commits) > setting.UI.FeedMaxCommitNum {
+		commits.Commits = commits.Commits[:setting.UI.FeedMaxCommitNum]
+	}
+
 	data, err := json.Marshal(commits)
 	if err != nil {
 		log.Error("json.Marshal: %v", err)

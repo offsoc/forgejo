@@ -11,21 +11,23 @@ import (
 
 // Webhook settings
 var Webhook = struct {
-	QueueLength     int
-	DeliverTimeout  int
-	SkipTLSVerify   bool
-	AllowedHostList string
-	PagingNum       int
-	ProxyURL        string
-	ProxyURLFixed   *url.URL
-	ProxyHosts      []string
+	QueueLength        int
+	DeliverTimeout     int
+	SkipTLSVerify      bool
+	AllowedHostList    string
+	PagingNum          int
+	ProxyURL           string
+	ProxyURLFixed      *url.URL
+	ProxyHosts         []string
+	PayloadCommitLimit int
 }{
-	QueueLength:    1000,
-	DeliverTimeout: 5,
-	SkipTLSVerify:  false,
-	PagingNum:      10,
-	ProxyURL:       "",
-	ProxyHosts:     []string{},
+	QueueLength:        1000,
+	DeliverTimeout:     5,
+	SkipTLSVerify:      false,
+	PagingNum:          10,
+	ProxyURL:           "",
+	ProxyHosts:         []string{},
+	PayloadCommitLimit: 15,
 }
 
 func loadWebhookFrom(rootCfg ConfigProvider) {
@@ -45,4 +47,5 @@ func loadWebhookFrom(rootCfg ConfigProvider) {
 		}
 	}
 	Webhook.ProxyHosts = sec.Key("PROXY_HOSTS").Strings(",")
+	Webhook.PayloadCommitLimit = sec.Key("PAYLOAD_COMMIT_LIMIT").MustInt(15)
 }

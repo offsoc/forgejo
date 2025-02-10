@@ -15,7 +15,6 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/lfs"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/migration"
@@ -97,7 +96,7 @@ func MigrateRepositoryGitData(ctx context.Context, u *user_model.User,
 				}
 				defer gitRepo.Close()
 
-				branch, err := gitrepo.GetDefaultBranch(ctx, repo)
+				branch, err := gitRepo.GetHEADBranch()
 				if err != nil {
 					log.Warn("Failed to get the default branch of a migrated wiki repo: %v", err)
 					if err := util.RemoveAll(wikiPath); err != nil {
@@ -106,7 +105,7 @@ func MigrateRepositoryGitData(ctx context.Context, u *user_model.User,
 
 					return repo, err
 				}
-				repo.WikiBranch = branch
+				repo.WikiBranch = branch.Name
 
 				if err := git.WriteCommitGraph(ctx, wikiPath); err != nil {
 					return repo, err

@@ -5,7 +5,6 @@
 package git
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -19,11 +18,6 @@ import (
 
 // TagPrefix tags prefix path on the repository
 const TagPrefix = "refs/tags/"
-
-// IsTagExist returns true if given tag exists in the repository.
-func IsTagExist(ctx context.Context, repoPath, name string) bool {
-	return IsReferenceExist(ctx, repoPath, TagPrefix+name)
-}
 
 // CreateTag create one tag in the repository
 func (repo *Repository) CreateTag(name, revision string) error {

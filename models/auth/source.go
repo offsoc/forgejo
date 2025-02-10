@@ -299,17 +299,6 @@ func GetSourceByID(ctx context.Context, id int64) (*Source, error) {
 	return source, nil
 }
 
-func GetSourceByName(ctx context.Context, name string) (*Source, error) {
-	source := &Source{}
-	has, err := db.GetEngine(ctx).Where("name = ?", name).Get(source)
-	if err != nil {
-		return nil, err
-	} else if !has {
-		return nil, ErrSourceNotExist{}
-	}
-	return source, nil
-}
-
 // UpdateSource updates a Source record in DB.
 func UpdateSource(ctx context.Context, source *Source) error {
 	var originalSource *Source

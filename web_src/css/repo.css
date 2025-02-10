@@ -2248,7 +2248,7 @@ details.repo-search-result summary::marker {
 }
 
 .timeline .ui.comment-header {
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.75rem;
 }
 
 .comment-header::before,
@@ -2400,6 +2400,11 @@ details.repo-search-result summary::marker {
 
 .repo-button-row .button.dropdown:not(.icon) {
   padding-right: 22px !important; /* normal buttons have !important paddings, so we need to override it for dropdown (Add File) icons */
+}
+
+.repo-button-row .button strong {
+  /* Workaround where 'overflow: hidden' is clipping the y-axis, force a small amount of extra padding in the y-axis. */
+  padding: .1em 0;
 }
 
 .repo-button-row input {

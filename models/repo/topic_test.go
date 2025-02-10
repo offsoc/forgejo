@@ -52,8 +52,7 @@ func TestAddTopic(t *testing.T) {
 	require.NoError(t, repo_model.SaveTopics(db.DefaultContext, 2, "golang", "gitea"))
 	repo2NrOfTopics = 2
 	totalNrOfTopics++
-	topic, err := repo_model.GetTopicByName(db.DefaultContext, "gitea")
-	require.NoError(t, err)
+	topic := unittest.AssertExistsAndLoadBean(t, &repo_model.Topic{Name: "gitea"})
 	assert.EqualValues(t, 1, topic.RepoCount)
 
 	topics, _, err = repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{})

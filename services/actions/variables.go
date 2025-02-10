@@ -31,7 +31,7 @@ func CreateVariable(ctx context.Context, ownerID, repoID int64, name, data strin
 	return v, nil
 }
 
-func UpdateVariable(ctx context.Context, variableID int64, name, data string) (bool, error) {
+func UpdateVariable(ctx context.Context, variableID, ownerID, repoID int64, name, data string) (bool, error) {
 	if err := secret_service.ValidateName(name); err != nil {
 		return false, err
 	}
@@ -41,14 +41,12 @@ func UpdateVariable(ctx context.Context, variableID int64, name, data string) (b
 	}
 
 	return actions_model.UpdateVariable(ctx, &actions_model.ActionVariable{
-		ID:   variableID,
-		Name: strings.ToUpper(name),
-		Data: util.ReserveLineBreakForTextarea(data),
+		ID:      variableID,
+		Name:    strings.ToUpper(name),
+		Data:    util.ReserveLineBreakForTextarea(data),
+		OwnerID: ownerID,
+		RepoID:  repoID,
 	})
-}
-
-func DeleteVariableByID(ctx context.Context, variableID int64) error {
-	return actions_model.DeleteVariable(ctx, variableID)
 }
 
 func DeleteVariableByName(ctx context.Context, ownerID, repoID int64, name string) error {
@@ -69,7 +67,8 @@ func DeleteVariableByName(ctx context.Context, ownerID, repoID int64, name strin
 		return err
 	}
 
-	return actions_model.DeleteVariable(ctx, v.ID)
+	_, err = actions_model.DeleteVariable(ctx, v.ID, ownerID, repoID)
+	return err
 }
 
 func GetVariable(ctx context.Context, opts actions_model.FindVariablesOpts) (*actions_model.ActionVariable, error) {

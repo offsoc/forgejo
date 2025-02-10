@@ -599,6 +599,10 @@ func (m *webhookNotifier) IssueChangeMilestone(ctx context.Context, doer *user_m
 }
 
 func (m *webhookNotifier) PushCommits(ctx context.Context, pusher *user_model.User, repo *repo_model.Repository, opts *repository.PushUpdateOptions, commits *repository.PushCommits) {
+	if len(commits.Commits) > setting.Webhook.PayloadCommitLimit {
+		commits.Commits = commits.Commits[:setting.Webhook.PayloadCommitLimit]
+	}
+
 	apiPusher := convert.ToUser(ctx, pusher, nil)
 	apiCommits, apiHeadCommit, err := commits.ToAPIPayloadCommits(ctx, repo.RepoPath(), repo.HTMLURL())
 	if err != nil {
@@ -840,6 +844,10 @@ func (m *webhookNotifier) DeleteRelease(ctx context.Context, doer *user_model.Us
 }
 
 func (m *webhookNotifier) SyncPushCommits(ctx context.Context, pusher *user_model.User, repo *repo_model.Repository, opts *repository.PushUpdateOptions, commits *repository.PushCommits) {
+	if len(commits.Commits) > setting.Webhook.PayloadCommitLimit {
+		commits.Commits = commits.Commits[:setting.Webhook.PayloadCommitLimit]
+	}
+
 	apiPusher := convert.ToUser(ctx, pusher, nil)
 	apiCommits, apiHeadCommit, err := commits.ToAPIPayloadCommits(ctx, repo.RepoPath(), repo.HTMLURL())
 	if err != nil {

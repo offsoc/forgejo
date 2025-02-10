@@ -177,7 +177,7 @@ test('Pull quote reply', async ({page}, workerInfo) => {
   const response = await page.goto('/user2/commitsonpr/pulls/1/files');
   expect(response?.status()).toBe(200);
 
-  const editorTextarea = page.locator('textarea.markdown-text-editor');
+  const editorTextarea = page.locator('form.comment-form textarea.markdown-text-editor');
 
   // Full quote with no reply handler being open.
   await page.click('.comment-code-cloud .context-menu');
