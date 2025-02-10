@@ -534,7 +534,7 @@ lint-templates: .venv node_modules
 
 .PHONY: lint-yaml
 lint-yaml: .venv
-	@poetry run yamllint .
+	@poetry run yamllint -s .
 
 .PHONY: security-check
 security-check:
