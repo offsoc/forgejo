@@ -70,6 +70,10 @@ func ListIssueComments(ctx *context.APIContext) {
 	}
 	issue, err := issues_model.GetIssueByIndex(ctx, ctx.Repo.Repository.ID, ctx.ParamsInt64(":index"))
 	if err != nil {
+		if issues_model.IsErrIssueNotExist(err) {
+			ctx.NotFound("IsErrIssueNotExist", err)
+			return
+		}
 		ctx.Error(http.StatusInternalServerError, "GetRawIssueByIndex", err)
 		return
 	}
