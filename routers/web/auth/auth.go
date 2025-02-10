@@ -171,7 +171,7 @@ func SignIn(ctx *context.Context) {
 		context.SetCaptchaData(ctx)
 	}
 
-	ctx.Data["DisablePassword"] = !setting.Service.RequireExternalRegistrationPassword || setting.Service.AllowOnlyExternalRegistration
+	ctx.Data["DisablePassword"] = setting.Service.RequireExternalRegistrationPassword || setting.Service.AllowOnlyExternalRegistration
 
 	ctx.HTML(http.StatusOK, tplSignIn)
 }
@@ -192,7 +192,7 @@ func SignInPost(ctx *context.Context) {
 	ctx.Data["PageIsLogin"] = true
 	ctx.Data["EnableSSPI"] = auth.IsSSPIEnabled(ctx)
 	ctx.Data["EnableInternalSignIn"] = setting.Service.EnableInternalSignIn
-	ctx.Data["DisablePassword"] = !setting.Service.RequireExternalRegistrationPassword || setting.Service.AllowOnlyExternalRegistration
+	ctx.Data["DisablePassword"] = setting.Service.RequireExternalRegistrationPassword || setting.Service.AllowOnlyExternalRegistration
 
 	// Permission denied if EnableInternalSignIn is false
 	if !setting.Service.EnableInternalSignIn {
