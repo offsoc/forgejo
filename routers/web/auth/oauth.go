@@ -14,6 +14,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strings"
 
@@ -947,13 +948,13 @@ func SignInOAuth(ctx *context.Context) {
 		return
 	}
 
-	if err = authSource.Cfg.(*oauth2.Source).Callout(ctx.Req, ctx.Resp, codeChallenge); err != nil {
+	if err = authSource.Cfg.(*oauth2.Source).Callout(ctx.Req, ctx.Resp, codeChallenge, setting.OAuth2Client.OpenIDConnectAcrValues); err != nil {
 		if strings.Contains(err.Error(), "no provider for ") {
 			if err = oauth2.ResetOAuth2(ctx); err != nil {
 				ctx.ServerError("SignIn", err)
 				return
 			}
-			if err = authSource.Cfg.(*oauth2.Source).Callout(ctx.Req, ctx.Resp, codeChallenge); err != nil {
+			if err = authSource.Cfg.(*oauth2.Source).Callout(ctx.Req, ctx.Resp, codeChallenge, setting.OAuth2Client.OpenIDConnectAcrValues); err != nil {
 				ctx.ServerError("SignIn", err)
 			}
 			return
@@ -1241,6 +1242,17 @@ func handleOAuth2SignIn(ctx *context.Context, source *auth.Source, u *user_model
 		return
 	}
 
+	if len(setting.OAuth2Client.OpenIDConnectAcrValues) > 0 {
+		// we require MFA from our OIDC provider, the `acr` key MUST
+		// be set and contain any of the ACR values part of this
+		// setting...
+		err := verifyAcr(setting.OAuth2Client.OpenIDConnectAcrValues, gothUser)
+		if err != nil {
+			ctx.ServerError("OpenID MFA", err)
+			return
+		}
+	}
+
 	needs2FA := false
 	if !source.Cfg.(*oauth2.Source).SkipLocalTwoFA {
 		_, err := auth.GetTwoFactorByUID(ctx, u.ID)
@@ -1377,6 +1389,18 @@ func encodeCodeChallenge(codeVerifier string) (string, error) {
 	_, err := io.WriteString(hasher, codeVerifier)
 	codeChallenge := base64.RawURLEncoding.EncodeToString(hasher.Sum(nil))
 	return codeChallenge, err
+}
+
+func verifyAcr(acrValues []string, gothUser goth.User) error {
+	acr, ok := gothUser.RawData["acr"]
+	if !ok {
+		return errors.New("no `acr` key in the IDToken")
+	}
+	if slices.Index(acrValues, fmt.Sprint(acr)) == -1 {
+		return errors.New(fmt.Sprintf("value of `acr` key is \"%s\", which is not in the allowed list %v", acr, acrValues))
+	}
+
+	return nil
 }
 
 // OAuth2UserLoginCallback attempts to handle the callback from the OAuth2 provider and if successful

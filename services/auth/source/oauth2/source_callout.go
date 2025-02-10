@@ -6,13 +6,14 @@ package oauth2
 import (
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 )
 
 // Callout redirects request/response pair to authenticate against the provider
-func (source *Source) Callout(request *http.Request, response http.ResponseWriter, codeChallengeS256 string) error {
+func (source *Source) Callout(request *http.Request, response http.ResponseWriter, codeChallengeS256 string, acrValues []string) error {
 	// not sure if goth is thread safe (?) when using multiple providers
 	request.Header.Set(ProviderHeaderKey, source.authSource.Name)
 
@@ -21,6 +22,13 @@ func (source *Source) Callout(request *http.Request, response http.ResponseWrite
 		querySuffix = "&" + url.Values{
 			"code_challenge_method": []string{"S256"},
 			"code_challenge":        []string{codeChallengeS256},
+		}.Encode()
+	}
+
+	var acrQuerySuffix string
+	if len(acrValues) != 0 {
+		acrQuerySuffix = "&" + url.Values{
+			"acr_values": []string{strings.Join(acrValues, " ")},
 		}.Encode()
 	}
 
@@ -35,7 +43,7 @@ func (source *Source) Callout(request *http.Request, response http.ResponseWrite
 	if err == nil {
 		// hacky way to set the code_challenge, but no better way until
 		// https://github.com/markbates/goth/issues/516 is resolved
-		http.Redirect(response, request, url+querySuffix, http.StatusTemporaryRedirect)
+		http.Redirect(response, request, url+querySuffix+acrQuerySuffix, http.StatusTemporaryRedirect)
 	}
 	return err
 }

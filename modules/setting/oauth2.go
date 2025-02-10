@@ -56,6 +56,7 @@ func (accountLinking OAuth2AccountLinkingType) isValid() bool {
 var OAuth2Client struct {
 	RegisterEmailConfirm   bool
 	OpenIDConnectScopes    []string
+	OpenIDConnectAcrValues []string
 	EnableAutoRegistration bool
 	Username               OAuth2UsernameType
 	UpdateAvatar           bool
@@ -66,6 +67,7 @@ func loadOAuth2ClientFrom(rootCfg ConfigProvider) {
 	sec := rootCfg.Section("oauth2_client")
 	OAuth2Client.RegisterEmailConfirm = sec.Key("REGISTER_EMAIL_CONFIRM").MustBool(Service.RegisterEmailConfirm)
 	OAuth2Client.OpenIDConnectScopes = parseScopes(sec, "OPENID_CONNECT_SCOPES")
+	OAuth2Client.OpenIDConnectAcrValues = parseScopes(sec, "OPENID_CONNECT_ACR_VALUES") // we reuse parseScopes here, same syntax
 	OAuth2Client.EnableAutoRegistration = sec.Key("ENABLE_AUTO_REGISTRATION").MustBool()
 	OAuth2Client.Username = OAuth2UsernameType(sec.Key("USERNAME").MustString(string(OAuth2UsernameNickname)))
 	if !OAuth2Client.Username.isValid() {
