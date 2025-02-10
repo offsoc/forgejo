@@ -11,9 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDisableForgottenPasswordTrue(t *testing.T) {
+func TestDisableForgottenPasswordTrueTrue(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-	defer test.MockVariableValue(&setting.Service.SignInForgottenPasswordEnabled, true)()
+	defer test.MockVariableValue(&setting.Service.RequireExternalRegistrationPassword, true)()
+	defer test.MockVariableValue(&setting.Service.AllowOnlyExternalRegistration, true)()
 
 	req := NewRequest(t, "GET", "/user/login/")
 	resp := MakeRequest(t, req, http.StatusOK)
@@ -28,7 +29,49 @@ func TestDisableForgottenPasswordTrue(t *testing.T) {
 			}
 		}
 	}
-	assert.EqualValues(t, 1, counterInstances)
+	assert.EqualValues(t, 0, counterInstances)
+}
+
+func TestDisableForgottenPasswordFalseTrue(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.Service.RequireExternalRegistrationPassword, false)()
+	defer test.MockVariableValue(&setting.Service.AllowOnlyExternalRegistration, true)()
+
+	req := NewRequest(t, "GET", "/user/login/")
+	resp := MakeRequest(t, req, http.StatusOK)
+	doc := NewHTMLParser(t, resp.Body).Find("a")
+	var counterInstances int = 0
+	for i := range doc.Nodes {
+		oneElement := doc.Eq(i)
+		attValue, attExists := oneElement.Attr("href")
+		if attExists {
+			if attValue == "/user/forgot_password" {
+				counterInstances += 1
+			}
+		}
+	}
+	assert.EqualValues(t, 0, counterInstances)
+}
+
+func TestDisableForgottenPasswordTrueFalse(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.Service.RequireExternalRegistrationPassword, true)()
+	defer test.MockVariableValue(&setting.Service.AllowOnlyExternalRegistration, false)()
+
+	req := NewRequest(t, "GET", "/user/login/")
+	resp := MakeRequest(t, req, http.StatusOK)
+	doc := NewHTMLParser(t, resp.Body).Find("a")
+	var counterInstances int = 0
+	for i := range doc.Nodes {
+		oneElement := doc.Eq(i)
+		attValue, attExists := oneElement.Attr("href")
+		if attExists {
+			if attValue == "/user/forgot_password" {
+				counterInstances += 1
+			}
+		}
+	}
+	assert.EqualValues(t, 0, counterInstances)
 }
 
 func TestDisableForgottenPasswordDefault(t *testing.T) {
@@ -50,9 +93,10 @@ func TestDisableForgottenPasswordDefault(t *testing.T) {
 	assert.EqualValues(t, 1, counterInstances)
 }
 
-func TestDisableForgottenPasswordFalse(t *testing.T) {
+func TestDisableForgottenPasswordFalseFalse(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-	defer test.MockVariableValue(&setting.Service.SignInForgottenPasswordEnabled, false)()
+	defer test.MockVariableValue(&setting.Service.RequireExternalRegistrationPassword, false)()
+	defer test.MockVariableValue(&setting.Service.AllowOnlyExternalRegistration, false)()
 
 	req := NewRequest(t, "GET", "/user/login/")
 	resp := MakeRequest(t, req, http.StatusOK)
@@ -67,5 +111,5 @@ func TestDisableForgottenPasswordFalse(t *testing.T) {
 			}
 		}
 	}
-	assert.EqualValues(t, 0, counterInstances)
+	assert.EqualValues(t, 1, counterInstances)
 }
