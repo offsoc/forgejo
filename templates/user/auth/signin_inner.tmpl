@@ -50,7 +50,7 @@
 	</div>
 </div>
 
-{{if .SignInForgottenPasswordEnabled}}
+{{if not .DisablePassword}}
 <div class="ui container fluid">
 	{{template "user/auth/webauthn_error" .}}
 
