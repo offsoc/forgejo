@@ -8669,7 +8669,7 @@
             "$ref": "#/responses/notFound"
           },
           "422": {
-            "$ref": "#/responses/unprocessableEntity"
+            "$ref": "#/responses/validationError"
           },
           "500": {
             "$ref": "#/responses/internalServerError"
@@ -9973,7 +9973,7 @@
             "$ref": "#/responses/notFound"
           },
           "422": {
-            "$ref": "#/responses/unprocessableEntity"
+            "$ref": "#/responses/validationError"
           },
           "500": {
             "$ref": "#/responses/internalServerError"
@@ -11412,7 +11412,7 @@
             "$ref": "#/responses/notFound"
           },
           "422": {
-            "$ref": "#/responses/unprocessableEntity"
+            "$ref": "#/responses/validationError"
           },
           "500": {
             "$ref": "#/responses/internalServerError"
@@ -20563,20 +20563,6 @@
       },
       "x-go-package": "code.gitea.io/gitea/services/context"
     },
-    "APIUnprocessableEntity": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string",
-          "x-go-name": "Message"
-        },
-        "url": {
-          "type": "string",
-          "x-go-name": "URL"
-        }
-      },
-      "x-go-package": "code.gitea.io/gitea/services/context"
-    },
     "APIValidationError": {
       "type": "object",
       "properties": {
@@ -29281,12 +29267,6 @@
       "description": "APIUnauthorizedError is a unauthorized error response",
       "schema": {
         "$ref": "#/definitions/APIUnauthorizedError"
-      }
-    },
-    "unprocessableEntity": {
-      "description": "APIUnprocessableEntity is an error that is raised when an entity is unprocessable",
-      "schema": {
-        "$ref": "#/definitions/APIUnprocessableEntity"
       }
     },
     "validationError": {

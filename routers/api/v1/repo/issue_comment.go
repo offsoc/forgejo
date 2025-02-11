@@ -63,7 +63,7 @@ func ListIssueComments(ctx *context.APIContext) {
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	//   "422":
-	//     "$ref": "#/responses/unprocessableEntity"
+	//     "$ref": "#/responses/validationError"
 	//   "500":
 	//     "$ref": "#/responses/internalServerError"
 
@@ -175,7 +175,7 @@ func ListIssueCommentsAndTimeline(ctx *context.APIContext) {
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	//   "422":
-	//     "$ref": "#/responses/unprocessableEntity"
+	//     "$ref": "#/responses/validationError"
 	//   "500":
 	//     "$ref": "#/responses/internalServerError"
 
@@ -288,7 +288,7 @@ func ListRepoIssueComments(ctx *context.APIContext) {
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	//   "422":
-	//     "$ref": "#/responses/unprocessableEntity"
+	//     "$ref": "#/responses/validationError"
 	//   "500":
 	//     "$ref": "#/responses/internalServerError"
 
