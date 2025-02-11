@@ -95,7 +95,6 @@ func TestAPIListIssueComments(t *testing.T) {
 	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/%d/comments", repoOwner.Name, repo.Name, IssueIdNotExist).
 		AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusNotFound)
-	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
 
 func TestAPICreateComment(t *testing.T) {
@@ -125,7 +124,6 @@ func TestAPICreateComment(t *testing.T) {
 		"body": commentBody,
 	}).AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusNotFound)
-	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
 
 func TestAPICreateCommentAutoDate(t *testing.T) {
@@ -482,5 +480,4 @@ func TestAPIListIssueTimeline(t *testing.T) {
 
 	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/%d/timeline", repoOwner.Name, repo.Name, IssueIdNotExist)
 	resp = MakeRequest(t, req, http.StatusNotFound)
-	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
