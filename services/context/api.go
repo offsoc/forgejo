@@ -156,16 +156,7 @@ type swaggerAPIRepoArchivedError struct {
 	// in:body
 	Body APIRepoArchivedError `json:"body"`
 }
-type APIUnprocessableEntity struct {
-	APIError
-}
 
-// APIUnprocessableEntity is an error that is raised when an entity is unprocessable
-// swagger:response unprocessableEntity
-type swaggerAPIUnprocessableEntity struct {
-	// in:body
-	Body APIUnprocessableEntity `json:"body"`
-}
 type APIInternalServerError struct {
 	APIError
 }
