@@ -18,13 +18,13 @@ func TestDisableForgottenPasswordFalse(t *testing.T) {
 	req := NewRequest(t, "GET", "/user/login/")
 	resp := MakeRequest(t, req, http.StatusOK)
 	doc := NewHTMLParser(t, resp.Body).Find("a")
-	var counterInstances int = 0
+	var counterInstances int
 	for i := range doc.Nodes {
 		oneElement := doc.Eq(i)
 		attValue, attExists := oneElement.Attr("href")
 		if attExists {
 			if attValue == "/user/forgot_password" {
-				counterInstances += 1
+				counterInstances++
 			}
 		}
 	}
@@ -38,13 +38,13 @@ func TestDisableForgottenPasswordTrue(t *testing.T) {
 	req := NewRequest(t, "GET", "/user/login/")
 	resp := MakeRequest(t, req, http.StatusOK)
 	doc := NewHTMLParser(t, resp.Body).Find("a")
-	var counterInstances int = 0
+	var counterInstances int
 	for i := range doc.Nodes {
 		oneElement := doc.Eq(i)
 		attValue, attExists := oneElement.Attr("href")
 		if attExists {
 			if attValue == "/user/forgot_password" {
-				counterInstances += 1
+				counterInstances++
 			}
 		}
 	}
@@ -57,13 +57,13 @@ func TestDisableForgottenPasswordDefault(t *testing.T) {
 	req := NewRequest(t, "GET", "/user/login/")
 	resp := MakeRequest(t, req, http.StatusOK)
 	doc := NewHTMLParser(t, resp.Body).Find("a")
-	var counterInstances int = 0
+	var counterInstances int
 	for i := range doc.Nodes {
 		oneElement := doc.Eq(i)
 		attValue, attExists := oneElement.Attr("href")
 		if attExists {
 			if attValue == "/user/forgot_password" {
-				counterInstances += 1
+				counterInstances++
 			}
 		}
 	}
