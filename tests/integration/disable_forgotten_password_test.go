@@ -14,7 +14,7 @@ import (
 func TestDisableForgottenPasswordFalse(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Service.EnableInternalSignIn, true)()
-	
+
 	req := NewRequest(t, "GET", "/user/login/")
 	resp := MakeRequest(t, req, http.StatusOK)
 	doc := NewHTMLParser(t, resp.Body).Find("a")
@@ -69,4 +69,3 @@ func TestDisableForgottenPasswordDefault(t *testing.T) {
 	}
 	assert.EqualValues(t, 1, counterInstances)
 }
-
