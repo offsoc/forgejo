@@ -517,8 +517,8 @@ export function initRepoPullRequestReview() {
   // The following part is only for diff views
   if (!$('.repository.pull.diff').length) return;
 
-  const $reviewBtn = $('.js-btn-review');
-  const $panel = $reviewBtn.parent().find('.review-box-panel');
+  const $reviewBtn = $reviewBox.parent().find('.js-btn-review');
+  const $panel = $reviewBox.parent().find('.review-box-panel');
   const $closeBtn = $panel.find('.close');
 
   if ($reviewBtn.length && $panel.length) {

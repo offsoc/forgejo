@@ -44,6 +44,10 @@ func CreateOrUpdateSecret(ctx *context.APIContext) {
 	//     description: response when updating a secret
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -88,6 +92,10 @@ func DeleteSecret(ctx *context.APIContext) {
 	//     description: delete one secret of the user
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -132,6 +140,10 @@ func CreateVariable(ctx *context.APIContext) {
 	//     description: response when creating a variable
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -191,6 +203,10 @@ func UpdateVariable(ctx *context.APIContext) {
 	//     description: response when updating a variable
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -212,7 +228,7 @@ func UpdateVariable(ctx *context.APIContext) {
 	if opt.Name == "" {
 		opt.Name = ctx.Params("variablename")
 	}
-	if _, err := actions_service.UpdateVariable(ctx, v.ID, opt.Name, opt.Value); err != nil {
+	if _, err := actions_service.UpdateVariable(ctx, v.ID, ctx.Doer.ID, 0, opt.Name, opt.Value); err != nil {
 		if errors.Is(err, util.ErrInvalidArgument) {
 			ctx.Error(http.StatusBadRequest, "UpdateVariable", err)
 		} else {
@@ -244,6 +260,10 @@ func DeleteVariable(ctx *context.APIContext) {
 	//     description: response when deleting a variable
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -279,6 +299,10 @@ func GetVariable(ctx *context.APIContext) {
 	//			"$ref": "#/responses/ActionVariable"
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -326,6 +350,10 @@ func ListVariables(ctx *context.APIContext) {
 	//			"$ref": "#/responses/VariableList"
 	//   "400":
 	//     "$ref": "#/responses/error"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 

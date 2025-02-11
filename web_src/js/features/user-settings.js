@@ -1,7 +1,8 @@
 import {hideElem, showElem} from '../utils/dom.js';
 
 function onPronounsDropdownUpdate() {
-  const pronounsCustom = document.getElementById('pronouns-custom');
+  const pronounsCustom = document.getElementById('label-pronouns-custom');
+  const pronounsCustomInput = pronounsCustom.querySelector('input');
   const pronounsDropdown = document.getElementById('pronouns-dropdown');
   const pronounsInput = pronounsDropdown.querySelector('input');
   // must be kept in sync with `routers/web/user/setting/profile.go`
@@ -15,49 +16,35 @@ function onPronounsDropdownUpdate() {
   );
   if (isCustom) {
     if (pronounsInput.value === '!') {
-      pronounsCustom.value = '';
+      pronounsCustomInput.value = '';
     } else {
-      pronounsCustom.value = pronounsInput.value;
+      pronounsCustomInput.value = pronounsInput.value;
     }
-    pronounsCustom.style.display = '';
+    showElem(pronounsCustom);
   } else {
-    pronounsCustom.style.display = 'none';
+    hideElem(pronounsCustom);
   }
 }
 function onPronounsCustomUpdate() {
-  const pronounsCustom = document.getElementById('pronouns-custom');
+  const pronounsCustomInput = document.querySelector('#label-pronouns-custom input');
   const pronounsInput = document.querySelector('#pronouns-dropdown input');
-  pronounsInput.value = pronounsCustom.value;
+  pronounsInput.value = pronounsCustomInput.value;
 }
 
 export function initUserSettings() {
   if (!document.querySelectorAll('.user.settings.profile').length) return;
 
-  const usernameInput = document.getElementById('username');
-  if (!usernameInput) return;
-  usernameInput.addEventListener('input', function () {
-    const prompt = document.getElementById('name-change-prompt');
-    const promptRedirect = document.getElementById('name-change-redirect-prompt');
-    if (this.value.toLowerCase() !== this.getAttribute('data-name').toLowerCase()) {
-      showElem(prompt);
-      showElem(promptRedirect);
-    } else {
-      hideElem(prompt);
-      hideElem(promptRedirect);
-    }
-  });
-
-  const pronounsDropdown = document.getElementById('pronouns-dropdown');
-  const pronounsCustom = document.getElementById('pronouns-custom');
+  const pronounsDropdown = document.getElementById('label-pronouns');
+  const pronounsCustomInput = document.querySelector('#label-pronouns-custom input');
   const pronounsInput = pronounsDropdown.querySelector('input');
 
   // If JS is disabled, the page will show the custom input, as the dropdown requires JS to work.
   // JS progressively enhances the input by adding a dropdown, but it works regardless.
-  pronounsCustom.removeAttribute('name');
+  pronounsCustomInput.removeAttribute('name');
   pronounsInput.setAttribute('name', 'pronouns');
-  pronounsDropdown.style.display = '';
+  showElem(pronounsDropdown);
 
   onPronounsDropdownUpdate();
   pronounsInput.addEventListener('change', onPronounsDropdownUpdate);
-  pronounsCustom.addEventListener('input', onPronounsCustomUpdate);
+  pronounsCustomInput.addEventListener('input', onPronounsCustomUpdate);
 }

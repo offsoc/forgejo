@@ -5,6 +5,7 @@ package setting
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -37,10 +38,12 @@ var Service = struct {
 	RegisterManualConfirm                   bool
 	EmailDomainAllowList                    []glob.Glob
 	EmailDomainBlockList                    []glob.Glob
+	EmailDomainBlockDisposable              bool
 	DisableRegistration                     bool
 	AllowOnlyInternalRegistration           bool
 	AllowOnlyExternalRegistration           bool
 	ShowRegistrationButton                  bool
+	EnableInternalSignIn                    bool
 	ShowMilestonesDashboardPage             bool
 	RequireSignInView                       bool
 	EnableNotifyMail                        bool
@@ -82,6 +85,8 @@ var Service = struct {
 	DefaultOrgMemberVisible                 bool
 	UserDeleteWithCommentsMaxTime           time.Duration
 	ValidSiteURLSchemes                     []string
+	UsernameCooldownPeriod                  int64
+	MaxUserRedirects                        int64
 
 	// OpenID settings
 	EnableOpenIDSignIn bool
@@ -135,6 +140,11 @@ func CompileEmailGlobList(sec ConfigSection, keys ...string) (globs []glob.Glob)
 	return globs
 }
 
+// LoadServiceSetting loads the service settings
+func LoadServiceSetting() {
+	loadServiceFrom(CfgProvider)
+}
+
 func loadServiceFrom(rootCfg ConfigProvider) {
 	sec := rootCfg.Section("service")
 	Service.ActiveCodeLives = sec.Key("ACTIVE_CODE_LIVE_MINUTES").MustInt(180)
@@ -156,7 +166,24 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 	}
 	Service.EmailDomainAllowList = CompileEmailGlobList(sec, "EMAIL_DOMAIN_WHITELIST", "EMAIL_DOMAIN_ALLOWLIST")
 	Service.EmailDomainBlockList = CompileEmailGlobList(sec, "EMAIL_DOMAIN_BLOCKLIST")
+	Service.EmailDomainBlockDisposable = sec.Key("EMAIL_DOMAIN_BLOCK_DISPOSABLE").MustBool(false)
+	if Service.EmailDomainBlockDisposable {
+		toAdd := make([]glob.Glob, 0, len(DisposableEmailDomains()))
+		for _, domain := range DisposableEmailDomains() {
+			domain = strings.ToLower(domain)
+			// Only add domains that aren't blocked yet.
+			if !slices.ContainsFunc(Service.EmailDomainBlockList, func(g glob.Glob) bool { return g.Match(domain) }) {
+				if g, err := glob.Compile(domain); err != nil {
+					log.Error("Error in disposable domain %s: %v", domain, err)
+				} else {
+					toAdd = append(toAdd, g)
+				}
+			}
+		}
+		Service.EmailDomainBlockList = append(Service.EmailDomainBlockList, toAdd...)
+	}
 	Service.ShowRegistrationButton = sec.Key("SHOW_REGISTRATION_BUTTON").MustBool(!(Service.DisableRegistration || Service.AllowOnlyExternalRegistration))
+	Service.EnableInternalSignIn = sec.Key("ENABLE_INTERNAL_SIGNIN").MustBool(true)
 	Service.ShowMilestonesDashboardPage = sec.Key("SHOW_MILESTONES_DASHBOARD_PAGE").MustBool(true)
 	Service.RequireSignInView = sec.Key("REQUIRE_SIGNIN_VIEW").MustBool()
 	Service.EnableBasicAuth = sec.Key("ENABLE_BASIC_AUTHENTICATION").MustBool(true)
@@ -237,6 +264,14 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 		}
 	}
 	Service.ValidSiteURLSchemes = schemes
+	Service.UsernameCooldownPeriod = sec.Key("USERNAME_COOLDOWN_PERIOD").MustInt64(0)
+
+	// Only set a default if USERNAME_COOLDOWN_PERIOD's feature is active.
+	maxUserRedirectsDefault := int64(0)
+	if Service.UsernameCooldownPeriod > 0 {
+		maxUserRedirectsDefault = 5
+	}
+	Service.MaxUserRedirects = sec.Key("MAX_USER_REDIRECTS").MustInt64(maxUserRedirectsDefault)
 
 	mustMapSetting(rootCfg, "service.explore", &Service.Explore)
 

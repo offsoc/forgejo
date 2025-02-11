@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -12,6 +13,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/translation"
 	"code.gitea.io/gitea/tests"
 
@@ -92,4 +94,50 @@ func TestSigninWithRememberMe(t *testing.T) {
 	// With session the settings page should be reachable
 	req = NewRequest(t, "GET", "/user/settings")
 	session.MakeRequest(t, req, http.StatusOK)
+}
+
+func TestDisableSignin(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	// Mock alternative auth ways as enabled
+	defer test.MockVariableValue(&setting.Service.EnableOpenIDSignIn, true)()
+	defer test.MockVariableValue(&setting.Service.EnableOpenIDSignUp, true)()
+	t.Run("Disabled", func(t *testing.T) {
+		defer test.MockVariableValue(&setting.Service.EnableInternalSignIn, false)()
+
+		t.Run("UI", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			req := NewRequest(t, "GET", "/user/login")
+			resp := MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+			htmlDoc.AssertElement(t, "form[action='/user/login']", false)
+			htmlDoc.AssertElement(t, ".divider-text", false)
+		})
+
+		t.Run("Signin", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+			req := NewRequest(t, "POST", "/user/login")
+			MakeRequest(t, req, http.StatusForbidden)
+		})
+	})
+
+	t.Run("Enabled", func(t *testing.T) {
+		defer test.MockVariableValue(&setting.Service.EnableInternalSignIn, true)()
+
+		t.Run("UI", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			req := NewRequest(t, "GET", "/user/login")
+			resp := MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+			htmlDoc.AssertElement(t, "form[action='/user/login']", true)
+			htmlDoc.AssertElement(t, ".divider-text", true)
+		})
+
+		t.Run("Signin", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+			req := NewRequest(t, "POST", "/user/login")
+			MakeRequest(t, req, http.StatusOK)
+		})
+	})
 }

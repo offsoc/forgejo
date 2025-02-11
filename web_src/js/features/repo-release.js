@@ -43,6 +43,9 @@ function initTagNameEditor() {
       showElem('#tag-target-selector');
       tagHelper.textContent = value ? newTagHelperText : defaultTagHelperText;
     }
+
+    const title_input = document.getElementById('release-title');
+    title_input.placeholder = value;
   });
 }
 

@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2018 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repo
@@ -1291,27 +1292,40 @@ func NewIssuePost(ctx *context.Context) {
 
 	log.Trace("Issue created: %d/%d", repo.ID, issue.ID)
 	if ctx.FormString("redirect_after_creation") == "project" && projectID > 0 {
-		ctx.JSONRedirect(ctx.Repo.RepoLink + "/projects/" + strconv.FormatInt(projectID, 10))
-	} else {
-		ctx.JSONRedirect(issue.Link())
+		project, err := project_model.GetProjectByID(ctx, projectID)
+		if err == nil {
+			if project.Type == project_model.TypeOrganization {
+				ctx.JSONRedirect(project_model.ProjectLinkForOrg(ctx.Repo.Owner, project.ID))
+			} else {
+				ctx.JSONRedirect(project_model.ProjectLinkForRepo(repo, project.ID))
+			}
+			return
+		}
 	}
+	ctx.JSONRedirect(issue.Link())
 }
 
 // roleDescriptor returns the role descriptor for a comment in/with the given repo, poster and issue
 func roleDescriptor(ctx stdCtx.Context, repo *repo_model.Repository, poster *user_model.User, issue *issues_model.Issue, hasOriginalAuthor bool) (issues_model.RoleDescriptor, error) {
 	roleDescriptor := issues_model.RoleDescriptor{}
 
+	// Migrated comment with no associated local user
 	if hasOriginalAuthor {
 		return roleDescriptor, nil
 	}
+
+	// Special user that can't have associated contributions and permissions in the repo.
+	if poster.IsGhost() || poster.IsActions() || poster.IsAPActor() {
+		return roleDescriptor, nil
+	}
+
+	// If the poster is the actual poster of the issue, enable Poster role.
+	roleDescriptor.IsPoster = issue.IsPoster(poster.ID)
 
 	perm, err := access_model.GetUserRepoPermission(ctx, repo, poster)
 	if err != nil {
 		return roleDescriptor, err
 	}
-
-	// If the poster is the actual poster of the issue, enable Poster role.
-	roleDescriptor.IsPoster = issue.IsPoster(poster.ID)
 
 	// Check if the poster is owner of the repo.
 	if perm.IsOwner() {
@@ -1912,6 +1926,21 @@ func ViewIssue(ctx *context.Context) {
 
 		ctx.Data["MergeStyle"] = mergeStyle
 
+		var updateStyle repo_model.UpdateStyle
+		// Check correct values and select default
+		if ms, ok := ctx.Data["UpdateStyle"].(repo_model.UpdateStyle); !ok ||
+			!prConfig.IsUpdateStyleAllowed(ms) {
+			defaultUpdateStyle := prConfig.GetDefaultUpdateStyle()
+			if prConfig.IsUpdateStyleAllowed(defaultUpdateStyle) && !ok {
+				updateStyle = defaultUpdateStyle
+			} else if prConfig.AllowMerge {
+				updateStyle = repo_model.UpdateStyleMerge
+			} else if prConfig.AllowRebase {
+				updateStyle = repo_model.UpdateStyleRebase
+			}
+		}
+		ctx.Data["UpdateStyle"] = updateStyle
+
 		defaultMergeMessage, defaultMergeBody, err := pull_service.GetDefaultMergeMessage(ctx, ctx.Repo.GitRepo, pull, mergeStyle)
 		if err != nil {
 			ctx.ServerError("GetDefaultMergeMessage", err)
@@ -2055,6 +2084,11 @@ func ViewIssue(ctx *context.Context) {
 	ctx.Data["RefEndName"] = git.RefName(issue.Ref).ShortName()
 	ctx.Data["NewPinAllowed"] = pinAllowed
 	ctx.Data["PinEnabled"] = setting.Repository.Issue.MaxPinned != 0
+	ctx.Data["OpenGraphTitle"] = issue.Title
+	ctx.Data["OpenGraphURL"] = issue.HTMLURL()
+	ctx.Data["OpenGraphDescription"] = issue.Content
+	ctx.Data["OpenGraphImageURL"] = issue.SummaryCardURL()
+	ctx.Data["OpenGraphImageAltText"] = ctx.Tr("repo.issues.summary_card_alt", issue.Title, issue.Repo.FullName())
 
 	prepareHiddenCommentType(ctx)
 	if ctx.Written() {
@@ -3778,7 +3812,7 @@ func combineRequestReviewComments(issue *issues_model.Issue) {
 			}
 		}
 
-		// Propoagate creation time.
+		// Propagate creation time.
 		prev.CreatedUnix = cur.CreatedUnix
 
 		// Remove the current comment since it has been combined to prev comment

@@ -9,8 +9,8 @@
   "baseBranches": [
     "$default",
     "/^v7\\.\\d+/forgejo$/",
-    "/^v9\\.\\d+/forgejo$/",
-    "/^v10\\.\\d+/forgejo$/"
+    "/^v10\\.\\d+/forgejo$/",
+    "/^v11\\.\\d+/forgejo$/"
   ],
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
   "prConcurrentLimit": 10,
@@ -62,6 +62,7 @@
       "description": "Group nodejs packages",
       "matchPackageNames": [
         "code.forgejo.org/oci/node",
+        "data.forgejo.org/oci/node",
         "docker.io/library/node",
         "docker.io/node",
         "node"
@@ -111,33 +112,18 @@
       "automerge": true
     },
     {
-      "description": "Automerge renovate updates",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
-      "automerge": true
-    },
-    {
       "description": "Add reviewer and additional labels to renovate PRs",
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
+      "matchPackageNames": ["data.forgejo.org/renovate/renovate"],
       "reviewers": ["viceice"],
       "addLabels": ["forgejo/ci", "test/not-needed"]
     },
     {
-      "description": "Update renovate with higher prio to come through rate limit",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
-      "extends": ["schedule:weekly"],
-      "prPriority": 10,
-      "groupName": "renovate"
-    },
-    {
       "description": "Disable renovate self-updates for release branches",
       "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
-      "matchDatasources": ["docker"],
       "matchPackageNames": [
         "code.forgejo.org/forgejo-contrib/renovate",
+        "data.forgejo.org/renovate/renovate",
         "ghcr.io/visualon/renovate"
       ],
       "enabled": false

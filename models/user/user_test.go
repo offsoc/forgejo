@@ -102,16 +102,6 @@ func TestGetUserByName(t *testing.T) {
 	}
 }
 
-func TestGetUserEmailsByNames(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-
-	// ignore none active user email
-	assert.ElementsMatch(t, []string{"user8@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "user9"}))
-	assert.ElementsMatch(t, []string{"user8@example.com", "user5@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "user5"}))
-
-	assert.ElementsMatch(t, []string{"user8@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "org7"}))
-}
-
 func TestCanCreateOrganization(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
@@ -222,7 +212,7 @@ func TestSearchUsers(t *testing.T) {
 		[]int64{1041, 37})
 
 	testUserSuccess(&user_model.SearchUserOptions{ListOptions: db.ListOptions{Page: 1}, IsTwoFactorEnabled: optional.Some(true)},
-		[]int64{24})
+		[]int64{24, 32})
 }
 
 func TestEmailNotificationPreferences(t *testing.T) {
@@ -391,6 +381,31 @@ func TestCreateUserWithoutCustomTimestamps(t *testing.T) {
 
 	assert.LessOrEqual(t, timestampStart, fetched.UpdatedUnix)
 	assert.LessOrEqual(t, fetched.UpdatedUnix, timestampEnd)
+}
+
+func TestCreateUserClaimingUsername(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	defer test.MockVariableValue(&setting.Service.UsernameCooldownPeriod, 1)()
+
+	_, err := db.GetEngine(db.DefaultContext).NoAutoTime().Insert(&user_model.Redirect{RedirectUserID: 1, LowerName: "redirecting", CreatedUnix: timeutil.TimeStampNow()})
+	require.NoError(t, err)
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	user.Name = "redirecting"
+	user.LowerName = strings.ToLower(user.Name)
+	user.ID = 0
+	user.Email = "unique@example.com"
+
+	t.Run("Normal creation", func(t *testing.T) {
+		err = user_model.CreateUser(db.DefaultContext, user)
+		assert.True(t, user_model.IsErrCooldownPeriod(err))
+	})
+
+	t.Run("Creation as admin", func(t *testing.T) {
+		err = user_model.AdminCreateUser(db.DefaultContext, user)
+		require.NoError(t, err)
+	})
 }
 
 func TestGetUserIDsByNames(t *testing.T) {
@@ -690,7 +705,7 @@ func TestDisabledUserFeatures(t *testing.T) {
 	// no features should be disabled with a plain login type
 	assert.LessOrEqual(t, user.LoginType, auth.Plain)
 	assert.Empty(t, user_model.DisabledFeaturesWithLoginType(user).Values())
-	for _, f := range testValues.Values() {
+	for f := range testValues.Seq() {
 		assert.False(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
 
@@ -699,7 +714,7 @@ func TestDisabledUserFeatures(t *testing.T) {
 
 	// all features should be disabled
 	assert.NotEmpty(t, user_model.DisabledFeaturesWithLoginType(user).Values())
-	for _, f := range testValues.Values() {
+	for f := range testValues.Seq() {
 		assert.True(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
 }
@@ -765,4 +780,18 @@ func TestVerifyUserAuthorizationToken(t *testing.T) {
 		require.ErrorIs(t, err, util.ErrNotExist)
 		assert.Nil(t, authToken)
 	})
+}
+
+func TestGetInactiveUsers(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	// all inactive users
+	// user1's createdunix is 1672578000
+	users, err := user_model.GetInactiveUsers(db.DefaultContext, 0)
+	require.NoError(t, err)
+	assert.Len(t, users, 1)
+	interval := time.Now().Unix() - 1672578000 + 3600*24
+	users, err = user_model.GetInactiveUsers(db.DefaultContext, time.Duration(interval*int64(time.Second)))
+	require.NoError(t, err)
+	require.Empty(t, users)
 }

@@ -46,9 +46,15 @@
 						</div>
 					</div>
 				</div>
-				<div class="ui icon buttons small">
-					<button id="flow-color-monochrome" class="ui icon button{{if eq .Mode "monochrome"}} active{{end}}" title="{{ctx.Locale.Tr "repo.commit_graph.monochrome"}}">{{svg "material-invert-colors" 16 "tw-mr-1"}}{{ctx.Locale.Tr "repo.commit_graph.monochrome"}}</button>
-					<button id="flow-color-colored" class="ui icon button{{if ne .Mode "monochrome"}} active{{end}}" title="{{ctx.Locale.Tr "repo.commit_graph.color"}}">{{svg "material-palette" 16 "tw-mr-1"}}{{ctx.Locale.Tr "repo.commit_graph.color"}}</button>
+				<div class="switch">
+					<button id="flow-color-monochrome" class="{{if eq .Mode "monochrome"}}active {{end}}item" title="{{ctx.Locale.Tr "repo.commit_graph.monochrome"}}">
+						{{svg "material-invert-colors" 16 "tw-mr-1"}}
+						{{ctx.Locale.Tr "repo.commit_graph.monochrome"}}
+					</button>
+					<button id="flow-color-colored" class="{{if ne .Mode "monochrome"}}active {{end}}item" title="{{ctx.Locale.Tr "repo.commit_graph.color"}}">
+						{{svg "material-palette" 16 "tw-mr-1"}}
+						{{ctx.Locale.Tr "repo.commit_graph.color"}}
+					</button>
 				</div>
 			</div>
 			<div id="git-graph-content">

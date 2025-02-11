@@ -902,7 +902,7 @@ func TestRepoFollowSymlink(t *testing.T) {
 		symlinkURL, ok := htmlDoc.Find(".file-actions .button[data-kind='follow-symlink']").Attr("href")
 		if shouldExist {
 			assert.True(t, ok)
-			assert.Equal(t, expectedSymlinkURL, symlinkURL) //nolint:testifylint // false positive https://github.com/Antonboom/testifylint/issues/72#issuecomment-2467548358
+			assert.Equal(t, expectedSymlinkURL, symlinkURL)
 		} else {
 			assert.False(t, ok)
 		}
@@ -1009,16 +1009,29 @@ func TestRepoCodeSearchForm(t *testing.T) {
 		resp := MakeRequest(t, req, http.StatusOK)
 
 		htmlDoc := NewHTMLParser(t, resp.Body)
-		action, exists := htmlDoc.doc.Find("form[data-test-tag=codesearch]").Attr("action")
+		formEl := htmlDoc.doc.Find("form[data-test-tag=codesearch]")
+
+		action, exists := formEl.Attr("action")
 		assert.True(t, exists)
-
 		branchSubURL := "/branch/master"
-
 		if indexer {
 			assert.NotContains(t, action, branchSubURL)
 		} else {
 			assert.Contains(t, action, branchSubURL)
 		}
+
+		filepath, exists := formEl.Find("input[name=path]").Attr("value")
+		assert.True(t, exists)
+		assert.Empty(t, filepath)
+
+		req = NewRequest(t, "GET", "/user2/glob/src/branch/master/x/y")
+		resp = MakeRequest(t, req, http.StatusOK)
+
+		filepath, exists = NewHTMLParser(t, resp.Body).doc.
+			Find("form[data-test-tag=codesearch] input[name=path]").
+			Attr("value")
+		assert.True(t, exists)
+		assert.Equal(t, "x/y", filepath)
 	}
 
 	t.Run("indexer disabled", func(t *testing.T) {
@@ -1412,4 +1425,52 @@ func TestRepoIssueFilterLinks(t *testing.T) {
 		})
 		assert.True(t, called)
 	})
+}
+
+func TestRepoSubmoduleView(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+		repo, _, f := tests.CreateDeclarativeRepo(t, user2, "", []unit_model.Type{unit_model.TypeCode}, nil, nil)
+		defer f()
+
+		// Clone the repository, add a submodule and push it.
+		dstPath := t.TempDir()
+
+		uClone := *u
+		uClone.Path = repo.FullName()
+		uClone.User = url.UserPassword(user2.Name, userPassword)
+
+		t.Run("Clone", doGitClone(dstPath, &uClone))
+
+		_, _, err := git.NewCommand(git.DefaultContext, "submodule", "add").AddDynamicArguments(u.JoinPath("/user2/repo1").String()).RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		_, _, err = git.NewCommand(git.DefaultContext, "add", "repo1", ".gitmodules").RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		_, _, err = git.NewCommand(git.DefaultContext, "commit", "-m", "add submodule").RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		_, _, err = git.NewCommand(git.DefaultContext, "push").RunStdString(&git.RunOpts{Dir: dstPath})
+		require.NoError(t, err)
+
+		// Check that the submodule entry exist and the link is correct.
+		req := NewRequest(t, "GET", "/"+repo.FullName())
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		htmlDoc.AssertElement(t, fmt.Sprintf(`tr[data-entryname="repo1"] a[href="%s"]`, u.JoinPath("/user2/repo1").String()), true)
+	})
+}
+
+func TestBlameDirectory(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	// Ensure directory exists.
+	req := NewRequest(t, "GET", "/user2/repo59/src/branch/master/deep")
+	MakeRequest(t, req, http.StatusOK)
+
+	// Blame is not allowed
+	req = NewRequest(t, "GET", "/user2/repo59/blame/branch/master/deep")
+	MakeRequest(t, req, http.StatusNotFound)
 }

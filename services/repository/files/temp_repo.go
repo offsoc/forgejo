@@ -212,24 +212,6 @@ func (t *TemporaryUploadRepository) WriteTree() (string, error) {
 	return strings.TrimSpace(stdout), nil
 }
 
-// GetLastCommit gets the last commit ID SHA of the repo
-func (t *TemporaryUploadRepository) GetLastCommit() (string, error) {
-	return t.GetLastCommitByRef("HEAD")
-}
-
-// GetLastCommitByRef gets the last commit ID SHA of the repo by ref
-func (t *TemporaryUploadRepository) GetLastCommitByRef(ref string) (string, error) {
-	if ref == "" {
-		ref = "HEAD"
-	}
-	stdout, _, err := git.NewCommand(t.ctx, "rev-parse").AddDynamicArguments(ref).RunStdString(&git.RunOpts{Dir: t.basePath})
-	if err != nil {
-		log.Error("Unable to get last ref for %s in temporary repo: %s(%s): Error: %v", ref, t.repo.FullName(), t.basePath, err)
-		return "", fmt.Errorf("Unable to rev-parse %s in temporary repo for: %s Error: %w", ref, t.repo.FullName(), err)
-	}
-	return strings.TrimSpace(stdout), nil
-}
-
 // CommitTree creates a commit from a given tree for the user with provided message
 func (t *TemporaryUploadRepository) CommitTree(parent string, author, committer *user_model.User, treeHash, message string, signoff bool) (string, error) {
 	return t.CommitTreeWithDate(parent, author, committer, treeHash, message, signoff, time.Now(), time.Now())

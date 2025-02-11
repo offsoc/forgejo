@@ -4,7 +4,7 @@
 	<div class="ui container">
 		{{template "base/alert" .}}
 		<div class="list-header">
-			<div class="small-menu-items ui compact tiny menu list-header-toggle">
+			<div class="switch list-header-toggle">
 				<a class="item{{if not .IsShowClosed}} active{{end}}" href="?type={{$.ViewType}}&sort={{$.SortType}}&state=open&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
 					{{svg "octicon-issue-opened" 16 "tw-mr-2"}}
 					{{ctx.Locale.PrettyNumber .IssueStats.OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}

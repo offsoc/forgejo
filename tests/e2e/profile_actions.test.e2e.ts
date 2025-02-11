@@ -5,13 +5,11 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, load_logged_in_context} from './utils_e2e.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
-test('Follow actions', async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-  const page = await context.newPage();
+test.use({user: 'user2'});
 
+test('Follow actions', async ({page}) => {
   await page.goto('/user1');
 
   // Check if following and then unfollowing works.
@@ -29,6 +27,7 @@ test('Follow actions', async ({browser}, workerInfo) => {
 
   await page.locator('.block').click();
   await expect(page.locator('#block-user')).toBeVisible();
+  await save_visual(page);
   await page.locator('#block-user .ok').click();
   await expect(page.locator('.block')).toContainText('Unblock');
   await expect(page.locator('#block-user')).toBeHidden();
@@ -38,6 +37,7 @@ test('Follow actions', async ({browser}, workerInfo) => {
   const flashMessage = page.locator('#flash-message');
   await expect(flashMessage).toBeVisible();
   await expect(flashMessage).toContainText('You cannot follow this user because you have blocked this user or this user has blocked you.');
+  await save_visual(page);
 
   // Unblock interaction.
   await page.locator('.block').click();

@@ -6,6 +6,7 @@ package common
 import (
 	"fmt"
 	"net/http"
+	"runtime/trace"
 	"strings"
 
 	"code.gitea.io/gitea/modules/cache"
@@ -43,6 +44,8 @@ func ProtocolMiddlewares() (handlers []any) {
 		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 			ctx, _, finished := process.GetManager().AddTypedContext(req.Context(), fmt.Sprintf("%s: %s", req.Method, req.RequestURI), process.RequestProcessType, true)
 			defer finished()
+			trace.Log(ctx, "method", req.Method)
+			trace.Log(ctx, "url", req.RequestURI)
 			next.ServeHTTP(context.WrapResponseWriter(resp), req.WithContext(cache.WithCacheContext(ctx)))
 		})
 	})
@@ -92,10 +95,9 @@ func stripSlashesMiddleware(next http.Handler) http.Handler {
 			prevWasSlash = chr == '/'
 		}
 
-		if rctx == nil {
-			req.URL.Path = sanitizedPath.String()
-		} else {
-			rctx.RoutePath = sanitizedPath.String()
+		req.URL.Path = sanitizedPath.String()
+		if rctx != nil {
+			rctx.RoutePath = req.URL.Path
 		}
 		next.ServeHTTP(resp, req)
 	})

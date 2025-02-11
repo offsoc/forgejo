@@ -57,20 +57,6 @@ func (Column) TableName() string {
 	return "project_board" // TODO: the legacy table name should be project_column
 }
 
-// NumIssues return counter of all issues assigned to the column
-func (c *Column) NumIssues(ctx context.Context) int {
-	total, err := db.GetEngine(ctx).Table("project_issue").
-		Where("project_id=?", c.ProjectID).
-		And("project_board_id=?", c.ID).
-		GroupBy("issue_id").
-		Cols("issue_id").
-		Count()
-	if err != nil {
-		return 0
-	}
-	return int(total)
-}
-
 func (c *Column) GetIssues(ctx context.Context) ([]*ProjectIssue, error) {
 	issues := make([]*ProjectIssue, 0, 5)
 	if err := db.GetEngine(ctx).Where("project_id=?", c.ProjectID).
@@ -302,20 +288,6 @@ func SetDefaultColumn(ctx context.Context, projectID, columnID int64) error {
 			Where(builder.Eq{"project_id": projectID}).
 			Cols("`default`").Update(&Column{Default: true})
 		return err
-	})
-}
-
-// UpdateColumnSorting update project column sorting
-func UpdateColumnSorting(ctx context.Context, cl ColumnList) error {
-	return db.WithTx(ctx, func(ctx context.Context) error {
-		for i := range cl {
-			if _, err := db.GetEngine(ctx).ID(cl[i].ID).Cols(
-				"sorting",
-			).Update(cl[i]); err != nil {
-				return err
-			}
-		}
-		return nil
 	})
 }
 

@@ -34,6 +34,7 @@ type PackageBlob struct {
 	HashSHA1    string             `xorm:"hash_sha1 char(40) UNIQUE(sha1) INDEX NOT NULL"`
 	HashSHA256  string             `xorm:"hash_sha256 char(64) UNIQUE(sha256) INDEX NOT NULL"`
 	HashSHA512  string             `xorm:"hash_sha512 char(128) UNIQUE(sha512) INDEX NOT NULL"`
+	HashBlake2b string             `xorm:"hash_blake2b char(128) UNIQUE(blake2b) INDEX"`
 	CreatedUnix timeutil.TimeStamp `xorm:"created INDEX NOT NULL"`
 }
 
@@ -44,11 +45,12 @@ func GetOrInsertBlob(ctx context.Context, pb *PackageBlob) (*PackageBlob, bool, 
 	existing := &PackageBlob{}
 
 	has, err := e.Where(builder.Eq{
-		"size":        pb.Size,
-		"hash_md5":    pb.HashMD5,
-		"hash_sha1":   pb.HashSHA1,
-		"hash_sha256": pb.HashSHA256,
-		"hash_sha512": pb.HashSHA512,
+		"size":         pb.Size,
+		"hash_md5":     pb.HashMD5,
+		"hash_sha1":    pb.HashSHA1,
+		"hash_sha256":  pb.HashSHA256,
+		"hash_sha512":  pb.HashSHA512,
+		"hash_blake2b": pb.HashBlake2b,
 	}).Get(existing)
 	if err != nil {
 		return nil, false, err

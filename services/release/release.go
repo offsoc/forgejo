@@ -151,6 +151,7 @@ func CreateRelease(gitRepo *git.Repository, rel *repo_model.Release, msg string,
 		return err
 	}
 
+	rel.Title, _ = util.SplitStringAtByteN(rel.Title, 255)
 	rel.LowerTagName = strings.ToLower(rel.TagName)
 	if err = db.Insert(gitRepo.Ctx, rel); err != nil {
 		return err
@@ -371,7 +372,7 @@ func UpdateRelease(ctx context.Context, doer *user_model.User, gitRepo *git.Repo
 		return err
 	}
 
-	for _, uuid := range delAttachmentUUIDs.Values() {
+	for uuid := range delAttachmentUUIDs.Seq() {
 		if err := storage.Attachments.Delete(repo_model.AttachmentRelativePath(uuid)); err != nil {
 			// Even delete files failed, but the attachments has been removed from database, so we
 			// should not return error but only record the error on logs.

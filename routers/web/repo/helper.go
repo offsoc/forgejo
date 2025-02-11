@@ -5,7 +5,7 @@ package repo
 
 import (
 	"net/url"
-	"sort"
+	"slices"
 
 	"code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/git"
@@ -14,12 +14,12 @@ import (
 
 func MakeSelfOnTop(doer *user.User, users []*user.User) []*user.User {
 	if doer != nil {
-		sort.Slice(users, func(i, j int) bool {
-			if users[i].ID == users[j].ID {
-				return false
-			}
-			return users[i].ID == doer.ID // if users[i] is self, put it before others, so less=true
+		doerIndex := slices.IndexFunc(users, func(user *user.User) bool {
+			return user.ID == doer.ID
 		})
+		if doerIndex != -1 {
+			return slices.Insert(slices.Delete(users, doerIndex, doerIndex+1), 0, doer)
+		}
 	}
 	return users
 }

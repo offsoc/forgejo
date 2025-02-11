@@ -11,6 +11,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/timeutil"
@@ -162,9 +163,22 @@ func GetBranch(ctx context.Context, repoID int64, branchName string) (*Branch, e
 	return &branch, nil
 }
 
-func GetBranches(ctx context.Context, repoID int64, branchNames []string) ([]*Branch, error) {
+func GetBranches(ctx context.Context, repoID int64, branchNames []string, includeDeleted bool) ([]*Branch, error) {
 	branches := make([]*Branch, 0, len(branchNames))
-	return branches, db.GetEngine(ctx).Where("repo_id=?", repoID).In("name", branchNames).Find(&branches)
+
+	sess := db.GetEngine(ctx).Where("repo_id=?", repoID).In("name", branchNames)
+	if !includeDeleted {
+		sess.And("is_deleted=?", false)
+	}
+	return branches, sess.Find(&branches)
+}
+
+func BranchesToNamesSet(branches []*Branch) container.Set[string] {
+	names := make(container.Set[string], len(branches))
+	for _, branch := range branches {
+		names.Add(branch.Name)
+	}
+	return names
 }
 
 func AddBranches(ctx context.Context, branches []*Branch) error {
@@ -417,15 +431,18 @@ func FindRecentlyPushedNewBranches(ctx context.Context, repoID, userID int64, ex
 	branches := make(BranchList, 0, 2)
 	subQuery := builder.Select("head_branch").From("pull_request").
 		InnerJoin("issue", "issue.id = pull_request.issue_id").
-		Where(builder.Eq{
-			"pull_request.head_repo_id": repoID,
-			"issue.is_closed":           false,
-		})
+		Where(builder.And(
+			builder.Eq{"pull_request.head_repo_id": repoID},
+			builder.Or(
+				builder.Eq{"pull_request.has_merged": true},
+				builder.Eq{"issue.is_closed": false},
+			),
+		))
 	err := db.GetEngine(ctx).
 		Where("pusher_id=? AND is_deleted=?", userID, false).
 		And("name <> ?", excludeBranchName).
 		And("repo_id = ?", repoID).
-		And("commit_time >= ?", time.Now().Add(-time.Hour*6).Unix()).
+		And("commit_time >= ?", time.Now().Add(-time.Minute*30).Unix()).
 		NotIn("name", subQuery).
 		OrderBy("branch.commit_time DESC").
 		Limit(2).

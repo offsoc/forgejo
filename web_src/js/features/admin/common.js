@@ -62,7 +62,7 @@ export function initAdminCommon() {
   }
 
   function onOAuth2Change(applyDefaultValues) {
-    hideElem('.open_id_connect_auto_discovery_url, .oauth2_use_custom_url');
+    hideElem('.open_id_connect_auto_discovery_url, .oauth2_use_custom_url, .oauth2_attribute_ssh_public_key');
     for (const input of document.querySelectorAll('.open_id_connect_auto_discovery_url input[required]')) {
       input.removeAttribute('required');
     }
@@ -84,6 +84,10 @@ export function initAdminCommon() {
           showElem('.oauth2_use_custom_url');
         }
       }
+    }
+    const canProvideSSHKeys = document.getElementById(`${provider}_canProvideSSHKeys`);
+    if (canProvideSSHKeys) {
+      showElem('.oauth2_attribute_ssh_public_key');
     }
     onOAuth2UseCustomURLChange(applyDefaultValues);
   }

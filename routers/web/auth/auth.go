@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
@@ -164,6 +165,7 @@ func SignIn(ctx *context.Context) {
 	ctx.Data["PageIsSignIn"] = true
 	ctx.Data["PageIsLogin"] = true
 	ctx.Data["EnableSSPI"] = auth.IsSSPIEnabled(ctx)
+	ctx.Data["EnableInternalSignIn"] = setting.Service.EnableInternalSignIn
 
 	if setting.Service.EnableCaptcha && setting.Service.RequireCaptchaForLogin {
 		context.SetCaptchaData(ctx)
@@ -187,6 +189,13 @@ func SignInPost(ctx *context.Context) {
 	ctx.Data["PageIsSignIn"] = true
 	ctx.Data["PageIsLogin"] = true
 	ctx.Data["EnableSSPI"] = auth.IsSSPIEnabled(ctx)
+	ctx.Data["EnableInternalSignIn"] = setting.Service.EnableInternalSignIn
+
+	// Permission denied if EnableInternalSignIn is false
+	if !setting.Service.EnableInternalSignIn {
+		ctx.Error(http.StatusForbidden)
+		return
+	}
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplSignIn)
@@ -216,15 +225,6 @@ func SignInPost(ctx *context.Context) {
 			log.Warn("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
 			ctx.Data["Title"] = ctx.Tr("auth.prohibit_login")
 			ctx.HTML(http.StatusOK, "user/auth/prohibit_login")
-		} else if user_model.IsErrUserInactive(err) {
-			if setting.Service.RegisterEmailConfirm {
-				ctx.Data["Title"] = ctx.Tr("auth.active_your_account")
-				ctx.HTML(http.StatusOK, TplActivate)
-			} else {
-				log.Warn("Failed authentication attempt for %s from %s: %v", form.UserName, ctx.RemoteAddr(), err)
-				ctx.Data["Title"] = ctx.Tr("auth.prohibit_login")
-				ctx.HTML(http.StatusOK, "user/auth/prohibit_login")
-			}
 		} else {
 			ctx.ServerError("UserSignIn", err)
 		}
@@ -547,6 +547,9 @@ func createUserInContext(ctx *context.Context, tpl base.TplName, form any, u *us
 		case user_model.IsErrEmailAlreadyUsed(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_been_used"), tpl, form)
+		case user_model.IsErrCooldownPeriod(err):
+			ctx.Data["Err_UserName"] = true
+			ctx.RenderWithErr(ctx.Locale.Tr("form.username_claiming_cooldown", err.(user_model.ErrCooldownPeriod).ExpireTime.Format(time.RFC1123Z)), tpl, form)
 		case validation.IsErrEmailCharIsNotSupported(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tpl, form)
@@ -591,8 +594,10 @@ func handleUserCreated(ctx *context.Context, u *user_model.User, gothUser *goth.
 	notify_service.NewUserSignUp(ctx, u)
 	// update external user information
 	if gothUser != nil {
-		if err := externalaccount.EnsureLinkExternalToUser(ctx, u, *gothUser); err != nil {
-			log.Error("EnsureLinkExternalToUser failed: %v", err)
+		if err := externalaccount.UpdateExternalUser(ctx, u, *gothUser); err != nil {
+			if !errors.Is(err, util.ErrNotExist) {
+				log.Error("UpdateExternalUser failed: %v", err)
+			}
 		}
 	}
 

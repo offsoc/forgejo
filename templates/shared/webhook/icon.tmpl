@@ -3,27 +3,27 @@
 	{{$size = .Size}}
 {{end}}
 {{if eq .HookType "forgejo"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/forgejo.svg">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/forgejo.svg" alt="">
 {{else if eq .HookType "gitea"}}
 	{{svg "gitea-gitea" $size "img"}}
 {{else if eq .HookType "gogs"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/gogs.ico">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/gogs.ico" alt="">
 {{else if eq .HookType "slack"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/slack.png">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/slack.png" alt="">
 {{else if eq .HookType "discord"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/discord.png">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/discord.png" alt="">
 {{else if eq .HookType "dingtalk"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/dingtalk.ico">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/dingtalk.ico" alt="">
 {{else if eq .HookType "telegram"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/telegram.png">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/telegram.png" alt="">
 {{else if eq .HookType "msteams"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/msteams.png">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/msteams.png" alt="">
 {{else if eq .HookType "feishu"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/feishu.png">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/feishu.png" alt="">
 {{else if eq .HookType "matrix"}}
 	{{svg "gitea-matrix" $size "img"}}
 {{else if eq .HookType "wechatwork"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/wechatwork.png">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/wechatwork.png" alt="">
 {{else if eq .HookType "packagist"}}
-	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/packagist.png">
+	<img width="{{$size}}" height="{{$size}}" src="{{AssetUrlPrefix}}/img/packagist.png" alt="">
 {{end}}

@@ -25,6 +25,7 @@ import (
 	unit_model "code.gitea.io/gitea/models/unit"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/cache"
+	"code.gitea.io/gitea/modules/card"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
 	code_indexer "code.gitea.io/gitea/modules/indexer/code"
@@ -413,14 +414,7 @@ func repoAssignment(ctx *Context, repo *repo_model.Repository) {
 		}
 	}
 
-	pushMirrors, _, err := repo_model.GetPushMirrorsByRepoID(ctx, repo.ID, db.ListOptions{})
-	if err != nil {
-		ctx.ServerError("GetPushMirrorsByRepoID", err)
-		return
-	}
-
 	ctx.Repo.Repository = repo
-	ctx.Data["PushMirrors"] = pushMirrors
 	ctx.Data["RepoName"] = ctx.Repo.Repository.Name
 	ctx.Data["IsEmptyRepo"] = ctx.Repo.Repository.IsEmpty
 	ctx.Data["DefaultWikiBranchName"] = setting.Repository.DefaultBranch
@@ -638,6 +632,16 @@ func RepoAssignment(ctx *Context) context.CancelFunc {
 		ctx.Data["IsWatchingRepo"] = repo_model.IsWatching(ctx, ctx.Doer.ID, repo.ID)
 		ctx.Data["IsStaringRepo"] = repo_model.IsStaring(ctx, ctx.Doer.ID, repo.ID)
 	}
+
+	cardWidth, cardHeight := card.DefaultSize()
+	ctx.Data["OpenGraphTitle"] = repo.Name
+	ctx.Data["OpenGraphURL"] = repo.HTMLURL()
+	ctx.Data["OpenGraphType"] = "object"
+	ctx.Data["OpenGraphDescription"] = repo.Description
+	ctx.Data["OpenGraphImageURL"] = repo.SummaryCardURL()
+	ctx.Data["OpenGraphImageWidth"] = cardWidth
+	ctx.Data["OpenGraphImageHeight"] = cardHeight
+	ctx.Data["OpenGraphImageAltText"] = ctx.Tr("repo.summary_card_alt", repo.FullName())
 
 	if repo.IsFork {
 		RetrieveBaseRepo(ctx, repo)
@@ -933,6 +937,9 @@ func getRefName(ctx *Base, repo *Repository, pathType RepoRefType) string {
 // of repository reference
 func RepoRefByType(refType RepoRefType, ignoreNotExistErr ...bool) func(*Context) context.CancelFunc {
 	return func(ctx *Context) (cancel context.CancelFunc) {
+		if ctx.Repo.Repository.IsBeingCreated() {
+			return nil // no git repo, so do nothing
+		}
 		// Empty repository does not have reference information.
 		if ctx.Repo.Repository.IsEmpty {
 			// assume the user is viewing the (non-existent) default branch
@@ -1051,7 +1058,7 @@ func RepoRefByType(refType RepoRefType, ignoreNotExistErr ...bool) func(*Context
 
 			if refType == RepoRefLegacy {
 				// redirect from old URL scheme to new URL scheme
-				prefix := strings.TrimPrefix(setting.AppSubURL+strings.ToLower(strings.TrimSuffix(ctx.Req.URL.Path, ctx.Params("*"))), strings.ToLower(ctx.Repo.RepoLink))
+				prefix := strings.TrimPrefix(setting.AppSubURL+strings.ToLower(strings.TrimSuffix(ctx.Req.URL.Path, ctx.PathParamRaw("*"))), strings.ToLower(ctx.Repo.RepoLink))
 
 				ctx.Redirect(path.Join(
 					ctx.Repo.RepoLink,

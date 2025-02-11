@@ -18,10 +18,10 @@ import (
 )
 
 type Setting struct {
-	ID           int64              `xorm:"pk autoincr"`
-	SettingKey   string             `xorm:"varchar(255) unique"` // key should be lowercase
-	SettingValue string             `xorm:"text"`
-	Version      int                `xorm:"version"`
+	ID           int64  `xorm:"pk autoincr"`
+	SettingKey   string `xorm:"varchar(255) unique"` // key should be lowercase
+	SettingValue string `xorm:"text"`
+	Version      int
 	Created      timeutil.TimeStamp `xorm:"created"`
 	Updated      timeutil.TimeStamp `xorm:"updated"`
 }

@@ -17,9 +17,11 @@ func Test_parseRemoteUpdateOutput(t *testing.T) {
  - [deleted]         (none)     -> tag1
  + f895a1e...957a993 test2      -> origin/test2  (forced update)
    957a993..a87ba5f  test3      -> origin/test3
-`
+ * [new ref]         refs/pull/27/merge     -> refs/pull/27/merge
+ * [new ref]         refs/pull/516/head  -> refs/pull/516/head
+ `
 	results := parseRemoteUpdateOutput(output, "origin")
-	assert.Len(t, results, 6)
+	assert.Len(t, results, 8)
 	assert.EqualValues(t, "refs/tags/v0.1.8", results[0].refName.String())
 	assert.EqualValues(t, gitShortEmptySha, results[0].oldCommitID)
 	assert.EqualValues(t, "", results[0].newCommitID)
@@ -43,4 +45,12 @@ func Test_parseRemoteUpdateOutput(t *testing.T) {
 	assert.EqualValues(t, "refs/heads/test3", results[5].refName.String())
 	assert.EqualValues(t, "957a993", results[5].oldCommitID)
 	assert.EqualValues(t, "a87ba5f", results[5].newCommitID)
+
+	assert.EqualValues(t, "refs/pull/27/merge", results[6].refName.String())
+	assert.EqualValues(t, gitShortEmptySha, results[6].oldCommitID)
+	assert.EqualValues(t, "", results[6].newCommitID)
+
+	assert.EqualValues(t, "refs/pull/516/head", results[7].refName.String())
+	assert.EqualValues(t, gitShortEmptySha, results[7].oldCommitID)
+	assert.EqualValues(t, "", results[7].newCommitID)
 }

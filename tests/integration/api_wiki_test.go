@@ -133,8 +133,31 @@ func TestAPIListWikiPages(t *testing.T) {
 			},
 		},
 		{
-			Title:   "Page With Image",
+			Title:   "Long Page",
 			HTMLURL: meta[1].HTMLURL,
+			SubURL:  "Long-Page",
+			LastCommit: &api.WikiCommit{
+				ID: "d49ac742d44063dcf69d4e0afe725813b777dd89",
+				Author: &api.CommitUser{
+					Identity: api.Identity{
+						Name:  "Oto Šťáva",
+						Email: "oto.stava@gmail.com",
+					},
+					Date: "2024-11-23T11:16:51Z",
+				},
+				Committer: &api.CommitUser{
+					Identity: api.Identity{
+						Name:  "Oto Šťáva",
+						Email: "oto.stava@gmail.com",
+					},
+					Date: "2024-11-23T11:16:51Z",
+				},
+				Message: "add long page\n",
+			},
+		},
+		{
+			Title:   "Page With Image",
+			HTMLURL: meta[2].HTMLURL,
 			SubURL:  "Page-With-Image",
 			LastCommit: &api.WikiCommit{
 				ID: "0cf15c3f66ec8384480ed9c3cf87c9e97fbb0ec3",
@@ -157,7 +180,7 @@ func TestAPIListWikiPages(t *testing.T) {
 		},
 		{
 			Title:   "Page With Spaced Name",
-			HTMLURL: meta[2].HTMLURL,
+			HTMLURL: meta[3].HTMLURL,
 			SubURL:  "Page-With-Spaced-Name",
 			LastCommit: &api.WikiCommit{
 				ID: "c10d10b7e655b3dab1f53176db57c8219a5488d6",
@@ -180,7 +203,7 @@ func TestAPIListWikiPages(t *testing.T) {
 		},
 		{
 			Title:   "Unescaped File",
-			HTMLURL: meta[3].HTMLURL,
+			HTMLURL: meta[4].HTMLURL,
 			SubURL:  "Unescaped-File",
 			LastCommit: &api.WikiCommit{
 				ID: "0dca5bd9b5d7ef937710e056f575e86c0184ba85",
@@ -199,6 +222,29 @@ func TestAPIListWikiPages(t *testing.T) {
 					Date: "2021-07-19T16:42:46Z",
 				},
 				Message: "add unescaped file\n",
+			},
+		},
+		{
+			Title:   "XSS",
+			HTMLURL: meta[5].HTMLURL,
+			SubURL:  "XSS",
+			LastCommit: &api.WikiCommit{
+				ID: "f54f5a6b7c4f83b606600e43186165854f189530",
+				Author: &api.CommitUser{
+					Identity: api.Identity{
+						Name:  "Gusted<script class=\"evil\">alert('Oh no!');</script>",
+						Email: "valid@example.org",
+					},
+					Date: "2024-01-31T00:00:00Z",
+				},
+				Committer: &api.CommitUser{
+					Identity: api.Identity{
+						Name:  "Gusted<script class=\"evil\">alert('Oh no!');</script>",
+						Email: "valid@example.org",
+					},
+					Date: "2024-01-31T00:00:00Z",
+				},
+				Message: "Yay XSS",
 			},
 		},
 	}

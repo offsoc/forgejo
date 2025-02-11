@@ -48,7 +48,7 @@ Mu0UFYgZ/bYnuvn/vz4wtCz8qMwsHUvP0PX3tbYFUctAPdrY6tiiDtcCddDECahx7SuVNP5dpmb5
 	zr, err := gzip.NewReader(bytes.NewReader(rpmPackageContent))
 	require.NoError(t, err)
 
-	p, err := ParsePackage(zr)
+	p, err := ParsePackage(zr, "rpm")
 	assert.NotNil(t, p)
 	require.NoError(t, err)
 

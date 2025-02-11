@@ -12,28 +12,32 @@ import (
 	"errors"
 	"hash"
 	"io"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 const (
-	marshaledSizeMD5    = 92
-	marshaledSizeSHA1   = 96
-	marshaledSizeSHA256 = 108
-	marshaledSizeSHA512 = 204
+	marshaledSizeMD5     = 92
+	marshaledSizeSHA1    = 96
+	marshaledSizeSHA256  = 108
+	marshaledSizeSHA512  = 204
+	marshaledSizeBlake2b = 213
 
-	marshaledSize = marshaledSizeMD5 + marshaledSizeSHA1 + marshaledSizeSHA256 + marshaledSizeSHA512
+	marshaledSize = marshaledSizeMD5 + marshaledSizeSHA1 + marshaledSizeSHA256 + marshaledSizeSHA512 + marshaledSizeBlake2b
 )
 
 // HashSummer provide a Sums method
 type HashSummer interface {
-	Sums() (hashMD5, hashSHA1, hashSHA256, hashSHA512 []byte)
+	Sums() (hashMD5, hashSHA1, hashSHA256, hashSHA512, hashBlake2b []byte)
 }
 
 // MultiHasher calculates multiple checksums
 type MultiHasher struct {
-	md5    hash.Hash
-	sha1   hash.Hash
-	sha256 hash.Hash
-	sha512 hash.Hash
+	md5     hash.Hash
+	sha1    hash.Hash
+	sha256  hash.Hash
+	sha512  hash.Hash
+	blake2b hash.Hash
 
 	combinedWriter io.Writer
 }
@@ -44,14 +48,16 @@ func NewMultiHasher() *MultiHasher {
 	sha1 := sha1.New()
 	sha256 := sha256.New()
 	sha512 := sha512.New()
+	blake2b, _ := blake2b.New512(nil)
 
-	combinedWriter := io.MultiWriter(md5, sha1, sha256, sha512)
+	combinedWriter := io.MultiWriter(md5, sha1, sha256, sha512, blake2b)
 
 	return &MultiHasher{
 		md5,
 		sha1,
 		sha256,
 		sha512,
+		blake2b,
 		combinedWriter,
 	}
 }
@@ -74,12 +80,17 @@ func (h *MultiHasher) MarshalBinary() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	blake2bBytes, err := h.blake2b.(encoding.BinaryMarshaler).MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
 
 	b := make([]byte, 0, marshaledSize)
 	b = append(b, md5Bytes...)
 	b = append(b, sha1Bytes...)
 	b = append(b, sha256Bytes...)
 	b = append(b, sha512Bytes...)
+	b = append(b, blake2bBytes...)
 	return b, nil
 }
 
@@ -104,7 +115,12 @@ func (h *MultiHasher) UnmarshalBinary(b []byte) error {
 	}
 
 	b = b[marshaledSizeSHA256:]
-	return h.sha512.(encoding.BinaryUnmarshaler).UnmarshalBinary(b[:marshaledSizeSHA512])
+	if err := h.sha512.(encoding.BinaryUnmarshaler).UnmarshalBinary(b[:marshaledSizeSHA512]); err != nil {
+		return err
+	}
+
+	b = b[marshaledSizeSHA512:]
+	return h.blake2b.(encoding.BinaryUnmarshaler).UnmarshalBinary(b[:marshaledSizeBlake2b])
 }
 
 // Write implements io.Writer
@@ -113,10 +129,11 @@ func (h *MultiHasher) Write(p []byte) (int, error) {
 }
 
 // Sums gets the MD5, SHA1, SHA256 and SHA512 checksums of the data
-func (h *MultiHasher) Sums() (hashMD5, hashSHA1, hashSHA256, hashSHA512 []byte) {
+func (h *MultiHasher) Sums() (hashMD5, hashSHA1, hashSHA256, hashSHA512, hashBlake2b []byte) {
 	hashMD5 = h.md5.Sum(nil)
 	hashSHA1 = h.sha1.Sum(nil)
 	hashSHA256 = h.sha256.Sum(nil)
 	hashSHA512 = h.sha512.Sum(nil)
-	return hashMD5, hashSHA1, hashSHA256, hashSHA512
+	hashBlake2b = h.blake2b.Sum(nil)
+	return hashMD5, hashSHA1, hashSHA256, hashSHA512, hashBlake2b
 }

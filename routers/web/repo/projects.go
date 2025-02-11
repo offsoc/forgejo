@@ -125,6 +125,19 @@ func Projects(ctx *context.Context) {
 	ctx.Data["IsProjectsPage"] = true
 	ctx.Data["SortType"] = sortType
 
+	numOpenIssues, err := issues_model.NumIssuesInProjects(ctx, projects, ctx.Doer, ctx.Org.Organization, optional.Some(false))
+	if err != nil {
+		ctx.ServerError("NumIssuesInProjects", err)
+		return
+	}
+	numClosedIssues, err := issues_model.NumIssuesInProjects(ctx, projects, ctx.Doer, ctx.Org.Organization, optional.Some(true))
+	if err != nil {
+		ctx.ServerError("NumIssuesInProjects", err)
+		return
+	}
+	ctx.Data["NumOpenIssuesInProject"] = numOpenIssues
+	ctx.Data["NumClosedIssuesInProject"] = numClosedIssues
+
 	ctx.HTML(http.StatusOK, tplProjects)
 }
 
@@ -183,7 +196,7 @@ func ChangeProjectStatus(ctx *context.Context) {
 		ctx.NotFoundOrServerError("ChangeProjectStatusByRepoIDAndID", project_model.IsErrProjectNotExist, err)
 		return
 	}
-	ctx.JSONRedirect(fmt.Sprintf("%s/projects/%d", ctx.Repo.RepoLink, id))
+	ctx.JSONRedirect(project_model.ProjectLinkForRepo(ctx.Repo.Repository, id))
 }
 
 // DeleteProject delete a project
@@ -237,7 +250,7 @@ func RenderEditProject(ctx *context.Context) {
 	ctx.Data["content"] = p.Description
 	ctx.Data["card_type"] = p.CardType
 	ctx.Data["redirect"] = ctx.FormString("redirect")
-	ctx.Data["CancelLink"] = fmt.Sprintf("%s/projects/%d", ctx.Repo.Repository.Link(), p.ID)
+	ctx.Data["CancelLink"] = project_model.ProjectLinkForRepo(ctx.Repo.Repository, p.ID)
 
 	ctx.HTML(http.StatusOK, tplProjectsNew)
 }
@@ -251,7 +264,7 @@ func EditProjectPost(ctx *context.Context) {
 	ctx.Data["PageIsEditProjects"] = true
 	ctx.Data["CanWriteProjects"] = ctx.Repo.Permission.CanWrite(unit.TypeProjects)
 	ctx.Data["CardTypes"] = project_model.GetCardConfig()
-	ctx.Data["CancelLink"] = fmt.Sprintf("%s/projects/%d", ctx.Repo.Repository.Link(), projectID)
+	ctx.Data["CancelLink"] = project_model.ProjectLinkForRepo(ctx.Repo.Repository, projectID)
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplProjectsNew)
@@ -310,7 +323,7 @@ func ViewProject(ctx *context.Context) {
 		return
 	}
 
-	issuesMap, err := issues_model.LoadIssuesFromColumnList(ctx, columns)
+	issuesMap, err := issues_model.LoadIssuesFromColumnList(ctx, columns, ctx.Doer, nil, optional.None[bool]())
 	if err != nil {
 		ctx.ServerError("LoadIssuesOfColumns", err)
 		return
@@ -363,6 +376,7 @@ func ViewProject(ctx *context.Context) {
 		return
 	}
 
+	ctx.Data["Title"] = project.Title
 	ctx.Data["IsProjectsPage"] = true
 	ctx.Data["CanWriteProjects"] = ctx.Repo.Permission.CanWrite(unit.TypeProjects)
 	ctx.Data["Project"] = project

@@ -86,6 +86,12 @@ var migrations = []*Migration{
 	NewMigration("Add `delete_branch_after_merge` to `auto_merge` table", AddDeleteBranchAfterMergeToAutoMerge),
 	// v24 -> v25
 	NewMigration("Add `purpose` column to `forgejo_auth_token` table", AddPurposeToForgejoAuthToken),
+	// v25 -> v26
+	NewMigration("Migrate `secret` column to store keying material", MigrateTwoFactorToKeying),
+	// v26 -> v27
+	NewMigration("Add `hash_blake2b` column to `package_blob` table", AddHashBlake2bToPackageBlob),
+	// v27 -> v28
+	NewMigration("Add `created_unix` column to `user_redirect` table", AddCreatedUnixToRedirect),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.

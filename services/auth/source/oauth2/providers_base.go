@@ -48,4 +48,8 @@ func (b *BaseProvider) CustomURLSettings() *CustomURLSettings {
 	return nil
 }
 
+func (b *BaseProvider) CanProvideSSHKeys() bool {
+	return false
+}
+
 var _ Provider = &BaseProvider{}

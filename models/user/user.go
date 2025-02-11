@@ -50,19 +50,19 @@ const (
 	UserTypeIndividual UserType = iota // Historic reason to make it starts at 0.
 
 	// UserTypeOrganization defines an organization
-	UserTypeOrganization
+	UserTypeOrganization // 1
 
 	// UserTypeUserReserved reserves a (non-existing) user, i.e. to prevent a spam user from re-registering after being deleted, or to reserve the name until the user is actually created later on
-	UserTypeUserReserved
+	UserTypeUserReserved // 2
 
 	// UserTypeOrganizationReserved reserves a (non-existing) organization, to be used in combination with UserTypeUserReserved
-	UserTypeOrganizationReserved
+	UserTypeOrganizationReserved // 3
 
 	// UserTypeBot defines a bot user
-	UserTypeBot
+	UserTypeBot // 4
 
 	// UserTypeRemoteUser defines a remote user for federated users
-	UserTypeRemoteUser
+	UserTypeRemoteUser // 5
 )
 
 const (
@@ -339,7 +339,7 @@ func GetUserFollowers(ctx context.Context, u, viewer *User, listOptions db.ListO
 		And("`user`.type=?", UserTypeIndividual).
 		And(isUserVisibleToViewerCond(viewer))
 
-	if listOptions.Page != 0 {
+	if listOptions.Page > 0 {
 		sess = db.SetSessionPagination(sess, &listOptions)
 
 		users := make([]*User, 0, listOptions.PageSize)
@@ -361,7 +361,7 @@ func GetUserFollowing(ctx context.Context, u, viewer *User, listOptions db.ListO
 		And("`user`.type IN (?, ?)", UserTypeIndividual, UserTypeOrganization).
 		And(isUserVisibleToViewerCond(viewer))
 
-	if listOptions.Page != 0 {
+	if listOptions.Page > 0 {
 		sess = db.SetSessionPagination(sess, &listOptions)
 
 		users := make([]*User, 0, listOptions.PageSize)
@@ -586,6 +586,7 @@ var (
 	reservedUsernames = []string{
 		".",
 		"..",
+		"-", // used by certain web routes
 		".well-known",
 
 		"api",     // gitea api
@@ -666,6 +667,18 @@ func AdminCreateUser(ctx context.Context, u *User, overwriteDefault ...*CreateUs
 func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefault ...*CreateUserOverwriteOptions) (err error) {
 	if err = IsUsableUsername(u.Name); err != nil {
 		return err
+	}
+
+	// Check if the new username can be claimed.
+	// Skip this check if done by an admin.
+	if !createdByAdmin {
+		if ok, expireTime, err := CanClaimUsername(ctx, u.Name, -1); err != nil {
+			return err
+		} else if !ok {
+			return ErrCooldownPeriod{
+				ExpireTime: expireTime,
+			}
+		}
 	}
 
 	// set system defaults
@@ -919,7 +932,13 @@ func UpdateUserCols(ctx context.Context, u *User, cols ...string) error {
 
 // GetInactiveUsers gets all inactive users
 func GetInactiveUsers(ctx context.Context, olderThan time.Duration) ([]*User, error) {
-	var cond builder.Cond = builder.Eq{"is_active": false}
+	cond := builder.And(
+		builder.Eq{"is_active": false},
+		builder.Or( // only plain user
+			builder.Eq{"`type`": UserTypeIndividual},
+			builder.Eq{"`type`": UserTypeUserReserved},
+		),
+	)
 
 	if olderThan > 0 {
 		cond = cond.And(builder.Lt{"created_unix": time.Now().Add(-olderThan).Unix()})
@@ -1024,22 +1043,6 @@ func GetUserByName(ctx context.Context, name string) (*User, error) {
 	return u, nil
 }
 
-// GetUserEmailsByNames returns a list of e-mails corresponds to names of users
-// that have their email notifications set to enabled or onmention.
-func GetUserEmailsByNames(ctx context.Context, names []string) []string {
-	mails := make([]string, 0, len(names))
-	for _, name := range names {
-		u, err := GetUserByName(ctx, name)
-		if err != nil {
-			continue
-		}
-		if u.IsMailable() && u.EmailNotificationsPreference != EmailNotificationsDisabled {
-			mails = append(mails, u.Email)
-		}
-	}
-	return mails
-}
-
 // GetMaileableUsersByIDs gets users from ids, but only if they can receive mails
 func GetMaileableUsersByIDs(ctx context.Context, ids []int64, isMention bool) ([]*User, error) {
 	if len(ids) == 0 {
@@ -1064,17 +1067,6 @@ func GetMaileableUsersByIDs(ctx context.Context, ids []int64, isMention bool) ([
 		And("`is_active` = ?", true).
 		In("`email_notifications_preference`", EmailNotificationsEnabled, EmailNotificationsAndYourOwn).
 		Find(&ous)
-}
-
-// GetUserNamesByIDs returns usernames for all resolved users from a list of Ids.
-func GetUserNamesByIDs(ctx context.Context, ids []int64) ([]string, error) {
-	unames := make([]string, 0, len(ids))
-	err := db.GetEngine(ctx).In("id", ids).
-		Table("user").
-		Asc("name").
-		Cols("name").
-		Find(&unames)
-	return unames, err
 }
 
 // GetUserNameByID returns username for the id

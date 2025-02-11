@@ -128,6 +128,7 @@ func (g *RepositoryDumper) CreateRepo(repo *base.Repository, opts base.MigrateOp
 		"comments":     opts.Comments,
 		"pulls":        opts.PullRequests,
 		"assets":       opts.ReleaseAssets,
+		"website":      repo.Website,
 	})
 	if err != nil {
 		return err

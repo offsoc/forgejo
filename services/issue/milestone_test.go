@@ -24,6 +24,7 @@ func TestChangeMilestoneAssign(t *testing.T) {
 
 	oldMilestoneID := issue.MilestoneID
 	issue.MilestoneID = 2
+	require.NoError(t, issue.LoadMilestone(db.DefaultContext))
 	require.NoError(t, ChangeMilestoneAssign(db.DefaultContext, issue, doer, oldMilestoneID))
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{
 		IssueID:        issue.ID,
@@ -32,4 +33,11 @@ func TestChangeMilestoneAssign(t *testing.T) {
 		OldMilestoneID: oldMilestoneID,
 	})
 	unittest.CheckConsistencyFor(t, &issues_model.Milestone{}, &issues_model.Issue{})
+	assert.NotNil(t, issue.Milestone)
+
+	oldMilestoneID = issue.MilestoneID
+	issue.MilestoneID = 0
+	require.NoError(t, ChangeMilestoneAssign(db.DefaultContext, issue, doer, oldMilestoneID))
+	assert.EqualValues(t, 0, issue.MilestoneID)
+	assert.Nil(t, issue.Milestone)
 }

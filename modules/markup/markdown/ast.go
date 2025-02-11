@@ -34,13 +34,6 @@ func NewDetails() *Details {
 	}
 }
 
-// IsDetails returns true if the given node implements the Details interface,
-// otherwise false.
-func IsDetails(node ast.Node) bool {
-	_, ok := node.(*Details)
-	return ok
-}
-
 // Summary is a block that contains the summary of details block
 type Summary struct {
 	ast.BaseBlock
@@ -64,13 +57,6 @@ func NewSummary() *Summary {
 	return &Summary{
 		BaseBlock: ast.BaseBlock{},
 	}
-}
-
-// IsSummary returns true if the given node implements the Summary interface,
-// otherwise false.
-func IsSummary(node ast.Node) bool {
-	_, ok := node.(*Summary)
-	return ok
 }
 
 // TaskCheckBoxListItem is a block that represents a list item of a markdown block with a checkbox
@@ -103,13 +89,6 @@ func NewTaskCheckBoxListItem(listItem *ast.ListItem) *TaskCheckBoxListItem {
 	}
 }
 
-// IsTaskCheckBoxListItem returns true if the given node implements the TaskCheckBoxListItem interface,
-// otherwise false.
-func IsTaskCheckBoxListItem(node ast.Node) bool {
-	_, ok := node.(*TaskCheckBoxListItem)
-	return ok
-}
-
 // Icon is an inline for a fomantic icon
 type Icon struct {
 	ast.BaseInline
@@ -137,13 +116,6 @@ func NewIcon(name string) *Icon {
 		BaseInline: ast.BaseInline{},
 		Name:       []byte(name),
 	}
-}
-
-// IsIcon returns true if the given node implements the Icon interface,
-// otherwise false.
-func IsIcon(node ast.Node) bool {
-	_, ok := node.(*Icon)
-	return ok
 }
 
 // ColorPreview is an inline for a color preview

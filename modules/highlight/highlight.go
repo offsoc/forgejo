@@ -134,6 +134,13 @@ func CodeFromLexer(lexer chroma.Lexer, code string) template.HTML {
 	return template.HTML(strings.TrimSuffix(htmlbuf.String(), "\n"))
 }
 
+// For the case where Enry recognizes the language, but doesn't use the naming
+// that Chroma expects.
+var normalizeEnryToChroma = map[string]string{
+	"F#":                "FSharp",
+	"Gradle Kotlin DSL": "Kotlin",
+}
+
 // File returns a slice of chroma syntax highlighted HTML lines of code and the matched lexer name
 func File(fileName, language string, code []byte) ([]template.HTML, string, error) {
 	NewContext()
@@ -162,6 +169,9 @@ func File(fileName, language string, code []byte) ([]template.HTML, string, erro
 
 	if lexer == nil {
 		guessLanguage := analyze.GetCodeLanguage(fileName, code)
+		if normalizedGuessLanguage, ok := normalizeEnryToChroma[guessLanguage]; ok {
+			guessLanguage = normalizedGuessLanguage
+		}
 
 		lexer = lexers.Get(guessLanguage)
 		if lexer == nil {

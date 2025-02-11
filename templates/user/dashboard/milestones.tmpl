@@ -35,7 +35,7 @@
 			</div>
 			<div class="flex-container-main content">
 				<div class="list-header">
-					<div class="small-menu-items ui compact tiny menu list-header-toggle">
+					<div class="switch list-header-toggle">
 						<a class="item{{if not .IsShowClosed}} active{{end}}" href="?repos=[{{range $.RepoIDs}}{{.}}%2C{{end}}]&sort={{$.SortType}}&state=open&q={{$.Keyword}}">
 							{{svg "octicon-milestone" 16 "tw-mr-2"}}
 							{{ctx.Locale.PrettyNumber .MilestoneStats.OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}

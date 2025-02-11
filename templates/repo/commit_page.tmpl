@@ -128,9 +128,11 @@
 											</form>
 										</div>
 									</div>
-									<div id="commit-notes-add-button" class="item">
-										{{ctx.Locale.Tr "repo.diff.git-notes.add"}}
-									</div>
+									{{if not .NoteRendered}}
+										<div id="commit-notes-add-button" class="item">
+											{{ctx.Locale.Tr "repo.diff.git-notes.add"}}
+										</div>
+									{{end}}
 								</div>
 							</div>
 						{{end}}
@@ -215,8 +217,8 @@
 				</div>
 				<div class="tw-flex tw-items-center">
 					{{if .Verification.Verified}}
+						{{svg "octicon-verified" 16 "tw-mr-2"}}
 						{{if ne .Verification.SigningUser.ID 0}}
-							{{svg "octicon-verified" 16 "tw-mr-2"}}
 							{{if .Verification.SigningSSHKey}}
 								<span class="ui text tw-mr-2">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
 								{{.Verification.SigningSSHKey.Fingerprint}}
@@ -225,7 +227,6 @@
 								{{.Verification.SigningKey.PaddedKeyID}}
 							{{end}}
 						{{else}}
-							{{svg "octicon-unverified" 16 "tw-mr-2"}}
 							{{if .Verification.SigningSSHKey}}
 								<span class="ui text tw-mr-2" data-tooltip-content="{{ctx.Locale.Tr "gpg.default_key"}}">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
 								{{.Verification.SigningSSHKey.Fingerprint}}
@@ -263,7 +264,7 @@
 			</div>
 		{{end}}
 		{{if .NoteRendered}}
-			<div class="ui top attached header segment git-notes">
+			<div class="ui top attached header segment git-notes tw-flex tw-gap-1 tw-flex-wrap">
 				{{svg "octicon-note" 16 "tw-mr-2"}}
 				{{ctx.Locale.Tr "repo.diff.git-notes"}}:
 				{{if .NoteAuthor}}
@@ -277,11 +278,11 @@
 				{{else}}
 					<strong>{{.NoteCommit.Author.Name}}</strong>
 				{{end}}
-				<span class="text grey" id="note-authored-time">{{DateUtils.TimeSince .NoteCommit.Author.When}}</span>
+				<span class="text grey tw-flex-1" id="note-authored-time">{{DateUtils.TimeSince .NoteCommit.Author.When}}</span>
 				{{if and ($.Permission.CanWrite $.UnitTypeCode) (not $.Repository.IsArchived) (not .IsDeleted)}}
-					<div class="ui right">
-						<button id="commit-notes-edit-button" class="ui tiny primary button">{{ctx.Locale.Tr "edit"}}</button>
-						<button class="ui tiny button red show-modal" data-modal="#delete-note-modal">{{ctx.Locale.Tr "remove"}}</button>
+					<div class="ui tw-flex tw-items-center">
+						<button id="commit-notes-edit-button" class="ui tiny primary button tw-py-[6px] tw-px-[10px]">{{ctx.Locale.Tr "edit"}}</button>
+						<button class="ui tiny button red show-modal tw-py-[6px] tw-px-[10px]" data-modal="#delete-note-modal">{{ctx.Locale.Tr "remove"}}</button>
 					</div>
 					<div class="ui small modal" id="delete-note-modal">
 						<div class="header">

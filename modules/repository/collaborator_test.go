@@ -272,8 +272,7 @@ func TestRepoPermissionPrivateOrgRepo(t *testing.T) {
 
 	// update team information and then check permission
 	team := unittest.AssertExistsAndLoadBean(t, &organization.Team{ID: 5})
-	err = organization.UpdateTeamUnits(db.DefaultContext, team, nil)
-	require.NoError(t, err)
+	unittest.AssertSuccessfulDelete(t, &organization.TeamUnit{TeamID: team.ID})
 	perm, err = access_model.GetUserRepoPermission(db.DefaultContext, repo, owner)
 	require.NoError(t, err)
 	for _, unit := range repo.Units {

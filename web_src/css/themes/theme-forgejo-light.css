@@ -269,7 +269,7 @@
   --color-nav-text: var(--color-text);
   --color-secondary-nav-bg: var(--color-body);
   --color-label-text: var(--color-text);
-  --color-label-bg: #cacaca5b;
+  --color-label-bg: #cacaca7b;
   --color-label-hover-bg: #cacacaa0;
   --color-label-active-bg: #cacacaff;
   --color-label-bg-alt: #cacacaff;
@@ -314,10 +314,9 @@
 .ui.ui.ui.basic.primary.label {
   color: var(--color-text-dark) !important;
 }
-.ui.basic.yellow.label.pending-label {
+.ui.yellow.label.pending-label {
   background: var(--color-warning-bg) !important;
-  color: var(--color-warning-text) !important;
-  border-color: var(--color-yellow-light) !important;
+  color: var(--color-text-dark) !important;
 }
 ::selection {
   background: var(--steel-450) !important;

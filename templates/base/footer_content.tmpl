@@ -8,7 +8,7 @@
 			{{if .IsAdmin}}
 				<a href="{{AppSubUrl}}/admin/config">{{AppVer}}</a>
 			{{else}}
-				{{AppVer}}
+				{{AppVerNoMetadata}}
 			{{end}}
 		{{end}}
 		{{if and .TemplateLoadTimes ShowFooterTemplateLoadTime}}

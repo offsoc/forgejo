@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"html/template"
 	"io"
+	"net/url"
 	"regexp"
 	"slices"
 	"strconv"
@@ -77,6 +78,16 @@ func newFilePreview(ctx *RenderContext, node *html.Node, locale translation.Loca
 
 	commitSha := node.Data[m[4]:m[5]]
 	filePath := node.Data[m[6]:m[7]]
+	urlFullSource := urlFull
+	if strings.HasSuffix(filePath, "?display=source") {
+		filePath = strings.TrimSuffix(filePath, "?display=source")
+	} else if Type(filePath) != "" {
+		urlFullSource = node.Data[m[0]:m[6]] + filePath + "?display=source#" + node.Data[m[8]:m[1]]
+	}
+	filePath, err := url.QueryUnescape(filePath)
+	if err != nil {
+		return nil
+	}
 	hash := node.Data[m[8]:m[9]]
 
 	preview.start = m[0]
@@ -113,7 +124,7 @@ func newFilePreview(ctx *RenderContext, node *html.Node, locale translation.Loca
 		titleBuffer.WriteString(" &ndash; ")
 	}
 
-	err = html.Render(titleBuffer, createLink(urlFull, filePath, "muted"))
+	err = html.Render(titleBuffer, createLink(urlFullSource, filePath, "muted"))
 	if err != nil {
 		log.Error("failed to render filepathLink: %v", err)
 	}

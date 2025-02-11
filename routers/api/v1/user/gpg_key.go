@@ -92,6 +92,10 @@ func ListMyGPGKeys(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/GPGKeyList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 
 	listGPGKeys(ctx, ctx.Doer.ID, utils.GetListOptions(ctx))
 }
@@ -113,6 +117,10 @@ func GetGPGKey(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/GPGKey"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -164,6 +172,10 @@ func GetVerificationToken(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/string"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -183,6 +195,10 @@ func VerifyUserGPGKey(ctx *context.APIContext) {
 	// responses:
 	//   "201":
 	//     "$ref": "#/responses/GPGKey"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	//   "422":
@@ -244,6 +260,10 @@ func CreateGPGKey(ctx *context.APIContext) {
 	// responses:
 	//   "201":
 	//     "$ref": "#/responses/GPGKey"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	//   "422":
@@ -270,6 +290,8 @@ func DeleteGPGKey(ctx *context.APIContext) {
 	// responses:
 	//   "204":
 	//     "$ref": "#/responses/empty"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
@@ -281,11 +303,7 @@ func DeleteGPGKey(ctx *context.APIContext) {
 	}
 
 	if err := asymkey_model.DeleteGPGKey(ctx, ctx.Doer, ctx.ParamsInt64(":id")); err != nil {
-		if asymkey_model.IsErrGPGKeyAccessDenied(err) {
-			ctx.Error(http.StatusForbidden, "", "You do not have access to this key")
-		} else {
-			ctx.Error(http.StatusInternalServerError, "DeleteGPGKey", err)
-		}
+		ctx.Error(http.StatusInternalServerError, "DeleteGPGKey", err)
 		return
 	}
 
@@ -295,8 +313,6 @@ func DeleteGPGKey(ctx *context.APIContext) {
 // HandleAddGPGKeyError handle add GPGKey error
 func HandleAddGPGKeyError(ctx *context.APIContext, err error, token string) {
 	switch {
-	case asymkey_model.IsErrGPGKeyAccessDenied(err):
-		ctx.Error(http.StatusUnprocessableEntity, "GPGKeyAccessDenied", "You do not have access to this GPG key")
 	case asymkey_model.IsErrGPGKeyIDAlreadyUsed(err):
 		ctx.Error(http.StatusUnprocessableEntity, "GPGKeyIDAlreadyUsed", "A key with the same id already exists")
 	case asymkey_model.IsErrGPGKeyParsing(err):

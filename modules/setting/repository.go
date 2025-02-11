@@ -87,6 +87,7 @@ var (
 			DefaultMergeMessageAllAuthors            bool
 			DefaultMergeMessageMaxApprovers          int
 			DefaultMergeMessageOfficialApproversOnly bool
+			DefaultUpdateStyle                       string
 			PopulateSquashCommentWithCommitMessages  bool
 			AddCoCommitterTrailers                   bool
 			TestConflictingPatchesWithGitApply       bool
@@ -216,6 +217,7 @@ var (
 			DefaultMergeMessageAllAuthors            bool
 			DefaultMergeMessageMaxApprovers          int
 			DefaultMergeMessageOfficialApproversOnly bool
+			DefaultUpdateStyle                       string
 			PopulateSquashCommentWithCommitMessages  bool
 			AddCoCommitterTrailers                   bool
 			TestConflictingPatchesWithGitApply       bool
@@ -232,6 +234,7 @@ var (
 			DefaultMergeMessageAllAuthors:            false,
 			DefaultMergeMessageMaxApprovers:          10,
 			DefaultMergeMessageOfficialApproversOnly: true,
+			DefaultUpdateStyle:                       "merge",
 			PopulateSquashCommentWithCommitMessages:  false,
 			AddCoCommitterTrailers:                   true,
 			RetargetChildrenOnMerge:                  true,
@@ -286,7 +289,7 @@ func loadRepositoryFrom(rootCfg ConfigProvider) {
 	// Determine and create root git repository path.
 	sec := rootCfg.Section("repository")
 	Repository.DisableHTTPGit = sec.Key("DISABLE_HTTP_GIT").MustBool()
-	Repository.UseCompatSSHURI = sec.Key("USE_COMPAT_SSH_URI").MustBool()
+	Repository.UseCompatSSHURI = sec.Key("USE_COMPAT_SSH_URI").MustBool(true)
 	Repository.GoGetCloneURLProtocol = sec.Key("GO_GET_CLONE_URL_PROTOCOL").MustString("https")
 	Repository.MaxCreationLimit = sec.Key("MAX_CREATION_LIMIT").MustInt(-1)
 	Repository.DefaultBranch = sec.Key("DEFAULT_BRANCH").MustString(Repository.DefaultBranch)

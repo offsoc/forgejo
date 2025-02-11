@@ -23,6 +23,18 @@
   #git-graph-heading {
     align-items: center;
   }
+
+  #git-graph-heading-left {
+    margin-right: 1rem;
+  }
+
+  #git-graph-heading h2 {
+    flex-shrink: 0;
+  }
+
+  #git-graph-container #flow-select-refs-dropdown {
+    min-width: 250px;
+  }
 }
 
 @media (max-width: 767.98px) {
@@ -34,15 +46,10 @@
   #git-graph-heading-left {
     margin-bottom: 1rem;
   }
-
-  h2,
-  #flow-select-refs-dropdown {
-    max-width: 100%;
-  }
 }
 
 #git-graph-container #flow-select-refs-dropdown {
-  min-width: 250px;
+  flex-wrap: wrap;
 }
 
 #git-graph-container #flow-select-refs-dropdown .ui.label {

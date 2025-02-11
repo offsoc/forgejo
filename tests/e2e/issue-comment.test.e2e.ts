@@ -5,15 +5,24 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, login_user, login} from './utils_e2e.ts';
+import {test, save_visual} from './utils_e2e.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
+test.use({user: 'user2'});
+
+test('Menu accessibility', async ({page}) => {
+  await page.goto('/user2/repo1/issues/1');
+  await expect(page.getByLabel('user2 reacted eyes. Remove eyes')).toBeVisible();
+  await expect(page.getByLabel('reacted laugh. Remove laugh')).toBeVisible();
+  await expect(page.locator('#issue-1').getByLabel('Comment menu')).toBeVisible();
+  await expect(page.locator('#issue-1').getByRole('heading').getByLabel('Add reaction')).toBeVisible();
+  page.getByLabel('reacted laugh. Remove').click();
+  await expect(page.getByLabel('user1 reacted laugh. Add laugh')).toBeVisible();
+  page.getByLabel('user1 reacted laugh.').click();
+  await expect(page.getByLabel('user1, user2 reacted laugh. Remove laugh')).toBeVisible();
 });
 
-test('Hyperlink paste behaviour', async ({browser}, workerInfo) => {
+test('Hyperlink paste behaviour', async ({page}, workerInfo) => {
   test.skip(['Mobile Safari', 'Mobile Chrome', 'webkit'].includes(workerInfo.project.name), 'Mobile clients seem to have very weird behaviour with this test, which I cannot confirm with real usage');
-  const page = await login({browser}, workerInfo);
   await page.goto('/user2/repo1/issues/new');
   await page.locator('textarea').click();
   // same URL
@@ -45,8 +54,7 @@ test('Hyperlink paste behaviour', async ({browser}, workerInfo) => {
   await page.locator('textarea').fill('');
 });
 
-test('Always focus edit tab first on edit', async ({browser}, workerInfo) => {
-  const page = await login({browser}, workerInfo);
+test('Always focus edit tab first on edit', async ({page}) => {
   const response = await page.goto('/user2/repo1/issues/1');
   expect(response?.status()).toBe(200);
 
@@ -66,11 +74,32 @@ test('Always focus edit tab first on edit', async ({browser}, workerInfo) => {
 
   await expect(editTab).toHaveClass(/active/);
   await expect(previewTab).not.toHaveClass(/active/);
+  await save_visual(page);
 });
 
-test('Quote reply', async ({browser}, workerInfo) => {
+test('Reset content of comment edit field on cancel', async ({page}) => {
+  const response = await page.goto('/user2/repo1/issues/1');
+  expect(response?.status()).toBe(200);
+
+  const editorTextarea = page.locator('[id="_combo_markdown_editor_1"]');
+
+  // Change the content of the edit field
+  await page.click('#issue-1 .comment-container .context-menu');
+  await page.click('#issue-1 .comment-container .menu>.edit-content');
+  await expect(editorTextarea).toHaveValue('content for the first issue');
+  await editorTextarea.fill('some random string');
+  await expect(editorTextarea).toHaveValue('some random string');
+  await page.click('#issue-1 .comment-container .edit .cancel');
+
+  // Edit again and assert that the edit field should be reset to the initial content
+  await page.click('#issue-1 .comment-container .context-menu');
+  await page.click('#issue-1 .comment-container .menu>.edit-content');
+  await expect(editorTextarea).toHaveValue('content for the first issue');
+  await save_visual(page);
+});
+
+test('Quote reply', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name !== 'firefox', 'Uses Firefox specific selection quirks');
-  const page = await login({browser}, workerInfo);
   const response = await page.goto('/user2/repo1/issues/1');
   expect(response?.status()).toBe(200);
 
@@ -143,13 +172,12 @@ test('Quote reply', async ({browser}, workerInfo) => {
   await editorTextarea.fill('');
 });
 
-test('Pull quote reply', async ({browser}, workerInfo) => {
+test('Pull quote reply', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name !== 'firefox', 'Uses Firefox specific selection quirks');
-  const page = await login({browser}, workerInfo);
   const response = await page.goto('/user2/commitsonpr/pulls/1/files');
   expect(response?.status()).toBe(200);
 
-  const editorTextarea = page.locator('textarea.markdown-text-editor');
+  const editorTextarea = page.locator('form.comment-form textarea.markdown-text-editor');
 
   // Full quote with no reply handler being open.
   await page.click('.comment-code-cloud .context-menu');

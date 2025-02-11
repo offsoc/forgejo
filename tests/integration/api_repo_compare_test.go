@@ -35,6 +35,7 @@ func TestAPICompareBranches(t *testing.T) {
 
 	assert.Equal(t, 2, apiResp.TotalCommits)
 	assert.Len(t, apiResp.Commits, 2)
+	assert.Len(t, apiResp.Files, 3)
 }
 
 func TestAPICompareCommits(t *testing.T) {
@@ -54,4 +55,5 @@ func TestAPICompareCommits(t *testing.T) {
 
 	assert.Equal(t, 2, apiResp.TotalCommits)
 	assert.Len(t, apiResp.Commits, 2)
+	assert.Len(t, apiResp.Files, 3)
 }

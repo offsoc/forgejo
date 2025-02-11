@@ -126,6 +126,19 @@ func Projects(ctx *context.Context) {
 	ctx.Data["PageIsViewProjects"] = true
 	ctx.Data["SortType"] = sortType
 
+	numOpenIssues, err := issues_model.NumIssuesInProjects(ctx, projects, ctx.Doer, ctx.Org.Organization, optional.Some(false))
+	if err != nil {
+		ctx.ServerError("NumIssuesInProjects", err)
+		return
+	}
+	numClosedIssues, err := issues_model.NumIssuesInProjects(ctx, projects, ctx.Doer, ctx.Org.Organization, optional.Some(true))
+	if err != nil {
+		ctx.ServerError("NumIssuesInProjects", err)
+		return
+	}
+	ctx.Data["NumOpenIssuesInProject"] = numOpenIssues
+	ctx.Data["NumClosedIssuesInProject"] = numClosedIssues
+
 	ctx.HTML(http.StatusOK, tplProjects)
 }
 
@@ -209,7 +222,7 @@ func ChangeProjectStatus(ctx *context.Context) {
 		ctx.NotFoundOrServerError("ChangeProjectStatusByRepoIDAndID", project_model.IsErrProjectNotExist, err)
 		return
 	}
-	ctx.JSONRedirect(fmt.Sprintf("%s/-/projects/%d", ctx.ContextUser.HomeLink(), id))
+	ctx.JSONRedirect(project_model.ProjectLinkForOrg(ctx.ContextUser, id))
 }
 
 // DeleteProject delete a project
@@ -259,7 +272,7 @@ func RenderEditProject(ctx *context.Context) {
 	ctx.Data["redirect"] = ctx.FormString("redirect")
 	ctx.Data["HomeLink"] = ctx.ContextUser.HomeLink()
 	ctx.Data["card_type"] = p.CardType
-	ctx.Data["CancelLink"] = fmt.Sprintf("%s/-/projects/%d", ctx.ContextUser.HomeLink(), p.ID)
+	ctx.Data["CancelLink"] = project_model.ProjectLinkForOrg(ctx.ContextUser, p.ID)
 
 	ctx.HTML(http.StatusOK, tplProjectsNew)
 }
@@ -273,7 +286,7 @@ func EditProjectPost(ctx *context.Context) {
 	ctx.Data["PageIsViewProjects"] = true
 	ctx.Data["CanWriteProjects"] = canWriteProjects(ctx)
 	ctx.Data["CardTypes"] = project_model.GetCardConfig()
-	ctx.Data["CancelLink"] = fmt.Sprintf("%s/-/projects/%d", ctx.ContextUser.HomeLink(), projectID)
+	ctx.Data["CancelLink"] = project_model.ProjectLinkForOrg(ctx.ContextUser, projectID)
 
 	shared_user.RenderUserHeader(ctx)
 
@@ -332,7 +345,7 @@ func ViewProject(ctx *context.Context) {
 		return
 	}
 
-	issuesMap, err := issues_model.LoadIssuesFromColumnList(ctx, columns)
+	issuesMap, err := issues_model.LoadIssuesFromColumnList(ctx, columns, ctx.Doer, ctx.Org.Organization, optional.None[bool]())
 	if err != nil {
 		ctx.ServerError("LoadIssuesOfColumns", err)
 		return

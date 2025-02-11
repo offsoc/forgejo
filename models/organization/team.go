@@ -247,22 +247,6 @@ func GetTeamByID(ctx context.Context, teamID int64) (*Team, error) {
 	return t, nil
 }
 
-// GetTeamNamesByID returns team's lower name from a list of team ids.
-func GetTeamNamesByID(ctx context.Context, teamIDs []int64) ([]string, error) {
-	if len(teamIDs) == 0 {
-		return []string{}, nil
-	}
-
-	var teamNames []string
-	err := db.GetEngine(ctx).Table("team").
-		Select("lower_name").
-		In("id", teamIDs).
-		Asc("name").
-		Find(&teamNames)
-
-	return teamNames, err
-}
-
 // IncrTeamRepoNum increases the number of repos for the given team by 1
 func IncrTeamRepoNum(ctx context.Context, teamID int64) error {
 	_, err := db.GetEngine(ctx).Incr("num_repos").ID(teamID).Update(new(Team))

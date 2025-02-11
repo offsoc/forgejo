@@ -5,17 +5,27 @@ package e2e
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
+	"code.gitea.io/gitea/models/unittest"
+	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/json"
+	modules_session "code.gitea.io/gitea/modules/session"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/tests"
 
+	"code.forgejo.org/go-chi/session"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,6 +35,8 @@ func onForgejoRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare .
 	if len(prepare) == 0 || prepare[0] {
 		defer tests.PrepareTestEnv(t, 1)()
 	}
+	createSessions(t)
+
 	s := http.Server{
 		Handler: testE2eWebRoutes,
 	}
@@ -63,4 +75,119 @@ func onForgejoRun(t *testing.T, callback func(*testing.T, *url.URL), prepare ...
 	onForgejoRunTB(t, func(t testing.TB, u *url.URL) {
 		callback(t.(*testing.T), u)
 	}, prepare...)
+}
+
+func createSessions(t testing.TB) {
+	t.Helper()
+	// copied from playwright.config.ts
+	browsers := []string{
+		"chromium",
+		"firefox",
+		"webkit",
+		"Mobile Chrome",
+		"Mobile Safari",
+	}
+	scopes := []string{
+		"shared",
+	}
+	users := []string{
+		"user1",
+		"user2",
+		"user12",
+		"user40",
+	}
+
+	authState := filepath.Join(filepath.Dir(setting.AppPath), "tests", "e2e", ".auth")
+	err := os.RemoveAll(authState)
+	require.NoError(t, err)
+
+	err = os.MkdirAll(authState, os.ModePerm)
+	require.NoError(t, err)
+
+	createSessionCookie := stateHelper(t)
+
+	for _, user := range users {
+		u := unittest.AssertExistsAndLoadBean(t, &user_model.User{LowerName: strings.ToLower(user)})
+		for _, browser := range browsers {
+			for _, scope := range scopes {
+				stateFile := strings.ReplaceAll(strings.ToLower(fmt.Sprintf("state-%s-%s-%s.json", browser, user, scope)), " ", "-")
+				createSessionCookie(filepath.Join(authState, stateFile), u)
+			}
+		}
+	}
+}
+
+func stateHelper(t testing.TB) func(stateFile string, user *user_model.User) {
+	type Cookie struct {
+		Name     string `json:"name"`
+		Value    string `json:"value"`
+		Domain   string `json:"domain"`
+		Path     string `json:"path"`
+		Expires  int    `json:"expires"`
+		HTTPOnly bool   `json:"httpOnly"`
+		Secure   bool   `json:"secure"`
+		SameSite string `json:"sameSite"`
+	}
+
+	type BrowserState struct {
+		Cookies []Cookie `json:"cookies"`
+		Origins []string `json:"origins"`
+	}
+
+	options := session.Options{
+		Provider:       setting.SessionConfig.Provider,
+		ProviderConfig: setting.SessionConfig.ProviderConfig,
+		CookieName:     setting.SessionConfig.CookieName,
+		CookiePath:     setting.SessionConfig.CookiePath,
+		Gclifetime:     setting.SessionConfig.Gclifetime,
+		Maxlifetime:    setting.SessionConfig.Maxlifetime,
+		Secure:         setting.SessionConfig.Secure,
+		SameSite:       setting.SessionConfig.SameSite,
+		Domain:         setting.SessionConfig.Domain,
+	}
+
+	opt := session.PrepareOptions([]session.Options{options})
+
+	vsp := modules_session.VirtualSessionProvider{}
+	err := vsp.Init(opt.Maxlifetime, opt.ProviderConfig)
+	require.NoError(t, err)
+
+	return func(stateFile string, user *user_model.User) {
+		buf := make([]byte, opt.IDLength/2)
+		_, err = rand.Read(buf)
+		require.NoError(t, err)
+
+		sessionID := hex.EncodeToString(buf)
+
+		s, err := vsp.Read(sessionID)
+		require.NoError(t, err)
+
+		err = s.Set("uid", user.ID)
+		require.NoError(t, err)
+
+		err = s.Release()
+		require.NoError(t, err)
+
+		state := BrowserState{
+			Cookies: []Cookie{
+				{
+					Name:     opt.CookieName,
+					Value:    sessionID,
+					Domain:   setting.Domain,
+					Path:     "/",
+					Expires:  -1,
+					HTTPOnly: true,
+					Secure:   false,
+					SameSite: "Lax",
+				},
+			},
+			Origins: []string{},
+		}
+
+		jsonData, err := json.Marshal(state)
+		require.NoError(t, err)
+
+		err = os.WriteFile(stateFile, jsonData, 0o644)
+		require.NoError(t, err)
+	}
 }
