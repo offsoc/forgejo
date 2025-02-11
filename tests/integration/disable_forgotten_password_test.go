@@ -28,7 +28,7 @@ func TestDisableForgottenPasswordFalse(t *testing.T) {
 			}
 		}
 	}
-	assert.EqualValues(t, 0, counterInstances)
+	assert.EqualValues(t, 1, counterInstances)
 }
 
 func TestDisableForgottenPasswordTrue(t *testing.T) {
