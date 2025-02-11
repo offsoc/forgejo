@@ -171,7 +171,7 @@ func SignIn(ctx *context.Context) {
 		context.SetCaptchaData(ctx)
 	}
 
-	ctx.Data["DisablePassword"] = setting.Service.RequireExternalRegistrationPassword || setting.Service.AllowOnlyExternalRegistration
+	ctx.Data["DisablePassword"] = !setting.Service.EnableInternalSignIn
 
 	ctx.HTML(http.StatusOK, tplSignIn)
 }
