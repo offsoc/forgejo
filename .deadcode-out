@@ -87,6 +87,9 @@ code.gitea.io/gitea/modules/eventsource
 	Event.String
 
 code.gitea.io/gitea/modules/forgefed
+	NewForgeUndoLike
+	ForgeUndoLike.UnmarshalJSON
+	ForgeUndoLike.Validate
 	GetItemByType
 	JSONUnmarshalerFn
 	NotEmpty
@@ -102,9 +105,6 @@ code.gitea.io/gitea/modules/git
 	SetUpdateHook
 	openRepositoryWithDefaultContext
 	ToEntryMode
-
-code.gitea.io/gitea/modules/gitgraph
-	Parser.Reset
 
 code.gitea.io/gitea/modules/gitrepo
 	GetBranchCommitID
@@ -223,6 +223,9 @@ code.gitea.io/gitea/services/repository
 
 code.gitea.io/gitea/services/repository/files
 	ContentType.String
+
+code.gitea.io/gitea/services/repository/gitgraph
+	Parser.Reset
 
 code.gitea.io/gitea/services/webhook
 	NewNotifier

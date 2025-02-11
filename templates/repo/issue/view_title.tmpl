@@ -95,6 +95,11 @@
 							</span>
 						</a>
 					{{end}}
+					{{if and .Issue.PullRequest.AllowMaintainerEdit .CanWriteCode}}
+						<span id="editable-label" data-tooltip-content="{{ctx.Locale.Tr "repo.pulls.editable_explanation"}}" class="ui small label">
+							{{ctx.Locale.Tr "repo.pulls.editable"}}
+						</span>
+					{{end}}
 					<span id="pull-desc-editor" class="tw-hidden flex-text-block" data-target-update-url="{{$.RepoLink}}/pull/{{.Issue.Index}}/target_branch">
 						<div class="ui floating filter dropdown">
 							<div class="ui basic small button tw-mr-0">
