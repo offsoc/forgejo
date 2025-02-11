@@ -87,6 +87,9 @@ code.gitea.io/gitea/modules/eventsource
 	Event.String
 
 code.gitea.io/gitea/modules/forgefed
+	NewForgeUndoLike
+	ForgeUndoLike.UnmarshalJSON
+	ForgeUndoLike.Validate
 	GetItemByType
 	JSONUnmarshalerFn
 	NotEmpty
