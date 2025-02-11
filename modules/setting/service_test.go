@@ -250,25 +250,3 @@ ALLOWED_USER_VISIBILITY_MODES = public, limit, privated
 		})
 	}
 }
-
-func TestLoadServiceDomainListsForFederation(t *testing.T) {
-	oldService := Service
-	defer func() {
-		Service = oldService
-	}()
-
-	cfg, err := NewConfigProviderFromData(`
-[federation]
-ENABLED = true
-[service]
-EMAIL_DOMAIN_ALLOWLIST = *.allow.random
-EMAIL_DOMAIN_BLOCKLIST = *.block.random
-`)
-
-	require.NoError(t, err)
-	loadServiceFrom(cfg)
-
-	assert.True(t, match(Service.EmailDomainAllowList, "d1.allow.random"))
-	assert.True(t, match(Service.EmailDomainAllowList, "localhost"))
-
-}

@@ -1,9 +1,11 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved
 // SPDX-License-Identifier: MIT
 
 package setting
 
 import (
+	"net/url"
 	"regexp"
 	"slices"
 	"strings"
@@ -164,7 +166,21 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 	if sec.HasKey("EMAIL_DOMAIN_WHITELIST") {
 		deprecatedSetting(rootCfg, "service", "EMAIL_DOMAIN_WHITELIST", "service", "EMAIL_DOMAIN_ALLOWLIST", "1.21")
 	}
-	Service.EmailDomainAllowList = CompileEmailGlobList(sec, "EMAIL_DOMAIN_WHITELIST", "EMAIL_DOMAIN_ALLOWLIST")
+	emailDomainAllowList := CompileEmailGlobList(sec, "EMAIL_DOMAIN_WHITELIST", "EMAIL_DOMAIN_ALLOWLIST")
+	if len(emailDomainAllowList) > 0 && Federation.Enabled {
+		localFqdn, err := url.ParseRequestURI(AppURL)
+		if err != nil {
+			// TODO
+			log.Error("Error in EmailDomainAllowList: %v", err)
+		}
+		appFqdn, err := glob.Compile(localFqdn.Hostname(), ',')
+		if err != nil {
+			// TODO
+			log.Error("Error in EmailDomainAllowList: %v", err)
+		}
+		emailDomainAllowList = append(emailDomainAllowList, appFqdn)
+	}
+	Service.EmailDomainAllowList = emailDomainAllowList
 	Service.EmailDomainBlockList = CompileEmailGlobList(sec, "EMAIL_DOMAIN_BLOCKLIST")
 	Service.EmailDomainBlockDisposable = sec.Key("EMAIL_DOMAIN_BLOCK_DISPOSABLE").MustBool(false)
 	if Service.EmailDomainBlockDisposable {
