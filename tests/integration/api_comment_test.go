@@ -25,6 +25,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const IssueIdNotExist = 10000
+
 func TestAPIListRepoComments(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
@@ -89,6 +91,11 @@ func TestAPIListIssueComments(t *testing.T) {
 	expectedCount := unittest.GetCount(t, &issues_model.Comment{IssueID: issue.ID},
 		unittest.Cond("type = ?", issues_model.CommentTypeComment))
 	assert.Len(t, comments, expectedCount)
+
+	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/%d/comments", repoOwner.Name, repo.Name, IssueIdNotExist).
+		AddTokenAuth(token)
+	resp = MakeRequest(t, req, http.StatusNotFound)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
 
 func TestAPICreateComment(t *testing.T) {
@@ -111,6 +118,14 @@ func TestAPICreateComment(t *testing.T) {
 	DecodeJSON(t, resp, &updatedComment)
 	assert.EqualValues(t, commentBody, updatedComment.Body)
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: updatedComment.ID, IssueID: issue.ID, Content: commentBody})
+
+	urlStr = fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/comments",
+		repoOwner.Name, repo.Name, IssueIdNotExist)
+	req = NewRequestWithValues(t, "POST", urlStr, map[string]string{
+		"body": commentBody,
+	}).AddTokenAuth(token)
+	resp = MakeRequest(t, req, http.StatusNotFound)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
 
 func TestAPICreateCommentAutoDate(t *testing.T) {
@@ -464,4 +479,8 @@ func TestAPIListIssueTimeline(t *testing.T) {
 	DecodeJSON(t, resp, &comments)
 	expectedCount := unittest.GetCount(t, &issues_model.Comment{IssueID: issue.ID})
 	assert.Len(t, comments, expectedCount)
+
+	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/%d/timeline", repoOwner.Name, repo.Name, IssueIdNotExist)
+	resp = MakeRequest(t, req, http.StatusNotFound)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
