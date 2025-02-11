@@ -63,3 +63,12 @@ test('User: Profile settings', async ({browser}, workerInfo) => {
   await page.goto('/user2?tab=activity');
   await expect(page.getByText('Your activity is visible to everyone')).toBeVisible();
 });
+
+test('User: Storage overview', async ({browser}, workerInfo) => {
+  const page = await login({browser}, workerInfo);
+  await page.goto('/user/settings/storage_overview');
+  await page.waitForLoadState();
+  await page.getByLabel('Git LFS – 8 KiB').nth(1).hover({position: {x: 250, y: 2}});
+  await expect(page.getByText('Git LFS')).toBeVisible();
+  await save_visual(page);
+});
