@@ -158,7 +158,7 @@ func PackageContexter() func(next http.Handler) http.Handler {
 
 			// it is still needed when rendering 500 page in a package handler
 			ctx := NewWebContext(base, renderer, nil)
-			ctx.Base.AppendContextValue(WebContextKey, ctx)
+			ctx.SetContextValue(WebContextKey, ctx) // FIXME: this should be removed because NewWebContext should already set it
 			next.ServeHTTP(ctx.Resp, ctx.Req)
 		})
 	}

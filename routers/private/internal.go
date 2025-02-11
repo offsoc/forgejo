@@ -81,5 +81,14 @@ func Routes() *web.Route {
 	r.Post("/restore_repo", RestoreRepo)
 	r.Post("/actions/generate_actions_runner_token", GenerateActionsRunnerToken)
 
+	r.Group("/repo", func() {
+		// FIXME: it is not right to use context.Contexter here because all routes here should use PrivateContext
+		// Fortunately, the LFS handlers are able to handle requests without a complete web context
+		common.AddOwnerRepoGitLFSRoutes(r, func(ctx *context.PrivateContext) {
+			webContext := &context.Context{Base: ctx.Base}
+			ctx.SetContextValue(context.WebContextKey, webContext) // FIXME: this is not ideal but no other way at the moment
+		})
+	})
+
 	return r
 }

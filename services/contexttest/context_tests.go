@@ -20,6 +20,7 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/cache"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/templates"
 	"code.gitea.io/gitea/modules/translation"
@@ -65,6 +66,13 @@ func MockContext(t *testing.T, reqPath string, opts ...MockContextOption) (*cont
 	base.Locale = &translation.MockLocale{}
 
 	ctx := context.NewWebContext(base, opt.Render, nil)
+	ctx.SetContextValue(context.WebContextKey, ctx) // FIXME: this should be removed because NewWebContext should already set it
+	ctx.SetContextValue(chi.RouteCtxKey, chiCtx)
+	if opt.SessionStore != nil {
+		ctx.SetContextValue(session.MockStoreContextKey, opt.SessionStore)
+		ctx.Session = opt.SessionStore
+	}
+	ctx.Cache = cache.GetCache()
 	ctx.PageData = map[string]any{}
 	ctx.Data["PageStartTime"] = time.Now()
 	chiCtx := chi.NewRouteContext()
