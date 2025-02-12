@@ -20,6 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/lfs"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/process"
+	"code.gitea.io/gitea/modules/proxy"
 	"code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
@@ -170,6 +171,7 @@ func runPushSync(ctx context.Context, m *repo_model.PushMirror) error {
 
 		log.Trace("Pushing %s mirror[%d] remote %s", path, m.ID, m.RemoteName)
 
+		envs := proxy.EnvWithProxy(remoteURL.URL)
 		// OpenSSH isn't very intuitive when you want to specify a specific keypair.
 		// Therefore, we need to create a temporary file that stores the private key, so that OpenSSH can use it.
 		// We delete the temporary file afterwards.
@@ -207,6 +209,7 @@ func runPushSync(ctx context.Context, m *repo_model.PushMirror) error {
 			Mirror:         true,
 			Timeout:        timeout,
 			PrivateKeyPath: privateKeyPath,
+			Env:            envs,
 		}); err != nil {
 			log.Error("Error pushing %s mirror[%d] remote %s: %v", path, m.ID, m.RemoteName, err)
 
