@@ -19,7 +19,6 @@ func TestDisableForgottenPasswordFalse(t *testing.T) {
 	resp := MakeRequest(t, req, http.StatusOK)
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	htmlDoc.AssertElement(t, true, "a[href='/user/forgot_password']")	
-	
 }
 
 func TestDisableForgottenPasswordTrue(t *testing.T) {
