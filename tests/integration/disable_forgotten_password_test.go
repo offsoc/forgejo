@@ -17,18 +17,9 @@ func TestDisableForgottenPasswordFalse(t *testing.T) {
 
 	req := NewRequest(t, "GET", "/user/login/")
 	resp := MakeRequest(t, req, http.StatusOK)
-	doc := NewHTMLParser(t, resp.Body).Find("a")
-	var counterInstances int
-	for i := range doc.Nodes {
-		oneElement := doc.Eq(i)
-		attValue, attExists := oneElement.Attr("href")
-		if attExists {
-			if attValue == "/user/forgot_password" {
-				counterInstances++
-			}
-		}
-	}
-	assert.EqualValues(t, 1, counterInstances)
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	htmlDoc.AssertElement(t, true, "a[href='/user/forgot_password']")	
+	
 }
 
 func TestDisableForgottenPasswordTrue(t *testing.T) {
@@ -37,18 +28,8 @@ func TestDisableForgottenPasswordTrue(t *testing.T) {
 
 	req := NewRequest(t, "GET", "/user/login/")
 	resp := MakeRequest(t, req, http.StatusOK)
-	doc := NewHTMLParser(t, resp.Body).Find("a")
-	var counterInstances int
-	for i := range doc.Nodes {
-		oneElement := doc.Eq(i)
-		attValue, attExists := oneElement.Attr("href")
-		if attExists {
-			if attValue == "/user/forgot_password" {
-				counterInstances++
-			}
-		}
-	}
-	assert.EqualValues(t, 0, counterInstances)
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	htmlDoc.AssertElement(t, false, "a[href='/user/forgot_password']")	
 }
 
 func TestDisableForgottenPasswordDefault(t *testing.T) {
@@ -56,16 +37,6 @@ func TestDisableForgottenPasswordDefault(t *testing.T) {
 
 	req := NewRequest(t, "GET", "/user/login/")
 	resp := MakeRequest(t, req, http.StatusOK)
-	doc := NewHTMLParser(t, resp.Body).Find("a")
-	var counterInstances int
-	for i := range doc.Nodes {
-		oneElement := doc.Eq(i)
-		attValue, attExists := oneElement.Attr("href")
-		if attExists {
-			if attValue == "/user/forgot_password" {
-				counterInstances++
-			}
-		}
-	}
-	assert.EqualValues(t, 1, counterInstances)
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	htmlDoc.AssertElement(t, true, "a[href='/user/forgot_password']")	
 }
