@@ -147,6 +147,20 @@ func LoadServiceSetting() {
 	loadServiceFrom(CfgProvider)
 }
 
+func appUrlAsGlob(fqdn string) (glob.Glob, error) {
+	localFqdn, err := url.ParseRequestURI(fqdn)
+	if err != nil {
+		log.Error("Error in EmailDomainAllowList: %v", err)
+		return nil, err
+	}
+	appFqdn, err := glob.Compile(localFqdn.Hostname(), ',')
+	if err != nil {
+		log.Error("Error in EmailDomainAllowList: %v", err)
+		return nil, err
+	}
+	return appFqdn, nil
+}
+
 func loadServiceFrom(rootCfg ConfigProvider) {
 	sec := rootCfg.Section("service")
 	Service.ActiveCodeLives = sec.Key("ACTIVE_CODE_LIVE_MINUTES").MustInt(180)
@@ -167,18 +181,12 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 		deprecatedSetting(rootCfg, "service", "EMAIL_DOMAIN_WHITELIST", "service", "EMAIL_DOMAIN_ALLOWLIST", "1.21")
 	}
 	emailDomainAllowList := CompileEmailGlobList(sec, "EMAIL_DOMAIN_WHITELIST", "EMAIL_DOMAIN_ALLOWLIST")
+
 	if len(emailDomainAllowList) > 0 && Federation.Enabled {
-		localFqdn, err := url.ParseRequestURI(AppURL)
-		if err != nil {
-			// TODO
-			log.Error("Error in EmailDomainAllowList: %v", err)
+		appURL, err := appUrlAsGlob(AppURL)
+		if err == nil {
+			emailDomainAllowList = append(emailDomainAllowList, appURL)
 		}
-		appFqdn, err := glob.Compile(localFqdn.Hostname(), ',')
-		if err != nil {
-			// TODO
-			log.Error("Error in EmailDomainAllowList: %v", err)
-		}
-		emailDomainAllowList = append(emailDomainAllowList, appFqdn)
 	}
 	Service.EmailDomainAllowList = emailDomainAllowList
 	Service.EmailDomainBlockList = CompileEmailGlobList(sec, "EMAIL_DOMAIN_BLOCKLIST")

@@ -61,3 +61,56 @@ EMAIL_DOMAIN_BLOCKLIST = *.block.random
 	assert.True(t, match(Service.EmailDomainAllowList, "localhost"))
 
 }
+
+func TestLoadServiceDomainListsNoFederation(t *testing.T) {
+	oldAppURL := AppURL
+	oldFederation := Federation
+	oldService := Service
+
+	defer func() {
+		AppURL = oldAppURL
+		Federation = oldFederation
+		Service = oldService
+	}()
+
+	cfg, err := NewConfigProviderFromData(`
+[federation]
+ENABLED = false
+[service]
+EMAIL_DOMAIN_ALLOWLIST = *.allow.random
+EMAIL_DOMAIN_BLOCKLIST = *.block.random
+`)
+
+	require.NoError(t, err)
+	loadServerFrom(cfg)
+	loadFederationFrom(cfg)
+	loadServiceFrom(cfg)
+
+	assert.True(t, match(Service.EmailDomainAllowList, "d1.allow.random"))
+}
+
+func TestLoadServiceDomainListsFederationEmptyAllowList(t *testing.T) {
+	oldAppURL := AppURL
+	oldFederation := Federation
+	oldService := Service
+
+	defer func() {
+		AppURL = oldAppURL
+		Federation = oldFederation
+		Service = oldService
+	}()
+
+	cfg, err := NewConfigProviderFromData(`
+[federation]
+ENABLED = true
+[service]
+EMAIL_DOMAIN_BLOCKLIST = *.block.random
+`)
+
+	require.NoError(t, err)
+	loadServerFrom(cfg)
+	loadFederationFrom(cfg)
+	loadServiceFrom(cfg)
+
+	assert.True(t, len(Service.EmailDomainAllowList) == 0)
+}
