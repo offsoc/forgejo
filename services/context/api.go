@@ -157,6 +157,17 @@ type swaggerAPIRepoArchivedError struct {
 	Body APIRepoArchivedError `json:"body"`
 }
 
+type APIInternalServerError struct {
+	APIError
+}
+
+// APIInternalServerError is an error that is raised when an internal server error occurs
+// swagger:response internalServerError
+type swaggerAPIInternalServerError struct {
+	// in:body
+	Body APIInternalServerError `json:"body"`
+}
+
 // ServerError responds with error message, status is 500
 func (ctx *APIContext) ServerError(title string, err error) {
 	ctx.Error(http.StatusInternalServerError, title, err)
