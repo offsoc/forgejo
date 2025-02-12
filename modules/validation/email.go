@@ -8,7 +8,6 @@ package validation
 import (
 	"fmt"
 	"net/mail"
-	"net/url"
 	"regexp"
 	"strings"
 
@@ -105,33 +104,18 @@ func IsEmailDomainAllowed(email string) bool {
 	return isEmailDomainAllowedInternal(
 		email,
 		setting.Service.EmailDomainAllowList,
-		setting.Service.EmailDomainBlockList,
-		setting.Federation.Enabled,
-		setting.AppURL)
+		setting.Service.EmailDomainBlockList)
 }
 
 func isEmailDomainAllowedInternal(
 	email string,
 	emailDomainAllowList []glob.Glob,
 	emailDomainBlockList []glob.Glob,
-	isFederation bool,
-	fqdn string,
 ) bool {
 	var result bool
 
 	if len(emailDomainAllowList) == 0 {
 		result = !isEmailDomainListed(emailDomainBlockList, email)
-	} else if isFederation {
-		localFqdn, err := url.ParseRequestURI(fqdn)
-		if err != nil {
-			return false
-		}
-		globber, err := glob.Compile(localFqdn.Hostname(), ',')
-		if err != nil {
-			return false
-		}
-		emailDomainAllowList = append(emailDomainAllowList, globber)
-		result = isEmailDomainListed(emailDomainAllowList, email)
 	} else {
 		result = isEmailDomainListed(emailDomainAllowList, email)
 	}
