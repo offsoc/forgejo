@@ -59,7 +59,6 @@ EMAIL_DOMAIN_BLOCKLIST = *.block.random
 
 	assert.True(t, match(Service.EmailDomainAllowList, "d1.allow.random"))
 	assert.True(t, match(Service.EmailDomainAllowList, "localhost"))
-
 }
 
 func TestLoadServiceDomainListsNoFederation(t *testing.T) {
@@ -112,5 +111,5 @@ EMAIL_DOMAIN_BLOCKLIST = *.block.random
 	loadFederationFrom(cfg)
 	loadServiceFrom(cfg)
 
-	assert.True(t, len(Service.EmailDomainAllowList) == 0)
+	assert.Empty(t, Service.EmailDomainAllowList)
 }

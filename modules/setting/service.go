@@ -147,7 +147,7 @@ func LoadServiceSetting() {
 	loadServiceFrom(CfgProvider)
 }
 
-func appUrlAsGlob(fqdn string) (glob.Glob, error) {
+func appURLAsGlob(fqdn string) (glob.Glob, error) {
 	localFqdn, err := url.ParseRequestURI(fqdn)
 	if err != nil {
 		log.Error("Error in EmailDomainAllowList: %v", err)
@@ -183,7 +183,7 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 	emailDomainAllowList := CompileEmailGlobList(sec, "EMAIL_DOMAIN_WHITELIST", "EMAIL_DOMAIN_ALLOWLIST")
 
 	if len(emailDomainAllowList) > 0 && Federation.Enabled {
-		appURL, err := appUrlAsGlob(AppURL)
+		appURL, err := appURLAsGlob(AppURL)
 		if err == nil {
 			emailDomainAllowList = append(emailDomainAllowList, appURL)
 		}
