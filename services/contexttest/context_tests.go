@@ -66,7 +66,6 @@ func MockContext(t *testing.T, reqPath string, opts ...MockContextOption) (*cont
 	base.Locale = &translation.MockLocale{}
 
 	ctx := context.NewWebContext(base, opt.Render, nil)
-	ctx.SetContextValue(context.WebContextKey, ctx) // FIXME: this should be removed because NewWebContext should already set it
 	ctx.SetContextValue(chi.RouteCtxKey, chiCtx)
 	if opt.SessionStore != nil {
 		ctx.SetContextValue(session.MockStoreContextKey, opt.SessionStore)

@@ -153,12 +153,10 @@ func PackageContexter() func(next http.Handler) http.Handler {
 	renderer := templates.HTMLRenderer()
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-			base, baseCleanUp := NewBaseContext(resp, req)
-			defer baseCleanUp()
-
-			// it is still needed when rendering 500 page in a package handler
+			base := NewBaseContext(resp, req)
+			// FIXME: web Context is still needed when rendering 500 page in a package handler
+			// It should be refactored to use new error handling mechanisms
 			ctx := NewWebContext(base, renderer, nil)
-			ctx.SetContextValue(WebContextKey, ctx) // FIXME: this should be removed because NewWebContext should already set it
 			next.ServeHTTP(ctx.Resp, ctx.Req)
 		})
 	}

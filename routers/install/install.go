@@ -64,7 +64,6 @@ func Contexter() func(next http.Handler) http.Handler {
 			defer baseCleanUp()
 
 			ctx := context.NewWebContext(base, rnd, session.GetSession(req))
-			ctx.SetContextValue(context.WebContextKey, ctx) // FIXME: this should be removed because NewWebContext should already set it
 			ctx.Data.MergeFrom(middleware.CommonTemplateContextData())
 			ctx.Data.MergeFrom(middleware.ContextData{
 				"Context":        ctx, // TODO: use "ctx" in template and remove this
