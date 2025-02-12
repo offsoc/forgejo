@@ -1379,7 +1379,8 @@ table th[data-sortt-desc] .svg {
 }
 
 /* Bold horizontal menu items are wider so enlargen regular items for visual consistency */
-.overflow-menu-items .item span::before {
+.overflow-menu-items .item span::before,
+.pull.menu span::before {
   font-weight: var(--font-weight-semibold);
   content: attr(data-text);
   visibility: hidden;
