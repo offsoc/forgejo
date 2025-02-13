@@ -1,157 +1,160 @@
 description = '''
-This file lists the default values used by Forgejo
-Copy required sections to your own app.ini (default is custom/conf/app.ini)
-and modify as needed.
-Do not copy the whole file as-is, as it contains some invalid sections for illustrative purposes.
-If you don't know what a setting is you should not set it.
+This is a cheat sheet for the Forgejo configuration file. It contains the settings
+that can be configured as well as their default values.
 
-see https://forgejo.org/docs/next/admin/config-cheat-sheet for additional documentation.
+Any changes to the Forgejo configuration file should be made in `custom/conf/app.ini`
+or any corresponding location. When installing from a distribution, this will
+typically be found at `/etc/forgejo/app.ini`.
 
-Default Configuration (non-`app.ini` configuration)
+In the default values below, a value in the form `$XYZ` refers to an environment variable. See [environment-to-ini](https://codeberg.org/forgejo/forgejo/src/branch/forgejo/contrib/environment-to-ini) for information on how environment variables are translated to `app.ini` variables. Values in the form _`XxYyZz`_ refer to values listed as part of the default configuration. These notation forms will not work in your own `app.ini` file and are only listed here as documentation.
 
-These values are environment-dependent but form the basis of a lot of values. They will be
-reported as part of the default configuration when running `gitea help` or on start-up. The order they are emitted there is slightly different but we will list them here in the order they are set-up.
+Any string in the format `%(X)s` is a feature powered by [ini](https://github.com/go-ini/ini/#recursive-values), for reading values recursively.
 
-- _`AppPath`_: This is the absolute path of the running gitea binary.
-- _`AppWorkPath`_: This refers to "working path" of the `gitea` binary. It is determined by using the first set thing in the following hierarchy:
-  - The "WORK_PATH" option in "app.ini" file
-  - The `--work-path` flag passed to the binary
-  - The environment variable `$GITEA_WORK_DIR`
-  - A built-in value set at build time (see building from source)
-  - Otherwise it defaults to the directory of the _`AppPath`_
-  - If any of the above are relative paths then they are made absolute against the directory of the _`AppPath`_
+Values containing `#` or `;` must be quoted using `` ` `` or `"""`.
+
+**Note:** A full restart is required for Forgejo configuration changes to take effect.
+
+## Default configuration (non-`app.ini` configuration)
+
+These values are environment-dependent but form the basis of a lot of values. They will be reported as part of the default configuration when running `forgejo help` or on start-up. The order they are emitted there is slightly different but we will list them here in the order they are set-up.
+
+- _`AppPath`_: This is the absolute path of the running `forgejo` binary.
+
+- _`AppWorkPath`_: This refers to "working path" of the `forgejo` binary. It is determined by using the first set thing in the following hierarchy:
+  1. The `WORK_PATH` option in "app.ini" file
+  2. The `--work-path` flag passed to the binary
+  3. The environment variable `$FORGEJO_WORK_DIR`
+  4. The environment variable `$GITEA_WORK_DIR`
+  5. A built-in value set at build time (see building from source)
+  6. Otherwise it defaults to the directory of the _`AppPath`_
+
+  If any of the above are relative paths then they are made absolute against the directory of the _`AppPath`_.
+
 - _`CustomPath`_: This is the base directory for custom templates and other options. It is determined by using the first set thing in the following hierarchy:
-  - The `--custom-path` flag passed to the binary
-  - The environment variable `$GITEA_CUSTOM`
-  - A built-in value set at build time (see building from source)
-  - Otherwise it defaults to _`AppWorkPath`_`/custom`
-  - If any of the above are relative paths then they are made absolute against the directory of the _`AppWorkPath`_
-- _`CustomConf`_: This is the path to the `app.ini` file.
-  - The `--config` flag passed to the binary
-  - A built-in value set at build time (see building from source)
-  - Otherwise it defaults to _`CustomPath`_`/conf/app.ini`
-  - If any of the above are relative paths then they are made absolute against the directory of the _`CustomPath`_
+  1. The `--custom-path` flag passed to the binary
+  2. The environment variable `$FORGEJO_CUSTOM`
+  3. The environment variable `$GITEA_CUSTOM`
+  4. A built-in value set at build time (see building from source)
+  5. Otherwise it defaults to _`AppWorkPath`_`/custom`
 
-In addition there is _`StaticRootPath`_ which can be set as a built-in at build time, but will otherwise default to _`AppWorkPath`_
+  If any of the above are relative paths then they are made absolute against the directory of the _`AppWorkPath`_.
+
+- _`CustomConf`_: This is the path to the `app.ini` file.
+  1. The `--config` flag passed to the binary
+  2. A built-in value set at build time (see building from source)
+  3. Otherwise it defaults to _`CustomPath`_`/conf/app.ini`
+
+  If any of the above are relative paths then they are made absolute against the directory of the _`CustomPath`_.
+
+- _`StaticRootPath`_: This can be set as a built-in at build time, but will otherwise default to _`AppWorkPath`_.
+
+## General settings
 '''
 
 [APP_NAME]
-default = '; Forgejo: Beyond coding. We Forge.'
-description = 'App name that shows in every page title'
+default = 'Forgejo'
+description = 'Application name that is shown in every page title'
 [APP_SLOGAN]
-description = 'APP_SLOGAN shows a slogan near the App name in every page title'
+default = 'Beyond coding. We Forge.'
+description = 'Slogan that is shown near the `APP_NAME` in every page title'
 [APP_DISPLAY_NAME_FORMAT]
 default = '{APP_NAME}: {APP_SLOGAN}'
-description = '''
-APP_DISPLAY_NAME_FORMAT defines how the AppDisplayName should be presented
-It is used only if APP_SLOGAN is set
-'''
+description = 'Format how the application display name presented in every page title. It is only used if `APP_SLOGAN` is set.'
 [RUN_USER]
-default = '; git'
-description = 'RUN_USER will automatically detect the current user - but you can set it here change it if you run locally'
+description = 'Operating system user name that is running Forgejo. If it is omitted it will be automatically detected as the current user.'
 [RUN_MODE]
 default = 'prod'
-description = '''
-Application run mode, affects performance and debugging: "dev" or "prod", default is "prod"
-Mode "dev" makes Forgejo easier to develop and debug, values other than "dev" are treated as "prod" which is for production use
-'''
+description = 'Application run mode, which affects performance and debugging: `"dev"` or `"prod"`. Mode `"dev"` makes Forgejo easier to develop and debug, values other than `"dev"` are treated as `"prod"` which is for production use.'
 [WORK_PATH]
-description = 'The working directory, see the comment of AppWorkPath above'
+description = 'Path of the working directory. It sets the _`AppWorkPath`_ variable and may also be specified by the command line argument `--work-path` or an environment variable, `GITEA_WORK_DIR`, and defaults to the path of the Forgejo binary.'
 
 [server.PROTOCOL]
 default = 'http'
-description = '''
-The protocol the server listens on. One of 'http', 'https', 'http+unix', 'fcgi' or 'fcgi+unix'. Defaults to 'http'
-Note: Value must be lowercase
-'''
+description = 'Protocol the server listens on. Must be one of `"http"`, `"https"`, `"http+unix"`, `"fcgi"` or `"fcgi+unix"`. Note: the value must be lowercase.'
 [server.USE_PROXY_PROTOCOL]
-default = 'false'
+default = false
 description = 'Expect PROXY protocol headers on connections'
 [server.PROXY_PROTOCOL_TLS_BRIDGING]
-default = 'false'
+default = false
 description = 'Use PROXY protocol in TLS Bridging mode'
 [server.PROXY_PROTOCOL_HEADER_TIMEOUT]
 default = '5s'
-description = 'Timeout to wait for PROXY protocol header (set to 0 to have no timeout)'
+description = 'Timeout to wait for PROXY protocol header (set to `0` to have no timeout)'
 [server.PROXY_PROTOCOL_ACCEPT_UNKNOWN]
-default = 'false'
+default = false
 description = 'Accept PROXY protocol headers with UNKNOWN type'
 [server.DOMAIN]
 default = 'localhost'
-description = 'Set the domain for the server'
+description = 'Domain for the server'
 [server.ROOT_URL]
 default = '%(PROTOCOL)s://%(DOMAIN)s:%(HTTP_PORT)s/'
-description = 'Overwrite the automatically generated public URL. Necessary for proxies and docker'
+description = 'Root URL of the public URL. If specified it overwrites the automatically generated public URL, which is necessary for proxies and inside containers.'
 [server.STATIC_URL_PREFIX]
-description = 'when STATIC_URL_PREFIX is empty it will follow ROOT_URL'
+description = 'Prefix of the static URL. If omitted it will follow the prefix of `ROOT_URL`'
 [server.HTTP_ADDR]
 default = '0.0.0.0'
 description = '''
-The address to listen on. Either a IPv4/IPv6 address or the path to a unix socket.
-If PROTOCOL is set to `http+unix` or `fcgi+unix`, this should be the name of the Unix socket file to use.
-Relative paths will be made absolute against the _`AppWorkPath`_
+Address to listen on. Either a IPv4/IPv6 address or the path to a unix socket.
+If `PROTOCOL` is set to `"http+unix"` or `"fcgi+unix"`, this should be the name of the Unix socket file to use.
+Relative paths will be made absolute against the _`AppWorkPath`_.
 '''
 [server.HTTP_PORT]
-default = '3000'
-description = 'The port to listen on. Leave empty when using a unix socket'
+default = 3000
+description = 'HTTP port to listen on. It should be left empty when using a unix socket.'
 [server.REDIRECT_OTHER_PORT]
-default = 'false'
-description = '''
-If REDIRECT_OTHER_PORT is true, and PROTOCOL is set to https an http server
-will be started on PORT_TO_REDIRECT and it will redirect plain, non-secure http requests to the main
-ROOT_URL.  Defaults are false for REDIRECT_OTHER_PORT and 80 for
-PORT_TO_REDIRECT
-'''
+default = false
+description = 'Redirect to other port. If `true` and `PROTOCOL` is `"https"` an HTTP server will be started on `PORT_TO_REDIRECT` and it will redirect plain, non-secure HTTP requests to the main `ROOT_URL`.'
 [server.PORT_TO_REDIRECT]
-default = '80'
+default = 80
+description = 'Port to redirect if `REDIRECT_OTHER_PORT` is `true`'
 [server.REDIRECTOR_USE_PROXY_PROTOCOL]
 default = '%(USE_PROXY_PROTOCOL)s'
-description = 'expect PROXY protocol header on connections to https redirector'
+description = 'Expect PROXY protocol header on connections to HTTPS redirector'
 [server.SSL_MIN_VERSION]
 default = 'TLSv1.2'
-description = 'Minimum and maximum supported TLS versions'
+description = 'Minimum supported TLS version'
 [server.SSL_MAX_VERSION]
+description = 'Maximum supported TLS version'
 [server.SSL_CURVE_PREFERENCES]
 default = 'X25519,P256'
-description = 'SSL Curve Preferences'
+description = 'Preferences for the SSL curve algorithms'
 [server.SSL_CIPHER_SUITES]
-default = '; Will default to "ecdhe_ecdsa_with_aes_256_gcm_sha384,ecdhe_rsa_with_aes_256_gcm_sha384,ecdhe_ecdsa_with_aes_128_gcm_sha256,ecdhe_rsa_with_aes_128_gcm_sha256,ecdhe_ecdsa_with_chacha20_poly1305,ecdhe_rsa_with_chacha20_poly1305" if aes is supported by hardware, otherwise chacha will be first.'
-description = 'SSL Cipher Suites'
+description = 'SSL Cipher Suites. It defaults to `"ecdhe_ecdsa_with_aes_256_gcm_sha384,ecdhe_rsa_with_aes_256_gcm_sha384,ecdhe_ecdsa_with_aes_128_gcm_sha256,ecdhe_rsa_with_aes_128_gcm_sha256,ecdhe_ecdsa_with_chacha20_poly1305,ecdhe_rsa_with_chacha20_poly1305"` if AES is supported by hardware, otherwise `"chacha"` will be first.'
 [server.PER_WRITE_TIMEOUT]
 default = '30s'
-description = 'Timeout for any write to the connection. (Set to -1 to disable all timeouts.)'
+description = 'Timeout for any write connection. If `-1`, all timeouts are disabled. Formatted as strings such as `"30s"`.'
 [server.PER_WRITE_PER_KB_TIMEOUT]
 default = '30s'
-description = 'Timeout per Kb written to connections'
+description = 'Timeout per kB written to any write connection. Formatted as strings such as `"30s"`.'
 [server.UNIX_SOCKET_PERMISSION]
-default = '666'
-description = 'Permission for unix socket'
+default = 666
+description = 'Permission for unix socket as octal mode (see `chmod --help`)'
 [server.LOCAL_ROOT_URL]
-default = '%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/'
 description = '''
-Local (DMZ) URL for Forgejo workers (such as SSH update) accessing web service. In
-most cases you do not need to change the default value. Alter it only if
-your SSH server node is not the same as HTTP node. For different protocol, the default
-values are different. If `PROTOCOL` is `http+unix`, the default value is `http://unix/`.
-If `PROTOCOL` is `fcgi` or `fcgi+unix`, the default value is `%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/`.
-If listen on `0.0.0.0`, the default value is `%(PROTOCOL)s://localhost:%(HTTP_PORT)s/`, Otherwise the default
-value is `%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/`
+Local (DMZ) URL for Forgejo workers (such as SSH update) accessing web service.
+In most cases you do not need to change the default value.
+Alter it only if your SSH server node is not the same as HTTP node.
+For different protocols, the default values are different.
+- If `PROTOCOL` is `"http+unix"`, the default value is `"http://unix/"`.
+- If `PROTOCOL` is `"fcgi"` or `"fcgi+unix"`, the default value is `"%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/"`.
+- If listen on `"0.0.0.0"`, the default value is `"%(PROTOCOL)s://localhost:%(HTTP_PORT)s/"`.
+- Otherwise the default value is `"%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/"`.
 '''
 [server.LOCAL_USE_PROXY_PROTOCOL]
 default = '%(USE_PROXY_PROTOCOL)s'
-description = 'When making local connections pass the PROXY protocol header'
+description = 'xpect PROXY protocol header when making local connections. If omitted, then it is the value of `USE_PROXY_PROTOCOL`.'
 [server.DISABLE_SSH]
-default = 'false'
-description = 'Disable SSH feature when not available'
+default = false
+description = 'Disable SSH'
 [server.START_SSH_SERVER]
-default = 'false'
-description = 'Whether to use the builtin SSH server or not'
+default = false
+description = 'Whether to use the builtin SSH server'
 [server.SSH_SERVER_USE_PROXY_PROTOCOL]
-default = 'false'
+default = false
 description = 'Expect PROXY protocol header on connections to the built-in SSH server'
 [server.BUILTIN_SSH_SERVER_USER]
 default = '%(RUN_USER)s'
-description = 'Username to use for the builtin SSH server. If blank, then it is the value of RUN_USER'
+description = 'Username to use for the builtin SSH server. If omitted, then it is the value of `RUN_USER`.'
 [server.SSH_DOMAIN]
 default = '%(DOMAIN)s'
 description = 'Domain name to be exposed in clone URL'
@@ -159,115 +162,113 @@ description = 'Domain name to be exposed in clone URL'
 default = '%(BUILTIN_SSH_SERVER_USER)s'
 description = 'SSH username displayed in clone URLs'
 [server.SSH_LISTEN_HOST]
-description = 'The network interface the builtin SSH server should listen on'
+description = 'Network interface the builtin SSH server should listen on'
 [server.SSH_PORT]
-default = '22'
+default = 22
 description = 'Port number to be exposed in clone URL'
 [server.SSH_LISTEN_PORT]
 default = '%(SSH_PORT)s'
-description = 'The port number the builtin SSH server should listen on'
+description = 'Port number the builtin SSH server should listen on'
 [server.SSH_ROOT_PATH]
-description = '''Root path of SSH directory, default is '~/.ssh', but you have to use '/home/git/.ssh''''
+description = 'Root path of SSH directory, default is `"~/.ssh"`, but you have to use `"/home/git/.ssh"`.'
 [server.SSH_CREATE_AUTHORIZED_KEYS_FILE]
-default = 'true'
+default = true
 description = '''
-Forgejo will create a authorized_keys file by default when it is not using the internal ssh server
-If you intend to use the AuthorizedKeysCommand functionality then you should turn this off
+Forgejo will create an `authorized_keys` file by default when it is not using the internal SSH server.
+If you intend to use the `AuthorizedKeysCommand` functionality then you should turn this off.
 '''
 [server.SSH_CREATE_AUTHORIZED_PRINCIPALS_FILE]
-default = 'true'
+default = true
 description = '''
-Forgejo will create a authorized_principals file by default when it is not using the internal ssh server
-If you intend to use the AuthorizedPrincipalsCommand functionality then you should turn this off
+Forgejo will create an `authorized_principals` file by default when it is not using the internal SSH server.
+If you intend to use the `AuthorizedPrincipalsCommand` functionality then you should turn this off.
 '''
 [server.SSH_SERVER_CIPHERS]
 default = 'chacha20-poly1305@openssh.com, aes128-ctr, aes192-ctr, aes256-ctr, aes128-gcm@openssh.com, aes256-gcm@openssh.com'
 description = '''
-For the built-in SSH server, choose the ciphers to support for SSH connections,
-for system SSH this setting has no effect
+For the built-in SSH server, choose the ciphers to support for SSH connections.
+For system SSH this setting has no effect.
 '''
 [server.SSH_SERVER_KEY_EXCHANGES]
 default = 'curve25519-sha256, ecdh-sha2-nistp256, ecdh-sha2-nistp384, ecdh-sha2-nistp521, diffie-hellman-group14-sha256, diffie-hellman-group14-sha1'
 description = '''
-For the built-in SSH server, choose the key exchange algorithms to support for SSH connections,
-for system SSH this setting has no effect
+For the built-in SSH server, choose the key exchange algorithms to support for SSH connections.
+For system SSH this setting has no effect.
 '''
 [server.SSH_SERVER_MACS]
 default = 'hmac-sha2-256-etm@openssh.com, hmac-sha2-256, hmac-sha1'
 description = '''
-For the built-in SSH server, choose the MACs to support for SSH connections,
-for system SSH this setting has no effect
+For the built-in SSH server, choose the MACs to support for SSH connections.
+For system SSH this setting has no effect.
 '''
 [server.SSH_SERVER_HOST_KEYS]
 default = 'ssh/gitea.rsa, ssh/gogs.rsa'
 description = '''
-For the built-in SSH server, choose the keypair to offer as the host key
-The private key should be at SSH_SERVER_HOST_KEY and the public SSH_SERVER_HOST_KEY.pub
-relative paths are made absolute relative to the %(APP_DATA_PATH)s
+For the built-in SSH server, choose the keypair to offer as the host key.
+The private key should be at `SSH_SERVER_HOST_KEY` and the public key at `SSH_SERVER_HOST_KEY`.pub.
+Relative paths are made absolute relative to the `APP_DATA_PATH`.
 '''
 [server.SSH_KEY_TEST_PATH]
-description = '''
-Directory to create temporary files in when testing public keys using ssh-keygen,
-default is the system temporary directory
-'''
+description = 'Path to the directory to create temporary files in when testing public keys using ssh-keygen, default is the system temporary directory.'
 [server.SSH_KEYGEN_PATH]
-description = 'Use `ssh-keygen` to parse public SSH keys. The value is passed to the shell. By default, Forgejo does the parsing itself'
+description = 'Path to the `ssh-keygen` binary to parse public SSH keys. The value is passed to the shell. By default, Forgejo does the parsing itself.'
 [server.SSH_AUTHORIZED_KEYS_BACKUP]
-default = 'false'
-description = 'Enable SSH Authorized Key Backup when rewriting all keys, default is false'
+default = false
+description = 'Enable SSH authorized key backup when rewriting all keys'
 [server.SSH_AUTHORIZED_PRINCIPALS_ALLOW]
 default = 'email, username'
 description = '''
-Determines which principals to allow
+Allowed SSH principals. Possible values are
 - empty: if SSH_TRUSTED_USER_CA_KEYS is empty this will default to off, otherwise will default to email, username.
-- off: Do not allow authorized principals
-- email: the principal must match the user's email
-- username: the principal must match the user's username
-- anything: there will be no checking on the content of the principal
+- `"off"`: Do not allow authorized principals
+- `"email"`: the principal must match the user's email
+- `"username"`: the principal must match the user's username
+- `"anything"`: there will be no checking on the content of the principal
 '''
 [server.SSH_AUTHORIZED_PRINCIPALS_BACKUP]
-default = 'true'
-description = 'Enable SSH Authorized Principals Backup when rewriting all keys, default is true'
+default = true
+description = 'Enable SSH authorized principals backup when rewriting all keys'
 [server.SSH_TRUSTED_USER_CA_KEYS]
 description = '''
-Specifies the public keys of certificate authorities that are trusted to sign user certificates for authentication.
-Multiple keys should be comma separated.
-E.g."ssh-<algorithm> <key>". or "ssh-<algorithm> <key1>, ssh-<algorithm> <key2>".
-For more information see "TrustedUserCAKeys" in the sshd config manpages
+Public keys of certificate authorities that are trusted to sign user certificates for authentication.
+Multiple keys should be comma separated, e.g. `"ssh-<algorithm> <key>"` or `"ssh-<algorithm> <key1>, ssh-<algorithm> <key2>"`.
+For more information see `TrustedUserCAKeys` in the `sshd_config` manpages.
 '''
 [server.SSH_TRUSTED_USER_CA_KEYS_FILENAME]
 description = '''
 Absolute path of the `TrustedUserCaKeys` file Forgejo will manage.
-Default this `RUN_USER`/.ssh/gitea-trusted-user-ca-keys.pem
-If you're running your own ssh server and you want to use the Forgejo managed file you'll also need to modify your
-sshd_config to point to this file. The official docker image will automatically work without further configuration
+By default this is `RUN_USER``/.ssh/gitea-trusted-user-ca-keys.pem`.
+If you're running your own ssh server and you want to use the Forgejo managed file you'll also need to modify your `sshd_config` to point to this file.
+The official docker image will automatically work without further configuration.
 '''
 [server.SSH_EXPOSE_ANONYMOUS]
-default = 'false'
-description = 'Enable exposure of SSH clone URL to anonymous visitors, default is false'
+default = false
+description = 'Enable exposure of SSH clone URL to anonymous visitors'
 [server.SSH_AUTHORIZED_KEYS_COMMAND_TEMPLATE]
 default = '{{.AppPath}} --config={{.CustomConf}} serv key-{{.Key.ID}}'
 description = 'Command template for authorized keys entries'
 [server.SSH_PER_WRITE_TIMEOUT]
-default = '30s'
 description = '''
-Timeout for any write to ssh connections. (Set to -1 to disable all timeouts.)
-Will default to the PER_WRITE_TIMEOUT
+Timeout for any write to ssh connections.
+If `-1`, all timeouts are disabled.
+Formatted as strings such as `"30s"`.
+If omitted, it is the value of `PER_WRITE_TIMEOUT`.
 '''
 [server.SSH_PER_WRITE_PER_KB_TIMEOUT]
-default = '30s'
 description = '''
 Timeout per Kb written to ssh connections.
-Will default to the PER_WRITE_PER_KB_TIMEOUT
+If `-1`, all timeouts are disabled.
+Formatted as strings such as `"30s"`.
+If omitted, it is the value of `PER_WRITE_PER_KB_TIMEOUT`.
 '''
 [server.MINIMUM_KEY_SIZE_CHECK]
-default = 'false'
-description = 'Indicate whether to check minimum key size with corresponding type'
+default = false
+description = 'Whether to check minimum key size with corresponding type'
 [server.OFFLINE_MODE]
-default = 'true'
-description = 'Disable CDN even in "prod" mode'
+default = true
+description = 'Disable CDN even in `"prod"` mode (`RUN_MODE`)'
 [server.ENABLE_ACME]
-default = 'false'
+default = false
 description = '''
 TLS Settings: Either ACME or manual
 (Other common TLS configuration are found before)
@@ -279,8 +280,8 @@ ACME directory URL (e.g. LetsEncrypt's staging/testing URL: https://acme-staging
 Leave empty to default to LetsEncrypt's (production) URL
 '''
 [server.ACME_ACCEPTTOS]
-default = 'false'
-description = '''Explicitly accept the ACME's TOS. The specific TOS cannot be retrieved at the moment'''
+default = false
+description = '''Explicitly accept the ACME's TOS. The specific TOS cannot be retrieved at the moment.'''
 [server.ACME_CA_ROOT]
 description = '''If the ACME CA is not in your system's CA trust chain, it can be manually added here'''
 [server.ACME_EMAIL]
@@ -309,27 +310,32 @@ Paths are relative to CUSTOM_PATH
 [server.KEY_FILE]
 default = 'https/key.pem'
 [server.STATIC_ROOT_PATH]
-default = '; Will default to the built-in value _`StaticRootPath`_'
 description = '''
 Root directory containing templates and static files.
-default is the path where Forgejo is executed
+Defaults to the built-in value of _`StaticRootPath`_, which by default the path where Forgejo is executed.
 '''
 [server.APP_DATA_PATH]
-default = 'data ; relative paths will be made absolute with _`AppWorkPath`_'
-description = 'Default path for App data'
+default = 'data'
+description = '''
+Default path for App data.
+Relative paths will be made absolute against the _`AppWorkPath`_.
+'''
 [server.ENABLE_GZIP]
-default = 'false'
+default = false
 description = 'Enable gzip compression for runtime-generated content, static resources excluded'
 [server.ENABLE_PPROF]
-default = 'false'
+default = false
 description = '''
 Application profiling (memory and cpu)
 For "web" command it listens on localhost:6060
 For "serve" command it dumps to disk at PPROF_DATA_PATH as (cpuprofile|memprofile)_<username>_<temporary id>
 '''
 [server.PPROF_DATA_PATH]
-default = 'data/tmp/pprof ; Path is relative to _`AppWorkPath`_'
-description = 'PPROF_DATA_PATH, use an absolute path when you start Forgejo as service'
+default = 'data/tmp/pprof'
+description = '''
+PProf data path, use an absolute path when you start Forgejo as service.'
+Relative paths will be made absolute against the _`AppWorkPath`_.
+'''
 [server.LANDING_PAGE]
 default = 'home'
 description = '''
@@ -337,7 +343,7 @@ Landing page, can be "home", "explore", "organizations", "login", or any URL suc
 The "login" choice is not a security measure but just a UI flow change, use REQUIRE_SIGNIN_VIEW to force users to log in
 '''
 [server.LFS_START_SERVER]
-default = 'false'
+default = false
 description = 'Enables git-lfs support. true or false, default is false'
 [server.LFS_JWT_SECRET]
 description = 'LFS authentication secret, change this yourself'
@@ -348,19 +354,19 @@ description = 'Alternative location to specify LFS authentication secret. You ca
 default = '24h'
 description = 'LFS authentication validity period (in time.Duration), pushes taking longer than this may fail'
 [server.LFS_MAX_FILE_SIZE]
-default = '0'
+default = 0
 description = 'Maximum allowed LFS file size in bytes (Set to 0 for no limit)'
 [server.LFS_LOCKS_PAGING_NUM]
-default = '50'
+default = 50
 description = 'Maximum number of locks returned per page'
 [server.LFS_MAX_BATCH_SIZE]
-default = '0'
+default = 0
 description = '''
 When clients make lfs batch requests, reject them if there are more pointers than this number
 zero means 'unlimited'
 '''
 [server.ALLOW_GRACEFUL_RESTARTS]
-default = 'true'
+default = true
 description = 'Allow graceful restarts using SIGHUP to fork'
 [server.GRACEFUL_HAMMER_TIME]
 default = '60s'
@@ -370,7 +376,7 @@ shutting down. Force shutdown if this process takes longer than this delay.
 set to a negative value to disable
 '''
 [server.STARTUP_TIMEOUT]
-default = '0'
+default = 0
 description = '''
 Allows the setting of a startup timeout and waithint for Windows as SVC service
 0 disables this
@@ -379,93 +385,128 @@ Allows the setting of a startup timeout and waithint for Windows as SVC service
 default = '6h'
 description = 'Static resources, includes resources on custom/, public/ and all uploaded avatars web browser cache time. Note that this cache is disabled when RUN_MODE is "dev". Default is 6h'
 
+[database]
+description = '''
+The configuration options and their default values depend on the database to be used:
+- SQLite configuration:
+  ```ini
+  DB_TYPE = sqlite3
+  ;PATH = data/forgejo.db
+  ;SQLITE_TIMEOUT = 500
+  ;SQLITE_JOURNAL_MODE = ; defaults to sqlite database default (often DELETE), can be used to enable WAL mode. https://www.sqlite.org/pragma.html#pragma_journal_mode
+  ```
+- MySQL/MariaDB configuration
+  ```ini
+  DB_TYPE = mysql
+  ;HOST = 127.0.0.1:3306 ; can use socket e.g. /var/run/mysqld/mysqld.sock
+  ;NAME = gitea
+  ;USER = root
+  ;PASSWD = ;Use PASSWD = `your password` for quoting if you use special characters in the password.
+  ;SSL_MODE = false ; either "false" (default), "true", or "skip-verify"
+  ;CHARSET_COLLATION = ; Empty as default, Forgejo will try to find a case-sensitive collation. Don't change it unless you clearly know what you need.
+  ```
+- Postgres configuration
+  ```ini
+  ;DB_TYPE = postgres
+  ;HOST = 127.0.0.1:5432 ; can use socket e.g. /var/run/postgresql/
+  ;NAME = gitea
+  ;USER = root
+  ;PASSWD =
+  ;SCHEMA =
+  ;SSL_MODE=disable ;either "disable" (default), "require", or "verify-full"
+  ```
+'''
 [database.DB_TYPE]
 default = 'sqlite3'
-description = '''
-Database to use. Either "sqlite3", "mySQL" or "postgres".
-SQLite Configuration
-'''
+description = 'Database type, either `"sqlite3"`, `"mySQL"` or `"postgres"`.'
 [database.PATH]
-default = '; defaults to data/forgejo.db'
+default = 'data/forgejo.db'
+description = 'Path to the database, only used for `DB_TYPE = sqlite3`'
 [database.SQLITE_TIMEOUT]
-default = '; Query timeout defaults to: 500'
+default = 500
+description = 'Query timeout'
 [database.SQLITE_JOURNAL_MODE]
-default = '; defaults to sqlite database default (often DELETE), can be used to enable WAL mode. https://www.sqlite.org/pragma.html#pragma_journal_mode'
-[database.DB_TYPE]
-default = 'mysql'
-description = 'MySQL Configuration'
+description = 'Journal mode, only used for `DB_TYPE = sqlite3`.'
 [database.HOST]
-default = '127.0.0.1:3306 ; can use socket e.g. /var/run/mysqld/mysqld.sock'
-[database.NAME]
-default = 'gitea'
-[database.USER]
-default = 'root'
-[database.PASSWD]
-default = ';Use PASSWD = `your password` for quoting if you use special characters in the password.'
-[database.SSL_MODE]
-default = 'false ; either "false" (default), "true", or "skip-verify"'
-[database.CHARSET_COLLATION]
-default = '''; Empty as default, Forgejo will try to find a case-sensitive collation. Don't change it unless you clearly know what you need.'''
-[database.DB_TYPE]
-default = 'postgres'
-description = 'Postgres Configuration'
-[database.HOST]
-default = '127.0.0.1:5432 ; can use socket e.g. /var/run/postgresql/'
-[database.NAME]
-default = 'gitea'
-[database.USER]
-default = 'root'
-[database.PASSWD]
-[database.SCHEMA]
-[database.SSL_MODE]
-default = 'disable ;either "disable" (default), "require", or "verify-full"'
-[database.ITERATE_BUFFER_SIZE]
-default = '50'
 description = '''
-Other settings
-For iterate buffer, default is 50
+Database host or socket.
+Ignored for `DB_TYPE = sqlite3`.
+Defaults to `127.0.0.1:3306` for `DB_TYPE = mysql` and `127.0.0.1:5432` for `DB_TYPE = postgres`.
+Can use socket, e.g. `/var/run/mysqld/mysqld.sock` or `/var/run/postgresql/`.
 '''
+[database.NAME]
+default = 'gitea'
+description = 'Database name. Ignored for `DB_TYPE = sqlite3`.'
+[database.USER]
+default = 'root'
+description = 'Database user. Ignored for `DB_TYPE = sqlite3`.'
+[database.PASSWD]
+description = '''
+Database user's password.
+Use 
+```ini
+PASSWD = `your password`
+```
+for quoting if you use special characters in the password.'
+'''
+[database.SSL_MODE]
+description = '''
+SSL mode.
+Ignored for `DB_TYPE = sqlite3`.
+For `DB_TYPE = mysql` either "false" (default), "true", or "skip-verify"'.
+For `DB_TYPE = postgres` either "disable" (default), "require", or "verify-full".
+'''
+[database.CHARSET_COLLATION]
+description = '''
+Charset collation, only used for `DB_TYPE = mysql`.
+Empty as default, Forgejo will try to find a case-sensitive collation. Don't change it unless you clearly know what you need.
+'''
+[database.SCHEMA]
+description = 'Database schema, only used for `DB_TYPE = postgres`'
+[database.ITERATE_BUFFER_SIZE]
+default = 50
+description = 'Size of iterate buffer'
 [database.LOG_SQL]
-default = 'false'
+default = false
 description = 'Show the database generated SQL'
 [database.DB_RETRIES]
-default = '10'
-description = 'Maximum number of DB Connect retries'
+default = 10
+description = 'Maximum number of database connect retries'
 [database.DB_RETRY_BACKOFF]
 default = '3s'
-description = 'Backoff time per DB retry (time.Duration)'
+description = 'Backoff time per database retry (time.Duration)'
 [database.MAX_IDLE_CONNS]
-default = '2'
-description = 'Max idle database connections on connection pool, default is 2'
+default = 2
+description = 'Max idle database connections on connection pool'
 [database.CONN_MAX_LIFETIME]
 default = '3s'
-description = 'Database connection max life time, default is 0 or 3s mysql (See #6804 & #7071 for reasoning)'
+description = 'Database connection max life time, default is `0` or `3s` mysql (See #6804 & #7071 for reasoning).'
 [database.CONN_MAX_IDLETIME]
-default = '0'
-description = 'Database connection max idle time, 0 prevents closing due to idle time'
+default = 0
+description = 'Database connection max idle time. `0` prevents closing due to idle time.'
 [database.MAX_OPEN_CONNS]
-default = '100'
-description = 'Database maximum number of open connections, default is 100 which is the lowest default from Postgres (MariaDB + MySQL default to 151). Ensure you only increase the value if you configured your database server accordingly'
+default = 100
+description = 'Database maximum number of open connections, default is `100` which is the lowest default from Postgres (MariaDB and MySQL default to `151`). Ensure you only increase the value if you configured your database server accordingly'
 [database.AUTO_MIGRATION]
-default = 'true'
+default = true
 description = 'Whether execute database models migrations automatically'
 [database.SLOW_QUERY_TRESHOLD]
 default = '5s'
 description = 'Threshold value (in seconds) beyond which query execution time is logged as a warning in the xorm logger'
 
 [security.INSTALL_LOCK]
-default = 'false'
+default = false
 description = 'Whether the installer is disabled (set to true to disable the installer)'
 [security.SECRET_KEY]
 description = '''
 Global secret key that will be used
-This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore
+This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore.
 '''
 [security.SECRET_KEY_URI]
 default = 'file:/etc/gitea/secret_key'
 description = '''
 Alternative location to specify secret key, instead of this file; you cannot specify both this and SECRET_KEY, and must pick one
-This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore
+This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore.
 '''
 [security.INTERNAL_TOKEN]
 description = 'Secret used to validate communication within Forgejo binary'
@@ -473,7 +514,7 @@ description = 'Secret used to validate communication within Forgejo binary'
 default = 'file:/etc/gitea/internal_token'
 description = 'Alternative location to specify internal token, instead of this file; you cannot specify both this and INTERNAL_TOKEN, and must pick one'
 [security.LOGIN_REMEMBER_DAYS]
-default = '31'
+default = 31
 description = 'How long to remember that a user is logged in before requiring relogin (in days)'
 [security.COOKIE_REMEMBER_NAME]
 default = 'gitea_incredible'
@@ -486,19 +527,19 @@ default = 'X-WEBAUTH-EMAIL'
 [security.REVERSE_PROXY_AUTHENTICATION_FULL_NAME]
 default = 'X-WEBAUTH-FULLNAME'
 [security.REVERSE_PROXY_LIMIT]
-default = '1'
+default = 1
 description = 'Interpret X-Forwarded-For header or the X-Real-IP header and set this as the remote IP for the request'
 [security.REVERSE_PROXY_TRUSTED_PROXIES]
 default = '127.0.0.0/8,::1/128'
 description = 'List of IP addresses and networks separated by comma of trusted proxy servers. Use `*` to trust all'
 [security.MIN_PASSWORD_LENGTH]
-default = '8'
+default = 8
 description = 'The minimum password length for new Users'
 [security.IMPORT_LOCAL_PATHS]
-default = 'false'
+default = false
 description = 'Set to true to allow users to import local server paths'
 [security.DISABLE_GIT_HOOKS]
-default = 'true'
+default = true
 description = '''
 Set to false to allow users with git hook privileges to create custom git hooks.
 Custom git hooks can be used to perform arbitrary code execution on the host operating system.
@@ -509,10 +550,10 @@ WARNING: This maybe harmful to you website or your operating system.
 WARNING: Setting this to true does not change existing hooks in git repos; adjust it before if necessary
 '''
 [security.DISABLE_WEBHOOKS]
-default = 'false'
+default = false
 description = 'Set to true to disable webhooks feature'
 [security.ONLY_ALLOW_PUSH_IF_GITEA_ENVIRONMENT_SET]
-default = 'true'
+default = true
 description = 'Set to false to allow pushes to Forgejo repositories despite having an incomplete environment - NOT RECOMMENDED'
 [security.PASSWORD_COMPLEXITY]
 default = 'off'
@@ -525,19 +566,19 @@ Classes include "lower,upper,digit,spec"
 default = 'pbkdf2_hi'
 description = 'Password Hash algorithm, either "argon2", "pbkdf2"/"pbkdf2_v2", "pbkdf2_hi", "scrypt" or "bcrypt"'
 [security.CSRF_COOKIE_HTTP_ONLY]
-default = 'true'
+default = true
 description = 'Set false to allow JavaScript to read CSRF cookie'
 [security.PASSWORD_CHECK_PWN]
-default = 'false'
+default = false
 description = 'Validate against https://haveibeenpwned.com/Passwords to see if a password has been exposed'
 [security.SUCCESSFUL_TOKENS_CACHE_SIZE]
-default = '20'
+default = 20
 description = '''
 Cache successful token hashes. API tokens are stored in the DB as pbkdf2 hashes however, this means that there is a potentially significant hashing load when there are multiple API operations.
 This cache will store the successfully hashed tokens in a LRU cache as a balance between performance and security
 '''
 [security.DISABLE_QUERY_AUTH_TOKEN]
-default = 'false'
+default = false
 description = '''
 Reject API tokens sent in URL query string (Accept Header-based API tokens only). This avoids security vulnerabilities
 stemming from cached/logged plain-text API tokens.
@@ -545,7 +586,7 @@ In future releases, this will become the default behavior
 '''
 
 [camo.ENABLED]
-default = 'false'
+default = false
 description = '''
 At the moment we only support images
 if the camo is enabled
@@ -555,14 +596,14 @@ description = 'url to a camo image proxy, it **is required** if camo is enabled'
 [camo.HMAC_KEY]
 description = 'HMAC to encode urls with, it **is required** if camo is enabled'
 [camo.ALWAYS]
-default = 'false'
+default = false
 description = '''
 Set to true to use camo for https too lese only non https urls are proxyed
 ALLWAYS is deprecated and will be removed in the future
 '''
 
 [oauth2.ENABLED]
-default = 'true'
+default = true
 description = 'Enables OAuth2 provider'
 [oauth2.JWT_SIGNING_ALGORITHM]
 default = 'RS256'
@@ -572,27 +613,27 @@ default = 'jwt/private.pem'
 description = '''
 Private key file path used to sign OAuth2 tokens. The path is relative to APP_DATA_PATH.
 This setting is only needed if JWT_SIGNING_ALGORITHM is set to RS256, RS384, RS512, ES256, ES384 or ES512.
-The file must contain a RSA or ECDSA private key in the PKCS8 format. If no key exists a 4096 bit key will be created for you
+The file must contain a RSA or ECDSA private key in the PKCS8 format. If no key exists a 4096 bit key will be created for you.
 '''
 [oauth2.JWT_SECRET]
 description = '''
 OAuth2 authentication secret for access and refresh tokens, change this yourself to a unique string. CLI generate option is helpful in this case. https://docs.gitea.io/en-us/command-line/#generate
-This setting is only needed if JWT_SIGNING_ALGORITHM is set to HS256, HS384 or HS512
+This setting is only needed if JWT_SIGNING_ALGORITHM is set to HS256, HS384 or HS512.
 '''
 [oauth2.JWT_SECRET_URI]
 default = 'file:/etc/gitea/oauth2_jwt_secret'
-description = 'Alternative location to specify OAuth2 authentication secret. You cannot specify both this and JWT_SECRET, and must pick one'
+description = 'Alternative location to specify OAuth2 authentication secret. You cannot specify both this and JWT_SECRET, and must pick one.'
 [oauth2.ACCESS_TOKEN_EXPIRATION_TIME]
-default = '3600'
+default = 3600
 description = 'Lifetime of an OAuth2 access token in seconds'
 [oauth2.REFRESH_TOKEN_EXPIRATION_TIME]
-default = '730'
+default = 730
 description = 'Lifetime of an OAuth2 refresh token in hours'
 [oauth2.INVALIDATE_REFRESH_TOKENS]
-default = 'false'
+default = false
 description = 'Check if refresh token got already used'
 [oauth2.MAX_TOKEN_LENGTH]
-default = '32767'
+default = 32767
 description = 'Maximum length of oauth2 token/cookie stored on server'
 [oauth2.DEFAULT_APPLICATIONS]
 default = 'git-credential-oauth, git-credential-manager, tea'
@@ -619,77 +660,80 @@ description = 'Either "Trace", "Debug", "Info", "Warn", "Error" or "None", defau
 default = 'None'
 description = 'Print Stacktrace with logs (rarely helpful, do not set) Either "Trace", "Debug", "Info", "Warn", "Error", default is "None"'
 [log.BUFFER_LEN]
-default = '10000'
+default = 10000
 description = '''Buffer length of the channel, keep it as it is if you don't know what it is'''
-[log.logger.access.MODE]
-description = 'Sub logger modes, a single comma means use default MODE above, empty means disable it'
-[log.logger.router.MODE]
-default = ','
-[log.logger.xorm.MODE]
-default = ','
 [log.ENABLE_SSH_LOG]
-default = 'false'
+default = false
 description = 'Collect SSH logs (Creates log from ssh git request)'
 [log.REQUEST_ID_HEADERS]
 description = '''
 Access Logger (Creates log in NCSA common log format)
 Print request id which parsed from request headers in access log, when access log is enabled.
-* E.g:
-* In request Header:         X-Request-ID: test-id-123
-* Configuration in app.ini:  REQUEST_ID_HEADERS = X-Request-ID
-* Print in log:              127.0.0.1:58384 - - [14/Feb/2023:16:33:51 +0800] "test-id-123"
+E.g:
+* In request header:         `X-Request-ID: test-id-123`
+* Configuration in app.ini:  `REQUEST_ID_HEADERS = X-Request-ID`
+* Print in log:              `127.0.0.1:58384 - - [14/Feb/2023:16:33:51 +0800] "test-id-123"`
+
 If you configure more than one in the .ini file, it will match in the order of configuration,
 and the first match will be finally printed in the log.
-* E.g:
-* In request Header:         X-Trace-ID: trace-id-1q2w3e4r
-* Configuration in app.ini:  REQUEST_ID_HEADERS = X-Request-ID, X-Trace-ID, X-Req-ID
-* Print in log:              127.0.0.1:58384 - - [14/Feb/2023:16:33:51 +0800] "trace-id-1q2w3e4r"
+E.g:
+* In request header:         `X-Trace-ID: trace-id-1q2w3e4r`
+* Configuration in app.ini:  `REQUEST_ID_HEADERS = X-Request-ID, X-Trace-ID, X-Req-ID`
+* Print in log:              `127.0.0.1:58384 - - [14/Feb/2023:16:33:51 +0800] "trace-id-1q2w3e4r"`
 '''
 [log.ACCESS_LOG_TEMPLATE]
 default = '{{.Ctx.RemoteHost}} - {{.Identity}} {{.Start.Format "[02/Jan/2006:15:04:05 -0700]" }} "{{.Ctx.Req.Method}} {{.Ctx.Req.URL.RequestURI}} {{.Ctx.Req.Proto}}" {{.ResponseWriter.Status}} {{.ResponseWriter.Size}} "{{.Ctx.Req.Referer}}" "{{.Ctx.Req.UserAgent}}"'
 description = 'Sets the template used to create the access log'
 
-[log.%(WriterMode)]
+[log.logger]
+description = 'Sub logger modes, a single comma means use default MODE above, empty means disable it'
+[log.logger.'access.MODE']
+[log.logger.'router.MODE']
+default = ','
+[log.logger.'xorm.MODE']
+default = ','
+
+[log."%(WriterMode)"]
 description = 'Log modes (aka log writers)'
-[log.%(WriterMode).MODE]
-default = 'console/file/conn/...'
-[log.%(WriterMode).LEVEL]
-[log.%(WriterMode).FLAGS]
-default = 'stdflags or journald'
-[log.%(WriterMode).EXPRESSION]
-[log.%(WriterMode).PREFIX]
-[log.%(WriterMode).COLORIZE]
-default = 'false'
+[log."%(WriterMode)".MODE]
+description = 'console/file/conn/...'
+[log."%(WriterMode)".LEVEL]
+[log."%(WriterMode)".FLAGS]
+description = 'stdflags or journald'
+[log."%(WriterMode)".EXPRESSION]
+[log."%(WriterMode)".PREFIX]
+[log."%(WriterMode)".COLORIZE]
+default = false
 
 [log.console.STDERR]
-default = 'false'
+default = false
 
 [log.file.FILE_NAME]
 description = 'Set the file_name for the logger. If this is a relative path this will be relative to ROOT_PATH'
 [log.file.LOG_ROTATE]
-default = 'true'
+default = true
 description = 'This enables automated log rotate(switch of following options), default is true'
 [log.file.MAX_SIZE_SHIFT]
-default = '28'
+default = 28
 description = 'Max size shift of a single file, default is 28 means 1 << 28, 256MB'
 [log.file.DAILY_ROTATE]
-default = 'true'
+default = true
 description = 'Segment log daily, default is true'
 [log.file.MAX_DAYS]
-default = '7'
+default = 7
 description = 'delete the log file after n days, default is 7'
 [log.file.COMPRESS]
-default = 'true'
+default = true
 description = 'compress logs with gzip'
 [log.file.COMPRESSION_LEVEL]
-default = '-1'
+default = -1
 description = 'compression level see godoc for compress/gzip'
 
 [log.conn.RECONNECT_ON_MSG]
-default = 'false'
+default = false
 description = 'Reconnect host for every single message, default is false'
 [log.conn.RECONNECT]
-default = 'false'
+default = false
 description = 'Try to reconnect when connection is lost, default is false'
 [log.conn.PROTOCOL]
 default = 'tcp'
@@ -698,98 +742,98 @@ description = 'Either "tcp", "unix" or "udp", default is "tcp"'
 description = 'Host address'
 
 [git.PATH]
-description = 'The path of git executable. If empty, Forgejo searches through the PATH environment'
+description = 'The path of git executable. If empty, Forgejo searches through the PATH environment.'
 [git.HOME_PATH]
 default = '%(APP_DATA_PATH)s/home'
 description = 'The HOME directory for Git'
 [git.DISABLE_DIFF_HIGHLIGHT]
-default = 'false'
+default = false
 description = 'Disables highlight of added and removed changes'
 [git.MAX_GIT_DIFF_LINES]
-default = '1000'
+default = 1000
 description = 'Max number of lines allowed in a single file in diff view'
 [git.MAX_GIT_DIFF_LINE_CHARACTERS]
-default = '5000'
+default = 5000
 description = 'Max number of allowed characters in a line in diff view'
 [git.MAX_GIT_DIFF_FILES]
-default = '100'
+default = 100
 description = 'Max number of files shown in diff view'
 [git.COMMITS_RANGE_SIZE]
-default = '50'
+default = 50
 description = 'Set the default commits range size'
 [git.BRANCHES_RANGE_SIZE]
-default = '20'
+default = 20
 description = 'Set the default branches range size'
 [git.VERBOSE_PUSH]
-default = 'true'
+default = true
 description = 'Print out verbose infos on push to stdout'
 [git.VERBOSE_PUSH_DELAY]
 default = '5s'
 description = 'Delay before verbose push infos are printed to stdout'
 [git.GC_ARGS]
 description = '''
-Arguments for command 'git gc', e.g. "--aggressive --auto"
-see more on http://git-scm.com/docs/git-gc/
+Arguments for command `git gc`, e.g. `--aggressive --auto`
+see more on <https://git-scm.com/docs/git-gc/>.
 '''
 [git.ENABLE_AUTO_GIT_WIRE_PROTOCOL]
-default = 'true'
+default = true
 description = '''
-If use git wire protocol version 2 when git version >= 2.18, default is true, set to false when you always want git wire protocol version 1
-To enable this for Git over SSH when using a OpenSSH server, add `AcceptEnv GIT_PROTOCOL` to your sshd_config file
+Whether to use git wire protocol version 2 when git version >= 2.18, default is true, set to false when you always want git wire protocol version 1.
+To enable this for Git over SSH when using a OpenSSH server, add `AcceptEnv GIT_PROTOCOL` to your `sshd_config` file.
 '''
 [git.PULL_REQUEST_PUSH_MESSAGE]
-default = 'true'
+default = true
 description = 'Respond to pushes to a non-default branch with a URL for creating a Pull Request (if the repository has them enabled)'
 [git.LARGE_OBJECT_THRESHOLD]
-default = '1048576'
+default = 1048576
 description = '''(Go-Git only) Don't cache objects greater than this in memory. (Set to 0 to disable.)'''
 [git.DISABLE_CORE_PROTECT_NTFS]
-default = 'false'
+default = false
 description = 'Set to true to forcibly set core.protectNTFS=false'
 [git.DISABLE_PARTIAL_CLONE]
-default = 'false'
+default = false
 description = 'Disable the usage of using partial clones for git'
 
 [git.timeout]
 description = 'Git Operation timeout in seconds'
 [git.timeout.DEFAULT]
-default = '360'
+default = 360
 [git.timeout.MIGRATE]
-default = '600'
+default = 600
 [git.timeout.MIRROR]
-default = '300'
+default = 300
 [git.timeout.CLONE]
-default = '300'
+default = 300
 [git.timeout.PULL]
-default = '300'
+default = 300
 [git.timeout.GC]
-default = '60'
+default = 60
 [git.timeout.GREP]
-default = '2'
+default = 2
 
 [git.config]
 description = '''
-Git config options
-This section only does "set" config, a removed config key from this section won't be removed from git config automatically. The format is `some.configKey = value`
+Git config options.
+This section only does "set" config, a removed config key from this section won't be removed from git config automatically. The format is `some.configKey = value`.
 '''
-[git.config.diff.algorithm]
+[git.config.'diff.algorithm']
 default = 'histogram'
-[git.config.core.logAllRefUpdates]
-default = 'true'
-[git.config.gc.reflogExpire]
-default = '90'
+[git.config.'core.logAllRefUpdates']
+default = true
+[git.config.'gc.reflogExpire']
+default = 90
 
 [service.ACTIVE_CODE_LIVE_MINUTES]
-default = '180'
+default = 180
 description = 'Time limit to confirm account/email registration'
 [service.RESET_PASSWD_CODE_LIVE_MINUTES]
-default = '180'
+default = 180
 description = 'Time limit to perform the reset of a forgotten password'
 [service.REGISTER_EMAIL_CONFIRM]
-default = 'false'
+default = false
 description = 'Whether a new user needs to confirm their email when registering'
 [service.REGISTER_MANUAL_CONFIRM]
-default = 'false'
+default = false
 description = 'Whether a new user needs to be confirmed manually after registration. (Requires `REGISTER_EMAIL_CONFIRM` to be disabled.)'
 [service.EMAIL_DOMAIN_ALLOWLIST]
 description = '''
@@ -799,54 +843,54 @@ eg: gitea.io,example.com,*.mydomain.com
 [service.EMAIL_DOMAIN_BLOCKLIST]
 description = 'Comma-separated list of domain names that are not allowed to be used to register on a Forgejo instance, wildcard is supported'
 [service.DISABLE_REGISTRATION]
-default = 'false'
+default = false
 description = 'Disallow registration, only allow admins to create accounts'
 [service.ALLOW_ONLY_INTERNAL_REGISTRATION]
-default = 'false'
+default = false
 description = 'Allow registration only using Forgejo itself, it works only when DISABLE_REGISTRATION is false'
 [service.ALLOW_ONLY_EXTERNAL_REGISTRATION]
-default = 'false'
+default = false
 description = 'Allow registration only using third-party services, it works only when DISABLE_REGISTRATION is false'
 [service.REQUIRE_SIGNIN_VIEW]
-default = 'false'
+default = false
 description = 'User must sign in to view anything'
 [service.ENABLE_NOTIFY_MAIL]
-default = 'false'
+default = false
 description = 'Mail notification'
 [service.ENABLE_BASIC_AUTHENTICATION]
-default = 'true'
+default = true
 description = '''
-This setting enables Forgejo to be signed in with HTTP BASIC Authentication using the user's password
-If you set this to false you will not be able to access the tokens endpoints on the API with your password
-Please note that setting this to false will not disable OAuth Basic or Basic authentication using a token
+This setting enables Forgejo to be signed in with HTTP BASIC Authentication using the user's password.
+If you set this to false you will not be able to access the tokens endpoints on the API with your password.
+Please note that setting this to false will not disable OAuth Basic or Basic authentication using a token.
 '''
 [service.ENABLE_REVERSE_PROXY_AUTHENTICATION]
-default = 'false'
+default = false
 description = 'More detail: https://github.com/gogits/gogs/issues/165'
 [service.ENABLE_REVERSE_PROXY_AUTHENTICATION_API]
-default = 'false'
-description = 'Enable this to allow reverse proxy authentication for API requests, the reverse proxy is responsible for ensuring that no CSRF is possible'
+default = false
+description = 'Enable this to allow reverse proxy authentication for API requests, the reverse proxy is responsible for ensuring that no CSRF is possible.'
 [service.ENABLE_REVERSE_PROXY_AUTO_REGISTRATION]
-default = 'false'
+default = false
 [service.ENABLE_REVERSE_PROXY_EMAIL]
-default = 'false'
+default = false
 [service.ENABLE_REVERSE_PROXY_FULL_NAME]
-default = 'false'
+default = false
 [service.ENABLE_CAPTCHA]
-default = 'false'
+default = false
 description = 'Enable captcha validation for registration'
 [service.REQUIRE_CAPTCHA_FOR_LOGIN]
-default = 'false'
+default = false
 description = 'Enable this to require captcha validation for login'
 [service.REQUIRE_EXTERNAL_REGISTRATION_CAPTCHA]
-default = 'false'
+default = false
 description = 'Requires captcha for external registrations'
 [service.REQUIRE_EXTERNAL_REGISTRATION_PASSWORD]
-default = 'false'
+default = false
 description = 'Requires a password for external registrations'
 [service.CAPTCHA_TYPE]
 default = 'image'
-description = 'Type of captcha you want to use. Options: image, recaptcha, hcaptcha, mcaptcha, cfturnstile'
+description = 'Type of captcha you want to use. Options: image, recaptcha, hcaptcha, mcaptcha, cfturnstile.'
 [service.RECAPTCHA_URL]
 default = 'https://www.google.com/recaptcha/'
 description = 'Change this to use recaptcha.net or other recaptcha service'
@@ -872,25 +916,25 @@ and use your account's secret
 description = 'Go to https://dash.cloudflare.com/?to=/:account/turnstile to sign up for a key'
 [service.CF_TURNSTILE_SECRET]
 [service.DEFAULT_KEEP_EMAIL_PRIVATE]
-default = 'false'
+default = false
 description = '''
 Default value for KeepEmailPrivate
 Each new user will get the value of this setting copied into their profile
 '''
 [service.DEFAULT_ALLOW_CREATE_ORGANIZATION]
-default = 'true'
+default = true
 description = '''
 Default value for AllowCreateOrganization
 Every new user will have rights set to create organizations depending on this setting
 '''
 [service.DEFAULT_USER_IS_RESTRICTED]
-default = 'false'
+default = false
 description = '''
 Default value for IsRestricted
 Every new user will have restricted permissions depending on this setting
 '''
 [service.ALLOW_DOTS_IN_USERNAMES]
-default = 'true'
+default = true
 description = '''
 Users will be able to use dots when choosing their username. Disabling this is
 helpful if your usersare having issues with e.g. RSS feeds or advanced third-party
@@ -916,19 +960,19 @@ Private is for organizations visible only to members of the organization
 Public is for organizations visible to everyone
 '''
 [service.DEFAULT_ORG_MEMBER_VISIBLE]
-default = 'false'
+default = false
 description = '''
 Default value for DefaultOrgMemberVisible
 True will make the membership of the users visible when added to the organisation
 '''
 [service.DEFAULT_ENABLE_DEPENDENCIES]
-default = 'true'
+default = true
 description = '''
 Default value for EnableDependencies
 Repositories will use dependencies by default depending on this setting
 '''
 [service.ALLOW_CROSS_REPOSITORY_DEPENDENCIES]
-default = 'true'
+default = true
 description = 'Dependencies can be added from any repository where the user is granted access or only from the current repository depending on this setting'
 [service.USER_LOCATION_MAP_URL]
 default = 'https://www.openstreetmap.org/search?query='
@@ -942,82 +986,75 @@ Some example values are:
 - Bing Maps: https://www.bing.com/maps?where1=
 '''
 [service.ENABLE_USER_HEATMAP]
-default = 'true'
+default = true
 description = 'Enable heatmap on users profiles'
 [service.ENABLE_TIMETRACKING]
-default = 'true'
+default = true
 description = 'Enable Timetracking'
 [service.DEFAULT_ENABLE_TIMETRACKING]
-default = 'true'
+default = true
 description = '''
 Default value for EnableTimetracking
 Repositories will use timetracking by default depending on this setting
 '''
 [service.DEFAULT_ALLOW_ONLY_CONTRIBUTORS_TO_TRACK_TIME]
-default = 'true'
+default = true
 description = '''
 Default value for AllowOnlyContributorsToTrackTime
 Only users with write permissions can track time if this is true
 '''
 [service.NO_REPLY_ADDRESS]
-default = '; noreply.<DOMAIN>'
+default = 'noreply.%(server.DOMAIN)s'
 description = '''
 Value for the domain part of the user's email address in the git log if user
 has set KeepEmailPrivate to true. The user's email will be replaced with a
-concatenation of the user name in lower case, "@" and NO_REPLY_ADDRESS. Default
-value is "noreply." + DOMAIN, where DOMAIN resolves to the value from server.DOMAIN
-Note: do not use the <DOMAIN> notation below
+concatenation of the user name in lower case, "@" and `NO_REPLY_ADDRESS`.
 '''
 [service.SHOW_REGISTRATION_BUTTON]
-default = 'true'
+default = true
 description = 'Show Registration button'
 [service.ENABLE_INTERNAL_SIGNIN]
-default = 'true'
+default = true
 description = 'Whether to allow internal signin'
 [service.SHOW_MILESTONES_DASHBOARD_PAGE]
-default = 'true'
+default = true
 description = '''Show milestones dashboard page - a view of all the user's milestones'''
 [service.AUTO_WATCH_NEW_REPOS]
-default = 'true'
+default = true
 description = '''
 Default value for AutoWatchNewRepos
 When adding a repo to a team or creating a new repo all team members will watch the
 repo automatically if enabled
 '''
 [service.AUTO_WATCH_ON_CHANGES]
-default = 'false'
+default = false
 description = '''
 Default value for AutoWatchOnChanges
 Make the user watch a repository When they commit for the first time
 '''
 [service.USER_DELETE_WITH_COMMENTS_MAX_TIME]
-default = '0'
+default = 0
 description = 'Minimum amount of time a user must exist before comments are kept when the user is deleted'
 [service.VALID_SITE_URL_SCHEMES]
 default = 'http,https'
 description = 'Valid site url schemes for user profiles'
 
 [service.explore.REQUIRE_SIGNIN_VIEW]
-default = 'false'
+default = false
 description = 'Only allow signed in users to view the explore pages'
 [service.explore.DISABLE_USERS_PAGE]
-default = 'false'
+default = false
 description = 'Disable the users explore page'
 [service.explore.DISABLE_ORGANIZATIONS_PAGE]
-default = 'false'
+default = false
 description = 'Disable the organizations explore page'
 [service.explore.DISABLE_CODE_PAGE]
-default = 'false'
+default = false
 description = 'Disable the code explore page'
 
 [badges]
-description = '''
-Other Settings
-Uncomment the [section.header] if you wish to
-set the below settings
-'''
 [badges.ENABLED]
-default = 'true'
+default = true
 description = 'Enable repository badges (via shields.io or a similar generator)'
 [badges.GENERATOR_URL_TEMPLATE]
 default = 'https://img.shields.io/badge/{{.label}}-{{.text}}-{{.color}}'
@@ -1025,33 +1062,33 @@ description = 'Template for the badge generator'
 
 [repository.ROOT]
 description = '''
-Root path for storing all repository data. By default, it is set to %(APP_DATA_PATH)s/gitea-repositories.
-A relative path is interpreted as _`AppWorkPath`_/%(ROOT)s
+Root path for storing all repository data. By default, it is set to `%(APP_DATA_PATH)s/gitea-repositories`.
+Relative paths will be made absolute against the _`AppWorkPath`_.
 '''
 [repository.SCRIPT_TYPE]
 default = 'bash'
-description = 'The script type this server supports. Usually this is `bash`, but some users report that only `sh` is available'
+description = 'The script type this server supports. Usually this is `bash`, but some users report that only `sh` is available.'
 [repository.DETECTED_CHARSETS_ORDER]
 default = 'UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, UTF-32LE, ISO-8859, windows-1252, ISO-8859, windows-1250, ISO-8859, ISO-8859, ISO-8859, windows-1253, ISO-8859, windows-1255, ISO-8859, windows-1251, windows-1256, KOI8-R, ISO-8859, windows-1254, Shift_JIS, GB18030, EUC-JP, EUC-KR, Big5, ISO-2022, ISO-2022, ISO-2022, IBM424_rtl, IBM424_ltr, IBM420_rtl, IBM420_ltr'
 description = '''
-DETECTED_CHARSETS_ORDER tie-break order for detected charsets.
+Tie-break order for detected charsets.
 If the charsets have equal confidence, tie-breaking will be done by order in this list
 with charsets earlier in the list chosen in preference to those later.
-Adding "defaults" will place the unused charsets at that position
+Adding "defaults" will place the unused charsets at that position.
 '''
 [repository.ANSI_CHARSET]
 description = 'Default ANSI charset to override non-UTF-8 charsets to'
 [repository.FORCE_PRIVATE]
-default = 'false'
+default = false
 description = 'Force every new repository to be private'
 [repository.DEFAULT_PRIVATE]
 default = 'last'
 description = 'Default privacy setting when creating a new repository, allowed values: last, private, public. Default is last which means the last setting used'
 [repository.DEFAULT_PUSH_CREATE_PRIVATE]
-default = 'true'
+default = true
 description = 'Default private when using push-to-create'
 [repository.MAX_CREATION_LIMIT]
-default = '-1'
+default = -1
 description = 'Global limit of repositories per user, applied at creation time. -1 means no limit'
 [repository.PREFERRED_LICENSES]
 default = 'Apache-2.0,MIT'
@@ -1060,69 +1097,69 @@ Preferred Licenses to place at the top of the List
 The name here must match the filename in options/license or custom/options/license
 '''
 [repository.DISABLE_HTTP_GIT]
-default = 'false'
+default = false
 description = 'Disable the ability to interact with repositories using the HTTP protocol'
 [repository.ACCESS_CONTROL_ALLOW_ORIGIN]
 description = '''
-Value for Access-Control-Allow-Origin header, default is not to present
-WARNING: This may be harmful to your website if you do not give it a right value
+Value for Access-Control-Allow-Origin header, default is not to present.
+WARNING: This may be harmful to your website if you do not give it a right value.
 '''
 [repository.USE_COMPAT_SSH_URI]
-default = 'true'
+default = true
 description = 'Force ssh:// clone url instead of scp-style uri when default SSH port is used'
 [repository.GO_GET_CLONE_URL_PROTOCOL]
 default = 'https'
 description = 'Value for the "go get" request returns the repository url as https or ssh, default is https'
 [repository.DEFAULT_CLOSE_ISSUES_VIA_COMMITS_IN_ANY_BRANCH]
-default = 'false'
+default = false
 description = 'Close issues as long as a commit on any branch marks it as fixed'
 [repository.ENABLE_PUSH_CREATE_USER]
-default = 'false'
+default = false
 description = 'Allow users to push local repositories to Forgejo and have them automatically created for a user or an org'
 [repository.ENABLE_PUSH_CREATE_ORG]
-default = 'false'
+default = false
 [repository.DISABLED_REPO_UNITS]
-description = 'Comma separated list of globally disabled repo units. Allowed values: repo.issues, repo.ext_issues, repo.pulls, repo.wiki, repo.ext_wiki, repo.projects, repo.packages, repo.actions'
+description = 'Comma separated list of globally disabled repo units. Allowed values: repo.issues, repo.ext_issues, repo.pulls, repo.wiki, repo.ext_wiki, repo.projects, repo.packages, repo.actions.'
 [repository.DEFAULT_REPO_UNITS]
 default = 'repo.code,repo.releases,repo.issues,repo.pulls,repo.wiki,repo.projects,repo.packages,repo.actions'
 description = '''
 Comma separated list of default new repo units. Allowed values: repo.code, repo.releases, repo.issues, repo.pulls, repo.wiki, repo.projects, repo.packages, repo.actions.
 Note: Code and Releases can currently not be deactivated. If you specify default repo units you should still list them for future compatibility.
 External wiki and issue tracker can't be enabled by default as it requires additional settings.
-Disabled repo units will not be added to new repositories regardless if it is in the default list
+Disabled repo units will not be added to new repositories regardless if it is in the default list.
 '''
 [repository.DEFAULT_FORK_REPO_UNITS]
 default = 'repo.code,repo.pulls'
 description = '''
 Comma separated list of default forked repo units.
-The set of allowed values and rules are the same as DEFAULT_REPO_UNITS
+The set of allowed values and rules are the same as `DEFAULT_REPO_UNITS`
 '''
 [repository.PREFIX_ARCHIVE_FILES]
-default = 'true'
+default = true
 description = 'Prefix archive files by placing them in a directory named after the repository'
 [repository.DISABLE_MIGRATIONS]
-default = 'false'
+default = false
 description = 'Disable migrating feature'
 [repository.DISABLE_STARS]
-default = 'false'
+default = false
 description = 'Disable stars feature'
 [repository.DISABLE_FORKS]
-default = 'false'
+default = false
 description = 'Disable repository forking'
 [repository.DEFAULT_BRANCH]
 default = 'main'
 description = 'The default branch name of new repositories'
 [repository.ALLOW_ADOPTION_OF_UNADOPTED_REPOSITORIES]
-default = 'false'
+default = false
 description = 'Allow adoption of unadopted repositories'
 [repository.ALLOW_DELETION_OF_UNADOPTED_REPOSITORIES]
-default = 'false'
+default = false
 description = 'Allow deletion of unadopted repositories'
 [repository.DISABLE_DOWNLOAD_SOURCE_ARCHIVES]
-default = 'false'
+default = false
 description = '''Don't allow download source archive files from UI'''
 [repository.ALLOW_FORK_WITHOUT_MAXIMUM_LIMIT]
-default = 'true'
+default = true
 description = 'Allow fork repositories without maximum number limit'
 
 [repository.editor.LINE_WRAP_EXTENSIONS]
@@ -1137,18 +1174,18 @@ default = 'tmp/local-repo'
 description = 'Path for local repository copy. Defaults to `tmp/local-repo` (content gets deleted on Forgejo restart)'
 
 [repository.upload.ENABLED]
-default = 'true'
+default = true
 description = 'Whether repository file uploads are enabled. Defaults to `true`'
 [repository.upload.TEMP_PATH]
 default = 'data/tmp/uploads'
 description = 'Path for uploads. Defaults to `data/tmp/uploads` (content gets deleted on gitea restart)'
 [repository.upload.ALLOWED_TYPES]
-description = 'Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types'
+description = 'Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types.'
 [repository.upload.FILE_MAX_SIZE]
-default = '50'
+default = 50
 description = 'Max size of each file in megabytes. Defaults to 50MB'
 [repository.upload.MAX_FILES]
-default = '5'
+default = 5
 description = 'Max number of files per upload. Defaults to 5'
 
 [repository.pull-request.WORK_IN_PROGRESS_PREFIXES]
@@ -1164,111 +1201,118 @@ description = 'List of keywords used in Pull Request comments to automatically r
 default = 'merge'
 description = 'Set default merge style for repository creating, valid options: merge, rebase, rebase-merge, squash, fast-forward-only'
 [repository.pull-request.DEFAULT_MERGE_MESSAGE_COMMITS_LIMIT]
-default = '50'
+default = 50
 description = 'In the default merge message for squash commits include at most this many commits'
 [repository.pull-request.DEFAULT_MERGE_MESSAGE_SIZE]
-default = '5120'
+default = 5120
 description = 'In the default merge message for squash commits limit the size of the commit messages to this'
 [repository.pull-request.DEFAULT_MERGE_MESSAGE_ALL_AUTHORS]
-default = 'false'
+default = false
 description = 'In the default merge message for squash commits walk all commits to include all authors in the Co-authored-by otherwise just use those in the limited list'
 [repository.pull-request.DEFAULT_MERGE_MESSAGE_MAX_APPROVERS]
-default = '10'
+default = 10
 description = 'In default merge messages limit the number of approvers listed as Reviewed-by: to this many'
 [repository.pull-request.DEFAULT_MERGE_MESSAGE_OFFICIAL_APPROVERS_ONLY]
-default = 'true'
+default = true
 description = 'In default merge messages only include approvers who are official'
 [repository.pull-request.POPULATE_SQUASH_COMMENT_WITH_COMMIT_MESSAGES]
-default = 'false'
+default = false
 description = '''If an squash commit's comment should be populated with the commit messages of the squashed commits'''
 [repository.pull-request.ADD_CO_COMMITTER_TRAILERS]
-default = 'true'
+default = true
 description = 'Add co-authored-by and co-committed-by trailers if committer does not match author'
 [repository.pull-request.TEST_CONFLICTING_PATCHES_WITH_GIT_APPLY]
-default = 'false'
+default = false
 description = 'In addition to testing patches using the three-way merge method, re-test conflicting patches with git apply'
 [repository.pull-request.RETARGET_CHILDREN_ON_MERGE]
-default = 'true'
-description = 'Retarget child pull requests to the parent pull request branch target on merge of parent pull request. It only works on merged PRs where the head and base branch target the same repo'
+default = true
+description = 'Retarget child pull requests to the parent pull request branch target on merge of parent pull request. It only works on merged PRs where the head and base branch target the same repo.'
 
 [repository.issue.LOCK_REASONS]
 default = 'Too heated,Off-topic,Spam,Resolved'
 description = 'List of reasons why a Pull Request or Issue can be locked'
 [repository.issue.MAX_PINNED]
-default = '3'
+default = 3
 description = '''
 Maximum number of pinned Issues per repo
 Set to 0 to disable pinning Issues
 '''
 
 [repository.release.ALLOWED_TYPES]
-description = 'Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types'
+description = 'Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types.'
 [repository.release.DEFAULT_PAGING_NUM]
-default = '10'
+default = 10
 
 [repository.signing.SIGNING_KEY]
 default = 'default'
 description = '''
-GPG key to use to sign commits, Defaults to the default - that is the value of git config --get user.signingkey
-run in the context of the RUN_USER
-Switch to none to stop signing completely
+GPG key to use to sign commits, Defaults to the default - that is the value of `git config --get user.signingkey`
+Run in the context of the `RUN_USER`.
+Switch to none to stop signing completely.
 '''
 [repository.signing.SIGNING_NAME]
 description = '''
 If a SIGNING_KEY ID is provided and is not set to default, use the provided Name and Email address as the signer.
-These should match a publicized name and email address for the key. (When SIGNING_KEY is default these are set to
-the results of git config --get user.name and git config --get user.email respectively and can only be overridden
-by setting the SIGNING_KEY ID to the correct ID.)
+These should match a publicized name and email address for the key
+(When SIGNING_KEY is default these are set to
+the results of `git config --get user.name` and `git config --get user.email`, respectively and can only be overridden
+by setting the SIGNING_KEY ID to the correct ID.).
 '''
 [repository.signing.SIGNING_EMAIL]
 [repository.signing.DEFAULT_TRUST_MODEL]
 default = 'collaborator'
-description = 'Sets the default trust model for repositories. Options are: collaborator, committer, collaboratorcommitter'
+description = 'Sets the default trust model for repositories. Options are: collaborator, committer, collaboratorcommitter.'
 [repository.signing.INITIAL_COMMIT]
 default = 'always'
 description = '''
-Determines when gitea should sign the initial commit when creating a repository
+Determines when Forgejo should sign the initial commit when creating a repository
 Either:
 - never
 - pubkey: only sign if the user has a pubkey
 - twofa: only sign if the user has logged in with twofa
 - always
-options other than none and always can be combined as comma separated list
+options other than none and always can be combined as comma separated list.
 '''
 [repository.signing.CRUD_ACTIONS]
 default = 'pubkey, twofa, parentsigned'
 description = '''
 Determines when to sign for CRUD actions
-- as above
-- parentsigned: requires that the parent commit is signed
+- as above for `INITIAL_COMMIT` or
+- parentsigned: requires that the parent commit is signed.
 '''
 [repository.signing.WIKI]
 default = 'never'
 description = '''
 Determines when to sign Wiki commits
-- as above
+- as above for `INITIAL_COMMIT`.
 '''
 [repository.signing.MERGES]
 default = 'pubkey, twofa, basesigned, commitssigned'
 description = '''
-Determines when to sign on merges
-- basesigned: require that the parent of commit on the base repo is signed.
-- commitssigned: require that all the commits in the head branch are signed.
-- approved: only sign when merging an approved pr to a protected branch
+Determines when to sign on merges:
+- as above for `INITIAL_COMMIT` or
+- `basesigned`: require that the parent of commit on the base repo is signed,
+- `commitssigned`: require that all the commits in the head branch are signed,
+- `approved`: only sign when merging an approved pr to a protected branch.
 '''
 
-[repository.mimetype_mapping..apk]
-default = 'application/vnd.android.package-archive'
-description = 'Custom MIME type mapping for downloadable files'
-
+[repository.mimetype_mapping]
+decsription = '''
+Custom MIME type mapping for downloadable files. E.g.,
+```ini
+.apk = application/vnd.android.package-archive
+```
+'''
 [project.PROJECT_BOARD_BASIC_KANBAN_TYPE]
 default = 'To Do, In Progress, Done'
 description = 'Default templates for project boards'
 [project.PROJECT_BOARD_BUG_TRIAGE_TYPE]
 default = 'Needs Triage, High Priority, Low Priority, Closed'
 
+[cors]
+heading = 'CORS'
 [cors.ENABLED]
-default = 'false'
+default = false
 description = '''
 More information about CORS can be found here: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#The_HTTP_response_headers
 enable cors headers (disabled by default)
@@ -1283,7 +1327,7 @@ description = 'list of methods allowed to request'
 default = '10m'
 description = 'max time to cache response'
 [cors.ALLOW_CREDENTIALS]
-default = 'false'
+default = false
 description = 'allow request with credentials'
 [cors.HEADERS]
 default = 'Content-Type,User-Agent'
@@ -1292,44 +1336,46 @@ description = 'headers to permit'
 default = 'SAMEORIGIN'
 description = 'set X-FRAME-OPTIONS header'
 
+[ui]
+heading = 'UI'
 [ui.EXPLORE_PAGING_NUM]
-default = '20'
+default = 20
 description = 'Number of repositories that are displayed on one explore page'
 [ui.ISSUE_PAGING_NUM]
-default = '20'
+default = 20
 description = 'Number of issues that are displayed on one page'
 [ui.REPO_SEARCH_PAGING_NUM]
-default = '20'
+default = 20
 description = 'Number of repositories that are displayed on one page when searching'
 [ui.MEMBERS_PAGING_NUM]
-default = '20'
+default = 20
 description = 'Number of members that are displayed on one page'
 [ui.FEED_MAX_COMMIT_NUM]
-default = '5'
+default = 5
 description = 'Number of maximum commits displayed in one activity feed'
 [ui.FEED_PAGING_NUM]
-default = '20'
+default = 20
 description = 'Number of items that are displayed in home feed'
 [ui.SITEMAP_PAGING_NUM]
-default = '20'
+default = 20
 description = 'Number of items that are displayed in a single subsitemap'
 [ui.PACKAGES_PAGING_NUM]
-default = '20'
+default = 20
 description = 'Number of packages that are displayed on one page'
 [ui.GRAPH_MAX_COMMIT_NUM]
-default = '100'
+default = 100
 description = 'Number of maximum commits displayed in commit graph'
 [ui.CODE_COMMENT_LINES]
-default = '4'
+default = 4
 description = 'Number of line of codes shown for a code comment'
 [ui.MAX_DISPLAY_FILE_SIZE]
-default = '8388608'
+default = 8388608
 description = 'Max size of files to be displayed (default is 8MiB)'
 [ui.AMBIGUOUS_UNICODE_DETECTION]
-default = 'true'
+default = true
 description = 'Detect ambiguous unicode characters in file contents and show warnings on the UI'
 [ui.SHOW_USER_EMAIL]
-default = 'true'
+default = true
 description = 'Whether the email of the user should be shown in the Explore Users page'
 [ui.DEFAULT_THEME]
 default = 'forgejo-auto'
@@ -1352,7 +1398,7 @@ Values can be emoji alias (:smile:) or a unicode emoji.
 For custom reactions, add a tightly cropped square image to public/assets/img/emoji/reaction_name.png
 '''
 [ui.REACTION_MAX_USER_NUM]
-default = '10'
+default = 10
 description = 'Change the number of users that are displayed in reactions tooltip (triggered by mouse hover)'
 [ui.CUSTOM_EMOJIS]
 default = 'gitea, codeberg, gitlab, git, github, gogs, forgejo'
@@ -1362,16 +1408,16 @@ By default we support gitea (:gitea:), to add more copy them to public/assets/im
 Dont mistake it for Reactions
 '''
 [ui.DEFAULT_SHOW_FULL_NAME]
-default = 'false'
-description = '''Whether the full name of the users should be shown where possible. If the full name isn't set, the username will be used'''
+default = false
+description = '''Whether the full name of the users should be shown where possible. If the full name isn't set, the username will be used.'''
 [ui.SEARCH_REPO_DESCRIPTION]
-default = 'true'
+default = true
 description = 'Whether to search within description at repository search on explore page'
 [ui.ONLY_SHOW_RELEVANT_REPOS]
-default = 'false'
+default = false
 description = '''
 Whether to only show relevant repos on the explore page when no keyword is specified and default sorting is used.
-A repo is considered irrelevant if it's a fork or if it has no metadata (no description, no icon, no topic)
+A repo is considered irrelevant if it's a fork or if it has no metadata (no description, no icon, no topic).
 '''
 [ui.EXPLORE_PAGING_DEFAULT_SORT]
 default = 'recentupdate'
@@ -1386,23 +1432,29 @@ The tense all timestamps should be rendered in. Possible values are `absolute` t
 `mixed` means most timestamps are rendered in relative time (i.e. 2 days ago)
 '''
 
+[ui.admin]
+heading = 'UI admin'
 [ui.admin.USER_PAGING_NUM]
-default = '50'
+default = 50
 description = 'Number of users that are displayed on one page'
 [ui.admin.REPO_PAGING_NUM]
-default = '50'
+default = 50
 description = 'Number of repos that are displayed on one page'
 [ui.admin.NOTICE_PAGING_NUM]
-default = '25'
+default = 25
 description = 'Number of notices that are displayed on one page'
 [ui.admin.ORG_PAGING_NUM]
-default = '50'
+default = 50
 description = 'Number of organizations that are displayed on one page'
 
+[ui.user]
+heading = 'UI user'
 [ui.user.REPO_PAGING_NUM]
-default = '15'
+default = 15
 description = 'Number of repos that are displayed on one page'
 
+[ui.meta]
+heading = 'UI metadata'
 [ui.meta.AUTHOR]
 default = 'Forgejo – Beyond coding. We forge.'
 [ui.meta.DESCRIPTION]
@@ -1410,6 +1462,8 @@ default = 'Forgejo is a self-hosted lightweight software forge. Easy to install 
 [ui.meta.KEYWORDS]
 default = 'git,forge,forgejo'
 
+[ui.notification]
+heading = 'UI notification'
 [ui.notification.MIN_TIMEOUT]
 default = '10s'
 description = '''
@@ -1428,34 +1482,41 @@ This setting determines how often the db is queried to get the latest notificati
 If the browser client supports EventSource and SharedWorker, a SharedWorker will be used in preference to polling notification. Set to -1 to disable the EventSource
 '''
 
+[ui.svg]
+heading = 'UI SVG images'
 [ui.svg.ENABLE_RENDER]
-default = 'true'
-description = 'Whether to render SVG files as images.  If SVG rendering is disabled, SVG files are displayed as text and cannot be embedded in markdown files as images'
+default = true
+description = '''
+Whether to render SVG files as images.
+If SVG rendering is disabled, SVG files are displayed as text and cannot be embedded in markdown files as images.
+'''
 
+[ui.csv]
+heading = 'UI CSV files'
 [ui.csv.MAX_FILE_SIZE]
-default = '524288'
+default = 524288
 description = 'Maximum allowed file size in bytes to render CSV files as table. (Set to 0 for no limit)'
 [ui.csv.MAX_ROWS]
-default = '2500'
-description = 'Maximum allowed rows to render CSV files. (Set to 0 for no limit)'
+default = 2500
+description = 'Maximum allowed rows to render CSV files. Set to 0 for no limit.'
 
 [markdown.ENABLE_HARD_LINE_BREAK_IN_COMMENTS]
-default = 'true'
+default = true
 description = '''
-Render soft line breaks as hard line breaks, which means a single newline character between
-paragraphs will cause a line break and adding trailing whitespace to paragraphs is not
-necessary to force a line break.
-Render soft line breaks as hard line breaks for comments
+Render soft line breaks as hard line breaks, which means a single newline
+character between paragraphs will cause a line break and adding trailing
+whitespace to paragraphs is not necessary to force a line break.
+Render soft line breaks as hard line breaks for comments.
 '''
 [markdown.ENABLE_HARD_LINE_BREAK_IN_DOCUMENTS]
-default = 'false'
+default = false
 description = 'Render soft line breaks as hard line breaks for markdown documents'
 [markdown.CUSTOM_URL_SCHEMES]
 description = '''
 Comma separated list of custom URL-Schemes that are allowed as links when rendering Markdown
 for example git,magnet,ftp (more at https://en.wikipedia.org/wiki/List_of_URI_schemes)
 URLs starting with http and https are always displayed, whatever is put in this entry.
-If this entry is empty, all URL schemes are allowed
+If this entry is empty, all URL schemes are allowed.
 '''
 [markdown.FILE_EXTENSIONS]
 default = '.md,.markdown,.mdown,.mkd,.livemd'
@@ -1464,18 +1525,24 @@ List of file extensions that should be rendered/edited as Markdown
 Separate the extensions with a comma. To render files without any extension as markdown, just put a comma
 '''
 [markdown.ENABLE_MATH]
-default = 'true'
+default = true
 description = 'Enables math inline and block detection'
 
+[ssh.minimum_key_sizes]
+heading = 'SSH minimum key sizes'
+description = 'Define allowed algorithms and their minimum key length (use -1 to disable a type).'
 [ssh.minimum_key_sizes.ED25519]
-default = '256'
-description = 'Define allowed algorithms and their minimum key length (use -1 to disable a type)'
+default = 256
+description = 'Minimum ED25519 key size'
 [ssh.minimum_key_sizes.ECDSA]
-default = '256'
+default = 256
+description = 'Minimum ECDSA key size'
 [ssh.minimum_key_sizes.RSA]
-default = '3071 ; we allow 3071 here because an otherwise valid 3072 bit RSA key can be reported as having 3071 bit length'
+default = '3071'
+description = 'Minimum RSA key size. The default value of `3071` ensures that an otherwise valid 3072 bit RSA key is allowed, because it may be reported as having 3071 bit length'
 [ssh.minimum_key_sizes.DSA]
-default = '-1 ; set to 1024 to switch on'
+default = '-1'
+description = 'Minimum DSA key size. Set to 1024 to switch on.'
 
 [indexer.ISSUE_INDEXER_TYPE]
 default = 'bleve'
@@ -1484,13 +1551,16 @@ Issue Indexer settings
 Issue indexer type, currently support: bleve, db, elasticsearch or meilisearch default is bleve
 '''
 [indexer.ISSUE_INDEXER_PATH]
-default = 'indexers/issues.bleve ; Relative paths will be made absolute against _`AppWorkPath`_.'
-description = 'Issue indexer storage path, available when ISSUE_INDEXER_TYPE is bleve'
+default = 'indexers/issues.bleve'
+description = '''
+Issue indexer storage path, available when `ISSUE_INDEXER_TYPE` is bleve'
+Relative paths will be made absolute against the _`AppWorkPath`_.
+'''
 [indexer.ISSUE_INDEXER_CONN_STR]
-description = 'Issue indexer connection string, available when ISSUE_INDEXER_TYPE is elasticsearch (e.g. http://elastic:password@localhost:9200) or meilisearch (e.g. http://:apikey@localhost:7700)'
+description = 'Issue indexer connection string, available when `ISSUE_INDEXER_TYPE` is elasticsearch (e.g. `http://elastic:password@localhost:9200`) or meilisearch (e.g. `http://:apikey@localhost:7700`)'
 [indexer.ISSUE_INDEXER_NAME]
 default = 'gitea_issues'
-description = 'Issue indexer name, available when ISSUE_INDEXER_TYPE is elasticsearch or meilisearch'
+description = 'Issue indexer name, available when `ISSUE_INDEXER_TYPE` is elasticsearch or meilisearch'
 [indexer.STARTUP_TIMEOUT]
 default = '30s'
 description = '''
@@ -1498,7 +1568,7 @@ Timeout the indexer if it takes longer than this to start.
 Set to -1 to disable timeout
 '''
 [indexer.REPO_INDEXER_ENABLED]
-default = 'false'
+default = false
 description = '''
 Repository Indexer settings
 repo indexer by default disabled, since it uses a lot of disk space
@@ -1507,7 +1577,7 @@ repo indexer by default disabled, since it uses a lot of disk space
 default = 'sources,forks,mirrors,templates'
 description = '''
 repo indexer units, the items to index, could be `sources`, `forks`, `mirrors`, `templates` or any combination of them separated by a comma.
-If empty then it defaults to `sources` only, as if you'd like to disable fully please see REPO_INDEXER_ENABLED
+If empty then it defaults to `sources` only, as if you'd like to disable fully please see `REPO_INDEXER_ENABLED`.
 '''
 [indexer.REPO_INDEXER_TYPE]
 default = 'bleve'
@@ -1516,151 +1586,163 @@ description = 'Code search engine type, could be `bleve` or `elasticsearch`'
 default = 'indexers/repos.bleve'
 description = 'Index file used for code search. available when `REPO_INDEXER_TYPE` is bleve'
 [indexer.REPO_INDEXER_CONN_STR]
-description = 'Code indexer connection string, available when `REPO_INDEXER_TYPE` is elasticsearch. i.e. http://elastic:changeme@localhost:9200'
+description = 'Code indexer connection string, available when `REPO_INDEXER_TYPE` is elasticsearch. i.e. `http://elastic:password@localhost:9200`'
 [indexer.REPO_INDEXER_NAME]
 default = 'gitea_codes'
 description = 'Code indexer name, available when `REPO_INDEXER_TYPE` is elasticsearch'
 [indexer.REPO_INDEXER_INCLUDE]
 description = '''
-A comma separated list of glob patterns (see https://github.com/gobwas/glob) to include
+A comma separated list of glob patterns (see <https://github.com/gobwas/glob>) to include
 in the index; default is empty
 '''
 [indexer.REPO_INDEXER_EXCLUDE]
 description = 'A comma separated list of glob patterns to exclude from the index; ; default is empty'
 [indexer.REPO_INDEXER_EXCLUDE_VENDORED]
-default = 'true'
+default = true
 description = '''
 If vendored files should be excluded.
-See https://github.com/go-enry/go-enry for more details which files are considered to be vendored
+See <https://github.com/go-enry/go-enry> for more details which files are considered to be vendored
 '''
 [indexer.MAX_FILE_SIZE]
-default = '1048576'
+default = 1048576
 description = 'The maximum filesize to include for indexing'
 
 [queue.TYPE]
 default = 'persistable-channel'
 description = '''
-Specific queues can be individually configured with [queue.name]. [queue] provides defaults
-([queue.issue_indexer] is special due to the old configuration described above)
-General queue queue type, currently support: persistable-channel, channel, level, redis, dummy
-default to persistable-channel
+Specific queues can be individually configured with `[queue.name]`. `[queue]` provides defaults
+(`[queue.issue_indexer]` is special due to the old configuration described above)
+General queue type, currently support: `persistable-channel`, `channel`, `level`, `redis`, `dummy`.
 '''
 [queue.DATADIR]
-default = 'queues/ ; Relative paths will be made absolute against `%(APP_DATA_PATH)s`.'
-description = 'data-dir for storing persistable queues and level queues, individual queues will default to `queues/common` meaning the queue is shared'
+default = 'queues/'
+description = '''
+Path to the directory for storing persistable queues and level queues.
+Individual queues will default to `queues/common` meaning the queue is shared.
+Relative paths will be made absolute against `%(APP_DATA_PATH)s`.
+'''
 [queue.LENGTH]
-default = '100000'
+default = 100000
 description = 'Default queue length before a channel queue will block'
 [queue.BATCH_LENGTH]
-default = '20'
+default = 20
 description = 'Batch size to send for batched queues'
 [queue.CONN_STR]
-default = '"redis://127.0.0.1:6379/0"'
+default = 'redis://127.0.0.1:6379/0'
 description = '''
 Connection string for redis queues this will store the redis (or Redis cluster) connection string.
 When `TYPE` is `persistable-channel`, this provides a directory for the underlying leveldb
 or additional options of the form `leveldb://path/to/db?option=value&....`, and will override `DATADIR`
 '''
 [queue.QUEUE_NAME]
-default = '"_queue"'
-description = 'Provides the suffix of the default redis/disk queue name - specific queues can be overridden within in their [queue.name] sections'
+default = '_queue'
+description = '''
+Suffix of the default redis/disk queue name.
+Specific queues can be overridden within in their `[queue.name]` sections.
+'''
 [queue.SET_NAME]
-default = '"_unique"'
-description = 'Provides the suffix of the default redis/disk unique queue set name - specific queues can be overridden within in their [queue.name] sections'
+default = '_unique'
+description = '''
+Suffix of the default redis/disk unique queue set name.
+Specific queues can be overridden within in their `[queue.name]` sections.
+'''
 [queue.MAX_WORKERS]
-default = '; (dynamic)'
-description = 'Maximum number of worker go-routines for the queue. Default value is "CpuNum/2" clipped to between 1 and 10'
+description = 'Maximum number of worker go-routines for the queue. Defaults to half the number of CPUs, clipped to between 1 and 10.'
 
 [admin.DISABLE_REGULAR_ORG_CREATION]
-default = 'false'
+default = false
 description = 'Disallow regular (non-admin) users from creating organizations'
 [admin.DEFAULT_EMAIL_NOTIFICATIONS]
 default = 'enabled'
-description = 'Default configuration for email notifications for users (user configurable). Options: enabled, onmention, disabled'
+description = 'Default configuration for email notifications for users (user configurable). Options: `enabled`, `onmention`, `disabled`.'
 [admin.SEND_NOTIFICATION_EMAIL_ON_NEW_USER]
-default = 'false'
-description = 'Send an email to all admins when a new user signs up to inform the admins about this act. Options: true, false'
+default = false
+description = 'Send an email to all admins when a new user signs up to inform the admins about this act'
 [admin.USER_DISABLED_FEATURES]
 description = '''
-Disabled features for users, could be "deletion", "manage_ssh_keys","manage_gpg_keys" more features can be disabled in future
-- deletion: a user cannot delete their own account
-- manage_ssh_keys: a user cannot configure ssh keys
-- manage_gpg_keys: a user cannot configure gpg keys
+Comma-separated list of disabled features for users.
+Features that can be disabled are:
+- `deletion`: a user cannot delete their own account
+- `manage_ssh_keys`: a user cannot configure ssh keys
+- `manage_gpg_keys`: a user cannot configure gpg keys
 '''
 [admin.EXTERNAL_USER_DISABLE_FEATURES]
 description = '''
-Comma separated list of disabled features ONLY if the user has an external login type (eg. LDAP, Oauth, etc.), could be `deletion`, `manage_ssh_keys`, `manage_gpg_keys`. This setting is independent from `USER_DISABLED_FEATURES` and supplements its behavior.
-- deletion: a user cannot delete their own account
-- manage_ssh_keys: a user cannot configure ssh keys
-- manage_gpg_keys: a user cannot configure gpg keys
+Comma-separated list of disabled features ONLY if the user has an external login type (eg. LDAP, Oauth, etc.).
+This setting is independent from `USER_DISABLED_FEATURES` and supplements its behavior.
+Features that can be disabled are:
+- `deletion`: a user cannot delete their own account
+- `manage_ssh_keys`: a user cannot configure ssh keys
+- `manage_gpg_keys`: a user cannot configure gpg keys
 '''
 
 [openid.ENABLE_OPENID_SIGNIN]
-default = 'true'
+default = true
 description = '''
+Whether to allow signin in via OpenID.
 OpenID is an open, standard and decentralized authentication protocol.
 Your identity is the address of a webpage you provide, which describes
 how to prove you are in control of that page.
-For more info: https://en.wikipedia.org/wiki/OpenID
+For more info: <https://en.wikipedia.org/wiki/OpenID>
 Current implementation supports OpenID-2.0
 Tested to work providers at the time of writing:
 - Any GNUSocial node (your.hostname.tld/username)
-- Any SimpleID provider (http://simpleid.koinic.net)
-- http://openid.org.cn/
-- openid.stackexchange.com
-- login.launchpad.net
+- Any SimpleID provider (<http://simpleid.koinic.net>)
+- <http://openid.org.cn/>
+- <openid.stackexchange.com>
+- <login.launchpad.net>
 - <username>.livejournal.com
-Whether to allow signin in via OpenID
 '''
 [openid.ENABLE_OPENID_SIGNUP]
-default = 'true'
+default = true
 description = '''
-Whether to allow registering via OpenID
-Do not include to rely on rhw DISABLE_REGISTRATION setting
+Whether to allow registering via OpenID.
+Do not include to rely on the `DISABLE_REGISTRATION` setting.
 '''
 [openid.WHITELISTED_URIS]
 description = '''
 Allowed URI patterns (POSIX regexp).
 Space separated.
 Only these would be allowed if non-blank.
-Example value: trusted.domain.org trusted.domain.net
+Example value: `trusted.domain.org trusted.domain.net`
 '''
 [openid.BLACKLISTED_URIS]
 description = '''
 Forbidden URI patterns (POSIX regexp).
 Space separated.
-Only used if WHITELISTED_URIS is blank.
-Example value: loadaverage.org/badguy stackexchange.com/.*spammer
+Only used if `WHITELISTED_URIS` is blank.
+Example value: `loadaverage.org/badguy stackexchange.com/.*spammer`
 '''
 
 [oauth2_client.REGISTER_EMAIL_CONFIRM]
 description = '''
 Whether a new auto registered oauth2 user needs to confirm their email.
-Do not include to use the REGISTER_EMAIL_CONFIRM setting from the `[service]` section
+Do not include to use the REGISTER_EMAIL_CONFIRM setting from the `[service]` section.
 '''
 [oauth2_client.OPENID_CONNECT_SCOPES]
 description = '''
 Scopes for the openid connect oauth2 provider (separated by space, the openid scope is implicitly added).
 Typical values are profile and email.
-For more information about the possible values see https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
+For more information about the possible values see <https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims>.
 '''
 [oauth2_client.ENABLE_AUTO_REGISTRATION]
-default = 'false'
+default = false
 description = 'Automatically create user accounts for new oauth2 users'
 [oauth2_client.USERNAME]
 default = 'nickname'
 description = '''
 The source of the username for new oauth2 accounts:
-userid = use the userid / sub attribute
-nickname = use the nickname attribute
-email = use the username part of the email attribute
+- `userid`:  use the userid / sub attribute
+- `nickname`: use the nickname attribute
+- `email`: use the username part of the email attribute
+
 Note: `nickname` and `email` options will normalize input strings using the following criteria:
 - diacritics are removed
 - the characters in the set `['´\x60]` are removed
 - the characters in the set `[\s~+]` are replaced with `-`
 '''
 [oauth2_client.UPDATE_AVATAR]
-default = 'false'
+default = false
 description = '''
 Update avatar if available from oauth2 provider.
 Update will be performed on each login
@@ -1675,51 +1757,54 @@ auto = link directly with the account
 '''
 
 [webhook.QUEUE_LENGTH]
-default = '1000'
+default = 1000
 description = 'Hook task queue length, increase if webhook shooting starts hanging'
 [webhook.DELIVER_TIMEOUT]
-default = '5'
+default = 5
 description = 'Deliver timeout in seconds'
 [webhook.ALLOWED_HOST_LIST]
 default = 'external'
 description = '''
-Webhook can only call allowed hosts for security reasons. Comma separated list, eg: external, 192.168.1.0/24, *.mydomain.com
-Built-in: loopback (for localhost), private (for LAN/intranet), external (for public hosts on internet), * (for all hosts)
-CIDR list: 1.2.3.0/8, 2001:db8::/32
-Wildcard hosts: *.mydomain.com, 192.168.100.*
-Since 1.15.7. Default to * for 1.15.x, external for 1.16 and later
+Webhook can only call allowed hosts for security reasons. Comma separated list, eg: `external, 192.168.1.0/24, *.mydomain.com`
+Built-in:
+- `loopback`: for localhost,
+- `private`: for LAN/intranet,
+- `external`: for public hosts on internet,
+- `*`: for all hosts
+
+CIDR list: `1.2.3.0/8, 2001:db8::/32`,
+Wildcard hosts: `*.mydomain.com, 192.168.100.*`.
 '''
 [webhook.SKIP_TLS_VERIFY]
-default = 'false'
+default = false
 description = 'Allow insecure certification'
 [webhook.PAGING_NUM]
-default = '10'
+default = 10
 description = 'Number of history information in each page'
 [webhook.PROXY_URL]
-description = 'Proxy server URL, support http://, https//, socks://, blank will follow environment http_proxy/https_proxy'
+description = 'Proxy server URL, support `http://`, `https//`, `socks://`, blank will follow environment http_proxy/https_proxy.'
 [webhook.PROXY_HOSTS]
-description = 'Comma separated list of host names requiring proxy. Glob patterns (*) are accepted; use ** to match all hosts'
+description = 'Comma separated list of host names requiring proxy. Glob patterns (`*`) are accepted; use `**` to match all hosts.'
 
 [mailer.ENABLED]
-default = 'false'
+default = false
 [mailer.SEND_BUFFER_LEN]
-default = '100'
+default = 100
 description = '''Buffer length of channel, keep it as it is if you don't know what it is'''
 [mailer.SUBJECT_PREFIX]
 description = 'Prefix displayed before subject in mail'
 [mailer.PROTOCOL]
 description = '''
-Mail server protocol. One of "smtp", "smtps", "smtp+starttls", "smtp+unix", "sendmail", "dummy".
-- sendmail: use the operating system's `sendmail` command instead of SMTP. This is common on Linux systems.
-- dummy: send email messages to the log as a testing phase.
+Mail server protocol. One of `smtp`, `smtps`, `smtp+starttls`, `smtp+unix`, `sendmail`, `dummy`.
+- `sendmail`: use the operating system's `sendmail` command instead of SMTP. This is common on Linux systems.
+- `dummy`: send email messages to the log as a testing phase.
 If your provider does not explicitly say which protocol it uses but does provide a port,
-you can set SMTP_PORT instead and this will be inferred.
-(Before 1.18, see the notice, this was controlled via MAILER_TYPE and IS_TLS_ENABLED.)
+you can set `SMTP_PORT` instead and this will be inferred.
 '''
 [mailer.SMTP_ADDR]
 description = '''
-Mail server address, e.g. smtp.gmail.com.
-For smtp+unix, this should be a path to a unix socket instead
+Mail server address, e.g. `smtp.gmail.com`.
+For `smtp+unix`, this should be a path to a unix socket instead.
 '''
 [mailer.SMTP_PORT]
 description = '''
@@ -1728,45 +1813,50 @@ Mail server port. Common ports are:
 - 465: SMTP Secure
 - 587: StartTLS
 If no protocol is specified, it will be inferred by this setting.
-(Before 1.18, this was combined with SMTP_ADDR as HOST.)
 '''
 [mailer.ENABLE_HELO]
-default = 'true'
+default = true
 description = 'Enable HELO operation. Defaults to true'
 [mailer.HELO_HOSTNAME]
 description = '''
 Custom hostname for HELO operation.
-If no value is provided, one is retrieved from system
+If no value is provided, one is retrieved from system.
 '''
 [mailer.FORCE_TRUST_SERVER_CERT]
-default = 'false'
+default = false
 description = '''
 If set to `true`, completely ignores server certificate validation errors.
-This option is unsafe. Consider adding the certificate to the system trust store instead
+This option is unsafe.
+Consider adding the certificate to the system trust store instead.
 '''
 [mailer.USE_CLIENT_CERT]
-default = 'false'
+default = false
 description = 'Use client certificate in connection'
 [mailer.CLIENT_CERT_FILE]
 default = 'custom/mailer/cert.pem'
 [mailer.CLIENT_KEY_FILE]
 default = 'custom/mailer/key.pem'
 [mailer.FROM]
-description = 'Mail from address, RFC 5322. This can be just an email address, or the `"Name" <email@example.com>` format'
+description = 'Mail from address, RFC 5322. This can be just an email address, or the `"Name" <email@example.com>` format.'
 [mailer.ENVELOPE_FROM]
-description = 'Sometimes it is helpful to use a different address on the envelope. Set this to use ENVELOPE_FROM as the from on the envelope. Set to `<>` to send an empty address'
+description = '''
+Sometimes it is helpful to use a different address on the envelope.
+Set this to use `ENVELOPE_FROM` as the from on the envelope.
+Set to `<>` to send an empty address.
+'''
 [mailer.FROM_DISPLAY_NAME_FORMAT]
 default = '{{ .DisplayName }}'
 description = '''
-If Forgejo sends mails on behave of users, it will just use the name also displayed in the WebUI. If you want e.g. `Mister X (by CodeIt) <gitea@codeit.net>`,
-set it to `{{ .DisplayName }} (by {{ .AppName }})`. Available Variables: `.DisplayName`, `.AppName` and `.Domain`
+If Forgejo sends mails on behave of users, it will just use the name also displayed in the WebUI.
+If you want e.g. `Mister X (by ExampleCom) <forgejo@example.com>`, set it to `{{ .DisplayName }} (by {{ .AppName }})`.
+Available Variables: `.DisplayName`, `.AppName` and `.Domain`.
 '''
 [mailer.USER]
-description = 'Mailer user name and password, if required by provider'
+description = 'Mailer user name, if required by provider'
 [mailer.PASSWD]
-description = 'Use PASSWD = `your password` for quoting if you use special characters in the password'
+description = 'Mailer password, if required by provider. Use `` PASSWD = `your password` `` for quoting if you use special characters in the password.'
 [mailer.SEND_AS_PLAIN_TEXT]
-default = 'false'
+default = false
 description = 'Send mails only in plain text, without HTML alternative'
 [mailer.SENDMAIL_PATH]
 default = 'sendmail'
@@ -1774,24 +1864,29 @@ description = 'Specify an alternative sendmail binary'
 [mailer.SENDMAIL_ARGS]
 description = '''
 Specify any extra sendmail arguments
-WARNING: if your sendmail program interprets options you should set this to "--" or terminate these args with "--"
+WARNING: if your sendmail program interprets options you should set this to "--" or terminate these args with "--".
 '''
 [mailer.SENDMAIL_TIMEOUT]
 default = '5m'
 description = 'Timeout for Sendmail'
 [mailer.SENDMAIL_CONVERT_CRLF]
-default = 'true'
+default = true
 description = 'convert \r\n to \n for Sendmail'
 
 [mailer.override_header.Reply-To]
-default = 'test@example.com, test2@example.com'
-description = 'This is empty by default, use it only if you know what you need it for'
+description = '''
+Reply-To mail addresses.
+Multiple addresses may be specified, separated by comma, e.g. `test@example.com, test2@example.com`.
+This is empty by default, use it only if you know what you need it for.
+'''
 [mailer.override_header.Content-Type]
-default = 'text/html; charset=utf-8'
+default = '`text/html; charset=utf-8`'
 [mailer.override_header.In-Reply-To]
 
+[email.incoming]
+heading = 'Incoming email'
 [email.incoming.ENABLED]
-default = 'false'
+default = false
 description = 'Enable handling of incoming emails'
 [email.incoming.REPLY_TO_ADDRESS]
 description = '''
@@ -1808,33 +1903,37 @@ description = 'Username of the receiving account'
 [email.incoming.PASSWORD]
 description = 'Password of the receiving account'
 [email.incoming.USE_TLS]
-default = 'false'
+default = false
 description = 'Whether the IMAP server uses TLS'
 [email.incoming.SKIP_TLS_VERIFY]
-default = 'true'
+default = true
 description = 'If set to true, completely ignores server certificate validation errors. This option is unsafe'
 [email.incoming.MAILBOX]
 default = 'INBOX'
 description = 'The mailbox name where incoming mail will end up'
 [email.incoming.DELETE_HANDLED_MESSAGE]
-default = 'true'
+default = true
 description = 'Whether handled messages should be deleted from the mailbox'
 [email.incoming.MAXIMUM_MESSAGE_SIZE]
-default = '10485760'
+default = 10485760
 description = 'Maximum size of a message to handle. Bigger messages are ignored. Set to 0 to allow every size'
 
 [cache.ADAPTER]
 default = 'memory'
 description = 'Either "memory", "redis", "memcache", or "twoqueue". default is "memory"'
 [cache.INTERVAL]
-default = '60'
+default = 60
 description = 'For "memory" only, GC interval in seconds, default is 60'
 [cache.HOST]
 description = '''
-For "redis" and "memcache", connection host address
-redis: `redis://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` (or `redis+cluster://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` for a Redis cluster)
-memcache: `127.0.0.1:11211`
-twoqueue: `{"size":50000,"recent_ratio":0.25,"ghost_ratio":0.5}` or `50000`
+Connection host address, only if `ADAPTER` is `redis` or `memcache`:
+- `redis`:
+  - `redis://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` or
+  - `redis+cluster://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` for a Redis cluster
+- `memcache`: `127.0.0.1:11211`
+- `twoqueue`:
+  - `{"size":50000,"recent_ratio":0.25,"ghost_ratio":0.5}` or
+  - `50000`
 '''
 [cache.ITEM_TTL]
 default = '16h'
@@ -1852,23 +1951,25 @@ Time to keep items in cache if not used, default is 8760 hours.
 Setting it to -1 disables caching
 '''
 [cache.last_commit.COMMITS_COUNT]
-default = '1000'
+default = 1000
 description = '''Only enable the cache when repository's commits count great than'''
 
 [session.PROVIDER]
 default = 'memory'
 description = '''
-Either "memory", "file", "redis", "db", "mysql", "couchbase", "memcache" or "postgres"
-Default is "memory". "db" will reuse the configuration in [database]
+Session provider. Either `memory`, `file`, `redis`, `db`, `mysql`, `couchbase`, `memcache` or `postgres`.
+`db` will reuse the configuration in `[database]`.
 '''
 [session.PROVIDER_CONFIG]
-default = 'data/sessions ; Relative paths will be made absolute against _`AppWorkPath`_.'
+default = 'data/sessions'
 description = '''
-Provider config options
-memory: doesn't have any config yet
-file: session file path, e.g. `data/sessions`
-redis: `redis://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` (or `redis+cluster://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` for a Redis cluster)
-mysql: go-sql-driver/mysql dsn config string, e.g. `root:password@/session_table`
+Provider config options. Possible values depend on the `PROVIDER`:
+- `memory`: doesn't have any config yet,
+- `file`: session file path, e.g. `data/sessions`, relative paths will be made absolute against _`AppWorkPath`_,
+- `redis`:
+  - `redis://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` or
+  - `redis+cluster://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` for a Redis cluster,
+- `mysql`: go-sql-driver/mysql dsn config string, e.g. `root:password@/session_table`
 '''
 [session.COOKIE_NAME]
 default = 'i_like_gitea'
@@ -1876,10 +1977,10 @@ description = 'Session cookie name'
 [session.COOKIE_SECURE]
 description = 'If you use session in https only: true or false. If not set, it defaults to `true` if the ROOT_URL is an HTTPS URL'
 [session.GC_INTERVAL_TIME]
-default = '86400'
+default = 86400
 description = 'Session GC time interval in seconds, default is 86400 (1 day)'
 [session.SESSION_LIFE_TIME]
-default = '86400'
+default = 86400
 description = 'Session life time in seconds, default is 86400 (1 day)'
 [session.DOMAIN]
 description = 'Cookie domain name. Default is empty'
@@ -1896,27 +1997,27 @@ none = no avatar will be displayed; random = random avatar will be displayed; im
 [picture.REPOSITORY_AVATAR_FALLBACK_IMAGE]
 default = '/img/repo_default.png'
 [picture.AVATAR_MAX_WIDTH]
-default = '4096'
+default = 4096
 description = '''
 Max Width and Height of uploaded avatars.
 This is to limit the amount of RAM used when resizing the image
 '''
 [picture.AVATAR_MAX_HEIGHT]
-default = '4096'
+default = 4096
 [picture.AVATAR_RENDERED_SIZE_FACTOR]
-default = '2'
+default = 2
 description = '''
 The multiplication factor for rendered avatar images.
 Larger values result in finer rendering on HiDPI devices
 '''
 [picture.AVATAR_MAX_FILE_SIZE]
-default = '1048576'
+default = 1048576
 description = '''
 Maximum allowed file size for uploaded avatars.
 This is to limit the amount of RAM used when resizing the image
 '''
 [picture.AVATAR_MAX_ORIGIN_SIZE]
-default = '262144'
+default = 262144
 description = 'If the uploaded file is not larger than this byte size, the image will be used as is, without resizing/converting'
 [picture.GRAVATAR_SOURCE]
 default = 'gravatar'
@@ -1925,10 +2026,10 @@ Chinese users can choose "duoshuo"
 or a custom avatar source, like: http://cn.gravatar.com/avatar/
 '''
 [picture.DISABLE_GRAVATAR]
-default = 'false'
+default = false
 description = 'This value will always be true in offline mode'
 [picture.ENABLE_FEDERATED_AVATAR]
-default = 'false'
+default = false
 description = '''
 Federated avatar lookup uses DNS to discover avatar associated
 with emails, see https://www.libravatar.org
@@ -1936,28 +2037,28 @@ This value will always be false in offline mode or when Gravatar is disabled
 '''
 
 [attachment.ENABLED]
-default = 'true'
+default = true
 description = 'Whether issue and pull request attachments are enabled. Defaults to `true`'
 [attachment.ALLOWED_TYPES]
 default = '.avif,.cpuprofile,.csv,.dmp,.docx,.fodg,.fodp,.fods,.fodt,.gif,.gz,.jpeg,.jpg,.json,.jsonc,.log,.md,.mov,.mp4,.odf,.odg,.odp,.ods,.odt,.patch,.pdf,.png,.pptx,.svg,.tgz,.txt,.webm,.xls,.xlsx,.zip'
-description = 'Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types'
+description = 'Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types.'
 [attachment.MAX_SIZE]
-default = '2048'
-description = 'Max size of each file. Defaults to 2048MB'
+default = 2048
+description = 'Max size of each file in MB'
 [attachment.MAX_FILES]
-default = '5'
-description = 'Max number of files per upload. Defaults to 5'
+default = 5
+description = 'Max number of files per upload'
 [attachment.STORAGE_TYPE]
 default = 'local'
 description = '''
 Storage type for attachments, `local` for local disk or `minio` for s3 compatible
-object storage service, default is `local`
+object storage service.`
 '''
 [attachment.SERVE_DIRECT]
-default = 'false'
+default = false
 description = '''
 Allows the storage driver to redirect to authenticated URLs to serve files directly
-Currently, only `minio` is supported
+Currently, only `minio` is supported.
 '''
 [attachment.PATH]
 default = 'attachments'
@@ -1970,100 +2071,101 @@ default = 'localhost:9000'
 description = 'Minio endpoint to connect only available when STORAGE_TYPE is `minio`'
 [attachment.MINIO_ACCESS_KEY_ID]
 description = '''
-Minio accessKeyID to connect only available when STORAGE_TYPE is `minio`.
-If not provided and STORAGE_TYPE is `minio`, will search for credentials in known
-environment variables (MINIO_ACCESS_KEY_ID, AWS_ACCESS_KEY_ID), credentials files
-(~/.mc/config.json, ~/.aws/credentials), and EC2 instance metadata
+Minio access key ID to connect, only available when `STORAGE_TYPE` is `minio`.
+If not provided and `STORAGE_TYPE` is `minio`, Forgejo will search for credentials in known
+environment variables (`MINIO_ACCESS_KEY_ID`, `AWS_ACCESS_KEY_ID`), credentials files
+(`~/.mc/config.json`, `~/.aws/credentials`), and EC2 instance metadata.
 '''
 [attachment.MINIO_SECRET_ACCESS_KEY]
-description = 'Minio secretAccessKey to connect only available when STORAGE_TYPE is `minio`'
+description = 'Minio secret access key to connect, only available when `STORAGE_TYPE` is `minio`'
 [attachment.MINIO_BUCKET]
 default = 'gitea'
-description = 'Minio bucket to store the attachments only available when STORAGE_TYPE is `minio`'
+description = 'Minio bucket to store the attachments, only available when `STORAGE_TYPE` is `minio`'
 [attachment.MINIO_BUCKET_LOOKUP]
+default = 'auto'
 description = '''
-Url lookup for the minio bucket only available when STORAGE_TYPE is `minio`
-Available values: auto, dns, path
-If empty, it behaves the same as "auto" was set
+URL lookup for the minio bucket, only available when `STORAGE_TYPE` is `minio`
+Available values: `auto`, `dns, `path`.
+If empty, it behaves the same as `auto` was set
 '''
 [attachment.MINIO_LOCATION]
 default = 'us-east-1'
-description = 'Minio location to create bucket only available when STORAGE_TYPE is `minio`'
+description = 'Minio location to create bucket, only available when `STORAGE_TYPE` is `minio`'
 [attachment.MINIO_BASE_PATH]
 default = 'attachments/'
-description = 'Minio base path on the bucket only available when STORAGE_TYPE is `minio`'
+description = 'Minio base path on the bucket, only available when `STORAGE_TYPE` is `minio`'
 [attachment.MINIO_USE_SSL]
-default = 'false'
-description = 'Minio enabled ssl only available when STORAGE_TYPE is `minio`'
+default = false
+description = 'Minio enabled SSL, only available when `STORAGE_TYPE` is `minio`'
 [attachment.MINIO_INSECURE_SKIP_VERIFY]
-default = 'false'
-description = 'Minio skip SSL verification available when STORAGE_TYPE is `minio`'
+default = false
+description = 'Minio skip SSL verification, only available when `STORAGE_TYPE` is `minio`'
 [attachment.MINIO_CHECKSUM_ALGORITHM]
 default = 'default'
-description = 'Minio checksum algorithm: default (for MinIO or AWS S3) or md5 (for Cloudflare or Backblaze)'
+description = '''
+Minio checksum algorithm:
+- `default`: for MinIO or AWS S3, or
+- `md5`: for Cloudflare or Backblaze.
+'''
 
 [time.DEFAULT_UI_LOCATION]
 description = '''
-Location the UI time display i.e. Asia/Shanghai
-Empty means server's location setting
+Location of the UI time display i.e. `Asia/Shanghai`
+Empty means server's location setting.
 '''
 
 [cron.ENABLED]
-default = 'false'
-description = '''
-Common settings
-Setting this to true will enable all cron tasks periodically with default settings
-'''
+default = false
+description = 'Whether to enable cron tasks execution'
 [cron.RUN_AT_START]
-default = 'false'
-description = 'Setting this to true will run all enabled cron tasks when Forgejo starts'
+default = false
+description = 'Whether to run all enabled cron tasks when Forgejo starts'
 
 [cron.archive_cleanup]
 description = '''
+Clean up old repository archives.
 Note: ``SCHEDULE`` accept formats
-- Full crontab specs, e.g. "* * * * * ?"
-- Descriptors, e.g. "@midnight", "@every 1h30m"
-See more: https://pkg.go.dev/github.com/gogs/cron@v0.0.0-20171120032916-9f6c956d3e14
-Basic cron tasks - enabled by default
-Clean up old repository archives
+- Full crontab specs, e.g. `* * * * * ?`
+- Descriptors, e.g. `@midnight`, `@every 1h30m`
+See more: <https://pkg.go.dev/github.com/gogs/cron@v0.0.0-20171120032916-9f6c956d3e14>
 '''
 [cron.archive_cleanup.ENABLED]
-default = 'true'
+default = true
 description = 'Whether to enable the job'
 [cron.archive_cleanup.RUN_AT_START]
-default = 'true'
-description = 'Whether to always run at least once at start up time (if ENABLED)'
+default = true
+description = 'Whether to always run at least once at start up time (if `ENABLED`)'
 [cron.archive_cleanup.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 description = 'Whether to emit notice on successful execution too'
 [cron.archive_cleanup.SCHEDULE]
 default = '@midnight'
 description = 'Time interval for job to run'
 [cron.archive_cleanup.OLDER_THAN]
 default = '24h'
-description = 'Archives created more than OLDER_THAN ago are subject to deletion'
+description = 'Archives created more than `OLDER_THAN` ago are subject to deletion'
 
 [cron.update_mirrors]
 description = 'Update mirrors'
 [cron.update_mirrors.SCHEDULE]
 default = '@every 10m'
 [cron.update_mirrors.ENABLED]
-default = 'true'
+default = true
 description = 'Enable running Update mirrors task periodically'
 [cron.update_mirrors.RUN_AT_START]
-default = 'false'
+default = false
 description = 'Run Update mirrors task when Forgejo starts'
 [cron.update_mirrors.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 description = 'Notice if not success'
 [cron.update_mirrors.PULL_LIMIT]
-default = '50'
+default = 50
 description = '''
 Limit the number of mirrors added to the queue to this number
 (negative values mean no limit, 0 will result in no result in no mirrors being queued effectively disabling pull mirror updating.)
 '''
 [cron.update_mirrors.PUSH_LIMIT]
-default = '50'
+default = 50
 description = '''
 Limit the number of mirrors added to the queue to this number
 (negative values mean no limit, 0 will result in no mirrors being queued effectively disabling push mirror updating)
@@ -2074,13 +2176,13 @@ description = 'Repository health check'
 [cron.repo_health_check.SCHEDULE]
 default = '@midnight'
 [cron.repo_health_check.ENABLED]
-default = 'true'
+default = true
 description = 'Enable running Repository health check task periodically'
 [cron.repo_health_check.RUN_AT_START]
-default = 'false'
+default = false
 description = 'Run Repository health check task when Forgejo starts'
 [cron.repo_health_check.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 description = 'Notice if not success'
 [cron.repo_health_check.TIMEOUT]
 default = '60s'
@@ -2093,25 +2195,25 @@ see more on http://git-scm.com/docs/git-fsck
 [cron.check_repo_stats]
 description = 'Check repository statistics'
 [cron.check_repo_stats.ENABLED]
-default = 'true'
+default = true
 description = 'Enable running check repository statistics task periodically'
 [cron.check_repo_stats.RUN_AT_START]
-default = 'true'
+default = true
 description = 'Run check repository statistics task when Forgejo starts'
 [cron.check_repo_stats.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 description = 'Notice if not success'
 [cron.check_repo_stats.SCHEDULE]
 default = '@midnight'
 
 [cron.update_migration_poster_id.ENABLED]
-default = 'true'
+default = true
 description = '''Update migrated repositories' issues and comments' posterid, it will always attempt synchronization when the instance starts'''
 [cron.update_migration_poster_id.RUN_AT_START]
-default = 'true'
+default = true
 description = '''Update migrated repositories' issues and comments' posterid when starting server (default true)'''
 [cron.update_migration_poster_id.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 description = 'Notice if not success'
 [cron.update_migration_poster_id.SCHEDULE]
 default = '@midnight'
@@ -2120,18 +2222,18 @@ description = 'Interval as a duration between each synchronization. (default eve
 [cron.sync_external_users]
 description = 'Synchronize external user data (only LDAP user synchronization is supported)'
 [cron.sync_external_users.ENABLED]
-default = 'true'
+default = true
 [cron.sync_external_users.RUN_AT_START]
-default = 'false'
+default = false
 description = 'Synchronize external user data when starting server (default false)'
 [cron.sync_external_users.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 description = 'Notice if not success'
 [cron.sync_external_users.SCHEDULE]
 default = '@midnight'
 description = 'Interval as a duration between each synchronization (default every 24h)'
 [cron.sync_external_users.UPDATE_EXISTING]
-default = 'true'
+default = true
 description = '''
 Create new users, update existing user data and disable users that are not in external source anymore (default)
 or only create new users if UPDATE_EXISTING is set to false
@@ -2140,21 +2242,21 @@ or only create new users if UPDATE_EXISTING is set to false
 [cron.cleanup_actions]
 description = 'Cleanup expired actions assets'
 [cron.cleanup_actions.ENABLED]
-default = 'true'
+default = true
 [cron.cleanup_actions.RUN_AT_START]
-default = 'true'
+default = true
 [cron.cleanup_actions.SCHEDULE]
 default = '@midnight'
 
 [cron.deleted_branches_cleanup]
 description = 'Clean-up deleted branches'
 [cron.deleted_branches_cleanup.ENABLED]
-default = 'true'
+default = true
 [cron.deleted_branches_cleanup.RUN_AT_START]
-default = 'true'
+default = true
 description = 'Clean-up deleted branches when starting server (default true)'
 [cron.deleted_branches_cleanup.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 description = 'Notice if not success'
 [cron.deleted_branches_cleanup.SCHEDULE]
 default = '@midnight'
@@ -2166,10 +2268,10 @@ description = 'deleted branches than OLDER_THAN ago are subject to deletion'
 [cron.cleanup_hook_task_table]
 description = 'Cleanup hook_task table'
 [cron.cleanup_hook_task_table.ENABLED]
-default = 'true'
+default = true
 description = 'Whether to enable the job'
 [cron.cleanup_hook_task_table.RUN_AT_START]
-default = 'false'
+default = false
 description = 'Whether to always run at start up time (if ENABLED)'
 [cron.cleanup_hook_task_table.SCHEDULE]
 default = '@midnight'
@@ -2181,19 +2283,19 @@ description = 'OlderThan or PerWebhook. How the records are removed, either by a
 default = '168h'
 description = 'If CLEANUP_TYPE is set to OlderThan, then any delivered hook_task records older than this expression will be deleted'
 [cron.cleanup_hook_task_table.NUMBER_TO_KEEP]
-default = '10'
+default = 10
 description = 'If CLEANUP_TYPE is set to PerWebhook, this is number of hook_task records to keep for a webhook (i.e. keep the most recent x deliveries)'
 
 [cron.cleanup_packages]
 description = 'Cleanup expired packages'
 [cron.cleanup_packages.ENABLED]
-default = 'true'
+default = true
 description = 'Whether to enable the job'
 [cron.cleanup_packages.RUN_AT_START]
-default = 'true'
-description = 'Whether to always run at least once at start up time (if ENABLED)'
+default = true
+description = 'Whether to always run at least once at start up time (if `ENABLED`)'
 [cron.cleanup_packages.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 description = 'Whether to emit notice on successful execution too'
 [cron.cleanup_packages.SCHEDULE]
 default = '@midnight'
@@ -2203,16 +2305,13 @@ default = '24h'
 description = 'Unreferenced blobs created more than OLDER_THAN ago are subject to deletion'
 
 [cron.delete_inactive_accounts]
-description = '''
-Extended cron task - not enabled by default
-Delete all unactivated accounts
-'''
+description = 'Delete all unactivated accounts'
 [cron.delete_inactive_accounts.ENABLED]
-default = 'false'
+default = false
 [cron.delete_inactive_accounts.RUN_AT_START]
-default = 'false'
+default = false
 [cron.delete_inactive_accounts.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 [cron.delete_inactive_accounts.SCHEDULE]
 default = '@annually'
 [cron.delete_inactive_accounts.OLDER_THAN]
@@ -2221,22 +2320,22 @@ default = '168h'
 [cron.delete_repo_archives]
 description = 'Delete all repository archives'
 [cron.delete_repo_archives.ENABLED]
-default = 'false'
+default = false
 [cron.delete_repo_archives.RUN_AT_START]
-default = 'false'
+default = false
 [cron.delete_repo_archives.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 [cron.delete_repo_archives.SCHEDULE]
-default = '@annually;'
+default = '@annually'
 
 [cron.git_gc_repos]
 description = 'Garbage collect all repositories'
 [cron.git_gc_repos.ENABLED]
-default = 'false'
+default = false
 [cron.git_gc_repos.RUN_AT_START]
-default = 'false'
+default = false
 [cron.git_gc_repos.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 [cron.git_gc_repos.SCHEDULE]
 default = '@every 72h'
 [cron.git_gc_repos.TIMEOUT]
@@ -2250,66 +2349,66 @@ The default value is same with [git] -> GC_ARGS
 [cron.resync_all_sshkeys]
 description = '''Update the '.ssh/authorized_keys' file with Forgejo SSH keys'''
 [cron.resync_all_sshkeys.ENABLED]
-default = 'false'
+default = false
 [cron.resync_all_sshkeys.RUN_AT_START]
-default = 'false'
+default = false
 [cron.resync_all_sshkeys.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 [cron.resync_all_sshkeys.SCHEDULE]
 default = '@every 72h'
 
 [cron.resync_all_hooks]
 description = 'Resynchronize pre-receive, update and post-receive hooks of all repositories'
 [cron.resync_all_hooks.ENABLED]
-default = 'false'
+default = false
 [cron.resync_all_hooks.RUN_AT_START]
-default = 'false'
+default = false
 [cron.resync_all_hooks.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 [cron.resync_all_hooks.SCHEDULE]
 default = '@every 72h'
 
 [cron.reinit_missing_repos]
 description = 'Reinitialize all missing Git repositories for which records exist'
 [cron.reinit_missing_repos.ENABLED]
-default = 'false'
+default = false
 [cron.reinit_missing_repos.RUN_AT_START]
-default = 'false'
+default = false
 [cron.reinit_missing_repos.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 [cron.reinit_missing_repos.SCHEDULE]
 default = '@every 72h'
 
 [cron.delete_missing_repos]
 description = 'Delete all repositories missing their Git files'
 [cron.delete_missing_repos.ENABLED]
-default = 'false'
+default = false
 [cron.delete_missing_repos.RUN_AT_START]
-default = 'false'
+default = false
 [cron.delete_missing_repos.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 [cron.delete_missing_repos.SCHEDULE]
 default = '@every 72h'
 
 [cron.delete_generated_repository_avatars]
 description = 'Delete generated repository avatars'
 [cron.delete_generated_repository_avatars.ENABLED]
-default = 'false'
+default = false
 [cron.delete_generated_repository_avatars.RUN_AT_START]
-default = 'false'
+default = false
 [cron.delete_generated_repository_avatars.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 [cron.delete_generated_repository_avatars.SCHEDULE]
 default = '@every 72h'
 
 [cron.delete_old_actions]
 description = 'Delete all old activities from database'
 [cron.delete_old_actions.ENABLED]
-default = 'false'
+default = false
 [cron.delete_old_actions.RUN_AT_START]
-default = 'false'
+default = false
 [cron.delete_old_actions.NOTICE_ON_SUCCESS]
-default = 'false'
+default = false
 [cron.delete_old_actions.SCHEDULE]
 default = '@every 168h'
 [cron.delete_old_actions.OLDER_THAN]
@@ -2318,11 +2417,11 @@ default = '8760h'
 [cron.update_checker]
 description = 'Check for new Forgejo versions'
 [cron.update_checker.ENABLED]
-default = 'true'
+default = true
 [cron.update_checker.RUN_AT_START]
-default = 'false'
+default = false
 [cron.update_checker.ENABLE_SUCCESS_NOTICE]
-default = 'false'
+default = false
 [cron.update_checker.SCHEDULE]
 default = '@every 168h'
 [cron.update_checker.HTTP_ENDPOINT]
@@ -2333,11 +2432,11 @@ default = 'release.forgejo.org'
 [cron.delete_old_system_notices]
 description = 'Delete all old system notices from database'
 [cron.delete_old_system_notices.ENABLED]
-default = 'false'
+default = false
 [cron.delete_old_system_notices.RUN_AT_START]
-default = 'false'
+default = false
 [cron.delete_old_system_notices.NO_SUCCESS_NOTICE]
-default = 'false'
+default = false
 [cron.delete_old_system_notices.SCHEDULE]
 default = '@every 168h'
 [cron.delete_old_system_notices.OLDER_THAN]
@@ -2346,9 +2445,9 @@ default = '8760h'
 [cron.gc_lfs]
 description = 'Garbage collect LFS pointers in repositories'
 [cron.gc_lfs.ENABLED]
-default = 'false'
+default = false
 [cron.gc_lfs.RUN_AT_START]
-default = 'false'
+default = false
 description = 'Garbage collect LFS pointers in repositories (default false)'
 [cron.gc_lfs.SCHEDULE]
 default = '@every 24h'
@@ -2360,20 +2459,20 @@ description = 'Only attempt to garbage collect LFSMetaObjects older than this (d
 default = '72h'
 description = 'Only attempt to garbage collect LFSMetaObjects that have not been attempted to be garbage collected for this long (default 3 days)'
 [cron.gc_lfs.NUMBER_TO_CHECK_PER_REPO]
-default = '100'
+default = 100
 description = 'Minimum number of stale LFSMetaObjects to check per repo. Set to `0` to always check all'
 [cron.gc_lfs.PROPORTION_TO_CHECK_PER_REPO]
 default = '0.6'
 description = 'Check at least this proportion of LFSMetaObjects per repo. (This may cause all stale LFSMetaObjects to be checked.)'
 
 [mirror.ENABLED]
-default = 'true'
+default = true
 description = '''Enables the mirror functionality. Set to **false** to disable all mirrors. Pre-existing mirrors remain valid but won't be updated; may be converted to regular repo'''
 [mirror.DISABLE_NEW_PULL]
-default = 'false'
+default = false
 description = 'Disable the creation of **new** pull mirrors. Pre-existing mirrors remain valid. Will be ignored if `mirror.ENABLED` is `false`'
 [mirror.DISABLE_NEW_PUSH]
-default = 'false'
+default = false
 description = 'Disable the creation of **new** push mirrors. Pre-existing mirrors remain valid. Will be ignored if `mirror.ENABLED` is `false`'
 [mirror.DEFAULT_INTERVAL]
 default = '8h'
@@ -2383,19 +2482,19 @@ default = '10m'
 description = 'Min interval as a duration must be > 1m'
 
 [api.ENABLE_SWAGGER]
-default = 'true'
+default = true
 description = 'Enables the API documentation endpoints (/api/swagger, /api/v1/swagger, …). True or false'
 [api.MAX_RESPONSE_ITEMS]
-default = '50'
+default = 50
 description = 'Max number of items in a page'
 [api.DEFAULT_PAGING_NUM]
-default = '30'
+default = 30
 description = 'Default paging number of api'
 [api.DEFAULT_GIT_TREES_PER_PAGE]
-default = '1000'
+default = 1000
 description = 'Default and maximum number of items per page for git trees api'
 [api.DEFAULT_MAX_BLOB_SIZE]
-default = '10485760'
+default = 10485760
 description = 'Default max size of a blob returned by the blobs API (default is 10MiB)'
 
 [i18n.LANGS]
@@ -2411,35 +2510,37 @@ Extension mapping to highlight class
 e.g. .toml=ini
 '''
 [other.SHOW_FOOTER_VERSION]
-default = 'true'
+default = true
 description = 'Show version information about Forgejo and Go in the footer'
 [other.SHOW_FOOTER_TEMPLATE_LOAD_TIME]
-default = 'true'
+default = true
 description = 'Show template execution time in the footer'
 [other.SHOW_FOOTER_POWERED_BY]
-default = 'true'
+default = true
 description = 'Show the "powered by" text in the footer'
 [other.ENABLE_SITEMAP]
-default = 'true'
+default = true
 description = 'Generate sitemap. Defaults to `true`'
 [other.ENABLE_FEED]
-default = 'true'
+default = true
 description = 'Enable/Disable RSS/Atom feed'
 
 [markup.MERMAID_MAX_SOURCE_CHARACTERS]
-default = '5000'
+default = 5000
 description = 'Set the maximum number of characters in a mermaid source. (Set to -1 to disable limits)'
 [markup.FILEPREVIEW_MAX_LINES]
-default = '50'
+default = 50
 description = 'Set the maximum number of lines allowed for a filepreview. (Set to -1 to disable limits; set to 0 to disable the feature)'
 
+[markup.sanitizer.1]
+heading = 'Markup sanitizer'
+description = '''
+This section can appear multiple times by adding a unique alphanumeric suffix to define multiple rules.
+e.g., `[markup.sanitizer.1]` -> `[markup.sanitizer.2]` -> `[markup.sanitizer.TeX]`
+The following keys can appear once to define a sanitation policy rule.
+'''
 [markup.sanitizer.1.ELEMENT]
 default = 'span'
-description = '''
-The following keys can appear once to define a sanitation policy rule.
-This section can appear multiple times by adding a unique alphanumeric suffix to define multiple rules.
-e.g., [markup.sanitizer.1] -> [markup.sanitizer.2] -> [markup.sanitizer.TeX]
-'''
 [markup.sanitizer.1.ALLOW_ATTR]
 default = 'class'
 [markup.sanitizer.1.REGEXP]
@@ -2447,48 +2548,48 @@ default = '^(info|warning|error)$'
 
 [markup.asciidoc]
 description = '''
-Other markup formats e.g. asciidoc
+Other markup formats e.g. `asciidoc`
 uncomment and enable the below section.
 (You can add other markup formats by copying the section and adjusting
-the section name suffix "asciidoc" to something else.)
+the section name suffix `asciidoc` to something else.)
 '''
 [markup.asciidoc.ENABLED]
-default = 'false'
+default = false
 [markup.asciidoc.FILE_EXTENSIONS]
 default = '.adoc,.asciidoc'
 description = 'List of file extensions that should be rendered by an external command'
 [markup.asciidoc.RENDER_COMMAND]
-default = '"asciidoc --out-file=- -"'
+default = 'asciidoc --out-file=- -'
 description = 'External command to render all matching extensions'
 [markup.asciidoc.IS_INPUT_FILE]
-default = 'false'
+default = false
 description = '''Don't pass the file on STDIN, pass the filename as argument instead'''
 [markup.asciidoc.RENDER_CONTENT_MODE]
 default = 'sanitized'
 description = '''
 How the content will be rendered.
-* sanitized: Sanitize the content and render it inside current page, default to only allow a few HTML tags and attributes. Customized sanitizer rules can be defined in [markup.sanitizer.*] .
-* no-sanitizer: Disable the sanitizer and render the content inside current page. It's **insecure** and may lead to XSS attack if the content contains malicious code.
-* iframe: Render the content in a separate standalone page and embed it into current page by iframe. The iframe is in sandbox mode with same-origin disabled, and the JS code are safely isolated from parent page
+* `sanitized`: Sanitize the content and render it inside current page, default to only allow a few HTML tags and attributes. Customized sanitizer rules can be defined in [markup.sanitizer.*] .
+* `no-sanitizer`: Disable the sanitizer and render the content inside current page. It's **insecure** and may lead to XSS attack if the content contains malicious code.
+* `iframe`: Render the content in a separate standalone page and embed it into current page by iframe. The iframe is in sandbox mode with same-origin disabled, and the JS code are safely isolated from parent page
 '''
 
 [metrics.ENABLED]
-default = 'false'
+default = false
 description = 'Enables metrics endpoint. True or false; default is false'
 [metrics.TOKEN]
 description = 'If you want to add authorization, specify a token here'
 [metrics.ENABLED_ISSUE_BY_LABEL]
-default = 'false'
+default = false
 description = 'Enable issue by label metrics; default is false'
 [metrics.ENABLED_ISSUE_BY_REPOSITORY]
-default = 'false'
+default = false
 description = 'Enable issue by repository metrics; default is false'
 
 [migrations.MAX_ATTEMPTS]
-default = '3'
+default = 3
 description = 'Max attempts per http/https request on migrations'
 [migrations.RETRY_BACKOFF]
-default = '3'
+default = 3
 description = 'Backoff time per http/https request retry (seconds)'
 [migrations.ALLOWED_DOMAINS]
 description = '''
@@ -2503,33 +2604,33 @@ When ALLOWED_DOMAINS is not blank, this option has a higher priority to deny dom
 Wildcard is supported
 '''
 [migrations.ALLOW_LOCALNETWORKS]
-default = 'false'
+default = false
 description = '''
 Allow private addresses defined by RFC 1918, RFC 1122, RFC 4632 and RFC 4291 (false by default)
 If a domain is allowed by ALLOWED_DOMAINS, this option will be ignored
 '''
 [migrations.SKIP_TLS_VERIFY]
-default = 'false'
+default = false
 description = 'If set to true, completely ignores server certificate validation errors. This option is unsafe'
 
 [F3.ENABLED]
-default = 'false'
+default = false
 description = 'Enable/Disable Friendly Forge Format (F3)'
 
 [federation.ENABLED]
-default = 'false'
+default = false
 description = 'Enable/Disable federation capabilities'
 [federation.SHARE_USER_STATISTICS]
-default = 'true'
+default = true
 description = 'Enable/Disable user statistics for nodeinfo if federation is enabled'
 [federation.MAX_SIZE]
-default = '4'
+default = 4
 description = 'Maximum federation request and response size (MB)'
 [federation.ALGORITHMS]
 default = 'rsa-sha256, rsa-sha512, ed25519'
 description = '''
+HTTP signature algorithms.
 WARNING: Changing the settings below can break federation.
-HTTP signature algorithms
 '''
 [federation.DIGEST_ALGORITHM]
 default = 'SHA-256'
@@ -2542,7 +2643,7 @@ default = '(request-target), Date, Digest'
 description = 'POST headers for federation requests'
 
 [packages.ENABLED]
-default = 'true'
+default = true
 description = 'Enable/Disable package registry capabilities'
 [packages.STORAGE_TYPE]
 default = 'local'
@@ -2553,76 +2654,76 @@ description = 'override the minio base path if storage type is minio'
 default = 'tmp/package-upload'
 description = 'Path for chunked uploads. Defaults to APP_DATA_PATH + `tmp/package-upload`'
 [packages.LIMIT_TOTAL_OWNER_COUNT]
-default = '-1'
+default = -1
 description = 'Maximum count of package versions a single owner can have (`-1` means no limits)'
 [packages.LIMIT_TOTAL_OWNER_SIZE]
-default = '-1'
+default = -1
 description = 'Maximum size of packages a single owner can use (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_ALPINE]
-default = '-1'
+default = -1
 description = 'Maximum size of an Alpine upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_CARGO]
-default = '-1'
+default = -1
 description = 'Maximum size of a Cargo upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_CHEF]
-default = '-1'
+default = -1
 description = 'Maximum size of a Chef upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_COMPOSER]
-default = '-1'
+default = -1
 description = 'Maximum size of a Composer upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_CONAN]
-default = '-1'
+default = -1
 description = 'Maximum size of a Conan upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_CONDA]
-default = '-1'
+default = -1
 description = 'Maximum size of a Conda upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_CONTAINER]
-default = '-1'
+default = -1
 description = 'Maximum size of a Container upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_CRAN]
-default = '-1'
+default = -1
 description = 'Maximum size of a CRAN upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_DEBIAN]
-default = '-1'
+default = -1
 description = 'Maximum size of a Debian upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_GENERIC]
-default = '-1'
+default = -1
 description = 'Maximum size of a Generic upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_GO]
-default = '-1'
+default = -1
 description = 'Maximum size of a Go upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_HELM]
-default = '-1'
+default = -1
 description = 'Maximum size of a Helm upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_MAVEN]
-default = '-1'
+default = -1
 description = 'Maximum size of a Maven upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_NPM]
-default = '-1'
+default = -1
 description = 'Maximum size of a npm upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_NUGET]
-default = '-1'
+default = -1
 description = 'Maximum size of a NuGet upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_PUB]
-default = '-1'
+default = -1
 description = 'Maximum size of a Pub upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_PYPI]
-default = '-1'
+default = -1
 description = 'Maximum size of a PyPI upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_RPM]
-default = '-1'
+default = -1
 description = 'Maximum size of a RPM upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_RUBYGEMS]
-default = '-1'
+default = -1
 description = 'Maximum size of a RubyGems upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_SWIFT]
-default = '-1'
+default = -1
 description = 'Maximum size of a Swift upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.LIMIT_SIZE_VAGRANT]
-default = '-1'
+default = -1
 description = 'Maximum size of a Vagrant upload (`-1` means no limits, format `1000`, `1 MB`, `1 GiB`)'
 [packages.DEFAULT_RPM_SIGN_ENABLED]
-default = 'false'
+default = false
 description = 'Enable RPM re-signing by default. (It will overwrite the old signature ,using v4 format, not compatible with CentOS 6 or older)'
 
 [storage]
@@ -2662,10 +2763,10 @@ description = 'override the minio base path if storage type is minio'
 [lfs_client]
 description = '''settings for Forgejo's LFS client (eg: mirroring an upstream lfs endpoint)'''
 [lfs_client.BATCH_SIZE]
-default = '20'
+default = 20
 description = 'Limit the number of pointers in each batch request to this number'
 [lfs_client.BATCH_OPERATION_CONCURRENCY]
-default = '8'
+default = 8
 description = 'Limit the number of concurrent upload/download operations within a batch'
 
 [storage.packages]
@@ -2703,14 +2804,14 @@ If empty, it behaves the same as "auto" was set
 default = 'us-east-1'
 description = 'Minio location to create bucket only available when STORAGE_TYPE is `minio`'
 [storage.my_minio.MINIO_USE_SSL]
-default = 'false'
+default = false
 description = 'Minio enabled ssl only available when STORAGE_TYPE is `minio`'
 [storage.my_minio.MINIO_INSECURE_SKIP_VERIFY]
-default = 'false'
+default = false
 description = 'Minio skip SSL verification available when STORAGE_TYPE is `minio`'
 
 [proxy.PROXY_ENABLED]
-default = 'false'
+default = false
 description = 'Enable the proxy, all requests to external via HTTP will be affected'
 [proxy.PROXY_URL]
 description = 'Proxy server URL, support http://, https//, socks://, blank will follow environment http_proxy/https_proxy/no_proxy'
@@ -2718,13 +2819,13 @@ description = 'Proxy server URL, support http://, https//, socks://, blank will 
 description = 'Comma separated list of host names requiring proxy. Glob patterns (*) are accepted; use ** to match all hosts'
 
 [actions.ENABLED]
-default = 'true'
+default = true
 description = 'Enable/Disable actions capabilities'
 [actions.DEFAULT_ACTIONS_URL]
 default = 'https://code.forgejo.org'
 description = 'Default address to get action plugins, e.g. the default value means downloading from "https://code.forgejo.org/actions/checkout" for "uses: actions/checkout@v3"'
 [actions.LOG_RETENTION_DAYS]
-default = '365'
+default = 365
 description = 'Logs retention time in days. Old logs will be deleted after this period'
 [actions.LOG_COMPRESSION]
 default = 'zstd'
@@ -2736,7 +2837,7 @@ And for object storage services like S3, which is billed for requests, it would 
 But it will save storage space and network bandwidth, so it's still recommended to use compression
 '''
 [actions.ARTIFACT_RETENTION_DAYS]
-default = '90'
+default = 90
 description = 'Default artifact retention time in days. Artifacts could have their own retention periods by setting the `retention-days` option in `actions/upload-artifact` step'
 [actions.ZOMBIE_TASK_TIMEOUT]
 default = '10m'
@@ -2751,7 +2852,7 @@ description = '''Timeout to cancel the jobs which have waiting status, but haven
 default = '[skip ci],[ci skip],[no ci],[skip actions],[actions skip]'
 description = 'Strings committers can place inside a commit message or PR title to skip executing the corresponding actions workflow'
 [actions.LIMIT_DISPATCH_INPUTS]
-default = '10'
+default = 10
 description = 'Limit on inputs for manual / workflow_dispatch triggers, default is 10'
 
 [storage.actions_log]
