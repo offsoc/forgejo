@@ -62,7 +62,7 @@ func autoSignIn(ctx *context.Context) (bool, error) {
 		return false, nil
 	}
 
-	u, err := user_model.VerifyUserAuthorizationToken(ctx, authCookie, auth.LongTermAuthorization, false)
+	u, _, err := user_model.VerifyUserAuthorizationToken(ctx, authCookie, auth.LongTermAuthorization)
 	if err != nil {
 		return false, fmt.Errorf("VerifyUserAuthorizationToken: %w", err)
 	}
@@ -669,7 +669,7 @@ func Activate(ctx *context.Context) {
 		return
 	}
 
-	user, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.UserActivation, false)
+	user, deleteToken, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.UserActivation)
 	if err != nil {
 		ctx.ServerError("VerifyUserAuthorizationToken", err)
 		return
@@ -687,6 +687,11 @@ func Activate(ctx *context.Context) {
 		ctx.Data["Code"] = code
 		ctx.Data["NeedsPassword"] = true
 		ctx.HTML(http.StatusOK, TplActivate)
+		return
+	}
+
+	if err := deleteToken(); err != nil {
+		ctx.ServerError("deleteToken", err)
 		return
 	}
 
@@ -738,7 +743,7 @@ func ActivatePost(ctx *context.Context) {
 		return
 	}
 
-	user, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.UserActivation, true)
+	user, deleteToken, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.UserActivation)
 	if err != nil {
 		ctx.ServerError("VerifyUserAuthorizationToken", err)
 		return
@@ -765,6 +770,11 @@ func ActivatePost(ctx *context.Context) {
 			ctx.HTML(http.StatusOK, TplActivate)
 			return
 		}
+	}
+
+	if err := deleteToken(); err != nil {
+		ctx.ServerError("deleteToken", err)
+		return
 	}
 
 	handleAccountActivation(ctx, user)
@@ -827,13 +837,18 @@ func ActivateEmail(ctx *context.Context) {
 	code := ctx.FormString("code")
 	emailStr := ctx.FormString("email")
 
-	u, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.EmailActivation(emailStr), true)
+	u, deleteToken, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.EmailActivation(emailStr))
 	if err != nil {
 		ctx.ServerError("VerifyUserAuthorizationToken", err)
 		return
 	}
 	if u == nil {
 		ctx.Redirect(setting.AppSubURL + "/user/settings/account")
+		return
+	}
+
+	if err := deleteToken(); err != nil {
+		ctx.ServerError("deleteToken", err)
 		return
 	}
 
