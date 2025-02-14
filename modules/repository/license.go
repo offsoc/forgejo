@@ -1,4 +1,5 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repository
@@ -107,6 +108,9 @@ func getLicensePlaceholder(name string) *licensePlaceholder {
 		}
 
 		// Other special placeholders can be added here.
+	} else if name == "BSD-4-Clause" {
+		ret.Owner = append(ret.Owner, "COPYRIGHT HOLDER")
+		ret.Owner = append(ret.Owner, "the organization")
 	}
 	return ret
 }
