@@ -430,7 +430,7 @@ export default sfc; // activate the IDE's Vue plugin
               class="item navigation tw-py-1" :class="{'disabled': page === 1}"
               @click="changePage(page - 1)" :title="textPreviousPage"
             >
-              <svg-icon name="octicon-chevron-left" :size="16" clsas-name="tw-mr-1"/>
+              <svg-icon name="octicon-chevron-left" :size="16" class="tw-mr-1"/>
             </a>
             <a class="active item tw-py-1">{{ page }}</a>
             <a
