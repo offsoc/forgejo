@@ -170,6 +170,8 @@ func SignIn(ctx *context.Context) {
 		context.SetCaptchaData(ctx)
 	}
 
+	ctx.Data["DisablePassword"] = !setting.Service.EnableInternalSignIn
+
 	ctx.HTML(http.StatusOK, tplSignIn)
 }
 
@@ -189,6 +191,7 @@ func SignInPost(ctx *context.Context) {
 	ctx.Data["PageIsLogin"] = true
 	ctx.Data["EnableSSPI"] = auth.IsSSPIEnabled(ctx)
 	ctx.Data["EnableInternalSignIn"] = setting.Service.EnableInternalSignIn
+	ctx.Data["DisablePassword"] = !setting.Service.EnableInternalSignIn
 
 	// Permission denied if EnableInternalSignIn is false
 	if !setting.Service.EnableInternalSignIn {
