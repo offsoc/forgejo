@@ -11,6 +11,8 @@
 			</div>
 		</div>
 	</div>
-	{{template "home_forgejo" .}}
+	{{if .LandingPageDetails}}
+		{{template "home_forgejo" .}}
+	{{end}}
 </div>
 {{template "base/footer" .}}

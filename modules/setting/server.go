@@ -89,6 +89,7 @@ var (
 	StaticCacheTime            time.Duration
 	EnableGzip                 bool
 	LandingPageURL             LandingPage
+	LandingPageDetails         bool
 	UnixSocketPermission       uint32
 	EnablePprof                bool
 	PprofDataPath              string
@@ -360,9 +361,10 @@ func loadServerFrom(rootCfg ConfigProvider) {
 		LandingPageURL = LandingPageOrganizations
 	case "login":
 		LandingPageURL = LandingPageLogin
-	case "", "home":
+	case "", "home", "nodetails":
 		LandingPageURL = LandingPageHome
 	default:
 		LandingPageURL = LandingPage(landingPage)
 	}
+	LandingPageDetails = (landingPage != "nodetails")
 }
