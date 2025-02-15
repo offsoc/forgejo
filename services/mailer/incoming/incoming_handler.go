@@ -130,6 +130,7 @@ func (h *ReplyHandler) Handle(ctx context.Context, content *MailContent, doer *u
 				nil,
 				issue,
 				comment.Line,
+				comment.EndLine,
 				content.Content,
 				comment.TreePath,
 				false, // not pending review but a single review

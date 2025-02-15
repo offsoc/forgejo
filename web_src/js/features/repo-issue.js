@@ -537,21 +537,35 @@ export function initRepoPullRequestReview() {
     });
   }
 
-  $(document).on('click', '.add-code-comment', async function (e) {
+  $(document).on('mousedown', '.add-code-comment', function (e) {
     if (e.target.classList.contains('btn-add-single')) return; // https://github.com/go-gitea/gitea/issues/4745
     e.preventDefault();
 
-    const isSplit = this.closest('.code-diff')?.classList.contains('code-diff-split');
-    const side = this.getAttribute('data-side');
-    const idx = this.getAttribute('data-idx');
-    const path = this.closest('[data-path]')?.getAttribute('data-path');
-    const tr = this.closest('tr');
-    const lineType = tr.getAttribute('data-line-type');
+    const startElement = $(e.currentTarget);
+    let startLine = startElement.data('idx');
 
-    const ntr = tr.nextElementSibling;
-    let $ntr = $(ntr);
-    if (!ntr?.classList.contains('add-comment')) {
-      $ntr = $(`
+    $(document).one('mouseup', async (e) => {
+      const endTarget = $(e.target);
+      const $endEl = endTarget.closest('.add-code-comment');
+      let endLine = $endEl.data('idx');
+      const isMultiLine = endLine !== startLine;
+      let tr = endTarget[0].closest('tr');
+
+      // if user 'moved' up, switch start/end lines
+      if (endLine < startLine) {
+        [endLine, startLine] = [startLine, endLine];
+        tr = startElement[0].closest('tr');
+      }
+
+      const isSplit = this.closest('.code-diff')?.classList.contains('code-diff-split');
+      const side = this.getAttribute('data-side');
+      const path = this.closest('[data-path]')?.getAttribute('data-path');
+      const lineType = tr.getAttribute('data-line-type');
+
+      const ntr = tr.nextElementSibling;
+      let $ntr = $(ntr);
+      if (!ntr?.classList.contains('add-comment')) {
+        $ntr = $(`
         <tr class="add-comment" data-line-type="${lineType}">
           ${isSplit ? `
             <td class="add-comment-left" colspan="4"></td>
@@ -560,27 +574,38 @@ export function initRepoPullRequestReview() {
             <td class="add-comment-left add-comment-right" colspan="5"></td>
           `}
         </tr>`);
-      $(tr).after($ntr);
-    }
-
-    const $td = $ntr.find(`.add-comment-${side}`);
-    const $commentCloud = $td.find('.comment-code-cloud');
-    if (!$commentCloud.length && !$ntr.find('button[name="pending_review"]').length) {
-      try {
-        const response = await GET(this.closest('[data-new-comment-url]')?.getAttribute('data-new-comment-url'));
-        const html = await response.text();
-        $td.html(html);
-        $td.find("input[name='line']").val(idx);
-        $td.find("input[name='side']").val(side === 'left' ? 'previous' : 'proposed');
-        $td.find("input[name='path']").val(path);
-
-        initDropzone($td.find('.dropzone')[0]);
-        const editor = await initComboMarkdownEditor($td.find('.combo-markdown-editor'));
-        editor.focus();
-      } catch (error) {
-        console.error(error);
+        $(tr).after($ntr);
       }
-    }
+
+      const $td = $ntr.find(`.add-comment-${side}`);
+      const $commentCloud = $td.find('.comment-code-cloud');
+      if (!$commentCloud.length && !$ntr.find('button[name="pending_review"]').length) {
+        try {
+          const url = `${this.closest('[data-new-comment-url]')?.getAttribute('data-new-comment-url')}?${new URLSearchParams({
+            ...(isMultiLine ? {isMultiLine: true} : {}),
+          })}`;
+          const response = await GET(url);
+          const html = await response.text();
+          $td.html(html);
+          $td.find("input[name='line']").val(startLine);
+          $td.find("input[name='end_line']").val(isMultiLine ? endLine : 0);
+
+          if (isMultiLine) {
+            $td.find('#start_line').text(startLine);
+            $td.find('#end_line').text(endLine);
+          }
+
+          $td.find("input[name='side']").val(side === 'left' ? 'previous' : 'proposed');
+          $td.find("input[name='path']").val(path);
+
+          initDropzone($td.find('.dropzone')[0]);
+          const editor = await initComboMarkdownEditor($td.find('.combo-markdown-editor'));
+          editor.focus();
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    });
   });
 }
 

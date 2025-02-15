@@ -27,6 +27,7 @@
 					<span class="text grey muted-links">
 						{{template "shared/user/namelink" .Poster}}
 						{{ctx.Locale.Tr "repo.issues.commented_at" .HashTag $createdStr}}
+			      {{if .EndLine}}on lines {{.Line}} to {{.EndLine}}{{end}}
 					</span>
 				{{end}}
 			</div>

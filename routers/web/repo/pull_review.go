@@ -49,6 +49,8 @@ func RenderNewCodeCommentForm(ctx *context.Context) {
 		ctx.ServerError("GetRefCommitID", err)
 		return
 	}
+
+	ctx.Data["IsMultiLine"] = ctx.Req.URL.Query().Get("isMultiLine")
 	ctx.Data["AfterCommitID"] = pullHeadCommitID
 	ctx.Data["IsAttachmentEnabled"] = setting.Attachment.Enabled
 	upload.AddUploadContext(ctx, "comment")
@@ -77,6 +79,11 @@ func CreateCodeComment(ctx *context.Context) {
 		signedLine *= -1
 	}
 
+	endLine := form.EndLine
+	if form.Side == "previous" {
+		endLine *= -1
+	}
+
 	var attachments []string
 	if setting.Attachment.Enabled {
 		attachments = form.Files
@@ -87,6 +94,7 @@ func CreateCodeComment(ctx *context.Context) {
 		ctx.Repo.GitRepo,
 		issue,
 		signedLine,
+		endLine,
 		form.Content,
 		form.TreePath,
 		!form.SingleReview,

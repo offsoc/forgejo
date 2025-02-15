@@ -284,6 +284,7 @@ type Comment struct {
 
 	CommitID        int64
 	Line            int64 // - previous line / + proposed line
+	EndLine         int64
 	TreePath        string
 	Content         string        `xorm:"LONGTEXT"`
 	ContentVersion  int           `xorm:"NOT NULL DEFAULT 0"`
@@ -836,6 +837,7 @@ func CreateComment(ctx context.Context, opts *CreateCommentOptions) (_ *Comment,
 		CommitID:         opts.CommitID,
 		CommitSHA:        opts.CommitSHA,
 		Line:             opts.LineNum,
+		EndLine:          opts.EndLineNum,
 		Content:          opts.Content,
 		OldTitle:         opts.OldTitle,
 		NewTitle:         opts.NewTitle,
@@ -1029,6 +1031,7 @@ type CreateCommentOptions struct {
 	CommitSHA        string
 	Patch            string
 	LineNum          int64
+	EndLineNum       int64
 	TreePath         string
 	ReviewID         int64
 	Content          string

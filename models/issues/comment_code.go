@@ -45,7 +45,11 @@ func (tree CodeConversationsAtLineAndTreePath) insertComment(comment *Comment) {
 		tree[comment.TreePath] = make(map[int64][]CodeConversation)
 	}
 
-	tree[comment.TreePath][comment.Line] = append(tree[comment.TreePath][comment.Line], CodeConversation{comment})
+	if comment.EndLine != 0 {
+	  tree[comment.TreePath][comment.EndLine] = append(tree[comment.TreePath][comment.EndLine], CodeConversation{comment})
+	} else {
+	  tree[comment.TreePath][comment.Line] = append(tree[comment.TreePath][comment.Line], CodeConversation{comment})
+	}
 }
 
 // FetchCodeConversations will return a 2d-map: ["Path"]["Line"] = List of CodeConversation (one per review) for this line

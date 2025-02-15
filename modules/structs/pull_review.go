@@ -87,6 +87,7 @@ type CreatePullReviewComment struct {
 	OldLineNum int64 `json:"old_position"`
 	// if comment to new file line or 0
 	NewLineNum int64 `json:"new_position"`
+	EndLineNum int64 `json:"end_line"`
 }
 
 // CreatePullReviewCommentOptions are options to create a pull review comment

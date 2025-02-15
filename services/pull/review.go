@@ -87,7 +87,7 @@ func InvalidateCodeComments(ctx context.Context, prs issues_model.PullRequestLis
 }
 
 // CreateCodeComment creates a comment on the code line
-func CreateCodeComment(ctx context.Context, doer *user_model.User, gitRepo *git.Repository, issue *issues_model.Issue, line int64, content, treePath string, pendingReview bool, replyReviewID int64, latestCommitID string, attachments []string) (*issues_model.Comment, error) {
+func CreateCodeComment(ctx context.Context, doer *user_model.User, gitRepo *git.Repository, issue *issues_model.Issue, line int64, endLine int64, content, treePath string, pendingReview bool, replyReviewID int64, latestCommitID string, attachments []string) (*issues_model.Comment, error) {
 	var (
 		existsReview bool
 		err          error
@@ -119,6 +119,7 @@ func CreateCodeComment(ctx context.Context, doer *user_model.User, gitRepo *git.
 			content,
 			treePath,
 			line,
+			endLine,
 			replyReviewID,
 			attachments,
 		)
@@ -160,6 +161,7 @@ func CreateCodeComment(ctx context.Context, doer *user_model.User, gitRepo *git.
 		content,
 		treePath,
 		line,
+		endLine,
 		review.ID,
 		attachments,
 	)
@@ -180,7 +182,7 @@ func CreateCodeComment(ctx context.Context, doer *user_model.User, gitRepo *git.
 }
 
 // CreateCodeCommentKnownReviewID creates a plain code comment at the specified line / path
-func CreateCodeCommentKnownReviewID(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, issue *issues_model.Issue, content, treePath string, line, reviewID int64, attachments []string) (*issues_model.Comment, error) {
+func CreateCodeCommentKnownReviewID(ctx context.Context, doer *user_model.User, repo *repo_model.Repository, issue *issues_model.Issue, content, treePath string, line, endLine, reviewID int64, attachments []string) (*issues_model.Comment, error) {
 	var commitID, patch string
 	if err := issue.LoadPullRequest(ctx); err != nil {
 		return nil, fmt.Errorf("LoadPullRequest: %w", err)
@@ -273,6 +275,7 @@ func CreateCodeCommentKnownReviewID(ctx context.Context, doer *user_model.User, 
 		Issue:       issue,
 		Content:     content,
 		LineNum:     line,
+		EndLineNum:  endLine,
 		TreePath:    treePath,
 		CommitSHA:   commitID,
 		ReviewID:    reviewID,
