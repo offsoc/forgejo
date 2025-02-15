@@ -106,6 +106,7 @@ func ProfilePost(ctx *context.Context) {
 		Location:            optional.Some(form.Location),
 		Visibility:          optional.Some(form.Visibility),
 		KeepActivityPrivate: optional.Some(form.KeepActivityPrivate),
+		KeepPronounsPrivate: optional.Some(form.KeepPronounsPrivate),
 	}
 	if err := user_service.UpdateUser(ctx, ctx.Doer, opts); err != nil {
 		ctx.ServerError("UpdateUser", err)

@@ -120,6 +120,12 @@
 						{{ctx.Locale.Tr "settings.keep_activity_private"}}
 						<span class="help">{{ctx.Locale.Tr "settings.keep_activity_private.description" (printf "/%s?tab=activity" .SignedUser.Name)}}</span>
 					</label>
+
+					<label>
+						<input name="keep_pronouns_private" type="checkbox" {{if .SignedUser.KeepPronounsPrivate}}checked{{end}}>
+						{{ctx.Locale.Tr "settings.keep_pronouns_private"}}
+						<span class="help">{{ctx.Locale.Tr "settings.keep_pronouns_private.description"}}</span>
+					</label>
 				</fieldset>
 
 				<button class="ui primary button">{{ctx.Locale.Tr "settings.update_profile"}}</button>

@@ -92,6 +92,8 @@ var migrations = []*Migration{
 	NewMigration("Add `hash_blake2b` column to `package_blob` table", AddHashBlake2bToPackageBlob),
 	// v27 -> v28
 	NewMigration("Add `created_unix` column to `user_redirect` table", AddCreatedUnixToRedirect),
+	// v28 -> v29
+	NewMigration("Add pronoun privacy settings to user", AddHidePronounsOptionToUser),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.
