@@ -3,6 +3,10 @@
 {{/* Placeholder (optional) - placeholder text to be used */}}
 {{/* Tooltip (optional) - a tooltip to be displayed on button hover */}}
 <div class="ui small fluid action input">
-	{{template "shared/search/input" dict "Value" .Value "Disabled" .Disabled "Placeholder" .Placeholder}}
+	{{template "shared/search/input"
+		dict
+			"Value" .Value
+			"Disabled" .Disabled
+			"Placeholder" .Placeholder}}
 	{{template "shared/search/button" dict "Disabled" .Disabled "Tooltip" .Tooltip}}
 </div>

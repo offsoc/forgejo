@@ -204,8 +204,6 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		keyword = ""
 	}
 
-	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
-
 	var mileIDs []int64
 	if milestoneID > 0 || milestoneID == db.NoConditionID { // -1 to get those issues which have no any milestone assigned
 		mileIDs = []int64{milestoneID}
@@ -226,7 +224,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		IssueIDs:          nil,
 	}
 	if keyword != "" {
-		allIssueIDs, err := issueIDsFromSearch(ctx, keyword, isFuzzy, statsOpts)
+		allIssueIDs, err := issueIDsFromSearch(ctx, keyword, statsOpts)
 		if err != nil {
 			if issue_indexer.IsAvailable(ctx) {
 				ctx.ServerError("issueIDsFromSearch", err)
@@ -294,7 +292,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 
 	var issues issues_model.IssueList
 	{
-		ids, err := issueIDsFromSearch(ctx, keyword, isFuzzy, &issues_model.IssuesOptions{
+		ids, err := issueIDsFromSearch(ctx, keyword, &issues_model.IssuesOptions{
 			Paginator: &db.ListOptions{
 				Page:     pager.Paginater.Current(),
 				PageSize: setting.UI.IssuePagingNum,
@@ -458,16 +456,16 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	ctx.Data["OpenCount"] = issueStats.OpenCount
 	ctx.Data["ClosedCount"] = issueStats.ClosedCount
 	ctx.Data["AllCount"] = issueStats.AllCount
-	linkStr := "?q=%s&type=%s&sort=%s&state=%s&labels=%s&milestone=%d&project=%d&assignee=%d&poster=%d&fuzzy=%t&archived=%t"
+	linkStr := "?q=%s&type=%s&sort=%s&state=%s&labels=%s&milestone=%d&project=%d&assignee=%d&poster=%d&archived=%t"
 	ctx.Data["AllStatesLink"] = fmt.Sprintf(linkStr,
 		url.QueryEscape(keyword), url.QueryEscape(viewType), url.QueryEscape(sortType), "all", url.QueryEscape(selectLabels),
-		milestoneID, projectID, assigneeID, posterID, isFuzzy, archived)
+		milestoneID, projectID, assigneeID, posterID, archived)
 	ctx.Data["OpenLink"] = fmt.Sprintf(linkStr,
 		url.QueryEscape(keyword), url.QueryEscape(viewType), url.QueryEscape(sortType), "open", url.QueryEscape(selectLabels),
-		milestoneID, projectID, assigneeID, posterID, isFuzzy, archived)
+		milestoneID, projectID, assigneeID, posterID, archived)
 	ctx.Data["ClosedLink"] = fmt.Sprintf(linkStr,
 		url.QueryEscape(keyword), url.QueryEscape(viewType), url.QueryEscape(sortType), "closed", url.QueryEscape(selectLabels),
-		milestoneID, projectID, assigneeID, posterID, isFuzzy, archived)
+		milestoneID, projectID, assigneeID, posterID, archived)
 	ctx.Data["SelLabelIDs"] = labelIDs
 	ctx.Data["SelectLabels"] = selectLabels
 	ctx.Data["ViewType"] = viewType
@@ -476,7 +474,6 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	ctx.Data["ProjectID"] = projectID
 	ctx.Data["AssigneeID"] = assigneeID
 	ctx.Data["PosterID"] = posterID
-	ctx.Data["IsFuzzy"] = isFuzzy
 	ctx.Data["Keyword"] = keyword
 	ctx.Data["IsShowClosed"] = isShowClosed
 	switch {
@@ -499,17 +496,12 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	pager.AddParam(ctx, "assignee", "AssigneeID")
 	pager.AddParam(ctx, "poster", "PosterID")
 	pager.AddParam(ctx, "archived", "ShowArchivedLabels")
-	pager.AddParam(ctx, "fuzzy", "IsFuzzy")
 
 	ctx.Data["Page"] = pager
 }
 
-func issueIDsFromSearch(ctx *context.Context, keyword string, fuzzy bool, opts *issues_model.IssuesOptions) ([]int64, error) {
-	ids, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts).Copy(
-		func(o *issue_indexer.SearchOptions) {
-			o.IsFuzzyKeyword = fuzzy
-		},
-	))
+func issueIDsFromSearch(ctx *context.Context, keyword string, opts *issues_model.IssuesOptions) ([]int64, error) {
+	ids, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts))
 	if err != nil {
 		return nil, fmt.Errorf("SearchIssues: %w", err)
 	}

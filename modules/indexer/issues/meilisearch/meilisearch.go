@@ -232,20 +232,36 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 		limit = 1
 	}
 
-	keyword := options.Keyword
-	if !options.IsFuzzyKeyword {
-		// to make it non fuzzy ("typo tolerance" in meilisearch terms), we have to quote the keyword(s)
-		// https://www.meilisearch.com/docs/reference/api/search#phrase-search
-		keyword = doubleQuoteKeyword(keyword)
+	var keywords []string
+	if options.Keyword != "" {
+		tokens, err := options.Tokens()
+		if err != nil {
+			return nil, err
+		}
+		for _, token := range tokens {
+			if !token.Fuzzy {
+				// to make it a phrase search, we have to quote the keyword(s)
+				// https://www.meilisearch.com/docs/reference/api/search#phrase-search
+				token.Term = doubleQuoteKeyword(token.Term)
+			}
+
+			// internal.BoolOptShould (Default, requires no modifications)
+			// internal.BoolOptMust (Not supported by meilisearch)
+			if token.Kind == internal.BoolOptNot {
+				token.Term = "-" + token.Term
+			}
+			keywords = append(keywords, token.Term)
+		}
 	}
 
-	searchRes, err := b.inner.Client.Index(b.inner.VersionedIndexName()).Search(keyword, &meilisearch.SearchRequest{
-		Filter:           query.Statement(),
-		Limit:            int64(limit),
-		Offset:           int64(skip),
-		Sort:             sortBy,
-		MatchingStrategy: meilisearch.All,
-	})
+	searchRes, err := b.inner.Client.Index(b.inner.VersionedIndexName()).
+		Search(strings.Join(keywords, " "), &meilisearch.SearchRequest{
+			Filter:           query.Statement(),
+			Limit:            int64(limit),
+			Offset:           int64(skip),
+			Sort:             sortBy,
+			MatchingStrategy: meilisearch.All,
+		})
 	if err != nil {
 		return nil, err
 	}
