@@ -592,6 +592,7 @@ func registerRoutes(m *web.Route) {
 			m.Combo("").Get(user_setting.Applications).
 				Post(web.Bind(forms.NewAccessTokenForm{}), user_setting.ApplicationsPost)
 			m.Post("/delete", user_setting.DeleteApplication)
+			m.Post("/regenerate", user_setting.RegenerateApplication)
 		})
 
 		m.Combo("/keys").Get(user_setting.Keys).

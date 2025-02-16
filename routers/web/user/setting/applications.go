@@ -87,6 +87,18 @@ func DeleteApplication(ctx *context.Context) {
 	ctx.JSONRedirect(setting.AppSubURL + "/user/settings/applications")
 }
 
+// RegenerateApplication response for regenerating user access token
+func RegenerateApplication(ctx *context.Context) {
+	if t, err := auth_model.RegenerateAccessTokenByID(ctx, ctx.FormInt64("id"), ctx.Doer.ID); err != nil {
+		ctx.Flash.Error("RegenerateAccessTokenByID: " + err.Error())
+	} else {
+		ctx.Flash.Success(ctx.Tr("settings.regenerate_token_success"))
+		ctx.Flash.Info(t.Token)
+	}
+
+	ctx.JSONRedirect(setting.AppSubURL + "/user/settings/applications")
+}
+
 func loadApplicationsData(ctx *context.Context) {
 	ctx.Data["AccessTokenScopePublicOnly"] = auth_model.AccessTokenScopePublicOnly
 	tokens, err := db.Find[auth_model.AccessToken](ctx, auth_model.ListAccessTokensOptions{UserID: ctx.Doer.ID})
