@@ -9,7 +9,7 @@
 		{{$class = (print $class " isWarning")}}
 	{{end}}
 
-	<a {{if $href}}href="{{$href}}"{{end}} class="ui label tw-ml-2 {{$class}}">
+	<a {{if $href}}href="{{$href}}"{{end}} class="ui label tw-ms-2 {{$class}}">
 		{{if $v.Verified}}
 			<div title="{{$v.Reason}}">
 				{{if ne $v.SigningUser.ID 0}}

@@ -14,7 +14,7 @@
 	<tbody>
 		{{if .HasParentPath}}
 			<tr class="has-parent">
-				<td colspan="3"><a class="muted" href="{{.BranchLink}}{{if .ParentPath}}{{PathEscapeSegments .ParentPath}}{{end}}">{{svg "octicon-reply" 16 "tw-mr-2"}}..</a></td>
+				<td colspan="3"><a class="muted" href="{{.BranchLink}}{{if .ParentPath}}{{PathEscapeSegments .ParentPath}}{{end}}">{{svg "octicon-reply" 16 "tw-me-2"}}..</a></td>
 			</tr>
 		{{end}}
 		{{range $item := .Files}}
@@ -26,7 +26,7 @@
 					<span class="truncate">
 						{{if $entry.IsSubModule}}
 							{{$refURL := $subModuleFile.RefURL AppUrl $.Repository.FullName $.SSHDomain}} {{/* FIXME: the usage of AppUrl seems incorrect, it would be fixed in the future, use AppSubUrl instead */}}
-							{{$icon := (svg "octicon-file-submodule" 16 "tw-mr-2")}}
+							{{$icon := (svg "octicon-file-submodule" 16 "tw-me-2")}}
 							{{if $refURL}}
 								<a class="muted" href="{{$refURL}}">{{$icon}}{{$entry.Name}}</a><span class="at">@</span><a href="{{$refURL}}/commit/{{PathEscape $subModuleFile.RefID}}">{{ShortSha $subModuleFile.RefID}}</a>
 							{{else}}
@@ -38,7 +38,7 @@
 								<a class="muted" href="{{$.TreeLink}}/{{PathEscapeSegments $subJumpablePathName}}" title="{{$subJumpablePathName}}">
 									{{$subJumpablePathFields := StringUtils.Split $subJumpablePathName "/"}}
 									{{$subJumpablePathFieldLast := (Eval (len $subJumpablePathFields) "-" 1)}}
-									{{svg "octicon-file-directory-fill" 16 "tw-mr-2" -}}
+									{{svg "octicon-file-directory-fill" 16 "tw-me-2" -}}
 									{{if eq $subJumpablePathFieldLast 0 -}}
 										{{$subJumpablePathName}}
 									{{else -}}
@@ -47,7 +47,7 @@
 									{{end}}
 								</a>
 							{{else}}
-								<a class="muted" href="{{$.TreeLink}}/{{PathEscapeSegments $entry.Name}}" title="{{$entry.Name}}">{{svg (printf "octicon-%s" (EntryIcon $entry)) 16 "tw-mr-2"}}{{$entry.Name}}</a>
+								<a class="muted" href="{{$.TreeLink}}/{{PathEscapeSegments $entry.Name}}" title="{{$entry.Name}}">{{svg (printf "octicon-%s" (EntryIcon $entry)) 16 "tw-me-2"}}{{$entry.Name}}</a>
 							{{end}}
 						{{end}}
 					</span>

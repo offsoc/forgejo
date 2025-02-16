@@ -1,7 +1,7 @@
 {{$showFileTree := (and (not .DiffNotAvailable) (gt .Diff.NumFiles 1))}}
 <div>
 	<div class="diff-detail-box diff-box">
-		<div class="tw-flex tw-items-center tw-flex-wrap tw-gap-2 tw-ml-0.5">
+		<div class="tw-flex tw-items-center tw-flex-wrap tw-gap-2 tw-ms-0.5">
 			{{if $showFileTree}}
 				<button class="diff-toggle-file-tree-button not-mobile btn interact-fg" data-show-text="{{ctx.Locale.Tr "repo.diff.show_file_tree"}}" data-hide-text="{{ctx.Locale.Tr "repo.diff.hide_file_tree"}}">
 					{{/* the icon meaning is reversed here, "octicon-sidebar-collapse" means show the file tree */}}
@@ -19,13 +19,13 @@
 			{{end}}
 			{{if not .DiffNotAvailable}}
 				<div class="diff-detail-stats tw-flex tw-items-center tw-flex-wrap">
-					{{svg "octicon-diff" 16 "tw-mr-1"}}{{ctx.Locale.Tr "repo.diff.stats_desc" .Diff.NumFiles .Diff.TotalAddition .Diff.TotalDeletion}}
+					{{svg "octicon-diff" 16 "tw-me-1"}}{{ctx.Locale.Tr "repo.diff.stats_desc" .Diff.NumFiles .Diff.TotalAddition .Diff.TotalDeletion}}
 				</div>
 			{{end}}
 		</div>
 		<div class="diff-detail-actions button-row">
 			{{if and .PageIsPullFiles $.SignedUserID (not .IsArchived) (not .DiffNotAvailable)}}
-				<div class="not-mobile tw-flex tw-items-center tw-flex-col tw-whitespace-nowrap tw-mr-1">
+				<div class="not-mobile tw-flex tw-items-center tw-flex-col tw-whitespace-nowrap tw-me-1">
 					<label for="viewed-files-summary" id="viewed-files-summary-label" data-text-changed-template="{{ctx.Locale.Tr "repo.pulls.viewed_files_label"}}">
 						{{ctx.Locale.Tr "repo.pulls.viewed_files_label" .Diff.NumViewedFiles .Diff.NumFiles}}
 					</label>
@@ -120,7 +120,7 @@
 								</button>
 								<div class="tw-font-semibold tw-flex tw-items-center tw-font-mono">
 									{{if $file.IsBin}}
-										<span class="tw-ml-0.5 tw-mr-2">
+										<span class="tw-ms-0.5 tw-me-2">
 											{{ctx.Locale.Tr "repo.diff.bin"}}
 										</span>
 									{{else}}

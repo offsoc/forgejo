@@ -22,7 +22,7 @@
 		</div>
 		{{if (not .Repository.IsPrivate)}}
 			<div class="field {{if (.Repository.UnitEnabled $.Context $.UnitTypeExternalWiki)}}disabled{{end}}" id="globally_writeable_checkbox">
-				<div class="field tw-pl-4">
+				<div class="field tw-ps-4">
 					<div class="ui checkbox">
 						<input name="globally_writeable_wiki" type="checkbox" {{if .Permission.IsGloballyWriteable $.UnitTypeWiki}}checked{{end}}>
 						<label>{{ctx.Locale.Tr "repo.settings.wiki_globally_editable"}}</label>
@@ -36,7 +36,7 @@
 				<label>{{ctx.Locale.Tr "repo.settings.use_external_wiki"}}</label>
 			</div>
 		</div>
-		<div class="field tw-pl-4 {{if not (.Repository.UnitEnabled $.Context $.UnitTypeExternalWiki)}}disabled{{end}}" id="external_wiki_box">
+		<div class="field tw-ps-4 {{if not (.Repository.UnitEnabled $.Context $.UnitTypeExternalWiki)}}disabled{{end}}" id="external_wiki_box">
 			<label for="external_wiki_url">{{ctx.Locale.Tr "repo.settings.external_wiki_url"}}</label>
 			<input id="external_wiki_url" name="external_wiki_url" type="url" value="{{(.Repository.MustGetUnit $.Context $.UnitTypeExternalWiki).ExternalWikiConfig.ExternalWikiURL}}">
 			<p class="help">{{ctx.Locale.Tr "repo.settings.external_wiki_url_desc"}}</p>

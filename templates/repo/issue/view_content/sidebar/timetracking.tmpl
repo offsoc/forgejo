@@ -11,11 +11,11 @@
 			</form>
 			{{if $.IsStopwatchRunning}}
 				<button class="ui fluid button issue-stop-time">
-					{{svg "octicon-stopwatch" 16 "tw-mr-2"}}
+					{{svg "octicon-stopwatch" 16 "tw-me-2"}}
 					{{ctx.Locale.Tr "repo.issues.stop_tracking"}}
 				</button>
 				<button class="ui fluid button issue-cancel-time tw-mt-2">
-					{{svg "octicon-trash" 16 "tw-mr-2"}}
+					{{svg "octicon-trash" 16 "tw-me-2"}}
 					{{ctx.Locale.Tr "repo.issues.cancel_tracking"}}
 				</button>
 			{{else}}
@@ -25,7 +25,7 @@
 					</div>
 				{{end}}
 				<button class="ui fluid button issue-start-time" data-tooltip-content='{{ctx.Locale.Tr "repo.issues.start_tracking"}}'>
-					{{svg "octicon-stopwatch" 16 "tw-mr-2"}}
+					{{svg "octicon-stopwatch" 16 "tw-me-2"}}
 					{{ctx.Locale.Tr "repo.issues.start_tracking_short"}}
 				</button>
 				<div class="ui mini modal issue-start-time-modal">
@@ -43,7 +43,7 @@
 					</div>
 				</div>
 				<button class="ui fluid button issue-add-time tw-mt-2" data-tooltip-content='{{ctx.Locale.Tr "repo.issues.add_time"}}'>
-					{{svg "octicon-plus" 16 "tw-mr-2"}}
+					{{svg "octicon-plus" 16 "tw-me-2"}}
 					{{ctx.Locale.Tr "repo.issues.add_time_short"}}
 				</button>
 			{{end}}

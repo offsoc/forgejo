@@ -248,12 +248,12 @@ export default sfc; // activate IDE's Vue plugin
 <template>
   <div class="ui dropdown custom">
     <button class="branch-dropdown-button gt-ellipsis ui basic small compact button tw-flex tw-m-0" @click="menuVisible = !menuVisible" @keyup.enter="menuVisible = !menuVisible">
-      <span class="text tw-flex tw-items-center tw-mr-1 gt-ellipsis">
+      <span class="text tw-flex tw-items-center tw-me-1 gt-ellipsis">
         <template v-if="release">{{ textReleaseCompare }}</template>
         <template v-else>
           <svg-icon v-if="isViewTag" name="octicon-tag"/>
           <svg-icon v-else name="octicon-git-branch"/>
-          <strong ref="dropdownRefName" class="tw-ml-2 tw-inline-block gt-ellipsis">{{ refNameText }}</strong>
+          <strong ref="dropdownRefName" class="tw-ms-2 tw-inline-block gt-ellipsis">{{ refNameText }}</strong>
         </template>
       </span>
       <svg-icon name="octicon-triangle-down" :size="14" class-name="dropdown icon"/>
@@ -265,10 +265,10 @@ export default sfc; // activate IDE's Vue plugin
       </div>
       <div v-if="showBranchesInDropdown" class="branch-tag-tab">
         <a class="branch-tag-item muted" :class="{active: mode === 'branches'}" href="#" @click="handleTabSwitch('branches')">
-          <svg-icon name="octicon-git-branch" :size="16" class-name="tw-mr-1"/>{{ textBranches }}
+          <svg-icon name="octicon-git-branch" :size="16" class-name="tw-me-1"/>{{ textBranches }}
         </a>
         <a v-if="!noTag" class="branch-tag-item muted" :class="{active: mode === 'tags'}" href="#" @click="handleTabSwitch('tags')">
-          <svg-icon name="octicon-tag" :size="16" class-name="tw-mr-1"/>{{ textTags }}
+          <svg-icon name="octicon-tag" :size="16" class-name="tw-me-1"/>{{ textTags }}
         </a>
       </div>
       <div class="branch-tag-divider"/>

@@ -16,7 +16,7 @@
 			>
 			<label for="archived-filter-checkbox">
 				{{ctx.Locale.Tr "repo.issues.label_archived_filter"}}
-				<i class="tw-ml-1" data-tooltip-content={{ctx.Locale.Tr "repo.issues.label_archive_tooltip"}}>
+				<i class="tw-ms-1" data-tooltip-content={{ctx.Locale.Tr "repo.issues.label_archive_tooltip"}}>
 					{{svg "octicon-info"}}
 				</i>
 			</label>
@@ -43,7 +43,7 @@
 					{{end}}
 				{{end}}
 				{{RenderLabel $.Context ctx.Locale .}}
-				<p class="tw-ml-auto">{{template "repo/issue/labels/label_archived" .}}</p>
+				<p class="tw-ms-auto">{{template "repo/issue/labels/label_archived" .}}</p>
 			</a>
 		{{end}}
 	</div>

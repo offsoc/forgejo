@@ -19,7 +19,7 @@
 		</div>
 		{{range .OpenMilestones}}
 			<a class="item"{{if $useHTMX}} hx-post="{{$.RepoLink}}/issues/milestone?id={{.ID}}&issue_ids={{$.Issue.ID}}&htmx=true"{{else}} data-id="{{.ID}}" data-href="{{$.RepoLink}}/issues?milestone={{.ID}}"{{end}}>
-				{{svg "octicon-milestone" 16 "tw-mr-1"}}
+				{{svg "octicon-milestone" 16 "tw-me-1"}}
 				{{.Name}}
 			</a>
 		{{end}}
@@ -31,7 +31,7 @@
 		</div>
 		{{range .ClosedMilestones}}
 			<a class="item"{{if $useHTMX}} hx-post="{{$.RepoLink}}/issues/milestone?id={{.ID}}&issue_ids={{$.Issue.ID}}&htmx=true"{{else}} data-id="{{.ID}}" data-href="{{$.RepoLink}}/issues?milestone={{.ID}}"{{end}}>
-				{{svg "octicon-milestone" 16 "tw-mr-1"}}
+				{{svg "octicon-milestone" 16 "tw-me-1"}}
 				{{.Name}}
 			</a>
 		{{end}}

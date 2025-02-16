@@ -41,7 +41,7 @@
 						</div>
 						<div class="flex-item-trailing">
 								<button class="ui red tiny button delete-button" data-modal-id="delete-token" data-url="{{$.Link}}/delete" data-id="{{.ID}}">
-									{{svg "octicon-trash" 16 "tw-mr-1"}}
+									{{svg "octicon-trash" 16 "tw-me-1"}}
 									{{ctx.Locale.Tr "settings.delete_token"}}
 								</button>
 						</div>
@@ -62,16 +62,16 @@
 				<div class="field">
 					<label>{{ctx.Locale.Tr "settings.repo_and_org_access"}}</label>
 					<label class="tw-cursor-pointer">
-						<input class="enable-system tw-mt-1 tw-mr-1" type="radio" name="scope" value="{{$.AccessTokenScopePublicOnly}}">
+						<input class="enable-system tw-mt-1 tw-me-1" type="radio" name="scope" value="{{$.AccessTokenScopePublicOnly}}">
 						{{ctx.Locale.Tr "settings.permissions_public_only"}}
 					</label>
 					<label class="tw-cursor-pointer">
-						<input class="enable-system tw-mt-1 tw-mr-1" type="radio" name="scope" value="" checked>
+						<input class="enable-system tw-mt-1 tw-me-1" type="radio" name="scope" value="" checked>
 						{{ctx.Locale.Tr "settings.permissions_access_all"}}
 					</label>
 				</div>
 				<details class="ui optional field">
-					<summary class="tw-pb-4 tw-pl-1">
+					<summary class="tw-pb-4 tw-ps-1">
 						{{ctx.Locale.Tr "settings.select_permissions"}}
 					</summary>
 					<p class="activity meta">

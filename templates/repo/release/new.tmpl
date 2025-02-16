@@ -65,9 +65,9 @@
 						<div class="flex-text-inline tw-flex-1">
 							<div class="flex-text-inline tw-shrink-0" title="{{ctx.Locale.Tr "repo.release.type_attachment"}}">
 								{{if .ExternalURL}}
-									{{svg "octicon-link-external" 16 "tw-mr-2"}}
+									{{svg "octicon-link-external" 16 "tw-me-2"}}
 								{{else}}
-									{{svg "octicon-package" 16 "tw-mr-2"}}
+									{{svg "octicon-package" 16 "tw-me-2"}}
 								{{end}}
 							</div>
 							<input name="attachment-edit-name-{{.UUID}}" placeholder="{{ctx.Locale.Tr "repo.release.asset_name"}}" class="attachment_edit" required value="{{.Name}}">
@@ -76,13 +76,13 @@
 							{{if .ExternalURL}}
 								<input name="attachment-edit-exturl-{{.UUID}}" placeholder="{{ctx.Locale.Tr "repo.release.asset_external_url"}}" class="attachment_edit" required value="{{.ExternalURL}}">
 							{{else}}
-								<span class="ui text grey tw-whitespace-nowrap tw-ml-auto tw-pl-3">{{ctx.Locale.TrN
+								<span class="ui text grey tw-whitespace-nowrap tw-ms-auto tw-ps-3">{{ctx.Locale.TrN
 								.DownloadCount "repo.release.download_count_one"
 								"repo.release.download_count_few" (ctx.Locale.PrettyNumber
 								.DownloadCount)}} · {{.Size | ctx.Locale.TrSize}}</span>
 							{{end}}
 						</div>
-						<a class="ui mini red button remove-rel-attach tw-ml-3" data-id="{{.ID}}" data-uuid="{{.UUID}}">
+						<a class="ui mini red button remove-rel-attach tw-ms-3" data-id="{{.ID}}" data-uuid="{{.UUID}}">
 							{{ctx.Locale.Tr "remove"}}
 						</a>
 					</div>
@@ -90,12 +90,12 @@
 				<div class="field flex-text-block tw-hidden" id="attachment-template">
 					<div class="flex-text-inline tw-flex-1">
 						<div class="flex-text-inline tw-shrink-0" title="{{ctx.Locale.Tr "repo.release.type_external_asset"}}">
-							{{svg "octicon-link-external" 16 "tw-mr-2"}}
+							{{svg "octicon-link-external" 16 "tw-me-2"}}
 						</div>
 						<input name="attachment-template-new-name" placeholder="{{ctx.Locale.Tr "repo.release.asset_name"}}" class="attachment_edit">
 						<input name="attachment-template-new-exturl" placeholder="{{ctx.Locale.Tr "repo.release.asset_external_url"}}" class="attachment_edit">
 					</div>
-					<a class="ui mini red button remove-rel-attach tw-ml-3">
+					<a class="ui mini red button remove-rel-attach tw-ms-3">
 						{{ctx.Locale.Tr "remove"}}
 					</a>
 				</div>

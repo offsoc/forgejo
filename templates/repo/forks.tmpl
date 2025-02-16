@@ -7,7 +7,7 @@
 		</h2>
 		{{range .Forks}}
 			<div class="tw-flex tw-items-center tw-py-2">
-				<span class="tw-mr-1">{{ctx.AvatarUtils.Avatar .Owner}}</span>
+				<span class="tw-me-1">{{ctx.AvatarUtils.Avatar .Owner}}</span>
 				<a href="{{.Owner.HomeLink}}">{{.Owner.Name}}</a> / <a href="{{.Link}}">{{.Name}}</a>
 			</div>
 		{{end}}

@@ -19,7 +19,7 @@
 					<form class="{{if not $notificationUnreadCount}}tw-hidden{{end}}" action="{{AppSubUrl}}/notifications/purge" method="post">
 						{{$.CsrfTokenHtml}}
 						<div>
-							<button class="ui mini button primary tw-mr-0" title="{{ctx.Locale.Tr "notification.mark_all_as_read"}}">
+							<button class="ui mini button primary tw-me-0" title="{{ctx.Locale.Tr "notification.mark_all_as_read"}}">
 								{{svg "octicon-checklist"}}
 							</button>
 						</div>
@@ -41,7 +41,7 @@
 				{{else}}
 					{{range $notification := .Notifications}}
 						<div class="notifications-item tw-flex tw-items-center tw-flex-wrap tw-gap-2 tw-p-2" id="notification_{{.ID}}" data-status="{{.Status}}">
-							<div class="notifications-icon tw-ml-2 tw-mr-1 tw-self-start tw-mt-1">
+							<div class="notifications-icon tw-ms-2 tw-me-1 tw-self-start tw-mt-1">
 								{{if .Issue}}
 									{{template "shared/issueicon" .Issue}}
 								{{else}}
@@ -52,7 +52,7 @@
 								<div class="notifications-top-row tw-text-13 tw-break-anywhere">
 									{{.Repository.FullName}} {{if .Issue}}<span class="text light-3">#{{.Issue.Index}}</span>{{end}}
 									{{if eq .Status 3}}
-										{{svg "octicon-pin" 13 "text blue tw-mt-0.5 tw-ml-1"}}
+										{{svg "octicon-pin" 13 "text blue tw-mt-0.5 tw-ms-1"}}
 									{{end}}
 								</div>
 								<div class="notifications-bottom-row tw-text-16 tw-py-0.5">
@@ -65,7 +65,7 @@
 									</span>
 								</div>
 							</a>
-							<div class="notifications-updated tw-items-center tw-mr-2">
+							<div class="notifications-updated tw-items-center tw-me-2">
 								{{if .Issue}}
 									{{DateUtils.TimeSince .Issue.UpdatedUnix}}
 								{{else}}

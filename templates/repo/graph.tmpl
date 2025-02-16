@@ -12,7 +12,7 @@
 						<div class="menu">
 							<div class="item" data-value="...flow-hide-pr-refs">
 								<span class="flex-text-block">
-									{{svg "octicon-eye-closed" 16 "tw-mr-1"}}<span class="gt-ellipsis" title="{{ctx.Locale.Tr "repo.commit_graph.hide_pr_refs"}}">{{ctx.Locale.Tr "repo.commit_graph.hide_pr_refs"}}</span>
+									{{svg "octicon-eye-closed" 16 "tw-me-1"}}<span class="gt-ellipsis" title="{{ctx.Locale.Tr "repo.commit_graph.hide_pr_refs"}}">{{ctx.Locale.Tr "repo.commit_graph.hide_pr_refs"}}</span>
 								</span>
 							</div>
 							{{range .AllRefs}}
@@ -20,25 +20,25 @@
 								{{if eq $refGroup "pull"}}
 									<div class="item" data-value="{{.Name}}">
 										<span class="flex-text-block">
-											{{svg "octicon-git-pull-request" 16 "tw-mr-1"}}<span class="gt-ellipsis" title="{{.ShortName}}">#{{.ShortName}}</span>
+											{{svg "octicon-git-pull-request" 16 "tw-me-1"}}<span class="gt-ellipsis" title="{{.ShortName}}">#{{.ShortName}}</span>
 										</span>
 									</div>
 								{{else if eq $refGroup "tags"}}
 									<div class="item" data-value="{{.Name}}">
 										<span class="flex-text-block">
-											{{svg "octicon-tag" 16 "tw-mr-1"}}<span class="gt-ellipsis" title="{{.ShortName}}">{{.ShortName}}</span>
+											{{svg "octicon-tag" 16 "tw-me-1"}}<span class="gt-ellipsis" title="{{.ShortName}}">{{.ShortName}}</span>
 										</span>
 									</div>
 								{{else if eq $refGroup "remotes"}}
 									<div class="item" data-value="{{.Name}}">
 										<span class="flex-text-block">
-											{{svg "octicon-cross-reference" 16 "tw-mr-1"}}<span class="gt-ellipsis" title="{{.ShortName}}">{{.ShortName}}</span>
+											{{svg "octicon-cross-reference" 16 "tw-me-1"}}<span class="gt-ellipsis" title="{{.ShortName}}">{{.ShortName}}</span>
 										</span>
 									</div>
 								{{else if eq $refGroup "heads"}}
 									<div class="item" data-value="{{.Name}}">
 										<span class="flex-text-block">
-											{{svg "octicon-git-branch" 16 "tw-mr-1"}}<span class="gt-ellipsis" title="{{.ShortName}}">{{.ShortName}}</span>
+											{{svg "octicon-git-branch" 16 "tw-me-1"}}<span class="gt-ellipsis" title="{{.ShortName}}">{{.ShortName}}</span>
 										</span>
 									</div>
 								{{end}}
@@ -48,11 +48,11 @@
 				</div>
 				<div class="switch">
 					<button id="flow-color-monochrome" class="{{if eq .Mode "monochrome"}}active {{end}}item" title="{{ctx.Locale.Tr "repo.commit_graph.monochrome"}}">
-						{{svg "material-invert-colors" 16 "tw-mr-1"}}
+						{{svg "material-invert-colors" 16 "tw-me-1"}}
 						{{ctx.Locale.Tr "repo.commit_graph.monochrome"}}
 					</button>
 					<button id="flow-color-colored" class="{{if ne .Mode "monochrome"}}active {{end}}item" title="{{ctx.Locale.Tr "repo.commit_graph.color"}}">
-						{{svg "material-palette" 16 "tw-mr-1"}}
+						{{svg "material-palette" 16 "tw-me-1"}}
 						{{ctx.Locale.Tr "repo.commit_graph.color"}}
 					</button>
 				</div>

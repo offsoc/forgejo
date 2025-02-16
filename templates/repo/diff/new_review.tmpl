@@ -5,7 +5,7 @@
 		{{else if .Repository.IsArchived}}
 			data-tooltip-content="{{ctx.Locale.Tr "repo.archive.pull.noreview"}}"
 		{{end}}>
-		<button class="ui tiny primary button tw-pr-1 tw-flex js-btn-review {{if or (not $.IsShowingAllCommits) .Repository.IsArchived}}disabled{{end}}">
+		<button class="ui tiny primary button tw-pe-1 tw-flex js-btn-review {{if or (not $.IsShowingAllCommits) .Repository.IsArchived}}disabled{{end}}">
 			{{ctx.Locale.Tr "repo.diff.review"}}
 			<span class="ui small label review-comments-counter" data-pending-comment-number="{{.PendingCodeCommentNumber}}">{{.PendingCodeCommentNumber}}</span>
 			{{svg "octicon-triangle-down" 14 "dropdown icon"}}

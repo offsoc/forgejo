@@ -130,7 +130,7 @@ export default {
         {{ mergeForm.textCancel }}
       </button>
 
-      <div class="ui checkbox tw-ml-1" v-if="mergeForm.isPullBranchDeletable">
+      <div class="ui checkbox tw-ms-1" v-if="mergeForm.isPullBranchDeletable">
         <input name="delete_branch_after_merge" type="checkbox" v-model="deleteBranchAfterMerge" id="delete-branch-after-merge">
         <label for="delete-branch-after-merge">{{ mergeForm.textDeleteBranch }}</label>
       </div>
@@ -177,7 +177,7 @@ export default {
       </div>
 
       <!-- the cancel auto merge button -->
-      <form v-if="mergeForm.hasPendingPullRequestMerge" :action="mergeForm.baseLink+'/cancel_auto_merge'" method="post" class="tw-ml-4">
+      <form v-if="mergeForm.hasPendingPullRequestMerge" :action="mergeForm.baseLink+'/cancel_auto_merge'" method="post" class="tw-ms-4">
         <input type="hidden" name="_csrf" :value="csrfToken">
         <button class="ui button">
           {{ mergeForm.textAutoMergeCancelSchedule }}

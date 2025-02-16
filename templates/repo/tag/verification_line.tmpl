@@ -13,18 +13,18 @@
 		<div class="tw-flex tw-content-center">
 			{{if $v.Verified}}
 				{{if ne $v.SigningUser.ID 0}}
-					{{svg "gitea-lock" 16 "tw-mr-2"}}
-					<span class="ui text tw-mr-2">{{ctx.Locale.Tr "repo.commits.signed_by"}}</span>
-					{{ctx.AvatarUtils.Avatar $v.SigningUser 28 "tw-mr-2"}}
+					{{svg "gitea-lock" 16 "tw-me-2"}}
+					<span class="ui text tw-me-2">{{ctx.Locale.Tr "repo.commits.signed_by"}}</span>
+					{{ctx.AvatarUtils.Avatar $v.SigningUser 28 "tw-me-2"}}
 					<a href="{{$v.SigningUser.HomeLink}}"><strong>{{$v.SigningUser.GetDisplayName}}</strong></a>
 				{{else}}
-					<span title="{{ctx.Locale.Tr "gpg.default_key"}}">{{svg "gitea-lock-cog" 16 "tw-mr-2"}}</span>
-					<span class="ui text tw-mr-2">{{ctx.Locale.Tr "repo.commits.signed_by"}}:</span>
-					{{ctx.AvatarUtils.AvatarByEmail $v.SigningEmail "" 28 "tw-mr-2"}}
+					<span title="{{ctx.Locale.Tr "gpg.default_key"}}">{{svg "gitea-lock-cog" 16 "tw-me-2"}}</span>
+					<span class="ui text tw-me-2">{{ctx.Locale.Tr "repo.commits.signed_by"}}:</span>
+					{{ctx.AvatarUtils.AvatarByEmail $v.SigningEmail "" 28 "tw-me-2"}}
 					<strong>{{$v.SigningUser.GetDisplayName}}</strong>
 				{{end}}
 			{{else}}
-				{{svg "gitea-unlock" 16 "tw-mr-2"}}
+				{{svg "gitea-unlock" 16 "tw-me-2"}}
 				<span class="ui text">{{ctx.Locale.Tr $v.Reason}}</span>
 			{{end}}
 		</div>
@@ -32,45 +32,45 @@
 		<div class="tw-flex tw-content-center">
 			{{if $v.Verified}}
 				{{if ne $v.SigningUser.ID 0}}
-					{{svg "octicon-verified" 16 "tw-mr-2"}}
+					{{svg "octicon-verified" 16 "tw-me-2"}}
 					{{if $v.SigningSSHKey}}
-						<span class="ui text tw-mr-2">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
+						<span class="ui text tw-me-2">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
 						{{$v.SigningSSHKey.Fingerprint}}
 					{{else}}
-						<span class="ui text tw-mr-2">{{ctx.Locale.Tr "repo.commits.gpg_key_id"}}:</span>
+						<span class="ui text tw-me-2">{{ctx.Locale.Tr "repo.commits.gpg_key_id"}}:</span>
 						{{$v.SigningKey.PaddedKeyID}}
 					{{end}}
 				{{else}}
-					{{svg "octicon-unverified" 16 "tw-mr-2"}}
+					{{svg "octicon-unverified" 16 "tw-me-2"}}
 					{{if $v.SigningSSHKey}}
-						<span class="ui text tw-mr-2" data-tooltip-content="{{ctx.Locale.Tr "gpg.default_key"}}">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
+						<span class="ui text tw-me-2" data-tooltip-content="{{ctx.Locale.Tr "gpg.default_key"}}">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
 						{{$v.SigningSSHKey.Fingerprint}}
 					{{else}}
-						<span class="ui text tw-mr-2" data-tooltip-content="{{ctx.Locale.Tr "gpg.default_key"}}">{{ctx.Locale.Tr "repo.commits.gpg_key_id"}}:</span>
+						<span class="ui text tw-me-2" data-tooltip-content="{{ctx.Locale.Tr "gpg.default_key"}}">{{ctx.Locale.Tr "repo.commits.gpg_key_id"}}:</span>
 						{{$v.SigningKey.PaddedKeyID}}
 					{{end}}
 				{{end}}
 			{{else if $v.Warning}}
-				{{svg "octicon-unverified" 16 "tw-mr-2"}}
+				{{svg "octicon-unverified" 16 "tw-me-2"}}
 				{{if $v.SigningSSHKey}}
-					<span class="ui text tw-mr-2">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
+					<span class="ui text tw-me-2">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
 					{{$v.SigningSSHKey.Fingerprint}}
 				{{else}}
-					<span class="ui text tw-mr-2">{{ctx.Locale.Tr "repo.commits.gpg_key_id"}}:</span>
+					<span class="ui text tw-me-2">{{ctx.Locale.Tr "repo.commits.gpg_key_id"}}:</span>
 					{{$v.SigningKey.PaddedKeyID}}
 				{{end}}
 			{{else}}
 				{{if $v.SigningKey}}
 					{{if ne $v.SigningKey.KeyID ""}}
-						{{svg "octicon-verified" 16 "tw-mr-2"}}
-						<span class="ui text tw-mr-2">{{ctx.Locale.Tr "repo.commits.gpg_key_id"}}:</span>
+						{{svg "octicon-verified" 16 "tw-me-2"}}
+						<span class="ui text tw-me-2">{{ctx.Locale.Tr "repo.commits.gpg_key_id"}}:</span>
 						{{$v.SigningKey.PaddedKeyID}}
 					{{end}}
 				{{end}}
 				{{if $v.SigningSSHKey}}
 					{{if ne $v.SigningSSHKey.Fingerprint ""}}
-						{{svg "octicon-verified" 16 "tw-mr-2"}}
-						<span class="ui text tw-mr-2">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
+						{{svg "octicon-verified" 16 "tw-me-2"}}
+						<span class="ui text tw-me-2">{{ctx.Locale.Tr "repo.commits.ssh_key_fingerprint"}}:</span>
 						{{$v.SigningSSHKey.Fingerprint}}
 					{{end}}
 				{{end}}

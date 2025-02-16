@@ -3,7 +3,7 @@
 		<a class="text muted flex-text-block">
 			<strong>{{ctx.Locale.Tr "repo.issues.new.milestone"}}</strong>
 			{{if and .HasIssuesOrPullsWritePermission (not .Repository.IsArchived)}}
-				{{svg "octicon-gear" 16 "tw-ml-1"}}
+				{{svg "octicon-gear" 16 "tw-ms-1"}}
 			{{end}}
 		</a>
 		<div class="menu">
@@ -15,7 +15,7 @@
 		<div class="selected">
 			{{if .Issue.Milestone}}
 				<a class="item muted sidebar-item-link" href="{{.RepoLink}}/milestone/{{.Issue.Milestone.ID}}">
-					{{svg "octicon-milestone" 18 "tw-mr-2"}}
+					{{svg "octicon-milestone" 18 "tw-me-2"}}
 					{{.Issue.Milestone.Name}}
 				</a>
 			{{end}}

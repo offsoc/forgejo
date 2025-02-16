@@ -26,9 +26,9 @@
 	{{end}}
 
 	<h4 class="file-header ui top attached header tw-flex tw-items-center tw-justify-between tw-flex-wrap">
-		<div class="file-header-left tw-flex tw-items-center tw-py-2 tw-pr-4">
+		<div class="file-header-left tw-flex tw-items-center tw-py-2 tw-pe-4">
 			{{if .ReadmeInList}}
-				{{svg "octicon-book" 16 "tw-mr-2"}}
+				{{svg "octicon-book" 16 "tw-me-2"}}
 				<strong><a class="default-link muted" href="#readme">{{.FileName}}</a></strong>
 			{{else}}
 				{{template "repo/file_info" .}}
@@ -42,7 +42,7 @@
 				</div>
 			{{end}}
 			{{if not .ReadmeInList}}
-				<div class="ui buttons tw-mr-1">
+				<div class="ui buttons tw-me-1">
 					{{if .SymlinkURL}}
 						<a class="ui mini basic button" href="{{$.SymlinkURL}}" data-kind="follow-symlink">{{ctx.Locale.Tr "repo.file_follow"}}</a>
 					{{end}}
@@ -85,8 +85,8 @@
 					{{end}}
 				{{end}}
 			{{else if .EscapeStatus.Escaped}}
-				<button class="ui mini basic button unescape-button tw-mr-1 tw-hidden">{{ctx.Locale.Tr "repo.unescape_control_characters"}}</button>
-				<button class="ui mini basic button escape-button tw-mr-1">{{ctx.Locale.Tr "repo.escape_control_characters"}}</button>
+				<button class="ui mini basic button unescape-button tw-me-1 tw-hidden">{{ctx.Locale.Tr "repo.unescape_control_characters"}}</button>
+				<button class="ui mini basic button escape-button tw-me-1">{{ctx.Locale.Tr "repo.escape_control_characters"}}</button>
 			{{end}}
 			{{if and .ReadmeInList .CanEditReadmeFile}}
 				<a class="btn-octicon" data-tooltip-content="{{ctx.Locale.Tr "repo.editor.edit_this_file"}}" href="{{.RepoLink}}/_edit/{{PathEscapeSegments .BranchName}}/{{PathEscapeSegments .TreePath}}/{{PathEscapeSegments .FileName}}">{{svg "octicon-pencil"}}</a>

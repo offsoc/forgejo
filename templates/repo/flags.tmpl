@@ -11,7 +11,7 @@
 				<form class="ui form" action="{{.Link}}" method="post">
 					{{.CsrfTokenHtml}}
 					<strong>{{ctx.Locale.Tr "repo.admin.enabled_flags"}}</strong>
-					<div class="ui segment tw-pl-4">
+					<div class="ui segment tw-ps-4">
 						{{range $flag, $checked := .Flags}}
 							<div class="field">
 								<div class="ui checkbox{{if $checked}} checked{{end}}">

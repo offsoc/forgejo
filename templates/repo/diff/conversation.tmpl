@@ -7,25 +7,25 @@
 	{{if $resolved}}
 		<div class="ui attached header resolved-placeholder tw-flex tw-items-center tw-justify-between">
 			<div class="ui grey text tw-flex tw-items-center tw-flex-wrap tw-gap-1">
-				{{svg "octicon-check" 16 "icon tw-mr-1"}}
+				{{svg "octicon-check" 16 "icon tw-me-1"}}
 				<b>{{$resolveDoer.Name}}</b> {{ctx.Locale.Tr "repo.issues.review.resolved_by"}}
 				{{if $invalid}}
 					<!--
 					We only handle the case $resolved=true and $invalid=true in this template because if the comment is not resolved it has the outdated label in the comments area (not the header above).
 					The case $resolved=false and $invalid=true is handled in repo/diff/comments.tmpl
 					-->
-					<a href="{{AppSubUrl}}{{$referenceUrl}}" class="ui label tw-ml-2" data-tooltip-content="{{ctx.Locale.Tr "repo.issues.review.outdated_description"}}">
+					<a href="{{AppSubUrl}}{{$referenceUrl}}" class="ui label tw-ms-2" data-tooltip-content="{{ctx.Locale.Tr "repo.issues.review.outdated_description"}}">
 						{{ctx.Locale.Tr "repo.issues.review.outdated"}}
 					</a>
 				{{end}}
 			</div>
 			<div class="tw-flex tw-items-center tw-gap-2">
 				<button id="show-outdated-{{(index .comments 0).ID}}" data-comment="{{(index .comments 0).ID}}" class="ui tiny labeled button show-outdated tw-flex tw-items-center">
-					{{svg "octicon-unfold" 16 "tw-mr-2"}}
+					{{svg "octicon-unfold" 16 "tw-me-2"}}
 					{{ctx.Locale.Tr "repo.issues.review.show_resolved"}}
 				</button>
 				<button id="hide-outdated-{{(index .comments 0).ID}}" data-comment="{{(index .comments 0).ID}}" class="ui tiny labeled button hide-outdated tw-flex tw-items-center tw-hidden">
-					{{svg "octicon-fold" 16 "tw-mr-2"}}
+					{{svg "octicon-fold" 16 "tw-me-2"}}
 					{{ctx.Locale.Tr "repo.issues.review.hide_resolved"}}
 				</button>
 			</div>
@@ -57,7 +57,7 @@
 			{{end}}
 			{{if and $.SignedUserID (not $.Repository.IsArchived)}}
 				<button class="comment-form-reply ui primary tiny labeled icon button">
-					{{svg "octicon-reply" 16 "reply icon tw-mr-1"}}{{ctx.Locale.Tr "repo.diff.comment.reply"}}
+					{{svg "octicon-reply" 16 "reply icon tw-me-1"}}{{ctx.Locale.Tr "repo.diff.comment.reply"}}
 				</button>
 			{{end}}
 		</div>

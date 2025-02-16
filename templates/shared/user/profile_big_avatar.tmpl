@@ -22,9 +22,9 @@
 					</a>
 				{{end}}</span>
 		<div class="tw-mt-2">
-			<a class="muted" href="{{.ContextUser.HomeLink}}?tab=followers">{{svg "octicon-people" 18 "tw-mr-1"}}{{ctx.Locale.TrN .NumFollowers "user.followers_one" "user.followers_few" .NumFollowers}}</a> · <a class="muted" href="{{.ContextUser.HomeLink}}?tab=following">{{ctx.Locale.TrN .NumFollowing "user.following_one" "user.following_few" .NumFollowing}}</a>
+			<a class="muted" href="{{.ContextUser.HomeLink}}?tab=followers">{{svg "octicon-people" 18 "tw-me-1"}}{{ctx.Locale.TrN .NumFollowers "user.followers_one" "user.followers_few" .NumFollowers}}</a> · <a class="muted" href="{{.ContextUser.HomeLink}}?tab=following">{{ctx.Locale.TrN .NumFollowing "user.following_one" "user.following_few" .NumFollowing}}</a>
 			{{if and .EnableFeed (or .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate))}}
-				<a href="{{.ContextUser.HomeLink}}.rss"><i class="ui text grey tw-ml-2" data-tooltip-content="{{ctx.Locale.Tr "rss_feed"}}">{{svg "octicon-rss" 18}}</i></a>
+				<a href="{{.ContextUser.HomeLink}}.rss"><i class="ui text grey tw-ms-2" data-tooltip-content="{{ctx.Locale.Tr "rss_feed"}}">{{svg "octicon-rss" 18}}</i></a>
 			{{end}}
 		</div>
 	</div>

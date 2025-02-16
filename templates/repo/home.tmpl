@@ -57,7 +57,7 @@
 		{{$isHomepage := (eq $n 0)}}
 		<div class="repo-button-row">
 			<div class="tw-flex tw-items-center tw-gap-y-2">
-				{{template "repo/branch_dropdown" dict "root" . "ContainerClasses" "tw-mr-1"}}
+				{{template "repo/branch_dropdown" dict "root" . "ContainerClasses" "tw-me-1"}}
 				{{if and .CanCompareOrPull .IsViewBranch (not .Repository.IsArchived)}}
 					{{$cmpBranch := ""}}
 					{{if ne .Repository.ID .BaseRepo.ID}}
@@ -76,7 +76,7 @@
 				{{end}}
 
 				{{if and .CanWriteCode .IsViewBranch (not .Repository.IsMirror) (not .Repository.IsArchived) (not .IsViewFile)}}
-					<button class="ui dropdown basic compact jump button tw-mr-1"{{if not .Repository.CanEnableEditor}} disabled{{end}}>
+					<button class="ui dropdown basic compact jump button tw-me-1"{{if not .Repository.CanEnableEditor}} disabled{{end}}>
 						{{ctx.Locale.Tr "repo.editor.add_file"}}
 						{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 						<div class="menu">
@@ -101,7 +101,7 @@
 					</a>
 				{{end}}
 				{{if (not $isHomepage)}}
-					<span class="breadcrumb repo-path tw-ml-1">
+					<span class="breadcrumb repo-path tw-ms-1">
 						<a class="section" href="{{.RepoLink}}/src/{{.BranchNameSubURL}}" title="{{.Repository.Name}}">{{StringUtils.EllipsisString .Repository.Name 30}}</a>
 						{{- range $i, $v := .TreeNames -}}
 							<span class="breadcrumb-divider">/</span>
@@ -124,12 +124,12 @@
 							{{svg "octicon-kebab-horizontal"}}
 							<div class="menu">
 								{{if not $.DisableDownloadSourceArchives}}
-									<a class="item archive-link" href="{{$.RepoLink}}/archive/{{PathEscapeSegments $.RefName}}.zip" rel="nofollow">{{svg "octicon-file-zip" 16 "tw-mr-2"}}{{ctx.Locale.Tr "repo.download_zip"}}</a>
-									<a class="item archive-link" href="{{$.RepoLink}}/archive/{{PathEscapeSegments $.RefName}}.tar.gz" rel="nofollow">{{svg "octicon-file-zip" 16 "tw-mr-2"}}{{ctx.Locale.Tr "repo.download_tar"}}</a>
-									<a class="item archive-link" href="{{$.RepoLink}}/archive/{{PathEscapeSegments $.RefName}}.bundle" rel="nofollow">{{svg "octicon-package" 16 "tw-mr-2"}}{{ctx.Locale.Tr "repo.download_bundle"}}</a>
+									<a class="item archive-link" href="{{$.RepoLink}}/archive/{{PathEscapeSegments $.RefName}}.zip" rel="nofollow">{{svg "octicon-file-zip" 16 "tw-me-2"}}{{ctx.Locale.Tr "repo.download_zip"}}</a>
+									<a class="item archive-link" href="{{$.RepoLink}}/archive/{{PathEscapeSegments $.RefName}}.tar.gz" rel="nofollow">{{svg "octicon-file-zip" 16 "tw-me-2"}}{{ctx.Locale.Tr "repo.download_tar"}}</a>
+									<a class="item archive-link" href="{{$.RepoLink}}/archive/{{PathEscapeSegments $.RefName}}.bundle" rel="nofollow">{{svg "octicon-package" 16 "tw-me-2"}}{{ctx.Locale.Tr "repo.download_bundle"}}</a>
 								{{end}}
 								{{if .CitationExist}}
-									<a class="item" id="cite-repo-button">{{svg "octicon-cross-reference" 16 "tw-mr-2"}}{{ctx.Locale.Tr "repo.cite_this_repo"}}</a>
+									<a class="item" id="cite-repo-button">{{svg "octicon-cross-reference" 16 "tw-me-2"}}{{ctx.Locale.Tr "repo.cite_this_repo"}}</a>
 								{{end}}
 								{{range .OpenWithEditorApps}}
 									<a class="item js-clone-url-editor" data-href-template="{{.OpenURL}}">{{.IconHTML}}{{ctx.Locale.Tr "repo.open_with_editor" .DisplayName}}</a>
@@ -142,7 +142,7 @@
 				{{end}}
 				{{if and (not $isHomepage) (not .IsViewFile) (not .IsBlame)}}{{/* IsViewDirectory (not home), TODO: split the templates, avoid using "if" tricks */}}
 					<a class="ui button" href="{{.RepoLink}}/commits/{{.BranchNameSubURL}}/{{.TreePath | PathEscapeSegments}}">
-						{{svg "octicon-history" 16 "tw-mr-2"}}{{ctx.Locale.Tr "repo.file_history"}}
+						{{svg "octicon-history" 16 "tw-me-2"}}{{ctx.Locale.Tr "repo.file_history"}}
 					</a>
 				{{end}}
 			</div>

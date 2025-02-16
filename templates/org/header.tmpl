@@ -9,9 +9,9 @@
 					{{if .Org.Visibility.IsPrivate}}<span class="ui large horizontal label">{{ctx.Locale.Tr "org.settings.visibility.private_shortname"}}</span>{{end}}
 				</span>
 			</div>
-			<span class="tw-flex tw-items-center button-row tw-ml-auto tw-text-16 tw-whitespace-nowrap">
+			<span class="tw-flex tw-items-center button-row tw-ms-auto tw-text-16 tw-whitespace-nowrap">
 				{{if .EnableFeed}}
-					<a class="ui basic label button tw-mr-0" href="{{.Org.HomeLink}}.rss" data-tooltip-content="{{ctx.Locale.Tr "rss_feed"}}">
+					<a class="ui basic label button tw-me-0" href="{{.Org.HomeLink}}.rss" data-tooltip-content="{{ctx.Locale.Tr "rss_feed"}}">
 						{{svg "octicon-rss" 24}}
 					</a>
 				{{end}}
@@ -19,7 +19,7 @@
 					{{template "org/follow_unfollow" .}}
 				{{end}}
 				{{if .IsOrganizationMember}}
-					<a class="ui basic button tw-mr-0" href="{{.OrgLink}}/dashboard">{{ctx.Locale.Tr "org.open_dashboard"}}</a>
+					<a class="ui basic button tw-me-0" href="{{.OrgLink}}/dashboard">{{ctx.Locale.Tr "org.open_dashboard"}}</a>
 				{{end}}
 			</span>
 		</div>

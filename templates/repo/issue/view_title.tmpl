@@ -34,7 +34,7 @@
 	{{end}}
 	<div class="issue-title-meta">
 		{{if .HasMerged}}
-			<div class="ui purple label issue-state-label">{{svg "octicon-git-merge" 16 "tw-mr-1"}} {{if eq .Issue.PullRequest.Status 3}}{{ctx.Locale.Tr "repo.pulls.manually_merged"}}{{else}}{{ctx.Locale.Tr "repo.pulls.merged"}}{{end}}</div>
+			<div class="ui purple label issue-state-label">{{svg "octicon-git-merge" 16 "tw-me-1"}} {{if eq .Issue.PullRequest.Status 3}}{{ctx.Locale.Tr "repo.pulls.manually_merged"}}{{else}}{{ctx.Locale.Tr "repo.pulls.merged"}}{{end}}</div>
 		{{else if .Issue.IsClosed}}
 			<div class="ui red label issue-state-label">{{if .Issue.IsPull}}{{svg "octicon-git-pull-request-closed"}}{{else}}{{svg "octicon-issue-closed"}}{{end}} {{ctx.Locale.Tr "repo.issues.closed_title"}}</div>
 		{{else if .Issue.IsPull}}
@@ -46,7 +46,7 @@
 		{{else}}
 			<div class="ui green label issue-state-label">{{svg "octicon-issue-opened"}} {{ctx.Locale.Tr "repo.issues.open_title"}}</div>
 		{{end}}
-		<div class="tw-ml-2 tw-flex-1 tw-break-anywhere">
+		<div class="tw-ms-2 tw-flex-1 tw-break-anywhere">
 			{{if .Issue.IsPull}}
 				{{$headHref := .HeadTarget}}
 				{{if .HeadBranchLink}}
@@ -102,7 +102,7 @@
 					{{end}}
 					<span id="pull-desc-editor" class="tw-hidden flex-text-block" data-target-update-url="{{$.RepoLink}}/pull/{{.Issue.Index}}/target_branch">
 						<div class="ui floating filter dropdown">
-							<div class="ui basic small button tw-mr-0">
+							<div class="ui basic small button tw-me-0">
 								<span class="text">{{ctx.Locale.Tr "repo.pulls.compare_compare"}}: {{$.HeadTarget}}</span>
 							</div>
 						</div>

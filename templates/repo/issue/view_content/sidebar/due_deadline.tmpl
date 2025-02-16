@@ -8,12 +8,12 @@
 		<p>
 			<div class="tw-flex tw-justify-between tw-items-center">
 				<div class="due-date {{if .Issue.IsOverdue}}text red{{end}}" {{if .Issue.IsOverdue}}data-tooltip-content="{{ctx.Locale.Tr "repo.issues.due_date_overdue"}}"{{end}}>
-					{{svg "octicon-calendar" 16 "tw-mr-2"}}
+					{{svg "octicon-calendar" 16 "tw-me-2"}}
 					{{DateUtils.AbsoluteLong .Issue.DeadlineUnix}}
 				</div>
 				<div>
 					{{if and .HasIssuesOrPullsWritePermission (not .Repository.IsArchived)}}
-						<a class="issue-due-edit muted" data-tooltip-content="{{ctx.Locale.Tr "repo.issues.due_date_form_edit"}}">{{svg "octicon-pencil" 16 "tw-mr-1"}}</a>
+						<a class="issue-due-edit muted" data-tooltip-content="{{ctx.Locale.Tr "repo.issues.due_date_form_edit"}}">{{svg "octicon-pencil" 16 "tw-me-1"}}</a>
 						<a class="issue-due-remove muted" data-tooltip-content="{{ctx.Locale.Tr "repo.issues.due_date_form_remove"}}">{{svg "octicon-trash"}}</a>
 					{{end}}
 				</div>
