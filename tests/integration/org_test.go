@@ -172,7 +172,7 @@ func TestOrgRestrictedUser(t *testing.T) {
 		Description:             "Code Reader",
 		IncludesAllRepositories: true,
 		Permission:              "read",
-		Units:                   []string{"repo.code"},
+		Units:                   []string{"code"},
 	}
 
 	req = NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/orgs/%s/teams", orgName), teamToCreate).

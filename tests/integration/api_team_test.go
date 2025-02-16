@@ -71,7 +71,7 @@ func TestAPITeam(t *testing.T) {
 		Description:             "team one",
 		IncludesAllRepositories: true,
 		Permission:              "write",
-		Units:                   []string{"repo.code", "repo.issues"},
+		Units:                   []string{"code", "issues"},
 	}
 	req = NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/orgs/%s/teams", org.Name), teamToCreate).
 		AddTokenAuth(token)
@@ -92,7 +92,7 @@ func TestAPITeam(t *testing.T) {
 		Description:             &editDescription,
 		Permission:              "admin",
 		IncludesAllRepositories: &editFalse,
-		Units:                   []string{"repo.code", "repo.pulls", "repo.releases"},
+		Units:                   []string{"code", "pulls", "releases"},
 	}
 
 	req = NewRequestWithJSON(t, "PATCH", fmt.Sprintf("/api/v1/teams/%d", teamID), teamToEdit).
@@ -101,9 +101,9 @@ func TestAPITeam(t *testing.T) {
 	apiTeam = api.Team{}
 	DecodeJSON(t, resp, &apiTeam)
 	checkTeamResponse(t, "EditTeam1", &apiTeam, teamToEdit.Name, *teamToEdit.Description, *teamToEdit.IncludesAllRepositories,
-		teamToEdit.Permission, unit.AllUnitKeyNames(), nil)
+		teamToEdit.Permission, unit.AllUnitNames(), nil)
 	checkTeamBean(t, apiTeam.ID, teamToEdit.Name, *teamToEdit.Description, *teamToEdit.IncludesAllRepositories,
-		teamToEdit.Permission, unit.AllUnitKeyNames(), nil)
+		teamToEdit.Permission, unit.AllUnitNames(), nil)
 
 	// Edit team Description only
 	editDescription = "first team"
@@ -114,9 +114,9 @@ func TestAPITeam(t *testing.T) {
 	apiTeam = api.Team{}
 	DecodeJSON(t, resp, &apiTeam)
 	checkTeamResponse(t, "EditTeam1_DescOnly", &apiTeam, teamToEdit.Name, *teamToEditDesc.Description, *teamToEdit.IncludesAllRepositories,
-		teamToEdit.Permission, unit.AllUnitKeyNames(), nil)
+		teamToEdit.Permission, unit.AllUnitNames(), nil)
 	checkTeamBean(t, apiTeam.ID, teamToEdit.Name, *teamToEditDesc.Description, *teamToEdit.IncludesAllRepositories,
-		teamToEdit.Permission, unit.AllUnitKeyNames(), nil)
+		teamToEdit.Permission, unit.AllUnitNames(), nil)
 
 	// Read team.
 	teamRead := unittest.AssertExistsAndLoadBean(t, &organization.Team{ID: teamID})
@@ -142,7 +142,7 @@ func TestAPITeam(t *testing.T) {
 		Description:             "team two",
 		IncludesAllRepositories: true,
 		Permission:              "write",
-		UnitsMap:                map[string]string{"repo.code": "read", "repo.issues": "write", "repo.wiki": "none"},
+		UnitsMap:                map[string]string{"code": "read", "issues": "write", "wiki": "none"},
 	}
 	req = NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/orgs/%s/teams", org.Name), teamToCreate).
 		AddTokenAuth(token)
@@ -163,7 +163,7 @@ func TestAPITeam(t *testing.T) {
 		Description:             &editDescription,
 		Permission:              "write",
 		IncludesAllRepositories: &editFalse,
-		UnitsMap:                map[string]string{"repo.code": "read", "repo.pulls": "read", "repo.releases": "write"},
+		UnitsMap:                map[string]string{"code": "read", "pulls": "read", "releases": "write"},
 	}
 
 	req = NewRequestWithJSON(t, "PATCH", fmt.Sprintf("/api/v1/teams/%d", teamID), teamToEdit).

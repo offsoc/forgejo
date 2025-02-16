@@ -25,9 +25,9 @@ func TestLoadUnitConfig(t *testing.T) {
 			setting.Repository.DefaultForkRepoUnits = defaultForkRepoUnits
 		}(setting.Repository.DisabledRepoUnits, setting.Repository.DefaultRepoUnits, setting.Repository.DefaultForkRepoUnits)
 
-		setting.Repository.DisabledRepoUnits = []string{"repo.issues"}
-		setting.Repository.DefaultRepoUnits = []string{"repo.code", "repo.releases", "repo.issues", "repo.pulls"}
-		setting.Repository.DefaultForkRepoUnits = []string{"repo.releases"}
+		setting.Repository.DisabledRepoUnits = []string{"issues"}
+		setting.Repository.DefaultRepoUnits = []string{"code", "releases", "issues", "pulls"}
+		setting.Repository.DefaultForkRepoUnits = []string{"releases"}
 		require.NoError(t, LoadUnitConfig())
 		assert.Equal(t, []Type{TypeIssues}, DisabledRepoUnitsGet())
 		assert.Equal(t, []Type{TypeCode, TypeReleases, TypePullRequests}, DefaultRepoUnits)
@@ -45,9 +45,9 @@ func TestLoadUnitConfig(t *testing.T) {
 			setting.Repository.DefaultForkRepoUnits = defaultForkRepoUnits
 		}(setting.Repository.DisabledRepoUnits, setting.Repository.DefaultRepoUnits, setting.Repository.DefaultForkRepoUnits)
 
-		setting.Repository.DisabledRepoUnits = []string{"repo.issues", "invalid.1"}
-		setting.Repository.DefaultRepoUnits = []string{"repo.code", "invalid.2", "repo.releases", "repo.issues", "repo.pulls"}
-		setting.Repository.DefaultForkRepoUnits = []string{"invalid.3", "repo.releases"}
+		setting.Repository.DisabledRepoUnits = []string{"issues", "invalid1"}
+		setting.Repository.DefaultRepoUnits = []string{"code", "invalid2", "releases", "issues", "pulls"}
+		setting.Repository.DefaultForkRepoUnits = []string{"invalid3", "releases"}
 		require.NoError(t, LoadUnitConfig())
 		assert.Equal(t, []Type{TypeIssues}, DisabledRepoUnitsGet())
 		assert.Equal(t, []Type{TypeCode, TypeReleases, TypePullRequests}, DefaultRepoUnits)
@@ -65,9 +65,9 @@ func TestLoadUnitConfig(t *testing.T) {
 			setting.Repository.DefaultForkRepoUnits = defaultForkRepoUnits
 		}(setting.Repository.DisabledRepoUnits, setting.Repository.DefaultRepoUnits, setting.Repository.DefaultForkRepoUnits)
 
-		setting.Repository.DisabledRepoUnits = []string{"repo.issues", "repo.issues"}
-		setting.Repository.DefaultRepoUnits = []string{"repo.code", "repo.releases", "repo.issues", "repo.pulls", "repo.code"}
-		setting.Repository.DefaultForkRepoUnits = []string{"repo.releases", "repo.releases"}
+		setting.Repository.DisabledRepoUnits = []string{"issues", "issues"}
+		setting.Repository.DefaultRepoUnits = []string{"code", "releases", "issues", "pulls", "code"}
+		setting.Repository.DefaultForkRepoUnits = []string{"releases", "releases"}
 		require.NoError(t, LoadUnitConfig())
 		assert.Equal(t, []Type{TypeIssues}, DisabledRepoUnitsGet())
 		assert.Equal(t, []Type{TypeCode, TypeReleases, TypePullRequests}, DefaultRepoUnits)
@@ -85,9 +85,9 @@ func TestLoadUnitConfig(t *testing.T) {
 			setting.Repository.DefaultForkRepoUnits = defaultForkRepoUnits
 		}(setting.Repository.DisabledRepoUnits, setting.Repository.DefaultRepoUnits, setting.Repository.DefaultForkRepoUnits)
 
-		setting.Repository.DisabledRepoUnits = []string{"repo.issues", "repo.issues"}
+		setting.Repository.DisabledRepoUnits = []string{"issues", "issues"}
 		setting.Repository.DefaultRepoUnits = []string{}
-		setting.Repository.DefaultForkRepoUnits = []string{"repo.releases", "repo.releases"}
+		setting.Repository.DefaultForkRepoUnits = []string{"releases", "releases"}
 		require.NoError(t, LoadUnitConfig())
 		assert.Equal(t, []Type{TypeIssues}, DisabledRepoUnitsGet())
 		assert.ElementsMatch(t, []Type{TypeCode, TypePullRequests, TypeReleases, TypeWiki, TypePackages, TypeProjects, TypeActions}, DefaultRepoUnits)

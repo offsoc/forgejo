@@ -223,7 +223,7 @@ func TestAPIOrgSearchEmptyTeam(t *testing.T) {
 		Name:                    "Empty",
 		IncludesAllRepositories: true,
 		Permission:              "read",
-		Units:                   []string{"repo.code", "repo.issues", "repo.ext_issues", "repo.wiki", "repo.pulls"},
+		Units:                   []string{"code", "issues", "ext_issues", "wiki", "pulls"},
 	}).AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusCreated)
 

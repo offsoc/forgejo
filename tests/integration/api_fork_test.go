@@ -49,7 +49,7 @@ func TestAPIForkAsAdminIgnoringLimits(t *testing.T) {
 		Name:                    "testers",
 		IncludesAllRepositories: true,
 		Permission:              "write",
-		Units:                   []string{"repo.code", "repo.issues"},
+		Units:                   []string{"code", "issues"},
 	}
 
 	req = NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/orgs/%s/teams", orgName), &teamToCreate).AddTokenAuth(adminToken)

@@ -74,7 +74,7 @@ func testOrgCounts(t *testing.T, u *url.URL) {
 	t.Run("CreateTeamForPublicTestOrganization", doAPICreateOrganizationTeam(ctx, orgName, &api.CreateTeamOption{
 		Name:             "test",
 		Permission:       "read",
-		Units:            []string{"repo.code", "repo.issues", "repo.wiki", "repo.pulls", "repo.releases"},
+		Units:            []string{"code", "issues", "wiki", "pulls", "releases"},
 		CanCreateOrgRepo: true,
 	}, func(_ *testing.T, team api.Team) {
 		testTeam = team

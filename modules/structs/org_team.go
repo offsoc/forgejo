@@ -13,10 +13,10 @@ type Team struct {
 	IncludesAllRepositories bool          `json:"includes_all_repositories"`
 	// enum: ["none", "read", "write", "admin", "owner"]
 	Permission string `json:"permission"`
-	// example: ["repo.code","repo.issues","repo.ext_issues","repo.wiki","repo.pulls","repo.releases","repo.projects","repo.ext_wiki"]
+	// example: ["code","issues","ext_issues","wiki","pulls","releases","projects","ext_wiki"]
 	// Deprecated: This variable should be replaced by UnitsMap and will be dropped in later versions.
 	Units []string `json:"units"`
-	// example: {"repo.code":"read","repo.issues":"write","repo.ext_issues":"none","repo.wiki":"admin","repo.pulls":"owner","repo.releases":"none","repo.projects":"none","repo.ext_wiki":"none"}
+	// example: {"code":"read","issues":"write","ext_issues":"none","wiki":"admin","pulls":"owner","releases":"none","projects":"none","ext_wiki":"none"}
 	UnitsMap         map[string]string `json:"units_map"`
 	CanCreateOrgRepo bool              `json:"can_create_org_repo"`
 }
@@ -29,10 +29,10 @@ type CreateTeamOption struct {
 	IncludesAllRepositories bool   `json:"includes_all_repositories"`
 	// enum: ["read", "write", "admin"]
 	Permission string `json:"permission"`
-	// example: ["repo.actions","repo.code","repo.issues","repo.ext_issues","repo.wiki","repo.ext_wiki","repo.pulls","repo.releases","repo.projects","repo.ext_wiki"]
+	// example: ["actions","code","issues","ext_issues","wiki","ext_wiki","pulls","releases","projects","ext_wiki"]
 	// Deprecated: This variable should be replaced by UnitsMap and will be dropped in later versions.
 	Units []string `json:"units"`
-	// example: {"repo.actions","repo.packages","repo.code":"read","repo.issues":"write","repo.ext_issues":"none","repo.wiki":"admin","repo.pulls":"owner","repo.releases":"none","repo.projects":"none","repo.ext_wiki":"none"}
+	// example: {"actions","packages","code":"read","issues":"write","ext_issues":"none","wiki":"admin","pulls":"owner","releases":"none","projects":"none","ext_wiki":"none"}
 	UnitsMap         map[string]string `json:"units_map"`
 	CanCreateOrgRepo bool              `json:"can_create_org_repo"`
 }
@@ -45,10 +45,10 @@ type EditTeamOption struct {
 	IncludesAllRepositories *bool   `json:"includes_all_repositories"`
 	// enum: ["read", "write", "admin"]
 	Permission string `json:"permission"`
-	// example: ["repo.code","repo.issues","repo.ext_issues","repo.wiki","repo.pulls","repo.releases","repo.projects","repo.ext_wiki"]
+	// example: ["code","issues","ext_issues","wiki","pulls","releases","projects","ext_wiki"]
 	// Deprecated: This variable should be replaced by UnitsMap and will be dropped in later versions.
 	Units []string `json:"units"`
-	// example: {"repo.code":"read","repo.issues":"write","repo.ext_issues":"none","repo.wiki":"admin","repo.pulls":"owner","repo.releases":"none","repo.projects":"none","repo.ext_wiki":"none"}
+	// example: {"code":"read","issues":"write","ext_issues":"none","wiki":"admin","pulls":"owner","releases":"none","projects":"none","ext_wiki":"none"}
 	UnitsMap         map[string]string `json:"units_map"`
 	CanCreateOrgRepo *bool             `json:"can_create_org_repo"`
 }

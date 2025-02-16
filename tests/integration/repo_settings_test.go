@@ -219,7 +219,7 @@ func TestRepoAddMoreUnits(t *testing.T) {
 		}()
 
 		// Disable both Issues and ExternalTracker units globally
-		setting.Repository.DisabledRepoUnits = []string{"repo.issues", "repo.ext_issues"}
+		setting.Repository.DisabledRepoUnits = []string{"issues", "ext_issues"}
 		unit_model.LoadUnitConfig()
 
 		// Disable the Issues unit
