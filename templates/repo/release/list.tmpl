@@ -72,7 +72,7 @@
 								<ul class="list">
 									{{if $hasArchiveLinks}}
 										<li>
-											<a class="archive-link tw-flex-1 flex-text-inline tw-font-bold" href="{{$.RepoLink}}/archive/{{$release.TagName | PathEscapeSegments}}.zip" rel="nofollow">
+											<a class="archive-link tw-flex-1 flex-text-inline tw-font-bold" href="{{$.RepoLink}}/archive/{{$release.TagName | PathEscapeSegments}}.zip" rel="nofollow" type="application/zip">
 												{{svg "octicon-file-zip" 16 "tw-mr-1"}}{{ctx.Locale.Tr "repo.release.source_code"}} (ZIP)
 											</a>
 											<div class="tw-mr-1">
@@ -83,7 +83,7 @@
 											</span>
 										</li>
 										<li class="{{if $hasReleaseAttachment}}start-gap{{end}}">
-											<a class="archive-link tw-flex-1 flex-text-inline tw-font-bold" href="{{$.RepoLink}}/archive/{{$release.TagName | PathEscapeSegments}}.tar.gz" rel="nofollow">
+											<a class="archive-link tw-flex-1 flex-text-inline tw-font-bold" href="{{$.RepoLink}}/archive/{{$release.TagName | PathEscapeSegments}}.tar.gz" rel="nofollow" type="application/gzip">
 												{{svg "octicon-file-zip" 16 "tw-mr-1"}}{{ctx.Locale.Tr "repo.release.source_code"}} (TAR.GZ)
 											</a>
 											<div class="tw-mr-1">
