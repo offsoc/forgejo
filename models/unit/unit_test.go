@@ -94,3 +94,17 @@ func TestLoadUnitConfig(t *testing.T) {
 		assert.Equal(t, []Type{TypeReleases}, DefaultForkRepoUnits)
 	})
 }
+
+func TestTypeFromKey(t *testing.T) {
+	t.Run("regular", func(t *testing.T) {
+		assert.Equal(t, TypeIssues, TypeFromKey("issues"))
+	})
+
+	t.Run("backwards compatible", func(t *testing.T) {
+		assert.Equal(t, TypeIssues, TypeFromKey("repo.issues"))
+	})
+
+	t.Run("invalid", func(t *testing.T) {
+		assert.Equal(t, TypeInvalid, TypeFromKey("wrong.key"))
+	})
+}

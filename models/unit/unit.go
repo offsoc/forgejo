@@ -400,10 +400,11 @@ func FindUnitTypes(nameKeys ...string) (res []Type, invalidKeys []string) {
 	return res, invalidKeys
 }
 
-// TypeFromKey give the unit key name and return unit
-func TypeFromKey(nameKey string) Type {
+// TypeFromKey give the unit name and return unit
+func TypeFromKey(name string) Type {
 	for t, u := range Units {
-		if strings.EqualFold(nameKey, u.NameKey) {
+		// Units prefixed with 'repo.' should be allowed for backwards compatability reasons.
+		if strings.EqualFold(name, u.Name) || strings.EqualFold(name, "repo."+u.Name) {
 			return t
 		}
 	}
