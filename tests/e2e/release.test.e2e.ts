@@ -43,10 +43,17 @@ test('External Release Attachments', async ({page, isMobile}) => {
   // Validate release page and click edit
   await expect(page).toHaveURL('/user2/repo2/releases');
   await expect(page.locator('.download[open] li')).toHaveCount(3);
+
   await expect(page.locator('.download[open] li:nth-of-type(1)')).toContainText('Source code (ZIP)');
+  await expect(page.locator('.download[open] li:nth-of-type(1) span[data-tooltip-content]')).toHaveAttribute('data-tooltip-content', 'This attachment is automatically generated.');
   await expect(page.locator('.download[open] li:nth-of-type(1) a')).toHaveAttribute('href', '/user2/repo2/archive/2.0.zip');
+  await expect(page.locator('.download[open] li:nth-of-type(1) a')).toHaveAttribute('type', 'application/zip');
+
   await expect(page.locator('.download[open] li:nth-of-type(2)')).toContainText('Source code (TAR.GZ)');
+  await expect(page.locator('.download[open] li:nth-of-type(2) span[data-tooltip-content]')).toHaveAttribute('data-tooltip-content', 'This attachment is automatically generated.');
   await expect(page.locator('.download[open] li:nth-of-type(2) a')).toHaveAttribute('href', '/user2/repo2/archive/2.0.tar.gz');
+  await expect(page.locator('.download[open] li:nth-of-type(2) a')).toHaveAttribute('type', 'application/gzip');
+
   await expect(page.locator('.download[open] li:nth-of-type(3)')).toContainText('Test');
   await expect(page.locator('.download[open] li:nth-of-type(3) a')).toHaveAttribute('href', 'https://forgejo.org/');
   await save_visual(page);
