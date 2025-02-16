@@ -158,23 +158,23 @@ func validateDefaultRepoUnits(defaultUnits, settingDefaultUnits []Type) []Type {
 
 // LoadUnitConfig load units from settings
 func LoadUnitConfig() error {
-	disabledRepoUnits, invalidKeys := FindUnitTypes(setting.Repository.DisabledRepoUnits...)
-	if len(invalidKeys) > 0 {
-		log.Warn("Invalid keys in disabled repo units: %s", strings.Join(invalidKeys, ", "))
+	disabledRepoUnits, invalidNames := FindUnitTypes(setting.Repository.DisabledRepoUnits...)
+	if len(invalidNames) > 0 {
+		log.Warn("Invalid names in disabled repo units: %s", strings.Join(invalidNames, ", "))
 	}
 	DisabledRepoUnitsSet(disabledRepoUnits)
 
-	setDefaultRepoUnits, invalidKeys := FindUnitTypes(setting.Repository.DefaultRepoUnits...)
-	if len(invalidKeys) > 0 {
-		log.Warn("Invalid keys in default repo units: %s", strings.Join(invalidKeys, ", "))
+	setDefaultRepoUnits, invalidNames := FindUnitTypes(setting.Repository.DefaultRepoUnits...)
+	if len(invalidNames) > 0 {
+		log.Warn("Invalid names in default repo units: %s", strings.Join(invalidNames, ", "))
 	}
 	DefaultRepoUnits = validateDefaultRepoUnits(DefaultRepoUnits, setDefaultRepoUnits)
 	if len(DefaultRepoUnits) == 0 {
 		return errors.New("no default repository units found")
 	}
-	setDefaultForkRepoUnits, invalidKeys := FindUnitTypes(setting.Repository.DefaultForkRepoUnits...)
-	if len(invalidKeys) > 0 {
-		log.Warn("Invalid keys in default fork repo units: %s", strings.Join(invalidKeys, ", "))
+	setDefaultForkRepoUnits, invalidNames := FindUnitTypes(setting.Repository.DefaultForkRepoUnits...)
+	if len(invalidNames) > 0 {
+		log.Warn("Invalid names in default fork repo units: %s", strings.Join(invalidNames, ", "))
 	}
 	DefaultForkRepoUnits = validateDefaultRepoUnits(DefaultForkRepoUnits, setDefaultForkRepoUnits)
 	if len(DefaultForkRepoUnits) == 0 {
@@ -386,22 +386,22 @@ var (
 	}
 )
 
-// FindUnitTypes give the unit key names and return valid unique units and invalid keys
-func FindUnitTypes(nameKeys ...string) (res []Type, invalidKeys []string) {
+// FindUnitTypes give the unit names and return valid unique units and invalid names.
+func FindUnitTypes(names ...string) (res []Type, invalidNames []string) {
 	m := make(container.Set[Type])
-	for _, key := range nameKeys {
-		t := TypeFromKey(key)
+	for _, name := range names {
+		t := TypeFromName(name)
 		if t == TypeInvalid {
-			invalidKeys = append(invalidKeys, key)
+			invalidNames = append(invalidNames, name)
 		} else if m.Add(t) {
 			res = append(res, t)
 		}
 	}
-	return res, invalidKeys
+	return res, invalidNames
 }
 
-// TypeFromKey give the unit name and return unit
-func TypeFromKey(name string) Type {
+// TypeFromName give the unit name and return unit
+func TypeFromName(name string) Type {
 	for t, u := range Units {
 		// Units prefixed with 'repo.' should be allowed for backwards compatability reasons.
 		if strings.EqualFold(name, u.Name) || strings.EqualFold(name, "repo."+u.Name) {
@@ -411,11 +411,11 @@ func TypeFromKey(name string) Type {
 	return TypeInvalid
 }
 
-// AllUnitKeyNames returns all unit key names
-func AllUnitKeyNames() []string {
+// AllUnitNames returns all unit names
+func AllUnitNames() []string {
 	res := make([]string, 0, len(Units))
 	for _, u := range Units {
-		res = append(res, u.NameKey)
+		res = append(res, u.Name)
 	}
 	return res
 }

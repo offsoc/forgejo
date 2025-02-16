@@ -158,18 +158,18 @@ func attachTeamUnits(team *organization.Team, units []string) {
 
 func convertUnitsMap(unitsMap map[string]string) map[unit_model.Type]perm.AccessMode {
 	res := make(map[unit_model.Type]perm.AccessMode, len(unitsMap))
-	for unitKey, p := range unitsMap {
-		res[unit_model.TypeFromKey(unitKey)] = perm.ParseAccessMode(p)
+	for name, p := range unitsMap {
+		res[unit_model.TypeFromName(name)] = perm.ParseAccessMode(p)
 	}
 	return res
 }
 
 func attachTeamUnitsMap(team *organization.Team, unitsMap map[string]string) {
 	team.Units = make([]*organization.TeamUnit, 0, len(unitsMap))
-	for unitKey, p := range unitsMap {
+	for name, p := range unitsMap {
 		team.Units = append(team.Units, &organization.TeamUnit{
 			OrgID:      team.OrgID,
-			Type:       unit_model.TypeFromKey(unitKey),
+			Type:       unit_model.TypeFromName(name),
 			AccessMode: perm.ParseAccessMode(p),
 		})
 	}

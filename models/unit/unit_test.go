@@ -97,14 +97,14 @@ func TestLoadUnitConfig(t *testing.T) {
 
 func TestTypeFromKey(t *testing.T) {
 	t.Run("regular", func(t *testing.T) {
-		assert.Equal(t, TypeIssues, TypeFromKey("issues"))
+		assert.Equal(t, TypeIssues, TypeFromName("issues"))
 	})
 
 	t.Run("backwards compatible", func(t *testing.T) {
-		assert.Equal(t, TypeIssues, TypeFromKey("repo.issues"))
+		assert.Equal(t, TypeIssues, TypeFromName("repo.issues"))
 	})
 
 	t.Run("invalid", func(t *testing.T) {
-		assert.Equal(t, TypeInvalid, TypeFromKey("wrong.key"))
+		assert.Equal(t, TypeInvalid, TypeFromName("wrong.key"))
 	})
 }

@@ -116,11 +116,11 @@ func (t *Team) LoadUnits(ctx context.Context) (err error) {
 // GetUnitNames returns the team units names
 func (t *Team) GetUnitNames() (res []string) {
 	if t.AccessMode >= perm.AccessModeAdmin {
-		return unit.AllUnitKeyNames()
+		return unit.AllUnitNames()
 	}
 
 	for _, u := range t.Units {
-		res = append(res, unit.Units[u.Type].NameKey)
+		res = append(res, unit.Units[u.Type].Name)
 	}
 	return res
 }
@@ -130,11 +130,11 @@ func (t *Team) GetUnitsMap() map[string]string {
 	m := make(map[string]string)
 	if t.AccessMode >= perm.AccessModeAdmin {
 		for _, u := range unit.Units {
-			m[u.NameKey] = t.AccessMode.String()
+			m[u.Name] = t.AccessMode.String()
 		}
 	} else {
 		for _, u := range t.Units {
-			m[u.Unit().NameKey] = u.AccessMode.String()
+			m[u.Unit().Name] = u.AccessMode.String()
 		}
 	}
 	return m
