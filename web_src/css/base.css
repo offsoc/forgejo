@@ -1488,6 +1488,16 @@ table th[data-sortt-desc] .svg {
   min-width: 0;
 }
 
+[dir="rtl"] {
+  .btn,
+  .ui.ui.button,
+  .ui.ui.dropdown,
+  .flex-items-inline > .item,
+  .flex-text-inline {
+    flex-direction: row-reverse;
+  }
+}
+
 .ui.ui.button {
   justify-content: center;
 }
