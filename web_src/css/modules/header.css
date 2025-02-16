@@ -120,7 +120,7 @@ h4.ui.header .sub.header {
 /* fix misaligned right buttons on box headers */
 .ui.attached.header > .ui.right {
   position: absolute;
-  right: 0.78571429rem;
+  inset-inline-end: 0.78571429rem;
   top: 0;
   bottom: 0;
   display: flex;
@@ -136,8 +136,8 @@ h4.ui.header .sub.header {
 
 /* open dropdown menus to the left in right-attached headers */
 .ui.attached.header > .ui.right .ui.dropdown .menu {
-  right: 0;
-  left: auto;
+  inset-inline-end: 0;
+  inset-inline-start: auto;
 }
 
 /* if a .top.attached.header is followed by a .segment, add some margin */
