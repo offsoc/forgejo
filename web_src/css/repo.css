@@ -88,7 +88,7 @@
   white-space: nowrap;
   margin-left: 10px;
   margin-right: 8px;
-  text-align: left;
+  text-align: start;
 }
 
 .repository .filter.menu.labels .label-filter .menu .info code {
@@ -1123,7 +1123,7 @@ td .commit-summary {
 }
 
 .repository.compare.pull .show-form-container {
-  text-align: left;
+  text-align: start;
 }
 
 .repository .choose.branch {
@@ -1197,11 +1197,11 @@ td .commit-summary {
 }
 
 .repository.branches .commit-divergence .count.count-ahead {
-  text-align: left;
+  text-align: start;
 }
 
 .repository.branches .commit-divergence .count.count-behind {
-  text-align: right;
+  text-align: end;
 }
 
 .repository.branches .commit-divergence .bar {
@@ -1418,7 +1418,7 @@ td .commit-summary {
   padding: 5px !important;
   overflow: hidden;
   font-size: 12px;
-  text-align: left;
+  text-align: start;
   white-space: nowrap;
   border: 1px solid var(--color-secondary);
 }
@@ -1479,7 +1479,7 @@ td .commit-summary {
   white-space: nowrap;
   vertical-align: top;
   cursor: pointer;
-  text-align: right;
+  text-align: end;
   background: var(--color-body);
   border: 0;
 }
@@ -1609,7 +1609,7 @@ td .commit-summary {
 }
 
 .repository .diff-file-box .file-body.file-code .lines-num {
-  text-align: right;
+  text-align: end;
   width: 1%;
   min-width: 50px;
 }
@@ -1649,7 +1649,7 @@ td .commit-summary {
 
 .repository .diff-file-box .code-diff tbody tr [data-line-num]::before {
   content: attr(data-line-num);
-  text-align: right;
+  text-align: end;
 }
 
 .repository .diff-file-box .code-diff tbody tr .lines-type-marker {
@@ -1659,7 +1659,7 @@ td .commit-summary {
 
 .repository .diff-file-box .code-diff tbody tr [data-type-marker]::before {
   content: attr(data-type-marker);
-  text-align: right;
+  text-align: end;
   display: inline-block;
 }
 
@@ -2476,7 +2476,7 @@ tbody.commit-list {
 }
 
 .git-notes.top {
-  text-align: left;
+  text-align: start;
 }
 
 .comment-diff-data {

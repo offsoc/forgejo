@@ -27,5 +27,5 @@
 
 /* fix alignment of PR popup in branches table */
 .ui.repository.branches table .ui.popup {
-  text-align: left;
+  text-align: start;
 }

@@ -987,7 +987,11 @@ fomantic:
 	cd $(FOMANTIC_WORK_DIR) && npx gulp -f node_modules/fomantic-ui/gulpfile.js build
 	# fomantic uses "touchstart" as click event for some browsers, it's not ideal, so we force fomantic to always use "click" as click event
 	$(SED_INPLACE) -e 's/clickEvent[ \t]*=/clickEvent = "click", unstableClickEvent =/g' $(FOMANTIC_WORK_DIR)/build/semantic.js
-	$(SED_INPLACE) -e 's/\r//g' $(FOMANTIC_WORK_DIR)/build/semantic.css $(FOMANTIC_WORK_DIR)/build/semantic.js
+	$(SED_INPLACE) -e 's/\r//g' $(FOMANTIC_WORK_DIR)/build/semantic.css $(FOMANTIC_WORK_DIR)/build/semantic.rtl.css $(FOMANTIC_WORK_DIR)/build/semantic.js
+	$(SED_INPLACE) -e '1s/^/:where([dir="rtl"]) {\n/' $(FOMANTIC_WORK_DIR)/build/semantic.rtl.css
+	echo -e '\n}' >> $(FOMANTIC_WORK_DIR)/build/semantic.rtl.css
+	$(SED_INPLACE) -e '1s/^/:where([dir="ltr"]) {\n/' $(FOMANTIC_WORK_DIR)/build/semantic.css
+	echo -e '\n}' >> $(FOMANTIC_WORK_DIR)/build/semantic.css
 	rm -f $(FOMANTIC_WORK_DIR)/build/*.min.*
 
 .PHONY: webpack

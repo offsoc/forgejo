@@ -256,11 +256,11 @@ export function initRepoCommentForm() {
 
       let icon = '';
       if (input_id === '#milestone_id') {
-        icon = svg('octicon-milestone', 18, 'tw-mr-2');
+        icon = svg('octicon-milestone', 18, 'tw-me-2');
       } else if (input_id === '#project_id') {
-        icon = svg('octicon-project', 18, 'tw-mr-2');
+        icon = svg('octicon-project', 18, 'tw-me-2');
       } else if (input_id === '#assignee_ids') {
-        icon = `<img class="ui avatar image tw-mr-2" alt="avatar" src=${$(this).data('avatar')}>`;
+        icon = `<img class="ui avatar image tw-me-2" alt="avatar" src=${$(this).data('avatar')}>`;
       }
 
       $list.find('.selected').html(`

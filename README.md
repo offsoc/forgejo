@@ -3,6 +3,11 @@
     <h1 align="center">Welcome to Forgejo</h1>
 </div>
 
+
+<!--
+TODO: Reminder for self: figure out how to get forgejo to use formantic's RTL output
+-->
+
 Hi there! Tired of big platforms playing monopoly?
 Providing Git hosting for your project, friends, company or community?
 **Forgejo** (/for'd&#865;ʒe.jo/ inspired by forĝejo – the Esperanto word for *forge*) has you covered with its intuitive interface,

@@ -434,7 +434,7 @@ export function initRepositoryActionView() {
         <button class="ui basic small compact button red" @click="cancelRun()" v-else-if="run.canCancel">
           {{ locale.cancel }}
         </button>
-        <button class="ui basic small compact button tw-mr-0 tw-whitespace-nowrap link-action" :data-url="`${run.link}/rerun`" v-else-if="run.canRerun">
+        <button class="ui basic small compact button tw-me-0 tw-whitespace-nowrap link-action" :data-url="`${run.link}/rerun`" v-else-if="run.canRerun">
           {{ locale.rerun_all }}
         </button>
       </div>
@@ -529,9 +529,9 @@ export function initRepositoryActionView() {
               <!-- If the job is done and the job step log is loaded for the first time, show the loading icon
                 currentJobStepsStates[i].cursor === null means the log is loaded for the first time
               -->
-              <SvgIcon v-if="isDone(run.status) && currentJobStepsStates[i].expanded && currentJobStepsStates[i].cursor === null" name="octicon-sync" class="tw-mr-2 job-status-rotate"/>
-              <SvgIcon v-else :name="currentJobStepsStates[i].expanded ? 'octicon-chevron-down': 'octicon-chevron-right'" :class="['tw-mr-2', !isExpandable(jobStep.status) && 'tw-invisible']"/>
-              <ActionRunStatus :status="jobStep.status" class="tw-mr-2"/>
+              <SvgIcon v-if="isDone(run.status) && currentJobStepsStates[i].expanded && currentJobStepsStates[i].cursor === null" name="octicon-sync" class="tw-me-2 job-status-rotate"/>
+              <SvgIcon v-else :name="currentJobStepsStates[i].expanded ? 'octicon-chevron-down': 'octicon-chevron-right'" :class="['tw-me-2', !isExpandable(jobStep.status) && 'tw-invisible']"/>
+              <ActionRunStatus :status="jobStep.status" class="tw-me-2"/>
 
               <span class="step-summary-msg gt-ellipsis">{{ jobStep.summary }}</span>
               <span class="step-summary-duration">{{ jobStep.duration }}</span>
@@ -888,7 +888,7 @@ export function initRepositoryActionView() {
 .job-log-line .line-num, .log-time-seconds {
   width: 48px;
   color: var(--color-text-light-3);
-  text-align: right;
+  text-align: end;
   user-select: none;
 }
 

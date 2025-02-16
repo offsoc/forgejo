@@ -302,7 +302,7 @@ input:-webkit-autofill:active,
     padding-left: 280px !important;
   }
   #create-page-form form .inline.field > label {
-    text-align: right;
+    text-align: end;
     width: 250px !important;
     word-wrap: break-word;
   }
@@ -395,7 +395,7 @@ input:-webkit-autofill:active,
     padding-left: 280px !important;
   }
   .user.activate form .inline.field > label {
-    text-align: right;
+    text-align: end;
     width: 250px !important;
     word-wrap: break-word;
   }
@@ -516,7 +516,7 @@ input:-webkit-autofill:active,
   }
   .repository.new.migrate form .inline.field > label,
   .repository.new.fork form .inline.field > label {
-    text-align: right;
+    text-align: end;
     width: 250px !important;
     word-wrap: break-word;
   }

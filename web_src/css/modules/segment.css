@@ -126,7 +126,7 @@
 }
 
 .ui[class*="left aligned"].segment {
-  text-align: left;
+  text-align: start;
 }
 .ui[class*="center aligned"].segment {
   text-align: center;

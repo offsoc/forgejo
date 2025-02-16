@@ -149,6 +149,11 @@
 .ui.fluid.input {
   display: flex;
 }
+
+[dir="rtl"] .ui.fluid.input {
+  flex-direction: row-reverse;
+}
+
 .ui.fluid.input > input {
   width: 0 !important;
 }

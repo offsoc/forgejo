@@ -83,6 +83,7 @@ cpu.out
 /web_src/fomantic/build/*
 !/web_src/fomantic/build/semantic.js
 !/web_src/fomantic/build/semantic.css
+!/web_src/fomantic/build/semantic.rtl.css
 !/web_src/fomantic/build/themes
 /web_src/fomantic/build/themes/*
 !/web_src/fomantic/build/themes/default

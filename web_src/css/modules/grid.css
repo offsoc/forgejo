@@ -371,7 +371,7 @@
 .ui.centered.grid > .column:not(.aligned):not(.justified):not(.row),
 .ui.centered.grid > .row > .column:not(.aligned):not(.justified),
 .ui.grid .centered.row > .column:not(.aligned):not(.justified) {
-  text-align: left;
+  text-align: start;
 }
 .ui.grid > .centered.column,
 .ui.grid > .row > .centered.column {
@@ -419,7 +419,7 @@
 .ui.grid > [class*="left aligned"].row > .column,
 .ui.grid > [class*="left aligned"].column.column,
 .ui.grid > .row > [class*="left aligned"].column.column {
-  text-align: left;
+  text-align: start;
   align-self: inherit;
 }
 
@@ -440,7 +440,7 @@
 .ui.grid > [class*="right aligned"].row > .column,
 .ui.grid > [class*="right aligned"].column.column,
 .ui.grid > .row > [class*="right aligned"].column.column {
-  text-align: right;
+  text-align: end;
   align-self: inherit;
 }
 

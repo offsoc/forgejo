@@ -4,7 +4,7 @@
 }
 
 .page-content.install form.ui.form .inline.field > label {
-  text-align: right;
+  text-align: end;
   width: 30%;
   padding-right: 10px;
   margin-right: 0;
@@ -34,20 +34,20 @@
 }
 
 .page-content.install form.ui.form .field {
-  text-align: left;
+  text-align: start;
 }
 
 .page-content.install .ui .reinstall-message {
   width: 70%;
   margin: 20px auto;
   color: var(--color-red);
-  text-align: left;
+  text-align: start;
   font-weight: var(--font-weight-semibold);
 }
 
 .page-content.install .ui .reinstall-confirm {
   width: 70%;
-  text-align: left;
+  text-align: start;
   margin: 10px auto;
 }
 

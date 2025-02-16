@@ -17,7 +17,7 @@
 
 .dashboard.feeds .filter.menu .item,
 .dashboard.issues .filter.menu .item {
-  text-align: left;
+  text-align: start;
   display: flex;
   align-items: center;
   justify-content: space-between;

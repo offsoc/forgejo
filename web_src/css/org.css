@@ -14,7 +14,7 @@
     padding-left: 280px !important;
   }
   #create-page-form form .inline.field > label {
-    text-align: right;
+    text-align: end;
     width: 250px !important;
     word-wrap: break-word;
   }
@@ -59,7 +59,7 @@
     padding-left: 280px !important;
   }
   .organization.new.org form .inline.field > label {
-    text-align: right;
+    text-align: end;
     width: 250px !important;
     word-wrap: break-word;
   }

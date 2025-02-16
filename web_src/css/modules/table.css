@@ -154,7 +154,7 @@
 
 .ui.table[class*="left aligned"],
 .ui.table [class*="left aligned"] {
-  text-align: left;
+  text-align: start;
 }
 
 .ui.table[class*="center aligned"],
@@ -164,7 +164,7 @@
 
 .ui.table[class*="right aligned"],
 .ui.table [class*="right aligned"] {
-  text-align: right;
+  text-align: end;
 }
 
 .ui.table[class*="top aligned"],

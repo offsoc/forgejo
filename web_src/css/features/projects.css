@@ -87,7 +87,7 @@
   display: inline-block;
   max-height: 50px;
   border-radius: var(--border-radius);
-  text-align: left;
+  text-align: start;
   margin-right: 2px;
   aspect-ratio: 1;
 }

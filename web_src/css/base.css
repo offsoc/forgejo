@@ -361,6 +361,7 @@ a.label,
   display: flex;
 }
 
+
 .ui.menu,
 .ui.vertical.menu {
   background: var(--color-menu);
@@ -375,7 +376,7 @@ a.label,
 }
 
 .ui.menu .item > .svg {
-  margin-right: 0.35em;
+  margin-inline-end: 0.35em;
 }
 
 .ui.menu .dropdown.item:hover,
@@ -775,11 +776,11 @@ img.ui.avatar,
 }
 
 .ui .text.left {
-  text-align: left !important;
+  text-align: start !important;
 }
 
 .ui .text.right {
-  text-align: right !important;
+  text-align: end !important;
 }
 
 .ui .text.truncate {
@@ -797,7 +798,7 @@ img.ui.avatar,
   margin-left: auto;
   margin-right: auto;
   display: table;
-  text-align: left;
+  text-align: start;
 }
 
 .ui .header > i + .content {
@@ -1117,7 +1118,7 @@ svg.text.purple,
 
 .lines-num {
   padding: 0 8px;
-  text-align: right !important;
+  text-align: end !important;
   color: var(--color-text-light-2);
   width: 1%;
   font-family: var(--fonts-monospace);
@@ -1389,7 +1390,7 @@ table th[data-sortt-desc] .svg {
 .flash-error details code,
 .flash-warning details code {
   display: block;
-  text-align: left;
+  text-align: start;
 }
 
 .truncated-item-container {
