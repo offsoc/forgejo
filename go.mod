@@ -7,6 +7,7 @@ toolchain go1.23.5
 require (
 	code.forgejo.org/f3/gof3/v3 v3.10.2
 	code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251
+	code.forgejo.org/forgejo/ipranges v1.0.20250217
 	code.forgejo.org/forgejo/reply v1.0.2
 	code.forgejo.org/go-chi/binding v1.0.0
 	code.forgejo.org/go-chi/cache v1.0.0
