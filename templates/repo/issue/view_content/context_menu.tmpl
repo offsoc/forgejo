@@ -23,5 +23,9 @@
 				{{end}}
 			{{end}}
 		{{end}}
+		{{if and .ctxData.IsSigned (not .IsCommentPoster)}}
+			<div class="divider"></div>
+			<div class="item context js-aria-clickable report-comment" data-target="{{.item.HashTag}}-raw" data-modal="#report-comment-modal" data-repo-url="{{.ctxData.RepoLink}}" data-comment-id="{{.item.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</div>
+		{{end}}
 	</div>
 </div>

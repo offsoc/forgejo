@@ -599,6 +599,21 @@ export function initRepoIssueReferenceIssue() {
   });
 }
 
+export function initRepoIssueReportComment() {
+  // Report abusive comment
+  $(document).on('click', '.report-comment', function (event) {
+    const $this = $(this);
+    const repo_url = $this.data('repo-url');
+    const comment_id = $this.data('comment-id');
+    const $modal = $($this.data('modal'));
+    $modal.find('#report-comment-form').attr('action',`${repo_url}/comments/${comment_id}/report`);
+    $modal.find('input[name="comment-id"]').val(`${comment_id}`);
+    $modal.modal('show');
+
+    event.preventDefault();
+  });
+}
+
 export function initRepoIssueWipToggle() {
   // Toggle WIP
   $('.toggle-wip a, .toggle-wip button').on('click', async (e) => {

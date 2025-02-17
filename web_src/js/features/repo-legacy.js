@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import {
   initRepoIssueBranchSelect, initRepoIssueCodeCommentCancel, initRepoIssueCommentDelete,
-  initRepoIssueComments, initRepoIssueDependencyDelete, initRepoIssueReferenceIssue,
+  initRepoIssueComments, initRepoIssueDependencyDelete, initRepoIssueReferenceIssue, initRepoIssueReportComment,
   initRepoIssueTitleEdit, initRepoIssueWipToggle,
   initRepoPullRequestUpdate, updateIssuesMeta, handleReply, initIssueTemplateCommentEditors, initSingleCommentEditor,
   initRepoIssueAssignMe, reloadConfirmDraftComment,
@@ -561,6 +561,7 @@ export function initRepository() {
 
     initRepoDiffConversationNav();
     initRepoIssueReferenceIssue();
+    initRepoIssueReportComment();
 
     initRepoIssueCommentDelete();
     initRepoIssueDependencyDelete();
