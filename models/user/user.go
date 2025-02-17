@@ -935,6 +935,10 @@ func UpdateUserCols(ctx context.Context, u *User, cols ...string) error {
 		return err
 	}
 
+	if err := IfNeededCreateShadowCopyForUser(ctx, u); err != nil {
+		return err
+	}
+
 	_, err := db.GetEngine(ctx).ID(u.ID).Cols(cols...).Update(u)
 	return err
 }
