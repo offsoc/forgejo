@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"code.gitea.io/gitea/models/db"
+	"code.gitea.io/gitea/models/moderation"
 	"code.gitea.io/gitea/models/organization"
 	packages_model "code.gitea.io/gitea/models/packages"
 	access_model "code.gitea.io/gitea/models/perm/access"
@@ -39,6 +40,7 @@ func PrepareContextForProfileBigAvatar(ctx *context.Context) {
 	prepareContextForCommonProfile(ctx)
 
 	ctx.Data["IsBlocked"] = ctx.Doer != nil && user_model.IsBlocked(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
+	ctx.Data["IsReported"] = ctx.Doer != nil && moderation.IsReportedUserBy(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
 	ctx.Data["IsFollowing"] = ctx.Doer != nil && user_model.IsFollowing(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
 	ctx.Data["ShowUserEmail"] = setting.UI.ShowUserEmail && ctx.ContextUser.Email != "" && ctx.IsSigned && !ctx.ContextUser.KeepEmailPrivate
 	if setting.Service.UserLocationMapURL != "" {

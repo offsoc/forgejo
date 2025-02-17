@@ -123,6 +123,11 @@
 					</button>
 				{{end}}
 			</li>
+			<li class="block" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
+				<button type="submit" {{if $.IsReported}} disabled {{end}} class="ui basic orange button" data-modal-id="report-user" hx-post="{{.ContextUser.HomeLink}}?action=report" hx-confirm="-">
+					{{svg "octicon-blocked"}} {{ctx.Locale.Tr "moderation.report"}}
+				</button>
+			</li>
 			{{end}}
 		</ul>
 	</div>
