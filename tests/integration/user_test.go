@@ -886,11 +886,27 @@ func TestUserActivate(t *testing.T) {
 	assert.False(t, authToken.IsExpired())
 	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
 
-	req = NewRequest(t, "POST", "/user/activate?code="+code)
-	session.MakeRequest(t, req, http.StatusOK)
+	t.Run("No password", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 
-	unittest.AssertNotExistsBean(t, &auth_model.AuthorizationToken{ID: authToken.ID})
-	unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "doesnotexist", IsActive: true})
+		req = NewRequest(t, "POST", "/user/activate?code="+code)
+		session.MakeRequest(t, req, http.StatusOK)
+
+		unittest.AssertExistsIf(t, true, &auth_model.AuthorizationToken{ID: authToken.ID})
+		unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "doesnotexist"}, "is_active = false")
+	})
+
+	t.Run("With password", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req = NewRequestWithValues(t, "POST", "/user/activate?code="+code, map[string]string{
+			"password": "examplePassword!1",
+		})
+		session.MakeRequest(t, req, http.StatusSeeOther)
+
+		unittest.AssertExistsIf(t, false, &auth_model.AuthorizationToken{ID: authToken.ID})
+		unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "doesnotexist"}, "is_active = true")
+	})
 }
 
 func TestUserPasswordReset(t *testing.T) {
