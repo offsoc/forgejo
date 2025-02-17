@@ -75,7 +75,7 @@
 													<tr>
 														<td>
 															<label {{if $unit.Type.UnitGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
-																<span id="help_{{$unit.Type.Value}}_name">{{ctx.Locale.Tr $unit.NameKey}}{{if $unit.Type.UnitGlobalDisabled}} {{ctx.Locale.Tr "org.team_unit_disabled"}}{{end}}</span>
+																<span id="help_{{$unit.Type.Value}}_name">{{ctx.Locale.Tr $unit.LocaleKey}}{{if $unit.Type.UnitGlobalDisabled}} {{ctx.Locale.Tr "org.team_unit_disabled"}}{{end}}</span>
 																<span class="help" id="help_{{$unit.Type.Value}}_r">{{ctx.Locale.Tr (print "repo.permissions." $unit.Name ".read")}}</span>
 																<span class="help" id="help_{{$unit.Type.Value}}_w">{{ctx.Locale.Tr (print "repo.permissions." $unit.Name ".write")}}</span>
 															</label>
@@ -108,7 +108,7 @@
 										{{if lt $unit.MaxPerm 2}}
 											<label {{if $unit.Type.UnitGlobalDisabled}}data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
 												<input type="checkbox" name="unit_{{$unit.Type.Value}}" value="1"{{if or (eq $.Team.ID 0) (eq ($.Team.UnitAccessMode $.Context $unit.Type) 1)}} checked{{end}} {{if $unit.Type.UnitGlobalDisabled}}disabled{{end}}>
-													{{ctx.Locale.Tr $unit.NameKey}}{{if $unit.Type.UnitGlobalDisabled}} {{ctx.Locale.Tr "org.team_unit_disabled"}}{{end}}
+													{{ctx.Locale.Tr $unit.LocaleKey}}{{if $unit.Type.UnitGlobalDisabled}} {{ctx.Locale.Tr "org.team_unit_disabled"}}{{end}}
 												<span class="help">{{ctx.Locale.Tr (print "repo.permissions." $unit.Name)}}</span>
 											</label>
 										{{end}}

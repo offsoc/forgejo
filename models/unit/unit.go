@@ -246,7 +246,7 @@ func (u *Type) CanBeDefault() bool {
 type Unit struct {
 	Type          Type
 	Name          string
-	NameKey       string
+	LocaleKey     string
 	URI           string
 	DescKey       string
 	Idx           int
