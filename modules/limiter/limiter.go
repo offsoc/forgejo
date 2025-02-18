@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/netip"
 	"slices"
+	"sync"
 
 	"code.forgejo.org/forgejo/ipranges"
 )
@@ -15,19 +16,28 @@ import (
 type limiter struct {
 	ipranges ipranges.IPRanges
 
-	blocked []netip.Prefix
-	allowed []netip.Prefix
+	blockedOrAllowedMutex RWLocker
+	blocked               []netip.Prefix
+	allowed               []netip.Prefix
 
+	ipsMutex  RWLocker
 	currentIP int
 	ips       []netip.Addr
 }
 
 func New() Limiter {
-	return new(limiter)
+	return new(limiter).initLocks()
+}
+
+func (o *limiter) initLocks() *limiter {
+	o.blockedOrAllowedMutex = &sync.RWMutex{}
+	o.ipsMutex = &sync.RWMutex{}
+	return o
 }
 
 func (o *limiter) Init() error {
 	o.ipranges = ipranges.New()
+	o.SetMaxIPs(100)
 	return o.ipranges.Load()
 }
 
@@ -65,11 +75,15 @@ func (o *limiter) SetBlockList(cidrs []string) error {
 	if err != nil {
 		return err
 	}
+	o.blockedOrAllowedMutex.Lock()
 	o.blocked = l
+	o.blockedOrAllowedMutex.Unlock()
 	return nil
 }
 
 func (o *limiter) GetBlockList() []string {
+	o.blockedOrAllowedMutex.RLock()
+	defer o.blockedOrAllowedMutex.RUnlock()
 	return convertCidrs(o.blocked)
 }
 
@@ -78,11 +92,15 @@ func (o *limiter) SetAllowList(cidrs []string) error {
 	if err != nil {
 		return err
 	}
+	o.blockedOrAllowedMutex.Lock()
 	o.allowed = l
+	o.blockedOrAllowedMutex.Unlock()
 	return nil
 }
 
 func (o *limiter) GetAllowList() []string {
+	o.blockedOrAllowedMutex.RLock()
+	defer o.blockedOrAllowedMutex.RUnlock()
 	return convertCidrs(o.allowed)
 }
 
@@ -91,11 +109,13 @@ func (o *limiter) add(ip string) (netip.Addr, error) {
 	if err != nil {
 		return netip.Addr{}, err
 	}
+	o.ipsMutex.Lock()
 	o.ips[o.currentIP] = a
 	o.currentIP++
 	if o.currentIP >= o.GetMaxIPs() {
 		o.currentIP = 0
 	}
+	o.ipsMutex.Unlock()
 	return a, nil
 }
 
@@ -113,6 +133,8 @@ func find(cidrs []netip.Prefix, ip netip.Addr) (int, bool) {
 }
 
 func (o *limiter) allow(ip netip.Addr) (allow bool, reason string, err error) {
+	o.blockedOrAllowedMutex.RLock()
+	defer o.blockedOrAllowedMutex.RUnlock()
 	if o.blocked == nil {
 		return true, "", nil
 	}
@@ -136,7 +158,10 @@ func (o *limiter) AddAndAllow(ip string) (allow bool, reason string, err error) 
 }
 
 func (o *limiter) MostUsedCidrs(top int) ([]CidrCount, []string) {
-	ips := o.ips
+	o.ipsMutex.RLock()
+	ips := make([]netip.Addr, len(o.ips))
+	copy(ips, o.ips)
+	o.ipsMutex.RUnlock()
 	// ips - sort
 	slices.SortFunc(ips, func(a, b netip.Addr) int {
 		if a == b {
@@ -149,13 +174,16 @@ func (o *limiter) MostUsedCidrs(top int) ([]CidrCount, []string) {
 	})
 
 	// ips - unique
-	ipsLength := 1
-	for i := 1; i < len(ips); i++ {
-		if ips[i] == ips[i-1] {
-			continue
+	ipsLength := 0
+	if len(ips) > 1 {
+		ipsLength = 1
+		for i := 1; i < len(ips); i++ {
+			if ips[i] == ips[i-1] {
+				continue
+			}
+			ips[ipsLength] = ips[i]
+			ipsLength++
 		}
-		ips[ipsLength] = ips[i]
-		ipsLength++
 	}
 
 	cidrs := o.ipranges.Get()

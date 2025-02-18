@@ -19,11 +19,110 @@ func TestLimiterSetGet(t *testing.T) {
 	assert.NoError(t, l.Init())
 	assert.NoError(t, l.SetBlockList(blocked))
 	assert.EqualValues(t, blocked, l.GetBlockList())
-	assert.NoError(t, l.SetAllowList(allowed))
+	require.NoError(t, l.SetAllowList(allowed))
 	assert.EqualValues(t, allowed, l.GetAllowList())
 	maxIPs := 200
 	l.SetMaxIPs(maxIPs)
 	assert.EqualValues(t, maxIPs, l.GetMaxIPs())
+}
+
+type testRWMutex struct {
+	called     int
+	wouldblock bool
+	locked     bool
+	rlocked    bool
+}
+
+func (o *testRWMutex) Lock() {
+	o.called++
+	if o.locked || o.rlocked {
+		o.wouldblock = true
+	}
+	o.locked = true
+}
+
+func (o *testRWMutex) Unlock() {}
+
+func (o *testRWMutex) RLock() {
+	o.called++
+	if o.locked {
+		o.wouldblock = true
+	}
+	o.rlocked = true
+}
+
+func (o *testRWMutex) RUnlock() {}
+
+func TestLimiterBlockedOrAllowedMutex(t *testing.T) {
+	l := (&limiter{}).initLocks()
+
+	for _, testCase := range []struct {
+		name       string
+		wouldblock bool
+		lock       bool
+		rlock      bool
+		fun        func()
+	}{
+		{name: "RLock does not block GetBlockList", wouldblock: false, lock: false, rlock: true, fun: func() { l.GetBlockList() }},
+		{name: "Lock blocks GetBlockList", wouldblock: true, lock: true, rlock: false, fun: func() { l.GetBlockList() }},
+		{name: "RLock blocks SetBlockList", wouldblock: true, lock: false, rlock: true, fun: func() { l.SetBlockList([]string{}) }},
+		{name: "Lock blocks SetBlockList", wouldblock: true, lock: true, rlock: false, fun: func() { l.SetBlockList([]string{}) }},
+
+		{name: "RLock does not block GetAllowList", wouldblock: false, lock: false, rlock: true, fun: func() { l.GetAllowList() }},
+		{name: "Lock blocks GetAllowList", wouldblock: true, lock: true, rlock: false, fun: func() { l.GetBlockList() }},
+		{name: "RLock blocks SetAllowList", wouldblock: true, lock: false, rlock: true, fun: func() { l.SetAllowList([]string{}) }},
+		{name: "Lock blocks SetAllowList", wouldblock: true, lock: true, rlock: false, fun: func() { l.SetAllowList([]string{}) }},
+
+		{name: "RLock does not block allow", wouldblock: false, lock: false, rlock: true, fun: func() { l.allow(netip.Addr{}) }},
+		{name: "Lock blocks allow", wouldblock: true, lock: true, rlock: false, fun: func() { l.allow(netip.Addr{}) }},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			m := &testRWMutex{}
+			l.blockedOrAllowedMutex = m
+			if testCase.lock {
+				m.Lock()
+			}
+			if testCase.rlock {
+				m.RLock()
+			}
+			testCase.fun()
+			assert.Equal(t, 2, m.called)
+			assert.Equal(t, testCase.wouldblock, m.wouldblock)
+		})
+	}
+}
+
+func TestLimiterIPSMutex(t *testing.T) {
+	l := (&limiter{}).initLocks()
+	require.NoError(t, l.Init())
+
+	for _, testCase := range []struct {
+		name       string
+		wouldblock bool
+		lock       bool
+		rlock      bool
+		fun        func()
+	}{
+		{name: "RLock does not block MostUsedCidrs", wouldblock: false, lock: false, rlock: true, fun: func() { l.MostUsedCidrs(0) }},
+		{name: "Lock blocks MostUsedCidrs", wouldblock: true, lock: true, rlock: false, fun: func() { l.MostUsedCidrs(0) }},
+
+		{name: "RLock blocks add", wouldblock: true, lock: false, rlock: true, fun: func() { l.add("1.1.1.1") }},
+		{name: "Lock blocks add", wouldblock: true, lock: true, rlock: false, fun: func() { l.add("1.1.1.1") }},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			m := &testRWMutex{}
+			l.ipsMutex = m
+			if testCase.lock {
+				m.Lock()
+			}
+			if testCase.rlock {
+				m.RLock()
+			}
+			testCase.fun()
+			assert.Equal(t, 2, m.called)
+			assert.Equal(t, testCase.wouldblock, m.wouldblock)
+		})
+	}
 }
 
 func TestLimiterFind(t *testing.T) {
@@ -60,7 +159,7 @@ func TestLimiterFind(t *testing.T) {
 }
 
 func TestLimiterAdd(t *testing.T) {
-	l := limiter{}
+	l := (&limiter{}).initLocks()
 	maxiIPs := 3
 	l.SetMaxIPs(maxiIPs)
 	last := "1.1.1.4"
@@ -123,7 +222,7 @@ func (o *testIPRanges) Load() error         { return nil }
 func (o *testIPRanges) Get() []netip.Prefix { return o.ipranges }
 
 func TestMostUsedCidrs(t *testing.T) {
-	l := limiter{}
+	l := (&limiter{}).initLocks()
 	first := "1.2.3.0/24"
 	second := "1.4.3.0/24"
 	third := "10.5.0.0/16"
