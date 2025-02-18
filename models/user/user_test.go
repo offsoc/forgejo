@@ -756,13 +756,13 @@ func TestVerifyUserAuthorizationToken(t *testing.T) {
 	assert.True(t, ok)
 
 	t.Run("Wrong purpose", func(t *testing.T) {
-		u, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.PasswordReset, false)
+		u, _, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.PasswordReset)
 		require.NoError(t, err)
 		assert.Nil(t, u)
 	})
 
 	t.Run("No delete", func(t *testing.T) {
-		u, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation, false)
+		u, _, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation)
 		require.NoError(t, err)
 		assert.EqualValues(t, user.ID, u.ID)
 
@@ -772,9 +772,10 @@ func TestVerifyUserAuthorizationToken(t *testing.T) {
 	})
 
 	t.Run("Delete", func(t *testing.T) {
-		u, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation, true)
+		u, deleteToken, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation)
 		require.NoError(t, err)
 		assert.EqualValues(t, user.ID, u.ID)
+		require.NoError(t, deleteToken())
 
 		authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
 		require.ErrorIs(t, err, util.ErrNotExist)
@@ -794,4 +795,43 @@ func TestGetInactiveUsers(t *testing.T) {
 	users, err = user_model.GetInactiveUsers(db.DefaultContext, time.Duration(interval*int64(time.Second)))
 	require.NoError(t, err)
 	require.Empty(t, users)
+}
+
+func TestPronounsPrivacy(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	t.Run("EmptyPronounsIfNoneSet", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = ""
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "", user.GetPronouns(false))
+	})
+	t.Run("EmptyPronounsIfSetButPrivateAndNotLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = true
+
+		assert.Equal(t, "", user.GetPronouns(false))
+	})
+	t.Run("ReturnPronounsIfSetAndNotPrivateAndNotLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "any", user.GetPronouns(false))
+	})
+	t.Run("ReturnPronounsIfSetAndPrivateAndLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "any", user.GetPronouns(true))
+	})
+	t.Run("ReturnPronounsIfSetAndNotPrivateAndLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = true
+
+		assert.Equal(t, "any", user.GetPronouns(true))
+	})
 }

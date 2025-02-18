@@ -1,4 +1,5 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repository
@@ -170,6 +171,31 @@ Copyright (C) 2023 by Gitea teabot@gitea.io
 ...
 
 ... THE AUTHOR BE LIABLE FOR ...
+`,
+		},
+		{
+			name: "BSD-4-Clause",
+			args: args{
+				name:   "BSD-4-Clause",
+				values: &LicenseValues{Year: "2025", Owner: "Forgejo", Email: "hello@forgejo.org", Repo: "forgejo"},
+				origin: `
+Copyright (c) <year> <owner>. All rights reserved.
+
+... includes software developed by the organization.
+
+... Neither the name of the copyright holder nor
+
+... PROVIDED BY COPYRIGHT HOLDER "AS IS" ... NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE ...
+`,
+			},
+			want: `
+Copyright (c) 2025 Forgejo. All rights reserved.
+
+... includes software developed by Forgejo.
+
+... Neither the name of the copyright holder nor
+
+... PROVIDED BY Forgejo "AS IS" ... NO EVENT SHALL Forgejo BE LIABLE ...
 `,
 		},
 	}

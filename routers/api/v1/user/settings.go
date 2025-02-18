@@ -63,6 +63,7 @@ func UpdateUserSettings(ctx *context.APIContext) {
 		Theme:               optional.FromPtr(form.Theme),
 		DiffViewStyle:       optional.FromPtr(form.DiffViewStyle),
 		KeepEmailPrivate:    optional.FromPtr(form.HideEmail),
+		KeepPronounsPrivate: optional.FromPtr(form.HidePronouns),
 		KeepActivityPrivate: optional.FromPtr(form.HideActivity),
 		EnableRepoUnitHints: optional.FromPtr(form.EnableRepoUnitHints),
 	}

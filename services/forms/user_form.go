@@ -224,6 +224,7 @@ type UpdateProfileForm struct {
 	Biography           string `binding:"MaxSize(255)"`
 	Visibility          structs.VisibleType
 	KeepActivityPrivate bool
+	KeepPronounsPrivate bool
 }
 
 // Validate validates the fields

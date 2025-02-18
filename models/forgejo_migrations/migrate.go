@@ -58,40 +58,42 @@ var migrations = []*Migration{
 	NewMigration("Add the `apply_to_admins` column to the `protected_branch` table", forgejo_v1_22.AddApplyToAdminsSetting),
 	// v9 -> v10
 	NewMigration("Add pronouns to user", forgejo_v1_22.AddPronounsToUser),
-	// v11 -> v12
+	// v10 -> v11
 	NewMigration("Add the `created` column to the `issue` table", forgejo_v1_22.AddCreatedToIssue),
-	// v12 -> v13
+	// v11 -> v12
 	NewMigration("Add repo_archive_download_count table", forgejo_v1_22.AddRepoArchiveDownloadCount),
-	// v13 -> v14
+	// v12 -> v13
 	NewMigration("Add `hide_archive_links` column to `release` table", AddHideArchiveLinksToRelease),
-	// v14 -> v15
+	// v13 -> v14
 	NewMigration("Remove Gitea-specific columns from the repository and badge tables", RemoveGiteaSpecificColumnsFromRepositoryAndBadge),
-	// v15 -> v16
+	// v14 -> v15
 	NewMigration("Create the `federation_host` table", CreateFederationHostTable),
-	// v16 -> v17
+	// v15 -> v16
 	NewMigration("Create the `federated_user` table", CreateFederatedUserTable),
-	// v17 -> v18
+	// v16 -> v17
 	NewMigration("Add `normalized_federated_uri` column to `user` table", AddNormalizedFederatedURIToUser),
-	// v18 -> v19
+	// v17 -> v18
 	NewMigration("Create the `following_repo` table", CreateFollowingRepoTable),
-	// v19 -> v20
+	// v18 -> v19
 	NewMigration("Add external_url to attachment table", AddExternalURLColumnToAttachmentTable),
-	// v20 -> v21
+	// v19 -> v20
 	NewMigration("Creating Quota-related tables", CreateQuotaTables),
-	// v21 -> v22
+	// v20 -> v21
 	NewMigration("Add SSH keypair to `pull_mirror` table", AddSSHKeypairToPushMirror),
-	// v22 -> v23
+	// v21 -> v22
 	NewMigration("Add `legacy` to `web_authn_credential` table", AddLegacyToWebAuthnCredential),
-	// v23 -> v24
+	// v22 -> v23
 	NewMigration("Add `delete_branch_after_merge` to `auto_merge` table", AddDeleteBranchAfterMergeToAutoMerge),
-	// v24 -> v25
+	// v23 -> v24
 	NewMigration("Add `purpose` column to `forgejo_auth_token` table", AddPurposeToForgejoAuthToken),
-	// v25 -> v26
+	// v24 -> v25
 	NewMigration("Migrate `secret` column to store keying material", MigrateTwoFactorToKeying),
-	// v26 -> v27
+	// v25 -> v26
 	NewMigration("Add `hash_blake2b` column to `package_blob` table", AddHashBlake2bToPackageBlob),
-	// v27 -> v28
+	// v26 -> v27
 	NewMigration("Add `created_unix` column to `user_redirect` table", AddCreatedUnixToRedirect),
+	// v27 -> v28
+	NewMigration("Add pronoun privacy settings to user", AddHidePronounsOptionToUser),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.

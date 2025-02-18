@@ -116,7 +116,7 @@ func commonResetPassword(ctx *context.Context, shouldDeleteToken bool) (*user_mo
 	}
 
 	// Fail early, don't frustrate the user
-	u, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.PasswordReset, shouldDeleteToken)
+	u, deleteToken, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.PasswordReset)
 	if err != nil {
 		ctx.ServerError("VerifyUserAuthorizationToken", err)
 		return nil, nil
@@ -125,6 +125,13 @@ func commonResetPassword(ctx *context.Context, shouldDeleteToken bool) (*user_mo
 	if u == nil {
 		ctx.Flash.Error(ctx.Tr("auth.invalid_code_forgot_password", fmt.Sprintf("%s/user/forgot_password", setting.AppSubURL)), true)
 		return nil, nil
+	}
+
+	if shouldDeleteToken {
+		if err := deleteToken(); err != nil {
+			ctx.ServerError("deleteToken", err)
+			return nil, nil
+		}
 	}
 
 	twofa, err := auth.GetTwoFactorByUID(ctx, u.ID)
