@@ -40,6 +40,7 @@ import (
 	"code.gitea.io/gitea/services/cron"
 	feed_service "code.gitea.io/gitea/services/feed"
 	indexer_service "code.gitea.io/gitea/services/indexer"
+	limiter_service "code.gitea.io/gitea/services/limiter"
 	"code.gitea.io/gitea/services/mailer"
 	mailer_incoming "code.gitea.io/gitea/services/mailer/incoming"
 	markup_service "code.gitea.io/gitea/services/markup"
@@ -166,6 +167,8 @@ func InitWebInstalled(ctx context.Context) {
 	mustInit(svg.Init)
 
 	actions_service.Init()
+
+	mustInitCtx(ctx, limiter_service.Init)
 
 	// Finally start up the cron
 	cron.NewContext(ctx)

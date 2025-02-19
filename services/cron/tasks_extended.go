@@ -15,6 +15,7 @@ import (
 	issue_indexer "code.gitea.io/gitea/modules/indexer/issues"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/updatechecker"
+	limiter_service "code.gitea.io/gitea/services/limiter"
 	repo_service "code.gitea.io/gitea/services/repository"
 	archiver_service "code.gitea.io/gitea/services/repository/archiver"
 	user_service "code.gitea.io/gitea/services/user"
@@ -225,7 +226,19 @@ func registerRebuildIssueIndexer() {
 	})
 }
 
-func initExtendedTasks() {
+func registerLimiter(ctx context.Context) {
+	periodicity := limiter_service.IPRangesSingleton().GetModel().GetPeriodicity(ctx)
+
+	RegisterTaskFatal("limiter", &BaseConfig{
+		Enabled:    true,
+		RunAtStart: false,
+		Schedule:   periodicity,
+	}, func(ctx context.Context, _ *user_model.User, config Config) error {
+		return limiter_service.IPRangesSingleton().Cron(ctx)
+	})
+}
+
+func initExtendedTasks(ctx context.Context) {
 	registerDeleteInactiveUsers()
 	registerDeleteRepositoryArchives()
 	registerGarbageCollectRepositories()
@@ -240,4 +253,5 @@ func initExtendedTasks() {
 	registerDeleteOldSystemNotices()
 	registerGCLFS()
 	registerRebuildIssueIndexer()
+	registerLimiter(ctx)
 }
