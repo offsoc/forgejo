@@ -20,6 +20,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
@@ -691,11 +692,15 @@ func GetPullRequestByIssueID(ctx context.Context, issueID int64) (*PullRequest, 
 }
 
 // GetPullRequestByBaseHeadInfo returns the pull request by given base and head
-func GetPullRequestByBaseHeadInfo(ctx context.Context, baseID, headID int64, base, head string) (*PullRequest, error) {
+func GetPullRequestByBaseHeadInfo(ctx context.Context, baseID, headID int64, base, head string, isClosed optional.Option[bool]) (*PullRequest, error) {
 	pr := &PullRequest{}
 	sess := db.GetEngine(ctx).
 		Join("INNER", "issue", "issue.id = pull_request.issue_id").
 		Where("base_repo_id = ? AND base_branch = ? AND head_repo_id = ? AND head_branch = ?", baseID, base, headID, head)
+	if isClosed.Has() {
+		sess = sess.And("issue.is_closed = ?", isClosed.Value())
+	}
+
 	has, err := sess.Get(pr)
 	if err != nil {
 		return nil, err

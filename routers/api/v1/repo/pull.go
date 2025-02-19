@@ -25,6 +25,7 @@ import (
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/timeutil"
@@ -261,6 +262,11 @@ func GetPullRequestByBaseHead(ctx *context.APIContext) {
 	//   description: head of the pull request to get
 	//   type: string
 	//   required: true
+	// - name: state
+	//   in: query
+	//   description: state of pull request to get
+	//   type: string
+	//   enum: [closed, open, all]
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/PullRequest"
@@ -297,7 +303,17 @@ func GetPullRequestByBaseHead(ctx *context.APIContext) {
 		headBranch = head
 	}
 
-	pr, err := issues_model.GetPullRequestByBaseHeadInfo(ctx, ctx.Repo.Repository.ID, headRepoID, ctx.Params(":base"), headBranch)
+	var isClosed optional.Option[bool]
+	switch ctx.FormString("state") {
+	case "closed":
+		isClosed = optional.Some(true)
+	case "open":
+		isClosed = optional.Some(false)
+	default:
+		isClosed = optional.None[bool]()
+	}
+
+	pr, err := issues_model.GetPullRequestByBaseHeadInfo(ctx, ctx.Repo.Repository.ID, headRepoID, ctx.Params(":base"), headBranch, isClosed)
 	if err != nil {
 		if issues_model.IsErrPullRequestNotExist(err) {
 			ctx.NotFound()
