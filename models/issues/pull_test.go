@@ -5,6 +5,7 @@ package issues_test
 
 import (
 	"fmt"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
+	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/tests"
 
@@ -263,6 +265,29 @@ func TestGetUnmergedPullRequestsByBaseInfo(t *testing.T) {
 	assert.Equal(t, int64(2), pr.ID)
 	assert.Equal(t, int64(1), pr.BaseRepoID)
 	assert.Equal(t, "master", pr.BaseBranch)
+}
+
+func TestGetPullRequestsByBaseHeadInfo(t *testing.T) {
+	defer unittest.OverrideFixtures(
+		unittest.FixturesOptions{
+			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
+			Base: setting.AppWorkPath,
+			Dirs: []string{"models/issues/TestGetPullRequestsByBaseHead/"},
+		},
+	)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+	openPr, err := issues_model.GetPullRequestByBaseHeadInfo(db.DefaultContext, 63, 63, "main", "branch2", optional.Some(false))
+	require.NoError(t, err)
+	assert.Equal(t, int64(11), openPr.ID)
+
+	closedPr, err := issues_model.GetPullRequestByBaseHeadInfo(db.DefaultContext, 63, 63, "main", "branch2", optional.Some(true))
+	require.NoError(t, err)
+	assert.Equal(t, int64(12), closedPr.ID)
+
+	// This should return the first PR regardless of state
+	anyPr, err := issues_model.GetPullRequestByBaseHeadInfo(db.DefaultContext, 63, 63, "main", "branch2", optional.None[bool]())
+	require.NoError(t, err)
+	assert.Equal(t, int64(11), anyPr.ID)
 }
 
 func TestGetPullRequestByIndex(t *testing.T) {
