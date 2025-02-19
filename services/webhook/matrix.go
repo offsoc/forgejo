@@ -9,6 +9,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"html"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -19,7 +20,6 @@ import (
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/json"
 	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/svg"
 	"code.gitea.io/gitea/modules/util"
@@ -143,9 +143,8 @@ func (m matrixConvertor) newPayload(text string, commits ...*api.PayloadCommit) 
 
 // Create implements payloadConvertor Create method
 func (m matrixConvertor) Create(p *api.CreatePayload) (MatrixPayload, error) {
-	repoLink := htmlLinkFormatter(p.Repo.HTMLURL, p.Repo.FullName)
 	refLink := MatrixLinkToRef(p.Repo.HTMLURL, p.Ref)
-	text := fmt.Sprintf("[%s:%s] %s created by %s", repoLink, refLink, p.RefType, p.Sender.UserName)
+	text := fmt.Sprintf("[%s:%s] %s created by %s", p.Repo.FullName, refLink, p.RefType, p.Sender.UserName)
 
 	return m.newPayload(text)
 }
@@ -206,9 +205,8 @@ func (m matrixConvertor) Push(p *api.PushPayload) (MatrixPayload, error) {
 		commitDesc = fmt.Sprintf("%d commits", p.TotalCommits)
 	}
 
-	repoLink := htmlLinkFormatter(p.Repo.HTMLURL, p.Repo.FullName)
-	branchLink := MatrixLinkToRef(p.Repo.HTMLURL, p.Ref)
-	text := fmt.Sprintf("[%s] %s pushed %s to %s:<br>", repoLink, p.Pusher.UserName, commitDesc, branchLink)
+	refName := html.EscapeString(git.RefName(p.Ref).ShortName())
+	text := fmt.Sprintf("[%s] %s pushed %s to %s:<br>", p.Repo.FullName, p.Pusher.UserName, commitDesc, refName)
 
 	// for each commit, generate a new line text
 	for i, commit := range p.Commits {
@@ -231,10 +229,8 @@ func (m matrixConvertor) PullRequest(p *api.PullRequestPayload) (MatrixPayload, 
 
 // Review implements payloadConvertor Review method
 func (m matrixConvertor) Review(p *api.PullRequestPayload, event webhook_module.HookEventType) (MatrixPayload, error) {
-	senderLink := htmlLinkFormatter(setting.AppURL+url.PathEscape(p.Sender.UserName), p.Sender.UserName)
 	title := fmt.Sprintf("#%d %s", p.Index, p.PullRequest.Title)
 	titleLink := htmlLinkFormatter(p.PullRequest.HTMLURL, title)
-	repoLink := htmlLinkFormatter(p.Repository.HTMLURL, p.Repository.FullName)
 	var text string
 
 	if p.Action == api.HookIssueReviewed {
@@ -243,7 +239,7 @@ func (m matrixConvertor) Review(p *api.PullRequestPayload, event webhook_module.
 			return MatrixPayload{}, err
 		}
 
-		text = fmt.Sprintf("[%s] Pull request review %s: %s by %s", repoLink, action, titleLink, senderLink)
+		text = fmt.Sprintf("[%s] Pull request review %s: %s by %s", p.Repository.FullName, action, titleLink, p.Sender.UserName)
 	}
 
 	return m.newPayload(text)
@@ -251,29 +247,27 @@ func (m matrixConvertor) Review(p *api.PullRequestPayload, event webhook_module.
 
 // Repository implements payloadConvertor Repository method
 func (m matrixConvertor) Repository(p *api.RepositoryPayload) (MatrixPayload, error) {
-	senderLink := htmlLinkFormatter(setting.AppURL+p.Sender.UserName, p.Sender.UserName)
 	repoLink := htmlLinkFormatter(p.Repository.HTMLURL, p.Repository.FullName)
 	var text string
 
 	switch p.Action {
 	case api.HookRepoCreated:
-		text = fmt.Sprintf("[%s] Repository created by %s", repoLink, senderLink)
+		text = fmt.Sprintf("[%s] Repository created by %s", repoLink, p.Sender.UserName)
 	case api.HookRepoDeleted:
-		text = fmt.Sprintf("[%s] Repository deleted by %s", repoLink, senderLink)
+		text = fmt.Sprintf("[%s] Repository deleted by %s", repoLink, p.Sender.UserName)
 	}
 	return m.newPayload(text)
 }
 
 func (m matrixConvertor) Package(p *api.PackagePayload) (MatrixPayload, error) {
-	senderLink := htmlLinkFormatter(setting.AppURL+p.Sender.UserName, p.Sender.UserName)
 	packageLink := htmlLinkFormatter(p.Package.HTMLURL, p.Package.Name)
 	var text string
 
 	switch p.Action {
 	case api.HookPackageCreated:
-		text = fmt.Sprintf("[%s] Package published by %s", packageLink, senderLink)
+		text = fmt.Sprintf("[%s] Package published by %s", packageLink, p.Sender.UserName)
 	case api.HookPackageDeleted:
-		text = fmt.Sprintf("[%s] Package deleted by %s", packageLink, senderLink)
+		text = fmt.Sprintf("[%s] Package deleted by %s", packageLink, p.Sender.UserName)
 	}
 
 	return m.newPayload(text)
