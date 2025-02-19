@@ -282,6 +282,7 @@ help:
 	@echo " - forgejo-api-validate             check if the forgejo API matches the specs"
 	@echo " - generate-swagger                 generate the swagger spec from code comments"
 	@echo " - swagger-validate                 check if the swagger spec is valid"
+	@echo " - generate-config                  generate config cheat sheet and app.example.ini"
 	@echo " - go-licenses                      regenerate go licenses"
 	@echo " - tidy                             run go mod tidy"
 	@echo " - test[\#TestSpecificName]         run unit test"
@@ -402,6 +403,10 @@ swagger-validate:
 	$(SED_INPLACE) '$(SWAGGER_SPEC_S_JSON)' './$(SWAGGER_SPEC)'
 	$(GO) run $(SWAGGER_PACKAGE) validate './$(SWAGGER_SPEC)'
 	$(SED_INPLACE) '$(SWAGGER_SPEC_S_TMPL)' './$(SWAGGER_SPEC)'
+
+.PHONY: generate-config
+generate-config:
+	python tools/make-generate-config.py
 
 .PHONY: checks
 checks: checks-frontend checks-backend
