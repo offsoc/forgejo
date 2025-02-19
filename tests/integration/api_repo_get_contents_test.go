@@ -18,6 +18,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	api "code.gitea.io/gitea/modules/structs"
 	repo_service "code.gitea.io/gitea/services/repository"
+	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -192,5 +193,12 @@ func TestAPIGetContentsRefFormats(t *testing.T) {
 		raw, err = io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		assert.EqualValues(t, content, string(raw))
+
+		t.Run("HEAD request", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			MakeRequest(t, NewRequest(t, http.MethodHead, noRef), http.StatusOK)
+			MakeRequest(t, NewRequest(t, http.MethodHead, "api/v1/repos/user2/repo1/raw/file-does-not-exist"), http.StatusNotFound)
+		})
 	})
 }
