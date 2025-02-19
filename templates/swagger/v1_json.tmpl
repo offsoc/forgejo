@@ -12885,6 +12885,17 @@
             "name": "head",
             "in": "path",
             "required": true
+          },
+          {
+            "enum": [
+              "closed",
+              "open",
+              "all"
+            ],
+            "type": "string",
+            "description": "state of pull request to get",
+            "name": "state",
+            "in": "query"
           }
         ],
         "responses": {
