@@ -22,7 +22,7 @@
     "css-loader": "7.0.0",
     "dayjs": "1.11.12",
     "dropzone": "6.0.0-beta.2",
-    "easymde": "2.18.0",
+    "easymde": "2.19.0",
     "esbuild-loader": "4.3.0",
     "escape-goat": "4.0.0",
     "fast-glob": "3.3.3",
