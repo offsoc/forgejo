@@ -26,7 +26,7 @@ require (
 	github.com/alecthomas/chroma/v2 v2.15.0
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/blevesearch/bleve/v2 v2.4.4
-	github.com/buildkite/terminal-to-html/v3 v3.16.5
+	github.com/buildkite/terminal-to-html/v3 v3.16.6
 	github.com/caddyserver/certmagic v0.21.7
 	github.com/chi-middleware/proxy v1.1.1
 	github.com/djherbis/buffer v1.2.0
