@@ -1,7 +1,8 @@
 ---
 title: 'Configuration Cheat Sheet'
 license: 'Apache-2.0'
-origin_url: 'https://github.com/go-gitea/gitea/blob/e865de1e9d65dc09797d165a51c8e705d2a86030/docs/content/administration/config-cheat-sheet.en-us.md' 
+origin_url: 'https://github.com/go-gitea/gitea/blob/e865de1e9d65dc09797d165a51c8e705d2a86030/docs/content/administration/config-cheat-sheet.en-us.md'
+edit_url: 'https://codeberg.org/forgejo/forgejo/src/branch/forgejo/options/config.toml'
 ---
 
 This is a cheat sheet for the Forgejo configuration file. It contains the settings

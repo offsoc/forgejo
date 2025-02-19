@@ -104,9 +104,4 @@ if __name__ == '__main__':
         convert_to_ini(t, file=f)
 
     with open('options/setting/config-cheat-sheet.md', 'w') as f:
-        f.write('''---
-title: 'Configuration Cheat Sheet'
-license: 'Apache-2.0'
-origin_url: 'https://github.com/go-gitea/gitea/blob/e865de1e9d65dc09797d165a51c8e705d2a86030/docs/content/administration/config-cheat-sheet.en-us.md' 
----\n\n''')
         convert_to_md(t, file=f)
