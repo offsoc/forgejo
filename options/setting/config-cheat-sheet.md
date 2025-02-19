@@ -68,25 +68,25 @@ These values are environment-dependent but form the basis of a lot of values. Th
   ```
 
 - <a name="APP_DISPLAY_NAME_FORMAT" href="#APP_DISPLAY_NAME_FORMAT">`APP_DISPLAY_NAME_FORMAT`</a>:
-  Format how the application display name presented in every page title. It is only used if <a href="#APP_SLOGAN">`APP_SLOGAN`</a> is set:
+  Format how the application display name presented in every page title. It is only used if <a href="#APP_SLOGAN">`APP_SLOGAN`</a> is set.:
   ```ini
   APP_DISPLAY_NAME_FORMAT = {APP_NAME}: {APP_SLOGAN}
   ```
 
 - <a name="RUN_USER" href="#RUN_USER">`RUN_USER`</a>:
-  Operating system user name that is running Forgejo. If it is omitted it will be automatically detected as the current user:
+  Operating system user name that is running Forgejo. If it is omitted it will be automatically detected as the current user.:
   ```ini
   RUN_USER =
   ```
 
 - <a name="RUN_MODE" href="#RUN_MODE">`RUN_MODE`</a>:
-  Application run mode, which affects performance and debugging: `"dev"` or `"prod"`. Mode `"dev"` makes Forgejo easier to develop and debug, values other than `"dev"` are treated as `"prod"` which is for production use:
+  Application run mode, which affects performance and debugging: `"dev"` or `"prod"`. Mode `"dev"` makes Forgejo easier to develop and debug, values other than `"dev"` are treated as `"prod"` which is for production use.:
   ```ini
   RUN_MODE = prod
   ```
 
 - <a name="WORK_PATH" href="#WORK_PATH">`WORK_PATH`</a>:
-  Path of the working directory. It sets the _<a href="#AppWorkPath">`AppWorkPath`</a>_ variable and may also be specified by the command line argument `--work-path` or an environment variable, `GITEA_WORK_DIR`, and defaults to the path of the Forgejo binary:
+  Path of the working directory. It sets the _<a href="#AppWorkPath">`AppWorkPath`</a>_ variable and may also be specified by the command line argument `--work-path` or an environment variable, `GITEA_WORK_DIR`, and defaults to the path of the Forgejo binary.:
   ```ini
   WORK_PATH =
   ```
@@ -98,7 +98,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
 ```
 
 - <a name="server.PROTOCOL" href="#server.PROTOCOL">`server.PROTOCOL`</a>:
-  Protocol the server listens on. Must be one of `"http"`, `"https"`, `"http+unix"`, `"fcgi"` or `"fcgi+unix"`. Note: the value must be lowercase:
+  Protocol the server listens on. Must be one of `"http"`, `"https"`, `"http+unix"`, `"fcgi"` or `"fcgi+unix"`. Note: the value must be lowercase.:
   ```ini
   PROTOCOL = http
   ```
@@ -134,7 +134,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
   ```
 
 - <a name="server.ROOT_URL" href="#server.ROOT_URL">`server.ROOT_URL`</a>:
-  Root URL of the public URL. If specified it overwrites the automatically generated public URL, which is necessary for proxies and inside containers:
+  Root URL of the public URL. If specified it overwrites the automatically generated public URL, which is necessary for proxies and inside containers.:
   ```ini
   ROOT_URL = %(PROTOCOL)s://%(DOMAIN)s:%(HTTP_PORT)s/
   ```
@@ -148,19 +148,19 @@ These values are environment-dependent but form the basis of a lot of values. Th
 - <a name="server.HTTP_ADDR" href="#server.HTTP_ADDR">`server.HTTP_ADDR`</a>:
   Address to listen on. Either a IPv4/IPv6 address or the path to a unix socket.
   If <a href="#server.PROTOCOL">`PROTOCOL`</a> is set to `"http+unix"` or `"fcgi+unix"`, this should be the name of the Unix socket file to use.
-  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_:
+  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_.:
   ```ini
   HTTP_ADDR = 0.0.0.0
   ```
 
 - <a name="server.HTTP_PORT" href="#server.HTTP_PORT">`server.HTTP_PORT`</a>:
-  HTTP port to listen on. It should be left empty when using a unix socket:
+  HTTP port to listen on. It should be left empty when using a unix socket.:
   ```ini
   HTTP_PORT = 3000
   ```
 
 - <a name="server.REDIRECT_OTHER_PORT" href="#server.REDIRECT_OTHER_PORT">`server.REDIRECT_OTHER_PORT`</a>:
-  Redirect to other port. If `true` and <a href="#server.PROTOCOL">`PROTOCOL`</a> is `"https"` an HTTP server will be started on <a href="#server.PORT_TO_REDIRECT">`PORT_TO_REDIRECT`</a> and it will redirect plain, non-secure HTTP requests to the main <a href="#server.ROOT_URL">`ROOT_URL`</a>:
+  Redirect to other port. If `true` and <a href="#server.PROTOCOL">`PROTOCOL`</a> is `"https"` an HTTP server will be started on <a href="#server.PORT_TO_REDIRECT">`PORT_TO_REDIRECT`</a> and it will redirect plain, non-secure HTTP requests to the main <a href="#server.ROOT_URL">`ROOT_URL`</a>.:
   ```ini
   REDIRECT_OTHER_PORT = false
   ```
@@ -196,19 +196,19 @@ These values are environment-dependent but form the basis of a lot of values. Th
   ```
 
 - <a name="server.SSL_CIPHER_SUITES" href="#server.SSL_CIPHER_SUITES">`server.SSL_CIPHER_SUITES`</a>:
-  SSL Cipher Suites. It defaults to `"ecdhe_ecdsa_with_aes_256_gcm_sha384,ecdhe_rsa_with_aes_256_gcm_sha384,ecdhe_ecdsa_with_aes_128_gcm_sha256,ecdhe_rsa_with_aes_128_gcm_sha256,ecdhe_ecdsa_with_chacha20_poly1305,ecdhe_rsa_with_chacha20_poly1305"` if AES is supported by hardware, otherwise `"chacha"` will be first:
+  SSL Cipher Suites. It defaults to `"ecdhe_ecdsa_with_aes_256_gcm_sha384,ecdhe_rsa_with_aes_256_gcm_sha384,ecdhe_ecdsa_with_aes_128_gcm_sha256,ecdhe_rsa_with_aes_128_gcm_sha256,ecdhe_ecdsa_with_chacha20_poly1305,ecdhe_rsa_with_chacha20_poly1305"` if AES is supported by hardware, otherwise `"chacha"` will be first.:
   ```ini
   SSL_CIPHER_SUITES =
   ```
 
 - <a name="server.PER_WRITE_TIMEOUT" href="#server.PER_WRITE_TIMEOUT">`server.PER_WRITE_TIMEOUT`</a>:
-  Timeout for any write connection. If `-1`, all timeouts are disabled. Formatted as strings such as `"30s"`:
+  Timeout for any write connection. If `-1`, all timeouts are disabled. Formatted as strings such as `"30s"`.:
   ```ini
   PER_WRITE_TIMEOUT = 30s
   ```
 
 - <a name="server.PER_WRITE_PER_KB_TIMEOUT" href="#server.PER_WRITE_PER_KB_TIMEOUT">`server.PER_WRITE_PER_KB_TIMEOUT`</a>:
-  Timeout per kB written to any write connection. Formatted as strings such as `"30s"`:
+  Timeout per kB written to any write connection. Formatted as strings such as `"30s"`.:
   ```ini
   PER_WRITE_PER_KB_TIMEOUT = 30s
   ```
@@ -227,13 +227,13 @@ These values are environment-dependent but form the basis of a lot of values. Th
   - If <a href="#server.PROTOCOL">`PROTOCOL`</a> is `"http+unix"`, the default value is `"http://unix/"`.
   - If <a href="#server.PROTOCOL">`PROTOCOL`</a> is `"fcgi"` or `"fcgi+unix"`, the default value is `"%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/"`.
   - If listen on `"0.0.0.0"`, the default value is `"%(PROTOCOL)s://localhost:%(HTTP_PORT)s/"`.
-  - Otherwise the default value is `"%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/"`:
+  - Otherwise the default value is `"%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/"`.:
   ```ini
   LOCAL_ROOT_URL =
   ```
 
 - <a name="server.LOCAL_USE_PROXY_PROTOCOL" href="#server.LOCAL_USE_PROXY_PROTOCOL">`server.LOCAL_USE_PROXY_PROTOCOL`</a>:
-  xpect PROXY protocol header when making local connections. If omitted, then it is the value of <a href="#server.USE_PROXY_PROTOCOL">`USE_PROXY_PROTOCOL`</a>:
+  xpect PROXY protocol header when making local connections. If omitted, then it is the value of <a href="#server.USE_PROXY_PROTOCOL">`USE_PROXY_PROTOCOL`</a>.:
   ```ini
   LOCAL_USE_PROXY_PROTOCOL = %(USE_PROXY_PROTOCOL)s
   ```
@@ -257,7 +257,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
   ```
 
 - <a name="server.BUILTIN_SSH_SERVER_USER" href="#server.BUILTIN_SSH_SERVER_USER">`server.BUILTIN_SSH_SERVER_USER`</a>:
-  Username to use for the builtin SSH server. If omitted, then it is the value of <a href="#RUN_USER">`RUN_USER`</a>:
+  Username to use for the builtin SSH server. If omitted, then it is the value of <a href="#RUN_USER">`RUN_USER`</a>.:
   ```ini
   BUILTIN_SSH_SERVER_USER = %(RUN_USER)s
   ```
@@ -293,42 +293,42 @@ These values are environment-dependent but form the basis of a lot of values. Th
   ```
 
 - <a name="server.SSH_ROOT_PATH" href="#server.SSH_ROOT_PATH">`server.SSH_ROOT_PATH`</a>:
-  Root path of SSH directory, default is `"~/.ssh"`, but you have to use `"/home/git/.ssh"`:
+  Root path of SSH directory, default is `"~/.ssh"`, but you have to use `"/home/git/.ssh"`.:
   ```ini
   SSH_ROOT_PATH =
   ```
 
 - <a name="server.SSH_CREATE_AUTHORIZED_KEYS_FILE" href="#server.SSH_CREATE_AUTHORIZED_KEYS_FILE">`server.SSH_CREATE_AUTHORIZED_KEYS_FILE`</a>:
   Forgejo will create an `authorized_keys` file by default when it is not using the internal SSH server.
-  If you intend to use the `AuthorizedKeysCommand` functionality then you should turn this off:
+  If you intend to use the `AuthorizedKeysCommand` functionality then you should turn this off.:
   ```ini
   SSH_CREATE_AUTHORIZED_KEYS_FILE = true
   ```
 
 - <a name="server.SSH_CREATE_AUTHORIZED_PRINCIPALS_FILE" href="#server.SSH_CREATE_AUTHORIZED_PRINCIPALS_FILE">`server.SSH_CREATE_AUTHORIZED_PRINCIPALS_FILE`</a>:
   Forgejo will create an `authorized_principals` file by default when it is not using the internal SSH server.
-  If you intend to use the `AuthorizedPrincipalsCommand` functionality then you should turn this off:
+  If you intend to use the `AuthorizedPrincipalsCommand` functionality then you should turn this off.:
   ```ini
   SSH_CREATE_AUTHORIZED_PRINCIPALS_FILE = true
   ```
 
 - <a name="server.SSH_SERVER_CIPHERS" href="#server.SSH_SERVER_CIPHERS">`server.SSH_SERVER_CIPHERS`</a>:
   For the built-in SSH server, choose the ciphers to support for SSH connections.
-  For system SSH this setting has no effect:
+  For system SSH this setting has no effect.:
   ```ini
   SSH_SERVER_CIPHERS = chacha20-poly1305@openssh.com, aes128-ctr, aes192-ctr, aes256-ctr, aes128-gcm@openssh.com, aes256-gcm@openssh.com
   ```
 
 - <a name="server.SSH_SERVER_KEY_EXCHANGES" href="#server.SSH_SERVER_KEY_EXCHANGES">`server.SSH_SERVER_KEY_EXCHANGES`</a>:
   For the built-in SSH server, choose the key exchange algorithms to support for SSH connections.
-  For system SSH this setting has no effect:
+  For system SSH this setting has no effect.:
   ```ini
   SSH_SERVER_KEY_EXCHANGES = curve25519-sha256, ecdh-sha2-nistp256, ecdh-sha2-nistp384, ecdh-sha2-nistp521, diffie-hellman-group14-sha256, diffie-hellman-group14-sha1
   ```
 
 - <a name="server.SSH_SERVER_MACS" href="#server.SSH_SERVER_MACS">`server.SSH_SERVER_MACS`</a>:
   For the built-in SSH server, choose the MACs to support for SSH connections.
-  For system SSH this setting has no effect:
+  For system SSH this setting has no effect.:
   ```ini
   SSH_SERVER_MACS = hmac-sha2-256-etm@openssh.com, hmac-sha2-256, hmac-sha1
   ```
@@ -336,19 +336,19 @@ These values are environment-dependent but form the basis of a lot of values. Th
 - <a name="server.SSH_SERVER_HOST_KEYS" href="#server.SSH_SERVER_HOST_KEYS">`server.SSH_SERVER_HOST_KEYS`</a>:
   For the built-in SSH server, choose the keypair to offer as the host key.
   The private key should be at `SSH_SERVER_HOST_KEY` and the public key at `SSH_SERVER_HOST_KEY`.pub.
-  Relative paths are made absolute relative to the <a href="#server.APP_DATA_PATH">`APP_DATA_PATH`</a>:
+  Relative paths are made absolute relative to the <a href="#server.APP_DATA_PATH">`APP_DATA_PATH`</a>.:
   ```ini
   SSH_SERVER_HOST_KEYS = ssh/gitea.rsa, ssh/gogs.rsa
   ```
 
 - <a name="server.SSH_KEY_TEST_PATH" href="#server.SSH_KEY_TEST_PATH">`server.SSH_KEY_TEST_PATH`</a>:
-  Path to the directory to create temporary files in when testing public keys using ssh-keygen, default is the system temporary directory:
+  Path to the directory to create temporary files in when testing public keys using ssh-keygen, default is the system temporary directory.:
   ```ini
   SSH_KEY_TEST_PATH =
   ```
 
 - <a name="server.SSH_KEYGEN_PATH" href="#server.SSH_KEYGEN_PATH">`server.SSH_KEYGEN_PATH`</a>:
-  Path to the `ssh-keygen` binary to parse public SSH keys. The value is passed to the shell. By default, Forgejo does the parsing itself:
+  Path to the `ssh-keygen` binary to parse public SSH keys. The value is passed to the shell. By default, Forgejo does the parsing itself.:
   ```ini
   SSH_KEYGEN_PATH =
   ```
@@ -379,7 +379,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
 - <a name="server.SSH_TRUSTED_USER_CA_KEYS" href="#server.SSH_TRUSTED_USER_CA_KEYS">`server.SSH_TRUSTED_USER_CA_KEYS`</a>:
   Public keys of certificate authorities that are trusted to sign user certificates for authentication.
   Multiple keys should be comma separated, e.g. `"ssh-<algorithm> <key>"` or `"ssh-<algorithm> <key1>, ssh-<algorithm> <key2>"`.
-  For more information see `TrustedUserCAKeys` in the `sshd_config` manpages:
+  For more information see `TrustedUserCAKeys` in the `sshd_config` manpages.:
   ```ini
   SSH_TRUSTED_USER_CA_KEYS =
   ```
@@ -388,7 +388,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
   Absolute path of the `TrustedUserCaKeys` file Forgejo will manage.
   By default this is <a href="#RUN_USER">`RUN_USER`</a>`/.ssh/gitea-trusted-user-ca-keys.pem`.
   If you're running your own ssh server and you want to use the Forgejo managed file you'll also need to modify your `sshd_config` to point to this file.
-  The official docker image will automatically work without further configuration:
+  The official docker image will automatically work without further configuration.:
   ```ini
   SSH_TRUSTED_USER_CA_KEYS_FILENAME =
   ```
@@ -409,7 +409,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
   Timeout for any write to ssh connections.
   If `-1`, all timeouts are disabled.
   Formatted as strings such as `"30s"`.
-  If omitted, it is the value of <a href="#server.PER_WRITE_TIMEOUT">`PER_WRITE_TIMEOUT`</a>:
+  If omitted, it is the value of <a href="#server.PER_WRITE_TIMEOUT">`PER_WRITE_TIMEOUT`</a>.:
   ```ini
   SSH_PER_WRITE_TIMEOUT =
   ```
@@ -418,7 +418,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
   Timeout per Kb written to ssh connections.
   If `-1`, all timeouts are disabled.
   Formatted as strings such as `"30s"`.
-  If omitted, it is the value of <a href="#server.PER_WRITE_PER_KB_TIMEOUT">`PER_WRITE_PER_KB_TIMEOUT`</a>:
+  If omitted, it is the value of <a href="#server.PER_WRITE_PER_KB_TIMEOUT">`PER_WRITE_PER_KB_TIMEOUT`</a>.:
   ```ini
   SSH_PER_WRITE_PER_KB_TIMEOUT =
   ```
@@ -451,7 +451,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
   ```
 
 - <a name="server.ACME_ACCEPTTOS" href="#server.ACME_ACCEPTTOS">`server.ACME_ACCEPTTOS`</a>:
-  Explicitly accept the ACME's TOS. The specific TOS cannot be retrieved at the moment:
+  Explicitly accept the ACME's TOS. The specific TOS cannot be retrieved at the moment.:
   ```ini
   ACME_ACCEPTTOS = false
   ```
@@ -496,14 +496,14 @@ These values are environment-dependent but form the basis of a lot of values. Th
 
 - <a name="server.STATIC_ROOT_PATH" href="#server.STATIC_ROOT_PATH">`server.STATIC_ROOT_PATH`</a>:
   Root directory containing templates and static files.
-  Defaults to the built-in value of _<a href="#StaticRootPath">`StaticRootPath`</a>_, which by default the path where Forgejo is executed:
+  Defaults to the built-in value of _<a href="#StaticRootPath">`StaticRootPath`</a>_, which by default the path where Forgejo is executed.:
   ```ini
   STATIC_ROOT_PATH =
   ```
 
 - <a name="server.APP_DATA_PATH" href="#server.APP_DATA_PATH">`server.APP_DATA_PATH`</a>:
   Default path for App data.
-  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_:
+  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_.:
   ```ini
   APP_DATA_PATH = data
   ```
@@ -524,7 +524,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
 
 - <a name="server.PPROF_DATA_PATH" href="#server.PPROF_DATA_PATH">`server.PPROF_DATA_PATH`</a>:
   PProf data path, use an absolute path when you start Forgejo as service.'
-  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_:
+  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_.:
   ```ini
   PPROF_DATA_PATH = data/tmp/pprof
   ```
@@ -627,21 +627,21 @@ The configuration options and their default values depend on the database to be 
   ```
 - Postgres configuration
   ```ini
-  ;DB_TYPE = postgres
+  DB_TYPE = postgres
   ;HOST = 127.0.0.1:5432 ; can use socket e.g. /var/run/postgresql/
   ;NAME = gitea
   ;USER = root
   ;PASSWD =
   ;SCHEMA =
   ;SSL_MODE=disable ;either "disable" (default), "require", or "verify-full"
-  ```:
+  ```
 
 ```ini
 [database]
 ```
 
 - <a name="database.DB_TYPE" href="#database.DB_TYPE">`database.DB_TYPE`</a>:
-  Database type, either `"sqlite3"`, `"mySQL"` or `"postgres"`:
+  Database type, either `"sqlite3"`, `"mySQL"` or `"postgres"`.:
   ```ini
   DB_TYPE = sqlite3
   ```
@@ -659,7 +659,7 @@ The configuration options and their default values depend on the database to be 
   ```
 
 - <a name="database.SQLITE_JOURNAL_MODE" href="#database.SQLITE_JOURNAL_MODE">`database.SQLITE_JOURNAL_MODE`</a>:
-  Journal mode, only used for `DB_TYPE = sqlite3`:
+  Journal mode, only used for `DB_TYPE = sqlite3`.:
   ```ini
   SQLITE_JOURNAL_MODE =
   ```
@@ -668,19 +668,19 @@ The configuration options and their default values depend on the database to be 
   Database host or socket.
   Ignored for `DB_TYPE = sqlite3`.
   Defaults to `127.0.0.1:3306` for `DB_TYPE = mysql` and `127.0.0.1:5432` for `DB_TYPE = postgres`.
-  Can use socket, e.g. `/var/run/mysqld/mysqld.sock` or `/var/run/postgresql/`:
+  Can use socket, e.g. `/var/run/mysqld/mysqld.sock` or `/var/run/postgresql/`.:
   ```ini
   HOST =
   ```
 
 - <a name="database.NAME" href="#database.NAME">`database.NAME`</a>:
-  Database name. Ignored for `DB_TYPE = sqlite3`:
+  Database name. Ignored for `DB_TYPE = sqlite3`.:
   ```ini
   NAME = gitea
   ```
 
 - <a name="database.USER" href="#database.USER">`database.USER`</a>:
-  Database user. Ignored for `DB_TYPE = sqlite3`:
+  Database user. Ignored for `DB_TYPE = sqlite3`.:
   ```ini
   USER = root
   ```
@@ -700,14 +700,14 @@ The configuration options and their default values depend on the database to be 
   SSL mode.
   Ignored for `DB_TYPE = sqlite3`.
   For `DB_TYPE = mysql` either "false" (default), "true", or "skip-verify"'.
-  For `DB_TYPE = postgres` either "disable" (default), "require", or "verify-full":
+  For `DB_TYPE = postgres` either "disable" (default), "require", or "verify-full".:
   ```ini
   SSL_MODE =
   ```
 
 - <a name="database.CHARSET_COLLATION" href="#database.CHARSET_COLLATION">`database.CHARSET_COLLATION`</a>:
   Charset collation, only used for `DB_TYPE = mysql`.
-  Empty as default, Forgejo will try to find a case-sensitive collation. Don't change it unless you clearly know what you need:
+  Empty as default, Forgejo will try to find a case-sensitive collation. Don't change it unless you clearly know what you need.:
   ```ini
   CHARSET_COLLATION =
   ```
@@ -749,13 +749,13 @@ The configuration options and their default values depend on the database to be 
   ```
 
 - <a name="database.CONN_MAX_LIFETIME" href="#database.CONN_MAX_LIFETIME">`database.CONN_MAX_LIFETIME`</a>:
-  Database connection max life time, default is `0` or `3s` mysql (See #6804 & #7071 for reasoning):
+  Database connection max life time, default is `0` or `3s` mysql (See #6804 & #7071 for reasoning).:
   ```ini
   CONN_MAX_LIFETIME = 3s
   ```
 
 - <a name="database.CONN_MAX_IDLETIME" href="#database.CONN_MAX_IDLETIME">`database.CONN_MAX_IDLETIME`</a>:
-  Database connection max idle time. `0` prevents closing due to idle time:
+  Database connection max idle time. `0` prevents closing due to idle time.:
   ```ini
   CONN_MAX_IDLETIME = 0
   ```
@@ -792,14 +792,14 @@ The configuration options and their default values depend on the database to be 
 
 - <a name="security.SECRET_KEY" href="#security.SECRET_KEY">`security.SECRET_KEY`</a>:
   Global secret key that will be used
-  This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore:
+  This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore.:
   ```ini
   SECRET_KEY =
   ```
 
 - <a name="security.SECRET_KEY_URI" href="#security.SECRET_KEY_URI">`security.SECRET_KEY_URI`</a>:
   Alternative location to specify secret key, instead of this file; you cannot specify both this and SECRET_KEY, and must pick one
-  This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore:
+  This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore.:
   ```ini
   SECRET_KEY_URI = file:/etc/gitea/secret_key
   ```
@@ -986,20 +986,20 @@ The configuration options and their default values depend on the database to be 
 - <a name="oauth2.JWT_SIGNING_PRIVATE_KEY_FILE" href="#oauth2.JWT_SIGNING_PRIVATE_KEY_FILE">`oauth2.JWT_SIGNING_PRIVATE_KEY_FILE`</a>:
   Private key file path used to sign OAuth2 tokens. The path is relative to APP_DATA_PATH.
   This setting is only needed if JWT_SIGNING_ALGORITHM is set to RS256, RS384, RS512, ES256, ES384 or ES512.
-  The file must contain a RSA or ECDSA private key in the PKCS8 format. If no key exists a 4096 bit key will be created for you:
+  The file must contain a RSA or ECDSA private key in the PKCS8 format. If no key exists a 4096 bit key will be created for you.:
   ```ini
   JWT_SIGNING_PRIVATE_KEY_FILE = jwt/private.pem
   ```
 
 - <a name="oauth2.JWT_SECRET" href="#oauth2.JWT_SECRET">`oauth2.JWT_SECRET`</a>:
   OAuth2 authentication secret for access and refresh tokens, change this yourself to a unique string. CLI generate option is helpful in this case. https://docs.gitea.io/en-us/command-line/#generate
-  This setting is only needed if JWT_SIGNING_ALGORITHM is set to HS256, HS384 or HS512:
+  This setting is only needed if JWT_SIGNING_ALGORITHM is set to HS256, HS384 or HS512.:
   ```ini
   JWT_SECRET =
   ```
 
 - <a name="oauth2.JWT_SECRET_URI" href="#oauth2.JWT_SECRET_URI">`oauth2.JWT_SECRET_URI`</a>:
-  Alternative location to specify OAuth2 authentication secret. You cannot specify both this and JWT_SECRET, and must pick one:
+  Alternative location to specify OAuth2 authentication secret. You cannot specify both this and JWT_SECRET, and must pick one.:
   ```ini
   JWT_SECRET_URI = file:/etc/gitea/oauth2_jwt_secret
   ```
@@ -1106,7 +1106,7 @@ The configuration options and their default values depend on the database to be 
   ```
 
 ### <a name="log.logger" href="#log.logger">Log logger</a>
-Sub logger modes, a single comma means use default MODE above, empty means disable it:
+Sub logger modes, a single comma means use default MODE above, empty means disable it
 
 ```ini
 [log.logger]
@@ -1128,14 +1128,14 @@ Sub logger modes, a single comma means use default MODE above, empty means disab
   ```
 
 ### <a name="log.%(WriterMode)" href="#log.%(WriterMode)">Log %(writermode)</a>
-Log modes (aka log writers):
+Log modes (aka log writers)
 
 ```ini
 [log.%(WriterMode)]
 ```
 
 - <a name="log.%(WriterMode).MODE" href="#log.%(WriterMode).MODE">`log.%(WriterMode).MODE`</a>:
-  console/file/conn/:
+  console/file/conn/...:
   ```ini
   MODE =
   ```
@@ -1256,7 +1256,7 @@ Log modes (aka log writers):
 ```
 
 - <a name="git.PATH" href="#git.PATH">`git.PATH`</a>:
-  The path of git executable. If empty, Forgejo searches through the PATH environment:
+  The path of git executable. If empty, Forgejo searches through the PATH environment.:
   ```ini
   PATH =
   ```
@@ -1317,14 +1317,14 @@ Log modes (aka log writers):
 
 - <a name="git.GC_ARGS" href="#git.GC_ARGS">`git.GC_ARGS`</a>:
   Arguments for command `git gc`, e.g. `--aggressive --auto`
-  see more on <https://git-scm.com/docs/git-gc/>:
+  see more on <https://git-scm.com/docs/git-gc/>.:
   ```ini
   GC_ARGS =
   ```
 
 - <a name="git.ENABLE_AUTO_GIT_WIRE_PROTOCOL" href="#git.ENABLE_AUTO_GIT_WIRE_PROTOCOL">`git.ENABLE_AUTO_GIT_WIRE_PROTOCOL`</a>:
   Whether to use git wire protocol version 2 when git version >= 2.18, default is true, set to false when you always want git wire protocol version 1.
-  To enable this for Git over SSH when using a OpenSSH server, add `AcceptEnv GIT_PROTOCOL` to your `sshd_config` file:
+  To enable this for Git over SSH when using a OpenSSH server, add `AcceptEnv GIT_PROTOCOL` to your `sshd_config` file.:
   ```ini
   ENABLE_AUTO_GIT_WIRE_PROTOCOL = true
   ```
@@ -1354,7 +1354,7 @@ Log modes (aka log writers):
   ```
 
 ### <a name="git.timeout" href="#git.timeout">Git timeout</a>
-Git Operation timeout in seconds:
+Git Operation timeout in seconds
 
 ```ini
 [git.timeout]
@@ -1397,7 +1397,7 @@ Git Operation timeout in seconds:
 
 ### <a name="git.config" href="#git.config">Git config</a>
 Git config options.
-This section only does "set" config, a removed config key from this section won't be removed from git config automatically. The format is `some.configKey = value`:
+This section only does "set" config, a removed config key from this section won't be removed from git config automatically. The format is `some.configKey = value`.
 
 ```ini
 [git.config]
@@ -1494,7 +1494,7 @@ This section only does "set" config, a removed config key from this section won'
 - <a name="service.ENABLE_BASIC_AUTHENTICATION" href="#service.ENABLE_BASIC_AUTHENTICATION">`service.ENABLE_BASIC_AUTHENTICATION`</a>:
   This setting enables Forgejo to be signed in with HTTP BASIC Authentication using the user's password.
   If you set this to false you will not be able to access the tokens endpoints on the API with your password.
-  Please note that setting this to false will not disable OAuth Basic or Basic authentication using a token:
+  Please note that setting this to false will not disable OAuth Basic or Basic authentication using a token.:
   ```ini
   ENABLE_BASIC_AUTHENTICATION = true
   ```
@@ -1506,7 +1506,7 @@ This section only does "set" config, a removed config key from this section won'
   ```
 
 - <a name="service.ENABLE_REVERSE_PROXY_AUTHENTICATION_API" href="#service.ENABLE_REVERSE_PROXY_AUTHENTICATION_API">`service.ENABLE_REVERSE_PROXY_AUTHENTICATION_API`</a>:
-  Enable this to allow reverse proxy authentication for API requests, the reverse proxy is responsible for ensuring that no CSRF is possible:
+  Enable this to allow reverse proxy authentication for API requests, the reverse proxy is responsible for ensuring that no CSRF is possible.:
   ```ini
   ENABLE_REVERSE_PROXY_AUTHENTICATION_API = false
   ```
@@ -1551,7 +1551,7 @@ This section only does "set" config, a removed config key from this section won'
   ```
 
 - <a name="service.CAPTCHA_TYPE" href="#service.CAPTCHA_TYPE">`service.CAPTCHA_TYPE`</a>:
-  Type of captcha you want to use. Options: image, recaptcha, hcaptcha, mcaptcha, cfturnstile:
+  Type of captcha you want to use. Options: image, recaptcha, hcaptcha, mcaptcha, cfturnstile.:
   ```ini
   CAPTCHA_TYPE = image
   ```
@@ -1728,7 +1728,7 @@ This section only does "set" config, a removed config key from this section won'
 - <a name="service.NO_REPLY_ADDRESS" href="#service.NO_REPLY_ADDRESS">`service.NO_REPLY_ADDRESS`</a>:
   Value for the domain part of the user's email address in the git log if user
   has set KeepEmailPrivate to true. The user's email will be replaced with a
-  concatenation of the user name in lower case, "@" and <a href="#service.NO_REPLY_ADDRESS">`NO_REPLY_ADDRESS`</a>:
+  concatenation of the user name in lower case, "@" and <a href="#service.NO_REPLY_ADDRESS">`NO_REPLY_ADDRESS`</a>.:
   ```ini
   NO_REPLY_ADDRESS = noreply.%(server.DOMAIN)s
   ```
@@ -1834,13 +1834,13 @@ This section only does "set" config, a removed config key from this section won'
 
 - <a name="repository.ROOT" href="#repository.ROOT">`repository.ROOT`</a>:
   Root path for storing all repository data. By default, it is set to `%(APP_DATA_PATH)s/gitea-repositories`.
-  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_:
+  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_.:
   ```ini
   ROOT =
   ```
 
 - <a name="repository.SCRIPT_TYPE" href="#repository.SCRIPT_TYPE">`repository.SCRIPT_TYPE`</a>:
-  The script type this server supports. Usually this is `bash`, but some users report that only `sh` is available:
+  The script type this server supports. Usually this is `bash`, but some users report that only `sh` is available.:
   ```ini
   SCRIPT_TYPE = bash
   ```
@@ -1849,7 +1849,7 @@ This section only does "set" config, a removed config key from this section won'
   Tie-break order for detected charsets.
   If the charsets have equal confidence, tie-breaking will be done by order in this list
   with charsets earlier in the list chosen in preference to those later.
-  Adding "defaults" will place the unused charsets at that position:
+  Adding "defaults" will place the unused charsets at that position.:
   ```ini
   DETECTED_CHARSETS_ORDER = UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, UTF-32LE, ISO-8859, windows-1252, ISO-8859, windows-1250, ISO-8859, ISO-8859, ISO-8859, windows-1253, ISO-8859, windows-1255, ISO-8859, windows-1251, windows-1256, KOI8-R, ISO-8859, windows-1254, Shift_JIS, GB18030, EUC-JP, EUC-KR, Big5, ISO-2022, ISO-2022, ISO-2022, IBM424_rtl, IBM424_ltr, IBM420_rtl, IBM420_ltr
   ```
@@ -1899,7 +1899,7 @@ This section only does "set" config, a removed config key from this section won'
 
 - <a name="repository.ACCESS_CONTROL_ALLOW_ORIGIN" href="#repository.ACCESS_CONTROL_ALLOW_ORIGIN">`repository.ACCESS_CONTROL_ALLOW_ORIGIN`</a>:
   Value for Access-Control-Allow-Origin header, default is not to present.
-  WARNING: This may be harmful to your website if you do not give it a right value:
+  WARNING: This may be harmful to your website if you do not give it a right value.:
   ```ini
   ACCESS_CONTROL_ALLOW_ORIGIN =
   ```
@@ -1934,7 +1934,7 @@ This section only does "set" config, a removed config key from this section won'
   ```
 
 - <a name="repository.DISABLED_REPO_UNITS" href="#repository.DISABLED_REPO_UNITS">`repository.DISABLED_REPO_UNITS`</a>:
-  Comma separated list of globally disabled repo units. Allowed values: repo.issues, repo.ext_issues, repo.pulls, repo.wiki, repo.ext_wiki, repo.projects, repo.packages, repo.actions:
+  Comma separated list of globally disabled repo units. Allowed values: repo.issues, repo.ext_issues, repo.pulls, repo.wiki, repo.ext_wiki, repo.projects, repo.packages, repo.actions.:
   ```ini
   DISABLED_REPO_UNITS =
   ```
@@ -1943,7 +1943,7 @@ This section only does "set" config, a removed config key from this section won'
   Comma separated list of default new repo units. Allowed values: repo.code, repo.releases, repo.issues, repo.pulls, repo.wiki, repo.projects, repo.packages, repo.actions.
   Note: Code and Releases can currently not be deactivated. If you specify default repo units you should still list them for future compatibility.
   External wiki and issue tracker can't be enabled by default as it requires additional settings.
-  Disabled repo units will not be added to new repositories regardless if it is in the default list:
+  Disabled repo units will not be added to new repositories regardless if it is in the default list.:
   ```ini
   DEFAULT_REPO_UNITS = repo.code,repo.releases,repo.issues,repo.pulls,repo.wiki,repo.projects,repo.packages,repo.actions
   ```
@@ -2041,7 +2041,7 @@ This section only does "set" config, a removed config key from this section won'
   ```
 
 - <a name="repository.upload.ALLOWED_TYPES" href="#repository.upload.ALLOWED_TYPES">`repository.upload.ALLOWED_TYPES`</a>:
-  Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types:
+  Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types.:
   ```ini
   ALLOWED_TYPES =
   ```
@@ -2137,7 +2137,7 @@ This section only does "set" config, a removed config key from this section won'
   ```
 
 - <a name="repository.pull-request.RETARGET_CHILDREN_ON_MERGE" href="#repository.pull-request.RETARGET_CHILDREN_ON_MERGE">`repository.pull-request.RETARGET_CHILDREN_ON_MERGE`</a>:
-  Retarget child pull requests to the parent pull request branch target on merge of parent pull request. It only works on merged PRs where the head and base branch target the same repo:
+  Retarget child pull requests to the parent pull request branch target on merge of parent pull request. It only works on merged PRs where the head and base branch target the same repo.:
   ```ini
   RETARGET_CHILDREN_ON_MERGE = true
   ```
@@ -2168,7 +2168,7 @@ This section only does "set" config, a removed config key from this section won'
 ```
 
 - <a name="repository.release.ALLOWED_TYPES" href="#repository.release.ALLOWED_TYPES">`repository.release.ALLOWED_TYPES`</a>:
-  Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types:
+  Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types.:
   ```ini
   ALLOWED_TYPES =
   ```
@@ -2187,7 +2187,7 @@ This section only does "set" config, a removed config key from this section won'
 - <a name="repository.signing.SIGNING_KEY" href="#repository.signing.SIGNING_KEY">`repository.signing.SIGNING_KEY`</a>:
   GPG key to use to sign commits, Defaults to the default - that is the value of `git config --get user.signingkey`
   Run in the context of the <a href="#RUN_USER">`RUN_USER`</a>.
-  Switch to none to stop signing completely:
+  Switch to none to stop signing completely.:
   ```ini
   SIGNING_KEY = default
   ```
@@ -2197,7 +2197,7 @@ This section only does "set" config, a removed config key from this section won'
   These should match a publicized name and email address for the key
   (When SIGNING_KEY is default these are set to
   the results of `git config --get user.name` and `git config --get user.email`, respectively and can only be overridden
-  by setting the SIGNING_KEY ID to the correct ID.):
+  by setting the SIGNING_KEY ID to the correct ID.).:
   ```ini
   SIGNING_NAME =
   ```
@@ -2208,7 +2208,7 @@ This section only does "set" config, a removed config key from this section won'
   ```
 
 - <a name="repository.signing.DEFAULT_TRUST_MODEL" href="#repository.signing.DEFAULT_TRUST_MODEL">`repository.signing.DEFAULT_TRUST_MODEL`</a>:
-  Sets the default trust model for repositories. Options are: collaborator, committer, collaboratorcommitter:
+  Sets the default trust model for repositories. Options are: collaborator, committer, collaboratorcommitter.:
   ```ini
   DEFAULT_TRUST_MODEL = collaborator
   ```
@@ -2220,7 +2220,7 @@ This section only does "set" config, a removed config key from this section won'
   - pubkey: only sign if the user has a pubkey
   - twofa: only sign if the user has logged in with twofa
   - always
-  options other than none and always can be combined as comma separated list:
+  options other than none and always can be combined as comma separated list.:
   ```ini
   INITIAL_COMMIT = always
   ```
@@ -2228,14 +2228,14 @@ This section only does "set" config, a removed config key from this section won'
 - <a name="repository.signing.CRUD_ACTIONS" href="#repository.signing.CRUD_ACTIONS">`repository.signing.CRUD_ACTIONS`</a>:
   Determines when to sign for CRUD actions
   - as above for <a href="#repository.signing.INITIAL_COMMIT">`INITIAL_COMMIT`</a> or
-  - parentsigned: requires that the parent commit is signed:
+  - parentsigned: requires that the parent commit is signed.:
   ```ini
   CRUD_ACTIONS = pubkey, twofa, parentsigned
   ```
 
 - <a name="repository.signing.WIKI" href="#repository.signing.WIKI">`repository.signing.WIKI`</a>:
   Determines when to sign Wiki commits
-  - as above for <a href="#repository.signing.INITIAL_COMMIT">`INITIAL_COMMIT`</a>:
+  - as above for <a href="#repository.signing.INITIAL_COMMIT">`INITIAL_COMMIT`</a>.:
   ```ini
   WIKI = never
   ```
@@ -2245,7 +2245,7 @@ This section only does "set" config, a removed config key from this section won'
   - as above for <a href="#repository.signing.INITIAL_COMMIT">`INITIAL_COMMIT`</a> or
   - `basesigned`: require that the parent of commit on the base repo is signed,
   - `commitssigned`: require that all the commits in the head branch are signed,
-  - `approved`: only sign when merging an approved pr to a protected branch:
+  - `approved`: only sign when merging an approved pr to a protected branch.:
   ```ini
   MERGES = pubkey, twofa, basesigned, commitssigned
   ```
@@ -2445,7 +2445,7 @@ This section only does "set" config, a removed config key from this section won'
   ```
 
 - <a name="ui.DEFAULT_SHOW_FULL_NAME" href="#ui.DEFAULT_SHOW_FULL_NAME">`ui.DEFAULT_SHOW_FULL_NAME`</a>:
-  Whether the full name of the users should be shown where possible. If the full name isn't set, the username will be used:
+  Whether the full name of the users should be shown where possible. If the full name isn't set, the username will be used.:
   ```ini
   DEFAULT_SHOW_FULL_NAME = false
   ```
@@ -2458,7 +2458,7 @@ This section only does "set" config, a removed config key from this section won'
 
 - <a name="ui.ONLY_SHOW_RELEVANT_REPOS" href="#ui.ONLY_SHOW_RELEVANT_REPOS">`ui.ONLY_SHOW_RELEVANT_REPOS`</a>:
   Whether to only show relevant repos on the explore page when no keyword is specified and default sorting is used.
-  A repo is considered irrelevant if it's a fork or if it has no metadata (no description, no icon, no topic):
+  A repo is considered irrelevant if it's a fork or if it has no metadata (no description, no icon, no topic).:
   ```ini
   ONLY_SHOW_RELEVANT_REPOS = false
   ```
@@ -2579,7 +2579,7 @@ This section only does "set" config, a removed config key from this section won'
 
 - <a name="ui.svg.ENABLE_RENDER" href="#ui.svg.ENABLE_RENDER">`ui.svg.ENABLE_RENDER`</a>:
   Whether to render SVG files as images.
-  If SVG rendering is disabled, SVG files are displayed as text and cannot be embedded in markdown files as images:
+  If SVG rendering is disabled, SVG files are displayed as text and cannot be embedded in markdown files as images.:
   ```ini
   ENABLE_RENDER = true
   ```
@@ -2597,7 +2597,7 @@ This section only does "set" config, a removed config key from this section won'
   ```
 
 - <a name="ui.csv.MAX_ROWS" href="#ui.csv.MAX_ROWS">`ui.csv.MAX_ROWS`</a>:
-  Maximum allowed rows to render CSV files. Set to 0 for no limit:
+  Maximum allowed rows to render CSV files. Set to 0 for no limit.:
   ```ini
   MAX_ROWS = 2500
   ```
@@ -2612,7 +2612,7 @@ This section only does "set" config, a removed config key from this section won'
   Render soft line breaks as hard line breaks, which means a single newline
   character between paragraphs will cause a line break and adding trailing
   whitespace to paragraphs is not necessary to force a line break.
-  Render soft line breaks as hard line breaks for comments:
+  Render soft line breaks as hard line breaks for comments.:
   ```ini
   ENABLE_HARD_LINE_BREAK_IN_COMMENTS = true
   ```
@@ -2627,7 +2627,7 @@ This section only does "set" config, a removed config key from this section won'
   Comma separated list of custom URL-Schemes that are allowed as links when rendering Markdown
   for example git,magnet,ftp (more at https://en.wikipedia.org/wiki/List_of_URI_schemes)
   URLs starting with http and https are always displayed, whatever is put in this entry.
-  If this entry is empty, all URL schemes are allowed:
+  If this entry is empty, all URL schemes are allowed.:
   ```ini
   CUSTOM_URL_SCHEMES =
   ```
@@ -2646,7 +2646,7 @@ This section only does "set" config, a removed config key from this section won'
   ```
 
 ## <a name="ssh.minimum_key_sizes" href="#ssh.minimum_key_sizes">SSH minimum key sizes</a>
-Define allowed algorithms and their minimum key length (use -1 to disable a type):
+Define allowed algorithms and their minimum key length (use -1 to disable a type).
 
 ```ini
 [ssh.minimum_key_sizes]
@@ -2671,7 +2671,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
   ```
 
 - <a name="ssh.minimum_key_sizes.DSA" href="#ssh.minimum_key_sizes.DSA">`ssh.minimum_key_sizes.DSA`</a>:
-  Minimum DSA key size. Set to 1024 to switch on:
+  Minimum DSA key size. Set to 1024 to switch on.:
   ```ini
   DSA = -1
   ```
@@ -2691,7 +2691,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 
 - <a name="indexer.ISSUE_INDEXER_PATH" href="#indexer.ISSUE_INDEXER_PATH">`indexer.ISSUE_INDEXER_PATH`</a>:
   Issue indexer storage path, available when <a href="#indexer.ISSUE_INDEXER_TYPE">`ISSUE_INDEXER_TYPE`</a> is bleve'
-  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_:
+  Relative paths will be made absolute against the _<a href="#AppWorkPath">`AppWorkPath`</a>_.:
   ```ini
   ISSUE_INDEXER_PATH = indexers/issues.bleve
   ```
@@ -2724,7 +2724,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 
 - <a name="indexer.REPO_INDEXER_REPO_TYPES" href="#indexer.REPO_INDEXER_REPO_TYPES">`indexer.REPO_INDEXER_REPO_TYPES`</a>:
   repo indexer units, the items to index, could be `sources`, `forks`, `mirrors`, `templates` or any combination of them separated by a comma.
-  If empty then it defaults to `sources` only, as if you'd like to disable fully please see <a href="#indexer.REPO_INDEXER_ENABLED">`REPO_INDEXER_ENABLED`</a>:
+  If empty then it defaults to `sources` only, as if you'd like to disable fully please see <a href="#indexer.REPO_INDEXER_ENABLED">`REPO_INDEXER_ENABLED`</a>.:
   ```ini
   REPO_INDEXER_REPO_TYPES = sources,forks,mirrors,templates
   ```
@@ -2788,7 +2788,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 - <a name="queue.TYPE" href="#queue.TYPE">`queue.TYPE`</a>:
   Specific queues can be individually configured with `[queue.name]`. <a href="#queue">`[queue]`</a> provides defaults
   (`[queue.issue_indexer]` is special due to the old configuration described above)
-  General queue type, currently support: `persistable-channel`, `channel`, `level`, `redis`, `dummy`:
+  General queue type, currently support: `persistable-channel`, `channel`, `level`, `redis`, `dummy`.:
   ```ini
   TYPE = persistable-channel
   ```
@@ -2796,7 +2796,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 - <a name="queue.DATADIR" href="#queue.DATADIR">`queue.DATADIR`</a>:
   Path to the directory for storing persistable queues and level queues.
   Individual queues will default to `queues/common` meaning the queue is shared.
-  Relative paths will be made absolute against `%(APP_DATA_PATH)s`:
+  Relative paths will be made absolute against `%(APP_DATA_PATH)s`.:
   ```ini
   DATADIR = queues/
   ```
@@ -2823,20 +2823,20 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 
 - <a name="queue.QUEUE_NAME" href="#queue.QUEUE_NAME">`queue.QUEUE_NAME`</a>:
   Suffix of the default redis/disk queue name.
-  Specific queues can be overridden within in their `[queue.name]` sections:
+  Specific queues can be overridden within in their `[queue.name]` sections.:
   ```ini
   QUEUE_NAME = _queue
   ```
 
 - <a name="queue.SET_NAME" href="#queue.SET_NAME">`queue.SET_NAME`</a>:
   Suffix of the default redis/disk unique queue set name.
-  Specific queues can be overridden within in their `[queue.name]` sections:
+  Specific queues can be overridden within in their `[queue.name]` sections.:
   ```ini
   SET_NAME = _unique
   ```
 
 - <a name="queue.MAX_WORKERS" href="#queue.MAX_WORKERS">`queue.MAX_WORKERS`</a>:
-  Maximum number of worker go-routines for the queue. Defaults to half the number of CPUs, clipped to between 1 and 10:
+  Maximum number of worker go-routines for the queue. Defaults to half the number of CPUs, clipped to between 1 and 10.:
   ```ini
   MAX_WORKERS =
   ```
@@ -2854,7 +2854,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
   ```
 
 - <a name="admin.DEFAULT_EMAIL_NOTIFICATIONS" href="#admin.DEFAULT_EMAIL_NOTIFICATIONS">`admin.DEFAULT_EMAIL_NOTIFICATIONS`</a>:
-  Default configuration for email notifications for users (user configurable). Options: `enabled`, `onmention`, `disabled`:
+  Default configuration for email notifications for users (user configurable). Options: `enabled`, `onmention`, `disabled`.:
   ```ini
   DEFAULT_EMAIL_NOTIFICATIONS = enabled
   ```
@@ -2912,7 +2912,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 
 - <a name="openid.ENABLE_OPENID_SIGNUP" href="#openid.ENABLE_OPENID_SIGNUP">`openid.ENABLE_OPENID_SIGNUP`</a>:
   Whether to allow registering via OpenID.
-  Do not include to rely on the <a href="#service.DISABLE_REGISTRATION">`DISABLE_REGISTRATION`</a> setting:
+  Do not include to rely on the <a href="#service.DISABLE_REGISTRATION">`DISABLE_REGISTRATION`</a> setting.:
   ```ini
   ENABLE_OPENID_SIGNUP = true
   ```
@@ -2943,7 +2943,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 
 - <a name="oauth2_client.REGISTER_EMAIL_CONFIRM" href="#oauth2_client.REGISTER_EMAIL_CONFIRM">`oauth2_client.REGISTER_EMAIL_CONFIRM`</a>:
   Whether a new auto registered oauth2 user needs to confirm their email.
-  Do not include to use the REGISTER_EMAIL_CONFIRM setting from the <a href="#service">`[service]`</a> section:
+  Do not include to use the REGISTER_EMAIL_CONFIRM setting from the <a href="#service">`[service]`</a> section.:
   ```ini
   REGISTER_EMAIL_CONFIRM =
   ```
@@ -2951,7 +2951,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 - <a name="oauth2_client.OPENID_CONNECT_SCOPES" href="#oauth2_client.OPENID_CONNECT_SCOPES">`oauth2_client.OPENID_CONNECT_SCOPES`</a>:
   Scopes for the openid connect oauth2 provider (separated by space, the openid scope is implicitly added).
   Typical values are profile and email.
-  For more information about the possible values see <https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims>:
+  For more information about the possible values see <https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims>.:
   ```ini
   OPENID_CONNECT_SCOPES =
   ```
@@ -3019,7 +3019,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
   - `*`: for all hosts
   
   CIDR list: `1.2.3.0/8, 2001:db8::/32`,
-  Wildcard hosts: `*.mydomain.com, 192.168.100.*`:
+  Wildcard hosts: `*.mydomain.com, 192.168.100.*`.:
   ```ini
   ALLOWED_HOST_LIST = external
   ```
@@ -3037,13 +3037,13 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
   ```
 
 - <a name="webhook.PROXY_URL" href="#webhook.PROXY_URL">`webhook.PROXY_URL`</a>:
-  Proxy server URL, support `http://`, `https//`, `socks://`, blank will follow environment http_proxy/https_proxy:
+  Proxy server URL, support `http://`, `https//`, `socks://`, blank will follow environment http_proxy/https_proxy.:
   ```ini
   PROXY_URL =
   ```
 
 - <a name="webhook.PROXY_HOSTS" href="#webhook.PROXY_HOSTS">`webhook.PROXY_HOSTS`</a>:
-  Comma separated list of host names requiring proxy. Glob patterns (`*`) are accepted; use `**` to match all hosts:
+  Comma separated list of host names requiring proxy. Glob patterns (`*`) are accepted; use `**` to match all hosts.:
   ```ini
   PROXY_HOSTS =
   ```
@@ -3076,14 +3076,14 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
   - `sendmail`: use the operating system's `sendmail` command instead of SMTP. This is common on Linux systems.
   - `dummy`: send email messages to the log as a testing phase.
   If your provider does not explicitly say which protocol it uses but does provide a port,
-  you can set <a href="#mailer.SMTP_PORT">`SMTP_PORT`</a> instead and this will be inferred:
+  you can set <a href="#mailer.SMTP_PORT">`SMTP_PORT`</a> instead and this will be inferred.:
   ```ini
   PROTOCOL =
   ```
 
 - <a name="mailer.SMTP_ADDR" href="#mailer.SMTP_ADDR">`mailer.SMTP_ADDR`</a>:
   Mail server address, e.g. `smtp.gmail.com`.
-  For `smtp+unix`, this should be a path to a unix socket instead:
+  For `smtp+unix`, this should be a path to a unix socket instead.:
   ```ini
   SMTP_ADDR =
   ```
@@ -3093,7 +3093,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
   - 25:  insecure SMTP
   - 465: SMTP Secure
   - 587: StartTLS
-  If no protocol is specified, it will be inferred by this setting:
+  If no protocol is specified, it will be inferred by this setting.:
   ```ini
   SMTP_PORT =
   ```
@@ -3106,7 +3106,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 
 - <a name="mailer.HELO_HOSTNAME" href="#mailer.HELO_HOSTNAME">`mailer.HELO_HOSTNAME`</a>:
   Custom hostname for HELO operation.
-  If no value is provided, one is retrieved from system:
+  If no value is provided, one is retrieved from system.:
   ```ini
   HELO_HOSTNAME =
   ```
@@ -3114,7 +3114,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 - <a name="mailer.FORCE_TRUST_SERVER_CERT" href="#mailer.FORCE_TRUST_SERVER_CERT">`mailer.FORCE_TRUST_SERVER_CERT`</a>:
   If set to `true`, completely ignores server certificate validation errors.
   This option is unsafe.
-  Consider adding the certificate to the system trust store instead:
+  Consider adding the certificate to the system trust store instead.:
   ```ini
   FORCE_TRUST_SERVER_CERT = false
   ```
@@ -3136,7 +3136,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
   ```
 
 - <a name="mailer.FROM" href="#mailer.FROM">`mailer.FROM`</a>:
-  Mail from address, RFC 5322. This can be just an email address, or the `"Name" <email@example.com>` format:
+  Mail from address, RFC 5322. This can be just an email address, or the `"Name" <email@example.com>` format.:
   ```ini
   FROM =
   ```
@@ -3144,7 +3144,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 - <a name="mailer.ENVELOPE_FROM" href="#mailer.ENVELOPE_FROM">`mailer.ENVELOPE_FROM`</a>:
   Sometimes it is helpful to use a different address on the envelope.
   Set this to use <a href="#mailer.ENVELOPE_FROM">`ENVELOPE_FROM`</a> as the from on the envelope.
-  Set to `<>` to send an empty address:
+  Set to `<>` to send an empty address.:
   ```ini
   ENVELOPE_FROM =
   ```
@@ -3152,7 +3152,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 - <a name="mailer.FROM_DISPLAY_NAME_FORMAT" href="#mailer.FROM_DISPLAY_NAME_FORMAT">`mailer.FROM_DISPLAY_NAME_FORMAT`</a>:
   If Forgejo sends mails on behave of users, it will just use the name also displayed in the WebUI.
   If you want e.g. `Mister X (by ExampleCom) <forgejo@example.com>`, set it to `{{ .DisplayName }} (by {{ .AppName }})`.
-  Available Variables: `.DisplayName`, `.AppName` and `.Domain`:
+  Available Variables: `.DisplayName`, `.AppName` and `.Domain`.:
   ```ini
   FROM_DISPLAY_NAME_FORMAT = {{ .DisplayName }}
   ```
@@ -3164,7 +3164,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
   ```
 
 - <a name="mailer.PASSWD" href="#mailer.PASSWD">`mailer.PASSWD`</a>:
-  Mailer password, if required by provider. Use `` PASSWD = `your password` `` for quoting if you use special characters in the password:
+  Mailer password, if required by provider. Use `` PASSWD = `your password` `` for quoting if you use special characters in the password.:
   ```ini
   PASSWD =
   ```
@@ -3183,7 +3183,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 
 - <a name="mailer.SENDMAIL_ARGS" href="#mailer.SENDMAIL_ARGS">`mailer.SENDMAIL_ARGS`</a>:
   Specify any extra sendmail arguments
-  WARNING: if your sendmail program interprets options you should set this to "--" or terminate these args with "--":
+  WARNING: if your sendmail program interprets options you should set this to "--" or terminate these args with "--".:
   ```ini
   SENDMAIL_ARGS =
   ```
@@ -3209,7 +3209,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
 - <a name="mailer.override_header.Reply-To" href="#mailer.override_header.Reply-To">`mailer.override_header.Reply-To`</a>:
   Reply-To mail addresses.
   Multiple addresses may be specified, separated by comma, e.g. `test@example.com, test2@example.com`.
-  This is empty by default, use it only if you know what you need it for:
+  This is empty by default, use it only if you know what you need it for.:
   ```ini
   Reply-To =
   ```
@@ -3337,7 +3337,7 @@ Define allowed algorithms and their minimum key length (use -1 to disable a type
   ```
 
 ### <a name="cache.last_commit" href="#cache.last_commit">Cache last commit</a>
-Last commit cache:
+Last commit cache
 
 ```ini
 [cache.last_commit]
@@ -3364,7 +3364,7 @@ Last commit cache:
 
 - <a name="session.PROVIDER" href="#session.PROVIDER">`session.PROVIDER`</a>:
   Session provider. Either `memory`, <a href="#log.file">`file`</a>, `redis`, `db`, `mysql`, `couchbase`, `memcache` or `postgres`.
-  `db` will reuse the configuration in <a href="#database">`[database]`</a>:
+  `db` will reuse the configuration in <a href="#database">`[database]`</a>.:
   ```ini
   PROVIDER = memory
   ```
@@ -3501,7 +3501,7 @@ Last commit cache:
   ```
 
 - <a name="attachment.ALLOWED_TYPES" href="#attachment.ALLOWED_TYPES">`attachment.ALLOWED_TYPES`</a>:
-  Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types:
+  Comma-separated list of allowed file extensions (`.zip`), mime types (`text/plain`) or wildcard type (`image/*`, `audio/*`, `video/*`). Empty value or `*/*` allows all types.:
   ```ini
   ALLOWED_TYPES = .avif,.cpuprofile,.csv,.dmp,.docx,.fodg,.fodp,.fods,.fodt,.gif,.gz,.jpeg,.jpg,.json,.jsonc,.log,.md,.mov,.mp4,.odf,.odg,.odp,.ods,.odt,.patch,.pdf,.png,.pptx,.svg,.tgz,.txt,.webm,.xls,.xlsx,.zip
   ```
@@ -3527,7 +3527,7 @@ Last commit cache:
 
 - <a name="attachment.SERVE_DIRECT" href="#attachment.SERVE_DIRECT">`attachment.SERVE_DIRECT`</a>:
   Allows the storage driver to redirect to authenticated URLs to serve files directly
-  Currently, only `minio` is supported:
+  Currently, only `minio` is supported.:
   ```ini
   SERVE_DIRECT = false
   ```
@@ -3549,7 +3549,7 @@ Last commit cache:
   Minio access key ID to connect, only available when <a href="#attachment.STORAGE_TYPE">`STORAGE_TYPE`</a> is `minio`.
   If not provided and <a href="#attachment.STORAGE_TYPE">`STORAGE_TYPE`</a> is `minio`, Forgejo will search for credentials in known
   environment variables (<a href="#attachment.MINIO_ACCESS_KEY_ID">`MINIO_ACCESS_KEY_ID`</a>, `AWS_ACCESS_KEY_ID`), credentials files
-  (`~/.mc/config.json`, `~/.aws/credentials`), and EC2 instance metadata:
+  (`~/.mc/config.json`, `~/.aws/credentials`), and EC2 instance metadata.:
   ```ini
   MINIO_ACCESS_KEY_ID =
   ```
@@ -3601,14 +3601,14 @@ Last commit cache:
 - <a name="attachment.MINIO_CHECKSUM_ALGORITHM" href="#attachment.MINIO_CHECKSUM_ALGORITHM">`attachment.MINIO_CHECKSUM_ALGORITHM`</a>:
   Minio checksum algorithm:
   - `default`: for MinIO or AWS S3, or
-  - `md5`: for Cloudflare or Backblaze:
+  - `md5`: for Cloudflare or Backblaze.:
   ```ini
   MINIO_CHECKSUM_ALGORITHM = default
   ```
 
 - <a name="time.DEFAULT_UI_LOCATION" href="#time.DEFAULT_UI_LOCATION">`time.DEFAULT_UI_LOCATION`</a>:
   Location of the UI time display i.e. `Asia/Shanghai`
-  Empty means server's location setting:
+  Empty means server's location setting.:
   ```ini
   DEFAULT_UI_LOCATION =
   ```
@@ -3636,7 +3636,7 @@ Clean up old repository archives.
 Note: ``SCHEDULE`` accept formats
 - Full crontab specs, e.g. `* * * * * ?`
 - Descriptors, e.g. `@midnight`, `@every 1h30m`
-See more: <https://pkg.go.dev/github.com/gogs/cron@v0.0.0-20171120032916-9f6c956d3e14>:
+See more: <https://pkg.go.dev/github.com/gogs/cron@v0.0.0-20171120032916-9f6c956d3e14>
 
 ```ini
 [cron.archive_cleanup]
@@ -3673,7 +3673,7 @@ See more: <https://pkg.go.dev/github.com/gogs/cron@v0.0.0-20171120032916-9f6c956
   ```
 
 ### <a name="cron.update_mirrors" href="#cron.update_mirrors">Cron update mirrors</a>
-Update mirrors:
+Update mirrors
 
 ```ini
 [cron.update_mirrors]
@@ -3717,7 +3717,7 @@ Update mirrors:
   ```
 
 ### <a name="cron.repo_health_check" href="#cron.repo_health_check">Cron repo health check</a>
-Repository health check:
+Repository health check
 
 ```ini
 [cron.repo_health_check]
@@ -3759,7 +3759,7 @@ Repository health check:
   ```
 
 ### <a name="cron.check_repo_stats" href="#cron.check_repo_stats">Cron check repo stats</a>
-Check repository statistics:
+Check repository statistics
 
 ```ini
 [cron.check_repo_stats]
@@ -3819,7 +3819,7 @@ Check repository statistics:
   ```
 
 ### <a name="cron.sync_external_users" href="#cron.sync_external_users">Cron sync external users</a>
-Synchronize external user data (only LDAP user synchronization is supported):
+Synchronize external user data (only LDAP user synchronization is supported)
 
 ```ini
 [cron.sync_external_users]
@@ -3856,7 +3856,7 @@ Synchronize external user data (only LDAP user synchronization is supported):
   ```
 
 ### <a name="cron.cleanup_actions" href="#cron.cleanup_actions">Cron cleanup actions</a>
-Cleanup expired actions assets:
+Cleanup expired actions assets
 
 ```ini
 [cron.cleanup_actions]
@@ -3878,7 +3878,7 @@ Cleanup expired actions assets:
   ```
 
 ### <a name="cron.deleted_branches_cleanup" href="#cron.deleted_branches_cleanup">Cron deleted branches cleanup</a>
-Clean-up deleted branches:
+Clean-up deleted branches
 
 ```ini
 [cron.deleted_branches_cleanup]
@@ -3914,7 +3914,7 @@ Clean-up deleted branches:
   ```
 
 ### <a name="cron.cleanup_hook_task_table" href="#cron.cleanup_hook_task_table">Cron cleanup hook task table</a>
-Cleanup hook_task table:
+Cleanup hook_task table
 
 ```ini
 [cron.cleanup_hook_task_table]
@@ -3957,7 +3957,7 @@ Cleanup hook_task table:
   ```
 
 ### <a name="cron.cleanup_packages" href="#cron.cleanup_packages">Cron cleanup packages</a>
-Cleanup expired packages:
+Cleanup expired packages
 
 ```ini
 [cron.cleanup_packages]
@@ -3994,7 +3994,7 @@ Cleanup expired packages:
   ```
 
 ### <a name="cron.delete_inactive_accounts" href="#cron.delete_inactive_accounts">Cron delete inactive accounts</a>
-Delete all unactivated accounts:
+Delete all unactivated accounts
 
 ```ini
 [cron.delete_inactive_accounts]
@@ -4026,7 +4026,7 @@ Delete all unactivated accounts:
   ```
 
 ### <a name="cron.delete_repo_archives" href="#cron.delete_repo_archives">Cron delete repo archives</a>
-Delete all repository archives:
+Delete all repository archives
 
 ```ini
 [cron.delete_repo_archives]
@@ -4053,7 +4053,7 @@ Delete all repository archives:
   ```
 
 ### <a name="cron.git_gc_repos" href="#cron.git_gc_repos">Cron git gc repos</a>
-Garbage collect all repositories:
+Garbage collect all repositories
 
 ```ini
 [cron.git_gc_repos]
@@ -4092,7 +4092,7 @@ Garbage collect all repositories:
   ```
 
 ### <a name="cron.resync_all_sshkeys" href="#cron.resync_all_sshkeys">Cron resync all sshkeys</a>
-Update the '.ssh/authorized_keys' file with Forgejo SSH keys:
+Update the '.ssh/authorized_keys' file with Forgejo SSH keys
 
 ```ini
 [cron.resync_all_sshkeys]
@@ -4119,7 +4119,7 @@ Update the '.ssh/authorized_keys' file with Forgejo SSH keys:
   ```
 
 ### <a name="cron.resync_all_hooks" href="#cron.resync_all_hooks">Cron resync all hooks</a>
-Resynchronize pre-receive, update and post-receive hooks of all repositories:
+Resynchronize pre-receive, update and post-receive hooks of all repositories
 
 ```ini
 [cron.resync_all_hooks]
@@ -4146,7 +4146,7 @@ Resynchronize pre-receive, update and post-receive hooks of all repositories:
   ```
 
 ### <a name="cron.reinit_missing_repos" href="#cron.reinit_missing_repos">Cron reinit missing repos</a>
-Reinitialize all missing Git repositories for which records exist:
+Reinitialize all missing Git repositories for which records exist
 
 ```ini
 [cron.reinit_missing_repos]
@@ -4173,7 +4173,7 @@ Reinitialize all missing Git repositories for which records exist:
   ```
 
 ### <a name="cron.delete_missing_repos" href="#cron.delete_missing_repos">Cron delete missing repos</a>
-Delete all repositories missing their Git files:
+Delete all repositories missing their Git files
 
 ```ini
 [cron.delete_missing_repos]
@@ -4200,7 +4200,7 @@ Delete all repositories missing their Git files:
   ```
 
 ### <a name="cron.delete_generated_repository_avatars" href="#cron.delete_generated_repository_avatars">Cron delete generated repository avatars</a>
-Delete generated repository avatars:
+Delete generated repository avatars
 
 ```ini
 [cron.delete_generated_repository_avatars]
@@ -4227,7 +4227,7 @@ Delete generated repository avatars:
   ```
 
 ### <a name="cron.delete_old_actions" href="#cron.delete_old_actions">Cron delete old actions</a>
-Delete all old activities from database:
+Delete all old activities from database
 
 ```ini
 [cron.delete_old_actions]
@@ -4259,7 +4259,7 @@ Delete all old activities from database:
   ```
 
 ### <a name="cron.update_checker" href="#cron.update_checker">Cron update checker</a>
-Check for new Forgejo versions:
+Check for new Forgejo versions
 
 ```ini
 [cron.update_checker]
@@ -4296,7 +4296,7 @@ Check for new Forgejo versions:
   ```
 
 ### <a name="cron.delete_old_system_notices" href="#cron.delete_old_system_notices">Cron delete old system notices</a>
-Delete all old system notices from database:
+Delete all old system notices from database
 
 ```ini
 [cron.delete_old_system_notices]
@@ -4328,7 +4328,7 @@ Delete all old system notices from database:
   ```
 
 ### <a name="cron.gc_lfs" href="#cron.gc_lfs">Cron gc lfs</a>
-Garbage collect LFS pointers in repositories:
+Garbage collect LFS pointers in repositories
 
 ```ini
 [cron.gc_lfs]
@@ -4466,7 +4466,7 @@ Garbage collect LFS pointers in repositories:
 
 ## <a name="other" href="#other">Other</a>
 Extension mapping to highlight class
-e.g. .toml=ini:
+e.g. .toml=ini
 
 ```ini
 [other]
@@ -4523,7 +4523,7 @@ e.g. .toml=ini:
 ### <a name="markup.sanitizer.1" href="#markup.sanitizer.1">Markup sanitizer</a>
 This section can appear multiple times by adding a unique alphanumeric suffix to define multiple rules.
 e.g., <a href="#markup.sanitizer.1">`[markup.sanitizer.1]`</a> -> `[markup.sanitizer.2]` -> `[markup.sanitizer.TeX]`
-The following keys can appear once to define a sanitation policy rule:
+The following keys can appear once to define a sanitation policy rule.
 
 ```ini
 [markup.sanitizer.1]
@@ -4548,7 +4548,7 @@ The following keys can appear once to define a sanitation policy rule:
 Other markup formats e.g. <a href="#markup.asciidoc">`asciidoc`</a>
 uncomment and enable the below section.
 (You can add other markup formats by copying the section and adjusting
-the section name suffix <a href="#markup.asciidoc">`asciidoc`</a> to something else.):
+the section name suffix <a href="#markup.asciidoc">`asciidoc`</a> to something else.)
 
 ```ini
 [markup.asciidoc]
@@ -4695,7 +4695,7 @@ the section name suffix <a href="#markup.asciidoc">`asciidoc`</a> to something e
 
 - <a name="federation.ALGORITHMS" href="#federation.ALGORITHMS">`federation.ALGORITHMS`</a>:
   HTTP signature algorithms.
-  WARNING: Changing the settings below can break federation:
+  WARNING: Changing the settings below can break federation.:
   ```ini
   ALGORITHMS = rsa-sha256, rsa-sha512, ed25519
   ```
@@ -4892,7 +4892,7 @@ the section name suffix <a href="#markup.asciidoc">`asciidoc`</a> to something e
   ```
 
 ## <a name="storage" href="#storage">Storage</a>
-default storage for attachments, lfs and avatars:
+default storage for attachments, lfs and avatars
 
 ```ini
 [storage]
@@ -4905,7 +4905,7 @@ default storage for attachments, lfs and avatars:
   ```
 
 ### <a name="storage.repo-archive" href="#storage.repo-archive">Storage repo archive</a>
-settings for repository archives, will override storage setting:
+settings for repository archives, will override storage setting
 
 ```ini
 [storage.repo-archive]
@@ -4918,7 +4918,7 @@ settings for repository archives, will override storage setting:
   ```
 
 ### <a name="storage.packages" href="#storage.packages">Storage packages</a>
-settings for packages, will override storage setting:
+settings for packages, will override storage setting
 
 ```ini
 [storage.packages]
@@ -4931,7 +4931,7 @@ settings for packages, will override storage setting:
   ```
 
 ### <a name="storage.my_minio" href="#storage.my_minio">Storage my minio</a>
-customize storage:
+customize storage
 
 ```ini
 [storage.my_minio]
@@ -4996,7 +4996,7 @@ customize storage:
   ```
 
 ### <a name="storage.actions_log" href="#storage.actions_log">Storage actions log</a>
-settings for action logs, will override storage setting:
+settings for action logs, will override storage setting
 
 ```ini
 [storage.actions_log]
@@ -5009,7 +5009,7 @@ settings for action logs, will override storage setting:
   ```
 
 ### <a name="storage.actions_artifacts" href="#storage.actions_artifacts">Storage actions artifacts</a>
-settings for action artifacts, will override storage setting:
+settings for action artifacts, will override storage setting
 
 ```ini
 [storage.actions_artifacts]
@@ -5022,7 +5022,7 @@ settings for action artifacts, will override storage setting:
   ```
 
 ## <a name="repo-archive" href="#repo-archive">Repo archive</a>
-repo-archive storage will override storage:
+repo-archive storage will override storage
 
 ```ini
 [repo-archive]
@@ -5046,7 +5046,7 @@ repo-archive storage will override storage:
   ```
 
 ## <a name="lfs" href="#lfs">Lfs</a>
-lfs storage will override storage:
+lfs storage will override storage
 
 ```ini
 [lfs]
@@ -5070,7 +5070,7 @@ lfs storage will override storage:
   ```
 
 ## <a name="lfs_client" href="#lfs_client">Lfs client</a>
-settings for Forgejo's LFS client (eg: mirroring an upstream lfs endpoint):
+settings for Forgejo's LFS client (eg: mirroring an upstream lfs endpoint)
 
 ```ini
 [lfs_client]

@@ -406,7 +406,7 @@ swagger-validate:
 
 .PHONY: generate-config
 generate-config:
-	python tools/make-generate-config.py
+	python tools/generate-config.py
 
 .PHONY: checks
 checks: checks-frontend checks-backend

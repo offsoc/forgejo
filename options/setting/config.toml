@@ -407,7 +407,7 @@ The configuration options and their default values depend on the database to be 
   ```
 - Postgres configuration
   ```ini
-  ;DB_TYPE = postgres
+  DB_TYPE = postgres
   ;HOST = 127.0.0.1:5432 ; can use socket e.g. /var/run/postgresql/
   ;NAME = gitea
   ;USER = root

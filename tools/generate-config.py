@@ -29,7 +29,7 @@ def convert_to_ini(t, key=None, section=None, file=None):
             _print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
     if is_section:
         if section is not None:
-            _print(f'[{section}]')
+            _print(f';[{section}]')
         _print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
         for k, _t in t.items():
             if type(_t) is not dict:
@@ -55,7 +55,7 @@ def convert_to_md(t, key=None, keys=[], headingNum=1,
     description = t.get('description')
     section = '.'.join(keys)
     if description:
-        description = description.strip('\n\r .:')
+        description = description.strip()
         if '## Default configuration' in description:
             for v in CONF_VARIABLES:
                 description = description.replace(f'\n- _`{v}`_',
@@ -66,11 +66,12 @@ def convert_to_md(t, key=None, keys=[], headingNum=1,
                 description = description.replace(f'`[{variable}]`', f'<a href="#{anchor}">`[{variable}]`</a>')
     if is_section:
         if key is not None and len(t) > 1:
-            if (heading := t.get('heading')) is None:
+            heading = t.get('heading')
+            if heading is None:
                 heading = section.replace('-', ' ').replace('_', ' ').replace('.', ' ').capitalize()
             _print(f'\n{"#" * headingNum} <a name="{section}" href="#{section}">{heading}</a>')
             if description:
-                _print(f"{description}:")
+                _print(description)
             _print(f"\n```ini\n[{section}]\n```")
         elif description:
             _print(description)
