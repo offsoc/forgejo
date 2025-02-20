@@ -365,7 +365,7 @@ func RepoRefForAPI(next http.Handler) http.Handler {
 		ctx := GetAPIContext(req)
 
 		if ctx.Repo.GitRepo == nil {
-			ctx.InternalServerError(fmt.Errorf("no open git repo"))
+			ctx.NotFound(fmt.Errorf("no open git repo"))
 			return
 		}
 
