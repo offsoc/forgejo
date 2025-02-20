@@ -14,6 +14,7 @@ import wc from 'eslint-plugin-wc';
 import globals from 'globals';
 import vue from 'eslint-plugin-vue';
 import vueScopedCss from 'eslint-plugin-vue-scoped-css';
+import toml from 'eslint-plugin-toml';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
@@ -35,6 +36,7 @@ export default tseslint.config(
       sonarjs,
       unicorn,
       playwright,
+      toml,
       'vitest-globals': vitestGlobals,
       vue,
       'vue-scoped-css': vueScopedCss,
@@ -1166,5 +1168,5 @@ export default tseslint.config(
       'vue-scoped-css/enforce-style-type': [0],
     },
   },
-
+  ...toml.configs['flat/recommended'],
 );

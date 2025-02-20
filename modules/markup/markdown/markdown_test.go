@@ -471,7 +471,7 @@ func TestColorPreview(t *testing.T) {
 		// no backticks
 		"rgb(166, 32, 64)",
 		// typo
-		"`hsI(0, 100%, 50%)`", // codespell-ignore
+		"`hsI(0, 100%, 50%)`", // codespell:ignore
 		// looks like a color but not really
 		"`hsl(40, 60, 80)`",
 	}

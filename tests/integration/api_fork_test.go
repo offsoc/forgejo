@@ -123,7 +123,7 @@ func TestAPIForkListPrivateRepo(t *testing.T) {
 	}).AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusAccepted)
 
-	t.Run("Anomynous", func(t *testing.T) {
+	t.Run("Anonymous", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		req := NewRequest(t, "GET", "/api/v1/repos/user2/repo1/forks")
