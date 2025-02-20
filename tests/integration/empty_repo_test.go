@@ -136,3 +136,21 @@ func TestEmptyRepoAddFileByAPI(t *testing.T) {
 	DecodeJSON(t, resp, &apiRepo)
 	assert.Equal(t, "new_branch", apiRepo.DefaultBranch)
 }
+
+func TestEmptyRepoRawAPIRequestsReturn404(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	session := loginUser(t, "user30")
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadRepository)
+	req := NewRequest(t, "GET", "/api/v1/repos/user30/empty/raw/main/something").AddTokenAuth(token)
+	_ = session.MakeRequest(t, req, http.StatusNotFound)
+}
+
+func TestEmptyRepoMediaAPIRequestsReturn404(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	session := loginUser(t, "user30")
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadRepository)
+	req := NewRequest(t, "GET", "/api/v1/repos/user30/empty/media/main/something").AddTokenAuth(token)
+	_ = session.MakeRequest(t, req, http.StatusNotFound)
+}
