@@ -1260,7 +1260,11 @@ func NewIssuePost(ctx *context.Context) {
 
 	if err := issue_service.NewIssue(ctx, repo, issue, labelIDs, attachments, assigneeIDs); err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.JSONError(ctx.Tr("repo.issues.blocked_by_user"))
+			if issue.IsPull {
+				ctx.JSONError(ctx.Tr("repo.pulls.blocked_by_user"))
+			} else {
+				ctx.JSONError(ctx.Tr("repo.issues.blocked_by_user"))
+			}
 			return
 		} else if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) {
 			ctx.Error(http.StatusBadRequest, "UserDoesNotHaveAccessToRepo", err.Error())
@@ -2081,6 +2085,7 @@ func ViewIssue(ctx *context.Context) {
 	ctx.Data["OpenGraphDescription"] = issue.Content
 	ctx.Data["OpenGraphImageURL"] = issue.SummaryCardURL()
 	ctx.Data["OpenGraphImageAltText"] = ctx.Tr("repo.issues.summary_card_alt", issue.Title, issue.Repo.FullName())
+	ctx.Data["IsBlocked"] = ctx.Doer != nil && user_model.IsBlockedMultiple(ctx, []int64{issue.PosterID, issue.Repo.OwnerID}, ctx.Doer.ID)
 
 	prepareHiddenCommentType(ctx)
 	if ctx.Written() {
@@ -3199,6 +3204,15 @@ func NewComment(ctx *context.Context) {
 			} else {
 				isClosed := form.Status == "close"
 				if err := issue_service.ChangeStatus(ctx, issue, ctx.Doer, "", isClosed); err != nil {
+					if errors.Is(err, user_model.ErrBlockedByUser) {
+						if issue.IsPull {
+							ctx.JSONError(ctx.Tr("repo.pulls.blocked_by_user"))
+						} else {
+							ctx.JSONError(ctx.Tr("repo.issues.blocked_by_user"))
+						}
+						return
+					}
+
 					log.Error("ChangeStatus: %v", err)
 
 					if issues_model.IsErrDependenciesLeft(err) {
@@ -3240,7 +3254,11 @@ func NewComment(ctx *context.Context) {
 	comment, err := issue_service.CreateIssueComment(ctx, ctx.Doer, ctx.Repo.Repository, issue, form.Content, attachments)
 	if err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.JSONError(ctx.Tr("repo.issues.comment.blocked_by_user"))
+			if issue.IsPull {
+				ctx.JSONError(ctx.Tr("repo.pulls.comment.blocked_by_user"))
+			} else {
+				ctx.JSONError(ctx.Tr("repo.issues.comment.blocked_by_user"))
+			}
 		} else {
 			ctx.ServerError("CreateIssueComment", err)
 		}
