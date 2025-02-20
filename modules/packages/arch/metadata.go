@@ -7,6 +7,7 @@ import (
 	"archive/tar"
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -19,7 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
 
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archives"
 )
 
 // Arch Linux Packages
@@ -109,55 +110,61 @@ func ParsePackage(r *packages.HashedBuffer) (*Package, error) {
 		return nil, err
 	}
 
-	var tarball archiver.Reader
+	var tarball archives.Extractor
 	var tarballType string
 	if bytes.Equal(header[:len(magicZSTD)], magicZSTD) {
 		tarballType = "zst"
-		tarball = archiver.NewTarZstd()
+		tarball = archives.CompressedArchive{
+			Compression: archives.Zstd{},
+			Extraction:  archives.Tar{},
+		}
 	} else if bytes.Equal(header[:len(magicXZ)], magicXZ) {
 		tarballType = "xz"
-		tarball = archiver.NewTarXz()
+		tarball = archives.CompressedArchive{
+			Compression: archives.Xz{},
+			Extraction:  archives.Tar{},
+		}
 	} else if bytes.Equal(header[:len(magicGZ)], magicGZ) {
 		tarballType = "gz"
-		tarball = archiver.NewTarGz()
+		tarball = archives.CompressedArchive{
+			Compression: archives.Gz{},
+			Extraction:  archives.Tar{},
+		}
 	} else {
 		return nil, errors.New("not supported compression")
 	}
-	err = tarball.Open(r, 0)
-	if err != nil {
-		return nil, err
-	}
-	defer tarball.Close()
 
 	var pkg *Package
 	var mTree bool
 
 	files := make([]string, 0)
 
-	for {
-		f, err := tarball.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
+	err = tarball.Extract(context.TODO(), r, func(ctx context.Context, file archives.FileInfo) error {
 		// ref:https://gitlab.archlinux.org/pacman/pacman/-/blob/91546004903eea5d5267d59898a6029ba1d64031/lib/libalpm/add.c#L529-L533
-		if !strings.HasPrefix(f.Name(), ".") {
-			files = append(files, (f.Header.(*tar.Header)).Name)
+		if !strings.HasPrefix(file.Name(), ".") {
+			files = append(files, (file.Header.(*tar.Header)).Name)
 		}
 
-		switch f.Name() {
+		switch file.Name() {
 		case ".PKGINFO":
+			f, err := file.Open()
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
 			pkg, err = ParsePackageInfo(tarballType, f)
 			if err != nil {
-				_ = f.Close()
-				return nil, err
+				return err
 			}
 		case ".MTREE":
 			mTree = true
 		}
-		_ = f.Close()
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	if pkg == nil {

@@ -42,9 +42,6 @@ arch = x86_64
 	pinf, err := fs.Stat("pkginfo")
 	require.NoError(t, err)
 
-	pfile, err := fs.Open("pkginfo")
-	require.NoError(t, err)
-
 	parcname, err := archiver.NameInArchive(pinf, ".PKGINFO", ".PKGINFO")
 	require.NoError(t, err)
 
@@ -52,17 +49,20 @@ arch = x86_64
 	minf, err := fs.Stat("mtree")
 	require.NoError(t, err)
 
-	mfile, err := fs.Open("mtree")
-	require.NoError(t, err)
-
 	marcname, err := archiver.NameInArchive(minf, ".MTREE", ".MTREE")
 	require.NoError(t, err)
 
-	t.Run("normal archive", func(t *testing.T) {
+	t.Run("normal zst archive", func(t *testing.T) {
 		var buf bytes.Buffer
 
 		archive := archiver.NewTarZstd()
 		archive.Create(&buf)
+
+		pfile, err := fs.Open("pkginfo")
+		require.NoError(t, err)
+
+		mfile, err := fs.Open("mtree")
+		require.NoError(t, err)
 
 		err = archive.Write(archiver.File{
 			FileInfo: archiver.FileInfo{
@@ -83,11 +83,103 @@ arch = x86_64
 		require.NoError(t, errors.Join(mfile.Close(), archive.Close(), err))
 
 		reader, err := packages.CreateHashedBufferFromReader(&buf)
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 		defer reader.Close()
-		_, err = ParsePackage(reader)
+		pkg, err := ParsePackage(reader)
+
+		require.Equal(t, "zst", pkg.CompressType)
+		require.Equal(t, "a", pkg.Name)
+		require.Equal(t, "b", pkg.VersionMetadata.Base)
+		require.Equal(t, "x86_64", pkg.FileMetadata.Arch)
+		require.Equal(t, "1-2", pkg.Version)
+
+		require.NoError(t, err)
+	})
+
+	t.Run("normal xz archive", func(t *testing.T) {
+		var buf bytes.Buffer
+
+		archive := archiver.NewTarXz()
+		archive.Create(&buf)
+
+		pfile, err := fs.Open("pkginfo")
+		require.NoError(t, err)
+
+		mfile, err := fs.Open("mtree")
+		require.NoError(t, err)
+
+		err = archive.Write(archiver.File{
+			FileInfo: archiver.FileInfo{
+				FileInfo:   pinf,
+				CustomName: parcname,
+			},
+			ReadCloser: pfile,
+		})
+		require.NoError(t, errors.Join(pfile.Close(), err))
+
+		err = archive.Write(archiver.File{
+			FileInfo: archiver.FileInfo{
+				FileInfo:   minf,
+				CustomName: marcname,
+			},
+			ReadCloser: mfile,
+		})
+		require.NoError(t, errors.Join(mfile.Close(), archive.Close(), err))
+
+		reader, err := packages.CreateHashedBufferFromReader(&buf)
+		require.NoError(t, err)
+		defer reader.Close()
+		pkg, err := ParsePackage(reader)
+
+		require.Equal(t, "xz", pkg.CompressType)
+		require.Equal(t, "a", pkg.Name)
+		require.Equal(t, "b", pkg.VersionMetadata.Base)
+		require.Equal(t, "x86_64", pkg.FileMetadata.Arch)
+		require.Equal(t, "1-2", pkg.Version)
+
+		require.NoError(t, err)
+	})
+
+	t.Run("normal gz archive", func(t *testing.T) {
+		var buf bytes.Buffer
+
+		archive := archiver.NewTarGz()
+		archive.Create(&buf)
+
+		pfile, err := fs.Open("pkginfo")
+		require.NoError(t, err)
+
+		mfile, err := fs.Open("mtree")
+		require.NoError(t, err)
+
+		err = archive.Write(archiver.File{
+			FileInfo: archiver.FileInfo{
+				FileInfo:   pinf,
+				CustomName: parcname,
+			},
+			ReadCloser: pfile,
+		})
+		require.NoError(t, errors.Join(pfile.Close(), err))
+
+		err = archive.Write(archiver.File{
+			FileInfo: archiver.FileInfo{
+				FileInfo:   minf,
+				CustomName: marcname,
+			},
+			ReadCloser: mfile,
+		})
+		require.NoError(t, errors.Join(mfile.Close(), archive.Close(), err))
+
+		reader, err := packages.CreateHashedBufferFromReader(&buf)
+		require.NoError(t, err)
+		defer reader.Close()
+		pkg, err := ParsePackage(reader)
+
+		require.Equal(t, "gz", pkg.CompressType)
+		require.Equal(t, "a", pkg.Name)
+		require.Equal(t, "b", pkg.VersionMetadata.Base)
+		require.Equal(t, "x86_64", pkg.FileMetadata.Arch)
+		require.Equal(t, "1-2", pkg.Version)
 
 		require.NoError(t, err)
 	})
