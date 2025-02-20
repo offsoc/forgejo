@@ -47,7 +47,7 @@ require (
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/go-ldap/ldap/v3 v3.4.6
 	github.com/go-openapi/spec v0.20.14
-	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-sql-driver/mysql v1.9.0
 	github.com/go-testfixtures/testfixtures/v3 v3.14.0
 	github.com/go-webauthn/webauthn v0.11.2
 	github.com/gobwas/glob v0.2.3
