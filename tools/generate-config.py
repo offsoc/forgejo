@@ -1,9 +1,9 @@
 # Copyright 2025 The Forgejo Authors c/o Codeberg e.V. All rights reserved.
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import json
 import sys
 import tomllib
-import json
 
 jsonEncoder = json.JSONEncoder()
 
@@ -24,7 +24,7 @@ def convert_to_ini(t, key=None, section=None, file=None):
     if is_section:
         _print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
     if description:
-        _print(f";; {description.strip('\n').replace('\n', '\n;; ')}")
+        _print(f";; {description.strip('\n').replace('\n', '\n;; ').replace(' \n', '\n')}")
         if is_section:
             _print(';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;')
     if is_section:
@@ -62,7 +62,8 @@ def convert_to_md(t, key=None, keys=[], headingNum=1,
                         f'\n- <a name="{v}" href="#{v}">_`{v}`_</a>')
         else:
             for variable, anchor in anchors.items():
-                description = description.replace(f'`{variable}`', f'<a href="#{anchor}">`{variable}`</a>')
+                if not anchor.lower() == anchor:
+                    description = description.replace(f'`{variable}`', f'<a href="#{anchor}">`{variable}`</a>')
                 description = description.replace(f'`[{variable}]`', f'<a href="#{anchor}">`[{variable}]`</a>')
     if is_section:
         if key is not None and len(t) > 1:
@@ -71,7 +72,7 @@ def convert_to_md(t, key=None, keys=[], headingNum=1,
                 heading = section.replace('-', ' ').replace('_', ' ').replace('.', ' ').capitalize()
             _print(f'\n{"#" * headingNum} <a name="{section}" href="#{section}">{heading}</a>')
             if description:
-                _print(description)
+                _print(f'\n{description}')
             _print(f"\n```ini\n[{section}]\n```")
         elif description:
             _print(description)
@@ -91,9 +92,9 @@ def convert_to_md(t, key=None, keys=[], headingNum=1,
     else:
         _print(f'\n- <a name="{section}" href="#{section}">`{section}`</a>:')
         if description:
-            _print(f"  {'\n  '.join(description.split('\n'))}:")
+            _print(f"  {'\n  '.join(description.split('\n'))}".replace('  \n', '\n'))
         default = t.get('default')
-        _print(f'  ```ini\n  {format_key_value(key, default)}\n  ```')
+        _print(f'\n  ```ini\n  {format_key_value(key, default)}\n  ```')
 
 
 if __name__ == '__main__':

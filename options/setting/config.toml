@@ -28,7 +28,8 @@ These values are environment-dependent but form the basis of a lot of values. Th
 - _`AppPath`_: This is the absolute path of the running `forgejo` binary.
 
 - _`AppWorkPath`_: This refers to "working path" of the `forgejo` binary. It is determined by using the first set thing in the following hierarchy:
-  1. The `WORK_PATH` option in "app.ini" file
+
+  1. The `WORK_PATH` option in `app.ini` file
   2. The `--work-path` flag passed to the binary
   3. The environment variable `$FORGEJO_WORK_DIR`
   4. The environment variable `$GITEA_WORK_DIR`
@@ -38,6 +39,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
   If any of the above are relative paths then they are made absolute against the directory of the _`AppPath`_.
 
 - _`CustomPath`_: This is the base directory for custom templates and other options. It is determined by using the first set thing in the following hierarchy:
+
   1. The `--custom-path` flag passed to the binary
   2. The environment variable `$FORGEJO_CUSTOM`
   3. The environment variable `$GITEA_CUSTOM`
@@ -47,6 +49,7 @@ These values are environment-dependent but form the basis of a lot of values. Th
   If any of the above are relative paths then they are made absolute against the directory of the _`AppWorkPath`_.
 
 - _`CustomConf`_: This is the path to the `app.ini` file.
+
   1. The `--config` flag passed to the binary
   2. A built-in value set at build time (see building from source)
   3. Otherwise it defaults to _`CustomPath`_`/conf/app.ini`
@@ -59,10 +62,9 @@ These values are environment-dependent but form the basis of a lot of values. Th
 '''
 
 [APP_NAME]
-default = 'Forgejo'
+default = 'Forgejo: Beyond coding. We Forge.'
 description = 'Application name that is shown in every page title'
 [APP_SLOGAN]
-default = 'Beyond coding. We Forge.'
 description = 'Slogan that is shown near the `APP_NAME` in every page title'
 [APP_DISPLAY_NAME_FORMAT]
 default = '{APP_NAME}: {APP_SLOGAN}'
@@ -71,13 +73,17 @@ description = 'Format how the application display name presented in every page t
 description = 'Operating system user name that is running Forgejo. If it is omitted it will be automatically detected as the current user.'
 [RUN_MODE]
 default = 'prod'
-description = 'Application run mode, which affects performance and debugging: `"dev"` or `"prod"`. Mode `"dev"` makes Forgejo easier to develop and debug, values other than `"dev"` are treated as `"prod"` which is for production use.'
-[WORK_PATH]
-description = 'Path of the working directory. It sets the _`AppWorkPath`_ variable and may also be specified by the command line argument `--work-path` or an environment variable, `GITEA_WORK_DIR`, and defaults to the path of the Forgejo binary.'
+description = '''
+Application run mode, which affects performance and debugging: `dev` or `prod`.
 
+- Mode `dev` makes Forgejo easier to develop and debug.
+- Values other than `dev` are treated as `prod` which is for production use.
+'''
+[WORK_PATH]
+description = 'Path of the working directory. It sets the _`AppWorkPath`_ variable.'
 [server.PROTOCOL]
 default = 'http'
-description = 'Protocol the server listens on. Must be one of `"http"`, `"https"`, `"http+unix"`, `"fcgi"` or `"fcgi+unix"`. Note: the value must be lowercase.'
+description = 'Protocol the server listens on. Must be one of `http`, `https`, `http+unix`, `fcgi` or `fcgi+unix`. Note: the value must be lowercase.'
 [server.USE_PROXY_PROTOCOL]
 default = false
 description = 'Expect PROXY protocol headers on connections'
@@ -102,17 +108,17 @@ description = 'Prefix of the static URL. If omitted it will follow the prefix of
 default = '0.0.0.0'
 description = '''
 Address to listen on. Either a IPv4/IPv6 address or the path to a unix socket.
-If `PROTOCOL` is set to `"http+unix"` or `"fcgi+unix"`, this should be the name of the Unix socket file to use.
+If `PROTOCOL` is set to `http+unix` or `fcgi+unix`, this should be the name of the Unix socket file to use.
 Relative paths will be made absolute against the _`AppWorkPath`_.
 '''
 [server.HTTP_PORT]
-default = 3000
+default = '3000'
 description = 'HTTP port to listen on. It should be left empty when using a unix socket.'
 [server.REDIRECT_OTHER_PORT]
 default = false
-description = 'Redirect to other port. If `true` and `PROTOCOL` is `"https"` an HTTP server will be started on `PORT_TO_REDIRECT` and it will redirect plain, non-secure HTTP requests to the main `ROOT_URL`.'
+description = 'Redirect to other port. If `true` and `PROTOCOL` is `https` an HTTP server will be started on `PORT_TO_REDIRECT` and it will redirect plain, non-secure HTTP requests to the main `ROOT_URL`.'
 [server.PORT_TO_REDIRECT]
-default = 80
+default = '80'
 description = 'Port to redirect if `REDIRECT_OTHER_PORT` is `true`'
 [server.REDIRECTOR_USE_PROXY_PROTOCOL]
 default = '%(USE_PROXY_PROTOCOL)s'
@@ -126,13 +132,13 @@ description = 'Maximum supported TLS version'
 default = 'X25519,P256'
 description = 'Preferences for the SSL curve algorithms'
 [server.SSL_CIPHER_SUITES]
-description = 'SSL Cipher Suites. It defaults to `"ecdhe_ecdsa_with_aes_256_gcm_sha384,ecdhe_rsa_with_aes_256_gcm_sha384,ecdhe_ecdsa_with_aes_128_gcm_sha256,ecdhe_rsa_with_aes_128_gcm_sha256,ecdhe_ecdsa_with_chacha20_poly1305,ecdhe_rsa_with_chacha20_poly1305"` if AES is supported by hardware, otherwise `"chacha"` will be first.'
+description = 'SSL Cipher Suites. It defaults to `ecdhe_ecdsa_with_aes_256_gcm_sha384,ecdhe_rsa_with_aes_256_gcm_sha384,ecdhe_ecdsa_with_aes_128_gcm_sha256,ecdhe_rsa_with_aes_128_gcm_sha256,ecdhe_ecdsa_with_chacha20_poly1305,ecdhe_rsa_with_chacha20_poly1305` if AES is supported by hardware, otherwise `chacha` will be first.'
 [server.PER_WRITE_TIMEOUT]
 default = '30s'
-description = 'Timeout for any write connection. If `-1`, all timeouts are disabled. Formatted as strings such as `"30s"`.'
+description = 'Timeout for any write connection. If `-1`, all timeouts are disabled. Formatted as strings such as `30s`.'
 [server.PER_WRITE_PER_KB_TIMEOUT]
-default = '30s'
-description = 'Timeout per kB written to any write connection. Formatted as strings such as `"30s"`.'
+default = '10s'
+description = 'Timeout per kB written to any write connection. Formatted as strings such as `10s`.'
 [server.UNIX_SOCKET_PERMISSION]
 default = 666
 description = 'Permission for unix socket as octal mode (see `chmod --help`)'
@@ -142,14 +148,15 @@ Local (DMZ) URL for Forgejo workers (such as SSH update) accessing web service.
 In most cases you do not need to change the default value.
 Alter it only if your SSH server node is not the same as HTTP node.
 For different protocols, the default values are different.
-- If `PROTOCOL` is `"http+unix"`, the default value is `"http://unix/"`.
-- If `PROTOCOL` is `"fcgi"` or `"fcgi+unix"`, the default value is `"%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/"`.
-- If listen on `"0.0.0.0"`, the default value is `"%(PROTOCOL)s://localhost:%(HTTP_PORT)s/"`.
-- Otherwise the default value is `"%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/"`.
+
+- If `PROTOCOL` is `http+unix`, the default value is `http://unix/`.
+- If `PROTOCOL` is `fcgi` or `fcgi+unix`, the default value is `%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/`.
+- If listen on `0.0.0.0`, the default value is `%(PROTOCOL)s://localhost:%(HTTP_PORT)s/`.
+- Otherwise the default value is `%(PROTOCOL)s://%(HTTP_ADDR)s:%(HTTP_PORT)s/`.
 '''
 [server.LOCAL_USE_PROXY_PROTOCOL]
 default = '%(USE_PROXY_PROTOCOL)s'
-description = 'xpect PROXY protocol header when making local connections. If omitted, then it is the value of `USE_PROXY_PROTOCOL`.'
+description = 'Expect PROXY protocol header when making local connections. If omitted, then it is the value of `USE_PROXY_PROTOCOL`.'
 [server.DISABLE_SSH]
 default = false
 description = 'Disable SSH'
@@ -177,7 +184,7 @@ description = 'Port number to be exposed in clone URL'
 default = '%(SSH_PORT)s'
 description = 'Port number the builtin SSH server should listen on'
 [server.SSH_ROOT_PATH]
-description = 'Root path of SSH directory, default is `"~/.ssh"`, but you have to use `"/home/git/.ssh"`.'
+description = 'Root path of SSH directory, default is `~/.ssh`, but you have to use `/home/git/.ssh`.'
 [server.SSH_CREATE_AUTHORIZED_KEYS_FILE]
 default = true
 description = '''
@@ -226,11 +233,12 @@ description = 'Enable SSH authorized key backup when rewriting all keys'
 default = 'email, username'
 description = '''
 Allowed SSH principals. Possible values are
-- empty: if SSH_TRUSTED_USER_CA_KEYS is empty this will default to off, otherwise will default to email, username.
-- `"off"`: Do not allow authorized principals
-- `"email"`: the principal must match the user's email
-- `"username"`: the principal must match the user's username
-- `"anything"`: there will be no checking on the content of the principal
+
+- empty: if `SSH_TRUSTED_USER_CA_KEYS` is empty this will default to off, otherwise will default to email, username.
+- `off`: Do not allow authorized principals
+- `email`: the principal must match the user's email
+- `username`: the principal must match the user's username
+- `anything`: there will be no checking on the content of the principal
 '''
 [server.SSH_AUTHORIZED_PRINCIPALS_BACKUP]
 default = true
@@ -238,7 +246,7 @@ description = 'Enable SSH authorized principals backup when rewriting all keys'
 [server.SSH_TRUSTED_USER_CA_KEYS]
 description = '''
 Public keys of certificate authorities that are trusted to sign user certificates for authentication.
-Multiple keys should be comma separated, e.g. `"ssh-<algorithm> <key>"` or `"ssh-<algorithm> <key1>, ssh-<algorithm> <key2>"`.
+Multiple keys should be comma separated, e.g. `ssh-<algorithm> <key>` or `ssh-<algorithm> <key1>, ssh-<algorithm> <key2>`.
 For more information see `TrustedUserCAKeys` in the `sshd_config` manpages.
 '''
 [server.SSH_TRUSTED_USER_CA_KEYS_FILENAME]
@@ -258,14 +266,14 @@ description = 'Command template for authorized keys entries'
 description = '''
 Timeout for any write to ssh connections.
 If `-1`, all timeouts are disabled.
-Formatted as strings such as `"30s"`.
+Formatted as strings such as `30s`.
 If omitted, it is the value of `PER_WRITE_TIMEOUT`.
 '''
 [server.SSH_PER_WRITE_PER_KB_TIMEOUT]
 description = '''
 Timeout per Kb written to ssh connections.
 If `-1`, all timeouts are disabled.
-Formatted as strings such as `"30s"`.
+Formatted as strings such as `30s`.
 If omitted, it is the value of `PER_WRITE_PER_KB_TIMEOUT`.
 '''
 [server.MINIMUM_KEY_SIZE_CHECK]
@@ -273,7 +281,7 @@ default = false
 description = 'Whether to check minimum key size with corresponding type'
 [server.OFFLINE_MODE]
 default = true
-description = 'Disable CDN even in `"prod"` mode (`RUN_MODE`)'
+description = 'Disable CDN even in `prod` mode (`RUN_MODE`)'
 [server.ENABLE_ACME]
 default = false
 description = '''
@@ -282,9 +290,9 @@ TLS Settings: Either ACME or manual
 '''
 [server.ACME_URL]
 description = '''
-ACME automatic TLS settings
-ACME directory URL (e.g. LetsEncrypt's staging/testing URL: https://acme-staging-v02.api.letsencrypt.org/directory)
-Leave empty to default to LetsEncrypt's (production) URL
+ACME automatic TLS settings.
+ACME directory URL (e.g. LetsEncrypt's staging/testing URL: <https://acme-staging-v02.api.letsencrypt.org/directory>)
+Leave empty to default to LetsEncrypt's (production) URL.
 '''
 [server.ACME_ACCEPTTOS]
 default = false
@@ -293,29 +301,40 @@ description = '''Explicitly accept the ACME's TOS. The specific TOS cannot be re
 description = '''If the ACME CA is not in your system's CA trust chain, it can be manually added here'''
 [server.ACME_EMAIL]
 description = '''
-Email used for the ACME registration service
-Can be left blank to initialize at first run and use the cached value
+Email used for the ACME registration service.
+Can be left blank to initialize at first run and use the cached value.
 '''
 [server.ACME_DIRECTORY]
 default = 'https'
 description = '''
-ACME live directory (not to be confused with ACME directory URL: ACME_URL)
+ACME live directory (not to be confused with ACME directory URL: `ACME_URL`).
 (Refer to caddy's ACME manager https://github.com/caddyserver/certmagic)
 '''
 [server.CERT_FILE]
 default = 'https/cert.pem'
 description = '''
-Manual TLS settings: (Only applicable if ENABLE_ACME=false)
-Generate steps:
-$ ./forgejo cert -ca=true -duration=8760h0m0s -host=myhost.example.com
-Or from a .pfx file exported from the Windows certificate store (do
+Certificate file for manual TLS settings, ignored if `ENABLE_ACME` is `true`.
+Steps to generate:
+
+```sh
+./forgejo cert -ca=true -duration=8760h0m0s -host=myhost.example.com
+```
+
+Or from a `.pfx` file exported from the Windows certificate store (do
 not forget to export the private key):
-$ openssl pkcs12 -in cert.pfx -out cert.pem -nokeys
-$ openssl pkcs12 -in cert.pfx -out key.pem -nocerts -nodes
-Paths are relative to CUSTOM_PATH
+
+```sh
+openssl pkcs12 -in cert.pfx -out cert.pem -nokeys
+openssl pkcs12 -in cert.pfx -out key.pem -nocerts -nodes
+```
+
+Paths are relative to _`CustomPath`_.
 '''
 [server.KEY_FILE]
 default = 'https/key.pem'
+description = '''
+Key file for manual TLS settings, ignored if `ENABLE_ACME` is `true`.
+See `CERT_FILE` for generation instructions.'''
 [server.STATIC_ROOT_PATH]
 description = '''
 Root directory containing templates and static files.
@@ -333,33 +352,40 @@ description = 'Enable gzip compression for runtime-generated content, static res
 [server.ENABLE_PPROF]
 default = false
 description = '''
-Application profiling (memory and cpu)
-For "web" command it listens on localhost:6060
-For "serve" command it dumps to disk at PPROF_DATA_PATH as (cpuprofile|memprofile)_<username>_<temporary id>
+Enable application profiling (memory and cpu).
+
+- For `web` command it listens on `localhost:6060`
+- For `serve` command it dumps to disk at `PPROF_DATA_PATH` as `(cpuprofile|memprofile)_<username>_<temporary id>`.
 '''
 [server.PPROF_DATA_PATH]
 default = 'data/tmp/pprof'
 description = '''
-PProf data path, use an absolute path when you start Forgejo as service.'
+Application profiling data path, use an absolute path when you start Forgejo as service.
 Relative paths will be made absolute against the _`AppWorkPath`_.
 '''
 [server.LANDING_PAGE]
 default = 'home'
 description = '''
-Landing page, can be "home", "explore", "organizations", "login", or any URL such as "/org/repo" or even "https://anotherwebsite.com"
-The "login" choice is not a security measure but just a UI flow change, use REQUIRE_SIGNIN_VIEW to force users to log in
+Landing page, can be `home`, `explore`, `organizations`, `login`, or any URL such as `/org/repo` or even `https://example.com`.
+The `login` choice is not a security measure but just a UI flow change, use `REQUIRE_SIGNIN_VIEW` to force users to log in.
 '''
 [server.LFS_START_SERVER]
 default = false
-description = 'Enables git-lfs support. true or false, default is false'
+description = 'Enables `git-lfs` support'
 [server.LFS_JWT_SECRET]
 description = 'LFS authentication secret, change this yourself'
 [server.LFS_JWT_SECRET_URI]
 default = 'file:/etc/gitea/lfs_jwt_secret'
-description = 'Alternative location to specify LFS authentication secret. You cannot specify both this and LFS_JWT_SECRET, and must pick one'
+description = '''
+Alternative location to specify LFS authentication secret.
+You cannot specify both this and `LFS_JWT_SECRET`, and must pick one.
+'''
 [server.LFS_HTTP_AUTH_EXPIRY]
 default = '24h'
-description = 'LFS authentication validity period (in time.Duration), pushes taking longer than this may fail'
+description = '''
+LFS authentication validity period (in time.Duration).
+Pushes taking longer than this may fail.
+'''
 [server.LFS_MAX_FILE_SIZE]
 default = 0
 description = 'Maximum allowed LFS file size in bytes (Set to 0 for no limit)'
@@ -369,7 +395,7 @@ description = 'Maximum number of locks returned per page'
 [server.LFS_MAX_BATCH_SIZE]
 default = 0
 description = '''
-When clients make lfs batch requests, reject them if there are more pointers than this number
+When clients make LFS batch requests, reject them if there are more pointers than this number
 zero means 'unlimited'
 '''
 [server.ALLOW_GRACEFUL_RESTARTS]
@@ -380,60 +406,68 @@ default = '60s'
 description = '''
 After a restart the parent will finish ongoing requests before
 shutting down. Force shutdown if this process takes longer than this delay.
-set to a negative value to disable
+Set to a negative value to disable.
 '''
 [server.STARTUP_TIMEOUT]
 default = 0
 description = '''
-Allows the setting of a startup timeout and waithint for Windows as SVC service
-0 disables this
+Allows the setting of a startup timeout and waithint for Windows as SVC service.
+Set to 0 to disable.
 '''
 [server.STATIC_CACHE_TIME]
 default = '6h'
-description = 'Static resources, includes resources on custom/, public/ and all uploaded avatars web browser cache time. Note that this cache is disabled when RUN_MODE is "dev". Default is 6h'
-
+description = '''
+Web browser cache time for static resources, includes resources on `custom/`, `public/` and all uploaded avatars.
+Note that this cache is disabled when `RUN_MODE` is `dev`.
+'''
 [database]
 description = '''
-The configuration options and their default values depend on the database to be used:
+The configuration options and their default values depend on the database to be used (see details below):
+
 - SQLite configuration:
+
   ```ini
   DB_TYPE = sqlite3
   ;PATH = data/forgejo.db
   ;SQLITE_TIMEOUT = 500
-  ;SQLITE_JOURNAL_MODE = ; defaults to sqlite database default (often DELETE), can be used to enable WAL mode. https://www.sqlite.org/pragma.html#pragma_journal_mode
+  ;SQLITE_JOURNAL_MODE =
   ```
+
 - MySQL/MariaDB configuration
+
   ```ini
   DB_TYPE = mysql
-  ;HOST = 127.0.0.1:3306 ; can use socket e.g. /var/run/mysqld/mysqld.sock
+  ;HOST = 127.0.0.1:3306
   ;NAME = gitea
   ;USER = root
-  ;PASSWD = ;Use PASSWD = `your password` for quoting if you use special characters in the password.
-  ;SSL_MODE = false ; either "false" (default), "true", or "skip-verify"
-  ;CHARSET_COLLATION = ; Empty as default, Forgejo will try to find a case-sensitive collation. Don't change it unless you clearly know what you need.
+  ;PASSWD =
+  ;SSL_MODE = false
+  ;CHARSET_COLLATION =
   ```
+
 - Postgres configuration
+
   ```ini
   DB_TYPE = postgres
-  ;HOST = 127.0.0.1:5432 ; can use socket e.g. /var/run/postgresql/
+  ;HOST = 127.0.0.1:543
   ;NAME = gitea
   ;USER = root
   ;PASSWD =
   ;SCHEMA =
-  ;SSL_MODE=disable ;either "disable" (default), "require", or "verify-full"
+  ;SSL_MODE = disable
   ```
 '''
 [database.DB_TYPE]
 default = 'sqlite3'
-description = 'Database type, either `"sqlite3"`, `"mySQL"` or `"postgres"`.'
+description = 'Database type, either `sqlite3`, `mySQL` or `postgres`.'
 [database.PATH]
-default = 'data/forgejo.db'
-description = 'Path to the database, only used for `DB_TYPE = sqlite3`'
+default = '%(APP_DATA_PATH)s/forgejo.db'
+description = 'Path to the database, only used if `DB_TYPE` is `sqlite3`'
 [database.SQLITE_TIMEOUT]
 default = 500
 description = 'Query timeout'
 [database.SQLITE_JOURNAL_MODE]
-description = 'Journal mode, only used for `DB_TYPE = sqlite3`.'
+description = 'Journal mode, only used if `DB_TYPE` is `sqlite3`.'
 [database.HOST]
 description = '''
 Database host or socket.
@@ -443,33 +477,30 @@ Can use socket, e.g. `/var/run/mysqld/mysqld.sock` or `/var/run/postgresql/`.
 '''
 [database.NAME]
 default = 'gitea'
-description = 'Database name. Ignored for `DB_TYPE = sqlite3`.'
+description = 'Database name, ignored if `DB_TYPE` is `sqlite3`.'
 [database.USER]
 default = 'root'
-description = 'Database user. Ignored for `DB_TYPE = sqlite3`.'
+description = 'Database user, ignored if `DB_TYPE` is `sqlite3`.'
 [database.PASSWD]
 description = '''
-Database user's password.
-Use 
-```ini
-PASSWD = `your password`
-```
-for quoting if you use special characters in the password.'
+Database user's password, ignored if `DB_TYPE` is `sqlite3`.
+Use `` PASSWD = `your password` `` for quoting if you use special characters in the password.
 '''
 [database.SSL_MODE]
 description = '''
-SSL mode.
-Ignored for `DB_TYPE = sqlite3`.
-For `DB_TYPE = mysql` either "false" (default), "true", or "skip-verify"'.
-For `DB_TYPE = postgres` either "disable" (default), "require", or "verify-full".
+SSL mode, ignored if `DB_TYPE` is `sqlite3`.
+
+- For `DB_TYPE = mysql` either `false` (default), `true`, or `skip-verify`.
+- For `DB_TYPE = postgres` either `disable` (default), `require`, or `verify-full`.
 '''
 [database.CHARSET_COLLATION]
 description = '''
-Charset collation, only used for `DB_TYPE = mysql`.
-Empty as default, Forgejo will try to find a case-sensitive collation. Don't change it unless you clearly know what you need.
+Charset collation, only used if `DB_TYPE` is `mysql`.
+By default, Forgejo will try to find a case-sensitive collation.
+Don't change it unless you clearly know what you need.
 '''
 [database.SCHEMA]
-description = 'Database schema, only used for `DB_TYPE = postgres`'
+description = 'Database schema, only used if `DB_TYPE` is `postgres`'
 [database.ITERATE_BUFFER_SIZE]
 default = 50
 description = 'Size of iterate buffer'
@@ -486,7 +517,7 @@ description = 'Backoff time per database retry (time.Duration)'
 default = 2
 description = 'Max idle database connections on connection pool'
 [database.CONN_MAX_LIFETIME]
-default = '3s'
+default = 0
 description = 'Database connection max life time, default is `0` or `3s` mysql (See #6804 & #7071 for reasoning).'
 [database.CONN_MAX_IDLETIME]
 default = 0
@@ -497,7 +528,7 @@ description = 'Database maximum number of open connections, default is `100` whi
 [database.AUTO_MIGRATION]
 default = true
 description = 'Whether execute database models migrations automatically'
-[database.SLOW_QUERY_TRESHOLD]
+[database.SLOW_QUERY_THRESHOLD]
 default = '5s'
 description = 'Threshold value (in seconds) beyond which query execution time is logged as a warning in the xorm logger'
 
@@ -506,20 +537,22 @@ default = false
 description = 'Whether the installer is disabled (set to true to disable the installer)'
 [security.SECRET_KEY]
 description = '''
-Global secret key that will be used
-This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore.
+Global secret key that will be used.
+This key is VERY IMPORTANT.
+If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore.
 '''
 [security.SECRET_KEY_URI]
 default = 'file:/etc/gitea/secret_key'
 description = '''
-Alternative location to specify secret key, instead of this file; you cannot specify both this and SECRET_KEY, and must pick one
+Alternative location to specify secret key, instead of this file.
+You cannot specify both this and `SECRET_KEY`, and must pick one.
 This key is VERY IMPORTANT. If you lose it, the data encrypted by it (like 2FA secret) can't be decrypted anymore.
 '''
 [security.INTERNAL_TOKEN]
 description = 'Secret used to validate communication within Forgejo binary'
 [security.INTERNAL_TOKEN_URI]
 default = 'file:/etc/gitea/internal_token'
-description = 'Alternative location to specify internal token, instead of this file; you cannot specify both this and INTERNAL_TOKEN, and must pick one'
+description = 'Alternative location to specify internal token, instead of this file. You cannot specify both this and `INTERNAL_TOKEN`, and must pick one'
 [security.LOGIN_REMEMBER_DAYS]
 default = 31
 description = 'How long to remember that a user is logged in before requiring relogin (in days)'
@@ -566,12 +599,12 @@ description = 'Set to false to allow pushes to Forgejo repositories despite havi
 default = 'off'
 description = '''
 Comma separated list of character classes required to pass minimum complexity.
-If left empty or no valid values are specified, the default is off (no checking)
-Classes include "lower,upper,digit,spec"
+If left empty or no valid values are specified, the default is off (no checking).
+Classes include `lower`, `upper`, `digit` and `spec`.
 '''
 [security.PASSWORD_HASH_ALGO]
 default = 'pbkdf2_hi'
-description = 'Password Hash algorithm, either "argon2", "pbkdf2"/"pbkdf2_v2", "pbkdf2_hi", "scrypt" or "bcrypt"'
+description = 'Password Hash algorithm, either `argon2`, `pbkdf2`/`pbkdf2_v2`, `pbkdf2_hi`, `scrypt` or `bcrypt`'
 [security.CSRF_COOKIE_HTTP_ONLY]
 default = true
 description = 'Set false to allow JavaScript to read CSRF cookie'
@@ -589,7 +622,7 @@ default = false
 description = '''
 Reject API tokens sent in URL query string (Accept Header-based API tokens only). This avoids security vulnerabilities
 stemming from cached/logged plain-text API tokens.
-In future releases, this will become the default behavior
+In future releases, this will become the default behavior.
 '''
 
 [camo.ENABLED]
@@ -604,10 +637,7 @@ description = 'url to a camo image proxy, it **is required** if camo is enabled'
 description = 'HMAC to encode urls with, it **is required** if camo is enabled'
 [camo.ALWAYS]
 default = false
-description = '''
-Set to true to use camo for https too lese only non https urls are proxyed
-ALLWAYS is deprecated and will be removed in the future
-'''
+description = 'Set to `true` to use camo for https to lese only non https urls are proxied.'
 
 [oauth2.ENABLED]
 default = true
@@ -618,18 +648,21 @@ description = 'Algorithm used to sign OAuth2 tokens. Valid values: HS256, HS384,
 [oauth2.JWT_SIGNING_PRIVATE_KEY_FILE]
 default = 'jwt/private.pem'
 description = '''
-Private key file path used to sign OAuth2 tokens. The path is relative to APP_DATA_PATH.
-This setting is only needed if JWT_SIGNING_ALGORITHM is set to RS256, RS384, RS512, ES256, ES384 or ES512.
+Private key file path used to sign OAuth2 tokens. The path is relative to _`AppDataPath`_.
+This setting is only needed if `JWT_SIGNING_ALGORITHM` is set to RS256, RS384, RS512, ES256, ES384 or ES512.
 The file must contain a RSA or ECDSA private key in the PKCS8 format. If no key exists a 4096 bit key will be created for you.
 '''
 [oauth2.JWT_SECRET]
 description = '''
 OAuth2 authentication secret for access and refresh tokens, change this yourself to a unique string. CLI generate option is helpful in this case. https://docs.gitea.io/en-us/command-line/#generate
-This setting is only needed if JWT_SIGNING_ALGORITHM is set to HS256, HS384 or HS512.
+This setting is only needed if `JWT_SIGNING_ALGORITHM` is set to HS256, HS384 or HS512.
 '''
 [oauth2.JWT_SECRET_URI]
 default = 'file:/etc/gitea/oauth2_jwt_secret'
-description = 'Alternative location to specify OAuth2 authentication secret. You cannot specify both this and JWT_SECRET, and must pick one.'
+description = '''
+Alternative location to specify OAuth2 authentication secret.
+You cannot specify both this and `JWT_SECRET`, and must pick one.
+'''
 [oauth2.ACCESS_TOKEN_EXPIRATION_TIME]
 default = 3600
 description = 'Lifetime of an OAuth2 access token in seconds'
@@ -646,26 +679,28 @@ description = 'Maximum length of oauth2 token/cookie stored on server'
 default = 'git-credential-oauth, git-credential-manager, tea'
 description = '''
 Pre-register OAuth2 applications for some universally useful services
-* https://github.com/hickford/git-credential-oauth
-* https://github.com/git-ecosystem/git-credential-manager
-* https://gitea.com/gitea/tea
+
+- https://github.com/hickford/git-credential-oauth
+- https://github.com/git-ecosystem/git-credential-manager
+- https://gitea.com/gitea/tea
 '''
 
 [log.ROOT_PATH]
-description = 'Root path for the log files - defaults to %(GITEA_WORK_DIR)/log'
+default = '%(AppWorkPath)s/log'
+description = 'Root path for the log files'
 [log.MODE]
 default = 'console'
 description = '''
-Main Logger
-Either "console", "file" or "conn", default is "console"
-Use comma to separate multiple modes, e.g. "console, file"
+Main Logger.
+Either `console`, `file` or `conn`, default is `console`.
+Use comma to separate multiple modes, e.g. `console, file`.
 '''
 [log.LEVEL]
 default = 'Info'
-description = 'Either "Trace", "Debug", "Info", "Warn", "Error" or "None", default is "Info"'
+description = 'Either `Trace`, `Debug`, `Info`, `Warn`, `Error` or `None`, default is `Info`'
 [log.STACKTRACE_LEVEL]
 default = 'None'
-description = 'Print Stacktrace with logs (rarely helpful, do not set) Either "Trace", "Debug", "Info", "Warn", "Error", default is "None"'
+description = 'Print Stacktrace with logs (rarely helpful, do not set) Either `Trace`, `Debug`, `Info`, `Warn`, `Error`, default is `None`'
 [log.BUFFER_LEN]
 default = 10000
 description = '''Buffer length of the channel, keep it as it is if you don't know what it is'''
@@ -677,23 +712,25 @@ description = '''
 Access Logger (Creates log in NCSA common log format)
 Print request id which parsed from request headers in access log, when access log is enabled.
 E.g:
-* In request header:         `X-Request-ID: test-id-123`
-* Configuration in app.ini:  `REQUEST_ID_HEADERS = X-Request-ID`
-* Print in log:              `127.0.0.1:58384 - - [14/Feb/2023:16:33:51 +0800] "test-id-123"`
+
+- In request header: `X-Request-ID: test-id-123`
+- Configuration in app.ini: `REQUEST_ID_HEADERS = X-Request-ID`
+- Print in log: `127.0.0.1:58384 - - [14/Feb/2023:16:33:51 +0800] "test-id-123"`
 
 If you configure more than one in the .ini file, it will match in the order of configuration,
 and the first match will be finally printed in the log.
 E.g:
-* In request header:         `X-Trace-ID: trace-id-1q2w3e4r`
-* Configuration in app.ini:  `REQUEST_ID_HEADERS = X-Request-ID, X-Trace-ID, X-Req-ID`
-* Print in log:              `127.0.0.1:58384 - - [14/Feb/2023:16:33:51 +0800] "trace-id-1q2w3e4r"`
+
+- In request header: `X-Trace-ID: trace-id-1q2w3e4r`
+- Configuration in app.ini: `REQUEST_ID_HEADERS = X-Request-ID, X-Trace-ID, X-Req-ID`
+- Print in log: `127.0.0.1:58384 - - [14/Feb/2023:16:33:51 +0800] "trace-id-1q2w3e4r"`
 '''
 [log.ACCESS_LOG_TEMPLATE]
 default = '{{.Ctx.RemoteHost}} - {{.Identity}} {{.Start.Format "[02/Jan/2006:15:04:05 -0700]" }} "{{.Ctx.Req.Method}} {{.Ctx.Req.URL.RequestURI}} {{.Ctx.Req.Proto}}" {{.ResponseWriter.Status}} {{.ResponseWriter.Size}} "{{.Ctx.Req.Referer}}" "{{.Ctx.Req.UserAgent}}"'
 description = 'Sets the template used to create the access log'
 
 [log.logger]
-description = 'Sub logger modes, a single comma means use default MODE above, empty means disable it'
+description = 'Sub logger modes, a single comma means use default `MODE` above, empty means disable it'
 [log.logger.'access.MODE']
 [log.logger.'router.MODE']
 default = ','
@@ -744,12 +781,12 @@ default = false
 description = 'Try to reconnect when connection is lost, default is false'
 [log.conn.PROTOCOL]
 default = 'tcp'
-description = 'Either "tcp", "unix" or "udp", default is "tcp"'
+description = 'Either `tcp`, `unix` or `udp`, default is `tcp`'
 [log.conn.ADDR]
 description = 'Host address'
 
 [git.PATH]
-description = 'The path of git executable. If empty, Forgejo searches through the PATH environment.'
+description = 'The path of git executable. If empty, Forgejo searches through the `$PATH` environment.'
 [git.HOME_PATH]
 default = '%(APP_DATA_PATH)s/home'
 description = 'The HOME directory for Git'
@@ -779,8 +816,8 @@ default = '5s'
 description = 'Delay before verbose push infos are printed to stdout'
 [git.GC_ARGS]
 description = '''
-Arguments for command `git gc`, e.g. `--aggressive --auto`
-see more on <https://git-scm.com/docs/git-gc/>.
+Arguments for command `git gc`, e.g. `--aggressive --auto`.
+See <https://git-scm.com/docs/git-gc/>.
 '''
 [git.ENABLE_AUTO_GIT_WIRE_PROTOCOL]
 default = true
@@ -844,8 +881,8 @@ default = false
 description = 'Whether a new user needs to be confirmed manually after registration. (Requires `REGISTER_EMAIL_CONFIRM` to be disabled.)'
 [service.EMAIL_DOMAIN_ALLOWLIST]
 description = '''
-List of domain names that are allowed to be used to register on a Forgejo instance, wildcard is supported
-eg: gitea.io,example.com,*.mydomain.com
+List of domain names that are allowed to be used to register on a Forgejo instance, wildcard is supported,
+e.g. `gitea.io,example.com,*.mydomain.com`.
 '''
 [service.EMAIL_DOMAIN_BLOCKLIST]
 description = 'Comma-separated list of domain names that are not allowed to be used to register on a Forgejo instance, wildcard is supported'
@@ -854,10 +891,10 @@ default = false
 description = 'Disallow registration, only allow admins to create accounts'
 [service.ALLOW_ONLY_INTERNAL_REGISTRATION]
 default = false
-description = 'Allow registration only using Forgejo itself, it works only when DISABLE_REGISTRATION is false'
+description = 'Allow registration only using Forgejo itself, it works only when `DISABLE_REGISTRATION` is `false`'
 [service.ALLOW_ONLY_EXTERNAL_REGISTRATION]
 default = false
-description = 'Allow registration only using third-party services, it works only when DISABLE_REGISTRATION is false'
+description = 'Allow registration only using third-party services, it works only when `DISABLE_REGISTRATION` is `false`'
 [service.REQUIRE_SIGNIN_VIEW]
 default = false
 description = 'User must sign in to view anything'
@@ -911,7 +948,7 @@ Go to https://www.google.com/recaptcha/admin to sign up for a key
 description = 'For hCaptcha, create an account at https://accounts.hcaptcha.com/login to get your keys'
 [service.HCAPTCHA_SITEKEY]
 [service.MCAPTCHA_URL]
-default = 'https://demo.mcaptcha.org'
+default = 'https://demo.mcaptcha.org/'
 description = 'Change this to use demo.mcaptcha.org or your self-hosted mcaptcha.org instance'
 [service.MCAPTCHA_SECRET]
 description = '''
@@ -950,10 +987,10 @@ extensions that use strange regex patterns
 [service.DEFAULT_USER_VISIBILITY]
 default = 'public'
 description = '''
-Either "public", "limited" or "private", default is "public"
-Limited is for users visible only to signed users
-Private is for users visible only to members of their organizations
-Public is for users visible for everyone
+Either `public`, `limited` or `private`, default is `public`.
+Limited is for users visible only to signed users.
+Private is for users visible only to members of their organizations.
+Public is for users visible for everyone.
 '''
 [service.ALLOWED_USER_VISIBILITY_MODES]
 default = 'public,limited,private'
@@ -961,10 +998,10 @@ description = 'Set which visibility modes a user can have'
 [service.DEFAULT_ORG_VISIBILITY]
 default = 'public'
 description = '''
-Either "public", "limited" or "private", default is "public"
-Limited is for organizations visible only to signed users
-Private is for organizations visible only to members of the organization
-Public is for organizations visible to everyone
+Either `public`, `limited` or `private`, default is `public`.
+Limited is for organizations visible only to signed users.
+Private is for organizations visible only to members of the organization.
+Public is for organizations visible to everyone.
 '''
 [service.DEFAULT_ORG_MEMBER_VISIBLE]
 default = false
@@ -987,6 +1024,7 @@ description = '''
 Default map service. No external API support has been included. A service has to allow
 searching using URL parameters, the location will be appended to the URL as escaped query parameter.
 Some example values are:
+
 - OpenStreetMap: https://www.openstreetmap.org/search?query=
 - Google Maps: https://www.google.com/maps/place/
 - MapQuest: https://www.mapquest.com/search/
@@ -1015,7 +1053,7 @@ default = 'noreply.%(server.DOMAIN)s'
 description = '''
 Value for the domain part of the user's email address in the git log if user
 has set KeepEmailPrivate to true. The user's email will be replaced with a
-concatenation of the user name in lower case, "@" and `NO_REPLY_ADDRESS`.
+concatenation of the user name in lower case, "@" and the value of `NO_REPLY_ADDRESS`.
 '''
 [service.SHOW_REGISTRATION_BUTTON]
 default = true
@@ -1079,9 +1117,9 @@ description = 'The script type this server supports. Usually this is `bash`, but
 default = 'UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, UTF-32LE, ISO-8859, windows-1252, ISO-8859, windows-1250, ISO-8859, ISO-8859, ISO-8859, windows-1253, ISO-8859, windows-1255, ISO-8859, windows-1251, windows-1256, KOI8-R, ISO-8859, windows-1254, Shift_JIS, GB18030, EUC-JP, EUC-KR, Big5, ISO-2022, ISO-2022, ISO-2022, IBM424_rtl, IBM424_ltr, IBM420_rtl, IBM420_ltr'
 description = '''
 Tie-break order for detected charsets.
-If the charsets have equal confidence, tie-breaking will be done by order in this list
+If the charsets have equal confidence, tie-breaking will be done by order in this list.
 with charsets earlier in the list chosen in preference to those later.
-Adding "defaults" will place the unused charsets at that position.
+Adding `defaults` will place the unused charsets at that position.
 '''
 [repository.ANSI_CHARSET]
 description = 'Default ANSI charset to override non-UTF-8 charsets to'
@@ -1113,33 +1151,33 @@ WARNING: This may be harmful to your website if you do not give it a right value
 '''
 [repository.USE_COMPAT_SSH_URI]
 default = true
-description = 'Force ssh:// clone url instead of scp-style uri when default SSH port is used'
+description = 'Force `ssh://` clone URL instead of scp-style URI when default SSH port is used'
 [repository.GO_GET_CLONE_URL_PROTOCOL]
 default = 'https'
-description = 'Value for the "go get" request returns the repository url as https or ssh, default is https'
+description = 'Value for the `go get` request returns the repository URL as `https` or `ssh`.'
 [repository.DEFAULT_CLOSE_ISSUES_VIA_COMMITS_IN_ANY_BRANCH]
 default = false
 description = 'Close issues as long as a commit on any branch marks it as fixed'
 [repository.ENABLE_PUSH_CREATE_USER]
 default = false
-description = 'Allow users to push local repositories to Forgejo and have them automatically created for a user or an org'
+description = 'Allow users to push local repositories to Forgejo and have them automatically created for a user or an organisation'
 [repository.ENABLE_PUSH_CREATE_ORG]
 default = false
 [repository.DISABLED_REPO_UNITS]
-description = 'Comma separated list of globally disabled repo units. Allowed values: repo.issues, repo.ext_issues, repo.pulls, repo.wiki, repo.ext_wiki, repo.projects, repo.packages, repo.actions.'
+description = 'Comma separated list of globally disabled repo units. Allowed values: `repo.issues`, `repo.ext_issues`, `repo.pulls`, `repo.wiki`, `repo.ext_wiki`, `repo.projects`, `repo.packages`, `repo.actions`.'
 [repository.DEFAULT_REPO_UNITS]
 default = 'repo.code,repo.releases,repo.issues,repo.pulls,repo.wiki,repo.projects,repo.packages,repo.actions'
 description = '''
-Comma separated list of default new repo units. Allowed values: repo.code, repo.releases, repo.issues, repo.pulls, repo.wiki, repo.projects, repo.packages, repo.actions.
-Note: Code and Releases can currently not be deactivated. If you specify default repo units you should still list them for future compatibility.
+Comma separated list of default new repository units. Allowed values: `repo.code`, `repo.releases`, `repo.issues`, `repo.pulls`, `repo.wiki`, `repo.projects`, `repo.packages`, `repo.actions`.
+Note: Currently, code and releases cannot be deactivated. If you specify default repo units you should still list them for future compatibility.
 External wiki and issue tracker can't be enabled by default as it requires additional settings.
-Disabled repo units will not be added to new repositories regardless if it is in the default list.
+Disabled repository units will not be added to new repositories regardless if it is in the default list.
 '''
 [repository.DEFAULT_FORK_REPO_UNITS]
 default = 'repo.code,repo.pulls'
 description = '''
-Comma separated list of default forked repo units.
-The set of allowed values and rules are the same as `DEFAULT_REPO_UNITS`
+Comma separated list of default forked repository units.
+The set of allowed values and rules are the same as for `DEFAULT_REPO_UNITS`.
 '''
 [repository.PREFIX_ARCHIVE_FILES]
 default = true
@@ -1253,17 +1291,16 @@ default = 10
 [repository.signing.SIGNING_KEY]
 default = 'default'
 description = '''
-GPG key to use to sign commits, Defaults to the default - that is the value of `git config --get user.signingkey`
-Run in the context of the `RUN_USER`.
+GPG key to use to sign commits.
+Defaults to the default - that is the value of `git config --get user.signingkey`, run in the context of the `RUN_USER`.
 Switch to none to stop signing completely.
 '''
 [repository.signing.SIGNING_NAME]
 description = '''
-If a SIGNING_KEY ID is provided and is not set to default, use the provided Name and Email address as the signer.
-These should match a publicized name and email address for the key
-(When SIGNING_KEY is default these are set to
-the results of `git config --get user.name` and `git config --get user.email`, respectively and can only be overridden
-by setting the SIGNING_KEY ID to the correct ID.).
+If a `SIGNING_KEY` ID is provided and is not set to default, use the provided Name and Email address as the signer.
+These should match a publicized name and email address for the key.
+(When `SIGNING_KEY` is default these are set to
+the results of `git config --get user.name` and `git config --get user.email`, respectively and can only be overridden by setting the `SIGNING_KEY` ID to the correct ID.).
 '''
 [repository.signing.SIGNING_EMAIL]
 [repository.signing.DEFAULT_TRUST_MODEL]
@@ -1272,18 +1309,21 @@ description = 'Sets the default trust model for repositories. Options are: colla
 [repository.signing.INITIAL_COMMIT]
 default = 'always'
 description = '''
-Determines when Forgejo should sign the initial commit when creating a repository
+Determines when Forgejo should sign the initial commit when creating a repository.
 Either:
-- never
-- pubkey: only sign if the user has a pubkey
-- twofa: only sign if the user has logged in with twofa
-- always
-options other than none and always can be combined as comma separated list.
+
+- `never`
+- `pubkey`: only sign if the user has a pubkey
+- `twofa`: only sign if the user has logged in with twofa
+- `always`
+
+Options other than `none` and `always` can be combined as comma separated list.
 '''
 [repository.signing.CRUD_ACTIONS]
 default = 'pubkey, twofa, parentsigned'
 description = '''
 Determines when to sign for CRUD actions
+
 - as above for `INITIAL_COMMIT` or
 - parentsigned: requires that the parent commit is signed.
 '''
@@ -1291,12 +1331,14 @@ Determines when to sign for CRUD actions
 default = 'never'
 description = '''
 Determines when to sign Wiki commits
+
 - as above for `INITIAL_COMMIT`.
 '''
 [repository.signing.MERGES]
 default = 'pubkey, twofa, basesigned, commitssigned'
 description = '''
 Determines when to sign on merges:
+
 - as above for `INITIAL_COMMIT` or
 - `basesigned`: require that the parent of commit on the base repo is signed,
 - `commitssigned`: require that all the commits in the head branch are signed,
@@ -1306,6 +1348,7 @@ Determines when to sign on merges:
 [repository.mimetype_mapping]
 decsription = '''
 Custom MIME type mapping for downloadable files. E.g.,
+
 ```ini
 .apk = application/vnd.android.package-archive
 ```
@@ -1318,30 +1361,28 @@ default = 'Needs Triage, High Priority, Low Priority, Closed'
 
 [cors]
 heading = 'CORS'
+description = 'More information about CORS can be found here: <https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#The_HTTP_response_headers>.'
 [cors.ENABLED]
 default = false
-description = '''
-More information about CORS can be found here: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#The_HTTP_response_headers
-enable cors headers (disabled by default)
-'''
+description = 'Enable CORS headers'
 [cors.ALLOW_DOMAIN]
 default = '*'
-description = 'list of requesting origins that are allowed, eg: "https://*.example.com"'
+description = 'List of requesting origins that are allowed, eg: `https://*.example.com`'
 [cors.METHODS]
 default = 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS'
-description = 'list of methods allowed to request'
+description = 'Comma-separated list of methods allowed to request'
 [cors.MAX_AGE]
 default = '10m'
-description = 'max time to cache response'
+description = 'Maximum time to cache response'
 [cors.ALLOW_CREDENTIALS]
 default = false
-description = 'allow request with credentials'
+description = 'Allow request with credentials'
 [cors.HEADERS]
 default = 'Content-Type,User-Agent'
-description = 'headers to permit'
+description = 'Comma-separated list of headers to permit'
 [cors.X_FRAME_OPTIONS]
 default = 'SAMEORIGIN'
-description = 'set X-FRAME-OPTIONS header'
+description = 'X-FRAME-OPTIONS header'
 
 [ui]
 heading = 'UI'
@@ -1392,6 +1433,7 @@ default = 'gitea-auto,gitea-light,gitea-dark'
 description = '''
 All available themes. Allow users select personalized themes regardless of the value of `DEFAULT_THEME`.
 By default available:
+
 - forgejo-auto, forgejo-light, forgejo-dark
 - gitea-auto, gitea-light, gitea-dark
 - forgejo-auto-deuteranopia-protanopia, forgejo-light-deuteranopia-protanopia, forgejo-dark-deuteranopia-protanopia
@@ -1430,7 +1472,7 @@ A repo is considered irrelevant if it's a fork or if it has no metadata (no desc
 default = 'recentupdate'
 description = '''
 Change the sort type of the explore pages.
-Default is "recentupdate", but you also have "alphabetically", "reverselastlogin", "newest", "oldest"
+Default is `recentupdate`, but you also have `alphabetically`, `reverselastlogin`, `newest`, `oldest`
 '''
 [ui.PREFERRED_TIMESTAMP_TENSE]
 default = 'mixed'
@@ -1475,8 +1517,8 @@ heading = 'UI notification'
 default = '10s'
 description = '''
 Control how often the notification endpoint is polled to update the notification
-The timeout will increase to MAX_TIMEOUT in TIMEOUT_STEPs if the notification count is unchanged
-Set MIN_TIMEOUT to -1 to turn off
+The timeout will increase to `MAX_TIMEOUT` in `TIMEOUT_STEP`s if the notification count is unchanged
+Set `MIN_TIMEOUT` to `-1` to turn it off.
 '''
 [ui.notification.MAX_TIMEOUT]
 default = '60s'
@@ -1485,8 +1527,8 @@ default = '10s'
 [ui.notification.EVENT_SOURCE_UPDATE_TIME]
 default = '10s'
 description = '''
-This setting determines how often the db is queried to get the latest notification counts.
-If the browser client supports EventSource and SharedWorker, a SharedWorker will be used in preference to polling notification. Set to -1 to disable the EventSource
+This setting determines how often the database is queried to get the latest notification counts.
+If the browser client supports EventSource and SharedWorker, a SharedWorker will be used in preference to polling notification. Set to -1 to disable the EventSource.
 '''
 
 [ui.svg]
@@ -1502,7 +1544,7 @@ If SVG rendering is disabled, SVG files are displayed as text and cannot be embe
 heading = 'UI CSV files'
 [ui.csv.MAX_FILE_SIZE]
 default = 524288
-description = 'Maximum allowed file size in bytes to render CSV files as table. (Set to 0 for no limit)'
+description = 'Maximum allowed file size in bytes to render CSV files as table. Set to 0 for no limit.'
 [ui.csv.MAX_ROWS]
 default = 2500
 description = 'Maximum allowed rows to render CSV files. Set to 0 for no limit.'
@@ -1545,10 +1587,10 @@ description = 'Minimum ED25519 key size'
 default = 256
 description = 'Minimum ECDSA key size'
 [ssh.minimum_key_sizes.RSA]
-default = '3071'
+default = 3071
 description = 'Minimum RSA key size. The default value of `3071` ensures that an otherwise valid 3072 bit RSA key is allowed, because it may be reported as having 3071 bit length'
 [ssh.minimum_key_sizes.DSA]
-default = '-1'
+default = -1
 description = 'Minimum DSA key size. Set to 1024 to switch on.'
 
 [indexer.ISSUE_INDEXER_TYPE]
@@ -1614,19 +1656,20 @@ See <https://github.com/go-enry/go-enry> for more details which files are consid
 default = 1048576
 description = 'The maximum filesize to include for indexing'
 
-[queue.TYPE]
-default = 'persistable-channel'
+[queue]
 description = '''
-Specific queues can be individually configured with `[queue.name]`. `[queue]` provides defaults
+Specific queues can be individually configured with `[queue.name]`. `[queue]` provides defaults.
 (`[queue.issue_indexer]` is special due to the old configuration described above)
 General queue type, currently support: `persistable-channel`, `channel`, `level`, `redis`, `dummy`.
 '''
+[queue.TYPE]
+default = 'persistable-channel'
 [queue.DATADIR]
 default = 'queues/'
 description = '''
 Path to the directory for storing persistable queues and level queues.
 Individual queues will default to `queues/common` meaning the queue is shared.
-Relative paths will be made absolute against `%(APP_DATA_PATH)s`.
+Relative paths will be made absolute against _`AppDataPath`_.
 '''
 [queue.LENGTH]
 default = 100000
@@ -1669,6 +1712,7 @@ description = 'Send an email to all admins when a new user signs up to inform th
 description = '''
 Comma-separated list of disabled features for users.
 Features that can be disabled are:
+
 - `deletion`: a user cannot delete their own account
 - `manage_ssh_keys`: a user cannot configure ssh keys
 - `manage_gpg_keys`: a user cannot configure gpg keys
@@ -1678,6 +1722,7 @@ description = '''
 Comma-separated list of disabled features ONLY if the user has an external login type (eg. LDAP, Oauth, etc.).
 This setting is independent from `USER_DISABLED_FEATURES` and supplements its behavior.
 Features that can be disabled are:
+
 - `deletion`: a user cannot delete their own account
 - `manage_ssh_keys`: a user cannot configure ssh keys
 - `manage_gpg_keys`: a user cannot configure gpg keys
@@ -1693,6 +1738,7 @@ how to prove you are in control of that page.
 For more info: <https://en.wikipedia.org/wiki/OpenID>
 Current implementation supports OpenID-2.0
 Tested to work providers at the time of writing:
+
 - Any GNUSocial node (your.hostname.tld/username)
 - Any SimpleID provider (<http://simpleid.koinic.net>)
 - <http://openid.org.cn/>
@@ -1724,7 +1770,7 @@ Example value: `loadaverage.org/badguy stackexchange.com/.*spammer`
 [oauth2_client.REGISTER_EMAIL_CONFIRM]
 description = '''
 Whether a new auto registered oauth2 user needs to confirm their email.
-Do not include to use the REGISTER_EMAIL_CONFIRM setting from the `[service]` section.
+Do not include to use the `REGISTER_EMAIL_CONFIRM` setting from the `[service]` section.
 '''
 [oauth2_client.OPENID_CONNECT_SCOPES]
 description = '''
@@ -1739,11 +1785,13 @@ description = 'Automatically create user accounts for new oauth2 users'
 default = 'nickname'
 description = '''
 The source of the username for new oauth2 accounts:
-- `userid`:  use the userid / sub attribute
+
+- `userid`: use the userid / sub attribute
 - `nickname`: use the nickname attribute
 - `email`: use the username part of the email attribute
 
 Note: `nickname` and `email` options will normalize input strings using the following criteria:
+
 - diacritics are removed
 - the characters in the set `['´\x60]` are removed
 - the characters in the set `[\s~+]` are replaced with `-`
@@ -1774,6 +1822,7 @@ default = 'external'
 description = '''
 Webhook can only call allowed hosts for security reasons. Comma separated list, eg: `external, 192.168.1.0/24, *.mydomain.com`
 Built-in:
+
 - `loopback`: for localhost,
 - `private`: for LAN/intranet,
 - `external`: for public hosts on internet,
@@ -1803,8 +1852,10 @@ description = 'Prefix displayed before subject in mail'
 [mailer.PROTOCOL]
 description = '''
 Mail server protocol. One of `smtp`, `smtps`, `smtp+starttls`, `smtp+unix`, `sendmail`, `dummy`.
+
 - `sendmail`: use the operating system's `sendmail` command instead of SMTP. This is common on Linux systems.
 - `dummy`: send email messages to the log as a testing phase.
+
 If your provider does not explicitly say which protocol it uses but does provide a port,
 you can set `SMTP_PORT` instead and this will be inferred.
 '''
@@ -1816,9 +1867,11 @@ For `smtp+unix`, this should be a path to a unix socket instead.
 [mailer.SMTP_PORT]
 description = '''
 Mail server port. Common ports are:
-- 25:  insecure SMTP
+
+- 25: insecure SMTP
 - 465: SMTP Secure
 - 587: StartTLS
+
 If no protocol is specified, it will be inferred by this setting.
 '''
 [mailer.ENABLE_HELO]
@@ -1870,8 +1923,8 @@ default = 'sendmail'
 description = 'Specify an alternative sendmail binary'
 [mailer.SENDMAIL_ARGS]
 description = '''
-Specify any extra sendmail arguments
-WARNING: if your sendmail program interprets options you should set this to "--" or terminate these args with "--".
+Specify any extra sendmail arguments.
+WARNING: if your sendmail program interprets options you should set this to `--` or terminate these args with `--`.
 '''
 [mailer.SENDMAIL_TIMEOUT]
 default = '5m'
@@ -1927,13 +1980,14 @@ description = 'Maximum size of a message to handle. Bigger messages are ignored.
 
 [cache.ADAPTER]
 default = 'memory'
-description = 'Either "memory", "redis", "memcache", or "twoqueue". default is "memory"'
+description = 'Either `memory`, `redis`, `memcache`, or `twoqueue`'
 [cache.INTERVAL]
 default = 60
-description = 'For "memory" only, GC interval in seconds, default is 60'
+description = 'GC interval in seconds, only if `ADAPTER` is `memory`'
 [cache.HOST]
 description = '''
 Connection host address, only if `ADAPTER` is `redis` or `memcache`:
+
 - `redis`:
   - `redis://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` or
   - `redis+cluster://127.0.0.1:6379/0?pool_size=100&idle_timeout=180s` for a Redis cluster
@@ -1971,6 +2025,7 @@ Session provider. Either `memory`, `file`, `redis`, `db`, `mysql`, `couchbase`, 
 default = 'data/sessions'
 description = '''
 Provider config options. Possible values depend on the `PROVIDER`:
+
 - `memory`: doesn't have any config yet,
 - `file`: session file path, e.g. `data/sessions`, relative paths will be made absolute against _`AppWorkPath`_,
 - `redis`:
@@ -1982,7 +2037,7 @@ Provider config options. Possible values depend on the `PROVIDER`:
 default = 'i_like_gitea'
 description = 'Session cookie name'
 [session.COOKIE_SECURE]
-description = 'If you use session in https only: true or false. If not set, it defaults to `true` if the ROOT_URL is an HTTPS URL'
+description = 'If you use session in https only: true or false. If not set, it defaults to `true` if the `ROOT_URL` is an HTTPS URL.'
 [session.GC_INTERVAL_TIME]
 default = 86400
 description = 'Session GC time interval in seconds, default is 86400 (1 day)'
@@ -1990,10 +2045,10 @@ description = 'Session GC time interval in seconds, default is 86400 (1 day)'
 default = 86400
 description = 'Session life time in seconds, default is 86400 (1 day)'
 [session.DOMAIN]
-description = 'Cookie domain name. Default is empty'
+description = 'Cookie domain name'
 [session.SAME_SITE]
 default = 'lax'
-description = 'SameSite settings. Either "none", "lax", or "strict"'
+description = 'SameSite settings. Either `none`, `lax`, or `strict`.'
 
 [picture.REPOSITORY_AVATAR_FALLBACK]
 default = 'none'
@@ -2020,17 +2075,18 @@ Larger values result in finer rendering on HiDPI devices
 [picture.AVATAR_MAX_FILE_SIZE]
 default = 1048576
 description = '''
-Maximum allowed file size for uploaded avatars.
+Maximum allowed file size for uploaded avatars in bytes.
 This is to limit the amount of RAM used when resizing the image
 '''
 [picture.AVATAR_MAX_ORIGIN_SIZE]
 default = 262144
-description = 'If the uploaded file is not larger than this byte size, the image will be used as is, without resizing/converting'
+description = 'Maximum size of uploaded avatar image in bytes without resizing/converting. If the uploaded file is not larger than this, the image will be used as is, without resizing/converting.'
 [picture.GRAVATAR_SOURCE]
 default = 'gravatar'
 description = '''
-Chinese users can choose "duoshuo"
-or a custom avatar source, like: http://cn.gravatar.com/avatar/
+Source for avatars.
+Chinese users can choose `duoshuo`
+or a custom avatar source, like: <https://cn.gravatar.com/avatar/>.
 '''
 [picture.DISABLE_GRAVATAR]
 default = false
@@ -2070,12 +2126,12 @@ Currently, only `minio` is supported.
 [attachment.PATH]
 default = 'attachments'
 description = '''
-Path for attachments. Defaults to `attachments`. Only available when STORAGE_TYPE is `local`
+Path for attachments. Defaults to `attachments`. Only available when `STORAGE_TYPE` is `local`
 Relative paths will be resolved to `${AppDataPath}/${attachment.PATH}`
 '''
 [attachment.MINIO_ENDPOINT]
 default = 'localhost:9000'
-description = 'Minio endpoint to connect only available when STORAGE_TYPE is `minio`'
+description = 'Minio endpoint to connect only available when `STORAGE_TYPE` is `minio`'
 [attachment.MINIO_ACCESS_KEY_ID]
 description = '''
 Minio access key ID to connect, only available when `STORAGE_TYPE` is `minio`.
@@ -2092,8 +2148,8 @@ description = 'Minio bucket to store the attachments, only available when `STORA
 default = 'auto'
 description = '''
 URL lookup for the minio bucket, only available when `STORAGE_TYPE` is `minio`
-Available values: `auto`, `dns, `path`.
-If empty, it behaves the same as `auto` was set
+Available values: `auto`, `dns`, `path`.
+If empty, it behaves the same as `auto` was set.
 '''
 [attachment.MINIO_LOCATION]
 default = 'us-east-1'
@@ -2111,6 +2167,7 @@ description = 'Minio skip SSL verification, only available when `STORAGE_TYPE` i
 default = 'default'
 description = '''
 Minio checksum algorithm:
+
 - `default`: for MinIO or AWS S3, or
 - `md5`: for Cloudflare or Backblaze.
 '''
@@ -2131,9 +2188,11 @@ description = 'Whether to run all enabled cron tasks when Forgejo starts'
 [cron.archive_cleanup]
 description = '''
 Clean up old repository archives.
-Note: ``SCHEDULE`` accept formats
+Note: `SCHEDULE` accept formats
+
 - Full crontab specs, e.g. `* * * * * ?`
 - Descriptors, e.g. `@midnight`, `@every 1h30m`
+
 See more: <https://pkg.go.dev/github.com/gogs/cron@v0.0.0-20171120032916-9f6c956d3e14>
 '''
 [cron.archive_cleanup.ENABLED]
@@ -2195,8 +2254,8 @@ description = 'Notice if not success'
 default = '60s'
 [cron.repo_health_check.ARGS]
 description = '''
-Arguments for command 'git fsck', e.g. "--unreachable --tags"
-see more on http://git-scm.com/docs/git-fsck
+Arguments for command 'git fsck', e.g. `--unreachable --tags`.
+See more on <https://git-scm.com/docs/git-fsck>.
 '''
 
 [cron.check_repo_stats]
@@ -2243,7 +2302,7 @@ description = 'Interval as a duration between each synchronization (default ever
 default = true
 description = '''
 Create new users, update existing user data and disable users that are not in external source anymore (default)
-or only create new users if UPDATE_EXISTING is set to false
+or only create new users if `UPDATE_EXISTING` is `false`.
 '''
 
 [cron.cleanup_actions]
@@ -2270,7 +2329,7 @@ default = '@midnight'
 description = 'Interval as a duration between each synchronization (default every 24h)'
 [cron.deleted_branches_cleanup.OLDER_THAN]
 default = '24h'
-description = 'deleted branches than OLDER_THAN ago are subject to deletion'
+description = 'Deleted branches older than `OLDER_THAN` ago are subject to deletion'
 
 [cron.cleanup_hook_task_table]
 description = 'Cleanup hook_task table'
@@ -2279,19 +2338,19 @@ default = true
 description = 'Whether to enable the job'
 [cron.cleanup_hook_task_table.RUN_AT_START]
 default = false
-description = 'Whether to always run at start up time (if ENABLED)'
+description = 'Whether to always run at start up time (if `ENABLED`)'
 [cron.cleanup_hook_task_table.SCHEDULE]
 default = '@midnight'
 description = 'Time interval for job to run'
 [cron.cleanup_hook_task_table.CLEANUP_TYPE]
 default = 'OlderThan'
-description = 'OlderThan or PerWebhook. How the records are removed, either by age (i.e. how long ago hook_task record was delivered) or by the number to keep per webhook (i.e. keep most recent x deliveries per webhook)'
+description = '`OlderThan` or `PerWebhook`. How the records are removed, either by age (i.e. how long ago hook_task record was delivered) or by the number to keep per webhook (i.e. keep most recent x deliveries per webhook)'
 [cron.cleanup_hook_task_table.OLDER_THAN]
 default = '168h'
-description = 'If CLEANUP_TYPE is set to OlderThan, then any delivered hook_task records older than this expression will be deleted'
+description = 'If `CLEANUP_TYPE` is set to `OlderThan`, then any delivered `hook_task` records older than this expression will be deleted'
 [cron.cleanup_hook_task_table.NUMBER_TO_KEEP]
 default = 10
-description = 'If CLEANUP_TYPE is set to PerWebhook, this is number of hook_task records to keep for a webhook (i.e. keep the most recent x deliveries)'
+description = 'If `CLEANUP_TYPE` is set to `PerWebhook`, this is number of `hook_task` records to keep for a webhook (i.e. keep the most recent x deliveries)'
 
 [cron.cleanup_packages]
 description = 'Cleanup expired packages'
@@ -2309,7 +2368,7 @@ default = '@midnight'
 description = 'Time interval for job to run'
 [cron.cleanup_packages.OLDER_THAN]
 default = '24h'
-description = 'Unreferenced blobs created more than OLDER_THAN ago are subject to deletion'
+description = 'Unreferenced blobs created more than `OLDER_THAN` ago are subject to deletion'
 
 [cron.delete_inactive_accounts]
 description = 'Delete all unactivated accounts'
@@ -2349,8 +2408,8 @@ default = '@every 72h'
 default = '60s'
 [cron.git_gc_repos.ARGS]
 description = '''
-Arguments for command 'git gc'
-The default value is same with [git] -> GC_ARGS
+Arguments for command `git gc`.
+The default value is same as `git.GC_ARGS`
 '''
 
 [cron.resync_all_sshkeys]
@@ -2510,7 +2569,6 @@ description = '''The first locale will be used as the default if user browser's 
 [i18n.NAMES]
 default = 'English,简体中文,繁體中文（香港）,繁體中文（台灣）,Deutsch,Plattdüütsch,Français,Nederlands,Latviešu,Русский,Українська,日本語,Español,Português do Brasil,Português de Portugal,Polski,Български,Italiano,Suomi,Filipino,Esperanto,Türkçe,Čeština,Slovenščina,Svenska,한국어,Ελληνικά,فارسی,Magyar nyelv,Bahasa Indonesia'
 
-
 [other]
 description = '''
 Extension mapping to highlight class
@@ -2527,7 +2585,7 @@ default = true
 description = 'Show the "powered by" text in the footer'
 [other.ENABLE_SITEMAP]
 default = true
-description = 'Generate sitemap. Defaults to `true`'
+description = 'Generate sitemap'
 [other.ENABLE_FEED]
 default = true
 description = 'Enable/Disable RSS/Atom feed'
@@ -2575,9 +2633,10 @@ description = '''Don't pass the file on STDIN, pass the filename as argument ins
 default = 'sanitized'
 description = '''
 How the content will be rendered.
-* `sanitized`: Sanitize the content and render it inside current page, default to only allow a few HTML tags and attributes. Customized sanitizer rules can be defined in [markup.sanitizer.*] .
-* `no-sanitizer`: Disable the sanitizer and render the content inside current page. It's **insecure** and may lead to XSS attack if the content contains malicious code.
-* `iframe`: Render the content in a separate standalone page and embed it into current page by iframe. The iframe is in sandbox mode with same-origin disabled, and the JS code are safely isolated from parent page
+
+- `sanitized`: Sanitize the content and render it inside current page, default to only allow a few HTML tags and attributes. Customized sanitizer rules can be defined in [markup.sanitizer.*] .
+- `no-sanitizer`: Disable the sanitizer and render the content inside current page. It's **insecure** and may lead to XSS attack if the content contains malicious code.
+- `iframe`: Render the content in a separate standalone page and embed it into current page by iframe. The iframe is in sandbox mode with same-origin disabled, and the JS code are safely isolated from parent page
 '''
 
 [metrics.ENABLED]
@@ -2602,19 +2661,19 @@ description = 'Backoff time per http/https request retry (seconds)'
 description = '''
 Allowed domains for migrating, default is blank. Blank means everything will be allowed.
 Multiple domains could be separated by commas.
-Wildcard is supported: "github.com, *.github.com"
+Wildcard is supported: `github.com, *.github.com`.
 '''
 [migrations.BLOCKED_DOMAINS]
 description = '''
 Blocklist for migrating, default is blank. Multiple domains could be separated by commas.
-When ALLOWED_DOMAINS is not blank, this option has a higher priority to deny domains.
-Wildcard is supported
+When `ALLOWED_DOMAINS` is not blank, this option has a higher priority to deny domains.
+Wildcard is supported.
 '''
 [migrations.ALLOW_LOCALNETWORKS]
 default = false
 description = '''
 Allow private addresses defined by RFC 1918, RFC 1122, RFC 4632 and RFC 4291 (false by default)
-If a domain is allowed by ALLOWED_DOMAINS, this option will be ignored
+If a domain is allowed by `ALLOWED_DOMAINS`, this option will be ignored.
 '''
 [migrations.SKIP_TLS_VERIFY]
 default = false
@@ -2659,7 +2718,7 @@ default = 'packages/'
 description = 'override the minio base path if storage type is minio'
 [packages.CHUNKED_UPLOAD_PATH]
 default = 'tmp/package-upload'
-description = 'Path for chunked uploads. Defaults to APP_DATA_PATH + `tmp/package-upload`'
+description = 'Path for chunked uploads. Defaults to _`AppDataPath`_`/tmp/package-upload`'
 [packages.LIMIT_TOTAL_OWNER_COUNT]
 default = -1
 description = 'Maximum count of package versions a single owner can have (`-1` means no limits)'
@@ -2733,36 +2792,24 @@ description = 'Maximum size of a Vagrant upload (`-1` means no limits, format `1
 default = false
 description = 'Enable RPM re-signing by default. (It will overwrite the old signature ,using v4 format, not compatible with CentOS 6 or older)'
 
-[storage]
-description = 'default storage for attachments, lfs and avatars'
-[storage.STORAGE_TYPE]
-default = 'local'
-description = 'storage type'
-
 [repo-archive]
 description = 'repo-archive storage will override storage'
 [repo-archive.STORAGE_TYPE]
 default = 'local'
 [repo-archive.PATH]
-default = 'data/repo-archive'
-description = 'Where your lfs files reside, default is data/lfs'
+default = '%(APP_DATA_PATH)s/repo-archive'
+description = 'Where your repo-archive files reside'
 [repo-archive.MINIO_BASE_PATH]
 default = 'repo-archive/'
 description = 'override the minio base path if storage type is minio'
-
-[storage.repo-archive]
-description = 'settings for repository archives, will override storage setting'
-[storage.repo-archive.STORAGE_TYPE]
-default = 'local'
-description = 'storage type'
 
 [lfs]
 description = 'lfs storage will override storage'
 [lfs.STORAGE_TYPE]
 default = 'local'
 [lfs.PATH]
-default = 'data/lfs'
-description = 'Where your lfs files reside, default is data/lfs'
+default = '%(APP_DATA_PATH)s/lfs'
+description = 'Where your LFS files reside'
 [lfs.MINIO_BASE_PATH]
 default = 'lfs/'
 description = 'override the minio base path if storage type is minio'
@@ -2776,61 +2823,12 @@ description = 'Limit the number of pointers in each batch request to this number
 default = 8
 description = 'Limit the number of concurrent upload/download operations within a batch'
 
-[storage.packages]
-description = 'settings for packages, will override storage setting'
-[storage.packages.STORAGE_TYPE]
-default = 'local'
-description = 'storage type'
-
-[storage.my_minio]
-description = 'customize storage'
-[storage.my_minio.STORAGE_TYPE]
-default = 'minio'
-[storage.my_minio.MINIO_ENDPOINT]
-default = 'localhost:9000'
-description = 'Minio endpoint to connect only available when STORAGE_TYPE is `minio`'
-[storage.my_minio.MINIO_ACCESS_KEY_ID]
-description = '''
-Minio accessKeyID to connect only available when STORAGE_TYPE is `minio`.
-If not provided and STORAGE_TYPE is `minio`, will search for credentials in known
-environment variables (MINIO_ACCESS_KEY_ID, AWS_ACCESS_KEY_ID), credentials files
-(~/.mc/config.json, ~/.aws/credentials), and EC2 instance metadata
-'''
-[storage.my_minio.MINIO_SECRET_ACCESS_KEY]
-description = 'Minio secretAccessKey to connect only available when STORAGE_TYPE is `minio`'
-[storage.my_minio.MINIO_BUCKET]
-default = 'gitea'
-description = 'Minio bucket to store the attachments only available when STORAGE_TYPE is `minio`'
-[storage.my_minio.MINIO_BUCKET_LOOKUP]
-description = '''
-Url lookup for the minio bucket only available when STORAGE_TYPE is `minio`
-Available values: auto, dns, path
-If empty, it behaves the same as "auto" was set
-'''
-[storage.my_minio.MINIO_LOCATION]
-default = 'us-east-1'
-description = 'Minio location to create bucket only available when STORAGE_TYPE is `minio`'
-[storage.my_minio.MINIO_USE_SSL]
-default = false
-description = 'Minio enabled ssl only available when STORAGE_TYPE is `minio`'
-[storage.my_minio.MINIO_INSECURE_SKIP_VERIFY]
-default = false
-description = 'Minio skip SSL verification available when STORAGE_TYPE is `minio`'
-
-[proxy.PROXY_ENABLED]
-default = false
-description = 'Enable the proxy, all requests to external via HTTP will be affected'
-[proxy.PROXY_URL]
-description = 'Proxy server URL, support http://, https//, socks://, blank will follow environment http_proxy/https_proxy/no_proxy'
-[proxy.PROXY_HOSTS]
-description = 'Comma separated list of host names requiring proxy. Glob patterns (*) are accepted; use ** to match all hosts'
-
 [actions.ENABLED]
 default = true
 description = 'Enable/Disable actions capabilities'
 [actions.DEFAULT_ACTIONS_URL]
 default = 'https://code.forgejo.org'
-description = 'Default address to get action plugins, e.g. the default value means downloading from "https://code.forgejo.org/actions/checkout" for "uses: actions/checkout@v3"'
+description = 'Default address to get action plugins, e.g. the default value means downloading from `https://code.forgejo.org/actions/checkout` for `uses: actions/checkout@v3`'
 [actions.LOG_RETENTION_DAYS]
 default = 365
 description = 'Logs retention time in days. Old logs will be deleted after this period'
@@ -2862,6 +2860,59 @@ description = 'Strings committers can place inside a commit message or PR title 
 default = 10
 description = 'Limit on inputs for manual / workflow_dispatch triggers, default is 10'
 
+[storage]
+description = 'default storage for attachments, lfs and avatars'
+[storage.STORAGE_TYPE]
+default = 'local'
+description = 'storage type'
+
+[storage.my_minio]
+description = 'customize storage'
+[storage.my_minio.STORAGE_TYPE]
+default = 'minio'
+[storage.my_minio.MINIO_ENDPOINT]
+default = 'localhost:9000'
+description = 'Minio endpoint to connect only available when `STORAGE_TYPE` is `minio`'
+[storage.my_minio.MINIO_ACCESS_KEY_ID]
+description = '''
+Minio accessKeyID to connect only available when `STORAGE_TYPE` is `minio`.
+If not provided and `STORAGE_TYPE` is `minio`, will search for credentials in known
+environment variables (`$MINIO_ACCESS_KEY_ID`, `$AWS_ACCESS_KEY_ID`), credentials files
+(`~/.mc/config.json`, `~/.aws/credentials`), and EC2 instance metadata.
+'''
+[storage.my_minio.MINIO_SECRET_ACCESS_KEY]
+description = 'Minio secretAccessKey to connect only available when `STORAGE_TYPE` is `minio`'
+[storage.my_minio.MINIO_BUCKET]
+default = 'gitea'
+description = 'Minio bucket to store the attachments only available when `STORAGE_TYPE` is `minio`'
+[storage.my_minio.MINIO_BUCKET_LOOKUP]
+description = '''
+URL lookup for the minio bucket only available when `STORAGE_TYPE` is `minio`.
+Available values: `auto`, `dns`, `path`.
+If empty, it behaves the same as `auto` was set
+'''
+[storage.my_minio.MINIO_LOCATION]
+default = 'us-east-1'
+description = 'Minio location to create bucket only available when `STORAGE_TYPE` is `minio`'
+[storage.my_minio.MINIO_USE_SSL]
+default = false
+description = 'Minio enabled ssl only available when `STORAGE_TYPE` is `minio`'
+[storage.my_minio.MINIO_INSECURE_SKIP_VERIFY]
+default = false
+description = 'Minio skip SSL verification available when `STORAGE_TYPE` is `minio`'
+
+[storage.packages]
+description = 'settings for packages, will override storage setting'
+[storage.packages.STORAGE_TYPE]
+default = 'local'
+description = 'storage type'
+
+[storage.repo-archive]
+description = 'settings for repository archives, will override storage setting'
+[storage.repo-archive.STORAGE_TYPE]
+default = 'local'
+description = 'storage type'
+
 [storage.actions_log]
 description = 'settings for action logs, will override storage setting'
 [storage.actions_log.STORAGE_TYPE]
@@ -2873,3 +2924,11 @@ description = 'settings for action artifacts, will override storage setting'
 [storage.actions_artifacts.STORAGE_TYPE]
 default = 'local'
 description = 'storage type'
+
+[proxy.PROXY_ENABLED]
+default = false
+description = 'Enable the proxy, all requests to external via HTTP will be affected'
+[proxy.PROXY_URL]
+description = 'Proxy server URL, support http://, https//, socks://, blank will follow environment http_proxy/https_proxy/no_proxy'
+[proxy.PROXY_HOSTS]
+description = 'Comma separated list of host names requiring proxy. Glob patterns (`*`) are accepted; use `**` to match all hosts.'
