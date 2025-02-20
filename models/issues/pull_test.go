@@ -276,18 +276,18 @@ func TestGetPullRequestsByBaseHeadInfo(t *testing.T) {
 		},
 	)()
 	require.NoError(t, unittest.PrepareTestDatabase())
-	openPr, err := issues_model.GetPullRequestByBaseHeadInfo(db.DefaultContext, 63, 63, "main", "branch2", optional.Some(false))
+	openPr, err := issues_model.GetPullRequestByBaseHeadInfo(db.DefaultContext, 1000, 1000, "main", "branch2", optional.Some(false))
 	require.NoError(t, err)
-	assert.Equal(t, int64(11), openPr.ID)
+	assert.Equal(t, int64(1000), openPr.ID)
 
-	closedPr, err := issues_model.GetPullRequestByBaseHeadInfo(db.DefaultContext, 63, 63, "main", "branch2", optional.Some(true))
+	closedPr, err := issues_model.GetPullRequestByBaseHeadInfo(db.DefaultContext, 1000, 1000, "main", "branch2", optional.Some(true))
 	require.NoError(t, err)
-	assert.Equal(t, int64(12), closedPr.ID)
+	assert.Equal(t, int64(1001), closedPr.ID)
 
 	// This should return the first PR regardless of state
-	anyPr, err := issues_model.GetPullRequestByBaseHeadInfo(db.DefaultContext, 63, 63, "main", "branch2", optional.None[bool]())
+	anyPr, err := issues_model.GetPullRequestByBaseHeadInfo(db.DefaultContext, 1000, 1000, "main", "branch2", optional.None[bool]())
 	require.NoError(t, err)
-	assert.Equal(t, int64(11), anyPr.ID)
+	assert.Equal(t, int64(1000), anyPr.ID)
 }
 
 func TestGetPullRequestByIndex(t *testing.T) {

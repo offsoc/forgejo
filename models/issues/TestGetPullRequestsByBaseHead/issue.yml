@@ -1,6 +1,6 @@
 -
-  id: 23
-  repo_id: 63
+  id: 1000
+  repo_id: 1000
   index: 1
   poster_id: 40
   original_author_id: 0
@@ -15,8 +15,8 @@
   updated_unix: 1707270422
   is_locked: false
 -
-  id: 24
-  repo_id: 63
+  id: 1001
+  repo_id: 1000
   index: 2
   poster_id: 40
   original_author_id: 0
