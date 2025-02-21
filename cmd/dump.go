@@ -6,7 +6,7 @@ package cmd
 
 import (
 	"fmt"
-	"io"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -21,36 +21,47 @@ import (
 	"code.gitea.io/gitea/modules/util"
 
 	"code.forgejo.org/go-chi/session"
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archives"
 	"github.com/urfave/cli/v2"
 )
 
-func addReader(w archiver.Writer, r io.ReadCloser, info os.FileInfo, customName string, verbose bool) error {
+func addObject(object fs.File, customName string, verbose bool) (archives.FileInfo, error) {
 	if verbose {
-		log.Info("Adding file %s", customName)
+		log.Info("Adding object %s", customName)
 	}
 
-	return w.Write(archiver.File{
-		FileInfo: archiver.FileInfo{
-			FileInfo:   info,
-			CustomName: customName,
+	info, err := object.Stat()
+	if err != nil {
+		return archives.FileInfo{}, err
+	}
+
+	return archives.FileInfo{
+		FileInfo:      info,
+		NameInArchive: customName,
+		Open: func() (fs.File, error) {
+			return object, nil
 		},
-		ReadCloser: r,
-	})
+	}, nil
 }
 
-func addFile(w archiver.Writer, filePath, absPath string, verbose bool) error {
-	file, err := os.Open(absPath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	fileInfo, err := file.Stat()
-	if err != nil {
-		return err
+func addFile(filePath, absPath string, verbose bool) (archives.FileInfo, error) {
+	if verbose {
+		log.Info("Adding file %s", filePath)
 	}
 
-	return addReader(w, file, fileInfo, filePath, verbose)
+	info, err := os.Stat(absPath)
+	if err != nil {
+		return archives.FileInfo{}, err
+	}
+
+	return archives.FileInfo{
+		FileInfo:      info,
+		NameInArchive: filePath,
+		Open: func() (fs.File, error) {
+			// Only open the file when it's needed
+			return os.Open(absPath)
+		},
+	}, nil
 }
 
 func isSubdir(upper, lower string) (bool, error) {
@@ -93,6 +104,54 @@ func (o outputType) String() string {
 var outputTypeEnum = &outputType{
 	Enum:    []string{"zip", "tar", "tar.sz", "tar.gz", "tar.xz", "tar.bz2", "tar.br", "tar.lz4", "tar.zst"},
 	Default: "zip",
+}
+
+func getArchiverByType(outType string) (archives.Archiver, error) {
+	var archiver archives.Archiver
+	switch outType {
+	case "zip":
+		archiver = archives.Zip{}
+	case "tar":
+		archiver = archives.Tar{}
+	case "tar.sz":
+		archiver = archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Sz{},
+		}
+	case "tar.gz":
+		archiver = archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Gz{},
+		}
+	case "tar.xz":
+		archiver = archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Xz{},
+		}
+	case "tar.bz2":
+		archiver = archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Bz2{},
+		}
+	case "tar.br":
+		archiver = archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Brotli{},
+		}
+	case "tar.lz4":
+		archiver = archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Lz4{},
+		}
+	case "tar.zst":
+		archiver = archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Zstd{},
+		}
+	default:
+		return nil, fmt.Errorf("unsupported output type: %s", outType)
+	}
+	return archiver, nil
 }
 
 // CmdDump represents the available dump sub-command.
@@ -247,41 +306,34 @@ func runDump(ctx *cli.Context) error {
 		return err
 	}
 
-	var iface any
-	if fileName == "-" {
-		iface, err = archiver.ByExtension(fmt.Sprintf(".%s", outType))
-	} else {
-		iface, err = archiver.ByExtension(fileName)
-	}
+	var files []archives.FileInfo
+	archiver, err := getArchiverByType(outType)
 	if err != nil {
 		fatal("Failed to get archiver for extension: %v", err)
 	}
-
-	w, _ := iface.(archiver.Writer)
-	if err := w.Create(file); err != nil {
-		fatal("Creating archiver.Writer failed: %v", err)
-	}
-	defer w.Close()
 
 	if ctx.IsSet("skip-repository") && ctx.Bool("skip-repository") {
 		log.Info("Skipping local repositories")
 	} else {
 		log.Info("Dumping local repositories... %s", setting.RepoRootPath)
-		if err := addRecursiveExclude(w, "repos", setting.RepoRootPath, []string{absFileName}, verbose); err != nil {
+		l, err := addRecursiveExclude("repos", setting.RepoRootPath, []string{absFileName}, verbose)
+		if err != nil {
 			fatal("Failed to include repositories: %v", err)
 		}
+		files = append(files, l...)
 
 		if ctx.IsSet("skip-lfs-data") && ctx.Bool("skip-lfs-data") {
 			log.Info("Skipping LFS data")
 		} else if !setting.LFS.StartServer {
 			log.Info("LFS not enabled - skipping")
 		} else if err := storage.LFS.IterateObjects("", func(objPath string, object storage.Object) error {
-			info, err := object.Stat()
+			f, err := addObject(object, path.Join("data", "lfs", objPath), verbose)
 			if err != nil {
 				return err
 			}
 
-			return addReader(w, object, info, path.Join("data", "lfs", objPath), verbose)
+			files = append(files, f)
+			return nil
 		}); err != nil {
 			fatal("Failed to dump LFS objects: %v", err)
 		}
@@ -314,15 +366,19 @@ func runDump(ctx *cli.Context) error {
 		fatal("Failed to dump database: %v", err)
 	}
 
-	if err := addFile(w, "forgejo-db.sql", dbDump.Name(), verbose); err != nil {
+	f, err := addFile("forgejo-db.sql", dbDump.Name(), verbose)
+	if err != nil {
 		fatal("Failed to include forgejo-db.sql: %v", err)
 	}
+	files = append(files, f)
 
 	if len(setting.CustomConf) > 0 {
 		log.Info("Adding custom configuration file from %s", setting.CustomConf)
-		if err := addFile(w, "app.ini", setting.CustomConf, verbose); err != nil {
+		f, err := addFile("app.ini", setting.CustomConf, verbose)
+		if err != nil {
 			fatal("Failed to include specified app.ini: %v", err)
 		}
+		files = append(files, f)
 	}
 
 	if ctx.IsSet("skip-custom-dir") && ctx.Bool("skip-custom-dir") {
@@ -331,9 +387,11 @@ func runDump(ctx *cli.Context) error {
 		customDir, err := os.Stat(setting.CustomPath)
 		if err == nil && customDir.IsDir() {
 			if is, _ := isSubdir(setting.AppDataPath, setting.CustomPath); !is {
-				if err := addRecursiveExclude(w, "custom", setting.CustomPath, []string{absFileName}, verbose); err != nil {
+				l, err := addRecursiveExclude("custom", setting.CustomPath, []string{absFileName}, verbose)
+				if err != nil {
 					fatal("Failed to include custom: %v", err)
 				}
+				files = append(files, l...)
 			} else {
 				log.Info("Custom dir %s is inside data dir %s, skipping", setting.CustomPath, setting.AppDataPath)
 			}
@@ -375,20 +433,23 @@ func runDump(ctx *cli.Context) error {
 		excludes = append(excludes, setting.Packages.Storage.Path)
 		excludes = append(excludes, setting.Log.RootPath)
 		excludes = append(excludes, absFileName)
-		if err := addRecursiveExclude(w, "data", setting.AppDataPath, excludes, verbose); err != nil {
+		l, err := addRecursiveExclude("data", setting.AppDataPath, excludes, verbose)
+		if err != nil {
 			fatal("Failed to include data directory: %v", err)
 		}
+		files = append(files, l...)
 	}
 
 	if ctx.IsSet("skip-attachment-data") && ctx.Bool("skip-attachment-data") {
 		log.Info("Skipping attachment data")
 	} else if err := storage.Attachments.IterateObjects("", func(objPath string, object storage.Object) error {
-		info, err := object.Stat()
+		f, err := addObject(object, path.Join("data", "attachments", objPath), verbose)
 		if err != nil {
 			return err
 		}
 
-		return addReader(w, object, info, path.Join("data", "attachments", objPath), verbose)
+		files = append(files, f)
+		return nil
 	}); err != nil {
 		fatal("Failed to dump attachments: %v", err)
 	}
@@ -398,12 +459,13 @@ func runDump(ctx *cli.Context) error {
 	} else if !setting.Packages.Enabled {
 		log.Info("Package registry not enabled - skipping")
 	} else if err := storage.Packages.IterateObjects("", func(objPath string, object storage.Object) error {
-		info, err := object.Stat()
+		f, err := addObject(object, path.Join("data", "packages", objPath), verbose)
 		if err != nil {
 			return err
 		}
 
-		return addReader(w, object, info, path.Join("data", "packages", objPath), verbose)
+		files = append(files, f)
+		return nil
 	}); err != nil {
 		fatal("Failed to dump packages: %v", err)
 	}
@@ -419,47 +481,50 @@ func runDump(ctx *cli.Context) error {
 			log.Error("Failed to check if %s exists: %v", setting.Log.RootPath, err)
 		}
 		if isExist {
-			if err := addRecursiveExclude(w, "log", setting.Log.RootPath, []string{absFileName}, verbose); err != nil {
+			l, err := addRecursiveExclude("log", setting.Log.RootPath, []string{absFileName}, verbose)
+			if err != nil {
 				fatal("Failed to include log: %v", err)
 			}
+			files = append(files, l...)
 		}
 	}
 
-	if fileName != "-" {
-		if err = w.Close(); err != nil {
-			_ = util.Remove(fileName)
-			fatal("Failed to save %s: %v", fileName, err)
-		}
+	if err := archiver.Archive(ctx.Context, file, files); err != nil {
+		_ = util.Remove(fileName)
 
+		fatal("Archiving failed: %v", err)
+	}
+
+	if fileName != "-" {
 		if err := os.Chmod(fileName, 0o600); err != nil {
 			log.Info("Can't change file access permissions mask to 0600: %v", err)
 		}
-	}
 
-	if fileName != "-" {
-		log.Info("Finish dumping in file %s", fileName)
+		log.Info("Finished dumping in file %s", fileName)
 	} else {
-		log.Info("Finish dumping to stdout")
+		log.Info("Finished dumping to stdout")
 	}
 
 	return nil
 }
 
 // addRecursiveExclude zips absPath to specified insidePath inside writer excluding excludeAbsPath
-func addRecursiveExclude(w archiver.Writer, insidePath, absPath string, excludeAbsPath []string, verbose bool) error {
+// archives.FilesFromDisk doesn't support excluding files, so we have to do it manually
+func addRecursiveExclude(insidePath, absPath string, excludeAbsPath []string, verbose bool) ([]archives.FileInfo, error) {
+	var list []archives.FileInfo
 	absPath, err := filepath.Abs(absPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	dir, err := os.Open(absPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer dir.Close()
 
 	files, err := dir.Readdir(0)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for _, file := range files {
 		currentAbsPath := filepath.Join(absPath, file.Name())
@@ -471,32 +536,39 @@ func addRecursiveExclude(w archiver.Writer, insidePath, absPath string, excludeA
 		}
 
 		if file.IsDir() {
-			if err := addFile(w, currentInsidePath, currentAbsPath, false); err != nil {
-				return err
+			f, err := addFile(currentInsidePath, currentAbsPath, false)
+			if err != nil {
+				return nil, err
 			}
-			if err = addRecursiveExclude(w, currentInsidePath, currentAbsPath, excludeAbsPath, verbose); err != nil {
-				return err
+			list = append(list, f)
+
+			l, err := addRecursiveExclude(currentInsidePath, currentAbsPath, excludeAbsPath, verbose)
+			if err != nil {
+				return nil, err
 			}
+			list = append(list, l...)
 		} else {
 			// only copy regular files and symlink regular files, skip non-regular files like socket/pipe/...
 			shouldAdd := file.Mode().IsRegular()
 			if !shouldAdd && file.Mode()&os.ModeSymlink == os.ModeSymlink {
 				target, err := filepath.EvalSymlinks(currentAbsPath)
 				if err != nil {
-					return err
+					return nil, err
 				}
 				targetStat, err := os.Stat(target)
 				if err != nil {
-					return err
+					return nil, err
 				}
 				shouldAdd = targetStat.Mode().IsRegular()
 			}
 			if shouldAdd {
-				if err = addFile(w, currentInsidePath, currentAbsPath, verbose); err != nil {
-					return err
+				f, err := addFile(currentInsidePath, currentAbsPath, verbose)
+				if err != nil {
+					return nil, err
 				}
+				list = append(list, f)
 			}
 		}
 	}
-	return nil
+	return list, nil
 }
