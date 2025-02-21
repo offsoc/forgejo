@@ -173,7 +173,7 @@ GO_DIRS := build cmd models modules routers services tests
 WEB_DIRS := web_src/js web_src/css
 
 STYLELINT_FILES := web_src/css web_src/js/components/*.vue
-SPELLCHECK_FILES := $(GO_DIRS) $(WEB_DIRS) docs/content templates options/locale/locale_en-US.ini .github $(wildcard *.go *.js *.ts *.vue *.md *.yml *.yaml *.toml)
+SPELLCHECK_FILES := $(GO_DIRS) $(WEB_DIRS) docs/content templates options/locale/locale_en-US.ini .github $(wildcard *.go *.js *.ts *.vue *.md *.yml *.yaml)
 
 GO_SOURCES := $(wildcard *.go)
 GO_SOURCES += $(shell find $(GO_DIRS) -type f -name "*.go" ! -path modules/options/bindata.go ! -path modules/public/bindata.go ! -path modules/templates/bindata.go)
@@ -431,16 +431,16 @@ lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale li
 lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig lint-disposable-emails-fix
 
 .PHONY: lint-codespell
-lint-codespell:
-	codespell
+lint-codespell: deps-py
+	@poetry run codespell
 
 .PHONY: lint-codespell-fix
-lint-codespell-fix:
-	codespell -w
+lint-codespell-fix: deps-py
+	@poetry run codespell -w
 
 .PHONY: lint-codespell-fix-i
-lint-codespell-fix-i:
-	codespell -w -i 3 -C 2
+lint-codespell-fix-i: deps-py
+	@poetry run codespell -w -i 3 -C 2
 
 .PHONY: lint-js
 lint-js: node_modules

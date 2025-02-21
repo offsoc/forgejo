@@ -69,7 +69,7 @@ func init() {
 }
 
 // GetUserRedirect returns the redirect for a given username, this is a
-// case-insenstive operation.
+// case-insensitive operation.
 func GetUserRedirect(ctx context.Context, userName string) (*Redirect, error) {
 	userName = strings.ToLower(userName)
 	redirect := &Redirect{LowerName: userName}

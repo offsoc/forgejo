@@ -125,7 +125,7 @@ func GrepSearch(ctx context.Context, repo *Repository, search string, opts GrepO
 		// (eg, global pattern = "src/**" and path = "node_modules/")
 
 		// FIXME: this is a bit too restrictive, and fails to consider cases where the
-		// gloabally set include pattern refers to a file than a directory
+		// globally set include pattern refers to a file than a directory
 		// (eg, global pattern = "**.go" and path = "modules/git")
 		exprMatched := false
 		for _, expr := range setting.Indexer.IncludePatterns {

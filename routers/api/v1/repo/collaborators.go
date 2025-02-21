@@ -295,7 +295,7 @@ func GetRepoPermissions(ctx *context.APIContext) {
 	// Only allow the request in any of the following situations:
 	// - The user is the instance admin.
 	// - The user is the repository admin.
-	// - The user is querying the permissiosn of themselves.
+	// - The user is querying the permissions of themselves.
 	if !ctx.IsUserSiteAdmin() && ctx.Doer.ID != collaborator.ID && !ctx.IsUserRepoAdmin() {
 		ctx.Error(http.StatusForbidden, "User", "Only admins can query all permissions, repo admins can query all repo permissions, collaborators can query only their own")
 		return
