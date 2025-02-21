@@ -24,7 +24,7 @@ jobs:
       - uses: https://data.forgejo.org/actions/checkout@v4
       - uses: ./.forgejo/workflows-composite/setup-env
       - run: su forgejo -c 'make deps-backend deps-tools'
-      - run: su forgejo -c 'make --always-make -j$(nproc) lint-backend tidy-check swagger-check fmt-check swagger-validate' # ensure the "go-licenses" make target runs
+      - run: su forgejo -c 'make --always-make -j$(nproc) lint-backend tidy-check swagger-check lint-swagger fmt-check swagger-validate' # ensure the "go-licenses" make target runs
       - uses: ./.forgejo/workflows-composite/build-backend
   frontend-checks:
     if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
