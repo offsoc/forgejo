@@ -113,3 +113,18 @@ func TestAllowBlockList(t *testing.T) {
 	// reset
 	init("", "", false)
 }
+
+func TestURLAllowedSSH(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user2"})
+	sshURL := "ssh://git@git.gay/gitgay/forgejo"
+
+	t.Run("Migrate URL", func(t *testing.T) {
+		require.Error(t, IsMigrateURLAllowed(sshURL, user))
+	})
+
+	t.Run("Pushmirror URL", func(t *testing.T) {
+		require.NoError(t, IsPushMirrorURLAllowed(sshURL, user))
+	})
+}
