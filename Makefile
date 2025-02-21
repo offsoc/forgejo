@@ -46,9 +46,9 @@ SWAGGER_PACKAGE ?= github.com/go-swagger/go-swagger/cmd/swagger@v0.31.0 # renova
 XGO_PACKAGE ?= src.techknowlogick.com/xgo@latest
 GO_LICENSES_PACKAGE ?= github.com/google/go-licenses@v1.6.0 # renovate: datasource=go
 GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasource=go
-DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.29.0 # renovate: datasource=go
+DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.30.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
-GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.17.1 # renovate: datasource=go
+GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.18.0 # renovate: datasource=go
 RENOVATE_NPM_PACKAGE ?= renovate@39.171.2 # renovate: datasource=docker packageName=data.forgejo.org/renovate/renovate
 
 # https://github.com/disposable-email-domains/disposable-email-domains/commits/main/
@@ -173,7 +173,7 @@ GO_DIRS := build cmd models modules routers services tests
 WEB_DIRS := web_src/js web_src/css
 
 STYLELINT_FILES := web_src/css web_src/js/components/*.vue
-SPELLCHECK_FILES := $(GO_DIRS) $(WEB_DIRS) docs/content templates options/locale/locale_en-US.ini .github $(wildcard *.go *.js *.ts *.vue *.md *.yml *.yaml *.toml)
+SPELLCHECK_FILES := $(GO_DIRS) $(WEB_DIRS) docs/content templates options/locale/locale_en-US.ini .github $(wildcard *.go *.js *.ts *.vue *.md *.yml *.yaml)
 
 GO_SOURCES := $(wildcard *.go)
 GO_SOURCES += $(shell find $(GO_DIRS) -type f -name "*.go" ! -path modules/options/bindata.go ! -path modules/public/bindata.go ! -path modules/templates/bindata.go)
@@ -431,16 +431,16 @@ lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale li
 lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig lint-disposable-emails-fix
 
 .PHONY: lint-codespell
-lint-codespell:
-	codespell
+lint-codespell: deps-py
+	@poetry run codespell
 
 .PHONY: lint-codespell-fix
-lint-codespell-fix:
-	codespell -w
+lint-codespell-fix: deps-py
+	@poetry run codespell -w
 
 .PHONY: lint-codespell-fix-i
-lint-codespell-fix-i:
-	codespell -w -i 3 -C 2
+lint-codespell-fix-i: deps-py
+	@poetry run codespell -w -i 3 -C 2
 
 .PHONY: lint-js
 lint-js: node_modules

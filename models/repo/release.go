@@ -140,7 +140,7 @@ func (r *Release) LoadArchiveDownloadCount(ctx context.Context) error {
 	return err
 }
 
-// GetTotalDownloadCount returns the summary of all dowload count of files attached to the release
+// GetTotalDownloadCount returns the summary of all download count of files attached to the release
 func (r *Release) GetTotalDownloadCount(ctx context.Context) (int64, error) {
 	var archiveCount int64
 	if !r.HideArchiveLinks {
@@ -194,7 +194,7 @@ func (r *Release) SummaryCardURL() string {
 	return fmt.Sprintf("%s/releases/summary-card/%s", r.Repo.HTMLURL(), util.PathEscapeSegments(r.TagName))
 }
 
-// DisplayName retruns the name of the release
+// DisplayName returns the name of the release
 func (r *Release) DisplayName() string {
 	if r.IsTag && r.Title == "" {
 		return r.TagName
