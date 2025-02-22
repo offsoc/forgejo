@@ -4,40 +4,32 @@
 package cmd
 
 import (
-	"io"
 	"os"
 	"testing"
 
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archives"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-type mockArchiver struct {
-	addedFiles []string
-}
-
-func (mockArchiver) Create(out io.Writer) error {
-	return nil
-}
-
-func (m *mockArchiver) Write(f archiver.File) error {
-	m.addedFiles = append(m.addedFiles, f.Name())
-	return nil
-}
-
-func (mockArchiver) Close() error {
-	return nil
+func mockArchiverAsync(ch chan archives.ArchiveAsyncJob, files *[]string) {
+	for job := range ch {
+		*files = append(*files, job.File.NameInArchive)
+		job.Result <- nil
+	}
 }
 
 func TestAddRecursiveExclude(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
-		dir := t.TempDir()
-		archiver := &mockArchiver{}
+		ch := make(chan archives.ArchiveAsyncJob)
+		var files []string
+		go mockArchiverAsync(ch, &files)
 
-		err := addRecursiveExclude(archiver, "", dir, []string{}, false)
+		dir := t.TempDir()
+
+		err := addRecursiveExclude(ch, "", dir, []string{}, false)
 		require.NoError(t, err)
-		assert.Empty(t, archiver.addedFiles)
+		assert.Empty(t, files)
 	})
 
 	t.Run("Single file", func(t *testing.T) {
@@ -46,20 +38,25 @@ func TestAddRecursiveExclude(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Run("No exclude", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			ch := make(chan archives.ArchiveAsyncJob)
+			var files []string
+			go mockArchiverAsync(ch, &files)
 
-			err = addRecursiveExclude(archiver, "", dir, nil, false)
+			err := addRecursiveExclude(ch, "", dir, nil, false)
 			require.NoError(t, err)
-			assert.Len(t, archiver.addedFiles, 1)
-			assert.Contains(t, archiver.addedFiles, "example")
+
+			assert.Len(t, files, 1)
+			assert.Contains(t, files, "example")
 		})
 
 		t.Run("With exclude", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			ch := make(chan archives.ArchiveAsyncJob)
+			var files []string
+			go mockArchiverAsync(ch, &files)
 
-			err = addRecursiveExclude(archiver, "", dir, []string{dir + "/example"}, false)
+			err := addRecursiveExclude(ch, "", dir, []string{dir + "/example"}, false)
 			require.NoError(t, err)
-			assert.Empty(t, archiver.addedFiles)
+			assert.Empty(t, files)
 		})
 	})
 
@@ -73,46 +70,57 @@ func TestAddRecursiveExclude(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Run("No exclude", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			ch := make(chan archives.ArchiveAsyncJob)
+			var files []string
+			go mockArchiverAsync(ch, &files)
 
-			err = addRecursiveExclude(archiver, "", dir, nil, false)
+			err := addRecursiveExclude(ch, "", dir, nil, false)
 			require.NoError(t, err)
-			assert.Len(t, archiver.addedFiles, 5)
-			assert.Contains(t, archiver.addedFiles, "deep")
-			assert.Contains(t, archiver.addedFiles, "deep/nested")
-			assert.Contains(t, archiver.addedFiles, "deep/nested/folder")
-			assert.Contains(t, archiver.addedFiles, "deep/nested/folder/example")
-			assert.Contains(t, archiver.addedFiles, "deep/nested/folder/another-file")
+			assert.Len(t, files, 5)
+
+			assert.Contains(t, files, "deep")
+			assert.Contains(t, files, "deep/nested")
+			assert.Contains(t, files, "deep/nested/folder")
+			assert.Contains(t, files, "deep/nested/folder/example")
+			assert.Contains(t, files, "deep/nested/folder/another-file")
 		})
 
 		t.Run("Exclude first directory", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			ch := make(chan archives.ArchiveAsyncJob)
+			var files []string
+			go mockArchiverAsync(ch, &files)
 
-			err = addRecursiveExclude(archiver, "", dir, []string{dir + "/deep"}, false)
+			err := addRecursiveExclude(ch, "", dir, []string{dir + "/deep"}, false)
 			require.NoError(t, err)
-			assert.Empty(t, archiver.addedFiles)
+			assert.Empty(t, files)
 		})
 
 		t.Run("Exclude nested directory", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			ch := make(chan archives.ArchiveAsyncJob)
+			var files []string
+			go mockArchiverAsync(ch, &files)
 
-			err = addRecursiveExclude(archiver, "", dir, []string{dir + "/deep/nested/folder"}, false)
+			err := addRecursiveExclude(ch, "", dir, []string{dir + "/deep/nested/folder"}, false)
 			require.NoError(t, err)
-			assert.Len(t, archiver.addedFiles, 2)
-			assert.Contains(t, archiver.addedFiles, "deep")
-			assert.Contains(t, archiver.addedFiles, "deep/nested")
+			assert.Len(t, files, 2)
+
+			assert.Contains(t, files, "deep")
+			assert.Contains(t, files, "deep/nested")
 		})
 
 		t.Run("Exclude file", func(t *testing.T) {
-			archiver := &mockArchiver{}
+			ch := make(chan archives.ArchiveAsyncJob)
+			var files []string
+			go mockArchiverAsync(ch, &files)
 
-			err = addRecursiveExclude(archiver, "", dir, []string{dir + "/deep/nested/folder/example"}, false)
+			err := addRecursiveExclude(ch, "", dir, []string{dir + "/deep/nested/folder/example"}, false)
 			require.NoError(t, err)
-			assert.Len(t, archiver.addedFiles, 4)
-			assert.Contains(t, archiver.addedFiles, "deep")
-			assert.Contains(t, archiver.addedFiles, "deep/nested")
-			assert.Contains(t, archiver.addedFiles, "deep/nested/folder")
-			assert.Contains(t, archiver.addedFiles, "deep/nested/folder/another-file")
+			assert.Len(t, files, 4)
+
+			assert.Contains(t, files, "deep")
+			assert.Contains(t, files, "deep/nested")
+			assert.Contains(t, files, "deep/nested/folder")
+			assert.Contains(t, files, "deep/nested/folder/another-file")
 		})
 	})
 }
