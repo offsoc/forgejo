@@ -1,6 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024-2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package user
@@ -156,6 +156,9 @@ type User struct {
 	KeepActivityPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	KeepPronounsPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	EnableRepoUnitHints bool   `xorm:"NOT NULL DEFAULT true"`
+
+	// If you add new fields that might be used to store abusive content (mainly string fields),
+	// please also add them in the UserData struct and the corresponding constructor.
 }
 
 func init() {
@@ -935,7 +938,7 @@ func UpdateUserCols(ctx context.Context, u *User, cols ...string) error {
 		return err
 	}
 
-	if err := IfNeededCreateShadowCopyForUser(ctx, u); err != nil {
+	if err := IfNeededCreateShadowCopyForUser(ctx, u, cols...); err != nil {
 		return err
 	}
 
