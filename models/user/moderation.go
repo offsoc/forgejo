@@ -11,8 +11,8 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 )
 
-// UserContent represents a trimmed down user that is used for preserving only the fields needed for abusive content reports.
-type UserContent struct {
+// UserData represents a trimmed down user that is used for preserving only the fields needed for abusive content reports.
+type UserData struct {
 	Name                   string
 	FullName               string
 	Email                  string
@@ -29,10 +29,10 @@ type UserContent struct {
 	NormalizedFederatedURI string
 }
 
-// newUserContent creates a trimmed down user to be used just to create a JSON structure
+// newUserData creates a trimmed down user to be used just to create a JSON structure
 // (keeping only the fields relevant for moderation purposes)
-func newUserContent(user *User) UserContent {
-	return UserContent{
+func newUserData(user *User) UserData {
+	return UserData{
 		Name:          user.Name,
 		FullName:      user.FullName,
 		Email:         user.Email,
@@ -54,7 +54,7 @@ func newUserContent(user *User) UserContent {
 // This function should be called when a user is deleted or updated.
 func IfNeededCreateShadowCopyForUser(ctx context.Context, user *User) error {
 	if moderation.IsReported(ctx, moderation.ReportedContentTypeUser, user.ID) {
-		userContent := newUserContent(user)
+		userContent := newUserData(user)
 		content, _ := json.Marshal(userContent)
 		return moderation.CreateShadowCopyForUser(ctx, user.ID, string(content))
 	}
