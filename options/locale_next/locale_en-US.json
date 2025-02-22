@@ -1,4 +1,9 @@
 {
+	"home.welcome.no_activity": "No activity",
+	"home.welcome.activity_hint": "There is nothing in your feed yet. Your actions and activity from repositories that you watch will show up here.",
+	"home.explore_repos": "Explore repositories",
+	"home.explore_users": "Explore users",
+	"home.explore_orgs": "Explore organizations",
 	"repo.pulls.merged_title_desc": {
 		"one": "merged %[1]d commit from <code>%[2]s</code> into <code>%[3]s</code> %[4]s",
 		"other": "merged %[1]d commits from <code>%[2]s</code> into <code>%[3]s</code> %[4]s"

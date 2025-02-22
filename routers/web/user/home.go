@@ -90,6 +90,8 @@ func Dashboard(ctx *context.Context) {
 	cnt, _ := organization.GetOrganizationCount(ctx, ctxUser)
 	ctx.Data["UserOrgsCount"] = cnt
 	ctx.Data["MirrorsEnabled"] = setting.Mirror.Enabled
+	ctx.Data["UsersPageIsDisabled"] = setting.Service.Explore.DisableUsersPage
+	ctx.Data["OrganizationsPageIsDisabled"] = setting.Service.Explore.DisableOrganizationsPage
 	ctx.Data["Date"] = date
 
 	var uid int64
