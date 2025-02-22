@@ -15,9 +15,9 @@ import (
 )
 
 type AbuseReportShadowCopy struct {
-	ID          int64 `xorm:"pk autoincr"`
-	RawValue    string
-	CreatedUnix timeutil.TimeStamp `xorm:"created"`
+	ID          int64              `xorm:"pk autoincr"`
+	RawValue    string             `xorm:"NOT NULL"`
+	CreatedUnix timeutil.TimeStamp `xorm:"created NOT NULL"`
 }
 
 func init() {
@@ -47,7 +47,7 @@ func createShadowCopy(ctx context.Context, contentType ReportedContentType, cont
 	err := db.WithTx(ctx, func(ctx context.Context) error {
 		sess := db.GetEngine(ctx)
 
-		notLinkedFound, err := sess.Cols("id").Where("shadow_copy_id = 0").Exist(
+		notLinkedFound, err := sess.Cols("id").Where(builder.IsNull{"shadow_copy_id"}).Exist(
 			&AbuseReport{ContentType: contentType, ContentID: contentID},
 		)
 		if err != nil {
@@ -65,16 +65,13 @@ func createShadowCopy(ctx context.Context, contentType ReportedContentType, cont
 			log.Warn("Something went wrong while trying to create the shadow copy for reported content with type %d and ID %d.", contentType, contentID)
 		}
 
-		affected, err = sess.Where(builder.Eq{
+		_, err = sess.Where(builder.Eq{
 			"content_type": contentType,
 			"content_id":   contentID,
 			// TODO: What should happen if an item is updated multiple times (and the reports already have a shadow copy ID)?
-			"shadow_copy_id": 0,
-		}).Cols("shadow_copy_id").Update(&AbuseReport{ShadowCopyID: shadowCopy.ID})
+		}).And(builder.IsNull{"shadow_copy_id"}).Cols("shadow_copy_id").Update(&AbuseReport{ShadowCopyID: &shadowCopy.ID})
 		if err != nil {
 			return fmt.Errorf("Could not link the shadow copy (%d) to reported content with type %d and ID %d. %w", shadowCopy.ID, contentType, contentID, err)
-		} else if affected == 0 {
-			log.Warn("Something went wrong while trying to link the shadow copy (%d) to reported content with type %d and ID %d.", shadowCopy.ID, contentType, contentID)
 		}
 
 		return nil

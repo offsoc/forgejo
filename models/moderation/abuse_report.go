@@ -17,10 +17,22 @@ import (
 type ReportStatusType int //revive:disable-line:exported
 
 const (
-	// ReportStatusTypeNew represents the status of a report that was submitted and no action has been taken for it.
-	ReportStatusTypeNew ReportStatusType = iota + 1 // 1
-	// ReportStatusTypeHandled represents the status of a report that was already handled in some way.
+	// ReportStatusTypeOpen represents the status of open reports that were not yet handled in any way.
+	ReportStatusTypeOpen ReportStatusType = iota + 1 // 1
+	// ReportStatusTypeHandled represents the status of valid reports, that have been acted upon.
 	ReportStatusTypeHandled // 2
+	// ReportStatusTypeIgnored represents the status of ignored reports, that were closed without any action.
+	ReportStatusTypeIgnored // 3
+)
+
+// AbuseCategoryType defines the categories in which a user can include the reported content.
+type AbuseCategoryType int //revive:disable-line:exported
+
+const (
+	AbuseCategoryTypeSpam            AbuseCategoryType = iota + 1 // 1
+	AbuseCategoryTypeMalware                                      // 2
+	AbuseCategoryTypeIllegalContent                               // 3
+	AbuseCategoryTypeOtherViolations                              // 4 (Other violations of platform rules)
 )
 
 // ReportedContentType defines the types of content that can be reported
@@ -48,14 +60,16 @@ type AbuseReport struct {
 	// The ID of the user who submitted the report.
 	ReporterID int64 `xorm:"NOT NULL"` // index ?!
 	// Reported content type: user/organization profile, repository, issue/pull or comment.
-	ContentType ReportedContentType `xorm:"NOT NULL"`
+	ContentType ReportedContentType `xorm:"INDEX NOT NULL"`
 	// The ID of the reported item (based on ContentType: user, repository, issue or comment).
 	ContentID int64 `xorm:"NOT NULL"`
+	// The abuse category selected by the reporter.
+	Category AbuseCategoryType `xorm:"INDEX NOT NULL"`
 	// Remarks provided by the reporter.
-	Remarks string
+	Remarks string // TODO: ReporterReparks or Reason
 	// The ID of the corresponding shadow-copied content when exists; otherwise null.
-	ShadowCopyID int64              `xorm:"DEFAULT NULL"`
-	CreatedUnix  timeutil.TimeStamp `xorm:"created"`
+	ShadowCopyID *int64             `xorm:"DEFAULT NULL"`
+	CreatedUnix  timeutil.TimeStamp `xorm:"created NOT NULL"`
 }
 
 func init() {
@@ -65,15 +79,14 @@ func init() {
 	db.RegisterModel(new(AbuseReport))
 }
 
-// IsReported returns a boolean value indicating if one or more reports
-// were already submitted for contentType and contentID.
+// IsReported reports whether one or more reports were already submitted for contentType and contentID.
 func IsReported(ctx context.Context, contentType ReportedContentType, contentID int64) bool {
 	// TODO: only consider the reports with 'New' status (and adjust the function name)?!
 	reported, _ := db.GetEngine(ctx).Exist(&AbuseReport{ContentType: contentType, ContentID: contentID})
 	return reported
 }
 
-// IsReportedUserBy returns a boolean value indicating if reportedUserID is already reported by doerID.
+// IsReportedUserBy reports whether reportedUserID is already reported by doerID.
 func IsReportedUserBy(ctx context.Context, doerID int64, reportedUserID int64) bool {
 	return alreadyReportedBy(ctx, doerID, ReportedContentTypeUser, reportedUserID)
 }
@@ -84,6 +97,7 @@ func alreadyReportedBy(ctx context.Context, doerID int64, contentType ReportedCo
 	return reported
 }
 
+// ReportUser creates a new abuse report regarding the user with the provided reportedUserID.
 func ReportUser(ctx context.Context, reporterID int64, reportedUserID int64, remarks string) error {
 	if reporterID == reportedUserID {
 		return nil
@@ -99,6 +113,7 @@ func ReportUser(ctx context.Context, reporterID int64, reportedUserID int64, rem
 	return reportAbuse(ctx, report)
 }
 
+// ReportRepository creates a new abuse report regarding the repository with the provided ID.
 func ReportRepository(ctx context.Context, reporterID int64, repositoryID int64, remarks string) error {
 	report := &AbuseReport{
 		ReporterID:  reporterID,
@@ -110,6 +125,7 @@ func ReportRepository(ctx context.Context, reporterID int64, repositoryID int64,
 	return reportAbuse(ctx, report)
 }
 
+// ReportIssue creates a new abuse report regarding the issue with the provided ID.
 func ReportIssue(ctx context.Context, reporterID int64, issueID int64, remarks string) error {
 	report := &AbuseReport{
 		ReporterID:  reporterID,
@@ -121,6 +137,7 @@ func ReportIssue(ctx context.Context, reporterID int64, issueID int64, remarks s
 	return reportAbuse(ctx, report)
 }
 
+// ReportComment creates a new abuse report regarding the comment with the provided ID.
 func ReportComment(ctx context.Context, reporterID int64, commentID int64, remarks string) error {
 	report := &AbuseReport{
 		ReporterID:  reporterID,
@@ -138,7 +155,8 @@ func reportAbuse(ctx context.Context, report *AbuseReport) error {
 		return nil
 	}
 
-	report.Status = ReportStatusTypeNew
+	report.Status = ReportStatusTypeOpen
+	report.Category = AbuseCategoryTypeOtherViolations // TODO: replace with user's selection
 
 	_, err := db.GetEngine(ctx).Insert(report)
 
@@ -147,10 +165,20 @@ func reportAbuse(ctx context.Context, report *AbuseReport) error {
 
 // MarkAsHandled will change the status to 'Handled' for all reports linked to the same item (user, repository, issue or comment).
 func MarkAsHandled(ctx context.Context, contentType ReportedContentType, contentID int64) error {
+	return updateStatus(ctx, contentType, contentID, ReportStatusTypeHandled)
+}
+
+// MarkAsIgnored will change the status to 'Ignored' for all reports linked to the same item (user, repository, issue or comment).
+func MarkAsIgnored(ctx context.Context, contentType ReportedContentType, contentID int64) error {
+	return updateStatus(ctx, contentType, contentID, ReportStatusTypeIgnored)
+}
+
+// updateStatus will set the provided status for any reports linked to the item with the given type and ID.
+func updateStatus(ctx context.Context, contentType ReportedContentType, contentID int64, status ReportStatusType) error {
 	_, err := db.GetEngine(ctx).Where(builder.Eq{
 		"content_type": contentType,
 		"content_id":   contentID,
-	}).Cols("status").Update(&AbuseReport{Status: ReportStatusTypeHandled})
+	}).Cols("status").Update(&AbuseReport{Status: status})
 
 	return err
 }
