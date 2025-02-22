@@ -1,5 +1,6 @@
 // Copyright 2018 The Gitea Authors.
 // Copyright 2016 The Gogs Authors.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // All rights reserved.
 // SPDX-License-Identifier: MIT
 
@@ -326,6 +327,9 @@ type Comment struct {
 	NewCommit   string                              `xorm:"-"`
 	CommitsNum  int64                               `xorm:"-"`
 	IsForcePush bool                                `xorm:"-"`
+
+	// If you add new fields that might be used to store abusive content (mainly string fields),
+	// please also add them in the CommentData struct and the corresponding constructor.
 }
 
 func init() {
@@ -1151,6 +1155,11 @@ func UpdateComment(ctx context.Context, c *Comment, contentVersion int, doer *us
 	}
 	defer committer.Close()
 
+	// If the comment was reported as abusive, a shadow copy should be created before first update.
+	if err := IfNeededCreateShadowCopyForComment(ctx, c); err != nil {
+		return err
+	}
+
 	if err := c.LoadIssue(ctx); err != nil {
 		return err
 	}
@@ -1186,6 +1195,12 @@ func UpdateComment(ctx context.Context, c *Comment, contentVersion int, doer *us
 // DeleteComment deletes the comment
 func DeleteComment(ctx context.Context, comment *Comment) error {
 	e := db.GetEngine(ctx)
+
+	// If the comment was reported as abusive, a shadow copy should be created before deletion.
+	if err := IfNeededCreateShadowCopyForComment(ctx, comment); err != nil {
+		return err
+	}
+
 	if _, err := e.ID(comment.ID).NoAutoCondition().Delete(comment); err != nil {
 		return err
 	}
