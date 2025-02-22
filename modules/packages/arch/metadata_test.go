@@ -5,7 +5,7 @@ package arch
 
 import (
 	"bytes"
-	"errors"
+	"io/fs"
 	"os"
 	"strings"
 	"testing"
@@ -14,7 +14,7 @@ import (
 
 	"code.gitea.io/gitea/modules/packages"
 
-	"github.com/mholt/archiver/v3"
+	"github.com/mholt/archives"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +25,7 @@ pkgbase = b
 pkgver = 1-2
 arch = x86_64
 `
-	fs := fstest.MapFS{
+	mapfs := fstest.MapFS{
 		"pkginfo": &fstest.MapFile{
 			Data:    []byte(PKGINFO),
 			Mode:    os.ModePerm,
@@ -39,48 +39,37 @@ arch = x86_64
 	}
 
 	// Test .PKGINFO file
-	pinf, err := fs.Stat("pkginfo")
-	require.NoError(t, err)
-
-	parcname, err := archiver.NameInArchive(pinf, ".PKGINFO", ".PKGINFO")
+	pinf, err := mapfs.Stat("pkginfo")
 	require.NoError(t, err)
 
 	// Test .MTREE file
-	minf, err := fs.Stat("mtree")
+	minf, err := mapfs.Stat("mtree")
 	require.NoError(t, err)
 
-	marcname, err := archiver.NameInArchive(minf, ".MTREE", ".MTREE")
-	require.NoError(t, err)
+	files := []archives.FileInfo{
+		{
+			FileInfo:      pinf,
+			NameInArchive: ".PKGINFO",
+			Open: func() (fs.File, error) {
+				return mapfs.Open("pkginfo")
+			},
+		},
+		{
+			FileInfo:      minf,
+			NameInArchive: ".MTREE",
+			Open: func() (fs.File, error) {
+				return mapfs.Open("mtree")
+			},
+		},
+	}
 
 	t.Run("normal zst archive", func(t *testing.T) {
 		var buf bytes.Buffer
-
-		archive := archiver.NewTarZstd()
-		archive.Create(&buf)
-
-		pfile, err := fs.Open("pkginfo")
-		require.NoError(t, err)
-
-		mfile, err := fs.Open("mtree")
-		require.NoError(t, err)
-
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   pinf,
-				CustomName: parcname,
-			},
-			ReadCloser: pfile,
-		})
-		require.NoError(t, errors.Join(pfile.Close(), err))
-
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   minf,
-				CustomName: marcname,
-			},
-			ReadCloser: mfile,
-		})
-		require.NoError(t, errors.Join(mfile.Close(), archive.Close(), err))
+		archive := archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Zstd{},
+		}
+		archive.Archive(t.Context(), &buf, files)
 
 		reader, err := packages.CreateHashedBufferFromReader(&buf)
 		require.NoError(t, err)
@@ -98,33 +87,11 @@ arch = x86_64
 
 	t.Run("normal xz archive", func(t *testing.T) {
 		var buf bytes.Buffer
-
-		archive := archiver.NewTarXz()
-		archive.Create(&buf)
-
-		pfile, err := fs.Open("pkginfo")
-		require.NoError(t, err)
-
-		mfile, err := fs.Open("mtree")
-		require.NoError(t, err)
-
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   pinf,
-				CustomName: parcname,
-			},
-			ReadCloser: pfile,
-		})
-		require.NoError(t, errors.Join(pfile.Close(), err))
-
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   minf,
-				CustomName: marcname,
-			},
-			ReadCloser: mfile,
-		})
-		require.NoError(t, errors.Join(mfile.Close(), archive.Close(), err))
+		archive := archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Xz{},
+		}
+		archive.Archive(t.Context(), &buf, files)
 
 		reader, err := packages.CreateHashedBufferFromReader(&buf)
 		require.NoError(t, err)
@@ -142,33 +109,11 @@ arch = x86_64
 
 	t.Run("normal gz archive", func(t *testing.T) {
 		var buf bytes.Buffer
-
-		archive := archiver.NewTarGz()
-		archive.Create(&buf)
-
-		pfile, err := fs.Open("pkginfo")
-		require.NoError(t, err)
-
-		mfile, err := fs.Open("mtree")
-		require.NoError(t, err)
-
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   pinf,
-				CustomName: parcname,
-			},
-			ReadCloser: pfile,
-		})
-		require.NoError(t, errors.Join(pfile.Close(), err))
-
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   minf,
-				CustomName: marcname,
-			},
-			ReadCloser: mfile,
-		})
-		require.NoError(t, errors.Join(mfile.Close(), archive.Close(), err))
+		archive := archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Gz{},
+		}
+		archive.Archive(t.Context(), &buf, files)
 
 		reader, err := packages.CreateHashedBufferFromReader(&buf)
 		require.NoError(t, err)
@@ -186,10 +131,19 @@ arch = x86_64
 
 	t.Run("missing .PKGINFO", func(t *testing.T) {
 		var buf bytes.Buffer
-
-		archive := archiver.NewTarZstd()
-		archive.Create(&buf)
-		require.NoError(t, archive.Close())
+		archive := archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Zstd{},
+		}
+		archive.Archive(t.Context(), &buf, []archives.FileInfo{
+			{
+				FileInfo:      minf,
+				NameInArchive: ".MTREE",
+				Open: func() (fs.File, error) {
+					return mapfs.Open("mtree")
+				},
+			},
+		})
 
 		reader, err := packages.CreateHashedBufferFromReader(&buf)
 		require.NoError(t, err)
@@ -203,21 +157,20 @@ arch = x86_64
 
 	t.Run("missing .MTREE", func(t *testing.T) {
 		var buf bytes.Buffer
-
-		pfile, err := fs.Open("pkginfo")
-		require.NoError(t, err)
-
-		archive := archiver.NewTarZstd()
-		archive.Create(&buf)
-
-		err = archive.Write(archiver.File{
-			FileInfo: archiver.FileInfo{
-				FileInfo:   pinf,
-				CustomName: parcname,
+		archive := archives.CompressedArchive{
+			Archival:    archives.Tar{},
+			Compression: archives.Zstd{},
+		}
+		archive.Archive(t.Context(), &buf, []archives.FileInfo{
+			{
+				FileInfo:      pinf,
+				NameInArchive: ".PKGINFO",
+				Open: func() (fs.File, error) {
+					return mapfs.Open("pkginfo")
+				},
 			},
-			ReadCloser: pfile,
 		})
-		require.NoError(t, errors.Join(pfile.Close(), archive.Close(), err))
+
 		reader, err := packages.CreateHashedBufferFromReader(&buf)
 		require.NoError(t, err)
 
