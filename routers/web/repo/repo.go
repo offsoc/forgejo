@@ -474,7 +474,7 @@ func Download(ctx *context.Context) {
 	uri := ctx.Params("*")
 	ext, tp, err := archiver_service.ParseFileName(uri)
 	if err != nil {
-		ctx.ServerError("ParseFileName", err)
+		ctx.NotFound("ParseFileName", err)
 		return
 	}
 	aReq, err := archiver_service.NewRequest(ctx, ctx.Repo.Repository.ID, ctx.Repo.GitRepo, strings.TrimSuffix(uri, ext), tp)
@@ -554,7 +554,7 @@ func InitiateDownload(ctx *context.Context) {
 	uri := ctx.Params("*")
 	ext, tp, err := archiver_service.ParseFileName(uri)
 	if err != nil {
-		ctx.ServerError("ParseFileName", err)
+		ctx.NotFound("ParseFileName", err)
 		return
 	}
 	aReq, err := archiver_service.NewRequest(ctx, ctx.Repo.Repository.ID, ctx.Repo.GitRepo, strings.TrimSuffix(uri, ext), tp)
