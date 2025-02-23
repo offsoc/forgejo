@@ -138,27 +138,25 @@ func TestViewIssuesKeyword(t *testing.T) {
 	})
 
 	// keyword: 'firstt'
-	// should not match when fuzzy searching is disabled
-	req = NewRequestf(t, "GET", "%s/issues?q=%st&fuzzy=false", repo.Link(), keyword)
+	// should not match when using phrase search
+	req = NewRequestf(t, "GET", "%s/issues?q=\"%st\"", repo.Link(), keyword)
 	resp = MakeRequest(t, req, http.StatusOK)
 	htmlDoc = NewHTMLParser(t, resp.Body)
 	issuesSelection = getIssuesSelection(t, htmlDoc)
 	assert.EqualValues(t, 0, issuesSelection.Length())
 
-	// should match as 'first' when fuzzy seaeching is enabled
-	for _, fmt := range []string{"%s/issues?q=%st&fuzzy=true", "%s/issues?q=%st"} {
-		req = NewRequestf(t, "GET", fmt, repo.Link(), keyword)
-		resp = MakeRequest(t, req, http.StatusOK)
-		htmlDoc = NewHTMLParser(t, resp.Body)
-		issuesSelection = getIssuesSelection(t, htmlDoc)
-		assert.EqualValues(t, 1, issuesSelection.Length())
-		issuesSelection.Each(func(_ int, selection *goquery.Selection) {
-			issue := getIssue(t, repo.ID, selection)
-			assert.False(t, issue.IsClosed)
-			assert.False(t, issue.IsPull)
-			assertMatch(t, issue, keyword)
-		})
-	}
+	// should match as 'first' when using a standard query
+	req = NewRequestf(t, "GET", "%s/issues?q=%st", repo.Link(), keyword)
+	resp = MakeRequest(t, req, http.StatusOK)
+	htmlDoc = NewHTMLParser(t, resp.Body)
+	issuesSelection = getIssuesSelection(t, htmlDoc)
+	assert.EqualValues(t, 1, issuesSelection.Length())
+	issuesSelection.Each(func(_ int, selection *goquery.Selection) {
+		issue := getIssue(t, repo.ID, selection)
+		assert.False(t, issue.IsClosed)
+		assert.False(t, issue.IsPull)
+		assertMatch(t, issue, keyword)
+	})
 }
 
 func TestViewIssuesSearchOptions(t *testing.T) {
