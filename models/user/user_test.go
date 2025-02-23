@@ -144,6 +144,15 @@ func TestAPActorID(t *testing.T) {
 	}
 }
 
+func TestAPActorID_APActorID(t *testing.T) {
+	user := user_model.User{ID: user_model.APActorUserID}
+	url := user.APActorID()
+	expected := "https://try.gitea.io/api/v1/activitypub/actor"
+	if url != expected {
+		t.Errorf("unexpected APActorID for server actor, expected: %q, actual: %q", expected, url)
+	}
+}
+
 func TestSearchUsers(t *testing.T) {
 	defer tests.AddFixtures("models/user/fixtures/")()
 	require.NoError(t, unittest.PrepareTestDatabase())
