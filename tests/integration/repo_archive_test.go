@@ -4,10 +4,17 @@
 package integration
 
 import (
+	"archive/tar"
+	"compress/gzip"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"testing"
 
+	repo_model "code.gitea.io/gitea/models/repo"
+	"code.gitea.io/gitea/models/unittest"
+	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/routers"
@@ -31,4 +38,48 @@ func TestRepoDownloadArchive(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, resp.Header().Get("Content-Encoding"))
 	assert.Len(t, bs, 320)
+}
+
+func TestRepoDownloadArchiveSubdir(t *testing.T) {
+	onGiteaRun(t, func(*testing.T, *url.URL) {
+		defer test.MockVariableValue(&setting.EnableGzip, true)()
+		defer test.MockVariableValue(&web.GzipMinSize, 10)()
+		defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
+
+		repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+
+		// Create a subdirectory
+		err := createOrReplaceFileInBranch(user, repo, "subdir/test.txt", "master", "Test")
+		require.NoError(t, err)
+
+		t.Run("Frontend", func(t *testing.T) {
+			resp := MakeRequest(t, NewRequestf(t, "GET", "/%s/src/branch/master/subdir", repo.FullName()), http.StatusOK)
+
+			assert.Contains(t, resp.Body.String(), fmt.Sprintf("/%s/archive/master:subdir.zip", repo.FullName()))
+			assert.Contains(t, resp.Body.String(), fmt.Sprintf("/%s/archive/master:subdir.tar.gz", repo.FullName()))
+		})
+
+		t.Run("Backend", func(t *testing.T) {
+			resp := MakeRequest(t, NewRequestf(t, "GET", "/%s/archive/master:subdir.tar.gz", repo.FullName()), http.StatusOK)
+
+			uncompressedStream, err := gzip.NewReader(resp.Body)
+			require.NoError(t, err)
+
+			tarReader := tar.NewReader(uncompressedStream)
+
+			header, err := tarReader.Next()
+			require.NoError(t, err)
+			assert.Equal(t, tar.TypeDir, int32(header.Typeflag))
+			assert.Equal(t, fmt.Sprintf("%s/", repo.Name), header.Name)
+
+			header, err = tarReader.Next()
+			require.NoError(t, err)
+			assert.Equal(t, tar.TypeReg, int32(header.Typeflag))
+			assert.Equal(t, fmt.Sprintf("%s/test.txt", repo.Name), header.Name)
+
+			_, err = tarReader.Next()
+			assert.Equal(t, io.EOF, err)
+		})
+	})
 }
