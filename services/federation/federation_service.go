@@ -155,18 +155,18 @@ func GetFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.Fe
 }
 
 func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
-	// ToDo: Do we get a publicKeyId from server, repo or owner or repo?
-	actionsUser := user.NewActionsUser()
+	actionsUser := user.NewAPActorUser()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
-	client, err := clientFactory.WithKeys(ctx, actionsUser, "no idea where to get key material.")
+
+	apClient, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.APActorKeyID())
 	if err != nil {
 		return nil, nil, err
 	}
 
-	body, err := client.GetBody(personID.AsURI())
+	body, err := apClient.GetBody(personID.AsURI())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -176,26 +176,32 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 	if err != nil {
 		return nil, nil, err
 	}
+
 	if res, err := validation.IsValid(person); !res {
 		return nil, nil, err
 	}
+
 	log.Info("Fetched valid person:%q", person)
 
 	localFqdn, err := url.ParseRequestURI(setting.AppURL)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	email := fmt.Sprintf("f%v@%v", uuid.New().String(), localFqdn.Hostname())
 	loginName := personID.AsLoginName()
 	name := fmt.Sprintf("%v%v", person.PreferredUsername.String(), personID.HostSuffix())
 	fullName := person.Name.String()
+
 	if len(person.Name) == 0 {
 		fullName = name
 	}
+
 	password, err := password.Generate(32)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	newUser := user.User{
 		LowerName:                    strings.ToLower(name),
 		Name:                         name,
@@ -209,16 +215,18 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		IsAdmin:                      false,
 		NormalizedFederatedURI:       personID.AsURI(),
 	}
+
 	federatedUser := user.FederatedUser{
 		ExternalID:       personID.ID,
 		FederationHostID: federationHostID,
 	}
+
 	err = user.CreateFederatedUser(ctx, &newUser, &federatedUser)
 	if err != nil {
 		return nil, nil, err
 	}
-	log.Info("Created federatedUser:%q", federatedUser)
 
+	log.Info("Created federatedUser:%q", federatedUser)
 	return &newUser, &federatedUser, nil
 }
 
@@ -274,7 +282,8 @@ func SendLikeActivities(ctx context.Context, doer user.User, repoID int64) error
 	if err != nil {
 		return err
 	}
-	apclient, err := apclientFactory.WithKeys(ctx, &doer, doer.APActorID())
+
+	apclient, err := apclientFactory.WithKeys(ctx, &doer, doer.APActorKeyID())
 	if err != nil {
 		return err
 	}
