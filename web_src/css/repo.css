@@ -153,7 +153,9 @@
   border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
 }
 
-.repository .clone-panel .dropdown .menu {
+/* Dropdown alignment */
+.repository .clone-panel .dropdown .menu,
+.repository .folder-actions .dropdown .menu {
   right: 0 !important;
   left: auto !important;
 }
