@@ -320,6 +320,11 @@ func (u *User) APActorID() string {
 	return fmt.Sprintf("%vapi/v1/activitypub/user-id/%v", setting.AppURL, url.PathEscape(fmt.Sprintf("%v", u.ID)))
 }
 
+// APActorKeyID returns the ID of the user's public key
+func (u *User) APActorKeyID() string {
+	return u.APActorID() + "#main-key"
+}
+
 // OrganisationLink returns the organization sub page link.
 func (u *User) OrganisationLink() string {
 	return setting.AppSubURL + "/org/" + url.PathEscape(u.Name)
