@@ -153,6 +153,15 @@ func TestAPActorID_APActorID(t *testing.T) {
 	}
 }
 
+func TestAPActorKeyID(t *testing.T) {
+	user := user_model.User{ID: 1}
+	url := user.APActorKeyID()
+	expected := "https://try.gitea.io/api/v1/activitypub/user-id/1#main-key"
+	if url != expected {
+		t.Errorf("unexpected APActorKeyID, expected: %q, actual: %q", expected, url)
+	}
+}
+
 func TestSearchUsers(t *testing.T) {
 	defer tests.AddFixtures("models/user/fixtures/")()
 	require.NoError(t, unittest.PrepareTestDatabase())
