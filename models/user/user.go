@@ -313,6 +313,10 @@ func (u *User) HTMLURL() string {
 
 // APActorID returns the IRI to the api endpoint of the user
 func (u *User) APActorID() string {
+	if u.ID == APActorUserID {
+		return fmt.Sprintf("%vapi/v1/activitypub/actor", setting.AppURL)
+	}
+
 	return fmt.Sprintf("%vapi/v1/activitypub/user-id/%v", setting.AppURL, url.PathEscape(fmt.Sprintf("%v", u.ID)))
 }
 
