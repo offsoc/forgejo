@@ -1,5 +1,6 @@
 // Copyright 2016 The Gogs Authors. All rights reserved.
 // Copyright 2020 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved
 // SPDX-License-Identifier: MIT
 
 package validation
@@ -100,11 +101,25 @@ func validateEmailDomain(email string) error {
 }
 
 func IsEmailDomainAllowed(email string) bool {
-	if len(setting.Service.EmailDomainAllowList) == 0 {
-		return !isEmailDomainListed(setting.Service.EmailDomainBlockList, email)
-	}
+	return isEmailDomainAllowedInternal(
+		email,
+		setting.Service.EmailDomainAllowList,
+		setting.Service.EmailDomainBlockList)
+}
 
-	return isEmailDomainListed(setting.Service.EmailDomainAllowList, email)
+func isEmailDomainAllowedInternal(
+	email string,
+	emailDomainAllowList []glob.Glob,
+	emailDomainBlockList []glob.Glob,
+) bool {
+	var result bool
+
+	if len(emailDomainAllowList) == 0 {
+		result = !isEmailDomainListed(emailDomainBlockList, email)
+	} else {
+		result = isEmailDomainListed(emailDomainAllowList, email)
+	}
+	return result
 }
 
 // isEmailDomainListed checks whether the domain of an email address

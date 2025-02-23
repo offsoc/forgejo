@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved
 // SPDX-License-Identifier: MIT
 
 package setting
@@ -210,6 +211,7 @@ func LoadSettings() {
 	initAllLoggers()
 
 	loadDBSetting(CfgProvider)
+	loadFederationFrom(CfgProvider)
 	loadServiceFrom(CfgProvider)
 	loadOAuth2ClientFrom(CfgProvider)
 	loadCacheFrom(CfgProvider)
@@ -224,7 +226,6 @@ func LoadSettings() {
 	LoadQueueSettings()
 	loadProjectFrom(CfgProvider)
 	loadMimeTypeMapFrom(CfgProvider)
-	loadFederationFrom(CfgProvider)
 	loadF3From(CfgProvider)
 }
 
