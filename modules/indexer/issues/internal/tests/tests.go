@@ -132,6 +132,20 @@ var cases = []*testIndexerCase{
 		ExpectedTotal: 3,
 	},
 	{
+		Name: "Keyword Exclude",
+		ExtraData: []*internal.IndexerData{
+			{ID: 1000, Title: "hi hello world"},
+			{ID: 1001, Content: "hi hello world"},
+			{ID: 1002, Comments: []string{"hello", "hello world"}},
+		},
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "hello world -hi",
+			SortBy:  internal.SortByCreatedDesc,
+		},
+		ExpectedIDs:   []int64{1002},
+		ExpectedTotal: 1,
+	},
+	{
 		Name: "Keyword Fuzzy",
 		ExtraData: []*internal.IndexerData{
 			{ID: 1000, Title: "hi hello world"},
@@ -139,9 +153,8 @@ var cases = []*testIndexerCase{
 			{ID: 1002, Comments: []string{"hi", "hello world"}},
 		},
 		SearchOptions: &internal.SearchOptions{
-			Keyword:        "hello world",
-			SortBy:         internal.SortByCreatedDesc,
-			IsFuzzyKeyword: true,
+			Keyword: "hello world",
+			SortBy:  internal.SortByCreatedDesc,
 		},
 		ExpectedIDs:   []int64{1002, 1001, 1000},
 		ExpectedTotal: 3,

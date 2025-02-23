@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved
 // SPDX-License-Identifier: MIT
 
 package validation
@@ -64,4 +65,9 @@ func TestEmailAddressValidate(t *testing.T) {
 			assert.EqualValues(t, err, ValidateEmail(kase))
 		})
 	}
+}
+
+func TestEmailDomainAllowList(t *testing.T) {
+	res := IsEmailDomainAllowed("someuser@localhost.localdomain")
+	assert.True(t, res)
 }

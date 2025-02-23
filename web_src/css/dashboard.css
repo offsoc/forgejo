@@ -79,3 +79,7 @@
 .dashboard .secondary-nav .ui.dropdown {
   max-width: 100%;
 }
+
+.dashboard .help {
+  color: var(--color-secondary-dark-8);
+}
