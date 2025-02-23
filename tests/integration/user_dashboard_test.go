@@ -1,5 +1,5 @@
 // Copyright 2024 The Forgejo Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 package integration
 
@@ -36,6 +36,25 @@ func TestUserDashboardActionLinks(t *testing.T) {
 	assert.EqualValues(t, locale.TrString("new_repo.link"), strings.TrimSpace(links.Find("a[href='/repo/create']").Text()))
 	assert.EqualValues(t, locale.TrString("new_migrate.link"), strings.TrimSpace(links.Find("a[href='/repo/migrate']").Text()))
 	assert.EqualValues(t, locale.TrString("new_org.link"), strings.TrimSpace(links.Find("a[href='/org/create']").Text()))
+}
+
+func TestUserDashboardFeedWelcome(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	// User2 has some activity in feed
+	session := loginUser(t, "user2")
+	page := NewHTMLParser(t, session.MakeRequest(t, NewRequest(t, "GET", "/"), http.StatusOK).Body)
+	testUserDashboardFeedType(t, page, false)
+
+	// User1 doesn't have any activity in feed
+	session = loginUser(t, "user1")
+	page = NewHTMLParser(t, session.MakeRequest(t, NewRequest(t, "GET", "/"), http.StatusOK).Body)
+	testUserDashboardFeedType(t, page, true)
+}
+
+func testUserDashboardFeedType(t *testing.T, page *HTMLDoc, isEmpty bool) {
+	page.AssertElement(t, "#activity-feed", !isEmpty)
+	page.AssertElement(t, "#empty-feed", isEmpty)
 }
 
 func TestDashboardTitleRendering(t *testing.T) {
