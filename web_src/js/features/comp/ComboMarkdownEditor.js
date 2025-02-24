@@ -243,36 +243,36 @@ class ComboMarkdownEditor {
       }
     }
 
-    let url = form.querySelector('input[name="link-url"]').value;
-    let description = form.querySelector('input[name="link-description"]').value;
+    const url = form.querySelector('input[name="link-url"]').value;
+    const description = form.querySelector('input[name="link-description"]').value;
 
-    let code = `[${description}](${url})`;
+    const code = `[${description}](${url})`;
 
     replaceTextareaSelection(document.getElementById(`_combo_markdown_editor_${elementId}`), code);
 
     // Close the modal then clear its fields in case the user wants to add another one.
     newLinkModal.querySelector('button[data-selector-name="cancel-button"]').click();
-    form.querySelector('input[name="link-url"]').value = "";
-    form.querySelector('input[name="link-description"]').value = "";
+    form.querySelector('input[name="link-url"]').value = '';
+    form.querySelector('input[name="link-description"]').value = '';
   }
 
   setupLinkInserter() {
     const newLinkModal = this.container.querySelector('div[data-modal-name="new-markdown-link"]');
     newLinkModal.setAttribute('data-markdown-link-modal-id', elementIdCounter);
-    let textarea = document.getElementById(`_combo_markdown_editor_${elementIdCounter}`);
+    const textarea = document.getElementById(`_combo_markdown_editor_${elementIdCounter}`);
 
     $(newLinkModal).modal({
       // Pre-fill the description field from the selection to create behavior similar
       // to pasting an URL over selected text.
       onShow: () => {
-        let start = textarea.selectionStart;
-        let end = textarea.selectionEnd;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
 
-        if (start != end) {
+        if (start !== end) {
           const selection = textarea.value.slice(start ?? undefined, end ?? undefined);
           newLinkModal.querySelector('input[name="link-description"]').value = selection;
         } else {
-          newLinkModal.querySelector('input[name="link-description"]').value = "";
+          newLinkModal.querySelector('input[name="link-description"]').value = '';
         }
       },
     });
