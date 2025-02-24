@@ -41,6 +41,10 @@ func getPublicKeyFromResponse(b []byte, keyID *url.URL) (p crypto.PublicKey, err
 }
 
 func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, err error) {
+	if !setting.Federation.SignatureEnforced {
+		return true, nil
+	}
+
 	r := ctx.Req
 
 	// 1. Figure out what key we need to verify

@@ -19,6 +19,7 @@ var (
 		DigestAlgorithm     string
 		GetHeaders          []string
 		PostHeaders         []string
+		SignatureEnforced   bool
 	}{
 		Enabled:             false,
 		ShareUserStatistics: true,
@@ -27,6 +28,7 @@ var (
 		DigestAlgorithm:     "SHA-256",
 		GetHeaders:          []string{"(request-target)", "Date", "Host"},
 		PostHeaders:         []string{"(request-target)", "Date", "Host", "Digest"},
+		SignatureEnforced:   true,
 	}
 )
 
