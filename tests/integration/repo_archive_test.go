@@ -1,4 +1,5 @@
 // Copyright 2024 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -55,9 +56,10 @@ func TestRepoDownloadArchiveSubdir(t *testing.T) {
 
 		t.Run("Frontend", func(t *testing.T) {
 			resp := MakeRequest(t, NewRequestf(t, "GET", "/%s/src/branch/master/subdir", repo.FullName()), http.StatusOK)
+			page := NewHTMLParser(t, resp.Body)
 
-			assert.Contains(t, resp.Body.String(), fmt.Sprintf("/%s/archive/master:subdir.zip", repo.FullName()))
-			assert.Contains(t, resp.Body.String(), fmt.Sprintf("/%s/archive/master:subdir.tar.gz", repo.FullName()))
+			page.AssertElement(t, fmt.Sprintf(".folder-actions a.archive-link[href='/%s/archive/master:subdir.zip'][type='application/zip']", repo.FullName()), true)
+			page.AssertElement(t, fmt.Sprintf(".folder-actions a.archive-link[href='/%s/archive/master:subdir.tar.gz'][type='application/gzip']", repo.FullName()), true)
 		})
 
 		t.Run("Backend", func(t *testing.T) {
