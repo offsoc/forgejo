@@ -12,7 +12,7 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/routers/api/v1/shared"
+	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -35,9 +35,9 @@ func TestAPISearchActionJobs_RepoRunner(t *testing.T) {
 	).AddTokenAuth(token)
 	res := MakeRequest(t, req, http.StatusOK)
 
-	var jobs shared.RunJobList
+	var jobs []*api.ActionRunJob
 	DecodeJSON(t, res, &jobs)
 
-	assert.Len(t, jobs.Body, 1)
-	assert.EqualValues(t, job.ID, jobs.Body[0].ID)
+	assert.Len(t, jobs, 1)
+	assert.EqualValues(t, job.ID, jobs[0].ID)
 }
