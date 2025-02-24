@@ -20608,6 +20608,63 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "ActionRunJob": {
+      "description": "ActionRunJob represents a job of a run",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "the action run job id",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "description": "the action run job name",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "needs": {
+          "description": "the action run job needed ids",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Needs"
+        },
+        "owner_id": {
+          "description": "the owner id",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "OwnerID"
+        },
+        "repo_id": {
+          "description": "the repository id",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RepoID"
+        },
+        "runs_on": {
+          "description": "the action run job labels to run on",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "RunsOn"
+        },
+        "status": {
+          "description": "the action run job status",
+          "type": "string",
+          "x-go-name": "Status"
+        },
+        "task_id": {
+          "description": "the action run job latest task id",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TaskID"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "ActionTask": {
       "description": "ActionTask represents a ActionTask",
       "type": "object",
@@ -28919,6 +28976,15 @@
         "type": "array",
         "items": {
           "$ref": "#/definitions/Repository"
+        }
+      }
+    },
+    "RunJobList": {
+      "description": "RunJobList is a list of action run jobs",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/ActionRunJob"
         }
       }
     },
