@@ -5,6 +5,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
+import {accessibilityCheck} from './shared/accessibility.ts';
 import {save_visual, test} from './utils_e2e.ts';
 
 test.use({user: 'user2'});
@@ -233,6 +234,7 @@ test('markdown insert link', async ({page}) => {
 
   const newLinkModal = page.locator('div[data-markdown-link-modal-id="0"]');
   await expect(newLinkModal).toBeVisible();
+  await accessibilityCheck({page}, ['[data-modal-name="new-markdown-link"]'], [], []);
   await save_visual(page);
 
   const url = 'https://example.com';
