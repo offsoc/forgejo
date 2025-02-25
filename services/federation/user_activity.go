@@ -36,7 +36,7 @@ func SendUserActivity(ctx context.Context, doer *user.User, activity *activities
 
 	for _, follower := range followers {
 		if err := pendingQueue.Push(pendingQueueItem{
-			FederatedUserID: follower.FederatedUserID,
+			FederatedUserID: follower.FollowingUserID,
 			Doer:            doer,
 			Payload:         payload,
 		}); err != nil {

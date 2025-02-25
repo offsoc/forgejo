@@ -8,14 +8,15 @@ import "code.gitea.io/gitea/modules/validation"
 type FederatedUserFollower struct {
 	ID int64 `xorm:"pk autoincr"`
 
-	LocalUserID     int64 `xorm:"NOT NULL unique(fuf_rel)"`
-	FederatedUserID int64 `xorm:"NOT NULL unique(fuf_rel)"`
+	FollowedUserID int64 `xorm:"NOT NULL unique(fuf_rel)"`
+	//TODO: This ID should point to User and not to FederationUser. As User is a aggregate root!
+	FollowingUserID int64 `xorm:"NOT NULL unique(fuf_rel)"`
 }
 
-func NewFederatedUserFollower(localUserID int64, federatedUserID int64) (FederatedUserFollower, error) {
+func NewFederatedUserFollower(followedUserID int64, federatedUserID int64) (FederatedUserFollower, error) {
 	result := FederatedUserFollower{
-		LocalUserID:     localUserID,
-		FederatedUserID: federatedUserID,
+		FollowedUserID:  followedUserID,
+		FollowingUserID: federatedUserID,
 	}
 	if valid, err := validation.IsValid(result); !valid {
 		return FederatedUserFollower{}, err
@@ -25,7 +26,7 @@ func NewFederatedUserFollower(localUserID int64, federatedUserID int64) (Federat
 
 func (user FederatedUserFollower) Validate() []string {
 	var result []string
-	result = append(result, validation.ValidateNotEmpty(user.LocalUserID, "LocalUserID")...)
-	result = append(result, validation.ValidateNotEmpty(user.FederatedUserID, "FederatedUserID")...)
+	result = append(result, validation.ValidateNotEmpty(user.FollowedUserID, "FollowedUserID")...)
+	result = append(result, validation.ValidateNotEmpty(user.FollowingUserID, "FollowingUserID")...)
 	return result
 }

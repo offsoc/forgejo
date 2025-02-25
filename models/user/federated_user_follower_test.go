@@ -11,15 +11,15 @@ import (
 
 func Test_FederatedUserFollowerValidation(t *testing.T) {
 	sut := FederatedUserFollower{
-		LocalUserID:     12,
-		FederatedUserID: 1,
+		FollowedUserID:  12,
+		FollowingUserID: 1,
 	}
 	if res, err := validation.IsValid(sut); !res {
 		t.Errorf("sut should be valid but was %q", err)
 	}
 
 	sut = FederatedUserFollower{
-		LocalUserID: 1,
+		FollowedUserID: 1,
 	}
 	if res, _ := validation.IsValid(sut); res {
 		t.Errorf("sut should be invalid")
