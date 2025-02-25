@@ -28,16 +28,8 @@ type FederatedUserActivity struct {
 	Created timeutil.TimeStamp `xorm:"created"`
 }
 
-type FederatedUserFollower struct {
-	ID int64 `xorm:"pk autoincr"`
-
-	LocalUserID     int64 `xorm:"NOT NULL unique(fuf_rel)"`
-	FederatedUserID int64 `xorm:"NOT NULL unique(fuf_rel)"`
-}
-
 func init() {
 	db.RegisterModel(new(FederatedUserActivity))
-	db.RegisterModel(new(FederatedUserFollower))
 }
 
 func (fua *FederatedUserActivity) LoadActor(ctx context.Context) error {
@@ -54,18 +46,6 @@ func (fua *FederatedUserActivity) LoadActor(ctx context.Context) error {
 	return nil
 }
 
-func GetFollowersForUserID(ctx context.Context, userID int64) ([]*FederatedUserFollower, error) {
-	followers := make([]*FederatedUserFollower, 0, 8)
-
-	err := db.GetEngine(ctx).
-		Where("local_user_id = ?", userID).
-		Find(&followers)
-	if err != nil {
-		return nil, err
-	}
-	return followers, nil
-}
-
 func AddUserActivity(ctx context.Context, userID int64, externalID string, activity *fm.ForgeUserActivityNote) error {
 	json, err := json.Marshal(activity)
 	if err != nil {
@@ -80,30 +60,6 @@ func AddUserActivity(ctx context.Context, userID int64, externalID string, activ
 			Original:    string(json),
 		})
 	return err
-}
-
-func AddFollower(ctx context.Context, followedUserID, followingUserID int64) (int64, error) {
-	followerID, err := db.GetEngine(ctx).
-		Insert(&FederatedUserFollower{
-			LocalUserID:     followedUserID,
-			FederatedUserID: followingUserID,
-		})
-	return followerID, err
-}
-
-func RemoveFollower(ctx context.Context, localUserID, federatedUserID int64) error {
-	_, err := db.GetEngine(ctx).Delete(&FederatedUserFollower{
-		LocalUserID:     localUserID,
-		FederatedUserID: federatedUserID,
-	})
-	return err
-}
-
-func IsFollowing(ctx context.Context, followedUserID, followingUserID int64) (bool, error) {
-	return db.GetEngine(ctx).Get(&FederatedUserFollower{
-		LocalUserID:     followedUserID,
-		FederatedUserID: followingUserID,
-	})
 }
 
 type GetFollowingFeedsOptions struct {

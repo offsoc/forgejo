@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.gitea.io/gitea/models/forgefed"
+	"code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/log"
 	context_service "code.gitea.io/gitea/services/context"
 
@@ -27,7 +27,7 @@ func processPersonInboxUndo(ctx *context_service.APIContext, activity *ap.Activi
 	}
 
 	if federatedUser != nil {
-		following, err := forgefed.IsFollowing(ctx, ctx.ContextUser.ID, federatedUser.ID)
+		following, err := user.IsFollowingAp(ctx, ctx.ContextUser.ID, federatedUser.ID)
 		if err != nil {
 			log.Error("forgefed.IsFollowing: %v", err)
 			ctx.Error(http.StatusInternalServerError, "forgefed.IsFollowing", err)
@@ -38,7 +38,7 @@ func processPersonInboxUndo(ctx *context_service.APIContext, activity *ap.Activi
 			log.Trace("Local user[%d] is not following federated user[%d]", ctx.ContextUser.ID, federatedUser.ID)
 			return
 		}
-		if err := forgefed.RemoveFollower(ctx, ctx.ContextUser.ID, federatedUser.ID); err != nil {
+		if err := user.RemoveFollower(ctx, ctx.ContextUser.ID, federatedUser.ID); err != nil {
 			ctx.Error(http.StatusInternalServerError, "Unable to remove follower", err)
 			return
 		}

@@ -7,7 +7,6 @@ import (
 	"context"
 
 	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/forgefed"
 	"code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
@@ -18,7 +17,7 @@ import (
 )
 
 func SendUserActivity(ctx context.Context, doer *user.User, activity *activities_model.Action) error {
-	followers, err := forgefed.GetFollowersForUserID(ctx, doer.ID)
+	followers, err := user.GetFollowersForUserID(ctx, doer.ID)
 	if err != nil {
 		return err
 	}
