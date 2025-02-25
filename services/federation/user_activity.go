@@ -17,7 +17,7 @@ import (
 )
 
 func SendUserActivity(ctx context.Context, doer *user.User, activity *activities_model.Action) error {
-	followers, err := user.GetFollowersForUserID(ctx, doer.ID)
+	followers, err := user.GetFollowersForUser(ctx, doer)
 	if err != nil {
 		return err
 	}

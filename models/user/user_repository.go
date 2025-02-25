@@ -83,11 +83,11 @@ func DeleteFederatedUser(ctx context.Context, userID int64) error {
 	return err
 }
 
-func GetFollowersForUserID(ctx context.Context, userID int64) ([]*FederatedUserFollower, error) {
+func GetFollowersForUser(ctx context.Context, user *User) ([]*FederatedUserFollower, error) {
 	followers := make([]*FederatedUserFollower, 0, 8)
 
 	err := db.GetEngine(ctx).
-		Where("local_user_id = ?", userID).
+		Where("local_user_id = ?", user.ID).
 		Find(&followers)
 	if err != nil {
 		return nil, err
@@ -95,26 +95,27 @@ func GetFollowersForUserID(ctx context.Context, userID int64) ([]*FederatedUserF
 	return followers, nil
 }
 
-func AddFollower(ctx context.Context, followedUserID, followingUserID int64) (int64, error) {
+func AddFollower(ctx context.Context, followedUser *User, followingUser *FederatedUser) (int64, error) {
 	followerID, err := db.GetEngine(ctx).
 		Insert(&FederatedUserFollower{
-			LocalUserID:     followedUserID,
-			FederatedUserID: followingUserID,
+			LocalUserID:     followedUser.ID,
+			FederatedUserID: followingUser.ID,
 		})
 	return followerID, err
 }
 
-func RemoveFollower(ctx context.Context, localUserID, federatedUserID int64) error {
+func RemoveFollower(ctx context.Context, followedUser *User, federatedUser *FederatedUser) error {
 	_, err := db.GetEngine(ctx).Delete(&FederatedUserFollower{
-		LocalUserID:     localUserID,
-		FederatedUserID: federatedUserID,
+		LocalUserID:     followedUser.ID,
+		FederatedUserID: federatedUser.ID,
 	})
 	return err
 }
 
-func IsFollowingAp(ctx context.Context, followedUserID, followingUserID int64) (bool, error) {
+// TODO: We should unify Activity-pub-following and classical following (see models/user/follow.go)
+func IsFollowingAp(ctx context.Context, followedUser *User, followingUser *FederatedUser) (bool, error) {
 	return db.GetEngine(ctx).Get(&FederatedUserFollower{
-		LocalUserID:     followedUserID,
-		FederatedUserID: followingUserID,
+		LocalUserID:     followedUser.ID,
+		FederatedUserID: followingUser.ID,
 	})
 }

@@ -36,7 +36,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 		return
 	}
 
-	following, err := user.IsFollowingAp(ctx, ctx.ContextUser.ID, federatedUser.ID)
+	following, err := user.IsFollowingAp(ctx, ctx.ContextUser, federatedUser)
 	if err != nil {
 		log.Error("forgefed.IsFollowing: %v", err)
 		ctx.Error(http.StatusInternalServerError, "forgefed.IsFollowing", err)
@@ -48,7 +48,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 		return
 	}
 
-	followingID, err := user.AddFollower(ctx, ctx.ContextUser.ID, federatedUser.ID)
+	followingID, err := user.AddFollower(ctx, ctx.ContextUser, federatedUser)
 	if err != nil {
 		log.Error("Unable to add follower: %v", err)
 		ctx.Error(http.StatusInternalServerError, "Unable to add follower", err)
