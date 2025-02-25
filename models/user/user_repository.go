@@ -84,6 +84,9 @@ func DeleteFederatedUser(ctx context.Context, userID int64) error {
 }
 
 func GetFollowersForUser(ctx context.Context, user *User) ([]*FederatedUserFollower, error) {
+	if res, err := validation.IsValid(user); !res {
+		return nil, err
+	}
 	followers := make([]*FederatedUserFollower, 0, 8)
 
 	err := db.GetEngine(ctx).
@@ -92,7 +95,12 @@ func GetFollowersForUser(ctx context.Context, user *User) ([]*FederatedUserFollo
 	if err != nil {
 		return nil, err
 	}
-	return followers, nil
+	for _, element := range followers {
+		if res, err := validation.IsValid(*element); !res {
+			return nil, err
+		}
+	}
+		return followers, nil
 }
 
 func AddFollower(ctx context.Context, followedUser *User, followingUser *FederatedUser) (int64, error) {
