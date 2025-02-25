@@ -39,6 +39,10 @@ func TestRepoDownloadArchive(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, resp.Header().Get("Content-Encoding"))
 	assert.Len(t, bs, 320)
+
+	// Verify that unrecognized archive type returns 404
+	req = NewRequest(t, "GET", "/user2/repo1/archive/master.invalid")
+	MakeRequest(t, req, http.StatusNotFound)
 }
 
 func TestRepoDownloadArchiveSubdir(t *testing.T) {
