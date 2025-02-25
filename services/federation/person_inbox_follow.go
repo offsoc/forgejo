@@ -48,7 +48,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 		return
 	}
 
-	followingID, err := user.AddFollower(ctx, ctx.ContextUser, federatedUser)
+	follower, err := user.AddFollower(ctx, ctx.ContextUser, federatedUser)
 	if err != nil {
 		log.Error("Unable to add follower: %v", err)
 		ctx.Error(http.StatusInternalServerError, "Unable to add follower", err)
@@ -66,7 +66,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 	}
 
 	accept := ap.AcceptNew(ap.IRI(fmt.Sprintf(
-		"%s/follows/%d", ctx.ContextUser.APActorID(), followingID,
+		"%s/follows/%d", ctx.ContextUser.APActorID(), follower.ID,
 	)), activity)
 	accept.Actor = ap.IRI(ctx.ContextUser.APActorID())
 	payload, err := jsonld.WithContext(jsonld.IRI(ap.ActivityBaseURI)).Marshal(accept)

@@ -100,16 +100,27 @@ func GetFollowersForUser(ctx context.Context, user *User) ([]*FederatedUserFollo
 			return nil, err
 		}
 	}
-		return followers, nil
+	return followers, nil
 }
 
-func AddFollower(ctx context.Context, followedUser *User, followingUser *FederatedUser) (int64, error) {
-	followerID, err := db.GetEngine(ctx).
-		Insert(&FederatedUserFollower{
-			LocalUserID:     followedUser.ID,
-			FederatedUserID: followingUser.ID,
-		})
-	return followerID, err
+func AddFollower(ctx context.Context, followedUser *User, followingUser *FederatedUser) (*FederatedUserFollower, error) {
+	if res, err := validation.IsValid(followedUser); !res {
+		return nil, err
+	}
+	if res, err := validation.IsValid(followingUser); !res {
+		return nil, err
+	}
+
+	federatedUserFollower, err := NewFederatedUserFollower(followedUser.ID, followingUser.ID)
+	if err != nil {
+		return nil, err
+	}
+	_, err = db.GetEngine(ctx).Insert(&federatedUserFollower)
+	if err != nil {
+		return nil, err
+	}
+
+	return &federatedUserFollower, err
 }
 
 func RemoveFollower(ctx context.Context, followedUser *User, federatedUser *FederatedUser) error {
