@@ -1,0 +1,32 @@
+<h4 class="ui top attached header">
+	{{ctx.Locale.Tr "settings.quota"}}
+</h4>
+<div class="ui attached segment">
+	<p>{{if .ContextUser.IsOrganization}}{{ctx.Locale.Tr "settings.quota.applies_to_org"}}{{else}}{{ctx.Locale.Tr "settings.quota.applies_to_user"}}{{end}}:</p>
+	{{range $group := .QuotaGroups}}
+		<p class="tw-my-4"><strong>{{$group.Name}}</strong></p>
+		<div class="tw-ml-4">
+		{{range $rule := .Rules}}
+			<div class="tw-flex tw-justify-between">
+				<span class="tw-flex tw-items-center tw-gap-2{{if eq $rule.Limit -1}} tw-mb-5{{end}}">
+					{{if $rule.Acceptable ($.SizeUsed)}}
+						{{svg "octicon-check-circle-fill" 16 "text green"}}
+						{{$rule.Name}}
+					{{else}}
+						{{svg "octicon-alert-fill" 16 "text red"}}
+						<span data-tooltip-content="{{ctx.Locale.Tr "settings.quota.rule.exceeded.helper"}}" data-tooltip-placement="top">
+							{{$rule.Name}} – {{ctx.Locale.Tr "settings.quota.rule.exceeded"}}
+						</span>
+					{{end}}
+				</span>
+				<span>{{ctx.Locale.TrSize ($rule.Sum $.SizeUsed)}} / {{if eq $rule.Limit -1 -}}{{ctx.Locale.Tr "settings.quota.rule.no_limit"}}{{else}}{{ctx.Locale.TrSize $rule.Limit}}{{end}}</span>
+			</div>
+			<div class="ui segment">
+				{{range $idx, $subject := .Subjects}}
+					<div class="bar" style="width: calc(max(1%, {{Eval 100.0 "*" ($.SizeUsed.CalculateFor $subject) "/" $rule.Limit}}%)); background-color: oklch(80% 30% {{call $.Color $subject}}deg)" data-tooltip-placement="top" data-tooltip-content="{{call $.PrettySubject $subject}} – {{ctx.Locale.TrSize ($.SizeUsed.CalculateFor $subject)}}" data-tooltip-follow-cursor="horizontal"></div>
+				{{end}}
+			</div>
+		{{end}}
+		</div>
+	{{end}}
+</div>
