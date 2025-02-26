@@ -30,9 +30,9 @@ func GetFederationHost(ctx context.Context, ID int64) (*FederationHost, error) {
 	return host, nil
 }
 
-func FindFederationHostByFqdn(ctx context.Context, fqdn string) (*FederationHost, error) {
+func FindFederationHostFromDB(ctx context.Context, searchKey, searchValue string) (*FederationHost, error) {
 	host := new(FederationHost)
-	has, err := db.GetEngine(ctx).Where("host_fqdn=?", strings.ToLower(fqdn)).Get(host)
+	has, err := db.GetEngine(ctx).Where(searchKey, searchValue).Get(host)
 	if err != nil {
 		return nil, err
 	} else if !has {
@@ -42,6 +42,14 @@ func FindFederationHostByFqdn(ctx context.Context, fqdn string) (*FederationHost
 		return nil, err
 	}
 	return host, nil
+}
+
+func FindFederationHostByFqdn(ctx context.Context, fqdn string) (*FederationHost, error) {
+	return FindFederationHostFromDB(ctx, "host_fqdn=?", strings.ToLower(fqdn))
+}
+
+func FindFederationHostByKeyID(ctx context.Context, keyID string) (*FederationHost, error) {
+	return FindFederationHostFromDB(ctx, "key_id=?", keyID)
 }
 
 func CreateFederationHost(ctx context.Context, host *FederationHost) error {
