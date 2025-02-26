@@ -84,7 +84,7 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 	}
 
 	// 3. Verify the other actor's key
-	algo := httpsig.Algorithm(setting.Federation.Algorithms[0])
+	algo := httpsig.Algorithm(setting.Federation.SignatureAlgorithms[0])
 	authenticated = v.Verify(pubKey, algo) == nil
 	return authenticated, err
 }
