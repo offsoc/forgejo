@@ -311,20 +311,6 @@ func (u *User) HTMLURL() string {
 	return setting.AppURL + url.PathEscape(u.Name)
 }
 
-// APActorID returns the IRI to the api endpoint of the user
-func (u *User) APActorID() string {
-	if u.ID == APActorUserID {
-		return fmt.Sprintf("%vapi/v1/activitypub/actor", setting.AppURL)
-	}
-
-	return fmt.Sprintf("%vapi/v1/activitypub/user-id/%v", setting.AppURL, url.PathEscape(fmt.Sprintf("%v", u.ID)))
-}
-
-// APActorKeyID returns the ID of the user's public key
-func (u *User) APActorKeyID() string {
-	return u.APActorID() + "#main-key"
-}
-
 // OrganisationLink returns the organization sub page link.
 func (u *User) OrganisationLink() string {
 	return setting.AppSubURL + "/org/" + url.PathEscape(u.Name)
