@@ -9,6 +9,9 @@ import (
 	"testing"
 
 	auth_model "code.gitea.io/gitea/models/auth"
+	"code.gitea.io/gitea/models/forgefed"
+	"code.gitea.io/gitea/models/unittest"
+	"code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/test"
@@ -44,5 +47,12 @@ func TestAPIFollowFederated(t *testing.T) {
 			}).
 			AddTokenAuth(token2)
 		MakeRequest(t, req, http.StatusNoContent)
+		federationHost := unittest.AssertExistsAndLoadBean(t, &forgefed.FederationHost{HostFqdn: "127.0.0.1"})
+		followedUser := unittest.AssertExistsAndLoadBean(t, &user.User{Name: user2})
+		followingFederatedUser := unittest.AssertExistsAndLoadBean(t, &user.FederatedUser{ExternalID: "15", FederationHostID: federationHost.ID})
+		unittest.AssertExistsAndLoadBean(t, &user.FederatedUserFollower{
+			FollowedUserID:  followedUser.ID,
+			FollowingUserID: followingFederatedUser.ID,
+		})
 	})
 }
