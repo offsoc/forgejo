@@ -8,12 +8,11 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 
+	"forgejo.org/models/user"
 	"forgejo.org/modules/activitypub"
-	"forgejo.org/modules/httplib"
 	"forgejo.org/modules/log"
 	"forgejo.org/modules/setting"
 	gitea_context "forgejo.org/services/context"
@@ -41,23 +40,6 @@ func getPublicKeyFromResponse(b []byte, keyID *url.URL) (p crypto.PublicKey, err
 	return p, err
 }
 
-func fetch(iri *url.URL) (b []byte, err error) {
-	req := httplib.NewRequest(iri.String(), http.MethodGet)
-	req.Header("Accept", activitypub.ActivityStreamsContentType)
-	req.Header("User-Agent", "Gitea/"+setting.AppVer)
-	resp, err := req.Response()
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("url IRI fetch [%s] failed with status (%d): %s", iri, resp.StatusCode, resp.Status)
-	}
-	b, err = io.ReadAll(io.LimitReader(resp.Body, setting.Federation.MaxSize))
-	return b, err
-}
-
 func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, err error) {
 	r := ctx.Req
 
@@ -66,20 +48,37 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 	if err != nil {
 		return false, err
 	}
+
 	ID := v.KeyId()
 	idIRI, err := url.Parse(ID)
 	if err != nil {
 		return false, err
 	}
+
+	log.Debug("Fetching keyID: %s", ID)
+
 	// 2. Fetch the public key of the other actor
-	b, err := fetch(idIRI)
+	actionsUser := user.NewAPActorUser()
+	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return false, err
 	}
+
+	apClient, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.APActorKeyID())
+	if err != nil {
+		return false, err
+	}
+
+	b, err := apClient.GetBody(idIRI.String())
+	if err != nil {
+		return false, err
+	}
+
 	pubKey, err := getPublicKeyFromResponse(b, idIRI)
 	if err != nil {
 		return false, err
 	}
+
 	// 3. Verify the other actor's key
 	algo := httpsig.Algorithm(setting.Federation.Algorithms[0])
 	authenticated = v.Verify(pubKey, algo) == nil

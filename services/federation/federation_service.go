@@ -98,39 +98,47 @@ func ProcessLikeActivity(ctx context.Context, form any, repositoryID int64) (int
 }
 
 func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forgefed.FederationHost, error) {
-	actionsUser := user.NewActionsUser()
+	actionsUser := user.NewAPActorUser()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return nil, err
 	}
-	client, err := clientFactory.WithKeys(ctx, actionsUser, "no idea where to get key material.")
+
+	client, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.APActorKeyID())
 	if err != nil {
 		return nil, err
 	}
+
 	body, err := client.GetBody(actorID.AsWellKnownNodeInfoURI())
 	if err != nil {
 		return nil, err
 	}
+
 	nodeInfoWellKnown, err := forgefed.NewNodeInfoWellKnown(body)
 	if err != nil {
 		return nil, err
 	}
+
 	body, err = client.GetBody(nodeInfoWellKnown.Href)
 	if err != nil {
 		return nil, err
 	}
+
 	nodeInfo, err := forgefed.NewNodeInfo(body)
 	if err != nil {
 		return nil, err
 	}
+
 	result, err := forgefed.NewFederationHost(nodeInfo, actorID.Host)
 	if err != nil {
 		return nil, err
 	}
+
 	err = forgefed.CreateFederationHost(ctx, &result)
 	if err != nil {
 		return nil, err
 	}
+
 	return &result, nil
 }
 
