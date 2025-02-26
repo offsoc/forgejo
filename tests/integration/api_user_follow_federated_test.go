@@ -10,6 +10,7 @@ import (
 
 	auth_model "code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/routers"
 	"code.gitea.io/gitea/tests"
@@ -33,12 +34,14 @@ func TestAPIFollowFederated(t *testing.T) {
 	session2 := loginUser(t, user2)
 	token2 := getTokenForLoggedInUser(t, session2, auth_model.AccessTokenScopeWriteUser)
 
-	activity := fmt.Sprintf(`{"target":"%s/api/v1/activitypub/user-id/15"}`, federatedSrv.URL)
-
 	t.Run("Follow", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
-		req := NewRequestWithJSON(t, "POST", "/api/v1/user/activitypub/follow", activity).
+		req := NewRequestWithJSON(t, "POST",
+			"/api/v1/user/activitypub/follow",
+			&structs.APRemoteFollowOption{
+				Target: fmt.Sprintf("%s/api/v1/activitypub/user-id/15", federatedSrv.URL),
+			}).
 			AddTokenAuth(token2)
 		MakeRequest(t, req, http.StatusNoContent)
 	})
