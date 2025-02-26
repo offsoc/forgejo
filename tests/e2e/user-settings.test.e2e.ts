@@ -16,8 +16,16 @@ test('User: Profile settings', async ({browser}, workerInfo) => {
   await page.goto('/user/settings');
 
   await page.getByLabel('Full name').fill('SecondUser');
-  await page.locator('#pronouns-dropdown').click();
-  await page.getByRole('option', {name: 'she/her'}).click();
+
+  const pronounsInput = page.locator('input[list="pronouns"]');
+  await expect(pronounsInput).toHaveAttribute('placeholder', 'Unspecified');
+  await pronounsInput.click();
+  const pronounsList = page.locator('datalist#pronouns');
+  const pronounsOptions = pronounsList.locator('option');
+  const pronounsValues = await pronounsOptions.evaluateAll((opts) => opts.map((opt) => opt.value));
+  expect(pronounsValues).toEqual(['he/him', 'she/her', 'they/them', 'it/its', 'any pronouns']);
+  await pronounsInput.fill('she/her');
+
   await page.getByPlaceholder('Tell others a little bit').fill('I am a playwright test running for several seconds.');
   await page.getByPlaceholder('Tell others a little bit').press('Tab');
   await page.getByLabel('Website').fill('https://forgejo.org');
@@ -44,9 +52,7 @@ test('User: Profile settings', async ({browser}, workerInfo) => {
   await save_visual(page);
 
   await page.goto('/user/settings');
-  await page.locator('#pronouns-dropdown').click();
-  await page.getByRole('option', {name: 'Custom'}).click();
-  await page.getByLabel('Custom pronouns').fill('rob/ot');
+  await page.locator('input[list="pronouns"]').fill('rob/ot');
   await page.getByLabel('User visibility').click();
   await page.getByLabel('Visible to everyone').click();
   await page.getByLabel('Hide email address Your email').check();
