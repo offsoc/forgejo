@@ -30,29 +30,43 @@ func TestActivityPubPerson(t *testing.T) {
 
 	userID := 2
 	username := "user2"
-	req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/activitypub/user-id/%v", userID))
-	resp := MakeRequest(t, req, http.StatusOK)
-	assert.Contains(t, resp.Body.String(), "@context")
+	userURL := fmt.Sprintf("/api/v1/activitypub/user-id/%v", userID)
 
-	var person ap.Person
-	err := person.UnmarshalJSON(resp.Body.Bytes())
+	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+
+	clientFactory, err := activitypub.GetClientFactory(db.DefaultContext)
 	require.NoError(t, err)
 
-	assert.Equal(t, ap.PersonType, person.Type)
-	assert.Equal(t, username, person.PreferredUsername.String())
-	keyID := person.GetID().String()
-	assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v$", userID), keyID)
-	assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v/outbox$", userID), person.Outbox.GetID().String())
-	assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v/inbox$", userID), person.Inbox.GetID().String())
+	apClient, err := clientFactory.WithKeys(db.DefaultContext, user1, user1.APActorKeyID())
+	require.NoError(t, err)
 
-	pubKey := person.PublicKey
-	assert.NotNil(t, pubKey)
-	publicKeyID := keyID + "#main-key"
-	assert.Equal(t, pubKey.ID.String(), publicKeyID)
+	// Unsigned request
+	req := NewRequest(t, "GET", userURL)
+	MakeRequest(t, req, http.StatusBadRequest)
 
-	pubKeyPem := pubKey.PublicKeyPem
-	assert.NotNil(t, pubKeyPem)
-	assert.Regexp(t, "^-----BEGIN PUBLIC KEY-----", pubKeyPem)
+	// Signed requset
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		userURL := u.JoinPath(userURL).String()
+
+		resp, err := apClient.GetBody(userURL)
+		require.NoError(t, err)
+
+		var person ap.Person
+		err = person.UnmarshalJSON(resp)
+		require.NoError(t, err)
+
+		assert.Equal(t, ap.PersonType, person.Type)
+		assert.Equal(t, username, person.PreferredUsername.String())
+		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v$", userID), person.GetID())
+		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v/outbox$", userID), person.Outbox.GetID().String())
+		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v/inbox$", userID), person.Inbox.GetID().String())
+
+		assert.NotNil(t, person.PublicKey)
+		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v#main-key$", userID), person.PublicKey.ID)
+
+		assert.NotNil(t, person.PublicKey.PublicKeyPem)
+		assert.Regexp(t, "^-----BEGIN PUBLIC KEY-----", person.PublicKey.PublicKeyPem)
+	})
 }
 
 func TestActivityPubMissingPerson(t *testing.T) {

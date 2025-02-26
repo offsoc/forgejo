@@ -28,18 +28,28 @@ import (
 func TestActivityPubRepository(t *testing.T) {
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
-	defer tests.PrepareTestEnv(t)()
 
-	repositoryID := 2
-	req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/activitypub/repository-id/%v", repositoryID))
-	resp := MakeRequest(t, req, http.StatusOK)
-	assert.Contains(t, resp.Body.String(), "@context")
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		repositoryID := 2
 
-	var repository forgefed_modules.Repository
-	err := repository.UnmarshalJSON(resp.Body.Bytes())
-	require.NoError(t, err)
+		apServerActor := user.NewAPActorUser()
 
-	assert.Regexp(t, fmt.Sprintf("activitypub/repository-id/%v$", repositoryID), repository.GetID().String())
+		cf, err := activitypub.GetClientFactory(db.DefaultContext)
+		require.NoError(t, err)
+
+		c, err := cf.WithKeys(db.DefaultContext, apServerActor, apServerActor.APActorKeyID())
+		require.NoError(t, err)
+
+		resp, err := c.GetBody(fmt.Sprintf("%vapi/v1/activitypub/repository-id/%v", u, repositoryID))
+		require.NoError(t, err)
+		assert.Contains(t, string(resp), "@context")
+
+		var repository forgefed_modules.Repository
+		err = repository.UnmarshalJSON(resp)
+		require.NoError(t, err)
+
+		assert.Regexp(t, fmt.Sprintf("activitypub/repository-id/%v$", repositoryID), repository.GetID().String())
+	})
 }
 
 func TestActivityPubMissingRepository(t *testing.T) {
@@ -62,14 +72,16 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 	defer federatedSrv.Close()
 
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		actionsUser := user.NewActionsUser()
+		apServerActor := user.NewAPActorUser()
 		repositoryID := 2
 		timeNow := time.Now().UTC()
 
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
-		c, err := cf.WithKeys(db.DefaultContext, actionsUser, "not used")
+
+		c, err := cf.WithKeys(db.DefaultContext, apServerActor, apServerActor.APActorKeyID())
 		require.NoError(t, err)
+
 		repoInboxURL := u.JoinPath(fmt.Sprintf("/api/v1/activitypub/repository-id/%d/inbox", repositoryID)).String()
 
 		activity1 := []byte(fmt.Sprintf(
@@ -139,11 +151,13 @@ func TestActivityPubRepositoryInboxInvalid(t *testing.T) {
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		actionsUser := user.NewActionsUser()
+		apServerActor := user.NewAPActorUser()
 		repositoryID := 2
+
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
-		c, err := cf.WithKeys(db.DefaultContext, actionsUser, "not used")
+
+		c, err := cf.WithKeys(db.DefaultContext, apServerActor, apServerActor.APActorKeyID())
 		require.NoError(t, err)
 
 		repoInboxURL := u.JoinPath(fmt.Sprintf("/api/v1/activitypub/repository-id/%v/inbox", repositoryID)).String()
