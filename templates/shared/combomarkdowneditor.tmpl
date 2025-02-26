@@ -29,7 +29,7 @@ Template Attributes:
 			<div class="markdown-toolbar-group">
 				<md-quote class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.quote.tooltip"}}">{{svg "octicon-quote"}}</md-quote>
 				<md-code class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.code.tooltip"}}">{{svg "octicon-code"}}</md-code>
-				<md-link class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.link.tooltip"}}">{{svg "octicon-link"}}</md-link>
+				<button class="markdown-toolbar-button show-modal button" data-md-button data-md-action="new-link" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.link.tooltip"}}">{{svg "octicon-link"}}</button>
 			</div>
 			<div class="markdown-toolbar-group">
 				<md-unordered-list class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.list.unordered.tooltip"}}">{{svg "octicon-list-unordered"}}</md-unordered-list>
@@ -87,5 +87,31 @@ Template Attributes:
 			<button class="ui cancel button" data-selector-name="cancel-button">{{ctx.Locale.Tr "cancel"}}</button>
 			<button class="ui primary button" data-selector-name="ok-button">{{ctx.Locale.Tr "ok"}}</button>
 		</div>
+	</div>
+
+	<div class="ui small modal" data-modal-name="new-markdown-link">
+		<div class="header">{{ctx.Locale.Tr "editor.link_modal.header"}}</div>
+
+		<fieldset class="content">
+			<div class="ui form" data-selector-name="form">
+				<label>
+					{{ctx.Locale.Tr "editor.link_modal.url"}}
+					<input name="link-url" required dir="auto" autocomplete="off">
+				</label>
+				<label>
+					{{ctx.Locale.Tr "editor.link_modal.description"}}
+					<input name="link-description" required dir="auto" autocomplete="off">
+				</label>
+
+				<div class="help">
+					{{ctx.Locale.Tr "editor.link_modal.paste_reminder"}}
+				</div>
+
+				<div class="text right actions">
+					<button class="ui cancel button" data-selector-name="cancel-button">{{ctx.Locale.Tr "cancel"}}</button>
+					<button class="ui primary button" data-selector-name="ok-button">{{ctx.Locale.Tr "ok"}}</button>
+				</div>
+			</div>
+		</fieldset>
 	</div>
 </div>

@@ -1,0 +1,14 @@
+-
+  id: 1001
+  group_name: trusted-user
+  rule_name: git-lfs
+
+-
+  id: 1002
+  group_name: trusted-user
+  rule_name: "all:assets"
+
+-
+  id: 1003
+  group_name: trusted-user
+  rule_name: "Multi subjects"

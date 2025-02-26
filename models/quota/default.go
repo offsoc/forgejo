@@ -7,7 +7,7 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 )
 
-func EvaluateDefault(used Used, forSubject LimitSubject) bool {
+func EvaluateDefault(used Used, forSubject LimitSubject) (bool, int64) {
 	groups := GroupList{
 		&Group{
 			Name: "builtin-default-group",

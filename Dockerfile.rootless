@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM data.forgejo.org/oci/xx AS xx
 
-FROM --platform=$BUILDPLATFORM data.forgejo.org/oci/golang:1.23-alpine3.21 AS build-env
+FROM --platform=$BUILDPLATFORM data.forgejo.org/oci/golang:1.24-alpine3.21 AS build-env
 
 ARG GOPROXY
 ENV GOPROXY=${GOPROXY:-direct}
@@ -50,6 +50,7 @@ RUN chmod 755 /tmp/local/usr/local/bin/docker-entrypoint.sh \
 RUN chmod 644 /go/src/code.gitea.io/gitea/contrib/autocompletion/bash_autocomplete
 
 FROM data.forgejo.org/oci/alpine:3.21
+ARG RELEASE_VERSION
 LABEL maintainer="contact@forgejo.org" \
       org.opencontainers.image.authors="Forgejo" \
       org.opencontainers.image.url="https://forgejo.org" \

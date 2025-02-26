@@ -34,13 +34,6 @@ func GetRegistrationToken(ctx *context.APIContext, ownerID, repoID int64) {
 	ctx.JSON(http.StatusOK, RegistrationToken{Token: token.Token})
 }
 
-// RunJobList is a list of action run jobs
-// swagger:response RunJobList
-type RunJobList struct {
-	// in:body
-	Body []*structs.ActionRunJob `json:"body"`
-}
-
 func GetActionRunJobs(ctx *context.APIContext, ownerID, repoID int64) {
 	labels := strings.Split(ctx.FormTrim("labels"), ",")
 
@@ -54,8 +47,7 @@ func GetActionRunJobs(ctx *context.APIContext, ownerID, repoID int64) {
 		return
 	}
 
-	res := new(RunJobList)
-	res.Body = fromRunJobModelToResponse(total, labels)
+	res := fromRunJobModelToResponse(total, labels)
 
 	ctx.JSON(http.StatusOK, res)
 }

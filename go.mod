@@ -1,8 +1,8 @@
 module code.gitea.io/gitea
 
-go 1.23
+go 1.24
 
-toolchain go1.23.6
+toolchain go1.24.0
 
 require (
 	code.forgejo.org/f3/gof3/v3 v3.10.2
@@ -84,7 +84,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.0
 	github.com/pquerna/otp v1.4.0
-	github.com/prometheus/client_golang v1.20.5
+	github.com/prometheus/client_golang v1.21.0
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1
@@ -101,7 +101,7 @@ require (
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	gitlab.com/gitlab-org/api/client-go v0.119.0
 	go.uber.org/mock v0.4.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.35.0
 	golang.org/x/image v0.23.0
 	golang.org/x/net v0.35.0
 	golang.org/x/oauth2 v0.24.0
@@ -239,7 +239,7 @@ require (
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.55.0 // indirect
+	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/rhysd/actionlint v1.6.27 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect

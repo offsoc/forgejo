@@ -49,6 +49,7 @@ class ComboMarkdownEditor {
     this.setupDropzone();
     this.setupTextarea();
     this.setupTableInserter();
+    this.setupLinkInserter();
 
     await this.switchToUserPreference();
 
@@ -93,6 +94,7 @@ class ComboMarkdownEditor {
       this.indentSelection(true);
     });
     this.textareaMarkdownToolbar.querySelector('button[data-md-action="new-table"]')?.setAttribute('data-modal', `div[data-markdown-table-modal-id="${elementIdCounter}"]`);
+    this.textareaMarkdownToolbar.querySelector('button[data-md-action="new-link"]')?.setAttribute('data-modal', `div[data-markdown-link-modal-id="${elementIdCounter}"]`);
 
     this.textarea.addEventListener('keydown', (e) => {
       if (e.shiftKey) {
@@ -226,6 +228,58 @@ class ComboMarkdownEditor {
     const button = newTableModal.querySelector('button[data-selector-name="ok-button"]');
     button.setAttribute('data-element-id', elementIdCounter);
     button.addEventListener('click', this.addNewTable);
+  }
+
+  addNewLink(event) {
+    const elementId = event.target.getAttribute('data-element-id');
+    const newLinkModal = document.querySelector(`div[data-markdown-link-modal-id="${elementId}"]`);
+    const form = newLinkModal.querySelector('div[data-selector-name="form"]');
+
+    // Validate input fields
+    for (const currentInput of form.querySelectorAll('input')) {
+      if (!currentInput.checkValidity()) {
+        currentInput.reportValidity();
+        return;
+      }
+    }
+
+    const url = form.querySelector('input[name="link-url"]').value;
+    const description = form.querySelector('input[name="link-description"]').value;
+
+    const code = `[${description}](${url})`;
+
+    replaceTextareaSelection(document.getElementById(`_combo_markdown_editor_${elementId}`), code);
+
+    // Close the modal then clear its fields in case the user wants to add another one.
+    newLinkModal.querySelector('button[data-selector-name="cancel-button"]').click();
+    form.querySelector('input[name="link-url"]').value = '';
+    form.querySelector('input[name="link-description"]').value = '';
+  }
+
+  setupLinkInserter() {
+    const newLinkModal = this.container.querySelector('div[data-modal-name="new-markdown-link"]');
+    newLinkModal.setAttribute('data-markdown-link-modal-id', elementIdCounter);
+    const textarea = document.getElementById(`_combo_markdown_editor_${elementIdCounter}`);
+
+    $(newLinkModal).modal({
+      // Pre-fill the description field from the selection to create behavior similar
+      // to pasting an URL over selected text.
+      onShow: () => {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        if (start !== end) {
+          const selection = textarea.value.slice(start ?? undefined, end ?? undefined);
+          newLinkModal.querySelector('input[name="link-description"]').value = selection;
+        } else {
+          newLinkModal.querySelector('input[name="link-description"]').value = '';
+        }
+      },
+    });
+
+    const button = newLinkModal.querySelector('button[data-selector-name="ok-button"]');
+    button.setAttribute('data-element-id', elementIdCounter);
+    button.addEventListener('click', this.addNewLink);
   }
 
   prepareEasyMDEToolbarActions() {

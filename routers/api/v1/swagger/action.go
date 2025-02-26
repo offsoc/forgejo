@@ -32,3 +32,10 @@ type swaggerResponseVariableList struct {
 	// in:body
 	Body []api.ActionVariable `json:"body"`
 }
+
+// RunJobList is a list of action run jobs
+// swagger:response RunJobList
+type swaggerRunJobList struct {
+	// in:body
+	Body []*api.ActionRunJob `json:"body"`
+}
