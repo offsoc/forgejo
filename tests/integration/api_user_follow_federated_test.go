@@ -25,7 +25,8 @@ func TestAPIFollowFederated(t *testing.T) {
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 	defer tests.PrepareTestEnv(t)()
 
-	federatedSrv := ttools.DistantFederationServer(t)
+	mock := ttools.NewFederationServerMock()
+	federatedSrv := mock.DistantServer(t)
 	defer federatedSrv.Close()
 
 	//user1 := "user4"

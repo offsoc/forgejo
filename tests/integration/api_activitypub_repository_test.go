@@ -57,7 +57,8 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 
-	federatedSrv := ttools.DistantFederationServer(t)
+	mock := ttools.NewFederationServerMock()
+	federatedSrv := mock.DistantServer(t)
 	defer federatedSrv.Close()
 
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
