@@ -41,8 +41,7 @@ func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, ac
 		return err
 	}
 
-	log.Warn("XXX FollowRemoteActor federatedUser: %s", federatedUser)
-
+	// TODO: Encapsulate Factory and add validation
 	followReq := ap.FollowNew(
 		ap.IRI(localUser.APActorID()+"/follows/"+uuid.New().String()),
 		ap.IRI(actorURI),
