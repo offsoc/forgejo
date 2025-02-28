@@ -124,9 +124,7 @@
 				{{end}}
 			</li>
 			<li class="block" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
-				<button type="submit" {{if $.IsReported}} disabled {{end}} class="ui basic orange button" data-modal-id="report-user" hx-post="{{.ContextUser.HomeLink}}?action=report" hx-confirm="-">
-					{{svg "octicon-blocked"}} {{ctx.Locale.Tr "moderation.report"}}
-				</button>
+				<a {{if $.IsReported}}disabled {{end}}class="ui basic orange button" href="/-/abuse_reports/new?type=user&id={{.ContextUser.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
 			</li>
 			{{end}}
 		</ul>

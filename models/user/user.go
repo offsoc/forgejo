@@ -938,6 +938,8 @@ func UpdateUserCols(ctx context.Context, u *User, cols ...string) error {
 		return err
 	}
 
+	// If the user was reported as abusive and any of the columns being updated is relevant
+	// for moderation purposes a shadow copy should be created before first update.
 	if err := IfNeededCreateShadowCopyForUser(ctx, u, cols...); err != nil {
 		return err
 	}

@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package web
@@ -33,6 +34,7 @@ import (
 	"code.gitea.io/gitea/routers/web/feed"
 	"code.gitea.io/gitea/routers/web/healthcheck"
 	"code.gitea.io/gitea/routers/web/misc"
+	"code.gitea.io/gitea/routers/web/moderation"
 	"code.gitea.io/gitea/routers/web/org"
 	org_setting "code.gitea.io/gitea/routers/web/org/setting"
 	"code.gitea.io/gitea/routers/web/repo"
@@ -478,6 +480,9 @@ func registerRoutes(m *web.Route) {
 		m.Get("", user.Issues)
 		m.Get("/search", repo.SearchIssues)
 	}, reqSignIn)
+
+	m.Get("/-/abuse_reports/new", moderation.NewReport, reqSignIn)
+	m.Post("/-/abuse_reports/new", web.Bind(forms.ReportAbuseForm{}), moderation.CreatePost, reqSignIn)
 
 	m.Get("/pulls", reqSignIn, user.Pulls)
 	m.Get("/milestones", reqSignIn, reqMilestonesDashboardPageEnabled, user.Milestones)

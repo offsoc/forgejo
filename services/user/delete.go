@@ -1,4 +1,5 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package user
@@ -216,6 +217,7 @@ func deleteUser(ctx context.Context, u *user_model.User, purge bool) (err error)
 	}
 	// ***** END: ExternalLoginUser *****
 
+	// If the user was reported as abusive, a shadow copy should be created before deletion.
 	if err = user_model.IfNeededCreateShadowCopyForUser(ctx, u); err != nil {
 		return err
 	}

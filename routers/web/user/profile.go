@@ -13,7 +13,7 @@ import (
 
 	activities_model "code.gitea.io/gitea/models/activities"
 	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/moderation"
+
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
@@ -360,8 +360,6 @@ func Action(ctx *context.Context) {
 		err = user_service.BlockUser(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
 	case "unblock":
 		err = user_model.UnblockUser(ctx, ctx.Doer.ID, ctx.ContextUser.ID)
-	case "report":
-		err = moderation.ReportUser(ctx, ctx.Doer.ID, ctx.ContextUser.ID, "{remarks not implemented}")
 	}
 
 	if err != nil {

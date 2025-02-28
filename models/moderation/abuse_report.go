@@ -25,8 +25,17 @@ const (
 	ReportStatusTypeIgnored // 3
 )
 
-// AbuseCategoryType defines the categories in which a user can include the reported content.
-type AbuseCategoryType int //revive:disable-line:exported
+type (
+	// AbuseCategoryType defines the categories in which a user can include the reported content.
+	AbuseCategoryType int //revive:disable-line:exported
+
+	// AbuseCategoryItem defines a pair of value and it's corresponding translation key
+	// (used when new reports are submitted).
+	AbuseCategoryItem struct {
+		Value          AbuseCategoryType
+		TranslationKey string
+	}
+)
 
 const (
 	AbuseCategoryTypeSpam            AbuseCategoryType = iota + 1 // 1
@@ -34,6 +43,17 @@ const (
 	AbuseCategoryTypeIllegalContent                               // 3
 	AbuseCategoryTypeOtherViolations                              // 4 (Other violations of platform rules)
 )
+
+// GetAbuseCategoriesList returns a list of pairs with the available abuse category types
+// and their corresponding translation keys
+func GetAbuseCategoriesList() []AbuseCategoryItem {
+	return []AbuseCategoryItem{
+		{AbuseCategoryTypeSpam, "moderation.abuse_category.spam"},
+		{AbuseCategoryTypeMalware, "moderation.abuse_category.malware"},
+		{AbuseCategoryTypeIllegalContent, "moderation.abuse_category.illegal_content"},
+		{AbuseCategoryTypeOtherViolations, "moderation.abuse_category.other_violations"},
+	}
+}
 
 // ReportedContentType defines the types of content that can be reported
 // (i.e. user/organization profile, repository, issue/pull, comment).
@@ -97,6 +117,15 @@ func alreadyReportedBy(ctx context.Context, doerID int64, contentType ReportedCo
 	return reported
 }
 
+func ReportAbuse(ctx context.Context, report *AbuseReport) error {
+	if report.ContentType == ReportedContentTypeUser && report.ReporterID == report.ContentID {
+		return nil
+	}
+
+	return reportAbuse(ctx, report)
+}
+
+/*
 // ReportUser creates a new abuse report regarding the user with the provided reportedUserID.
 func ReportUser(ctx context.Context, reporterID int64, reportedUserID int64, remarks string) error {
 	if reporterID == reportedUserID {
@@ -148,6 +177,7 @@ func ReportComment(ctx context.Context, reporterID int64, commentID int64, remar
 
 	return reportAbuse(ctx, report)
 }
+*/
 
 func reportAbuse(ctx context.Context, report *AbuseReport) error {
 	if alreadyReportedBy(ctx, report.ReporterID, report.ContentType, report.ContentID) {
@@ -156,8 +186,6 @@ func reportAbuse(ctx context.Context, report *AbuseReport) error {
 	}
 
 	report.Status = ReportStatusTypeOpen
-	report.Category = AbuseCategoryTypeOtherViolations // TODO: replace with user's selection
-
 	_, err := db.GetEngine(ctx).Insert(report)
 
 	return err

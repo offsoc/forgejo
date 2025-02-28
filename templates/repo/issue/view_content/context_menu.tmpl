@@ -24,8 +24,12 @@
 			{{end}}
 		{{end}}
 		{{if and .ctxData.IsSigned (not .IsCommentPoster)}}
+			{{$contentType := "comment"}}
+			{{if eq .item .ctxData.Issue}}
+				{{if .ctxData.Issue.IsPull}} {{$contentType = "pull"}} {{else}} {{$contentType = "issue"}} {{end}}
+			{{end}}
 			<div class="divider"></div>
-			<div class="item context js-aria-clickable report-comment" data-target="{{.item.HashTag}}-raw" data-modal="#report-comment-modal" data-repo-url="{{.ctxData.RepoLink}}" data-comment-id="{{.item.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</div>
+			<a class="item context" href="/-/abuse_reports/new?type={{$contentType}}&id={{.item.ID}}">{{ctx.Locale.Tr "moderation.report_content"}}</a>
 		{{end}}
 	</div>
 </div>

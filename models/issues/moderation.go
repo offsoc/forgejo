@@ -14,8 +14,8 @@ import (
 // CommentData represents a trimmed down comment that is used for preserving
 // only the fields needed for abusive content reports (mainly string fields).
 type CommentData struct {
-	OriginalAuthor string // TODO: decide if this is needed
-	TreePath       string // TODO: decide if this is needed
+	OriginalAuthor string // TODO: decide if this is useful
+	TreePath       string // TODO: decide if this is useful
 	Content        string
 	ContentVersion int
 	CreatedUnix    timeutil.TimeStamp
