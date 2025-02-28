@@ -10,13 +10,16 @@ import (
 	"errors"
 	"fmt"
 	"html"
+	"html/template"
 	"net/http"
 	"net/url"
+	"path"
 	"strconv"
 	"strings"
 
 	"forgejo.org/models"
 	activities_model "forgejo.org/models/activities"
+	asymkey_model "forgejo.org/models/asymkey"
 	"forgejo.org/models/db"
 	git_model "forgejo.org/models/git"
 	issues_model "forgejo.org/models/issues"
@@ -28,11 +31,13 @@ import (
 	"forgejo.org/models/unit"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/base"
+	"forgejo.org/modules/charset"
 	"forgejo.org/modules/emoji"
 	"forgejo.org/modules/git"
 	"forgejo.org/modules/gitrepo"
 	issue_template "forgejo.org/modules/issue/template"
 	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup"
 	"forgejo.org/modules/optional"
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/structs"
@@ -928,7 +933,55 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 
 	ctx.Data["IsShowingOnlySingleCommit"] = willShowSpecifiedCommit
 
-	if willShowSpecifiedCommit || willShowSpecifiedCommitRange {
+	if willShowSpecifiedCommit {
+		endCommitID = specifiedEndCommit
+		startCommitID = prInfo.MergeBase
+
+		ctx.Data["CommitID"] = specifiedEndCommit
+		commit, err := gitRepo.GetCommit(specifiedEndCommit)
+		if err != nil {
+			ctx.ServerError("Repo.GitRepo.GetCommit", err)
+		}
+
+		ctx.Data["Commit"] = commit
+
+		statuses, _, err := git_model.GetLatestCommitStatus(ctx, ctx.Repo.Repository.ID, specifiedEndCommit, db.ListOptionsAll)
+		if err != nil {
+			log.Error("GetLatestCommitStatus: %v", err)
+		}
+		if !ctx.Repo.CanRead(unit.TypeActions) {
+			git_model.CommitStatusesHideActionsURL(ctx, statuses)
+		}
+
+		ctx.Data["CommitStatus"] = git_model.CalcCommitStatus(statuses)
+		ctx.Data["CommitStatuses"] = statuses
+
+		verification := asymkey_model.ParseCommitWithSignature(ctx, commit)
+		ctx.Data["Verification"] = verification
+		ctx.Data["Author"] = user_model.ValidateCommitWithEmail(ctx, commit)
+
+		note := &git.Note{}
+		err = git.GetNote(ctx, ctx.Repo.GitRepo, specifiedEndCommit, note)
+		if err == nil {
+			ctx.Data["NoteCommit"] = note.Commit
+			ctx.Data["NoteAuthor"] = user_model.ValidateCommitWithEmail(ctx, note.Commit)
+			ctx.Data["NoteRendered"], err = markup.RenderCommitMessage(&markup.RenderContext{
+				Links: markup.Links{
+					Base:       ctx.Repo.RepoLink,
+					BranchPath: path.Join("commit", util.PathEscapeSegments(specifiedEndCommit)),
+				},
+				Metas:   ctx.Repo.Repository.ComposeMetas(ctx),
+				GitRepo: ctx.Repo.GitRepo,
+				Ctx:     ctx,
+			}, template.HTMLEscapeString(string(charset.ToUTF8WithFallback(note.Message, charset.ConvertOpts{}))))
+			if err != nil {
+				ctx.ServerError("RenderCommitMessage", err)
+				return
+			}
+		}
+
+		ctx.Data["IsShowingAllCommits"] = false
+	} else if willShowSpecifiedCommitRange {
 		if len(specifiedEndCommit) > 0 {
 			endCommitID = specifiedEndCommit
 		} else {
@@ -939,6 +992,9 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 		} else {
 			startCommitID = prInfo.MergeBase
 		}
+
+		ctx.Data["AfterCommitID"] = endCommitID
+		ctx.Data["BeforeCommitID"] = startCommitID
 		ctx.Data["IsShowingAllCommits"] = false
 	} else {
 		endCommitID = headCommitID
@@ -948,8 +1004,6 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 
 	ctx.Data["Username"] = ctx.Repo.Owner.Name
 	ctx.Data["Reponame"] = ctx.Repo.Repository.Name
-	ctx.Data["AfterCommitID"] = endCommitID
-	ctx.Data["BeforeCommitID"] = startCommitID
 
 	fileOnly := ctx.FormBool("file-only")
 
