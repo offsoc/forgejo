@@ -6,37 +6,130 @@ package activitypub
 import (
 	"crypto"
 	"crypto/x509"
+	"database/sql"
 	"encoding/pem"
 	"fmt"
 	"net/http"
 	"net/url"
 
+	"forgejo.org/models/db"
+	"forgejo.org/models/forgefed"
 	"forgejo.org/models/user"
 	"forgejo.org/modules/activitypub"
+	fm "forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
 	"forgejo.org/modules/setting"
 	gitea_context "forgejo.org/services/context"
+	"forgejo.org/services/federation"
 
 	"github.com/42wim/httpsig"
 	ap "github.com/go-ap/activitypub"
 )
 
-func getPublicKeyFromResponse(b []byte, keyID *url.URL) (p crypto.PublicKey, err error) {
+func decodePublicKeyPem(pubKeyPem string) ([]byte, error) {
+	block, _ := pem.Decode([]byte(pubKeyPem))
+	if block == nil || block.Type != "PUBLIC KEY" {
+		return nil, fmt.Errorf("could not decode publicKeyPem to PUBLIC KEY pem block type")
+	}
+
+	return block.Bytes, nil
+}
+
+func getFederatedUser(ctx *gitea_context.APIContext, person *ap.Person, federationHost *forgefed.FederationHost) (*user.FederatedUser, error) {
+	dbUser, err := user.GetUserByFederatedURI(ctx, person.ID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if dbUser != nil {
+		federatedUser, err := user.GetFederatedUserByUserID(ctx, dbUser.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		if federatedUser != nil {
+			return federatedUser, nil
+		}
+	}
+
+	personID, err := fm.NewPersonID(person.ID.String(), string(federationHost.NodeInfo.SoftwareName))
+	if err != nil {
+		return nil, err
+	}
+
+	_, federatedUser, err := federation.CreateUserFromAP(ctx, personID, federationHost.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return federatedUser, nil
+}
+
+func getPublicKeyFromResponse(ctx *gitea_context.APIContext, b []byte, keyID *url.URL) (p crypto.PublicKey, err error) {
 	person := ap.PersonNew(ap.IRI(keyID.String()))
 	err = person.UnmarshalJSON(b)
 	if err != nil {
 		return nil, fmt.Errorf("ActivityStreams type cannot be converted to one known to have publicKey property: %w", err)
 	}
+
 	pubKey := person.PublicKey
 	if pubKey.ID.String() != keyID.String() {
 		return nil, fmt.Errorf("cannot find publicKey with id: %s in %s", keyID, string(b))
 	}
-	pubKeyPem := pubKey.PublicKeyPem
-	block, _ := pem.Decode([]byte(pubKeyPem))
-	if block == nil || block.Type != "PUBLIC KEY" {
-		return nil, fmt.Errorf("could not decode publicKeyPem to PUBLIC KEY pem block type")
+
+	pubKeyBytes, err := decodePublicKeyPem(pubKey.PublicKeyPem)
+	if err != nil {
+		return nil, err
 	}
-	p, err = x509.ParsePKIXPublicKey(block.Bytes)
+
+	p, err = x509.ParsePKIXPublicKey(pubKeyBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	// Cache siging key in the database
+	federationHost, err := federation.GetFederationHostForURI(ctx, person.ID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if person.Type == ap.ActivityVocabularyType("Application") {
+		federationHost.KeyID = sql.NullString{
+			String: keyID.String(),
+			Valid:  true,
+		}
+
+		federationHost.PublicKey = sql.Null[sql.RawBytes]{
+			V:     pubKeyBytes,
+			Valid: true,
+		}
+
+		_, err = db.GetEngine(ctx).ID(federationHost.ID).Update(federationHost)
+		if err != nil {
+			return nil, err
+		}
+	} else if person.Type == ap.ActivityVocabularyType("Person") {
+		federatedUser, err := getFederatedUser(ctx, person, federationHost)
+		if err != nil {
+			return nil, err
+		}
+
+		federatedUser.KeyID = sql.NullString{
+			String: keyID.String(),
+			Valid:  true,
+		}
+
+		federatedUser.PublicKey = sql.Null[sql.RawBytes]{
+			V:     pubKeyBytes,
+			Valid: true,
+		}
+
+		_, err = db.GetEngine(ctx).ID(federatedUser.ID).Update(federatedUser)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return p, err
 }
 
@@ -59,9 +152,42 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 		return false, err
 	}
 
-	log.Debug("Fetching keyID: %s", ID)
+	signatureAlgorithm := httpsig.Algorithm(setting.Federation.SignatureAlgorithms[0])
 
 	// 2. Fetch the public key of the other actor
+	// Try if the signing actor is an already known federated user
+	federationUser, err := user.GetFederatedUserByKeyID(ctx, idIRI.String())
+	if err != nil {
+		return false, err
+	}
+
+	if federationUser != nil && federationUser.PublicKey.Valid {
+		pubKey, err := x509.ParsePKIXPublicKey(federationUser.PublicKey.V)
+		if err != nil {
+			return false, err
+		}
+
+		authenticated = v.Verify(pubKey, signatureAlgorithm) == nil
+		return authenticated, err
+	}
+
+	// Try if the signing actor is an already known federation host
+	federationHost, err := forgefed.FindFederationHostByKeyID(ctx, idIRI.String())
+	if err != nil {
+		return false, err
+	}
+
+	if federationHost != nil && federationHost.PublicKey.Valid {
+		pubKey, err := x509.ParsePKIXPublicKey(federationHost.PublicKey.V)
+		if err != nil {
+			return false, err
+		}
+
+		authenticated = v.Verify(pubKey, signatureAlgorithm) == nil
+		return authenticated, err
+	}
+
+	// Fetch missing public key
 	actionsUser := user.NewAPActorUser()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
@@ -78,14 +204,12 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 		return false, err
 	}
 
-	pubKey, err := getPublicKeyFromResponse(b, idIRI)
+	pubKey, err := getPublicKeyFromResponse(ctx, b, idIRI)
 	if err != nil {
 		return false, err
 	}
 
-	// 3. Verify the other actor's key
-	algo := httpsig.Algorithm(setting.Federation.SignatureAlgorithms[0])
-	authenticated = v.Verify(pubKey, algo) == nil
+	authenticated = v.Verify(pubKey, signatureAlgorithm) == nil
 	return authenticated, err
 }
 

@@ -32,16 +32,24 @@ func NewFederatedUser(userID int64, externalID string, federationHostID int64) (
 	return result, nil
 }
 
-func GetFederatedUserByKeyID(ctx context.Context, keyID *url.URL) (*FederatedUser, error) {
-	user := new(FederatedUser)
-	has, err := db.GetEngine(ctx).Where("key_id=?", keyID).Get(user)
+func GetFederatedUserFromDB(ctx context.Context, searchKey, searchValue any) (*FederatedUser, error) {
+	federatedUser := new(FederatedUser)
+	has, err := db.GetEngine(ctx).Where(searchKey, searchValue).Get(federatedUser)
 	if err != nil {
 		return nil, err
 	} else if !has {
 		return nil, nil
 	}
 
-	return user, nil
+	return federatedUser, nil
+}
+
+func GetFederatedUserByKeyID(ctx context.Context, keyID string) (*FederatedUser, error) {
+	return GetFederatedUserFromDB(ctx, "key_id=?", keyID)
+}
+
+func GetFederatedUserByUserID(ctx context.Context, userID int64) (*FederatedUser, error) {
+	return GetFederatedUserFromDB(ctx, "user_id=?", userID)
 }
 
 func (user FederatedUser) Validate() []string {

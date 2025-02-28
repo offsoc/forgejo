@@ -10,8 +10,9 @@ import (
 	"testing"
 
 	"forgejo.org/models/db"
+	"forgejo.org/models/forgefed"
 	"forgejo.org/models/unittest"
-	user_model "forgejo.org/models/user"
+	"forgejo.org/models/user"
 	"forgejo.org/modules/activitypub"
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/test"
@@ -29,7 +30,7 @@ func TestFederationHttpSigValidation(t *testing.T) {
 		userID := 2
 		userURL := fmt.Sprintf("%vapi/v1/activitypub/user-id/%v", u, userID)
 
-		user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user1 := unittest.AssertExistsAndLoadBean(t, &user.User{ID: 1})
 
 		clientFactory, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
@@ -45,6 +46,23 @@ func TestFederationHttpSigValidation(t *testing.T) {
 		resp, err := apClient.Get(userURL)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		// HACK HACK HACK: the host part of the URL gets set to which IP forgejo is
+		// listening on, NOT localhost, which is the Domain given to forgejo which
+		// is then used for eg. the keyID all requests
+		applicationKeyID := fmt.Sprintf("http://localhost:%v/api/v1/activitypub/actor#main-key", u.Port())
+		actorKeyID := fmt.Sprintf("http://localhost:%v/api/v1/activitypub/user-id/1#main-key", u.Port())
+
+		// Check for cached public keys
+		host, err := forgefed.FindFederationHostByKeyID(db.DefaultContext, applicationKeyID)
+		require.NoError(t, err)
+		assert.NotNil(t, host)
+		assert.True(t, host.PublicKey.Valid)
+
+		user, err := user.GetFederatedUserByKeyID(db.DefaultContext, actorKeyID)
+		require.NoError(t, err)
+		assert.NotNil(t, user)
+		assert.True(t, user.PublicKey.Valid)
 
 		// Disable signature validation
 		defer test.MockVariableValue(&setting.Federation.SignatureEnforced, false)()
