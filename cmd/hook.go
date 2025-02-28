@@ -295,6 +295,9 @@ Forgejo or set your environment appropriately.`, "")
 
 // runHookUpdate process the update hook: https://git-scm.com/docs/githooks#update
 func runHookUpdate(c *cli.Context) error {
+	if !setting.Git.DisallowRefsPull {
+		return nil
+	}
 	// Now if we're an internal don't do anything else
 	if isInternal, _ := strconv.ParseBool(os.Getenv(repo_module.EnvIsInternal)); isInternal {
 		return nil

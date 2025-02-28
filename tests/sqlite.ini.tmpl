@@ -18,6 +18,9 @@ DATADIR = tests/{{TEST_TYPE}}/gitea-{{TEST_TYPE}}-sqlite/indexers/issues.queue
 [queue]
 TYPE = immediate
 
+[git]
+DISALLOW_REFS_PULL = true
+
 [repository]
 ROOT = {{REPO_TEST_DIR}}tests/{{TEST_TYPE}}/gitea-{{TEST_TYPE}}-sqlite/gitea-repositories
 

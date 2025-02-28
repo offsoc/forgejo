@@ -167,8 +167,14 @@ func TestRunHookUpdate(t *testing.T) {
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{subcmdHookUpdate}
 
-	t.Run("Removal of internal reference", func(t *testing.T) {
+	t.Run("Removal of internal reference allowed", func(t *testing.T) {
+		err := app.Run([]string{"./forgejo", "update", "refs/pull/1/head", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000000"})
+		require.NoError(t, err)
+	})
+
+	t.Run("Removal of internal reference disallowed", func(t *testing.T) {
 		defer test.MockVariableValue(&cli.OsExiter, func(code int) {})()
+		defer test.MockVariableValue(&setting.Git.DisallowRefsPull, true)()
 		defer test.MockVariableValue(&setting.IsProd, false)()
 		finish := captureOutput(t, os.Stderr)
 
@@ -179,8 +185,14 @@ func TestRunHookUpdate(t *testing.T) {
 		assert.Contains(t, out, "The deletion of refs/pull/1/head is skipped as it's an internal reference.")
 	})
 
-	t.Run("Update of internal reference", func(t *testing.T) {
+	t.Run("Update of internal reference allowed", func(t *testing.T) {
+		err := app.Run([]string{"./forgejo", "update", "refs/pull/1/head", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000001"})
+		require.NoError(t, err)
+	})
+
+	t.Run("Update of internal reference disallowed", func(t *testing.T) {
 		defer test.MockVariableValue(&cli.OsExiter, func(code int) {})()
+		defer test.MockVariableValue(&setting.Git.DisallowRefsPull, true)()
 		defer test.MockVariableValue(&setting.IsProd, false)()
 		finish := captureOutput(t, os.Stderr)
 
