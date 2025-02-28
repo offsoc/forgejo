@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM docker.io/tonistiigi/xx AS xx
 
-FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.22-alpine3.19 as build-env
+FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.23-alpine3.19 as build-env
 
 ARG GOPROXY
 ENV GOPROXY ${GOPROXY:-direct}
