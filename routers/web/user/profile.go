@@ -13,7 +13,6 @@ import (
 
 	activities_model "code.gitea.io/gitea/models/activities"
 	"code.gitea.io/gitea/models/db"
-
 	repo_model "code.gitea.io/gitea/models/repo"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/base"
@@ -340,14 +339,14 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 	ctx.Data["Page"] = pager
 }
 
-// Action response for follow/unfollow and block/unblock user requests
+// Action response for follow/unfollow user request
 func Action(ctx *context.Context) {
 	var err error
 	action := ctx.FormString("action")
 
 	if ctx.ContextUser.IsOrganization() && (action == "block" || action == "unblock") {
-		log.Error("Cannot perform this action on an organization %q", action)
-		ctx.JSONError(fmt.Sprintf("Action %q failed", action))
+		log.Error("Cannot perform this action on an organization %q", ctx.FormString("action"))
+		ctx.JSONError(fmt.Sprintf("Action %q failed", ctx.FormString("action")))
 		return
 	}
 
@@ -364,8 +363,8 @@ func Action(ctx *context.Context) {
 
 	if err != nil {
 		if !errors.Is(err, user_model.ErrBlockedByUser) {
-			log.Error("Failed to apply action %q: %v", action, err)
-			ctx.Error(http.StatusBadRequest, fmt.Sprintf("Action %q failed", action))
+			log.Error("Failed to apply action %q: %v", ctx.FormString("action"), err)
+			ctx.Error(http.StatusBadRequest, fmt.Sprintf("Action %q failed", ctx.FormString("action")))
 			return
 		}
 
@@ -387,6 +386,6 @@ func Action(ctx *context.Context) {
 		ctx.HTML(http.StatusOK, tplFollowUnfollow)
 		return
 	}
-	log.Error("Failed to apply action %q: unsupported context user type: %s", action, ctx.ContextUser.Type)
-	ctx.Error(http.StatusBadRequest, fmt.Sprintf("Action %q failed", action))
+	log.Error("Failed to apply action %q: unsupported context user type: %s", ctx.FormString("action"), ctx.ContextUser.Type)
+	ctx.Error(http.StatusBadRequest, fmt.Sprintf("Action %q failed", ctx.FormString("action")))
 }
