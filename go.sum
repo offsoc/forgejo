@@ -620,6 +620,8 @@ code.forgejo.org/forgejo/archiver/v3 v3.5.1 h1:UmmbA7D5550uf71SQjarmrn6yKwOGxtEj
 code.forgejo.org/forgejo/archiver/v3 v3.5.1/go.mod h1:e3dqJ7H78uzsRSEACH1joayhuSyhnonssnDhppzS1L4=
 code.forgejo.org/forgejo/go-xsd-duration v0.0.0-20220703122237-02e73435a078 h1:RArF5AsF9LH4nEoJxqRxcP5r8hhRfWcId84G82YbqzA=
 code.forgejo.org/forgejo/go-xsd-duration v0.0.0-20220703122237-02e73435a078/go.mod h1:g/V2Hjas6Z1UHUp4yIx6bATpNzJ7DYtD0FG3+xARWxs=
+code.forgejo.org/forgejo/levelqueue v1.0.0 h1:9krYpU6BM+j/1Ntj6m+VCAIu0UNnne1/UfU/XgPpLuE=
+code.forgejo.org/forgejo/levelqueue v1.0.0/go.mod h1:fmG6zhVuqim2rxSFOoasgXO8V2W/k9U31VVYqLIRLhQ=
 code.forgejo.org/forgejo/reply v1.0.2 h1:dMhQCHV6/O3L5CLWNTol+dNzDAuyCK88z4J/lCdgFuQ=
 code.forgejo.org/forgejo/reply v1.0.2/go.mod h1:RyZUfzQLc+fuLIGjTSQWDAJWPiL4WtKXB/FifT5fM7U=
 code.forgejo.org/forgejo/ssh v0.0.0-20241211213324-5fc306ca0616 h1:kEZL84+02jY9RxXM4zHBWZ3Fml0B09cmP1LGkDsCfIA=
@@ -647,8 +649,6 @@ filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 gioui.org v0.0.0-20210308172011-57750fc8a0a6/go.mod h1:RSH6KIUZ0p2xy5zHDxgAM4zumjgTw83q2ge/PI+yyw8=
 git.sr.ht/~sbinet/gg v0.3.1/go.mod h1:KGYtlADtqsqANL9ueOFkWymvzUvLMQllU5Ixo+8v3pc=
-gitea.com/lunny/levelqueue v0.4.2-0.20230414023320-3c0159fe0fe4 h1:IFT+hup2xejHqdhS7keYWioqfmxdnfblFDTGoOwcZ+o=
-gitea.com/lunny/levelqueue v0.4.2-0.20230414023320-3c0159fe0fe4/go.mod h1:HBqmLbz56JWpfEGG0prskAV97ATNRoj5LDmPicD22hU=
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a h1:lSA0F4e9A2NcQSqGqTOXqu2aRi/XEQxDCBwM8yJtE6s=
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a/go.mod h1:EXuID2Zs0pAQhH8yz+DNjUbjppKQzKFAn28TMYPB6IU=
 github.com/42wim/httpsig v1.2.2 h1:ofAYoHUNs/MJOLqQ8hIxeyz2QxOz8qdSVvp3PX/oPgA=
@@ -1031,7 +1031,6 @@ github.com/golang/protobuf v1.5.3/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiu
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
 github.com/golang/protobuf v1.5.4/go.mod h1:lnTiLA8Wa4RWRcIUkrtSVa5nRhsEGBg48fD6rSs7xps=
 github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
-github.com/golang/snappy v0.0.1/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/golang/snappy v0.0.2/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/golang/snappy v0.0.3/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/golang/snappy v0.0.4 h1:yAGX7huGHXlcLOEtBnF4w7FQwA26wojNCwOYAEhLjQM=

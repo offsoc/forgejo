@@ -7,6 +7,7 @@ toolchain go1.24.0
 require (
 	code.forgejo.org/f3/gof3/v3 v3.10.2
 	code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251
+	code.forgejo.org/forgejo/levelqueue v1.0.0
 	code.forgejo.org/forgejo/reply v1.0.2
 	code.forgejo.org/go-chi/binding v1.0.0
 	code.forgejo.org/go-chi/cache v1.0.0
@@ -16,7 +17,6 @@ require (
 	code.gitea.io/sdk/gitea v0.20.0
 	codeberg.org/gusted/mcaptcha v0.0.0-20220723083913-4f3072e1d570
 	connectrpc.com/connect v1.17.0
-	gitea.com/lunny/levelqueue v0.4.2-0.20230414023320-3c0159fe0fe4
 	github.com/42wim/httpsig v1.2.2
 	github.com/42wim/sshsig v0.0.0-20211121163825-841cf5bbc121
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358
