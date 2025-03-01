@@ -64,6 +64,10 @@ func changeIssueStatus(ctx context.Context, issue *Issue, doer *user_model.User,
 }
 
 func doChangeIssueStatus(ctx context.Context, issue *Issue, doer *user_model.User, isMergePull bool) (*Comment, error) {
+	if user_model.IsBlockedMultiple(ctx, []int64{issue.Repo.OwnerID, issue.PosterID}, doer.ID) {
+		return nil, user_model.ErrBlockedByUser
+	}
+
 	// Check for open dependencies
 	if issue.IsClosed && issue.Repo.IsDependenciesEnabled(ctx) {
 		// only check if dependencies are enabled and we're about to close an issue, otherwise reopening an issue would fail when there are unsatisfied dependencies
