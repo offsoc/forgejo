@@ -3253,11 +3253,7 @@ func NewComment(ctx *context.Context) {
 	comment, err := issue_service.CreateIssueComment(ctx, ctx.Doer, ctx.Repo.Repository, issue, form.Content, attachments)
 	if err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			if issue.IsPull {
-				ctx.JSONError(ctx.Tr("repo.pulls.comment.blocked_by_user"))
-			} else {
-				ctx.JSONError(ctx.Tr("repo.issues.comment.blocked_by_user"))
-			}
+			ctx.JSONError(ctx.Tr("repo.comment.blocked_by_user"))
 		} else {
 			ctx.ServerError("CreateIssueComment", err)
 		}
