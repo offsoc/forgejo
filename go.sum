@@ -1179,8 +1179,8 @@ github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056 h1:iCHtR9CQykt
 github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056/go.mod h1:CVKlgaMiht+LXvHG173ujK6JUhZXKb2u/BQtjPDIvyk=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
-github.com/jhillyerd/enmime/v2 v2.0.0 h1:I39PYf0peLGroKq+uX2yGB1ExH/78HcRJy4VmERQAVk=
-github.com/jhillyerd/enmime/v2 v2.0.0/go.mod h1:wQkz7BochDzSukAz5ajAQaXOB7pEg5Vh5QWs7m1uAPw=
+github.com/jhillyerd/enmime/v2 v2.1.0 h1:c8Qwi5Xq5EdtMN6byQWoZ/8I2RMTo6OJ7Xay+s1oPO0=
+github.com/jhillyerd/enmime/v2 v2.1.0/go.mod h1:EJ74dcRbBcqHSP2TBu08XRoy6y3Yx0cevwb1YkGMEmQ=
 github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
 github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
