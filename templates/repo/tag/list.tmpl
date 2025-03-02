@@ -33,8 +33,8 @@
 										<a class="tw-mr-2 tw-font-mono muted" href="{{$.RepoLink}}/src/commit/{{.Sha1}}" rel="nofollow">{{svg "octicon-git-commit" 16 "tw-mr-1"}}{{ShortSha .Sha1}}</a>
 
 										{{if not $.DisableDownloadSourceArchives}}
-											<a class="archive-link tw-mr-2 muted" href="{{$.RepoLink}}/archive/{{.TagName | PathEscapeSegments}}.zip" rel="nofollow">{{svg "octicon-file-zip" 16 "tw-mr-1"}}ZIP</a>
-											<a class="archive-link tw-mr-2 muted" href="{{$.RepoLink}}/archive/{{.TagName | PathEscapeSegments}}.tar.gz" rel="nofollow">{{svg "octicon-file-zip" 16 "tw-mr-1"}}TAR.GZ</a>
+											<a class="archive-link tw-mr-2 muted" href="#" data-link="{{$.RepoLink}}/archive/{{.TagName | PathEscapeSegments}}.zip">{{svg "octicon-file-zip" 16 "tw-mr-1"}}ZIP</a>
+											<a class="archive-link tw-mr-2 muted" href="#" data-link="{{$.RepoLink}}/archive/{{.TagName | PathEscapeSegments}}.tar.gz">{{svg "octicon-file-zip" 16 "tw-mr-1"}}TAR.GZ</a>
 										{{end}}
 
 										{{if (and $canReadReleases $.CanCreateRelease $release.IsTag)}}

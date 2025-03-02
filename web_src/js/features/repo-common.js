@@ -7,19 +7,19 @@ import {sleep} from '../utils.js';
 async function onDownloadArchive(e) {
   e.preventDefault();
   // there are many places using the "archive-link", eg: the dropdown on the repo code page, the release list
-  const el = e.target.closest('a.archive-link[href]');
+  const el = e.target.closest('a.archive-link[data-link]');
   const targetLoading = el.closest('.ui.dropdown') ?? el;
   targetLoading.classList.add('is-loading', 'loading-icon-2px');
   try {
     for (let tryCount = 0; ;tryCount++) {
-      const response = await POST(el.href);
+      const response = await POST(el.getAttribute('data-link'));
       if (!response.ok) throw new Error(`Invalid server response: ${response.status}`);
 
       const data = await response.json();
       if (data.complete) break;
       await sleep(Math.min((tryCount + 1) * 750, 2000));
     }
-    window.location.href = el.href; // the archive is ready, start real downloading
+    window.location.href = el.getAttribute('data-link'); // the archive is ready, start real downloading
   } catch (e) {
     console.error(e);
     showErrorToast(`Failed to download the archive: ${e}`, {duration: 2500});
@@ -29,7 +29,7 @@ async function onDownloadArchive(e) {
 }
 
 export function initRepoArchiveLinks() {
-  queryElems('a.archive-link[href]', (el) => el.addEventListener('click', onDownloadArchive));
+  queryElems('a.archive-link[data-link]', (el) => el.addEventListener('click', onDownloadArchive));
 }
 
 export function initRepoCloneLink() {

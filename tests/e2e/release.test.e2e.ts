@@ -11,6 +11,7 @@
 import {expect} from '@playwright/test';
 import {save_visual, test} from './utils_e2e.ts';
 import {validate_form} from './shared/forms.ts';
+import {createHash} from 'node:crypto';
 
 test.use({user: 'user2'});
 
@@ -45,13 +46,11 @@ test('External Release Attachments', async ({page, isMobile}) => {
 
   await expect(page.locator('.download[open] li:nth-of-type(1)')).toContainText('Source code (ZIP)');
   await expect(page.locator('.download[open] li:nth-of-type(1) span[data-tooltip-content]')).toHaveAttribute('data-tooltip-content', 'This attachment is automatically generated.');
-  await expect(page.locator('.download[open] li:nth-of-type(1) a')).toHaveAttribute('href', '/user2/repo2/archive/2.0.zip');
-  await expect(page.locator('.download[open] li:nth-of-type(1) a')).toHaveAttribute('type', 'application/zip');
+  await expect(page.locator('.download[open] li:nth-of-type(1) a')).toHaveAttribute('data-link', '/user2/repo2/archive/2.0.zip');
 
   await expect(page.locator('.download[open] li:nth-of-type(2)')).toContainText('Source code (TAR.GZ)');
   await expect(page.locator('.download[open] li:nth-of-type(2) span[data-tooltip-content]')).toHaveAttribute('data-tooltip-content', 'This attachment is automatically generated.');
-  await expect(page.locator('.download[open] li:nth-of-type(2) a')).toHaveAttribute('href', '/user2/repo2/archive/2.0.tar.gz');
-  await expect(page.locator('.download[open] li:nth-of-type(2) a')).toHaveAttribute('type', 'application/gzip');
+  await expect(page.locator('.download[open] li:nth-of-type(2) a')).toHaveAttribute('data-link', '/user2/repo2/archive/2.0.tar.gz');
 
   await expect(page.locator('.download[open] li:nth-of-type(3)')).toContainText('Test');
   await expect(page.locator('.download[open] li:nth-of-type(3) a')).toHaveAttribute('href', 'https://forgejo.org/');
@@ -88,4 +87,21 @@ test('External Release Attachments', async ({page, isMobile}) => {
   await page.click('.delete-button');
   await page.click('.button.ok');
   await expect(page).toHaveURL('/user2/repo2/releases');
+});
+
+test('Download release attachments', async ({page}) => {
+  await page.goto('/user2/repo2/releases');
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByText('Source code (ZIP)').first().click();
+  const download = await downloadPromise;
+
+  const fileStream = await download.createReadStream();
+
+  const chunks = []
+  // Check that we got a zip.
+  for await (const chunk of fileStream) {
+    chunks.push(chunk);
+  }
+  expect(chunks.join().substring(0, 2)).toBe("PK");
 });
