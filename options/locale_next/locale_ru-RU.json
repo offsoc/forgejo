@@ -9,5 +9,8 @@
         "few": "хочет влить %[1]d коммита из <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>",
         "many": "хочет влить %[1]d коммитов из <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>"
     },
-    "search.milestone_kind": "Найти этапы..."
+    "search.milestone_kind": "Найти этапы...",
+    "home.explore_repos": "Обзор репозиториев",
+    "home.explore_users": "Обзор пользователей",
+    "home.explore_orgs": "Обзор организаций"
 }
