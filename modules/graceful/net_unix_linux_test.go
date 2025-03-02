@@ -13,4 +13,3 @@ func TestAbstractUnixSocket(t *testing.T) {
 	_, err := DefaultGetListener("unix", "@abc")
 	require.NoError(t, err)
 }
-
