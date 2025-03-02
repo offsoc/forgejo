@@ -35,16 +35,20 @@ func TestActivityPubClientBodySize(t *testing.T) {
 		url := u.JoinPath("/api/v1/nodeinfo").String()
 
 		// Request with normal MaxSize
-		resp, err := apClient.GetBody(url)
-		require.NoError(t, err)
-		assert.Contains(t, string(resp), "forgejo")
+		t.Run("NormalMaxSize", func(t *testing.T) {
+			resp, err := apClient.GetBody(url)
+			require.NoError(t, err)
+			assert.Contains(t, string(resp), "forgejo")
+		})
 
 		// Set MaxSize to something very low to always fail
-		defer test.MockVariableValue(&setting.Federation.MaxSize, 100)()
-
 		// Request with low MaxSize
-		_, err = apClient.GetBody(url)
-		require.Error(t, err)
-		assert.ErrorContains(t, err, "Request returned")
+		t.Run("LowMaxSize", func(t *testing.T) {
+			defer test.MockVariableValue(&setting.Federation.MaxSize, 100)()
+
+			_, err = apClient.GetBody(url)
+			require.Error(t, err)
+			assert.ErrorContains(t, err, "Request returned")
+		})
 	})
 }
