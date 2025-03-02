@@ -15,6 +15,7 @@ import (
 	"code.gitea.io/gitea/models/db"
 	git_model "code.gitea.io/gitea/models/git"
 	issues_model "code.gitea.io/gitea/models/issues"
+	access_model "code.gitea.io/gitea/models/perm/access"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
 	"code.gitea.io/gitea/modules/base"
@@ -58,6 +59,11 @@ func GetNotificationCount(ctx *context.Context) {
 
 		return count
 	}
+}
+
+// Notifications is the notifications page
+func Notifications(ctx *context.Context) {
+	getNotifications(ctx)
 
 	ctx.Data["NotificationIsUserSubscribed"] = func(issue *issues_model.Issue) bool {
 		isSubscribed, err := issues_model.CheckIssueWatch(ctx, ctx.Doer, issue)
@@ -69,19 +75,17 @@ func GetNotificationCount(ctx *context.Context) {
 		}
 		return isSubscribed
 	}
-}
 
-// Notifications is the notifications page
-func Notifications(ctx *context.Context) {
-	getNotifications(ctx)
 	if ctx.Written() {
 		return
 	}
+
 	if ctx.FormBool("div-only") {
 		ctx.Data["SequenceNumber"] = ctx.FormString("sequence-number")
 		ctx.HTML(http.StatusOK, tplNotificationDiv)
 		return
 	}
+
 	ctx.HTML(http.StatusOK, tplNotification)
 }
 
@@ -504,6 +508,51 @@ func NewAvailable(ctx *context.Context) {
 // NotificationUnsubscribe unsubscribes the current user from the notification's associated issue
 func NotificationUnsubscribe(ctx *context.Context) {
 	issueID := ctx.FormInt64("issue_id")
+	issue, err := issues_model.GetIssueByID(ctx, issueID)
+	if err != nil {
+		ctx.NotFoundOrServerError("GetIssueByID", issues_model.IsErrIssueNotExist, err)
+		return
+	}
+
+	if err = issue.LoadRepo(ctx); err != nil {
+		ctx.ServerError("LoadRepo", err)
+		return
+	}
+
+	if err = issue.Repo.LoadOwner(ctx); err != nil {
+		ctx.ServerError("LoadOwner", err)
+		return
+	}
+
+	repo := new(context.Repository)
+	repo.Repository = issue.Repo
+	repo.Permission, err = access_model.GetUserRepoPermission(ctx, repo.Repository, ctx.Doer)
+	if err != nil {
+		ctx.ServerError("GetUserRepoPermission", err)
+		return
+	}
+
+	if !ctx.IsSigned || (ctx.Doer.ID != issue.PosterID && !repo.CanReadIssuesOrPulls(issue.IsPull)) {
+		if log.IsTrace() {
+			if ctx.IsSigned {
+				issueType := "issues"
+				if issue.IsPull {
+					issueType = "pulls"
+				}
+				log.Trace("Permission Denied: User %-v not the Poster (ID: %d) and cannot read %s in Repo %-v.\n"+
+					"User in Repo has Permissions: %-+v",
+					ctx.Doer,
+					issue.PosterID,
+					issueType,
+					repo.Repository,
+					repo.Permission)
+			} else {
+				log.Trace("Permission Denied: Not logged in")
+			}
+		}
+		ctx.Error(http.StatusForbidden)
+		return
+	}
 
 	if err := issues_model.CreateOrUpdateIssueWatch(ctx, ctx.Doer.ID, issueID, false); err != nil {
 		ctx.ServerError("NotificationUnsubscribe", err)
