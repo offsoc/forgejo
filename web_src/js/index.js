@@ -24,7 +24,7 @@ import {initFindFileInRepo} from './features/repo-findfile.js';
 import {initCommentContent, initMarkupContent} from './markup/content.js';
 import {initPdfViewer} from './render/pdf.js';
 
-import {initUserAuthOauth2} from './features/user-auth.js';
+import {initUserAuthOauth2, initUserAuth} from './features/user-auth.js';
 import {
   initRepoIssueDue,
   initRepoIssueReferenceRepositorySearch,
@@ -184,6 +184,7 @@ onDomReady(() => {
   initUserAuthOauth2();
   initUserAuthWebAuthn();
   initUserAuthWebAuthnRegister();
+  initUserAuth();
   initRepoDiffView();
   initPdfViewer();
   initScopedAccessTokenCategories();

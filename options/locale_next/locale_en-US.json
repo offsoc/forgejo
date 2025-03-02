@@ -12,5 +12,6 @@
 		"one": "wants to merge %[1]d commit from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>",
 		"other": "wants to merge %[1]d commits from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>"
 	},
-	"search.milestone_kind": "Search milestones..."
+	"search.milestone_kind": "Search milestones...",
+	"incorrect_root_url": "Your ROOT_URL, as set in app.ini, is %q, which does not correspond to the site you are currently visiting. A mismatched ROOT_URL configuration can cause the application to break."
 }

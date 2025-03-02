@@ -5,8 +5,6 @@ export function initUserAuthOauth2() {
   if (!outer) return;
   const inner = document.getElementById('oauth2-login-navigator-inner');
 
-  checkAppUrl();
-
   for (const link of outer.querySelectorAll('.oauth-login-link')) {
     link.addEventListener('click', () => {
       inner.classList.add('tw-invisible');
@@ -19,4 +17,9 @@ export function initUserAuthOauth2() {
       }, 5000);
     });
   }
+}
+
+export function initUserAuth() {
+  if (!document.querySelector('.user.signin')) return;
+  checkAppUrl();
 }
