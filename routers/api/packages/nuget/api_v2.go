@@ -262,7 +262,7 @@ type FeedEntryProperties struct {
 	Published                TypedValue[time.Time] `xml:"d:Published"`
 	ProjectURL               string                `xml:"d:ProjectUrl,omitempty"`
 	LicenseURL               string                `xml:"d:LicenseUrl,omitempty"`
-	IconURL                  string                `xml:"d:IconURL,omitempty"`
+	IconURL                  string                `xml:"d:IconUrl,omitempty"`
 	ReleaseNotes             string                `xml:"d:ReleaseNotes,omitempty"`
 	RequireLicenseAcceptance TypedValue[bool]      `xml:"d:RequireLicenseAcceptance"`
 	DevelopmentDependency    TypedValue[bool]      `xml:"d:DevelopmentDependency"`
