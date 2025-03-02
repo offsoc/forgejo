@@ -13,5 +13,5 @@
 		"other": "wants to merge %[1]d commits from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>"
 	},
 	"search.milestone_kind": "Search milestones...",
-	"incorrect_root_url": "Your ROOT_URL, as set in app.ini, is %q, which does not correspond to the site you are currently visiting. A mismatched ROOT_URL configuration can cause the application to break."
+	"incorrect_root_url": "This Forgejo instance is configured to be served on \"%s\". You are currently viewing Forgejo through a different URL, which may cause parts of the application to break. The canonical URL is controlled by Forgejo admins via the ROOT_URL setting in the app.ini."
 }

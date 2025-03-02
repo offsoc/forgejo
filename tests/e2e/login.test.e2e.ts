@@ -28,6 +28,6 @@ test('Mismatched ROOT_URL', async ({browser}) => {
 
   await save_visual(page);
   const globalError = page.locator('.js-global-error');
-  await expect(globalError).toContainText('Your ROOT_URL, as set in app.ini, is');
-  await expect(globalError).toContainText('which does not correspond to the site you are currently visiting. A mismatched ROOT_URL configuration can cause the application to break.');
+  await expect(globalError).toContainText('This Forgejo instance is configured to be served on ');
+  await expect(globalError).toContainText('You are currently viewing Forgejo through a different URL, which may cause parts of the application to break. The canonical URL is controlled by Forgejo admins via the ROOT_URL setting in the app.ini.');
 });
