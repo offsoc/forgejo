@@ -10,7 +10,9 @@
         "many": "хочет влить %[1]d коммитов из <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>"
     },
     "search.milestone_kind": "Найти этапы...",
-    "home.explore_repos": "Обзор репозиториев",
-    "home.explore_users": "Обзор пользователей",
-    "home.explore_orgs": "Обзор организаций"
+    "home.explore_repos": "Каталог репозиториев",
+    "home.explore_users": "Каталог пользователей",
+    "home.explore_orgs": "Каталог организаций",
+    "home.welcome.activity_hint": "В вашей ленте пока ничего нет. Ваши действия и активность из отслеживаемых вами репозиториев будут отображены здесь.",
+    "home.welcome.no_activity": "Нет событий"
 }
