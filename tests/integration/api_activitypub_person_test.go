@@ -26,46 +26,46 @@ import (
 func TestActivityPubPerson(t *testing.T) {
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
-	defer tests.PrepareTestEnv(t)()
-
-	userID := 2
-	username := "user2"
-	userURL := fmt.Sprintf("/api/v1/activitypub/user-id/%d", userID)
-
-	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-
-	clientFactory, err := activitypub.GetClientFactory(db.DefaultContext)
-	require.NoError(t, err)
-
-	apClient, err := clientFactory.WithKeys(db.DefaultContext, user1, user1.APActorKeyID())
-	require.NoError(t, err)
-
-	// Unsigned request
-	req := NewRequest(t, "GET", userURL)
-	MakeRequest(t, req, http.StatusBadRequest)
-
-	// Signed requset
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		userURL := u.JoinPath(userURL).String()
+		userID := 2
+		username := "user2"
+		userURL := fmt.Sprintf("%sapi/v1/activitypub/user-id/%d", u, userID)
 
-		resp, err := apClient.GetBody(userURL)
+		user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+
+		clientFactory, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
 
-		var person ap.Person
-		err = person.UnmarshalJSON(resp)
+		apClient, err := clientFactory.WithKeys(db.DefaultContext, user1, user1.APActorKeyID())
 		require.NoError(t, err)
 
-		assert.Equal(t, ap.PersonType, person.Type)
-		assert.Equal(t, username, person.PreferredUsername.String())
-		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d$", userID), person.GetID())
-		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/outbox$", userID), person.Outbox.GetID().String())
-		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/inbox$", userID), person.Inbox.GetID().String())
+		// Unsigned request
+		t.Run("UnsignedRequest", func(t *testing.T) {
+			req := NewRequest(t, "GET", userURL)
+			MakeRequest(t, req, http.StatusBadRequest)
+		})
 
-		assert.NotNil(t, person.PublicKey)
-		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d#main-key$", userID), person.PublicKey.ID)
+		t.Run("SignedRequestValidation", func(t *testing.T) {
+			// Signed requset
+			resp, err := apClient.GetBody(userURL)
+			require.NoError(t, err)
 
-		assert.NotNil(t, person.PublicKey.PublicKeyPem)
-		assert.Regexp(t, "^-----BEGIN PUBLIC KEY-----", person.PublicKey.PublicKeyPem)
+			var person ap.Person
+			err = person.UnmarshalJSON(resp)
+			require.NoError(t, err)
+
+			assert.Equal(t, ap.PersonType, person.Type)
+			assert.Equal(t, username, person.PreferredUsername.String())
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d$", userID), person.GetID())
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/outbox$", userID), person.Outbox.GetID().String())
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/inbox$", userID), person.Inbox.GetID().String())
+
+			assert.NotNil(t, person.PublicKey)
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d#main-key$", userID), person.PublicKey.ID)
+
+			assert.NotNil(t, person.PublicKey.PublicKeyPem)
+			assert.Regexp(t, "^-----BEGIN PUBLIC KEY-----", person.PublicKey.PublicKeyPem)
+		})
 	})
 }
 
