@@ -710,7 +710,7 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 				var result FeedEntry
 				decodeXML(t, resp, &result)
 
-				assert.Equal(t, packageName, result.Properties.Title)
+				assert.Equal(t, packageName, result.Properties.ID)
 				assert.Equal(t, packageVersion, result.Properties.Version)
 				assert.Equal(t, packageAuthors, result.Properties.Authors)
 				assert.Equal(t, packageDescription, result.Properties.Description)

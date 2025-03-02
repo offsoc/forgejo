@@ -266,7 +266,7 @@ type FeedEntryProperties struct {
 	ReleaseNotes             string                `xml:"d:ReleaseNotes,omitempty"`
 	RequireLicenseAcceptance TypedValue[bool]      `xml:"d:RequireLicenseAcceptance"`
 	DevelopmentDependency    TypedValue[bool]      `xml:"d:DevelopmentDependency"`
-	Title                    string                `xml:"d:Title"`
+	Title                    string                `xml:"d:Title,omitempty"`
 	MinClientVersion         string                `xml:"d:MinClientVersion,omitempty"`
 	Tags                     string                `xml:"d:Tags,omitempty"`
 	ID                       string                `xml:"d:Id,omitempty"`
@@ -382,7 +382,7 @@ func createEntry(l *linkBuilder, pd *packages_model.PackageDescriptor, withNames
 			ReleaseNotes:             metadata.ReleaseNotes,
 			RequireLicenseAcceptance: TypedValue[bool]{Type: "Edm.Boolean", Value: metadata.RequireLicenseAcceptance},
 			DevelopmentDependency:    TypedValue[bool]{Type: "Edm.Boolean", Value: metadata.DevelopmentDependency},
-			Title:                    pd.Package.Name,
+			Title:                    metadata.Title,
 			MinClientVersion:         metadata.MinClientVersion,
 			Tags:                     metadata.Tags,
 			ID:                       pd.Package.Name,
