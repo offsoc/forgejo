@@ -40,7 +40,7 @@ func TestActivityPubRepository(t *testing.T) {
 		c, err := cf.WithKeys(db.DefaultContext, apServerActor, apServerActor.APActorKeyID())
 		require.NoError(t, err)
 
-		resp, err := c.GetBody(fmt.Sprintf("%vapi/v1/activitypub/repository-id/%v", u, repositoryID))
+		resp, err := c.GetBody(fmt.Sprintf("%sapi/v1/activitypub/repository-id/%d", u, repositoryID))
 		require.NoError(t, err)
 		assert.Contains(t, string(resp), "@context")
 
@@ -48,7 +48,7 @@ func TestActivityPubRepository(t *testing.T) {
 		err = repository.UnmarshalJSON(resp)
 		require.NoError(t, err)
 
-		assert.Regexp(t, fmt.Sprintf("activitypub/repository-id/%v$", repositoryID), repository.GetID().String())
+		assert.Regexp(t, fmt.Sprintf("activitypub/repository-id/%d$", repositoryID), repository.GetID().String())
 	})
 }
 
@@ -58,7 +58,7 @@ func TestActivityPubMissingRepository(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
 	repositoryID := 9999999
-	req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/activitypub/repository-id/%v", repositoryID))
+	req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/activitypub/repository-id/%d", repositoryID))
 	resp := MakeRequest(t, req, http.StatusNotFound)
 	assert.Contains(t, resp.Body.String(), "repository does not exist")
 }
@@ -160,7 +160,7 @@ func TestActivityPubRepositoryInboxInvalid(t *testing.T) {
 		c, err := cf.WithKeys(db.DefaultContext, apServerActor, apServerActor.APActorKeyID())
 		require.NoError(t, err)
 
-		repoInboxURL := u.JoinPath(fmt.Sprintf("/api/v1/activitypub/repository-id/%v/inbox", repositoryID)).String()
+		repoInboxURL := u.JoinPath(fmt.Sprintf("/api/v1/activitypub/repository-id/%d/inbox", repositoryID)).String()
 		activity := []byte(`{"type":"Wrong"}`)
 		resp, err := c.Post(activity, repoInboxURL)
 		require.NoError(t, err)

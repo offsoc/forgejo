@@ -30,7 +30,7 @@ func TestActivityPubPerson(t *testing.T) {
 
 	userID := 2
 	username := "user2"
-	userURL := fmt.Sprintf("/api/v1/activitypub/user-id/%v", userID)
+	userURL := fmt.Sprintf("/api/v1/activitypub/user-id/%d", userID)
 
 	user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
@@ -57,12 +57,12 @@ func TestActivityPubPerson(t *testing.T) {
 
 		assert.Equal(t, ap.PersonType, person.Type)
 		assert.Equal(t, username, person.PreferredUsername.String())
-		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v$", userID), person.GetID())
-		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v/outbox$", userID), person.Outbox.GetID().String())
-		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v/inbox$", userID), person.Inbox.GetID().String())
+		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d$", userID), person.GetID())
+		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/outbox$", userID), person.Outbox.GetID().String())
+		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/inbox$", userID), person.Inbox.GetID().String())
 
 		assert.NotNil(t, person.PublicKey)
-		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v#main-key$", userID), person.PublicKey.ID)
+		assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d#main-key$", userID), person.PublicKey.ID)
 
 		assert.NotNil(t, person.PublicKey.PublicKeyPem)
 		assert.Regexp(t, "^-----BEGIN PUBLIC KEY-----", person.PublicKey.PublicKeyPem)
