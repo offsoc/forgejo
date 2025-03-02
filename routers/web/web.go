@@ -1650,6 +1650,7 @@ func registerRoutes(m *web.Route) {
 		m.Get("/watching", user.NotificationWatching)
 		m.Post("/status", user.NotificationStatusPost)
 		m.Post("/purge", user.NotificationPurgePost)
+		m.Post("/unsubscribe", user.NotificationUnsubscribe)
 		m.Get("/new", user.NewAvailable)
 	}, reqSignIn)
 

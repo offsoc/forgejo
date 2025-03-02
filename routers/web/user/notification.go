@@ -58,6 +58,17 @@ func GetNotificationCount(ctx *context.Context) {
 
 		return count
 	}
+
+	ctx.Data["NotificationIsUserSubscribed"] = func(issue *issues_model.Issue) bool {
+		isSubscribed, err := issues_model.CheckIssueWatch(ctx, ctx.Doer, issue)
+		if err != nil {
+			if err != goctx.Canceled {
+				log.Error("Unable to CheckIssueWatch for user:%-v and issue:%-v: %v", ctx.Doer, issue, err)
+			}
+			return false
+		}
+		return isSubscribed
+	}
 }
 
 // Notifications is the notifications page
@@ -488,4 +499,28 @@ func NewAvailable(ctx *context.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, structs.NotificationCount{New: total})
+}
+
+// NotificationUnsubscribe unsubscribes the current user from the notification's associated issue
+func NotificationUnsubscribe(ctx *context.Context) {
+	issueID := ctx.FormInt64("issue_id")
+
+	if err := issues_model.CreateOrUpdateIssueWatch(ctx, ctx.Doer.ID, issueID, false); err != nil {
+		ctx.ServerError("NotificationUnsubscribe", err)
+		return
+	}
+
+	if !ctx.FormBool("noredirect") {
+		url := fmt.Sprintf("%s/notifications?page=%s", setting.AppSubURL, url.QueryEscape(ctx.FormString("page")))
+		ctx.Redirect(url, http.StatusSeeOther)
+	}
+
+	getNotifications(ctx)
+	if ctx.Written() {
+		return
+	}
+	ctx.Data["Link"] = setting.AppSubURL + "/notifications"
+	ctx.Data["SequenceNumber"] = ctx.Req.PostFormValue("sequence-number")
+
+	ctx.HTML(http.StatusOK, tplNotificationDiv)
 }
