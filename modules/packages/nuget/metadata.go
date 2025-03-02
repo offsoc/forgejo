@@ -57,7 +57,7 @@ type Package struct {
 
 // Metadata represents the metadata of a Nuget package
 type Metadata struct {
-	Title                    string                  `json:"titlw,omitempty"`
+	Title                    string                  `json:"title,omitempty"`
 	Language                 string                  `json:"language,omitempty"`
 	Description              string                  `json:"description,omitempty"`
 	ReleaseNotes             string                  `json:"release_notes,omitempty"`
