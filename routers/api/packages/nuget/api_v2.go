@@ -269,7 +269,7 @@ type FeedEntryProperties struct {
 	Title                    string                `xml:"d:Title"`
 	MinClientVersion         string                `xml:"d:MinClientVersion,omitempty"`
 	Tags                     string                `xml:"d:Tags,omitempty"`
-	Id                       string                `xml:"d:Id,omitempty"`
+	ID                       string                `xml:"d:Id,omitempty"`
 }
 
 type FeedEntry struct {
@@ -385,7 +385,7 @@ func createEntry(l *linkBuilder, pd *packages_model.PackageDescriptor, withNames
 			Title:                    pd.Package.Name,
 			MinClientVersion:         metadata.MinClientVersion,
 			Tags:                     metadata.Tags,
-			Id:                       pd.Package.Name,
+			ID:                       pd.Package.Name,
 		},
 	}
 
