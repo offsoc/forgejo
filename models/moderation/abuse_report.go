@@ -106,11 +106,6 @@ func IsReported(ctx context.Context, contentType ReportedContentType, contentID 
 	return reported
 }
 
-// IsReportedUserBy reports whether reportedUserID is already reported by doerID.
-func IsReportedUserBy(ctx context.Context, doerID int64, reportedUserID int64) bool {
-	return alreadyReportedBy(ctx, doerID, ReportedContentTypeUser, reportedUserID)
-}
-
 // alreadyReportedBy returns if doerID has already submitted a report for contentType and contentID.
 func alreadyReportedBy(ctx context.Context, doerID int64, contentType ReportedContentType, contentID int64) bool {
 	reported, _ := db.GetEngine(ctx).Exist(&AbuseReport{ReporterID: doerID, ContentType: contentType, ContentID: contentID})
@@ -122,64 +117,6 @@ func ReportAbuse(ctx context.Context, report *AbuseReport) error {
 		return nil
 	}
 
-	return reportAbuse(ctx, report)
-}
-
-/*
-// ReportUser creates a new abuse report regarding the user with the provided reportedUserID.
-func ReportUser(ctx context.Context, reporterID int64, reportedUserID int64, remarks string) error {
-	if reporterID == reportedUserID {
-		return nil
-	}
-
-	report := &AbuseReport{
-		ReporterID:  reporterID,
-		ContentType: ReportedContentTypeUser,
-		ContentID:   reportedUserID,
-		Remarks:     remarks,
-	}
-
-	return reportAbuse(ctx, report)
-}
-
-// ReportRepository creates a new abuse report regarding the repository with the provided ID.
-func ReportRepository(ctx context.Context, reporterID int64, repositoryID int64, remarks string) error {
-	report := &AbuseReport{
-		ReporterID:  reporterID,
-		ContentType: ReportedContentTypeRepository,
-		ContentID:   repositoryID,
-		Remarks:     remarks,
-	}
-
-	return reportAbuse(ctx, report)
-}
-
-// ReportIssue creates a new abuse report regarding the issue with the provided ID.
-func ReportIssue(ctx context.Context, reporterID int64, issueID int64, remarks string) error {
-	report := &AbuseReport{
-		ReporterID:  reporterID,
-		ContentType: ReportedContentTypeIssue,
-		ContentID:   issueID,
-		Remarks:     remarks,
-	}
-
-	return reportAbuse(ctx, report)
-}
-
-// ReportComment creates a new abuse report regarding the comment with the provided ID.
-func ReportComment(ctx context.Context, reporterID int64, commentID int64, remarks string) error {
-	report := &AbuseReport{
-		ReporterID:  reporterID,
-		ContentType: ReportedContentTypeComment,
-		ContentID:   commentID,
-		Remarks:     remarks,
-	}
-
-	return reportAbuse(ctx, report)
-}
-*/
-
-func reportAbuse(ctx context.Context, report *AbuseReport) error {
 	if alreadyReportedBy(ctx, report.ReporterID, report.ContentType, report.ContentID) {
 		log.Warn("Seems that user %d wanted to report again the content with type %d and ID %d; this request will be ignored.", report.ReporterID, report.ContentType, report.ContentID)
 		return nil
