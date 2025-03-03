@@ -44,6 +44,11 @@ func NewReport(ctx *context.Context) {
 		return
 	}
 
+	if moderation.AlreadyReportedByAndOpen(ctx, ctx.Doer.ID, contentType, contentID) {
+		ctx.RenderWithErr(ctx.Tr("moderation.report_abuse_form.already_reported"), tplSubmitAbuseReport, nil)
+		return
+	}
+
 	setContextDataAndRender(ctx, contentType, contentID)
 }
 
@@ -61,7 +66,7 @@ func setContextDataAndRender(ctx *context.Context, contentType moderation.Report
 func CreatePost(ctx *context.Context) {
 	form := *web.GetForm(ctx).(*forms.ReportAbuseForm)
 
-	if form.ContentID <= 0 || form.ContentType == 0 {
+	if form.ContentID <= 0 || !form.ContentType.IsValid() {
 		ctx.RenderWithErr(ctx.Tr("moderation.report_abuse_form.invalid"), tplSubmitAbuseReport, nil)
 		return
 	}
@@ -80,7 +85,8 @@ func CreatePost(ctx *context.Context) {
 	}
 
 	if err := moderation.ReportAbuse(ctx, &report); err != nil {
-		ctx.ServerError("Something went wrong while trying to submit the new abuse report.", err)
+		ctx.Flash.Error(ctx.Tr("moderation.reporting_failed", err))
+		ctx.Redirect(ctx.Doer.DashboardLink())
 		return
 	}
 

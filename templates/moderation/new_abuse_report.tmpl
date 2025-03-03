@@ -14,7 +14,7 @@
 					<input type="hidden" name="content_id" value="{{.ContentID}}" />
 					<input type="hidden" name="content_type" value="{{.ContentType}}" />
 
-					<fieldset>
+					<fieldset{{if not .ContentID}} disabled{{end}}>
 						<label{{if .Err_AbuseCategory}} class="error"{{end}}>
 							{{ctx.Locale.Tr "moderation.abuse_category"}}
 							<select class="ui selection dropdown" id="abuse_category" name="abuse_category" required autofocus>
@@ -33,7 +33,9 @@
 					<div class="divider"></div>
 					<div class="text right actions">
 						<a class="ui cancel button" href="{{$.CancelLink}}">{{ctx.Locale.Tr "cancel"}}</a>
-						<button class="ui primary button"{{if not .ContentID}} disabled{{end}}>{{ctx.Locale.Tr "moderation.submit_report"}}</button>
+						{{if .ContentID}}
+						<button class="ui primary button">{{ctx.Locale.Tr "moderation.submit_report"}}</button>
+						{{end}}
 					</div>
 				</div>
 			</form>

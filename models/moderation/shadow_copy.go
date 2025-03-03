@@ -71,7 +71,7 @@ func createShadowCopy(ctx context.Context, contentType ReportedContentType, cont
 			// TODO: What should happen if an item is updated multiple times (and the reports already have a shadow copy ID)?
 		}).And(builder.IsNull{"shadow_copy_id"}).Cols("shadow_copy_id").Update(&AbuseReport{ShadowCopyID: &shadowCopy.ID})
 		if err != nil {
-			return fmt.Errorf("Could not link the shadow copy (%d) to reported content with type %d and ID %d. %w", shadowCopy.ID, contentType, contentID, err)
+			return fmt.Errorf("could not link the shadow copy (%d) to reported content with type %d and ID %d - %w", shadowCopy.ID, contentType, contentID, err)
 		}
 
 		return nil

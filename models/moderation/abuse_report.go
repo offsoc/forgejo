@@ -5,6 +5,8 @@ package moderation
 
 import (
 	"context"
+	"errors"
+	"slices"
 
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/modules/log"
@@ -73,6 +75,17 @@ const (
 	ReportedContentTypeComment // 4
 )
 
+var allReportedContentTypes = []ReportedContentType{
+	ReportedContentTypeUser,
+	ReportedContentTypeRepository,
+	ReportedContentTypeIssue,
+	ReportedContentTypeComment,
+}
+
+func (t ReportedContentType) IsValid() bool {
+	return slices.Contains(allReportedContentTypes, t)
+}
+
 // AbuseReport represents a report of abusive content.
 type AbuseReport struct {
 	ID     int64            `xorm:"pk autoincr"`
@@ -99,25 +112,31 @@ func init() {
 	db.RegisterModel(new(AbuseReport))
 }
 
-// IsReported reports whether one or more reports were already submitted for contentType and contentID.
+// IsReported reports whether one or more reports were already submitted for contentType and contentID
+// (regardless the status of the reports).
 func IsReported(ctx context.Context, contentType ReportedContentType, contentID int64) bool {
 	// TODO: only consider the reports with 'New' status (and adjust the function name)?!
 	reported, _ := db.GetEngine(ctx).Exist(&AbuseReport{ContentType: contentType, ContentID: contentID})
 	return reported
 }
 
-// alreadyReportedBy returns if doerID has already submitted a report for contentType and contentID.
-func alreadyReportedBy(ctx context.Context, doerID int64, contentType ReportedContentType, contentID int64) bool {
-	reported, _ := db.GetEngine(ctx).Exist(&AbuseReport{ReporterID: doerID, ContentType: contentType, ContentID: contentID})
+// AlreadyReportedByAndOpen returns if doerID has already submitted a report for contentType and contentID that is still Open.
+func AlreadyReportedByAndOpen(ctx context.Context, doerID int64, contentType ReportedContentType, contentID int64) bool {
+	reported, _ := db.GetEngine(ctx).Exist(&AbuseReport{
+		Status:      ReportStatusTypeOpen,
+		ReporterID:  doerID,
+		ContentType: contentType,
+		ContentID:   contentID,
+	})
 	return reported
 }
 
 func ReportAbuse(ctx context.Context, report *AbuseReport) error {
 	if report.ContentType == ReportedContentTypeUser && report.ReporterID == report.ContentID {
-		return nil
+		return errors.New("reporting yourself is not allowed")
 	}
 
-	if alreadyReportedBy(ctx, report.ReporterID, report.ContentType, report.ContentID) {
+	if AlreadyReportedByAndOpen(ctx, report.ReporterID, report.ContentType, report.ContentID) {
 		log.Warn("Seems that user %d wanted to report again the content with type %d and ID %d; this request will be ignored.", report.ReporterID, report.ContentType, report.ContentID)
 		return nil
 	}
