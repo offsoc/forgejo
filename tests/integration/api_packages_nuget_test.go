@@ -367,7 +367,7 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 
 					pb, err := packages.GetBlobByID(db.DefaultContext, pf.BlobID)
 					require.NoError(t, err)
-					assert.Equal(t, int64(414), pb.Size)
+					assert.Equal(t, int64(len(content)), pb.Size)
 				case fmt.Sprintf("%s.%s.snupkg", packageName, packageVersion):
 					assert.False(t, pf.IsLead)
 
@@ -379,7 +379,7 @@ AAAjQmxvYgAAAGm7ENm9SGxMtAFVvPUsPJTF6PbtAAAAAFcVogEJAAAAAQAAAA==`)
 
 					pb, err := packages.GetBlobByID(db.DefaultContext, pf.BlobID)
 					require.NoError(t, err)
-					assert.Equal(t, int64(453), pb.Size)
+					assert.Equal(t, int64(len([]byte(nuspec))), pb.Size)
 				case symbolFilename:
 					assert.False(t, pf.IsLead)
 
