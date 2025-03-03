@@ -143,7 +143,7 @@ func TestAPActorID(t *testing.T) {
 }
 
 func TestAPActorID_APActorID(t *testing.T) {
-	user := user_model.User{ID: user_model.APActorUserID}
+	user := user_model.User{ID: user_model.APServerActorUserID}
 	url := user.APActorID()
 	expected := "https://try.gitea.io/api/v1/activitypub/actor"
 	assert.Equal(t, expected, url)

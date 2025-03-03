@@ -191,7 +191,7 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 	}
 
 	// Fetch missing public key
-	actionsUser := user.NewAPActorUser()
+	actionsUser := user.NewAPServerActor()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return false, err

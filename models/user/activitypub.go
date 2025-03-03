@@ -10,11 +10,12 @@ import (
 
 	"forgejo.org/models/db"
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/validation"
 )
 
 // APActorID returns the IRI to the api endpoint of the user
 func (u *User) APActorID() string {
-	if u.ID == APActorUserID {
+	if u.IsAPServerActor() {
 		return fmt.Sprintf("%sapi/v1/activitypub/actor", setting.AppURL)
 	}
 
@@ -33,6 +34,10 @@ func GetUserByFederatedURI(ctx context.Context, federatedURI string) (*User, err
 		return nil, err
 	} else if !has {
 		return nil, nil
+	}
+
+	if res, err := validation.IsValid(*user); !res {
+		return nil, err
 	}
 
 	return user, nil

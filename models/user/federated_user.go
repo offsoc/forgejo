@@ -41,6 +41,10 @@ func getFederatedUserFromDB(ctx context.Context, searchKey, searchValue any) (*F
 		return nil, nil
 	}
 
+	if res, err := validation.IsValid(*federatedUser); !res {
+		return nil, err
+	}
+
 	return federatedUser, nil
 }
 

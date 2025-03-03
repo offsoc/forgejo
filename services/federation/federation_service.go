@@ -98,7 +98,7 @@ func ProcessLikeActivity(ctx context.Context, form any, repositoryID int64) (int
 }
 
 func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forgefed.FederationHost, error) {
-	actionsUser := user.NewAPActorUser()
+	actionsUser := user.NewAPServerActor()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func GetFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.Fe
 }
 
 func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
-	actionsUser := user.NewAPActorUser()
+	actionsUser := user.NewAPServerActor()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return nil, nil, err

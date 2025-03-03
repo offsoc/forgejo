@@ -32,7 +32,7 @@ func TestActivityPubRepository(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		repositoryID := 2
 
-		apServerActor := user.NewAPActorUser()
+		apServerActor := user.NewAPServerActor()
 
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
@@ -72,7 +72,7 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 	defer federatedSrv.Close()
 
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		apServerActor := user.NewAPActorUser()
+		apServerActor := user.NewAPServerActor()
 		repositoryID := 2
 		timeNow := time.Now().UTC()
 
@@ -151,7 +151,7 @@ func TestActivityPubRepositoryInboxInvalid(t *testing.T) {
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		apServerActor := user.NewAPActorUser()
+		apServerActor := user.NewAPServerActor()
 		repositoryID := 2
 
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
