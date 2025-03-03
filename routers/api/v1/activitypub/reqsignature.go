@@ -65,37 +65,15 @@ func getFederatedUser(ctx *gitea_context.APIContext, person *ap.Person, federati
 	return federatedUser, nil
 }
 
-func getPublicKeyFromResponse(ctx *gitea_context.APIContext, b []byte, keyID *url.URL) (p crypto.PublicKey, err error) {
-	person := ap.PersonNew(ap.IRI(keyID.String()))
-	err = person.UnmarshalJSON(b)
-	if err != nil {
-		return nil, fmt.Errorf("ActivityStreams type cannot be converted to one known to have publicKey property: %w", err)
-	}
-
-	pubKey := person.PublicKey
-	if pubKey.ID.String() != keyID.String() {
-		return nil, fmt.Errorf("cannot find publicKey with id: %s in %s", keyID, string(b))
-	}
-
-	pubKeyBytes, err := decodePublicKeyPem(pubKey.PublicKeyPem)
-	if err != nil {
-		return nil, err
-	}
-
-	p, err = x509.ParsePKIXPublicKey(pubKeyBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	// Cache siging key in the database
+func storePublicKey(ctx *gitea_context.APIContext, person *ap.Person, pubKeyBytes []byte) error {
 	federationHost, err := federation.GetFederationHostForURI(ctx, person.ID.String())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if person.Type == ap.ActivityVocabularyType("Application") {
 		federationHost.KeyID = sql.NullString{
-			String: keyID.String(),
+			String: person.PublicKey.ID.String(),
 			Valid:  true,
 		}
 
@@ -106,16 +84,16 @@ func getPublicKeyFromResponse(ctx *gitea_context.APIContext, b []byte, keyID *ur
 
 		_, err = db.GetEngine(ctx).ID(federationHost.ID).Update(federationHost)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	} else if person.Type == ap.ActivityVocabularyType("Person") {
 		federatedUser, err := getFederatedUser(ctx, person, federationHost)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		federatedUser.KeyID = sql.NullString{
-			String: keyID.String(),
+			String: person.PublicKey.ID.String(),
 			Valid:  true,
 		}
 
@@ -126,11 +104,36 @@ func getPublicKeyFromResponse(ctx *gitea_context.APIContext, b []byte, keyID *ur
 
 		_, err = db.GetEngine(ctx).ID(federatedUser.ID).Update(federatedUser)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return p, err
+	return nil
+}
+
+func getPublicKeyFromResponse(ctx *gitea_context.APIContext, b []byte, keyID *url.URL) (person *ap.Person, pubKeyBytes []byte, p crypto.PublicKey, err error) {
+	person = ap.PersonNew(ap.IRI(keyID.String()))
+	err = person.UnmarshalJSON(b)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("ActivityStreams type cannot be converted to one known to have publicKey property: %w", err)
+	}
+
+	pubKey := person.PublicKey
+	if pubKey.ID.String() != keyID.String() {
+		return nil, nil, nil, fmt.Errorf("cannot find publicKey with id: %s in %s", keyID, string(b))
+	}
+
+	pubKeyBytes, err = decodePublicKeyPem(pubKey.PublicKeyPem)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	p, err = x509.ParsePKIXPublicKey(pubKeyBytes)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return person, pubKeyBytes, p, err
 }
 
 func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, err error) {
@@ -204,12 +207,19 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 		return false, err
 	}
 
-	pubKey, err := getPublicKeyFromResponse(ctx, b, idIRI)
+	person, pubKeyBytes, pubKey, err := getPublicKeyFromResponse(ctx, b, idIRI)
 	if err != nil {
 		return false, err
 	}
 
 	authenticated = v.Verify(pubKey, signatureAlgorithm) == nil
+	if authenticated {
+		err = storePublicKey(ctx, person, pubKeyBytes)
+		if err != nil {
+			return false, err
+		}
+	}
+
 	return authenticated, err
 }
 
