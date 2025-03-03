@@ -111,7 +111,7 @@ func storePublicKey(ctx *gitea_context.APIContext, person *ap.Person, pubKeyByte
 	return nil
 }
 
-func getPublicKeyFromResponse(ctx *gitea_context.APIContext, b []byte, keyID *url.URL) (person *ap.Person, pubKeyBytes []byte, p crypto.PublicKey, err error) {
+func getPublicKeyFromResponse(b []byte, keyID *url.URL) (person *ap.Person, pubKeyBytes []byte, p crypto.PublicKey, err error) {
 	person = ap.PersonNew(ap.IRI(keyID.String()))
 	err = person.UnmarshalJSON(b)
 	if err != nil {
@@ -207,7 +207,7 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 		return false, err
 	}
 
-	person, pubKeyBytes, pubKey, err := getPublicKeyFromResponse(ctx, b, idIRI)
+	person, pubKeyBytes, pubKey, err := getPublicKeyFromResponse(b, idIRI)
 	if err != nil {
 		return false, err
 	}
