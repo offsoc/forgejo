@@ -54,8 +54,8 @@ func TestFederationHttpSigValidation(t *testing.T) {
 		// HACK HACK HACK: the host part of the URL gets set to which IP forgejo is
 		// listening on, NOT localhost, which is the Domain given to forgejo which
 		// is then used for eg. the keyID all requests
-		applicationKeyID := fmt.Sprintf("http://%s/api/v1/activitypub/actor#main-key", setting.AppURL)
-		actorKeyID := fmt.Sprintf("http://%s/api/v1/activitypub/user-id/1#main-key", setting.AppURL)
+		applicationKeyID := fmt.Sprintf("%sapi/v1/activitypub/actor#main-key", setting.AppURL)
+		actorKeyID := fmt.Sprintf("%sapi/v1/activitypub/user-id/1#main-key", setting.AppURL)
 
 		// Check for cached public keys
 		t.Run("ValidateCaches", func(t *testing.T) {
