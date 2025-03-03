@@ -27,6 +27,7 @@ runs:
     - name: "Get go environment information"
       id: go-environment
       run: |
+        chmod 755 $HOME # ensure ${RUN_AS_USER} has permission when go is located in $HOME
         export GOROOT="$(go env GOROOT)"
         echo "modcache=$(su ${RUN_AS_USER} -c '${GOROOT}/bin/go env GOMODCACHE')" >> "$GITHUB_OUTPUT"
         echo "cache=$(su ${RUN_AS_USER} -c '${GOROOT}/bin/go env GOCACHE')" >> "$GITHUB_OUTPUT"

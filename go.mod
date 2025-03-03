@@ -5,8 +5,9 @@ go 1.24
 toolchain go1.24.0
 
 require (
-	code.forgejo.org/f3/gof3/v3 v3.10.2
+	code.forgejo.org/f3/gof3/v3 v3.10.4
 	code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251
+	code.forgejo.org/forgejo/levelqueue v1.0.0
 	code.forgejo.org/forgejo/reply v1.0.2
 	code.forgejo.org/go-chi/binding v1.0.0
 	code.forgejo.org/go-chi/cache v1.0.0
@@ -16,12 +17,11 @@ require (
 	code.gitea.io/sdk/gitea v0.20.0
 	codeberg.org/gusted/mcaptcha v0.0.0-20220723083913-4f3072e1d570
 	connectrpc.com/connect v1.17.0
-	gitea.com/lunny/levelqueue v0.4.2-0.20230414023320-3c0159fe0fe4
 	github.com/42wim/httpsig v1.2.2
 	github.com/42wim/sshsig v0.0.0-20211121163825-841cf5bbc121
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358
-	github.com/ProtonMail/go-crypto v1.1.5
-	github.com/PuerkitoBio/goquery v1.10.1
+	github.com/ProtonMail/go-crypto v1.1.6
+	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/SaveTheRbtz/zstd-seekable-format-go/pkg v0.7.2
 	github.com/alecthomas/chroma/v2 v2.15.0
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
@@ -60,11 +60,11 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/feeds v1.2.0
 	github.com/gorilla/sessions v1.4.0
-	github.com/hashicorp/go-version v1.6.0
+	github.com/hashicorp/go-version v1.7.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/huandu/xstrings v1.5.0
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
-	github.com/jhillyerd/enmime/v2 v2.0.0
+	github.com/jhillyerd/enmime/v2 v2.1.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/klauspost/compress v1.17.11
@@ -99,7 +99,7 @@ require (
 	github.com/yohcop/openid-go v1.0.1
 	github.com/yuin/goldmark v1.7.8
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
-	gitlab.com/gitlab-org/api/client-go v0.119.0
+	gitlab.com/gitlab-org/api/client-go v0.123.0
 	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.35.0
 	golang.org/x/image v0.23.0
@@ -200,7 +200,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.1.2 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/go-tpm v0.9.1 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
@@ -269,7 +269,7 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 	go.uber.org/zap/exp v0.3.0 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/time v0.8.0 // indirect
+	golang.org/x/time v0.9.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
 	google.golang.org/api v0.203.0 // indirect
 	google.golang.org/genproto v0.0.0-20241015192408-796eee8c2d53 // indirect
