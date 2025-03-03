@@ -491,6 +491,7 @@ input:-webkit-autofill:active,
   margin: 0;
 }
 
+.moderation.new-report form,
 .repository.new.repo form,
 .repository.new.migrate form,
 .repository.new.fork form {
@@ -504,11 +505,13 @@ input:-webkit-autofill:active,
 }
 
 @media (min-width: 768px) {
+  .moderation.new-report form,
   .repository.new.repo form,
   .repository.new.migrate form,
   .repository.new.fork form {
     width: 800px !important;
   }
+  .moderation.new-report form .header,
   .repository.new.repo form .header,
   .repository.new.migrate form .header,
   .repository.new.fork form .header {
@@ -555,6 +558,7 @@ input:-webkit-autofill:active,
   margin-right: 0 !important;
 }
 
+.moderation.new-report form .header,
 .repository.new.repo form .header,
 .repository.new.migrate form .header,
 .repository.new.fork form .header {
