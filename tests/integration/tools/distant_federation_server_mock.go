@@ -37,6 +37,7 @@ func NewFederationServerMockPerson(id int64, name string) FederationServerMockPe
 			`LXX5AQ1xQNtlssnVoUBqBrvZsX2jUUKUocvZqMGuE4hfAgMBAAE=\n-----END PUBLIC KEY-----\n"`,
 	}
 }
+
 func NewFederationServerMockRepository(id int64) FederationServerMockRepository {
 	return FederationServerMockRepository{
 		ID: id,
@@ -70,7 +71,7 @@ func (p FederationServerMockPerson) marshal(host string) string {
 		`"publicKeyPem":%[4]v}}`, host, p.ID, p.Name, p.PubKey)
 }
 
-func (mock FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
+func (mock *FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
 	federatedRoutes := http.NewServeMux()
 	federatedRoutes.HandleFunc("/.well-known/nodeinfo",
 		func(res http.ResponseWriter, req *http.Request) {
@@ -106,7 +107,6 @@ func (mock FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
 				}
 				mock.LastPost = buf.String()
 			})
-
 	}
 	federatedRoutes.HandleFunc("/",
 		func(res http.ResponseWriter, req *http.Request) {
