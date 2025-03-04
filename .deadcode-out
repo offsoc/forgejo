@@ -1,343 +1,346 @@
-package "code.gitea.io/gitea/cmd"
-	func NoMainListener
+code.gitea.io/gitea/cmd
+	NoMainListener
 
-package "code.gitea.io/gitea/cmd/forgejo"
-	func ContextSetNoInit
-	func ContextSetNoExit
-	func ContextSetStderr
-	func ContextGetStderr
-	func ContextSetStdout
-	func ContextSetStdin
+code.gitea.io/gitea/cmd/forgejo
+	ContextSetNoInit
+	ContextSetNoExit
+	ContextSetStderr
+	ContextGetStderr
+	ContextSetStdout
+	ContextSetStdin
 
-package "code.gitea.io/gitea/models"
-	func IsErrUpdateTaskNotExist
-	func (ErrUpdateTaskNotExist).Error
-	func (ErrUpdateTaskNotExist).Unwrap
-	func IsErrSHANotFound
-	func IsErrMergeDivergingFastForwardOnly
-	func GetYamlFixturesAccess
+code.gitea.io/gitea/models
+	IsErrUpdateTaskNotExist
+	ErrUpdateTaskNotExist.Error
+	ErrUpdateTaskNotExist.Unwrap
+	IsErrSHANotFound
+	IsErrMergeDivergingFastForwardOnly
+	GetYamlFixturesAccess
 
-package "code.gitea.io/gitea/models/actions"
-	func (ScheduleList).GetUserIDs
-	func (ScheduleList).GetRepoIDs
-	func (ScheduleList).LoadTriggerUser
-	func (ScheduleList).LoadRepos
+code.gitea.io/gitea/models/actions
+	ScheduleList.GetUserIDs
+	ScheduleList.GetRepoIDs
+	ScheduleList.LoadTriggerUser
+	ScheduleList.LoadRepos
 
-package "code.gitea.io/gitea/models/asymkey"
-	func (ErrGPGKeyAccessDenied).Error
-	func (ErrGPGKeyAccessDenied).Unwrap
-	func HasDeployKey
+code.gitea.io/gitea/models/asymkey
+	ErrGPGKeyAccessDenied.Error
+	ErrGPGKeyAccessDenied.Unwrap
+	HasDeployKey
 
-package "code.gitea.io/gitea/models/auth"
-	func GetSourceByName
-	func GetWebAuthnCredentialByID
-	func WebAuthnCredentials
+code.gitea.io/gitea/models/auth
+	GetSourceByName
+	GetWebAuthnCredentialByID
+	WebAuthnCredentials
 
-package "code.gitea.io/gitea/models/db"
-	func TruncateBeans
-	func InTransaction
-	func DumpTables
+code.gitea.io/gitea/models/db
+	TruncateBeans
+	InTransaction
+	DumpTables
 
-package "code.gitea.io/gitea/models/dbfs"
-	func (*file).renameTo
-	func Create
-	func Rename
+code.gitea.io/gitea/models/dbfs
+	file.renameTo
+	Create
+	Rename
 
-package "code.gitea.io/gitea/models/forgejo/semver"
-	func GetVersion
-	func SetVersionString
-	func SetVersion
+code.gitea.io/gitea/models/forgejo/semver
+	GetVersion
+	SetVersionString
+	SetVersion
 
-package "code.gitea.io/gitea/models/git"
-	func RemoveDeletedBranchByID
+code.gitea.io/gitea/models/git
+	RemoveDeletedBranchByID
 
-package "code.gitea.io/gitea/models/issues"
-	func IsErrUnknownDependencyType
-	func (ErrNewIssueInsert).Error
-	func IsErrIssueWasClosed
-	func ChangeMilestoneStatus
+code.gitea.io/gitea/models/issues
+	IsErrUnknownDependencyType
+	ErrNewIssueInsert.Error
+	IsErrIssueWasClosed
+	ChangeMilestoneStatus
 
-package "code.gitea.io/gitea/models/migrations/base"
-	func removeAllWithRetry
-	func newXORMEngine
-	func deleteDB
-	func PrepareTestEnv
-	func MainTest
+code.gitea.io/gitea/models/migrations/base
+	removeAllWithRetry
+	newXORMEngine
+	deleteDB
+	PrepareTestEnv
+	MainTest
 
-package "code.gitea.io/gitea/models/organization"
-	func GetTeamNamesByID
-	func UpdateTeamUnits
-	func (SearchMembersOptions).ToConds
-	func UsersInTeamsCount
+code.gitea.io/gitea/models/organization
+	GetTeamNamesByID
+	UpdateTeamUnits
+	SearchMembersOptions.ToConds
+	UsersInTeamsCount
 
-package "code.gitea.io/gitea/models/perm/access"
-	func GetRepoWriters
+code.gitea.io/gitea/models/perm/access
+	GetRepoWriters
 
-package "code.gitea.io/gitea/models/project"
-	func UpdateBoardSorting
-	func ChangeProjectStatus
+code.gitea.io/gitea/models/project
+	UpdateBoardSorting
+	ChangeProjectStatus
 
-package "code.gitea.io/gitea/models/repo"
-	func DeleteAttachmentsByIssue
-	func (*releaseSorter).Len
-	func (*releaseSorter).Less
-	func (*releaseSorter).Swap
-	func SortReleases
-	func FindReposMapByIDs
-	func (SearchOrderBy).String
-	func IsErrTopicNotExist
-	func (ErrTopicNotExist).Error
-	func (ErrTopicNotExist).Unwrap
-	func GetTopicByName
-	func WatchRepoMode
+code.gitea.io/gitea/models/repo
+	DeleteAttachmentsByIssue
+	releaseSorter.Len
+	releaseSorter.Less
+	releaseSorter.Swap
+	SortReleases
+	FindReposMapByIDs
+	SearchOrderBy.String
+	IsErrTopicNotExist
+	ErrTopicNotExist.Error
+	ErrTopicNotExist.Unwrap
+	GetTopicByName
+	WatchRepoMode
 
-package "code.gitea.io/gitea/models/unittest"
-	func CheckConsistencyFor
-	func checkForConsistency
-	func GetXORMEngine
-	func OverrideFixtures
-	func InitFixtures
-	func LoadFixtures
-	func Copy
-	func CopyDir
-	func NewMockWebServer
-	func NormalizedFullPath
-	func FixturesDir
-	func fatalTestError
-	func InitSettings
-	func MainTest
-	func CreateTestEngine
-	func PrepareTestDatabase
-	func PrepareTestEnv
-	func Cond
-	func OrderBy
-	func LoadBeanIfExists
-	func BeanExists
-	func AssertExistsAndLoadBean
-	func GetCount
-	func AssertNotExistsBean
-	func AssertExistsIf
-	func AssertSuccessfulInsert
-	func AssertCount
-	func AssertInt64InRange
+code.gitea.io/gitea/models/unittest
+	CheckConsistencyFor
+	checkForConsistency
+	GetXORMEngine
+	OverrideFixtures
+	InitFixtures
+	LoadFixtures
+	Copy
+	CopyDir
+	NewMockWebServer
+	NormalizedFullPath
+	FixturesDir
+	fatalTestError
+	InitSettings
+	MainTest
+	CreateTestEngine
+	PrepareTestDatabase
+	PrepareTestEnv
+	Cond
+	OrderBy
+	LoadBeanIfExists
+	BeanExists
+	AssertExistsAndLoadBean
+	GetCount
+	AssertNotExistsBean
+	AssertExistsIf
+	AssertSuccessfulInsert
+	AssertCount
+	AssertInt64InRange
 
-package "code.gitea.io/gitea/models/user"
-	func IsErrPrimaryEmailCannotDelete
-	func (ErrUserInactive).Error
-	func (ErrUserInactive).Unwrap
-	func IsErrExternalLoginUserAlreadyExist
-	func IsErrExternalLoginUserNotExist
-	func IsErrUserSettingIsNotExist
-	func GetUserAllSettings
-	func DeleteUserSetting
-	func GetUserEmailsByNames
-	func GetUserNamesByIDs
+code.gitea.io/gitea/models/user
+	IsErrPrimaryEmailCannotDelete
+	ErrUserInactive.Error
+	ErrUserInactive.Unwrap
+	IsErrExternalLoginUserAlreadyExist
+	IsErrExternalLoginUserNotExist
+	IsErrUserSettingIsNotExist
+	GetUserAllSettings
+	DeleteUserSetting
+	GetUserEmailsByNames
+	GetUserNamesByIDs
 
-package "code.gitea.io/gitea/modules/activitypub"
-	func CurrentTime
-	func containsRequiredHTTPHeaders
-	func NewClient
-	func (*Client).NewRequest
-	func (*Client).Post
-	func GetPrivateKey
+code.gitea.io/gitea/modules/activitypub
+	CurrentTime
+	containsRequiredHTTPHeaders
+	NewClient
+	Client.NewRequest
+	Client.Post
+	GetPrivateKey
 
-package "code.gitea.io/gitea/modules/assetfs"
-	func Bindata
+code.gitea.io/gitea/modules/assetfs
+	Bindata
 
-package "code.gitea.io/gitea/modules/auth/password/hash"
-	func (*DummyHasher).HashWithSaltBytes
-	func NewDummyHasher
+code.gitea.io/gitea/modules/auth/password/hash
+	DummyHasher.HashWithSaltBytes
+	NewDummyHasher
 
-package "code.gitea.io/gitea/modules/auth/password/pwn"
-	func WithHTTP
+code.gitea.io/gitea/modules/auth/password/pwn
+	WithHTTP
 
-package "code.gitea.io/gitea/modules/base"
-	func SetupGiteaRoot
+code.gitea.io/gitea/modules/base
+	SetupGiteaRoot
 
-package "code.gitea.io/gitea/modules/cache"
-	func GetInt
-	func WithNoCacheContext
-	func RemoveContextData
+code.gitea.io/gitea/modules/cache
+	GetInt
+	WithNoCacheContext
+	RemoveContextData
 
-package "code.gitea.io/gitea/modules/charset"
-	func (*BreakWriter).Write
+code.gitea.io/gitea/modules/charset
+	BreakWriter.Write
 
-package "code.gitea.io/gitea/modules/emoji"
-	func ReplaceCodes
+code.gitea.io/gitea/modules/emoji
+	ReplaceCodes
 
-package "code.gitea.io/gitea/modules/eventsource"
-	func (*Event).String
+code.gitea.io/gitea/modules/eventsource
+	Event.String
 
-package "code.gitea.io/gitea/modules/git"
-	func AllowLFSFiltersArgs
-	func AddChanges
-	func AddChangesWithArgs
-	func CommitChanges
-	func CommitChangesWithArgs
-	func IsErrExecTimeout
-	func (ErrExecTimeout).Error
-	func (ErrUnsupportedVersion).Error
-	func SetUpdateHook
-	func openRepositoryWithDefaultContext
-	func IsTagExist
-	func ToEntryMode
-	func (*LimitedReaderCloser).Read
-	func (*LimitedReaderCloser).Close
+code.gitea.io/gitea/modules/git
+	AllowLFSFiltersArgs
+	AddChanges
+	AddChangesWithArgs
+	CommitChanges
+	CommitChangesWithArgs
+	IsErrExecTimeout
+	ErrExecTimeout.Error
+	ErrUnsupportedVersion.Error
+	SetUpdateHook
+	openRepositoryWithDefaultContext
+	IsTagExist
+	ToEntryMode
+	LimitedReaderCloser.Read
+	LimitedReaderCloser.Close
 
-package "code.gitea.io/gitea/modules/gitgraph"
-	func (*Parser).Reset
+code.gitea.io/gitea/modules/gitgraph
+	Parser.Reset
 
-package "code.gitea.io/gitea/modules/gitrepo"
-	func GetBranchCommitID
-	func GetWikiDefaultBranch
+code.gitea.io/gitea/modules/gitrepo
+	GetBranchCommitID
+	GetWikiDefaultBranch
 
-package "code.gitea.io/gitea/modules/graceful"
-	func (*Manager).TerminateContext
-	func (*Manager).Err
-	func (*Manager).Value
-	func (*Manager).Deadline
+code.gitea.io/gitea/modules/graceful
+	Manager.TerminateContext
+	Manager.Err
+	Manager.Value
+	Manager.Deadline
 
-package "code.gitea.io/gitea/modules/hcaptcha"
-	func WithHTTP
+code.gitea.io/gitea/modules/hcaptcha
+	WithHTTP
 
-package "code.gitea.io/gitea/modules/json"
-	func (StdJSON).Marshal
-	func (StdJSON).Unmarshal
-	func (StdJSON).NewEncoder
-	func (StdJSON).NewDecoder
-	func (StdJSON).Indent
+code.gitea.io/gitea/modules/json
+	StdJSON.Marshal
+	StdJSON.Unmarshal
+	StdJSON.NewEncoder
+	StdJSON.NewDecoder
+	StdJSON.Indent
 
-package "code.gitea.io/gitea/modules/markup"
-	func IsSameDomain
-	func GetRendererByType
-	func RenderString
-	func IsMarkupFile
+code.gitea.io/gitea/modules/markup
+	IsSameDomain
+	GetRendererByType
+	RenderString
+	IsMarkupFile
 
-package "code.gitea.io/gitea/modules/markup/console"
-	func Render
-	func RenderString
+code.gitea.io/gitea/modules/markup/console
+	Render
+	RenderString
 
-package "code.gitea.io/gitea/modules/markup/markdown"
-	func IsDetails
-	func IsSummary
-	func IsTaskCheckBoxListItem
-	func IsIcon
-	func RenderRawString
+code.gitea.io/gitea/modules/markup/markdown
+	IsDetails
+	IsSummary
+	IsTaskCheckBoxListItem
+	IsIcon
+	RenderRawString
 
-package "code.gitea.io/gitea/modules/markup/markdown/math"
-	func WithInlineDollarParser
-	func WithBlockDollarParser
+code.gitea.io/gitea/modules/markup/markdown/math
+	WithInlineDollarParser
+	WithBlockDollarParser
 
-package "code.gitea.io/gitea/modules/markup/mdstripper"
-	func StripMarkdown
+code.gitea.io/gitea/modules/markup/mdstripper
+	stripRenderer.AddOptions
+	StripMarkdown
 
-package "code.gitea.io/gitea/modules/markup/orgmode"
-	func RenderString
+code.gitea.io/gitea/modules/markup/orgmode
+	RenderString
 
-package "code.gitea.io/gitea/modules/private"
-	func ActionsRunnerRegister
+code.gitea.io/gitea/modules/private
+	ActionsRunnerRegister
 
-package "code.gitea.io/gitea/modules/process"
-	func (*Manager).ExecTimeout
+code.gitea.io/gitea/modules/process
+	Manager.ExecTimeout
 
-package "code.gitea.io/gitea/modules/queue"
-	func newBaseChannelSimple
-	func newBaseChannelUnique
-	func newBaseRedisSimple
-	func newBaseRedisUnique
-	func newWorkerPoolQueueForTest
+code.gitea.io/gitea/modules/queue
+	newBaseChannelSimple
+	newBaseChannelUnique
+	newBaseRedisSimple
+	newBaseRedisUnique
+	testStateRecorder.Records
+	testStateRecorder.Reset
+	newWorkerPoolQueueForTest
 
-package "code.gitea.io/gitea/modules/queue/lqinternal"
-	func QueueItemIDBytes
-	func QueueItemKeyBytes
-	func ListLevelQueueKeys
+code.gitea.io/gitea/modules/queue/lqinternal
+	QueueItemIDBytes
+	QueueItemKeyBytes
+	ListLevelQueueKeys
 
-package "code.gitea.io/gitea/modules/setting"
-	func NewConfigProviderFromData
-	func (*GitConfigType).GetOption
-	func InitLoggersForTest
+code.gitea.io/gitea/modules/setting
+	NewConfigProviderFromData
+	GitConfigType.GetOption
+	InitLoggersForTest
 
-package "code.gitea.io/gitea/modules/storage"
-	func (ErrInvalidConfiguration).Error
-	func IsErrInvalidConfiguration
+code.gitea.io/gitea/modules/storage
+	ErrInvalidConfiguration.Error
+	IsErrInvalidConfiguration
 
-package "code.gitea.io/gitea/modules/structs"
-	func ParseCreateHook
-	func ParsePushHook
+code.gitea.io/gitea/modules/structs
+	ParseCreateHook
+	ParsePushHook
 
-package "code.gitea.io/gitea/modules/sync"
-	func (*StatusTable).Start
-	func (*StatusTable).IsRunning
+code.gitea.io/gitea/modules/sync
+	StatusTable.Start
+	StatusTable.IsRunning
 
-package "code.gitea.io/gitea/modules/testlogger"
-	func (*testLoggerWriterCloser).pushT
-	func (*testLoggerWriterCloser).Log
-	func (*testLoggerWriterCloser).recordError
-	func (*testLoggerWriterCloser).printMsg
-	func (*testLoggerWriterCloser).popT
-	func (*testLoggerWriterCloser).Reset
-	func PrintCurrentTest
-	func Printf
-	func NewTestLoggerWriter
-	func (*TestLogEventWriter).Base
-	func (*TestLogEventWriter).GetLevel
-	func (*TestLogEventWriter).GetWriterName
-	func (*TestLogEventWriter).GetWriterType
-	func (*TestLogEventWriter).Run
+code.gitea.io/gitea/modules/testlogger
+	testLoggerWriterCloser.pushT
+	testLoggerWriterCloser.Log
+	testLoggerWriterCloser.recordError
+	testLoggerWriterCloser.printMsg
+	testLoggerWriterCloser.popT
+	testLoggerWriterCloser.Reset
+	PrintCurrentTest
+	Printf
+	NewTestLoggerWriter
+	TestLogEventWriter.Base
+	TestLogEventWriter.GetLevel
+	TestLogEventWriter.GetWriterName
+	TestLogEventWriter.GetWriterType
+	TestLogEventWriter.Run
 
-package "code.gitea.io/gitea/modules/timeutil"
-	func GetExecutableModTime
-	func MockSet
-	func MockUnset
+code.gitea.io/gitea/modules/timeutil
+	GetExecutableModTime
+	MockSet
+	MockUnset
 
-package "code.gitea.io/gitea/modules/translation"
-	func (MockLocale).Language
-	func (MockLocale).TrString
-	func (MockLocale).Tr
-	func (MockLocale).TrN
-	func (MockLocale).TrSize
-	func (MockLocale).PrettyNumber
+code.gitea.io/gitea/modules/translation
+	MockLocale.Language
+	MockLocale.TrString
+	MockLocale.Tr
+	MockLocale.TrN
+	MockLocale.TrSize
+	MockLocale.PrettyNumber
 
-package "code.gitea.io/gitea/modules/util/filebuffer"
-	func CreateFromReader
+code.gitea.io/gitea/modules/util/filebuffer
+	CreateFromReader
 
-package "code.gitea.io/gitea/modules/web"
-	func RouteMock
-	func RouteMockReset
+code.gitea.io/gitea/modules/web
+	RouteMock
+	RouteMockReset
 
-package "code.gitea.io/gitea/modules/web/middleware"
-	func DeleteLocaleCookie
+code.gitea.io/gitea/modules/web/middleware
+	DeleteLocaleCookie
 
-package "code.gitea.io/gitea/routers/web"
-	func NotFound
+code.gitea.io/gitea/routers/web
+	NotFound
 
-package "code.gitea.io/gitea/routers/web/org"
-	func MustEnableProjects
+code.gitea.io/gitea/routers/web/org
+	MustEnableProjects
 
-package "code.gitea.io/gitea/services/context"
-	func GetPrivateContext
+code.gitea.io/gitea/services/context
+	GetPrivateContext
 
-package "code.gitea.io/gitea/services/convert"
-	func ToSecret
+code.gitea.io/gitea/services/convert
+	ToSecret
 
-package "code.gitea.io/gitea/services/forms"
-	func (*DeadlineForm).Validate
+code.gitea.io/gitea/services/forms
+	DeadlineForm.Validate
 
-package "code.gitea.io/gitea/services/pull"
-	func IsCommitStatusContextSuccess
+code.gitea.io/gitea/services/pull
+	IsCommitStatusContextSuccess
 
-package "code.gitea.io/gitea/services/repository"
-	func IsErrForkAlreadyExist
+code.gitea.io/gitea/services/repository
+	IsErrForkAlreadyExist
 
-package "code.gitea.io/gitea/services/repository/archiver"
-	func ArchiveRepository
+code.gitea.io/gitea/services/repository/archiver
+	ArchiveRepository
 
-package "code.gitea.io/gitea/services/repository/files"
-	func (*ContentType).String
-	func GetFileResponseFromCommit
-	func (*TemporaryUploadRepository).GetLastCommit
-	func (*TemporaryUploadRepository).GetLastCommitByRef
+code.gitea.io/gitea/services/repository/files
+	ContentType.String
+	GetFileResponseFromCommit
+	TemporaryUploadRepository.GetLastCommit
+	TemporaryUploadRepository.GetLastCommitByRef
 
-package "code.gitea.io/gitea/services/webhook"
-	func NewNotifier
+code.gitea.io/gitea/services/webhook
+	NewNotifier
 
