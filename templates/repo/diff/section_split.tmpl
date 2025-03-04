@@ -110,7 +110,7 @@
 			{{if and (eq .GetType 3) $hasmatch}}
 				{{$match := index $section.Lines $line.Match}}
 				{{if or $line.Conversations $match.Conversations}}
-					<tr class="add-comment" data-line-type="{{.GetHTMLDiffLineType}}">
+					<tr class="code-conversations" data-line-type="{{.GetHTMLDiffLineType}}">
 						<td class="add-comment-left" colspan="4">
 							{{if $line.Conversations}}
 								{{if eq $line.GetCommentSide "previous"}}
@@ -138,7 +138,7 @@
 					</tr>
 				{{end}}
 			{{else if $line.Conversations}}
-				<tr class="add-comment" data-line-type="{{.GetHTMLDiffLineType}}">
+				<tr class="code-conversations" data-line-type="{{.GetHTMLDiffLineType}}">
 					<td class="add-comment-left" colspan="4">
 						{{if eq $line.GetCommentSide "previous"}}
 							{{template "repo/diff/conversations" dict "." $.root "conversations" $line.Conversations}}

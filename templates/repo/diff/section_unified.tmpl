@@ -62,7 +62,7 @@
 			{{end}}
 		</tr>
 		{{if $line.Conversations}}
-			<tr class="add-comment" data-line-type="{{.GetHTMLDiffLineType}}">
+			<tr class="code-conversations" data-line-type="{{.GetHTMLDiffLineType}}">
 				<td class="add-comment-left add-comment-right" colspan="5">
 					{{template "repo/diff/conversations" dict "." $.root "conversations" $line.Conversations}}
 				</td>
