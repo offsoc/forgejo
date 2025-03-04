@@ -14,5 +14,6 @@
     "home.welcome.activity_hint": "Barotnē pagaidām nekā nav. Šeit parādīsies darbības un vēroto glabātavu notikumi.",
     "home.explore_repos": "Izpētīt glabātavas",
     "home.explore_users": "Izpētīt lietotājus",
-    "home.explore_orgs": "Izpētīt apvienības"
+    "home.explore_orgs": "Izpētīt apvienības",
+    "incorrect_root_url": "Šis Forgejo serveris ir konfigurēts darboties \"%s\". Pašlaik Forgejo tiek apmeklēta ar atšķirīgu URL, kas var radīt atsevišķu lietotnes daļu salūšanu. Kanonisko URL pārrauga Forgejo pārvaldītāji ar app.ini iestatījumu ROOT_URL."
 }
