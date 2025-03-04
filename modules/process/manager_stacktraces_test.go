@@ -4,7 +4,6 @@
 package process
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,13 +11,13 @@ import (
 )
 
 func TestProcessStacktraces(t *testing.T) {
-	_, _, finish := GetManager().AddContext(context.Background(), "Normal process")
+	_, _, finish := GetManager().AddContext(t.Context(), "Normal process")
 	defer finish()
-	parentCtx, _, finish := GetManager().AddContext(context.Background(), "Children normal process")
+	parentCtx, _, finish := GetManager().AddContext(t.Context(), "Children normal process")
 	defer finish()
 	_, _, finish = GetManager().AddContext(parentCtx, "Children process")
 	defer finish()
-	_, _, finish = GetManager().AddTypedContext(context.Background(), "System process", SystemProcessType, true)
+	_, _, finish = GetManager().AddTypedContext(t.Context(), "System process", SystemProcessType, true)
 	defer finish()
 
 	t.Run("No flat with no system process", func(t *testing.T) {

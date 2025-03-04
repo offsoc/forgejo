@@ -101,7 +101,7 @@ func onGiteaRun[T testing.TB](t T, callback func(T, *url.URL)) {
 func doGitClone(dstLocalPath string, u *url.URL) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Helper()
-		require.NoError(t, git.CloneWithArgs(context.Background(), git.AllowLFSFiltersArgs(), u.String(), dstLocalPath, git.CloneRepoOptions{}))
+		require.NoError(t, git.CloneWithArgs(t.Context(), git.AllowLFSFiltersArgs(), u.String(), dstLocalPath, git.CloneRepoOptions{}))
 		exist, err := util.IsExist(filepath.Join(dstLocalPath, "README.md"))
 		require.NoError(t, err)
 		assert.True(t, exist)
@@ -111,7 +111,7 @@ func doGitClone(dstLocalPath string, u *url.URL) func(*testing.T) {
 func doPartialGitClone(dstLocalPath string, u *url.URL) func(*testing.T) {
 	return func(t *testing.T) {
 		t.Helper()
-		require.NoError(t, git.CloneWithArgs(context.Background(), git.AllowLFSFiltersArgs(), u.String(), dstLocalPath, git.CloneRepoOptions{
+		require.NoError(t, git.CloneWithArgs(t.Context(), git.AllowLFSFiltersArgs(), u.String(), dstLocalPath, git.CloneRepoOptions{
 			Filter: "blob:none",
 		}))
 		exist, err := util.IsExist(filepath.Join(dstLocalPath, "README.md"))

@@ -5,7 +5,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -179,7 +178,7 @@ func TestPullView_ResolveInvalidatedReviewComment(t *testing.T) {
 		// (to invalidate it properly, one should push a commit which should trigger this logic,
 		// in the meantime, use this quick-and-dirty trick)
 		comment := loadComment(t, commentID)
-		require.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
+		require.NoError(t, issues_model.UpdateCommentInvalidate(t.Context(), &issues_model.Comment{
 			ID:          comment.ID,
 			Invalidated: true,
 		}))
@@ -241,7 +240,7 @@ func TestPullView_ResolveInvalidatedReviewComment(t *testing.T) {
 			// (to invalidate it properly, one should push a commit which should trigger this logic,
 			// in the meantime, use this quick-and-dirty trick)
 			comment := loadComment(t, commentID)
-			require.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
+			require.NoError(t, issues_model.UpdateCommentInvalidate(t.Context(), &issues_model.Comment{
 				ID:          comment.ID,
 				Invalidated: true,
 			}))

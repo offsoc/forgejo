@@ -5,7 +5,6 @@ package queue
 
 import (
 	"bytes"
-	"context"
 	"runtime"
 	"strconv"
 	"sync"
@@ -59,7 +58,7 @@ func TestWorkerPoolQueueUnhandled(t *testing.T) {
 			testRecorder.Record("push:%v", i)
 			require.NoError(t, q.Push(i))
 		}
-		require.NoError(t, q.FlushWithContext(context.Background(), 0))
+		require.NoError(t, q.FlushWithContext(t.Context(), 0))
 		stop()
 
 		ok := true
@@ -167,7 +166,7 @@ func testWorkerPoolQueuePersistence(t *testing.T, queueSetting setting.QueueSett
 
 		q, _ := newWorkerPoolQueueForTest("pr_patch_checker_test", queueSetting, testHandler, true)
 		stop := runWorkerPoolQueue(q)
-		require.NoError(t, q.FlushWithContext(context.Background(), 0))
+		require.NoError(t, q.FlushWithContext(t.Context(), 0))
 		stop()
 	}
 

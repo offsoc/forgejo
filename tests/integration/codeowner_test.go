@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -48,7 +47,7 @@ func TestCodeOwner(t *testing.T) {
 		r := fmt.Sprintf("%suser2/%s.git", u.String(), repo.Name)
 		cloneURL, _ := url.Parse(r)
 		cloneURL.User = url.UserPassword("user2", userPassword)
-		require.NoError(t, git.CloneWithArgs(context.Background(), nil, cloneURL.String(), dstPath, git.CloneRepoOptions{}))
+		require.NoError(t, git.CloneWithArgs(t.Context(), nil, cloneURL.String(), dstPath, git.CloneRepoOptions{}))
 
 		t.Run("Normal", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()

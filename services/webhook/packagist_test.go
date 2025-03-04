@@ -4,7 +4,6 @@
 package webhook
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -53,7 +52,7 @@ func TestPackagistPayload(t *testing.T) {
 				PayloadVersion: 2,
 			}
 
-			req, reqBody, err := packagistHandler{}.NewRequest(context.Background(), hook, task)
+			req, reqBody, err := packagistHandler{}.NewRequest(t.Context(), hook, task)
 			require.NotNil(t, req)
 			require.NotNil(t, reqBody)
 			require.NoError(t, err)

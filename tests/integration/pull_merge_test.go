@@ -5,7 +5,6 @@ package integration
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -303,11 +302,11 @@ func TestCantMergeConflict(t *testing.T) {
 		gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo1)
 		require.NoError(t, err)
 
-		err = pull.Merge(context.Background(), pr, user1, gitRepo, repo_model.MergeStyleMerge, "", "CONFLICT", false)
+		err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleMerge, "", "CONFLICT", false)
 		require.Error(t, err, "Merge should return an error due to conflict")
 		assert.True(t, models.IsErrMergeConflicts(err), "Merge error is not a conflict error")
 
-		err = pull.Merge(context.Background(), pr, user1, gitRepo, repo_model.MergeStyleRebase, "", "CONFLICT", false)
+		err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleRebase, "", "CONFLICT", false)
 		require.Error(t, err, "Merge should return an error due to conflict")
 		assert.True(t, models.IsErrRebaseConflicts(err), "Merge error is not a conflict error")
 		gitRepo.Close()
@@ -402,7 +401,7 @@ func TestCantMergeUnrelated(t *testing.T) {
 			BaseBranch: "base",
 		})
 
-		err = pull.Merge(context.Background(), pr, user1, gitRepo, repo_model.MergeStyleMerge, "", "UNRELATED", false)
+		err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleMerge, "", "UNRELATED", false)
 		require.Error(t, err, "Merge should return an error due to unrelated")
 		assert.True(t, models.IsErrMergeUnrelatedHistories(err), "Merge error is not a unrelated histories error")
 		gitRepo.Close()
@@ -442,7 +441,7 @@ func TestFastForwardOnlyMerge(t *testing.T) {
 		gitRepo, err := git.OpenRepository(git.DefaultContext, repo_model.RepoPath(user1.Name, repo1.Name))
 		require.NoError(t, err)
 
-		err = pull.Merge(context.Background(), pr, user1, gitRepo, repo_model.MergeStyleFastForwardOnly, "", "FAST-FORWARD-ONLY", false)
+		err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleFastForwardOnly, "", "FAST-FORWARD-ONLY", false)
 
 		require.NoError(t, err)
 
@@ -484,7 +483,7 @@ func TestCantFastForwardOnlyMergeDiverging(t *testing.T) {
 		gitRepo, err := git.OpenRepository(git.DefaultContext, repo_model.RepoPath(user1.Name, repo1.Name))
 		require.NoError(t, err)
 
-		err = pull.Merge(context.Background(), pr, user1, gitRepo, repo_model.MergeStyleFastForwardOnly, "", "DIVERGING", false)
+		err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleFastForwardOnly, "", "DIVERGING", false)
 
 		require.Error(t, err, "Merge should return an error due to being for a diverging branch")
 		assert.True(t, models.IsErrMergeDivergingFastForwardOnly(err), "Merge error is not a diverging fast-forward-only error")
@@ -633,7 +632,7 @@ func TestPullMergeIndexerNotifier(t *testing.T) {
 		testEditFile(t, session, "user1", "repo1", "master", "README.md", "Hello, World (Edited)\n")
 		createPullResp := testPullCreate(t, session, "user1", "repo1", false, "master", "master", "Indexer notifier test pull")
 
-		require.NoError(t, queue.GetManager().FlushAll(context.Background(), 0))
+		require.NoError(t, queue.GetManager().FlushAll(t.Context(), 0))
 		time.Sleep(time.Second)
 
 		repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{
@@ -672,7 +671,7 @@ func TestPullMergeIndexerNotifier(t *testing.T) {
 		})
 		assert.True(t, issue.IsClosed)
 
-		require.NoError(t, queue.GetManager().FlushAll(context.Background(), 0))
+		require.NoError(t, queue.GetManager().FlushAll(t.Context(), 0))
 		time.Sleep(time.Second)
 
 		// search issues again
@@ -692,7 +691,7 @@ func testResetRepo(t *testing.T, repoPath, branch, commitID string) {
 	require.NoError(t, err)
 	f.Close()
 
-	repo, err := git.OpenRepository(context.Background(), repoPath)
+	repo, err := git.OpenRepository(t.Context(), repoPath)
 	require.NoError(t, err)
 	defer repo.Close()
 	id, err := repo.GetBranchCommitID(branch)

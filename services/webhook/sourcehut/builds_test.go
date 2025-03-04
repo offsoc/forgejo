@@ -4,7 +4,6 @@
 package sourcehut
 
 import (
-	"context"
 	"strings"
 	"testing"
 
@@ -26,7 +25,7 @@ func gitInit(t testing.TB) {
 		return
 	}
 	t.Cleanup(test.MockVariableValue(&setting.Git.HomePath, t.TempDir()))
-	require.NoError(t, git.InitSimple(context.Background()))
+	require.NoError(t, git.InitSimple(t.Context()))
 }
 
 func TestSourcehutBuildsPayload(t *testing.T) {
@@ -372,7 +371,7 @@ func TestSourcehutJSONPayload(t *testing.T) {
 		PayloadVersion: 2,
 	}
 
-	req, reqBody, err := BuildsHandler{}.NewRequest(context.Background(), hook, task)
+	req, reqBody, err := BuildsHandler{}.NewRequest(t.Context(), hook, task)
 	require.NoError(t, err)
 	require.NotNil(t, req)
 	require.NotNil(t, reqBody)
