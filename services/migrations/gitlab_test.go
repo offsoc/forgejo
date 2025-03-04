@@ -4,7 +4,6 @@
 package migrations
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -19,7 +18,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 func TestGitlabDownloadRepo(t *testing.T) {
@@ -31,7 +30,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	server := unittest.NewMockWebServer(t, "https://gitlab.com", fixturePath, gitlabPersonalAccessToken != "")
 	defer server.Close()
 
-	downloader, err := NewGitlabDownloader(context.Background(), server.URL, "forgejo/test_repo", "", "", gitlabPersonalAccessToken)
+	downloader, err := NewGitlabDownloader(t.Context(), server.URL, "forgejo/test_repo", "", "", gitlabPersonalAccessToken)
 	if err != nil {
 		t.Fatalf("NewGitlabDownloader is nil: %v", err)
 	}
@@ -331,7 +330,7 @@ func TestGitlabSkippedIssueNumber(t *testing.T) {
 	server := unittest.NewMockWebServer(t, "https://gitlab.com", fixturePath, gitlabPersonalAccessToken != "")
 	defer server.Close()
 
-	downloader, err := NewGitlabDownloader(context.Background(), server.URL, "troyengel/archbuild", "", "", gitlabPersonalAccessToken)
+	downloader, err := NewGitlabDownloader(t.Context(), server.URL, "troyengel/archbuild", "", "", gitlabPersonalAccessToken)
 	if err != nil {
 		t.Fatalf("NewGitlabDownloader is nil: %v", err)
 	}
@@ -454,7 +453,7 @@ func TestGitlabGetReviews(t *testing.T) {
 	repoID := 1324
 
 	downloader := &GitlabDownloader{
-		ctx:    context.Background(),
+		ctx:    t.Context(),
 		client: client,
 		repoID: repoID,
 	}

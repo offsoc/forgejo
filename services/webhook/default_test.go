@@ -4,7 +4,6 @@
 package webhook
 
 import (
-	"context"
 	"testing"
 
 	webhook_model "code.gitea.io/gitea/models/webhook"
@@ -45,7 +44,7 @@ func TestGiteaPayload(t *testing.T) {
 			PayloadVersion: 2,
 		}
 
-		req, reqBody, err := dh.NewRequest(context.Background(), hook, task)
+		req, reqBody, err := dh.NewRequest(t.Context(), hook, task)
 		require.NoError(t, err)
 		require.NotNil(t, req)
 		require.NotNil(t, reqBody)
@@ -74,7 +73,7 @@ func TestGiteaPayload(t *testing.T) {
 			PayloadVersion: 2,
 		}
 
-		req, reqBody, err := dh.NewRequest(context.Background(), hook, task)
+		req, reqBody, err := dh.NewRequest(t.Context(), hook, task)
 		require.NoError(t, err)
 		require.NotNil(t, req)
 		require.NotNil(t, reqBody)
@@ -103,7 +102,7 @@ func TestGiteaPayload(t *testing.T) {
 			PayloadVersion: 2,
 		}
 
-		req, reqBody, err := dh.NewRequest(context.Background(), hook, task)
+		req, reqBody, err := dh.NewRequest(t.Context(), hook, task)
 		require.NoError(t, err)
 		require.NotNil(t, req)
 		require.NotNil(t, reqBody)
@@ -148,7 +147,7 @@ func TestForgejoPayload(t *testing.T) {
 			PayloadVersion: 2,
 		}
 
-		req, reqBody, err := dh.NewRequest(context.Background(), hook, task)
+		req, reqBody, err := dh.NewRequest(t.Context(), hook, task)
 		require.NoError(t, err)
 		require.NotNil(t, req)
 		require.NotNil(t, reqBody)
@@ -177,7 +176,7 @@ func TestForgejoPayload(t *testing.T) {
 			PayloadVersion: 2,
 		}
 
-		req, reqBody, err := dh.NewRequest(context.Background(), hook, task)
+		req, reqBody, err := dh.NewRequest(t.Context(), hook, task)
 		require.NoError(t, err)
 		require.NotNil(t, req)
 		require.NotNil(t, reqBody)
@@ -206,7 +205,7 @@ func TestForgejoPayload(t *testing.T) {
 			PayloadVersion: 2,
 		}
 
-		req, reqBody, err := dh.NewRequest(context.Background(), hook, task)
+		req, reqBody, err := dh.NewRequest(t.Context(), hook, task)
 		require.NoError(t, err)
 		require.NotNil(t, req)
 		require.NotNil(t, reqBody)

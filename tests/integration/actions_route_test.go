@@ -5,7 +5,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -71,12 +70,12 @@ func TestActionsWebRouteLatestWorkflowRun(t *testing.T) {
 
 			// Verify that each points to the correct workflow.
 			workflowOne := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID, Index: 1})
-			err := workflowOne.LoadAttributes(context.Background())
+			err := workflowOne.LoadAttributes(t.Context())
 			require.NoError(t, err)
 			assert.Equal(t, workflowOneURI, workflowOne.HTMLURL())
 
 			workflowTwo := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID, Index: 2})
-			err = workflowTwo.LoadAttributes(context.Background())
+			err = workflowTwo.LoadAttributes(t.Context())
 			require.NoError(t, err)
 			assert.Equal(t, workflowTwoURI, workflowTwo.HTMLURL())
 		})
@@ -141,7 +140,7 @@ func TestActionsWebRouteLatestRun(t *testing.T) {
 
 		// Verify that it redirects to the run we just created
 		workflow := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID})
-		err := workflow.LoadAttributes(context.Background())
+		err := workflow.LoadAttributes(t.Context())
 		require.NoError(t, err)
 
 		assert.Equal(t, workflow.HTMLURL(), resp.Header().Get("Location"))
@@ -170,7 +169,7 @@ func TestActionsArtifactDeletion(t *testing.T) {
 
 		// Load the run we just created
 		run := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID})
-		err := run.LoadAttributes(context.Background())
+		err := run.LoadAttributes(t.Context())
 		require.NoError(t, err)
 
 		// Visit it's web view

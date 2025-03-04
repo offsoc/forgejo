@@ -3,7 +3,6 @@
 package integration
 
 import (
-	gocontext "context"
 	"io"
 	"net/url"
 	"os"
@@ -189,7 +188,7 @@ func Test_CmdForgejo_Actions(t *testing.T) {
 					require.NoError(t, err)
 					if assert.EqualValues(t, testCase.uuid, uuid) {
 						ownerName, repoName, found := strings.Cut(testCase.scope, "/")
-						action, err := actions_model.GetRunnerByUUID(gocontext.Background(), uuid)
+						action, err := actions_model.GetRunnerByUUID(t.Context(), uuid)
 						require.NoError(t, err)
 
 						user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: action.OwnerID})

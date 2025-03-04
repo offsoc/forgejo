@@ -4,7 +4,6 @@
 package migrations
 
 import (
-	"context"
 	"net/http"
 	"net/url"
 	"testing"
@@ -23,7 +22,7 @@ func TestOneDevDownloadRepo(t *testing.T) {
 	}
 
 	u, _ := url.Parse("https://code.onedev.io")
-	downloader := NewOneDevDownloader(context.Background(), u, "", "", "go-gitea-test_repo")
+	downloader := NewOneDevDownloader(t.Context(), u, "", "", "go-gitea-test_repo")
 	if err != nil {
 		t.Fatalf("NewOneDevDownloader is nil: %v", err)
 	}

@@ -4,7 +4,6 @@
 package cmd
 
 import (
-	"context"
 	"io"
 	"os"
 	"strings"
@@ -31,7 +30,7 @@ func createLocalStorage(t *testing.T) (storage.ObjectStorage, string) {
 	p := t.TempDir()
 
 	storage, err := storage.NewLocalStorage(
-		context.Background(),
+		t.Context(),
 		&setting.Storage{
 			Path: p,
 		})
@@ -72,7 +71,7 @@ func TestMigratePackages(t *testing.T) {
 	assert.NotNil(t, v)
 	assert.NotNil(t, f)
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	dstStorage, p := createLocalStorage(t)
 

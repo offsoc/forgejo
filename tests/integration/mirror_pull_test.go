@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
@@ -50,7 +49,7 @@ func TestMirrorPull(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, mirrorRepo.IsMirror, "expected pull-mirror repo to be marked as a mirror immediately after its creation")
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	mirror, err := repo_service.MigrateRepositoryGitData(ctx, user, mirrorRepo, opts, nil)
 	require.NoError(t, err)

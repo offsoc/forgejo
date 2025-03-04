@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -131,7 +130,7 @@ func TestSourceId(t *testing.T) {
 		LoginType:   auth_model.Plain,
 		LoginSource: 23,
 	}
-	defer createUser(context.Background(), t, testUser23)()
+	defer createUser(t.Context(), t, testUser23)()
 
 	session := loginUser(t, "user1")
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadAdmin)
@@ -163,7 +162,7 @@ func TestAdminViewUsersSorted(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	createTimestamp := time.Now().Unix() - 1000
 	updateTimestamp := time.Now().Unix() - 500
-	sess := db.GetEngine(context.Background())
+	sess := db.GetEngine(t.Context())
 
 	// Create 10 users with login source 44
 	for i := int64(1); i <= 10; i++ {

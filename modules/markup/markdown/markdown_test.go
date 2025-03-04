@@ -1190,7 +1190,7 @@ space</p>
 	}
 
 	for i, c := range cases {
-		result, err := markdown.RenderString(&markup.RenderContext{Ctx: context.Background(), Links: c.Links, IsWiki: c.IsWiki}, input)
+		result, err := markdown.RenderString(&markup.RenderContext{Ctx: t.Context(), Links: c.Links, IsWiki: c.IsWiki}, input)
 		require.NoError(t, err, "Unexpected error in testcase: %v", i)
 		assert.Equal(t, template.HTML(c.Expected), result, "Unexpected result in testcase %v", i)
 	}

@@ -680,7 +680,7 @@ func TestRender_FilePreview(t *testing.T) {
 	defer test.MockVariableValue(&setting.StaticRootPath, "../../")()
 	defer test.MockVariableValue(&setting.Names, []string{"english"})()
 	defer test.MockVariableValue(&setting.Langs, []string{"en-US"})()
-	translation.InitLocales(context.Background())
+	translation.InitLocales(t.Context())
 
 	setting.AppURL = markup.TestAppURL
 	markup.Init(&markup.ProcessorHelper{
