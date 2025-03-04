@@ -296,6 +296,24 @@ func TestRepoFollowing(t *testing.T) {
 		})
 		session.MakeRequest(t, req, http.StatusSeeOther)
 
+		// Verify it was added.
+		federationHost := unittest.AssertExistsAndLoadBean(t, &forgefed.FederationHost{HostFqdn: "127.0.0.1"})
+		unittest.AssertExistsAndLoadBean(t, &repo_model.FollowingRepo{
+			ExternalID:       "1",
+			FederationHostID: federationHost.ID,
+		})
+	})
+
+	t.Run("Star a repo having a following repo", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		repoLink := fmt.Sprintf("/%s", repo.FullName())
+		link := fmt.Sprintf("%s/action/star", repoLink)
+		req := NewRequestWithValues(t, "POST", link, map[string]string{
+			"_csrf": GetCSRF(t, session, repoLink),
+		})
+
+		session.MakeRequest(t, req, http.StatusOK)
+
 		// Verify distant server received a like activity
 		like := fm.ForgeLike{}
 		err := like.UnmarshalJSON([]byte(mock.LastPost))
@@ -312,24 +330,5 @@ func TestRepoFollowing(t *testing.T) {
 		if !isLikeType || !isCorrectObject {
 			t.Errorf("Activity is not a like for this repo")
 		}
-
-		// Verify it was added.
-		federationHost := unittest.AssertExistsAndLoadBean(t, &forgefed.FederationHost{HostFqdn: "127.0.0.1"})
-		unittest.AssertExistsAndLoadBean(t, &repo_model.FollowingRepo{
-			ExternalID:       "1",
-			FederationHostID: federationHost.ID,
-		})
-	})
-
-	t.Run("Star a repo having a following repo", func(t *testing.T) {
-		defer tests.PrintCurrentTest(t)()
-		repoLink := fmt.Sprintf("/%s", repo.FullName())
-		link := fmt.Sprintf("%s/action/star", repoLink)
-		req := NewRequestWithValues(t, "POST", link, map[string]string{
-			"_csrf": GetCSRF(t, session, repoLink),
-		})
-		assert.False(t, repo1InboxReceivedLike)
-		session.MakeRequest(t, req, http.StatusOK)
-		assert.True(t, repo1InboxReceivedLike)
 	})
 }
