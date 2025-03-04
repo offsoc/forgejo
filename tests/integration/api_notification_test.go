@@ -121,7 +121,7 @@ func TestAPINotification(t *testing.T) {
 		AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &new)
-	assert.Greater(t, new.New, int64(0))
+	assert.Positive(t, new.New)
 
 	// -- mark notifications as read --
 	req = NewRequest(t, "GET", "/api/v1/notifications?status-types=unread").

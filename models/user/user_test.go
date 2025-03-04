@@ -510,7 +510,7 @@ func Test_ValidateUser(t *testing.T) {
 		{ID: 2, Visibility: structs.VisibleTypePrivate}: true,
 	}
 	for kase, expected := range kases {
-		assert.EqualValues(t, expected, nil == user_model.ValidateUser(kase), fmt.Sprintf("case: %+v", kase))
+		assert.EqualValues(t, expected, nil == user_model.ValidateUser(kase), "case: %+v", kase)
 	}
 }
 

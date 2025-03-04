@@ -5,7 +5,6 @@
 package gitdiff
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -645,9 +644,9 @@ func TestGetDiffRangeWithWhitespaceBehavior(t *testing.T) {
 				MaxFiles:           setting.Git.MaxGitDiffFiles,
 				WhitespaceBehavior: behavior,
 			})
-		require.NoError(t, err, fmt.Sprintf("Error when diff with %s", behavior))
+		require.NoError(t, err, "Error when diff with %s", behavior)
 		for _, f := range diffs.Files {
-			assert.Positive(t, len(f.Sections), fmt.Sprintf("%s should have sections", f.Name))
+			assert.NotEmpty(t, f.Sections, "%s should have sections", f.Name)
 		}
 	}
 }

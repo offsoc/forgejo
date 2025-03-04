@@ -34,7 +34,9 @@ import (
 	"github.com/nektos/act/pkg/model"
 )
 
-var methodCtxKey struct{}
+type methodCtx struct{}
+
+var methodCtxKey = methodCtx{}
 
 // withMethod sets the notification method that this context currently executes.
 // Used for debugging/ troubleshooting purposes.
