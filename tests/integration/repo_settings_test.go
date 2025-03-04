@@ -24,7 +24,7 @@ import (
 	repo_service "code.gitea.io/gitea/services/repository"
 	user_service "code.gitea.io/gitea/services/user"
 	"code.gitea.io/gitea/tests"
-	ttools "code.gitea.io/gitea/tests/tools"
+	ttools "code.gitea.io/gitea/tests/integration/tools"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

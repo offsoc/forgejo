@@ -20,7 +20,7 @@ import (
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/routers"
 	"code.gitea.io/gitea/tests"
-	ttools "code.gitea.io/gitea/tests/tools"
+	ttools "code.gitea.io/gitea/tests/integration/tools"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
