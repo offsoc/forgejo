@@ -251,7 +251,7 @@ func TestHTTPClientDownload(t *testing.T) {
 			return nil
 		})
 		if len(c.expectederror) > 0 {
-			assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
+			assert.ErrorContains(t, err, c.expectederror)
 		} else {
 			require.NoError(t, err, "case %d", n)
 		}
@@ -353,7 +353,7 @@ func TestHTTPClientUpload(t *testing.T) {
 			return io.NopCloser(new(bytes.Buffer)), objectError
 		})
 		if len(c.expectederror) > 0 {
-			assert.True(t, strings.Contains(err.Error(), c.expectederror), "case %d: '%s' should contain '%s'", n, err.Error(), c.expectederror)
+			assert.ErrorContains(t, err, c.expectederror)
 		} else {
 			require.NoError(t, err, "case %d", n)
 		}

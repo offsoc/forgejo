@@ -81,7 +81,7 @@ func TestMigrate(t *testing.T) {
 			{svc: structs.ForgejoService},
 		} {
 			// Step 0: verify the repo is available
-			req := NewRequestf(t, "GET", fmt.Sprintf("/%s/%s", ownerName, repoName))
+			req := NewRequestf(t, "GET", "/%s/%s", ownerName, repoName)
 			_ = session.MakeRequest(t, req, http.StatusOK)
 			// Step 1: get the Gitea migration form
 			req = NewRequestf(t, "GET", "/repo/migrate/?service_type=%d", s.svc)

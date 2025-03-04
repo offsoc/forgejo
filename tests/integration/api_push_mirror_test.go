@@ -5,6 +5,7 @@ package integration
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -54,13 +55,13 @@ func testAPIPushMirror(t *testing.T, u *url.URL) {
 	deletePushMirrors := repo_model.DeletePushMirrors
 	deletePushMirrorsError := "deletePushMirrorsError"
 	deletePushMirrorsFail := func(ctx context.Context, opts repo_model.PushMirrorOptions) error {
-		return fmt.Errorf(deletePushMirrorsError)
+		return errors.New(deletePushMirrorsError)
 	}
 
 	addPushMirrorRemote := mirror_service.AddPushMirrorRemote
 	addPushMirrorRemoteError := "addPushMirrorRemoteError"
 	addPushMirrorRemoteFail := func(ctx context.Context, m *repo_model.PushMirror, addr string) error {
-		return fmt.Errorf(addPushMirrorRemoteError)
+		return errors.New(addPushMirrorRemoteError)
 	}
 
 	for _, testCase := range []struct {

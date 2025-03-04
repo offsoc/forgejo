@@ -118,7 +118,7 @@ func TestDelayWriter(t *testing.T) {
 	defer test.MockVariableValue(&setting.InternalToken, "Random")()
 	defer test.MockVariableValue(&setting.InstallLock, true)()
 	defer test.MockVariableValue(&setting.Git.VerbosePush, true)()
-	require.NoError(t, os.Setenv("SSH_ORIGINAL_COMMAND", "true"))
+	t.Setenv("SSH_ORIGINAL_COMMAND", "true")
 
 	// Setup the Stdin.
 	f, err := os.OpenFile(t.TempDir()+"/stdin", os.O_RDWR|os.O_CREATE|os.O_EXCL, 0o666)
@@ -165,11 +165,11 @@ func TestDelayWriter(t *testing.T) {
 }
 
 func TestPushOptions(t *testing.T) {
-	require.NoError(t, os.Setenv(private.GitPushOptionCount, "3"))
-	require.NoError(t, os.Setenv("GIT_PUSH_OPTION_0", "force-push"))
-	require.NoError(t, os.Setenv("GIT_PUSH_OPTION_1", "option=value"))
-	require.NoError(t, os.Setenv("GIT_PUSH_OPTION_2", "option-double=another=value"))
-	require.NoError(t, os.Setenv("GIT_PUSH_OPTION_3", "not=valid"))
+	t.Setenv(private.GitPushOptionCount, "3")
+	t.Setenv("GIT_PUSH_OPTION_0", "force-push")
+	t.Setenv("GIT_PUSH_OPTION_1", "option=value")
+	t.Setenv("GIT_PUSH_OPTION_2", "option-double=another=value")
+	t.Setenv("GIT_PUSH_OPTION_3", "not=valid")
 
 	assert.Equal(t, map[string]string{
 		"force-push":    "true",
