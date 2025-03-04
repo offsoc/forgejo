@@ -96,9 +96,9 @@
 							<td>{{if .IsActive}}{{svg "octicon-check"}}{{else}}{{svg "octicon-x"}}{{end}}</td>
 							<td>{{if .IsRestricted}}{{svg "octicon-check"}}{{else}}{{svg "octicon-x"}}{{end}}</td>
 							<td>{{if index $.UsersTwoFaStatus .ID}}{{svg "octicon-check"}}{{else}}{{svg "octicon-x"}}{{end}}</td>
-							<td>{{ctx.DateUtils.AbsoluteShort .CreatedUnix}}</td>
+							<td>{{DateUtils.AbsoluteShort .CreatedUnix}}</td>
 							{{if .LastLoginUnix}}
-								<td>{{ctx.DateUtils.AbsoluteShort .LastLoginUnix}}</td>
+								<td>{{DateUtils.AbsoluteShort .LastLoginUnix}}</td>
 							{{else}}
 								<td><span>{{ctx.Locale.Tr "admin.users.never_login"}}</span></td>
 							{{end}}
@@ -109,6 +109,8 @@
 								</div>
 							</td>
 						</tr>
+					{{else}}
+						<tr class="no-results-row"><td class="tw-text-center" colspan="9">{{ctx.Locale.Tr "no_results_found"}}</td></tr>
 					{{end}}
 				</tbody>
 			</table>

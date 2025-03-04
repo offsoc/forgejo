@@ -517,8 +517,8 @@ export function initRepoPullRequestReview() {
   // The following part is only for diff views
   if (!$('.repository.pull.diff').length) return;
 
-  const $reviewBtn = $('.js-btn-review');
-  const $panel = $reviewBtn.parent().find('.review-box-panel');
+  const $reviewBtn = $reviewBox.parent().find('.js-btn-review');
+  const $panel = $reviewBox.parent().find('.review-box-panel');
   const $closeBtn = $panel.find('.close');
 
   if ($reviewBtn.length && $panel.length) {
@@ -631,9 +631,11 @@ export function initRepoIssueTitleEdit() {
 
   const issueTitleInput = issueTitleEditor.querySelector('input');
   const oldTitle = issueTitleInput.getAttribute('data-old-title');
+  const normalModeElements = [issueTitleDisplay, '#pull-desc-display', '#agit-label', '#editable-label'];
   issueTitleDisplay.querySelector('#issue-title-edit-show').addEventListener('click', () => {
-    hideElem(issueTitleDisplay);
-    hideElem('#pull-desc-display');
+    for (const element of normalModeElements) {
+      hideElem(element);
+    }
     showElem(issueTitleEditor);
     showElem('#pull-desc-editor');
     if (!issueTitleInput.value.trim()) {
@@ -644,8 +646,9 @@ export function initRepoIssueTitleEdit() {
   issueTitleEditor.querySelector('.ui.cancel.button').addEventListener('click', () => {
     hideElem(issueTitleEditor);
     hideElem('#pull-desc-editor');
-    showElem(issueTitleDisplay);
-    showElem('#pull-desc-display');
+    for (const element of normalModeElements) {
+      showElem(element);
+    }
   });
 
   const pullDescEditor = document.querySelector('#pull-desc-editor'); // it may not exist for a merged PR

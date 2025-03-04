@@ -20,7 +20,6 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/svg"
 	"code.gitea.io/gitea/modules/templates/eval"
-	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/services/gitdiff"
 )
@@ -65,15 +64,17 @@ func NewFuncMap() template.FuncMap {
 
 		// -----------------------------------------------------------------
 		// time / number / format
-		"FileSize":      FileSizePanic,
-		"CountFmt":      base.FormatNumberSI,
-		"TimeSince":     timeutil.TimeSince,
-		"TimeSinceUnix": timeutil.TimeSinceUnix,
-		"DateTime":      dateTimeLegacy, // for backward compatibility only, do not use it anymore
-		"Sec2Time":      util.SecToTime,
+		"FileSize": FileSizePanic,
+		"CountFmt": base.FormatNumberSI,
+		"Sec2Time": util.SecToTime,
 		"LoadTimes": func(startTime time.Time) string {
 			return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"
 		},
+
+		// for backward compatibility only, do not use them anymore
+		"TimeSince":     timeSinceLegacy,
+		"TimeSinceUnix": timeSinceLegacy,
+		"DateTime":      dateTimeLegacy,
 
 		// -----------------------------------------------------------------
 		// setting
@@ -101,6 +102,10 @@ func NewFuncMap() template.FuncMap {
 		},
 		"AppVer": func() string {
 			return setting.AppVer
+		},
+		"AppVerNoMetadata": func() string {
+			version, _, _ := strings.Cut(setting.AppVer, "+")
+			return version
 		},
 		"AppDomain": func() string { // documented in mail-templates.md
 			return setting.Domain

@@ -18,6 +18,8 @@ func GetQuota(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/QuotaInfo"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 
@@ -34,6 +36,8 @@ func CheckQuota(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/boolean"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 	//   "422":
@@ -61,6 +65,8 @@ func ListQuotaAttachments(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/QuotaUsedAttachmentList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 
@@ -86,6 +92,8 @@ func ListQuotaPackages(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/QuotaUsedPackageList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 
@@ -111,6 +119,8 @@ func ListQuotaArtifacts(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/QuotaUsedArtifactList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 

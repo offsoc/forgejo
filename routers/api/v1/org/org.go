@@ -15,6 +15,7 @@ import (
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
 	api "code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/routers/api/v1/user"
 	"code.gitea.io/gitea/routers/api/v1/utils"
@@ -68,6 +69,10 @@ func ListMyOrgs(ctx *context.APIContext) {
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/OrganizationList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 
@@ -315,6 +320,44 @@ func Get(ctx *context.APIContext) {
 	ctx.JSON(http.StatusOK, org)
 }
 
+func Rename(ctx *context.APIContext) {
+	// swagger:operation POST /orgs/{org}/rename organization renameOrg
+	// ---
+	// summary: Rename an organization
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: org
+	//   in: path
+	//   description: existing org name
+	//   type: string
+	//   required: true
+	// - name: body
+	//   in: body
+	//   required: true
+	//   schema:
+	//     "$ref": "#/definitions/RenameOrgOption"
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/empty"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
+
+	form := web.GetForm(ctx).(*api.RenameOrgOption)
+	orgUser := ctx.Org.Organization.AsUser()
+	if err := user_service.RenameUser(ctx, orgUser, form.NewName); err != nil {
+		if user_model.IsErrUserAlreadyExist(err) || db.IsErrNameReserved(err) || db.IsErrNamePatternNotAllowed(err) || db.IsErrNameCharsNotAllowed(err) {
+			ctx.Error(http.StatusUnprocessableEntity, "RenameOrg", err)
+		} else {
+			ctx.ServerError("RenameOrg", err)
+		}
+		return
+	}
+	ctx.Status(http.StatusNoContent)
+}
+
 // Edit change an organization's information
 func Edit(ctx *context.APIContext) {
 	// swagger:operation PATCH /orgs/{org} organization orgEdit
@@ -340,13 +383,28 @@ func Edit(ctx *context.APIContext) {
 	//     "$ref": "#/responses/Organization"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "422":
+	//     "$ref": "#/responses/error"
 
 	form := web.GetForm(ctx).(*api.EditOrgOption)
 
-	if form.Email != "" {
-		if err := user_service.ReplacePrimaryEmailAddress(ctx, ctx.Org.Organization.AsUser(), form.Email); err != nil {
-			ctx.Error(http.StatusInternalServerError, "ReplacePrimaryEmailAddress", err)
-			return
+	if form.Email != nil {
+		if *form.Email == "" {
+			err := user_model.DeletePrimaryEmailAddressOfUser(ctx, ctx.Org.Organization.ID)
+			if err != nil {
+				ctx.Error(http.StatusInternalServerError, "DeletePrimaryEmailAddressOfUser", err)
+				return
+			}
+			ctx.Org.Organization.Email = ""
+		} else {
+			if err := user_service.ReplacePrimaryEmailAddress(ctx, ctx.Org.Organization.AsUser(), *form.Email); err != nil {
+				if validation.IsErrEmailInvalid(err) || validation.IsErrEmailCharIsNotSupported(err) {
+					ctx.Error(http.StatusUnprocessableEntity, "ReplacePrimaryEmailAddress", err)
+				} else {
+					ctx.Error(http.StatusInternalServerError, "ReplacePrimaryEmailAddress", err)
+				}
+				return
+			}
 		}
 	}
 

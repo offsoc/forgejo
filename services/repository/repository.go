@@ -12,7 +12,6 @@ import (
 	"code.gitea.io/gitea/models/git"
 	issues_model "code.gitea.io/gitea/models/issues"
 	"code.gitea.io/gitea/models/organization"
-	packages_model "code.gitea.io/gitea/models/packages"
 	repo_model "code.gitea.io/gitea/models/repo"
 	system_model "code.gitea.io/gitea/models/system"
 	"code.gitea.io/gitea/models/unit"
@@ -22,7 +21,6 @@ import (
 	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
-	federation_service "code.gitea.io/gitea/services/federation"
 	notify_service "code.gitea.io/gitea/services/notify"
 	pull_service "code.gitea.io/gitea/services/pull"
 )
@@ -64,15 +62,7 @@ func DeleteRepository(ctx context.Context, doer *user_model.User, repo *repo_mod
 		notify_service.DeleteRepository(ctx, doer, repo)
 	}
 
-	if err := DeleteRepositoryDirectly(ctx, doer, repo.ID); err != nil {
-		return err
-	}
-
-	if err := federation_service.DeleteFollowingRepos(ctx, repo.ID); err != nil {
-		return err
-	}
-
-	return packages_model.UnlinkRepositoryFromAllPackages(ctx, repo.ID)
+	return DeleteRepositoryDirectly(ctx, doer, repo.ID)
 }
 
 // PushCreateRepo creates a repository when a new repository is pushed to an appropriate namespace

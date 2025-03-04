@@ -155,9 +155,15 @@ func EmailPost(ctx *context.Context) {
 				return
 			}
 			// Only fired when the primary email is inactive (Wrong state)
-			mailer.SendActivateAccountMail(ctx.Locale, ctx.Doer)
+			if err := mailer.SendActivateAccountMail(ctx, ctx.Doer); err != nil {
+				ctx.ServerError("SendActivateAccountMail", err)
+				return
+			}
 		} else {
-			mailer.SendActivateEmailMail(ctx.Doer, email.Email)
+			if err := mailer.SendActivateEmailMail(ctx, ctx.Doer, email.Email); err != nil {
+				ctx.ServerError("SendActivateEmailMail", err)
+				return
+			}
 		}
 		address = email.Email
 
@@ -218,7 +224,10 @@ func EmailPost(ctx *context.Context) {
 
 	// Send confirmation email
 	if setting.Service.RegisterEmailConfirm {
-		mailer.SendActivateEmailMail(ctx.Doer, form.Email)
+		if err := mailer.SendActivateEmailMail(ctx, ctx.Doer, form.Email); err != nil {
+			ctx.ServerError("SendActivateEmailMail", err)
+			return
+		}
 		if err := ctx.Cache.Put("MailResendLimit_"+ctx.Doer.LowerName, ctx.Doer.LowerName, 180); err != nil {
 			log.Error("Set cache(MailResendLimit) fail: %v", err)
 		}

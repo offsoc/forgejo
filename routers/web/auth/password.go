@@ -86,7 +86,10 @@ func ForgotPasswdPost(ctx *context.Context) {
 		return
 	}
 
-	mailer.SendResetPasswordMail(u)
+	if err := mailer.SendResetPasswordMail(ctx, u); err != nil {
+		ctx.ServerError("SendResetPasswordMail", err)
+		return
+	}
 
 	if err = ctx.Cache.Put("MailResendLimit_"+u.LowerName, u.LowerName, 180); err != nil {
 		log.Error("Set cache(MailResendLimit) fail: %v", err)
@@ -97,7 +100,7 @@ func ForgotPasswdPost(ctx *context.Context) {
 	ctx.HTML(http.StatusOK, tplForgotPassword)
 }
 
-func commonResetPassword(ctx *context.Context) (*user_model.User, *auth.TwoFactor) {
+func commonResetPassword(ctx *context.Context, shouldDeleteToken bool) (*user_model.User, *auth.TwoFactor) {
 	code := ctx.FormString("code")
 
 	ctx.Data["Title"] = ctx.Tr("auth.reset_password")
@@ -113,10 +116,22 @@ func commonResetPassword(ctx *context.Context) (*user_model.User, *auth.TwoFacto
 	}
 
 	// Fail early, don't frustrate the user
-	u := user_model.VerifyUserActiveCode(ctx, code)
+	u, deleteToken, err := user_model.VerifyUserAuthorizationToken(ctx, code, auth.PasswordReset)
+	if err != nil {
+		ctx.ServerError("VerifyUserAuthorizationToken", err)
+		return nil, nil
+	}
+
 	if u == nil {
 		ctx.Flash.Error(ctx.Tr("auth.invalid_code_forgot_password", fmt.Sprintf("%s/user/forgot_password", setting.AppSubURL)), true)
 		return nil, nil
+	}
+
+	if shouldDeleteToken {
+		if err := deleteToken(); err != nil {
+			ctx.ServerError("deleteToken", err)
+			return nil, nil
+		}
 	}
 
 	twofa, err := auth.GetTwoFactorByUID(ctx, u.ID)
@@ -145,7 +160,7 @@ func commonResetPassword(ctx *context.Context) (*user_model.User, *auth.TwoFacto
 func ResetPasswd(ctx *context.Context) {
 	ctx.Data["IsResetForm"] = true
 
-	commonResetPassword(ctx)
+	commonResetPassword(ctx, false)
 	if ctx.Written() {
 		return
 	}
@@ -155,7 +170,7 @@ func ResetPasswd(ctx *context.Context) {
 
 // ResetPasswdPost response from account recovery request
 func ResetPasswdPost(ctx *context.Context) {
-	u, twofa := commonResetPassword(ctx)
+	u, twofa := commonResetPassword(ctx, true)
 	if ctx.Written() {
 		return
 	}

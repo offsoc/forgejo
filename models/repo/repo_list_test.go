@@ -4,13 +4,18 @@
 package repo_test
 
 import (
+	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unittest"
+	"code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/optional"
+	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -401,5 +406,45 @@ func TestSearchRepositoryByTopicName(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, int64(testCase.count), count)
 		})
+	}
+}
+
+func TestSearchRepositoryIDsByCondition(t *testing.T) {
+	defer unittest.OverrideFixtures(
+		unittest.FixturesOptions{
+			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
+			Base: setting.AppWorkPath,
+			Dirs: []string{"models/repo/TestSearchRepositoryIDsByCondition/"},
+		},
+	)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+	// Sanity check of the database
+	limitedUser := unittest.AssertExistsAndLoadBean(t, &user.User{ID: 33, Visibility: structs.VisibleTypeLimited})
+	unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1001, OwnerID: limitedUser.ID})
+
+	testCases := []struct {
+		user    *user.User
+		repoIDs []int64
+	}{
+		{
+			user:    nil,
+			repoIDs: []int64{1, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 1059},
+		},
+		{
+			user:    unittest.AssertExistsAndLoadBean(t, &user.User{ID: 4}),
+			repoIDs: []int64{1, 3, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 38, 40, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 1001, 1059},
+		},
+		{
+			user:    unittest.AssertExistsAndLoadBean(t, &user.User{ID: 5}),
+			repoIDs: []int64{1, 4, 8, 9, 10, 11, 12, 14, 17, 18, 21, 23, 25, 27, 29, 32, 33, 34, 35, 36, 37, 38, 40, 42, 44, 45, 46, 47, 48, 49, 50, 51, 53, 57, 58, 60, 61, 62, 1001, 1059},
+		},
+	}
+
+	for _, testCase := range testCases {
+		repoIDs, err := repo_model.FindUserCodeAccessibleRepoIDs(db.DefaultContext, testCase.user)
+		require.NoError(t, err)
+
+		slices.Sort(repoIDs)
+		assert.EqualValues(t, testCase.repoIDs, repoIDs)
 	}
 }

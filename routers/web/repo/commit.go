@@ -21,15 +21,17 @@ import (
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/charset"
 	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitgraph"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/markup"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/util"
+	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
+	"code.gitea.io/gitea/services/forms"
 	"code.gitea.io/gitea/services/gitdiff"
 	git_service "code.gitea.io/gitea/services/repository"
+	"code.gitea.io/gitea/services/repository/gitgraph"
 )
 
 const (
@@ -417,6 +419,10 @@ func Diff(ctx *context.Context) {
 		}
 	}
 
+	ctx.Data["OpenGraphTitle"] = commit.Summary() + " · " + base.ShortSha(commitID)
+	ctx.Data["OpenGraphURL"] = fmt.Sprintf("%s/commit/%s", ctx.Repo.Repository.HTMLURL(), commitID)
+	_, ctx.Data["OpenGraphDescription"], _ = strings.Cut(commit.Message(), "\n")
+
 	ctx.HTML(http.StatusOK, tplCommitPage)
 }
 
@@ -466,4 +472,30 @@ func processGitCommits(ctx *context.Context, gitCommits []*git.Commit) []*git_mo
 		}
 	}
 	return commits
+}
+
+func SetCommitNotes(ctx *context.Context) {
+	form := web.GetForm(ctx).(*forms.CommitNotesForm)
+
+	commitID := ctx.Params(":sha")
+
+	err := git.SetNote(ctx, ctx.Repo.GitRepo, commitID, form.Notes, ctx.Doer.Name, ctx.Doer.GetEmail())
+	if err != nil {
+		ctx.ServerError("SetNote", err)
+		return
+	}
+
+	ctx.Redirect(fmt.Sprintf("%s/commit/%s", ctx.Repo.Repository.HTMLURL(), commitID))
+}
+
+func RemoveCommitNotes(ctx *context.Context) {
+	commitID := ctx.Params(":sha")
+
+	err := git.RemoveNote(ctx, ctx.Repo.GitRepo, commitID)
+	if err != nil {
+		ctx.ServerError("RemoveNotes", err)
+		return
+	}
+
+	ctx.Redirect(fmt.Sprintf("%s/commit/%s", ctx.Repo.Repository.HTMLURL(), commitID))
 }

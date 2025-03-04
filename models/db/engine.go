@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"runtime/trace"
 	"strings"
 	"time"
 
@@ -162,6 +163,8 @@ func InitEngine(ctx context.Context) error {
 	xormEngine.AddHook(&ErrorQueryHook{
 		Logger: errorLogger,
 	})
+
+	xormEngine.AddHook(&TracingHook{})
 
 	SetDefaultEngine(ctx, xormEngine)
 	return nil
@@ -316,6 +319,25 @@ func SetLogSQL(ctx context.Context, on bool) {
 	} else if sess, ok := e.(*xorm.Session); ok {
 		sess.Engine().ShowSQL(on)
 	}
+}
+
+type TracingHook struct{}
+
+var _ contexts.Hook = &TracingHook{}
+
+type sqlTask struct{}
+
+func (TracingHook) BeforeProcess(c *contexts.ContextHook) (context.Context, error) {
+	ctx, task := trace.NewTask(c.Ctx, "sql")
+	ctx = context.WithValue(ctx, sqlTask{}, task)
+	trace.Log(ctx, "query", c.SQL)
+	trace.Logf(ctx, "args", "%v", c.Args)
+	return ctx, nil
+}
+
+func (TracingHook) AfterProcess(c *contexts.ContextHook) error {
+	c.Ctx.Value(sqlTask{}).(*trace.Task).End()
+	return nil
 }
 
 type SlowQueryHook struct {

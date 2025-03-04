@@ -78,6 +78,7 @@ func testSearchRepo(t *testing.T, indexer bool) {
 		code_indexer.UpdateRepoIndexer(repo)
 	}
 
+	testSearch(t, "/user2/glob/search?q=", []string{}, indexer)
 	testSearch(t, "/user2/glob/search?q=loren&page=1", []string{"a.txt"}, indexer)
 	testSearch(t, "/user2/glob/search?q=loren&page=1&mode=exact", []string{"a.txt"}, indexer)
 
@@ -106,9 +107,6 @@ func testSearch(t *testing.T, url string, expected []string, indexer bool) {
 
 	doc := NewHTMLParser(t, resp.Body)
 	container := doc.Find(".repository").Find(".ui.container")
-
-	grepMsg := container.Find(".ui.message[data-test-tag=grep]")
-	assert.EqualValues(t, indexer, len(grepMsg.Nodes) == 0)
 
 	branchDropdown := container.Find(".js-branch-tag-selector")
 	assert.EqualValues(t, indexer, len(branchDropdown.Nodes) == 0)

@@ -74,8 +74,6 @@ type SearchResult struct {
 type SearchOptions struct {
 	Keyword string // keyword to search
 
-	IsFuzzyKeyword bool // if false the levenshtein distance is 0
-
 	RepoIDs   []int64 // repository IDs which the issues belong to
 	AllPublic bool    // if include all public repositories
 
@@ -127,6 +125,7 @@ func (o *SearchOptions) Copy(edit ...func(options *SearchOptions)) *SearchOption
 type SortBy string
 
 const (
+	SortByScore        SortBy = "-_score"
 	SortByCreatedDesc  SortBy = "-created_unix"
 	SortByUpdatedDesc  SortBy = "-updated_unix"
 	SortByCommentsDesc SortBy = "-comment_count"

@@ -19,7 +19,7 @@ import (
 // StopZombieTasks stops the task which have running status, but haven't been updated for a long time
 func StopZombieTasks(ctx context.Context) error {
 	return stopTasks(ctx, actions_model.FindTaskOptions{
-		Status:        actions_model.StatusRunning,
+		Status:        []actions_model.Status{actions_model.StatusRunning},
 		UpdatedBefore: timeutil.TimeStamp(time.Now().Add(-setting.Actions.ZombieTaskTimeout).Unix()),
 	})
 }
@@ -27,7 +27,7 @@ func StopZombieTasks(ctx context.Context) error {
 // StopEndlessTasks stops the tasks which have running status and continuous updates, but don't end for a long time
 func StopEndlessTasks(ctx context.Context) error {
 	return stopTasks(ctx, actions_model.FindTaskOptions{
-		Status:        actions_model.StatusRunning,
+		Status:        []actions_model.Status{actions_model.StatusRunning},
 		StartedBefore: timeutil.TimeStamp(time.Now().Add(-setting.Actions.EndlessTaskTimeout).Unix()),
 	})
 }

@@ -17,6 +17,7 @@ import (
 	"code.gitea.io/gitea/modules/charset"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
+	tokenizer_hierarchy "code.gitea.io/gitea/modules/indexer/code/bleve/tokenizer/hierarchy"
 	"code.gitea.io/gitea/modules/indexer/code/internal"
 	indexer_internal "code.gitea.io/gitea/modules/indexer/internal"
 	inner_bleve "code.gitea.io/gitea/modules/indexer/internal/bleve"
@@ -56,6 +57,7 @@ func addUnicodeNormalizeTokenFilter(m *mapping.IndexMappingImpl) error {
 type RepoIndexerData struct {
 	RepoID    int64
 	CommitID  string
+	Filename  string
 	Content   string
 	Language  string
 	UpdatedAt time.Time
@@ -69,7 +71,8 @@ func (d *RepoIndexerData) Type() string {
 const (
 	repoIndexerAnalyzer      = "repoIndexerAnalyzer"
 	repoIndexerDocType       = "repoIndexerDocType"
-	repoIndexerLatestVersion = 6
+	pathHierarchyAnalyzer    = "pathHierarchyAnalyzer"
+	repoIndexerLatestVersion = 7
 )
 
 // generateBleveIndexMapping generates a bleve index mapping for the repo indexer
@@ -89,6 +92,11 @@ func generateBleveIndexMapping() (mapping.IndexMapping, error) {
 	docMapping.AddFieldMappingsAt("Language", termFieldMapping)
 	docMapping.AddFieldMappingsAt("CommitID", termFieldMapping)
 
+	pathFieldMapping := bleve.NewTextFieldMapping()
+	pathFieldMapping.IncludeInAll = false
+	pathFieldMapping.Analyzer = pathHierarchyAnalyzer
+	docMapping.AddFieldMappingsAt("Filename", pathFieldMapping)
+
 	timeFieldMapping := bleve.NewDateTimeFieldMapping()
 	timeFieldMapping.IncludeInAll = false
 	docMapping.AddFieldMappingsAt("UpdatedAt", timeFieldMapping)
@@ -101,6 +109,13 @@ func generateBleveIndexMapping() (mapping.IndexMapping, error) {
 		"char_filters":  []string{},
 		"tokenizer":     unicode.Name,
 		"token_filters": []string{unicodeNormalizeName, camelcase.Name, lowercase.Name},
+	}); err != nil {
+		return nil, err
+	} else if err := mapping.AddCustomAnalyzer(pathHierarchyAnalyzer, map[string]any{
+		"type":          analyzer_custom.Name,
+		"char_filters":  []string{},
+		"tokenizer":     tokenizer_hierarchy.Name,
+		"token_filters": []string{unicodeNormalizeName},
 	}); err != nil {
 		return nil, err
 	}
@@ -178,6 +193,7 @@ func (b *Indexer) addUpdate(ctx context.Context, batchWriter git.WriteCloserErro
 	return batch.Index(id, &RepoIndexerData{
 		RepoID:    repo.ID,
 		CommitID:  commitSha,
+		Filename:  update.Filename,
 		Content:   string(charset.ToUTF8DropErrors(fileContents, charset.ConvertOpts{})),
 		Language:  analyze.GetCodeLanguage(update.Filename, fileContents),
 		UpdatedAt: time.Now().UTC(),
@@ -266,22 +282,30 @@ func (b *Indexer) Search(ctx context.Context, opts *internal.SearchOptions) (int
 		indexerQuery = keywordQuery
 	}
 
+	opts.Filename = strings.Trim(opts.Filename, "/")
+	if len(opts.Filename) > 0 {
+		// we use a keyword analyzer for the query than path hierarchy analyzer
+		// to match only the exact path
+		// eg, a query for modules/indexer/code
+		// should not provide results for modules/ nor modules/indexer
+		indexerQuery = bleve.NewConjunctionQuery(
+			indexerQuery,
+			inner_bleve.MatchQuery(opts.Filename, "Filename", analyzer_keyword.Name, 0),
+		)
+	}
+
 	// Save for reuse without language filter
 	facetQuery := indexerQuery
 	if len(opts.Language) > 0 {
-		languageQuery := bleve.NewMatchQuery(opts.Language)
-		languageQuery.FieldVal = "Language"
-		languageQuery.Analyzer = analyzer_keyword.Name
-
 		indexerQuery = bleve.NewConjunctionQuery(
 			indexerQuery,
-			languageQuery,
+			inner_bleve.MatchQuery(opts.Language, "Language", analyzer_keyword.Name, 0),
 		)
 	}
 
 	from, pageSize := opts.GetSkipTake()
 	searchRequest := bleve.NewSearchRequestOptions(indexerQuery, pageSize, from, false)
-	searchRequest.Fields = []string{"Content", "RepoID", "Language", "CommitID", "UpdatedAt"}
+	searchRequest.Fields = []string{"Content", "RepoID", "Filename", "Language", "CommitID", "UpdatedAt"}
 	searchRequest.IncludeLocations = true
 
 	if len(opts.Language) == 0 {
@@ -320,7 +344,7 @@ func (b *Indexer) Search(ctx context.Context, opts *internal.SearchOptions) (int
 			RepoID:      int64(hit.Fields["RepoID"].(float64)),
 			StartIndex:  startIndex,
 			EndIndex:    endIndex,
-			Filename:    internal.FilenameOfIndexerID(hit.ID),
+			Filename:    hit.Fields["Filename"].(string),
 			Content:     hit.Fields["Content"].(string),
 			CommitID:    hit.Fields["CommitID"].(string),
 			UpdatedUnix: updatedUnix,
@@ -333,7 +357,7 @@ func (b *Indexer) Search(ctx context.Context, opts *internal.SearchOptions) (int
 	if len(opts.Language) > 0 {
 		// Use separate query to go get all language counts
 		facetRequest := bleve.NewSearchRequestOptions(facetQuery, 1, 0, false)
-		facetRequest.Fields = []string{"Content", "RepoID", "Language", "CommitID", "UpdatedAt"}
+		facetRequest.Fields = []string{"Content", "RepoID", "Filename", "Language", "CommitID", "UpdatedAt"}
 		facetRequest.IncludeLocations = true
 		facetRequest.AddFacet("languages", bleve.NewFacetRequest("Language", 10))
 

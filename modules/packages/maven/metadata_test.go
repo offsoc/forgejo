@@ -14,6 +14,7 @@ import (
 
 const (
 	groupID              = "org.gitea"
+	parentGroupID        = "org.gitea.parent"
 	artifactID           = "my-project"
 	version              = "1.0.1"
 	name                 = "My Gitea Project"
@@ -27,6 +28,11 @@ const (
 
 const pomContent = `<?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>` + parentGroupID + `</groupId>
+    <artifactId>parent-project</artifactId>
+    <version>1.0.0</version>
+  </parent>
   <groupId>` + groupID + `</groupId>
   <artifactId>` + artifactID + `</artifactId>
   <version>` + version + `</version>
@@ -45,6 +51,24 @@ const pomContent = `<?xml version="1.0"?>
       <version>` + dependencyVersion + `</version>
     </dependency>
   </dependencies>
+</project>`
+
+const pomWithParentGroupID = `<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>` + parentGroupID + `</groupId>
+    <artifactId>parent-project</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
+  <artifactId>` + artifactID + `</artifactId>
+  <version>` + version + `</version>
+</project>`
+
+const pomWithMissingGroupID = `<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <artifactId>` + artifactID + `</artifactId>
+  <version>` + version + `</version>
 </project>`
 
 func TestParsePackageMetaData(t *testing.T) {
@@ -86,5 +110,20 @@ func TestParsePackageMetaData(t *testing.T) {
 		m, err := ParsePackageMetaData(strings.NewReader(pomContent8859_1))
 		require.NoError(t, err)
 		assert.NotNil(t, m)
+	})
+
+	t.Run("UseParentGroupID", func(t *testing.T) {
+		m, err := ParsePackageMetaData(strings.NewReader(pomWithParentGroupID))
+		require.NoError(t, err)
+		assert.NotNil(t, m)
+
+		assert.Equal(t, parentGroupID, m.GroupID)
+	})
+
+	t.Run("MissingGroupIDThrowsError", func(t *testing.T) {
+		m, err := ParsePackageMetaData(strings.NewReader(pomWithMissingGroupID))
+		assert.Nil(t, m)
+		require.Error(t, err)
+		assert.Equal(t, ErrNoGroupID, err)
 	})
 }

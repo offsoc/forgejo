@@ -262,6 +262,7 @@ func UnitsPost(ctx *context.Context) {
 				AllowRebaseUpdate:             form.PullsAllowRebaseUpdate,
 				DefaultDeleteBranchAfterMerge: form.DefaultDeleteBranchAfterMerge,
 				DefaultMergeStyle:             repo_model.MergeStyle(form.PullsDefaultMergeStyle),
+				DefaultUpdateStyle:            repo_model.UpdateStyle(form.PullsDefaultUpdateStyle),
 				DefaultAllowMaintainerEdit:    form.DefaultAllowMaintainerEdit,
 			},
 		})
@@ -566,21 +567,19 @@ func SettingsPost(ctx *context.Context) {
 		// as an error on the UI for this action
 		ctx.Data["Err_RepoName"] = nil
 
+		m, err := selectPushMirrorByForm(ctx, form, repo)
+		if err != nil {
+			ctx.NotFound("", nil)
+			return
+		}
+
 		interval, err := time.ParseDuration(form.PushMirrorInterval)
 		if err != nil || (interval != 0 && interval < setting.Mirror.MinInterval) {
 			ctx.RenderWithErr(ctx.Tr("repo.mirror_interval_invalid"), tplSettingsOptions, &forms.RepoSettingForm{})
 			return
 		}
 
-		id, err := strconv.ParseInt(form.PushMirrorID, 10, 64)
-		if err != nil {
-			ctx.ServerError("UpdatePushMirrorIntervalPushMirrorID", err)
-			return
-		}
-		m := &repo_model.PushMirror{
-			ID:       id,
-			Interval: interval,
-		}
+		m.Interval = interval
 		if err := repo_model.UpdatePushMirrorInterval(ctx, m); err != nil {
 			ctx.ServerError("UpdatePushMirrorInterval", err)
 			return
@@ -652,7 +651,7 @@ func SettingsPost(ctx *context.Context) {
 
 		address, err := forms.ParseRemoteAddr(form.PushMirrorAddress, form.PushMirrorUsername, form.PushMirrorPassword)
 		if err == nil {
-			err = migrations.IsMigrateURLAllowed(address, ctx.Doer)
+			err = migrations.IsPushMirrorURLAllowed(address, ctx.Doer)
 		}
 		if err != nil {
 			ctx.Data["Err_PushMirrorAddress"] = true

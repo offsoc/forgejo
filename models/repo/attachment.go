@@ -219,16 +219,6 @@ func DeleteAttachments(ctx context.Context, attachments []*Attachment, remove bo
 	return int(cnt), nil
 }
 
-// DeleteAttachmentsByIssue deletes all attachments associated with the given issue.
-func DeleteAttachmentsByIssue(ctx context.Context, issueID int64, remove bool) (int, error) {
-	attachments, err := GetAttachmentsByIssueID(ctx, issueID)
-	if err != nil {
-		return 0, err
-	}
-
-	return DeleteAttachments(ctx, attachments, remove)
-}
-
 // DeleteAttachmentsByComment deletes all attachments associated with the given comment.
 func DeleteAttachmentsByComment(ctx context.Context, commentID int64, remove bool) (int, error) {
 	attachments, err := GetAttachmentsByCommentID(ctx, commentID)

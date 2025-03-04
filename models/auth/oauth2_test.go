@@ -296,4 +296,5 @@ func TestOrphanedOAuth2Applications(t *testing.T) {
 	require.NoError(t, err)
 	assert.EqualValues(t, 0, count)
 	unittest.AssertExistsIf(t, false, &auth_model.OAuth2Application{ID: 1002})
+	unittest.AssertExistsIf(t, true, &auth_model.OAuth2Application{ID: 1003})
 }

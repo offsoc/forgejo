@@ -79,7 +79,7 @@ func RunnerDetails(ctx *context.Context, page int, runnerID, ownerID, repoID int
 			Page:     page,
 			PageSize: 30,
 		},
-		Status:   actions_model.StatusUnknown, // Unknown means all
+		Status:   []actions_model.Status{actions_model.StatusUnknown}, // Unknown means all
 		RunnerID: runner.ID,
 	}
 
@@ -142,10 +142,21 @@ func RunnerResetRegistrationToken(ctx *context.Context, ownerID, repoID int64, r
 }
 
 // RunnerDeletePost response for deleting a runner
-func RunnerDeletePost(ctx *context.Context, runnerID int64,
+func RunnerDeletePost(ctx *context.Context, runnerID, ownerID, repoID int64,
 	successRedirectTo, failedRedirectTo string,
 ) {
-	if err := actions_model.DeleteRunner(ctx, runnerID); err != nil {
+	runner, err := actions_model.GetRunnerByID(ctx, runnerID)
+	if err != nil {
+		ctx.ServerError("GetRunnerByID", err)
+		return
+	}
+
+	if !runner.Editable(ownerID, repoID) {
+		ctx.NotFound("Editable", util.NewPermissionDeniedErrorf("no permission to edit this runner"))
+		return
+	}
+
+	if err := actions_model.DeleteRunner(ctx, runner); err != nil {
 		log.Warn("DeleteRunnerPost.UpdateRunner failed: %v, url: %s", err, ctx.Req.URL)
 		ctx.Flash.Warning(ctx.Tr("actions.runners.delete_runner_failed"))
 

@@ -18,6 +18,7 @@ import (
 
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/queue"
+	"code.gitea.io/gitea/modules/util"
 )
 
 var (
@@ -445,10 +446,7 @@ func (w *testLoggerWriterCloser) Reset() error {
 func PrintCurrentTest(t testing.TB, skip ...int) func() {
 	t.Helper()
 	start := time.Now()
-	actualSkip := 1
-	if len(skip) > 0 {
-		actualSkip = skip[0] + 1
-	}
+	actualSkip := util.OptionalArg(skip) + 1
 	_, filename, line, _ := runtime.Caller(actualSkip)
 
 	if log.CanColorStdout {
@@ -488,7 +486,7 @@ func PrintCurrentTest(t testing.TB, skip ...int) func() {
 
 		if err := WriterCloser.popT(); err != nil {
 			// disable test failure for now (too flacky)
-			_, _ = fmt.Fprintf(os.Stdout, "testlogger.go:recordError() FATAL ERROR: log.Error has been called: %v", err)
+			_, _ = fmt.Fprintf(os.Stdout, "testlogger.go:recordError() FATAL ERROR: log.Error has been called: %v\n", err)
 			// t.Errorf("testlogger.go:recordError() FATAL ERROR: log.Error has been called: %v", err)
 		}
 	}

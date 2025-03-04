@@ -216,7 +216,7 @@ func CreateSource(ctx context.Context, source *Source) error {
 		return ErrSourceAlreadyExist{source.Name}
 	}
 	// Synchronization is only available with LDAP for now
-	if !source.IsLDAP() && !source.IsOAuth2() {
+	if !source.IsLDAP() {
 		source.IsSyncEnabled = false
 	}
 
@@ -295,17 +295,6 @@ func GetSourceByID(ctx context.Context, id int64) (*Source, error) {
 		return nil, err
 	} else if !has {
 		return nil, ErrSourceNotExist{id}
-	}
-	return source, nil
-}
-
-func GetSourceByName(ctx context.Context, name string) (*Source, error) {
-	source := &Source{}
-	has, err := db.GetEngine(ctx).Where("name = ?", name).Get(source)
-	if err != nil {
-		return nil, err
-	} else if !has {
-		return nil, ErrSourceNotExist{}
 	}
 	return source, nil
 }

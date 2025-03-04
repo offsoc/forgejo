@@ -12,8 +12,10 @@
 #    whatever is in the default branch instead
 #
 #  - after it is merged, double check it works by setting the
-#    run-end-to-end-test on a pull request (any pull request will doe
+#    run-end-to-end-test on a pull request (any pull request will do)
 #
+name: issue-labels
+
 on:
   push:
     branches:
@@ -23,42 +25,23 @@ on:
       - labeled
 
 jobs:
-  info:
-    if: ${{ !startsWith(vars.ROLE, 'forgejo-') }}
-    runs-on: docker
-    container:
-      image: code.forgejo.org/oci/node:20-bookworm
-    steps:
-      - name: event
-        run: |
-          echo github.event.pull_request.head.repo.fork = ${{ github.event.pull_request.head.repo.fork }}
-          echo github.event.action = ${{ github.event.action }}
-          echo github.event.pull_request.merged = ${{ github.event.pull_request.merged }}
-          echo github.event.pull_request.labels.*.name
-          cat <<'EOF'
-          ${{ toJSON(github.event.pull_request.labels.*.name) }}
-          EOF
-          cat <<'EOF'
-          ${{ toJSON(github.event) }}
-          EOF
-
   cascade:
     if: >
-      !startsWith(vars.ROLE, 'forgejo-') && (
+      vars.ROLE == 'forgejo-coding' && (
         github.event_name == 'push' ||
         (
-          github.event.action == 'label_updated' && contains(github.event.pull_request.labels.*.name, 'run-end-to-end-tests')
+          github.event.action == 'label_updated' && github.event.label.name == 'run-end-to-end-tests'
         )
       )
     runs-on: docker
     container:
-      image: code.forgejo.org/oci/node:20-bookworm
+      image: data.forgejo.org/oci/node:20-bookworm
     steps:
-      - uses: actions/checkout@v4
+      - uses: https://data.forgejo.org/actions/checkout@v4
         with:
           fetch-depth: '0'
           show-progress: 'false'
-      - uses: actions/cascading-pr@v2
+      - uses: https://data.forgejo.org/actions/cascading-pr@v2.2.0
         with:
           origin-url: ${{ env.GITHUB_SERVER_URL }}
           origin-repo: ${{ github.repository }}

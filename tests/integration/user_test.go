@@ -5,14 +5,18 @@
 package integration
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	auth_model "code.gitea.io/gitea/models/auth"
+	"code.gitea.io/gitea/models/db"
 	issues_model "code.gitea.io/gitea/models/issues"
 	repo_model "code.gitea.io/gitea/models/repo"
 	unit_model "code.gitea.io/gitea/models/unit"
@@ -434,8 +438,16 @@ func TestUserHints(t *testing.T) {
 func TestUserPronouns(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	session := loginUser(t, "user2")
-	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteUser)
+	// user1 is admin, using user2 and user10 respectively instead.
+	// This is explicitly mentioned here because of the unconventional
+	// variable naming scheme.
+	firstUserSession := loginUser(t, "user2")
+	firstUserToken := getTokenForLoggedInUser(t, firstUserSession, auth_model.AccessTokenScopeWriteUser)
+
+	// This user has the HidePronouns setting enabled.
+	// Check the fixture!
+	secondUserSession := loginUser(t, "user10")
+	secondUserToken := getTokenForLoggedInUser(t, secondUserSession, auth_model.AccessTokenScopeWriteUser)
 
 	adminUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{IsAdmin: true})
 	adminSession := loginUser(t, adminUser.Name)
@@ -445,8 +457,10 @@ func TestUserPronouns(t *testing.T) {
 		t.Run("user", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
-			req := NewRequest(t, "GET", "/api/v1/user").AddTokenAuth(token)
-			resp := MakeRequest(t, req, http.StatusOK)
+			// secondUserToken was chosen arbitrarily and should have no impact.
+			// See next comment.
+			req := NewRequest(t, "GET", "/api/v1/user").AddTokenAuth(secondUserToken)
+			resp := firstUserSession.MakeRequest(t, req, http.StatusOK)
 
 			// We check the raw JSON, because we want to test the response, not
 			// what it decodes into. Contents doesn't matter, we're testing the
@@ -464,16 +478,22 @@ func TestUserPronouns(t *testing.T) {
 			// what it decodes into. Contents doesn't matter, we're testing the
 			// presence only.
 			assert.Contains(t, resp.Body.String(), `"pronouns":`)
+
+			req = NewRequest(t, "GET", "/api/v1/users/user10")
+			resp = MakeRequest(t, req, http.StatusOK)
+
+			// Same deal here.
+			assert.Contains(t, resp.Body.String(), `"pronouns":`)
 		})
 
 		t.Run("user/settings", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
-			// Set pronouns first
+			// Set pronouns first for user2
 			pronouns := "they/them"
 			req := NewRequestWithJSON(t, "PATCH", "/api/v1/user/settings", &api.UserSettingsOptions{
 				Pronouns: &pronouns,
-			}).AddTokenAuth(token)
+			}).AddTokenAuth(firstUserToken)
 			resp := MakeRequest(t, req, http.StatusOK)
 
 			// Verify the response
@@ -482,7 +502,7 @@ func TestUserPronouns(t *testing.T) {
 			assert.Equal(t, pronouns, user.Pronouns)
 
 			// Verify retrieving the settings again
-			req = NewRequest(t, "GET", "/api/v1/user/settings").AddTokenAuth(token)
+			req = NewRequest(t, "GET", "/api/v1/user/settings").AddTokenAuth(firstUserToken)
 			resp = MakeRequest(t, req, http.StatusOK)
 
 			DecodeJSON(t, resp, &user)
@@ -493,22 +513,40 @@ func TestUserPronouns(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			// Set the pronouns for user2
-			pronouns := "she/her"
+			pronouns := "he/him"
 			req := NewRequestWithJSON(t, "PATCH", "/api/v1/admin/users/user2", &api.EditUserOption{
 				Pronouns: &pronouns,
 			}).AddTokenAuth(adminToken)
 			resp := MakeRequest(t, req, http.StatusOK)
 
 			// Verify the API response
-			var user *api.User
-			DecodeJSON(t, resp, &user)
-			assert.Equal(t, pronouns, user.Pronouns)
+			var user2 *api.User
+			DecodeJSON(t, resp, &user2)
+			assert.Equal(t, pronouns, user2.Pronouns)
 
-			// Verify via user2 too
-			req = NewRequest(t, "GET", "/api/v1/user").AddTokenAuth(token)
+			// Verify via user2
+			req = NewRequest(t, "GET", "/api/v1/user").AddTokenAuth(firstUserToken)
 			resp = MakeRequest(t, req, http.StatusOK)
-			DecodeJSON(t, resp, &user)
-			assert.Equal(t, pronouns, user.Pronouns)
+			DecodeJSON(t, resp, &user2)
+			assert.Equal(t, pronouns, user2.Pronouns) // TODO: This fails for some reason
+
+			// Set the pronouns for user10
+			pronouns = "he/him"
+			req = NewRequestWithJSON(t, "PATCH", "/api/v1/admin/users/user10", &api.EditUserOption{
+				Pronouns: &pronouns,
+			}).AddTokenAuth(adminToken)
+			resp = MakeRequest(t, req, http.StatusOK)
+
+			// Verify the API response
+			var user10 *api.User
+			DecodeJSON(t, resp, &user10)
+			assert.Equal(t, pronouns, user10.Pronouns)
+
+			// Verify via user10
+			req = NewRequest(t, "GET", "/api/v1/user").AddTokenAuth(secondUserToken)
+			resp = MakeRequest(t, req, http.StatusOK)
+			DecodeJSON(t, resp, &user10)
+			assert.Equal(t, pronouns, user10.Pronouns)
 		})
 	})
 
@@ -516,10 +554,10 @@ func TestUserPronouns(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		// Set the pronouns to a known state via the API
-		pronouns := "she/her"
+		pronouns := "they/them"
 		req := NewRequestWithJSON(t, "PATCH", "/api/v1/user/settings", &api.UserSettingsOptions{
 			Pronouns: &pronouns,
-		}).AddTokenAuth(token)
+		}).AddTokenAuth(firstUserToken)
 		MakeRequest(t, req, http.StatusOK)
 
 		t.Run("profile view", func(t *testing.T) {
@@ -530,14 +568,14 @@ func TestUserPronouns(t *testing.T) {
 			htmlDoc := NewHTMLParser(t, resp.Body)
 
 			userNameAndPronouns := strings.TrimSpace(htmlDoc.Find(".profile-avatar-name .username").Text())
-			assert.Contains(t, userNameAndPronouns, pronouns)
+			assert.NotContains(t, userNameAndPronouns, pronouns)
 		})
 
 		t.Run("settings", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			req := NewRequest(t, "GET", "/user/settings")
-			resp := session.MakeRequest(t, req, http.StatusOK)
+			resp := firstUserSession.MakeRequest(t, req, http.StatusOK)
 			htmlDoc := NewHTMLParser(t, resp.Body)
 
 			// Check that the field is present
@@ -546,12 +584,12 @@ func TestUserPronouns(t *testing.T) {
 			assert.Equal(t, pronouns, pronounField)
 
 			// Check that updating the field works
-			newPronouns := "they/them"
+			newPronouns := "she/her"
 			req = NewRequestWithValues(t, "POST", "/user/settings", map[string]string{
-				"_csrf":    GetCSRF(t, session, "/user/settings"),
+				"_csrf":    GetCSRF(t, firstUserSession, "/user/settings"),
 				"pronouns": newPronouns,
 			})
-			session.MakeRequest(t, req, http.StatusSeeOther)
+			firstUserSession.MakeRequest(t, req, http.StatusSeeOther)
 
 			user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user2"})
 			assert.Equal(t, newPronouns, user2.Pronouns)
@@ -835,4 +873,188 @@ func TestUserRepos(t *testing.T) {
 			assert.EqualValues(t, repos[i], strings.TrimSpace(sel.Eq(i).Text()))
 		}
 	}
+}
+
+func TestUserActivate(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.Service.RegisterEmailConfirm, true)()
+
+	called := false
+	code := ""
+	defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+		called = true
+		assert.Len(t, msgs, 1)
+		assert.Equal(t, `"doesnotexist" <doesnotexist@example.com>`, msgs[0].To)
+		assert.EqualValues(t, translation.NewLocale("en-US").Tr("mail.activate_account"), msgs[0].Subject)
+
+		messageDoc := NewHTMLParser(t, bytes.NewBuffer([]byte(msgs[0].Body)))
+		link, ok := messageDoc.Find("a").Attr("href")
+		assert.True(t, ok)
+		u, err := url.Parse(link)
+		require.NoError(t, err)
+		code = u.Query()["code"][0]
+	})()
+
+	session := emptyTestSession(t)
+	req := NewRequestWithValues(t, "POST", "/user/sign_up", map[string]string{
+		"_csrf":     GetCSRF(t, session, "/user/sign_up"),
+		"user_name": "doesnotexist",
+		"email":     "doesnotexist@example.com",
+		"password":  "examplePassword!1",
+		"retype":    "examplePassword!1",
+	})
+	session.MakeRequest(t, req, http.StatusOK)
+	assert.True(t, called)
+
+	queryCode, err := url.QueryUnescape(code)
+	require.NoError(t, err)
+
+	lookupKey, validator, ok := strings.Cut(queryCode, ":")
+	assert.True(t, ok)
+
+	rawValidator, err := hex.DecodeString(validator)
+	require.NoError(t, err)
+
+	authToken, err := auth_model.FindAuthToken(db.DefaultContext, lookupKey, auth_model.UserActivation)
+	require.NoError(t, err)
+	assert.False(t, authToken.IsExpired())
+	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
+
+	t.Run("No password", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req = NewRequest(t, "POST", "/user/activate?code="+code)
+		session.MakeRequest(t, req, http.StatusOK)
+
+		unittest.AssertExistsIf(t, true, &auth_model.AuthorizationToken{ID: authToken.ID})
+		unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "doesnotexist"}, "is_active = false")
+	})
+
+	t.Run("With password", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req = NewRequestWithValues(t, "POST", "/user/activate?code="+code, map[string]string{
+			"password": "examplePassword!1",
+		})
+		session.MakeRequest(t, req, http.StatusSeeOther)
+
+		unittest.AssertExistsIf(t, false, &auth_model.AuthorizationToken{ID: authToken.ID})
+		unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "doesnotexist"}, "is_active = true")
+	})
+}
+
+func TestUserPasswordReset(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	called := false
+	code := ""
+	defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+		if called {
+			return
+		}
+		called = true
+
+		assert.Len(t, msgs, 1)
+		assert.Equal(t, user2.EmailTo(), msgs[0].To)
+		assert.EqualValues(t, translation.NewLocale("en-US").Tr("mail.reset_password"), msgs[0].Subject)
+
+		messageDoc := NewHTMLParser(t, bytes.NewBuffer([]byte(msgs[0].Body)))
+		link, ok := messageDoc.Find("a").Attr("href")
+		assert.True(t, ok)
+		u, err := url.Parse(link)
+		require.NoError(t, err)
+		code = u.Query()["code"][0]
+	})()
+
+	session := emptyTestSession(t)
+	req := NewRequestWithValues(t, "POST", "/user/forgot_password", map[string]string{
+		"_csrf": GetCSRF(t, session, "/user/forgot_password"),
+		"email": user2.Email,
+	})
+	session.MakeRequest(t, req, http.StatusOK)
+	assert.True(t, called)
+
+	queryCode, err := url.QueryUnescape(code)
+	require.NoError(t, err)
+
+	lookupKey, validator, ok := strings.Cut(queryCode, ":")
+	assert.True(t, ok)
+
+	rawValidator, err := hex.DecodeString(validator)
+	require.NoError(t, err)
+
+	authToken, err := auth_model.FindAuthToken(db.DefaultContext, lookupKey, auth_model.PasswordReset)
+	require.NoError(t, err)
+	assert.False(t, authToken.IsExpired())
+	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
+
+	req = NewRequestWithValues(t, "POST", "/user/recover_account", map[string]string{
+		"_csrf":    GetCSRF(t, session, "/user/recover_account"),
+		"code":     code,
+		"password": "new_password",
+	})
+	session.MakeRequest(t, req, http.StatusSeeOther)
+
+	unittest.AssertNotExistsBean(t, &auth_model.AuthorizationToken{ID: authToken.ID})
+	assert.True(t, unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2}).ValidatePassword("new_password"))
+}
+
+func TestActivateEmailAddress(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.Service.RegisterEmailConfirm, true)()
+
+	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	called := false
+	code := ""
+	defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+		if called {
+			return
+		}
+		called = true
+
+		assert.Len(t, msgs, 1)
+		assert.Equal(t, "newemail@example.org", msgs[0].To)
+		assert.EqualValues(t, translation.NewLocale("en-US").Tr("mail.activate_email"), msgs[0].Subject)
+
+		messageDoc := NewHTMLParser(t, bytes.NewBuffer([]byte(msgs[0].Body)))
+		link, ok := messageDoc.Find("a").Attr("href")
+		assert.True(t, ok)
+		u, err := url.Parse(link)
+		require.NoError(t, err)
+		code = u.Query()["code"][0]
+	})()
+
+	session := loginUser(t, user2.Name)
+	req := NewRequestWithValues(t, "POST", "/user/settings/account/email", map[string]string{
+		"_csrf": GetCSRF(t, session, "/user/settings"),
+		"email": "newemail@example.org",
+	})
+	session.MakeRequest(t, req, http.StatusSeeOther)
+	assert.True(t, called)
+
+	queryCode, err := url.QueryUnescape(code)
+	require.NoError(t, err)
+
+	lookupKey, validator, ok := strings.Cut(queryCode, ":")
+	assert.True(t, ok)
+
+	rawValidator, err := hex.DecodeString(validator)
+	require.NoError(t, err)
+
+	authToken, err := auth_model.FindAuthToken(db.DefaultContext, lookupKey, auth_model.EmailActivation("newemail@example.org"))
+	require.NoError(t, err)
+	assert.False(t, authToken.IsExpired())
+	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
+
+	req = NewRequestWithValues(t, "POST", "/user/activate_email", map[string]string{
+		"code":  code,
+		"email": "newemail@example.org",
+	})
+	session.MakeRequest(t, req, http.StatusSeeOther)
+
+	unittest.AssertNotExistsBean(t, &auth_model.AuthorizationToken{ID: authToken.ID})
+	unittest.AssertExistsAndLoadBean(t, &user_model.EmailAddress{UID: user2.ID, IsActivated: true, Email: "newemail@example.org"})
 }

@@ -125,3 +125,12 @@ func TestUpdateCommentsMigrationsByType(t *testing.T) {
 	assert.Empty(t, comment.OriginalAuthorID)
 	assert.EqualValues(t, 513, comment.PosterID)
 }
+
+func Test_UpdateIssueNumComments(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	issue2 := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 2})
+
+	require.NoError(t, issues_model.UpdateIssueNumComments(db.DefaultContext, issue2.ID))
+	issue2 = unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 2})
+	assert.EqualValues(t, 1, issue2.NumComments)
+}

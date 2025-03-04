@@ -23,9 +23,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar1
+  avatar: ""
   avatar_email: user1@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -36,6 +36,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578000
 
 -
   id: 2
@@ -44,6 +45,7 @@
   full_name: '   < U<se>r Tw<o > ><  '
   email: user2@example.com
   keep_email_private: true
+  keep_pronouns_private: true
   email_notifications_preference: enabled
   passwd: ZogKvWdyEx:password
   passwd_hash_algo: dummy
@@ -60,8 +62,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar2
+  avatar: ""
   avatar_email: user2@example.com
+  # cause a random avatar to be generated when referenced for test purposes
   use_custom_avatar: false
   num_followers: 2
   num_following: 1
@@ -73,6 +76,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578010
 
 -
   id: 3
@@ -97,9 +101,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar3
+  avatar: ""
   avatar_email: org3@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -110,6 +114,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578020
 
 -
   id: 4
@@ -134,9 +139,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar4
+  avatar: ""
   avatar_email: user4@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 1
   num_stars: 0
@@ -147,6 +152,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578030
 
 -
   id: 5
@@ -171,9 +177,9 @@
   allow_import_local: false
   allow_create_organization: false
   prohibit_login: false
-  avatar: avatar5
+  avatar: ""
   avatar_email: user5@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -184,6 +190,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578040
 
 -
   id: 6
@@ -208,9 +215,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar6
+  avatar: ""
   avatar_email: org6@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -221,6 +228,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578050
 
 -
   id: 7
@@ -245,9 +253,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar7
+  avatar: ""
   avatar_email: org7@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -258,6 +266,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578060
 
 -
   id: 8
@@ -282,9 +291,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar8
+  avatar: ""
   avatar_email: user8@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 1
   num_following: 1
   num_stars: 0
@@ -295,6 +304,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578070
 
 -
   id: 9
@@ -319,9 +329,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar9
+  avatar: ""
   avatar_email: user9@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -332,6 +342,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578080
 
 -
   id: 10
@@ -340,6 +351,7 @@
   full_name: User Ten
   email: user10@example.com
   keep_email_private: false
+  keep_pronouns_private: true
   email_notifications_preference: enabled
   passwd: ZogKvWdyEx:password
   passwd_hash_algo: dummy
@@ -356,9 +368,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar10
+  avatar: ""
   avatar_email: user10@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -369,6 +381,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578090
 
 -
   id: 11
@@ -393,9 +406,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar11
+  avatar: ""
   avatar_email: user11@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -406,6 +419,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578100
 
 -
   id: 12
@@ -430,9 +444,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar12
+  avatar: ""
   avatar_email: user12@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -443,6 +457,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578110
 
 -
   id: 13
@@ -467,9 +482,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar13
+  avatar: ""
   avatar_email: user13@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -480,6 +495,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578120
 
 -
   id: 14
@@ -504,9 +520,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar14
+  avatar: ""
   avatar_email: user13@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -517,6 +533,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578130
 
 -
   id: 15
@@ -541,9 +558,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar15
+  avatar: ""
   avatar_email: user15@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -554,6 +571,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578140
 
 -
   id: 16
@@ -578,9 +596,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar16
+  avatar: ""
   avatar_email: user16@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -591,6 +609,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578150
 
 -
   id: 17
@@ -615,9 +634,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar17
+  avatar: ""
   avatar_email: org17@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -628,6 +647,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578160
 
 -
   id: 18
@@ -652,9 +672,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar18
+  avatar: ""
   avatar_email: user18@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -665,6 +685,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578170
 
 -
   id: 19
@@ -689,9 +710,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar19
+  avatar: ""
   avatar_email: org19@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -702,6 +723,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578180
 
 -
   id: 20
@@ -726,9 +748,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar20
+  avatar: ""
   avatar_email: user20@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -739,6 +761,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578190
 
 -
   id: 21
@@ -763,9 +786,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar21
+  avatar: ""
   avatar_email: user21@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -776,6 +799,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578200
 
 -
   id: 22
@@ -800,9 +824,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar22
+  avatar: ""
   avatar_email: limited_org@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -813,6 +837,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578210
 
 -
   id: 23
@@ -837,9 +862,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar23
+  avatar: ""
   avatar_email: privated_org@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -850,6 +875,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578220
 
 -
   id: 24
@@ -874,9 +900,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar24
+  avatar: ""
   avatar_email: user24@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -887,6 +913,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578230
 
 -
   id: 25
@@ -911,9 +938,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar25
+  avatar: ""
   avatar_email: org25@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -924,6 +951,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578240
 
 -
   id: 26
@@ -948,9 +976,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar26
+  avatar: ""
   avatar_email: org26@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -961,6 +989,7 @@
   repo_admin_change_team_access: true
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578250
 
 -
   id: 27
@@ -985,9 +1014,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar27
+  avatar: ""
   avatar_email: user27@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -998,6 +1027,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578260
 
 -
   id: 28
@@ -1022,9 +1052,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar28
+  avatar: ""
   avatar_email: user28@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1035,6 +1065,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578270
 
 -
   id: 29
@@ -1059,9 +1090,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar29
+  avatar: ""
   avatar_email: user29@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1072,6 +1103,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578280
 
 -
   id: 30
@@ -1096,9 +1128,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar29
+  avatar: ""
   avatar_email: user30@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1109,6 +1141,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578290
 
 -
   id: 31
@@ -1133,9 +1166,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar31
+  avatar: ""
   avatar_email: user31@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 1
   num_stars: 0
@@ -1146,6 +1179,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578300
 
 -
   id: 32
@@ -1170,9 +1204,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar32
+  avatar: ""
   avatar_email: user30@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1183,6 +1217,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578310
 
 -
   id: 33
@@ -1207,9 +1242,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar33
+  avatar: ""
   avatar_email: user33@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 1
   num_following: 0
   num_stars: 0
@@ -1220,6 +1255,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578320
 
 -
   id: 34
@@ -1245,7 +1281,7 @@
   allow_import_local: false
   allow_create_organization: false
   prohibit_login: false
-  avatar: avatar34
+  avatar: ""
   avatar_email: user34@example.com
   use_custom_avatar: true
   num_followers: 0
@@ -1258,6 +1294,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578330
 
 -
   id: 35
@@ -1282,9 +1319,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar35
+  avatar: ""
   avatar_email: private_org35@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1295,6 +1332,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578340
 
 -
   id: 36
@@ -1319,9 +1357,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar22
+  avatar: ""
   avatar_email: abcde@gitea.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1332,6 +1370,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578350
 
 -
   id: 37
@@ -1356,9 +1395,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: true
-  avatar: avatar29
+  avatar: ""
   avatar_email: user37@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1369,6 +1408,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578360
 
 -
   id: 38
@@ -1393,9 +1433,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar38
+  avatar: ""
   avatar_email: user38@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1406,6 +1446,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578370
 
 -
   id: 39
@@ -1430,9 +1471,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar39
+  avatar: ""
   avatar_email: user39@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1443,6 +1484,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578380
 
 -
   id: 40
@@ -1467,9 +1509,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar40
+  avatar: ""
   avatar_email: user40@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1480,6 +1522,7 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578390
 
 -
   id: 41
@@ -1504,9 +1547,9 @@
   allow_import_local: false
   allow_create_organization: true
   prohibit_login: false
-  avatar: avatar41
+  avatar: ""
   avatar_email: org41@example.com
-  use_custom_avatar: false
+  use_custom_avatar: true
   num_followers: 0
   num_following: 0
   num_stars: 0
@@ -1517,3 +1560,4 @@
   repo_admin_change_team_access: false
   theme: ""
   keep_activity_private: false
+  created_unix: 1672578400

@@ -26,10 +26,10 @@ const sfc = {
     return {
       // internal state
       loading: false,
+      needLoadingWithLogCursors: null,
       intervalID: null,
       currentJobStepsStates: [],
       artifacts: [],
-      onHoverRerunIndex: -1,
       menuVisible: false,
       isFullScreen: false,
       timeVisible: {
@@ -41,6 +41,7 @@ const sfc = {
       run: {
         link: '',
         title: '',
+        titleHTML: '',
         status: '',
         canCancel: false,
         canApprove: false,
@@ -114,7 +115,9 @@ const sfc = {
     toggleStepLogs(idx) {
       this.currentJobStepsStates[idx].expanded = !this.currentJobStepsStates[idx].expanded;
       if (this.currentJobStepsStates[idx].expanded) {
-        this.loadJob(); // try to load the data immediately instead of waiting for next timer interval
+        // request data load immediately instead of waiting for next timer interval (which, if the job is done, will
+        // never happen because the interval will have been disabled)
+        this.loadJob();
       }
     },
     // cancel a run
@@ -229,13 +232,16 @@ const sfc = {
       await this.loadJob();
     },
 
-    async fetchJob() {
-      const logCursors = this.currentJobStepsStates.map((it, idx) => {
+    getLogCursors() {
+      return this.currentJobStepsStates.map((it, idx) => {
         // cursor is used to indicate the last position of the logs
         // it's only used by backend, frontend just reads it and passes it back, it and can be any type.
         // for example: make cursor=null means the first time to fetch logs, cursor=eof means no more logs, etc
         return {step: idx, cursor: it.cursor, expanded: it.expanded};
       });
+    },
+
+    async fetchJob(logCursors) {
       const resp = await POST(`${this.actionsURL}/runs/${this.runIndex}/jobs/${this.jobIndex}`, {
         data: {logCursors},
       });
@@ -243,19 +249,45 @@ const sfc = {
     },
 
     async loadJob() {
-      if (this.loading) return;
+      let myLoadingLogCursors = this.getLogCursors();
+      if (this.loading) {
+        // loadJob is already executing; but it's possible that our log cursor request has changed since it started.  If
+        // the interval load is active, that problem would solve itself, but if it isn't (say we're viewing a "done"
+        // job), then the change to the requested cursors may never be loaded.  To address this we set our newest
+        // requested log cursors into a state property and rely on loadJob to retry at the end of its execution if it
+        // notices these have changed.
+        this.needLoadingWithLogCursors = myLoadingLogCursors;
+        return;
+      }
+
       try {
         this.loading = true;
+        // Since no async operations occurred since fetching myLoadingLogCursors, we can be sure that we have the most
+        // recent needed log cursors, so we can reset needLoadingWithLogCursors -- it could be stale if exceptions
+        // occurred in previous load attempts.
+        this.needLoadingWithLogCursors = null;
 
         let job, artifacts;
-        try {
-          [job, artifacts] = await Promise.all([
-            this.fetchJob(),
-            this.fetchArtifacts(), // refresh artifacts if upload-artifact step done
-          ]);
-        } catch (err) {
-          if (err instanceof TypeError) return; // avoid network error while unloading page
-          throw err;
+
+        while (true) {
+          try {
+            [job, artifacts] = await Promise.all([
+              this.fetchJob(myLoadingLogCursors),
+              this.fetchArtifacts(), // refresh artifacts if upload-artifact step done
+            ]);
+          } catch (err) {
+            if (err instanceof TypeError) return; // avoid network error while unloading page
+            throw err;
+          }
+
+          // We can be done as long as needLoadingWithLogCursors is null, or the same as what we just loaded.
+          if (this.needLoadingWithLogCursors === null || JSON.stringify(this.needLoadingWithLogCursors) === JSON.stringify(myLoadingLogCursors)) {
+            this.needLoadingWithLogCursors = null;
+            break;
+          }
+
+          // Otherwise we need to retry that.
+          myLoadingLogCursors = this.needLoadingWithLogCursors;
         }
 
         this.artifacts = artifacts['artifacts'] || [];
@@ -392,9 +424,8 @@ export function initRepositoryActionView() {
       <div class="action-info-summary">
         <div class="action-info-summary-title">
           <ActionRunStatus :locale-status="locale.status[run.status]" :status="run.status" :size="20"/>
-          <h2 class="action-info-summary-title-text">
-            {{ run.title }}
-          </h2>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <h2 class="action-info-summary-title-text" v-html="run.titleHTML"/>
         </div>
         <button class="ui basic small compact button primary" @click="approveRun()" v-if="run.canApprove">
           {{ locale.approve }}
@@ -412,7 +443,8 @@ export function initRepositoryActionView() {
         {{ run.commit.localePushedBy }}
         <a class="muted" :href="run.commit.pusher.link">{{ run.commit.pusher.displayName }}</a>
         <span class="ui label tw-max-w-full" v-if="run.commit.shortSHA">
-          <a class="gt-ellipsis" :href="run.commit.branch.link">{{ run.commit.branch.name }}</a>
+          <span v-if="run.commit.branch.isDeleted" class="gt-ellipsis tw-line-through" :data-tooltip-content="run.commit.branch.name">{{ run.commit.branch.name }}</span>
+          <a v-else class="gt-ellipsis" :href="run.commit.branch.link" :data-tooltip-content="run.commit.branch.name">{{ run.commit.branch.name }}</a>
         </span>
       </div>
       <div class="action-summary">
@@ -424,13 +456,13 @@ export function initRepositoryActionView() {
       <div class="action-view-left">
         <div class="job-group-section">
           <div class="job-brief-list">
-            <a class="job-brief-item" :href="run.link+'/jobs/'+index" :class="parseInt(jobIndex) === index ? 'selected' : ''" v-for="(job, index) in run.jobs" :key="job.id" @mouseenter="onHoverRerunIndex = job.id" @mouseleave="onHoverRerunIndex = -1">
+            <a class="job-brief-item" :href="run.link+'/jobs/'+index" :class="parseInt(jobIndex) === index ? 'selected' : ''" v-for="(job, index) in run.jobs" :key="job.id">
               <div class="job-brief-item-left">
                 <ActionRunStatus :locale-status="locale.status[job.status]" :status="job.status"/>
                 <span class="job-brief-name tw-mx-2 gt-ellipsis">{{ job.name }}</span>
               </div>
               <span class="job-brief-item-right">
-                <SvgIcon name="octicon-sync" role="button" :data-tooltip-content="locale.rerun" class="job-brief-rerun tw-mx-2 link-action" :data-url="`${run.link}/jobs/${index}/rerun`" v-if="job.canRerun && onHoverRerunIndex === job.id"/>
+                <SvgIcon name="octicon-sync" role="button" :data-tooltip-content="locale.rerun" class="job-brief-rerun tw-mx-3 link-action" :data-url="`${run.link}/jobs/${index}/rerun`" v-if="job.canRerun"/>
                 <span class="step-summary-duration">{{ job.duration }}</span>
               </span>
             </a>
@@ -537,11 +569,13 @@ export function initRepositoryActionView() {
 
 .action-info-summary-title {
   display: flex;
+  align-items: center;
+  gap: 0.5em;
 }
 
 .action-info-summary-title-text {
   font-size: 20px;
-  margin: 0 0 0 8px;
+  margin: 0;
   flex: 1;
   overflow-wrap: anywhere;
 }

@@ -83,6 +83,7 @@ func Users(ctx *context.Context) {
 		IsTwoFactorEnabled: util.OptionalBoolParse(statusFilterMap["is_2fa_enabled"]),
 		IsProhibitLogin:    util.OptionalBoolParse(statusFilterMap["is_prohibit_login"]),
 		IncludeReserved:    true, // administrator needs to list all accounts include reserved, bot, remote ones
+		Load2FAStatus:      true,
 		ExtraParamStrings:  extraParamStrings,
 	}, tplUsers)
 }
@@ -349,7 +350,7 @@ func EditUserPost(ctx *context.Context) {
 	}
 
 	if form.UserName != "" {
-		if err := user_service.RenameUser(ctx, u, form.UserName); err != nil {
+		if err := user_service.AdminRenameUser(ctx, u, form.UserName); err != nil {
 			switch {
 			case user_model.IsErrUserIsNotLocal(err):
 				ctx.Data["Err_UserName"] = true

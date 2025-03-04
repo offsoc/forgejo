@@ -1,0 +1,49 @@
+<label class="tw-mb-0">
+	{{ctx.Locale.Tr "repo.template"}}
+</label>
+{{/* If the dropdown is inside the label, the focus works correctly and it is more accessible.
+	However, the Javascript takes the focus and opens the dropdown again immediately after closing.
+	When the user interacts (via mouse or keyboard), the dropdown closes again.
+	Due to the fieldset legend, this solutions is probably acceptable until the dropdown can be fixed properly. */}}
+<div id="repo_template_search" class="ui search selection dropdown tw-w-full">
+	<input type="hidden" id="repo_template" name="repo_template" value="{{if ne .repo_template 0}}{{.repo_template}}{{end}}">
+	<div class="default text">{{.repo_template_name}}</div>
+	<div class="menu">
+	</div>
+</div>
+
+<fieldset id="template_units" class="tw-hidden simple-grid grid-2">
+	<legend>{{ctx.Locale.Tr "repo.template.items"}}</legend>
+
+	<label>
+		<input name="git_content" type="checkbox" {{if .git_content}}checked{{end}}>
+		{{ctx.Locale.Tr "repo.template.git_content"}}
+	</label>
+	<label>
+		<input name="webhooks" type="checkbox" {{if .webhooks}}checked{{end}}>
+		{{ctx.Locale.Tr "repo.template.webhooks"}}
+	</label>
+	<label>
+		<input name="topics" type="checkbox" {{if .topics}}checked{{end}}>
+		{{ctx.Locale.Tr "repo.template.topics"}}
+	</label>
+	<label>
+		<input name="avatar" type="checkbox" {{if .avatar}}checked{{end}}>
+		{{ctx.Locale.Tr "repo.template.avatar"}}
+	</label>
+	<label>
+		<input name="labels" type="checkbox" {{if .labels}}checked{{end}}>
+		{{ctx.Locale.Tr "repo.template.issue_labels"}}
+	</label>
+	<label>
+		<input name="protected_branch" type="checkbox" {{if .protected_branch}}checked{{end}}>
+		{{ctx.Locale.Tr "repo.settings.protected_branch"}}
+	</label>
+	<label>
+		<input name="git_hooks" type="checkbox" {{if .git_hooks}}checked{{end}}>
+		{{ctx.Locale.Tr "repo.template.git_hooks"}}
+		{{if not .SignedUser.CanEditGitHook}}
+			<span class="help">{{ctx.Locale.Tr "repo.template.git_hooks_tooltip"}}</span>
+		{{end}}
+	</label>
+</fieldset>

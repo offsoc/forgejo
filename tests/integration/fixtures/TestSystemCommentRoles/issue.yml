@@ -1,0 +1,67 @@
+-
+  id: 1000
+  repo_id: 1
+  index: 1000
+  poster_id: 2
+  original_author_id: 0
+  name: issue1
+  content: authored by a normal user 2
+  milestone_id: 0
+  priority: 0
+  is_closed: false
+  is_pull: false
+  num_comments: 1
+  created_unix: 946684800
+  updated_unix: 978307200
+  is_locked: false
+
+-
+  id: 1001
+  repo_id: 1
+  index: 1001
+  poster_id: -1
+  original_author_id: 0
+  name: issue1
+  content: authored by the system user -1 / Ghost
+  milestone_id: 0
+  priority: 0
+  is_closed: false
+  is_pull: false
+  num_comments: 1
+  created_unix: 946684800
+  updated_unix: 978307200
+  is_locked: false
+
+-
+  id: 1002
+  repo_id: 1
+  index: 1002
+  poster_id: -2
+  original_author_id: 0
+  name: issue2
+  content: authored by the system user -2 / Action
+  milestone_id: 0
+  priority: 0
+  is_closed: false
+  is_pull: false
+  num_comments: 1
+  created_unix: 946684800
+  updated_unix: 978307200
+  is_locked: false
+
+-
+  id: 1003
+  repo_id: 1
+  index: 1003
+  poster_id: -3
+  original_author_id: 0
+  name: issue3
+  content: authored by the system user -3 / APActor
+  milestone_id: 0
+  priority: 0
+  is_closed: false
+  is_pull: false
+  num_comments: 1
+  created_unix: 946684800
+  updated_unix: 978307200
+  is_locked: false

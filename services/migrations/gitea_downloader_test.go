@@ -40,6 +40,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 		CloneURL:      server.URL + "/gitea/test_repo.git",
 		OriginalURL:   server.URL + "/gitea/test_repo",
 		DefaultBranch: "master",
+		Website:       "https://codeberg.org/forgejo/forgejo/",
 	}, repo)
 
 	topics, err := downloader.GetTopics()

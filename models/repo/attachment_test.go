@@ -46,11 +46,7 @@ func TestGetByCommentOrIssueID(t *testing.T) {
 func TestDeleteAttachments(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
-	count, err := repo_model.DeleteAttachmentsByIssue(db.DefaultContext, 4, false)
-	require.NoError(t, err)
-	assert.Equal(t, 2, count)
-
-	count, err = repo_model.DeleteAttachmentsByComment(db.DefaultContext, 2, false)
+	count, err := repo_model.DeleteAttachmentsByComment(db.DefaultContext, 2, false)
 	require.NoError(t, err)
 	assert.Equal(t, 2, count)
 

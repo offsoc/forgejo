@@ -21,9 +21,10 @@ func TestHashedBuffer(t *testing.T) {
 		HashSHA1      string
 		HashSHA256    string
 		HashSHA512    string
+		hashBlake2b   string
 	}{
-		{5, "test", "098f6bcd4621d373cade4e832627b4f6", "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3", "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff"},
-		{5, "testtest", "05a671c66aefea124cc08b76ea6d30bb", "51abb9636078defbf888d8457a7c76f85c8f114c", "37268335dd6931045bdcdf92623ff819a64244b53d0e746d438797349d4da578", "125d6d03b32c84d492747f79cf0bf6e179d287f341384eb5d6d3197525ad6be8e6df0116032935698f99a09e265073d1d6c32c274591bf1d0a20ad67cba921bc"},
+		{5, "test", "098f6bcd4621d373cade4e832627b4f6", "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3", "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff", "a71079d42853dea26e453004338670a53814b78137ffbed07603a41d76a483aa9bc33b582f77d30a65e6f29a896c0411f38312e1d66e0bf16386c86a89bea572"},
+		{5, "testtest", "05a671c66aefea124cc08b76ea6d30bb", "51abb9636078defbf888d8457a7c76f85c8f114c", "37268335dd6931045bdcdf92623ff819a64244b53d0e746d438797349d4da578", "125d6d03b32c84d492747f79cf0bf6e179d287f341384eb5d6d3197525ad6be8e6df0116032935698f99a09e265073d1d6c32c274591bf1d0a20ad67cba921bc", "372a53b95f46e775b973031e40b844f24389657019f7b7540a9f0496f4ead4a2e4b050909664611fb0f4b7c7e92c3c04c84787be7f6b8edf7bf6bc31856b6c76"},
 	}
 
 	for _, c := range cases {
@@ -36,11 +37,12 @@ func TestHashedBuffer(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, c.Data, string(data))
 
-		hashMD5, hashSHA1, hashSHA256, hashSHA512 := buf.Sums()
+		hashMD5, hashSHA1, hashSHA256, hashSHA512, hashBlake2b := buf.Sums()
 		assert.Equal(t, c.HashMD5, hex.EncodeToString(hashMD5))
 		assert.Equal(t, c.HashSHA1, hex.EncodeToString(hashSHA1))
 		assert.Equal(t, c.HashSHA256, hex.EncodeToString(hashSHA256))
 		assert.Equal(t, c.HashSHA512, hex.EncodeToString(hashSHA512))
+		assert.Equal(t, c.hashBlake2b, hex.EncodeToString(hashBlake2b))
 
 		require.NoError(t, buf.Close())
 	}

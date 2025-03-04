@@ -7,6 +7,7 @@ package org
 import (
 	"net/http"
 	"net/url"
+	"time"
 
 	"code.gitea.io/gitea/models"
 	"code.gitea.io/gitea/models/db"
@@ -48,6 +49,7 @@ func Settings(ctx *context.Context) {
 	ctx.Data["CurrentVisibility"] = ctx.Org.Organization.Visibility
 	ctx.Data["RepoAdminChangeTeamAccess"] = ctx.Org.Organization.RepoAdminChangeTeamAccess
 	ctx.Data["ContextUser"] = ctx.ContextUser
+	ctx.Data["CooldownPeriod"] = setting.Service.UsernameCooldownPeriod
 
 	err := shared_user.LoadHeaderCount(ctx)
 	if err != nil {
@@ -65,6 +67,7 @@ func SettingsPost(ctx *context.Context) {
 	ctx.Data["PageIsOrgSettings"] = true
 	ctx.Data["PageIsSettingsOptions"] = true
 	ctx.Data["CurrentVisibility"] = ctx.Org.Organization.Visibility
+	ctx.Data["CooldownPeriod"] = setting.Service.UsernameCooldownPeriod
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplSettingsOptions)
@@ -78,6 +81,9 @@ func SettingsPost(ctx *context.Context) {
 			if user_model.IsErrUserAlreadyExist(err) {
 				ctx.Data["Err_Name"] = true
 				ctx.RenderWithErr(ctx.Tr("form.username_been_taken"), tplSettingsOptions, &form)
+			} else if user_model.IsErrCooldownPeriod(err) {
+				ctx.Data["Err_UserName"] = true
+				ctx.RenderWithErr(ctx.Locale.Tr("form.username_claiming_cooldown", err.(user_model.ErrCooldownPeriod).ExpireTime.Format(time.RFC1123Z)), tplSettingsOptions, form)
 			} else if db.IsErrNameReserved(err) {
 				ctx.Data["Err_Name"] = true
 				ctx.RenderWithErr(ctx.Tr("repo.form.name_reserved", err.(db.ErrNameReserved).Name), tplSettingsOptions, &form)
@@ -93,7 +99,13 @@ func SettingsPost(ctx *context.Context) {
 		ctx.Org.OrgLink = setting.AppSubURL + "/org/" + url.PathEscape(org.Name)
 	}
 
-	if form.Email != "" {
+	if form.Email == "" {
+		err := user_model.DeletePrimaryEmailAddressOfUser(ctx, org.ID)
+		if err != nil {
+			ctx.ServerError("DeletePrimaryEmailAddressOfUser", err)
+			return
+		}
+	} else {
 		if err := user_service.ReplacePrimaryEmailAddress(ctx, org.AsUser(), form.Email); err != nil {
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tplSettingsOptions, &form)

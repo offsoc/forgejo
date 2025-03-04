@@ -10,26 +10,10 @@ code.gitea.io/gitea/cmd/forgejo
 	ContextSetStdin
 
 code.gitea.io/gitea/models
-	IsErrUpdateTaskNotExist
-	ErrUpdateTaskNotExist.Error
-	ErrUpdateTaskNotExist.Unwrap
 	IsErrSHANotFound
 	IsErrMergeDivergingFastForwardOnly
-	GetYamlFixturesAccess
-
-code.gitea.io/gitea/models/actions
-	ScheduleList.GetUserIDs
-	ScheduleList.GetRepoIDs
-	ScheduleList.LoadTriggerUser
-	ScheduleList.LoadRepos
-
-code.gitea.io/gitea/models/asymkey
-	ErrGPGKeyAccessDenied.Error
-	ErrGPGKeyAccessDenied.Unwrap
-	HasDeployKey
 
 code.gitea.io/gitea/models/auth
-	GetSourceByName
 	WebAuthnCredentials
 
 code.gitea.io/gitea/models/db
@@ -55,43 +39,24 @@ code.gitea.io/gitea/models/git
 
 code.gitea.io/gitea/models/issues
 	IsErrUnknownDependencyType
-	ErrNewIssueInsert.Error
 	IsErrIssueWasClosed
-	ChangeMilestoneStatus
 
 code.gitea.io/gitea/models/organization
-	GetTeamNamesByID
-	UpdateTeamUnits
 	SearchMembersOptions.ToConds
-	UsersInTeamsCount
 
 code.gitea.io/gitea/models/perm/access
 	GetRepoWriters
 
-code.gitea.io/gitea/models/project
-	UpdateColumnSorting
-	ChangeProjectStatus
-
 code.gitea.io/gitea/models/repo
-	DeleteAttachmentsByIssue
-	FindReposMapByIDs
-	IsErrTopicNotExist
-	ErrTopicNotExist.Error
-	ErrTopicNotExist.Unwrap
-	GetTopicByName
 	WatchRepoMode
 
 code.gitea.io/gitea/models/user
-	ErrUserInactive.Error
-	ErrUserInactive.Unwrap
 	IsErrExternalLoginUserAlreadyExist
 	IsErrExternalLoginUserNotExist
 	NewFederatedUser
 	IsErrUserSettingIsNotExist
 	GetUserAllSettings
 	DeleteUserSetting
-	GetUserEmailsByNames
-	GetUserNamesByIDs
 
 code.gitea.io/gitea/modules/activitypub
 	NewContext
@@ -115,9 +80,6 @@ code.gitea.io/gitea/modules/cache
 	WithNoCacheContext
 	RemoveContextData
 
-code.gitea.io/gitea/modules/charset
-	BreakWriter.Write
-
 code.gitea.io/gitea/modules/emoji
 	ReplaceCodes
 
@@ -125,6 +87,9 @@ code.gitea.io/gitea/modules/eventsource
 	Event.String
 
 code.gitea.io/gitea/modules/forgefed
+	NewForgeUndoLike
+	ForgeUndoLike.UnmarshalJSON
+	ForgeUndoLike.Validate
 	GetItemByType
 	JSONUnmarshalerFn
 	NotEmpty
@@ -139,13 +104,7 @@ code.gitea.io/gitea/modules/git
 	CommitChangesWithArgs
 	SetUpdateHook
 	openRepositoryWithDefaultContext
-	IsTagExist
 	ToEntryMode
-	LimitedReaderCloser.Read
-	LimitedReaderCloser.Close
-
-code.gitea.io/gitea/modules/gitgraph
-	Parser.Reset
 
 code.gitea.io/gitea/modules/gitrepo
 	GetBranchCommitID
@@ -170,6 +129,9 @@ code.gitea.io/gitea/modules/json
 	StdJSON.NewDecoder
 	StdJSON.Indent
 
+code.gitea.io/gitea/modules/log
+	NewEventWriterBuffer
+
 code.gitea.io/gitea/modules/markup
 	GetRendererByType
 	RenderString
@@ -180,15 +142,7 @@ code.gitea.io/gitea/modules/markup/console
 	RenderString
 
 code.gitea.io/gitea/modules/markup/markdown
-	IsDetails
-	IsSummary
-	IsTaskCheckBoxListItem
-	IsIcon
 	RenderRawString
-
-code.gitea.io/gitea/modules/markup/markdown/math
-	WithInlineDollarParser
-	WithBlockDollarParser
 
 code.gitea.io/gitea/modules/markup/mdstripper
 	stripRenderer.AddOptions
@@ -196,9 +150,6 @@ code.gitea.io/gitea/modules/markup/mdstripper
 
 code.gitea.io/gitea/modules/markup/orgmode
 	RenderString
-
-code.gitea.io/gitea/modules/private
-	ActionsRunnerRegister
 
 code.gitea.io/gitea/modules/process
 	Manager.ExecTimeout
@@ -222,14 +173,6 @@ code.gitea.io/gitea/modules/setting
 	GitConfigType.GetOption
 	InitLoggersForTest
 
-code.gitea.io/gitea/modules/storage
-	ErrInvalidConfiguration.Error
-	IsErrInvalidConfiguration
-
-code.gitea.io/gitea/modules/structs
-	ParseCreateHook
-	ParsePushHook
-
 code.gitea.io/gitea/modules/sync
 	StatusTable.Start
 	StatusTable.IsRunning
@@ -244,8 +187,12 @@ code.gitea.io/gitea/modules/translation
 	MockLocale.TrString
 	MockLocale.Tr
 	MockLocale.TrN
+	MockLocale.TrPluralString
 	MockLocale.TrSize
 	MockLocale.PrettyNumber
+
+code.gitea.io/gitea/modules/util
+	OptionalArg
 
 code.gitea.io/gitea/modules/util/filebuffer
 	CreateFromReader
@@ -256,9 +203,6 @@ code.gitea.io/gitea/modules/validation
 code.gitea.io/gitea/modules/web
 	RouteMock
 	RouteMockReset
-
-code.gitea.io/gitea/modules/web/middleware
-	DeleteLocaleCookie
 
 code.gitea.io/gitea/modules/zstd
 	NewWriter
@@ -274,26 +218,14 @@ code.gitea.io/gitea/routers/web/org
 code.gitea.io/gitea/services/context
 	GetPrivateContext
 
-code.gitea.io/gitea/services/convert
-	ToSecret
-
-code.gitea.io/gitea/services/forms
-	DeadlineForm.Validate
-
-code.gitea.io/gitea/services/pull
-	IsCommitStatusContextSuccess
-
 code.gitea.io/gitea/services/repository
 	IsErrForkAlreadyExist
 
-code.gitea.io/gitea/services/repository/archiver
-	ArchiveRepository
-
 code.gitea.io/gitea/services/repository/files
 	ContentType.String
-	GetFileResponseFromCommit
-	TemporaryUploadRepository.GetLastCommit
-	TemporaryUploadRepository.GetLastCommitByRef
+
+code.gitea.io/gitea/services/repository/gitgraph
+	Parser.Reset
 
 code.gitea.io/gitea/services/webhook
 	NewNotifier

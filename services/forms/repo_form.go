@@ -189,6 +189,7 @@ type RepoUnitSettingForm struct {
 	PullsAllowFastForwardOnly             bool
 	PullsAllowManualMerge                 bool
 	PullsDefaultMergeStyle                string
+	PullsDefaultUpdateStyle               string
 	EnableAutodetectManualMerge           bool
 	PullsAllowRebaseUpdate                bool
 	DefaultDeleteBranchAfterMerge         bool
@@ -739,13 +740,6 @@ type SaveTopicForm struct {
 	Topics []string `binding:"topics;Required;"`
 }
 
-// DeadlineForm hold the validation rules for deadlines
-type DeadlineForm struct {
-	DateString string `form:"date" binding:"Required;Size(10)"`
-}
-
-// Validate validates the fields
-func (f *DeadlineForm) Validate(req *http.Request, errs binding.Errors) binding.Errors {
-	ctx := context.GetValidateContext(req)
-	return middleware.Validate(errs, ctx.Data, f, ctx.Locale)
+type CommitNotesForm struct {
+	Notes string
 }

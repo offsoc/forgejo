@@ -3,50 +3,17 @@
 
 package forgejo_migrations //nolint:revive
 
-import (
-	"code.gitea.io/gitea/modules/timeutil"
+import "xorm.io/xorm"
 
-	"xorm.io/xorm"
-)
-
-func AddFederatedUserActivityTables(x *xorm.Engine) error {
-	type FederatedUserActivity struct {
-		ID     int64 `xorm:"pk autoincr"`
-		UserID int64 `xorm:"NOT NULL"`
-
-		ExternalID  string `xorm:"NOT NULL"`
-		Note        string
-		OriginalURL string
-
-		Original string
-
-		Created timeutil.TimeStamp `xorm:"created"`
+func AddPurposeToForgejoAuthToken(x *xorm.Engine) error {
+	type ForgejoAuthToken struct {
+		ID      int64  `xorm:"pk autoincr"`
+		Purpose string `xorm:"NOT NULL DEFAULT 'long_term_authorization'"`
 	}
-
-	type FederatedUserFollower struct {
-		ID int64 `xorm:"pk autoincr"`
-
-		FollowedUserID  int64 `xorm:"NOT NULL unique(fuf_rel)"`
-		FollowingUserID int64 `xorm:"NOT NULL unique(fuf_rel)"`
-	}
-
-	// Add ActorURL and InboxURL to FederatedUser
-	type FederatedUser struct {
-		ID int64 `xorm:"pk autoincr"`
-
-		InboxURL *string
-		ActorURL *string
-	}
-
-	err := x.Sync(&FederatedUserActivity{})
-	if err != nil {
+	if err := x.Sync(new(ForgejoAuthToken)); err != nil {
 		return err
 	}
 
-	err = x.Sync(&FederatedUserFollower{})
-	if err != nil {
-		return err
-	}
-
-	return x.Sync(&FederatedUser{})
+	_, err := x.Exec("UPDATE `forgejo_auth_token` SET purpose = 'long_term_authorization' WHERE purpose = ''")
+	return err
 }

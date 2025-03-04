@@ -78,7 +78,7 @@ func httpBase(ctx *context.Context) *serviceHandler {
 		strings.HasSuffix(ctx.Req.URL.Path, "git-upload-archive") {
 		isPull = true
 	} else {
-		isPull = ctx.Req.Method == "GET"
+		isPull = ctx.Req.Method == "GET" || ctx.Req.Method == "HEAD"
 	}
 
 	var accessMode perm.AccessMode

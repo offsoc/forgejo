@@ -20,6 +20,22 @@ func (r *Rule) TableName() string {
 	return "quota_rule"
 }
 
+func (r Rule) Acceptable(used Used) bool {
+	if r.Limit == -1 {
+		return true
+	}
+
+	return r.Sum(used) <= r.Limit
+}
+
+func (r Rule) Sum(used Used) int64 {
+	var sum int64
+	for _, subject := range r.Subjects {
+		sum += used.CalculateFor(subject)
+	}
+	return sum
+}
+
 func (r Rule) Evaluate(used Used, forSubject LimitSubject) (bool, bool) {
 	// If there's no limit, short circuit out
 	if r.Limit == -1 {
@@ -31,11 +47,7 @@ func (r Rule) Evaluate(used Used, forSubject LimitSubject) (bool, bool) {
 		return false, false
 	}
 
-	var sum int64
-	for _, subject := range r.Subjects {
-		sum += used.CalculateFor(subject)
-	}
-	return sum <= r.Limit, true
+	return r.Sum(used) <= r.Limit, true
 }
 
 func (r *Rule) Edit(ctx context.Context, limit *int64, subjects *LimitSubjects) (*Rule, error) {

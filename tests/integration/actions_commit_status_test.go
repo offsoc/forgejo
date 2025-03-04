@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/services/actions"
 	"code.gitea.io/gitea/services/automerge"
 
@@ -23,7 +24,7 @@ import (
 
 func TestActionsAutomerge(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		assert.True(t, setting.Actions.Enabled, "Actions should be enabled")
+		defer test.MockVariableValue(&setting.Actions.Enabled, true)()
 
 		ctx := db.DefaultContext
 

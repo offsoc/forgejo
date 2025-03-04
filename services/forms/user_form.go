@@ -224,6 +224,7 @@ type UpdateProfileForm struct {
 	Biography           string `binding:"MaxSize(255)"`
 	Visibility          structs.VisibleType
 	KeepActivityPrivate bool
+	KeepPronounsPrivate bool
 }
 
 // Validate validates the fields
@@ -290,7 +291,7 @@ func (f *UpdateThemeForm) Validate(req *http.Request, errs binding.Errors) bindi
 	return middleware.Validate(errs, ctx.Data, f, ctx.Locale)
 }
 
-// IsThemeExists checks if the theme is a theme available in the config.
+// IsThemeExists checks if the theme is available in the config.
 func (f UpdateThemeForm) IsThemeExists() bool {
 	var exists bool
 
@@ -388,7 +389,7 @@ func (f *NewAccessTokenForm) GetScope() (auth_model.AccessTokenScope, error) {
 // EditOAuth2ApplicationForm form for editing oauth2 applications
 type EditOAuth2ApplicationForm struct {
 	Name               string `binding:"Required;MaxSize(255)" form:"application_name"`
-	RedirectURIs       string `binding:"Required" form:"redirect_uris"`
+	RedirectURIs       string `binding:"Required;ValidUrlList" form:"redirect_uris"`
 	ConfidentialClient bool   `form:"confidential_client"`
 }
 

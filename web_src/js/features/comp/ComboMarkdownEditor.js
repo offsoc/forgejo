@@ -49,6 +49,7 @@ class ComboMarkdownEditor {
     this.setupDropzone();
     this.setupTextarea();
     this.setupTableInserter();
+    this.setupLinkInserter();
 
     await this.switchToUserPreference();
 
@@ -93,12 +94,15 @@ class ComboMarkdownEditor {
       this.indentSelection(true);
     });
     this.textareaMarkdownToolbar.querySelector('button[data-md-action="new-table"]')?.setAttribute('data-modal', `div[data-markdown-table-modal-id="${elementIdCounter}"]`);
+    this.textareaMarkdownToolbar.querySelector('button[data-md-action="new-link"]')?.setAttribute('data-modal', `div[data-markdown-link-modal-id="${elementIdCounter}"]`);
 
     this.textarea.addEventListener('keydown', (e) => {
       if (e.shiftKey) {
         e.target._shiftDown = true;
       }
       if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+        // Prevent special line break handling if currently a text expander popup is open
+        if (this.textarea.hasAttribute('aria-expanded')) return;
         if (!this.breakLine()) return; // Nothing changed, let the default handler work.
         this.options?.onContentChanged?.(this, e);
         e.preventDefault();
@@ -189,7 +193,7 @@ class ComboMarkdownEditor {
     const newTableModal = document.querySelector(`div[data-markdown-table-modal-id="${elementId}"]`);
     const form = newTableModal.querySelector('div[data-selector-name="form"]');
 
-    // Vaildate input fields
+    // Validate input fields
     for (const currentInput of form.querySelectorAll('input')) {
       if (!currentInput.checkValidity()) {
         currentInput.reportValidity();
@@ -224,6 +228,58 @@ class ComboMarkdownEditor {
     const button = newTableModal.querySelector('button[data-selector-name="ok-button"]');
     button.setAttribute('data-element-id', elementIdCounter);
     button.addEventListener('click', this.addNewTable);
+  }
+
+  addNewLink(event) {
+    const elementId = event.target.getAttribute('data-element-id');
+    const newLinkModal = document.querySelector(`div[data-markdown-link-modal-id="${elementId}"]`);
+    const form = newLinkModal.querySelector('div[data-selector-name="form"]');
+
+    // Validate input fields
+    for (const currentInput of form.querySelectorAll('input')) {
+      if (!currentInput.checkValidity()) {
+        currentInput.reportValidity();
+        return;
+      }
+    }
+
+    const url = form.querySelector('input[name="link-url"]').value;
+    const description = form.querySelector('input[name="link-description"]').value;
+
+    const code = `[${description}](${url})`;
+
+    replaceTextareaSelection(document.getElementById(`_combo_markdown_editor_${elementId}`), code);
+
+    // Close the modal then clear its fields in case the user wants to add another one.
+    newLinkModal.querySelector('button[data-selector-name="cancel-button"]').click();
+    form.querySelector('input[name="link-url"]').value = '';
+    form.querySelector('input[name="link-description"]').value = '';
+  }
+
+  setupLinkInserter() {
+    const newLinkModal = this.container.querySelector('div[data-modal-name="new-markdown-link"]');
+    newLinkModal.setAttribute('data-markdown-link-modal-id', elementIdCounter);
+    const textarea = document.getElementById(`_combo_markdown_editor_${elementIdCounter}`);
+
+    $(newLinkModal).modal({
+      // Pre-fill the description field from the selection to create behavior similar
+      // to pasting an URL over selected text.
+      onShow: () => {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        if (start !== end) {
+          const selection = textarea.value.slice(start ?? undefined, end ?? undefined);
+          newLinkModal.querySelector('input[name="link-description"]').value = selection;
+        } else {
+          newLinkModal.querySelector('input[name="link-description"]').value = '';
+        }
+      },
+    });
+
+    const button = newLinkModal.querySelector('button[data-selector-name="ok-button"]');
+    button.setAttribute('data-element-id', elementIdCounter);
+    button.addEventListener('click', this.addNewLink);
   }
 
   prepareEasyMDEToolbarActions() {
@@ -407,13 +463,27 @@ class ComboMarkdownEditor {
     // Find the beginning of the current line.
     const lineStart = Math.max(0, value.lastIndexOf('\n', start - 1) + 1);
     // Find the end and extract the line.
-    const lineEnd = value.indexOf('\n', start);
-    const line = value.slice(lineStart, lineEnd === -1 ? value.length : lineEnd);
+    const nextLF = value.indexOf('\n', start);
+    const lineEnd = nextLF === -1 ? value.length : nextLF;
+    const line = value.slice(lineStart, lineEnd);
     // Match any whitespace at the start + any repeatable prefix + exactly one space after.
-    const prefix = line.match(/^\s*((\d+)[.)]\s|[-*+]\s+(\[[ x]\]\s?)?|(>\s+)+)?/);
+    const prefix = line.match(/^\s*((\d+)[.)]\s|[-*+]\s{1,4}\[[ x]\]\s?|[-*+]\s|(>\s?)+)?/);
 
     // Defer to browser if we can't do anything more useful, or if the cursor is inside the prefix.
-    if (!prefix || !prefix[0].length || lineStart + prefix[0].length > start) return false;
+    if (!prefix) return false;
+    const prefixLength = prefix[0].length;
+    if (!prefixLength || lineStart + prefixLength > start) return false;
+    // If the prefix is just indentation (which should always be an even number of spaces or tabs), check if a single whitespace is added to the end of the line.
+    // If this is the case do not leave the indentation and continue with the prefix.
+    if ((prefixLength % 2 === 1 && /^ +$/.test(prefix[0])) || /^\t+ $/.test(prefix[0])) {
+      prefix[0] = prefix[0].slice(0, prefixLength - 1);
+    } else if (prefixLength === lineEnd - lineStart) {
+      this.textarea.setSelectionRange(lineStart, lineEnd);
+      if (!document.execCommand('insertText', false, '\n')) {
+        this.textarea.setRangeText('\n');
+      }
+      return true;
+    }
 
     // Insert newline + prefix.
     let text = `\n${prefix[0]}`;

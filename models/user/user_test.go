@@ -7,6 +7,7 @@ package user_test
 import (
 	"context"
 	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"strings"
 	"testing"
@@ -21,7 +22,9 @@ import (
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/timeutil"
+	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/validation"
 	"code.gitea.io/gitea/tests"
 
@@ -97,16 +100,6 @@ func TestGetUserByName(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "remote01", user.Name)
 	}
-}
-
-func TestGetUserEmailsByNames(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-
-	// ignore none active user email
-	assert.ElementsMatch(t, []string{"user8@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "user9"}))
-	assert.ElementsMatch(t, []string{"user8@example.com", "user5@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "user5"}))
-
-	assert.ElementsMatch(t, []string{"user8@example.com"}, user_model.GetUserEmailsByNames(db.DefaultContext, []string{"user8", "org7"}))
 }
 
 func TestCanCreateOrganization(t *testing.T) {
@@ -219,7 +212,7 @@ func TestSearchUsers(t *testing.T) {
 		[]int64{1041, 37})
 
 	testUserSuccess(&user_model.SearchUserOptions{ListOptions: db.ListOptions{Page: 1}, IsTwoFactorEnabled: optional.Some(true)},
-		[]int64{24})
+		[]int64{24, 32})
 }
 
 func TestEmailNotificationPreferences(t *testing.T) {
@@ -388,6 +381,31 @@ func TestCreateUserWithoutCustomTimestamps(t *testing.T) {
 
 	assert.LessOrEqual(t, timestampStart, fetched.UpdatedUnix)
 	assert.LessOrEqual(t, fetched.UpdatedUnix, timestampEnd)
+}
+
+func TestCreateUserClaimingUsername(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	defer test.MockVariableValue(&setting.Service.UsernameCooldownPeriod, 1)()
+
+	_, err := db.GetEngine(db.DefaultContext).NoAutoTime().Insert(&user_model.Redirect{RedirectUserID: 1, LowerName: "redirecting", CreatedUnix: timeutil.TimeStampNow()})
+	require.NoError(t, err)
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	user.Name = "redirecting"
+	user.LowerName = strings.ToLower(user.Name)
+	user.ID = 0
+	user.Email = "unique@example.com"
+
+	t.Run("Normal creation", func(t *testing.T) {
+		err = user_model.CreateUser(db.DefaultContext, user)
+		assert.True(t, user_model.IsErrCooldownPeriod(err))
+	})
+
+	t.Run("Creation as admin", func(t *testing.T) {
+		err = user_model.AdminCreateUser(db.DefaultContext, user)
+		require.NoError(t, err)
+	})
 }
 
 func TestGetUserIDsByNames(t *testing.T) {
@@ -647,7 +665,7 @@ func TestEmailTo(t *testing.T) {
 		{"Hi Its <Mee>", "ee@mail.box", `"Hi Its Mee" <ee@mail.box>`},
 		{"Sinéad.O'Connor", "sinead.oconnor@gmail.com", "=?utf-8?b?U2luw6lhZC5PJ0Nvbm5vcg==?= <sinead.oconnor@gmail.com>"},
 		{"Æsir", "aesir@gmx.de", "=?utf-8?q?=C3=86sir?= <aesir@gmx.de>"},
-		{"new😀user", "new.user@alo.com", "=?utf-8?q?new=F0=9F=98=80user?= <new.user@alo.com>"}, // codespell-ignore
+		{"new😀user", "new.user@alo.com", "=?utf-8?q?new=F0=9F=98=80user?= <new.user@alo.com>"}, // codespell:ignore
 		{`"quoted"`, "quoted@test.com", `"quoted" <quoted@test.com>`},
 		{`gusted`, "gusted@test.com", `"gusted" <gusted@test.com>`},
 		{`Joe Q. Public`, "john.q.public@example.com", `"Joe Q. Public" <john.q.public@example.com>`},
@@ -687,7 +705,7 @@ func TestDisabledUserFeatures(t *testing.T) {
 	// no features should be disabled with a plain login type
 	assert.LessOrEqual(t, user.LoginType, auth.Plain)
 	assert.Empty(t, user_model.DisabledFeaturesWithLoginType(user).Values())
-	for _, f := range testValues.Values() {
+	for f := range testValues.Seq() {
 		assert.False(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
 
@@ -696,7 +714,124 @@ func TestDisabledUserFeatures(t *testing.T) {
 
 	// all features should be disabled
 	assert.NotEmpty(t, user_model.DisabledFeaturesWithLoginType(user).Values())
-	for _, f := range testValues.Values() {
+	for f := range testValues.Seq() {
 		assert.True(t, user_model.IsFeatureDisabledWithLoginType(user, f))
 	}
+}
+
+func TestGenerateEmailAuthorizationCode(t *testing.T) {
+	defer test.MockVariableValue(&setting.Service.ActiveCodeLives, 2)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	code, err := user.GenerateEmailAuthorizationCode(db.DefaultContext, auth.UserActivation)
+	require.NoError(t, err)
+
+	lookupKey, validator, ok := strings.Cut(code, ":")
+	assert.True(t, ok)
+
+	rawValidator, err := hex.DecodeString(validator)
+	require.NoError(t, err)
+
+	authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
+	require.NoError(t, err)
+	assert.False(t, authToken.IsExpired())
+	assert.EqualValues(t, authToken.HashedValidator, auth.HashValidator(rawValidator))
+
+	authToken.Expiry = authToken.Expiry.Add(-int64(setting.Service.ActiveCodeLives) * 60)
+	assert.True(t, authToken.IsExpired())
+}
+
+func TestVerifyUserAuthorizationToken(t *testing.T) {
+	defer test.MockVariableValue(&setting.Service.ActiveCodeLives, 2)()
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	code, err := user.GenerateEmailAuthorizationCode(db.DefaultContext, auth.UserActivation)
+	require.NoError(t, err)
+
+	lookupKey, _, ok := strings.Cut(code, ":")
+	assert.True(t, ok)
+
+	t.Run("Wrong purpose", func(t *testing.T) {
+		u, _, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.PasswordReset)
+		require.NoError(t, err)
+		assert.Nil(t, u)
+	})
+
+	t.Run("No delete", func(t *testing.T) {
+		u, _, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation)
+		require.NoError(t, err)
+		assert.EqualValues(t, user.ID, u.ID)
+
+		authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
+		require.NoError(t, err)
+		assert.NotNil(t, authToken)
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		u, deleteToken, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation)
+		require.NoError(t, err)
+		assert.EqualValues(t, user.ID, u.ID)
+		require.NoError(t, deleteToken())
+
+		authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
+		require.ErrorIs(t, err, util.ErrNotExist)
+		assert.Nil(t, authToken)
+	})
+}
+
+func TestGetInactiveUsers(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	// all inactive users
+	// user1's createdunix is 1672578000
+	users, err := user_model.GetInactiveUsers(db.DefaultContext, 0)
+	require.NoError(t, err)
+	assert.Len(t, users, 1)
+	interval := time.Now().Unix() - 1672578000 + 3600*24
+	users, err = user_model.GetInactiveUsers(db.DefaultContext, time.Duration(interval*int64(time.Second)))
+	require.NoError(t, err)
+	require.Empty(t, users)
+}
+
+func TestPronounsPrivacy(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	t.Run("EmptyPronounsIfNoneSet", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = ""
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "", user.GetPronouns(false))
+	})
+	t.Run("EmptyPronounsIfSetButPrivateAndNotLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = true
+
+		assert.Equal(t, "", user.GetPronouns(false))
+	})
+	t.Run("ReturnPronounsIfSetAndNotPrivateAndNotLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "any", user.GetPronouns(false))
+	})
+	t.Run("ReturnPronounsIfSetAndPrivateAndLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "any", user.GetPronouns(true))
+	})
+	t.Run("ReturnPronounsIfSetAndNotPrivateAndLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = true
+
+		assert.Equal(t, "any", user.GetPronouns(true))
+	})
 }

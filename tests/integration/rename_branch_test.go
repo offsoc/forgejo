@@ -22,8 +22,6 @@ func TestRenameBranch(t *testing.T) {
 }
 
 func testRenameBranch(t *testing.T, u *url.URL) {
-	defer tests.PrepareTestEnv(t)()
-
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	unittest.AssertExistsAndLoadBean(t, &git_model.Branch{RepoID: repo.ID, Name: "master"})
 

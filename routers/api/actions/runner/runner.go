@@ -158,7 +158,7 @@ func (s *Service) FetchTask(
 		// if the task version in request is not equal to the version in db,
 		// it means there may still be some tasks not be assigned.
 		// try to pick a task for the runner that send the request.
-		if t, ok, err := pickTask(ctx, runner); err != nil {
+		if t, ok, err := actions_service.PickTask(ctx, runner); err != nil {
 			log.Error("pick task failed: %v", err)
 			return nil, status.Errorf(codes.Internal, "pick task: %v", err)
 		} else if ok {
@@ -177,7 +177,9 @@ func (s *Service) UpdateTask(
 	ctx context.Context,
 	req *connect.Request[runnerv1.UpdateTaskRequest],
 ) (*connect.Response[runnerv1.UpdateTaskResponse], error) {
-	task, err := actions_model.UpdateTaskByState(ctx, req.Msg.State)
+	runner := GetRunner(ctx)
+
+	task, err := actions_model.UpdateTaskByState(ctx, runner.ID, req.Msg.State)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "update task: %v", err)
 	}
@@ -239,11 +241,15 @@ func (s *Service) UpdateLog(
 	ctx context.Context,
 	req *connect.Request[runnerv1.UpdateLogRequest],
 ) (*connect.Response[runnerv1.UpdateLogResponse], error) {
+	runner := GetRunner(ctx)
+
 	res := connect.NewResponse(&runnerv1.UpdateLogResponse{})
 
 	task, err := actions_model.GetTaskByID(ctx, req.Msg.TaskId)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "get task: %v", err)
+	} else if runner.ID != task.RunnerID {
+		return nil, status.Errorf(codes.Internal, "invalid runner for task")
 	}
 	ack := task.LogLength
 

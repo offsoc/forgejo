@@ -39,8 +39,17 @@ func RegisterDownloaderFactory(factory base.DownloaderFactory) {
 	factories = append(factories, factory)
 }
 
-// IsMigrateURLAllowed checks if an URL is allowed to be migrated from
+// IsPushMirrorURLAllowed checks if an URL is allowed to be pushed to.
+func IsPushMirrorURLAllowed(remoteURL string, doer *user_model.User) error {
+	return isURLAllowed(remoteURL, doer, true)
+}
+
+// IsMigrateURLAllowed checks if an URL is allowed to be migrated from.
 func IsMigrateURLAllowed(remoteURL string, doer *user_model.User) error {
+	return isURLAllowed(remoteURL, doer, false)
+}
+
+func isURLAllowed(remoteURL string, doer *user_model.User, isPushMirror bool) error {
 	// Remote address can be HTTP/HTTPS/Git URL or local path.
 	u, err := url.Parse(remoteURL)
 	if err != nil {
@@ -71,7 +80,7 @@ func IsMigrateURLAllowed(remoteURL string, doer *user_model.User) error {
 		return &models.ErrInvalidCloneAddr{Host: u.Host, IsURLError: true}
 	}
 
-	if u.Opaque != "" || u.Scheme != "" && u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "git" && u.Scheme != "ssh" {
+	if u.Opaque != "" || u.Scheme != "" && u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "git" && u.Scheme != "ssh" || (!isPushMirror && u.Scheme == "ssh") {
 		return &models.ErrInvalidCloneAddr{Host: u.Host, IsProtocolInvalid: true, IsPermissionDenied: true, IsURLError: true}
 	}
 

@@ -80,13 +80,13 @@ func uploadArtifact(t *testing.T, body string) string {
 }
 
 func TestActionsArtifactV4UploadSingleFile(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
+	defer prepareTestEnvActionsArtifacts(t)()
 	body := strings.Repeat("A", 1024)
 	uploadArtifact(t, body)
 }
 
 func TestActionsArtifactV4UploadSingleFileWrongChecksum(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
+	defer prepareTestEnvActionsArtifacts(t)()
 
 	token, err := actions_service.CreateAuthorizationToken(48, 792, 193)
 	require.NoError(t, err)
@@ -130,7 +130,7 @@ func TestActionsArtifactV4UploadSingleFileWrongChecksum(t *testing.T) {
 }
 
 func TestActionsArtifactV4UploadSingleFileWithRetentionDays(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
+	defer prepareTestEnvActionsArtifacts(t)()
 
 	token, err := actions_service.CreateAuthorizationToken(48, 792, 193)
 	require.NoError(t, err)
@@ -178,7 +178,7 @@ func TestActionsArtifactV4UploadSingleFileWithRetentionDays(t *testing.T) {
 }
 
 func TestActionsArtifactV4UploadSingleFileWithPotentialHarmfulBlockID(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
+	defer prepareTestEnvActionsArtifacts(t)()
 
 	token, err := actions_service.CreateAuthorizationToken(48, 792, 193)
 	require.NoError(t, err)
@@ -241,7 +241,7 @@ func TestActionsArtifactV4UploadSingleFileWithPotentialHarmfulBlockID(t *testing
 }
 
 func TestActionsArtifactV4UploadSingleFileWithChunksOutOfOrder(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
+	defer prepareTestEnvActionsArtifacts(t)()
 
 	token, err := actions_service.CreateAuthorizationToken(48, 792, 193)
 	require.NoError(t, err)
@@ -306,7 +306,7 @@ func TestActionsArtifactV4UploadSingleFileWithChunksOutOfOrder(t *testing.T) {
 }
 
 func TestActionsArtifactV4DownloadSingle(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
+	defer prepareTestEnvActionsArtifacts(t)()
 
 	token, err := actions_service.CreateAuthorizationToken(48, 792, 193)
 	require.NoError(t, err)
@@ -386,7 +386,7 @@ func TestActionsArtifactV4DownloadRange(t *testing.T) {
 }
 
 func TestActionsArtifactV4Delete(t *testing.T) {
-	defer tests.PrepareTestEnv(t)()
+	defer prepareTestEnvActionsArtifacts(t)()
 
 	token, err := actions_service.CreateAuthorizationToken(48, 792, 193)
 	require.NoError(t, err)

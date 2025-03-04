@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"regexp"
 	"slices"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -91,6 +90,8 @@ func Dashboard(ctx *context.Context) {
 	cnt, _ := organization.GetOrganizationCount(ctx, ctxUser)
 	ctx.Data["UserOrgsCount"] = cnt
 	ctx.Data["MirrorsEnabled"] = setting.Mirror.Enabled
+	ctx.Data["UsersPageIsDisabled"] = setting.Service.Explore.DisableUsersPage
+	ctx.Data["OrganizationsPageIsDisabled"] = setting.Service.Explore.DisableOrganizationsPage
 	ctx.Data["Date"] = date
 
 	var uid int64
@@ -242,7 +243,9 @@ func Milestones(ctx *context.Context) {
 		ctx.ServerError("SearchRepositoryByCondition", err)
 		return
 	}
-	sort.Sort(showRepos)
+	slices.SortFunc(showRepos, func(a, b *repo_model.Repository) int {
+		return strings.Compare(a.FullName(), b.FullName())
+	})
 
 	for i := 0; i < len(milestones); {
 		for _, repo := range showRepos {
@@ -462,8 +465,6 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 		User:       ctx.Doer,
 	}
 
-	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
-
 	// Search all repositories which
 	//
 	// As user:
@@ -593,9 +594,7 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	// USING FINAL STATE OF opts FOR A QUERY.
 	var issues issues_model.IssueList
 	{
-		issueIDs, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts).Copy(
-			func(o *issue_indexer.SearchOptions) { o.IsFuzzyKeyword = isFuzzy },
-		))
+		issueIDs, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts))
 		if err != nil {
 			ctx.ServerError("issueIDsFromSearch", err)
 			return
@@ -621,9 +620,7 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	// -------------------------------
 	// Fill stats to post to ctx.Data.
 	// -------------------------------
-	issueStats, err := getUserIssueStats(ctx, ctxUser, filterMode, issue_indexer.ToSearchOptions(keyword, opts).Copy(
-		func(o *issue_indexer.SearchOptions) { o.IsFuzzyKeyword = isFuzzy },
-	))
+	issueStats, err := getUserIssueStats(ctx, ctxUser, filterMode, issue_indexer.ToSearchOptions(keyword, opts))
 	if err != nil {
 		ctx.ServerError("getUserIssueStats", err)
 		return
@@ -678,7 +675,6 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	ctx.Data["IsShowClosed"] = isShowClosed
 	ctx.Data["SelectLabels"] = selectedLabels
 	ctx.Data["PageIsOrgIssues"] = org != nil
-	ctx.Data["IsFuzzy"] = isFuzzy
 
 	if isShowClosed {
 		ctx.Data["State"] = "closed"
@@ -694,7 +690,6 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	pager.AddParam(ctx, "labels", "SelectLabels")
 	pager.AddParam(ctx, "milestone", "MilestoneID")
 	pager.AddParam(ctx, "assignee", "AssigneeID")
-	pager.AddParam(ctx, "fuzzy", "IsFuzzy")
 	ctx.Data["Page"] = pager
 
 	ctx.HTML(http.StatusOK, tplIssues)

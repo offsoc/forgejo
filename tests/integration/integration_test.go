@@ -159,13 +159,6 @@ func TestMain(m *testing.M) {
 		}
 	}
 
-	os.Unsetenv("GIT_AUTHOR_NAME")
-	os.Unsetenv("GIT_AUTHOR_EMAIL")
-	os.Unsetenv("GIT_AUTHOR_DATE")
-	os.Unsetenv("GIT_COMMITTER_NAME")
-	os.Unsetenv("GIT_COMMITTER_EMAIL")
-	os.Unsetenv("GIT_COMMITTER_DATE")
-
 	err := unittest.InitFixtures(
 		unittest.FixturesOptions{
 			Dir: filepath.Join(filepath.Dir(setting.AppPath), "models/fixtures/"),
@@ -305,9 +298,7 @@ func addAuthSource(t *testing.T, payload map[string]string) *auth.Source {
 	payload["_csrf"] = GetCSRF(t, session, "/admin/auths/new")
 	req := NewRequestWithValues(t, "POST", "/admin/auths/new", payload)
 	session.MakeRequest(t, req, http.StatusSeeOther)
-	source, err := auth.GetSourceByName(context.Background(), payload["name"])
-	require.NoError(t, err)
-	return source
+	return unittest.AssertExistsAndLoadBean(t, &auth.Source{Name: payload["name"]})
 }
 
 func authSourcePayloadOAuth2(name string) map[string]string {
@@ -365,9 +356,7 @@ func createRemoteAuthSource(t *testing.T, name, url, matchingSource string) *aut
 			MatchingSource: matchingSource,
 		},
 	}))
-	source, err := auth.GetSourceByName(context.Background(), name)
-	require.NoError(t, err)
-	return source
+	return unittest.AssertExistsAndLoadBean(t, &auth.Source{Name: name})
 }
 
 func createUser(ctx context.Context, t testing.TB, user *user_model.User) func() {

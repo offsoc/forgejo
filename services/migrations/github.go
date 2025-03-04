@@ -220,6 +220,7 @@ func (g *GithubDownloaderV3) GetRepoInfo() (*base.Repository, error) {
 		OriginalURL:   gr.GetHTMLURL(),
 		CloneURL:      gr.GetCloneURL(),
 		DefaultBranch: gr.GetDefaultBranch(),
+		Website:       gr.GetHomepage(),
 	}, nil
 }
 

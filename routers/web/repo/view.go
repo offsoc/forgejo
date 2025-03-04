@@ -39,6 +39,7 @@ import (
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/gitrepo"
 	"code.gitea.io/gitea/modules/highlight"
+	code_indexer "code.gitea.io/gitea/modules/indexer/code"
 	"code.gitea.io/gitea/modules/lfs"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/markup"
@@ -392,6 +393,10 @@ func renderFile(ctx *context.Context, entry *git.TreeEntry) {
 	ctx.Data["FileIsSymlink"] = entry.IsLink()
 	ctx.Data["FileName"] = blob.Name()
 	ctx.Data["RawFileLink"] = ctx.Repo.RepoLink + "/raw/" + ctx.Repo.BranchNameSubURL() + "/" + util.PathEscapeSegments(ctx.Repo.TreePath)
+
+	ctx.Data["OpenGraphTitle"] = ctx.Data["Title"]
+	ctx.Data["OpenGraphURL"] = fmt.Sprintf("%s%s", setting.AppURL, ctx.Data["Link"])
+	ctx.Data["OpenGraphNoDescription"] = true
 
 	if entry.IsLink() {
 		_, link, err := entry.FollowLinks()
@@ -1152,6 +1157,12 @@ PostRecentBranchCheck:
 	ctx.Data["TreeNames"] = treeNames
 	ctx.Data["BranchLink"] = branchLink
 	ctx.Data["CodeIndexerDisabled"] = !setting.Indexer.RepoIndexerEnabled
+	if setting.Indexer.RepoIndexerEnabled {
+		ctx.Data["CodeIndexerUnavailable"] = !code_indexer.IsAvailable(ctx)
+		ctx.Data["CodeSearchOptions"] = code_indexer.CodeSearchOptions
+	} else {
+		ctx.Data["CodeSearchOptions"] = git.GrepSearchOptions
+	}
 	ctx.HTML(http.StatusOK, tplRepoHome)
 }
 
@@ -1232,17 +1243,17 @@ func Forks(ctx *context.Context) {
 		page = 1
 	}
 
-	pager := context.NewPagination(ctx.Repo.Repository.NumForks, setting.MaxForksPerPage, page, 5)
-	ctx.Data["Page"] = pager
-
-	forks, err := repo_model.GetForks(ctx, ctx.Repo.Repository, db.ListOptions{
-		Page:     pager.Paginater.Current(),
+	forks, total, err := repo_model.GetForks(ctx, ctx.Repo.Repository, ctx.Doer, db.ListOptions{
+		Page:     page,
 		PageSize: setting.MaxForksPerPage,
 	})
 	if err != nil {
 		ctx.ServerError("GetForks", err)
 		return
 	}
+
+	pager := context.NewPagination(int(total), setting.MaxForksPerPage, page, 5)
+	ctx.Data["Page"] = pager
 
 	for _, fork := range forks {
 		if err = fork.LoadOwner(ctx); err != nil {

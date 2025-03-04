@@ -63,21 +63,6 @@ func (err ErrIssueIsClosed) Error() string {
 	return fmt.Sprintf("issue is closed [id: %d, repo_id: %d, index: %d]", err.ID, err.RepoID, err.Index)
 }
 
-// ErrNewIssueInsert is used when the INSERT statement in newIssue fails
-type ErrNewIssueInsert struct {
-	OriginalError error
-}
-
-// IsErrNewIssueInsert checks if an error is a ErrNewIssueInsert.
-func IsErrNewIssueInsert(err error) bool {
-	_, ok := err.(ErrNewIssueInsert)
-	return ok
-}
-
-func (err ErrNewIssueInsert) Error() string {
-	return err.OriginalError.Error()
-}
-
 // ErrIssueWasClosed is used when close a closed issue
 type ErrIssueWasClosed struct {
 	ID    int64
@@ -268,6 +253,9 @@ func (issue *Issue) loadCommentsByType(ctx context.Context, tp CommentType) (err
 		IssueID: issue.ID,
 		Type:    tp,
 	})
+	for _, comment := range issue.Comments {
+		comment.Issue = issue
+	}
 	return err
 }
 
@@ -409,6 +397,11 @@ func (issue *Issue) HTMLURL() string {
 		path = "issues"
 	}
 	return fmt.Sprintf("%s/%s/%d", issue.Repo.HTMLURL(), path, issue.Index)
+}
+
+// SummaryCardURL returns the absolute URL to an image providing a summary of the issue
+func (issue *Issue) SummaryCardURL() string {
+	return fmt.Sprintf("%s/summary-card", issue.HTMLURL())
 }
 
 // Link returns the issue's relative URL.
@@ -644,7 +637,7 @@ func (issue *Issue) BlockedByDependencies(ctx context.Context, opts db.ListOptio
 		Where("issue_id = ?", issue.ID).
 		// sort by repo id then created date, with the issues of the same repo at the beginning of the list
 		OrderBy("CASE WHEN issue.repo_id = ? THEN 0 ELSE issue.repo_id END, issue.created_unix DESC", issue.RepoID)
-	if opts.Page != 0 {
+	if opts.Page > 0 {
 		sess = db.SetSessionPagination(sess, &opts)
 	}
 	err = sess.Find(&issueDeps)

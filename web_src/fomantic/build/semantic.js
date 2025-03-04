@@ -344,7 +344,7 @@ $.api = $.fn.api = function(parameters) {
           cancelled: function() {
             return (module.cancelled || false);
           },
-          succesful: function() {  // codespell-ignore
+          succesful: function() {  // codespell:ignore
             module.verbose('This behavior will be deleted due to typo. Use "was successful" instead.');
             return module.was.successful();
           },

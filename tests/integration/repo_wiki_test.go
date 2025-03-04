@@ -29,9 +29,9 @@ func TestWikiSearchContent(t *testing.T) {
 		return el.Text()
 	})
 	assert.Equal(t, []string{
-		"Home.md",
-		"Page-With-Spaced-Name.md",
-		"Unescaped File.md",
+		"Home",
+		"Page With Spaced Name",
+		"Unescaped File",
 	}, res)
 }
 
@@ -88,4 +88,28 @@ func TestWikiBranchNormalize(t *testing.T) {
 	repo = unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	assert.Equal(t, setting.Repository.DefaultBranch, repo.GetWikiBranchName())
 	assertNormalizeButton(false)
+}
+
+func TestWikiTOC(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	username := "user2"
+	session := loginUser(t, username)
+
+	t.Run("Link in heading", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequestWithValues(t, "POST", "/user2/repo1/wiki/Home?action=_edit", map[string]string{
+			"_csrf":   GetCSRF(t, session, "/user2/repo1/wiki/Home"),
+			"title":   "Home",
+			"content": "# [Helpdesk](Helpdesk)",
+		})
+		session.MakeRequest(t, req, http.StatusSeeOther)
+
+		req = NewRequest(t, "GET", "/user2/repo1/wiki/Home")
+		resp := MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		assert.EqualValues(t, "Helpdesk", htmlDoc.Find(".wiki-content-toc a").Text())
+	})
 }

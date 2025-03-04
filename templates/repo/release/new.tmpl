@@ -46,7 +46,7 @@
 			</div>
 			<div class="eleven wide tw-pt-0">
 				<div class="field {{if .Err_Title}}error{{end}}">
-					<input name="title" aria-label="{{ctx.Locale.Tr "repo.release.title"}}" placeholder="{{ctx.Locale.Tr "repo.release.title"}}" value="{{.title}}" autofocus maxlength="255">
+					<input id="release-title" name="title" aria-label="{{ctx.Locale.Tr "repo.release.title"}}" placeholder="{{ctx.Locale.Tr "repo.release.title"}}" value="{{.tag_name}}" autofocus maxlength="255">
 				</div>
 				<div class="field">
 					{{template "shared/combomarkdowneditor" (dict

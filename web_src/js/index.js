@@ -24,7 +24,7 @@ import {initFindFileInRepo} from './features/repo-findfile.js';
 import {initCommentContent, initMarkupContent} from './markup/content.js';
 import {initPdfViewer} from './render/pdf.js';
 
-import {initUserAuthOauth2} from './features/user-auth.js';
+import {initUserAuthOauth2, initUserAuth} from './features/user-auth.js';
 import {
   initRepoIssueDue,
   initRepoIssueReferenceRepositorySearch,
@@ -33,7 +33,7 @@ import {
   initRepoPullRequestAllowMaintainerEdit,
   initRepoPullRequestReview, initRepoIssueSidebarList, initArchivedLabelHandler,
 } from './features/repo-issue.js';
-import {initRepoEllipsisButton, initCommitStatuses} from './features/repo-commit.js';
+import {initRepoEllipsisButton, initCommitStatuses, initCommitNotes} from './features/repo-commit.js';
 import {
   initFootLanguageMenu,
   initGlobalButtonClickOnEnter,
@@ -51,7 +51,6 @@ import {initAdminCommon} from './features/admin/common.js';
 import {initRepoTemplateSearch} from './features/repo-template.js';
 import {initRepoCodeView} from './features/repo-code.js';
 import {initSshKeyFormParser} from './features/sshkey-helper.js';
-import {initUserSettings} from './features/user-settings.js';
 import {initRepoArchiveLinks} from './features/repo-common.js';
 import {initRepoMigrationStatusChecker} from './features/repo-migrate.js';
 import {
@@ -179,12 +178,13 @@ onDomReady(() => {
   initRepoMilestoneEditor();
 
   initCommitStatuses();
+  initCommitNotes();
   initCaptcha();
 
   initUserAuthOauth2();
   initUserAuthWebAuthn();
   initUserAuthWebAuthnRegister();
-  initUserSettings();
+  initUserAuth();
   initRepoDiffView();
   initPdfViewer();
   initScopedAccessTokenCategories();

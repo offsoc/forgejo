@@ -22,25 +22,17 @@ func (k *KeyLocale) HasKey(trKey string) bool {
 
 // TrHTML implements Locale.
 func (k *KeyLocale) TrHTML(trKey string, trArgs ...any) template.HTML {
-	args := slices.Clone(trArgs)
-	for i, v := range args {
-		switch v := v.(type) {
-		case nil, bool, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, template.HTML:
-			// for most basic types (including template.HTML which is safe), just do nothing and use it
-		case string:
-			args[i] = template.HTMLEscapeString(v)
-		case fmt.Stringer:
-			args[i] = template.HTMLEscapeString(v.String())
-		default:
-			args[i] = template.HTMLEscapeString(fmt.Sprint(v))
-		}
-	}
-	return template.HTML(k.TrString(trKey, args...))
+	return template.HTML(k.TrString(trKey, PrepareArgsForHTML(trArgs...)...))
 }
 
 // TrString implements Locale.
 func (k *KeyLocale) TrString(trKey string, trArgs ...any) string {
 	return FormatDummy(trKey, trArgs...)
+}
+
+// TrPluralString implements Locale.
+func (k *KeyLocale) TrPluralString(count any, trKey string, trArgs ...any) template.HTML {
+	return template.HTML(FormatDummy(trKey, PrepareArgsForHTML(trArgs...)...))
 }
 
 func FormatDummy(trKey string, args ...any) string {

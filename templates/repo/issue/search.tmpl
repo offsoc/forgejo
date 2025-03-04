@@ -10,11 +10,11 @@
 			<input type="hidden" name="poster" value="{{$.PosterID}}">
 		{{end}}
 		{{if .PageIsPullList}}
-			{{template "shared/search/combo_fuzzy" dict "Value" .Keyword "IsFuzzy" .IsFuzzy "Placeholder" (ctx.Locale.Tr "search.pull_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
+			{{template "shared/search/combo" dict "Value" .Keyword "Placeholder" (ctx.Locale.Tr "search.pull_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
 		{{else if .PageIsMilestones}}
-			{{template "shared/search/combo_fuzzy" dict "Value" .Keyword "IsFuzzy" .IsFuzzy "Placeholder" (ctx.Locale.Tr "search.milestone_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
+			{{template "shared/search/combo" dict "Value" .Keyword "Placeholder" (ctx.Locale.Tr "search.milestone_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
 		{{else}}
-			{{template "shared/search/combo_fuzzy" dict "Value" .Keyword "IsFuzzy" .IsFuzzy "Placeholder" (ctx.Locale.Tr "search.issue_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
+			{{template "shared/search/combo" dict "Value" .Keyword "Placeholder" (ctx.Locale.Tr "search.issue_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
 		{{end}}
 	</div>
 </form>

@@ -1,6 +1,6 @@
 {{if and (not .HideRepoInfo) (not .IsBlame)}}
 <div class="ui segments repository-summary tw-mt-1 tw-mb-0">
-	<div class="ui segment sub-menu repository-menu">
+	<div class="ui segment repository-menu">
 		{{if and (.Permission.CanRead $.UnitTypeCode) (not .IsEmptyRepo)}}
 			<a class="item muted {{if .PageIsCommits}}active{{end}}" href="{{.RepoLink}}/commits/{{.BranchNameSubURL}}">
 				{{svg "octicon-history"}} {{ctx.Locale.TrN .CommitsCount "repo.n_commit_one" "repo.n_commit_few" (printf "<b>%d</b>" .CommitsCount | SafeHTML)}}
@@ -13,14 +13,19 @@
 					{{svg "octicon-tag"}} {{ctx.Locale.TrN .NumTags "repo.n_tag_one" "repo.n_tag_few" (printf "<b>%d</b>" .NumTags | SafeHTML)}}
 				</a>
 			{{end}}
-			<span class="item not-mobile" {{if not (eq .Repository.Size 0)}}data-tooltip-content="{{.Repository.SizeDetailsString ctx.Locale}}"{{end}}>
+			<span class="item" {{if not (eq .Repository.Size 0)}}data-tooltip-content="{{.Repository.SizeDetailsString ctx.Locale}}"{{end}}>
 				{{$fileSizeFields :=  ctx.Locale.TrSize .Repository.Size}}
 				{{svg "octicon-database"}} <b>{{$fileSizeFields.PrettyNumber}}</b> {{$fileSizeFields.TranslatedUnit}}
 			</span>
 		{{end}}
 	</div>
 	{{if and (.Permission.CanRead $.UnitTypeCode) (not .IsEmptyRepo) .LanguageStats}}
-	<div class="ui segment sub-menu language-stats-details tw-hidden">
+	<a class="ui segment show-panel toggle" id="language-stats-bar" data-panel="#language-stats-legend">
+		{{range .LanguageStats}}
+		<div class="bar" style="width: {{.Percentage}}%; background-color: {{.Color}}" data-tooltip-placement="top" data-tooltip-content={{.Language}} data-tooltip-follow-cursor="horizontal"></div>
+		{{end}}
+	</a>
+	<div class="ui segment sub-menu tw-hidden" id="language-stats-legend">
 		{{range .LanguageStats}}
 		<div class="item">
 			<i class="color-icon" style="background-color: {{.Color}}"></i>
@@ -35,11 +40,6 @@
 		</div>
 		{{end}}
 	</div>
-	<a class="ui segment language-stats show-panel toggle" data-panel=".repository-summary > .sub-menu">
-		{{range .LanguageStats}}
-		<div class="bar" style="width: {{.Percentage}}%; background-color: {{.Color}}" data-tooltip-placement="top" data-tooltip-content={{.Language}} data-tooltip-follow-cursor="horizontal"></div>
-		{{end}}
-	</a>
 	{{end}}
 </div>
 {{end}}

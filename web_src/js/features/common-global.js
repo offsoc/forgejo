@@ -357,7 +357,7 @@ export function initGlobalLinkActions() {
   });
 }
 
-function initGlobalShowModal() {
+export function initGlobalShowModal() {
   // A ".show-modal" button will show a modal dialog defined by its "data-modal" attribute.
   // Each "data-modal-{target}" attribute will be filled to target element's value or text-content.
   // * First, try to query '#target'
@@ -458,6 +458,6 @@ export function checkAppUrl() {
   if (curUrl.startsWith(appUrl) || `${curUrl}/` === appUrl) {
     return;
   }
-  showGlobalErrorMessage(`Your ROOT_URL in app.ini is "${appUrl}", it's unlikely matching the site you are visiting.
-Mismatched ROOT_URL config causes wrong URL links for web UI/mail content/webhook notification/OAuth2 sign-in.`);
+
+  showGlobalErrorMessage(i18n.incorrect_root_url);
 }

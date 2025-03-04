@@ -17,7 +17,6 @@ import (
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/timeutil"
 	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/services/context"
 	files_service "code.gitea.io/gitea/services/repository/files"
@@ -57,6 +56,11 @@ func RefBlame(ctx *context.Context) {
 		HandleGitError(ctx, "Repo.Commit.GetTreeEntryByPath", err)
 		return
 	}
+	if entry.IsDir() {
+		ctx.NotFound("Cannot blame directory", nil)
+		return
+	}
+
 	blob := entry.Blob()
 
 	ctx.Data["PageIsViewCode"] = true
@@ -254,7 +258,7 @@ func renderBlame(ctx *context.Context, blameParts []*git.BlamePart, commitNames 
 				commitCnt++
 
 				// User avatar image
-				commitSince := timeutil.TimeSinceUnix(timeutil.TimeStamp(commit.Author.When.Unix()), ctx.Locale)
+				commitSince := templates.TimeSince(commit.Author.When)
 
 				var avatar string
 				if commit.User != nil {

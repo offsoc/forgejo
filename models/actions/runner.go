@@ -271,6 +271,7 @@ func GetRunnerByID(ctx context.Context, id int64) (*ActionRunner, error) {
 // UpdateRunner updates runner's information.
 func UpdateRunner(ctx context.Context, r *ActionRunner, cols ...string) error {
 	e := db.GetEngine(ctx)
+	r.Name, _ = util.SplitStringAtByteN(r.Name, 255)
 	var err error
 	if len(cols) == 0 {
 		_, err = e.ID(r.ID).AllCols().Update(r)
@@ -281,27 +282,22 @@ func UpdateRunner(ctx context.Context, r *ActionRunner, cols ...string) error {
 }
 
 // DeleteRunner deletes a runner by given ID.
-func DeleteRunner(ctx context.Context, id int64) error {
-	runner, err := GetRunnerByID(ctx, id)
-	if err != nil {
-		return err
-	}
-
+func DeleteRunner(ctx context.Context, r *ActionRunner) error {
 	// Replace the UUID, which was either based on the secret's first 16 bytes or an UUIDv4,
 	// with a sequence of 8 0xff bytes followed by the little-endian version of the record's
 	// identifier. This will prevent the deleted record's identifier from colliding with any
 	// new record.
 	b := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b, uint64(id))
-	runner.UUID = fmt.Sprintf("ffffffff-ffff-ffff-%.2x%.2x-%.2x%.2x%.2x%.2x%.2x%.2x",
+	binary.LittleEndian.PutUint64(b, uint64(r.ID))
+	r.UUID = fmt.Sprintf("ffffffff-ffff-ffff-%.2x%.2x-%.2x%.2x%.2x%.2x%.2x%.2x",
 		b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7])
 
-	err = UpdateRunner(ctx, runner, "UUID")
+	err := UpdateRunner(ctx, r, "UUID")
 	if err != nil {
 		return err
 	}
 
-	_, err = db.DeleteByID[ActionRunner](ctx, id)
+	_, err = db.DeleteByID[ActionRunner](ctx, r.ID)
 	return err
 }
 
@@ -312,6 +308,7 @@ func CreateRunner(ctx context.Context, t *ActionRunner) error {
 		// Remove OwnerID to avoid confusion; it's not worth returning an error here.
 		t.OwnerID = 0
 	}
+	t.Name, _ = util.SplitStringAtByteN(t.Name, 255)
 	return db.Insert(ctx, t)
 }
 

@@ -4,10 +4,6 @@
   user-select: none;
 }
 
-.repository .owner.dropdown {
-  min-width: 40% !important;
-}
-
 .repository .unicode-escaped .escaped-code-point[data-escaped]::before {
   visibility: visible;
   content: attr(data-escaped);
@@ -157,7 +153,9 @@
   border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
 }
 
-.repository .clone-panel .dropdown .menu {
+/* Dropdown alignment */
+.repository .clone-panel .dropdown .menu,
+.repository .folder-actions .dropdown .menu {
   right: 0 !important;
   left: auto !important;
 }
@@ -387,6 +385,11 @@ td .commit-summary {
   color: inherit;
   opacity: var(--opacity-disabled);
   cursor: default;
+}
+
+.code-search + #repo-files-table {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .view-raw {
@@ -923,16 +926,6 @@ td .commit-summary {
 .repository.view.issue .comment-list .comment .comment-container {
   border: 1px solid var(--color-secondary);
   border-radius: var(--border-radius);
-}
-
-@media (max-width: 767.98px) {
-  .repository.view.issue .comment-list .comment .content .form .button {
-    width: 100%;
-    margin: 0;
-  }
-  .repository.view.issue .comment-list .comment .content .form .button:not(:last-child) {
-    margin-bottom: 1rem;
-  }
 }
 
 .repository.view.issue .comment-list .comment .merge-section {
@@ -1718,26 +1711,6 @@ td .commit-summary {
   max-width: initial; /* remove fomantic over 100% width */
 }
 
-.repository .diff-stats {
-  clear: both;
-  margin-bottom: 5px;
-  max-height: 200px;
-  height: fit-content;
-  overflow: auto;
-  padding-left: 0;
-}
-
-.repository .diff-stats li {
-  list-style: none;
-  padding-bottom: 4px;
-  margin-bottom: 4px;
-  padding-left: 6px;
-}
-
-.repository .diff-stats li + li {
-  border-top: 1px solid var(--color-secondary);
-}
-
 .repository .repo-search-result {
   padding-top: 10px;
   padding-bottom: 10px;
@@ -1846,10 +1819,6 @@ details.repo-search-result summary::marker {
   box-shadow: none;
   background-color: var(--color-success-bg);
   color: var(--color-success-text);
-}
-
-.repository .ui.attached.isSigned.isVerified.message .pull-right {
-  color: var(--color-text);
 }
 
 .repository .ui.attached.isSigned.isVerified.message .ui.text {
@@ -2018,15 +1987,27 @@ details.repo-search-result summary::marker {
   box-shadow: none;
 }
 
+.repository .repository-summary .repository-menu {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 0;
+}
+
+@media (max-width: 767.98px) {
+  .repository .repository-summary .repository-menu {
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .repository .repository-summary .segment.sub-menu {
   border: none;
   display: flex;
   align-items: center;
   padding: 0;
-  overflow: hidden;
 }
 
-.repository .repository-summary .sub-menu .item {
+.repository .repository-summary .item {
   flex: 1;
   height: 30px;
   line-height: var(--line-height-default);
@@ -2034,21 +2015,31 @@ details.repo-search-result summary::marker {
   align-items: center;
   justify-content: center;
   gap: 0.25em;
-  padding: 0 0.5em; /* make the UI look better for narrow (mobile) view */
   text-decoration: none;
+  border-radius: var(--border-radius);
 }
 
-.repository .repository-summary .sub-menu .item.active {
+.repository .repository-summary .item.active {
   background: var(--color-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
-.repository .repository-summary .segment.language-stats {
+.repository .repository-summary #language-stats-bar {
   display: flex;
   gap: 2px;
   padding: 0;
   height: 10px;
   white-space: nowrap;
-  border-radius: 0 0 3px 3px !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  overflow: hidden;
+}
+
+.size-overview .segment:has(> .bar) {
+  display: flex;
+  height: 10px;
+  padding: 0;
+  border-radius: 3px;
   overflow: hidden;
 }
 
@@ -2256,7 +2247,6 @@ details.repo-search-result summary::marker {
   background: var(--color-box-header);
   border-bottom: 1px solid var(--color-secondary) !important;
   font-weight: var(--font-weight-normal) !important;
-  padding: 0.5rem 1rem;
   margin: 0 !important;
   position: relative;
   color: var(--color-text);
@@ -2265,6 +2255,10 @@ details.repo-search-result summary::marker {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.timeline .ui.comment-header {
+  padding: 0.25rem 0.75rem;
 }
 
 .comment-header::before,
@@ -2416,6 +2410,11 @@ details.repo-search-result summary::marker {
 
 .repo-button-row .button.dropdown:not(.icon) {
   padding-right: 22px !important; /* normal buttons have !important paddings, so we need to override it for dropdown (Add File) icons */
+}
+
+.repo-button-row .button strong {
+  /* Workaround where 'overflow: hidden' is clipping the y-axis, force a small amount of extra padding in the y-axis. */
+  padding: .1em 0;
 }
 
 .repo-button-row input {
@@ -2846,7 +2845,6 @@ tbody.commit-list {
   }
   .commits-table .commits-table-left {
     align-items: initial !important;
-    margin-bottom: 6px;
   }
   .commits-table .commits-table-right form > div:nth-child(1) {
     order: 1; /* the "commit search" input */
@@ -2895,7 +2893,7 @@ tbody.commit-list {
 .commit-status-header {
   /* reset the default ".ui.attached.header" styles, to use the outer border */
   border: none !important;
-  /* add a bottom border to make sure the there is always a divider between the header and list when the list is scrolling */
+  /* add a bottom border to make sure there is always a divider between the header and list when the list is scrolling */
   border-bottom: 1px solid var(--color-secondary) !important;
   /* use negative margin to avoid the newly added border conflict with the list's top border */
   margin: 0 0 -1px !important;

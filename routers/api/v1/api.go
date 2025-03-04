@@ -823,6 +823,7 @@ func Routes() *web.Route {
 
 			m.Group("/runners", func() {
 				m.Get("/registration-token", reqToken(), reqChecker, act.GetRegistrationToken)
+				m.Get("/jobs", reqToken(), reqChecker, act.SearchActionRunJobs)
 			})
 		})
 	}
@@ -911,9 +912,9 @@ func Routes() *web.Route {
 				m.Get("/repos", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), reqExploreSignIn(), user.ListUserRepos)
 				m.Group("/tokens", func() {
 					m.Combo("").Get(user.ListAccessTokens).
-						Post(bind(api.CreateAccessTokenOption{}), reqToken(), user.CreateAccessToken)
-					m.Combo("/{id}").Delete(reqToken(), user.DeleteAccessToken)
-				}, reqSelfOrAdmin(), reqBasicOrRevProxyAuth())
+						Post(bind(api.CreateAccessTokenOption{}), reqBasicOrRevProxyAuth(), reqToken(), user.CreateAccessToken)
+					m.Combo("/{id}").Delete(reqBasicOrRevProxyAuth(), reqToken(), user.DeleteAccessToken)
+				}, reqSelfOrAdmin())
 
 				m.Get("/activities/feeds", user.ListUserActivityFeeds)
 			}, context.UserAssignmentAPI(), checkTokenPublicOnly(), individualPermsChecker)
@@ -979,6 +980,7 @@ func Routes() *web.Route {
 
 				m.Group("/runners", func() {
 					m.Get("/registration-token", reqToken(), user.GetRegistrationToken)
+					m.Get("/jobs", reqToken(), user.SearchActionRunJobs)
 				})
 			})
 
@@ -1162,6 +1164,7 @@ func Routes() *web.Route {
 					m.Get("/*", repo.GetBranch)
 					m.Delete("/*", reqToken(), reqRepoWriter(unit.TypeCode), mustNotBeArchived, repo.DeleteBranch)
 					m.Post("", reqToken(), reqRepoWriter(unit.TypeCode), mustNotBeArchived, bind(api.CreateBranchRepoOption{}), context.EnforceQuotaAPI(quota_model.LimitSubjectSizeGitAll, context.QuotaTargetRepo), repo.CreateBranch)
+					m.Patch("/*", reqToken(), reqRepoWriter(unit.TypeCode), mustNotBeArchived, bind(api.UpdateBranchRepoOption{}), repo.UpdateBranch)
 				}, context.ReferencesGitRepo(), reqRepoReader(unit.TypeCode))
 				m.Group("/branch_protections", func() {
 					m.Get("", repo.ListBranchProtections)
@@ -1325,7 +1328,11 @@ func Routes() *web.Route {
 					m.Get("/trees/{sha}", repo.GetTree)
 					m.Get("/blobs/{sha}", repo.GetBlob)
 					m.Get("/tags/{sha}", repo.GetAnnotatedTag)
-					m.Get("/notes/{sha}", repo.GetNote)
+					m.Group("/notes/{sha}", func() {
+						m.Get("", repo.GetNote)
+						m.Post("", reqToken(), reqRepoWriter(unit.TypeCode), bind(api.NoteOptions{}), repo.SetNote)
+						m.Delete("", reqToken(), reqRepoWriter(unit.TypeCode), repo.RemoveNote)
+					})
 				}, context.ReferencesGitRepo(true), reqRepoReader(unit.TypeCode))
 				m.Post("/diffpatch", reqRepoWriter(unit.TypeCode), reqToken(), bind(api.ApplyDiffPatchFileOptions{}), mustNotBeArchived, context.EnforceQuotaAPI(quota_model.LimitSubjectSizeReposAll, context.QuotaTargetRepo), repo.ApplyDiffPatch)
 				m.Group("/contents", func() {
@@ -1357,6 +1364,8 @@ func Routes() *web.Route {
 					m.Post("", bind(api.UpdateRepoAvatarOption{}), repo.UpdateAvatar)
 					m.Delete("", repo.DeleteAvatar)
 				}, reqAdmin(), reqToken())
+
+				m.Get("/{ball_type:tarball|zipball|bundle}/*", reqRepoReader(unit.TypeCode), repo.DownloadArchive)
 			}, repoAssignment(), checkTokenPublicOnly())
 		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository))
 
@@ -1485,13 +1494,19 @@ func Routes() *web.Route {
 
 		// NOTE: these are Gitea package management API - see packages.CommonRoutes and packages.DockerContainerRoutes for endpoints that implement package manager APIs
 		m.Group("/packages/{username}", func() {
-			m.Group("/{type}/{name}/{version}", func() {
-				m.Get("", reqToken(), packages.GetPackage)
-				m.Delete("", reqToken(), reqPackageAccess(perm.AccessModeWrite), packages.DeletePackage)
-				m.Get("/files", reqToken(), packages.ListPackageFiles)
+			m.Group("/{type}/{name}", func() {
+				m.Group("/{version}", func() {
+					m.Get("", packages.GetPackage)
+					m.Delete("", reqPackageAccess(perm.AccessModeWrite), packages.DeletePackage)
+					m.Get("/files", packages.ListPackageFiles)
+				})
+
+				m.Post("/-/link/{repo_name}", reqPackageAccess(perm.AccessModeWrite), packages.LinkPackage)
+				m.Post("/-/unlink", reqPackageAccess(perm.AccessModeWrite), packages.UnlinkPackage)
 			})
-			m.Get("/", reqToken(), packages.ListPackages)
-		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryPackage), context.UserAssignmentAPI(), context.PackageAssignmentAPI(), reqPackageAccess(perm.AccessModeRead), checkTokenPublicOnly())
+
+			m.Get("/", packages.ListPackages)
+		}, reqToken(), tokenRequiresScopes(auth_model.AccessTokenScopeCategoryPackage), context.UserAssignmentAPI(), context.PackageAssignmentAPI(), reqPackageAccess(perm.AccessModeRead), checkTokenPublicOnly())
 
 		// Organizations
 		m.Get("/user/orgs", reqToken(), tokenRequiresScopes(auth_model.AccessTokenScopeCategoryUser, auth_model.AccessTokenScopeCategoryOrganization), org.ListMyOrgs)
@@ -1505,6 +1520,7 @@ func Routes() *web.Route {
 			m.Combo("").Get(org.Get).
 				Patch(reqToken(), reqOrgOwnership(), bind(api.EditOrgOption{}), org.Edit).
 				Delete(reqToken(), reqOrgOwnership(), org.Delete)
+			m.Post("/rename", reqToken(), reqOrgOwnership(), bind(api.RenameOrgOption{}), org.Rename)
 			m.Combo("/repos").Get(user.ListOrgRepos).
 				Post(reqToken(), bind(api.CreateRepoOption{}), context.EnforceQuotaAPI(quota_model.LimitSubjectSizeReposAll, context.QuotaTargetOrg), repo.CreateOrgRepo)
 			m.Group("/members", func() {
@@ -1633,6 +1649,7 @@ func Routes() *web.Route {
 			})
 			m.Group("/runners", func() {
 				m.Get("/registration-token", admin.GetRegistrationToken)
+				m.Get("/jobs", admin.SearchActionRunJobs)
 			})
 			if setting.Quota.Enabled {
 				m.Group("/quota", func() {

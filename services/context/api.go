@@ -99,6 +99,17 @@ type swaggerAPIInvalidTopicsError struct {
 // swagger:response empty
 type APIEmpty struct{}
 
+type APIUnauthorizedError struct {
+	APIError
+}
+
+// APIUnauthorizedError is a unauthorized error response
+// swagger:response unauthorized
+type swaggerAPUnauthorizedError struct {
+	// in:body
+	Body APIUnauthorizedError `json:"body"`
+}
+
 type APIForbiddenError struct {
 	APIError
 }
@@ -144,6 +155,17 @@ type APIRepoArchivedError struct {
 type swaggerAPIRepoArchivedError struct {
 	// in:body
 	Body APIRepoArchivedError `json:"body"`
+}
+
+type APIInternalServerError struct {
+	APIError
+}
+
+// APIInternalServerError is an error that is raised when an internal server error occurs
+// swagger:response internalServerError
+type swaggerAPIInternalServerError struct {
+	// in:body
+	Body APIInternalServerError `json:"body"`
 }
 
 // ServerError responds with error message, status is 500
@@ -341,6 +363,11 @@ func ReferencesGitRepo(allowEmpty ...bool) func(ctx *APIContext) (cancel context
 func RepoRefForAPI(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ctx := GetAPIContext(req)
+
+		if ctx.Repo.Repository.IsEmpty {
+			ctx.NotFound(fmt.Errorf("repository is empty"))
+			return
+		}
 
 		if ctx.Repo.GitRepo == nil {
 			ctx.InternalServerError(fmt.Errorf("no open git repo"))

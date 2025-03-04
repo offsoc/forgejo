@@ -7,7 +7,9 @@ package user
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/mail"
 	"net/url"
@@ -48,19 +50,19 @@ const (
 	UserTypeIndividual UserType = iota // Historic reason to make it starts at 0.
 
 	// UserTypeOrganization defines an organization
-	UserTypeOrganization
+	UserTypeOrganization // 1
 
 	// UserTypeUserReserved reserves a (non-existing) user, i.e. to prevent a spam user from re-registering after being deleted, or to reserve the name until the user is actually created later on
-	UserTypeUserReserved
+	UserTypeUserReserved // 2
 
 	// UserTypeOrganizationReserved reserves a (non-existing) organization, to be used in combination with UserTypeUserReserved
-	UserTypeOrganizationReserved
+	UserTypeOrganizationReserved // 3
 
 	// UserTypeBot defines a bot user
-	UserTypeBot
+	UserTypeBot // 4
 
 	// UserTypeRemoteUser defines a remote user for federated users
-	UserTypeRemoteUser
+	UserTypeRemoteUser // 5
 )
 
 const (
@@ -152,6 +154,7 @@ type User struct {
 	DiffViewStyle       string `xorm:"NOT NULL DEFAULT ''"`
 	Theme               string `xorm:"NOT NULL DEFAULT ''"`
 	KeepActivityPrivate bool   `xorm:"NOT NULL DEFAULT false"`
+	KeepPronounsPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	EnableRepoUnitHints bool   `xorm:"NOT NULL DEFAULT true"`
 }
 
@@ -318,15 +321,14 @@ func (u *User) OrganisationLink() string {
 	return setting.AppSubURL + "/org/" + url.PathEscape(u.Name)
 }
 
-// GenerateEmailActivateCode generates an activate code based on user information and given e-mail.
-func (u *User) GenerateEmailActivateCode(email string) string {
-	code := base.CreateTimeLimitCode(
-		fmt.Sprintf("%d%s%s%s%s", u.ID, email, u.LowerName, u.Passwd, u.Rands),
-		setting.Service.ActiveCodeLives, time.Now(), nil)
-
-	// Add tail hex username
-	code += hex.EncodeToString([]byte(u.LowerName))
-	return code
+// GenerateEmailAuthorizationCode generates an activation code based for the user for the specified purpose.
+// The standard expiry is ActiveCodeLives minutes.
+func (u *User) GenerateEmailAuthorizationCode(ctx context.Context, purpose auth.AuthorizationPurpose) (string, error) {
+	lookup, validator, err := auth.GenerateAuthToken(ctx, u.ID, timeutil.TimeStampNow().Add(int64(setting.Service.ActiveCodeLives)*60), purpose)
+	if err != nil {
+		return "", err
+	}
+	return lookup + ":" + validator, nil
 }
 
 // GetUserFollowers returns range of user's followers.
@@ -338,7 +340,7 @@ func GetUserFollowers(ctx context.Context, u, viewer *User, listOptions db.ListO
 		And("`user`.type=?", UserTypeIndividual).
 		And(isUserVisibleToViewerCond(viewer))
 
-	if listOptions.Page != 0 {
+	if listOptions.Page > 0 {
 		sess = db.SetSessionPagination(sess, &listOptions)
 
 		users := make([]*User, 0, listOptions.PageSize)
@@ -360,7 +362,7 @@ func GetUserFollowing(ctx context.Context, u, viewer *User, listOptions db.ListO
 		And("`user`.type IN (?, ?)", UserTypeIndividual, UserTypeOrganization).
 		And(isUserVisibleToViewerCond(viewer))
 
-	if listOptions.Page != 0 {
+	if listOptions.Page > 0 {
 		sess = db.SetSessionPagination(sess, &listOptions)
 
 		users := make([]*User, 0, listOptions.PageSize)
@@ -499,6 +501,16 @@ func (u *User) GetCompleteName() string {
 	return u.Name
 }
 
+// GetPronouns returns an empty string, if the user has set to keep his
+// pronouns private from non-logged in users, otherwise the pronouns
+// are returned.
+func (u *User) GetPronouns(signed bool) string {
+	if u.KeepPronounsPrivate && !signed {
+		return ""
+	}
+	return u.Pronouns
+}
+
 func gitSafeName(name string) string {
 	return strings.TrimSpace(strings.NewReplacer("\n", "", "<", "", ">", "").Replace(name))
 }
@@ -585,6 +597,7 @@ var (
 	reservedUsernames = []string{
 		".",
 		"..",
+		"-", // used by certain web routes
 		".well-known",
 
 		"api",     // gitea api
@@ -665,6 +678,18 @@ func AdminCreateUser(ctx context.Context, u *User, overwriteDefault ...*CreateUs
 func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefault ...*CreateUserOverwriteOptions) (err error) {
 	if err = IsUsableUsername(u.Name); err != nil {
 		return err
+	}
+
+	// Check if the new username can be claimed.
+	// Skip this check if done by an admin.
+	if !createdByAdmin {
+		if ok, expireTime, err := CanClaimUsername(ctx, u.Name, -1); err != nil {
+			return err
+		} else if !ok {
+			return ErrCooldownPeriod{
+				ExpireTime: expireTime,
+			}
+		}
 	}
 
 	// set system defaults
@@ -838,35 +863,48 @@ func countUsers(ctx context.Context, opts *CountUserFilter) int64 {
 	return count
 }
 
-// GetVerifyUser get user by verify code
-func GetVerifyUser(ctx context.Context, code string) (user *User) {
-	if len(code) <= base.TimeLimitCodeLength {
-		return nil
+// VerifyUserActiveCode verifies that the code is valid for the given purpose for this user.
+// If delete is specified, the token will be deleted.
+func VerifyUserAuthorizationToken(ctx context.Context, code string, purpose auth.AuthorizationPurpose) (user *User, deleteToken func() error, err error) {
+	lookupKey, validator, found := strings.Cut(code, ":")
+	if !found {
+		return nil, nil, nil
 	}
 
-	// use tail hex username query user
-	hexStr := code[base.TimeLimitCodeLength:]
-	if b, err := hex.DecodeString(hexStr); err == nil {
-		if user, err = GetUserByName(ctx, string(b)); user != nil {
-			return user
+	authToken, err := auth.FindAuthToken(ctx, lookupKey, purpose)
+	if err != nil {
+		if errors.Is(err, util.ErrNotExist) {
+			return nil, nil, nil
 		}
-		log.Error("user.getVerifyUser: %v", err)
+		return nil, nil, err
 	}
 
-	return nil
-}
+	if authToken.IsExpired() {
+		return nil, nil, auth.DeleteAuthToken(ctx, authToken)
+	}
 
-// VerifyUserActiveCode verifies active code when active account
-func VerifyUserActiveCode(ctx context.Context, code string) (user *User) {
-	if user = GetVerifyUser(ctx, code); user != nil {
-		// time limit code
-		prefix := code[:base.TimeLimitCodeLength]
-		data := fmt.Sprintf("%d%s%s%s%s", user.ID, user.Email, user.LowerName, user.Passwd, user.Rands)
-		if base.VerifyTimeLimitCode(time.Now(), data, setting.Service.ActiveCodeLives, prefix) {
-			return user
+	rawValidator, err := hex.DecodeString(validator)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if subtle.ConstantTimeCompare([]byte(authToken.HashedValidator), []byte(auth.HashValidator(rawValidator))) == 0 {
+		return nil, nil, errors.New("validator doesn't match")
+	}
+
+	u, err := GetUserByID(ctx, authToken.UID)
+	if err != nil {
+		if IsErrUserNotExist(err) {
+			return nil, nil, nil
 		}
+		return nil, nil, err
 	}
-	return nil
+
+	deleteToken = func() error {
+		return auth.DeleteAuthToken(ctx, authToken)
+	}
+
+	return u, deleteToken, nil
 }
 
 // ValidateUser check if user is valid to insert / update into database
@@ -903,7 +941,13 @@ func UpdateUserCols(ctx context.Context, u *User, cols ...string) error {
 
 // GetInactiveUsers gets all inactive users
 func GetInactiveUsers(ctx context.Context, olderThan time.Duration) ([]*User, error) {
-	var cond builder.Cond = builder.Eq{"is_active": false}
+	cond := builder.And(
+		builder.Eq{"is_active": false},
+		builder.Or( // only plain user
+			builder.Eq{"`type`": UserTypeIndividual},
+			builder.Eq{"`type`": UserTypeUserReserved},
+		),
+	)
 
 	if olderThan > 0 {
 		cond = cond.And(builder.Lt{"created_unix": time.Now().Add(-olderThan).Unix()})
@@ -1008,22 +1052,6 @@ func GetUserByName(ctx context.Context, name string) (*User, error) {
 	return u, nil
 }
 
-// GetUserEmailsByNames returns a list of e-mails corresponds to names of users
-// that have their email notifications set to enabled or onmention.
-func GetUserEmailsByNames(ctx context.Context, names []string) []string {
-	mails := make([]string, 0, len(names))
-	for _, name := range names {
-		u, err := GetUserByName(ctx, name)
-		if err != nil {
-			continue
-		}
-		if u.IsMailable() && u.EmailNotificationsPreference != EmailNotificationsDisabled {
-			mails = append(mails, u.Email)
-		}
-	}
-	return mails
-}
-
 // GetMaileableUsersByIDs gets users from ids, but only if they can receive mails
 func GetMaileableUsersByIDs(ctx context.Context, ids []int64, isMention bool) ([]*User, error) {
 	if len(ids) == 0 {
@@ -1048,17 +1076,6 @@ func GetMaileableUsersByIDs(ctx context.Context, ids []int64, isMention bool) ([
 		And("`is_active` = ?", true).
 		In("`email_notifications_preference`", EmailNotificationsEnabled, EmailNotificationsAndYourOwn).
 		Find(&ous)
-}
-
-// GetUserNamesByIDs returns usernames for all resolved users from a list of Ids.
-func GetUserNamesByIDs(ctx context.Context, ids []int64) ([]string, error) {
-	unames := make([]string, 0, len(ids))
-	err := db.GetEngine(ctx).In("id", ids).
-		Table("user").
-		Asc("name").
-		Cols("name").
-		Find(&unames)
-	return unames, err
 }
 
 // GetUserNameByID returns username for the id

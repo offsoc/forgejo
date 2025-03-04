@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2018 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repo
@@ -203,8 +204,6 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		keyword = ""
 	}
 
-	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
-
 	var mileIDs []int64
 	if milestoneID > 0 || milestoneID == db.NoConditionID { // -1 to get those issues which have no any milestone assigned
 		mileIDs = []int64{milestoneID}
@@ -225,7 +224,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 		IssueIDs:          nil,
 	}
 	if keyword != "" {
-		allIssueIDs, err := issueIDsFromSearch(ctx, keyword, isFuzzy, statsOpts)
+		allIssueIDs, err := issueIDsFromSearch(ctx, keyword, statsOpts)
 		if err != nil {
 			if issue_indexer.IsAvailable(ctx) {
 				ctx.ServerError("issueIDsFromSearch", err)
@@ -293,7 +292,7 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 
 	var issues issues_model.IssueList
 	{
-		ids, err := issueIDsFromSearch(ctx, keyword, isFuzzy, &issues_model.IssuesOptions{
+		ids, err := issueIDsFromSearch(ctx, keyword, &issues_model.IssuesOptions{
 			Paginator: &db.ListOptions{
 				Page:     pager.Paginater.Current(),
 				PageSize: setting.UI.IssuePagingNum,
@@ -457,14 +456,14 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	ctx.Data["OpenCount"] = issueStats.OpenCount
 	ctx.Data["ClosedCount"] = issueStats.ClosedCount
 	ctx.Data["AllCount"] = issueStats.AllCount
-	linkStr := "%s?q=%s&type=%s&sort=%s&state=%s&labels=%s&milestone=%d&project=%d&assignee=%d&poster=%d&archived=%t"
-	ctx.Data["AllStatesLink"] = fmt.Sprintf(linkStr, ctx.Link,
+	linkStr := "?q=%s&type=%s&sort=%s&state=%s&labels=%s&milestone=%d&project=%d&assignee=%d&poster=%d&archived=%t"
+	ctx.Data["AllStatesLink"] = fmt.Sprintf(linkStr,
 		url.QueryEscape(keyword), url.QueryEscape(viewType), url.QueryEscape(sortType), "all", url.QueryEscape(selectLabels),
 		milestoneID, projectID, assigneeID, posterID, archived)
-	ctx.Data["OpenLink"] = fmt.Sprintf(linkStr, ctx.Link,
+	ctx.Data["OpenLink"] = fmt.Sprintf(linkStr,
 		url.QueryEscape(keyword), url.QueryEscape(viewType), url.QueryEscape(sortType), "open", url.QueryEscape(selectLabels),
 		milestoneID, projectID, assigneeID, posterID, archived)
-	ctx.Data["ClosedLink"] = fmt.Sprintf(linkStr, ctx.Link,
+	ctx.Data["ClosedLink"] = fmt.Sprintf(linkStr,
 		url.QueryEscape(keyword), url.QueryEscape(viewType), url.QueryEscape(sortType), "closed", url.QueryEscape(selectLabels),
 		milestoneID, projectID, assigneeID, posterID, archived)
 	ctx.Data["SelLabelIDs"] = labelIDs
@@ -475,7 +474,6 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	ctx.Data["ProjectID"] = projectID
 	ctx.Data["AssigneeID"] = assigneeID
 	ctx.Data["PosterID"] = posterID
-	ctx.Data["IsFuzzy"] = isFuzzy
 	ctx.Data["Keyword"] = keyword
 	ctx.Data["IsShowClosed"] = isShowClosed
 	switch {
@@ -498,17 +496,12 @@ func issues(ctx *context.Context, milestoneID, projectID int64, isPullOption opt
 	pager.AddParam(ctx, "assignee", "AssigneeID")
 	pager.AddParam(ctx, "poster", "PosterID")
 	pager.AddParam(ctx, "archived", "ShowArchivedLabels")
-	pager.AddParam(ctx, "fuzzy", "IsFuzzy")
 
 	ctx.Data["Page"] = pager
 }
 
-func issueIDsFromSearch(ctx *context.Context, keyword string, fuzzy bool, opts *issues_model.IssuesOptions) ([]int64, error) {
-	ids, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts).Copy(
-		func(o *issue_indexer.SearchOptions) {
-			o.IsFuzzyKeyword = fuzzy
-		},
-	))
+func issueIDsFromSearch(ctx *context.Context, keyword string, opts *issues_model.IssuesOptions) ([]int64, error) {
+	ids, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts))
 	if err != nil {
 		return nil, fmt.Errorf("SearchIssues: %w", err)
 	}
@@ -1267,7 +1260,11 @@ func NewIssuePost(ctx *context.Context) {
 
 	if err := issue_service.NewIssue(ctx, repo, issue, labelIDs, attachments, assigneeIDs); err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.JSONError(ctx.Tr("repo.issues.blocked_by_user"))
+			if issue.IsPull {
+				ctx.JSONError(ctx.Tr("repo.pulls.blocked_by_user"))
+			} else {
+				ctx.JSONError(ctx.Tr("repo.issues.blocked_by_user"))
+			}
 			return
 		} else if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) {
 			ctx.Error(http.StatusBadRequest, "UserDoesNotHaveAccessToRepo", err.Error())
@@ -1291,27 +1288,40 @@ func NewIssuePost(ctx *context.Context) {
 
 	log.Trace("Issue created: %d/%d", repo.ID, issue.ID)
 	if ctx.FormString("redirect_after_creation") == "project" && projectID > 0 {
-		ctx.JSONRedirect(ctx.Repo.RepoLink + "/projects/" + strconv.FormatInt(projectID, 10))
-	} else {
-		ctx.JSONRedirect(issue.Link())
+		project, err := project_model.GetProjectByID(ctx, projectID)
+		if err == nil {
+			if project.Type == project_model.TypeOrganization {
+				ctx.JSONRedirect(project_model.ProjectLinkForOrg(ctx.Repo.Owner, project.ID))
+			} else {
+				ctx.JSONRedirect(project_model.ProjectLinkForRepo(repo, project.ID))
+			}
+			return
+		}
 	}
+	ctx.JSONRedirect(issue.Link())
 }
 
 // roleDescriptor returns the role descriptor for a comment in/with the given repo, poster and issue
 func roleDescriptor(ctx stdCtx.Context, repo *repo_model.Repository, poster *user_model.User, issue *issues_model.Issue, hasOriginalAuthor bool) (issues_model.RoleDescriptor, error) {
 	roleDescriptor := issues_model.RoleDescriptor{}
 
+	// Migrated comment with no associated local user
 	if hasOriginalAuthor {
 		return roleDescriptor, nil
 	}
+
+	// Special user that can't have associated contributions and permissions in the repo.
+	if poster.IsGhost() || poster.IsActions() || poster.IsAPActor() {
+		return roleDescriptor, nil
+	}
+
+	// If the poster is the actual poster of the issue, enable Poster role.
+	roleDescriptor.IsPoster = issue.IsPoster(poster.ID)
 
 	perm, err := access_model.GetUserRepoPermission(ctx, repo, poster)
 	if err != nil {
 		return roleDescriptor, err
 	}
-
-	// If the poster is the actual poster of the issue, enable Poster role.
-	roleDescriptor.IsPoster = issue.IsPoster(poster.ID)
 
 	// Check if the poster is owner of the repo.
 	if perm.IsOwner() {
@@ -1912,6 +1922,21 @@ func ViewIssue(ctx *context.Context) {
 
 		ctx.Data["MergeStyle"] = mergeStyle
 
+		var updateStyle repo_model.UpdateStyle
+		// Check correct values and select default
+		if ms, ok := ctx.Data["UpdateStyle"].(repo_model.UpdateStyle); !ok ||
+			!prConfig.IsUpdateStyleAllowed(ms) {
+			defaultUpdateStyle := prConfig.GetDefaultUpdateStyle()
+			if prConfig.IsUpdateStyleAllowed(defaultUpdateStyle) && !ok {
+				updateStyle = defaultUpdateStyle
+			} else if prConfig.AllowMerge {
+				updateStyle = repo_model.UpdateStyleMerge
+			} else if prConfig.AllowRebase {
+				updateStyle = repo_model.UpdateStyleRebase
+			}
+		}
+		ctx.Data["UpdateStyle"] = updateStyle
+
 		defaultMergeMessage, defaultMergeBody, err := pull_service.GetDefaultMergeMessage(ctx, ctx.Repo.GitRepo, pull, mergeStyle)
 		if err != nil {
 			ctx.ServerError("GetDefaultMergeMessage", err)
@@ -2055,6 +2080,12 @@ func ViewIssue(ctx *context.Context) {
 	ctx.Data["RefEndName"] = git.RefName(issue.Ref).ShortName()
 	ctx.Data["NewPinAllowed"] = pinAllowed
 	ctx.Data["PinEnabled"] = setting.Repository.Issue.MaxPinned != 0
+	ctx.Data["OpenGraphTitle"] = issue.Title
+	ctx.Data["OpenGraphURL"] = issue.HTMLURL()
+	ctx.Data["OpenGraphDescription"] = issue.Content
+	ctx.Data["OpenGraphImageURL"] = issue.SummaryCardURL()
+	ctx.Data["OpenGraphImageAltText"] = ctx.Tr("repo.issues.summary_card_alt", issue.Title, issue.Repo.FullName())
+	ctx.Data["IsBlocked"] = ctx.Doer != nil && user_model.IsBlockedMultiple(ctx, []int64{issue.PosterID, issue.Repo.OwnerID}, ctx.Doer.ID)
 
 	prepareHiddenCommentType(ctx)
 	if ctx.Written() {
@@ -3173,6 +3204,15 @@ func NewComment(ctx *context.Context) {
 			} else {
 				isClosed := form.Status == "close"
 				if err := issue_service.ChangeStatus(ctx, issue, ctx.Doer, "", isClosed); err != nil {
+					if errors.Is(err, user_model.ErrBlockedByUser) {
+						if issue.IsPull {
+							ctx.JSONError(ctx.Tr("repo.pulls.blocked_by_user"))
+						} else {
+							ctx.JSONError(ctx.Tr("repo.issues.blocked_by_user"))
+						}
+						return
+					}
+
 					log.Error("ChangeStatus: %v", err)
 
 					if issues_model.IsErrDependenciesLeft(err) {
@@ -3214,7 +3254,11 @@ func NewComment(ctx *context.Context) {
 	comment, err := issue_service.CreateIssueComment(ctx, ctx.Doer, ctx.Repo.Repository, issue, form.Content, attachments)
 	if err != nil {
 		if errors.Is(err, user_model.ErrBlockedByUser) {
-			ctx.JSONError(ctx.Tr("repo.issues.comment.blocked_by_user"))
+			if issue.IsPull {
+				ctx.JSONError(ctx.Tr("repo.pulls.comment.blocked_by_user"))
+			} else {
+				ctx.JSONError(ctx.Tr("repo.issues.comment.blocked_by_user"))
+			}
 		} else {
 			ctx.ServerError("CreateIssueComment", err)
 		}
@@ -3778,7 +3822,7 @@ func combineRequestReviewComments(issue *issues_model.Issue) {
 			}
 		}
 
-		// Propoagate creation time.
+		// Propagate creation time.
 		prev.CreatedUnix = cur.CreatedUnix
 
 		// Remove the current comment since it has been combined to prev comment

@@ -84,7 +84,23 @@ jobs:
 			baseGitRepo.Close()
 		}()
 
-		// prepare the pull request
+		// prepare the repository labels
+		labelStr := "/api/v1/repos/user2/repo-pull-request/labels"
+		labelsCount := 2
+		labels := make([]*api.Label, labelsCount)
+		for i := 0; i < labelsCount; i++ {
+			color := "abcdef"
+			req := NewRequestWithJSON(t, "POST", labelStr, &api.CreateLabelOption{
+				Name:  fmt.Sprintf("label%d", i),
+				Color: color,
+			}).AddTokenAuth(token)
+			resp := MakeRequest(t, req, http.StatusCreated)
+			labels[i] = new(api.Label)
+			DecodeJSON(t, resp, &labels[i])
+			assert.Equal(t, color, labels[i].Color)
+		}
+
+		// create the pull request
 		testEditFileToNewBranch(t, session, "user2", "repo-pull-request", "main", "wip-something", "README.md", "Hello, world 1")
 		testPullCreate(t, session, "user2", "repo-pull-request", true, "main", "wip-something", "Commit status PR")
 		pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: baseRepo.ID})
@@ -94,24 +110,15 @@ jobs:
 		issueURL := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%s", "user2", "repo-pull-request", fmt.Sprintf("%d", pr.Issue.Index))
 
 		// prepare the labels
-		labelStr := "/api/v1/repos/user2/repo-pull-request/labels"
-		req := NewRequestWithJSON(t, "POST", labelStr, &api.CreateLabelOption{
-			Name:        "mylabel",
-			Color:       "abcdef",
-			Description: "description mylabel",
-		}).AddTokenAuth(token)
-		resp := MakeRequest(t, req, http.StatusCreated)
-		label := new(api.Label)
-		DecodeJSON(t, resp, &label)
 		labelURL := fmt.Sprintf("%s/labels", issueURL)
 
 		// prepare the milestone
 		milestoneStr := "/api/v1/repos/user2/repo-pull-request/milestones"
-		req = NewRequestWithJSON(t, "POST", milestoneStr, &api.CreateMilestoneOption{
+		req := NewRequestWithJSON(t, "POST", milestoneStr, &api.CreateMilestoneOption{
 			Title: "mymilestone",
 			State: "open",
 		}).AddTokenAuth(token)
-		resp = MakeRequest(t, req, http.StatusCreated)
+		resp := MakeRequest(t, req, http.StatusCreated)
 		milestone := new(api.Milestone)
 		DecodeJSON(t, resp, &milestone)
 
@@ -128,47 +135,97 @@ jobs:
 			return false
 		}
 
-		count := 0
+		assertActionRun := func(t *testing.T, sha, onType string, action api.HookIssueAction, actionRun *actions_model.ActionRun) {
+			assert.Equal(t, fmt.Sprintf("%s.yml", onType), actionRun.WorkflowID)
+			assert.Equal(t, sha, actionRun.CommitSHA)
+			assert.Equal(t, actions_module.GithubEventPullRequest, actionRun.TriggerEvent)
+			event, err := actionRun.GetPullRequestEventPayload()
+			require.NoError(t, err)
+			assert.Equal(t, action, event.Action)
+		}
+
+		type assertType func(t *testing.T, sha, onType string, action api.HookIssueAction, actionRuns []*actions_model.ActionRun)
+		assertActionRuns := func(t *testing.T, sha, onType string, action api.HookIssueAction, actionRuns []*actions_model.ActionRun) {
+			require.Len(t, actionRuns, 1)
+			assertActionRun(t, sha, onType, action, actionRuns[0])
+		}
+
 		for _, testCase := range []struct {
-			onType      string
-			jobID       string
-			doSomething func()
-			action      api.HookIssueAction
-			hasLabel    bool
+			onType         string
+			jobID          string
+			doSomething    func()
+			actionRunCount int
+			action         api.HookIssueAction
+			assert         assertType
 		}{
 			{
-				onType:      "opened",
-				doSomething: func() {},
-				action:      api.HookIssueOpened,
+				onType:         "opened",
+				doSomething:    func() {},
+				actionRunCount: 1,
+				action:         api.HookIssueOpened,
+				assert:         assertActionRuns,
 			},
 			{
 				onType: "synchronize",
 				doSomething: func() {
 					testEditFile(t, session, "user2", "repo-pull-request", "wip-something", "README.md", "Hello, world 2")
 				},
-				action: api.HookIssueSynchronized,
+				actionRunCount: 1,
+				action:         api.HookIssueSynchronized,
+				assert:         assertActionRuns,
 			},
 			{
 				onType: "labeled",
 				doSomething: func() {
 					req := NewRequestWithJSON(t, "POST", labelURL, &api.IssueLabelsOption{
-						Labels: []any{label.ID},
+						Labels: []any{labels[0].ID, labels[1].ID},
 					}).AddTokenAuth(token)
 					MakeRequest(t, req, http.StatusOK)
 				},
-				action:   api.HookIssueLabelUpdated,
-				hasLabel: true,
+				actionRunCount: 2,
+				action:         api.HookIssueLabelUpdated,
+				assert: func(t *testing.T, sha, onType string, action api.HookIssueAction, actionRuns []*actions_model.ActionRun) {
+					assertActionRun(t, sha, onType, api.HookIssueLabelUpdated, actionRuns[0])
+					assertActionRun(t, sha, onType, api.HookIssueLabelUpdated, actionRuns[1])
+				},
 			},
 			{
 				onType: "unlabeled",
 				doSomething: func() {
 					req := NewRequestWithJSON(t, "PUT", labelURL, &api.IssueLabelsOption{
-						Labels: []any{},
+						Labels: []any{labels[0].ID},
 					}).AddTokenAuth(token)
 					MakeRequest(t, req, http.StatusOK)
 				},
-				action:   api.HookIssueLabelCleared,
-				hasLabel: true,
+				actionRunCount: 3,
+				action:         api.HookIssueLabelCleared,
+				assert: func(t *testing.T, sha, onType string, action api.HookIssueAction, actionRuns []*actions_model.ActionRun) {
+					foundPayloadWithLabels := false
+					knownLabels := []string{"label0", "label1"}
+					for _, actionRun := range actionRuns {
+						assert.Equal(t, sha, actionRun.CommitSHA)
+						assert.Equal(t, actions_module.GithubEventPullRequest, actionRun.TriggerEvent)
+						event, err := actionRun.GetPullRequestEventPayload()
+						require.NoError(t, err)
+						switch event.Action {
+						case api.HookIssueLabelUpdated:
+							assert.Equal(t, "labeled.yml", actionRun.WorkflowID)
+							assert.Equal(t, "label0", event.Label.Name)
+							require.Len(t, event.PullRequest.Labels, 1)
+							assert.Contains(t, "label0", event.PullRequest.Labels[0].Name)
+						case api.HookIssueLabelCleared:
+							assert.Equal(t, "unlabeled.yml", actionRun.WorkflowID)
+							assert.Contains(t, knownLabels, event.Label.Name)
+							if len(event.PullRequest.Labels) > 0 {
+								foundPayloadWithLabels = true
+								assert.Contains(t, knownLabels, event.PullRequest.Labels[0].Name)
+							}
+						default:
+							require.Fail(t, fmt.Sprintf("unexpected action '%s'", event.Action))
+						}
+					}
+					assert.True(t, foundPayloadWithLabels, "expected at least one clear label payload with non empty labels")
+				},
 			},
 			{
 				onType: "assigned",
@@ -178,7 +235,9 @@ jobs:
 					}).AddTokenAuth(token)
 					MakeRequest(t, req, http.StatusCreated)
 				},
-				action: api.HookIssueAssigned,
+				actionRunCount: 1,
+				action:         api.HookIssueAssigned,
+				assert:         assertActionRuns,
 			},
 			{
 				onType: "unassigned",
@@ -188,7 +247,9 @@ jobs:
 					}).AddTokenAuth(token)
 					MakeRequest(t, req, http.StatusCreated)
 				},
-				action: api.HookIssueUnassigned,
+				actionRunCount: 1,
+				action:         api.HookIssueUnassigned,
+				assert:         assertActionRuns,
 			},
 			{
 				onType: "milestoned",
@@ -198,7 +259,9 @@ jobs:
 					}).AddTokenAuth(token)
 					MakeRequest(t, req, http.StatusCreated)
 				},
-				action: api.HookIssueMilestoned,
+				actionRunCount: 1,
+				action:         api.HookIssueMilestoned,
+				assert:         assertActionRuns,
 			},
 			{
 				onType: "demilestoned",
@@ -209,7 +272,9 @@ jobs:
 					}).AddTokenAuth(token)
 					MakeRequest(t, req, http.StatusCreated)
 				},
-				action: api.HookIssueDemilestoned,
+				actionRunCount: 1,
+				action:         api.HookIssueDemilestoned,
+				assert:         assertActionRuns,
 			},
 			{
 				onType: "closed",
@@ -219,7 +284,9 @@ jobs:
 					err = issue_service.ChangeStatus(db.DefaultContext, pr.Issue, user2, sha, true)
 					require.NoError(t, err)
 				},
-				action: api.HookIssueClosed,
+				actionRunCount: 1,
+				action:         api.HookIssueClosed,
+				assert:         assertActionRuns,
 			},
 			{
 				onType: "reopened",
@@ -229,43 +296,55 @@ jobs:
 					err = issue_service.ChangeStatus(db.DefaultContext, pr.Issue, user2, sha, false)
 					require.NoError(t, err)
 				},
-				action: api.HookIssueReOpened,
+				actionRunCount: 1,
+				action:         api.HookIssueReOpened,
+				assert:         assertActionRuns,
 			},
 		} {
 			t.Run(testCase.onType, func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+				defer func() {
+					// cleanup leftovers, start from scratch
+					unittest.AssertSuccessfulDelete(t, &actions_model.ActionRun{RepoID: baseRepo.ID})
+					unittest.AssertSuccessfulDelete(t, &actions_model.ActionRunJob{RepoID: baseRepo.ID})
+				}()
+
 				// trigger the onType event
 				testCase.doSomething()
-				count++
+				count := testCase.actionRunCount
 				context := fmt.Sprintf("%[1]s / %[1]s (pull_request)", testCase.onType)
 
-				// wait for a new ActionRun to be created
-				assert.Eventually(t, func() bool {
-					return count == unittest.GetCount(t, &actions_model.ActionRun{RepoID: baseRepo.ID})
+				var actionRuns []*actions_model.ActionRun
+
+				// wait for ActionRun(s) to be created
+				require.Eventually(t, func() bool {
+					actionRuns = make([]*actions_model.ActionRun, 0)
+					require.NoError(t, db.GetEngine(db.DefaultContext).Where("repo_id=?", baseRepo.ID).Find(&actionRuns))
+					return len(actionRuns) == count
 				}, 30*time.Second, 1*time.Second)
 
-				// verify the expected  ActionRun was created
+				// verify the expected  ActionRuns were created
 				sha, err := baseGitRepo.GetRefCommitID(pr.GetGitRefName())
 				require.NoError(t, err)
-				actionRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: baseRepo.ID, WorkflowID: fmt.Sprintf("%s.yml", testCase.onType)})
-
-				assert.Equal(t, sha, actionRun.CommitSHA)
-				assert.Equal(t, actions_module.GithubEventPullRequest, actionRun.TriggerEvent)
-				event, err := actionRun.GetPullRequestEventPayload()
-				if testCase.hasLabel {
-					assert.NotNil(t, event.Label)
-				}
-				require.NoError(t, err)
-				assert.Equal(t, testCase.action, event.Action)
-
-				// verify the expected  ActionRunJob was created and is StatusWaiting
-				job := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRunJob{JobID: testCase.onType, CommitSHA: sha})
-				assert.Equal(t, actions_model.StatusWaiting, job.Status)
-
 				// verify the commit status changes to CommitStatusSuccess when the job changes to StatusSuccess
-				assert.True(t, checkCommitStatus(sha, context, api.CommitStatusPending))
-				job.Status = actions_model.StatusSuccess
-				actions_service.CreateCommitStatus(db.DefaultContext, job)
-				assert.True(t, checkCommitStatus(sha, context, api.CommitStatusSuccess))
+				require.Eventually(t, func() bool {
+					return checkCommitStatus(sha, context, api.CommitStatusPending)
+				}, 30*time.Second, 1*time.Second)
+				for _, actionRun := range actionRuns {
+					// verify the expected  ActionRunJob was created and is StatusWaiting
+					job := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRunJob{RunID: actionRun.ID, CommitSHA: sha})
+					assert.Equal(t, actions_model.StatusWaiting, job.Status)
+
+					// change the state of the job to success
+					job.Status = actions_model.StatusSuccess
+					actions_service.CreateCommitStatus(db.DefaultContext, job)
+				}
+				// verify the commit status changed to CommitStatusSuccess because the job(s) changed to StatusSuccess
+				require.Eventually(t, func() bool {
+					return checkCommitStatus(sha, context, api.CommitStatusSuccess)
+				}, 30*time.Second, 1*time.Second)
+
+				testCase.assert(t, sha, testCase.onType, testCase.action, actionRuns)
 			})
 		}
 	})

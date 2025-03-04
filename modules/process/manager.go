@@ -7,6 +7,7 @@ package process
 import (
 	"context"
 	"runtime/pprof"
+	"runtime/trace"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -126,6 +127,27 @@ func (pm *Manager) AddTypedContext(parent context.Context, description, processT
 	return ctx, cancel, finished
 }
 
+// AddTypedContextTimeout creates a new context and adds it as a process. Once the process is finished, finished must be called
+// to remove the process from the process table. It should not be called until the process is finished but must always be called.
+//
+// cancel should be used to cancel the returned context, however it will not remove the process from the process table.
+// finished will cancel the returned context and remove it from the process table.
+//
+// Most processes will not need to use the cancel function but there will be cases whereby you want to cancel the process but not immediately remove it from the
+// process table.
+func (pm *Manager) AddTypedContextTimeout(parent context.Context, timeout time.Duration, description, processType string, currentlyRunning bool) (ctx context.Context, cancel context.CancelFunc, finished FinishedFunc) {
+	if timeout <= 0 {
+		// it's meaningless to use timeout <= 0, and it must be a bug! so we must panic here to tell developers to make the timeout correct
+		panic("the timeout must be greater than zero, otherwise the context will be cancelled immediately")
+	}
+
+	ctx, cancel = context.WithTimeout(parent, timeout)
+
+	ctx, _, finished = pm.Add(ctx, description, cancel, processType, currentlyRunning)
+
+	return ctx, cancel, finished
+}
+
 // AddContextTimeout creates a new context and add it as a process. Once the process is finished, finished must be called
 // to remove the process from the process table. It should not be called until the process is finished but must always be called.
 //
@@ -135,16 +157,7 @@ func (pm *Manager) AddTypedContext(parent context.Context, description, processT
 // Most processes will not need to use the cancel function but there will be cases whereby you want to cancel the process but not immediately remove it from the
 // process table.
 func (pm *Manager) AddContextTimeout(parent context.Context, timeout time.Duration, description string) (ctx context.Context, cancel context.CancelFunc, finished FinishedFunc) {
-	if timeout <= 0 {
-		// it's meaningless to use timeout <= 0, and it must be a bug! so we must panic here to tell developers to make the timeout correct
-		panic("the timeout must be greater than zero, otherwise the context will be cancelled immediately")
-	}
-
-	ctx, cancel = context.WithTimeout(parent, timeout)
-
-	ctx, _, finished = pm.Add(ctx, description, cancel, NormalProcessType, true)
-
-	return ctx, cancel, finished
+	return pm.AddTypedContextTimeout(parent, timeout, description, NormalProcessType, true)
 }
 
 // Add create a new process
@@ -159,6 +172,8 @@ func (pm *Manager) Add(ctx context.Context, description string, cancel context.C
 		parentPID = ""
 	}
 
+	ctx, traceTask := trace.NewTask(ctx, processType)
+
 	process := &process{
 		PID:         pid,
 		ParentPID:   parentPID,
@@ -166,6 +181,7 @@ func (pm *Manager) Add(ctx context.Context, description string, cancel context.C
 		Start:       start,
 		Cancel:      cancel,
 		Type:        processType,
+		TraceTrask:  traceTask,
 	}
 
 	var finished FinishedFunc
@@ -218,6 +234,7 @@ func (pm *Manager) nextPID() (start time.Time, pid IDType) {
 }
 
 func (pm *Manager) remove(process *process) {
+	process.TraceTrask.End()
 	deleted := false
 
 	pm.mutex.Lock()

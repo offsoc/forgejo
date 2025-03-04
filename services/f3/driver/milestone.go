@@ -117,7 +117,7 @@ func (o *milestone) Get(ctx context.Context) bool {
 
 func (o *milestone) Patch(ctx context.Context) {
 	o.Trace("%d", o.forgejoMilestone.ID)
-	if _, err := db.GetEngine(ctx).ID(o.forgejoMilestone.ID).Cols("name", "description").Update(o.forgejoMilestone); err != nil {
+	if _, err := db.GetEngine(ctx).ID(o.forgejoMilestone.ID).Cols("name", "description", "is_closed", "deadline_unix").Update(o.forgejoMilestone); err != nil {
 		panic(fmt.Errorf("UpdateMilestoneCols: %v %v", o.forgejoMilestone, err))
 	}
 }

@@ -18,7 +18,7 @@ DIST := dist
 DIST_DIRS := $(DIST)/binaries $(DIST)/release
 IMPORT := code.gitea.io/gitea
 
-GO ?= go
+GO ?= $(shell go env GOROOT)/bin/go
 SHASUM ?= shasum -a 256
 HAS_GO := $(shell hash $(GO) > /dev/null 2>&1 && echo yes)
 COMMA := ,
@@ -37,19 +37,22 @@ endif
 XGO_VERSION := go-1.21.x
 
 AIR_PACKAGE ?= github.com/air-verse/air@v1 # renovate: datasource=go
-EDITORCONFIG_CHECKER_PACKAGE ?= github.com/editorconfig-checker/editorconfig-checker/v3/cmd/editorconfig-checker@v3.0.3 # renovate: datasource=go
+EDITORCONFIG_CHECKER_PACKAGE ?= github.com/editorconfig-checker/editorconfig-checker/v3/cmd/editorconfig-checker@v3.2.0 # renovate: datasource=go
 GOFUMPT_PACKAGE ?= mvdan.cc/gofumpt@v0.7.0 # renovate: datasource=go
-GOLANGCI_LINT_PACKAGE ?= github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 # renovate: datasource=go
+GOLANGCI_LINT_PACKAGE ?= github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.2 # renovate: datasource=go
 GXZ_PACKAGE ?= github.com/ulikunitz/xz/cmd/gxz@v0.5.11 # renovate: datasource=go
 MISSPELL_PACKAGE ?= github.com/golangci/misspell/cmd/misspell@v0.6.0 # renovate: datasource=go
 SWAGGER_PACKAGE ?= github.com/go-swagger/go-swagger/cmd/swagger@v0.31.0 # renovate: datasource=go
 XGO_PACKAGE ?= src.techknowlogick.com/xgo@latest
 GO_LICENSES_PACKAGE ?= github.com/google/go-licenses@v1.6.0 # renovate: datasource=go
 GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasource=go
-DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.26.0 # renovate: datasource=go
+DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.30.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
-GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.16.2 # renovate: datasource=go
-RENOVATE_NPM_PACKAGE ?= renovate@38.142.5 # renovate: datasource=docker packageName=code.forgejo.org/forgejo-contrib/renovate
+GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.18.1 # renovate: datasource=go
+RENOVATE_NPM_PACKAGE ?= renovate@39.185.0 # renovate: datasource=docker packageName=data.forgejo.org/renovate/renovate
+
+# https://github.com/disposable-email-domains/disposable-email-domains/commits/main/
+DISPOSABLE_EMAILS_SHA ?= 0c27e671231d27cf66370034d7f6818037416989 # renovate: ...
 
 ifeq ($(HAS_GO), yes)
 	CGO_EXTRA_CFLAGS := -DSQLITE_MAX_VARIABLE_NUMBER=32766
@@ -124,6 +127,11 @@ FORGEJO_VERSION_API ?= ${FORGEJO_VERSION}
 show-version-api:
 	@echo ${FORGEJO_VERSION_API}
 
+# Strip binaries by default to reduce size, allow overriding for debugging
+STRIP ?= 1
+ifeq ($(STRIP),1)
+	LDFLAGS := $(LDFLAGS) -s -w
+endif
 LDFLAGS := $(LDFLAGS) -X "main.ReleaseVersion=$(RELEASE_VERSION)" -X "main.MakeVersion=$(MAKE_VERSION)" -X "main.Version=$(FORGEJO_VERSION)" -X "main.Tags=$(TAGS)" -X "main.ForgejoVersion=$(FORGEJO_VERSION_API)"
 
 LINUX_ARCHS ?= linux/amd64,linux/386,linux/arm-5,linux/arm-6,linux/arm64
@@ -165,7 +173,7 @@ GO_DIRS := build cmd models modules routers services tests
 WEB_DIRS := web_src/js web_src/css
 
 STYLELINT_FILES := web_src/css web_src/js/components/*.vue
-SPELLCHECK_FILES := $(GO_DIRS) $(WEB_DIRS) docs/content templates options/locale/locale_en-US.ini .github $(wildcard *.go *.js *.ts *.vue *.md *.yml *.yaml *.toml)
+SPELLCHECK_FILES := $(GO_DIRS) $(WEB_DIRS) docs/content templates options/locale/locale_en-US.ini .github $(wildcard *.go *.js *.ts *.vue *.md *.yml *.yaml)
 
 GO_SOURCES := $(wildcard *.go)
 GO_SOURCES += $(shell find $(GO_DIRS) -type f -name "*.go" ! -path modules/options/bindata.go ! -path modules/public/bindata.go ! -path modules/templates/bindata.go)
@@ -417,22 +425,22 @@ lint-frontend: lint-js lint-css
 lint-frontend-fix: lint-js-fix lint-css-fix
 
 .PHONY: lint-backend
-lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale
+lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale lint-disposable-emails
 
 .PHONY: lint-backend-fix
-lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig
+lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig lint-disposable-emails-fix
 
 .PHONY: lint-codespell
-lint-codespell:
-	codespell
+lint-codespell: deps-py
+	@poetry run codespell
 
 .PHONY: lint-codespell-fix
-lint-codespell-fix:
-	codespell -w
+lint-codespell-fix: deps-py
+	@poetry run codespell -w
 
 .PHONY: lint-codespell-fix-i
-lint-codespell-fix-i:
-	codespell -w -i 3 -C 2
+lint-codespell-fix-i: deps-py
+	@poetry run codespell -w -i 3 -C 2
 
 .PHONY: lint-js
 lint-js: node_modules
@@ -511,6 +519,14 @@ lint-go-gopls:
 lint-editorconfig:
 	$(GO) run $(EDITORCONFIG_CHECKER_PACKAGE) templates .forgejo/workflows
 
+.PHONY: lint-disposable-emails
+lint-disposable-emails:
+	$(GO) run build/generate-disposable-email.go -check -r $(DISPOSABLE_EMAILS_SHA)
+
+.PHONY: lint-disposable-emails-fix
+lint-disposable-emails-fix:
+	$(GO) run build/generate-disposable-email.go -r $(DISPOSABLE_EMAILS_SHA)
+
 .PHONY: lint-templates
 lint-templates: .venv node_modules
 	@node tools/lint-templates-svg.js
@@ -518,7 +534,7 @@ lint-templates: .venv node_modules
 
 .PHONY: lint-yaml
 lint-yaml: .venv
-	@poetry run yamllint .
+	@poetry run yamllint -s .
 
 .PHONY: security-check
 security-check:
@@ -609,7 +625,7 @@ tidy-check: tidy
 go-licenses: $(GO_LICENSE_FILE)
 
 $(GO_LICENSE_FILE): go.mod go.sum
-	-$(shell $(GO) env GOROOT)/bin/go run $(GO_LICENSES_PACKAGE) save . --force --ignore code.gitea.io/gitea --save_path=$(GO_LICENSE_TMP_DIR) 2>/dev/null
+	-$(GO) run $(GO_LICENSES_PACKAGE) save . --force --ignore code.gitea.io/gitea --save_path=$(GO_LICENSE_TMP_DIR) 2>/dev/null
 	$(GO) run build/generate-go-licenses.go $(GO_LICENSE_TMP_DIR) $(GO_LICENSE_FILE)
 	@rm -rf $(GO_LICENSE_TMP_DIR)
 
@@ -660,6 +676,7 @@ generate-ini-pgsql:
 		-e 's|{{REPO_TEST_DIR}}|${REPO_TEST_DIR}|g' \
 		-e 's|{{TEST_LOGGER}}|$(or $(TEST_LOGGER),test$(COMMA)file)|g' \
 		-e 's|{{TEST_TYPE}}|$(or $(TEST_TYPE),integration)|g' \
+		-e 's|{{TEST_STORAGE_TYPE}}|$(or $(TEST_STORAGE_TYPE),minio)|g' \
 			tests/pgsql.ini.tmpl > tests/pgsql.ini
 
 .PHONY: test-pgsql
@@ -715,7 +732,6 @@ test-e2e-pgsql\#%: playwright e2e.pgsql.test generate-ini-pgsql
 
 .PHONY: test-e2e-debugserver
 test-e2e-debugserver: e2e.sqlite.test generate-ini-sqlite
-	sed -i s/3003/3000/g tests/sqlite.ini
 	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini ./e2e.sqlite.test -test.run TestDebugserver -test.timeout 24h
 
 .PHONY: bench-sqlite
@@ -816,7 +832,7 @@ check: test
 
 .PHONY: install $(TAGS_PREREQ)
 install: $(wildcard *.go)
-	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) install -v -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS)'
+	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) install -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)'
 
 .PHONY: build
 build: frontend backend
@@ -844,13 +860,13 @@ merge-locales:
 	@echo "NOT NEEDED: THIS IS A NOOP AS OF Forgejo 7.0 BUT KEPT FOR BACKWARD COMPATIBILITY"
 
 $(EXECUTABLE): $(GO_SOURCES) $(TAGS_PREREQ)
-	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS)' -o $@
+	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@
 
 forgejo: $(EXECUTABLE)
 	ln -f $(EXECUTABLE) forgejo
 
 static-executable: $(GO_SOURCES) $(TAGS_PREREQ)
-	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags 'netgo osusergo $(TAGS)' -ldflags '-s -w -linkmode external -extldflags "-static" $(LDFLAGS)' -o $(EXECUTABLE)
+	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -o $(EXECUTABLE)
 
 .PHONY: release
 release: frontend generate release-linux release-copy release-compress vendor release-sources release-check
@@ -909,7 +925,7 @@ release-docs: | $(DIST_DIRS) docs
 .PHONY: reproduce-build
 reproduce-build:
 # Start building the Dockerfile with the RELEASE_VERSION tag set. GOPROXY is set
-# for convience, because the default of the Dockerfile is `direct` which can be
+# for convenience, because the default of the Dockerfile is `direct` which can be
 # quite slow.
 	@docker build --build-arg="RELEASE_VERSION=$(RELEASE_VERSION)" --build-arg="GOPROXY=$(shell $(GO) env GOPROXY)" --tag "forgejo-reproducibility" .
 	@id=$$(docker create forgejo-reproducibility); \

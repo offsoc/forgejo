@@ -9,13 +9,14 @@
   "baseBranches": [
     "$default",
     "/^v7\\.\\d+/forgejo$/",
-    "/^v9\\.\\d+/forgejo$/",
-    "/^v10\\.\\d+/forgejo$/"
+    "/^v10\\.\\d+/forgejo$/",
+    "/^v11\\.\\d+/forgejo$/"
   ],
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
   "prConcurrentLimit": 10,
   "osvVulnerabilityAlerts": true,
-  "labels": ["dependency-upgrade"],
+  "automergeStrategy": "squash",
+  "labels": ["dependency-upgrade","test/not-needed"],
   "packageRules": [
     {
       "description": "Require approval for python minor version",
@@ -61,6 +62,7 @@
       "description": "Group nodejs packages",
       "matchPackageNames": [
         "code.forgejo.org/oci/node",
+        "data.forgejo.org/oci/node",
         "docker.io/library/node",
         "docker.io/node",
         "node"
@@ -81,6 +83,12 @@
       "extends": ["packages:postcss"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "postcss"
+    },
+    {
+      "description": "Group Forgejo go-chi packages",
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchPackageNames": ["code.forgejo.org/go-chi/**"],
+      "groupName": "forgejo go-chi packages"
     },
     {
       "description": "Split minor and patch updates",
@@ -104,41 +112,27 @@
       "automerge": true
     },
     {
-      "description": "Automerge renovate updates",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
-      "automerge": true
-    },
-    {
       "description": "Add reviewer and additional labels to renovate PRs",
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
+      "matchPackageNames": ["data.forgejo.org/renovate/renovate"],
       "reviewers": ["viceice"],
       "addLabels": ["forgejo/ci", "test/not-needed"]
     },
     {
-      "description": "Update renovate with higher prio to come through rate limit",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
-      "extends": ["schedule:weekly"],
-      "prPriority": 10,
-      "groupName": "renovate"
-    },
-    {
       "description": "Disable renovate self-updates for release branches",
-      "matchBaseBranches": ["^v\\d+\\.\\d+\\/forgejo$"],
-      "matchDatasources": ["docker"],
+      "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
       "matchPackageNames": [
         "code.forgejo.org/forgejo-contrib/renovate",
+        "data.forgejo.org/renovate/renovate",
         "ghcr.io/visualon/renovate"
       ],
       "enabled": false
     },
     {
       "description": "Automerge some packages when CI succeeds",
-      "extends": ["packages:linters", "packages:test"],
+      "extends": ["packages:linters", "packages:test", "schedule:monthly"],
       "matchPackageNames": [
+        "@axe-core/playwright",
         "@eslint-community/**",
         "@playwright/**",
         "@stoplight/spectral-cli",

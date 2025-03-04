@@ -75,7 +75,7 @@ func TestProject(t *testing.T) {
 
 	assert.Equal(t, project.Title, projectFromDB.Title)
 
-	require.NoError(t, ChangeProjectStatus(db.DefaultContext, project, true))
+	require.NoError(t, ChangeProjectStatusByRepoIDAndID(db.DefaultContext, project.RepoID, project.ID, true))
 
 	// Retrieve from DB afresh to check if it is truly closed
 	projectFromDB, err = GetProjectByID(db.DefaultContext, project.ID)

@@ -9,23 +9,31 @@
 			{{if and $.UpdateAllowed $.UpdateByRebaseAllowed}}
 				<div class="tw-inline-block">
 					<div class="ui buttons update-button">
-						<button class="ui button" data-do="{{$.Link}}/update" data-redirect="{{$.Link}}">
+						<button class="ui button" data-do="{{$.Link}}/update?style={{$.UpdateStyle}}" data-redirect="{{$.Link}}">
 							<span class="button-text">
-								{{ctx.Locale.Tr "repo.pulls.update_branch"}}
+								{{if eq $.UpdateStyle "rebase"}}
+									{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}
+								{{else}}
+									{{ctx.Locale.Tr "repo.pulls.update_branch"}}
+								{{end}}
 							</span>
 						</button>
 						<div class="ui dropdown icon button">
 							{{svg "octicon-triangle-down"}}
 							<div class="menu">
-								<a class="item active selected" data-do="{{$.Link}}/update">{{ctx.Locale.Tr "repo.pulls.update_branch"}}</a>
-								<a class="item" data-do="{{$.Link}}/update?style=rebase">{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}</a>
+								<a class="item {{if ne $.UpdateStyle "rebase"}}active selected{{end}}" data-do="{{$.Link}}/update?style=merge">
+									{{ctx.Locale.Tr "repo.pulls.update_branch"}}
+								</a>
+								<a class="item {{if eq $.UpdateStyle "rebase"}}active selected{{end}}" data-do="{{$.Link}}/update?style=rebase">
+									{{ctx.Locale.Tr "repo.pulls.update_branch_rebase"}}
+								</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			{{end}}
 			{{if and $.UpdateAllowed (not $.UpdateByRebaseAllowed)}}
-				<form action="{{$.Link}}/update" method="post" class="ui update-branch-form">
+				<form action="{{$.Link}}/update?style=merge" method="post" class="ui update-branch-form">
 					{{$.CsrfTokenHtml}}
 					<button class="ui compact button">
 						<span class="ui text">{{ctx.Locale.Tr "repo.pulls.update_branch"}}</span>

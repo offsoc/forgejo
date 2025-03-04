@@ -35,13 +35,7 @@ func addUnicodeNormalizeTokenFilter(m *mapping.IndexMappingImpl) error {
 	})
 }
 
-const (
-	maxBatchSize = 16
-	// fuzzyDenominator determines the levenshtein distance per each character of a keyword
-	fuzzyDenominator = 4
-	// see https://github.com/blevesearch/bleve/issues/1563#issuecomment-786822311
-	maxFuzziness = 2
-)
+const maxBatchSize = 16
 
 // IndexerData an update to the issue indexer
 type IndexerData internal.IndexerData
@@ -162,16 +156,32 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 	var queries []query.Query
 
 	if options.Keyword != "" {
-		fuzziness := 0
-		if options.IsFuzzyKeyword {
-			fuzziness = min(maxFuzziness, len(options.Keyword)/fuzzyDenominator)
+		tokens, err := options.Tokens()
+		if err != nil {
+			return nil, err
 		}
+		q := bleve.NewBooleanQuery()
+		for _, token := range tokens {
+			fuzziness := 0
+			if token.Fuzzy {
+				// TODO: replace with "auto" after bleve update
+				fuzziness = min(len(token.Term)/4, 2)
+			}
+			innerQ := bleve.NewDisjunctionQuery(
+				inner_bleve.MatchPhraseQuery(token.Term, "title", issueIndexerAnalyzer, fuzziness),
+				inner_bleve.MatchPhraseQuery(token.Term, "content", issueIndexerAnalyzer, fuzziness),
+				inner_bleve.MatchPhraseQuery(token.Term, "comments", issueIndexerAnalyzer, fuzziness))
 
-		queries = append(queries, bleve.NewDisjunctionQuery([]query.Query{
-			inner_bleve.MatchPhraseQuery(options.Keyword, "title", issueIndexerAnalyzer, fuzziness),
-			inner_bleve.MatchPhraseQuery(options.Keyword, "content", issueIndexerAnalyzer, fuzziness),
-			inner_bleve.MatchPhraseQuery(options.Keyword, "comments", issueIndexerAnalyzer, fuzziness),
-		}...))
+			switch token.Kind {
+			case internal.BoolOptMust:
+				q.AddMust(innerQ)
+			case internal.BoolOptShould:
+				q.AddShould(innerQ)
+			case internal.BoolOptNot:
+				q.AddMustNot(innerQ)
+			}
+		}
+		queries = append(queries, q)
 	}
 
 	if len(options.RepoIDs) > 0 || options.AllPublic {

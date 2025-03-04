@@ -33,7 +33,7 @@
 							{{if eq $val.Type "boolean"}}
 								<div class="ui checkbox">
 									<label><strong>{{if $val.Description}}{{$val.Description}}{{else}}{{$key}}{{end}}</strong></label>
-									{{/* These two inputs need to stay in exactly this order (checkbox first, hidden second) or boolean fields wont work correctly! */}}
+									{{/* These two inputs need to stay in exactly this order (checkbox first, hidden second) or boolean fields won't work correctly! */}}
 									<input type="checkbox" name="inputs[{{$key}}]" value="on" {{if eq $val.Default "true"}}checked{{end}}>
 									<input type="hidden" name="inputs[{{$key}}]" value="off" autocomplete="off">
 								</div>

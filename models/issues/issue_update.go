@@ -21,6 +21,7 @@ import (
 	"code.gitea.io/gitea/modules/references"
 	api "code.gitea.io/gitea/modules/structs"
 	"code.gitea.io/gitea/modules/timeutil"
+	"code.gitea.io/gitea/modules/util"
 
 	"xorm.io/builder"
 )
@@ -63,6 +64,10 @@ func changeIssueStatus(ctx context.Context, issue *Issue, doer *user_model.User,
 }
 
 func doChangeIssueStatus(ctx context.Context, issue *Issue, doer *user_model.User, isMergePull bool) (*Comment, error) {
+	if user_model.IsBlockedMultiple(ctx, []int64{issue.Repo.OwnerID, issue.PosterID}, doer.ID) {
+		return nil, user_model.ErrBlockedByUser
+	}
+
 	// Check for open dependencies
 	if issue.IsClosed && issue.Repo.IsDependenciesEnabled(ctx) {
 		// only check if dependencies are enabled and we're about to close an issue, otherwise reopening an issue would fail when there are unsatisfied dependencies
@@ -154,6 +159,7 @@ func ChangeIssueTitle(ctx context.Context, issue *Issue, doer *user_model.User, 
 	}
 	defer committer.Close()
 
+	issue.Title, _ = util.SplitStringAtByteN(issue.Title, 255)
 	if err = UpdateIssueCols(ctx, issue, "name"); err != nil {
 		return fmt.Errorf("updateIssueCols: %w", err)
 	}
@@ -409,6 +415,7 @@ func NewIssueWithIndex(ctx context.Context, doer *user_model.User, opts NewIssue
 }
 
 // NewIssue creates new issue with labels for repository.
+// The title will be cut off at 255 characters if it's longer than 255 characters.
 func NewIssue(ctx context.Context, repo *repo_model.Repository, issue *Issue, labelIDs []int64, uuids []string) (err error) {
 	ctx, committer, err := db.TxContext(ctx)
 	if err != nil {
@@ -422,6 +429,7 @@ func NewIssue(ctx context.Context, repo *repo_model.Repository, issue *Issue, la
 	}
 
 	issue.Index = idx
+	issue.Title, _ = util.SplitStringAtByteN(issue.Title, 255)
 
 	if err = NewIssueWithIndex(ctx, issue.Poster, NewIssueOptions{
 		Repo:        repo,
@@ -429,7 +437,7 @@ func NewIssue(ctx context.Context, repo *repo_model.Repository, issue *Issue, la
 		LabelIDs:    labelIDs,
 		Attachments: uuids,
 	}); err != nil {
-		if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) || IsErrNewIssueInsert(err) {
+		if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) {
 			return err
 		}
 		return fmt.Errorf("newIssue: %w", err)

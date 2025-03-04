@@ -566,6 +566,7 @@ func NewPullRequest(ctx context.Context, repo *repo_model.Repository, issue *Iss
 	}
 
 	issue.Index = idx
+	issue.Title, _ = util.SplitStringAtByteN(issue.Title, 255)
 
 	if err = NewIssueWithIndex(ctx, issue.Poster, NewIssueOptions{
 		Repo:        repo,
@@ -574,7 +575,7 @@ func NewPullRequest(ctx context.Context, repo *repo_model.Repository, issue *Iss
 		Attachments: uuids,
 		IsPull:      true,
 	}); err != nil {
-		if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) || IsErrNewIssueInsert(err) {
+		if repo_model.IsErrUserDoesNotHaveAccessToRepo(err) {
 			return err
 		}
 		return fmt.Errorf("newIssue: %w", err)

@@ -263,8 +263,6 @@ func loadMailerFrom(rootCfg ConfigProvider) {
 		MailService.OverrideEnvelopeFrom = true
 		MailService.EnvelopeFrom = parsed.Address
 	}
-
-	log.Info("Mail Service Enabled")
 }
 
 func loadRegisterMailFrom(rootCfg ConfigProvider) {
@@ -275,7 +273,6 @@ func loadRegisterMailFrom(rootCfg ConfigProvider) {
 		return
 	}
 	Service.RegisterEmailConfirm = true
-	log.Info("Register Mail Service Enabled")
 }
 
 func loadNotifyMailFrom(rootCfg ConfigProvider) {
@@ -286,7 +283,6 @@ func loadNotifyMailFrom(rootCfg ConfigProvider) {
 		return
 	}
 	Service.EnableNotifyMail = true
-	log.Info("Notify Mail Service Enabled")
 }
 
 func tryResolveAddr(addr string) []net.IPAddr {

@@ -151,25 +151,6 @@ func (err *ErrInvalidCloneAddr) Unwrap() error {
 	return util.ErrInvalidArgument
 }
 
-// ErrUpdateTaskNotExist represents a "UpdateTaskNotExist" kind of error.
-type ErrUpdateTaskNotExist struct {
-	UUID string
-}
-
-// IsErrUpdateTaskNotExist checks if an error is a ErrUpdateTaskNotExist.
-func IsErrUpdateTaskNotExist(err error) bool {
-	_, ok := err.(ErrUpdateTaskNotExist)
-	return ok
-}
-
-func (err ErrUpdateTaskNotExist) Error() string {
-	return fmt.Sprintf("update task does not exist [uuid: %s]", err.UUID)
-}
-
-func (err ErrUpdateTaskNotExist) Unwrap() error {
-	return util.ErrNotExist
-}
-
 // ErrInvalidTagName represents a "InvalidTagName" kind of error.
 type ErrInvalidTagName struct {
 	TagName string
