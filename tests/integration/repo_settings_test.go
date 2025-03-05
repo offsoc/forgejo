@@ -19,12 +19,12 @@ import (
 	fm "code.gitea.io/gitea/modules/forgefed"
 	"code.gitea.io/gitea/modules/optional"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/modules/validation"
 	gitea_context "code.gitea.io/gitea/services/context"
 	repo_service "code.gitea.io/gitea/services/repository"
 	user_service "code.gitea.io/gitea/services/user"
 	"code.gitea.io/gitea/tests"
-	ttools "code.gitea.io/gitea/tests/integration/tools"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -277,7 +277,7 @@ func TestRepoFollowing(t *testing.T) {
 		setting.Federation.Enabled = false
 	}()
 
-	mock := ttools.NewFederationServerMock()
+	mock := test.NewFederationServerMock()
 	federatedSrv := mock.DistantServer(t)
 	defer federatedSrv.Close()
 

@@ -1,7 +1,7 @@
 // Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-package tools
+package test
 
 import (
 	"fmt"
@@ -44,19 +44,6 @@ func NewFederationServerMockRepository(id int64) FederationServerMockRepository 
 	}
 }
 
-func NewFederationServerMock() FederationServerMock {
-	return FederationServerMock{
-		Persons: []FederationServerMockPerson{
-			NewFederationServerMockPerson(15, "stargoose1"),
-			NewFederationServerMockPerson(30, "stargoose2"),
-		},
-		Repositories: []FederationServerMockRepository{
-			NewFederationServerMockRepository(1),
-		},
-		LastPost: "",
-	}
-}
-
 func (p FederationServerMockPerson) marshal(host string) string {
 	return fmt.Sprintf(`{"@context":["https://www.w3.org/ns/activitystreams","https://w3id.org/security/v1"],`+
 		`"id":"http://%[1]v/api/activitypub/user-id/%[2]v",`+
@@ -69,6 +56,19 @@ func (p FederationServerMockPerson) marshal(host string) string {
 		`"publicKey":{"id":"http://%[1]v/api/activitypub/user-id/%[2]v#main-key",`+
 		`"owner":"http://%[1]v/api/activitypub/user-id/%[2]v",`+
 		`"publicKeyPem":%[4]v}}`, host, p.ID, p.Name, p.PubKey)
+}
+
+func NewFederationServerMock() *FederationServerMock {
+	return &FederationServerMock{
+		Persons: []FederationServerMockPerson{
+			NewFederationServerMockPerson(15, "stargoose1"),
+			NewFederationServerMockPerson(30, "stargoose2"),
+		},
+		Repositories: []FederationServerMockRepository{
+			NewFederationServerMockRepository(1),
+		},
+		LastPost: "",
+	}
 }
 
 func (mock *FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
@@ -95,7 +95,7 @@ func (mock *FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
 			})
 	}
 	for _, repository := range mock.Repositories {
-		federatedRoutes.HandleFunc(fmt.Sprintf("/api/v1/activitypub/repository-id/%vj/inbox/", repository.ID),
+		federatedRoutes.HandleFunc(fmt.Sprintf("/api/v1/activitypub/repository-id/%v/inbox/", repository.ID),
 			func(res http.ResponseWriter, req *http.Request) {
 				if req.Method != "POST" {
 					t.Errorf("POST expected at: %q", req.URL.EscapedPath())

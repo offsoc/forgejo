@@ -20,7 +20,6 @@ import (
 	"code.gitea.io/gitea/modules/test"
 	"code.gitea.io/gitea/routers"
 	"code.gitea.io/gitea/tests"
-	ttools "code.gitea.io/gitea/tests/integration/tools"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -58,7 +57,7 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 
-	mock := ttools.NewFederationServerMock()
+	mock := test.NewFederationServerMock()
 	federatedSrv := mock.DistantServer(t)
 	defer federatedSrv.Close()
 
