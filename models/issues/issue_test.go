@@ -4,7 +4,6 @@
 package issues_test
 
 import (
-	"context"
 	"fmt"
 	"sort"
 	"sync"
@@ -309,7 +308,7 @@ func TestIssue_ResolveMentions(t *testing.T) {
 func TestResourceIndex(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
-	beforeCount, err := issues_model.CountIssues(context.Background(), &issues_model.IssuesOptions{})
+	beforeCount, err := issues_model.CountIssues(t.Context(), &issues_model.IssuesOptions{})
 	require.NoError(t, err)
 
 	var wg sync.WaitGroup
@@ -326,7 +325,7 @@ func TestResourceIndex(t *testing.T) {
 		t.Parallel()
 
 		wg.Wait()
-		afterCount, err := issues_model.CountIssues(context.Background(), &issues_model.IssuesOptions{})
+		afterCount, err := issues_model.CountIssues(t.Context(), &issues_model.IssuesOptions{})
 		require.NoError(t, err)
 		assert.EqualValues(t, 100, afterCount-beforeCount)
 	})
@@ -354,7 +353,7 @@ func TestCorrectIssueStats(t *testing.T) {
 	wg.Wait()
 
 	// Now we will get all issueID's that match the "Bugs are nasty" query.
-	issues, err := issues_model.Issues(context.TODO(), &issues_model.IssuesOptions{
+	issues, err := issues_model.Issues(t.Context(), &issues_model.IssuesOptions{
 		Paginator: &db.ListOptions{
 			PageSize: issueAmount,
 		},

@@ -5,7 +5,6 @@
 package migrations
 
 import (
-	"context"
 	"os"
 	"testing"
 	"time"
@@ -25,7 +24,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	server := unittest.NewMockWebServer(t, "https://api.github.com", fixturePath, token != "")
 	defer server.Close()
 
-	downloader := NewGithubDownloaderV3(context.Background(), server.URL, "", "", token, "go-gitea", "test_repo")
+	downloader := NewGithubDownloaderV3(t.Context(), server.URL, "", "", token, "go-gitea", "test_repo")
 	err := downloader.RefreshRate()
 	require.NoError(t, err)
 

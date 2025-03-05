@@ -4,7 +4,6 @@
 package log_test
 
 import (
-	"context"
 	"testing"
 
 	"code.gitea.io/gitea/modules/log"
@@ -23,7 +22,7 @@ func TestBufferLogger(t *testing.T) {
 		Expression: expected,
 	})
 
-	logger := log.NewLoggerWithWriters(context.Background(), "test", bufferWriter)
+	logger := log.NewLoggerWithWriters(t.Context(), "test", bufferWriter)
 
 	logger.SendLogEvent(&log.Event{
 		Level:         log.INFO,

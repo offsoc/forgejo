@@ -13,14 +13,22 @@ import (
 )
 
 const (
-	id                = "System.Gitea"
+	id                = "System.Forgejo"
+	title             = "Package Title"
+	language          = "Package Language"
 	semver            = "1.0.1"
-	authors           = "Gitea Authors"
-	projectURL        = "https://gitea.io"
+	authors           = "Forgejo Authors"
+	owners            = "Package Owners"
+	copyright         = "Package Copyright"
+	projectURL        = "https://forgejo.org"
+	licenseURL        = "https://forgejo.org/docs/latest/license/"
+	iconURL           = "https://codeberg.org/forgejo/governance/raw/branch/main/branding/logo/forgejo.png"
 	description       = "Package Description"
 	releaseNotes      = "Package Release Notes"
 	readme            = "Readme"
-	repositoryURL     = "https://gitea.io/gitea/gitea"
+	tags              = "tag_1 tag_2 tag_3"
+	minClientVersion  = "1.0.0.0"
+	repositoryURL     = "https://codeberg.org/forgejo"
 	targetFramework   = ".NETStandard2.1"
 	dependencyID      = "System.Text.Json"
 	dependencyVersion = "5.0.0"
@@ -28,16 +36,24 @@ const (
 
 const nuspecContent = `<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
-  <metadata>
+  <metadata minClientVersion="` + minClientVersion + `">
     <id>` + id + `</id>
+	<title>` + title + `</title>
+	<language>` + language + `</language>
     <version>` + semver + `</version>
     <authors>` + authors + `</authors>
+    <owners>` + owners + `</owners>
+    <copyright>` + copyright + `</copyright>
+    <developmentDependency>true</developmentDependency>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <projectUrl>` + projectURL + `</projectUrl>
+    <licenseUrl>` + licenseURL + `</licenseUrl>
+    <iconUrl>` + iconURL + `</iconUrl>
     <description>` + description + `</description>
     <releaseNotes>` + releaseNotes + `</releaseNotes>
     <repository url="` + repositoryURL + `" />
     <readme>README.md</readme>
+    <tags>` + tags + `</tags>
     <dependencies>
       <group targetFramework="` + targetFramework + `">
         <dependency id="` + dependencyID + `" version="` + dependencyVersion + `" exclude="Build,Analyzers" />
@@ -142,12 +158,22 @@ func TestParsePackageMetaData(t *testing.T) {
 		assert.Equal(t, DependencyPackage, np.PackageType)
 
 		assert.Equal(t, id, np.ID)
+		assert.Equal(t, title, np.Metadata.Title)
+		assert.Equal(t, language, np.Metadata.Language)
 		assert.Equal(t, semver, np.Version)
 		assert.Equal(t, authors, np.Metadata.Authors)
+		assert.Equal(t, owners, np.Metadata.Owners)
+		assert.Equal(t, copyright, np.Metadata.Copyright)
+		assert.True(t, np.Metadata.DevelopmentDependency)
+		assert.True(t, np.Metadata.RequireLicenseAcceptance)
 		assert.Equal(t, projectURL, np.Metadata.ProjectURL)
+		assert.Equal(t, licenseURL, np.Metadata.LicenseURL)
+		assert.Equal(t, iconURL, np.Metadata.IconURL)
 		assert.Equal(t, description, np.Metadata.Description)
 		assert.Equal(t, releaseNotes, np.Metadata.ReleaseNotes)
 		assert.Equal(t, readme, np.Metadata.Readme)
+		assert.Equal(t, tags, np.Metadata.Tags)
+		assert.Equal(t, minClientVersion, np.Metadata.MinClientVersion)
 		assert.Equal(t, repositoryURL, np.Metadata.RepositoryURL)
 		assert.Len(t, np.Metadata.Dependencies, 1)
 		assert.Contains(t, np.Metadata.Dependencies, targetFramework)

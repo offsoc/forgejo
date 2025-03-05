@@ -2,7 +2,7 @@ module code.gitea.io/gitea
 
 go 1.24
 
-toolchain go1.24.0
+toolchain go1.24.1
 
 require (
 	code.forgejo.org/f3/gof3/v3 v3.10.4
@@ -82,7 +82,7 @@ require (
 	github.com/niklasfasching/go-org v1.7.0
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/opencontainers/go-digest v1.0.0
-	github.com/opencontainers/image-spec v1.1.0
+	github.com/opencontainers/image-spec v1.1.1
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.21.0
 	github.com/redis/go-redis/v9 v9.7.0

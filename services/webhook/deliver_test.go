@@ -4,12 +4,10 @@
 package webhook
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -19,6 +17,7 @@ import (
 	webhook_model "code.gitea.io/gitea/models/webhook"
 	"code.gitea.io/gitea/modules/hostmatcher"
 	"code.gitea.io/gitea/modules/setting"
+	"code.gitea.io/gitea/modules/test"
 	webhook_module "code.gitea.io/gitea/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
@@ -26,16 +25,9 @@ import (
 )
 
 func TestWebhookProxy(t *testing.T) {
-	oldWebhook := setting.Webhook
-	oldHTTPProxy := os.Getenv("http_proxy")
-	oldHTTPSProxy := os.Getenv("https_proxy")
-	t.Cleanup(func() {
-		setting.Webhook = oldWebhook
-		os.Setenv("http_proxy", oldHTTPProxy)
-		os.Setenv("https_proxy", oldHTTPSProxy)
-	})
-	os.Unsetenv("http_proxy")
-	os.Unsetenv("https_proxy")
+	defer test.MockProtect(&setting.Webhook)()
+	t.Setenv("http_proxy", "")
+	t.Setenv("https_proxy", "")
 
 	setting.Webhook.ProxyURL = "http://localhost:8080"
 	setting.Webhook.ProxyURLFixed, _ = url.Parse(setting.Webhook.ProxyURL)
@@ -124,7 +116,7 @@ func TestWebhookDeliverAuthorizationHeader(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, hookTask)
 
-	require.NoError(t, Deliver(context.Background(), hookTask))
+	require.NoError(t, Deliver(t.Context(), hookTask))
 	select {
 	case <-done:
 	case <-time.After(5 * time.Second):
@@ -190,7 +182,7 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotNil(t, hookTask)
 
-		require.NoError(t, Deliver(context.Background(), hookTask))
+		require.NoError(t, Deliver(t.Context(), hookTask))
 		select {
 		case <-done:
 		case <-time.After(5 * time.Second):
@@ -216,7 +208,7 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotNil(t, hookTask)
 
-		require.NoError(t, Deliver(context.Background(), hookTask))
+		require.NoError(t, Deliver(t.Context(), hookTask))
 		select {
 		case <-done:
 		case <-time.After(5 * time.Second):
@@ -317,7 +309,7 @@ func TestWebhookDeliverSpecificTypes(t *testing.T) {
 			require.NoError(t, err)
 			assert.NotNil(t, hookTask)
 
-			require.NoError(t, Deliver(context.Background(), hookTask))
+			require.NoError(t, Deliver(t.Context(), hookTask))
 			select {
 			case gotBody := <-hc.gotBody:
 				assert.NotEqual(t, string(data), string(gotBody), "request body must be different from the event payload")

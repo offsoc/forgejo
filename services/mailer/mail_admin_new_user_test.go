@@ -45,7 +45,7 @@ func cleanUpUsers(ctx context.Context, users []*user_model.User) {
 }
 
 func TestAdminNotificationMail_test(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	users := getTestUsers(t)
 

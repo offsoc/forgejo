@@ -347,7 +347,7 @@ func authSourcePayloadGitHubCustom(name string) map[string]string {
 }
 
 func createRemoteAuthSource(t *testing.T, name, url, matchingSource string) *auth.Source {
-	require.NoError(t, auth.CreateSource(context.Background(), &auth.Source{
+	require.NoError(t, auth.CreateSource(t.Context(), &auth.Source{
 		Type:     auth.Remote,
 		Name:     name,
 		IsActive: true,

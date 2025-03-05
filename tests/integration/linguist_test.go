@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"net/http"
 	"net/url"
 	"strings"
@@ -82,7 +81,7 @@ func TestLinguistSupport(t *testing.T) {
 			err := stats.UpdateRepoIndexer(repo)
 			require.NoError(t, err)
 
-			require.NoError(t, queue.GetManager().FlushAll(context.Background(), 10*time.Second))
+			require.NoError(t, queue.GetManager().FlushAll(t.Context(), 10*time.Second))
 
 			status, err := repo_model.GetIndexerStatus(db.DefaultContext, repo, repo_model.RepoIndexerTypeStats)
 			require.NoError(t, err)

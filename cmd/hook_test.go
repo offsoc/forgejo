@@ -6,7 +6,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -42,7 +41,7 @@ func captureOutput(t *testing.T, stdFD *os.File) (finish func() (output string))
 }
 
 func TestPktLine(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	t.Run("Read", func(t *testing.T) {
 		s := strings.NewReader("0000")
