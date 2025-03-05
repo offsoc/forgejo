@@ -1356,6 +1356,10 @@ table th[data-sortt-desc] .svg {
   border-color: var(--color-secondary);
 }
 
+.ui.tabular.menu .item {
+  height: 100%;
+}
+
 .ui.tabular.menu .item,
 .ui.secondary.pointing.menu .item {
   padding: 11px 12px !important;

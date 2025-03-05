@@ -115,6 +115,8 @@ const (
 
 	CommentTypePin   // 36 pin Issue
 	CommentTypeUnpin // 37 unpin Issue
+
+	CommentTypeAggregator // 38 Aggregator of comments
 )
 
 var commentStrings = []string{
@@ -156,6 +158,7 @@ var commentStrings = []string{
 	"pull_cancel_scheduled_merge",
 	"pin",
 	"unpin",
+	"action_aggregator",
 }
 
 func (t CommentType) String() string {
@@ -237,12 +240,6 @@ func (r RoleInRepo) LocaleHelper(lang translation.Locale) string {
 	return lang.TrString("repo.issues.role." + string(r) + "_helper")
 }
 
-type RequestReviewTarget interface {
-	ID() int64
-	Name() string
-	Type() string
-}
-
 // Comment represents a comment in commit and issue page.
 type Comment struct {
 	ID                   int64            `xorm:"pk autoincr"`
@@ -255,6 +252,7 @@ type Comment struct {
 	Issue                *Issue `xorm:"-"`
 	LabelID              int64
 	Label                *Label                `xorm:"-"`
+	Aggregator           *ActionAggregator     `xorm:"-"`
 	AddedLabels          []*Label              `xorm:"-"`
 	RemovedLabels        []*Label              `xorm:"-"`
 	AddedRequestReview   []RequestReviewTarget `xorm:"-"`
