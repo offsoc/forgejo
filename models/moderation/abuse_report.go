@@ -5,6 +5,7 @@ package moderation
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"slices"
 
@@ -101,7 +102,7 @@ type AbuseReport struct {
 	// Remarks provided by the reporter.
 	Remarks string // TODO: ReporterReparks or Reason
 	// The ID of the corresponding shadow-copied content when exists; otherwise null.
-	ShadowCopyID *int64             `xorm:"DEFAULT NULL"`
+	ShadowCopyID sql.NullInt64      `xorm:"DEFAULT NULL"`
 	CreatedUnix  timeutil.TimeStamp `xorm:"created NOT NULL"`
 }
 

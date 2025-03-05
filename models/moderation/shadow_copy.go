@@ -5,6 +5,7 @@ package moderation
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"code.gitea.io/gitea/models/db"
@@ -18,6 +19,11 @@ type AbuseReportShadowCopy struct {
 	ID          int64              `xorm:"pk autoincr"`
 	RawValue    string             `xorm:"NOT NULL"`
 	CreatedUnix timeutil.TimeStamp `xorm:"created NOT NULL"`
+}
+
+// Returns the ID encapsulated in a sql.NullInt64 struct.
+func (sc AbuseReportShadowCopy) NullableID() sql.NullInt64 {
+	return sql.NullInt64{Int64: sc.ID, Valid: sc.ID > 0}
 }
 
 func init() {
@@ -69,7 +75,7 @@ func createShadowCopy(ctx context.Context, contentType ReportedContentType, cont
 			"content_type": contentType,
 			"content_id":   contentID,
 			// TODO: What should happen if an item is updated multiple times (and the reports already have a shadow copy ID)?
-		}).And(builder.IsNull{"shadow_copy_id"}).Cols("shadow_copy_id").Update(&AbuseReport{ShadowCopyID: &shadowCopy.ID})
+		}).And(builder.IsNull{"shadow_copy_id"}).Update(&AbuseReport{ShadowCopyID: shadowCopy.NullableID()})
 		if err != nil {
 			return fmt.Errorf("could not link the shadow copy (%d) to reported content with type %d and ID %d - %w", shadowCopy.ID, contentType, contentID, err)
 		}
