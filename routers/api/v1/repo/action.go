@@ -612,6 +612,11 @@ func ListActionTasks(ctx *context.APIContext) {
 	ctx.JSON(http.StatusOK, &res)
 }
 
+type ActionRun struct {
+	ID   int64
+	Jobs []string
+}
+
 // DispatchWorkflow dispatches a workflow
 func DispatchWorkflow(ctx *context.APIContext) {
 	// swagger:operation POST /repos/{owner}/{repo}/actions/workflows/{workflowname}/dispatches repository DispatchWorkflow
@@ -670,7 +675,8 @@ func DispatchWorkflow(ctx *context.APIContext) {
 		return opt.Inputs[key]
 	}
 
-	if err := workflow.Dispatch(ctx, inputGetter, ctx.Repo.Repository, ctx.Doer); err != nil {
+	run, jobs, err := workflow.Dispatch(ctx, inputGetter, ctx.Repo.Repository, ctx.Doer)
+	if err != nil {
 		if actions_service.IsInputRequiredErr(err) {
 			ctx.Error(http.StatusBadRequest, "workflow.Dispatch", err)
 		} else {
@@ -679,5 +685,10 @@ func DispatchWorkflow(ctx *context.APIContext) {
 		return
 	}
 
-	ctx.JSON(http.StatusNoContent, nil)
+	actionRun := &ActionRun{
+		ID:   run.ID,
+		Jobs: jobs,
+	}
+
+	ctx.JSON(http.StatusOK, actionRun)
 }

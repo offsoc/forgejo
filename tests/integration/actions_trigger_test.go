@@ -752,7 +752,7 @@ func TestWorkflowDispatchEvent(t *testing.T) {
 			return ""
 		}
 
-		err = workflow.Dispatch(db.DefaultContext, inputGetter, repo, user2)
+		_, _, err = workflow.Dispatch(db.DefaultContext, inputGetter, repo, user2)
 		require.NoError(t, err)
 
 		assert.Equal(t, 1, unittest.GetCount(t, &actions_model.ActionRun{RepoID: repo.ID}))
