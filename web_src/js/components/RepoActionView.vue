@@ -419,7 +419,7 @@ export function initRepositoryActionView() {
 }
 </script>
 <template>
-  <div class="ui container action-view-container">
+  <div class="ui container fluid padded action-view-container">
     <div class="action-view-header">
       <div class="action-info-summary">
         <div class="action-info-summary-title">
