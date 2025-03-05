@@ -13,6 +13,7 @@ import (
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/forms"
+	moderation_service "code.gitea.io/gitea/services/moderation"
 )
 
 const (
@@ -83,6 +84,21 @@ func CreatePost(ctx *context.Context) {
 
 	if ctx.HasError() {
 		setContextDataAndRender(ctx, form.ContentType, form.ContentID)
+		return
+	}
+
+	can, err := moderation_service.CanReport(*ctx, ctx.Doer, form.ContentType, form.ContentID)
+	if err != nil {
+		if errors.Is(err, moderation_service.ErrContentDoesNotExist) || errors.Is(err, moderation_service.ErrDoerNotAllowed) {
+			ctx.Flash.Error(ctx.Tr("moderation.report_abuse_form.invalid"))
+			ctx.Redirect(ctx.Doer.DashboardLink())
+		} else {
+			ctx.ServerError("Failed to check if user can report content", err)
+		}
+		return
+	} else if !can {
+		ctx.Flash.Error(ctx.Tr("moderation.report_abuse_form.invalid"))
+		ctx.Redirect(ctx.Doer.DashboardLink())
 		return
 	}
 
