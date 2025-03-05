@@ -4,6 +4,7 @@
 package moderation
 
 import (
+	"errors"
 	"net/http"
 
 	"code.gitea.io/gitea/models/moderation"
@@ -22,8 +23,9 @@ const (
 func NewReport(ctx *context.Context) {
 	contentID := ctx.FormInt64("id")
 	if contentID <= 0 {
+		setMinimalContextData(ctx)
 		ctx.RenderWithErr(ctx.Tr("moderation.report_abuse_form.invalid"), tplSubmitAbuseReport, nil)
-		log.Warn("The content ID is expected to be an integer greater that 0; the provided value is %d.", contentID)
+		log.Warn("The content ID is expected to be an integer greater that 0; the provided value is %s.", ctx.FormString("id"))
 		return
 	}
 
@@ -39,12 +41,14 @@ func NewReport(ctx *context.Context) {
 	case "comment":
 		contentType = moderation.ReportedContentTypeComment
 	default:
+		setMinimalContextData(ctx)
 		ctx.RenderWithErr(ctx.Tr("moderation.report_abuse_form.invalid"), tplSubmitAbuseReport, nil)
 		log.Warn("The provided content type `%s` is not among the expected values.", contentTypeString)
 		return
 	}
 
 	if moderation.AlreadyReportedByAndOpen(ctx, ctx.Doer.ID, contentType, contentID) {
+		setMinimalContextData(ctx)
 		ctx.RenderWithErr(ctx.Tr("moderation.report_abuse_form.already_reported"), tplSubmitAbuseReport, nil)
 		return
 	}
@@ -52,13 +56,18 @@ func NewReport(ctx *context.Context) {
 	setContextDataAndRender(ctx, contentType, contentID)
 }
 
+// setMinimalContextData adds minimal values (Title and CancelLink) into context data.
+func setMinimalContextData(ctx *context.Context) {
+	ctx.Data["Title"] = ctx.Tr("moderation.report_abuse")
+	ctx.Data["CancelLink"] = ctx.Doer.DashboardLink()
+}
+
 // setContextDataAndRender adds some values into context data and renders the new abuse report page.
 func setContextDataAndRender(ctx *context.Context, contentType moderation.ReportedContentType, contentID int64) {
-	ctx.Data["Title"] = ctx.Tr("moderation.report_abuse")
+	setMinimalContextData(ctx)
 	ctx.Data["ContentID"] = contentID
 	ctx.Data["ContentType"] = contentType
 	ctx.Data["AbuseCategories"] = moderation.GetAbuseCategoriesList()
-	ctx.Data["CancelLink"] = ctx.Doer.DashboardLink()
 	ctx.HTML(http.StatusOK, tplSubmitAbuseReport)
 }
 
@@ -67,6 +76,7 @@ func CreatePost(ctx *context.Context) {
 	form := *web.GetForm(ctx).(*forms.ReportAbuseForm)
 
 	if form.ContentID <= 0 || !form.ContentType.IsValid() {
+		setMinimalContextData(ctx)
 		ctx.RenderWithErr(ctx.Tr("moderation.report_abuse_form.invalid"), tplSubmitAbuseReport, nil)
 		return
 	}
@@ -85,8 +95,12 @@ func CreatePost(ctx *context.Context) {
 	}
 
 	if err := moderation.ReportAbuse(ctx, &report); err != nil {
-		ctx.Flash.Error(ctx.Tr("moderation.reporting_failed", err))
-		ctx.Redirect(ctx.Doer.DashboardLink())
+		if errors.Is(err, moderation.ErrSelfReporting) {
+			ctx.Flash.Error(ctx.Tr("moderation.reporting_failed", err))
+			ctx.Redirect(ctx.Doer.DashboardLink())
+		} else {
+			ctx.ServerError("Failed to save new abuse report", err)
+		}
 		return
 	}
 

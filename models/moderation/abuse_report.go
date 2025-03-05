@@ -105,6 +105,8 @@ type AbuseReport struct {
 	CreatedUnix  timeutil.TimeStamp `xorm:"created NOT NULL"`
 }
 
+var ErrSelfReporting = errors.New("reporting yourself is not allowed")
+
 func init() {
 	// RegisterModel will create the table if does not already exist
 	// or any missing columns if the table was previously created.
@@ -133,7 +135,7 @@ func AlreadyReportedByAndOpen(ctx context.Context, doerID int64, contentType Rep
 
 func ReportAbuse(ctx context.Context, report *AbuseReport) error {
 	if report.ContentType == ReportedContentTypeUser && report.ReporterID == report.ContentID {
-		return errors.New("reporting yourself is not allowed")
+		return ErrSelfReporting
 	}
 
 	if AlreadyReportedByAndOpen(ctx, report.ReporterID, report.ContentType, report.ContentID) {

@@ -14,8 +14,6 @@ import (
 // CommentData represents a trimmed down comment that is used for preserving
 // only the fields needed for abusive content reports (mainly string fields).
 type CommentData struct {
-	OriginalAuthor string // TODO: decide if this is useful
-	TreePath       string // TODO: decide if this is useful
 	Content        string
 	ContentVersion int
 	CreatedUnix    timeutil.TimeStamp
@@ -26,8 +24,6 @@ type CommentData struct {
 // (keeping only the fields relevant for moderation purposes)
 func newCommentData(comment *Comment) CommentData {
 	return CommentData{
-		OriginalAuthor: comment.OriginalAuthor,
-		TreePath:       comment.TreePath,
 		Content:        comment.Content,
 		ContentVersion: comment.ContentVersion,
 		CreatedUnix:    comment.CreatedUnix,

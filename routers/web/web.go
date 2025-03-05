@@ -481,8 +481,8 @@ func registerRoutes(m *web.Route) {
 		m.Get("/search", repo.SearchIssues)
 	}, reqSignIn)
 
-	m.Get("/-/abuse_reports/new", moderation.NewReport, reqSignIn)
-	m.Post("/-/abuse_reports/new", web.Bind(forms.ReportAbuseForm{}), moderation.CreatePost, reqSignIn)
+	m.Get("/-/abuse_reports/new", reqSignIn, moderation.NewReport)
+	m.Post("/-/abuse_reports/new", reqSignIn, web.Bind(forms.ReportAbuseForm{}), moderation.CreatePost)
 
 	m.Get("/pulls", reqSignIn, user.Pulls)
 	m.Get("/milestones", reqSignIn, reqMilestonesDashboardPageEnabled, user.Milestones)
