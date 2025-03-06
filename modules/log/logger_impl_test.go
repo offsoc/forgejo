@@ -4,6 +4,7 @@
 package log
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,7 +19,7 @@ func TestLog(t *testing.T) {
 		Level: INFO,
 	})
 
-	logger := NewLoggerWithWriters(t.Context(), "test", bufferWriter)
+	logger := NewLoggerWithWriters(context.Background(), "test", bufferWriter)
 
 	testGeneric(logger, "I'm the generic value!")
 	logger.Close()
