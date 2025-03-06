@@ -1,6 +1,6 @@
 -
   id: 1001
-  title: Org project that contains private issues
+  title: Org project that contains private and public issues
   owner_id: 3
   repo_id: 0
   is_closed: false
@@ -12,7 +12,7 @@
 
 -
   id: 1002
-  title: User project that contains private issues
+  title: User project that contains private and public issues
   owner_id: 2
   repo_id: 0
   is_closed: false
