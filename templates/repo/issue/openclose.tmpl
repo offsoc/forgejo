@@ -10,7 +10,7 @@
 		{{ctx.Locale.PrettyNumber .OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
 	</a>
 	<a class="{{if eq .State "closed"}}active {{end}}item" href="{{.ClosedLink}}" data-test-name="closed-issue-count">
-		{{svg "octicon-check" 16 "tw-mr-2"}}
+		{{svg "octicon-issue-closed" 16 "tw-mr-2"}}
 		{{ctx.Locale.PrettyNumber .ClosedCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
 	</a>
 	{{if not .PageIsMilestones}}
