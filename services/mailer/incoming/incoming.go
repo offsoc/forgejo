@@ -7,6 +7,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"mime"
 	net_mail "net/mail"
 	"regexp"
 	"strings"
@@ -20,6 +21,7 @@ import (
 	"code.forgejo.org/forgejo/reply"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	"github.com/h2non/filetype"
 	"github.com/jhillyerd/enmime/v2"
 )
 
@@ -374,25 +376,62 @@ type Attachment struct {
 // getContentFromMailReader grabs the plain content and the attachments from the mail.
 // A potential reply/signature gets stripped from the content.
 func getContentFromMailReader(env *enmime.Envelope) *MailContent {
+	// get attachments
 	attachments := make([]*Attachment, 0, len(env.Attachments))
 	for _, attachment := range env.Attachments {
 		attachments = append(attachments, &Attachment{
-			Name:    attachment.FileName,
+			Name:    constructFilename(attachment),
 			Content: attachment.Content,
 		})
 	}
+	// get inlines
 	inlineAttachments := make([]*Attachment, 0, len(env.Inlines))
 	for _, inline := range env.Inlines {
 		if inline.FileName != "" && inline.ContentType != "text/plain" {
 			inlineAttachments = append(inlineAttachments, &Attachment{
-				Name:    inline.FileName,
+				Name:    constructFilename(inline),
 				Content: inline.Content,
 			})
 		}
 	}
+	// get other parts (mostly multipart/related files, these are for example embedded images in an html mail)
+	otherParts := make([]*Attachment, 0, len(env.Inlines))
+	for _, otherPart := range env.OtherParts {
+		otherParts = append(otherParts, &Attachment{
+			Name:    constructFilename(otherPart),
+			Content: otherPart.Content,
+		})
+	}
 
 	return &MailContent{
 		Content:     reply.FromText(env.Text),
-		Attachments: append(attachments, inlineAttachments...),
+		Attachments: append(append(attachments, inlineAttachments...), otherParts...),
 	}
+}
+
+// constructFilename interprets the mime part as an (inline) attachment and returns its filename
+// If no filename is given it guesses a sensible filename for it based on the filetype.
+func constructFilename(part *enmime.Part) string {
+	if strings.TrimSpace(part.FileName) != "" {
+		return part.FileName
+	}
+
+	filenameWOExtension := "unnamed_file"
+	if strings.TrimSpace(part.ContentID) != "" {
+		filenameWOExtension = part.ContentID
+	}
+
+	fileExtension := ".unknown"
+	match, err := filetype.Match(part.Content)
+	if err != nil {
+		mimeExtensions, err := mime.ExtensionsByType(part.ContentType)
+		if err == nil && len(mimeExtensions) != 0 {
+			// just use the first one we find, this is just a fallback anyways
+			fileExtension = mimeExtensions[0]
+		}
+	} else {
+		// while the mime detector includes the leading dot the filetype library does not
+		fileExtension = "." + match.Extension
+	}
+	return filenameWOExtension + fileExtension
 }
