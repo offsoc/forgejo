@@ -65,6 +65,12 @@ func TestIsAutomaticReply(t *testing.T) {
 			},
 			Expected: true,
 		},
+		{
+			Headers: map[string]string{
+				"Precedence": "auto_reply",
+			},
+			Expected: true,
+		},
 	}
 
 	for _, c := range cases {

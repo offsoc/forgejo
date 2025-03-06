@@ -297,6 +297,10 @@ func isAutomaticReply(env *enmime.Envelope) bool {
 	if autoReply == "yes" {
 		return true
 	}
+	precedence := env.GetHeader("Precedence")
+	if precedence == "auto_reply" {
+		return true
+	}
 	autoRespond := env.GetHeader("X-Autorespond")
 	return autoRespond != ""
 }
