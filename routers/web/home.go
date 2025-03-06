@@ -60,6 +60,7 @@ func Home(ctx *context.Context) {
 	}
 
 	ctx.Data["PageIsHome"] = true
+	ctx.Data["HideExploreButton"] = (setting.Service.RequireSignInView || setting.Service.Explore.RequireSigninView) && (!ctx.IsSigned || setting.Service.DisableRegistration)
 	ctx.Data["IsRepoIndexerEnabled"] = setting.Indexer.RepoIndexerEnabled
 
 	ctx.Data["OpenGraphDescription"] = setting.UI.Meta.Description

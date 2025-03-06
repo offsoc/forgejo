@@ -193,6 +193,7 @@ func SignInPost(ctx *context.Context) {
 	ctx.Data["EnableSSPI"] = auth.IsSSPIEnabled(ctx)
 	ctx.Data["EnableInternalSignIn"] = setting.Service.EnableInternalSignIn
 	ctx.Data["DisablePassword"] = !setting.Service.EnableInternalSignIn
+	ctx.Data["HideExploreButton"] = (setting.Service.RequireSignInView || setting.Service.Explore.RequireSigninView) && (!ctx.IsSigned || setting.Service.DisableRegistration)
 
 	// Permission denied if EnableInternalSignIn is false
 	if !setting.Service.EnableInternalSignIn {

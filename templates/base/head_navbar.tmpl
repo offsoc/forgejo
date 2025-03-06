@@ -42,7 +42,11 @@
 		{{else if .IsLandingPageOrganizations}}
 			<a class="item{{if .PageIsExplore}} active{{end}}" href="{{AppSubUrl}}/explore/organizations">{{ctx.Locale.Tr "explore"}}</a>
 		{{else}}
-			<a class="item{{if .PageIsExplore}} active{{end}}" href="{{AppSubUrl}}/explore/repos">{{ctx.Locale.Tr "explore"}}</a>
+			{{/* If the instance is not open to the public, prompting visitors to explore its contents is counterproductive. */}}
+			{{/* HideExploreButton is only set in the homepage (routers/web/home.go) and sign-in page (routers/web/auth/auth.go) */}}
+			{{if not .HideExploreButton}}
+				<a class="item{{if .PageIsExplore}} active{{end}}" href="{{AppSubUrl}}/explore/repos">{{ctx.Locale.Tr "explore"}}</a>
+			{{end}}
 		{{end}}
 
 		{{template "custom/extra_links" .}}
