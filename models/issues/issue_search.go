@@ -49,9 +49,13 @@ type IssuesOptions struct { //nolint
 	// prioritize issues from this repo
 	PriorityRepoID int64
 	IsArchived     optional.Option[bool]
-	Org            *organization.Organization // issues permission scope
-	Team           *organization.Team         // issues permission scope
-	User           *user_model.User           // issues permission scope
+
+	// If combined with AllPublic, then private as well as public issues
+	// that matches the criteria will be returned, if AllPublic is false
+	// only the private issues will be returned.
+	Org  *organization.Organization // issues permission scope
+	Team *organization.Team         // issues permission scope
+	User *user_model.User           // issues permission scope
 }
 
 // applySorts sort an issues-related session based on the provided
@@ -196,7 +200,8 @@ func applyRepoConditions(sess *xorm.Session, opts *IssuesOptions) {
 	} else if len(opts.RepoIDs) > 1 {
 		opts.RepoCond = builder.In("issue.repo_id", opts.RepoIDs)
 	}
-	if opts.AllPublic {
+	// If permission scoping is set, then we set this condition at a later stage.
+	if opts.AllPublic && opts.User == nil {
 		if opts.RepoCond == nil {
 			opts.RepoCond = builder.NewCond()
 		}
@@ -268,7 +273,14 @@ func applyConditions(sess *xorm.Session, opts *IssuesOptions) {
 	applyLabelsCondition(sess, opts)
 
 	if opts.User != nil {
-		sess.And(issuePullAccessibleRepoCond("issue.repo_id", opts.User.ID, opts.Org, opts.Team, opts.IsPull.Value()))
+		cond := issuePullAccessibleRepoCond("issue.repo_id", opts.User.ID, opts.Org, opts.Team, opts.IsPull.Value())
+		// If AllPublic was set, then also consider all issues in public
+		// repositories in addition to the private repositories the user has access
+		// to.
+		if opts.AllPublic {
+			cond = cond.Or(builder.In("issue.repo_id", builder.Select("id").From("repository").Where(builder.Eq{"is_private": false})))
+		}
+		sess.And(cond)
 	}
 }
 
