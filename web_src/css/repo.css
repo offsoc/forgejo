@@ -153,7 +153,9 @@
   border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
 }
 
-.repository .clone-panel .dropdown .menu {
+/* Dropdown alignment */
+.repository .clone-panel .dropdown .menu,
+.repository .folder-actions .dropdown .menu {
   right: 0 !important;
   left: auto !important;
 }
@@ -757,7 +759,7 @@ td .commit-summary {
 
 .repository.view.issue .comment-list .timeline-item,
 .repository.view.issue .comment-list .timeline-item-group {
-  padding: 16px 0;
+  padding: 0.65rem 0;
 }
 
 .repository.view.issue .comment-list .timeline-item-group .timeline-item {
@@ -838,6 +840,18 @@ td .commit-summary {
 .repository.view.issue .comment-list .timeline-item.commits-list .ui.avatar,
 .repository.view.issue .comment-list .timeline-item.event .ui.avatar {
   margin-right: 0.25em;
+}
+
+.repository.view.issue .comment-list .timeline-item .aggregated-actions .badge {
+  width: 20px;
+  height: 20px;
+  margin-top: 5px;
+  padding: 12px;
+}
+
+.repository.view.issue .comment-list .timeline-item .aggregated-actions .badge .svg {
+  width: 20px;
+  height: 20px;
 }
 
 .singular-commit {
@@ -2033,6 +2047,14 @@ details.repo-search-result summary::marker {
   overflow: hidden;
 }
 
+.size-overview .segment:has(> .bar) {
+  display: flex;
+  height: 10px;
+  padding: 0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
 #cite-repo-modal #citation-panel {
   display: flex;
   width: 100%;
@@ -2248,7 +2270,7 @@ details.repo-search-result summary::marker {
 }
 
 .timeline .ui.comment-header {
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.75rem;
 }
 
 .comment-header::before,
@@ -2400,6 +2422,11 @@ details.repo-search-result summary::marker {
 
 .repo-button-row .button.dropdown:not(.icon) {
   padding-right: 22px !important; /* normal buttons have !important paddings, so we need to override it for dropdown (Add File) icons */
+}
+
+.repo-button-row .button strong {
+  /* Workaround where 'overflow: hidden' is clipping the y-axis, force a small amount of extra padding in the y-axis. */
+  padding: .1em 0;
 }
 
 .repo-button-row input {

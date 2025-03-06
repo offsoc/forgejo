@@ -4159,6 +4159,93 @@
         }
       }
     },
+    "/packages/{owner}/{type}/{name}/-/link/{repo_name}": {
+      "post": {
+        "tags": [
+          "package"
+        ],
+        "summary": "Link a package to a repository",
+        "operationId": "linkPackage",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the package",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "type of the package",
+            "name": "type",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the package",
+            "name": "name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the repository to link.",
+            "name": "repo_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/empty"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
+    "/packages/{owner}/{type}/{name}/-/unlink": {
+      "post": {
+        "tags": [
+          "package"
+        ],
+        "summary": "Unlink a package from a repository",
+        "operationId": "unlinkPackage",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "owner of the package",
+            "name": "owner",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "type of the package",
+            "name": "type",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "name of the package",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/empty"
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
     "/packages/{owner}/{type}/{name}/{version}": {
       "get": {
         "produces": [
@@ -6074,6 +6161,7 @@
     },
     "/repos/{owner}/{repo}/collaborators/{collaborator}": {
       "get": {
+        "description": "If the user is a collaborator, return 204. If the user is not a collaborator, return 404.",
         "produces": [
           "application/json"
         ],
@@ -8666,6 +8754,12 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -8719,6 +8813,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       },
@@ -8759,8 +8856,8 @@
           "403": {
             "$ref": "#/responses/forbidden"
           },
-          "404": {
-            "$ref": "#/responses/notFound"
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       },
@@ -8822,6 +8919,9 @@
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -9958,6 +10058,12 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       },
@@ -10016,6 +10122,9 @@
           },
           "423": {
             "$ref": "#/responses/repoArchivedError"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -10066,8 +10175,8 @@
           "403": {
             "$ref": "#/responses/forbidden"
           },
-          "404": {
-            "$ref": "#/responses/notFound"
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       },
@@ -10134,6 +10243,9 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -11385,6 +11497,12 @@
           },
           "404": {
             "$ref": "#/responses/notFound"
+          },
+          "422": {
+            "$ref": "#/responses/validationError"
+          },
+          "500": {
+            "$ref": "#/responses/internalServerError"
           }
         }
       }
@@ -20452,6 +20570,20 @@
       },
       "x-go-package": "code.gitea.io/gitea/services/context"
     },
+    "APIInternalServerError": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/services/context"
+    },
     "APIInvalidTopicsError": {
       "type": "object",
       "properties": {
@@ -22366,7 +22498,6 @@
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
     "CreatePullReviewCommentOptions": {
-      "description": "CreatePullReviewCommentOptions are options to create a pull review comment",
       "$ref": "#/definitions/CreatePullReviewComment"
     },
     "CreatePullReviewOptions": {
@@ -27909,6 +28040,10 @@
           "type": "boolean",
           "x-go-name": "HideEmail"
         },
+        "hide_pronouns": {
+          "type": "boolean",
+          "x-go-name": "HidePronouns"
+        },
         "language": {
           "type": "string",
           "x-go-name": "Language"
@@ -27960,6 +28095,10 @@
           "description": "Privacy",
           "type": "boolean",
           "x-go-name": "HideEmail"
+        },
+        "hide_pronouns": {
+          "type": "boolean",
+          "x-go-name": "HidePronouns"
         },
         "language": {
           "type": "string",
@@ -29162,6 +29301,12 @@
       "description": "APIForbiddenError is a forbidden error response",
       "schema": {
         "$ref": "#/definitions/APIForbiddenError"
+      }
+    },
+    "internalServerError": {
+      "description": "APIInternalServerError is an error that is raised when an internal server error occurs",
+      "schema": {
+        "$ref": "#/definitions/APIInternalServerError"
       }
     },
     "invalidTopicsError": {

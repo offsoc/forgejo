@@ -4,7 +4,6 @@
 package migrations
 
 import (
-	"context"
 	"net/url"
 	"os"
 	"testing"
@@ -33,7 +32,7 @@ func TestCodebaseDownloadRepo(t *testing.T) {
 	}
 
 	factory := &CodebaseDownloaderFactory{}
-	downloader, err := factory.New(context.Background(), base.MigrateOptions{
+	downloader, err := factory.New(t.Context(), base.MigrateOptions{
 		CloneAddr:    u.String(),
 		AuthUsername: apiUser,
 		AuthPassword: apiPassword,

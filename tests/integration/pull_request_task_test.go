@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -100,7 +99,7 @@ func TestPullRequestSynchronized(t *testing.T) {
 			logChecker.Filter("Updating PR").StopMark("TestPullRequest ")
 			defer cleanup()
 
-			pull_service.TestPullRequest(context.Background(), owner, repo.ID, testCase.olderThan, "branch2", true, pull.HeadCommitID, pull.HeadCommitID)
+			pull_service.TestPullRequest(t.Context(), owner, repo.ID, testCase.olderThan, "branch2", true, pull.HeadCommitID, pull.HeadCommitID)
 			logFiltered, logStopped := logChecker.Check(5 * time.Second)
 			assert.True(t, logStopped)
 			assert.Equal(t, testCase.expected, logFiltered[0])

@@ -79,7 +79,7 @@
 				{{template "repo/issue/view_content/pull".}}
 			{{end}}
 
-			{{if .IsSigned}}
+			{{if and .IsSigned (not .IsBlocked)}}
 				{{if and (or .IsRepoAdmin .HasIssuesOrPullsWritePermission (not .Issue.IsLocked)) (not .Repository.IsArchived)}}
 				<div class="timeline-item comment form">
 					<a class="timeline-avatar" href="{{.SignedUser.HomeLink}}">
@@ -123,6 +123,14 @@
 						{{end}}
 					</div>
 				{{end}}
+			{{else if .IsBlocked}}
+				<div class="ui warning message">
+					{{if .Issue.IsPull}}
+						{{ctx.Locale.Tr "repo.pulls.comment.blocked_by_user"}}
+					{{else}}
+						{{ctx.Locale.Tr "repo.issues.comment.blocked_by_user"}}
+					{{end}}
+				</div>
 			{{else}} {{/* not .IsSigned */}}
 				{{if .Repository.IsArchived}}
 					<div class="ui warning message tw-text-center">

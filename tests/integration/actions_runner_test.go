@@ -61,7 +61,7 @@ func newMockRunnerClient(uuid, token string) *mockRunnerClient {
 }
 
 func (r *mockRunner) doPing(t *testing.T) {
-	resp, err := r.client.pingServiceClient.Ping(context.Background(), connect.NewRequest(&pingv1.PingRequest{
+	resp, err := r.client.pingServiceClient.Ping(t.Context(), connect.NewRequest(&pingv1.PingRequest{
 		Data: "mock-runner",
 	}))
 	require.NoError(t, err)
@@ -70,7 +70,7 @@ func (r *mockRunner) doPing(t *testing.T) {
 
 func (r *mockRunner) doRegister(t *testing.T, name, token string, labels []string) {
 	r.doPing(t)
-	resp, err := r.client.runnerServiceClient.Register(context.Background(), connect.NewRequest(&runnerv1.RegisterRequest{
+	resp, err := r.client.runnerServiceClient.Register(t.Context(), connect.NewRequest(&runnerv1.RegisterRequest{
 		Name:    name,
 		Token:   token,
 		Version: "mock-runner-version",
@@ -104,7 +104,7 @@ func (r *mockRunner) fetchTask(t *testing.T, timeout ...time.Duration) *runnerv1
 	ddl := time.Now().Add(fetchTimeout)
 	var task *runnerv1.Task
 	for time.Now().Before(ddl) {
-		resp, err := r.client.runnerServiceClient.FetchTask(context.Background(), connect.NewRequest(&runnerv1.FetchTaskRequest{
+		resp, err := r.client.runnerServiceClient.FetchTask(t.Context(), connect.NewRequest(&runnerv1.FetchTaskRequest{
 			TasksVersion: 0,
 		}))
 		require.NoError(t, err)
@@ -127,7 +127,7 @@ type mockTaskOutcome struct {
 
 func (r *mockRunner) execTask(t *testing.T, task *runnerv1.Task, outcome *mockTaskOutcome) {
 	for idx, lr := range outcome.logRows {
-		resp, err := r.client.runnerServiceClient.UpdateLog(context.Background(), connect.NewRequest(&runnerv1.UpdateLogRequest{
+		resp, err := r.client.runnerServiceClient.UpdateLog(t.Context(), connect.NewRequest(&runnerv1.UpdateLogRequest{
 			TaskId: task.Id,
 			Index:  int64(idx),
 			Rows:   []*runnerv1.LogRow{lr},
@@ -138,7 +138,7 @@ func (r *mockRunner) execTask(t *testing.T, task *runnerv1.Task, outcome *mockTa
 	}
 	sentOutputKeys := make([]string, 0, len(outcome.outputs))
 	for outputKey, outputValue := range outcome.outputs {
-		resp, err := r.client.runnerServiceClient.UpdateTask(context.Background(), connect.NewRequest(&runnerv1.UpdateTaskRequest{
+		resp, err := r.client.runnerServiceClient.UpdateTask(t.Context(), connect.NewRequest(&runnerv1.UpdateTaskRequest{
 			State: &runnerv1.TaskState{
 				Id:     task.Id,
 				Result: runnerv1.Result_RESULT_UNSPECIFIED,
@@ -150,7 +150,7 @@ func (r *mockRunner) execTask(t *testing.T, task *runnerv1.Task, outcome *mockTa
 		assert.ElementsMatch(t, sentOutputKeys, resp.Msg.SentOutputs)
 	}
 	time.Sleep(outcome.execTime)
-	resp, err := r.client.runnerServiceClient.UpdateTask(context.Background(), connect.NewRequest(&runnerv1.UpdateTaskRequest{
+	resp, err := r.client.runnerServiceClient.UpdateTask(t.Context(), connect.NewRequest(&runnerv1.UpdateTaskRequest{
 		State: &runnerv1.TaskState{
 			Id:        task.Id,
 			Result:    outcome.result,

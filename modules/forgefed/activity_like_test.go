@@ -16,11 +16,11 @@ import (
 )
 
 func Test_NewForgeLike(t *testing.T) {
+	want := []byte(`{"type":"Like","startTime":"2024-03-07T00:00:00Z","actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1","object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}`)
+
 	actorIRI := "https://repo.prod.meissa.de/api/v1/activitypub/user-id/1"
 	objectIRI := "https://codeberg.org/api/v1/activitypub/repository-id/1"
-	want := []byte(`{"type":"Like","startTime":"2024-03-27T00:00:00Z","actor":"https://repo.prod.meissa.de/api/v1/activitypub/user-id/1","object":"https://codeberg.org/api/v1/activitypub/repository-id/1"}`)
-
-	startTime, _ := time.Parse("2006-Jan-02", "2024-Mar-27")
+	startTime, _ := time.Parse("2006-Jan-02", "2024-Mar-07")
 	sut, err := NewForgeLike(actorIRI, objectIRI, startTime)
 	if err != nil {
 		t.Errorf("unexpected error: %v\n", err)
@@ -84,7 +84,6 @@ func Test_LikeUnmarshalJSON(t *testing.T) {
 		wantErr error
 	}
 
-	//revive:disable
 	tests := map[string]testPair{
 		"with ID": {
 			item: []byte(`{"type":"Like","actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1","object":"https://codeberg.org/api/activitypub/repository-id/1"}`),
@@ -100,10 +99,9 @@ func Test_LikeUnmarshalJSON(t *testing.T) {
 		"invalid": {
 			item:    []byte(`{"type":"Invalid","actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1","object":"https://codeberg.org/api/activitypub/repository-id/1"`),
 			want:    &ForgeLike{},
-			wantErr: fmt.Errorf("cannot parse JSON:"),
+			wantErr: fmt.Errorf("cannot parse JSON"),
 		},
 	}
-	//revive:enable
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -120,7 +118,9 @@ func Test_LikeUnmarshalJSON(t *testing.T) {
 	}
 }
 
-func TestActivityValidation(t *testing.T) {
+func Test_ForgeLikeValidation(t *testing.T) {
+	// Successful
+
 	sut := new(ForgeLike)
 	sut.UnmarshalJSON([]byte(`{"type":"Like",
 	"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
@@ -130,35 +130,37 @@ func TestActivityValidation(t *testing.T) {
 		t.Errorf("sut expected to be valid: %v\n", sut.Validate())
 	}
 
+	// Errors
+
 	sut.UnmarshalJSON([]byte(`{"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
 	"object":"https://codeberg.org/api/activitypub/repository-id/1",
 	"startTime": "2014-12-31T23:00:00-08:00"}`))
-	if sut.Validate()[0] != "type should not be empty" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+	if err := validateAndCheckError(sut, "type should not be empty"); err != nil {
+		t.Error(err)
 	}
 
 	sut.UnmarshalJSON([]byte(`{"type":"bad-type",
 		"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
 	"object":"https://codeberg.org/api/activitypub/repository-id/1",
 	"startTime": "2014-12-31T23:00:00-08:00"}`))
-	if sut.Validate()[0] != "Value bad-type is not contained in allowed values [Like]" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
+	if err := validateAndCheckError(sut, "Value bad-type is not contained in allowed values [Like]"); err != nil {
+		t.Error(err)
 	}
 
 	sut.UnmarshalJSON([]byte(`{"type":"Like",
 		"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
-	"object":"https://codeberg.org/api/activitypub/repository-id/1",
-	"startTime": "not a date"}`))
-	if sut.Validate()[0] != "StartTime was invalid." {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate())
+	  "object":"https://codeberg.org/api/activitypub/repository-id/1",
+	  "startTime": "not a date"}`))
+	if err := validateAndCheckError(sut, "StartTime was invalid."); err != nil {
+		t.Error(err)
 	}
 
 	sut.UnmarshalJSON([]byte(`{"type":"Wrong",
 		"actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1",
-	"object":"https://codeberg.org/api/activitypub/repository-id/1",
-	"startTime": "2014-12-31T23:00:00-08:00"}`))
-	if sut.Validate()[0] != "Value Wrong is not contained in allowed values [Like]" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate())
+	  "object":"https://codeberg.org/api/activitypub/repository-id/1",
+	  "startTime": "2014-12-31T23:00:00-08:00"}`))
+	if err := validateAndCheckError(sut, "Value Wrong is not contained in allowed values [Like]"); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -166,6 +168,6 @@ func TestActivityValidation_Attack(t *testing.T) {
 	sut := new(ForgeLike)
 	sut.UnmarshalJSON([]byte(`{rubbish}`))
 	if len(sut.Validate()) != 5 {
-		t.Errorf("5 validateion errors expected but was: %v\n", len(sut.Validate()))
+		t.Errorf("5 validation errors expected but was: %v\n", len(sut.Validate()))
 	}
 }

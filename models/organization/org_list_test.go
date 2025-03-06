@@ -4,6 +4,8 @@
 package organization_test
 
 import (
+	"slices"
+	"strings"
 	"testing"
 
 	"code.gitea.io/gitea/models/db"
@@ -73,4 +75,16 @@ func TestGetUserOrgsList(t *testing.T) {
 		// repo_id: 3 is in the team, 32 is public, 5 is private with no team
 		assert.EqualValues(t, 2, orgs[0].NumRepos)
 	}
+}
+
+func TestGetUserOrgsListSorting(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	orgs, err := organization.GetUserOrgsList(db.DefaultContext, &user_model.User{ID: 1})
+	require.NoError(t, err)
+
+	isSorted := slices.IsSortedFunc(orgs, func(a, b *organization.MinimalOrg) int {
+		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
+	})
+
+	assert.True(t, isSorted)
 }

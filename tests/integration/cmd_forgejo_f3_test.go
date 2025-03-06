@@ -59,7 +59,7 @@ func TestF3_CmdMirror_LocalForgejo(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.F3.Enabled, true)()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	mirrorOptions := f3_tests_forge.GetFactory(options.Name)().NewOptions(t)
 	mirrorTree := f3_generic.GetFactory("f3")(ctx, mirrorOptions)

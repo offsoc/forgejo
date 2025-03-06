@@ -4,7 +4,6 @@
 package code
 
 import (
-	"context"
 	"os"
 	"testing"
 
@@ -94,7 +93,7 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 
 		for _, kw := range keywords {
 			t.Run(kw.Keyword, func(t *testing.T) {
-				total, res, langs, err := indexer.Search(context.TODO(), &internal.SearchOptions{
+				total, res, langs, err := indexer.Search(t.Context(), &internal.SearchOptions{
 					RepoIDs: kw.RepoIDs,
 					Keyword: kw.Keyword,
 					Paginator: &db.ListOptions{
@@ -117,7 +116,7 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 			})
 		}
 
-		require.NoError(t, indexer.Delete(context.Background(), repoID))
+		require.NoError(t, indexer.Delete(t.Context(), repoID))
 	})
 }
 
@@ -127,7 +126,7 @@ func TestBleveIndexAndSearch(t *testing.T) {
 	dir := t.TempDir()
 
 	idx := bleve.NewIndexer(dir)
-	_, err := idx.Init(context.Background())
+	_, err := idx.Init(t.Context())
 	if err != nil {
 		if idx != nil {
 			idx.Close()
@@ -149,7 +148,7 @@ func TestESIndexAndSearch(t *testing.T) {
 	}
 
 	indexer := elasticsearch.NewIndexer(u, "gitea_codes")
-	if _, err := indexer.Init(context.Background()); err != nil {
+	if _, err := indexer.Init(t.Context()); err != nil {
 		if indexer != nil {
 			indexer.Close()
 		}

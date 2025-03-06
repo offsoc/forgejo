@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"code.gitea.io/gitea/modules/markup"
+	mdutil "code.gitea.io/gitea/modules/markup/markdown/util"
 	"code.gitea.io/gitea/modules/util"
 
 	"github.com/yuin/goldmark/ast"
@@ -19,7 +20,7 @@ func (g *ASTTransformer) transformHeading(_ *markup.RenderContext, v *ast.Headin
 			v.SetAttribute(attr.Name, []byte(fmt.Sprintf("%v", attr.Value)))
 		}
 	}
-	txt := v.Lines().Value(reader.Source())
+	txt := mdutil.Text(v, reader.Source())
 	header := markup.Header{
 		Text:  util.UnsafeBytesToString(txt),
 		Level: v.Level,

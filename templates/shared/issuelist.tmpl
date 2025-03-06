@@ -21,7 +21,7 @@
 						{{end}}
 						<span class="labels-list tw-ml-1">
 							{{range .Labels}}
-								<a href="?q={{$.Keyword}}&type={{$.ViewType}}&state={{$.State}}&labels={{.ID}}{{if ne $.listType "milestone"}}&milestone={{$.MilestoneID}}{{end}}&assignee={{$.AssigneeID}}&poster={{$.PosterID}}&fuzzy={{$.IsFuzzy}}{{if $.ShowArchivedLabels}}&archived=true{{end}}" rel="nofollow">{{RenderLabel $.Context ctx.Locale .}}</a>
+								<a href="?q={{$.Keyword}}&type={{$.ViewType}}&state={{$.State}}&labels={{.ID}}{{if ne $.listType "milestone"}}&milestone={{$.MilestoneID}}{{end}}&assignee={{$.AssigneeID}}&poster={{$.PosterID}}{{if $.ShowArchivedLabels}}&archived=true{{end}}" rel="nofollow">{{RenderLabel $.Context ctx.Locale .}}</a>
 							{{end}}
 						</span>
 					</div>
@@ -45,7 +45,7 @@
 						{{if .NumComments}}
 						<div class="text grey">
 							<a class="tw-no-underline muted flex-text-block" href="{{if .Link}}{{.Link}}{{else}}{{$.Link}}/{{.Index}}{{end}}">
-								{{svg "octicon-comment" 16}}{{.NumComments}}
+								{{svg "octicon-comment-discussion" 16}}{{.NumComments}}
 							</a>
 						</div>
 						{{end}}

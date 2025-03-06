@@ -471,7 +471,7 @@ func TestColorPreview(t *testing.T) {
 		// no backticks
 		"rgb(166, 32, 64)",
 		// typo
-		"`hsI(0, 100%, 50%)`", // codespell-ignore
+		"`hsI(0, 100%, 50%)`", // codespell:ignore
 		// looks like a color but not really
 		"`hsl(40, 60, 80)`",
 	}
@@ -1190,7 +1190,7 @@ space</p>
 	}
 
 	for i, c := range cases {
-		result, err := markdown.RenderString(&markup.RenderContext{Ctx: context.Background(), Links: c.Links, IsWiki: c.IsWiki}, input)
+		result, err := markdown.RenderString(&markup.RenderContext{Ctx: t.Context(), Links: c.Links, IsWiki: c.IsWiki}, input)
 		require.NoError(t, err, "Unexpected error in testcase: %v", i)
 		assert.Equal(t, template.HTML(c.Expected), result, "Unexpected result in testcase %v", i)
 	}

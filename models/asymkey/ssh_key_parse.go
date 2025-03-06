@@ -219,8 +219,13 @@ func SSHNativeParsePublicKey(keyLine string) (string, int, error) {
 		return "", 0, fmt.Errorf("ParsePublicKey: %w", err)
 	}
 
+	pkeyType := pkey.Type()
+	if certPkey, ok := pkey.(*ssh.Certificate); ok {
+		pkeyType = certPkey.Key.Type()
+	}
+
 	// The ssh library can parse the key, so next we find out what key exactly we have.
-	switch pkey.Type() {
+	switch pkeyType {
 	case ssh.KeyAlgoDSA:
 		rawPub := struct {
 			Name       string

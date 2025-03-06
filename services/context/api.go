@@ -157,6 +157,17 @@ type swaggerAPIRepoArchivedError struct {
 	Body APIRepoArchivedError `json:"body"`
 }
 
+type APIInternalServerError struct {
+	APIError
+}
+
+// APIInternalServerError is an error that is raised when an internal server error occurs
+// swagger:response internalServerError
+type swaggerAPIInternalServerError struct {
+	// in:body
+	Body APIInternalServerError `json:"body"`
+}
+
 // ServerError responds with error message, status is 500
 func (ctx *APIContext) ServerError(title string, err error) {
 	ctx.Error(http.StatusInternalServerError, title, err)
@@ -352,6 +363,11 @@ func ReferencesGitRepo(allowEmpty ...bool) func(ctx *APIContext) (cancel context
 func RepoRefForAPI(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ctx := GetAPIContext(req)
+
+		if ctx.Repo.Repository.IsEmpty {
+			ctx.NotFound(fmt.Errorf("repository is empty"))
+			return
+		}
 
 		if ctx.Repo.GitRepo == nil {
 			ctx.InternalServerError(fmt.Errorf("no open git repo"))

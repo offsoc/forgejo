@@ -167,7 +167,7 @@ func TestUserRedirect(t *testing.T) {
 			defer test.MockVariableValue(&setting.Service.UsernameCooldownPeriod, 8)()
 			defer tests.PrintCurrentTest(t)()
 
-			assert.Contains(t, getPrompt(t), "The old username will be available to everyone after a cooldown period of 8 days, you can still reclaim the old username during the cooldown period.")
+			assert.Contains(t, getPrompt(t), "The old organization name will be available to everyone after a cooldown period of 8 days, you can still reclaim the old name during the cooldown period.")
 		})
 	})
 }

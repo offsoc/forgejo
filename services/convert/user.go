@@ -57,7 +57,7 @@ func toUser(ctx context.Context, user *user_model.User, signed, authed bool) *ap
 		Created:     user.CreatedUnix.AsTime(),
 		Restricted:  user.IsRestricted,
 		Location:    user.Location,
-		Pronouns:    user.Pronouns,
+		Pronouns:    user.GetPronouns(signed),
 		Website:     user.Website,
 		Description: user.Description,
 		// counter's
@@ -97,6 +97,7 @@ func User2UserSettings(user *user_model.User) api.UserSettings {
 		Description:         user.Description,
 		Theme:               user.Theme,
 		HideEmail:           user.KeepEmailPrivate,
+		HidePronouns:        user.KeepPronounsPrivate,
 		HideActivity:        user.KeepActivityPrivate,
 		DiffViewStyle:       user.DiffViewStyle,
 		EnableRepoUnitHints: user.EnableRepoUnitHints,

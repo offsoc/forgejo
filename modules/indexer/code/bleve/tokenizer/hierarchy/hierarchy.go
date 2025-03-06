@@ -31,19 +31,19 @@ func (t *PathHierarchyTokenizer) Tokenize(input []byte) analysis.TokenStream {
 	rv := make(analysis.TokenStream, 0, 8)
 	count, off := 1, 0
 
-	// iterate till all directory seperators
+	// iterate till all directory separators
 	for i := bytes.IndexRune(input[off:], '/'); i != -1; i = bytes.IndexRune(input[off:], '/') {
-		// the index is relative to input[offest...]
-		// add this index to the accumlated offset to get the index of the current seperator in input[0...]
+		// the index is relative to input[offset...]
+		// add this index to the accumulated offset to get the index of the current separator in input[0...]
 		off += i
 		rv = append(rv, &analysis.Token{
-			Term:     input[:off], // take the slice, input[0...index of seperator]
+			Term:     input[:off], // take the slice, input[0...index of separator]
 			Start:    0,
 			End:      off,
 			Position: count,
 			Type:     analysis.AlphaNumeric,
 		})
-		// increment the offset after considering the seperator
+		// increment the offset after considering the separator
 		off++
 		count++
 	}

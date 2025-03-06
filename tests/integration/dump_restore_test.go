@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -21,7 +20,6 @@ import (
 	base "code.gitea.io/gitea/modules/migration"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/services/migrations"
 
 	"github.com/stretchr/testify/assert"
@@ -45,9 +43,7 @@ func TestDumpRestore(t *testing.T) {
 
 		reponame := "repo1"
 
-		basePath, err := os.MkdirTemp("", reponame)
-		require.NoError(t, err)
-		defer util.RemoveAll(basePath)
+		basePath := t.TempDir()
 
 		repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: reponame})
 		repoOwner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
@@ -58,7 +54,7 @@ func TestDumpRestore(t *testing.T) {
 		// Phase 1: dump repo1 from the Gitea instance to the filesystem
 		//
 
-		ctx := context.Background()
+		ctx := t.Context()
 		opts := migrations.MigrateOptions{
 			GitServiceType: structs.GiteaService,
 			Issues:         true,
@@ -70,7 +66,7 @@ func TestDumpRestore(t *testing.T) {
 			CloneAddr:      repo.CloneLink().HTTPS,
 			RepoName:       reponame,
 		}
-		err = migrations.DumpRepository(ctx, basePath, repoOwner.Name, opts)
+		err := migrations.DumpRepository(ctx, basePath, repoOwner.Name, opts)
 		require.NoError(t, err)
 
 		//

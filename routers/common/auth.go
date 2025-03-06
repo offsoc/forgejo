@@ -31,6 +31,7 @@ func AuthShared(ctx *context.Base, sessionStore auth_service.SessionStore, authM
 		ctx.Data["SignedUserID"] = ar.Doer.ID
 		ctx.Data["IsAdmin"] = ar.Doer.IsAdmin
 	} else {
+		ctx.Data["IsSigned"] = false
 		ctx.Data["SignedUserID"] = int64(0)
 	}
 	return ar, nil

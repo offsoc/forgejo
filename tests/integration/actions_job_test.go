@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -416,7 +415,7 @@ jobs:
 		actionTask := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionTask{ID: task.Id})
 		actionRunJob := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRunJob{ID: actionTask.JobID})
 		actionRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: actionRunJob.RunID})
-		require.NoError(t, actionRun.LoadAttributes(context.Background()))
+		require.NoError(t, actionRun.LoadAttributes(t.Context()))
 
 		assert.Equal(t, user2.Name, gtCtx["actor"].GetStringValue())
 		assert.Equal(t, setting.AppURL+"api/v1", gtCtx["api_url"].GetStringValue())

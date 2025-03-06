@@ -10,7 +10,7 @@ import (
 	"code.gitea.io/gitea/modules/nosql"
 	"code.gitea.io/gitea/modules/queue/lqinternal"
 
-	"gitea.com/lunny/levelqueue"
+	"code.forgejo.org/forgejo/levelqueue"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

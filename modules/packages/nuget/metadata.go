@@ -57,12 +57,21 @@ type Package struct {
 
 // Metadata represents the metadata of a Nuget package
 type Metadata struct {
+	Title                    string                  `json:"title,omitempty"`
+	Language                 string                  `json:"language,omitempty"`
 	Description              string                  `json:"description,omitempty"`
 	ReleaseNotes             string                  `json:"release_notes,omitempty"`
 	Readme                   string                  `json:"readme,omitempty"`
 	Authors                  string                  `json:"authors,omitempty"`
+	Owners                   string                  `json:"owners,omitempty"`
+	Copyright                string                  `json:"copyright,omitempty"`
 	ProjectURL               string                  `json:"project_url,omitempty"`
 	RepositoryURL            string                  `json:"repository_url,omitempty"`
+	LicenseURL               string                  `json:"license_url,omitempty"`
+	IconURL                  string                  `json:"icon_url,omitempty"`
+	MinClientVersion         string                  `json:"min_client_version,omitempty"`
+	Tags                     string                  `json:"tags,omitempty"`
+	DevelopmentDependency    bool                    `json:"development_dependency,omitempty"`
 	RequireLicenseAcceptance bool                    `json:"require_license_acceptance"`
 	Dependencies             map[string][]Dependency `json:"dependencies,omitempty"`
 }
@@ -77,13 +86,22 @@ type Dependency struct {
 type nuspecPackage struct {
 	Metadata struct {
 		ID                       string `xml:"id"`
+		Title                    string `xml:"title"`
+		Language                 string `xml:"language"`
 		Version                  string `xml:"version"`
 		Authors                  string `xml:"authors"`
+		Owners                   string `xml:"owners"`
+		Copyright                string `xml:"copyright"`
+		DevelopmentDependency    bool   `xml:"developmentDependency"`
 		RequireLicenseAcceptance bool   `xml:"requireLicenseAcceptance"`
 		ProjectURL               string `xml:"projectUrl"`
+		LicenseURL               string `xml:"licenseUrl"`
+		IconURL                  string `xml:"iconUrl"`
 		Description              string `xml:"description"`
 		ReleaseNotes             string `xml:"releaseNotes"`
 		Readme                   string `xml:"readme"`
+		Tags                     string `xml:"tags"`
+		MinClientVersion         string `xml:"minClientVersion,attr"`
 		PackageTypes             struct {
 			PackageType []struct {
 				Name string `xml:"name,attr"`
@@ -167,11 +185,20 @@ func ParseNuspecMetaData(archive *zip.Reader, r io.Reader) (*Package, error) {
 	}
 
 	m := &Metadata{
+		Title:                    p.Metadata.Title,
+		Language:                 p.Metadata.Language,
 		Description:              p.Metadata.Description,
 		ReleaseNotes:             p.Metadata.ReleaseNotes,
 		Authors:                  p.Metadata.Authors,
+		Owners:                   p.Metadata.Owners,
+		Copyright:                p.Metadata.Copyright,
 		ProjectURL:               p.Metadata.ProjectURL,
 		RepositoryURL:            p.Metadata.Repository.URL,
+		LicenseURL:               p.Metadata.LicenseURL,
+		IconURL:                  p.Metadata.IconURL,
+		MinClientVersion:         p.Metadata.MinClientVersion,
+		Tags:                     p.Metadata.Tags,
+		DevelopmentDependency:    p.Metadata.DevelopmentDependency,
 		RequireLicenseAcceptance: p.Metadata.RequireLicenseAcceptance,
 		Dependencies:             make(map[string][]Dependency),
 	}

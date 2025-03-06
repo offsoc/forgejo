@@ -32,5 +32,6 @@ func EvaluateForUser(ctx context.Context, userID int64, subject LimitSubject) (b
 		return false, err
 	}
 
-	return groups.Evaluate(*used, subject), nil
+	acceptable, _ := groups.Evaluate(*used, subject)
+	return acceptable, nil
 }

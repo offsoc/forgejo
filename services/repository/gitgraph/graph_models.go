@@ -199,7 +199,7 @@ func NewCommit(row, column int, line []byte) (*Commit, error) {
 	if len(data) < 5 {
 		return nil, fmt.Errorf("malformed data section on line %d with commit: %s", row, string(line))
 	}
-	// Format is a slight modifcation from RFC1123Z
+	// Format is a slight modification from RFC1123Z
 	t, err := time.Parse("Mon, _2 Jan 2006 15:04:05 -0700", string(data[2]))
 	if err != nil {
 		return nil, fmt.Errorf("could not parse date of commit: %w", err)

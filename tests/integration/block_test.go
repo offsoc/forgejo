@@ -253,6 +253,12 @@ func TestBlockActions(t *testing.T) {
 			DecodeJSON(t, resp, &errorResp)
 
 			assert.EqualValues(t, expectedMessage, errorResp.Error)
+
+			req = NewRequest(t, "GET", issue10URL)
+			resp = session.MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+			msg := htmlDoc.doc.Find("div .warning").Text()
+			assert.Contains(t, msg, "You cannot comment on this issue because you are blocked")
 		})
 
 		t.Run("Blocked by issue poster", func(t *testing.T) {
@@ -274,6 +280,12 @@ func TestBlockActions(t *testing.T) {
 			DecodeJSON(t, resp, &errorResp)
 
 			assert.EqualValues(t, expectedMessage, errorResp.Error)
+
+			req = NewRequest(t, "GET", issue10URL)
+			resp = session.MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+			msg := htmlDoc.doc.Find("div .warning").Text()
+			assert.Contains(t, msg, "You cannot comment on this issue because you are blocked")
 		})
 	})
 

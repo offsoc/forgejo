@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -286,7 +285,7 @@ func doAPIMergePullRequestForm(t *testing.T, ctx APITestContext, owner, repo str
 		if err.Message != "Please try again later" {
 			break
 		}
-		queue.GetManager().FlushAll(context.Background(), 5*time.Second)
+		queue.GetManager().FlushAll(t.Context(), 5*time.Second)
 		<-time.After(1 * time.Second)
 	}
 

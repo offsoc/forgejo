@@ -95,10 +95,9 @@ func stripSlashesMiddleware(next http.Handler) http.Handler {
 			prevWasSlash = chr == '/'
 		}
 
-		if rctx == nil {
-			req.URL.Path = sanitizedPath.String()
-		} else {
-			rctx.RoutePath = sanitizedPath.String()
+		req.URL.Path = sanitizedPath.String()
+		if rctx != nil {
+			rctx.RoutePath = req.URL.Path
 		}
 		next.ServeHTTP(resp, req)
 	})

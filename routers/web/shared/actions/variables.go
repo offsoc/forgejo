@@ -39,25 +39,33 @@ func CreateVariable(ctx *context.Context, ownerID, repoID int64, redirectURL str
 	ctx.JSONRedirect(redirectURL)
 }
 
-func UpdateVariable(ctx *context.Context, redirectURL string) {
+func UpdateVariable(ctx *context.Context, ownerID, repoID int64, redirectURL string) {
 	id := ctx.ParamsInt64(":variable_id")
 	form := web.GetForm(ctx).(*forms.EditVariableForm)
 
-	if ok, err := actions_service.UpdateVariable(ctx, id, form.Name, form.Data); err != nil || !ok {
-		log.Error("UpdateVariable: %v", err)
-		ctx.JSONError(ctx.Tr("actions.variables.update.failed"))
+	if ok, err := actions_service.UpdateVariable(ctx, id, ownerID, repoID, form.Name, form.Data); err != nil || !ok {
+		if !ok {
+			ctx.JSONError(ctx.Tr("actions.variables.not_found"))
+		} else {
+			log.Error("UpdateVariable: %v", err)
+			ctx.JSONError(ctx.Tr("actions.variables.update.failed"))
+		}
 		return
 	}
 	ctx.Flash.Success(ctx.Tr("actions.variables.update.success"))
 	ctx.JSONRedirect(redirectURL)
 }
 
-func DeleteVariable(ctx *context.Context, redirectURL string) {
+func DeleteVariable(ctx *context.Context, ownerID, repoID int64, redirectURL string) {
 	id := ctx.ParamsInt64(":variable_id")
 
-	if err := actions_service.DeleteVariableByID(ctx, id); err != nil {
-		log.Error("Delete variable [%d] failed: %v", id, err)
-		ctx.JSONError(ctx.Tr("actions.variables.deletion.failed"))
+	if ok, err := actions_model.DeleteVariable(ctx, id, ownerID, repoID); err != nil || !ok {
+		if !ok {
+			ctx.JSONError(ctx.Tr("actions.variables.not_found"))
+		} else {
+			log.Error("Delete variable [%d] failed: %v", id, err)
+			ctx.JSONError(ctx.Tr("actions.variables.deletion.failed"))
+		}
 		return
 	}
 	ctx.Flash.Success(ctx.Tr("actions.variables.deletion.success"))

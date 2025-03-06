@@ -644,7 +644,8 @@ func registerRoutes(m *web.Route) {
 			m.Get("", user_setting.BlockedUsers)
 			m.Post("/unblock", user_setting.UnblockUser)
 		})
-	}, reqSignIn, ctxDataSet("PageIsUserSettings", true, "AllThemes", setting.UI.Themes, "EnablePackages", setting.Packages.Enabled))
+		m.Get("/storage_overview", user_setting.StorageOverview)
+	}, reqSignIn, ctxDataSet("PageIsUserSettings", true, "AllThemes", setting.UI.Themes, "EnablePackages", setting.Packages.Enabled, "EnableQuota", setting.Quota.Enabled))
 
 	m.Group("/user", func() {
 		m.Get("/activate", auth.Activate)
@@ -930,6 +931,7 @@ func registerRoutes(m *web.Route) {
 					m.Post("/block", org_setting.BlockedUsersBlock)
 					m.Post("/unblock", org_setting.BlockedUsersUnblock)
 				})
+				m.Get("/storage_overview", org_setting.StorageOverview)
 
 				m.Group("/packages", func() {
 					m.Get("", org.Packages)
@@ -949,7 +951,7 @@ func registerRoutes(m *web.Route) {
 						m.Post("/rebuild", org.RebuildCargoIndex)
 					})
 				}, packagesEnabled)
-			}, ctxDataSet("EnableOAuth2", setting.OAuth2.Enabled, "EnablePackages", setting.Packages.Enabled, "PageIsOrgSettings", true))
+			}, ctxDataSet("EnableOAuth2", setting.OAuth2.Enabled, "EnablePackages", setting.Packages.Enabled, "EnableQuota", setting.Quota.Enabled, "PageIsOrgSettings", true))
 		}, context.OrgAssignment(true, true))
 	}, reqSignIn)
 	// ***** END: Organization *****

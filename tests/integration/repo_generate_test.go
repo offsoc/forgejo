@@ -194,7 +194,7 @@ func TestRepoGenerateTemplating(t *testing.T) {
 		})
 		defer f()
 
-		// The repo.TemplateID field is not initalized. Luckly the ID field holds the expected value
+		// The repo.TemplateID field is not initialized. Luckily, the ID field holds the expected value
 		templateID := strconv.FormatInt(template.ID, 10)
 
 		testRepoGenerate(

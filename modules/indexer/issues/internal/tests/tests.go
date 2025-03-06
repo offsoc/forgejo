@@ -24,10 +24,10 @@ import (
 )
 
 func TestIndexer(t *testing.T, indexer internal.Indexer) {
-	_, err := indexer.Init(context.Background())
+	_, err := indexer.Init(t.Context())
 	require.NoError(t, err)
 
-	require.NoError(t, indexer.Ping(context.Background()))
+	require.NoError(t, indexer.Ping(t.Context()))
 
 	var (
 		ids  []int64
@@ -39,32 +39,32 @@ func TestIndexer(t *testing.T, indexer internal.Indexer) {
 			ids = append(ids, v.ID)
 			data[v.ID] = v
 		}
-		require.NoError(t, indexer.Index(context.Background(), d...))
+		require.NoError(t, indexer.Index(t.Context(), d...))
 		require.NoError(t, waitData(indexer, int64(len(data))))
 	}
 
 	defer func() {
-		require.NoError(t, indexer.Delete(context.Background(), ids...))
+		require.NoError(t, indexer.Delete(t.Context(), ids...))
 	}()
 
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
 			if len(c.ExtraData) > 0 {
-				require.NoError(t, indexer.Index(context.Background(), c.ExtraData...))
+				require.NoError(t, indexer.Index(t.Context(), c.ExtraData...))
 				for _, v := range c.ExtraData {
 					data[v.ID] = v
 				}
 				require.NoError(t, waitData(indexer, int64(len(data))))
 				defer func() {
 					for _, v := range c.ExtraData {
-						require.NoError(t, indexer.Delete(context.Background(), v.ID))
+						require.NoError(t, indexer.Delete(t.Context(), v.ID))
 						delete(data, v.ID)
 					}
 					require.NoError(t, waitData(indexer, int64(len(data))))
 				}()
 			}
 
-			result, err := indexer.Search(context.Background(), c.SearchOptions)
+			result, err := indexer.Search(t.Context(), c.SearchOptions)
 			require.NoError(t, err)
 
 			if c.Expected != nil {
@@ -80,7 +80,7 @@ func TestIndexer(t *testing.T, indexer internal.Indexer) {
 
 			// test counting
 			c.SearchOptions.Paginator = &db.ListOptions{PageSize: 0}
-			countResult, err := indexer.Search(context.Background(), c.SearchOptions)
+			countResult, err := indexer.Search(t.Context(), c.SearchOptions)
 			require.NoError(t, err)
 			assert.Empty(t, countResult.Hits)
 			assert.Equal(t, result.Total, countResult.Total)
@@ -132,6 +132,20 @@ var cases = []*testIndexerCase{
 		ExpectedTotal: 3,
 	},
 	{
+		Name: "Keyword Exclude",
+		ExtraData: []*internal.IndexerData{
+			{ID: 1000, Title: "hi hello world"},
+			{ID: 1001, Content: "hi hello world"},
+			{ID: 1002, Comments: []string{"hello", "hello world"}},
+		},
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "hello world -hi",
+			SortBy:  internal.SortByCreatedDesc,
+		},
+		ExpectedIDs:   []int64{1002},
+		ExpectedTotal: 1,
+	},
+	{
 		Name: "Keyword Fuzzy",
 		ExtraData: []*internal.IndexerData{
 			{ID: 1000, Title: "hi hello world"},
@@ -139,9 +153,8 @@ var cases = []*testIndexerCase{
 			{ID: 1002, Comments: []string{"hi", "hello world"}},
 		},
 		SearchOptions: &internal.SearchOptions{
-			Keyword:        "hello world",
-			SortBy:         internal.SortByCreatedDesc,
-			IsFuzzyKeyword: true,
+			Keyword: "hello world",
+			SortBy:  internal.SortByCreatedDesc,
 		},
 		ExpectedIDs:   []int64{1002, 1001, 1000},
 		ExpectedTotal: 3,

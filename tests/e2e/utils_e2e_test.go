@@ -60,7 +60,7 @@ func onForgejoRunTB(t testing.TB, callback func(testing.TB, *url.URL), prepare .
 
 	defer func() {
 		require.NoError(t, os.WriteFile(setting.CustomConf, conf, 0o644))
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		ctx, cancel := context.WithTimeout(t.Context(), 2*time.Minute)
 		s.Shutdown(ctx)
 		cancel()
 	}()

@@ -5,7 +5,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -120,7 +119,7 @@ func TestViewIssuesKeyword(t *testing.T) {
 		RepoID: repo.ID,
 		Index:  1,
 	})
-	issues.UpdateIssueIndexer(context.Background(), issue.ID)
+	issues.UpdateIssueIndexer(t.Context(), issue.ID)
 	time.Sleep(time.Second * 1)
 
 	const keyword = "first"
@@ -138,27 +137,25 @@ func TestViewIssuesKeyword(t *testing.T) {
 	})
 
 	// keyword: 'firstt'
-	// should not match when fuzzy searching is disabled
-	req = NewRequestf(t, "GET", "%s/issues?q=%st&fuzzy=false", repo.Link(), keyword)
+	// should not match when using phrase search
+	req = NewRequestf(t, "GET", "%s/issues?q=\"%st\"", repo.Link(), keyword)
 	resp = MakeRequest(t, req, http.StatusOK)
 	htmlDoc = NewHTMLParser(t, resp.Body)
 	issuesSelection = getIssuesSelection(t, htmlDoc)
 	assert.EqualValues(t, 0, issuesSelection.Length())
 
-	// should match as 'first' when fuzzy seaeching is enabled
-	for _, fmt := range []string{"%s/issues?q=%st&fuzzy=true", "%s/issues?q=%st"} {
-		req = NewRequestf(t, "GET", fmt, repo.Link(), keyword)
-		resp = MakeRequest(t, req, http.StatusOK)
-		htmlDoc = NewHTMLParser(t, resp.Body)
-		issuesSelection = getIssuesSelection(t, htmlDoc)
-		assert.EqualValues(t, 1, issuesSelection.Length())
-		issuesSelection.Each(func(_ int, selection *goquery.Selection) {
-			issue := getIssue(t, repo.ID, selection)
-			assert.False(t, issue.IsClosed)
-			assert.False(t, issue.IsPull)
-			assertMatch(t, issue, keyword)
-		})
-	}
+	// should match as 'first' when using a standard query
+	req = NewRequestf(t, "GET", "%s/issues?q=%st", repo.Link(), keyword)
+	resp = MakeRequest(t, req, http.StatusOK)
+	htmlDoc = NewHTMLParser(t, resp.Body)
+	issuesSelection = getIssuesSelection(t, htmlDoc)
+	assert.EqualValues(t, 1, issuesSelection.Length())
+	issuesSelection.Each(func(_ int, selection *goquery.Selection) {
+		issue := getIssue(t, repo.ID, selection)
+		assert.False(t, issue.IsClosed)
+		assert.False(t, issue.IsPull)
+		assertMatch(t, issue, keyword)
+	})
 }
 
 func TestViewIssuesSearchOptions(t *testing.T) {
@@ -1335,4 +1332,47 @@ func TestIssueCount(t *testing.T) {
 
 	allCount := htmlDoc.doc.Find("a[data-test-name='all-issue-count']").Text()
 	assert.Contains(t, allCount, "2\u00a0All")
+}
+
+func TestIssuePostersSearch(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	type userSearchInfo struct {
+		UserID   int64  `json:"user_id"`
+		UserName string `json:"username"`
+	}
+
+	type userSearchResponse struct {
+		Results []*userSearchInfo `json:"results"`
+	}
+
+	t.Run("Name search", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.UI.DefaultShowFullName, false)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues/posters?q=USer2")
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		var data userSearchResponse
+		DecodeJSON(t, resp, &data)
+
+		assert.Len(t, data.Results, 1)
+		assert.EqualValues(t, "user2", data.Results[0].UserName)
+		assert.EqualValues(t, 2, data.Results[0].UserID)
+	})
+
+	t.Run("Full name search", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.UI.DefaultShowFullName, true)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues/posters?q=OnE")
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		var data userSearchResponse
+		DecodeJSON(t, resp, &data)
+
+		assert.Len(t, data.Results, 1)
+		assert.EqualValues(t, "user1", data.Results[0].UserName)
+		assert.EqualValues(t, 1, data.Results[0].UserID)
+	})
 }
