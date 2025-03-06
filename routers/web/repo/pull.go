@@ -934,18 +934,42 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 	ctx.Data["IsShowingOnlySingleCommit"] = willShowSpecifiedCommit
 
 	if willShowSpecifiedCommit {
-		endCommitID = specifiedEndCommit
-		startCommitID = prInfo.MergeBase
+		commitID := specifiedEndCommit
 
-		ctx.Data["CommitID"] = specifiedEndCommit
-		commit, err := gitRepo.GetCommit(specifiedEndCommit)
-		if err != nil {
-			ctx.ServerError("Repo.GitRepo.GetCommit", err)
+		ctx.Data["CommitID"] = commitID
+
+		var prevCommit, curCommit, nextCommit *git.Commit
+
+		// Iterate in reverse to properly map "previous" and "next" buttons
+		for i := len(prInfo.Commits) - 1; i >= 0; i-- {
+			commit := prInfo.Commits[i]
+
+			if curCommit != nil {
+				nextCommit = commit
+				break
+			}
+
+			if commit.ID.String() == commitID {
+				curCommit = commit
+			} else {
+				prevCommit = commit
+			}
 		}
 
-		ctx.Data["Commit"] = commit
+		if curCommit == nil {
+			ctx.ServerError("Repo.GitRepo.viewPullFiles", git.ErrNotExist{ID: commitID})
+			return
+		}
 
-		statuses, _, err := git_model.GetLatestCommitStatus(ctx, ctx.Repo.Repository.ID, specifiedEndCommit, db.ListOptionsAll)
+		ctx.Data["Commit"] = curCommit
+		if prevCommit != nil {
+			ctx.Data["PrevCommitLink"] = path.Join(ctx.Repo.RepoLink, "pulls", strconv.FormatInt(issue.Index, 10), "commits", prevCommit.ID.String())
+		}
+		if nextCommit != nil {
+			ctx.Data["NextCommitLink"] = path.Join(ctx.Repo.RepoLink, "pulls", strconv.FormatInt(issue.Index, 10), "commits", nextCommit.ID.String())
+		}
+
+		statuses, _, err := git_model.GetLatestCommitStatus(ctx, ctx.Repo.Repository.ID, commitID, db.ListOptionsAll)
 		if err != nil {
 			log.Error("GetLatestCommitStatus: %v", err)
 		}
@@ -956,9 +980,9 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 		ctx.Data["CommitStatus"] = git_model.CalcCommitStatus(statuses)
 		ctx.Data["CommitStatuses"] = statuses
 
-		verification := asymkey_model.ParseCommitWithSignature(ctx, commit)
+		verification := asymkey_model.ParseCommitWithSignature(ctx, curCommit)
 		ctx.Data["Verification"] = verification
-		ctx.Data["Author"] = user_model.ValidateCommitWithEmail(ctx, commit)
+		ctx.Data["Author"] = user_model.ValidateCommitWithEmail(ctx, curCommit)
 
 		note := &git.Note{}
 		err = git.GetNote(ctx, ctx.Repo.GitRepo, specifiedEndCommit, note)
@@ -968,7 +992,7 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 			ctx.Data["NoteRendered"], err = markup.RenderCommitMessage(&markup.RenderContext{
 				Links: markup.Links{
 					Base:       ctx.Repo.RepoLink,
-					BranchPath: path.Join("commit", util.PathEscapeSegments(specifiedEndCommit)),
+					BranchPath: path.Join("commit", util.PathEscapeSegments(commitID)),
 				},
 				Metas:   ctx.Repo.Repository.ComposeMetas(ctx),
 				GitRepo: ctx.Repo.GitRepo,
@@ -980,6 +1004,8 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 			}
 		}
 
+		endCommitID = commitID
+		startCommitID = prInfo.MergeBase
 		ctx.Data["IsShowingAllCommits"] = false
 	} else if willShowSpecifiedCommitRange {
 		if len(specifiedEndCommit) > 0 {
@@ -993,8 +1019,6 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 			startCommitID = prInfo.MergeBase
 		}
 
-		ctx.Data["AfterCommitID"] = endCommitID
-		ctx.Data["BeforeCommitID"] = startCommitID
 		ctx.Data["IsShowingAllCommits"] = false
 	} else {
 		endCommitID = headCommitID
@@ -1002,6 +1026,8 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 		ctx.Data["IsShowingAllCommits"] = true
 	}
 
+	ctx.Data["AfterCommitID"] = endCommitID
+	ctx.Data["BeforeCommitID"] = startCommitID
 	ctx.Data["Username"] = ctx.Repo.Owner.Name
 	ctx.Data["Reponame"] = ctx.Repo.Repository.Name
 

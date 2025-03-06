@@ -89,6 +89,8 @@
     "mail.actions.run_info_previous_status": "Previous Run's Status: %[1]s",
     "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Triggered because: %[1]s by: %[2]s",
+    "repo.diff.commit.next-short": "Next",
+    "repo.diff.commit.previous-short": "Prev",
     "discussion.locked": "This discussion has been locked. Commenting is limited to contributors.",
     "editor.textarea.tab_hint": "Line already indented. Press <kbd>Tab</kbd> again or <kbd>Escape</kbd> to leave the editor.",
     "editor.textarea.shift_tab_hint": "No indentation on this line. Press <kbd>Shift</kbd> + <kbd>Tab</kbd> again or <kbd>Escape</kbd> to leave the editor.",
