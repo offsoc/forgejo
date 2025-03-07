@@ -181,7 +181,6 @@ func TestCleanPath(t *testing.T) {
 		{[]string{`/a`, `..`, `b`}, `/a/b`},
 		{[]string{`/lfs`, `repo/..`, `user/../path`}, `/lfs/path`},
 	}
-	}
 	for _, c := range cases {
 		assert.Equal(t, c.expected, FilePathJoinAbs(c.elems[0], c.elems[1:]...), "case: %v", c.elems)
 	}

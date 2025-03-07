@@ -32,7 +32,7 @@ const (
 	PAM         // 4
 	DLDAP       // 5
 	OAuth2      // 6
-	_           // 7
+	_           // 7 (was SSPI)
 	Remote      // 8
 )
 

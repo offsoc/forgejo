@@ -5,7 +5,6 @@ package user
 
 import (
 	"os/exec"
-	"runtime"
 	"strings"
 	"testing"
 )
