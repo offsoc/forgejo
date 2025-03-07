@@ -208,8 +208,6 @@ func StatDir(rootPath string, includeDir ...bool) ([]string, error) {
 	return statDir(rootPath, "", isIncludeDir, false, false)
 }
 
-var driveLetterRegexp = regexp.MustCompile("/[A-Za-z]:/")
-
 // FileURLToPath extracts the path information from a file://... url.
 // It returns an error only if the URL is not a file URL.
 func FileURLToPath(u *url.URL) (string, error) {

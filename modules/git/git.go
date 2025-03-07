@@ -59,9 +59,7 @@ func loadGitVersion() error {
 		return fmt.Errorf("invalid git version output: %s", stdout)
 	}
 
-	var versionString string
-
-	versionString = fields[2]
+	versionString := fields[2]
 
 	var err error
 	gitVersion, err = version.NewVersion(versionString)

@@ -166,7 +166,6 @@ func TestCleanPath(t *testing.T) {
 		assert.Equal(t, c.expected, PathJoinRelX(c.elems...), "case: %v", c.elems)
 	}
 
-	
 	cases = []struct {
 		elems    []string
 		expected string
