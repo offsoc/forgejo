@@ -5,7 +5,6 @@ package util
 
 import (
 	"net/url"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
