@@ -1,17 +1,14 @@
 <div id="review-box">
 	<div
-		{{if not $.IsShowingAllCommits}}
-			data-tooltip-content="{{ctx.Locale.Tr "repo.pulls.review_only_possible_for_full_diff"}}"
-		{{else if .Repository.IsArchived}}
+		{{if .Repository.IsArchived}}
 			data-tooltip-content="{{ctx.Locale.Tr "repo.archive.pull.noreview"}}"
 		{{end}}>
-		<button class="ui tiny primary button tw-pr-1 tw-flex js-btn-review {{if or (not $.IsShowingAllCommits) .Repository.IsArchived}}disabled{{end}}">
+		<button class="ui tiny primary button tw-pr-1 tw-flex js-btn-review {{if .Repository.IsArchived}}disabled{{end}}">
 			{{ctx.Locale.Tr "repo.diff.review"}}
 			<span class="ui small label review-comments-counter" data-pending-comment-number="{{.PendingCodeCommentNumber}}">{{.PendingCodeCommentNumber}}</span>
 			{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 		</button>
 	</div>
-	{{if $.IsShowingAllCommits}}
 	<div class="review-box-panel tippy-target">
 		<div class="ui segment">
 			<form class="ui form form-fetch-action" action="{{.Link}}/reviews/submit" method="post">
@@ -55,5 +52,4 @@
 			</form>
 		</div>
 	</div>
-	{{end}}
 </div>
