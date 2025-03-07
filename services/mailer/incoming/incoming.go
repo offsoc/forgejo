@@ -10,6 +10,7 @@ import (
 	"mime"
 	net_mail "net/mail"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -404,7 +405,7 @@ func getContentFromMailReader(env *enmime.Envelope) *MailContent {
 
 	return &MailContent{
 		Content:     reply.FromText(env.Text),
-		Attachments: append(append(attachments, inlineAttachments...), otherParts...),
+		Attachments: slices.Concat(attachments, inlineAttachments, otherParts),
 	}
 }
 
