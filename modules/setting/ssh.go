@@ -38,7 +38,7 @@ var SSH = struct {
 	AuthorizedPrincipalsBackup            bool               `ini:"SSH_AUTHORIZED_PRINCIPALS_BACKUP"`
 	AuthorizedKeysCommandTemplate         string             `ini:"SSH_AUTHORIZED_KEYS_COMMAND_TEMPLATE"`
 	AuthorizedKeysCommandTemplateTemplate *template.Template `ini:"-"`
-	MinimumKeySizeCheck                   bool               `ini:"-"`
+	MinimumKeySizeCheck                   bool               `ini:"MINIMUM_KEY_SIZE_CHECK"`
 	MinimumKeySizes                       map[string]int     `ini:"-"`
 	CreateAuthorizedKeysFile              bool               `ini:"SSH_CREATE_AUTHORIZED_KEYS_FILE"`
 	CreateAuthorizedPrincipalsFile        bool               `ini:"SSH_CREATE_AUTHORIZED_PRINCIPALS_FILE"`

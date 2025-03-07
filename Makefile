@@ -110,22 +110,10 @@ endif
 FORGEJO_VERSION_MAJOR=$(shell echo $(FORGEJO_VERSION) | sed -e 's/\..*//')
 FORGEJO_VERSION_MINOR=$(shell echo $(FORGEJO_VERSION) | sed -E -e 's/^([0-9]+\.[0-9]+).*/\1/')
 
-show-version-full:
-	@echo ${FORGEJO_VERSION}
-
-show-version-major:
-	@echo ${FORGEJO_VERSION_MAJOR}
-
-show-version-minor:
-	@echo ${FORGEJO_VERSION_MINOR}
-
 RELEASE_VERSION ?= ${FORGEJO_VERSION}
 VERSION ?= ${RELEASE_VERSION}
 
 FORGEJO_VERSION_API ?= ${FORGEJO_VERSION}
-
-show-version-api:
-	@echo ${FORGEJO_VERSION_API}
 
 # Strip binaries by default to reduce size, allow overriding for debugging
 STRIP ?= 1
@@ -243,6 +231,8 @@ help:
 	@echo " - lint-codespell                   lint typos"
 	@echo " - lint-codespell-fix               lint typos and fix them automatically"
 	@echo " - lint-codespell-fix-i             lint typos and fix them interactively"
+	@echo " - lint-config                      lint config files"
+	@echo " - lint-config-md                   lint config cheat sheet"
 	@echo " - lint-go                          lint go files"
 	@echo " - lint-go-fix                      lint go files and fix issues"
 	@echo " - lint-go-vet                      lint go files with vet"
@@ -261,9 +251,12 @@ help:
 	@echo " - checks                           run various consistency checks"
 	@echo " - checks-frontend                  check frontend files"
 	@echo " - checks-backend                   check backend files"
+	@echo " - checks-config                    check config files"
 	@echo " - test                             test everything"
-	@echo " - show-version-full                show the same version as the API endpoint"
+	@echo " - show-version-api                 show the same version as the API endpoint"
+	@echo " - show-version-full                show the full version, same as show-version-api"
 	@echo " - show-version-major               show major release number only"
+	@echo " - show-version-minor               show minor release number only"
 	@echo " - test-frontend                    test frontend files"
 	@echo " - test-frontend-coverage           test frontend files and display code coverage"
 	@echo " - test-backend                     test backend files"
@@ -288,6 +281,18 @@ help:
 	@echo " - test[\#TestSpecificName]         run unit test"
 	@echo " - test-sqlite[\#TestSpecificName]  run integration test for sqlite"
 	@echo " - reproduce-build\#version         build a reproducible binary for the specified release version"
+
+show-version-api:
+	@echo ${FORGEJO_VERSION_API}
+
+show-version-full:
+	@echo ${FORGEJO_VERSION}
+
+show-version-major:
+	@echo ${FORGEJO_VERSION_MAJOR}
+
+show-version-minor:
+	@echo ${FORGEJO_VERSION_MINOR}
 
 ###
 # Check system and environment requirements
@@ -409,7 +414,7 @@ generate-config:
 	python tools/generate-config.py
 
 .PHONY: checks
-checks: checks-frontend checks-backend
+checks: checks-frontend checks-backend checks-config
 
 .PHONY: checks-frontend
 checks-frontend: lockfile-check svg-check
@@ -417,8 +422,12 @@ checks-frontend: lockfile-check svg-check
 .PHONY: checks-backend
 checks-backend: tidy-check swagger-check fmt-check swagger-validate security-check
 
+.PHONY: checks-config
+checks-config:
+	go run tools/checks-config.go
+
 .PHONY: lint
-lint: lint-frontend lint-backend lint-spell
+lint: lint-frontend lint-backend lint-spell lint-config
 
 .PHONY: lint-fix
 lint-fix: lint-frontend-fix lint-backend-fix lint-spell-fix
@@ -490,6 +499,13 @@ lint-spell-fix: lint-codespell-fix
 	@go run $(MISSPELL_PACKAGE) -w $(SPELLCHECK_FILES)
 
 RUN_DEADCODE = $(GO) run $(DEADCODE_PACKAGE) -generated=false -f='{{println .Path}}{{range .Funcs}}{{printf "\t%s\n" .Name}}{{end}}{{println}}' -test code.gitea.io/gitea
+
+.PHONY: lint-config
+lint-config: lint-config-md
+
+.PHONY: lint-config-md
+lint-config-md: node_modules
+	npx markdownlint options/setting/config-cheat-sheet.md
 
 .PHONY: lint-go
 lint-go:
