@@ -21,7 +21,6 @@ import (
 	"code.forgejo.org/forgejo/reply"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
-	"github.com/h2non/filetype"
 	"github.com/jhillyerd/enmime/v2"
 )
 
@@ -422,16 +421,10 @@ func constructFilename(part *enmime.Part) string {
 	}
 
 	fileExtension := ".unknown"
-	match, err := filetype.Match(part.Content)
-	if err != nil {
-		mimeExtensions, err := mime.ExtensionsByType(part.ContentType)
-		if err == nil && len(mimeExtensions) != 0 {
-			// just use the first one we find, this is just a fallback anyways
-			fileExtension = mimeExtensions[0]
-		}
-	} else {
-		// while the mime detector includes the leading dot the filetype library does not
-		fileExtension = "." + match.Extension
-	}
+    mimeExtensions, err := mime.ExtensionsByType(part.ContentType)
+    if err == nil && len(mimeExtensions) != 0 {
+        // just use the first one we find
+        fileExtension = mimeExtensions[0]
+    }
 	return filenameWOExtension + fileExtension
 }
