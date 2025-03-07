@@ -1,11 +1,19 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"one": "об'єднав %[1]d коміт з <code>%[2]s</code> в <code>%[3]s</code> %[4]s",
-		"many": "об'єднав %[1]d комітів з <code>%[2]s</code> в <code>%[3]s</code> %[4]s"
-	},
-	"repo.pulls.title_desc": {
-		"one": "хоче об'єднати %[1]d коміт з <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>",
-		"many": "хоче об'єднати %[1]d комітів з <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>"
-	},
-	"search.milestone_kind": "Шукати віхи..."
+    "repo.pulls.merged_title_desc": {
+        "one": "об'єднує %[1]d коміт з <code>%[2]s</code> в <code>%[3]s</code> %[4]s",
+        "few": "об'єднує %[1]d коміти з <code>%[2]s</code> в <code>%[3]s</code> %[4]s",
+        "many": "об'єднує %[1]d комітів з <code>%[2]s</code> в <code>%[3]s</code> %[4]s"
+    },
+    "repo.pulls.title_desc": {
+        "one": "хоче об'єднати %[1]d коміт з <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>",
+        "few": "хоче об'єднати %[1]d коміти з <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>",
+        "many": "хоче об'єднати %[1]d комітів з <code>%[2]s</code> в <code id=\"%[4]s\">%[3]s</code>"
+    },
+    "search.milestone_kind": "Шукати етапи...",
+    "home.welcome.activity_hint": "У вашій стрічці ще нічого немає. Тут з'являтимуться ваші дії та активність із відстежуваних репозиторіїв.",
+    "home.welcome.no_activity": "Немає подій",
+    "home.explore_repos": "Огляд репозиторіїв",
+    "home.explore_users": "Огляд користувачів",
+    "home.explore_orgs": "Огляд організацій",
+    "incorrect_root_url": "Цей екземпляр Forgejo налаштовано на відвідування з «%s». Зараз ви переглядаєте Forgejo за іншою URL-адресою, що може призвести до збоїв деяких частин програми. Канонічна URL-адреса встановлюється адміністраторами Forgejo за допомогою параметра ROOT_URL у файлі app.ini."
 }
