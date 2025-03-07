@@ -421,10 +421,10 @@ func constructFilename(part *enmime.Part) string {
 	}
 
 	fileExtension := ".unknown"
-    mimeExtensions, err := mime.ExtensionsByType(part.ContentType)
-    if err == nil && len(mimeExtensions) != 0 {
-        // just use the first one we find
-        fileExtension = mimeExtensions[0]
-    }
+	mimeExtensions, err := mime.ExtensionsByType(part.ContentType)
+	if err == nil && len(mimeExtensions) != 0 {
+		// just use the first one we find
+		fileExtension = mimeExtensions[0]
+	}
 	return filenameWOExtension + fileExtension
 }
