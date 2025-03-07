@@ -6,5 +6,6 @@
     "home.welcome.activity_hint": "您的订阅中还没有任何内容。您关注的仓库中的操作和活动将显示在此处。",
     "home.explore_repos": "探索仓库",
     "home.explore_users": "探索用户",
-    "home.explore_orgs": "探索组织"
+    "home.explore_orgs": "探索组织",
+    "incorrect_root_url": "此 Forgejo 实例配置为在“%s”上提供服务。您当前正在通过不同的网址查看 Forgejo，这可能会导致应用程序的某些部分损坏。Forgejo 管理员通过 app.ini 中的 ROOT_URL 设置控制规范网址。"
 }
