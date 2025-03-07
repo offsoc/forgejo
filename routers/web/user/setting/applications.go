@@ -10,6 +10,7 @@ import (
 	auth_model "code.gitea.io/gitea/models/auth"
 	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/modules/base"
+	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/services/context"
@@ -90,7 +91,12 @@ func DeleteApplication(ctx *context.Context) {
 // RegenerateApplication response for regenerating user access token
 func RegenerateApplication(ctx *context.Context) {
 	if t, err := auth_model.RegenerateAccessTokenByID(ctx, ctx.FormInt64("id"), ctx.Doer.ID); err != nil {
-		ctx.Flash.Error("RegenerateAccessTokenByID: " + err.Error())
+		if auth_model.IsErrAccessTokenNotExist(err) {
+			ctx.Flash.Error(ctx.Tr("error.not_found"))
+		} else {
+			ctx.Flash.Error(ctx.Tr("error.server_internal"))
+			log.Error("DeleteAccessTokenByID", err)
+		}
 	} else {
 		ctx.Flash.Success(ctx.Tr("settings.regenerate_token_success"))
 		ctx.Flash.Info(t.Token)
