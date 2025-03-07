@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/perm"
 	quota_model "code.gitea.io/gitea/models/quota"
 	"code.gitea.io/gitea/models/unit"
@@ -109,10 +107,6 @@ func buildAuthGroup() *auth_service.Group {
 		group.Add(&auth_service.ReverseProxy{}) // reverseproxy should before Session, otherwise the header will be ignored if user has login
 	}
 	group.Add(&auth_service.Session{})
-
-	if setting.IsWindows && auth_model.IsSSPIEnabled(db.DefaultContext) {
-		group.Add(&auth_service.SSPI{}) // it MUST be the last, see the comment of SSPI
-	}
 
 	return group
 }

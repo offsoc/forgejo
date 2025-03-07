@@ -23,10 +23,6 @@ func TestCurrentUsername(t *testing.T) {
 	if len(user) == 0 {
 		t.Errorf("expected non-empty user, got: %s", user)
 	}
-	// Windows whoami is weird, so just skip remaining tests
-	if runtime.GOOS == "windows" {
-		t.Skip("skipped test because of weird whoami on Windows")
-	}
 	whoami, err := getWhoamiOutput()
 	if err != nil {
 		t.Errorf("failed to run whoami to test current user: %f", err)

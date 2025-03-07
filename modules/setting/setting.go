@@ -8,7 +8,6 @@ package setting
 import (
 	"fmt"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
@@ -34,7 +33,6 @@ var (
 	RunMode     string
 	RunUser     string
 	IsProd      bool
-	IsWindows   bool
 
 	// IsInTesting indicates whether the testing is running. A lot of unreliable code causes a lot of nonsense error logs during testing
 	// TODO: this is only a temporary solution, we should make the test code more reliable
@@ -42,22 +40,18 @@ var (
 )
 
 func init() {
-	IsWindows = runtime.GOOS == "windows"
 	if AppVer == "" {
 		AppVer = "dev"
 	}
 
-	// We can rely on log.CanColorStdout being set properly because modules/log/console_windows.go comes before modules/setting/setting.go lexicographically
 	// By default set this logger at Info - we'll change it later, but we need to start with something.
 	log.SetConsoleLogger(log.DEFAULT, "console", log.INFO)
 }
 
 // IsRunUserMatchCurrentUser returns false if configured run user does not match
 // actual user that runs the app. The first return value is the actual user name.
-// This check is ignored under Windows since SSH remote login is not the main
-// method to login on Windows.
 func IsRunUserMatchCurrentUser(runUser string) (string, bool) {
-	if IsWindows || SSH.StartBuiltinServer {
+	if SSH.StartBuiltinServer {
 		return "", true
 	}
 
