@@ -56,12 +56,11 @@ func LoadIssuesFromColumn(ctx context.Context, b *project_model.Column, doer *us
 		ProjectID:       b.ProjectID,
 		SortType:        "project-column-sorting",
 		IsClosed:        isClosed,
+		AllPublic:       true,
 	}
 	if doer != nil {
 		issueOpts.User = doer
 		issueOpts.Org = org
-	} else {
-		issueOpts.AllPublic = true
 	}
 
 	issueList, err := Issues(ctx, issueOpts)

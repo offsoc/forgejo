@@ -191,7 +191,7 @@ func (l *LoggerImpl) Log(skip int, level Level, format string, logArgs ...any) {
 	if ok {
 		fn := runtime.FuncForPC(pc)
 		if fn != nil {
-			event.Caller = fn.Name() + "()"
+			event.Caller = strings.TrimSuffix(fn.Name(), "[...]") + "()"
 		}
 	}
 	event.Filename, event.Line = strings.TrimPrefix(filename, projectPackagePrefix), line

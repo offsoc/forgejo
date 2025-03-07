@@ -1,11 +1,17 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"one": "hett %[1]d Kommitteren vun <code>%[2]s</code> na <code>%[3]s</code> %[4]s tosamenföhrt",
-		"other": "hett %[1]d Kommitterens vun <code>%[2]s</code> na <code>%[3]s</code> %[4]s tosamenföhrt"
-	},
-	"repo.pulls.title_desc": {
-		"one": "will %[1]d Kommitteren vun <code>%[2]s</code> na <code id=\"%[4]s\">%[3]s</code> tosamenföhren",
-		"other": "will %[1]d Kommitterens vun <code>%[2]s</code> na <code id=\"%[4]s\">%[3]s</code> tosamenföhren"
-	},
-	"search.milestone_kind": "In Markstenen söken …"
+    "repo.pulls.merged_title_desc": {
+        "one": "hett %[4]s %[1]d Kommitteren vun <code>%[2]s</code> na <code>%[3]s</code> tosamenföhrt",
+        "other": "hett %[4]s %[1]d Kommitterens vun <code>%[2]s</code> na <code>%[3]s</code> tosamenföhrt"
+    },
+    "repo.pulls.title_desc": {
+        "one": "will %[1]d Kommitteren vun <code>%[2]s</code> na <code id=\"%[4]s\">%[3]s</code> tosamenföhren",
+        "other": "will %[1]d Kommitterens vun <code>%[2]s</code> na <code id=\"%[4]s\">%[3]s</code> tosamenföhren"
+    },
+    "search.milestone_kind": "In Markstenen söken …",
+    "home.explore_users": "Brukers utförsken",
+    "home.explore_orgs": "Vereenigungen utförsken",
+    "home.explore_repos": "Repositoriums utförsken",
+    "home.welcome.no_activity": "Keen Doon",
+    "home.welcome.activity_hint": "In dienem Schuuv is noch nix. Dien Doon un dat Doon vun Repositoriums, wat du beluurst, word hier wiest worden.",
+    "incorrect_root_url": "Deese Forgejo-Instanz is inricht, unner »%s« besöcht to worden. Du bekiekst Forgejo jüüst dör een anner URL, wat daarto föhren kann, dat ’t deelwies nich richtig warkt. De kanonisk URL word vun de Forgejo-Chefs över de ROOT_URL-Instellen in de app.ini kuntrolleert."
 }

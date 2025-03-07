@@ -1,3 +1,17 @@
 {
-	"search.milestone_kind": "Søg milepæle..."
+    "search.milestone_kind": "Søg milepæle...",
+    "repo.pulls.title_desc": {
+        "one": "ønsker at flette %[1]d commit fra <code>%[2]s</code> til <code id=\"%[4]s\">%[3]s</code>",
+        "other": "ønsker at flette %[1]d commits fra <code>%[2]s</code> til <code id=\"%[4]s\">%[3]s</code>"
+    },
+    "repo.pulls.merged_title_desc": {
+        "one": "flettet %[1]d commit fra <code>%[2]s</code> til <code>%[3]s</code> %[4]s",
+        "other": "flettet %[1]d commits fra <code>%[2]s</code> til <code>%[3]s</code> %[4]s"
+    },
+    "incorrect_root_url": "Denne Forgejo-instans er konfigureret til at blive serveret på \"%s\". Du ser i øjeblikket Forgejo gennem en anden URL, hvilket kan få dele af applikationen til at gå i stykker. Den kanoniske URL styres af Forgejo-administratorer via indstillingen ROOT_URL i app.ini.",
+    "home.welcome.no_activity": "Ingen aktivitet",
+    "home.welcome.activity_hint": "Der er intet i dit feed endnu. Dine handlinger og aktivitet fra depoterne, som du ser, vises her.",
+    "home.explore_repos": "Udforsk depoter",
+    "home.explore_users": "Udforsk brugere",
+    "home.explore_orgs": "Udforsk organisationer"
 }
