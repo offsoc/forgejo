@@ -59,20 +59,8 @@ ifeq ($(HAS_GO), yes)
 	CGO_CFLAGS ?= $(shell $(GO) env CGO_CFLAGS) $(CGO_EXTRA_CFLAGS)
 endif
 
-ifeq ($(GOOS),windows)
-	IS_WINDOWS := yes
-else ifeq ($(patsubst Windows%,Windows,$(OS)),Windows)
-	ifeq ($(GOOS),)
-		IS_WINDOWS := yes
-	endif
-endif
-ifeq ($(IS_WINDOWS),yes)
-	GOFLAGS := -v -buildmode=exe
-	EXECUTABLE ?= gitea.exe
-else
-	GOFLAGS := -v
-	EXECUTABLE ?= gitea
-endif
+GOFLAGS := -v
+EXECUTABLE ?= gitea
 
 ifeq ($(shell sed --version 2>/dev/null | grep -q GNU && echo gnu),gnu)
 	SED_INPLACE := sed -i
@@ -498,13 +486,6 @@ lint-go-fix:
 	$(GO) run $(GOLANGCI_LINT_PACKAGE) run $(GOLANGCI_LINT_ARGS) --fix
 	$(RUN_DEADCODE) > .deadcode-out
 
-# workaround step for the lint-go-windows CI task because 'go run' can not
-# have distinct GOOS/GOARCH for its build and run steps
-.PHONY: lint-go-windows
-lint-go-windows:
-	@GOOS= GOARCH= $(GO) install $(GOLANGCI_LINT_PACKAGE)
-	golangci-lint run
-
 .PHONY: lint-go-vet
 lint-go-vet:
 	@echo "Running go vet..."
@@ -876,10 +857,6 @@ sources-tarbal: frontend generate vendor release-sources release-check
 
 $(DIST_DIRS):
 	mkdir -p $(DIST_DIRS)
-
-.PHONY: release-windows
-release-windows: | $(DIST_DIRS)
-	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) run $(XGO_PACKAGE) -go $(XGO_VERSION) -buildmode exe -dest $(DIST)/binaries -tags 'osusergo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets 'windows/*' -out gitea-$(VERSION) .
 
 .PHONY: release-linux
 release-linux: | $(DIST_DIRS)

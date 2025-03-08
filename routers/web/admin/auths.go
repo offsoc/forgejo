@@ -4,11 +4,9 @@
 package admin
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -18,14 +16,12 @@ import (
 	"code.gitea.io/gitea/modules/base"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
 	"code.gitea.io/gitea/modules/web"
 	auth_service "code.gitea.io/gitea/services/auth"
 	"code.gitea.io/gitea/services/auth/source/ldap"
 	"code.gitea.io/gitea/services/auth/source/oauth2"
 	pam_service "code.gitea.io/gitea/services/auth/source/pam"
 	"code.gitea.io/gitea/services/auth/source/smtp"
-	"code.gitea.io/gitea/services/auth/source/sspi"
 	"code.gitea.io/gitea/services/context"
 	"code.gitea.io/gitea/services/forms"
 
@@ -36,11 +32,6 @@ const (
 	tplAuths    base.TplName = "admin/auth/list"
 	tplAuthNew  base.TplName = "admin/auth/new"
 	tplAuthEdit base.TplName = "admin/auth/edit"
-)
-
-var (
-	separatorAntiPattern = regexp.MustCompile(`[^\w-\.]`)
-	langCodePattern      = regexp.MustCompile(`^[a-z]{2}-[A-Z]{2}$`)
 )
 
 // Authentications show authentication config page
@@ -70,7 +61,6 @@ var (
 			{auth.DLDAP.String(), auth.DLDAP},
 			{auth.SMTP.String(), auth.SMTP},
 			{auth.OAuth2.String(), auth.OAuth2},
-			{auth.SSPI.String(), auth.SSPI},
 		}
 		if pam.Supported {
 			items = append(items, dropdownItem{auth.Names[auth.PAM], auth.PAM})
@@ -101,12 +91,6 @@ func NewAuthSource(ctx *context.Context) {
 	ctx.Data["SMTPAuths"] = smtp.Authenticators
 	oauth2providers := oauth2.GetSupportedOAuth2Providers()
 	ctx.Data["OAuth2Providers"] = oauth2providers
-
-	ctx.Data["SSPIAutoCreateUsers"] = true
-	ctx.Data["SSPIAutoActivateUsers"] = true
-	ctx.Data["SSPIStripDomainNames"] = true
-	ctx.Data["SSPISeparatorReplacement"] = "_"
-	ctx.Data["SSPIDefaultLanguage"] = ""
 
 	// only the first as default
 	ctx.Data["oauth2_provider"] = oauth2providers[0].Name()
@@ -209,30 +193,6 @@ func parseOAuth2Config(form forms.AuthenticationForm) *oauth2.Source {
 	}
 }
 
-func parseSSPIConfig(ctx *context.Context, form forms.AuthenticationForm) (*sspi.Source, error) {
-	if util.IsEmptyString(form.SSPISeparatorReplacement) {
-		ctx.Data["Err_SSPISeparatorReplacement"] = true
-		return nil, errors.New(ctx.Locale.TrString("form.SSPISeparatorReplacement") + ctx.Locale.TrString("form.require_error"))
-	}
-	if separatorAntiPattern.MatchString(form.SSPISeparatorReplacement) {
-		ctx.Data["Err_SSPISeparatorReplacement"] = true
-		return nil, errors.New(ctx.Locale.TrString("form.SSPISeparatorReplacement") + ctx.Locale.TrString("form.alpha_dash_dot_error"))
-	}
-
-	if form.SSPIDefaultLanguage != "" && !langCodePattern.MatchString(form.SSPIDefaultLanguage) {
-		ctx.Data["Err_SSPIDefaultLanguage"] = true
-		return nil, errors.New(ctx.Locale.TrString("form.lang_select_error"))
-	}
-
-	return &sspi.Source{
-		AutoCreateUsers:      form.SSPIAutoCreateUsers,
-		AutoActivateUsers:    form.SSPIAutoActivateUsers,
-		StripDomainNames:     form.SSPIStripDomainNames,
-		SeparatorReplacement: form.SSPISeparatorReplacement,
-		DefaultLanguage:      form.SSPIDefaultLanguage,
-	}, nil
-}
-
 // NewAuthSourcePost response for adding an auth source
 func NewAuthSourcePost(ctx *context.Context) {
 	form := *web.GetForm(ctx).(*forms.AuthenticationForm)
@@ -246,12 +206,6 @@ func NewAuthSourcePost(ctx *context.Context) {
 	ctx.Data["SMTPAuths"] = smtp.Authenticators
 	oauth2providers := oauth2.GetSupportedOAuth2Providers()
 	ctx.Data["OAuth2Providers"] = oauth2providers
-
-	ctx.Data["SSPIAutoCreateUsers"] = true
-	ctx.Data["SSPIAutoActivateUsers"] = true
-	ctx.Data["SSPIStripDomainNames"] = true
-	ctx.Data["SSPISeparatorReplacement"] = "_"
-	ctx.Data["SSPIDefaultLanguage"] = ""
 
 	hasTLS := false
 	var config convert.Conversion
@@ -278,19 +232,6 @@ func NewAuthSourcePost(ctx *context.Context) {
 				ctx.RenderWithErr(ctx.Tr("admin.auths.invalid_openIdConnectAutoDiscoveryURL"), tplAuthNew, form)
 				return
 			}
-		}
-	case auth.SSPI:
-		var err error
-		config, err = parseSSPIConfig(ctx, form)
-		if err != nil {
-			ctx.RenderWithErr(err.Error(), tplAuthNew, form)
-			return
-		}
-		existing, err := db.Find[auth.Source](ctx, auth.FindSourcesOptions{LoginType: auth.SSPI})
-		if err != nil || len(existing) > 0 {
-			ctx.Data["Err_Type"] = true
-			ctx.RenderWithErr(ctx.Tr("admin.auths.login_source_of_type_exist"), tplAuthNew, form)
-			return
 		}
 	default:
 		ctx.Error(http.StatusBadRequest)
@@ -407,12 +348,6 @@ func EditAuthSourcePost(ctx *context.Context) {
 				ctx.RenderWithErr(ctx.Tr("admin.auths.invalid_openIdConnectAutoDiscoveryURL"), tplAuthEdit, form)
 				return
 			}
-		}
-	case auth.SSPI:
-		config, err = parseSSPIConfig(ctx, form)
-		if err != nil {
-			ctx.RenderWithErr(err.Error(), tplAuthEdit, form)
-			return
 		}
 	default:
 		ctx.Error(http.StatusBadRequest)

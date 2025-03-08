@@ -32,7 +32,7 @@ const (
 	PAM         // 4
 	DLDAP       // 5
 	OAuth2      // 6
-	SSPI        // 7
+	_           // 7 (was SSPI)
 	Remote      // 8
 )
 
@@ -53,7 +53,6 @@ var Names = map[Type]string{
 	SMTP:   "SMTP",
 	PAM:    "PAM",
 	OAuth2: "OAuth2",
-	SSPI:   "SPNEGO with SSPI",
 	Remote: "Remote",
 }
 
@@ -178,11 +177,6 @@ func (source *Source) IsOAuth2() bool {
 	return source.Type == OAuth2
 }
 
-// IsSSPI returns true of this source is of the SSPI type.
-func (source *Source) IsSSPI() bool {
-	return source.Type == SSPI
-}
-
 func (source *Source) IsRemote() bool {
 	return source.Type == Remote
 }
@@ -263,20 +257,6 @@ func (opts FindSourcesOptions) ToConds() builder.Cond {
 		conds = conds.And(builder.Eq{"`type`": opts.LoginType})
 	}
 	return conds
-}
-
-// IsSSPIEnabled returns true if there is at least one activated login
-// source of type LoginSSPI
-func IsSSPIEnabled(ctx context.Context) bool {
-	exist, err := db.Exist[Source](ctx, FindSourcesOptions{
-		IsActive:  optional.Some(true),
-		LoginType: SSPI,
-	}.ToConds())
-	if err != nil {
-		log.Error("IsSSPIEnabled: failed to query active SSPI sources: %v", err)
-		return false
-	}
-	return exist
 }
 
 // GetSourceByID returns login source by given ID.

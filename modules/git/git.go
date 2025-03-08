@@ -59,15 +59,7 @@ func loadGitVersion() error {
 		return fmt.Errorf("invalid git version output: %s", stdout)
 	}
 
-	var versionString string
-
-	// Handle special case on Windows.
-	i := strings.Index(fields[2], "windows")
-	if i >= 1 {
-		versionString = fields[2][:i-1]
-	} else {
-		versionString = fields[2]
-	}
+	versionString := fields[2]
 
 	var err error
 	gitVersion, err = version.NewVersion(versionString)
@@ -280,23 +272,10 @@ func syncGitConfig() (err error) {
 	// Thus the owner uid/gid for files on these filesystems will be marked as root.
 	// As Gitea now always use its internal git config file, and access to the git repositories is managed through Gitea,
 	// it is now safe to set "safe.directory=*" for internal usage only.
-	// Please note: the wildcard "*" is only supported by Git 2.30.4/2.31.3/2.32.2/2.33.3/2.34.3/2.35.3/2.36 and later
-	// Although only supported by Git 2.30.4/2.31.3/2.32.2/2.33.3/2.34.3/2.35.3/2.36 and later - this setting is tolerated by earlier versions
+	// Please note: the wildcard "*" is only supported by Git 2.30.4/2.31.3/2.32.2/2.33.3/2.34.3/2.35.3/2.36 and later,
+	// but is tolerated by earlier versions
 	if err := configAddNonExist("safe.directory", "*"); err != nil {
 		return err
-	}
-	if runtime.GOOS == "windows" {
-		if err := configSet("core.longpaths", "true"); err != nil {
-			return err
-		}
-		if setting.Git.DisableCoreProtectNTFS {
-			err = configSet("core.protectNTFS", "false")
-		} else {
-			err = configUnsetAll("core.protectNTFS", "false")
-		}
-		if err != nil {
-			return err
-		}
 	}
 
 	// By default partial clones are disabled, enable them from git v2.22
