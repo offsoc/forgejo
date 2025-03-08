@@ -82,6 +82,24 @@ func CreateCodeComment(ctx *context.Context) {
 		attachments = form.Files
 	}
 
+	// If the reply is made to a comment that is part of a pending review, then
+	// this comment also should be seen as part of that pending review. Consider
+	// it to be a pending review by default, except when `single_review` was
+	// passed.
+	pendingReview := !form.SingleReview
+	if form.Reply > 0 {
+		r, err := issues_model.GetReviewByID(ctx, form.Reply)
+		if err != nil {
+			ctx.ServerError("GetReviewByID", err)
+			return
+		}
+		if r.IssueID != issue.ID {
+			ctx.NotFound("Review does not belong to pull request", nil)
+			return
+		}
+		pendingReview = r.Type == issues_model.ReviewTypePending
+	}
+
 	comment, err := pull_service.CreateCodeComment(ctx,
 		ctx.Doer,
 		ctx.Repo.GitRepo,
@@ -89,7 +107,7 @@ func CreateCodeComment(ctx *context.Context) {
 		signedLine,
 		form.Content,
 		form.TreePath,
-		!form.SingleReview,
+		pendingReview,
 		form.Reply,
 		form.LatestCommitID,
 		attachments,
