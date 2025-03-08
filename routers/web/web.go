@@ -640,7 +640,7 @@ func registerRoutes(m *web.Route) {
 			m.Post("/unblock", user_setting.UnblockUser)
 		})
 		m.Get("/storage_overview", user_setting.StorageOverview)
-	}, reqSignIn, ctxDataSet("PageIsUserSettings", true, "AllThemes", setting.UI.Themes, "EnablePackages", setting.Packages.Enabled, "EnableQuota", setting.Quota.Enabled))
+	}, reqSignIn, ctxDataSet("PageIsUserSettings", true, "EnablePackages", setting.Packages.Enabled, "EnableQuota", setting.Quota.Enabled))
 
 	m.Group("/user", func() {
 		m.Get("/activate", auth.Activate)
