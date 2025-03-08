@@ -72,6 +72,15 @@
 							{{if IsMultilineCommitMessage .Message}}
 							<pre class="commit-body tw-hidden">{{RenderCommitBody $.Context .Message ($.Repository.ComposeMetas ctx)}}</pre>
 							{{end}}
+							{{if .Tag}}
+							<div class="ui label">
+								{{svg "octicon-tag" 16 "tw-mr-1"}}
+								{{.Tag}}
+								{{if .MoreTags}}
+									...
+								{{end}}
+							</div>
+						{{end}}
 						</td>
 						{{if .Committer}}
 							<td class="text right aligned">{{DateUtils.TimeSince .Committer.When}}</td>

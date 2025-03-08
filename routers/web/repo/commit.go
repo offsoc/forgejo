@@ -457,7 +457,7 @@ func RawDiff(ctx *context.Context) {
 }
 
 func processGitCommits(ctx *context.Context, gitCommits []*git.Commit) []*git_model.SignCommitWithStatuses {
-	commits := git_model.ConvertFromGitCommit(ctx, gitCommits, ctx.Repo.Repository)
+	commits := git_model.ConvertFromGitCommit(ctx, gitCommits, ctx.Repo.Repository, ctx.Repo.GitRepo)
 	if !ctx.Repo.CanRead(unit_model.TypeActions) {
 		for _, commit := range commits {
 			if commit.Status == nil {

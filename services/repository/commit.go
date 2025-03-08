@@ -24,11 +24,11 @@ type namedLink struct { // TODO: better name?
 
 // LoadBranchesAndTags creates a new repository branch
 func LoadBranchesAndTags(ctx context.Context, baseRepo *gitea_ctx.Repository, commitSHA string) (*ContainedLinks, error) {
-	containedTags, err := baseRepo.GitRepo.ListOccurrences(ctx, "tag", commitSHA)
+	containedTags, err := baseRepo.GitRepo.ListOccurrences(ctx, "tag", commitSHA, false)
 	if err != nil {
 		return nil, fmt.Errorf("encountered a problem while querying %s: %w", "tags", err)
 	}
-	containedBranches, err := baseRepo.GitRepo.ListOccurrences(ctx, "branch", commitSHA)
+	containedBranches, err := baseRepo.GitRepo.ListOccurrences(ctx, "branch", commitSHA, false)
 	if err != nil {
 		return nil, fmt.Errorf("encountered a problem while querying %s: %w", "branches", err)
 	}

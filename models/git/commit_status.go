@@ -450,11 +450,13 @@ func NewCommitStatus(ctx context.Context, opts NewCommitStatusOptions) error {
 type SignCommitWithStatuses struct {
 	Status   *CommitStatus
 	Statuses []*CommitStatus
+	Tag      string
+	MoreTags bool
 	*asymkey_model.SignCommit
 }
 
 // ParseCommitsWithStatus checks commits latest statuses and calculates its worst status state
-func ParseCommitsWithStatus(ctx context.Context, oldCommits []*asymkey_model.SignCommit, repo *repo_model.Repository) []*SignCommitWithStatuses {
+func ParseCommitsWithStatus(ctx context.Context, oldCommits []*asymkey_model.SignCommit, repo *repo_model.Repository, gitRepo *git.Repository) []*SignCommitWithStatuses {
 	newCommits := make([]*SignCommitWithStatuses, 0, len(oldCommits))
 
 	for _, c := range oldCommits {
@@ -469,6 +471,16 @@ func ParseCommitsWithStatus(ctx context.Context, oldCommits []*asymkey_model.Sig
 			commit.Status = CalcCommitStatus(statuses)
 		}
 
+		if gitRepo != nil {
+			tags, err := gitRepo.ListOccurrences(ctx, "tag", commit.ID.String(), true)
+			if err != nil {
+				log.Error("ListOccurrences: %v", err)
+			} else if len(tags) > 0 {
+				commit.Tag = tags[0]
+				commit.MoreTags = len(tags) > 1
+			}
+		}
+
 		newCommits = append(newCommits, commit)
 	}
 	return newCommits
@@ -480,7 +492,7 @@ func hashCommitStatusContext(context string) string {
 }
 
 // ConvertFromGitCommit converts git commits into SignCommitWithStatuses
-func ConvertFromGitCommit(ctx context.Context, commits []*git.Commit, repo *repo_model.Repository) []*SignCommitWithStatuses {
+func ConvertFromGitCommit(ctx context.Context, commits []*git.Commit, repo *repo_model.Repository, gitRepo *git.Repository) []*SignCommitWithStatuses {
 	return ParseCommitsWithStatus(ctx,
 		asymkey_model.ParseCommitsWithSignature(
 			ctx,
@@ -491,6 +503,7 @@ func ConvertFromGitCommit(ctx context.Context, commits []*git.Commit, repo *repo
 			},
 		),
 		repo,
+		gitRepo,
 	)
 }
 
