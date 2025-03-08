@@ -303,6 +303,10 @@ func (l *locale) TrPluralString(count any, trKey string, trArgs ...any) template
 
 // HasKey returns whether a key is present in this locale or not
 func (l *locale) HasKey(trKey string) bool {
+	_, ok := l.newStyleMessages[trKey]
+	if ok {
+		return true
+	}
 	idx, ok := l.store.trKeyToIdxMap[trKey]
 	if !ok {
 		return false
