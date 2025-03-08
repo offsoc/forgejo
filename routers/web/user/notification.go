@@ -15,7 +15,6 @@ import (
 	"code.gitea.io/gitea/models/db"
 	git_model "code.gitea.io/gitea/models/git"
 	issues_model "code.gitea.io/gitea/models/issues"
-	access_model "code.gitea.io/gitea/models/perm/access"
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/models/unit"
 	"code.gitea.io/gitea/modules/base"
@@ -524,32 +523,12 @@ func NotificationUnsubscribe(ctx *context.Context) {
 		return
 	}
 
-	repo := new(context.Repository)
-	repo.Repository = issue.Repo
-	repo.Permission, err = access_model.GetUserRepoPermission(ctx, repo.Repository, ctx.Doer)
+	isSubscribed, err := issues_model.CheckIssueWatch(ctx, ctx.Doer, issue)
 	if err != nil {
-		ctx.ServerError("GetUserRepoPermission", err)
+		ctx.ServerError("CheckIssueWatch", err)
 		return
 	}
-
-	if !ctx.IsSigned || (ctx.Doer.ID != issue.PosterID && !repo.CanReadIssuesOrPulls(issue.IsPull)) {
-		if log.IsTrace() {
-			if ctx.IsSigned {
-				issueType := "issues"
-				if issue.IsPull {
-					issueType = "pulls"
-				}
-				log.Trace("Permission Denied: User %-v not the Poster (ID: %d) and cannot read %s in Repo %-v.\n"+
-					"User in Repo has Permissions: %-+v",
-					ctx.Doer,
-					issue.PosterID,
-					issueType,
-					repo.Repository,
-					repo.Permission)
-			} else {
-				log.Trace("Permission Denied: Not logged in")
-			}
-		}
+	if !isSubscribed {
 		ctx.Error(http.StatusForbidden)
 		return
 	}
