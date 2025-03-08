@@ -30,6 +30,7 @@ import (
 	"code.gitea.io/gitea/services/mailer"
 	"code.gitea.io/gitea/tests"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/pquerna/otp/totp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -245,6 +246,69 @@ func testExportUserGPGKeys(t *testing.T, user, expected string) {
 	resp := session.MakeRequest(t, req, http.StatusOK)
 	// t.Log(resp.Body.String())
 	assert.Equal(t, expected, resp.Body.String())
+}
+
+func TestAccessTokenRegenerate(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	session := loginUser(t, "user1")
+	prevLatestTokenName, prevLatestTokenID := findLatestTokenID(t, session)
+
+	createApplicationSettingsToken(t, session, "TestAccessToken", auth_model.AccessTokenScopeWriteUser)
+	oldToken := assertAccessToken(t, session)
+	oldTokenName, oldTokenID := findLatestTokenID(t, session)
+
+	assert.Equal(t, "TestAccessToken", oldTokenName)
+
+	req := NewRequestWithValues(t, "POST", "/user/settings/applications/regenerate", map[string]string{
+		"_csrf": GetCSRF(t, session, "/user/settings/applications"),
+		"id":    strconv.Itoa(oldTokenID),
+	})
+	session.MakeRequest(t, req, http.StatusOK)
+
+	newToken := assertAccessToken(t, session)
+	newTokenName, newTokenID := findLatestTokenID(t, session)
+
+	assert.NotEqual(t, oldToken, newToken)
+	assert.Equal(t, oldTokenID, newTokenID)
+	assert.Equal(t, "TestAccessToken", newTokenName)
+
+	req = NewRequestWithValues(t, "POST", "/user/settings/applications/delete", map[string]string{
+		"_csrf": GetCSRF(t, session, "/user/settings/applications"),
+		"id":    strconv.Itoa(newTokenID),
+	})
+	session.MakeRequest(t, req, http.StatusOK)
+
+	latestTokenName, latestTokenID := findLatestTokenID(t, session)
+
+	assert.Less(t, latestTokenID, oldTokenID)
+	assert.Equal(t, latestTokenID, prevLatestTokenID)
+	assert.Equal(t, latestTokenName, prevLatestTokenName)
+	assert.NotEqual(t, "TestAccessToken", latestTokenName)
+}
+
+func findLatestTokenID(t *testing.T, session *TestSession) (string, int) {
+	req := NewRequest(t, "GET", "/user/settings/applications")
+	resp := session.MakeRequest(t, req, http.StatusOK)
+	htmlDoc := NewHTMLParser(t, resp.Body)
+	latestTokenName := ""
+	latestTokenID := 0
+	htmlDoc.Find(".delete-button").Each(func(i int, s *goquery.Selection) {
+		tokenID, exists := s.Attr("data-id")
+
+		if !exists || tokenID == "" {
+			return
+		}
+
+		id, err := strconv.Atoi(tokenID)
+		require.NoError(t, err)
+		if id > latestTokenID {
+			latestTokenName = s.Parent().Parent().Find(".flex-item-title").Text()
+			latestTokenID = id
+		}
+	})
+
+	return latestTokenName, latestTokenID
 }
 
 func TestGetUserRss(t *testing.T) {
