@@ -19,15 +19,15 @@
 							<input name="theme" type="hidden" value="{{.SignedUser.Theme}}">
 							{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 							<div class="text">
-								{{range $i,$a := .AllThemes}}
-									{{if eq $.SignedUser.Theme $a}}{{$a}}{{end}}
-								{{end}}
+								{{- range $i,$a := .AllThemes -}}
+									{{if eq $.SignedUser.Theme $a}}{{call $.ThemeName $a}}{{end}}
+								{{- end -}}
 							</div>
 
 							<div class="menu">
 							{{range $i,$a := .AllThemes}}
 								<div class="item{{if eq $.SignedUser.Theme $a}} active selected{{end}}" data-value="{{$a}}">
-									{{$a}}
+									{{call $.ThemeName $a}}
 								</div>
 							{{end}}
 							</div>

@@ -39,6 +39,8 @@ type Locale interface {
 
 	TrSize(size int64) ReadableSize
 
+	HasKey(trKey string) bool
+
 	PrettyNumber(v any) string
 }
 
