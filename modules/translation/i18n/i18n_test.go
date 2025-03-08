@@ -156,7 +156,15 @@ commits = fallback value for commits
 	assert.ElementsMatch(t, []string{"lang1", "lang2"}, langs)
 	assert.ElementsMatch(t, []string{"Lang1", "Lang2"}, descs)
 
-	found := lang1.HasKey("no-such")
+	// Test HasKey for JSON
+	found := lang2.HasKey("section.json")
+	assert.True(t, found)
+
+	// Test HasKey for INI
+	found = lang2.HasKey("section.sub")
+	assert.True(t, found)
+
+	found = lang1.HasKey("no-such")
 	assert.False(t, found)
 	assert.EqualValues(t, "no-such", lang1.TrString("no-such"))
 	require.NoError(t, ls.Close())
