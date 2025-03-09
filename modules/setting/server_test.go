@@ -73,3 +73,16 @@ MAX_USER_REDIRECTS = 8`
 	assert.EqualValues(t, 3, Service.UsernameCooldownPeriod)
 	assert.EqualValues(t, 8, Service.MaxUserRedirects)
 }
+
+func TestUnixSocketAbstractNamespace(t *testing.T) {
+	iniStr := `
+	[server]
+	PROTOCOL=http+unix
+	HTTP_ADDR=@forgejo
+	`
+	cfg, err := NewConfigProviderFromData(iniStr)
+	require.NoError(t, err)
+	loadServerFrom(cfg)
+
+	assert.EqualValues(t, "@forgejo", HTTPAddr)
+}

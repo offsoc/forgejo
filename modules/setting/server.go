@@ -265,7 +265,7 @@ func loadServerFrom(rootCfg ConfigProvider) {
 		}
 
 		UnixSocketPermission = uint32(UnixSocketPermissionParsed)
-		if !filepath.IsAbs(HTTPAddr) {
+		if HTTPAddr[0] != '@' && !filepath.IsAbs(HTTPAddr) {
 			HTTPAddr = filepath.Join(AppWorkPath, HTTPAddr)
 		}
 	}
