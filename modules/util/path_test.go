@@ -5,7 +5,6 @@ package util
 
 import (
 	"net/url"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,7 +16,6 @@ func TestFileURLToPath(t *testing.T) {
 		url      string
 		expected string
 		haserror bool
-		windows  bool
 	}{
 		// case 0
 		{
@@ -34,18 +32,9 @@ func TestFileURLToPath(t *testing.T) {
 			url:      "file:///path",
 			expected: "/path",
 		},
-		// case 3
-		{
-			url:      "file:///C:/path",
-			expected: "C:/path",
-			windows:  true,
-		},
 	}
 
 	for n, c := range cases {
-		if c.windows && runtime.GOOS != "windows" {
-			continue
-		}
 		u, _ := url.Parse(c.url)
 		p, err := FileURLToPath(u)
 		if c.haserror {
@@ -177,35 +166,18 @@ func TestCleanPath(t *testing.T) {
 		assert.Equal(t, c.expected, PathJoinRelX(c.elems...), "case: %v", c.elems)
 	}
 
-	// for POSIX only, but the result is similar on Windows, because the first element must be an absolute path
-	if isOSWindows() {
-		cases = []struct {
-			elems    []string
-			expected string
-		}{
-			{[]string{`C:\..`}, `C:\`},
-			{[]string{`C:\a`}, `C:\a`},
-			{[]string{`C:\a/`}, `C:\a`},
-			{[]string{`C:\..\a\`, `../b`, `c\..`, `d`}, `C:\a\b\d`},
-			{[]string{`C:\a/..\b`}, `C:\b`},
-			{[]string{`C:\a`, ``, `b`}, `C:\a\b`},
-			{[]string{`C:\a`, `..`, `b`}, `C:\a\b`},
-			{[]string{`C:\lfs`, `repo/..`, `user/../path`}, `C:\lfs\path`},
-		}
-	} else {
-		cases = []struct {
-			elems    []string
-			expected string
-		}{
-			{[]string{`/..`}, `/`},
-			{[]string{`/a`}, `/a`},
-			{[]string{`/a/`}, `/a`},
-			{[]string{`/../a/`, `../b`, `c/..`, `d`}, `/a/b/d`},
-			{[]string{`/a\..\b`}, `/b`},
-			{[]string{`/a`, ``, `b`}, `/a/b`},
-			{[]string{`/a`, `..`, `b`}, `/a/b`},
-			{[]string{`/lfs`, `repo/..`, `user/../path`}, `/lfs/path`},
-		}
+	cases = []struct {
+		elems    []string
+		expected string
+	}{
+		{[]string{`/..`}, `/`},
+		{[]string{`/a`}, `/a`},
+		{[]string{`/a/`}, `/a`},
+		{[]string{`/../a/`, `../b`, `c/..`, `d`}, `/a/b/d`},
+		{[]string{`/a\..\b`}, `/b`},
+		{[]string{`/a`, ``, `b`}, `/a/b`},
+		{[]string{`/a`, `..`, `b`}, `/a/b`},
+		{[]string{`/lfs`, `repo/..`, `user/../path`}, `/lfs/path`},
 	}
 	for _, c := range cases {
 		assert.Equal(t, c.expected, FilePathJoinAbs(c.elems[0], c.elems[1:]...), "case: %v", c.elems)

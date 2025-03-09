@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 
 	"code.gitea.io/gitea/modules/graceful"
@@ -70,9 +69,6 @@ func (p *Renderer) DisplayInIFrame() bool {
 }
 
 func envMark(envName string) string {
-	if runtime.GOOS == "windows" {
-		return "%" + envName + "%"
-	}
 	return "$" + envName
 }
 

@@ -29,7 +29,6 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/modules/templates"
 	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/user"
 	"code.gitea.io/gitea/modules/web"
 	"code.gitea.io/gitea/modules/web/middleware"
 	"code.gitea.io/gitea/routers/common"
@@ -119,15 +118,7 @@ func Install(ctx *context.Context) {
 	form.AppSlogan = "Beyond coding. We Forge."
 	form.RepoRootPath = setting.RepoRootPath
 	form.LFSRootPath = setting.LFS.Storage.Path
-
-	// Note(unknown): it's hard for Windows users change a running user,
-	// 	so just use current one if config says default.
-	if setting.IsWindows && setting.RunUser == "git" {
-		form.RunUser = user.CurrentUsername()
-	} else {
-		form.RunUser = setting.RunUser
-	}
-
+	form.RunUser = setting.RunUser
 	form.Domain = setting.Domain
 	form.SSHPort = setting.SSH.Port
 	form.HTTPPort = setting.HTTPPort

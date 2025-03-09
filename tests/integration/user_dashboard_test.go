@@ -92,7 +92,11 @@ func TestDashboardTitleRendering(t *testing.T) {
 		count := 0
 		htmlDoc.doc.Find("#activity-feed .flex-item-main .title").Each(func(i int, s *goquery.Selection) {
 			count++
-			assert.EqualValues(t, ":exclamation: not rendered", s.Text())
+			if s.IsMatcher(goquery.Single("a")) {
+				assert.EqualValues(t, "❗ not rendered", s.Text())
+			} else {
+				assert.EqualValues(t, ":exclamation: not rendered", s.Text())
+			}
 		})
 
 		assert.EqualValues(t, 6, count)

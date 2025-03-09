@@ -77,11 +77,6 @@ type AuthenticationForm struct {
 	Oauth2GroupTeamMapRemoval     bool
 	Oauth2AttributeSSHPublicKey   string
 	SkipLocalTwoFA                bool
-	SSPIAutoCreateUsers           bool
-	SSPIAutoActivateUsers         bool
-	SSPIStripDomainNames          bool
-	SSPISeparatorReplacement      string `binding:"AlphaDashDot;MaxSize(5)"`
-	SSPIDefaultLanguage           string
 	GroupTeamMap                  string `binding:"ValidGroupTeamMap"`
 	GroupTeamMapRemoval           bool
 }

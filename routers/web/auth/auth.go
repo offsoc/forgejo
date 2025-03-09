@@ -164,7 +164,6 @@ func SignIn(ctx *context.Context) {
 	ctx.Data["SignInLink"] = setting.AppSubURL + "/user/login"
 	ctx.Data["PageIsSignIn"] = true
 	ctx.Data["PageIsLogin"] = true
-	ctx.Data["EnableSSPI"] = auth.IsSSPIEnabled(ctx)
 	ctx.Data["EnableInternalSignIn"] = setting.Service.EnableInternalSignIn
 
 	if setting.Service.EnableCaptcha && setting.Service.RequireCaptchaForLogin {
@@ -190,7 +189,6 @@ func SignInPost(ctx *context.Context) {
 	ctx.Data["SignInLink"] = setting.AppSubURL + "/user/login"
 	ctx.Data["PageIsSignIn"] = true
 	ctx.Data["PageIsLogin"] = true
-	ctx.Data["EnableSSPI"] = auth.IsSSPIEnabled(ctx)
 	ctx.Data["EnableInternalSignIn"] = setting.Service.EnableInternalSignIn
 	ctx.Data["DisablePassword"] = !setting.Service.EnableInternalSignIn
 

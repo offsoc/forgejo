@@ -6,8 +6,6 @@ package user
 import (
 	"os"
 	"os/user"
-	"runtime"
-	"strings"
 )
 
 // CurrentUsername return current login OS user name
@@ -16,12 +14,7 @@ func CurrentUsername() string {
 	if err != nil {
 		return fallbackCurrentUsername()
 	}
-	username := userinfo.Username
-	if runtime.GOOS == "windows" {
-		parts := strings.Split(username, "\\")
-		username = parts[len(parts)-1]
-	}
-	return username
+	return userinfo.Username
 }
 
 // Old method, used if new method doesn't work on your OS for some reason

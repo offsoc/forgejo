@@ -329,6 +329,14 @@ func Repos(ctx *context.Context) {
 func Appearance(ctx *context.Context) {
 	ctx.Data["Title"] = ctx.Tr("settings.appearance")
 	ctx.Data["PageIsSettingsAppearance"] = true
+	ctx.Data["AllThemes"] = setting.UI.Themes
+	ctx.Data["ThemeName"] = func(themeName string) string {
+		fullThemeName := "themes.names." + themeName
+		if ctx.Locale.HasKey(fullThemeName) {
+			return ctx.Locale.TrString(fullThemeName)
+		}
+		return themeName
+	}
 
 	var hiddenCommentTypes *big.Int
 	val, err := user_model.GetUserSetting(ctx, ctx.Doer.ID, user_model.SettingsKeyHiddenCommentTypes)

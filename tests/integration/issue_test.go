@@ -80,7 +80,7 @@ func TestViewIssues(t *testing.T) {
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	search := htmlDoc.doc.Find(".list-header-search > .search > .input > input")
 	placeholder, _ := search.Attr("placeholder")
-	assert.Equal(t, "Search issues...", placeholder)
+	assert.Equal(t, "Search issues…", placeholder)
 }
 
 func TestViewIssuesSortByType(t *testing.T) {

@@ -60,7 +60,7 @@
 			</div>
 			{{range .OpenProjects}}
 				<a rel="nofollow" class="{{if $.ProjectID}}{{if eq $.ProjectID .ID}}active selected{{end}}{{end}} item tw-flex" href="?q={{$.Keyword}}&type={{$.ViewType}}&sort={{$.SortType}}&state={{$.State}}&labels={{$.SelectLabels}}&milestone={{$.MilestoneID}}&project={{.ID}}&assignee={{$.AssigneeID}}&poster={{$.PosterID}}{{if $.ShowArchivedLabels}}&archived=true{{end}}">
-					{{svg .IconName 18 "tw-mr-2 tw-shrink-0"}}<span class="gt-ellipsis">{{.Title}}</span>
+					{{svg .IconName 16 "tw-mr-2 tw-shrink-0"}}<span class="gt-ellipsis">{{.Title}}</span>
 				</a>
 			{{end}}
 		{{end}}
@@ -71,7 +71,7 @@
 			</div>
 			{{range .ClosedProjects}}
 				<a rel="nofollow" class="{{if $.ProjectID}}{{if eq $.ProjectID .ID}}active selected{{end}}{{end}} item" href="?q={{$.Keyword}}&type={{$.ViewType}}&sort={{$.SortType}}&state={{$.State}}&labels={{$.SelectLabels}}&milestone={{$.MilestoneID}}&project={{.ID}}&assignee={{$.AssigneeID}}&poster={{$.PosterID}}{{if $.ShowArchivedLabels}}&archived=true{{end}}">
-					{{svg .IconName 18 "tw-mr-2"}}{{.Title}}
+					{{svg .IconName 16 "tw-mr-2"}}{{.Title}}
 				</a>
 			{{end}}
 		{{end}}

@@ -123,9 +123,9 @@ export function initAdminCommon() {
   // New authentication
   if (document.querySelector('.admin.new.authentication')) {
     document.getElementById('auth_type')?.addEventListener('change', function () {
-      hideElem('.ldap, .dldap, .smtp, .pam, .oauth2, .has-tls, .search-page-size, .sspi');
+      hideElem('.ldap, .dldap, .smtp, .pam, .oauth2, .has-tls, .search-page-size');
 
-      for (const input of document.querySelectorAll('.ldap input[required], .binddnrequired input[required], .dldap input[required], .smtp input[required], .pam input[required], .oauth2 input[required], .has-tls input[required], .sspi input[required]')) {
+      for (const input of document.querySelectorAll('.ldap input[required], .binddnrequired input[required], .dldap input[required], .smtp input[required], .pam input[required], .oauth2 input[required], .has-tls input[required]')) {
         input.removeAttribute('required');
       }
 
@@ -165,12 +165,6 @@ export function initAdminCommon() {
             input.setAttribute('required', 'required');
           }
           onOAuth2Change(true);
-          break;
-        case '7': // SSPI
-          showElem('.sspi');
-          for (const input of document.querySelectorAll('.sspi div.required input')) {
-            input.setAttribute('required', 'required');
-          }
           break;
       }
       if (authType === '2' || authType === '5') {
