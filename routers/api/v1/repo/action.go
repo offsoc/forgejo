@@ -612,11 +612,6 @@ func ListActionTasks(ctx *context.APIContext) {
 	ctx.JSON(http.StatusOK, &res)
 }
 
-type ActionRun struct {
-	ID   int64
-	Jobs []string
-}
-
 // DispatchWorkflow dispatches a workflow
 func DispatchWorkflow(ctx *context.APIContext) {
 	// swagger:operation POST /repos/{owner}/{repo}/actions/workflows/{workflowname}/dispatches repository DispatchWorkflow
@@ -644,7 +639,11 @@ func DispatchWorkflow(ctx *context.APIContext) {
 	//   in: body
 	//   schema:
 	//     "$ref": "#/definitions/DispatchWorkflowOption"
+	// produces:
+	// - application/json
 	// responses:
+	//   "201":
+	//    "$ref": "#/responses/DispatchWorkflowRun"
 	//   "204":
 	//     "$ref": "#/responses/empty"
 	//   "404":
@@ -685,10 +684,10 @@ func DispatchWorkflow(ctx *context.APIContext) {
 		return
 	}
 
-	actionRun := &ActionRun{
+	workflowRun := &api.DispatchWorkflowRun{
 		ID:   run.ID,
 		Jobs: jobs,
 	}
 
-	ctx.JSON(http.StatusOK, actionRun)
+	ctx.JSON(http.StatusCreated, workflowRun)
 }

@@ -5378,6 +5378,9 @@
         "consumes": [
           "application/json"
         ],
+        "produces": [
+          "application/json"
+        ],
         "tags": [
           "repository"
         ],
@@ -5414,6 +5417,9 @@
           }
         ],
         "responses": {
+          "201": {
+            "$ref": "#/responses/DispatchWorkflowRun"
+          },
           "204": {
             "$ref": "#/responses/empty"
           },
@@ -23132,6 +23138,27 @@
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
     },
+    "DispatchWorkflowRun": {
+      "description": "DispatchWorkflowRun represents a workflow run",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "the workflow run id",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "jobs": {
+          "description": "the jobs name",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Jobs"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
     "EditAttachmentOptions": {
       "description": "EditAttachmentOptions options for editing attachments",
       "type": "object",
@@ -28509,6 +28536,12 @@
         "items": {
           "$ref": "#/definitions/DeployKey"
         }
+      }
+    },
+    "DispatchWorkflowRun": {
+      "description": "DispatchWorkflowRun is a Workflow Run after dispatching",
+      "schema": {
+        "$ref": "#/definitions/DispatchWorkflowRun"
       }
     },
     "EmailList": {
