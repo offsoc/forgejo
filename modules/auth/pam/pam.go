@@ -8,7 +8,7 @@ package pam
 import (
 	"errors"
 
-	"github.com/msteinert/pam"
+	"github.com/msteinert/pam/v2"
 )
 
 // Supported is true when built with PAM
