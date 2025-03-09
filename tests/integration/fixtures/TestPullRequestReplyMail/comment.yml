@@ -1,0 +1,25 @@
+-
+  id: 1001
+  type: 21 # code comment
+  poster_id: 2
+  issue_id: 2
+  content: "Still pending"
+  review_id: 1002
+  line: 4
+  tree_path: "README.md"
+  created_unix: 1730000000
+  invalidated: false
+  content_version: 1
+
+-
+  id: 1002
+  type: 21 # code comment
+  poster_id: 2
+  issue_id: 2
+  content: "Visible"
+  review_id: 1001
+  line: 3
+  tree_path: "README.md"
+  created_unix: 1720000000
+  invalidated: false
+  content_version: 1

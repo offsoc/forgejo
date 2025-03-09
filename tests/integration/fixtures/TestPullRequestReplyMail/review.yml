@@ -1,0 +1,17 @@
+-
+  id: 1001
+  type: 2
+  reviewer_id: 2
+  issue_id: 2
+  content: "Normal review"
+  updated_unix: 1720000000
+  created_unix: 1720000000
+
+-
+  id: 1002
+  type: 0
+  reviewer_id: 2
+  issue_id: 2
+  content: "Pending review"
+  updated_unix: 1730000000
+  created_unix: 1730000000
