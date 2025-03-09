@@ -28,6 +28,7 @@ func Auth(serviceName, userName, passwd string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer t.End()
 
 	if err = t.Authenticate(0); err != nil {
 		return "", err
