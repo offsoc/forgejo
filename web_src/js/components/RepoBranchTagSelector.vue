@@ -265,10 +265,10 @@ export default sfc; // activate IDE's Vue plugin
       </div>
       <div v-if="showBranchesInDropdown" class="branch-tag-tab">
         <a class="branch-tag-item muted" :class="{active: mode === 'branches'}" href="#" @click="handleTabSwitch('branches')">
-          <svg-icon name="octicon-git-branch" :size="16" class="tw-mr-1"/>{{ textBranches }}
+          <svg-icon name="octicon-git-branch" :size="16"/>{{ textBranches }}
         </a>
         <a v-if="!noTag" class="branch-tag-item muted" :class="{active: mode === 'tags'}" href="#" @click="handleTabSwitch('tags')">
-          <svg-icon name="octicon-tag" :size="16" class="tw-mr-1"/>{{ textTags }}
+          <svg-icon name="octicon-tag" :size="16"/>{{ textTags }}
         </a>
       </div>
       <div class="branch-tag-divider"/>

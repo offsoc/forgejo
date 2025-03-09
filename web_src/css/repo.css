@@ -1158,7 +1158,9 @@ td .commit-summary {
 }
 
 .branch-tag-item {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 10px;
   border: 1px solid transparent;
   border-bottom: none;
