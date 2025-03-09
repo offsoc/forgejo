@@ -316,17 +316,6 @@ export default sfc; // activate IDE's Vue plugin
   </div>
 </template>
 <style scoped>
-.branch-tag-tab {
-  padding: 0 10px;
-}
-
-.branch-tag-item {
-  display: inline-block;
-  padding: 10px;
-  border: 1px solid transparent;
-  border-bottom: none;
-}
-
 .branch-tag-item.active {
   border-color: var(--color-secondary);
   background: var(--color-menu);
