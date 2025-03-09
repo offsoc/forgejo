@@ -23,7 +23,7 @@
 				{{end}}
 			{{end}}
 		{{end}}
-		{{if and .ctxData.IsSigned (not .IsCommentPoster)}}
+		{{if and .ctxData.IsModerationEnabled .ctxData.IsSigned (not .IsCommentPoster)}}
 			{{$contentType := "comment"}}
 			{{if eq .item .ctxData.Issue}}
 				{{if .ctxData.Issue.IsPull}} {{$contentType = "pull"}} {{else}} {{$contentType = "issue"}} {{end}}

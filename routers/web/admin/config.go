@@ -145,6 +145,7 @@ func Config(ctx *context.Context) {
 	ctx.Data["Service"] = setting.Service
 	ctx.Data["DbCfg"] = setting.Database
 	ctx.Data["Webhook"] = setting.Webhook
+	ctx.Data["Moderation"] = setting.Moderation
 
 	ctx.Data["MailerEnabled"] = false
 	if setting.MailService != nil {

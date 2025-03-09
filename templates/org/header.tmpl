@@ -21,7 +21,7 @@
 				{{if .IsOrganizationMember}}
 					<a class="ui basic button tw-mr-0" href="{{.OrgLink}}/dashboard">{{ctx.Locale.Tr "org.open_dashboard"}}</a>
 				{{end}}
-				{{if and .IsSigned (not .IsOrganizationOwner)}}
+				{{if and .IsModerationEnabled .IsSigned (not .IsOrganizationOwner)}}
 					<button class="ui dropdown icon button" data-tooltip-content="{{ctx.Locale.Tr "repo.more_operations"}}" aria-label="{{ctx.Locale.Tr "toggle_menu"}}">
 						{{svg "octicon-kebab-horizontal" 14}}
 						<div class="menu top left">
