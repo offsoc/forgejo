@@ -83,7 +83,7 @@
     "eslint-plugin-unicorn": "56.0.1",
     "eslint-plugin-toml": "0.12.0",
     "eslint-plugin-vitest-globals": "1.5.0",
-    "eslint-plugin-vue": "9.32.0",
+    "eslint-plugin-vue": "10.0.0",
     "eslint-plugin-vue-scoped-css": "2.9.0",
     "eslint-plugin-wc": "2.2.0",
     "globals": "15.15.0",
