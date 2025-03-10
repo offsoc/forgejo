@@ -49,15 +49,15 @@ type Workflow struct {
 
 type InputValueGetter func(key string) string
 
-func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGetter, repo *repo_model.Repository, doer *user.User) error {
+func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGetter, repo *repo_model.Repository, doer *user.User) (r *actions_model.ActionRun, j []string, err error) {
 	content, err := actions.GetContentFromEntry(entry.GitEntry)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	wf, err := act_model.ReadWorkflow(bytes.NewReader(content))
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	fullWorkflowID := ".forgejo/workflows/" + entry.WorkflowID
@@ -79,7 +79,7 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 						if len(name) == 0 {
 							name = key
 						}
-						return InputRequiredErr{Name: name}
+						return nil, nil, InputRequiredErr{Name: name}
 					}
 					continue
 				}
@@ -92,7 +92,12 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 	}
 
 	if int64(len(inputs)) > setting.Actions.LimitDispatchInputs {
-		return errors.New("to many inputs")
+		return nil, nil, errors.New("to many inputs")
+	}
+
+	var jobNames []string
+	for jobName, _ := range wf.Jobs {
+		jobNames = append(jobNames, jobName)
 	}
 
 	payload := &structs.WorkflowDispatchPayload{
@@ -105,7 +110,7 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 
 	p, err := json.Marshal(payload)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	run := &actions_model.ActionRun{
@@ -126,15 +131,15 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 
 	vars, err := actions_model.GetVariablesOfRun(ctx, run)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	jobs, err := jobparser.Parse(content, jobparser.WithVars(vars))
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	return actions_model.InsertRun(ctx, run, jobs)
+	return run, jobNames, actions_model.InsertRun(ctx, run, jobs)
 }
 
 func GetWorkflowFromCommit(gitRepo *git.Repository, ref, workflowID string) (*Workflow, error) {
