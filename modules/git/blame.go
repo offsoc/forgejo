@@ -139,7 +139,7 @@ func CreateBlameReader(ctx context.Context, objectFormat ObjectFormat, repoPath 
 	cmd := NewCommandContextNoGlobals(ctx, "blame", "--porcelain")
 	if ignoreRevsFile != nil {
 		// Possible improvement: use --ignore-revs-file /dev/stdin on unix
-		// There is no equivalent on Windows. May be implemented if Gitea uses an external git backend.
+		// This was not done in Gitea because it would not have been compatible with Windows.
 		cmd.AddOptionValues("--ignore-revs-file", *ignoreRevsFile)
 	}
 	cmd.AddDynamicArguments(commit.ID.String()).

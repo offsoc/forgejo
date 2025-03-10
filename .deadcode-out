@@ -189,6 +189,7 @@ code.gitea.io/gitea/modules/translation
 	MockLocale.TrN
 	MockLocale.TrPluralString
 	MockLocale.TrSize
+	MockLocale.HasKey
 	MockLocale.PrettyNumber
 
 code.gitea.io/gitea/modules/util

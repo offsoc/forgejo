@@ -315,11 +315,7 @@ func Diff(ctx *context.Context) {
 
 	commit, err := gitRepo.GetCommit(commitID)
 	if err != nil {
-		if git.IsErrNotExist(err) {
-			ctx.NotFound("Repo.GitRepo.GetCommit", err)
-		} else {
-			ctx.ServerError("Repo.GitRepo.GetCommit", err)
-		}
+		ctx.NotFoundOrServerError("gitRepo.GetCommit", git.IsErrNotExist, err)
 		return
 	}
 	if len(commitID) != commit.ID.Type().FullLength() {
@@ -343,7 +339,7 @@ func Diff(ctx *context.Context) {
 		FileOnly:           fileOnly,
 	}, files...)
 	if err != nil {
-		ctx.NotFound("GetDiff", err)
+		ctx.ServerError("GetDiff", err)
 		return
 	}
 

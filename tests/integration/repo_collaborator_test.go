@@ -33,5 +33,5 @@ func TestRepoCollaborators(t *testing.T) {
 	// Veirfy placeholder
 	placeholder, exists := page.Find("#search-user-box input").Attr("placeholder")
 	assert.True(t, exists)
-	assert.EqualValues(t, "Search users...", placeholder)
+	assert.EqualValues(t, "Search users…", placeholder)
 }

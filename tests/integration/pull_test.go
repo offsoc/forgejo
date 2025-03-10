@@ -27,7 +27,7 @@ func TestViewPulls(t *testing.T) {
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	search := htmlDoc.doc.Find(".list-header-search > .search > .input > input")
 	placeholder, _ := search.Attr("placeholder")
-	assert.Equal(t, "Search pulls...", placeholder)
+	assert.Equal(t, "Search pulls…", placeholder)
 }
 
 func TestPullManuallyMergeWarning(t *testing.T) {

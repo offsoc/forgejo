@@ -1,8 +1,16 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"other": "%[1]d کامیت ادغام شده از <code>%[2]s</code> به <code>%[3]s</code> %[4]s"
-	},
-	"repo.pulls.title_desc": {
-		"other": "قصد ادغام %[1]d تغییر را از <code>%[2]s</code> به <code id=\"%[4]s\">%[3]s</code> دارد"
-	}
+    "repo.pulls.merged_title_desc": {
+        "one": "واکشی %[1]d سپرده از <code>%[2]s</code> به <code>%[3]s</code> %[4]s",
+        "other": "واکشی %[1]d سپرده‌ها از <code>%[2]s</code> به <code>%[3]s</code> %[4]s"
+    },
+    "repo.pulls.title_desc": {
+        "one": "خواست واکشی %[1]d سپرده را از <code>%[2]s</code> به <code id=\"%[4]s\">%[3]s</code> دارد",
+        "other": "خواست واکشی %[1]d سپرده‌ها را از <code>%[2]s</code> به <code id=\"%[4]s\">%[3]s</code> دارد"
+    },
+    "home.welcome.activity_hint": "هنوز چیزی در آزوغه شما نیست. در اینجا کنش‌ها و کوشش‌های شما در مخازنی که نگاه‌بانی می‌کنید نمایش داده خواهد شد.",
+    "search.milestone_kind": "جستجو نقاط عطف...",
+    "home.welcome.no_activity": "بدون کوشش",
+    "home.explore_repos": "کاوش مخازن",
+    "home.explore_users": "کاوش کاربران",
+    "home.explore_orgs": "کاوش سازمان‌ها"
 }

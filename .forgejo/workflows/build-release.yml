@@ -45,7 +45,7 @@ jobs:
 
       - uses: https://data.forgejo.org/actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - uses: https://data.forgejo.org/actions/setup-go@v5
         with:

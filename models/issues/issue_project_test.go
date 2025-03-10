@@ -33,12 +33,13 @@ func TestPrivateIssueProjects(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 			issueList, err := issues.LoadIssuesFromColumn(db.DefaultContext, column, user2, org, optional.None[bool]())
 			require.NoError(t, err)
-			assert.Len(t, issueList, 1)
-			assert.EqualValues(t, 6, issueList[0].ID)
+			assert.Len(t, issueList, 2)
+			assert.EqualValues(t, 16, issueList[0].ID)
+			assert.EqualValues(t, 6, issueList[1].ID)
 
 			issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.None[bool]())
 			require.NoError(t, err)
-			assert.EqualValues(t, 1, issuesNum)
+			assert.EqualValues(t, 2, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.Some(true))
 			require.NoError(t, err)
@@ -46,18 +47,27 @@ func TestPrivateIssueProjects(t *testing.T) {
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.Some(false))
 			require.NoError(t, err)
-			assert.EqualValues(t, 1, issuesNum)
+			assert.EqualValues(t, 2, issuesNum)
 		})
 
 		t.Run("Anonymous user", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 			issueList, err := issues.LoadIssuesFromColumn(db.DefaultContext, column, nil, org, optional.None[bool]())
 			require.NoError(t, err)
-			assert.Empty(t, issueList)
+			assert.Len(t, issueList, 1)
+			assert.EqualValues(t, 16, issueList[0].ID)
 
 			issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, orgProject, nil, org, optional.None[bool]())
 			require.NoError(t, err)
+			assert.EqualValues(t, 1, issuesNum)
+
+			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, nil, org, optional.Some(true))
+			require.NoError(t, err)
 			assert.EqualValues(t, 0, issuesNum)
+
+			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, nil, org, optional.Some(false))
+			require.NoError(t, err)
+			assert.EqualValues(t, 1, issuesNum)
 		})
 	})
 
@@ -69,12 +79,13 @@ func TestPrivateIssueProjects(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 			issueList, err := issues.LoadIssuesFromColumn(db.DefaultContext, column, user2, nil, optional.None[bool]())
 			require.NoError(t, err)
-			assert.Len(t, issueList, 1)
+			assert.Len(t, issueList, 2)
 			assert.EqualValues(t, 7, issueList[0].ID)
+			assert.EqualValues(t, 1, issueList[1].ID)
 
 			issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, userProject, user2, nil, optional.None[bool]())
 			require.NoError(t, err)
-			assert.EqualValues(t, 1, issuesNum)
+			assert.EqualValues(t, 2, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, userProject, user2, nil, optional.Some(true))
 			require.NoError(t, err)
@@ -82,19 +93,27 @@ func TestPrivateIssueProjects(t *testing.T) {
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, userProject, user2, nil, optional.Some(false))
 			require.NoError(t, err)
-			assert.EqualValues(t, 1, issuesNum)
+			assert.EqualValues(t, 2, issuesNum)
 		})
 
 		t.Run("Anonymous user", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
-
 			issueList, err := issues.LoadIssuesFromColumn(db.DefaultContext, column, nil, nil, optional.None[bool]())
 			require.NoError(t, err)
-			assert.Empty(t, issueList)
+			assert.Len(t, issueList, 1)
+			assert.EqualValues(t, 1, issueList[0].ID)
 
 			issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, userProject, nil, nil, optional.None[bool]())
 			require.NoError(t, err)
+			assert.EqualValues(t, 1, issuesNum)
+
+			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, userProject, nil, nil, optional.Some(true))
+			require.NoError(t, err)
 			assert.EqualValues(t, 0, issuesNum)
+
+			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, userProject, nil, nil, optional.Some(false))
+			require.NoError(t, err)
+			assert.EqualValues(t, 1, issuesNum)
 		})
 	})
 }
