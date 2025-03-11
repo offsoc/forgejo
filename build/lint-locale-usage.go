@@ -230,12 +230,33 @@ func (omh OnMsgidHandler) HandleTemplateFile(fname string, src any) error {
 }
 
 // This command assumes that we get started from the project root directory
+//
+// Possible command line flags:
+//
+//	--allow-missing-msgids        don't return an error code if missing message IDs are found
+//
+// EXIT CODES:
+//
+//	0  success, no issues found
+//	1  unable to walk directory tree
+//	2  unable to parse locale ini/json files
+//	3  unable to parse go or text/template files
+//	4  found missing message IDs
 func main() {
+	allowMissingMsgids := false
+	for _, arg := range os.Args {
+		switch arg {
+		case "--allow-missing-msgids":
+			allowMissingMsgids = true
+		}
+	}
+
 	onError := func(err error) {
 		if err == nil {
 			return
 		}
 		fmt.Println(err.Error())
+		os.Exit(3)
 	}
 
 	msgids := make(container.Set[string])
@@ -268,8 +289,11 @@ func main() {
 		os.Exit(2)
 	}
 
+	gotAnyMsgidError := false
+
 	omh := OnMsgidHandler(func(fset *token.FileSet, pos token.Pos, msgid string) {
 		if !msgids.Contains(msgid) {
+			gotAnyMsgidError = true
 			fmt.Printf("%s:\tmissing msgid: %s\n", fset.Position(pos).String(), msgid)
 		}
 	})
@@ -301,5 +325,9 @@ func main() {
 	}); err != nil {
 		fmt.Printf("walkdir ERROR: %s\n", err.Error())
 		os.Exit(1)
+	}
+
+	if !allowMissingMsgids && gotAnyMsgidError {
+		os.Exit(4)
 	}
 }

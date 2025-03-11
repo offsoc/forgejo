@@ -462,7 +462,7 @@ lint-locale:
 
 .PHONY: lint-locale-usage
 lint-locale-usage:
-	$(GO) run build/lint-locale-usage.go
+	$(GO) run build/lint-locale-usage.go --allow-missing-msgids
 
 .PHONY: lint-md
 lint-md: node_modules
