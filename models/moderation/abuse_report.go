@@ -92,7 +92,7 @@ type AbuseReport struct {
 	ID     int64            `xorm:"pk autoincr"`
 	Status ReportStatusType `xorm:"NOT NULL DEFAULT 1"`
 	// The ID of the user who submitted the report.
-	ReporterID int64 `xorm:"NOT NULL"` // index ?!
+	ReporterID int64 `xorm:"NOT NULL"`
 	// Reported content type: user/organization profile, repository, issue/pull or comment.
 	ContentType ReportedContentType `xorm:"INDEX NOT NULL"`
 	// The ID of the reported item (based on ContentType: user, repository, issue or comment).
@@ -100,7 +100,7 @@ type AbuseReport struct {
 	// The abuse category selected by the reporter.
 	Category AbuseCategoryType `xorm:"INDEX NOT NULL"`
 	// Remarks provided by the reporter.
-	Remarks string // TODO: ReporterReparks or Reason
+	Remarks string
 	// The ID of the corresponding shadow-copied content when exists; otherwise null.
 	ShadowCopyID sql.NullInt64      `xorm:"DEFAULT NULL"`
 	CreatedUnix  timeutil.TimeStamp `xorm:"created NOT NULL"`

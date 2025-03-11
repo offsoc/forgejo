@@ -37,12 +37,12 @@ func CreateShadowCopyForUser(ctx context.Context, userID int64, content string) 
 	return createShadowCopy(ctx, ReportedContentTypeUser, userID, content)
 }
 
-func CreateShadowCopyForRepository(ctx context.Context, commentID int64, content string) error {
-	return createShadowCopy(ctx, ReportedContentTypeRepository, commentID, content)
+func CreateShadowCopyForRepository(ctx context.Context, repoID int64, content string) error {
+	return createShadowCopy(ctx, ReportedContentTypeRepository, repoID, content)
 }
 
-func CreateShadowCopyForIssue(ctx context.Context, commentID int64, content string) error {
-	return createShadowCopy(ctx, ReportedContentTypeIssue, commentID, content)
+func CreateShadowCopyForIssue(ctx context.Context, issueID int64, content string) error {
+	return createShadowCopy(ctx, ReportedContentTypeIssue, issueID, content)
 }
 
 func CreateShadowCopyForComment(ctx context.Context, commentID int64, content string) error {
@@ -74,7 +74,6 @@ func createShadowCopy(ctx context.Context, contentType ReportedContentType, cont
 		_, err = sess.Where(builder.Eq{
 			"content_type": contentType,
 			"content_id":   contentID,
-			// TODO: What should happen if an item is updated multiple times (and the reports already have a shadow copy ID)?
 		}).And(builder.IsNull{"shadow_copy_id"}).Update(&AbuseReport{ShadowCopyID: shadowCopy.NullableID()})
 		if err != nil {
 			return fmt.Errorf("could not link the shadow copy (%d) to reported content with type %d and ID %d - %w", shadowCopy.ID, contentType, contentID, err)

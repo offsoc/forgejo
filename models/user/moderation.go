@@ -31,30 +31,28 @@ type UserData struct {
 	// This field was intentionally renamed so that is not the same with the one from User struct.
 	// If we keep it the same as in User, during login it might trigger the creation of a shadow copy.
 	// TODO: Should we decide that this field is not that relevant for abuse reporting purposes, better remove it.
-	LastLogin              timeutil.TimeStamp `json:"LastLoginUnix"`
-	Avatar                 string
-	AvatarEmail            string
-	NormalizedFederatedURI string
+	LastLogin   timeutil.TimeStamp `json:"LastLoginUnix"`
+	Avatar      string
+	AvatarEmail string
 }
 
 // newUserData creates a trimmed down user to be used just to create a JSON structure
 // (keeping only the fields relevant for moderation purposes)
 func newUserData(user *User) UserData {
 	return UserData{
-		Name:                   user.Name,
-		FullName:               user.FullName,
-		Email:                  user.Email,
-		LoginName:              user.LoginName,
-		Location:               user.Location,
-		Website:                user.Website,
-		Pronouns:               user.Pronouns,
-		Description:            user.Description,
-		CreatedUnix:            user.CreatedUnix,
-		UpdatedUnix:            user.UpdatedUnix,
-		LastLogin:              user.LastLoginUnix,
-		Avatar:                 user.Avatar,
-		AvatarEmail:            user.AvatarEmail,
-		NormalizedFederatedURI: user.NormalizedFederatedURI,
+		Name:        user.Name,
+		FullName:    user.FullName,
+		Email:       user.Email,
+		LoginName:   user.LoginName,
+		Location:    user.Location,
+		Website:     user.Website,
+		Pronouns:    user.Pronouns,
+		Description: user.Description,
+		CreatedUnix: user.CreatedUnix,
+		UpdatedUnix: user.UpdatedUnix,
+		LastLogin:   user.LastLoginUnix,
+		Avatar:      user.Avatar,
+		AvatarEmail: user.AvatarEmail,
 	}
 }
 
@@ -84,9 +82,6 @@ func IfNeededCreateShadowCopyForUser(ctx context.Context, user *User, alteredCol
 			}
 		}
 	}
-
-	// TODO: Maybe it is better (faster) to first check the result of moderation.IsReported()
-	// and only when true to check if any of the columns being updated is relevant in the context of shadow copying.
 
 	if shouldCheckIfReported && moderation.IsReported(ctx, moderation.ReportedContentTypeUser, user.ID) {
 		userData := newUserData(user)
