@@ -15,7 +15,7 @@
 					<input type="hidden" name="content_type" value="{{.ContentType}}" />
 
 					<fieldset{{if not .ContentID}} disabled{{end}}>
-						<label{{if .Err_AbuseCategory}} class="error"{{end}}>
+						<label{{if .Err_AbuseCategory}} class="field error"{{end}}>
 							{{ctx.Locale.Tr "moderation.abuse_category"}}
 							<select class="ui selection dropdown" id="abuse_category" name="abuse_category" required autofocus>
 								<option value="">{{ctx.Locale.Tr "moderation.abuse_category.placeholder"}}</option>
@@ -24,7 +24,7 @@
 								{{end}}
 							</select>
 						</label>
-						<label{{if .Err_Remarks}} class="error"{{end}}>
+						<label{{if .Err_Remarks}} class="field error"{{end}}>
 							{{ctx.Locale.Tr "moderation.report_remarks"}}
 							<textarea id="remarks" name="remarks" required minlength="20" maxlength="500" placeholder="{{ctx.Locale.Tr "moderation.report_remarks.placeholder"}}">{{.remarks}}</textarea>
 						</label>
