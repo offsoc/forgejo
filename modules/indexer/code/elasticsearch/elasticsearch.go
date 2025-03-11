@@ -33,8 +33,8 @@ const (
 	esRepoIndexerLatestVersion = 2
 	// multi-match-types, currently only 2 types are used
 	// Reference: https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-multi-match-query.html#multi-match-types
-	esMultiMatchTypeBestFields   = "best_fields"
-	esMultiMatchTypePhrasePrefix = "phrase_prefix"
+	esMultiMatchTypeBestFields = "best_fields"
+	esMultiMatchTypePhrase     = "phrase"
 )
 
 var _ internal.Indexer = &Indexer{}
@@ -334,8 +334,8 @@ func extractAggs(searchResult *elastic.SearchResult) []*internal.SearchResultLan
 
 // Search searches for codes and language stats by given conditions.
 func (b *Indexer) Search(ctx context.Context, opts *internal.SearchOptions) (int64, []*internal.SearchResult, []*internal.SearchResultLanguages, error) {
-	searchType := esMultiMatchTypePhrasePrefix
-	if opts.IsKeywordFuzzy {
+	searchType := esMultiMatchTypePhrase
+	if opts.Mode == internal.CodeSearchModeUnion {
 		searchType = esMultiMatchTypeBestFields
 	}
 
