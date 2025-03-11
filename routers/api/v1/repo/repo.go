@@ -85,7 +85,7 @@ func Search(ctx *context.APIContext) {
 	//   type: boolean
 	// - name: is_private
 	//   in: query
-	//   description: show only pubic, private or all repositories (defaults to all)
+	//   description: show only public, private or all repositories (defaults to all)
 	//   type: boolean
 	// - name: template
 	//   in: query
