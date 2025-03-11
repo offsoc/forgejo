@@ -136,7 +136,7 @@ type User struct {
 	UseCustomAvatar bool
 
 	// For federation
-	NormalizedFederatedURI string
+	//NormalizedFederatedURI string
 
 	// Counters
 	NumFollowers int
