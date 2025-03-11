@@ -33,7 +33,7 @@ type (
 	AbuseCategoryType int //revive:disable-line:exported
 
 	// AbuseCategoryItem defines a pair of value and it's corresponding translation key
-	// (used when new reports are submitted).
+	// (used to add options within the dropdown shown when new reports are submitted).
 	AbuseCategoryItem struct {
 		Value          AbuseCategoryType
 		TranslationKey string
@@ -41,10 +41,10 @@ type (
 )
 
 const (
-	AbuseCategoryTypeSpam            AbuseCategoryType = iota + 1 // 1
-	AbuseCategoryTypeMalware                                      // 2
-	AbuseCategoryTypeIllegalContent                               // 3
-	AbuseCategoryTypeOtherViolations                              // 4 (Other violations of platform rules)
+	AbuseCategoryTypeOther          AbuseCategoryType = iota + 1 // 1 (Other violations of platform rules)
+	AbuseCategoryTypeSpam                                        // 2
+	AbuseCategoryTypeMalware                                     // 3
+	AbuseCategoryTypeIllegalContent                              // 4
 )
 
 // GetAbuseCategoriesList returns a list of pairs with the available abuse category types
@@ -54,7 +54,7 @@ func GetAbuseCategoriesList() []AbuseCategoryItem {
 		{AbuseCategoryTypeSpam, "moderation.abuse_category.spam"},
 		{AbuseCategoryTypeMalware, "moderation.abuse_category.malware"},
 		{AbuseCategoryTypeIllegalContent, "moderation.abuse_category.illegal_content"},
-		{AbuseCategoryTypeOtherViolations, "moderation.abuse_category.other_violations"},
+		{AbuseCategoryTypeOther, "moderation.abuse_category.other_violations"},
 	}
 }
 
