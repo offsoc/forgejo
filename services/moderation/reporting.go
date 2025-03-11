@@ -22,16 +22,17 @@ var (
 	ErrDoerNotAllowed      = errors.New("doer not allowed to access the content to be reported")
 )
 
-// CanReport checks if doer has access to the content they are reporting (repository, issue, pull request or comment).
+// CanReport checks if doer has access to the content they are reporting
+// (user, organization, repository, issue, pull request or comment).
 // When reporting repositories the user should have at least read access to any repo unit type.
 // When reporting issues, pull requests or comments the user should have at least read access
 // to 'TypeIssues', respectively 'TypePullRequests' unit for the repository where the content belongs.
-// When reporting users or organizations doer should be able to view the reported user.
+// When reporting users or organizations doer should be able to view the reported entity.
 func CanReport(ctx context.Context, doer *user.User, contentType moderation.ReportedContentType, contentID int64) (bool, error) {
 	var hasAccess bool = false
 	var issueID int64 = 0
 	var repoID int64 = 0
-	var unitType unit.Type = unit.TypeInvalid
+	var unitType unit.Type = unit.TypeInvalid // used when checking access for issues, pull requests or comments
 
 	if contentType == moderation.ReportedContentTypeUser {
 		reported_user, err := user.GetUserByID(ctx, contentID)
@@ -45,6 +46,7 @@ func CanReport(ctx context.Context, doer *user.User, contentType moderation.Repo
 
 		hasAccess = user.IsUserVisibleToViewer(ctx, reported_user, ctx.Doer)
 	} else {
+		// for comments and issues/pulls we need to get the parent repository
 		if contentType == moderation.ReportedContentTypeComment {
 			comment, err := issues.GetCommentByID(ctx, contentID)
 			if err != nil {
@@ -53,6 +55,11 @@ func CanReport(ctx context.Context, doer *user.User, contentType moderation.Repo
 					return false, ErrContentDoesNotExist
 				}
 				return false, err
+			}
+			if !comment.Type.HasContentSupport() {
+				// this is not a comment with text and/or attachments
+				log.Warn("User #%d wanted to report comment #%d but it is not a comment with content.", doer.ID, contentID)
+				return false, nil
 			}
 			issueID = comment.IssueID
 		} else if contentType == moderation.ReportedContentTypeIssue {
@@ -90,6 +97,7 @@ func CanReport(ctx context.Context, doer *user.User, contentType moderation.Repo
 			}
 
 			if issueID > 0 {
+				// for comments and issues/pulls doer should have at least read access to the corresponding repo unit (issues, respectively pull requests)
 				hasAccess, err = access_model.HasAccessUnit(ctx, doer, repo, unitType, perm.AccessModeRead)
 				if err != nil {
 					return false, err
@@ -98,6 +106,7 @@ func CanReport(ctx context.Context, doer *user.User, contentType moderation.Repo
 					return false, ErrDoerNotAllowed
 				}
 			} else {
+				// for repositories doer should have at least read access to at least one repo unit
 				perm, err := access_model.GetUserRepoPermission(ctx, repo, doer)
 				if err != nil {
 					return false, err
