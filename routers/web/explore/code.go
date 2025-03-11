@@ -37,19 +37,17 @@ func Code(ctx *context.Context) {
 	keyword := ctx.FormTrim("q")
 	path := ctx.FormTrim("path")
 
-	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
-	if mode := ctx.FormTrim("mode"); len(mode) > 0 {
-		isFuzzy = mode == "fuzzy"
+	mode := code_indexer.SearchModeExact
+	if m := ctx.FormTrim("mode"); m == "union" ||
+		m == "fuzzy" ||
+		ctx.FormBool("fuzzy") {
+		mode = code_indexer.SearchModeUnion
 	}
 
 	ctx.Data["Keyword"] = keyword
 	ctx.Data["Language"] = language
-	ctx.Data["CodeSearchOptions"] = []string{"exact", "fuzzy"}
-	if isFuzzy {
-		ctx.Data["CodeSearchMode"] = "fuzzy"
-	} else {
-		ctx.Data["CodeSearchMode"] = "exact"
-	}
+	ctx.Data["CodeSearchOptions"] = code_indexer.CodeSearchOptions
+	ctx.Data["CodeSearchMode"] = mode.String()
 	ctx.Data["PageIsViewCode"] = true
 
 	if keyword == "" {
@@ -88,11 +86,11 @@ func Code(ctx *context.Context) {
 
 	if (len(repoIDs) > 0) || isAdmin {
 		total, searchResults, searchResultLanguages, err = code_indexer.PerformSearch(ctx, &code_indexer.SearchOptions{
-			RepoIDs:        repoIDs,
-			Keyword:        keyword,
-			IsKeywordFuzzy: isFuzzy,
-			Language:       language,
-			Filename:       path,
+			RepoIDs:  repoIDs,
+			Keyword:  keyword,
+			Mode:     mode,
+			Language: language,
+			Filename: path,
 			Paginator: &db.ListOptions{
 				Page:     page,
 				PageSize: setting.UI.RepoSearchPagingNum,

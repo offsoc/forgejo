@@ -28,10 +28,10 @@ type GrepResult struct {
 	HighlightedRanges [][3]int
 }
 
-type grepMode int
+type GrepMode int
 
 const (
-	FixedGrepMode grepMode = iota
+	FixedGrepMode GrepMode = iota
 	FixedAnyGrepMode
 	RegExpGrepMode
 )
@@ -43,7 +43,7 @@ type GrepOptions struct {
 	MaxResultLimit    int
 	MatchesPerFile    int // >= git 2.38
 	ContextLineNumber int
-	Mode              grepMode
+	Mode              GrepMode
 	Filename          string
 }
 

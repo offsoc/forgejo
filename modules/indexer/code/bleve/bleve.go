@@ -40,10 +40,6 @@ import (
 const (
 	unicodeNormalizeName = "unicodeNormalize"
 	maxBatchSize         = 16
-	// fuzzyDenominator determines the levenshtein distance per each character of a keyword
-	fuzzyDenominator = 4
-	// see https://github.com/blevesearch/bleve/issues/1563#issuecomment-786822311
-	maxFuzziness = 2
 )
 
 func addUnicodeNormalizeTokenFilter(m *mapping.IndexMappingImpl) error {
@@ -260,12 +256,14 @@ func (b *Indexer) Search(ctx context.Context, opts *internal.SearchOptions) (int
 		keywordQuery query.Query
 	)
 
-	phraseQuery := bleve.NewMatchPhraseQuery(opts.Keyword)
-	phraseQuery.FieldVal = "Content"
-	phraseQuery.Analyzer = repoIndexerAnalyzer
-	keywordQuery = phraseQuery
-	if opts.IsKeywordFuzzy {
-		phraseQuery.Fuzziness = min(maxFuzziness, len(opts.Keyword)/fuzzyDenominator)
+	if opts.Mode == internal.CodeSearchModeUnion {
+		query := bleve.NewDisjunctionQuery()
+		for _, field := range strings.Fields(opts.Keyword) {
+			query.AddQuery(inner_bleve.MatchPhraseQuery(field, "Content", repoIndexerAnalyzer, 0))
+		}
+		keywordQuery = query
+	} else {
+		keywordQuery = inner_bleve.MatchPhraseQuery(opts.Keyword, "Content", repoIndexerAnalyzer, 0)
 	}
 
 	if len(opts.RepoIDs) > 0 {
@@ -325,13 +323,16 @@ func (b *Indexer) Search(ctx context.Context, opts *internal.SearchOptions) (int
 	for i, hit := range result.Hits {
 		startIndex, endIndex := -1, -1
 		for _, locations := range hit.Locations["Content"] {
+			if startIndex != -1 && endIndex != -1 {
+				break
+			}
 			location := locations[0]
 			locationStart := int(location.Start)
 			locationEnd := int(location.End)
 			if startIndex < 0 || locationStart < startIndex {
 				startIndex = locationStart
 			}
-			if endIndex < 0 || locationEnd > endIndex {
+			if endIndex < 0 && locationEnd > endIndex {
 				endIndex = locationEnd
 			}
 		}
