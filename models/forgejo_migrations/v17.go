@@ -5,10 +5,10 @@ package forgejo_migrations //nolint:revive
 
 import "xorm.io/xorm"
 
-func AddNormalizedFederatedURIToUser(x *xorm.Engine) error {
+func AddNormalizedOriginalUrlToUser(x *xorm.Engine) error {
 	type User struct {
-		ID                     int64 `xorm:"pk autoincr"`
-		NormalizedFederatedURI string
+		ID                    int64 `xorm:"pk autoincr"`
+		NormalizedOriginalUrl string
 	}
 	return x.Sync(&User{})
 }
