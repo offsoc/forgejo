@@ -13,7 +13,8 @@ type DispatchWorkflowOption struct {
 	// Input keys and values configured in the workflow file.
 	Inputs map[string]string `json:"inputs"`
 	// Flag to return the run info
-	ReturnRunInfo bool `json:"return_run_info" default:"false"`
+	// default: false
+	ReturnRunInfo bool `json:"return_run_info"`
 }
 
 // DispatchWorkflowRun represents a workflow run
