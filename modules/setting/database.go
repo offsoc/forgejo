@@ -71,7 +71,7 @@ func loadDBSetting(rootCfg ConfigProvider) {
 	Database.Host = sec.Key("HOST").String()
 	Database.HostPrimary = sec.Key("HOST_PRIMARY").String()
 	Database.HostReplica = sec.Key("HOST_REPLICA").String()
-	Database.LoadBalancePolicy = sec.Key("LOAD_BALANCE_POLICY").MustString("xorm.RandomPolicy()")
+	Database.LoadBalancePolicy = sec.Key("LOAD_BALANCE_POLICY").String()
 	Database.LoadBalanceWeights = sec.Key("LOAD_BALANCE_WEIGHTS").String()
 	Database.Name = sec.Key("NAME").String()
 	Database.User = sec.Key("USER").String()
