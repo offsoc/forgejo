@@ -689,5 +689,9 @@ func DispatchWorkflow(ctx *context.APIContext) {
 		Jobs: jobs,
 	}
 
-	ctx.JSON(http.StatusCreated, workflowRun)
+	if opt.ReturnRunInfo {
+		ctx.JSON(http.StatusCreated, workflowRun)
+	} else {
+		ctx.JSON(http.StatusNoContent, nil)
+	}
 }
