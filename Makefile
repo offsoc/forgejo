@@ -458,11 +458,11 @@ lint-renovate: node_modules
 
 .PHONY: lint-locale
 lint-locale:
-	$(GO) run build/lint-locale.go
+	$(GO) run build/lint-locale/lint-locale.go
 
 .PHONY: lint-locale-usage
 lint-locale-usage:
-	$(GO) run build/lint-locale-usage.go --allow-missing-msgids
+	$(GO) run build/lint-locale-usage/lint-locale-usage.go --allow-missing-msgids
 
 .PHONY: lint-md
 lint-md: node_modules
