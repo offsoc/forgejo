@@ -8628,6 +8628,24 @@
             "description": "page size of results",
             "name": "limit",
             "in": "query"
+          },
+          {
+            "enum": [
+              "relevance",
+              "latest",
+              "oldest",
+              "recentupdate",
+              "leastupdate",
+              "mostcomment",
+              "leastcomment",
+              "nearduedate",
+              "farduedate"
+            ],
+            "type": "string",
+            "default": "latest",
+            "description": "Type of sort",
+            "name": "sort",
+            "in": "query"
           }
         ],
         "responses": {

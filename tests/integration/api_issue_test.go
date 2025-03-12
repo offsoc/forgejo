@@ -74,6 +74,50 @@ func TestAPIListIssues(t *testing.T) {
 	if assert.Len(t, apiIssues, 1) {
 		assert.EqualValues(t, 1, apiIssues[0].ID)
 	}
+
+	t.Run("Sort", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		link.RawQuery = url.Values{"token": {token}, "sort": {"oldest"}}.Encode()
+		resp = MakeRequest(t, NewRequest(t, "GET", link.String()), http.StatusOK)
+		DecodeJSON(t, resp, &apiIssues)
+		if assert.Len(t, apiIssues, 4) {
+			assert.EqualValues(t, 1, apiIssues[0].ID)
+			assert.EqualValues(t, 2, apiIssues[1].ID)
+			assert.EqualValues(t, 3, apiIssues[2].ID)
+			assert.EqualValues(t, 11, apiIssues[3].ID)
+		}
+
+		link.RawQuery = url.Values{"token": {token}, "sort": {"newest"}}.Encode()
+		resp = MakeRequest(t, NewRequest(t, "GET", link.String()), http.StatusOK)
+		DecodeJSON(t, resp, &apiIssues)
+		if assert.Len(t, apiIssues, 4) {
+			assert.EqualValues(t, 11, apiIssues[0].ID)
+			assert.EqualValues(t, 3, apiIssues[1].ID)
+			assert.EqualValues(t, 2, apiIssues[2].ID)
+			assert.EqualValues(t, 1, apiIssues[3].ID)
+		}
+
+		link.RawQuery = url.Values{"token": {token}, "sort": {"recentupdate"}}.Encode()
+		resp = MakeRequest(t, NewRequest(t, "GET", link.String()), http.StatusOK)
+		DecodeJSON(t, resp, &apiIssues)
+		if assert.Len(t, apiIssues, 4) {
+			assert.EqualValues(t, 11, apiIssues[0].ID)
+			assert.EqualValues(t, 1, apiIssues[1].ID)
+			assert.EqualValues(t, 2, apiIssues[2].ID)
+			assert.EqualValues(t, 3, apiIssues[3].ID)
+		}
+
+		link.RawQuery = url.Values{"token": {token}, "sort": {"leastupdate"}}.Encode()
+		resp = MakeRequest(t, NewRequest(t, "GET", link.String()), http.StatusOK)
+		DecodeJSON(t, resp, &apiIssues)
+		if assert.Len(t, apiIssues, 4) {
+			assert.EqualValues(t, 3, apiIssues[0].ID)
+			assert.EqualValues(t, 2, apiIssues[1].ID)
+			assert.EqualValues(t, 1, apiIssues[2].ID)
+			assert.EqualValues(t, 11, apiIssues[3].ID)
+		}
+	})
 }
 
 func TestAPIListIssuesPublicOnly(t *testing.T) {
