@@ -107,3 +107,79 @@ func Test_getPostgreSQLConnectionString(t *testing.T) {
 		assert.Equal(t, test.Output, connStr)
 	}
 }
+
+func Test_getPostgreSQLEngineGroupConnectionStrings(t *testing.T) {
+	tests := []struct {
+		primaryHost    string // primary host setting (e.g. "localhost" or "[::1]:1234")
+		replicaHosts   string // comma-separated replica hosts (e.g. "replica1,replica2:2345")
+		user           string
+		passwd         string
+		name           string
+		sslmode        string
+		outputPrimary  string
+		outputReplicas []string
+	}{
+		{
+			// No primary override (empty => default) and no replicas.
+			primaryHost:    "",
+			replicaHosts:   "",
+			user:           "",
+			passwd:         "",
+			name:           "",
+			sslmode:        "",
+			outputPrimary:  "postgres://:@127.0.0.1:5432?sslmode=",
+			outputReplicas: []string{},
+		},
+		{
+			// Primary set and one replica.
+			primaryHost:    "localhost",
+			replicaHosts:   "replicahost",
+			user:           "user",
+			passwd:         "pass",
+			name:           "gitea",
+			sslmode:        "disable",
+			outputPrimary:  "postgres://user:pass@localhost:5432/gitea?sslmode=disable",
+			outputReplicas: []string{"postgres://user:pass@replicahost:5432/gitea?sslmode=disable"},
+		},
+		{
+			// Primary with explicit port; multiple replicas (one without and one with an explicit port).
+			primaryHost:   "localhost:5433",
+			replicaHosts:  "replica1,replica2:5434",
+			user:          "test",
+			passwd:        "secret",
+			name:          "db",
+			sslmode:       "require",
+			outputPrimary: "postgres://test:secret@localhost:5433/db?sslmode=require",
+			outputReplicas: []string{
+				"postgres://test:secret@replica1:5432/db?sslmode=require",
+				"postgres://test:secret@replica2:5434/db?sslmode=require",
+			},
+		},
+		{
+			// IPv6 addresses for primary and replica.
+			primaryHost:   "[::1]:1234",
+			replicaHosts:  "[::2]:2345",
+			user:          "ipv6",
+			passwd:        "ipv6pass",
+			name:          "ipv6db",
+			sslmode:       "disable",
+			outputPrimary: "postgres://ipv6:ipv6pass@::1:1234/ipv6db?sslmode=disable",
+			outputReplicas: []string{
+				"postgres://ipv6:ipv6pass@::2:2345/ipv6db?sslmode=disable",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		primary, replicas := getPostgreSQLEngineGroupConnectionStrings(
+			test.primaryHost,
+			test.replicaHosts,
+			test.user,
+			test.passwd,
+			test.name,
+			test.sslmode,
+		)
+		assert.Equal(t, test.outputPrimary, primary)
+		assert.Equal(t, test.outputReplicas, replicas)
+	}
+}

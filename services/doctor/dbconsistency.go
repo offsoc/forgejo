@@ -16,6 +16,8 @@ import (
 	repo_model "code.gitea.io/gitea/models/repo"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
+
+	"xorm.io/xorm"
 )
 
 type consistencyCheck struct {
@@ -78,7 +80,16 @@ func genericOrphanCheck(name, subject, refobject, joincond string) consistencyCh
 
 func checkDBConsistency(ctx context.Context, logger log.Logger, autofix bool) error {
 	// make sure DB version is up-to-date
-	if err := db.InitEngineWithMigration(ctx, migrations.EnsureUpToDate); err != nil {
+	ensureUpToDateWrapper := func(e db.Engine) error {
+		var engine *xorm.Engine
+		if getter, ok := e.(interface{ Master() *xorm.Engine }); ok {
+			engine = getter.Master()
+		} else {
+			engine = e.(*xorm.Engine)
+		}
+		return migrations.EnsureUpToDate(engine)
+	}
+	if err := db.InitEngineWithMigration(ctx, ensureUpToDateWrapper); err != nil {
 		logger.Critical("Model version on the database does not match the current Gitea version. Model consistency will not be checked until the database is upgraded")
 		return err
 	}

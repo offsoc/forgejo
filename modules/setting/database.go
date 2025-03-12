@@ -1,6 +1,3 @@
-// Copyright 2019 The Gitea Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
-
 package setting
 
 import (
@@ -12,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"code.gitea.io/gitea/modules/log"
 )
 
 var (
@@ -27,6 +26,10 @@ var (
 	Database = struct {
 		Type               DatabaseType
 		Host               string
+		HostPrimary        string
+		HostReplica        string
+		LoadBalancePolicy  string
+		LoadBalanceWeights string
 		Name               string
 		User               string
 		Passwd             string
@@ -63,6 +66,10 @@ func loadDBSetting(rootCfg ConfigProvider) {
 	Database.Type = DatabaseType(sec.Key("DB_TYPE").String())
 
 	Database.Host = sec.Key("HOST").String()
+	Database.HostPrimary = sec.Key("HOST_PRIMARY").String()
+	Database.HostReplica = sec.Key("HOST_REPLICA").String()
+	Database.LoadBalancePolicy = sec.Key("LOAD_BALANCE_POLICY").MustString("xorm.RandomPolicy()")
+	Database.LoadBalanceWeights = sec.Key("LOAD_BALANCE_WEIGHTS").String()
 	Database.Name = sec.Key("NAME").String()
 	Database.User = sec.Key("USER").String()
 	if len(Database.Passwd) == 0 {
@@ -99,8 +106,62 @@ func loadDBSetting(rootCfg ConfigProvider) {
 	}
 }
 
-// DBConnStr returns database connection string
+// DBConnStr returns a database connection string using Database.Host.
 func DBConnStr() (string, error) {
+	return dbConnStrWithHost(Database.Host)
+}
+
+// DBMasterConnStr returns the connection string for the master (primary) database.
+// If a primary host is defined in the configuration, it is used;
+// otherwise, it falls back to Database.Host.
+// Returns an error if no master host is provided.
+func DBMasterConnStr() (string, error) {
+	var host string
+	if Database.HostPrimary != "" {
+		host = Database.HostPrimary
+	} else {
+		host = Database.Host
+	}
+	if host == "" {
+		return "", fmt.Errorf("master host is not defined while slave is defined; cannot proceed")
+	}
+	return dbConnStrWithHost(host)
+}
+
+// DBSlaveConnStrs returns one or more connection strings for the replica databases.
+// If a replica host is defined (possibly as a comma‐separated list) then those DSNs are returned.
+// Otherwise, this function falls back to the master DSN (with a warning log).
+func DBSlaveConnStrs() ([]string, error) {
+	var dsns []string
+	if Database.HostReplica != "" {
+		// support multiple replica hosts separated by commas
+		replicas := strings.SplitSeq(Database.HostReplica, ",")
+		for r := range replicas {
+			trimmed := strings.TrimSpace(r)
+			if trimmed == "" {
+				continue
+			}
+			dsn, err := dbConnStrWithHost(trimmed)
+			if err != nil {
+				return nil, err
+			}
+			dsns = append(dsns, dsn)
+		}
+	}
+	// Fall back to master if no slave DSN was provided.
+	if len(dsns) == 0 {
+		master, err := DBMasterConnStr()
+		if err != nil {
+			return nil, err
+		}
+		log.Info("DB: No dedicated replica host defined; falling back to primary DSN for replica connections")
+		dsns = append(dsns, master)
+	}
+	return dsns, nil
+}
+
+// dbConnStrWithHost constructs the connection string, given a host value.
+func dbConnStrWithHost(host string) (string, error) {
 	var connStr string
 	paramSep := "?"
 	if strings.Contains(Database.Name, paramSep) {
@@ -109,23 +170,25 @@ func DBConnStr() (string, error) {
 	switch Database.Type {
 	case "mysql":
 		connType := "tcp"
-		if len(Database.Host) > 0 && Database.Host[0] == '/' { // looks like a unix socket
+		// if the host starts with '/' it is assumed to be a unix socket path
+		if len(host) > 0 && host[0] == '/' {
 			connType = "unix"
 		}
 		tls := Database.SSLMode
-		if tls == "disable" { // allow (Postgres-inspired) default value to work in MySQL
+		// allow the "disable" value (borrowed from Postgres defaults) to behave as false
+		if tls == "disable" {
 			tls = "false"
 		}
 		connStr = fmt.Sprintf("%s:%s@%s(%s)/%s%sparseTime=true&tls=%s",
-			Database.User, Database.Passwd, connType, Database.Host, Database.Name, paramSep, tls)
+			Database.User, Database.Passwd, connType, host, Database.Name, paramSep, tls)
 	case "postgres":
-		connStr = getPostgreSQLConnectionString(Database.Host, Database.User, Database.Passwd, Database.Name, Database.SSLMode)
+		connStr = getPostgreSQLConnectionString(host, Database.User, Database.Passwd, Database.Name, Database.SSLMode)
 	case "sqlite3":
 		if !EnableSQLite3 {
 			return "", errors.New("this Gitea binary was not built with SQLite3 support")
 		}
 		if err := os.MkdirAll(filepath.Dir(Database.Path), os.ModePerm); err != nil {
-			return "", fmt.Errorf("Failed to create directories: %w", err)
+			return "", fmt.Errorf("failed to create directories: %w", err)
 		}
 		journalMode := ""
 		if Database.SQLiteJournalMode != "" {
@@ -136,7 +199,6 @@ func DBConnStr() (string, error) {
 	default:
 		return "", fmt.Errorf("unknown database type: %s", Database.Type)
 	}
-
 	return connStr, nil
 }
 
@@ -183,6 +245,31 @@ func getPostgreSQLConnectionString(dbHost, dbUser, dbPasswd, dbName, dbsslMode s
 	query.Set("sslmode", dbsslMode)
 	connURL.RawQuery = query.Encode()
 	return connURL.String()
+}
+
+func getPostgreSQLEngineGroupConnectionStrings(primaryHost, replicaHosts, user, passwd, name, sslmode string) (string, []string) {
+	// Determine the primary connection string.
+	primary := primaryHost
+	if strings.TrimSpace(primary) == "" {
+		primary = "127.0.0.1:5432"
+	}
+	primaryConn := getPostgreSQLConnectionString(primary, user, passwd, name, sslmode)
+
+	// Build the replica connection strings.
+	replicaConns := []string{}
+	if strings.TrimSpace(replicaHosts) != "" {
+		// Split comma-separated replica host values.
+		hosts := strings.Split(replicaHosts, ",")
+		for _, h := range hosts {
+			trimmed := strings.TrimSpace(h)
+			if trimmed != "" {
+				replicaConns = append(replicaConns,
+					getPostgreSQLConnectionString(trimmed, user, passwd, name, sslmode))
+			}
+		}
+	}
+
+	return primaryConn, replicaConns
 }
 
 type DatabaseType string

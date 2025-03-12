@@ -130,11 +130,17 @@ func runRecreateTable(ctx *cli.Context) error {
 	}
 	recreateTables := migrate_base.RecreateTables(beans...)
 
-	return db.InitEngineWithMigration(stdCtx, func(x *xorm.Engine) error {
-		if err := migrations.EnsureUpToDate(x); err != nil {
+	return db.InitEngineWithMigration(stdCtx, func(x db.Engine) error {
+		var engine *xorm.Engine
+		if getter, ok := x.(interface{ Master() *xorm.Engine }); ok {
+			engine = getter.Master()
+		} else {
+			engine = x.(*xorm.Engine)
+		}
+		if err := migrations.EnsureUpToDate(engine); err != nil {
 			return err
 		}
-		return recreateTables(x)
+		return recreateTables(engine)
 	})
 }
 
