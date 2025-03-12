@@ -221,10 +221,9 @@ func (omh OnMsgidHandler) HandleTemplateFile(fname string, src any) error {
 			Kind:     "Template parser",
 			Err:      err,
 		}
-	} else {
-		omh.handleTemplateFileNodes(fset, tmplParsed.Tree.Root.Nodes)
-		return nil
 	}
+	omh.handleTemplateFileNodes(fset, tmplParsed.Tree.Root.Nodes)
+	return nil
 }
 
 // This command assumes that we get started from the project root directory
@@ -240,11 +239,12 @@ func (omh OnMsgidHandler) HandleTemplateFile(fname string, src any) error {
 //	2  unable to parse locale ini/json files
 //	3  unable to parse go or text/template files
 //	4  found missing message IDs
+//
+//nolint:forbidigo
 func main() {
 	allowMissingMsgids := false
-	for _, arg := range os.Args {
-		switch arg {
-		case "--allow-missing-msgids":
+	for _, arg := range os.Args[1:] {
+		if arg == "--allow-missing-msgids" {
 			allowMissingMsgids = true
 		}
 	}
