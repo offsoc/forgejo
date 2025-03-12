@@ -4645,7 +4645,7 @@
           },
           {
             "type": "boolean",
-            "description": "show only public, private or all repositories (defaults to all)",
+            "description": "show only pubic, private or all repositories (defaults to all)",
             "name": "is_private",
             "in": "query"
           },
@@ -5378,9 +5378,6 @@
         "consumes": [
           "application/json"
         ],
-        "produces": [
-          "application/json"
-        ],
         "tags": [
           "repository"
         ],
@@ -5417,9 +5414,6 @@
           }
         ],
         "responses": {
-          "201": {
-            "$ref": "#/responses/DispatchWorkflowRun"
-          },
           "204": {
             "$ref": "#/responses/empty"
           },
@@ -23134,6 +23128,12 @@
           "description": "Git reference for the workflow",
           "type": "string",
           "x-go-name": "Ref"
+        },
+        "return_run_info": {
+          "description": "Flag to return the run info",
+          "type": "boolean",
+          "default": false,
+          "x-go-name": "ReturnRunInfo"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
