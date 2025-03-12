@@ -95,7 +95,6 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 		return nil, nil, errors.New("to many inputs")
 	}
 
-	var jobNames []string
 	jobNames := util.KeysOfMap(wf.Jobs)
 
 	payload := &structs.WorkflowDispatchPayload{
