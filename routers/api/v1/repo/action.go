@@ -639,11 +639,7 @@ func DispatchWorkflow(ctx *context.APIContext) {
 	//   in: body
 	//   schema:
 	//     "$ref": "#/definitions/DispatchWorkflowOption"
-	// produces:
-	// - application/json
 	// responses:
-	//   "201":
-	//    "$ref": "#/responses/DispatchWorkflowRun"
 	//   "204":
 	//     "$ref": "#/responses/empty"
 	//   "404":
