@@ -82,19 +82,10 @@ func testSearchRepo(t *testing.T, indexer bool) {
 	testSearch(t, "/user2/glob/search?q=loren&page=1", []string{"a.txt"}, indexer)
 	testSearch(t, "/user2/glob/search?q=loren&page=1&mode=exact", []string{"a.txt"}, indexer)
 
-	if indexer {
-		// fuzzy search: matches both file3 (x/b.txt) and file1 (a.txt)
-		// when indexer is enabled
-		testSearch(t, "/user2/glob/search?q=file3&mode=fuzzy&page=1", []string{"x/b.txt", "a.txt"}, indexer)
-		testSearch(t, "/user2/glob/search?q=file4&mode=fuzzy&page=1", []string{"x/b.txt", "a.txt"}, indexer)
-		testSearch(t, "/user2/glob/search?q=file5&mode=fuzzy&page=1", []string{"x/b.txt", "a.txt"}, indexer)
-	} else {
-		// fuzzy search: Union/OR of all the keywords
-		// when indexer is disabled
-		testSearch(t, "/user2/glob/search?q=file3+file1&mode=union&page=1", []string{"a.txt", "x/b.txt"}, indexer)
-		testSearch(t, "/user2/glob/search?q=file4&mode=union&page=1", []string{}, indexer)
-		testSearch(t, "/user2/glob/search?q=file5&mode=union&page=1", []string{}, indexer)
-	}
+	// union search: Union/OR of all the keywords
+	testSearch(t, "/user2/glob/search?q=file3+file1&mode=union&page=1", []string{"a.txt", "x/b.txt"}, indexer)
+	testSearch(t, "/user2/glob/search?q=file4&mode=union&page=1", []string{}, indexer)
+	testSearch(t, "/user2/glob/search?q=file5&mode=union&page=1", []string{}, indexer)
 
 	testSearch(t, "/user2/glob/search?q=file3&page=1&mode=exact", []string{"x/b.txt"}, indexer)
 	testSearch(t, "/user2/glob/search?q=file4&page=1&mode=exact", []string{}, indexer)
@@ -121,11 +112,11 @@ func testSearch(t *testing.T, url string, expected []string, indexer bool) {
 		})
 
 	if indexer {
-		assert.EqualValues(t, []string{"exact", "fuzzy"}, dropdownOptions)
+		assert.EqualValues(t, []string{"exact", "union"}, dropdownOptions)
 	} else {
 		assert.EqualValues(t, []string{"exact", "union", "regexp"}, dropdownOptions)
 	}
 
 	filenames := resultFilenames(t, doc)
-	assert.EqualValues(t, expected, filenames)
+	assert.ElementsMatch(t, expected, filenames)
 }
