@@ -72,7 +72,7 @@ type Engine interface {
 	Ping() error
 }
 
-// TableInfo remains the same – it will call x.TableInfo on the underlying engine or group.
+// TableInfo returns table's information via an object
 func TableInfo(v any) (*schemas.Table, error) {
 	return x.TableInfo(v)
 }
@@ -82,7 +82,7 @@ func DumpTables(tables []*schemas.Table, w io.Writer, tp ...schemas.DBType) erro
 	return x.DumpTables(tables, w, tp...)
 }
 
-// RegisterModel registers model, if initfunc provided, it will be invoked after data model sync.
+// RegisterModel registers model, if initfunc provided, it will be invoked after data model sync
 func RegisterModel(bean any, initFunc ...func() error) {
 	tables = append(tables, bean)
 	if len(initFuncs) > 0 && initFunc[0] != nil {
@@ -122,14 +122,13 @@ func newXORMEngineGroup() (Engine, error) {
 	}
 	masterEngine.SetSchema(setting.Database.Schema)
 
-	// Get slave DSNs.
 	slaveConnStrs, err := setting.DBSlaveConnStrs()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load slave DSNs: %w", err)
 	}
 
 	var slaveEngines []*xorm.Engine
-	// Iterate over all slave DSNs and create engines.
+	// Iterate over all slave DSNs and create engines
 	for _, dsn := range slaveConnStrs {
 		slaveEngine, err := xorm.NewEngine(setting.Database.Type.String(), dsn)
 		if err != nil {
@@ -142,7 +141,7 @@ func newXORMEngineGroup() (Engine, error) {
 		slaveEngines = append(slaveEngines, slaveEngine)
 	}
 
-	// Build load balance policy from user settings.
+	// Build load balance policy from user settings
 	var policy xorm.GroupPolicy
 	switch setting.Database.LoadBalancePolicy {
 	case "WeightRandom":
@@ -156,7 +155,7 @@ func newXORMEngineGroup() (Engine, error) {
 				weights = append(weights, w)
 			}
 		}
-		// If no valid weights were provided, default each slave to weight 1.
+		// If no valid weights were provided, default each slave to weight 1
 		if len(weights) == 0 {
 			weights = make([]int, len(slaveEngines))
 			for i := range weights {
@@ -169,7 +168,7 @@ func newXORMEngineGroup() (Engine, error) {
 	default:
 		policy = xorm.RandomPolicy()
 	}
-	// Create the EngineGroup using the selected policy.
+	// Create the EngineGroup using the selected policy
 	group, err := xorm.NewEngineGroup(masterEngine, slaveEngines, policy)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create engine group: %w", err)
@@ -186,7 +185,7 @@ func (w engineGroupWrapper) AddHook(hook contexts.Hook) bool {
 	return true
 }
 
-// SyncAllTables sync the schemas of all tables.
+// SyncAllTables sync the schemas of all tables
 func SyncAllTables() error {
 	_, err := x.StoreEngine("InnoDB").SyncWithOptions(xorm.SyncOptions{
 		WarnIfDatabaseColumnMissed: true,
@@ -194,13 +193,13 @@ func SyncAllTables() error {
 	return err
 }
 
-// InitEngine initializes the xorm EngineGroup and sets it as db.DefaultContext.
+// InitEngine initializes the xorm EngineGroup and sets it as db.DefaultContext
 func InitEngine(ctx context.Context) error {
 	xormEngine, err := newXORMEngineGroup()
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	// Try to cast to the concrete type to access diagnostic methods.
+	// Try to cast to the concrete type to access diagnostic methods
 	if eng, ok := xormEngine.(engineGroupWrapper); ok {
 		eng.SetMapper(names.GonicMapper{})
 		// WARNING: for serv command, MUST remove the output to os.Stdout,
@@ -233,7 +232,7 @@ func InitEngine(ctx context.Context) error {
 
 		SetDefaultEngine(ctx, eng)
 	} else {
-		// Fallback: if type assertion fails, set default engine without extended diagnostics.
+		// Fallback: if type assertion fails, set default engine without extended diagnostics
 		SetDefaultEngine(ctx, xormEngine)
 	}
 	return nil
@@ -252,7 +251,10 @@ func SetDefaultEngine(ctx context.Context, eng Engine) {
 	}
 }
 
-// UnsetDefaultEngine closes and unsets the default engine.
+// UnsetDefaultEngine closes and unsets the default engine
+// We hope the SetDefaultEngine and UnsetDefaultEngine can be paired, but it's impossible now,
+// there are many calls to InitEngine -> SetDefaultEngine directly to overwrite the `x` and DefaultContext without close
+// Global database engine related functions are all racy and there is no graceful close right now.
 func UnsetDefaultEngine() {
 	if x != nil {
 		_ = x.Close()
@@ -261,7 +263,11 @@ func UnsetDefaultEngine() {
 	DefaultContext = nil
 }
 
-// InitEngineWithMigration initializes a new xorm EngineGroup, runs migrations, and sets it as db.DefaultContext.
+// InitEngineWithMigration initializes a new xorm EngineGroup, runs migrations, and sets it as db.DefaultContext
+// This function must never call .Sync() if the provided migration function fails.
+// When called from the "doctor" command, the migration function is a version check
+// that prevents the doctor from fixing anything in the database if the migration level
+// is different from the expected value.
 func InitEngineWithMigration(ctx context.Context, migrateFunc func(Engine) error) (err error) {
 	if err = InitEngine(ctx); err != nil {
 		return err
@@ -273,7 +279,12 @@ func InitEngineWithMigration(ctx context.Context, migrateFunc func(Engine) error
 
 	preprocessDatabaseCollation(x)
 
-	// Run migration function.
+	// We have to run migrateFunc here in case the user is re-running installation on a previously created DB.
+	// If we do not then table schemas will be changed and there will be conflicts when the migrations run properly.
+	//
+	// Installation should only be being re-run if users want to recover an old database.
+	// However, we should think carefully about should we support re-install on an installed instance,
+	// as there may be other problems due to secret reinitialization.
 	if err = migrateFunc(x); err != nil {
 		return fmt.Errorf("migrate: %w", err)
 	}
@@ -291,14 +302,14 @@ func InitEngineWithMigration(ctx context.Context, migrateFunc func(Engine) error
 	return nil
 }
 
-// NamesToBean returns a list of beans given names.
+// NamesToBean returns a list of beans given names
 func NamesToBean(names ...string) ([]any, error) {
 	beans := []any{}
 	if len(names) == 0 {
 		beans = append(beans, tables...)
 		return beans, nil
 	}
-	// Map provided names to beans.
+	// Map provided names to beans
 	beanMap := make(map[string]any)
 	for _, bean := range tables {
 		beanMap[strings.ToLower(reflect.Indirect(reflect.ValueOf(bean)).Type().Name())] = bean
@@ -347,7 +358,7 @@ func DumpDatabase(filePath, dbType string) error {
 	return x.DumpTablesToFile(tbs, filePath)
 }
 
-// MaxBatchInsertSize returns the table's max batch insert size.
+// MaxBatchInsertSize returns the table's max batch insert size
 func MaxBatchInsertSize(bean any) int {
 	t, err := x.TableInfo(bean)
 	if err != nil {
@@ -356,7 +367,7 @@ func MaxBatchInsertSize(bean any) int {
 	return 999 / len(t.ColumnsSeq())
 }
 
-// IsTableNotEmpty returns true if the table has at least one record.
+// IsTableNotEmpty returns true if the table has at least one record
 func IsTableNotEmpty(beanOrTableName any) (bool, error) {
 	return x.Table(beanOrTableName).Exist()
 }
@@ -367,7 +378,7 @@ func DeleteAllRecords(tableName string) error {
 	return err
 }
 
-// GetMaxID returns the maximum id in the table.
+// GetMaxID returns the maximum id in the table
 func GetMaxID(beanOrTableName any) (maxID int64, err error) {
 	_, err = x.Select("MAX(id)").Table(beanOrTableName).Get(&maxID)
 	return maxID, err

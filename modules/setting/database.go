@@ -1,3 +1,6 @@
+// Copyright 2019 The Gitea Authors. All rights reserved.
+// SPDX-License-Identifier: MIT
+
 package setting
 
 import (
@@ -129,7 +132,7 @@ func DBMasterConnStr() (string, error) {
 }
 
 // DBSlaveConnStrs returns one or more connection strings for the replica databases.
-// If a replica host is defined (possibly as a comma‐separated list) then those DSNs are returned.
+// If a replica host is defined (possibly as a comma-separated list) then those DSNs are returned.
 // Otherwise, this function falls back to the master DSN (with a warning log).
 func DBSlaveConnStrs() ([]string, error) {
 	var dsns []string
