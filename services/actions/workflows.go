@@ -96,9 +96,7 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 	}
 
 	var jobNames []string
-	for jobName := range wf.Jobs {
-		jobNames = append(jobNames, jobName)
-	}
+	jobNames := util.KeysOfMap(wf.Jobs)
 
 	payload := &structs.WorkflowDispatchPayload{
 		Inputs:     inputs,
