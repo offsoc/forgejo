@@ -366,6 +366,8 @@ func prepareMigrationTasks() []*migration {
 		// Migration to Forgejo v10
 		newMigration(303, "Gitea last drop", v1_23.GiteaLastDrop),
 		newMigration(304, "Migrate `secret` column to store keying material", forgejo_migrations.MigrateTwoFactorToKeying),
+
+		newMigration(305, "Migrate `User.NormalizedFederatedURI` column to extract port & schema into FederatedHost", v1_23.MigrateNormalizedFederatedURI),
 	}
 	return preparedMigrations
 }
