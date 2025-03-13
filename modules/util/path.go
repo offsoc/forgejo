@@ -10,8 +10,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
-	"runtime"
 	"strings"
 )
 
@@ -78,11 +76,7 @@ func FilePathJoinAbs(base string, sub ...string) string {
 
 	// POSIX filesystem can have `\` in file names. Windows: `\` and `/` are both used for path separators
 	// to keep the behavior consistent, we do not allow `\` in file names, replace all `\` with `/`
-	if isOSWindows() {
-		elems[0] = filepath.Clean(base)
-	} else {
-		elems[0] = filepath.Clean(strings.ReplaceAll(base, "\\", pathSeparator))
-	}
+	elems[0] = filepath.Clean(strings.ReplaceAll(base, "\\", pathSeparator))
 	if !filepath.IsAbs(elems[0]) {
 		// This shouldn't happen. If there is really necessary to pass in relative path, return the full path with filepath.Abs() instead
 		panic(fmt.Sprintf("FilePathJoinAbs: %q (for path %v) is not absolute, do not guess a relative path based on current working directory", elems[0], elems))
@@ -91,11 +85,7 @@ func FilePathJoinAbs(base string, sub ...string) string {
 		if s == "" {
 			continue
 		}
-		if isOSWindows() {
-			elems = append(elems, filepath.Clean(pathSeparator+s))
-		} else {
-			elems = append(elems, filepath.Clean(pathSeparator+strings.ReplaceAll(s, "\\", pathSeparator)))
-		}
+		elems = append(elems, filepath.Clean(pathSeparator+strings.ReplaceAll(s, "\\", pathSeparator)))
 	}
 	// the elems[0] must be an absolute path, just join them together
 	return filepath.Join(elems...)
@@ -217,12 +207,6 @@ func StatDir(rootPath string, includeDir ...bool) ([]string, error) {
 	return statDir(rootPath, "", isIncludeDir, false, false)
 }
 
-func isOSWindows() bool {
-	return runtime.GOOS == "windows"
-}
-
-var driveLetterRegexp = regexp.MustCompile("/[A-Za-z]:/")
-
 // FileURLToPath extracts the path information from a file://... url.
 // It returns an error only if the URL is not a file URL.
 func FileURLToPath(u *url.URL) (string, error) {
@@ -230,17 +214,7 @@ func FileURLToPath(u *url.URL) (string, error) {
 		return "", errors.New("URL scheme is not 'file': " + u.String())
 	}
 
-	path := u.Path
-
-	if !isOSWindows() {
-		return path, nil
-	}
-
-	// If it looks like there's a Windows drive letter at the beginning, strip off the leading slash.
-	if driveLetterRegexp.MatchString(path) {
-		return path[1:], nil
-	}
-	return path, nil
+	return u.Path, nil
 }
 
 // HomeDir returns path of '~'(in Linux) on Windows,
@@ -249,14 +223,7 @@ func HomeDir() (home string, err error) {
 	// TODO: some users run Gitea with mismatched uid  and "HOME=xxx" (they set HOME=xxx by environment manually)
 	// TODO: when running gitea as a sub command inside git, the HOME directory is not the user's home directory
 	// so at the moment we can not use `user.Current().HomeDir`
-	if isOSWindows() {
-		home = os.Getenv("USERPROFILE")
-		if home == "" {
-			home = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
-		}
-	} else {
-		home = os.Getenv("HOME")
-	}
+	home = os.Getenv("HOME")
 
 	if home == "" {
 		return "", errors.New("cannot get home directory")

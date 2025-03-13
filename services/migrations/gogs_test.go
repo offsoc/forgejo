@@ -4,7 +4,6 @@
 package migrations
 
 import (
-	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -30,7 +29,7 @@ func TestGogsDownloadRepo(t *testing.T) {
 		return
 	}
 
-	downloader := NewGogsDownloader(context.Background(), "https://try.gogs.io", "", "", gogsPersonalAccessToken, "lunnytest", "TESTREPO")
+	downloader := NewGogsDownloader(t.Context(), "https://try.gogs.io", "", "", gogsPersonalAccessToken, "lunnytest", "TESTREPO")
 	repo, err := downloader.GetRepoInfo()
 	require.NoError(t, err)
 
@@ -207,7 +206,7 @@ func TestGogsDownloaderFactory_New(t *testing.T) {
 				AuthPassword: tt.args.AuthPassword,
 				AuthToken:    tt.args.AuthToken,
 			}
-			got, err := f.New(context.Background(), opts)
+			got, err := f.New(t.Context(), opts)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GogsDownloaderFactory.New() error = %v, wantErr %v", err, tt.wantErr)
 				return

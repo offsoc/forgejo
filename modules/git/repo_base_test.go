@@ -14,7 +14,7 @@ import (
 
 // This unit test relies on the implementation detail of CatFileBatch.
 func TestCatFileBatch(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 
 	repo, err := OpenRepository(ctx, "./tests/repos/repo1_bare")
@@ -89,7 +89,7 @@ func TestCatFileBatch(t *testing.T) {
 
 // This unit test relies on the implementation detail of CatFileBatchCheck.
 func TestCatFileBatchCheck(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 
 	repo, err := OpenRepository(ctx, "./tests/repos/repo1_bare")

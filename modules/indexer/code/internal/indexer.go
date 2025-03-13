@@ -20,13 +20,27 @@ type Indexer interface {
 	Search(ctx context.Context, opts *SearchOptions) (int64, []*SearchResult, []*SearchResultLanguages, error)
 }
 
+type CodeSearchMode int
+
+const (
+	CodeSearchModeExact CodeSearchMode = iota
+	CodeSearchModeUnion
+)
+
+func (mode CodeSearchMode) String() string {
+	if mode == CodeSearchModeUnion {
+		return "union"
+	}
+	return "exact"
+}
+
 type SearchOptions struct {
 	RepoIDs  []int64
 	Keyword  string
 	Language string
 	Filename string
 
-	IsKeywordFuzzy bool
+	Mode CodeSearchMode
 
 	db.Paginator
 }

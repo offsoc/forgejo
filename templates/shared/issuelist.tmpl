@@ -45,7 +45,7 @@
 						{{if .NumComments}}
 						<div class="text grey">
 							<a class="tw-no-underline muted flex-text-block" href="{{if .Link}}{{.Link}}{{else}}{{$.Link}}/{{.Index}}{{end}}">
-								{{svg "octicon-comment" 16}}{{.NumComments}}
+								{{svg "octicon-comment-discussion" 16}}{{.NumComments}}
 							</a>
 						</div>
 						{{end}}
@@ -144,6 +144,11 @@
 					{{end}}
 				</div>
 			</div>
+		</div>
+	{{else}}
+		<div class="tw-text-center tw-p-8">
+			<h3 class="tw-my-4">{{ctx.Locale.Tr "repo.issues.filter_no_results"}}</h3>
+			<p class="tw-text-placeholder-text">{{ctx.Locale.Tr "repo.issues.filter_no_results_placeholder"}}</p>
 		</div>
 	{{end}}
 	{{if .IssueIndexerUnavailable}}

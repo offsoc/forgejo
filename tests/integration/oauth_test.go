@@ -5,7 +5,6 @@ package integration
 
 import (
 	"bytes"
-	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
@@ -518,7 +517,7 @@ func TestSignInOAuthCallbackSignIn(t *testing.T) {
 		LoginSource: gitlab.ID,
 		LoginName:   userGitLabUserID,
 	}
-	defer createUser(context.Background(), t, userGitLab)()
+	defer createUser(t.Context(), t, userGitLab)()
 
 	//
 	// A request for user information sent to Goth will return a
@@ -556,7 +555,7 @@ func TestSignInOAuthCallbackWithoutPKCEWhenUnsupported(t *testing.T) {
 		LoginSource: gitlab.ID,
 		LoginName:   userGitLabUserID,
 	}
-	defer createUser(context.Background(), t, userGitLab)()
+	defer createUser(t.Context(), t, userGitLab)()
 
 	// initial redirection (to generate the code_challenge)
 	session := emptyTestSession(t)
@@ -598,7 +597,7 @@ func TestSignInOAuthCallbackPKCE(t *testing.T) {
 			LoginSource: authSource.ID,
 			LoginName:   userID,
 		}
-		defer createUser(context.Background(), t, user)()
+		defer createUser(t.Context(), t, user)()
 
 		// initial redirection (to generate the code_challenge)
 		session := emptyTestSession(t)
@@ -656,7 +655,7 @@ func TestSignInOAuthCallbackRedirectToEscaping(t *testing.T) {
 		LoginSource: gitlab.ID,
 		LoginName:   userGitLabUserID,
 	}
-	defer createUser(context.Background(), t, userGitLab)()
+	defer createUser(t.Context(), t, userGitLab)()
 
 	//
 	// A request for user information sent to Goth will return a
@@ -731,7 +730,7 @@ func TestSignInOauthCallbackSyncSSHKeys(t *testing.T) {
 		LoginName:   userID,
 		IsActive:    true,
 	}
-	defer createUser(context.Background(), t, user)()
+	defer createUser(t.Context(), t, user)()
 
 	for _, tt := range []struct {
 		name          string

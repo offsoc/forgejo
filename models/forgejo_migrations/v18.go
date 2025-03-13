@@ -14,5 +14,5 @@ type FollowingRepo struct {
 }
 
 func CreateFollowingRepoTable(x *xorm.Engine) error {
-	return x.Sync(new(FederatedUser))
+	return x.Sync(new(FollowingRepo))
 }

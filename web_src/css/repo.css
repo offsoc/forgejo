@@ -759,7 +759,7 @@ td .commit-summary {
 
 .repository.view.issue .comment-list .timeline-item,
 .repository.view.issue .comment-list .timeline-item-group {
-  padding: 16px 0;
+  padding: 0.65rem 0;
 }
 
 .repository.view.issue .comment-list .timeline-item-group .timeline-item {
@@ -840,6 +840,18 @@ td .commit-summary {
 .repository.view.issue .comment-list .timeline-item.commits-list .ui.avatar,
 .repository.view.issue .comment-list .timeline-item.event .ui.avatar {
   margin-right: 0.25em;
+}
+
+.repository.view.issue .comment-list .timeline-item .aggregated-actions .badge {
+  width: 20px;
+  height: 20px;
+  margin-top: 5px;
+  padding: 12px;
+}
+
+.repository.view.issue .comment-list .timeline-item .aggregated-actions .badge .svg {
+  width: 20px;
+  height: 20px;
 }
 
 .singular-commit {

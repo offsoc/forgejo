@@ -5,7 +5,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -24,6 +23,7 @@ import (
 	repo_module "code.gitea.io/gitea/modules/repository"
 	"code.gitea.io/gitea/modules/test"
 	issue_service "code.gitea.io/gitea/services/issue"
+	"code.gitea.io/gitea/services/mailer"
 	repo_service "code.gitea.io/gitea/services/repository"
 	files_service "code.gitea.io/gitea/services/repository/files"
 	"code.gitea.io/gitea/tests"
@@ -179,7 +179,7 @@ func TestPullView_ResolveInvalidatedReviewComment(t *testing.T) {
 		// (to invalidate it properly, one should push a commit which should trigger this logic,
 		// in the meantime, use this quick-and-dirty trick)
 		comment := loadComment(t, commentID)
-		require.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
+		require.NoError(t, issues_model.UpdateCommentInvalidate(t.Context(), &issues_model.Comment{
 			ID:          comment.ID,
 			Invalidated: true,
 		}))
@@ -241,7 +241,7 @@ func TestPullView_ResolveInvalidatedReviewComment(t *testing.T) {
 			// (to invalidate it properly, one should push a commit which should trigger this logic,
 			// in the meantime, use this quick-and-dirty trick)
 			comment := loadComment(t, commentID)
-			require.NoError(t, issues_model.UpdateCommentInvalidate(context.Background(), &issues_model.Comment{
+			require.NoError(t, issues_model.UpdateCommentInvalidate(t.Context(), &issues_model.Comment{
 				ID:          comment.ID,
 				Invalidated: true,
 			}))
@@ -649,4 +649,116 @@ func getUserNotificationCount(t *testing.T, session *TestSession, csrf string) s
 	resp := testNofiticationCount(t, session, csrf, http.StatusOK)
 	doc := NewHTMLParser(t, resp.Body)
 	return doc.Find(`.notification_count`).Text()
+}
+
+func TestPullRequestReplyMail(t *testing.T) {
+	defer tests.AddFixtures("tests/integration/fixtures/TestPullRequestReplyMail/")()
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	session := loginUser(t, user.Name)
+
+	t.Run("Reply to pending review comment", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		called := false
+		defer test.MockVariableValue(&mailer.SendAsync, func(...*mailer.Message) {
+			called = true
+		})()
+
+		review := unittest.AssertExistsAndLoadBean(t, &issues_model.Review{ID: 1002}, "type = 0")
+
+		req := NewRequestWithValues(t, "POST", "/user2/repo1/pulls/2/files/reviews/comments", map[string]string{
+			"_csrf":   GetCSRF(t, session, "/user2/repo1/pulls/2"),
+			"origin":  "diff",
+			"content": "Just a comment!",
+			"side":    "proposed",
+			"line":    "4",
+			"path":    "README.md",
+			"reply":   strconv.FormatInt(review.ID, 10),
+		})
+		session.MakeRequest(t, req, http.StatusOK)
+
+		assert.False(t, called)
+		unittest.AssertExistsIf(t, true, &issues_model.Comment{Content: "Just a comment!", ReviewID: review.ID, IssueID: 2})
+	})
+
+	t.Run("Start a review", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		called := false
+		defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+			called = true
+		})()
+
+		req := NewRequestWithValues(t, "POST", "/user2/repo1/pulls/2/files/reviews/comments", map[string]string{
+			"_csrf":   GetCSRF(t, session, "/user2/repo1/pulls/2"),
+			"origin":  "diff",
+			"content": "Notification time 2!",
+			"side":    "proposed",
+			"line":    "2",
+			"path":    "README.md",
+		})
+		session.MakeRequest(t, req, http.StatusOK)
+
+		assert.False(t, called)
+		unittest.AssertExistsIf(t, true, &issues_model.Comment{Content: "Notification time 2!", IssueID: 2})
+	})
+
+	t.Run("Create a single comment", func(t *testing.T) {
+		t.Run("As a reply", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			called := false
+			defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+				assert.Len(t, msgs, 2)
+				assert.Equal(t, "user1@example.com", msgs[0].To)
+				assert.EqualValues(t, "Re: [user2/repo1] issue2 (PR #2)", msgs[0].Subject)
+				assert.Contains(t, msgs[0].Body, "Notification time!")
+				called = true
+			})()
+
+			review := unittest.AssertExistsAndLoadBean(t, &issues_model.Review{ID: 1001, Type: issues_model.ReviewTypeComment})
+
+			req := NewRequestWithValues(t, "POST", "/user2/repo1/pulls/2/files/reviews/comments", map[string]string{
+				"_csrf":   GetCSRF(t, session, "/user2/repo1/pulls/2"),
+				"origin":  "diff",
+				"content": "Notification time!",
+				"side":    "proposed",
+				"line":    "3",
+				"path":    "README.md",
+				"reply":   strconv.FormatInt(review.ID, 10),
+			})
+			session.MakeRequest(t, req, http.StatusOK)
+
+			assert.True(t, called)
+			unittest.AssertExistsIf(t, true, &issues_model.Comment{Content: "Notification time!", ReviewID: review.ID, IssueID: 2})
+		})
+		t.Run("On a new line", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			called := false
+			defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
+				assert.Len(t, msgs, 2)
+				assert.Equal(t, "user1@example.com", msgs[0].To)
+				assert.EqualValues(t, "Re: [user2/repo1] issue2 (PR #2)", msgs[0].Subject)
+				assert.Contains(t, msgs[0].Body, "Notification time 2!")
+				called = true
+			})()
+
+			req := NewRequestWithValues(t, "POST", "/user2/repo1/pulls/2/files/reviews/comments", map[string]string{
+				"_csrf":         GetCSRF(t, session, "/user2/repo1/pulls/2"),
+				"origin":        "diff",
+				"content":       "Notification time 2!",
+				"side":          "proposed",
+				"line":          "5",
+				"path":          "README.md",
+				"single_review": "true",
+			})
+			session.MakeRequest(t, req, http.StatusOK)
+
+			assert.True(t, called)
+			unittest.AssertExistsIf(t, true, &issues_model.Comment{Content: "Notification time 2!", IssueID: 2})
+		})
+	})
 }

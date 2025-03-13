@@ -6,8 +6,6 @@ package shared
 import (
 	"net/http"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/modules/log"
 	"code.gitea.io/gitea/modules/setting"
 	"code.gitea.io/gitea/routers/common"
@@ -49,10 +47,6 @@ func buildAuthGroup() *auth.Group {
 	)
 	if setting.Service.EnableReverseProxyAuthAPI {
 		group.Add(&auth.ReverseProxy{})
-	}
-
-	if setting.IsWindows && auth_model.IsSSPIEnabled(db.DefaultContext) {
-		group.Add(&auth.SSPI{}) // it MUST be the last, see the comment of SSPI
 	}
 
 	return group

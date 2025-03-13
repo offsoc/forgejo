@@ -1,11 +1,19 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"one": "mesclou %[1]d commit de <code>%[2]s</code> em <code>%[3]s</code> %[4]s",
-		"other": "mesclou %[1]d commits de <code>%[2]s</code> em <code>%[3]s</code> %[4]s"
-	},
-	"repo.pulls.title_desc": {
-		"one": "quer mesclar %[1]d commit de <code>%[2]s</code> em <code id=\"%[4]s\">%[3]s</code>",
-		"other": "quer mesclar %[1]d commits de <code>%[2]s</code> em <code id=\"%[4]s\">%[3]s</code>"
-	},
-	"search.milestone_kind": "Pesquisar marcos..."
+    "repo.pulls.merged_title_desc": {
+        "one": "mesclou %[1]d commit de <code>%[2]s</code> em <code>%[3]s</code> %[4]s",
+        "many": "mesclou %[1]d commits de <code>%[2]s</code> em <code>%[3]s</code> %[4]s",
+        "other": ""
+    },
+    "repo.pulls.title_desc": {
+        "one": "quer mesclar %[1]d commit de <code>%[2]s</code> em <code id=\"%[4]s\">%[3]s</code>",
+        "many": "quer mesclar %[1]d commits de <code>%[2]s</code> em <code id=\"%[4]s\">%[3]s</code>",
+        "other": ""
+    },
+    "search.milestone_kind": "Pesquisar marcos...",
+    "home.welcome.no_activity": "Sem atividade",
+    "home.welcome.activity_hint": "Ainda não tem nada no seu feed. Suas ações e atividade dos seus repositórios vigiados aparecerão aqui.",
+    "home.explore_repos": "Explorar repositórios",
+    "home.explore_users": "Explorar usuários",
+    "home.explore_orgs": "Explorar organizações",
+    "incorrect_root_url": "Esta instância do Forgejo está configurada para o endereço \"%s\". Você está atualmente vendo o Forgejo através de uma URL diferente, o que pode causar erros em algumas partes da aplicação. A URL oficial é controlada pela administração do Forgejo através da configuração ROOT_URL no arquivo app.ini."
 }

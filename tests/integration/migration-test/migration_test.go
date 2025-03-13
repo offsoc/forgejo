@@ -5,7 +5,6 @@ package migrations
 
 import (
 	"compress/gzip"
-	"context"
 	"database/sql"
 	"fmt"
 	"io"
@@ -87,7 +86,7 @@ func initMigrationTest(t *testing.T) func() {
 		}
 	}
 
-	require.NoError(t, git.InitFull(context.Background()))
+	require.NoError(t, git.InitFull(t.Context()))
 	setting.LoadDBSetting()
 	setting.InitLoggersForTest()
 	return deferFn
@@ -279,13 +278,13 @@ func doMigrationTest(t *testing.T, version string) {
 
 	setting.InitSQLLoggersForCli(log.INFO)
 
-	err := db.InitEngineWithMigration(context.Background(), wrappedMigrate)
+	err := db.InitEngineWithMigration(t.Context(), wrappedMigrate)
 	require.NoError(t, err)
 	currentEngine.Close()
 
 	beans, _ := db.NamesToBean()
 
-	err = db.InitEngineWithMigration(context.Background(), func(x *xorm.Engine) error {
+	err = db.InitEngineWithMigration(t.Context(), func(x *xorm.Engine) error {
 		currentEngine = x
 		return migrate_base.RecreateTables(beans...)(x)
 	})
@@ -293,7 +292,7 @@ func doMigrationTest(t *testing.T, version string) {
 	currentEngine.Close()
 
 	// We do this a second time to ensure that there is not a problem with retained indices
-	err = db.InitEngineWithMigration(context.Background(), func(x *xorm.Engine) error {
+	err = db.InitEngineWithMigration(t.Context(), func(x *xorm.Engine) error {
 		currentEngine = x
 		return migrate_base.RecreateTables(beans...)(x)
 	})

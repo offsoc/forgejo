@@ -347,7 +347,7 @@ func authSourcePayloadGitHubCustom(name string) map[string]string {
 }
 
 func createRemoteAuthSource(t *testing.T, name, url, matchingSource string) *auth.Source {
-	require.NoError(t, auth.CreateSource(context.Background(), &auth.Source{
+	require.NoError(t, auth.CreateSource(t.Context(), &auth.Source{
 		Type:     auth.Remote,
 		Name:     name,
 		IsActive: true,
@@ -421,7 +421,15 @@ var tokenCounter int64
 // but without the "scope_" prefix.
 func getTokenForLoggedInUser(t testing.TB, session *TestSession, scopes ...auth.AccessTokenScope) string {
 	t.Helper()
-	var token string
+	accessTokenName := fmt.Sprintf("api-testing-token-%d", atomic.AddInt64(&tokenCounter, 1))
+	createApplicationSettingsToken(t, session, accessTokenName, scopes...)
+	token := assertAccessToken(t, session)
+	return token
+}
+
+// createApplicationSettingsToken creates a token with given name and scopes for the currently logged in user.
+// It will assert CSRF token and redirect to the application settings page.
+func createApplicationSettingsToken(t testing.TB, session *TestSession, name string, scopes ...auth.AccessTokenScope) {
 	req := NewRequest(t, "GET", "/user/settings/applications")
 	resp := session.MakeRequest(t, req, http.StatusOK)
 	var csrf string
@@ -439,7 +447,7 @@ func getTokenForLoggedInUser(t testing.TB, session *TestSession, scopes ...auth.
 	assert.NotEmpty(t, csrf)
 	urlValues := url.Values{}
 	urlValues.Add("_csrf", csrf)
-	urlValues.Add("name", fmt.Sprintf("api-testing-token-%d", atomic.AddInt64(&tokenCounter, 1)))
+	urlValues.Add("name", name)
 	for _, scope := range scopes {
 		urlValues.Add("scope", string(scope))
 	}
@@ -458,11 +466,15 @@ func getTokenForLoggedInUser(t testing.TB, session *TestSession, scopes ...auth.
 			}
 		}
 	}
+}
 
-	req = NewRequest(t, "GET", "/user/settings/applications")
-	resp = session.MakeRequest(t, req, http.StatusOK)
+// assertAccessToken retrieves a token from "/user/settings/applications" and returns it.
+// It will also assert that the page contains a token.
+func assertAccessToken(t testing.TB, session *TestSession) string {
+	req := NewRequest(t, "GET", "/user/settings/applications")
+	resp := session.MakeRequest(t, req, http.StatusOK)
 	htmlDoc := NewHTMLParser(t, resp.Body)
-	token = htmlDoc.doc.Find(".ui.info p").Text()
+	token := htmlDoc.doc.Find(".ui.info p").Text()
 	assert.NotEmpty(t, token)
 	return token
 }

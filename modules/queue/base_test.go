@@ -18,7 +18,7 @@ func testQueueBasic(t *testing.T, newFn func(cfg *BaseConfig) (baseQueue, error)
 		q, err := newFn(cfg)
 		require.NoError(t, err)
 
-		ctx := context.Background()
+		ctx := t.Context()
 		_ = q.RemoveAll(ctx)
 		cnt, err := q.Len(ctx)
 		require.NoError(t, err)
@@ -122,7 +122,7 @@ func TestBaseDummy(t *testing.T) {
 	q, err := newBaseDummy(&BaseConfig{}, true)
 	require.NoError(t, err)
 
-	ctx := context.Background()
+	ctx := t.Context()
 	require.NoError(t, q.PushItem(ctx, []byte("foo")))
 
 	cnt, err := q.Len(ctx)

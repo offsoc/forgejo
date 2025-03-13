@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -48,7 +47,7 @@ func TestRemote_MaybePromoteUserSuccess(t *testing.T) {
 		LoginSource: remote.ID,
 		LoginName:   gitlabUserID,
 	}
-	defer createUser(context.Background(), t, userBeforeSignIn)()
+	defer createUser(t.Context(), t, userBeforeSignIn)()
 
 	//
 	// A request for user information sent to Goth will return a
@@ -81,7 +80,7 @@ func TestRemote_MaybePromoteUserSuccess(t *testing.T) {
 func TestRemote_MaybePromoteUserFail(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	ctx := context.Background()
+	ctx := t.Context()
 	//
 	// OAuth2 authentication source GitLab
 	//
@@ -126,7 +125,7 @@ func TestRemote_MaybePromoteUserFail(t *testing.T) {
 			LoginName:   remoteUserID,
 			Email:       "some@example.com",
 		}
-		defer createUser(context.Background(), t, remoteUser)()
+		defer createUser(t.Context(), t, remoteUser)()
 		promoted, reason, err := remote_service.MaybePromoteRemoteUser(ctx, gitlabSource, remoteUserID, "")
 		require.NoError(t, err)
 		assert.False(t, promoted)
@@ -143,7 +142,7 @@ func TestRemote_MaybePromoteUserFail(t *testing.T) {
 			LoginSource: nonexistentloginsource,
 			LoginName:   remoteUserID,
 		}
-		defer createUser(context.Background(), t, remoteUser)()
+		defer createUser(t.Context(), t, remoteUser)()
 		promoted, reason, err := remote_service.MaybePromoteRemoteUser(ctx, gitlabSource, remoteUserID, "")
 		require.NoError(t, err)
 		assert.False(t, promoted)
@@ -159,7 +158,7 @@ func TestRemote_MaybePromoteUserFail(t *testing.T) {
 			LoginSource: gitlabSource.ID,
 			LoginName:   remoteUserID,
 		}
-		defer createUser(context.Background(), t, remoteUser)()
+		defer createUser(t.Context(), t, remoteUser)()
 		promoted, reason, err := remote_service.MaybePromoteRemoteUser(ctx, gitlabSource, remoteUserID, "")
 		require.NoError(t, err)
 		assert.False(t, promoted)
@@ -180,7 +179,7 @@ func TestRemote_MaybePromoteUserFail(t *testing.T) {
 			LoginSource: remoteSource.ID,
 			LoginName:   remoteUserID,
 		}
-		defer createUser(context.Background(), t, remoteUser)()
+		defer createUser(t.Context(), t, remoteUser)()
 		promoted, reason, err := remote_service.MaybePromoteRemoteUser(ctx, unrelatedSource, remoteUserID, remoteEmail)
 		require.NoError(t, err)
 		assert.False(t, promoted)
@@ -197,7 +196,7 @@ func TestRemote_MaybePromoteUserFail(t *testing.T) {
 			LoginSource: remoteSource.ID,
 			LoginName:   remoteUserID,
 		}
-		defer createUser(context.Background(), t, remoteUser)()
+		defer createUser(t.Context(), t, remoteUser)()
 		promoted, reason, err := remote_service.MaybePromoteRemoteUser(ctx, gitlabSource, remoteUserID, remoteEmail)
 		require.NoError(t, err)
 		assert.True(t, promoted)

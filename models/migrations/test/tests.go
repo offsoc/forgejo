@@ -11,7 +11,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -123,9 +122,6 @@ func MainTest(m *testing.M) {
 		os.Exit(1)
 	}
 	giteaBinary := "gitea"
-	if runtime.GOOS == "windows" {
-		giteaBinary += ".exe"
-	}
 	setting.AppPath = path.Join(giteaRoot, giteaBinary)
 	if _, err := os.Stat(setting.AppPath); err != nil {
 		fmt.Printf("Could not find gitea binary at %s\n", setting.AppPath)

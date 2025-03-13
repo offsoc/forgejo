@@ -12,7 +12,7 @@ import (
 )
 
 func Test_getGoroutineLabels(t *testing.T) {
-	pprof.Do(context.Background(), pprof.Labels(), func(ctx context.Context) {
+	pprof.Do(t.Context(), pprof.Labels(), func(ctx context.Context) {
 		currentLabels := getGoroutineLabels()
 		pprof.ForLabels(ctx, func(key, value string) bool {
 			assert.EqualValues(t, value, currentLabels[key])

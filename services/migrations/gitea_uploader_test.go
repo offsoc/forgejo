@@ -5,7 +5,6 @@
 package migrations
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -40,7 +39,7 @@ func TestGiteaUploadRepo(t *testing.T) {
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
 	var (
-		ctx        = context.Background()
+		ctx        = t.Context()
 		downloader = NewGithubDownloaderV3(ctx, "https://github.com", "", "", "", "go-xorm", "builder")
 		repoName   = "builder-" + time.Now().Format("2006-01-02-15-04-05")
 		uploader   = NewGiteaLocalUploader(graceful.GetManager().HammerContext(), user, user.Name, repoName)
@@ -133,7 +132,7 @@ func TestGiteaUploadRemapLocalUser(t *testing.T) {
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 
 	repoName := "migrated"
-	uploader := NewGiteaLocalUploader(context.Background(), doer, doer.Name, repoName)
+	uploader := NewGiteaLocalUploader(t.Context(), doer, doer.Name, repoName)
 	// call remapLocalUser
 	uploader.sameApp = true
 
@@ -182,7 +181,7 @@ func TestGiteaUploadRemapExternalUser(t *testing.T) {
 	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
 	repoName := "migrated"
-	uploader := NewGiteaLocalUploader(context.Background(), doer, doer.Name, repoName)
+	uploader := NewGiteaLocalUploader(t.Context(), doer, doer.Name, repoName)
 	uploader.gitServiceType = structs.GiteaService
 	// call remapExternalUser
 	uploader.sameApp = false
@@ -301,7 +300,7 @@ func TestGiteaUploadUpdateGitForPullRequest(t *testing.T) {
 	require.NoError(t, err)
 
 	toRepoName := "migrated"
-	uploader := NewGiteaLocalUploader(context.Background(), fromRepoOwner, fromRepoOwner.Name, toRepoName)
+	uploader := NewGiteaLocalUploader(t.Context(), fromRepoOwner, fromRepoOwner.Name, toRepoName)
 	uploader.gitServiceType = structs.GiteaService
 	require.NoError(t, uploader.CreateRepo(&base.Repository{
 		Description: "description",

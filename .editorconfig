@@ -26,3 +26,8 @@ insert_final_newline = false
 
 [options/locale/locale_*.ini]
 insert_final_newline = false
+
+# Weblate JSON output defaults to four spaces
+[options/locale_next/locale_*.json]
+indent_style = space
+indent_size = 4

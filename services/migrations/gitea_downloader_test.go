@@ -4,7 +4,6 @@
 package migrations
 
 import (
-	"context"
 	"os"
 	"sort"
 	"testing"
@@ -24,7 +23,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	server := unittest.NewMockWebServer(t, "https://gitea.com", fixturePath, giteaToken != "")
 	defer server.Close()
 
-	downloader, err := NewGiteaDownloader(context.Background(), server.URL, "gitea/test_repo", "", "", giteaToken)
+	downloader, err := NewGiteaDownloader(t.Context(), server.URL, "gitea/test_repo", "", "", giteaToken)
 	if downloader == nil {
 		t.Fatal("NewGitlabDownloader is nil")
 	}

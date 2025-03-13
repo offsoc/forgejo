@@ -1,11 +1,19 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"one": "iekļāva %[1]d iesūtījumu no <code>%[2]s</code> <code>%[3]s</code> %[4]s",
-		"other": "Iekļāva %[1]d iesūtījumus no <code>%[2]s</code> zarā <code>%[3]s</code> %[4]s"
-	},
-	"repo.pulls.title_desc": {
-		"one": "vēlas iekļaut %[1]d iesūtījumu no <code>%[2]s</code> <code id=\"%[4]s\">%[3]s</code>",
-		"other": "vēlas iekļaut %[1]d iesūtījumus no <code>%[2]s</code> zarā <code id=\"%[4]s\">%[3]s</code>"
-	},
-	"search.milestone_kind": "Meklēt atskaites punktus..."
+    "repo.pulls.merged_title_desc": {
+        "zero": "iekļāva %[1]d iesūtījumu no <code>%[2]s</code> <code>%[3]s</code> %[4]s",
+        "one": "Iekļāva %[1]d iesūtījumu no <code>%[2]s</code> zarā <code>%[3]s</code> %[4]s",
+        "other": "Iekļāva %[1]d iesūtījumus no <code>%[2]s</code> zarā <code>%[3]s</code> %[4]s"
+    },
+    "repo.pulls.title_desc": {
+        "zero": "vēlas iekļaut %[1]d iesūtījumu no <code>%[2]s</code> <code id=\"%[4]s\">%[3]s</code>",
+        "one": "vēlas iekļaut %[1]d iesūtījumu no <code>%[2]s</code> zarā <code id=\"%[4]s\">%[3]s</code>",
+        "other": "vēlas iekļaut %[1]d iesūtījumus no <code>%[2]s</code> zarā <code id=\"%[4]s\">%[3]s</code>"
+    },
+    "search.milestone_kind": "Meklēt atskaites punktus...",
+    "home.welcome.no_activity": "Nav darbību",
+    "home.welcome.activity_hint": "Barotnē pagaidām nekā nav. Šeit parādīsies darbības un vēroto glabātavu notikumi.",
+    "home.explore_repos": "Izpētīt glabātavas",
+    "home.explore_users": "Izpētīt lietotājus",
+    "home.explore_orgs": "Izpētīt apvienības",
+    "incorrect_root_url": "Šis Forgejo serveris ir konfigurēts darboties \"%s\". Pašlaik Forgejo tiek apmeklēta ar atšķirīgu URL, kas var radīt atsevišķu lietotnes daļu salūšanu. Kanonisko URL pārrauga Forgejo pārvaldītāji ar app.ini iestatījumu ROOT_URL."
 }

@@ -5,7 +5,6 @@
 package integration
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -320,7 +319,7 @@ func TestAPIEditOtherWikiPage(t *testing.T) {
 	testCreateWiki(http.StatusForbidden)
 
 	// Update the repo settings for user2's repo to enable globally writeable wiki
-	ctx := context.Background()
+	ctx := t.Context()
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	var units []repo_model.RepoUnit
 	units = append(units, repo_model.RepoUnit{

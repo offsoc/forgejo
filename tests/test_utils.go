@@ -66,9 +66,6 @@ func InitTest(requireGitea bool) {
 	setting.CustomPath = filepath.Join(setting.AppWorkPath, "custom")
 	if requireGitea {
 		giteaBinary := "gitea"
-		if setting.IsWindows {
-			giteaBinary += ".exe"
-		}
 		setting.AppPath = path.Join(giteaRoot, giteaBinary)
 		if _, err := os.Stat(setting.AppPath); err != nil {
 			exitf("Could not find gitea binary at %s", setting.AppPath)
@@ -267,9 +264,7 @@ func cancelProcesses(t testing.TB, delay time.Duration) {
 }
 
 func PrepareGitRepoDirectory(t testing.TB) {
-	var err error
-	setting.RepoRootPath, err = os.MkdirTemp(t.TempDir(), "forgejo-repo-rooth")
-	require.NoError(t, err)
+	setting.RepoRootPath = t.TempDir()
 	require.NoError(t, unittest.CopyDir(preparedDir, setting.RepoRootPath))
 }
 
