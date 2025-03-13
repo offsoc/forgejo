@@ -1,13 +1,119 @@
 {{template "repo/settings/layout_head" (dict "ctxData" . "pageClass" "repository settings options")}}
 <div class="user-main-content twelve wide column">
-	<form class="ui form" method="post" action="{{.RepoLink}}/settings/units">
+	<form class="ui form units-form" method="post" action="{{.RepoLink}}/settings/units">
 		{{.CsrfTokenHtml}}
-		{{template "repo/settings/units/overview" .}}
-		{{template "repo/settings/units/issues" .}}
-		{{if not .IsMirror}}
-			{{template "repo/settings/units/pulls" .}}
-		{{end}}
-		{{template "repo/settings/units/wiki" .}}
+		<h4 class="ui top attached header" id="overview">
+			{{ctx.Locale.Tr "repo.settings.units.units"}}
+		</h4>
+		<div class="ui attached segment">
+			{{$isCodeEnabled := .Repository.UnitEnabled $.Context $.UnitTypeCode}}
+			{{$isCodeGlobalDisabled := .UnitTypeCode.UnitGlobalDisabled}}
+			<div class="inline field">
+				<div class="ui checkbox{{if $isCodeGlobalDisabled}} disabled{{end}}"{{if $isCodeGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+					<label>
+						<b>{{ctx.Locale.Tr "repo.code"}}</b>
+						<input class="enable-system" name="enable_code" type="checkbox"{{if $isCodeEnabled}} checked{{end}}>
+						{{ctx.Locale.Tr "repo.code.desc"}}
+					</label>
+				</div>
+			</div>
+
+			{{$isIssuesEnabled := or (.Repository.UnitEnabled $.Context $.UnitTypeIssues) (.Repository.UnitEnabled $.Context $.UnitTypeExternalTracker)}}
+			{{$isIssuesGlobalDisabled := .UnitTypeIssues.UnitGlobalDisabled}}
+			{{$isExternalTrackerGlobalDisabled := .UnitTypeExternalTracker.UnitGlobalDisabled}}
+			{{$isIssuesAndExternalGlobalDisabled := and $isIssuesGlobalDisabled $isExternalTrackerGlobalDisabled}}
+			<div class="inline field">
+				<div class="ui checkbox{{if $isIssuesAndExternalGlobalDisabled}} disabled{{end}}"{{if $isIssuesAndExternalGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+					<label>
+						<b>{{ctx.Locale.Tr "repo.issues"}}</b>
+						<input class="enable-system" name="enable_issues" type="checkbox" data-target="#issue_box" {{if $isIssuesEnabled}}checked{{end}}>
+						{{ctx.Locale.Tr "repo.settings.issues_desc"}}
+					</label>
+				</div>
+			</div>
+
+			{{$pullRequestEnabled := .Repository.UnitEnabled $.Context $.UnitTypePullRequests}}
+			{{$pullRequestGlobalDisabled := .UnitTypePullRequests.UnitGlobalDisabled}}
+			<div class="inline field">
+				<div class="ui checkbox{{if $pullRequestGlobalDisabled}} disabled{{end}}"{{if $pullRequestGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+					<label>
+						<b>{{ctx.Locale.Tr "repo.pulls"}}</b>
+						<input class="enable-system" name="enable_pulls" type="checkbox" data-target="#pull_box" {{if $pullRequestEnabled}}checked{{end}}>
+						{{ctx.Locale.Tr "repo.settings.pulls_desc"}}
+					</label>
+				</div>
+			</div>
+
+			{{$isProjectsEnabled := .Repository.UnitEnabled $.Context $.UnitTypeProjects}}
+			{{$isProjectsGlobalDisabled := .UnitTypeProjects.UnitGlobalDisabled}}
+			<div class="inline field">
+				<div class="ui checkbox{{if $isProjectsGlobalDisabled}} disabled{{end}}"{{if $isProjectsGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+					<label>
+						<b>{{ctx.Locale.Tr "repo.projects"}}</b>
+						<input class="enable-system" name="enable_projects" type="checkbox" {{if $isProjectsEnabled}}checked{{end}}>
+						{{ctx.Locale.Tr "repo.settings.projects_desc"}}
+					</label>
+				</div>
+			</div>
+
+			{{$isReleasesEnabled := .Repository.UnitEnabled $.Context $.UnitTypeReleases}}
+			{{$isReleasesGlobalDisabled := .UnitTypeReleases.UnitGlobalDisabled}}
+			<div class="inline field">
+				<div class="ui checkbox{{if $isReleasesGlobalDisabled}} disabled{{end}}"{{if $isReleasesGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+					<label>
+						<b>{{ctx.Locale.Tr "repo.releases"}}</b>
+						<input class="enable-system" name="enable_releases" type="checkbox" {{if $isReleasesEnabled}}checked{{end}}>
+						{{ctx.Locale.Tr "repo.settings.releases_desc"}}
+					</label>
+				</div>
+			</div>
+
+			{{$isPackagesEnabled := .Repository.UnitEnabled $.Context $.UnitTypePackages}}
+			{{$isPackagesGlobalDisabled := .UnitTypePackages.UnitGlobalDisabled}}
+			<div class="inline field">
+				<div class="ui checkbox{{if $isPackagesGlobalDisabled}} disabled{{end}}"{{if $isPackagesGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+					<label>
+						<b>{{ctx.Locale.Tr "repo.packages"}}</b>
+					  <input class="enable-system" name="enable_packages" type="checkbox" {{if $isPackagesEnabled}}checked{{end}}>
+					  {{ctx.Locale.Tr "repo.settings.packages_desc"}}
+					</label>
+				</div>
+			</div>
+
+			{{$isWikiEnabled := or (.Repository.UnitEnabled $.Context $.UnitTypeWiki) (.Repository.UnitEnabled $.Context $.UnitTypeExternalWiki)}}
+			{{$isWikiGlobalDisabled := .UnitTypeWiki.UnitGlobalDisabled}}
+			{{$isExternalWikiGlobalDisabled := .UnitTypeExternalWiki.UnitGlobalDisabled}}
+			{{$isBothWikiGlobalDisabled := and $isWikiGlobalDisabled $isExternalWikiGlobalDisabled}}
+			<div class="inline field">
+				<div class="ui checkbox{{if $isBothWikiGlobalDisabled}} disabled{{end}}"{{if $isBothWikiGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+					<label>
+						<b>{{ctx.Locale.Tr "repo.wiki"}}</b>
+					  <input class="enable-system" name="enable_wiki" type="checkbox" data-target="#wiki_box" {{if $isWikiEnabled}}checked{{end}}>
+					  {{ctx.Locale.Tr "repo.settings.wiki_desc"}}
+					</label>
+				</div>
+			</div>
+
+			{{if .EnableActions}}
+				{{$isActionsEnabled := .Repository.UnitEnabled $.Context $.UnitTypeActions}}
+				{{$isActionsGlobalDisabled := .UnitTypeActions.UnitGlobalDisabled}}
+				<div class="inline field">
+					<div class="ui checkbox{{if $isActionsGlobalDisabled}} disabled{{end}}"{{if $isActionsGlobalDisabled}} data-tooltip-content="{{ctx.Locale.Tr "repo.unit_disabled"}}"{{end}}>
+						<label>
+							<b>{{ctx.Locale.Tr "actions.actions"}}</b>
+						  <input class="enable-system" name="enable_actions" type="checkbox" {{if $isActionsEnabled}}checked{{end}}>
+						  {{ctx.Locale.Tr "repo.settings.actions_desc"}}
+						</label>
+					</div>
+				</div>
+			{{end}}
+
+			<div class="divider"></div>
+
+			<div class="field">
+				<button class="ui primary button">{{ctx.Locale.Tr "repo.settings.update_settings"}}</button>
+			</div>
+		</div>
 	</form>
 </div>
 {{template "repo/settings/layout_footer" .}}

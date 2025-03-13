@@ -4,23 +4,57 @@
 		<a class="{{if .PageIsSettingsOptions}}active {{end}}item" href="{{.RepoLink}}/settings">
 			{{ctx.Locale.Tr "repo.settings.options"}}
 		</a>
-		<details class="item toggleable-item" {{if .PageIsRepoSettingsUnits}}open{{end}}>
-			<summary {{if .PageIsRepoSettingsUnits}}class="active"{{end}}>{{ctx.Locale.Tr "repo.settings.units.units"}}</summary>
+		<a class="{{if .PageIsRepoSettingsUnits}}active {{end}}item" href="{{.RepoLink}}/settings/units">
+			{{ctx.Locale.Tr "repo.settings.units.units"}}
+		</a>
+		{{if .Repository.UnitEnabled $.Context $.UnitTypeCode}}
+		{{ $RepositoryIsCodeSubpage := or .PageIsSettingsBranches .PageIsSettingsTags .PageIsSettingsGitHooks .PageIsSettingsKeys .PageIsSettingsLFS}}
+		<details class="item toggleable-item" {{if $RepositoryIsCodeSubpage}}open{{end}}>
+			<summary {{if $RepositoryIsCodeSubpage}}class="active"{{end}}>{{ctx.Locale.Tr "repo.code"}}</summary>
 			<div class="menu">
-				<a class="item" href="{{.RepoLink}}/settings/units#overview">
-					{{ctx.Locale.Tr "repo.settings.units.overview"}}
+				{{if not .Repository.IsEmpty}}
+					<a class="{{if .PageIsSettingsBranches}}active {{end}}item" href="{{.RepoLink}}/settings/branches">
+						{{ctx.Locale.Tr "repo.settings.branches"}}
+					</a>
+				{{end}}
+				<a class="{{if .PageIsSettingsTags}}active {{end}}item" href="{{.RepoLink}}/settings/tags">
+					{{ctx.Locale.Tr "repo.settings.tags"}}
 				</a>
-				<a class="item" href="{{.RepoLink}}/settings/units#issues">
-					{{ctx.Locale.Tr "repo.issues"}}
+				{{if .SignedUser.CanEditGitHook}}
+					<a class="{{if .PageIsSettingsGitHooks}}active {{end}}item" href="{{.RepoLink}}/settings/hooks/git">
+						{{ctx.Locale.Tr "repo.settings.githooks"}}
+					</a>
+				{{end}}
+				<a class="{{if .PageIsSettingsKeys}}active {{end}}item" href="{{.RepoLink}}/settings/keys">
+					{{ctx.Locale.Tr "repo.settings.deploy_keys"}}
 				</a>
-				<a class="item" href="{{.RepoLink}}/settings/units#pulls">
-					{{ctx.Locale.Tr "repo.pulls"}}
-				</a>
-				<a class="item" href="{{.RepoLink}}/settings/units#wiki">
-					{{ctx.Locale.Tr "repo.wiki"}}
-				</a>
+				{{if .LFSStartServer}}
+					<a class="{{if .PageIsSettingsLFS}}active {{end}}item" href="{{.RepoLink}}/settings/lfs">
+						{{ctx.Locale.Tr "repo.settings.lfs"}}
+					</a>
+				{{end}}
 			</div>
 		</details>
+		{{end}}
+		{{if and (.Repository.UnitEnabled $.Context $.UnitTypeIssues) (not .UnitTypeIssues.UnitGlobalDisabled) (not .UnitTypeExternalTracker.UnitGlobalDisabled)}}
+		<a class="{{if .PageIsSettingsIssues}}active {{end}}item" href="{{.RepoLink}}/settings/issues">
+			{{ctx.Locale.Tr "repo.issues"}}
+		</a>
+		{{end}}
+		{{if and (.Repository.UnitEnabled $.Context $.UnitTypePullRequests) (not .UnitTypePullRequests.UnitGlobalDisabled)}}
+		<a class="{{if .PageIsSettingsPulls}}active {{end}}item" href="{{.RepoLink}}/settings/pulls">
+			{{ctx.Locale.Tr "repo.pulls"}}
+		</a>
+		{{end}}
+		{{$isWikiEnabled := or (.Repository.UnitEnabled $.Context $.UnitTypeWiki) (.Repository.UnitEnabled $.Context $.UnitTypeExternalWiki)}}
+		{{$isWikiGlobalDisabled := .UnitTypeWiki.UnitGlobalDisabled}}
+		{{$isExternalWikiGlobalDisabled := .UnitTypeExternalWiki.UnitGlobalDisabled}}
+		{{$isBothWikiGlobalDisabled := and $isWikiGlobalDisabled $isExternalWikiGlobalDisabled}}
+		{{if and ($isWikiEnabled) (not $isBothWikiGlobalDisabled)}}
+		<a class="{{if .PageIsSettingsWiki}}active {{end}}item" href="{{.RepoLink}}/settings/wiki">
+			{{ctx.Locale.Tr "repo.wiki"}}
+		</a>
+		{{end}}
 		<a class="{{if .PageIsSettingsCollaboration}}active {{end}}item" href="{{.RepoLink}}/settings/collaboration">
 			{{ctx.Locale.Tr "repo.settings.collaboration"}}
 		</a>
@@ -28,29 +62,6 @@
 			<a class="{{if .PageIsSettingsHooks}}active {{end}}item" href="{{.RepoLink}}/settings/hooks">
 				{{ctx.Locale.Tr "repo.settings.hooks"}}
 			</a>
-		{{end}}
-		{{if .Repository.UnitEnabled $.Context $.UnitTypeCode}}
-			{{if not .Repository.IsEmpty}}
-				<a class="{{if .PageIsSettingsBranches}}active {{end}}item" href="{{.RepoLink}}/settings/branches">
-					{{ctx.Locale.Tr "repo.settings.branches"}}
-				</a>
-			{{end}}
-			<a class="{{if .PageIsSettingsTags}}active {{end}}item" href="{{.RepoLink}}/settings/tags">
-				{{ctx.Locale.Tr "repo.settings.tags"}}
-			</a>
-			{{if .SignedUser.CanEditGitHook}}
-				<a class="{{if .PageIsSettingsGitHooks}}active {{end}}item" href="{{.RepoLink}}/settings/hooks/git">
-					{{ctx.Locale.Tr "repo.settings.githooks"}}
-				</a>
-			{{end}}
-			<a class="{{if .PageIsSettingsKeys}}active {{end}}item" href="{{.RepoLink}}/settings/keys">
-				{{ctx.Locale.Tr "repo.settings.deploy_keys"}}
-			</a>
-			{{if .LFSStartServer}}
-				<a class="{{if .PageIsSettingsLFS}}active {{end}}item" href="{{.RepoLink}}/settings/lfs">
-					{{ctx.Locale.Tr "repo.settings.lfs"}}
-				</a>
-			{{end}}
 		{{end}}
 		{{if and .EnableActions (not .UnitActionsGlobalDisabled) (.Permission.CanRead $.UnitTypeActions)}}
 		<details class="item toggleable-item" {{if or .PageIsSharedSettingsRunners .PageIsSharedSettingsSecrets .PageIsSharedSettingsVariables}}open{{end}}>

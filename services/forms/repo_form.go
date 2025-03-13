@@ -164,39 +164,50 @@ func (f *RepoSettingForm) Validate(req *http.Request, errs binding.Errors) bindi
 
 // RepoUnitSettingForm form for changing repository unit settings
 type RepoUnitSettingForm struct {
-	EnableCode                            bool
-	EnableWiki                            bool
-	GloballyWriteableWiki                 bool
-	EnableExternalWiki                    bool
-	ExternalWikiURL                       string
-	EnableIssues                          bool
+	EnableCode     bool
+	EnableWiki     bool
+	EnableIssues   bool
+	EnableProjects bool
+	EnableReleases bool
+	EnablePackages bool
+	EnablePulls    bool
+	EnableActions  bool
+}
+
+// RepoIssuesForm form for changing repository issue settings
+type RepoIssuesSettingForm struct {
 	EnableExternalTracker                 bool
 	ExternalTrackerURL                    string
 	TrackerURLFormat                      string
 	TrackerIssueStyle                     string
 	ExternalTrackerRegexpPattern          string
 	EnableCloseIssuesViaCommitInAnyBranch bool
-	EnableProjects                        bool
-	EnableReleases                        bool
-	EnablePackages                        bool
-	EnablePulls                           bool
-	EnableActions                         bool
-	PullsIgnoreWhitespace                 bool
-	PullsAllowMerge                       bool
-	PullsAllowRebase                      bool
-	PullsAllowRebaseMerge                 bool
-	PullsAllowSquash                      bool
-	PullsAllowFastForwardOnly             bool
-	PullsAllowManualMerge                 bool
-	PullsDefaultMergeStyle                string
-	PullsDefaultUpdateStyle               string
-	EnableAutodetectManualMerge           bool
-	PullsAllowRebaseUpdate                bool
-	DefaultDeleteBranchAfterMerge         bool
-	DefaultAllowMaintainerEdit            bool
 	EnableTimetracker                     bool
 	AllowOnlyContributorsToTrackTime      bool
 	EnableIssueDependencies               bool
+}
+
+// RepoPullsSettingForm form for changing repository pull request settings
+type RepoPullsSettingForm struct {
+	PullsIgnoreWhitespace         bool
+	PullsAllowMerge               bool
+	PullsAllowRebase              bool
+	PullsAllowRebaseMerge         bool
+	PullsAllowSquash              bool
+	PullsAllowFastForwardOnly     bool
+	PullsAllowManualMerge         bool
+	PullsDefaultMergeStyle        string
+	PullsDefaultUpdateStyle       string
+	EnableAutodetectManualMerge   bool
+	PullsAllowRebaseUpdate        bool
+	DefaultDeleteBranchAfterMerge bool
+	DefaultAllowMaintainerEdit    bool
+}
+
+type RepoWikiSettingForm struct {
+	GloballyWriteableWiki bool
+	EnableExternalWiki    bool
+	ExternalWikiURL       string
 }
 
 // Validate validates the fields

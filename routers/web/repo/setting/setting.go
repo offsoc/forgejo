@@ -46,6 +46,9 @@ import (
 const (
 	tplSettingsOptions base.TplName = "repo/settings/options"
 	tplSettingsUnits   base.TplName = "repo/settings/units"
+	tplSettingsIssues  base.TplName = "repo/settings/issues"
+	tplSettingsPulls   base.TplName = "repo/settings/pulls"
+	tplSettingsWiki    base.TplName = "repo/settings/wiki"
 	tplCollaboration   base.TplName = "repo/settings/collaboration"
 	tplBranches        base.TplName = "repo/settings/branches"
 	tplGithooks        base.TplName = "repo/settings/githooks"
@@ -108,18 +111,12 @@ func UnitsPost(ctx *context.Context) {
 
 	repo := ctx.Repo.Repository
 
-	var repoChanged bool
 	var units []repo_model.RepoUnit
 	var deleteUnitTypes []unit_model.Type
 
 	// This section doesn't require repo_name/RepoName to be set in the form, don't show it
 	// as an error on the UI for this action
 	ctx.Data["Err_RepoName"] = nil
-
-	if repo.CloseIssuesViaCommitInAnyBranch != form.EnableCloseIssuesViaCommitInAnyBranch {
-		repo.CloseIssuesViaCommitInAnyBranch = form.EnableCloseIssuesViaCommitInAnyBranch
-		repoChanged = true
-	}
 
 	if form.EnableCode && !unit_model.TypeCode.UnitGlobalDisabled() {
 		units = append(units, repo_model.RepoUnit{
@@ -130,35 +127,11 @@ func UnitsPost(ctx *context.Context) {
 		deleteUnitTypes = append(deleteUnitTypes, unit_model.TypeCode)
 	}
 
-	if form.EnableWiki && form.EnableExternalWiki && !unit_model.TypeExternalWiki.UnitGlobalDisabled() {
-		if !validation.IsValidExternalURL(form.ExternalWikiURL) {
-			ctx.Flash.Error(ctx.Tr("repo.settings.external_wiki_url_error"))
-			ctx.Redirect(repo.Link() + "/settings/units")
-			return
-		}
-
+	if form.EnableWiki && !unit_model.TypeExternalWiki.UnitGlobalDisabled() {
 		units = append(units, repo_model.RepoUnit{
 			RepoID: repo.ID,
-			Type:   unit_model.TypeExternalWiki,
-			Config: &repo_model.ExternalWikiConfig{
-				ExternalWikiURL: form.ExternalWikiURL,
-			},
+			Type:   unit_model.TypeWiki,
 		})
-		deleteUnitTypes = append(deleteUnitTypes, unit_model.TypeWiki)
-	} else if form.EnableWiki && !form.EnableExternalWiki && !unit_model.TypeWiki.UnitGlobalDisabled() {
-		var wikiPermissions repo_model.UnitAccessMode
-		if form.GloballyWriteableWiki {
-			wikiPermissions = repo_model.UnitAccessModeWrite
-		} else {
-			wikiPermissions = repo_model.UnitAccessModeRead
-		}
-		units = append(units, repo_model.RepoUnit{
-			RepoID:             repo.ID,
-			Type:               unit_model.TypeWiki,
-			Config:             new(repo_model.UnitConfig),
-			DefaultPermissions: wikiPermissions,
-		})
-		deleteUnitTypes = append(deleteUnitTypes, unit_model.TypeExternalWiki)
 	} else {
 		if !unit_model.TypeExternalWiki.UnitGlobalDisabled() {
 			deleteUnitTypes = append(deleteUnitTypes, unit_model.TypeExternalWiki)
@@ -168,37 +141,10 @@ func UnitsPost(ctx *context.Context) {
 		}
 	}
 
-	if form.EnableIssues && form.EnableExternalTracker && !unit_model.TypeExternalTracker.UnitGlobalDisabled() {
-		if !validation.IsValidExternalURL(form.ExternalTrackerURL) {
-			ctx.Flash.Error(ctx.Tr("repo.settings.external_tracker_url_error"))
-			ctx.Redirect(repo.Link() + "/settings/units")
-			return
-		}
-		if len(form.TrackerURLFormat) != 0 && !validation.IsValidExternalTrackerURLFormat(form.TrackerURLFormat) {
-			ctx.Flash.Error(ctx.Tr("repo.settings.tracker_url_format_error"))
-			ctx.Redirect(repo.Link() + "/settings/units")
-			return
-		}
-		units = append(units, repo_model.RepoUnit{
-			RepoID: repo.ID,
-			Type:   unit_model.TypeExternalTracker,
-			Config: &repo_model.ExternalTrackerConfig{
-				ExternalTrackerURL:           form.ExternalTrackerURL,
-				ExternalTrackerFormat:        form.TrackerURLFormat,
-				ExternalTrackerStyle:         form.TrackerIssueStyle,
-				ExternalTrackerRegexpPattern: form.ExternalTrackerRegexpPattern,
-			},
-		})
-		deleteUnitTypes = append(deleteUnitTypes, unit_model.TypeIssues)
-	} else if form.EnableIssues && !form.EnableExternalTracker && !unit_model.TypeIssues.UnitGlobalDisabled() {
+	if form.EnableIssues && !unit_model.TypeExternalTracker.UnitGlobalDisabled() {
 		units = append(units, repo_model.RepoUnit{
 			RepoID: repo.ID,
 			Type:   unit_model.TypeIssues,
-			Config: &repo_model.IssuesConfig{
-				EnableTimetracker:                form.EnableTimetracker,
-				AllowOnlyContributorsToTrackTime: form.AllowOnlyContributorsToTrackTime,
-				EnableDependencies:               form.EnableIssueDependencies,
-			},
 		})
 		deleteUnitTypes = append(deleteUnitTypes, unit_model.TypeExternalTracker)
 	} else {
@@ -250,21 +196,6 @@ func UnitsPost(ctx *context.Context) {
 		units = append(units, repo_model.RepoUnit{
 			RepoID: repo.ID,
 			Type:   unit_model.TypePullRequests,
-			Config: &repo_model.PullRequestsConfig{
-				IgnoreWhitespaceConflicts:     form.PullsIgnoreWhitespace,
-				AllowMerge:                    form.PullsAllowMerge,
-				AllowRebase:                   form.PullsAllowRebase,
-				AllowRebaseMerge:              form.PullsAllowRebaseMerge,
-				AllowSquash:                   form.PullsAllowSquash,
-				AllowFastForwardOnly:          form.PullsAllowFastForwardOnly,
-				AllowManualMerge:              form.PullsAllowManualMerge,
-				AutodetectManualMerge:         form.EnableAutodetectManualMerge,
-				AllowRebaseUpdate:             form.PullsAllowRebaseUpdate,
-				DefaultDeleteBranchAfterMerge: form.DefaultDeleteBranchAfterMerge,
-				DefaultMergeStyle:             repo_model.MergeStyle(form.PullsDefaultMergeStyle),
-				DefaultUpdateStyle:            repo_model.UpdateStyle(form.PullsDefaultUpdateStyle),
-				DefaultAllowMaintainerEdit:    form.DefaultAllowMaintainerEdit,
-			},
 		})
 	} else if !unit_model.TypePullRequests.UnitGlobalDisabled() {
 		deleteUnitTypes = append(deleteUnitTypes, unit_model.TypePullRequests)
@@ -280,16 +211,184 @@ func UnitsPost(ctx *context.Context) {
 		ctx.ServerError("UpdateRepositoryUnits", err)
 		return
 	}
-	if repoChanged {
-		if err := repo_service.UpdateRepository(ctx, repo, false); err != nil {
-			ctx.ServerError("UpdateRepository", err)
-			return
-		}
-	}
 	log.Trace("Repository advanced settings updated: %s/%s", ctx.Repo.Owner.Name, repo.Name)
 
 	ctx.Flash.Success(ctx.Tr("repo.settings.update_settings_success"))
 	ctx.Redirect(ctx.Repo.RepoLink + "/settings/units")
+}
+
+// Issues show a repository's issue settings page
+func Issues(ctx *context.Context) {
+	ctx.Data["Title"] = ctx.Tr("repo.issues")
+	ctx.Data["PageIsSettingsIssues"] = true
+
+	ctx.HTML(http.StatusOK, tplSettingsIssues)
+}
+
+// IssuesPost update issues of a repository
+func IssuesPost(ctx *context.Context) {
+	repo := ctx.Repo.Repository
+	form := web.GetForm(ctx).(*forms.RepoIssuesSettingForm)
+	repoChanged := false
+
+	if repo.CloseIssuesViaCommitInAnyBranch != form.EnableCloseIssuesViaCommitInAnyBranch {
+		repo.CloseIssuesViaCommitInAnyBranch = form.EnableCloseIssuesViaCommitInAnyBranch
+		repoChanged = true
+	}
+
+	if form.EnableExternalTracker && !unit_model.TypeExternalTracker.UnitGlobalDisabled() {
+		if !validation.IsValidExternalURL(form.ExternalTrackerURL) {
+			ctx.Flash.Error(ctx.Tr("repo.settings.external_tracker_url_error"))
+			ctx.Redirect(repo.Link() + "/settings/issues")
+			return
+		}
+		if len(form.TrackerURLFormat) != 0 && !validation.IsValidExternalTrackerURLFormat(form.TrackerURLFormat) {
+			ctx.Flash.Error(ctx.Tr("repo.settings.tracker_url_format_error"))
+			ctx.Redirect(repo.Link() + "/settings/issues")
+			return
+		}
+		unit := repo_model.RepoUnit{
+			RepoID: repo.ID,
+			Type:   unit_model.TypeExternalTracker,
+			Config: &repo_model.ExternalTrackerConfig{
+				ExternalTrackerURL:           form.ExternalTrackerURL,
+				ExternalTrackerFormat:        form.TrackerURLFormat,
+				ExternalTrackerStyle:         form.TrackerIssueStyle,
+				ExternalTrackerRegexpPattern: form.ExternalTrackerRegexpPattern,
+			},
+		}
+		if err := repo_service.UpdateRepositoryUnits(ctx, repo, []repo_model.RepoUnit{unit}, []unit_model.Type{unit_model.TypeIssues}); err != nil {
+			ctx.ServerError("UpdateRepositoryUnits", err)
+			return
+		}
+	} else if !form.EnableExternalTracker && !unit_model.TypeIssues.UnitGlobalDisabled() {
+		unit := repo_model.RepoUnit{
+			RepoID: repo.ID,
+			Type:   unit_model.TypeIssues,
+			Config: &repo_model.IssuesConfig{
+				EnableTimetracker:                form.EnableTimetracker,
+				AllowOnlyContributorsToTrackTime: form.AllowOnlyContributorsToTrackTime,
+				EnableDependencies:               form.EnableIssueDependencies,
+			},
+		}
+
+		if err := repo_service.UpdateRepositoryUnits(ctx, repo, []repo_model.RepoUnit{unit}, []unit_model.Type{unit_model.TypeExternalTracker}); err != nil {
+			ctx.ServerError("UpdateRepositoryUnits", err)
+			return
+		}
+		if repoChanged {
+			if err := repo_service.UpdateRepository(ctx, repo, false); err != nil {
+				ctx.ServerError("UpdateRepository", err)
+				return
+			}
+		}
+	}
+
+	ctx.Flash.Success(ctx.Tr("repo.settings.update_settings_success"))
+	ctx.Redirect(ctx.Repo.RepoLink + "/settings/issues")
+}
+
+// Pulls show a repository's pull request settings page
+func Pulls(ctx *context.Context) {
+	ctx.Data["Title"] = ctx.Tr("repo.pulls")
+	ctx.Data["PageIsSettingsPulls"] = true
+
+	ctx.HTML(http.StatusOK, tplSettingsPulls)
+}
+
+// PullsPost update pull request settings of a repository
+func PullsPost(ctx *context.Context) {
+	repo := ctx.Repo.Repository
+	form := web.GetForm(ctx).(*forms.RepoPullsSettingForm)
+	unit := repo_model.RepoUnit{
+		RepoID: repo.ID,
+		Type:   unit_model.TypePullRequests,
+		Config: &repo_model.PullRequestsConfig{
+			IgnoreWhitespaceConflicts:     form.PullsIgnoreWhitespace,
+			AllowMerge:                    form.PullsAllowMerge,
+			AllowRebase:                   form.PullsAllowRebase,
+			AllowRebaseMerge:              form.PullsAllowRebaseMerge,
+			AllowSquash:                   form.PullsAllowSquash,
+			AllowFastForwardOnly:          form.PullsAllowFastForwardOnly,
+			AllowManualMerge:              form.PullsAllowManualMerge,
+			AutodetectManualMerge:         form.EnableAutodetectManualMerge,
+			AllowRebaseUpdate:             form.PullsAllowRebaseUpdate,
+			DefaultDeleteBranchAfterMerge: form.DefaultDeleteBranchAfterMerge,
+			DefaultMergeStyle:             repo_model.MergeStyle(form.PullsDefaultMergeStyle),
+			DefaultUpdateStyle:            repo_model.UpdateStyle(form.PullsDefaultUpdateStyle),
+			DefaultAllowMaintainerEdit:    form.DefaultAllowMaintainerEdit,
+		},
+	}
+
+	if err := repo_service.UpdateRepositoryUnits(ctx, repo, []repo_model.RepoUnit{unit}, []unit_model.Type{}); err != nil {
+		ctx.ServerError("UpdateRepositoryUnits", err)
+		return
+	}
+
+	ctx.Flash.Success(ctx.Tr("repo.settings.update_settings_success"))
+	ctx.Redirect(ctx.Repo.RepoLink + "/settings/pulls")
+}
+
+// Wiki show a repository's wiki settings page
+func Wiki(ctx *context.Context) {
+	ctx.Data["Title"] = ctx.Tr("repo.wiki")
+	ctx.Data["PageIsSettingsWiki"] = true
+
+	ctx.HTML(http.StatusOK, tplSettingsWiki)
+}
+
+// WikiPost update wiki settings of a repository
+func WikiPost(ctx *context.Context) {
+	repo := ctx.Repo.Repository
+	form := web.GetForm(ctx).(*forms.RepoWikiSettingForm)
+	var unit repo_model.RepoUnit
+	var deleteUnitType unit_model.Type
+
+	if form.EnableExternalWiki && !unit_model.TypeExternalWiki.UnitGlobalDisabled() {
+		if !validation.IsValidExternalURL(form.ExternalWikiURL) {
+			ctx.Flash.Error(ctx.Tr("repo.settings.external_wiki_url_error"))
+			ctx.Redirect(repo.Link() + "/settings/wiki")
+			return
+		}
+
+		unit = repo_model.RepoUnit{
+			RepoID: repo.ID,
+			Type:   unit_model.TypeExternalWiki,
+			Config: &repo_model.ExternalWikiConfig{
+				ExternalWikiURL: form.ExternalWikiURL,
+			},
+		}
+		deleteUnitType = unit_model.TypeWiki
+	} else if !form.EnableExternalWiki && !unit_model.TypeWiki.UnitGlobalDisabled() {
+		var wikiPermissions repo_model.UnitAccessMode
+		if form.GloballyWriteableWiki {
+			wikiPermissions = repo_model.UnitAccessModeWrite
+		} else {
+			wikiPermissions = repo_model.UnitAccessModeRead
+		}
+		unit = repo_model.RepoUnit{
+			RepoID:             repo.ID,
+			Type:               unit_model.TypeWiki,
+			Config:             new(repo_model.UnitConfig),
+			DefaultPermissions: wikiPermissions,
+		}
+		deleteUnitType = unit_model.TypeExternalWiki
+	} else {
+		if !unit_model.TypeExternalWiki.UnitGlobalDisabled() {
+			deleteUnitType = unit_model.TypeExternalWiki
+		}
+		if !unit_model.TypeWiki.UnitGlobalDisabled() {
+			deleteUnitType = unit_model.TypeWiki
+		}
+	}
+
+	if err := repo_service.UpdateRepositoryUnits(ctx, repo, []repo_model.RepoUnit{unit}, []unit_model.Type{deleteUnitType}); err != nil {
+		ctx.ServerError("UpdateRepositoryUnits", err)
+		return
+	}
+
+	ctx.Flash.Success(ctx.Tr("repo.settings.update_settings_success"))
+	ctx.Redirect(ctx.Repo.RepoLink + "/settings/wiki")
 }
 
 // Settings show a repository's settings page

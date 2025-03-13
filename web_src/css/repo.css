@@ -548,6 +548,25 @@ td .commit-summary {
   color: var(--color-grey);
 }
 
+.repository.options .units-form .ui.checkbox label {
+  line-height: 20px;
+  margin-left: 0;
+}
+
+.repository.options .units-form .ui.checkbox label b {
+  display: inline-block;
+  min-width: 100px;
+  text-align: end;
+}
+
+.repository.options .units-form .ui.checkbox input[type="checkbox"],
+.repository.options .units-form .ui.checkbox input[type="radio"] {
+  position: inherit;
+  margin-left: 10px;
+  margin-right: 10px;
+  vertical-align: text-top;
+}
+
 .repository.options #interval {
   width: 100px !important;
   min-width: 100px;

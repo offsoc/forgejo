@@ -490,7 +490,7 @@ export function initRepository() {
   initRepoBranchTagSelector('.js-branch-tag-selector');
 
   // Options
-  if ($('.repository.settings.options').length > 0) {
+  if ($('.repository.settings.issues,.repository.settings.wiki').length > 0) {
     // Enable or select internal/external wiki system and issue tracker.
     $('.enable-system').on('change', function () {
       if (this.checked) {

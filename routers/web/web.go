@@ -1030,6 +1030,15 @@ func registerRoutes(m *web.Route) {
 				Post(web.Bind(forms.RepoUnitSettingForm{}), repo_setting.UnitsPost)
 			m.Post("/avatar", web.Bind(forms.AvatarForm{}), repo_setting.SettingsAvatar)
 			m.Post("/avatar/delete", repo_setting.SettingsDeleteAvatar)
+			m.Combo("/issues").
+				Get(repo_setting.Issues).
+				Post(web.Bind(forms.RepoIssuesSettingForm{}), repo_setting.IssuesPost)
+			m.Combo("/pulls").
+				Get(repo_setting.Pulls).
+				Post(web.Bind(forms.RepoPullsSettingForm{}), repo_setting.PullsPost)
+			m.Combo("/wiki").
+				Get(repo_setting.Wiki).
+				Post(web.Bind(forms.RepoWikiSettingForm{}), repo_setting.WikiPost)
 
 			m.Group("/collaboration", func() {
 				m.Combo("").Get(repo_setting.Collaboration).Post(repo_setting.CollaborationPost)
