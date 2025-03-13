@@ -15,21 +15,13 @@
 			<i class="icon">{{svg "octicon-filter" 16}}</i>
 			<input name="search" placeholder="{{ctx.Locale.Tr "repo.filter_branch_and_tag"}}...">
 		</div>
-		<div class="header">
-			<div class="ui grid">
-				<div class="two column row">
-					<a class="reference column muted" href="#" data-target="#branch-list">
-						<span class="text black">
-							{{svg "octicon-git-branch" 16 "tw-mr-1"}}{{ctx.Locale.Tr "repo.branches"}}
-						</span>
-					</a>
-					<a class="reference column muted" href="#" data-target="#tag-list">
-						<span class="text">
-							{{svg "octicon-tag" 16 "tw-mr-1"}}{{ctx.Locale.Tr "repo.tags"}}
-						</span>
-					</a>
-				</div>
-			</div>
+		<div class="branch-tag-tab">
+			<a class="branch-tag-item muted" href="#" data-target="#branch-list">
+				{{svg "octicon-git-branch"}}{{ctx.Locale.Tr "repo.branches"}}
+			</a>
+			<a class="branch-tag-item muted" href="#" data-target="#tag-list">
+				{{svg "octicon-tag"}}{{ctx.Locale.Tr "repo.tags"}}
+			</a>
 		</div>
 		<div class="branch-tag-divider"></div>
 		<div id="branch-list" class="scrolling menu reference-list-menu {{if not .Issue}}new-issue{{end}}">
