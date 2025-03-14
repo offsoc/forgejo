@@ -39,6 +39,7 @@ func ProcessLikeActivity(ctx context.Context, form any, repositoryID int64) (int
 	log.Info("Activity validated:%v", activity)
 
 	// parse actorID (person)
+	// Todo: GetFederationHostForURI
 	actorURI := activity.Actor.GetID().String()
 	log.Info("actorURI was: %v", actorURI)
 	federationHost, err := GetFederationHostForURI(ctx, actorURI)
@@ -123,7 +124,7 @@ func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 	if err != nil {
 		return nil, err
 	}
-	result, err := forgefed.NewFederationHost(nodeInfo, actorID.Host)
+	result, err := forgefed.NewFederationHost(actorID.Host, nodeInfo, actorID.Port, actorID.Schema)
 	if err != nil {
 		return nil, err
 	}
@@ -209,8 +210,8 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		IsAdmin:                      false,
 	}
 	federatedUser := user.FederatedUser{
-		ExternalID:             personID.ID,
-		FederationHostID:       federationHostID,
+		ExternalID:            personID.ID,
+		FederationHostID:      federationHostID,
 		NormalizedOriginalUrl: personID.AsURI(),
 	}
 	err = user.CreateFederatedUser(ctx, &newUser, &federatedUser)

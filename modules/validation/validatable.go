@@ -53,6 +53,10 @@ func ValidateNotEmpty(value any, name string) []string {
 		if v.IsZero() {
 			isValid = false
 		}
+	case uint16:
+		if v == 0 {
+			isValid = false
+		}
 	case int64:
 		if v == 0 {
 			isValid = false
