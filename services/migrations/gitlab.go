@@ -16,6 +16,7 @@ import (
 	"time"
 
 	issues_model "code.gitea.io/gitea/models/issues"
+	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/log"
 	base "code.gitea.io/gitea/modules/migration"
@@ -543,11 +544,19 @@ func (g *GitlabDownloader) GetComments(commentable base.Commentable) ([]*base.Co
 		}
 
 		for _, stateEvent := range stateEvents {
+			// If the user is deleted, then `stateEvent.User == nil` holds. Fallback
+			// to the Ghost user in that case.
+			posterID := int64(user_model.GhostUserID)
+			posterName := user_model.GhostUserName
+			if stateEvent.User != nil {
+				posterID = int64(stateEvent.User.ID)
+				posterName = stateEvent.User.Username
+			}
 			comment := &base.Comment{
 				IssueIndex: commentable.GetLocalIndex(),
 				Index:      int64(stateEvent.ID),
-				PosterID:   int64(stateEvent.User.ID),
-				PosterName: stateEvent.User.Username,
+				PosterID:   posterID,
+				PosterName: posterName,
 				Content:    "",
 				Created:    *stateEvent.CreatedAt,
 			}
