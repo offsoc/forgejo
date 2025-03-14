@@ -1153,6 +1153,19 @@ td .commit-summary {
   text-align: center;
 }
 
+.branch-tag-tab {
+  padding: 0 10px 10px;
+}
+
+.branch-tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-bottom: none;
+}
+
 .repository.compare.pull .comment.form .content::before,
 .repository.compare.pull .comment.form .content::after {
   right: 100%;

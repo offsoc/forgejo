@@ -100,8 +100,8 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 						Page:     1,
 						PageSize: 10,
 					},
-					Filename:       kw.Filename,
-					IsKeywordFuzzy: true,
+					Filename: kw.Filename,
+					Mode:     SearchModeUnion,
 				})
 				require.NoError(t, err)
 				assert.Len(t, kw.IDs, int(total))
