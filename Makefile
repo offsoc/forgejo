@@ -413,7 +413,7 @@ lint-frontend: lint-js lint-css
 lint-frontend-fix: lint-js-fix lint-css-fix
 
 .PHONY: lint-backend
-lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale lint-disposable-emails
+lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale lint-locale-usage lint-disposable-emails
 
 .PHONY: lint-backend-fix
 lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig lint-disposable-emails-fix
@@ -458,7 +458,11 @@ lint-renovate: node_modules
 
 .PHONY: lint-locale
 lint-locale:
-	$(GO) run build/lint-locale.go
+	$(GO) run build/lint-locale/lint-locale.go
+
+.PHONY: lint-locale-usage
+lint-locale-usage:
+	$(GO) run build/lint-locale-usage/lint-locale-usage.go --allow-missing-msgids
 
 .PHONY: lint-md
 lint-md: node_modules
