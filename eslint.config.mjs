@@ -29,7 +29,6 @@ export default tseslint.config(
       '@stylistic/js': stylisticEslintPluginJs,
       '@vitest': vitest,
       'array-func': arrayFunc,
-      'import-x': eslintPluginImportX,
       'no-jquery': noJquery,
       'no-use-extend-native': noUseExtendNative,
       regexp,
