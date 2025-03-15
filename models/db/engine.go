@@ -12,7 +12,6 @@ import (
 	"io"
 	"reflect"
 	"runtime/trace"
-	"strconv"
 	"strings"
 	"time"
 
@@ -107,7 +106,7 @@ func newXORMEngineGroup() (Engine, error) {
 	}
 
 	var masterEngine *xorm.Engine
-	// For PostgreSQL: if a schema is provided, we use the special “postgresschema” driver.
+	// For PostgreSQL: if a schema is provided, we use the special "postgresschema" driver.
 	if setting.Database.Type.IsPostgreSQL() && len(setting.Database.Schema) > 0 {
 		registerPostgresSchemaDriver()
 		masterEngine, err = xorm.NewEngine("postgresschema", masterConnStr)
@@ -141,33 +140,8 @@ func newXORMEngineGroup() (Engine, error) {
 		slaveEngines = append(slaveEngines, slaveEngine)
 	}
 
-	// Build load balance policy from user settings
-	var policy xorm.GroupPolicy
-	switch setting.Database.LoadBalancePolicy {
-	case "WeightRandom":
-		var weights []int
-		if setting.Database.LoadBalanceWeights != "" {
-			for part := range strings.SplitSeq(setting.Database.LoadBalanceWeights, ",") {
-				w, err := strconv.Atoi(strings.TrimSpace(part))
-				if err != nil {
-					w = 1 // use a default weight if conversion fails
-				}
-				weights = append(weights, w)
-			}
-		}
-		// If no valid weights were provided, default each slave to weight 1
-		if len(weights) == 0 {
-			weights = make([]int, len(slaveEngines))
-			for i := range weights {
-				weights[i] = 1
-			}
-		}
-		policy = xorm.WeightRandomPolicy(weights)
-	case "RoundRobin":
-		policy = xorm.RoundRobinPolicy()
-	default:
-		policy = xorm.RandomPolicy()
-	}
+	policy := setting.BuildLoadBalancePolicy(&setting.Database, slaveEngines)
+
 	// Create the EngineGroup using the selected policy
 	group, err := xorm.NewEngineGroup(masterEngine, slaveEngines, policy)
 	if err != nil {

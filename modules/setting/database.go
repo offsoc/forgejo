@@ -10,10 +10,12 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	"code.gitea.io/gitea/modules/log"
+	"xorm.io/xorm"
 )
 
 var (
@@ -26,38 +28,40 @@ var (
 	EnableSQLite3 bool
 
 	// Database holds the database settings
-	Database = struct {
-		Type               DatabaseType
-		Host               string
-		HostPrimary        string
-		HostReplica        string
-		LoadBalancePolicy  string
-		LoadBalanceWeights string
-		Name               string
-		User               string
-		Passwd             string
-		Schema             string
-		SSLMode            string
-		Path               string
-		LogSQL             bool
-		MysqlCharset       string
-		CharsetCollation   string
-		Timeout            int // seconds
-		SQLiteJournalMode  string
-		DBConnectRetries   int
-		DBConnectBackoff   time.Duration
-		MaxIdleConns       int
-		MaxOpenConns       int
-		ConnMaxIdleTime    time.Duration
-		ConnMaxLifetime    time.Duration
-		IterateBufferSize  int
-		AutoMigration      bool
-		SlowQueryThreshold time.Duration
-	}{
+	Database = DatabaseSettings{
 		Timeout:           500,
 		IterateBufferSize: 50,
 	}
 )
+
+type DatabaseSettings struct {
+	Type               DatabaseType
+	Host               string
+	HostPrimary        string
+	HostReplica        string
+	LoadBalancePolicy  string
+	LoadBalanceWeights string
+	Name               string
+	User               string
+	Passwd             string
+	Schema             string
+	SSLMode            string
+	Path               string
+	LogSQL             bool
+	MysqlCharset       string
+	CharsetCollation   string
+	Timeout            int // seconds
+	SQLiteJournalMode  string
+	DBConnectRetries   int
+	DBConnectBackoff   time.Duration
+	MaxIdleConns       int
+	MaxOpenConns       int
+	ConnMaxIdleTime    time.Duration
+	ConnMaxLifetime    time.Duration
+	IterateBufferSize  int
+	AutoMigration      bool
+	SlowQueryThreshold time.Duration
+}
 
 // LoadDBSetting loads the database settings
 func LoadDBSetting() {
@@ -161,6 +165,36 @@ func DBSlaveConnStrs() ([]string, error) {
 		dsns = append(dsns, master)
 	}
 	return dsns, nil
+}
+
+func BuildLoadBalancePolicy(settings *DatabaseSettings, slaveEngines []*xorm.Engine) xorm.GroupPolicy {
+	var policy xorm.GroupPolicy
+	switch settings.LoadBalancePolicy { // Use the settings parameter directly
+	case "WeightRandom":
+		var weights []int
+		if settings.LoadBalanceWeights != "" { // Use the settings parameter directly
+			for part := range strings.SplitSeq(settings.LoadBalanceWeights, ",") {
+				w, err := strconv.Atoi(strings.TrimSpace(part))
+				if err != nil {
+					w = 1 // use a default weight if conversion fails
+				}
+				weights = append(weights, w)
+			}
+		}
+		// If no valid weights were provided, default each slave to weight 1
+		if len(weights) == 0 {
+			weights = make([]int, len(slaveEngines))
+			for i := range weights {
+				weights[i] = 1
+			}
+		}
+		policy = xorm.WeightRandomPolicy(weights)
+	case "RoundRobin":
+		policy = xorm.RoundRobinPolicy()
+	default:
+		policy = xorm.RandomPolicy()
+	}
+	return policy
 }
 
 // dbConnStrWithHost constructs the connection string, given a host value.
