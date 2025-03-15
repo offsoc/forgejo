@@ -36,7 +36,6 @@ import (
 	"code.gitea.io/gitea/services/forms"
 
 	"code.forgejo.org/go-chi/session"
-	"xorm.io/xorm"
 )
 
 const (
@@ -364,13 +363,11 @@ func SubmitInstall(ctx *context.Context) {
 	// Init the engine with migration
 	// Wrap migrations.Migrate into a function of type func(db.Engine) error to fix diagnostics.
 	wrapperMigrate := func(e db.Engine) error {
-		var xe *xorm.Engine
-		if getter, ok := e.(interface{ Master() *xorm.Engine }); ok {
-			xe = getter.Master()
-		} else {
-			xe = e.(*xorm.Engine)
+		engine, err := db.GetMasterEngine(e)
+		if err != nil {
+			return err
 		}
-		return migrations.Migrate(xe)
+		return migrations.Migrate(engine)
 	}
 	if err = db.InitEngineWithMigration(ctx, wrapperMigrate); err != nil {
 		db.UnsetDefaultEngine()

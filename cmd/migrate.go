@@ -39,10 +39,9 @@ func runMigrate(ctx *cli.Context) error {
 
 	if err := db.InitEngineWithMigration(context.Background(), func(engine db.Engine) error {
 		var e *xorm.Engine
-		if getter, ok := engine.(interface{ Master() *xorm.Engine }); ok {
-			e = getter.Master()
-		} else {
-			e = engine.(*xorm.Engine)
+		engine, err := db.GetMasterEngine(e)
+		if err != nil {
+			return err
 		}
 		return migrations.Migrate(e)
 	}); err != nil {

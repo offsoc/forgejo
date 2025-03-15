@@ -279,11 +279,9 @@ func doMigrationTest(t *testing.T, version string) {
 	setting.InitSQLLoggersForCli(log.INFO)
 
 	err := db.InitEngineWithMigration(t.Context(), func(e db.Engine) error {
-		var engine *xorm.Engine
-		if eg, ok := e.(interface{ Master() *xorm.Engine }); ok {
-			engine = eg.Master()
-		} else {
-			engine = e.(*xorm.Engine)
+		engine, err := db.GetMasterEngine(e)
+		if err != nil {
+			return err
 		}
 		currentEngine = engine
 		return wrappedMigrate(engine)
