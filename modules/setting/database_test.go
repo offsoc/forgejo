@@ -163,9 +163,9 @@ func Test_getPostgreSQLEngineGroupConnectionStrings(t *testing.T) {
 			passwd:        "ipv6pass",
 			name:          "ipv6db",
 			sslmode:       "disable",
-			outputPrimary: "postgres://ipv6:ipv6pass@::1:1234/ipv6db?sslmode=disable",
+			outputPrimary: "postgres://ipv6:ipv6pass@[::1]:1234/ipv6db?sslmode=disable",
 			outputReplicas: []string{
-				"postgres://ipv6:ipv6pass@::2:2345/ipv6db?sslmode=disable",
+				"postgres://ipv6:ipv6pass@[::2]:2345/ipv6db?sslmode=disable",
 			},
 		},
 	}
