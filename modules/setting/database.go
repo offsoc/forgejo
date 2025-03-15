@@ -126,7 +126,7 @@ func DBMasterConnStr() (string, error) {
 		host = Database.Host
 	}
 	if host == "" {
-		return "", fmt.Errorf("master host is not defined while slave is defined; cannot proceed")
+		return "", errors.New("master host is not defined while slave is defined; cannot proceed")
 	}
 	return dbConnStrWithHost(host)
 }
