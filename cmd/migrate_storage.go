@@ -196,7 +196,6 @@ func runMigrateStorage(ctx *cli.Context) error {
 	log.Info("Log path: %s", setting.Log.RootPath)
 	log.Info("Configuration file: %s", setting.CustomConf)
 
-	// Wrap migrations.Migrate to match the expected signature: func(db.Engine) error.
 	if err := db.InitEngineWithMigration(context.Background(), func(e db.Engine) error {
 		return migrations.Migrate(e.(*xorm.Engine))
 	}); err != nil {
