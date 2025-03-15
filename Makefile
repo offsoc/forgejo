@@ -39,7 +39,7 @@ XGO_VERSION := go-1.21.x
 AIR_PACKAGE ?= github.com/air-verse/air@v1 # renovate: datasource=go
 EDITORCONFIG_CHECKER_PACKAGE ?= github.com/editorconfig-checker/editorconfig-checker/v3/cmd/editorconfig-checker@v3.2.0 # renovate: datasource=go
 GOFUMPT_PACKAGE ?= mvdan.cc/gofumpt@v0.7.0 # renovate: datasource=go
-GOLANGCI_LINT_PACKAGE ?= github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.6 # renovate: datasource=go
+GOLANGCI_LINT_PACKAGE ?= github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.7 # renovate: datasource=go
 GXZ_PACKAGE ?= github.com/ulikunitz/xz/cmd/gxz@v0.5.11 # renovate: datasource=go
 MISSPELL_PACKAGE ?= github.com/golangci/misspell/cmd/misspell@v0.6.0 # renovate: datasource=go
 SWAGGER_PACKAGE ?= github.com/go-swagger/go-swagger/cmd/swagger@v0.31.0 # renovate: datasource=go
@@ -49,7 +49,7 @@ GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasour
 DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.31.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.4.0 # renovate: datasource=go
 GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.18.1 # renovate: datasource=go
-RENOVATE_NPM_PACKAGE ?= renovate@39.185.0 # renovate: datasource=docker packageName=data.forgejo.org/renovate/renovate
+RENOVATE_NPM_PACKAGE ?= renovate@39.195.1 # renovate: datasource=docker packageName=data.forgejo.org/renovate/renovate
 
 # https://github.com/disposable-email-domains/disposable-email-domains/commits/main/
 DISPOSABLE_EMAILS_SHA ?= 0c27e671231d27cf66370034d7f6818037416989 # renovate: ...
@@ -413,7 +413,7 @@ lint-frontend: lint-js lint-css
 lint-frontend-fix: lint-js-fix lint-css-fix
 
 .PHONY: lint-backend
-lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale lint-disposable-emails
+lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale lint-locale-usage lint-disposable-emails
 
 .PHONY: lint-backend-fix
 lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig lint-disposable-emails-fix
@@ -458,7 +458,11 @@ lint-renovate: node_modules
 
 .PHONY: lint-locale
 lint-locale:
-	$(GO) run build/lint-locale.go
+	$(GO) run build/lint-locale/lint-locale.go
+
+.PHONY: lint-locale-usage
+lint-locale-usage:
+	$(GO) run build/lint-locale-usage/lint-locale-usage.go --allow-missing-msgids
 
 .PHONY: lint-md
 lint-md: node_modules

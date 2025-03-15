@@ -752,9 +752,18 @@ func TestWorkflowDispatchEvent(t *testing.T) {
 			return ""
 		}
 
-		err = workflow.Dispatch(db.DefaultContext, inputGetter, repo, user2)
+		var r *actions_model.ActionRun
+		var j []string
+		r, j, err = workflow.Dispatch(db.DefaultContext, inputGetter, repo, user2)
 		require.NoError(t, err)
 
 		assert.Equal(t, 1, unittest.GetCount(t, &actions_model.ActionRun{RepoID: repo.ID}))
+
+		assert.Equal(t, "test", r.Title)
+		assert.Equal(t, "dispatch.yml", r.WorkflowID)
+		assert.Equal(t, sha, r.CommitSHA)
+		assert.Equal(t, actions_module.GithubEventWorkflowDispatch, r.TriggerEvent)
+		assert.Len(t, j, 1)
+		assert.Equal(t, "test", j[0])
 	})
 }

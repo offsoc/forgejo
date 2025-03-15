@@ -23128,6 +23128,33 @@
           "description": "Git reference for the workflow",
           "type": "string",
           "x-go-name": "Ref"
+        },
+        "return_run_info": {
+          "description": "Flag to return the run info",
+          "type": "boolean",
+          "default": false,
+          "x-go-name": "ReturnRunInfo"
+        }
+      },
+      "x-go-package": "code.gitea.io/gitea/modules/structs"
+    },
+    "DispatchWorkflowRun": {
+      "description": "DispatchWorkflowRun represents a workflow run",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "the workflow run id",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "jobs": {
+          "description": "the jobs name",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Jobs"
         }
       },
       "x-go-package": "code.gitea.io/gitea/modules/structs"
@@ -28509,6 +28536,12 @@
         "items": {
           "$ref": "#/definitions/DeployKey"
         }
+      }
+    },
+    "DispatchWorkflowRun": {
+      "description": "DispatchWorkflowRun is a Workflow Run after dispatching",
+      "schema": {
+        "$ref": "#/definitions/DispatchWorkflowRun"
       }
     },
     "EmailList": {
