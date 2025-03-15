@@ -420,3 +420,18 @@ func (h *ErrorQueryHook) AfterProcess(c *contexts.ContextHook) error {
 	}
 	return nil
 }
+
+// GetMasterEngine extracts the master xorm.Engine from the provided xorm.Engine.
+// This handles both direct xorm.Engine cases and engines that implement a Master() method.
+func GetMasterEngine(x Engine) (*xorm.Engine, error) {
+	if getter, ok := x.(interface{ Master() *xorm.Engine }); ok {
+		return getter.Master(), nil
+	}
+
+	engine, ok := x.(*xorm.Engine)
+	if !ok {
+		return nil, fmt.Errorf("unsupported engine type: %T", x)
+	}
+
+	return engine, nil
+}

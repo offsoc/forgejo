@@ -20,7 +20,6 @@ import (
 	"code.gitea.io/gitea/services/doctor"
 
 	"github.com/urfave/cli/v2"
-	"xorm.io/xorm"
 )
 
 // CmdDoctor represents the available doctor sub-command.
@@ -120,7 +119,7 @@ func runRecreateTable(ctx *cli.Context) error {
 
 	args := ctx.Args()
 	names := make([]string, 0, ctx.NArg())
-	for i := 0; i < ctx.NArg(); i++ {
+	for i := range ctx.NArg() {
 		names = append(names, args.Get(i))
 	}
 
@@ -131,15 +130,15 @@ func runRecreateTable(ctx *cli.Context) error {
 	recreateTables := migrate_base.RecreateTables(beans...)
 
 	return db.InitEngineWithMigration(stdCtx, func(x db.Engine) error {
-		var engine *xorm.Engine
-		if getter, ok := x.(interface{ Master() *xorm.Engine }); ok {
-			engine = getter.Master()
-		} else {
-			engine = x.(*xorm.Engine)
+		engine, err := db.GetMasterEngine(x)
+		if err != nil {
+			return err
 		}
+
 		if err := migrations.EnsureUpToDate(engine); err != nil {
 			return err
 		}
+
 		return recreateTables(engine)
 	})
 }
