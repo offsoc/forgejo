@@ -114,11 +114,6 @@ func loadDBSetting(rootCfg ConfigProvider) {
 	}
 }
 
-// DBConnStr returns a database connection string using Database.Host.
-func DBConnStr() (string, error) {
-	return dbConnStrWithHost(Database.Host)
-}
-
 // DBMasterConnStr returns the connection string for the master (primary) database.
 // If a primary host is defined in the configuration, it is used;
 // otherwise, it falls back to Database.Host.
@@ -283,31 +278,6 @@ func getPostgreSQLConnectionString(dbHost, dbUser, dbPasswd, dbName, dbsslMode s
 	query.Set("sslmode", dbsslMode)
 	connURL.RawQuery = query.Encode()
 	return connURL.String()
-}
-
-func getPostgreSQLEngineGroupConnectionStrings(primaryHost, replicaHosts, user, passwd, name, sslmode string) (string, []string) {
-	// Determine the primary connection string.
-	primary := primaryHost
-	if strings.TrimSpace(primary) == "" {
-		primary = "127.0.0.1:5432"
-	}
-	primaryConn := getPostgreSQLConnectionString(primary, user, passwd, name, sslmode)
-
-	// Build the replica connection strings.
-	replicaConns := []string{}
-	if strings.TrimSpace(replicaHosts) != "" {
-		// Split comma-separated replica host values.
-		hosts := strings.Split(replicaHosts, ",")
-		for _, h := range hosts {
-			trimmed := strings.TrimSpace(h)
-			if trimmed != "" {
-				replicaConns = append(replicaConns,
-					getPostgreSQLConnectionString(trimmed, user, passwd, name, sslmode))
-			}
-		}
-	}
-
-	return primaryConn, replicaConns
 }
 
 type DatabaseType string

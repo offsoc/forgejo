@@ -4,6 +4,7 @@
 package setting
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -106,6 +107,31 @@ func Test_getPostgreSQLConnectionString(t *testing.T) {
 		connStr := getPostgreSQLConnectionString(test.Host, test.User, test.Passwd, test.Name, test.SSLMode)
 		assert.Equal(t, test.Output, connStr)
 	}
+}
+
+func getPostgreSQLEngineGroupConnectionStrings(primaryHost, replicaHosts, user, passwd, name, sslmode string) (string, []string) {
+	// Determine the primary connection string.
+	primary := primaryHost
+	if strings.TrimSpace(primary) == "" {
+		primary = "127.0.0.1:5432"
+	}
+	primaryConn := getPostgreSQLConnectionString(primary, user, passwd, name, sslmode)
+
+	// Build the replica connection strings.
+	replicaConns := []string{}
+	if strings.TrimSpace(replicaHosts) != "" {
+		// Split comma-separated replica host values.
+		hosts := strings.Split(replicaHosts, ",")
+		for _, h := range hosts {
+			trimmed := strings.TrimSpace(h)
+			if trimmed != "" {
+				replicaConns = append(replicaConns,
+					getPostgreSQLConnectionString(trimmed, user, passwd, name, sslmode))
+			}
+		}
+	}
+
+	return primaryConn, replicaConns
 }
 
 func Test_getPostgreSQLEngineGroupConnectionStrings(t *testing.T) {
