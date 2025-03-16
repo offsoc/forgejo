@@ -1,9 +1,5 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"other": "將 %[1]d 次提交從 <code>%[2]s</code> 合併至 <code>%[3]s</code> %[4]s"
-	},
-	"repo.pulls.title_desc": {
-		"other": "請求將 %[1]d 次程式碼提交從 <code>%[2]s</code> 合併至 <code id=\"%[4]s\">%[3]s</code>"
-	},
-	"search.milestone_kind": "搜尋里程碑..."
+    "repo.pulls.merged_title_desc": "將 %[1]d 次提交從 <code>%[2]s</code> 合併至 <code>%[3]s</code> %[4]s",
+    "repo.pulls.title_desc": "請求將 %[1]d 次程式碼提交從 <code>%[2]s</code> 合併至 <code id=\"%[4]s\">%[3]s</code>",
+    "search.milestone_kind": "搜尋里程碑..."
 }

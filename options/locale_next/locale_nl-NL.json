@@ -7,11 +7,14 @@
         "one": "wilt %[1]d commit van <code>%[2]s</code> samenvoegen in <code id=\"%[4]s\">%[3]s</code>",
         "other": "wilt %[1]d commits van <code>%[2]s</code> samenvoegen met <code id=\"%[4]s\">%[3]s</code>"
     },
-    "search.milestone_kind": "Zoek mijlpalen...",
+    "search.milestone_kind": "Zoek mijlpalen…",
     "home.welcome.no_activity": "Geen activiteit",
     "home.welcome.activity_hint": "Er staat nog niets in uw feed. Uw acties en activiteiten van repositories die u bekijkt zullen hier verschijnen.",
     "home.explore_repos": "Ontdek repositories",
     "home.explore_users": "Ontdek gebruikers",
     "home.explore_orgs": "Ontdek organisaties",
-    "incorrect_root_url": "Deze Forgejo-instantie is geconfigureerd om geserveerd te worden op \"%s\". U bekijkt Forgejo momenteel via een andere URL, waardoor onderdelen van de applicatie kunnen breken. De canonieke URL kan worden gewijzigd door Forgejo admins via de ROOT_URL instelling in de app.ini."
+    "incorrect_root_url": "Deze Forgejo-instantie is geconfigureerd om geserveerd te worden op \"%s\". U bekijkt Forgejo momenteel via een andere URL, waardoor onderdelen van de applicatie kunnen breken. De canonieke URL kan worden gewijzigd door Forgejo admins via de ROOT_URL instelling in de app.ini.",
+    "themes.names.forgejo-auto": "Forgejo (volg het systeemthema)",
+    "themes.names.forgejo-light": "Forgejo licht",
+    "themes.names.forgejo-dark": "Forgejo donker"
 }

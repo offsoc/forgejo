@@ -670,7 +670,8 @@ func DispatchWorkflow(ctx *context.APIContext) {
 		return opt.Inputs[key]
 	}
 
-	if err := workflow.Dispatch(ctx, inputGetter, ctx.Repo.Repository, ctx.Doer); err != nil {
+	run, jobs, err := workflow.Dispatch(ctx, inputGetter, ctx.Repo.Repository, ctx.Doer)
+	if err != nil {
 		if actions_service.IsInputRequiredErr(err) {
 			ctx.Error(http.StatusBadRequest, "workflow.Dispatch", err)
 		} else {
@@ -679,5 +680,14 @@ func DispatchWorkflow(ctx *context.APIContext) {
 		return
 	}
 
-	ctx.JSON(http.StatusNoContent, nil)
+	workflowRun := &api.DispatchWorkflowRun{
+		ID:   run.ID,
+		Jobs: jobs,
+	}
+
+	if opt.ReturnRunInfo {
+		ctx.JSON(http.StatusCreated, workflowRun)
+	} else {
+		ctx.JSON(http.StatusNoContent, nil)
+	}
 }

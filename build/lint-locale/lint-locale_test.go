@@ -69,26 +69,26 @@ func TestNextLocalizationPolicy(t *testing.T) {
 	initRemoveTags()
 
 	t.Run("Nested locales", func(t *testing.T) {
-		assert.Empty(t, checkLocaleNextContent(map[string]any{
-			"settings": map[string]any{
-				"hidden_comment_types_description": `Comment types checked here will not be shown inside issue pages. Checking "Label" for example removes all "<user> added/removed <label>" comments.`,
-			},
-		}))
+		assert.Empty(t, checkLocaleNextContent([]byte(`{
+			"settings": {
+				"hidden_comment_types_description": "Comment types checked here will not be shown inside issue pages. Checking \"Label\" for example removes all \"<user> added/removed <label>\" comments."
+			}
+		}`)))
 
-		assert.EqualValues(t, []string{"settings.hidden_comment_types_description: \"\x1b[31m<not-an-allowed-key>\x1b[0m REPLACED-TAG\""}, checkLocaleNextContent(map[string]any{
-			"settings": map[string]any{
-				"hidden_comment_types_description": `"<not-an-allowed-key> <label>"`,
-			},
-		}))
+		assert.EqualValues(t, []string{"settings.hidden_comment_types_description: \"\x1b[31m<not-an-allowed-key>\x1b[0m REPLACED-TAG\""}, checkLocaleNextContent([]byte(`{
+			"settings": {
+				"hidden_comment_types_description": "\"<not-an-allowed-key> <label>\""
+			}
+		}`)))
 	})
 
 	t.Run("Flat locales", func(t *testing.T) {
-		assert.Empty(t, checkLocaleNextContent(map[string]any{
-			"settings.hidden_comment_types_description": `Comment types checked here will not be shown inside issue pages. Checking "Label" for example removes all "<user> added/removed <label>" comments.`,
-		}))
+		assert.Empty(t, checkLocaleNextContent([]byte(`{
+			"settings.hidden_comment_types_description": "Comment types checked here will not be shown inside issue pages. Checking \"Label\" for example removes all \"<user> added/removed <label>\" comments."
+		}`)))
 
-		assert.EqualValues(t, []string{"settings.hidden_comment_types_description: \"\x1b[31m<not-an-allowed-key>\x1b[0m REPLACED-TAG\""}, checkLocaleNextContent(map[string]any{
-			"settings.hidden_comment_types_description": `"<not-an-allowed-key> <label>"`,
-		}))
+		assert.EqualValues(t, []string{"settings.hidden_comment_types_description: \"\x1b[31m<not-an-allowed-key>\x1b[0m REPLACED-TAG\""}, checkLocaleNextContent([]byte(`{
+			"settings.hidden_comment_types_description": "\"<not-an-allowed-key> <label>\""
+		}`)))
 	})
 }
