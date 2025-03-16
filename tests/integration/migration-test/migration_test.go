@@ -293,10 +293,9 @@ func doMigrationTest(t *testing.T, version string) {
 
 	err = db.InitEngineWithMigration(t.Context(), func(e db.Engine) error {
 		var engine *xorm.Engine
-		if eg, ok := e.(interface{ Master() *xorm.Engine }); ok {
-			engine = eg.Master()
-		} else {
-			engine = e.(*xorm.Engine)
+		engine, err = db.GetMasterEngine(e)
+		if err != nil {
+			return err
 		}
 		currentEngine = engine
 		return migrate_base.RecreateTables(beans...)(engine)
@@ -307,10 +306,9 @@ func doMigrationTest(t *testing.T, version string) {
 	// We do this a second time to ensure that there is not a problem with retained indices
 	err = db.InitEngineWithMigration(t.Context(), func(e db.Engine) error {
 		var engine *xorm.Engine
-		if eg, ok := e.(interface{ Master() *xorm.Engine }); ok {
-			engine = eg.Master()
-		} else {
-			engine = e.(*xorm.Engine)
+		engine, err = db.GetMasterEngine(e)
+		if err != nil {
+			return err
 		}
 		currentEngine = engine
 		return migrate_base.RecreateTables(beans...)(engine)
