@@ -15,5 +15,8 @@
     "home.explore_repos": "Procházet repozitáře",
     "home.explore_users": "Procházet uživatele",
     "home.explore_orgs": "Procházet organizace",
-    "incorrect_root_url": "Tato instance Forgejo je nastavena tak, aby běžela na adrese „%s“. Vy si momentálně prohlížíte Forgejo na jiné adrese, což může způsobit rozbití některých částí aplikace. Správná adresa je ovládána správci Forgejo pomocí nastavení ROOT_URL v souboru app.ini."
+    "incorrect_root_url": "Tato instance Forgejo je nastavena tak, aby běžela na adrese „%s“. Vy si momentálně prohlížíte Forgejo na jiné adrese, což může způsobit rozbití některých částí aplikace. Správná adresa je ovládána správci Forgejo pomocí nastavení ROOT_URL v souboru app.ini.",
+    "themes.names.forgejo-auto": "Forgejo (podle motivu systému)",
+    "themes.names.forgejo-light": "Forgejo – světlé",
+    "themes.names.forgejo-dark": "Forgejo – tmavé"
 }
