@@ -13,5 +13,8 @@
     "home.explore_repos": "Repositoriums utförsken",
     "home.welcome.no_activity": "Keen Doon",
     "home.welcome.activity_hint": "In dienem Schuuv is noch nix. Dien Doon un dat Doon vun Repositoriums, wat du beluurst, word hier wiest worden.",
-    "incorrect_root_url": "Deese Forgejo-Instanz is inricht, unner »%s« besöcht to worden. Du bekiekst Forgejo jüüst dör een anner URL, wat daarto föhren kann, dat ’t deelwies nich richtig warkt. De kanonisk URL word vun de Forgejo-Chefs över de ROOT_URL-Instellen in de app.ini kuntrolleert."
+    "incorrect_root_url": "Deese Forgejo-Instanz is inricht, unner »%s« besöcht to worden. Du bekiekst Forgejo jüüst dör een anner URL, wat daarto föhren kann, dat ’t deelwies nich richtig warkt. De kanonisk URL word vun de Forgejo-Chefs över de ROOT_URL-Instellen in de app.ini kuntrolleert.",
+    "themes.names.forgejo-light": "Forgejo Hell",
+    "themes.names.forgejo-dark": "Forgejo Dunker",
+    "themes.names.forgejo-auto": "Forgejo (Systeem-Thema nagahn)"
 }

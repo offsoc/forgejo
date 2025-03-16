@@ -1,11 +1,11 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"one": "συγχώνευσε %[1]d υποβολή από τον κλάδο <code>%[2]s</code> στον κλάδο <code>%[3]s</code> %[4]s",
-		"other": "συγχώνευσε %[1]d υποβολές από <code>%[2]s</code> σε <code>%[3]s</code> %[4]s"
-	},
-	"repo.pulls.title_desc": {
-		"one": ": θα ήθελε να συγχωνεύσει %[1]d υποβολή από τον κλάδο <code>%[2]s</code> στον κλάδο <code id=\"%[4]s\">%[3]s</code>",
-		"other": "θέλει να συγχωνεύσει %[1]d υποβολές από <code>%[2]s</code> σε <code id=\"%[4]s\">%[3]s</code>"
-	},
-	"search.milestone_kind": "Αναζήτηση ορόσημων..."
+    "repo.pulls.merged_title_desc": {
+        "one": "συγχώνευσε %[1]d υποβολή από τον κλάδο <code>%[2]s</code> στον κλάδο <code>%[3]s</code> %[4]s",
+        "other": "συγχώνευσε %[1]d υποβολές από <code>%[2]s</code> σε <code>%[3]s</code> %[4]s"
+    },
+    "repo.pulls.title_desc": {
+        "one": ": θα ήθελε να συγχωνεύσει %[1]d υποβολή από τον κλάδο <code>%[2]s</code> στον κλάδο <code id=\"%[4]s\">%[3]s</code>",
+        "other": "θέλει να συγχωνεύσει %[1]d υποβολές από <code>%[2]s</code> σε <code id=\"%[4]s\">%[3]s</code>"
+    },
+    "search.milestone_kind": "Αναζήτηση ορόσημων..."
 }
