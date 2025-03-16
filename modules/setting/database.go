@@ -117,7 +117,7 @@ func loadDBSetting(rootCfg ConfigProvider) {
 // DBMasterConnStr returns the connection string for the master (primary) database.
 // If a primary host is defined in the configuration, it is used;
 // otherwise, it falls back to Database.Host.
-// Returns an error if no master host is provided.
+// Returns an error if no master host is provided but a slave is defined.
 func DBMasterConnStr() (string, error) {
 	var host string
 	if Database.HostPrimary != "" {
@@ -125,9 +125,15 @@ func DBMasterConnStr() (string, error) {
 	} else {
 		host = Database.Host
 	}
-	if host == "" {
+	if host == "" && Database.HostReplica != "" {
 		return "", errors.New("master host is not defined while slave is defined; cannot proceed")
 	}
+
+	// For SQLite, no host is needed
+	if host == "" && !Database.Type.IsSQLite3() {
+		return "", errors.New("no database host defined")
+	}
+
 	return dbConnStrWithHost(host)
 }
 

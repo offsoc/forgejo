@@ -17,7 +17,8 @@ import (
 
 func TestIterate(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
-	xe := unittest.GetXORMEngine()
+	xe, err := unittest.GetXORMEngine()
+	require.NoError(t, err)
 	require.NoError(t, xe.Sync(&repo_model.RepoUnit{}))
 
 	cnt, err := db.GetEngine(db.DefaultContext).Count(&repo_model.RepoUnit{})
