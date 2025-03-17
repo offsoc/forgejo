@@ -19361,8 +19361,28 @@
             "in": "query"
           },
           {
+            "enum": [
+              "name",
+              "id",
+              "newest",
+              "oldest",
+              "recentupdate",
+              "leastupdate",
+              "reversealphabetically",
+              "alphabetically",
+              "reversesize",
+              "size",
+              "reversegitsize",
+              "gitsize",
+              "reverselfssize",
+              "lfssize",
+              "moststars",
+              "feweststars",
+              "mostforks",
+              "fewestforks"
+            ],
             "type": "string",
-            "description": "order the repositories by name (default), id, or size",
+            "description": "order the repositories",
             "name": "order_by",
             "in": "query"
           }

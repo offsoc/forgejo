@@ -764,3 +764,58 @@ func TestAPIRepoCommitPull(t *testing.T) {
 	req = NewRequest(t, "GET", "/api/v1/repos/user2/repo1/commits/not-a-commit/pull")
 	MakeRequest(t, req, http.StatusNotFound)
 }
+
+func TestAPIListOwnRepoSorting(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	session := loginUser(t, user.Name)
+	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadRepository, auth_model.AccessTokenScopeReadUser)
+
+	t.Run("No sorting", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		MakeRequest(t, NewRequest(t, "GET", "/api/v1/user/repos").AddTokenAuth(token), http.StatusOK)
+	})
+
+	t.Run("ID sorting", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		var repos []api.Repository
+		resp := MakeRequest(t, NewRequest(t, "GET", "/api/v1/user/repos?limit=2&order_by=id").AddTokenAuth(token), http.StatusOK)
+		DecodeJSON(t, resp, &repos)
+
+		assert.Len(t, repos, 2)
+		assert.EqualValues(t, 1, repos[0].ID)
+		assert.EqualValues(t, 2, repos[1].ID)
+	})
+
+	t.Run("Name sorting", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		var repos []api.Repository
+		resp := MakeRequest(t, NewRequest(t, "GET", "/api/v1/user/repos?limit=2&order_by=name").AddTokenAuth(token), http.StatusOK)
+		DecodeJSON(t, resp, &repos)
+
+		assert.Len(t, repos, 2)
+		assert.EqualValues(t, "big_test_private_4", repos[0].Name)
+		// Postgres doesn't do ascii sorting.
+		if setting.Database.Type.IsPostgreSQL() {
+			assert.EqualValues(t, "commitsonpr", repos[1].Name)
+		} else {
+			assert.EqualValues(t, "commits_search_test", repos[1].Name)
+		}
+	})
+
+	t.Run("Reverse alphabetic sorting", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		var repos []api.Repository
+		resp := MakeRequest(t, NewRequest(t, "GET", "/api/v1/user/repos?limit=2&order_by=reversealphabetically").AddTokenAuth(token), http.StatusOK)
+		DecodeJSON(t, resp, &repos)
+
+		assert.Len(t, repos, 2)
+		assert.EqualValues(t, "utf8", repos[0].Name)
+		assert.EqualValues(t, "test_workflows", repos[1].Name)
+	})
+}
