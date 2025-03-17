@@ -17,6 +17,7 @@ import (
 	release_service "code.gitea.io/gitea/services/release"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -115,7 +116,7 @@ func (o *release) Patch(ctx context.Context) {
 	}
 }
 
-func (o *release) Put(ctx context.Context) generic.NodeID {
+func (o *release) Put(ctx context.Context) f3_id.NodeID {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
@@ -133,7 +134,7 @@ func (o *release) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("release created %d", o.forgejoRelease.ID)
-	return generic.NewNodeID(o.forgejoRelease.ID)
+	return f3_id.NewNodeID(o.forgejoRelease.ID)
 }
 
 func (o *release) Delete(ctx context.Context) {
