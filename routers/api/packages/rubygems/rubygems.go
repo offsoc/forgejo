@@ -105,9 +105,11 @@ func ServePackageInfo(ctx *context.Context) {
 		ctx, ctx.Package.Owner.ID, packages_model.TypeRubyGems, packageName)
 	if err != nil {
 		apiError(ctx, http.StatusInternalServerError, err)
+		return
 	}
 	if len(versions) == 0 {
 		apiError(ctx, http.StatusNotFound, fmt.Sprintf("Could not find package %s", packageName))
+		return
 	}
 
 	result, err := buildInfoFileForPackage(ctx, versions)
@@ -135,6 +137,7 @@ func ServeVersionsFile(ctx *context.Context) {
 			ctx, ctx.Package.Owner.ID, packages_model.TypeRubyGems, pack.Name)
 		if err != nil {
 			apiError(ctx, http.StatusInternalServerError, err)
+			return
 		}
 		if len(versions) == 0 {
 			// No versions left for this package, we should continue.
@@ -148,6 +151,7 @@ func ServeVersionsFile(ctx *context.Context) {
 			pd, err := packages_model.GetPackageDescriptor(ctx, v)
 			if err != nil {
 				apiError(ctx, http.StatusInternalServerError, err)
+				return
 			}
 
 			metadata := pd.Metadata.(*rubygems_module.Metadata)
@@ -165,6 +169,7 @@ func ServeVersionsFile(ctx *context.Context) {
 		info, err := buildInfoFileForPackage(ctx, versions)
 		if err != nil {
 			apiError(ctx, http.StatusInternalServerError, err)
+			return
 		}
 
 		checksum := md5.Sum([]byte(*info))
