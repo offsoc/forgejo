@@ -148,7 +148,8 @@
         "mvdan.cc/gofumpt",
         "updates",
         "vite-string-plugin",
-        "@vue/test-utils"
+        "@vue/test-utils",
+        "@vitejs/plugin-vue"
       ],
       "automerge": true
     },
