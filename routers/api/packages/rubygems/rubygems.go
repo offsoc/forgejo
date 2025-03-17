@@ -425,7 +425,12 @@ func buildRequirementStringFromVersion(ctx *context.Context, version *packages_m
 		additionalRequirements.WriteString(",rubygems:")
 		writeRequirements(metadata.RequiredRubygemsVersion, additionalRequirements)
 	}
-	return fmt.Sprintf("%s %s|%s", version.Version, dependencyRequirements, additionalRequirements), nil
+
+	if metadata.Platform != "ruby" {
+		return fmt.Sprintf("%s-%s %s|%s", version.Version, metadata.Platform, dependencyRequirements, additionalRequirements), nil
+	} else {
+		return fmt.Sprintf("%s %s|%s", version.Version, dependencyRequirements, additionalRequirements), nil
+	}
 }
 
 func buildInfoFileForPackage(ctx *context.Context, versions []*packages_model.PackageVersion) (*string, error) {
