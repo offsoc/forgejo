@@ -143,17 +143,18 @@ func ServeVersionsFile(ctx *context.Context) {
 
 		fmt.Fprintf(result, "%s ", pack.Name)
 		for i, v := range versions {
-
 			result.WriteString(v.Version)
 
 			pd, err := packages_model.GetPackageDescriptor(ctx, v)
-			if err == nil {
-				metadata := pd.Metadata.(*rubygems_module.Metadata)
+			if err != nil {
+				apiError(ctx, http.StatusInternalServerError, err)
+			}
 
-				if metadata.Platform != "ruby" {
-					result.WriteString("_")
-					result.WriteString(metadata.Platform)
-				}
+			metadata := pd.Metadata.(*rubygems_module.Metadata)
+
+			if metadata.Platform != "ruby" {
+				result.WriteString("_")
+				result.WriteString(metadata.Platform)
 			}
 
 			if i != len(versions)-1 {
