@@ -14,6 +14,7 @@ import (
 	"code.gitea.io/gitea/modules/timeutil"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -134,7 +135,7 @@ func (o *review) Patch(ctx context.Context) {
 	}
 }
 
-func (o *review) Put(ctx context.Context) generic.NodeID {
+func (o *review) Put(ctx context.Context) f3_id.NodeID {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
@@ -153,7 +154,7 @@ func (o *review) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("review created %d", o.forgejoReview.ID)
-	return generic.NewNodeID(o.forgejoReview.ID)
+	return f3_id.NewNodeID(o.forgejoReview.ID)
 }
 
 func (o *review) Delete(ctx context.Context) {

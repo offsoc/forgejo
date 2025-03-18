@@ -17,6 +17,7 @@ import (
 	issue_service "code.gitea.io/gitea/services/issue"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -210,7 +211,7 @@ func updateIssueLabels(ctx context.Context, issueID int64, labels []*issues_mode
 	}
 }
 
-func (o *issue) Put(ctx context.Context) generic.NodeID {
+func (o *issue) Put(ctx context.Context) f3_id.NodeID {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
@@ -232,7 +233,7 @@ func (o *issue) Put(ctx context.Context) generic.NodeID {
 	updateIssueLabels(ctx, o.forgejoIssue.ID, o.forgejoIssue.Labels)
 
 	o.Trace("issue created %d/%d", o.forgejoIssue.ID, o.forgejoIssue.Index)
-	return generic.NewNodeID(o.forgejoIssue.Index)
+	return f3_id.NewNodeID(o.forgejoIssue.Index)
 }
 
 func (o *issue) Delete(ctx context.Context) {
