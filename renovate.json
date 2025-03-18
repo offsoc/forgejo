@@ -137,6 +137,8 @@
         "@playwright/**",
         "@stoplight/spectral-cli",
         "@stylistic/**",
+        "@vitejs/plugin-vue",
+        "@vue/test-utils",
         "djlint",
         "github.com/editorconfig-checker/editorconfig-checker/v2/cmd/editorconfig-checker",
         "github.com/golangci/golangci-lint/cmd/golangci-lint",
@@ -148,8 +150,7 @@
         "mvdan.cc/gofumpt",
         "updates",
         "vite-string-plugin",
-        "@vue/test-utils",
-        "@vitejs/plugin-vue"
+        "yamllint"
       ],
       "automerge": true
     },
