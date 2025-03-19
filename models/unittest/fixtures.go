@@ -101,7 +101,7 @@ func LoadFixtures(engine ...*xorm.Engine) error {
 		return err
 	}
 	// (doubt) database transaction conflicts could occur and result in ROLLBACK? just try for a few times.
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		if err = fixturesLoader.Load(); err == nil {
 			break
 		}
