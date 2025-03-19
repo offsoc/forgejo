@@ -101,8 +101,9 @@ func ListMyRepos(ctx *context.APIContext) {
 	//   type: integer
 	// - name: order_by
 	//   in: query
-	//   description: order the repositories by name (default), id, or size
+	//   description: order the repositories
 	//   type: string
+	//   enum: [name, id, newest, oldest, recentupdate, leastupdate, reversealphabetically, alphabetically, reversesize, size, reversegitsize, gitsize, reverselfssize, lfssize, moststars, feweststars, mostforks, fewestforks]
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/RepositoryList"
@@ -124,14 +125,15 @@ func ListMyRepos(ctx *context.APIContext) {
 	switch orderBy {
 	case "name":
 		opts.OrderBy = "name ASC"
-	case "size":
-		opts.OrderBy = "size DESC"
 	case "id":
 		opts.OrderBy = "id ASC"
-	case "":
 	default:
-		ctx.Error(http.StatusUnprocessableEntity, "", "invalid order_by")
-		return
+		if orderBy, ok := repo_model.OrderByFlatMap[orderBy]; ok {
+			opts.OrderBy = orderBy
+		} else if orderBy != "" {
+			ctx.Error(http.StatusUnprocessableEntity, "", "invalid order_by")
+			return
+		}
 	}
 
 	repos, count, err := repo_model.SearchRepository(ctx, opts)

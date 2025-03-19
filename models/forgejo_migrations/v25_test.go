@@ -36,9 +36,13 @@ func Test_MigrateTwoFactorToKeying(t *testing.T) {
 
 	cnt, err := x.Table("two_factor").Count()
 	require.NoError(t, err)
-	assert.EqualValues(t, 1, cnt)
+	assert.EqualValues(t, 2, cnt)
 
 	require.NoError(t, MigrateTwoFactorToKeying(x))
+
+	cnt, err = x.Table("two_factor").Count()
+	require.NoError(t, err)
+	assert.EqualValues(t, 1, cnt)
 
 	var twofactor auth.TwoFactor
 	_, err = x.Table("two_factor").ID(1).Get(&twofactor)

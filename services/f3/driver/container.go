@@ -8,8 +8,8 @@ import (
 	"context"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
-	"code.forgejo.org/f3/gof3/v3/tree/generic"
 )
 
 type container struct {
@@ -30,7 +30,7 @@ func (o *container) FromFormat(content f3.Interface) {
 
 func (o *container) Get(context.Context) bool { return true }
 
-func (o *container) Put(ctx context.Context) generic.NodeID {
+func (o *container) Put(ctx context.Context) f3_id.NodeID {
 	return o.upsert(ctx)
 }
 
@@ -38,6 +38,6 @@ func (o *container) Patch(ctx context.Context) {
 	o.upsert(ctx)
 }
 
-func (o *container) upsert(context.Context) generic.NodeID {
-	return generic.NewNodeID(o.getKind())
+func (o *container) upsert(context.Context) f3_id.NodeID {
+	return f3_id.NewNodeID(o.getKind())
 }

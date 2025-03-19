@@ -397,6 +397,12 @@ func ListIssues(ctx *context.APIContext) {
 	//   in: query
 	//   description: page size of results
 	//   type: integer
+	// - name: sort
+	//   in: query
+	//   description: Type of sort
+	//   type: string
+	//   enum: [relevance, latest, oldest, recentupdate, leastupdate, mostcomment, leastcomment, nearduedate, farduedate]
+	//   default: latest
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/IssueList"
@@ -510,7 +516,7 @@ func ListIssues(ctx *context.APIContext) {
 		RepoIDs:   []int64{ctx.Repo.Repository.ID},
 		IsPull:    isPull,
 		IsClosed:  isClosed,
-		SortBy:    issue_indexer.SortByCreatedDesc,
+		SortBy:    issue_indexer.ParseSortBy(ctx.FormString("sort"), issue_indexer.SortByCreatedDesc),
 	}
 	if since != 0 {
 		searchOpt.UpdatedAfterUnix = optional.Some(since)
