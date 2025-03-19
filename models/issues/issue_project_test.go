@@ -117,3 +117,57 @@ func TestPrivateIssueProjects(t *testing.T) {
 		})
 	})
 }
+
+func TestPrivateRepoProjects(t *testing.T) {
+	defer tests.AddFixtures("models/fixtures/TestPrivateRepoProjects/")()
+	require.NoError(t, unittest.PrepareTestDatabase())
+
+	org := unittest.AssertExistsAndLoadBean(t, &organization.Organization{ID: 3})
+	orgProject := unittest.AssertExistsAndLoadBean(t, &project.Project{ID: 1001, OwnerID: org.ID})
+	column := unittest.AssertExistsAndLoadBean(t, &project.Column{ID: 1001, ProjectID: orgProject.ID})
+
+	t.Run("Partial access", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		user29 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 29})
+
+		issueList, err := issues.LoadIssuesFromColumn(db.DefaultContext, column, user29, org, optional.None[bool]())
+		require.NoError(t, err)
+		assert.Len(t, issueList, 1)
+		assert.EqualValues(t, 6, issueList[0].ID)
+
+		issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, orgProject, user29, org, optional.None[bool]())
+		require.NoError(t, err)
+		assert.EqualValues(t, 1, issuesNum)
+
+		issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user29, org, optional.Some(true))
+		require.NoError(t, err)
+		assert.EqualValues(t, 0, issuesNum)
+
+		issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user29, org, optional.Some(false))
+		require.NoError(t, err)
+		assert.EqualValues(t, 1, issuesNum)
+	})
+
+	t.Run("Full access", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+		issueList, err := issues.LoadIssuesFromColumn(db.DefaultContext, column, user2, org, optional.None[bool]())
+		require.NoError(t, err)
+		assert.Len(t, issueList, 2)
+		assert.EqualValues(t, 15, issueList[0].ID)
+		assert.EqualValues(t, 6, issueList[1].ID)
+
+		issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.None[bool]())
+		require.NoError(t, err)
+		assert.EqualValues(t, 2, issuesNum)
+
+		issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.Some(true))
+		require.NoError(t, err)
+		assert.EqualValues(t, 0, issuesNum)
+
+		issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.Some(false))
+		require.NoError(t, err)
+		assert.EqualValues(t, 2, issuesNum)
+	})
+}
