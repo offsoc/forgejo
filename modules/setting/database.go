@@ -163,7 +163,7 @@ func DBSlaveConnStrs() ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		log.Info("DB: No dedicated replica host defined; falling back to primary DSN for replica connections")
+		log.Debug("Database: No dedicated replica host defined; falling back to primary DSN for replica connections")
 		dsns = append(dsns, master)
 	}
 	return dsns, nil
