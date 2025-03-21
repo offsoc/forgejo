@@ -681,8 +681,9 @@ func DispatchWorkflow(ctx *context.APIContext) {
 	}
 
 	workflowRun := &api.DispatchWorkflowRun{
-		ID:   run.ID,
-		Jobs: jobs,
+		ID:        run.ID,
+		RunNumber: run.Index,
+		Jobs:      jobs,
 	}
 
 	if opt.ReturnRunInfo {

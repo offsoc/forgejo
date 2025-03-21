@@ -22,6 +22,8 @@ type DispatchWorkflowOption struct {
 type DispatchWorkflowRun struct {
 	// the workflow run id
 	ID int64 `json:"id"`
+	// a unique number for each run of a repository
+	RunNumber int64 `json:"run_number"`
 	// the jobs name
 	Jobs []string `json:"jobs"`
 }
