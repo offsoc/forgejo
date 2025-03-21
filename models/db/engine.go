@@ -359,11 +359,15 @@ func GetMaxID(beanOrTableName any) (maxID int64, err error) {
 }
 
 func SetLogSQL(ctx context.Context, on bool) {
-	e := GetEngine(ctx)
-	if eng, ok := e.(*xorm.Engine); ok {
-		eng.ShowSQL(on)
-	} else if sess, ok := e.(*xorm.Session); ok {
+	ctxEngine := GetEngine(ctx)
+
+	if sess, ok := ctxEngine.(*xorm.Session); ok {
 		sess.Engine().ShowSQL(on)
+	} else if wrapper, ok := ctxEngine.(engineGroupWrapper); ok {
+		// Handle engineGroupWrapper directly
+		wrapper.ShowSQL(on)
+	} else if masterEngine, err := GetMasterEngine(ctxEngine); err == nil {
+		masterEngine.ShowSQL(on)
 	}
 }
 
