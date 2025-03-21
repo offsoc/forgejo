@@ -12,7 +12,6 @@ import (
 	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/urfave/cli/v2"
-	"xorm.io/xorm"
 )
 
 // CmdMigrate represents the available migrate sub-command.
@@ -38,8 +37,7 @@ func runMigrate(ctx *cli.Context) error {
 	log.Info("Configuration file: %s", setting.CustomConf)
 
 	if err := db.InitEngineWithMigration(context.Background(), func(dbEngine db.Engine) error {
-		var e *xorm.Engine
-		masterEngine, err := db.GetMasterEngine(e)
+		masterEngine, err := db.GetMasterEngine(dbEngine)
 		if err != nil {
 			return err
 		}
