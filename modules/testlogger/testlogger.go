@@ -363,6 +363,9 @@ var ignoredErrorMessage = []string{
 
 	// TestDatabaseCollation
 	`[E] [Error SQL Query] INSERT INTO test_collation_tbl (txt) VALUES ('main') []`,
+
+	// Test_CmdForgejo_Actions
+	`DB: No dedicated replica host defined; falling back to primary DSN for replica connections`,
 }
 
 func (w *testLoggerWriterCloser) recordError(msg string) {
