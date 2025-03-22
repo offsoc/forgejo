@@ -104,7 +104,7 @@ require (
 	github.com/yuin/goldmark-meta v1.1.0
 	golang.org/x/crypto v0.35.0
 	golang.org/x/image v0.18.0
-	golang.org/x/net v0.33.0
+	golang.org/x/net v0.36.0
 	golang.org/x/oauth2 v0.16.0
 	golang.org/x/sys v0.30.0
 	golang.org/x/text v0.22.0
