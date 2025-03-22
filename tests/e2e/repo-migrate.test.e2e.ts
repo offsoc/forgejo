@@ -8,7 +8,7 @@ import {test, save_visual, test_context} from './utils_e2e.ts';
 test.use({user: 'user2'});
 
 
-test('Migration Repo Name detection', async ({page, browser}, workerInfo) => {
+test('Migration Repo Name detection', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky actionability checks on Mobile Safari');
 
   await page.goto('/repo/migrate?service_type=2');
@@ -18,21 +18,21 @@ test('Migration Repo Name detection', async ({page, browser}, workerInfo) => {
   // Test trailing slashes are stripped
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).fill('https://github.com/example/test/');
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).blur();
-  await expect(form.getByRole('textbox', {name: 'Repository Name'})).toHaveValue("test")
+  await expect(form.getByRole('textbox', {name: 'Repository Name'})).toHaveValue("test");
   await save_visual(page);
 
   // Test trailing .git is stripped
   await page.reload();
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).fill('https://github.com/example/test.git');
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).blur();
-  await expect(form.getByRole('textbox', {name: 'Repository Name'})).toHaveValue("test")
+  await expect(form.getByRole('textbox', {name: 'Repository Name'})).toHaveValue("test");
   await save_visual(page);
 
   // Test trailing .git and trailing / together is stripped
   await page.reload();
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).fill('https://github.com/example/test.git/');
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).blur();
-  await expect(form.getByRole('textbox', {name: 'Repository Name'})).toHaveValue("test")
+  await expect(form.getByRole('textbox', {name: 'Repository Name'})).toHaveValue("test");
   await save_visual(page);
 });
 
