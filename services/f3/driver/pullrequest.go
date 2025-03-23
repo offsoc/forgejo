@@ -18,6 +18,8 @@ import (
 	issue_service "code.gitea.io/gitea/services/issue"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
+	f3_path "code.forgejo.org/f3/gof3/v3/path"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -51,7 +53,7 @@ func (o *pullRequest) repositoryToReference(ctx context.Context, repository *rep
 	if repository == nil {
 		panic("unexpected nil repository")
 	}
-	forge := o.getTree().GetRoot().GetChild(generic.NewNodeID(f3_tree.KindForge)).GetDriver().(*forge)
+	forge := o.getTree().GetRoot().GetChild(f3_id.NewNodeID(f3_tree.KindForge)).GetDriver().(*forge)
 	owners := forge.getOwnersPath(ctx, fmt.Sprintf("%d", repository.OwnerID))
 	return f3_tree.NewRepositoryReference(owners.String(), repository.OwnerID, repository.ID)
 }
@@ -61,7 +63,7 @@ func (o *pullRequest) referenceToRepository(reference *f3.Reference) int64 {
 	if reference.Get() == "../../repository/vcs" {
 		project = f3_tree.GetProjectID(o.GetNode())
 	} else {
-		p := f3_tree.ToPath(generic.PathAbsolute(o.GetNode().GetCurrentPath().String(), reference.Get()))
+		p := f3_tree.ToPath(f3_path.PathAbsolute(generic.NewElementNode, o.GetNode().GetCurrentPath().String(), reference.Get()))
 		o.Trace("%v %v", o.GetNode().GetCurrentPath().String(), p)
 		_, project = p.OwnerAndProjectID()
 	}
@@ -237,7 +239,7 @@ func (o *pullRequest) GetPullRequestRef() string {
 	return fmt.Sprintf("refs/pull/%s/head", o.GetNativeID())
 }
 
-func (o *pullRequest) Put(ctx context.Context) generic.NodeID {
+func (o *pullRequest) Put(ctx context.Context) f3_id.NodeID {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
@@ -289,7 +291,7 @@ func (o *pullRequest) Put(ctx context.Context) generic.NodeID {
 	}
 
 	o.Trace("pullRequest created %d/%d", o.forgejoPullRequest.ID, o.forgejoPullRequest.Index)
-	return generic.NewNodeID(o.forgejoPullRequest.Index)
+	return f3_id.NewNodeID(o.forgejoPullRequest.Index)
 }
 
 func (o *pullRequest) Delete(ctx context.Context) {

@@ -529,7 +529,6 @@ func (repo *Repository) ComposeMetas(ctx context.Context) map[string]string {
 				Join("INNER", "team", "team.id = team_repo.team_id").
 				Where("team_repo.repo_id = ?", repo.ID).
 				Select("team.lower_name").
-				OrderBy("team.lower_name").
 				Find(&teams)
 			metas["teams"] = "," + strings.Join(teams, ",") + ","
 			metas["org"] = strings.ToLower(repo.OwnerName)
