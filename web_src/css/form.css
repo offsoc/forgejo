@@ -1,6 +1,9 @@
 fieldset {
   margin: 0.2em 0 0.3em;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 fieldset legend {
@@ -52,11 +55,6 @@ fieldset label > input[type="radio"] {
   position: relative;
   top: 2px;
   vertical-align: initial !important; /* overrides a semantic.css rule, remove when obsolete */
-}
-
-fieldset label:has(input[type="checkbox"]),
-fieldset label:has(input[type="radio"]) {
-  margin-bottom: 0.5rem !important;
 }
 
 fieldset label:has(input[type="checkbox"]) .help,
