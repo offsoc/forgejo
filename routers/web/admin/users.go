@@ -22,7 +22,6 @@ import (
 	"forgejo.org/modules/log"
 	"forgejo.org/modules/optional"
 	"forgejo.org/modules/setting"
-	"forgejo.org/modules/util"
 	"forgejo.org/modules/validation"
 	"forgejo.org/modules/web"
 	"forgejo.org/routers/web/explore"
@@ -77,11 +76,11 @@ func Users(ctx *context.Context) {
 			PageSize: setting.UI.Admin.UserPagingNum,
 		},
 		SearchByEmail:      true,
-		IsActive:           util.OptionalBoolParse(statusFilterMap["is_active"]),
-		IsAdmin:            util.OptionalBoolParse(statusFilterMap["is_admin"]),
-		IsRestricted:       util.OptionalBoolParse(statusFilterMap["is_restricted"]),
-		IsTwoFactorEnabled: util.OptionalBoolParse(statusFilterMap["is_2fa_enabled"]),
-		IsProhibitLogin:    util.OptionalBoolParse(statusFilterMap["is_prohibit_login"]),
+		IsActive:           optional.ParseBool(statusFilterMap["is_active"]),
+		IsAdmin:            optional.ParseBool(statusFilterMap["is_admin"]),
+		IsRestricted:       optional.ParseBool(statusFilterMap["is_restricted"]),
+		IsTwoFactorEnabled: optional.ParseBool(statusFilterMap["is_2fa_enabled"]),
+		IsProhibitLogin:    optional.ParseBool(statusFilterMap["is_prohibit_login"]),
 		IncludeReserved:    true, // administrator needs to list all accounts include reserved, bot, remote ones
 		Load2FAStatus:      true,
 		ExtraParamStrings:  extraParamStrings,
