@@ -18,20 +18,20 @@ test('Migration Repo Name detection', async ({page}, workerInfo) => {
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).fill('https://github.com/example/test/');
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).blur();
   await expect(form.getByRole('textbox', {name: 'Repository Name'})).toHaveValue('test');
-  await save_visual(page);
 
   // Test trailing .git is stripped
   await page.reload();
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).fill('https://github.com/example/test.git');
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).blur();
   await expect(form.getByRole('textbox', {name: 'Repository Name'})).toHaveValue('test');
-  await save_visual(page);
 
   // Test trailing .git and trailing / together is stripped
   await page.reload();
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).fill('https://github.com/example/test.git/');
   await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).blur();
   await expect(form.getByRole('textbox', {name: 'Repository Name'})).toHaveValue('test');
+
+  // Save screenshot only once
   await save_visual(page);
 });
 
