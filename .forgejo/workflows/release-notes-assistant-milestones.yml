@@ -9,7 +9,7 @@ jobs:
     if: vars.ROLE == 'forgejo-coding'
     runs-on: docker
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
 

@@ -12,7 +12,7 @@ jobs:
     if: ( vars.ROLE == 'forgejo-coding' ) && contains(github.event.pull_request.labels.*.name, 'worth a release-note')
     runs-on: docker
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
 
