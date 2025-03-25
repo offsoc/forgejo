@@ -10,12 +10,12 @@ import (
 	"path"
 	"strings"
 
-	git_model "code.gitea.io/gitea/models/git"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/setting"
+	git_model "forgejo.org/models/git"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/setting"
 )
 
 // UploadRepoFileOptions contains the uploaded repository file options

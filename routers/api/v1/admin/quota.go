@@ -6,9 +6,9 @@ package admin
 import (
 	"net/http"
 
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 // GetUserQuota return information about a user's quota

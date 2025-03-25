@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/test"
-	remote_service "code.gitea.io/gitea/services/remote"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/test"
+	remote_service "forgejo.org/services/remote"
+	"forgejo.org/tests"
 
 	"github.com/markbates/goth"
 	"github.com/stretchr/testify/assert"

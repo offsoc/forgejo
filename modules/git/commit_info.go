@@ -10,7 +10,7 @@ import (
 	"path"
 	"sort"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 // CommitInfo describes the first commit with the provided entry

@@ -8,14 +8,14 @@ import (
 	"context"
 	"errors"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/services/f3/util"
+	"forgejo.org/models"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/services/f3/util"
 
-	_ "code.gitea.io/gitea/services/f3/driver" // register the driver
+	_ "forgejo.org/services/f3/driver" // register the driver
 
 	f3_cmd "code.forgejo.org/f3/gof3/v3/cmd"
 	f3_logger "code.forgejo.org/f3/gof3/v3/logger"

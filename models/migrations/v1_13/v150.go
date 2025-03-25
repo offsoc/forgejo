@@ -4,8 +4,8 @@
 package v1_13 //nolint
 
 import (
-	"code.gitea.io/gitea/models/migrations/base"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/migrations/base"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm"
 )

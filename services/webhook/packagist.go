@@ -10,12 +10,12 @@ import (
 	"net/http"
 	"net/url"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/webhook/shared"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	webhook_module "forgejo.org/modules/webhook"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/webhook/shared"
 )
 
 type packagistHandler struct{}

@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
-	"code.gitea.io/gitea/modules/timeutil"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	migration_tests "forgejo.org/models/migrations/test"
+	"forgejo.org/modules/timeutil"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

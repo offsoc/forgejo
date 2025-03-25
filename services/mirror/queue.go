@@ -4,10 +4,10 @@
 package mirror
 
 import (
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/queue"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/queue"
+	"forgejo.org/modules/setting"
 )
 
 var mirrorQueue *queue.WorkerPoolQueue[*SyncRequest]

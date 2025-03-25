@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/indexer/internal"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/indexer/internal"
 )
 
 // Indexer defines an interface to index and search code contents

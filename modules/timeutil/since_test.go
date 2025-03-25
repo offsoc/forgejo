@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation"
 
 	"github.com/stretchr/testify/assert"
 )

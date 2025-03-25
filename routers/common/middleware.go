@@ -9,12 +9,12 @@ import (
 	"runtime/trace"
 	"strings"
 
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/modules/web/routing"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/cache"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/modules/web/routing"
+	"forgejo.org/services/context"
 
 	"code.forgejo.org/go-chi/session"
 	"github.com/chi-middleware/proxy"

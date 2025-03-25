@@ -11,10 +11,10 @@ import (
 	"path"
 	"strings"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/context"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/context"
 )
 
 func goGet(ctx *context.Context) {

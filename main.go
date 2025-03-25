@@ -10,16 +10,16 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/cmd"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/cmd"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 
 	// register supported doc types
-	_ "code.gitea.io/gitea/modules/markup/asciicast"
-	_ "code.gitea.io/gitea/modules/markup/console"
-	_ "code.gitea.io/gitea/modules/markup/csv"
-	_ "code.gitea.io/gitea/modules/markup/markdown"
-	_ "code.gitea.io/gitea/modules/markup/orgmode"
+	_ "forgejo.org/modules/markup/asciicast"
+	_ "forgejo.org/modules/markup/console"
+	_ "forgejo.org/modules/markup/csv"
+	_ "forgejo.org/modules/markup/markdown"
+	_ "forgejo.org/modules/markup/orgmode"
 
 	"github.com/urfave/cli/v2"
 )

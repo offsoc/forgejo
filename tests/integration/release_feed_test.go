@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )

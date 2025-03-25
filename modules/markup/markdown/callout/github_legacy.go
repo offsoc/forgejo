@@ -7,7 +7,7 @@ package callout
 import (
 	"strings"
 
-	"code.gitea.io/gitea/modules/markup/markdown/util"
+	"forgejo.org/modules/markup/markdown/util"
 
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"

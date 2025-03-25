@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	api "code.gitea.io/gitea/modules/structs"
+	api "forgejo.org/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 )

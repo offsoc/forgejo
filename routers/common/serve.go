@@ -7,11 +7,11 @@ import (
 	"io"
 	"time"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/httpcache"
-	"code.gitea.io/gitea/modules/httplib"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/httpcache"
+	"forgejo.org/modules/httplib"
+	"forgejo.org/modules/log"
+	"forgejo.org/services/context"
 )
 
 // ServeBlob download a git.Blob

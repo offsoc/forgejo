@@ -6,7 +6,7 @@ package doctor
 import (
 	"testing"
 
-	repo_model "code.gitea.io/gitea/models/repo"
+	repo_model "forgejo.org/models/repo"
 
 	"github.com/stretchr/testify/assert"
 )

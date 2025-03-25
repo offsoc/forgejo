@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/container"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/container"
+	api "forgejo.org/modules/structs"
 
 	"code.forgejo.org/go-chi/binding"
 )

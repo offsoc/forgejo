@@ -6,10 +6,10 @@ package forgejo_migrations //nolint:revive
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/auth"
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
-	"code.gitea.io/gitea/modules/keying"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/auth"
+	migration_tests "forgejo.org/models/migrations/test"
+	"forgejo.org/modules/keying"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

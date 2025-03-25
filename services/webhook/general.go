@@ -9,11 +9,11 @@ import (
 	"net/url"
 	"strings"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	webhook_module "forgejo.org/modules/webhook"
 )
 
 type linkFormatter = func(string, string) string

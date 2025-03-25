@@ -8,8 +8,8 @@ import (
 	"io"
 	"strings"
 
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/validation"
 
 	"github.com/sassoftware/go-rpmutils"
 )

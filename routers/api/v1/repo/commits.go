@@ -10,14 +10,14 @@ import (
 	"net/http"
 	"strconv"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	issues_model "forgejo.org/models/issues"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 // GetSingleCommit get a commit via sha

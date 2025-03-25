@@ -9,17 +9,17 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/models"
-	git_model "code.gitea.io/gitea/models/git"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	releaseservice "code.gitea.io/gitea/services/release"
+	"forgejo.org/models"
+	git_model "forgejo.org/models/git"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	releaseservice "forgejo.org/services/release"
 )
 
 // ListTags list all the tags of a repository

@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/modules/indexer/internal"
+	"forgejo.org/modules/indexer/internal"
 )
 
 // Indexer defines an interface to indexer issues contents

@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"net/http"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	issues_model "forgejo.org/models/issues"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 // AddIssueSubscription Subscribe user to issue

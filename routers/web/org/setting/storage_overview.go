@@ -4,9 +4,9 @@
 package setting
 
 import (
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/routers/web/shared"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/base"
+	"forgejo.org/routers/web/shared"
+	"forgejo.org/services/context"
 )
 
 const (

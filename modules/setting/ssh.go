@@ -11,8 +11,8 @@ import (
 	"text/template"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/util"
 
 	gossh "golang.org/x/crypto/ssh"
 )

@@ -8,9 +8,9 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	user_model "forgejo.org/models/user"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
 	f3_id "code.forgejo.org/f3/gof3/v3/id"

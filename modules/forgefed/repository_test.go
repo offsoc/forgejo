@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 
 	ap "github.com/go-ap/activitypub"
 )

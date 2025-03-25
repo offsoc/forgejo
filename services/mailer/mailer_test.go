@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	indexer_internal "code.gitea.io/gitea/modules/indexer/internal"
-	inner_meilisearch "code.gitea.io/gitea/modules/indexer/internal/meilisearch"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
+	indexer_internal "forgejo.org/modules/indexer/internal"
+	inner_meilisearch "forgejo.org/modules/indexer/internal/meilisearch"
+	"forgejo.org/modules/indexer/issues/internal"
 
 	"github.com/meilisearch/meilisearch-go"
 )

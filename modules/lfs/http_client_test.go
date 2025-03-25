@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

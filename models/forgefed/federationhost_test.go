@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 )
 
 func Test_FederationHostValidation(t *testing.T) {

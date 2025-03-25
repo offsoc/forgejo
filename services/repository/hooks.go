@@ -7,12 +7,12 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/log"
-	repo_module "code.gitea.io/gitea/modules/repository"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/webhook"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/log"
+	repo_module "forgejo.org/modules/repository"
 
 	"xorm.io/builder"
 )

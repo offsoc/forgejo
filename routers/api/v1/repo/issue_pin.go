@@ -6,10 +6,10 @@ package repo
 import (
 	"net/http"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	issues_model "forgejo.org/models/issues"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 // PinIssue pins a issue

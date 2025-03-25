@@ -4,7 +4,7 @@
 package user
 
 import (
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 )
 
 type FederatedUser struct {

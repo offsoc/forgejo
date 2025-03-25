@@ -13,14 +13,14 @@ import (
 	"net/http"
 	"strings"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/modules/optional"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	rubygems_module "code.gitea.io/gitea/modules/packages/rubygems"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/api/packages/helper"
-	"code.gitea.io/gitea/services/context"
-	packages_service "code.gitea.io/gitea/services/packages"
+	packages_model "forgejo.org/models/packages"
+	"forgejo.org/modules/optional"
+	packages_module "forgejo.org/modules/packages"
+	rubygems_module "forgejo.org/modules/packages/rubygems"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/api/packages/helper"
+	"forgejo.org/services/context"
+	packages_service "forgejo.org/services/packages"
 )
 
 const (

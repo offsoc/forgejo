@@ -16,8 +16,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
 
 	"github.com/dustin/go-humanize"
 )

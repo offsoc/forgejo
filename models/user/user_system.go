@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strings"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
 )
 
 const (

@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"net/url"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/routers/api/v1/user"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	"forgejo.org/models"
+	"forgejo.org/models/organization"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/routers/api/v1/user"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 // listMembers list an organization's members

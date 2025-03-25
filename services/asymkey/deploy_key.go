@@ -6,10 +6,10 @@ package asymkey
 import (
 	"context"
 
-	"code.gitea.io/gitea/models"
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
 )
 
 // DeleteDeployKey deletes deploy key from its repository authorized_keys file if needed.

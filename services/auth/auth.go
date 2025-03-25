@@ -10,15 +10,15 @@ import (
 	"regexp"
 	"strings"
 
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/auth/webauthn"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/session"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web/middleware"
-	gitea_context "code.gitea.io/gitea/services/context"
-	user_service "code.gitea.io/gitea/services/user"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/auth/webauthn"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/session"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web/middleware"
+	gitea_context "forgejo.org/services/context"
+	user_service "forgejo.org/services/user"
 )
 
 // Init should be called exactly once when the application starts to allow plugins

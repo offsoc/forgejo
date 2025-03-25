@@ -14,10 +14,10 @@ import (
 	"io"
 	"net/http"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/json"
-	api "code.gitea.io/gitea/modules/structs"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/json"
+	api "forgejo.org/modules/structs"
+	webhook_module "forgejo.org/modules/webhook"
 )
 
 var ErrPayloadTypeNotSupported = errors.New("unsupported webhook event")

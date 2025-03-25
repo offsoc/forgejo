@@ -10,7 +10,7 @@ import (
 	"io"
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

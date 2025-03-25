@@ -9,10 +9,10 @@ import (
 	"html/template"
 	"strings"
 
-	"code.gitea.io/gitea/modules/highlight"
-	"code.gitea.io/gitea/modules/indexer/code/internal"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/services/gitdiff"
+	"forgejo.org/modules/highlight"
+	"forgejo.org/modules/indexer/code/internal"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/services/gitdiff"
 )
 
 // Result a search result to display

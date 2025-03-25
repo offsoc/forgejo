@@ -7,8 +7,8 @@ package convert
 import (
 	"strings"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
 )
 
 // ToCorrectPageSize makes sure page size is in allowed range.

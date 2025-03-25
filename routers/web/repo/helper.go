@@ -7,9 +7,9 @@ import (
 	"net/url"
 	"slices"
 
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/services/context"
 )
 
 func MakeSelfOnTop(doer *user.User, users []*user.User) []*user.User {

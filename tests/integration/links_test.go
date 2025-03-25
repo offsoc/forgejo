@@ -9,11 +9,11 @@ import (
 	"path"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	forgejo_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	forgejo_context "forgejo.org/services/context"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )

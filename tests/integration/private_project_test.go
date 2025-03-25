@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	org_model "code.gitea.io/gitea/models/organization"
-	project_model "code.gitea.io/gitea/models/project"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/tests"
+	org_model "forgejo.org/models/organization"
+	project_model "forgejo.org/models/project"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )

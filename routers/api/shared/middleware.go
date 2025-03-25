@@ -6,11 +6,11 @@ package shared
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/routers/common"
+	"forgejo.org/services/auth"
+	"forgejo.org/services/context"
 
 	"github.com/go-chi/cors"
 )

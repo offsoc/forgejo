@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/perm"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/models/perm"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 )
 
 // AddPrincipalKey adds new principal to database and authorized_principals file.

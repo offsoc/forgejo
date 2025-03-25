@@ -6,10 +6,10 @@ package cmd
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/migrations"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/models/migrations"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 
 	"github.com/urfave/cli/v2"
 )

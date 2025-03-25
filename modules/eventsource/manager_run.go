@@ -7,15 +7,15 @@ import (
 	"context"
 	"time"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/services/convert"
+	activities_model "forgejo.org/models/activities"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/services/convert"
 )
 
 // Init starts this eventsource

@@ -6,11 +6,11 @@ package avatars_test
 import (
 	"testing"
 
-	avatars_model "code.gitea.io/gitea/models/avatars"
-	"code.gitea.io/gitea/models/db"
-	system_model "code.gitea.io/gitea/models/system"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/setting/config"
+	avatars_model "forgejo.org/models/avatars"
+	"forgejo.org/models/db"
+	system_model "forgejo.org/models/system"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/setting/config"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

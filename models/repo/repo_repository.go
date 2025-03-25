@@ -5,8 +5,8 @@ package repo
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/validation"
 )
 
 func init() {

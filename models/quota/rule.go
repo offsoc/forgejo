@@ -7,7 +7,7 @@ import (
 	"context"
 	"slices"
 
-	"code.gitea.io/gitea/models/db"
+	"forgejo.org/models/db"
 )
 
 type Rule struct {

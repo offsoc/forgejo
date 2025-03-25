@@ -9,9 +9,9 @@ import (
 	"io"
 	"testing"
 
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/markup/markdown"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/markup/markdown"
+	"forgejo.org/modules/setting"
 )
 
 var renderContext = markup.RenderContext{

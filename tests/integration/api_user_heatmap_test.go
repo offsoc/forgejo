@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/tests"
+	activities_model "forgejo.org/models/activities"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
