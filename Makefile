@@ -523,7 +523,7 @@ lint-yaml: .venv
 
 .PHONY: security-check
 security-check:
-	go run $(GOVULNCHECK_PACKAGE) ./...
+	go run $(GOVULNCHECK_PACKAGE) -show color ./...
 
 ###
 # Development and testing targets
