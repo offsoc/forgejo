@@ -11,21 +11,27 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func buildHandler(ret *[]string) Handler {
+	return Handler{
+		OnMsgid: func(fset *token.FileSet, pos token.Pos, msgid string) {
+			*ret = append(*ret, msgid)
+		},
+		OnUnexpectedInvoke: func(fset *token.FileSet, pos token.Pos, funcname string, argc int) {},
+		LocaleTrFunctions:  InitLocaleTrFunctions(),
+	}
+}
+
 func HandleGoFileWrapped(t *testing.T, fname, src string) []string {
 	var ret []string
-	omh := OnMsgidHandler(func(fset *token.FileSet, pos token.Pos, msgid string) {
-		ret = append(ret, msgid)
-	})
-	require.NoError(t, omh.HandleGoFile(fname, src))
+	handler := buildHandler(&ret)
+	require.NoError(t, handler.HandleGoFile(fname, src))
 	return ret
 }
 
 func HandleTemplateFileWrapped(t *testing.T, fname, src string) []string {
 	var ret []string
-	omh := OnMsgidHandler(func(fset *token.FileSet, pos token.Pos, msgid string) {
-		ret = append(ret, msgid)
-	})
-	require.NoError(t, omh.HandleTemplateFile(fname, src))
+	handler := buildHandler(&ret)
+	require.NoError(t, handler.HandleTemplateFile(fname, src))
 	return ret
 }
 
