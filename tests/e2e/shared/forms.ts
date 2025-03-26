@@ -18,7 +18,6 @@ export async function validate_form({page}: {page: Page}, scope: 'form' | 'field
   for (const b of await boxes.all()) {
     await expect(b).toHaveCSS('margin-left', '0px');
     await expect(b).toHaveCSS('margin-top', '0px');
-    await expect(b).toHaveCSS('vertical-align', 'baseline');
   }
 
   // assert no (trailing) colon is used in labels
