@@ -29,7 +29,7 @@
 				{{if .ctxData.Issue.IsPull}} {{$contentType = "pull"}} {{else}} {{$contentType = "issue"}} {{end}}
 			{{end}}
 			<div class="divider"></div>
-			<a class="item context" href="/-/abuse_reports/new?type={{$contentType}}&id={{.item.ID}}">{{ctx.Locale.Tr "moderation.report_content"}}</a>
+			<a class="item context" href="{{AppSubUrl}}/report_abuse?type={{$contentType}}&id={{.item.ID}}">{{ctx.Locale.Tr "moderation.report_content"}}</a>
 		{{end}}
 	</div>
 </div>

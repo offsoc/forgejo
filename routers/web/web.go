@@ -476,8 +476,8 @@ func registerRoutes(m *web.Route) {
 	}, reqSignIn)
 
 	if setting.Moderation.Enabled {
-		m.Get("/-/abuse_reports/new", reqSignIn, moderation.NewReport)
-		m.Post("/-/abuse_reports/new", reqSignIn, web.Bind(forms.ReportAbuseForm{}), moderation.CreatePost)
+		m.Get("/report_abuse", reqSignIn, moderation.NewReport)
+		m.Post("/report_abuse", reqSignIn, web.Bind(forms.ReportAbuseForm{}), moderation.CreatePost)
 	}
 
 	m.Get("/pulls", reqSignIn, user.Pulls)

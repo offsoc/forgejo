@@ -125,7 +125,7 @@
 			</li>
 			{{if .IsModerationEnabled}}
 			<li class="block" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
-				<a class="ui basic orange button" href="/-/abuse_reports/new?type=user&id={{.ContextUser.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
+				<a class="ui basic orange button" href="{{AppSubUrl}}/report_abuse?type=user&id={{.ContextUser.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
 			</li>
 			{{end}}
 			{{end}}

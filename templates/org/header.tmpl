@@ -25,7 +25,7 @@
 					<button class="ui dropdown icon button" data-tooltip-content="{{ctx.Locale.Tr "repo.more_operations"}}" aria-label="{{ctx.Locale.Tr "toggle_menu"}}">
 						{{svg "octicon-kebab-horizontal" 14}}
 						<div class="menu top left">
-							<a class="item context" href="/-/abuse_reports/new?type=org&id={{$.Org.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
+							<a class="item context" href="{{AppSubUrl}}/report_abuse?type=org&id={{$.Org.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
 						</div>
 					</button>
 				{{end}}
