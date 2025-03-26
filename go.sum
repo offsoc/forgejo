@@ -614,8 +614,8 @@ code.forgejo.org/f3/gof3/v3 v3.10.6 h1:Ru/Iz+pqM8IPi7atUHE7+q7v3O3DRbYgMFqrFTsO1
 code.forgejo.org/f3/gof3/v3 v3.10.6/go.mod h1:K6lQCWQIyN/5rjP/OJL9fMA6fd++satndE20w/I6Kss=
 code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251 h1:HTZl3CBk3ABNYtFI6TPLvJgGKFIhKT5CBk0sbOtkDKU=
 code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251/go.mod h1:PphB88CPbx601QrWPMZATeorACeVmQlyv3u+uUMbSaM=
-code.forgejo.org/forgejo/act v1.23.1 h1:4LU7u3FE380DicHz1oZ4ohsWU9I527OHeslVHnr9eP4=
-code.forgejo.org/forgejo/act v1.23.1/go.mod h1:9zh6c69HHCT8HfMR8I38I5ikPebxumJc34IFKeiSrAE=
+code.forgejo.org/forgejo/act v1.25.1 h1:T0CsN9iEWIyJzIbmMHMM9pl1KHzmI41q8mtepqVqdCc=
+code.forgejo.org/forgejo/act v1.25.1/go.mod h1:tSg5CAHnXp4WLNkMa2e9AEDSujMxKzNM4bF2pvvRCYQ=
 code.forgejo.org/forgejo/archiver/v3 v3.5.1 h1:UmmbA7D5550uf71SQjarmrn6yKwOGxtEjb3jaYYtmSE=
 code.forgejo.org/forgejo/archiver/v3 v3.5.1/go.mod h1:e3dqJ7H78uzsRSEACH1joayhuSyhnonssnDhppzS1L4=
 code.forgejo.org/forgejo/go-xsd-duration v0.0.0-20220703122237-02e73435a078 h1:RArF5AsF9LH4nEoJxqRxcP5r8hhRfWcId84G82YbqzA=
