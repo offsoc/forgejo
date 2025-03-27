@@ -627,6 +627,7 @@ var (
 		"pulls",
 		"milestones",
 		"notifications",
+		"report_abuse",
 
 		"favicon.ico",
 		"manifest.json", // web app manifests
