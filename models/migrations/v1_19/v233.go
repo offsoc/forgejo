@@ -6,10 +6,10 @@ package v1_19 //nolint
 import (
 	"fmt"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/secret"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/secret"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"

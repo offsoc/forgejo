@@ -6,15 +6,15 @@ package repo_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/unittest"
 
-	_ "code.gitea.io/gitea/models" // register table model
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/activities"
-	_ "code.gitea.io/gitea/models/forgefed"
-	_ "code.gitea.io/gitea/models/perm/access" // register table model
-	_ "code.gitea.io/gitea/models/repo"        // register table model
-	_ "code.gitea.io/gitea/models/user"        // register table model
+	_ "forgejo.org/models" // register table model
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/activities"
+	_ "forgejo.org/models/forgefed"
+	_ "forgejo.org/models/perm/access" // register table model
+	_ "forgejo.org/models/repo"        // register table model
+	_ "forgejo.org/models/user"        // register table model
 )
 
 func TestMain(m *testing.M) {

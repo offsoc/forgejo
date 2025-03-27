@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 // TreeEntry the leaf in the git tree

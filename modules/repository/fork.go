@@ -6,9 +6,9 @@ package repository
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
 )
 
 // CanUserForkRepo returns true if specified user can fork repository.

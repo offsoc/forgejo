@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"strings"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
 
 	"code.forgejo.org/go-chi/binding"
 )

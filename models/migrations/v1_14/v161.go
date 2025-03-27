@@ -6,7 +6,7 @@ package v1_14 //nolint
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/migrations/base"
+	"forgejo.org/models/migrations/base"
 
 	"xorm.io/xorm"
 )

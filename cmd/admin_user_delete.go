@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"strings"
 
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/storage"
-	user_service "code.gitea.io/gitea/services/user"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/storage"
+	user_service "forgejo.org/services/user"
 
 	"github.com/urfave/cli/v2"
 )

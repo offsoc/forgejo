@@ -12,11 +12,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"code.gitea.io/gitea/modules/activitypub"
-	"code.gitea.io/gitea/modules/httplib"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	gitea_context "code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/activitypub"
+	"forgejo.org/modules/httplib"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	gitea_context "forgejo.org/services/context"
 
 	"github.com/42wim/httpsig"
 	ap "github.com/go-ap/activitypub"

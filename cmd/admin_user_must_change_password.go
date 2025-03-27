@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	user_model "code.gitea.io/gitea/models/user"
+	user_model "forgejo.org/models/user"
 
 	"github.com/urfave/cli/v2"
 )

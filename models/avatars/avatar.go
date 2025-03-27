@@ -14,10 +14,10 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/cache"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 
 	"code.forgejo.org/forgejo-contrib/go-libravatar"
 )

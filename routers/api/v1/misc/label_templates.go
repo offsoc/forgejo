@@ -6,10 +6,10 @@ package misc
 import (
 	"net/http"
 
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 // Shows a list of all Label templates

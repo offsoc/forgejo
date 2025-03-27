@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/modules/markup"
-	mdutil "code.gitea.io/gitea/modules/markup/markdown/util"
+	"forgejo.org/modules/markup"
+	mdutil "forgejo.org/modules/markup/markdown/util"
 
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/renderer/html"

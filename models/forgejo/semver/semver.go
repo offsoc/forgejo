@@ -5,7 +5,7 @@ package semver
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
+	"forgejo.org/models/db"
 
 	"github.com/hashicorp/go-version"
 )

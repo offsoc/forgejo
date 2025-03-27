@@ -11,16 +11,16 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	debian_module "code.gitea.io/gitea/modules/packages/debian"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/api/packages/helper"
-	"code.gitea.io/gitea/services/context"
-	notify_service "code.gitea.io/gitea/services/notify"
-	packages_service "code.gitea.io/gitea/services/packages"
-	debian_service "code.gitea.io/gitea/services/packages/debian"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	packages_module "forgejo.org/modules/packages"
+	debian_module "forgejo.org/modules/packages/debian"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/api/packages/helper"
+	"forgejo.org/services/context"
+	notify_service "forgejo.org/services/notify"
+	packages_service "forgejo.org/services/packages"
+	debian_service "forgejo.org/services/packages/debian"
 )
 
 func apiError(ctx *context.Context, status int, obj any) {

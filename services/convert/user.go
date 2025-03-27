@@ -6,9 +6,9 @@ package convert
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/perm"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/perm"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
 )
 
 // ToUser convert user_model.User to api.User

@@ -6,8 +6,8 @@ package actions
 import (
 	"net/url"
 
-	actions_service "code.gitea.io/gitea/services/actions"
-	context_module "code.gitea.io/gitea/services/context"
+	actions_service "forgejo.org/services/actions"
+	context_module "forgejo.org/services/context"
 )
 
 func ManualRunWorkflow(ctx *context_module.Context) {

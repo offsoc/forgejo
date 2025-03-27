@@ -7,8 +7,8 @@ import (
 	"context"
 	"testing"
 
-	"code.gitea.io/gitea/modules/queue/mock"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/queue/mock"
+	"forgejo.org/modules/setting"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/suite"

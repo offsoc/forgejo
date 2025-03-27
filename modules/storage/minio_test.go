@@ -10,7 +10,7 @@ import (
 	"os"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/assert"

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/structs"
 
 	"github.com/gobwas/glob"
 )

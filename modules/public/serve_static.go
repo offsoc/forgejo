@@ -8,8 +8,8 @@ package public
 import (
 	"time"
 
-	"code.gitea.io/gitea/modules/assetfs"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/modules/assetfs"
+	"forgejo.org/modules/timeutil"
 )
 
 var _ GzipBytesProvider = (*vfsgen۰CompressedFileInfo)(nil)

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/private"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/private"
 
 	"github.com/urfave/cli/v2"
 )

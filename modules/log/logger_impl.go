@@ -11,8 +11,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/util"
 )
 
 type LoggerImpl struct {

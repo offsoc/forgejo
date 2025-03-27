@@ -12,14 +12,14 @@ import (
 	"regexp"
 	"strings"
 
-	"code.gitea.io/gitea/models"
-	issues_model "code.gitea.io/gitea/models/issues"
-	project_model "code.gitea.io/gitea/models/project"
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models"
+	issues_model "forgejo.org/models/issues"
+	project_model "forgejo.org/models/project"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/services/context"
 
 	"code.forgejo.org/go-chi/binding"
 )

@@ -6,8 +6,8 @@ package db
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/auth"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/auth"
+	user_model "forgejo.org/models/user"
 )
 
 // Source is a password authentication service

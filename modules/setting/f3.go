@@ -3,7 +3,7 @@
 package setting
 
 import (
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 // Friendly Forge Format (F3) settings

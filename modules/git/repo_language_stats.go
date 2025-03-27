@@ -10,9 +10,9 @@ import (
 	"strings"
 	"unicode"
 
-	"code.gitea.io/gitea/modules/analyze"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/modules/analyze"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
 
 	"github.com/go-enry/go-enry/v2"
 )

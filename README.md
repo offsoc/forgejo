@@ -15,11 +15,6 @@ Our promise: **Independent Free/Libre Software forever!**
 
 ## What does Forgejo offer?
 
-<!-- If you want to know what Forgejo is like,
-you can check out public instances,
-e.g. [Codeberg.org](https://codeberg.org).
--->
-
 If you like any of the following, Forgejo is literally meant for you:
 
 - Lightweight: Forgejo can easily be hosted on nearly **every machine**.

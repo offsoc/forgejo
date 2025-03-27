@@ -5414,6 +5414,9 @@
           }
         ],
         "responses": {
+          "201": {
+            "$ref": "#/responses/DispatchWorkflowRun"
+          },
           "204": {
             "$ref": "#/responses/empty"
           },
@@ -20592,7 +20595,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "APIForbiddenError": {
       "type": "object",
@@ -20606,7 +20609,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/services/context"
+      "x-go-package": "forgejo.org/services/context"
     },
     "APIInternalServerError": {
       "type": "object",
@@ -20620,7 +20623,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/services/context"
+      "x-go-package": "forgejo.org/services/context"
     },
     "APIInvalidTopicsError": {
       "type": "object",
@@ -20637,7 +20640,7 @@
           "x-go-name": "Message"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/services/context"
+      "x-go-package": "forgejo.org/services/context"
     },
     "APINotFound": {
       "type": "object",
@@ -20658,7 +20661,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/services/context"
+      "x-go-package": "forgejo.org/services/context"
     },
     "APIRepoArchivedError": {
       "type": "object",
@@ -20672,7 +20675,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/services/context"
+      "x-go-package": "forgejo.org/services/context"
     },
     "APIUnauthorizedError": {
       "type": "object",
@@ -20686,7 +20689,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/services/context"
+      "x-go-package": "forgejo.org/services/context"
     },
     "APIValidationError": {
       "type": "object",
@@ -20700,7 +20703,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/services/context"
+      "x-go-package": "forgejo.org/services/context"
     },
     "AccessToken": {
       "type": "object",
@@ -20731,7 +20734,7 @@
           "x-go-name": "TokenLastEight"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ActionRunJob": {
       "description": "ActionRunJob represents a job of a run",
@@ -20788,7 +20791,7 @@
           "x-go-name": "TaskID"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ActionTask": {
       "description": "ActionTask represents a ActionTask",
@@ -20852,7 +20855,7 @@
           "x-go-name": "WorkflowID"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ActionTaskResponse": {
       "description": "ActionTaskResponse returns a ActionTask",
@@ -20871,7 +20874,7 @@
           "x-go-name": "Entries"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ActionVariable": {
       "description": "ActionVariable return value of the query API",
@@ -20900,7 +20903,7 @@
           "x-go-name": "RepoID"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Activity": {
       "type": "object",
@@ -20991,7 +20994,7 @@
           "x-go-name": "UserID"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ActivityPub": {
       "description": "ActivityPub type",
@@ -21002,7 +21005,7 @@
           "x-go-name": "Context"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "AddCollaboratorOption": {
       "description": "AddCollaboratorOption options when adding a user as a collaborator of a repository",
@@ -21018,7 +21021,7 @@
           "x-go-name": "Permission"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "AddTimeOption": {
       "description": "AddTimeOption options for adding time to an issue",
@@ -21044,7 +21047,7 @@
           "x-go-name": "User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "AnnotatedTag": {
       "description": "AnnotatedTag represents an annotated tag",
@@ -21079,7 +21082,7 @@
           "$ref": "#/definitions/PayloadCommitVerification"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "AnnotatedTagObject": {
       "description": "AnnotatedTagObject contains meta information of the tag object",
@@ -21098,7 +21101,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Attachment": {
       "description": "Attachment a generic attachment",
@@ -21145,7 +21148,7 @@
           "x-go-name": "UUID"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "BlockedUser": {
       "type": "object",
@@ -21162,7 +21165,7 @@
           "x-go-name": "Created"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Branch": {
       "description": "Branch represents a repository branch",
@@ -21208,7 +21211,7 @@
           "x-go-name": "UserCanPush"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "BranchProtection": {
       "description": "BranchProtection represents a branch protection for a repository",
@@ -21348,7 +21351,7 @@
           "x-go-name": "Updated"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ChangeFileOperation": {
       "description": "ChangeFileOperation for creating, updating or deleting a file",
@@ -21389,7 +21392,7 @@
           "x-go-name": "SHA"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ChangeFilesOptions": {
       "description": "ChangeFilesOptions options for creating, updating or deleting multiple files\nNote: `author` and `committer` are optional (if only one is given, it will be used for the other, otherwise the authenticated user will be used)",
@@ -21436,7 +21439,7 @@
           "x-go-name": "Signoff"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ChangedFile": {
       "description": "ChangedFile store information about files affected by the pull request",
@@ -21482,7 +21485,7 @@
           "x-go-name": "Status"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CombinedStatus": {
       "description": "CombinedStatus holds the combined state of several statuses for a single commit",
@@ -21519,7 +21522,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Comment": {
       "description": "Comment represents a comment on a commit or issue",
@@ -21576,7 +21579,7 @@
           "$ref": "#/definitions/User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Commit": {
       "type": "object",
@@ -21626,7 +21629,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CommitAffectedFiles": {
       "description": "CommitAffectedFiles store information about files affected by the commit",
@@ -21641,7 +21644,7 @@
           "x-go-name": "Status"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CommitDateOptions": {
       "description": "CommitDateOptions store dates for GIT_AUTHOR_DATE and GIT_COMMITTER_DATE",
@@ -21658,7 +21661,7 @@
           "x-go-name": "Committer"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CommitMeta": {
       "type": "object",
@@ -21678,7 +21681,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CommitStats": {
       "description": "CommitStats is statistics for a RepoCommit",
@@ -21700,7 +21703,7 @@
           "x-go-name": "Total"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CommitStatus": {
       "description": "CommitStatus holds a single status of a single Commit",
@@ -21744,12 +21747,12 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CommitStatusState": {
       "description": "CommitStatusState holds the state of a CommitStatus\nIt can be \"pending\", \"success\", \"error\" and \"failure\"",
       "type": "string",
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CommitUser": {
       "type": "object",
@@ -21769,7 +21772,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Compare": {
       "type": "object",
@@ -21795,7 +21798,7 @@
           "x-go-name": "TotalCommits"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ContentsResponse": {
       "description": "ContentsResponse contains information about a repo's entry's (dir, file, symlink, submodule) metadata and content",
@@ -21867,7 +21870,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateAccessTokenOption": {
       "description": "CreateAccessTokenOption options when create access token",
@@ -21888,7 +21891,7 @@
           "x-go-name": "Scopes"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateBranchProtectionOption": {
       "description": "CreateBranchProtectionOption options for creating a branch protection",
@@ -22018,7 +22021,7 @@
           "x-go-name": "UnprotectedFilePatterns"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateBranchRepoOption": {
       "description": "CreateBranchRepoOption options when creating a branch in a repository",
@@ -22046,7 +22049,7 @@
           "x-go-name": "OldRefName"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateEmailOption": {
       "description": "CreateEmailOption options when creating email addresses",
@@ -22061,7 +22064,7 @@
           "x-go-name": "Emails"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateFileOptions": {
       "description": "CreateFileOptions options for creating files\nNote: `author` and `committer` are optional (if only one is given, it will be used for the other, otherwise the authenticated user will be used)",
@@ -22105,7 +22108,7 @@
           "x-go-name": "Signoff"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateForkOption": {
       "description": "CreateForkOption options for creating a fork",
@@ -22122,7 +22125,7 @@
           "x-go-name": "Organization"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateGPGKeyOption": {
       "description": "CreateGPGKeyOption options create user GPG key",
@@ -22142,7 +22145,7 @@
           "x-go-name": "Signature"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateHookOption": {
       "description": "CreateHookOption options when create a hook",
@@ -22193,7 +22196,7 @@
           "x-go-name": "Type"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateHookOptionConfig": {
       "description": "CreateHookOptionConfig has all config options in it\nrequired are \"content_type\" and \"url\" Required",
@@ -22201,7 +22204,7 @@
       "additionalProperties": {
         "type": "string"
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateIssueCommentOption": {
       "description": "CreateIssueCommentOption options for creating a comment on an issue",
@@ -22220,7 +22223,7 @@
           "x-go-name": "Updated"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateIssueOption": {
       "description": "CreateIssueOption options to create one issue",
@@ -22278,7 +22281,7 @@
           "x-go-name": "Title"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateKeyOption": {
       "description": "CreateKeyOption options when creating a key",
@@ -22306,7 +22309,7 @@
           "x-go-name": "Title"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateLabelOption": {
       "description": "CreateLabelOption options for creating a label",
@@ -22340,7 +22343,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateMilestoneOption": {
       "description": "CreateMilestoneOption options for creating a milestone",
@@ -22368,7 +22371,7 @@
           "x-go-name": "Title"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateOAuth2ApplicationOptions": {
       "description": "CreateOAuth2ApplicationOptions holds options to create an oauth2 application",
@@ -22390,7 +22393,7 @@
           "x-go-name": "RedirectURIs"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateOrUpdateSecretOption": {
       "description": "CreateOrUpdateSecretOption options when creating or updating secret",
@@ -22405,7 +22408,7 @@
           "x-go-name": "Data"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateOrgOption": {
       "description": "CreateOrgOption options for creating an organization",
@@ -22453,7 +22456,7 @@
           "x-go-name": "Website"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreatePullRequestOption": {
       "description": "CreatePullRequestOption options when creating a pull request",
@@ -22505,7 +22508,7 @@
           "x-go-name": "Title"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreatePullReviewComment": {
       "description": "CreatePullReviewComment represent a review comment for creation api",
@@ -22533,7 +22536,7 @@
           "x-go-name": "Path"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreatePullReviewCommentOptions": {
       "$ref": "#/definitions/CreatePullReviewComment"
@@ -22561,7 +22564,7 @@
           "$ref": "#/definitions/ReviewStateType"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreatePushMirrorOption": {
       "type": "object",
@@ -22592,7 +22595,7 @@
           "x-go-name": "UseSSH"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateQuotaGroupOptions": {
       "description": "CreateQutaGroupOptions represents the options for creating a quota group",
@@ -22612,7 +22615,7 @@
           "x-go-name": "Rules"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateQuotaRuleOptions": {
       "description": "CreateQuotaRuleOptions represents the options for creating a quota rule",
@@ -22638,7 +22641,7 @@
           "x-go-name": "Subjects"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateReleaseOption": {
       "description": "CreateReleaseOption options when creating a release",
@@ -22676,7 +22679,7 @@
           "x-go-name": "Target"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateRepoOption": {
       "description": "CreateRepoOption options when creating repository",
@@ -22757,7 +22760,7 @@
           "x-go-name": "TrustModel"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateStatusOption": {
       "description": "CreateStatusOption holds the information needed to create a new CommitStatus for a Commit",
@@ -22779,7 +22782,7 @@
           "x-go-name": "TargetURL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateTagOption": {
       "description": "CreateTagOption options when creating a tag",
@@ -22801,7 +22804,7 @@
           "x-go-name": "Target"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateTagProtectionOption": {
       "description": "CreateTagProtectionOption options for creating a tag protection",
@@ -22826,7 +22829,7 @@
           "x-go-name": "WhitelistUsernames"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateTeamOption": {
       "description": "CreateTeamOption options for creating a team",
@@ -22888,7 +22891,7 @@
           "example": "{\"repo.actions\",\"repo.packages\",\"repo.code\":\"read\",\"repo.issues\":\"write\",\"repo.ext_issues\":\"none\",\"repo.wiki\":\"admin\",\"repo.pulls\":\"owner\",\"repo.releases\":\"none\",\"repo.projects\":\"none\",\"repo.ext_wiki\":\"none\"}"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateUserOption": {
       "description": "CreateUserOption create user options",
@@ -22947,7 +22950,7 @@
           "x-go-name": "Visibility"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateVariableOption": {
       "description": "CreateVariableOption the option when creating variable",
@@ -22962,7 +22965,7 @@
           "x-go-name": "Value"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "CreateWikiPageOptions": {
       "description": "CreateWikiPageOptions form for creating wiki",
@@ -22984,7 +22987,7 @@
           "x-go-name": "Title"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Cron": {
       "description": "Cron represents a Cron task",
@@ -23014,7 +23017,7 @@
           "x-go-name": "Schedule"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "DeleteEmailOption": {
       "description": "DeleteEmailOption options when deleting email addresses",
@@ -23029,7 +23032,7 @@
           "x-go-name": "Emails"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "DeleteFileOptions": {
       "description": "DeleteFileOptions options for deleting files (used for other File structs below)\nNote: `author` and `committer` are optional (if only one is given, it will be used for the other, otherwise the authenticated user will be used)",
@@ -23073,7 +23076,7 @@
           "x-go-name": "Signoff"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "DeleteLabelsOption": {
       "description": "DeleteLabelOption options for deleting a label",
@@ -23085,7 +23088,7 @@
           "x-go-name": "Updated"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "DeployKey": {
       "description": "DeployKey a deploy key",
@@ -23130,7 +23133,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "DismissPullReviewOptions": {
       "description": "DismissPullReviewOptions are options to dismiss a pull review",
@@ -23145,7 +23148,7 @@
           "x-go-name": "Priors"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "DispatchWorkflowOption": {
       "description": "DispatchWorkflowOption options when dispatching a workflow",
@@ -23174,7 +23177,7 @@
           "x-go-name": "ReturnRunInfo"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "DispatchWorkflowRun": {
       "description": "DispatchWorkflowRun represents a workflow run",
@@ -23193,9 +23196,15 @@
             "type": "string"
           },
           "x-go-name": "Jobs"
+        },
+        "run_number": {
+          "description": "a unique number for each run of a repository",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RunNumber"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditAttachmentOptions": {
       "description": "EditAttachmentOptions options for editing attachments",
@@ -23211,7 +23220,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditBranchProtectionOption": {
       "description": "EditBranchProtectionOption options for editing a branch protection",
@@ -23332,7 +23341,7 @@
           "x-go-name": "UnprotectedFilePatterns"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditDeadlineOption": {
       "description": "EditDeadlineOption options for creating a deadline",
@@ -23347,7 +23356,7 @@
           "x-go-name": "Deadline"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditGitHookOption": {
       "description": "EditGitHookOption options when modifying one Git hook",
@@ -23358,7 +23367,7 @@
           "x-go-name": "Content"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditHookOption": {
       "description": "EditHookOption options when modify one hook",
@@ -23391,7 +23400,7 @@
           "x-go-name": "Events"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditIssueCommentOption": {
       "description": "EditIssueCommentOption options for editing a comment",
@@ -23410,7 +23419,7 @@
           "x-go-name": "Updated"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditIssueOption": {
       "description": "EditIssueOption options for editing an issue",
@@ -23464,7 +23473,7 @@
           "x-go-name": "Updated"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditLabelOption": {
       "description": "EditLabelOption options for editing a label",
@@ -23494,7 +23503,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditMilestoneOption": {
       "description": "EditMilestoneOption options for editing a milestone",
@@ -23518,7 +23527,7 @@
           "x-go-name": "Title"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditOrgOption": {
       "description": "EditOrgOption options for editing an organization",
@@ -23559,7 +23568,7 @@
           "x-go-name": "Website"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditPullRequestOption": {
       "description": "EditPullRequestOption options when modify pull request",
@@ -23619,7 +23628,7 @@
           "x-go-name": "RemoveDeadline"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditQuotaRuleOptions": {
       "description": "EditQuotaRuleOptions represents the options for editing a quota rule",
@@ -23640,7 +23649,7 @@
           "x-go-name": "Subjects"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditReactionOption": {
       "description": "EditReactionOption contain the reaction type",
@@ -23651,7 +23660,7 @@
           "x-go-name": "Reaction"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditReleaseOption": {
       "description": "EditReleaseOption options when editing a release",
@@ -23686,7 +23695,7 @@
           "x-go-name": "Target"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditRepoOption": {
       "description": "EditRepoOption options when editing a repository's properties",
@@ -23858,7 +23867,7 @@
           "x-go-name": "WikiBranch"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditTagProtectionOption": {
       "description": "EditTagProtectionOption options for editing a tag protection",
@@ -23883,7 +23892,7 @@
           "x-go-name": "WhitelistUsernames"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditTeamOption": {
       "description": "EditTeamOption options for editing a team",
@@ -23952,7 +23961,7 @@
           }
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "EditUserOption": {
       "description": "EditUserOption edit user options",
@@ -24038,7 +24047,7 @@
           "x-go-name": "Website"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Email": {
       "description": "Email an email address belonging to a user",
@@ -24067,7 +24076,7 @@
           "x-go-name": "Verified"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ExternalTracker": {
       "description": "ExternalTracker represents settings for external tracker",
@@ -24094,7 +24103,7 @@
           "x-go-name": "ExternalTrackerURL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ExternalWiki": {
       "description": "ExternalWiki represents setting for external wiki",
@@ -24106,7 +24115,7 @@
           "x-go-name": "ExternalWikiURL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "FileCommitResponse": {
       "type": "object",
@@ -24150,7 +24159,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "FileDeleteResponse": {
       "description": "FileDeleteResponse contains information about a repo's file that was deleted",
@@ -24166,7 +24175,7 @@
           "$ref": "#/definitions/PayloadCommitVerification"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "FileLinksResponse": {
       "description": "FileLinksResponse contains the links for a repo's file",
@@ -24185,7 +24194,7 @@
           "x-go-name": "Self"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "FileResponse": {
       "description": "FileResponse contains information about a repo's file",
@@ -24201,7 +24210,7 @@
           "$ref": "#/definitions/PayloadCommitVerification"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "FilesResponse": {
       "description": "FilesResponse contains information about multiple files from a repo",
@@ -24221,12 +24230,12 @@
           "$ref": "#/definitions/PayloadCommitVerification"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ForgeLike": {
       "description": "ForgeLike activity data type",
       "type": "object",
-      "x-go-package": "code.gitea.io/gitea/modules/forgefed"
+      "x-go-package": "forgejo.org/modules/forgefed"
     },
     "GPGKey": {
       "description": "GPGKey a user GPG key to sign commit and tag in repository",
@@ -24294,7 +24303,7 @@
           "x-go-name": "Verified"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GPGKeyEmail": {
       "description": "GPGKeyEmail an email attached to a GPGKey",
@@ -24309,7 +24318,7 @@
           "x-go-name": "Verified"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GeneralAPISettings": {
       "description": "GeneralAPISettings contains global api settings exposed by it",
@@ -24336,7 +24345,7 @@
           "x-go-name": "MaxResponseItems"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GeneralAttachmentSettings": {
       "description": "GeneralAttachmentSettings contains global Attachment settings exposed by API",
@@ -24361,7 +24370,7 @@
           "x-go-name": "MaxSize"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GeneralRepoSettings": {
       "description": "GeneralRepoSettings contains global repository settings exposed by API",
@@ -24396,7 +24405,7 @@
           "x-go-name": "TimeTrackingDisabled"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GeneralUISettings": {
       "description": "GeneralUISettings contains global ui settings exposed by API",
@@ -24421,7 +24430,7 @@
           "x-go-name": "DefaultTheme"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GenerateRepoOption": {
       "description": "GenerateRepoOption options when creating repository using a template",
@@ -24493,7 +24502,7 @@
           "x-go-name": "Webhooks"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GitBlobResponse": {
       "description": "GitBlobResponse represents a git blob",
@@ -24521,7 +24530,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GitEntry": {
       "description": "GitEntry represents a git tree",
@@ -24553,7 +24562,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GitHook": {
       "description": "GitHook represents a Git repository hook",
@@ -24572,7 +24581,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GitObject": {
       "type": "object",
@@ -24591,7 +24600,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GitTreeResponse": {
       "description": "GitTreeResponse returns a git tree",
@@ -24627,7 +24636,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "GitignoreTemplateInfo": {
       "description": "GitignoreTemplateInfo name and text of a gitignore template",
@@ -24642,7 +24651,7 @@
           "x-go-name": "Source"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Hook": {
       "description": "Hook a hook is a web hook when one repository changed",
@@ -24706,7 +24715,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Identity": {
       "description": "Identity for a person's identity like an author or committer",
@@ -24722,7 +24731,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "InternalTracker": {
       "description": "InternalTracker represents settings for internal tracker",
@@ -24744,7 +24753,7 @@
           "x-go-name": "EnableTimeTracker"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Issue": {
       "description": "Issue represents an issue in a repository",
@@ -24863,7 +24872,7 @@
           "$ref": "#/definitions/User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueConfig": {
       "type": "object",
@@ -24880,7 +24889,7 @@
           "x-go-name": "ContactLinks"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueConfigContactLink": {
       "type": "object",
@@ -24898,7 +24907,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueConfigValidation": {
       "type": "object",
@@ -24912,7 +24921,7 @@
           "x-go-name": "Valid"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueDeadline": {
       "description": "IssueDeadline represents an issue deadline",
@@ -24924,7 +24933,7 @@
           "x-go-name": "Deadline"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueFormField": {
       "description": "IssueFormField represents a form field",
@@ -24955,17 +24964,17 @@
           "x-go-name": "Visible"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueFormFieldType": {
       "type": "string",
       "title": "IssueFormFieldType defines issue form field type, can be \"markdown\", \"textarea\", \"input\", \"dropdown\" or \"checkboxes\"",
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueFormFieldVisible": {
       "description": "IssueFormFieldVisible defines issue form field visible",
       "type": "string",
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueLabelsOption": {
       "description": "IssueLabelsOption a collection of labels",
@@ -24983,7 +24992,7 @@
           "x-go-name": "Updated"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueMeta": {
       "description": "IssueMeta basic issue information",
@@ -25003,7 +25012,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueTemplate": {
       "description": "IssueTemplate represents an issue template for a repository",
@@ -25044,14 +25053,14 @@
           "x-go-name": "Title"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "IssueTemplateLabels": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Label": {
       "description": "Label a label to an issue or a pr",
@@ -25090,7 +25099,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "LabelTemplate": {
       "description": "LabelTemplate info of a Label template",
@@ -25115,7 +25124,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "LicenseTemplateInfo": {
       "description": "LicensesInfo contains information about a License",
@@ -25142,7 +25151,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "LicensesTemplateListEntry": {
       "description": "LicensesListEntry is used for the API",
@@ -25161,7 +25170,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "MarkdownOption": {
       "description": "MarkdownOption markdown options",
@@ -25184,7 +25193,7 @@
           "type": "boolean"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "MarkupOption": {
       "description": "MarkupOption markup options",
@@ -25215,7 +25224,7 @@
           "type": "boolean"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "MergePullRequestOption": {
       "description": "MergePullRequestForm form for merging Pull Request",
@@ -25262,7 +25271,7 @@
         }
       },
       "x-go-name": "MergePullRequestForm",
-      "x-go-package": "code.gitea.io/gitea/services/forms"
+      "x-go-package": "forgejo.org/services/forms"
     },
     "MigrateRepoOptions": {
       "description": "MigrateRepoOptions options for migrating repository's\nthis is used to interact with api v1",
@@ -25366,7 +25375,7 @@
           "x-go-name": "Wiki"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Milestone": {
       "description": "Milestone milestone is a collection of issues on one repository",
@@ -25419,7 +25428,7 @@
           "x-go-name": "Updated"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NewIssuePinsAllowed": {
       "description": "NewIssuePinsAllowed represents an API response that says if new Issue Pins are allowed",
@@ -25434,7 +25443,7 @@
           "x-go-name": "PullRequests"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NodeInfo": {
       "description": "NodeInfo contains standardized way of exposing metadata about a server running one of the distributed social networks",
@@ -25469,7 +25478,7 @@
           "x-go-name": "Version"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NodeInfoServices": {
       "description": "NodeInfoServices contains the third party sites this server can connect to via their application API",
@@ -25490,7 +25499,7 @@
           "x-go-name": "Outbound"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NodeInfoSoftware": {
       "description": "NodeInfoSoftware contains Metadata about server software in use",
@@ -25513,7 +25522,7 @@
           "x-go-name": "Version"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NodeInfoUsage": {
       "description": "NodeInfoUsage contains usage statistics for this server",
@@ -25533,7 +25542,7 @@
           "$ref": "#/definitions/NodeInfoUsageUsers"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NodeInfoUsageUsers": {
       "description": "NodeInfoUsageUsers contains statistics about the users of this server",
@@ -25555,7 +25564,7 @@
           "x-go-name": "Total"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Note": {
       "description": "Note contains information related to a git note",
@@ -25569,7 +25578,7 @@
           "x-go-name": "Message"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NoteOptions": {
       "type": "object",
@@ -25579,7 +25588,7 @@
           "x-go-name": "Message"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NotificationCount": {
       "description": "NotificationCount number of unread notifications",
@@ -25591,7 +25600,7 @@
           "x-go-name": "New"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NotificationSubject": {
       "description": "NotificationSubject contains the notification subject (Issue/Pull/Commit)",
@@ -25624,7 +25633,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NotificationThread": {
       "description": "NotificationThread expose Notification on API",
@@ -25659,12 +25668,12 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "NotifySubjectType": {
       "description": "NotifySubjectType represent type of notification subject",
       "type": "string",
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "OAuth2Application": {
       "type": "object",
@@ -25704,7 +25713,7 @@
           "x-go-name": "RedirectURIs"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Organization": {
       "description": "Organization represents an organization",
@@ -25757,7 +25766,7 @@
           "x-go-name": "Website"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "OrganizationPermissions": {
       "description": "OrganizationPermissions list different users permissions on an organization",
@@ -25784,7 +25793,7 @@
           "x-go-name": "IsOwner"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PRBranchInfo": {
       "description": "PRBranchInfo information about a branch",
@@ -25811,7 +25820,7 @@
           "x-go-name": "Sha"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Package": {
       "description": "Package represents a package",
@@ -25853,7 +25862,7 @@
           "x-go-name": "Version"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PackageFile": {
       "description": "PackageFile represents a package file",
@@ -25889,7 +25898,7 @@
           "x-go-name": "HashSHA512"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PayloadCommit": {
       "description": "PayloadCommit represents a commit",
@@ -25944,7 +25953,7 @@
           "$ref": "#/definitions/PayloadCommitVerification"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PayloadCommitVerification": {
       "description": "PayloadCommitVerification represents the GPG verification of a commit",
@@ -25970,7 +25979,7 @@
           "x-go-name": "Verified"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PayloadUser": {
       "description": "PayloadUser represents the author or committer of a commit",
@@ -25991,7 +26000,7 @@
           "x-go-name": "UserName"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Permission": {
       "description": "Permission represents a set of permissions",
@@ -26010,7 +26019,7 @@
           "x-go-name": "Push"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PublicKey": {
       "description": "PublicKey publickey is a user key to push code to repository",
@@ -26054,7 +26063,7 @@
           "$ref": "#/definitions/User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PullRequest": {
       "description": "PullRequest represents a pull request",
@@ -26228,7 +26237,7 @@
           "$ref": "#/definitions/User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PullRequestMeta": {
       "description": "PullRequestMeta PR info if an issue is a PR",
@@ -26252,7 +26261,7 @@
           "x-go-name": "Merged"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PullReview": {
       "description": "PullReview represents a pull request review",
@@ -26316,7 +26325,7 @@
           "$ref": "#/definitions/User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PullReviewComment": {
       "description": "PullReviewComment represents a comment on a pull request review",
@@ -26387,7 +26396,7 @@
           "$ref": "#/definitions/User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PullReviewRequestOptions": {
       "description": "PullReviewRequestOptions are options to add or remove pull review requests",
@@ -26408,7 +26417,7 @@
           "x-go-name": "TeamReviewers"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "PushMirror": {
       "description": "PushMirror represents information of a push mirror",
@@ -26453,7 +26462,7 @@
           "x-go-name": "SyncOnCommit"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaGroup": {
       "description": "QuotaGroup represents a quota group",
@@ -26473,7 +26482,7 @@
           "x-go-name": "Rules"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaGroupList": {
       "description": "QuotaGroupList represents a list of quota groups",
@@ -26481,7 +26490,7 @@
       "items": {
         "$ref": "#/definitions/QuotaGroup"
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaInfo": {
       "description": "QuotaInfo represents information about a user's quota",
@@ -26494,7 +26503,7 @@
           "$ref": "#/definitions/QuotaUsed"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaRuleInfo": {
       "description": "QuotaRuleInfo contains information about a quota rule",
@@ -26520,7 +26529,7 @@
           "x-go-name": "Subjects"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsed": {
       "description": "QuotaUsed represents the quota usage of a user",
@@ -26530,7 +26539,7 @@
           "$ref": "#/definitions/QuotaUsedSize"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedArtifact": {
       "description": "QuotaUsedArtifact represents an artifact counting towards a user's quota",
@@ -26553,7 +26562,7 @@
           "x-go-name": "Size"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedArtifactList": {
       "description": "QuotaUsedArtifactList represents a list of artifacts counting towards a user's quota",
@@ -26561,7 +26570,7 @@
       "items": {
         "$ref": "#/definitions/QuotaUsedArtifact"
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedAttachment": {
       "description": "QuotaUsedAttachment represents an attachment counting towards a user's quota",
@@ -26601,7 +26610,7 @@
           "x-go-name": "Size"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedAttachmentList": {
       "description": "QuotaUsedAttachmentList represents a list of attachment counting towards a user's quota",
@@ -26609,7 +26618,7 @@
       "items": {
         "$ref": "#/definitions/QuotaUsedAttachment"
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedPackage": {
       "description": "QuotaUsedPackage represents a package counting towards a user's quota",
@@ -26642,7 +26651,7 @@
           "x-go-name": "Version"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedPackageList": {
       "description": "QuotaUsedPackageList represents a list of packages counting towards a user's quota",
@@ -26650,7 +26659,7 @@
       "items": {
         "$ref": "#/definitions/QuotaUsedPackage"
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedSize": {
       "description": "QuotaUsedSize represents the size-based quota usage of a user",
@@ -26666,7 +26675,7 @@
           "$ref": "#/definitions/QuotaUsedSizeRepos"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedSizeAssets": {
       "description": "QuotaUsedSizeAssets represents the size-based asset usage of a user",
@@ -26685,7 +26694,7 @@
           "$ref": "#/definitions/QuotaUsedSizeAssetsPackages"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedSizeAssetsAttachments": {
       "description": "QuotaUsedSizeAssetsAttachments represents the size-based attachment quota usage of a user",
@@ -26704,7 +26713,7 @@
           "x-go-name": "Releases"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedSizeAssetsPackages": {
       "description": "QuotaUsedSizeAssetsPackages represents the size-based package quota usage of a user",
@@ -26717,7 +26726,7 @@
           "x-go-name": "All"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedSizeGit": {
       "description": "QuotaUsedSizeGit represents the size-based git (lfs) quota usage of a user",
@@ -26729,7 +26738,7 @@
           "format": "int64"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "QuotaUsedSizeRepos": {
       "description": "QuotaUsedSizeRepos represents the size-based repository quota usage of a user",
@@ -26748,7 +26757,7 @@
           "x-go-name": "Public"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Reaction": {
       "description": "Reaction contain one reaction",
@@ -26767,7 +26776,7 @@
           "$ref": "#/definitions/User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Reference": {
       "type": "object",
@@ -26785,7 +26794,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Release": {
       "description": "Release represents a repository release",
@@ -26868,7 +26877,7 @@
           "x-go-name": "ZipURL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "RenameOrgOption": {
       "description": "RenameOrgOption options when renaming an organization",
@@ -26884,7 +26893,7 @@
           "x-go-name": "NewName"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "RenameUserOption": {
       "description": "RenameUserOption options when renaming a user",
@@ -26900,7 +26909,7 @@
           "x-go-name": "NewName"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ReplaceFlagsOption": {
       "description": "ReplaceFlagsOption options when replacing the flags of a repository",
@@ -26914,7 +26923,7 @@
           "x-go-name": "Flags"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "RepoCollaboratorPermission": {
       "description": "RepoCollaboratorPermission to get repository permission for a collaborator",
@@ -26932,7 +26941,7 @@
           "$ref": "#/definitions/User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "RepoCommit": {
       "type": "object",
@@ -26959,7 +26968,7 @@
           "$ref": "#/definitions/PayloadCommitVerification"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "RepoTopicOptions": {
       "description": "RepoTopicOptions a collection of repo topic names",
@@ -26974,7 +26983,7 @@
           "x-go-name": "Topics"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "RepoTransfer": {
       "description": "RepoTransfer represents a pending repo transfer",
@@ -26994,7 +27003,7 @@
           "x-go-name": "Teams"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Repository": {
       "description": "Repository represents a repository",
@@ -27266,7 +27275,7 @@
           "x-go-name": "WikiBranch"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "RepositoryMeta": {
       "description": "RepositoryMeta basic repository information",
@@ -27290,12 +27299,12 @@
           "x-go-name": "Owner"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ReviewStateType": {
       "description": "ReviewStateType review state type",
       "type": "string",
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "SearchResults": {
       "description": "SearchResults results of a successful search",
@@ -27313,7 +27322,7 @@
           "x-go-name": "OK"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Secret": {
       "description": "Secret represents a secret",
@@ -27330,7 +27339,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "ServerVersion": {
       "description": "ServerVersion wraps the version of the server",
@@ -27341,7 +27350,7 @@
           "x-go-name": "Version"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "SetUserQuotaGroupsOptions": {
       "description": "SetUserQuotaGroupsOptions represents the quota groups of a user",
@@ -27359,12 +27368,12 @@
           "x-go-name": "Groups"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "StateType": {
       "description": "StateType issue state type",
       "type": "string",
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "StopWatch": {
       "description": "StopWatch represent a running stopwatch",
@@ -27402,7 +27411,7 @@
           "x-go-name": "Seconds"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "SubmitPullReviewOptions": {
       "description": "SubmitPullReviewOptions are options to submit a pending pull review",
@@ -27416,7 +27425,7 @@
           "$ref": "#/definitions/ReviewStateType"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Tag": {
       "description": "Tag represents a repository tag",
@@ -27449,7 +27458,7 @@
           "x-go-name": "ZipballURL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "TagArchiveDownloadCount": {
       "description": "TagArchiveDownloadCount counts how many times a archive was downloaded",
@@ -27466,7 +27475,7 @@
           "x-go-name": "Zip"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "TagProtection": {
       "description": "TagProtection represents a tag protection",
@@ -27506,7 +27515,7 @@
           "x-go-name": "WhitelistUsernames"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "Team": {
       "description": "Team represents a team in an organization",
@@ -27582,13 +27591,13 @@
           }
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "TimeStamp": {
       "description": "TimeStamp defines a timestamp",
       "type": "integer",
       "format": "int64",
-      "x-go-package": "code.gitea.io/gitea/modules/timeutil"
+      "x-go-package": "forgejo.org/modules/timeutil"
     },
     "TimelineComment": {
       "description": "TimelineComment represents a timeline comment (comment of any type) on a commit or issue",
@@ -27708,7 +27717,7 @@
           "$ref": "#/definitions/User"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "TopicName": {
       "description": "TopicName a list of repo topic names",
@@ -27722,7 +27731,7 @@
           "x-go-name": "TopicNames"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "TopicResponse": {
       "description": "TopicResponse for returning topics",
@@ -27753,7 +27762,7 @@
           "x-go-name": "Updated"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "TrackedTime": {
       "description": "TrackedTime worked time for an issue / pr",
@@ -27795,7 +27804,7 @@
           "x-go-name": "UserName"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "TransferRepoOption": {
       "description": "TransferRepoOption options when transfer a repository's ownership",
@@ -27818,7 +27827,7 @@
           "x-go-name": "TeamIDs"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "UpdateBranchRepoOption": {
       "description": "UpdateBranchRepoOption options when updating a branch in a repository",
@@ -27834,7 +27843,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "UpdateFileOptions": {
       "description": "UpdateFileOptions options for updating files\nNote: `author` and `committer` are optional (if only one is given, it will be used for the other, otherwise the authenticated user will be used)",
@@ -27889,7 +27898,7 @@
           "x-go-name": "Signoff"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "UpdateRepoAvatarOption": {
       "description": "UpdateRepoAvatarUserOption options when updating the repo avatar",
@@ -27901,7 +27910,7 @@
           "x-go-name": "Image"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "UpdateUserAvatarOption": {
       "description": "UpdateUserAvatarUserOption options when updating the user avatar",
@@ -27913,7 +27922,7 @@
           "x-go-name": "Image"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "UpdateVariableOption": {
       "description": "UpdateVariableOption the option when updating variable",
@@ -27933,7 +27942,7 @@
           "x-go-name": "Value"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "User": {
       "description": "User represents a user",
@@ -28059,7 +28068,7 @@
           "x-go-name": "Website"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "UserHeatmapData": {
       "description": "UserHeatmapData represents the data needed to create a heatmap",
@@ -28074,7 +28083,7 @@
           "$ref": "#/definitions/TimeStamp"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/models/activities"
+      "x-go-package": "forgejo.org/models/activities"
     },
     "UserSettings": {
       "description": "UserSettings represents user settings",
@@ -28130,7 +28139,7 @@
           "x-go-name": "Website"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "UserSettingsOptions": {
       "description": "UserSettingsOptions represents options to change user settings",
@@ -28186,7 +28195,7 @@
           "x-go-name": "Website"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "WatchInfo": {
       "description": "WatchInfo represents an API watch status of one repository",
@@ -28217,7 +28226,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "WikiCommit": {
       "description": "WikiCommit page commit/revision",
@@ -28238,7 +28247,7 @@
           "x-go-name": "ID"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "WikiCommitList": {
       "description": "WikiCommitList commit/revision list",
@@ -28257,7 +28266,7 @@
           "x-go-name": "Count"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "WikiPage": {
       "description": "WikiPage a wiki page",
@@ -28297,7 +28306,7 @@
           "x-go-name": "Title"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     },
     "WikiPageMetaData": {
       "description": "WikiPageMetaData wiki page meta information",
@@ -28319,7 +28328,7 @@
           "x-go-name": "Title"
         }
       },
-      "x-go-package": "code.gitea.io/gitea/modules/structs"
+      "x-go-package": "forgejo.org/modules/structs"
     }
   },
   "responses": {

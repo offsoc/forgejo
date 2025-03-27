@@ -9,9 +9,9 @@ import (
 	"path"
 	"strings"
 
-	gitea_html "code.gitea.io/gitea/modules/html"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/public"
+	gitea_html "forgejo.org/modules/html"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/public"
 )
 
 var svgIcons map[string]string

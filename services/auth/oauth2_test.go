@@ -6,10 +6,10 @@ package auth
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/services/actions"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/services/actions"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

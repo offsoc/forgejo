@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	forgejo_log "code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/test"
+	forgejo_log "forgejo.org/modules/log"
+	"forgejo.org/modules/test"
 
 	"code.forgejo.org/f3/gof3/v3/logger"
 	"github.com/stretchr/testify/assert"

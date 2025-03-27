@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"sync"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
 
 	"code.forgejo.org/go-chi/session"
 	memcache "code.forgejo.org/go-chi/session/memcache"
