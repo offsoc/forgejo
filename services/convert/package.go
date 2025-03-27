@@ -6,10 +6,10 @@ package convert
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/packages"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/packages"
+	access_model "forgejo.org/models/perm/access"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
 )
 
 // ToPackage convert a packages.PackageDescriptor to api.Package

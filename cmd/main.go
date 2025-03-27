@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code.gitea.io/gitea/cmd/forgejo"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/cmd/forgejo"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 
 	"github.com/urfave/cli/v2"
 )

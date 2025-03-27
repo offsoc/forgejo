@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/web/types"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/web/types"
 )
 
 // NewLoggerHandler is a handler that will log routing to the router log taking account of

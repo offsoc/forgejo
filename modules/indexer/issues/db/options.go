@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	issue_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/models/db"
+	issue_model "forgejo.org/models/issues"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/indexer/issues/internal"
+	"forgejo.org/modules/optional"
 )
 
 func ToDBOptions(ctx context.Context, options *internal.SearchOptions) (*issue_model.IssuesOptions, error) {

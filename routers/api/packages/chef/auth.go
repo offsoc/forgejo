@@ -23,10 +23,10 @@ import (
 	"strings"
 	"time"
 
-	user_model "code.gitea.io/gitea/models/user"
-	chef_module "code.gitea.io/gitea/modules/packages/chef"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/auth"
+	user_model "forgejo.org/models/user"
+	chef_module "forgejo.org/modules/packages/chef"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/auth"
 )
 
 const (

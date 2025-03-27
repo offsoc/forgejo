@@ -6,9 +6,9 @@ package repo
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	webhook_service "code.gitea.io/gitea/services/webhook"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
+	webhook_service "forgejo.org/services/webhook"
 )
 
 func TestMain(m *testing.M) {

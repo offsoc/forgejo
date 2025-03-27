@@ -4,8 +4,8 @@
 package v1_12 //nolint
 
 import (
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/xorm"
 )

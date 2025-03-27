@@ -6,8 +6,8 @@ package v1_16 //nolint
 import (
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
-	"code.gitea.io/gitea/modules/json"
+	migration_tests "forgejo.org/models/migrations/test"
+	"forgejo.org/modules/json"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

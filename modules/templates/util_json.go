@@ -6,7 +6,7 @@ package templates
 import (
 	"bytes"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 )
 
 type JsonUtils struct{} //nolint:revive

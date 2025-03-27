@@ -10,11 +10,11 @@ import (
 	"strings"
 	"sync"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/options"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation/i18n"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/options"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation/i18n"
+	"forgejo.org/modules/util"
 
 	"github.com/dustin/go-humanize"
 	"golang.org/x/text/language"

@@ -8,8 +8,8 @@ import (
 	"slices"
 	"testing"
 
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/tests"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/tests"
 )
 
 func TestOrgProjectAccess(t *testing.T) {

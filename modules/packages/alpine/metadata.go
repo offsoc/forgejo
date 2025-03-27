@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
 )
 
 var (

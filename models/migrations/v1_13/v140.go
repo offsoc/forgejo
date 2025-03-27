@@ -6,8 +6,8 @@ package v1_13 //nolint
 import (
 	"fmt"
 
-	"code.gitea.io/gitea/models/migrations/base"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/migrations/base"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/xorm"
 )

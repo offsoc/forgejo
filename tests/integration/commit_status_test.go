@@ -6,11 +6,11 @@ package integration
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

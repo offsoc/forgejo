@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 // NotesRef is the git ref where Gitea will look for git-notes data.

@@ -6,8 +6,8 @@ package misc
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/base"
+	"forgejo.org/services/context"
 )
 
 // tplSwagger swagger page template

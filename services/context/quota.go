@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/modules/base"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/modules/base"
 )
 
 type QuotaTargetType int

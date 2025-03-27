@@ -11,7 +11,7 @@ import (
 	"io"
 	"time"
 
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/util"
 
 	"github.com/golang-jwt/jwt/v5"
 )

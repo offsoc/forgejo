@@ -7,9 +7,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/markup/common"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/markup/common"
+	"forgejo.org/modules/util"
 
 	"github.com/yuin/goldmark/ast"
 )

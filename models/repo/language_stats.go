@@ -10,8 +10,8 @@ import (
 	"slices"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/go-enry/go-enry/v2"
 )

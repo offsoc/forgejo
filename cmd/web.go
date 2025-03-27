@@ -16,14 +16,14 @@ import (
 
 	_ "net/http/pprof" // Used for debugging if enabled and a web server is running
 
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/public"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/routers/install"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/public"
+	"forgejo.org/modules/setting"
+	"forgejo.org/routers"
+	"forgejo.org/routers/install"
 
 	"github.com/felixge/fgprof"
 	"github.com/urfave/cli/v2"

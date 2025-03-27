@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/perm"
+	"forgejo.org/models/perm"
 )
 
 // AccessTokenScopeCategory represents the scope category for an access token

@@ -4,8 +4,8 @@
 package v1_22 //nolint
 
 import (
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm"
 )

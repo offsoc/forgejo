@@ -4,9 +4,9 @@
 package cmd
 
 import (
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/modules/graceful"
-	repo_service "code.gitea.io/gitea/services/repository"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/modules/graceful"
+	repo_service "forgejo.org/services/repository"
 
 	"github.com/urfave/cli/v2"
 )

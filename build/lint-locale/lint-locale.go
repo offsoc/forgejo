@@ -14,7 +14,7 @@ import (
 	"slices"
 	"strings"
 
-	"code.gitea.io/gitea/modules/locale"
+	"forgejo.org/modules/locale"
 
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/sergi/go-diff/diffmatchpatch"

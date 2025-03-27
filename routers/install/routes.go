@@ -8,12 +8,12 @@ import (
 	"html"
 	"net/http"
 
-	"code.gitea.io/gitea/modules/public"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/routers/web/healthcheck"
-	"code.gitea.io/gitea/services/forms"
+	"forgejo.org/modules/public"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/common"
+	"forgejo.org/routers/web/healthcheck"
+	"forgejo.org/services/forms"
 )
 
 // Routes registers the installation routes

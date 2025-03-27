@@ -6,11 +6,11 @@ package nuget
 import (
 	"net/http"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/services/auth"
+	auth_model "forgejo.org/models/auth"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/services/auth"
 )
 
 var _ auth.Method = &Auth{}

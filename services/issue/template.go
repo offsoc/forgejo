@@ -10,11 +10,11 @@ import (
 	"path"
 	"strings"
 
-	"code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/issue/template"
-	"code.gitea.io/gitea/modules/log"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/repo"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/issue/template"
+	"forgejo.org/modules/log"
+	api "forgejo.org/modules/structs"
 
 	"gopkg.in/yaml.v3"
 )

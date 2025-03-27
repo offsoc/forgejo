@@ -9,7 +9,7 @@ import (
 	"io"
 	"reflect"
 
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/util"
 )
 
 const (

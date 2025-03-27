@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/services/contexttest"
+	"forgejo.org/models/unittest"
+	"forgejo.org/models/webhook"
+	"forgejo.org/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -7,15 +7,15 @@ import (
 	"errors"
 	"net/http"
 
-	"code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/optional"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	packages_service "code.gitea.io/gitea/services/packages"
+	"forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/optional"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	packages_service "forgejo.org/services/packages"
 )
 
 // ListPackages gets all packages of an owner

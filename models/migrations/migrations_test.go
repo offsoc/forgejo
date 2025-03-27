@@ -6,7 +6,7 @@ package migrations
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 )

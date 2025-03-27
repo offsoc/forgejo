@@ -12,14 +12,14 @@ import (
 	"strings"
 	"time"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/git"
-	giturl "code.gitea.io/gitea/modules/git/url"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/svg"
+	activities_model "forgejo.org/models/activities"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/git"
+	giturl "forgejo.org/modules/git/url"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/repository"
+	"forgejo.org/modules/svg"
 
 	"github.com/editorconfig/editorconfig-core-go/v2"
 )

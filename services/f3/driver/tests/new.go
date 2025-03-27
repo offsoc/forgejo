@@ -7,7 +7,7 @@ package tests
 import (
 	"testing"
 
-	driver_options "code.gitea.io/gitea/services/f3/driver/options"
+	driver_options "forgejo.org/services/f3/driver/options"
 
 	f3_kind "code.forgejo.org/f3/gof3/v3/kind"
 	"code.forgejo.org/f3/gof3/v3/options"

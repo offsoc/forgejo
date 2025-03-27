@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 )
 
 func wrapNewlines(w io.Writer, prefix, value []byte) (sum int64, err error) {

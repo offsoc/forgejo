@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"strings"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	repo_service "code.gitea.io/gitea/services/repository"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	repo_service "forgejo.org/services/repository"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
 	f3_id "code.forgejo.org/f3/gof3/v3/id"

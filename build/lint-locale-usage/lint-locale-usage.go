@@ -17,10 +17,10 @@ import (
 	"text/template"
 	tmplParser "text/template/parse"
 
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/locale"
-	fjTemplates "code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/locale"
+	fjTemplates "forgejo.org/modules/templates"
+	"forgejo.org/modules/util"
 )
 
 // this works by first gathering all valid source string IDs from `en-US` reference files

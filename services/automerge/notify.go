@@ -6,10 +6,10 @@ package automerge
 import (
 	"context"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	notify_service "code.gitea.io/gitea/services/notify"
+	issues_model "forgejo.org/models/issues"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	notify_service "forgejo.org/services/notify"
 )
 
 type automergeNotifier struct {

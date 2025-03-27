@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	"code.gitea.io/gitea/modules/eventsource"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/routers/web/auth"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/eventsource"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/routers/web/auth"
+	"forgejo.org/services/context"
 )
 
 // Events listens for events

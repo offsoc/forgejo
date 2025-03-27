@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/structs"
 
 	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"

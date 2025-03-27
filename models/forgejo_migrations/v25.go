@@ -9,11 +9,11 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/secret"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/secret"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"

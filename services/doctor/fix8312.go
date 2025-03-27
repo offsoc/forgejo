@@ -6,11 +6,11 @@ package doctor
 import (
 	"context"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/db"
-	org_model "code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/models"
+	"forgejo.org/models/db"
+	org_model "forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	"forgejo.org/modules/log"
 
 	"xorm.io/builder"
 )
