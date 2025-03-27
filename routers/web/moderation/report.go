@@ -7,13 +7,13 @@ import (
 	"errors"
 	"net/http"
 
-	"code.gitea.io/gitea/models/moderation"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
-	moderation_service "code.gitea.io/gitea/services/moderation"
+	"forgejo.org/models/moderation"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
+	moderation_service "forgejo.org/services/moderation"
 )
 
 const (

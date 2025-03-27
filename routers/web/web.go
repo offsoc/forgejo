@@ -32,7 +32,7 @@ import (
 	"forgejo.org/routers/web/feed"
 	"forgejo.org/routers/web/healthcheck"
 	"forgejo.org/routers/web/misc"
-	"code.gitea.io/gitea/routers/web/moderation"
+	"forgejo.org/routers/web/moderation"
 	"forgejo.org/routers/web/org"
 	org_setting "forgejo.org/routers/web/org/setting"
 	"forgejo.org/routers/web/repo"

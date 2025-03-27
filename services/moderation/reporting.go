@@ -6,15 +6,15 @@ package moderation
 import (
 	"errors"
 
-	"code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/moderation"
-	"code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/issues"
+	"forgejo.org/models/moderation"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/services/context"
 )
 
 var (

@@ -6,9 +6,9 @@ package issues
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/moderation"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/moderation"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/timeutil"
 )
 
 // CommentData represents a trimmed down comment that is used for preserving

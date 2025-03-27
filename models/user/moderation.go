@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"slices"
 
-	"code.gitea.io/gitea/models/moderation"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/moderation"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm/names"
 )
