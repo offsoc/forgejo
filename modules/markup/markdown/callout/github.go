@@ -7,7 +7,7 @@ package callout
 import (
 	"strings"
 
-	"code.gitea.io/gitea/modules/svg"
+	"forgejo.org/modules/svg"
 
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"

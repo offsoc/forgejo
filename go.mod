@@ -1,4 +1,4 @@
-module code.gitea.io/gitea
+module forgejo.org
 
 go 1.24
 

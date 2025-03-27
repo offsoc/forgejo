@@ -6,7 +6,7 @@ package packages
 import (
 	"io"
 
-	"code.gitea.io/gitea/modules/util/filebuffer"
+	"forgejo.org/modules/util/filebuffer"
 )
 
 // HashedSizeReader provide methods to read, sum hashes and a Size method

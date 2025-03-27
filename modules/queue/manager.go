@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 )
 
 // Manager is a manager for the queues created by "CreateXxxQueue" functions, these queues are called "managed queues".

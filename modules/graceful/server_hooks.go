@@ -7,7 +7,7 @@ import (
 	"os"
 	"runtime"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 // awaitShutdown waits for the shutdown signal from the Manager

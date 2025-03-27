@@ -6,9 +6,9 @@ package forms
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/services/context"
 
 	"code.forgejo.org/go-chi/binding"
 )

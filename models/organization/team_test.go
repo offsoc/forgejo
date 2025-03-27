@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

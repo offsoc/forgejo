@@ -6,12 +6,12 @@ package remote
 import (
 	"context"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/services/auth/source/oauth2"
-	remote_source "code.gitea.io/gitea/services/auth/source/remote"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/services/auth/source/oauth2"
+	remote_source "forgejo.org/services/auth/source/remote"
 )
 
 type Reason int

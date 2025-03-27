@@ -8,16 +8,16 @@ import (
 	"fmt"
 	"strings"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	user_model "code.gitea.io/gitea/models/user"
-	auth_module "code.gitea.io/gitea/modules/auth"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	source_service "code.gitea.io/gitea/services/auth/source"
-	user_service "code.gitea.io/gitea/services/user"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	user_model "forgejo.org/models/user"
+	auth_module "forgejo.org/modules/auth"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	source_service "forgejo.org/services/auth/source"
+	user_service "forgejo.org/services/user"
 )
 
 // Sync causes this ldap source to synchronize its users with the db

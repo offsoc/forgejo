@@ -6,8 +6,8 @@ package quota
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
 )
 
 func init() {

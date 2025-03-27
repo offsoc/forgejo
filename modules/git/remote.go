@@ -7,7 +7,7 @@ import (
 	"context"
 	"strings"
 
-	giturl "code.gitea.io/gitea/modules/git/url"
+	giturl "forgejo.org/modules/git/url"
 )
 
 // GetRemoteAddress returns remote url of git repository in the repoPath with special remote name

@@ -12,12 +12,12 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	cran_module "code.gitea.io/gitea/modules/packages/cran"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	cran_module "forgejo.org/modules/packages/cran"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

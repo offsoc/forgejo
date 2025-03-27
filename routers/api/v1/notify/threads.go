@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 // GetThread get notification by ID

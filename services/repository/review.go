@@ -6,9 +6,9 @@ package repository
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	repo_model "code.gitea.io/gitea/models/repo"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	repo_model "forgejo.org/models/repo"
 )
 
 // GetReviewerTeams get all teams can be requested to review

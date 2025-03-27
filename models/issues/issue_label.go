@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"sort"
 
-	"code.gitea.io/gitea/models/db"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	access_model "forgejo.org/models/perm/access"
+	user_model "forgejo.org/models/user"
 
 	"xorm.io/builder"
 )

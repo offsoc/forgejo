@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/modules/web/middleware"
+	"forgejo.org/modules/web/middleware"
 
 	"code.forgejo.org/go-chi/binding"
 	"github.com/go-chi/chi/v5"

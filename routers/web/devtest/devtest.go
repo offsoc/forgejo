@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/templates"
+	"forgejo.org/services/context"
 )
 
 // List all devtest templates, they will be used for e2e tests for the UI components

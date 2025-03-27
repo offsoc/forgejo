@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 // ExternalMarkupRenderers represents the external markup renderers

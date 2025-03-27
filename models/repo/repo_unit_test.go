@@ -6,9 +6,9 @@ package repo
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/models/perm"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 )

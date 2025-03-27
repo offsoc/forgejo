@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	secret_model "code.gitea.io/gitea/models/secret"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	secret_model "forgejo.org/models/secret"
 
 	runnerv1 "code.gitea.io/actions-proto-go/runner/v1"
 	"google.golang.org/protobuf/types/known/structpb"

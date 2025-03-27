@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
+	"forgejo.org/models"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
 )
 
 // TeamAddRepository adds new repository to team of organization.

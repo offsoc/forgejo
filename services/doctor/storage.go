@@ -9,16 +9,16 @@ import (
 	"io/fs"
 	"strings"
 
-	"code.gitea.io/gitea/models/git"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/log"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/git"
+	"forgejo.org/models/packages"
+	"forgejo.org/models/repo"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/log"
+	packages_module "forgejo.org/modules/packages"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/util"
 )
 
 type commonStorageCheckOptions struct {

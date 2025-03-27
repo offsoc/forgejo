@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"strings"
 
-	conan_model "code.gitea.io/gitea/models/packages/conan"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/json"
-	conan_module "code.gitea.io/gitea/modules/packages/conan"
-	"code.gitea.io/gitea/services/context"
+	conan_model "forgejo.org/models/packages/conan"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/json"
+	conan_module "forgejo.org/modules/packages/conan"
+	"forgejo.org/services/context"
 )
 
 // SearchResult contains the found recipe names

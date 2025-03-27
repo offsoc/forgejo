@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

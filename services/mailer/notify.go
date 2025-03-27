@@ -7,12 +7,12 @@ import (
 	"context"
 	"fmt"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	notify_service "code.gitea.io/gitea/services/notify"
+	activities_model "forgejo.org/models/activities"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	notify_service "forgejo.org/services/notify"
 )
 
 type mailNotifier struct {

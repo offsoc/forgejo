@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/setting"
 )
 
 func main() {

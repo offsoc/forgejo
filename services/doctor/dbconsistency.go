@@ -6,16 +6,16 @@ package doctor
 import (
 	"context"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	activities_model "code.gitea.io/gitea/models/activities"
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/migrations"
-	org_model "code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	actions_model "forgejo.org/models/actions"
+	activities_model "forgejo.org/models/activities"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/migrations"
+	org_model "forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 )
 
 type consistencyCheck struct {

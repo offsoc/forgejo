@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/services/context"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

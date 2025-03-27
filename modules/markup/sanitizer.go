@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"sync"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"github.com/microcosm-cc/bluemonday"
 )

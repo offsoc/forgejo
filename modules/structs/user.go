@@ -6,7 +6,7 @@ package structs
 import (
 	"time"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 )
 
 // User represents a user

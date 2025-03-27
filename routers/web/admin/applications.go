@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/setting"
-	user_setting "code.gitea.io/gitea/routers/web/user/setting"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/setting"
+	user_setting "forgejo.org/routers/web/user/setting"
+	"forgejo.org/services/context"
 )
 
 var (

@@ -6,14 +6,14 @@ package issue
 import (
 	"testing"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/require"
 )

@@ -6,9 +6,9 @@ package actions
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/container"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/container"
 
 	"xorm.io/builder"
 )

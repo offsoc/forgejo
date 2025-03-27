@@ -6,17 +6,17 @@ package issue_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	issue_service "code.gitea.io/gitea/services/issue"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	issue_service "forgejo.org/services/issue"
+	"forgejo.org/tests"
 
-	_ "code.gitea.io/gitea/services/webhook"
+	_ "forgejo.org/services/webhook"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

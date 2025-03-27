@@ -6,10 +6,10 @@ package repository
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/federation"
+	"forgejo.org/models/repo"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/federation"
 )
 
 func StarRepoAndSendLikeActivities(ctx context.Context, doer user.User, repoID int64, star bool) error {

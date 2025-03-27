@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/cache"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 )
 
 // GetBranchCommitID returns last commit ID string of given branch.

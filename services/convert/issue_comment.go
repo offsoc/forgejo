@@ -6,12 +6,12 @@ package convert
 import (
 	"context"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
 )
 
 // ToAPIComment converts a issues_model.Comment to the api.Comment format for API usage

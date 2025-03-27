@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/context"
+	issues_model "forgejo.org/models/issues"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/services/context"
 )
 
 const cacheKeyNodeInfoUsage = "API_NodeInfoUsage"

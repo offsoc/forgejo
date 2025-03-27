@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
 
 	"github.com/42wim/sshsig"
 )

@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"code.gitea.io/gitea/modules/git"
+	"forgejo.org/modules/git"
 )
 
 // LFSResult represents commits found using a provided pointer file hash

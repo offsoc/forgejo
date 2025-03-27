@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 
 	mc "code.forgejo.org/go-chi/cache"
 	lru "github.com/hashicorp/golang-lru/v2"

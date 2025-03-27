@@ -8,14 +8,14 @@ import (
 	"fmt"
 	"strings"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	actions_module "code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/log"
-	secret_module "code.gitea.io/gitea/modules/secret"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	actions_module "forgejo.org/modules/actions"
+	"forgejo.org/modules/log"
+	secret_module "forgejo.org/modules/secret"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )

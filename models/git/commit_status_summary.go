@@ -6,9 +6,9 @@ package git
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
 
 	"xorm.io/builder"
 )

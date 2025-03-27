@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
-	"code.gitea.io/gitea/modules/indexer/issues/internal/tests"
+	"forgejo.org/modules/indexer/issues/internal"
+	"forgejo.org/modules/indexer/issues/internal/tests"
 
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/stretchr/testify/assert"

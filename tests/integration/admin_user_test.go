@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )

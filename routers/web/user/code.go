@@ -6,13 +6,13 @@ package user
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/base"
-	code_indexer "code.gitea.io/gitea/modules/indexer/code"
-	"code.gitea.io/gitea/modules/setting"
-	shared_user "code.gitea.io/gitea/routers/web/shared/user"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/base"
+	code_indexer "forgejo.org/modules/indexer/code"
+	"forgejo.org/modules/setting"
+	shared_user "forgejo.org/routers/web/shared/user"
+	"forgejo.org/services/context"
 )
 
 const (

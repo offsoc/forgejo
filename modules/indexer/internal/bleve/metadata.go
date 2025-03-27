@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 )
 
 const metaFilename = "rupture_meta.json"

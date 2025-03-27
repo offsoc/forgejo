@@ -6,9 +6,9 @@ package repo
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/context"
 )
 
 const (

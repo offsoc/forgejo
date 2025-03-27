@@ -6,7 +6,7 @@ package user
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
+	"forgejo.org/models/db"
 )
 
 func IncrUserRepoNum(ctx context.Context, userID int64) error {

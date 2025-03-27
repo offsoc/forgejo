@@ -6,8 +6,8 @@ package markdown
 import (
 	"strings"
 
-	"code.gitea.io/gitea/modules/markup"
-	giteautil "code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/markup"
+	giteautil "forgejo.org/modules/util"
 
 	"github.com/yuin/goldmark/ast"
 )

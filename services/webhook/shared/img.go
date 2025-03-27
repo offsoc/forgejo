@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"strconv"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 )
 
 func ImgIcon(name string, size int) template.HTML {

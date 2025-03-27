@@ -16,7 +16,7 @@ else
 
 DIST := dist
 DIST_DIRS := $(DIST)/binaries $(DIST)/release
-IMPORT := code.gitea.io/gitea
+IMPORT := forgejo.org
 
 GO ?= $(shell go env GOROOT)/bin/go
 SHASUM ?= shasum -a 256
@@ -125,10 +125,10 @@ LDFLAGS := $(LDFLAGS) -X "main.ReleaseVersion=$(RELEASE_VERSION)" -X "main.MakeV
 LINUX_ARCHS ?= linux/amd64,linux/386,linux/arm-5,linux/arm-6,linux/arm64
 
 ifeq ($(HAS_GO), yes)
-	GO_TEST_PACKAGES ?= $(filter-out $(shell $(GO) list code.gitea.io/gitea/models/migrations/...) $(shell $(GO) list code.gitea.io/gitea/models/forgejo_migrations/...) code.gitea.io/gitea/tests/integration/migration-test code.gitea.io/gitea/tests code.gitea.io/gitea/tests/integration code.gitea.io/gitea/tests/e2e,$(shell $(GO) list ./...))
+	GO_TEST_PACKAGES ?= $(filter-out $(shell $(GO) list forgejo.org/models/migrations/...) $(shell $(GO) list forgejo.org/models/forgejo_migrations/...) forgejo.org/tests/integration/migration-test forgejo.org/tests forgejo.org/tests/integration forgejo.org/tests/e2e,$(shell $(GO) list ./...))
 endif
 REMOTE_CACHER_MODULES ?= cache nosql session queue
-GO_TEST_REMOTE_CACHER_PACKAGES ?= $(addprefix code.gitea.io/gitea/modules/,$(REMOTE_CACHER_MODULES))
+GO_TEST_REMOTE_CACHER_PACKAGES ?= $(addprefix forgejo.org/modules/,$(REMOTE_CACHER_MODULES))
 
 FOMANTIC_WORK_DIR := web_src/fomantic
 
@@ -169,7 +169,7 @@ GO_SOURCES += $(GENERATED_GO_DEST)
 GO_SOURCES_NO_BINDATA := $(GO_SOURCES)
 
 ifeq ($(HAS_GO), yes)
-	MIGRATION_PACKAGES := $(shell $(GO) list code.gitea.io/gitea/models/migrations/... code.gitea.io/gitea/models/forgejo_migrations/...)
+	MIGRATION_PACKAGES := $(shell $(GO) list forgejo.org/models/migrations/... forgejo.org/models/forgejo_migrations/...)
 endif
 
 ifeq ($(filter $(TAGS_SPLIT),bindata),bindata)
@@ -476,7 +476,7 @@ lint-spell: lint-codespell
 lint-spell-fix: lint-codespell-fix
 	@go run $(MISSPELL_PACKAGE) -w $(SPELLCHECK_FILES)
 
-RUN_DEADCODE = $(GO) run $(DEADCODE_PACKAGE) -generated=false -f='{{println .Path}}{{range .Funcs}}{{printf "\t%s\n" .Name}}{{end}}{{println}}' -test code.gitea.io/gitea
+RUN_DEADCODE = $(GO) run $(DEADCODE_PACKAGE) -generated=false -f='{{println .Path}}{{range .Funcs}}{{printf "\t%s\n" .Name}}{{end}}{{println}}' -test forgejo.org
 
 .PHONY: lint-go
 lint-go:
@@ -610,7 +610,7 @@ tidy-check: tidy
 go-licenses: $(GO_LICENSE_FILE)
 
 $(GO_LICENSE_FILE): go.mod go.sum
-	-$(GO) run $(GO_LICENSES_PACKAGE) save . --force --ignore code.gitea.io/gitea --save_path=$(GO_LICENSE_TMP_DIR) 2>/dev/null
+	-$(GO) run $(GO_LICENSES_PACKAGE) save . --force --ignore forgejo.org --save_path=$(GO_LICENSE_TMP_DIR) 2>/dev/null
 	$(GO) run build/generate-go-licenses.go $(GO_LICENSE_TMP_DIR) $(GO_LICENSE_FILE)
 	@rm -rf $(GO_LICENSE_TMP_DIR)
 
@@ -740,33 +740,33 @@ integration-test-coverage-sqlite: integrations.cover.sqlite.test generate-ini-sq
 	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini ./integrations.cover.sqlite.test -test.coverprofile=integration.coverage.out
 
 integrations.mysql.test: git-check $(GO_SOURCES)
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -o integrations.mysql.test
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/integration -o integrations.mysql.test
 
 integrations.pgsql.test: git-check $(GO_SOURCES)
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -o integrations.pgsql.test
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/integration -o integrations.pgsql.test
 
 integrations.sqlite.test: git-check $(GO_SOURCES)
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -o integrations.sqlite.test -tags '$(TEST_TAGS)'
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/integration -o integrations.sqlite.test -tags '$(TEST_TAGS)'
 
 integrations.cover.test: git-check $(GO_SOURCES)
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -coverpkg $(shell echo $(GO_TEST_PACKAGES) | tr ' ' ',') -o integrations.cover.test
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/integration -coverpkg $(shell echo $(GO_TEST_PACKAGES) | tr ' ' ',') -o integrations.cover.test
 
 integrations.cover.sqlite.test: git-check $(GO_SOURCES)
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration -coverpkg $(shell echo $(GO_TEST_PACKAGES) | tr ' ' ',') -o integrations.cover.sqlite.test -tags '$(TEST_TAGS)'
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/integration -coverpkg $(shell echo $(GO_TEST_PACKAGES) | tr ' ' ',') -o integrations.cover.sqlite.test -tags '$(TEST_TAGS)'
 
 .PHONY: migrations.mysql.test
 migrations.mysql.test: $(GO_SOURCES) generate-ini-mysql
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration/migration-test -o migrations.mysql.test
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/integration/migration-test -o migrations.mysql.test
 	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/mysql.ini $(GOTESTCOMPILEDRUNPREFIX) ./migrations.mysql.test $(GOTESTCOMPILEDRUNSUFFIX)
 
 .PHONY: migrations.pgsql.test
 migrations.pgsql.test: $(GO_SOURCES) generate-ini-pgsql
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration/migration-test -o migrations.pgsql.test
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/integration/migration-test -o migrations.pgsql.test
 	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTESTCOMPILEDRUNPREFIX) ./migrations.pgsql.test $(GOTESTCOMPILEDRUNSUFFIX)
 
 .PHONY: migrations.sqlite.test
 migrations.sqlite.test: $(GO_SOURCES) generate-ini-sqlite
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/integration/migration-test -o migrations.sqlite.test -tags '$(TEST_TAGS)'
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/integration/migration-test -o migrations.sqlite.test -tags '$(TEST_TAGS)'
 	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTESTCOMPILEDRUNPREFIX) ./migrations.sqlite.test $(GOTESTCOMPILEDRUNSUFFIX)
 
 .PHONY: migrations.individual.mysql.test
@@ -777,7 +777,7 @@ migrations.individual.mysql.test: $(GO_SOURCES)
 
 .PHONY: migrations.individual.sqlite.test\#%
 migrations.individual.sqlite.test\#%: $(GO_SOURCES) generate-ini-sqlite
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' code.gitea.io/gitea/models/migrations/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' forgejo.org/models/migrations/$*
 
 .PHONY: migrations.individual.pgsql.test
 migrations.individual.pgsql.test: $(GO_SOURCES)
@@ -787,7 +787,7 @@ migrations.individual.pgsql.test: $(GO_SOURCES)
 
 .PHONY: migrations.individual.pgsql.test\#%
 migrations.individual.pgsql.test\#%: $(GO_SOURCES) generate-ini-pgsql
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' code.gitea.io/gitea/models/migrations/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/pgsql.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' forgejo.org/models/migrations/$*
 
 .PHONY: migrations.individual.sqlite.test
 migrations.individual.sqlite.test: $(GO_SOURCES) generate-ini-sqlite
@@ -797,16 +797,16 @@ migrations.individual.sqlite.test: $(GO_SOURCES) generate-ini-sqlite
 
 .PHONY: migrations.individual.sqlite.test\#%
 migrations.individual.sqlite.test\#%: $(GO_SOURCES) generate-ini-sqlite
-	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' code.gitea.io/gitea/models/migrations/$*
+	GITEA_ROOT="$(CURDIR)" GITEA_CONF=tests/sqlite.ini $(GOTEST) $(GOTESTFLAGS) -tags '$(TEST_TAGS)' forgejo.org/models/migrations/$*
 
 e2e.mysql.test: $(GO_SOURCES)
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/e2e -o e2e.mysql.test
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/e2e -o e2e.mysql.test
 
 e2e.pgsql.test: $(GO_SOURCES)
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/e2e -o e2e.pgsql.test
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/e2e -o e2e.pgsql.test
 
 e2e.sqlite.test: $(GO_SOURCES)
-	$(GOTEST) $(GOTESTFLAGS) -c code.gitea.io/gitea/tests/e2e -o e2e.sqlite.test -tags '$(TEST_TAGS)'
+	$(GOTEST) $(GOTESTFLAGS) -c forgejo.org/tests/e2e -o e2e.sqlite.test -tags '$(TEST_TAGS)'
 
 .PHONY: check
 check: test
@@ -1013,7 +1013,7 @@ generate-gitignore:
 
 .PHONY: generate-gomock
 generate-gomock:
-	$(GO) run $(GOMOCK_PACKAGE) -package mock -destination ./modules/queue/mock/redisuniversalclient.go code.gitea.io/gitea/modules/nosql RedisClient
+	$(GO) run $(GOMOCK_PACKAGE) -package mock -destination ./modules/queue/mock/redisuniversalclient.go forgejo.org/modules/nosql RedisClient
 
 .PHONY: generate-images
 generate-images: | node_modules

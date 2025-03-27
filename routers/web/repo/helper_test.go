@@ -6,7 +6,7 @@ package repo
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/user"
+	"forgejo.org/models/user"
 
 	"github.com/stretchr/testify/assert"
 )

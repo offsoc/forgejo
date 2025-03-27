@@ -8,7 +8,7 @@ import (
 	"html/template"
 	"strings"
 
-	"code.gitea.io/gitea/modules/base"
+	"forgejo.org/modules/base"
 )
 
 type StringUtils struct{}

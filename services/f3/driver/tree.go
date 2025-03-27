@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	forgejo_options "code.gitea.io/gitea/services/f3/driver/options"
+	forgejo_options "forgejo.org/services/f3/driver/options"
 
 	f3_kind "code.forgejo.org/f3/gof3/v3/kind"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"

@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"code.gitea.io/gitea/modules/private"
+	"forgejo.org/modules/private"
 
 	"github.com/urfave/cli/v2"
 )

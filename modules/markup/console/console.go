@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"strings"
 
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/setting"
 
 	trend "github.com/buildkite/terminal-to-html/v3"
 	"github.com/go-enry/go-enry/v2"

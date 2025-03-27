@@ -6,11 +6,11 @@ package db
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	issue_model "code.gitea.io/gitea/models/issues"
-	indexer_internal "code.gitea.io/gitea/modules/indexer/internal"
-	inner_db "code.gitea.io/gitea/modules/indexer/internal/db"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
+	"forgejo.org/models/db"
+	issue_model "forgejo.org/models/issues"
+	indexer_internal "forgejo.org/modules/indexer/internal"
+	inner_db "forgejo.org/modules/indexer/internal/db"
+	"forgejo.org/modules/indexer/issues/internal"
 
 	"xorm.io/builder"
 )

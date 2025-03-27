@@ -8,12 +8,12 @@ import (
 	"errors"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	webhook_module "forgejo.org/modules/webhook"
 
 	gouuid "github.com/google/uuid"
 	"xorm.io/builder"

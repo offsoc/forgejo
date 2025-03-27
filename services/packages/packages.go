@@ -12,17 +12,17 @@ import (
 	"net/url"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	notify_service "code.gitea.io/gitea/services/notify"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	packages_module "forgejo.org/modules/packages"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	notify_service "forgejo.org/services/notify"
 )
 
 var (

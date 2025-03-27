@@ -7,12 +7,12 @@ import (
 	"context"
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/markup"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/markup"
 
-	_ "code.gitea.io/gitea/models"
-	_ "code.gitea.io/gitea/models/forgefed"
-	_ "code.gitea.io/gitea/models/issues"
+	_ "forgejo.org/models"
+	_ "forgejo.org/models/forgefed"
+	_ "forgejo.org/models/issues"
 )
 
 func TestMain(m *testing.M) {

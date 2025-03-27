@@ -10,9 +10,9 @@ import (
 	"encoding/base64"
 	"io"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/typesniffer"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/typesniffer"
+	"forgejo.org/modules/util"
 )
 
 // Blob represents a Git object.

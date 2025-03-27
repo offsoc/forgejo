@@ -4,8 +4,8 @@
 package admin
 
 import (
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/context"
 )
 
 func RedirectToDefaultSetting(ctx *context.Context) {

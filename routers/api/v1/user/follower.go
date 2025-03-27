@@ -8,11 +8,11 @@ import (
 	"errors"
 	"net/http"
 
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 func responseAPIUsers(ctx *context.APIContext, users []*user_model.User) {

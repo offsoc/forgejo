@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/util"
 
 	"gopkg.in/ini.v1" //nolint:depguard
 )

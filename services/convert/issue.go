@@ -9,13 +9,13 @@ import (
 	"net/url"
 	"strings"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/label"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/label"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
 )
 
 func ToIssue(ctx context.Context, doer *user_model.User, issue *issues_model.Issue) *api.Issue {

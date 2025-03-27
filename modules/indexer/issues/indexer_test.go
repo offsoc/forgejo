@@ -6,17 +6,17 @@ package issues
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/indexer/issues/internal"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
 
-	_ "code.gitea.io/gitea/models"
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/activities"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/activities"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

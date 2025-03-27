@@ -6,8 +6,8 @@ package private
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/git"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/git"
 
 	"github.com/stretchr/testify/require"
 )

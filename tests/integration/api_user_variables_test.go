@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 )
 
 func TestAPIUserVariables(t *testing.T) {

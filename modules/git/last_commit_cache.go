@@ -8,8 +8,8 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 )
 
 // Cache represents a caching interface
