@@ -34,7 +34,6 @@ var (
 )
 
 // Engine represents a xorm engine or session.
-// (Our Engine interface remains unchanged.)
 type Engine interface {
 	Table(tableNameOrBean any) *xorm.Session
 	Count(...any) (int64, error)
