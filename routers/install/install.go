@@ -362,14 +362,7 @@ func SubmitInstall(ctx *context.Context) {
 
 	// Init the engine with migration
 	// Wrap migrations.Migrate into a function of type func(db.Engine) error to fix diagnostics.
-	wrapperMigrate := func(e db.Engine) error {
-		engine, err := db.GetMasterEngine(e)
-		if err != nil {
-			return err
-		}
-		return migrations.Migrate(engine)
-	}
-	if err = db.InitEngineWithMigration(ctx, wrapperMigrate); err != nil {
+	if err = db.InitEngineWithMigration(ctx, migrations.WrapperMigrate); err != nil {
 		db.UnsetDefaultEngine()
 		ctx.Data["Err_DbSetting"] = true
 		ctx.RenderWithErr(ctx.Tr("install.invalid_db_setting", err), tplInstall, &form)

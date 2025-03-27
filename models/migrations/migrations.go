@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 
+	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/forgejo_migrations"
 	"code.gitea.io/gitea/models/migrations/v1_10"
 	"code.gitea.io/gitea/models/migrations/v1_11"
@@ -509,4 +510,13 @@ Please try upgrading to a lower version first (suggested v1.6.4), then upgrade t
 
 	// Execute Forgejo specific migrations.
 	return forgejo_migrations.Migrate(x)
+}
+
+// WrapperMigrate is a wrapper for Migrate to be called in diagnostics
+func WrapperMigrate(e db.Engine) error {
+	engine, err := db.GetMasterEngine(e)
+	if err != nil {
+		return err
+	}
+	return Migrate(engine)
 }
