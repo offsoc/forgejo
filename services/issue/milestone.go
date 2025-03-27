@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	user_model "code.gitea.io/gitea/models/user"
-	notify_service "code.gitea.io/gitea/services/notify"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	user_model "forgejo.org/models/user"
+	notify_service "forgejo.org/services/notify"
 )
 
 func updateMilestoneCounters(ctx context.Context, issue *issues_model.Issue, id int64) error {

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/json"
+	"forgejo.org/tests"
 
 	swagger_spec "github.com/go-openapi/spec"
 	"github.com/stretchr/testify/require"

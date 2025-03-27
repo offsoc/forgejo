@@ -6,9 +6,9 @@ package repo
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/git"
+	"forgejo.org/services/context"
 
 	"github.com/go-enry/go-enry/v2"
 )

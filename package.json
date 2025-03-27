@@ -2,7 +2,7 @@
   "name": "forgejo",
   "type": "module",
   "engines": {
-    "node": ">= 18.0.0"
+    "node": ">= 20.0.0"
   },
   "dependencies": {
     "@citation-js/core": "0.7.14",
@@ -31,7 +31,7 @@
     "idiomorph": "0.3.0",
     "jquery": "3.7.1",
     "katex": "0.16.21",
-    "mermaid": "11.5.0",
+    "mermaid": "11.6.0",
     "mini-css-extract-plugin": "2.9.2",
     "minimatch": "10.0.1",
     "monaco-editor": "0.52.2",

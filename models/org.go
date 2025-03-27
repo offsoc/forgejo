@@ -8,10 +8,10 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
 )
 
 // RemoveOrgUser removes user from given organization.

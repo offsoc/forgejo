@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/xorm"
 )

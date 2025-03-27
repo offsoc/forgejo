@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 
 	ap "github.com/go-ap/activitypub"
 )

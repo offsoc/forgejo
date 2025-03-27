@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"code.gitea.io/gitea/modules/translation"
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/translation"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )

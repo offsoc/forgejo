@@ -6,10 +6,10 @@ package quota
 import (
 	"context"
 
-	action_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	package_model "code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
+	action_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	package_model "forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
 
 	"xorm.io/builder"
 )

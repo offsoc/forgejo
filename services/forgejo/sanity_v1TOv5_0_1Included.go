@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/forgejo/semver"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/models/forgejo/semver"
+	"forgejo.org/modules/setting"
 
 	"github.com/hashicorp/go-version"
 )

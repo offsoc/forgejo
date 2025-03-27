@@ -4,13 +4,13 @@
 package actions
 
 import (
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/web"
-	actions_service "code.gitea.io/gitea/services/actions"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/web"
+	actions_service "forgejo.org/services/actions"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
 )
 
 func SetVariablesContext(ctx *context.Context, ownerID, repoID int64) {

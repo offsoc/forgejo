@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/setting"
-	shared "code.gitea.io/gitea/routers/web/shared/packages"
-	shared_user "code.gitea.io/gitea/routers/web/shared/user"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/setting"
+	shared "forgejo.org/routers/web/shared/packages"
+	shared_user "forgejo.org/routers/web/shared/user"
+	"forgejo.org/services/context"
 )
 
 const (

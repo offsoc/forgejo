@@ -7,10 +7,10 @@ import (
 	"html/template"
 	"net/http"
 
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/context"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/context"
 )
 
 // StorageOverview render a size overview of the user, as well as relevant

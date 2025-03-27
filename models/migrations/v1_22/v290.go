@@ -4,8 +4,8 @@
 package v1_22 //nolint
 
 import (
-	"code.gitea.io/gitea/modules/timeutil"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/modules/timeutil"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"xorm.io/xorm"
 )

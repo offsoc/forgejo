@@ -6,7 +6,7 @@ package forgejo_migrations //nolint:revive
 import (
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
+	migration_tests "forgejo.org/models/migrations/test"
 
 	"github.com/stretchr/testify/require"
 )

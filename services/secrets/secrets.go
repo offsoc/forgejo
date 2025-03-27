@@ -6,8 +6,8 @@ package secrets
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	secret_model "code.gitea.io/gitea/models/secret"
+	"forgejo.org/models/db"
+	secret_model "forgejo.org/models/secret"
 )
 
 func CreateOrUpdateSecret(ctx context.Context, ownerID, repoID int64, name, data string) (*secret_model.Secret, bool, error) {

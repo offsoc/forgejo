@@ -7,12 +7,12 @@ import (
 	"context"
 	"strconv"
 
-	action_model "code.gitea.io/gitea/models/actions"
-	issue_model "code.gitea.io/gitea/models/issues"
-	package_model "code.gitea.io/gitea/models/packages"
-	quota_model "code.gitea.io/gitea/models/quota"
-	repo_model "code.gitea.io/gitea/models/repo"
-	api "code.gitea.io/gitea/modules/structs"
+	action_model "forgejo.org/models/actions"
+	issue_model "forgejo.org/models/issues"
+	package_model "forgejo.org/models/packages"
+	quota_model "forgejo.org/models/quota"
+	repo_model "forgejo.org/models/repo"
+	api "forgejo.org/modules/structs"
 )
 
 func ToQuotaRuleInfo(rule quota_model.Rule, withName bool) api.QuotaRuleInfo {

@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	user_model "code.gitea.io/gitea/models/user"
+	user_model "forgejo.org/models/user"
 
 	"github.com/markbates/goth"
 )

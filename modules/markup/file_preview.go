@@ -14,11 +14,11 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/charset"
-	"code.gitea.io/gitea/modules/highlight"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/charset"
+	"forgejo.org/modules/highlight"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"

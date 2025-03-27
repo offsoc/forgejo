@@ -7,17 +7,17 @@ import (
 	"context"
 	"time"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/system"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	issue_indexer "code.gitea.io/gitea/modules/indexer/issues"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/updatechecker"
-	repo_service "code.gitea.io/gitea/services/repository"
-	archiver_service "code.gitea.io/gitea/services/repository/archiver"
-	user_service "code.gitea.io/gitea/services/user"
+	activities_model "forgejo.org/models/activities"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/system"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	issue_indexer "forgejo.org/modules/indexer/issues"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/updatechecker"
+	repo_service "forgejo.org/services/repository"
+	archiver_service "forgejo.org/services/repository/archiver"
+	user_service "forgejo.org/services/user"
 )
 
 func registerDeleteInactiveUsers() {

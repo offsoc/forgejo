@@ -6,7 +6,7 @@ package activitypub
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 )
 
 func Test_UserEmailValidate(t *testing.T) {

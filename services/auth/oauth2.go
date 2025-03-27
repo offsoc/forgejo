@@ -11,15 +11,15 @@ import (
 	"strings"
 	"time"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	auth_model "code.gitea.io/gitea/models/auth"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/services/actions"
-	"code.gitea.io/gitea/services/auth/source/oauth2"
+	actions_model "forgejo.org/models/actions"
+	auth_model "forgejo.org/models/auth"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/services/actions"
+	"forgejo.org/services/auth/source/oauth2"
 )
 
 // Ensure the struct implements the interface.

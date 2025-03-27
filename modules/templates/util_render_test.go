@@ -8,10 +8,10 @@ import (
 	"html/template"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/translation"
 
 	"github.com/stretchr/testify/assert"
 )

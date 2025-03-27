@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
 )
 
 // QueueSettings represent the settings for a queue from the ini

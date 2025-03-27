@@ -7,7 +7,7 @@ import (
 	"math"
 	"testing"
 
-	"code.gitea.io/gitea/modules/keying"
+	"forgejo.org/modules/keying"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

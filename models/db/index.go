@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 )
 
 // ResourceIndex represents a resource index which could be used as issue/release and others

@@ -6,8 +6,8 @@ package issues
 import (
 	"slices"
 
-	"code.gitea.io/gitea/models/organization"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/organization"
+	user_model "forgejo.org/models/user"
 )
 
 type ActionAggregator struct {

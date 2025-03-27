@@ -8,9 +8,9 @@ import (
 	"io"
 	"strings"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/packages/container/helm"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/packages/container/helm"
+	"forgejo.org/modules/validation"
 
 	oci "github.com/opencontainers/image-spec/specs-go/v1"
 )

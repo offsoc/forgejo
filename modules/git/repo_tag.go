@@ -11,9 +11,9 @@ import (
 	"slices"
 	"strings"
 
-	"code.gitea.io/gitea/modules/git/foreachref"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/git/foreachref"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/util"
 )
 
 // TagPrefix tags prefix path on the repository

@@ -7,8 +7,8 @@ import (
 	std_json "encoding/json" //nolint:depguard
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/optional"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

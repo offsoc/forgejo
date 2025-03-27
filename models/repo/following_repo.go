@@ -4,7 +4,7 @@
 package repo
 
 import (
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 )
 
 // FollowingRepo represents a federated Repository Actor connected with a local Repo
