@@ -382,7 +382,6 @@ a.label,
 }
 
 .ui.menu .item > .svg {
-  align-self: baseline;
   margin-right: 0.35em;
 }
 
@@ -1058,6 +1057,10 @@ overflow-menu .overflow-menu-items {
 
 overflow-menu .overflow-menu-items .item {
   margin-bottom: 0 !important; /* reset fomantic's margin, because the active menu has special bottom border */
+}
+
+overflow-menu .overflow-menu-items .item > .svg {
+  align-self: baseline;
 }
 
 overflow-menu .ui.label {
