@@ -11,12 +11,12 @@ import (
 	"io"
 	"strings"
 
-	"code.gitea.io/gitea/models/avatars"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/avatar"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
+	"forgejo.org/models/avatars"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/avatar"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
 )
 
 // CustomAvatarRelativePath returns user custom avatar relative path.

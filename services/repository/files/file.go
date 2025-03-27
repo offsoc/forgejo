@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
 )
 
 func GetFilesResponseFromCommit(ctx context.Context, repo *repo_model.Repository, commit *git.Commit, branch string, treeNames []string) (*api.FilesResponse, error) {

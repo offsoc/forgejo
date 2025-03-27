@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	csv_module "code.gitea.io/gitea/modules/csv"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	csv_module "forgejo.org/modules/csv"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

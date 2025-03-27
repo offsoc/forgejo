@@ -13,10 +13,10 @@ import (
 	"strings"
 	"testing"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/tests"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/test"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

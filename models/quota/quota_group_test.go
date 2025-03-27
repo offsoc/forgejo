@@ -7,7 +7,7 @@ import (
 	"math"
 	"testing"
 
-	quota_model "code.gitea.io/gitea/models/quota"
+	quota_model "forgejo.org/models/quota"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"

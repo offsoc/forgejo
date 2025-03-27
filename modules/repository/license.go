@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"code.gitea.io/gitea/modules/options"
+	"forgejo.org/modules/options"
 )
 
 type LicenseValues struct {

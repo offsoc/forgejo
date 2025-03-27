@@ -14,12 +14,12 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/git/pushoptions"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/private"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/git/pushoptions"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/private"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
 
 	"github.com/urfave/cli/v2"
 )

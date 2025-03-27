@@ -15,17 +15,17 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	issue_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/card"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/db"
+	issue_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/cache"
+	"forgejo.org/modules/card"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/services/context"
 )
 
 // drawUser draws a user avatar in a summary card

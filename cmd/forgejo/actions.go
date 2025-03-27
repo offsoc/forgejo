@@ -11,10 +11,10 @@ import (
 	"os"
 	"strings"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/modules/private"
-	"code.gitea.io/gitea/modules/setting"
-	private_routers "code.gitea.io/gitea/routers/private"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/modules/private"
+	"forgejo.org/modules/setting"
+	private_routers "forgejo.org/routers/private"
 
 	"github.com/urfave/cli/v2"
 )

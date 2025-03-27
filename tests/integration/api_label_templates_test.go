@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	repo_module "code.gitea.io/gitea/modules/repository"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	repo_module "forgejo.org/modules/repository"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

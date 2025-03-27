@@ -7,9 +7,9 @@ import (
 	"context"
 	"strings"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	user_model "code.gitea.io/gitea/models/user"
-	container_module "code.gitea.io/gitea/modules/packages/container"
+	packages_model "forgejo.org/models/packages"
+	user_model "forgejo.org/models/user"
+	container_module "forgejo.org/modules/packages/container"
 )
 
 // UpdateRepositoryNames updates the repository name property for all packages of the specific owner

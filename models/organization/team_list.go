@@ -7,10 +7,10 @@ import (
 	"context"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/perm"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
+	"forgejo.org/models/db"
+	"forgejo.org/models/perm"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
 
 	"xorm.io/builder"
 )

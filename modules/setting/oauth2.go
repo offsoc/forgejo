@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"sync/atomic"
 
-	"code.gitea.io/gitea/modules/generate"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/generate"
+	"forgejo.org/modules/log"
 )
 
 // OAuth2UsernameType is enum describing the way gitea 'name' should be generated from oauth2 data

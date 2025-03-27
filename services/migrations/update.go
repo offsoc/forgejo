@@ -6,11 +6,11 @@ package migrations
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/externalaccount"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/structs"
+	"forgejo.org/services/externalaccount"
 )
 
 // UpdateMigrationPosterID updates all migrated repositories' issues and comments posterID

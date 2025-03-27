@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 )
 
 func Test_NodeInfoWellKnownUnmarshalJSON(t *testing.T) {

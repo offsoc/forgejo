@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/perm"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/models/db"
+	"forgejo.org/models/perm"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
 
 	"xorm.io/builder"
 )

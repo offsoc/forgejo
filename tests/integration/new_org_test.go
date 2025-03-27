@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/translation"
 
 	"github.com/stretchr/testify/assert"
 )

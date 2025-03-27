@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"testing"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/tests"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )

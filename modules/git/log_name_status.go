@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"code.gitea.io/gitea/modules/container"
+	"forgejo.org/modules/container"
 
 	"github.com/djherbis/buffer"
 	"github.com/djherbis/nio/v3"

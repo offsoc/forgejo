@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/markup/markdown"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/markup/markdown"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/context"
 
 	"mvdan.cc/xurls/v2"
 )

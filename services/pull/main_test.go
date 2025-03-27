@@ -7,10 +7,10 @@ package pull
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/unittest"
 
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/forgefed"
 )
 
 func TestMain(m *testing.M) {

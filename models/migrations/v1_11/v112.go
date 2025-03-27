@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"

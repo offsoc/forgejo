@@ -6,8 +6,8 @@ package setting
 import (
 	"sync"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting/config"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting/config"
 )
 
 type PictureStruct struct {

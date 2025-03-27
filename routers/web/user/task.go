@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	admin_model "code.gitea.io/gitea/models/admin"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/services/context"
+	admin_model "forgejo.org/models/admin"
+	"forgejo.org/modules/json"
+	"forgejo.org/services/context"
 )
 
 // TaskStatus returns task's status

@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	logger "code.gitea.io/gitea/modules/log"
+	logger "forgejo.org/modules/log"
 )
 
 // CompareInfo represents needed information for comparing references.

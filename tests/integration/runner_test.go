@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"testing"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	forgejo_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/tests"
+	actions_model "forgejo.org/models/actions"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	forgejo_context "forgejo.org/services/context"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )

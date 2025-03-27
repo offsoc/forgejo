@@ -6,13 +6,13 @@ package webhook
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/hostmatcher"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/hostmatcher"
+	"forgejo.org/modules/setting"
 
-	_ "code.gitea.io/gitea/models"
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/forgefed"
 )
 
 func TestMain(m *testing.M) {

@@ -6,10 +6,10 @@ package stats
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
 )
 
 // Indexer defines an interface to index repository stats

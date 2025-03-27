@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/timeutil"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/timeutil"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

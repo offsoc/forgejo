@@ -6,7 +6,7 @@ package repo
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 )
 
 func Test_FollowingRepoValidation(t *testing.T) {

@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/json"
-	base "code.gitea.io/gitea/modules/migration"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/json"
+	base "forgejo.org/modules/migration"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

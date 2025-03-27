@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"strings"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/indexer/code/internal"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/indexer/code/internal"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 )
 
 func getDefaultBranchSha(ctx context.Context, repo *repo_model.Repository) (string, error) {

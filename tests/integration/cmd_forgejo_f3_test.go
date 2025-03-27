@@ -9,14 +9,14 @@ import (
 	"fmt"
 	"testing"
 
-	"code.gitea.io/gitea/cmd/forgejo"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/services/f3/driver/options"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/cmd/forgejo"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/services/f3/driver/options"
+	"forgejo.org/tests"
 
-	_ "code.gitea.io/gitea/services/f3/driver"
-	_ "code.gitea.io/gitea/services/f3/driver/tests"
+	_ "forgejo.org/services/f3/driver"
+	_ "forgejo.org/services/f3/driver/tests"
 
 	f3_filesystem_options "code.forgejo.org/f3/gof3/v3/forges/filesystem/options"
 	f3_logger "code.forgejo.org/f3/gof3/v3/logger"

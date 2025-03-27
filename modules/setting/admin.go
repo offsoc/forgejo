@@ -4,7 +4,7 @@
 package setting
 
 import (
-	"code.gitea.io/gitea/modules/container"
+	"forgejo.org/modules/container"
 )
 
 // Admin settings

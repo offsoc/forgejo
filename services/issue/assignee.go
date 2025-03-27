@@ -6,15 +6,15 @@ package issue
 import (
 	"context"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	notify_service "code.gitea.io/gitea/services/notify"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	notify_service "forgejo.org/services/notify"
 )
 
 // DeleteNotPassedAssignee deletes all assignees who aren't passed via the "assignees" array

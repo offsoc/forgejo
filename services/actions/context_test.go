@@ -6,8 +6,8 @@ package actions
 import (
 	"testing"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/unittest"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

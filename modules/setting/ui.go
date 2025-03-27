@@ -6,8 +6,8 @@ package setting
 import (
 	"time"
 
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/log"
 )
 
 // UI settings

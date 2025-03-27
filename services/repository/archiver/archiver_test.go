@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/services/contexttest"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/git"
+	"forgejo.org/services/contexttest"
 
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

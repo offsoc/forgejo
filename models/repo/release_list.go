@@ -6,7 +6,7 @@ package repo
 import (
 	"context"
 
-	user_model "code.gitea.io/gitea/models/user"
+	user_model "forgejo.org/models/user"
 )
 
 type ReleaseList []*Release

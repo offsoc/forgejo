@@ -8,10 +8,10 @@ import (
 	"io"
 	"strings"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	api "code.gitea.io/gitea/modules/structs"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	api "forgejo.org/modules/structs"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/gobwas/glob"
 	"github.com/nektos/act/pkg/jobparser"

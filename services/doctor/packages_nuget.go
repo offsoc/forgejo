@@ -9,12 +9,12 @@ import (
 	"slices"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/modules/log"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	nuget_module "code.gitea.io/gitea/modules/packages/nuget"
-	packages_service "code.gitea.io/gitea/services/packages"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	"forgejo.org/modules/log"
+	packages_module "forgejo.org/modules/packages"
+	nuget_module "forgejo.org/modules/packages/nuget"
+	packages_service "forgejo.org/services/packages"
 
 	"xorm.io/builder"
 )

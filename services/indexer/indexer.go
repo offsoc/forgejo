@@ -4,10 +4,10 @@
 package indexer
 
 import (
-	code_indexer "code.gitea.io/gitea/modules/indexer/code"
-	issue_indexer "code.gitea.io/gitea/modules/indexer/issues"
-	stats_indexer "code.gitea.io/gitea/modules/indexer/stats"
-	notify_service "code.gitea.io/gitea/services/notify"
+	code_indexer "forgejo.org/modules/indexer/code"
+	issue_indexer "forgejo.org/modules/indexer/issues"
+	stats_indexer "forgejo.org/modules/indexer/stats"
+	notify_service "forgejo.org/services/notify"
 )
 
 // Init initialize the repo indexer

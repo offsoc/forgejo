@@ -7,17 +7,17 @@ import (
 	"net/http"
 	"time"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/attachment"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/context/upload"
-	"code.gitea.io/gitea/services/convert"
-	issue_service "code.gitea.io/gitea/services/issue"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/attachment"
+	"forgejo.org/services/context"
+	"forgejo.org/services/context/upload"
+	"forgejo.org/services/convert"
+	issue_service "forgejo.org/services/issue"
 )
 
 // GetIssueCommentAttachment gets a single attachment of the comment

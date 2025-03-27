@@ -9,12 +9,12 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/timeutil"
-	release_service "code.gitea.io/gitea/services/release"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/timeutil"
+	release_service "forgejo.org/services/release"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
 	f3_id "code.forgejo.org/f3/gof3/v3/id"

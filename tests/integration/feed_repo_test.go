@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

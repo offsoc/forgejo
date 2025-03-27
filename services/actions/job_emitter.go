@@ -8,10 +8,10 @@ import (
 	"errors"
 	"fmt"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/queue"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/queue"
 
 	"github.com/nektos/act/pkg/jobparser"
 	"xorm.io/builder"

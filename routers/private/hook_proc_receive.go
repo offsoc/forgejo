@@ -6,13 +6,13 @@ package private
 import (
 	"net/http"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/private"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/agit"
-	gitea_context "code.gitea.io/gitea/services/context"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/private"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/agit"
+	gitea_context "forgejo.org/services/context"
 )
 
 // HookProcReceive proc-receive hook - only handles agit Proc-Receive requests at present

@@ -6,10 +6,10 @@ package utils
 import (
 	"net/http"
 
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/context"
-	user_service "code.gitea.io/gitea/services/user"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/context"
+	user_service "forgejo.org/services/user"
 )
 
 // ListUserBlockedUsers lists the blocked users of the provided doer.

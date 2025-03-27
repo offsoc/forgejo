@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"strings"
 
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/gitrepo"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/gitrepo"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 // CompareDiff compare two branches or commits

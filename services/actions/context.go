@@ -7,13 +7,13 @@ import (
 	"context"
 	"fmt"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	actions_module "code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	actions_module "forgejo.org/modules/actions"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
 )
 
 // GenerateGiteaContext generate the gitea context without token and gitea_runtime_token

@@ -5,10 +5,10 @@
 package misc
 
 import (
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/services/context"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/common"
+	"forgejo.org/services/context"
 )
 
 // Markup render markup document to HTML

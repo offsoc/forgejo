@@ -11,8 +11,8 @@ import (
 	"runtime/trace"
 	"time"
 
-	"code.gitea.io/gitea/modules/httplib"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/httplib"
+	"forgejo.org/services/context"
 )
 
 func MonitorDiagnosis(ctx *context.Context) {

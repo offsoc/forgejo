@@ -7,9 +7,9 @@ import (
 	"context"
 	"net/http"
 
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/session"
-	"code.gitea.io/gitea/modules/web/middleware"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/session"
+	"forgejo.org/modules/web/middleware"
 )
 
 // DataStore represents a data store

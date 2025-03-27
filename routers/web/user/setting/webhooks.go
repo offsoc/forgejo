@@ -6,12 +6,12 @@ package setting
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/context"
-	webhook_service "code.gitea.io/gitea/services/webhook"
+	"forgejo.org/models/db"
+	"forgejo.org/models/webhook"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/context"
+	webhook_service "forgejo.org/services/webhook"
 )
 
 const (

@@ -7,7 +7,7 @@ package driver
 import (
 	"context"
 
-	repo_model "code.gitea.io/gitea/models/repo"
+	repo_model "forgejo.org/models/repo"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
 	helpers_repository "code.forgejo.org/f3/gof3/v3/forges/helpers/repository"

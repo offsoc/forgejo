@@ -6,15 +6,15 @@ package models
 import (
 	"testing"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/forgefed"
-	_ "code.gitea.io/gitea/models/system"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/forgefed"
+	_ "forgejo.org/models/system"
 
 	"github.com/stretchr/testify/require"
 )

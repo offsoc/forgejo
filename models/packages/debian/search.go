@@ -7,10 +7,10 @@ import (
 	"context"
 	"strconv"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	debian_module "code.gitea.io/gitea/modules/packages/debian"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	debian_module "forgejo.org/modules/packages/debian"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/builder"
 )

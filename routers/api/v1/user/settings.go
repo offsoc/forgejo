@@ -6,12 +6,12 @@ package user
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/optional"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	user_service "code.gitea.io/gitea/services/user"
+	"forgejo.org/modules/optional"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	user_service "forgejo.org/services/user"
 )
 
 // GetUserSettings returns user settings

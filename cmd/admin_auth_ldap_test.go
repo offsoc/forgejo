@@ -7,8 +7,8 @@ import (
 	"context"
 	"testing"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/services/auth/source/ldap"
+	"forgejo.org/models/auth"
+	"forgejo.org/services/auth/source/ldap"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

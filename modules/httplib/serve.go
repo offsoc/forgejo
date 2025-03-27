@@ -16,13 +16,13 @@ import (
 	"strings"
 	"time"
 
-	charsetModule "code.gitea.io/gitea/modules/charset"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/httpcache"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/typesniffer"
-	"code.gitea.io/gitea/modules/util"
+	charsetModule "forgejo.org/modules/charset"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/httpcache"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/typesniffer"
+	"forgejo.org/modules/util"
 
 	"github.com/klauspost/compress/gzhttp"
 )

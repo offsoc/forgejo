@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/routers"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )

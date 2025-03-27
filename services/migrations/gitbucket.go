@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
-	base "code.gitea.io/gitea/modules/migration"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/log"
+	base "forgejo.org/modules/migration"
+	"forgejo.org/modules/structs"
 )
 
 var (

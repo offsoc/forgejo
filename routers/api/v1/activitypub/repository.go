@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/modules/forgefed"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/federation"
+	"forgejo.org/modules/forgefed"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/federation"
 
 	ap "github.com/go-ap/activitypub"
 )

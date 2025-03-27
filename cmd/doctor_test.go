@@ -7,8 +7,8 @@ import (
 	"context"
 	"testing"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/services/doctor"
+	"forgejo.org/modules/log"
+	"forgejo.org/services/doctor"
 
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"

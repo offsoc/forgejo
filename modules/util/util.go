@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/modules/optional"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/text/cases"
