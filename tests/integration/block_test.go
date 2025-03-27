@@ -258,7 +258,7 @@ func TestBlockActions(t *testing.T) {
 			resp = session.MakeRequest(t, req, http.StatusOK)
 			htmlDoc := NewHTMLParser(t, resp.Body)
 			msg := htmlDoc.doc.Find("div .warning").Text()
-			assert.Contains(t, msg, "You cannot comment on this issue because you are blocked")
+			assert.Contains(t, msg, expectedMessage)
 		})
 
 		t.Run("Blocked by issue poster", func(t *testing.T) {
@@ -285,7 +285,7 @@ func TestBlockActions(t *testing.T) {
 			resp = session.MakeRequest(t, req, http.StatusOK)
 			htmlDoc := NewHTMLParser(t, resp.Body)
 			msg := htmlDoc.doc.Find("div .warning").Text()
-			assert.Contains(t, msg, "You cannot comment on this issue because you are blocked")
+			assert.Contains(t, msg, expectedMessage)
 		})
 	})
 
