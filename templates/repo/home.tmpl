@@ -56,8 +56,8 @@
 		{{$l := Eval $n "-" 1}}
 		{{$isHomepage := (eq $n 0)}}
 		<div class="repo-button-row">
-			<div class="tw-flex tw-items-center tw-gap-y-2">
-				{{template "repo/branch_dropdown" dict "root" . "ContainerClasses" "tw-mr-1"}}
+			<div class="tw-gap-y-2 button-sequence">
+				{{template "repo/branch_dropdown" dict "root" .}}
 				{{if and .CanCompareOrPull .IsViewBranch (not .Repository.IsArchived)}}
 					{{$cmpBranch := ""}}
 					{{if ne .Repository.ID .BaseRepo.ID}}
@@ -141,7 +141,7 @@
 					{{template "repo/cite/cite_modal" .}}
 				{{end}}
 				{{if and (not $isHomepage) (not .IsViewFile) (not .IsBlame)}}{{/* IsViewDirectory (not home), TODO: split the templates, avoid using "if" tricks */}}
-					<div class="button-row folder-actions">
+					<div class="button-sequence folder-actions">
 						<a class="ui button" href="{{.RepoLink}}/commits/{{.BranchNameSubURL}}/{{.TreePath | PathEscapeSegments}}">
 							{{svg "octicon-history" 16 "tw-mr-2"}}{{ctx.Locale.Tr "repo.file_history"}}
 						</a>
