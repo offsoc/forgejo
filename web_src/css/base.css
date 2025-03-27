@@ -382,6 +382,7 @@ a.label,
 }
 
 .ui.menu .item > .svg {
+  align-self: baseline;
   margin-right: 0.35em;
 }
 
