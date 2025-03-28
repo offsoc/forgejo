@@ -83,8 +83,6 @@ linters:
           disabled: true
     staticcheck:
       checks:
-        - -ST1003
-        - -ST1005
         - all
     testifylint:
       disable:
@@ -136,6 +134,9 @@ linters:
       - linters:
           - gocritic
         text: '(?i)exitAfterDefer:'
+      - linters:
+          - staticcheck
+        text: "(ST1005|ST1003|QF1001):"
     paths:
       - node_modules
       - public

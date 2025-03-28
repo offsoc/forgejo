@@ -160,8 +160,8 @@ func TestParseGitURLs(t *testing.T) {
 		t.Run(kase.kase, func(t *testing.T) {
 			u, err := Parse(kase.kase)
 			require.NoError(t, err)
-			assert.EqualValues(t, kase.expected.extraMark, u.extraMark)
-			assert.EqualValues(t, *kase.expected, *u)
+			assert.Equal(t, kase.expected.extraMark, u.extraMark)
+			assert.Equal(t, *kase.expected, *u)
 		})
 	}
 }

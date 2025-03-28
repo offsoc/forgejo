@@ -220,10 +220,7 @@ Forgejo or set your environment appropriately.`, "")
 		}
 	}
 
-	supportProcReceive := false
-	if git.CheckGitVersionAtLeast("2.29") == nil {
-		supportProcReceive = true
-	}
+	supportProcReceive := git.CheckGitVersionAtLeast("2.29") == nil
 
 	for scanner.Scan() {
 		// TODO: support news feeds for wiki

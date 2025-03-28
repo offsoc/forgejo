@@ -114,10 +114,10 @@ func TestProjectsSort(t *testing.T) {
 			OrderBy: GetSearchOrderByBySortType(tt.sortType),
 		})
 		require.NoError(t, err)
-		assert.EqualValues(t, int64(6), count)
+		assert.Equal(t, int64(6), count)
 		if assert.Len(t, projects, 6) {
 			for i := range projects {
-				assert.EqualValues(t, tt.wants[i], projects[i].ID)
+				assert.Equal(t, tt.wants[i], projects[i].ID)
 			}
 		}
 	}

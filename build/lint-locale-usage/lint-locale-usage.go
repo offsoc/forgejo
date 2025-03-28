@@ -264,7 +264,7 @@ func (handler Handler) HandleTemplateFile(fname string, src any) error {
 			Err:      err,
 		}
 	}
-	handler.handleTemplateFileNodes(fset, tmplParsed.Tree.Root.Nodes)
+	handler.handleTemplateFileNodes(fset, tmplParsed.Root.Nodes)
 	return nil
 }
 

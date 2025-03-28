@@ -133,7 +133,7 @@ func TestAPIForkListPrivateRepo(t *testing.T) {
 		DecodeJSON(t, resp, &forks)
 
 		assert.Empty(t, forks)
-		assert.EqualValues(t, "0", resp.Header().Get("X-Total-Count"))
+		assert.Equal(t, "0", resp.Header().Get("X-Total-Count"))
 	})
 
 	t.Run("Logged in", func(t *testing.T) {
@@ -146,6 +146,6 @@ func TestAPIForkListPrivateRepo(t *testing.T) {
 		DecodeJSON(t, resp, &forks)
 
 		assert.Len(t, forks, 1)
-		assert.EqualValues(t, "1", resp.Header().Get("X-Total-Count"))
+		assert.Equal(t, "1", resp.Header().Get("X-Total-Count"))
 	})
 }

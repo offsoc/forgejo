@@ -139,7 +139,7 @@ func EnumeratePackages(ctx *context.Context) {
 		})
 	}
 
-	skip, _ := opts.Paginator.GetSkipTake()
+	skip, _ := opts.GetSkipTake()
 
 	ctx.JSON(http.StatusOK, &Result{
 		Start: skip,

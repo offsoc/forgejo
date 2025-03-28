@@ -147,7 +147,7 @@ func getSignVersion(req *http.Request) (string, error) {
 	version := m[1]
 
 	m = algorithmPattern.FindStringSubmatch(hdr)
-	if len(m) == 2 && m[1] != "sha1" && !(m[1] == "sha256" && version == "1.3") {
+	if len(m) == 2 && m[1] != "sha1" && (m[1] != "sha256" || version != "1.3") {
 		return "", util.NewInvalidArgumentErrorf("unsupported algorithm")
 	}
 

@@ -220,7 +220,7 @@ func TestLDAPAuthChange(t *testing.T) {
 	binddn, _ = doc.Find(`input[name="bind_dn"]`).Attr("value")
 	assert.Equal(t, "uid=gitea,ou=service,dc=planetexpress,dc=com", binddn)
 	domainname, _ := doc.Find(`input[name="default_domain_name"]`).Attr("value")
-	assert.Equal(t, "", domainname)
+	assert.Empty(t, domainname)
 
 	req = NewRequestWithValues(t, "POST", href, buildAuthSourceLDAPPayload(csrf, "", "", "test.org", "", "", "off"))
 	session.MakeRequest(t, req, http.StatusSeeOther)

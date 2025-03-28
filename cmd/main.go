@@ -122,9 +122,9 @@ func NewMainApp(version, versionExtra string) *cli.App {
 	}
 	executable := filepath.Base(path)
 
-	var subCmdsStandalone []*cli.Command = make([]*cli.Command, 0, 10)
-	var subCmdWithConfig []*cli.Command = make([]*cli.Command, 0, 10)
-	var globalFlags []cli.Flag = make([]cli.Flag, 0, 10)
+	subCmdsStandalone := make([]*cli.Command, 0, 10)
+	subCmdWithConfig := make([]*cli.Command, 0, 10)
+	globalFlags := make([]cli.Flag, 0, 10)
 
 	//
 	// If the executable is forgejo-cli, provide a Forgejo specific CLI

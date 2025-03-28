@@ -28,11 +28,11 @@ func Test_RegenerateSession(t *testing.T) {
 
 	sess, err := auth.RegenerateSession(db.DefaultContext, "", key)
 	require.NoError(t, err)
-	assert.EqualValues(t, key, sess.Key)
+	assert.Equal(t, key, sess.Key)
 	assert.Empty(t, sess.Data, 0)
 
 	sess, err = auth.ReadSession(db.DefaultContext, key2)
 	require.NoError(t, err)
-	assert.EqualValues(t, key2, sess.Key)
+	assert.Equal(t, key2, sess.Key)
 	assert.Empty(t, sess.Data, 0)
 }

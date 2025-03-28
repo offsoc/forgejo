@@ -43,7 +43,7 @@ func TestDiffWithHighlight(t *testing.T) {
 
 	diff.Text = "C"
 	hcd.recoverOneDiff(&diff)
-	assert.Equal(t, "", diff.Text)
+	assert.Empty(t, diff.Text)
 }
 
 func TestDiffWithHighlightPlaceholder(t *testing.T) {
@@ -53,8 +53,8 @@ func TestDiffWithHighlightPlaceholder(t *testing.T) {
 		"a='\U00100000'",
 		"a='\U0010FFFD''",
 	)
-	assert.Equal(t, "", hcd.PlaceholderTokenMap[0x00100000])
-	assert.Equal(t, "", hcd.PlaceholderTokenMap[0x0010FFFD])
+	assert.Empty(t, hcd.PlaceholderTokenMap[0x00100000])
+	assert.Empty(t, hcd.PlaceholderTokenMap[0x0010FFFD])
 
 	expected := fmt.Sprintf(`<span class="nx">a</span><span class="o">=</span><span class="s1">&#39;</span><span class="removed-code">%s</span>&#39;`, "\U00100000")
 	output := diffToHTML(hcd.lineWrapperTags, diffs, DiffLineDel)

@@ -28,6 +28,6 @@ func TestRenderCSV(t *testing.T) {
 		err := render.Render(&markup.RenderContext{Ctx: git.DefaultContext},
 			strings.NewReader(k), &buf)
 		require.NoError(t, err)
-		assert.EqualValues(t, v, buf.String())
+		assert.Equal(t, v, buf.String())
 	}
 }

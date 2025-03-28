@@ -69,7 +69,7 @@ func TestShadowPassword(t *testing.T) {
 	}
 
 	for _, k := range kases {
-		assert.EqualValues(t, k.Result, shadowPassword(k.Provider, k.CfgItem))
+		assert.Equal(t, k.Result, shadowPassword(k.Provider, k.CfgItem))
 	}
 }
 

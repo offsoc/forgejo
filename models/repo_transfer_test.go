@@ -23,6 +23,6 @@ func TestGetPendingTransferIDs(t *testing.T) {
 	pendingTransferIDs, err := GetPendingTransferIDs(db.DefaultContext, reciepient.ID, doer.ID)
 	require.NoError(t, err)
 	if assert.Len(t, pendingTransferIDs, 1) {
-		assert.EqualValues(t, pendingTransfer.ID, pendingTransferIDs[0])
+		assert.Equal(t, pendingTransfer.ID, pendingTransferIDs[0])
 	}
 }

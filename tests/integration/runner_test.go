@@ -61,7 +61,7 @@ func TestRunnerModification(t *testing.T) {
 			sess.MakeRequest(t, req, http.StatusSeeOther)
 			flashCookie := sess.GetCookie(forgejo_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DRunner%2Bupdated%2Bsuccessfully", flashCookie.Value)
+			assert.Equal(t, "success%3DRunner%2Bupdated%2Bsuccessfully", flashCookie.Value)
 		}
 
 		req = NewRequestWithValues(t, "POST", baseURL+fmt.Sprintf("/%d/delete", id), map[string]string{
@@ -73,7 +73,7 @@ func TestRunnerModification(t *testing.T) {
 			sess.MakeRequest(t, req, http.StatusOK)
 			flashCookie := sess.GetCookie(forgejo_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DRunner%2Bdeleted%2Bsuccessfully", flashCookie.Value)
+			assert.Equal(t, "success%3DRunner%2Bdeleted%2Bsuccessfully", flashCookie.Value)
 		}
 	}
 

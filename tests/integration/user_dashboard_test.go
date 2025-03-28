@@ -33,9 +33,9 @@ func TestUserDashboardActionLinks(t *testing.T) {
 	response := session.MakeRequest(t, NewRequest(t, "GET", "/"), http.StatusOK)
 	page := NewHTMLParser(t, response.Body)
 	links := page.Find("#navbar .dropdown[data-tooltip-content='Create…'] .menu")
-	assert.EqualValues(t, locale.TrString("new_repo.link"), strings.TrimSpace(links.Find("a[href='/repo/create']").Text()))
-	assert.EqualValues(t, locale.TrString("new_migrate.link"), strings.TrimSpace(links.Find("a[href='/repo/migrate']").Text()))
-	assert.EqualValues(t, locale.TrString("new_org.link"), strings.TrimSpace(links.Find("a[href='/org/create']").Text()))
+	assert.Equal(t, locale.TrString("new_repo.link"), strings.TrimSpace(links.Find("a[href='/repo/create']").Text()))
+	assert.Equal(t, locale.TrString("new_migrate.link"), strings.TrimSpace(links.Find("a[href='/repo/migrate']").Text()))
+	assert.Equal(t, locale.TrString("new_org.link"), strings.TrimSpace(links.Find("a[href='/org/create']").Text()))
 }
 
 func TestUserDashboardFeedWelcome(t *testing.T) {
@@ -93,12 +93,12 @@ func TestDashboardTitleRendering(t *testing.T) {
 		htmlDoc.doc.Find("#activity-feed .flex-item-main .title").Each(func(i int, s *goquery.Selection) {
 			count++
 			if s.IsMatcher(goquery.Single("a")) {
-				assert.EqualValues(t, "❗ not rendered", s.Text())
+				assert.Equal(t, "❗ not rendered", s.Text())
 			} else {
-				assert.EqualValues(t, ":exclamation: not rendered", s.Text())
+				assert.Equal(t, ":exclamation: not rendered", s.Text())
 			}
 		})
 
-		assert.EqualValues(t, 6, count)
+		assert.Equal(t, 6, count)
 	})
 }

@@ -253,11 +253,12 @@ func runServ(c *cli.Context) error {
 	}
 
 	if verb == lfsAuthenticateVerb {
-		if lfsVerb == "upload" {
+		switch lfsVerb {
+		case "upload":
 			requestedMode = perm.AccessModeWrite
-		} else if lfsVerb == "download" {
+		case "download":
 			requestedMode = perm.AccessModeRead
-		} else {
+		default:
 			return fail(ctx, "Unknown LFS verb", "Unknown lfs verb %s", lfsVerb)
 		}
 	}

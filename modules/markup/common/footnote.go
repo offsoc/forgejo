@@ -459,7 +459,7 @@ func (r *FootnoteHTMLRenderer) renderFootnoteList(w util.BufWriter, source []byt
 			html.RenderAttributes(w, node, html.GlobalAttributeFilter)
 		}
 		_ = w.WriteByte('>')
-		if r.Config.XHTML {
+		if r.XHTML {
 			_, _ = w.WriteString("\n<hr />\n")
 		} else {
 			_, _ = w.WriteString("\n<hr>\n")

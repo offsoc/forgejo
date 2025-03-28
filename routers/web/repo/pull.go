@@ -892,7 +892,7 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 		foundStartCommit := len(specifiedStartCommit) == 0
 		foundEndCommit := len(specifiedEndCommit) == 0
 
-		if !(foundStartCommit && foundEndCommit) {
+		if !foundStartCommit || !foundEndCommit {
 			for _, commit := range prInfo.Commits {
 				if commit.ID.String() == specifiedStartCommit {
 					foundStartCommit = true
@@ -907,7 +907,7 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 			}
 		}
 
-		if !(foundStartCommit && foundEndCommit) {
+		if !foundStartCommit || !foundEndCommit {
 			ctx.NotFound("Given SHA1 not found for this PR", nil)
 			return
 		}

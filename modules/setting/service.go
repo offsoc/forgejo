@@ -206,7 +206,7 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 		}
 		Service.EmailDomainBlockList = append(Service.EmailDomainBlockList, toAdd...)
 	}
-	Service.ShowRegistrationButton = sec.Key("SHOW_REGISTRATION_BUTTON").MustBool(!(Service.DisableRegistration || Service.AllowOnlyExternalRegistration))
+	Service.ShowRegistrationButton = sec.Key("SHOW_REGISTRATION_BUTTON").MustBool(!Service.DisableRegistration && !Service.AllowOnlyExternalRegistration)
 	Service.EnableInternalSignIn = sec.Key("ENABLE_INTERNAL_SIGNIN").MustBool(true)
 	Service.ShowMilestonesDashboardPage = sec.Key("SHOW_MILESTONES_DASHBOARD_PAGE").MustBool(true)
 	Service.RequireSignInView = sec.Key("REQUIRE_SIGNIN_VIEW").MustBool()

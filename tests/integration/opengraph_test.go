@@ -180,7 +180,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				foundProps[prop] = content
 			})
 
-			assert.EqualValues(t, tc.expected, foundProps, "mismatching opengraph properties")
+			assert.Equal(t, tc.expected, foundProps, "mismatching opengraph properties")
 		})
 	}
 }

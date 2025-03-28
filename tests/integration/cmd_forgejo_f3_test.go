@@ -83,7 +83,7 @@ func TestF3_CmdMirror_LocalForgejo(t *testing.T) {
 		user := users.CreateChild(ctx)
 		user.FromFormat(userFormat)
 		user.Upsert(ctx)
-		require.EqualValues(t, user.GetID(), users.GetIDFromName(ctx, userFormat.UserName))
+		require.Equal(t, user.GetID(), users.GetIDFromName(ctx, userFormat.UserName))
 
 		projectFormat := creator.GenerateProject()
 		projectFormat.SetID(fixtureProjectID)
@@ -91,7 +91,7 @@ func TestF3_CmdMirror_LocalForgejo(t *testing.T) {
 		project := projects.CreateChild(ctx)
 		project.FromFormat(projectFormat)
 		project.Upsert(ctx)
-		require.EqualValues(t, project.GetID(), projects.GetIDFromName(ctx, projectFormat.Name))
+		require.Equal(t, project.GetID(), projects.GetIDFromName(ctx, projectFormat.Name))
 
 		fromPath = fmt.Sprintf("/forge/users/%s/projects/%s", userFormat.UserName, projectFormat.Name)
 	}
@@ -106,14 +106,14 @@ func TestF3_CmdMirror_LocalForgejo(t *testing.T) {
 		user := users.CreateChild(ctx)
 		user.FromFormat(userFormat)
 		user.Upsert(ctx)
-		require.EqualValues(t, user.GetID(), users.GetIDFromName(ctx, userFormat.UserName))
+		require.Equal(t, user.GetID(), users.GetIDFromName(ctx, userFormat.UserName))
 
 		projectFormat := creator.GenerateProject()
 		projects = user.MustFind(f3_generic.NewPathFromString("projects"))
 		project := projects.CreateChild(ctx)
 		project.FromFormat(projectFormat)
 		project.Upsert(ctx)
-		require.EqualValues(t, project.GetID(), projects.GetIDFromName(ctx, projectFormat.Name))
+		require.Equal(t, project.GetID(), projects.GetIDFromName(ctx, projectFormat.Name))
 
 		toPath = fmt.Sprintf("/forge/users/%s/projects/%s", userFormat.UserName, projectFormat.Name)
 	}

@@ -23,8 +23,8 @@ func TestGetActivityStats(t *testing.T) {
 	stats, err := GetActivityStats(db.DefaultContext, repo, time.Unix(0, 0), true, true, true, true)
 	require.NoError(t, err)
 
-	assert.EqualValues(t, 2, stats.ActiveIssueCount())
-	assert.EqualValues(t, 2, stats.OpenedIssueCount())
-	assert.EqualValues(t, 0, stats.ClosedIssueCount())
-	assert.EqualValues(t, 3, stats.ActivePRCount())
+	assert.Equal(t, 2, stats.ActiveIssueCount())
+	assert.Equal(t, 2, stats.OpenedIssueCount())
+	assert.Equal(t, 0, stats.ClosedIssueCount())
+	assert.Equal(t, 3, stats.ActivePRCount())
 }
