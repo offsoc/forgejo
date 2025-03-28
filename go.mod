@@ -67,7 +67,7 @@ require (
 	github.com/jhillyerd/enmime/v2 v2.1.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/klauspost/compress v1.17.11
+	github.com/klauspost/compress v1.18.0
 	github.com/klauspost/cpuid/v2 v2.2.10
 	github.com/lib/pq v1.10.9
 	github.com/markbates/goth v1.80.0
@@ -76,7 +76,7 @@ require (
 	github.com/meilisearch/meilisearch-go v0.31.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/microcosm-cc/bluemonday v1.0.27
-	github.com/minio/minio-go/v7 v7.0.88
+	github.com/minio/minio-go/v7 v7.0.89
 	github.com/msteinert/pam/v2 v2.0.0
 	github.com/nektos/act v0.2.52
 	github.com/niklasfasching/go-org v1.7.0
