@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2023 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -691,7 +692,7 @@ func TestCommitView(t *testing.T) {
 
 		// Really ensure that 404 is being sent back.
 		doc := NewHTMLParser(t, resp.Body)
-		doc.AssertElement(t, `[aria-label="Page Not Found"]`, true)
+		doc.AssertElement(t, `[aria-label="Page not found"]`, true)
 	})
 
 	t.Run("Too short commit ID", func(t *testing.T) {

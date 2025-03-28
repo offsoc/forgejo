@@ -1,4 +1,5 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package context
@@ -66,7 +67,10 @@ func (ctx *Context) RedirectToFirst(location ...string) string {
 	return setting.AppSubURL + "/"
 }
 
-const tplStatus500 base.TplName = "status/500"
+const (
+	tplStatus404 base.TplName = "status/404"
+	tplStatus500 base.TplName = "status/500"
+)
 
 // HTML calls Context.HTML and renders the template to HTTP response
 func (ctx *Context) HTML(status int, name base.TplName) {
@@ -153,8 +157,8 @@ func (ctx *Context) notFoundInternal(logMsg string, logErr error) {
 	}
 
 	ctx.Data["IsRepo"] = ctx.Repo.Repository != nil
-	ctx.Data["Title"] = "Page Not Found"
-	ctx.HTML(http.StatusNotFound, base.TplName("status/404"))
+	ctx.Data["Title"] = ctx.Locale.TrString("error.not_found.title")
+	ctx.HTML(http.StatusNotFound, tplStatus404)
 }
 
 // ServerError displays a 500 (Internal Server Error) page and prints the given error, if any.
@@ -177,7 +181,6 @@ func (ctx *Context) serverErrorInternal(logMsg string, logErr error) {
 		}
 	}
 
-	ctx.Data["Title"] = "Internal Server Error"
 	ctx.HTML(http.StatusInternalServerError, tplStatus500)
 }
 

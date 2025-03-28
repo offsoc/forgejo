@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package web
@@ -111,10 +112,4 @@ func HomeSitemap(ctx *context.Context) {
 	if _, err := m.WriteTo(ctx.Resp); err != nil {
 		log.Error("Failed writing sitemap: %v", err)
 	}
-}
-
-// NotFound render 404 page
-func NotFound(ctx *context.Context) {
-	ctx.Data["Title"] = "Page Not Found"
-	ctx.NotFound("home.NotFound", nil)
 }

@@ -363,6 +363,9 @@ var ignoredErrorMessage = []string{
 
 	// TestDatabaseCollation
 	`[E] [Error SQL Query] INSERT INTO test_collation_tbl (txt) VALUES ('main') []`,
+
+	// TestDevtestErrorpages
+	`ErrorPage() [E] Example error: Example error`,
 }
 
 func (w *testLoggerWriterCloser) recordError(msg string) {
