@@ -13,6 +13,23 @@ import {expect} from '@playwright/test';
 import {save_visual, test} from './utils_e2e.ts';
 
 const workflow_trigger_notification_text = 'This workflow has a workflow_dispatch event trigger.';
+
+async function dispatchSuccess(page, testInfo) {
+  test.skip(testInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari; see https://codeberg.org/forgejo/forgejo/pulls/3334#issuecomment-2033383');
+  await page.goto('/user2/test_workflows/actions?workflow=test-dispatch.yml&actor=0&status=0');
+
+  await page.locator('#workflow_dispatch_dropdown>button').click();
+
+  await page.fill('input[name="inputs[string2]"]', 'abc');
+  await save_visual(page);
+  await page.locator('#workflow-dispatch-submit').click();
+
+  await expect(page.getByText('Workflow run was successfully requested.')).toBeVisible();
+
+  await expect(page.locator('.run-list>:first-child .run-list-meta', {hasText: 'now'})).toBeVisible();
+  await save_visual(page);
+}
+
 test.describe('Workflow Authenticated user2', () => {
   test.use({user: 'user2'});
 
@@ -51,19 +68,7 @@ test.describe('Workflow Authenticated user2', () => {
   });
 
   test('dispatch success', async ({page}, testInfo) => {
-    test.skip(testInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari; see https://codeberg.org/forgejo/forgejo/pulls/3334#issuecomment-2033383');
-    await page.goto('/user2/test_workflows/actions?workflow=test-dispatch.yml&actor=0&status=0');
-
-    await page.locator('#workflow_dispatch_dropdown>button').click();
-
-    await page.fill('input[name="inputs[string2]"]', 'abc');
-    await save_visual(page);
-    await page.locator('#workflow-dispatch-submit').click();
-
-    await expect(page.getByText('Workflow run was successfully requested.')).toBeVisible();
-
-    await expect(page.locator('.run-list>:first-child .run-list-meta', {hasText: 'now'})).toBeVisible();
-    await save_visual(page);
+    await dispatchSuccess(page, testInfo);
   });
 });
 
@@ -72,4 +77,28 @@ test('workflow dispatch box not available for unauthenticated users', async ({pa
 
   await expect(page.locator('body')).not.toContainText(workflow_trigger_notification_text);
   await save_visual(page);
+});
+
+test.describe('workflow list dynamic refresh', () => {
+  test.use({user: 'user2'});
+
+  test('refreshes on visibility change', async ({page}, testInfo) => {
+    // Test operates by creating two pages; one which is sitting idle on the workflows list (backgroundPage), and one
+    // which triggers a workflow dispatch.  Then a document visibilitychange event is fired on the background page to
+    // mimic a user returning to the tab on their browser, which should trigger the workflow list to refresh and display
+    // the newly dispatched workflow from the other page.
+
+    const backgroundPage = await (await page.context()).newPage();
+    await backgroundPage.goto('/user2/test_workflows/actions?workflow=test-dispatch.yml&actor=0&status=0');
+
+    // Mirror the `Workflow Authenticated user2 > dispatch success` test:
+    await dispatchSuccess(page, testInfo);
+
+    await backgroundPage.$eval("html", () => {
+      const ev = new Event("visibilitychange");
+      document.dispatchEvent(ev)
+    });
+    await expect(backgroundPage.locator('.run-list>:first-child .run-list-meta', {hasText: 'now'})).toBeVisible();
+    await save_visual(backgroundPage);
+  });
 });
