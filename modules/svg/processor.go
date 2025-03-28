@@ -25,7 +25,7 @@ var (
 
 // Normalize normalizes the SVG content: set default width/height, remove unnecessary tags/attributes
 // It's designed to work with valid SVG content. For invalid SVG content, the returned content is not guaranteed.
-func Normalize(data []byte, size int) []byte {
+func Normalize(data []byte, size any) []byte {
 	normalizeVarsOnce.Do(func() {
 		normalizeVars = &normalizeVarsStruct{
 			reXMLDoc:  regexp.MustCompile(`(?s)<\?xml.*?>`),
@@ -49,7 +49,18 @@ func Normalize(data []byte, size int) []byte {
 	normalized = normalizeVars.reAttrSize.ReplaceAll(normalized, nil)
 	normalized = normalizeVars.reAttrClassPrefix.ReplaceAll(normalized, []byte(` class="`))
 	normalized = bytes.TrimSpace(normalized)
-	normalized = fmt.Appendf(normalized, ` width="%d" height="%d"`, size, size)
+
+    sizeStr := ""
+    switch v := size.(type) {
+    case string:
+        sizeStr = v
+    case int:
+        sizeStr = fmt.Sprintf("%dpx", v)
+    default:
+        sizeStr = "16px"
+    }
+
+  normalized = fmt.Appendf(normalized, ` width="%s" height="%s"`, sizeStr, sizeStr)
 	if !bytes.Contains(normalized, []byte(` class="`)) {
 		normalized = append(normalized, ` class="svg"`...)
 	}
