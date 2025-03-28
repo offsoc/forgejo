@@ -210,9 +210,6 @@ forgejo.org/modules/zstd
 	Writer.Write
 	Writer.Close
 
-forgejo.org/routers/web
-	NotFound
-
 forgejo.org/routers/web/org
 	MustEnableProjects
 

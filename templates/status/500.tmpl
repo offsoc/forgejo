@@ -16,19 +16,14 @@
 </head>
 <body>
 	<div class="full height">
-		<nav class="ui secondary menu">
-			<div class="ui container tw-flex">
-				<div class="item tw-flex-1">
-					<a href="{{AppSubUrl}}/" aria-label="{{ctx.Locale.Tr "home"}}">
-						<img width="30" height="30" src="{{AssetUrlPrefix}}/img/logo.svg" alt="{{ctx.Locale.Tr "logo"}}" aria-hidden="true">
-					</a>
-				</div>
-				<div class="item">
-					<button class="ui icon button disabled">{{svg "octicon-three-bars"}}</button>{{/* a fake button to make the UI looks better*/}}
-				</div>
+		<nav id="navbar" aria-label="{{ctx.Locale.Tr "aria.navbar"}}">
+			<div class="navbar-left ui secondary menu">
+				<a class="item" id="navbar-logo" href="{{AppSubUrl}}/" aria-label="{{ctx.Locale.Tr "home"}}">
+					<img width="30" height="30" src="{{AssetUrlPrefix}}/img/logo.svg" alt="{{ctx.Locale.Tr "logo"}}" aria-hidden="true">
+				</a>
 			</div>
 		</nav>
-		<div class="divider tw-my-0"></div>
+
 		<div role="main" class="page-content status-page-500">
 			<div class="ui container" >
 				<style> .ui.message.flash-message { text-align: left; } </style>
