@@ -24,8 +24,12 @@
 //
 // Can't inline this into the `hx-trigger` above because using a left-brace ('[') breaks htmx's trigger parsing.
 function noActiveDropdowns() {
-	return document.querySelector('[aria-expanded=true]') === null &&
-		!document.querySelector('#branch-dropdown-form').checkVisibility();
+	if (document.querySelector('[aria-expanded=true]') !== null)
+		return false;
+	const dropdownForm = document.querySelector('#branch-dropdown-form');
+	if (dropdownForm !== null && dropdownForm.checkVisibility())
+		return false;
+	return true;
 }
 </script>
 
