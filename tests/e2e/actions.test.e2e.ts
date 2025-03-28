@@ -67,6 +67,8 @@ test.describe('Workflow Authenticated user2', () => {
     await save_visual(page);
   });
 
+  // no assertions as the login in this test case is extracted for reuse
+  // eslint-disable-next-line playwright/expect-expect
   test('dispatch success', async ({page}, testInfo) => {
     await dispatchSuccess(page, testInfo);
   });
@@ -94,9 +96,11 @@ test.describe('workflow list dynamic refresh', () => {
     // Mirror the `Workflow Authenticated user2 > dispatch success` test:
     await dispatchSuccess(page, testInfo);
 
-    await backgroundPage.$eval("html", () => {
-      const ev = new Event("visibilitychange");
-      document.dispatchEvent(ev)
+    // No other way to trigger a visibilitychange event other than using browser-side eval:
+    // eslint-disable-next-line playwright/no-eval
+    await backgroundPage.$eval('html', () => {
+      const ev = new Event('visibilitychange');
+      document.dispatchEvent(ev);
     });
     await expect(backgroundPage.locator('.run-list>:first-child .run-list-meta', {hasText: 'now'})).toBeVisible();
     await save_visual(backgroundPage);
