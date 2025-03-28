@@ -20,6 +20,8 @@
 	</div>
 	<div class="twelve wide column content">
 		<div class="ui secondary filter menu tw-justify-end tw-flex tw-items-center">
+			<div id="reloading-indicator" class="htmx-indicator"></div>
+
 			<!-- Actor -->
 			<div class="ui{{if not .Actors}} disabled{{end}} dropdown jump item">
 				<span class="text">{{ctx.Locale.Tr "actions.runs.actor"}}</span>

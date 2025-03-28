@@ -4,14 +4,13 @@
 	<div class="ui container">
 		{{template "base/alert" .}}
 
-		<div class="no-loading-indicator tw-hidden"></div>
-		{{/* Refresh the list every interval (15s) unless the document isn't visible or a dropdown is open; refresh
+		{{/* Refresh the list every interval (30s) unless the document isn't visible or a dropdown is open; refresh
 		if visibility changes as well. */}}
 		<div
-			hx-get="{{$.Link}}/inner"
+			hx-get="?workflow={{$.CurWorkflow}}&actor={{$.CurActor}}&status={{$.CurStatus}}&listonly=true"
 			hx-swap="morph:innerHTML"
-			hx-trigger="every 15s [document.visibilityState === 'visible' && noActiveDropdowns()], visibilitychange[document.visibilityState === 'visible'] from:document"
-			hx-indicator=".no-loading-indicator">
+			hx-trigger="every 30s [document.visibilityState === 'visible' && noActiveDropdowns()], visibilitychange[document.visibilityState === 'visible'] from:document"
+			hx-indicator="#reloading-indicator">
 			{{template "repo/actions/list_inner" .}}
 		</div>
 	</div>
