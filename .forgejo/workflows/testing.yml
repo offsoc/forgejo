@@ -116,7 +116,7 @@ jobs:
       - uses: ./.forgejo/workflows-composite/build-backend
       - name: Get changed files
         id: changed-files
-        uses: https://data.forgejo.org/tj-actions/changed-files@v45
+        uses: https://data.forgejo.org/tj-actions/changed-files@v46
         with:
           separator: '\n'
       - run: |
