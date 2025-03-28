@@ -92,7 +92,7 @@ func TestGetUIDsAndStopwatch(t *testing.T) {
 
 	uidStopwatches, err := issues_model.GetUIDsAndStopwatch(db.DefaultContext)
 	require.NoError(t, err)
-	assert.EqualValues(t, map[int64][]*issues_model.Stopwatch{
+	assert.Equal(t, map[int64][]*issues_model.Stopwatch{
 		1: {
 			{
 				ID:          1,

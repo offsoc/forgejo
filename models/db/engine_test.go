@@ -56,7 +56,7 @@ func TestDeleteOrphanedObjects(t *testing.T) {
 
 	countAfter, err := db.GetEngine(db.DefaultContext).Count(&issues_model.PullRequest{})
 	require.NoError(t, err)
-	assert.EqualValues(t, countBefore, countAfter)
+	assert.Equal(t, countBefore, countAfter)
 }
 
 func TestPrimaryKeys(t *testing.T) {

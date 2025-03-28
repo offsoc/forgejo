@@ -48,6 +48,6 @@ func TestFind(t *testing.T) {
 
 	repoUnits, newCnt, err := db.FindAndCount[repo_model.RepoUnit](db.DefaultContext, opts)
 	require.NoError(t, err)
-	assert.EqualValues(t, cnt, newCnt)
+	assert.Equal(t, cnt, newCnt)
 	assert.Len(t, repoUnits, repoUnitCount)
 }

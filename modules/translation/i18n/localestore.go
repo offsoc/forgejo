@@ -107,11 +107,12 @@ func RecursivelyAddTranslationsFromJSON(locale *locale, object map[string]any, p
 		case string:
 			// Check whether we are adding a plural form to the parent object, or a new nested JSON object.
 
-			if key == "zero" || key == "one" || key == "two" || key == "few" || key == "many" {
+			switch key {
+			case "zero", "one", "two", "few", "many":
 				locale.newStyleMessages[prefix+PluralFormSeparator+key] = v
-			} else if key == "other" {
+			case "other":
 				locale.newStyleMessages[prefix] = v
-			} else {
+			default:
 				locale.newStyleMessages[fullkey] = v
 			}
 

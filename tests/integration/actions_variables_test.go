@@ -64,12 +64,12 @@ func TestActionVariablesModification(t *testing.T) {
 			resp := sess.MakeRequest(t, req, http.StatusBadRequest)
 			var error errorJSON
 			DecodeJSON(t, resp, &error)
-			assert.EqualValues(t, "Failed to find the variable.", error.Error)
+			assert.Equal(t, "Failed to find the variable.", error.Error)
 		} else {
 			sess.MakeRequest(t, req, http.StatusOK)
 			flashCookie := sess.GetCookie(forgejo_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2Bvariable%2Bhas%2Bbeen%2Bedited.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2Bvariable%2Bhas%2Bbeen%2Bedited.", flashCookie.Value)
 		}
 
 		req = NewRequestWithValues(t, "POST", baseURL+fmt.Sprintf("/%d/delete", id), map[string]string{
@@ -79,12 +79,12 @@ func TestActionVariablesModification(t *testing.T) {
 			resp := sess.MakeRequest(t, req, http.StatusBadRequest)
 			var error errorJSON
 			DecodeJSON(t, resp, &error)
-			assert.EqualValues(t, "Failed to find the variable.", error.Error)
+			assert.Equal(t, "Failed to find the variable.", error.Error)
 		} else {
 			sess.MakeRequest(t, req, http.StatusOK)
 			flashCookie := sess.GetCookie(forgejo_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2Bvariable%2Bhas%2Bbeen%2Bremoved.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2Bvariable%2Bhas%2Bbeen%2Bremoved.", flashCookie.Value)
 		}
 	}
 

@@ -61,39 +61,39 @@ func TestCommentRoles(t *testing.T) {
 		response = sessionUser2.MakeRequest(t, NewRequest(t, "GET", path.Join(user, repo, "pulls", testID)), http.StatusOK)
 		page = NewHTMLParser(t, response.Body)
 		commentHeads := page.Find(".timeline .comment .comment-header .comment-header-right")
-		assert.EqualValues(t, 6, commentHeads.Length())
+		assert.Equal(t, 6, commentHeads.Length())
 
 		// Test the first comment and it's label "Owner"
 		labels := commentHeads.Eq(0).Find(".role-label")
-		assert.EqualValues(t, 1, labels.Length())
+		assert.Equal(t, 1, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "Owner", ownerTooltip)
 
 		// Test the second (review) comment and it's labels "Author" and "Owner"
 		labels = commentHeads.Eq(1).Find(".role-label")
-		assert.EqualValues(t, 2, labels.Length())
+		assert.Equal(t, 2, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "Author", authorTooltipPR)
 		testIssueCommentUserLabel(t, labels.Eq(1), "Owner", ownerTooltip)
 
 		// Test the third (review) comment and it's labels "Author" and "Owner"
 		labels = commentHeads.Eq(2).Find(".role-label")
-		assert.EqualValues(t, 2, labels.Length())
+		assert.Equal(t, 2, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "Author", authorTooltipPR)
 		testIssueCommentUserLabel(t, labels.Eq(1), "Owner", ownerTooltip)
 
 		// Test the fourth comment and it's labels "Author" and "Owner"
 		labels = commentHeads.Eq(3).Find(".role-label")
-		assert.EqualValues(t, 2, labels.Length())
+		assert.Equal(t, 2, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "Author", authorTooltipPR)
 		testIssueCommentUserLabel(t, labels.Eq(1), "Owner", ownerTooltip)
 
 		// Test the fivth comment and it's label "Contributor"
 		labels = commentHeads.Eq(4).Find(".role-label")
-		assert.EqualValues(t, 1, labels.Length())
+		assert.Equal(t, 1, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "Contributor", contributorTooltip)
 
 		// Test the sixth comment and it's label "First-time contributor"
 		labels = commentHeads.Eq(5).Find(".role-label")
-		assert.EqualValues(t, 1, labels.Length())
+		assert.Equal(t, 1, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "First-time contributor", newContributorTooltip)
 	})
 
@@ -123,27 +123,27 @@ func TestCommentRoles(t *testing.T) {
 		response := sessionUser2.MakeRequest(t, NewRequest(t, "GET", path.Join(user, repo, "issues", testID)), http.StatusOK)
 		page := NewHTMLParser(t, response.Body)
 		commentHeads := page.Find(".timeline .comment .comment-header .comment-header-right")
-		assert.EqualValues(t, 4, commentHeads.Length())
+		assert.Equal(t, 4, commentHeads.Length())
 
 		// Test the first comment and it's label "Owner"
 		labels := commentHeads.Eq(0).Find(".role-label")
-		assert.EqualValues(t, 1, labels.Length())
+		assert.Equal(t, 1, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "Owner", ownerTooltip)
 
 		// Test the second comment and it's labels "Author" and "Owner"
 		labels = commentHeads.Eq(1).Find(".role-label")
-		assert.EqualValues(t, 2, labels.Length())
+		assert.Equal(t, 2, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "Author", authorTooltipIssue)
 		testIssueCommentUserLabel(t, labels.Eq(1), "Owner", ownerTooltip)
 
 		// Test the third comment and it's label "Contributor"
 		labels = commentHeads.Eq(2).Find(".role-label")
-		assert.EqualValues(t, 1, labels.Length())
+		assert.Equal(t, 1, labels.Length())
 		testIssueCommentUserLabel(t, labels.Eq(0), "Contributor", contributorTooltip)
 
 		// Test the fifth comment and it's lack of labels
 		labels = commentHeads.Eq(3).Find(".role-label")
-		assert.EqualValues(t, 0, labels.Length())
+		assert.Equal(t, 0, labels.Length())
 	})
 }
 
@@ -153,8 +153,8 @@ func testIssueCommentUserLabel(t *testing.T, label *goquery.Selection, expectedT
 	title := label.Text()
 	tooltip, exists := label.Attr("data-tooltip-content")
 	assert.True(t, exists)
-	assert.EqualValues(t, expectedTitle, strings.TrimSpace(title))
-	assert.EqualValues(t, expectedTooltip, strings.TrimSpace(tooltip))
+	assert.Equal(t, expectedTitle, strings.TrimSpace(title))
+	assert.Equal(t, expectedTooltip, strings.TrimSpace(tooltip))
 }
 
 // testEasyLeaveIssueComment is used to create a comment on an issue with minimum code and parameters

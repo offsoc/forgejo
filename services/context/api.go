@@ -186,7 +186,7 @@ func (ctx *APIContext) Error(status int, title string, obj any) {
 	if status == http.StatusInternalServerError {
 		log.ErrorWithSkip(1, "%s: %s", title, message)
 
-		if setting.IsProd && !(ctx.Doer != nil && ctx.Doer.IsAdmin) {
+		if setting.IsProd && (ctx.Doer == nil || !ctx.Doer.IsAdmin) {
 			message = ""
 		}
 	}
@@ -285,8 +285,8 @@ func APIContexter() func(http.Handler) http.Handler {
 			}
 			defer baseCleanUp()
 
-			ctx.Base.AppendContextValue(apiContextKey, ctx)
-			ctx.Base.AppendContextValueFunc(gitrepo.RepositoryContextKey, func() any { return ctx.Repo.GitRepo })
+			ctx.AppendContextValue(apiContextKey, ctx)
+			ctx.AppendContextValueFunc(gitrepo.RepositoryContextKey, func() any { return ctx.Repo.GitRepo })
 
 			// If request sends files, parse them here otherwise the Query() can't be parsed and the CsrfToken will be invalid.
 			if ctx.Req.Method == "POST" && strings.Contains(ctx.Req.Header.Get("Content-Type"), "multipart/form-data") {
@@ -334,7 +334,7 @@ func (ctx *APIContext) NotFound(objs ...any) {
 func ReferencesGitRepo(allowEmpty ...bool) func(ctx *APIContext) (cancel context.CancelFunc) {
 	return func(ctx *APIContext) (cancel context.CancelFunc) {
 		// Empty repository does not have reference information.
-		if ctx.Repo.Repository.IsEmpty && !(len(allowEmpty) != 0 && allowEmpty[0]) {
+		if ctx.Repo.Repository.IsEmpty && (len(allowEmpty) == 0 || !allowEmpty[0]) {
 			return nil
 		}
 

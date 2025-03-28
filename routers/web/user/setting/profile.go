@@ -146,7 +146,7 @@ func UpdateAvatarSetting(ctx *context.Context, form *forms.AvatarForm, ctxUser *
 		}
 
 		st := typesniffer.DetectContentType(data)
-		if !(st.IsImage() && !st.IsSvgImage()) {
+		if !st.IsImage() || st.IsSvgImage() {
 			return errors.New(ctx.Locale.TrString("settings.uploaded_avatar_not_a_image"))
 		}
 		if err = user_service.UploadAvatar(ctx, ctxUser, data); err != nil {

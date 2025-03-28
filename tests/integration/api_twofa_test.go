@@ -77,5 +77,5 @@ func TestAPIWebAuthn(t *testing.T) {
 
 	DecodeJSON(t, resp, &userParsed)
 
-	assert.EqualValues(t, "Basic authorization is not allowed while having security keys enrolled", userParsed.Message)
+	assert.Equal(t, "Basic authorization is not allowed while having security keys enrolled", userParsed.Message)
 }

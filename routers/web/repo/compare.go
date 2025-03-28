@@ -597,7 +597,7 @@ func PrepareCompareDiff(
 			config := unit.PullRequestsConfig()
 
 			if !config.AutodetectManualMerge {
-				allowEmptyPr := !(ci.BaseBranch == ci.HeadBranch && ctx.Repo.Repository.Name == ci.HeadRepo.Name)
+				allowEmptyPr := ci.BaseBranch != ci.HeadBranch || ctx.Repo.Repository.Name != ci.HeadRepo.Name
 				ctx.Data["AllowEmptyPr"] = allowEmptyPr
 
 				return !allowEmptyPr
@@ -660,9 +660,9 @@ func PrepareCompareDiff(
 
 	if len(commits) == 1 {
 		c := commits[0]
-		title = strings.TrimSpace(c.UserCommit.Summary())
+		title = strings.TrimSpace(c.Summary())
 
-		body := strings.Split(strings.TrimSpace(c.UserCommit.Message()), "\n")
+		body := strings.Split(strings.TrimSpace(c.Message()), "\n")
 		if len(body) > 1 {
 			ctx.Data["content"] = strings.Join(body[1:], "\n")
 		}
@@ -952,9 +952,10 @@ func ExcerptBlob(ctx *context.Context) {
 				RightHunkSize: rightHunkSize,
 			},
 		}
-		if direction == "up" {
+		switch direction {
+		case "up":
 			section.Lines = append([]*gitdiff.DiffLine{lineSection}, section.Lines...)
-		} else if direction == "down" {
+		case "down":
 			section.Lines = append(section.Lines, lineSection)
 		}
 	}
@@ -966,7 +967,7 @@ func ExcerptBlob(ctx *context.Context) {
 }
 
 func getExcerptLines(commit *git.Commit, filePath string, idxLeft, idxRight, chunkSize int) ([]*gitdiff.DiffLine, error) {
-	blob, err := commit.Tree.GetBlobByPath(filePath)
+	blob, err := commit.GetBlobByPath(filePath)
 	if err != nil {
 		return nil, err
 	}

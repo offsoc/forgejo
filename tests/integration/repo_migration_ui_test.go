@@ -105,12 +105,12 @@ func testRepoMigrationFormItems(t *testing.T, items *goquery.Selection, expected
 	t.Helper()
 
 	// Compare lengths of item lists
-	assert.EqualValues(t, len(expectedItems), items.Length())
+	assert.Equal(t, len(expectedItems), items.Length())
 
 	// Compare contents of item lists
 	for index, expectedName := range expectedItems {
 		name, exists := items.Eq(index).Attr("name")
 		assert.True(t, exists)
-		assert.EqualValues(t, expectedName, name)
+		assert.Equal(t, expectedName, name)
 	}
 }

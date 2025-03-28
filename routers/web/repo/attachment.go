@@ -106,7 +106,7 @@ func ServeAttachment(ctx *context.Context, uuid string) {
 	}
 
 	if repository == nil { // If not linked
-		if !(ctx.IsSigned && attach.UploaderID == ctx.Doer.ID) { // We block if not the uploader
+		if !ctx.IsSigned || attach.UploaderID != ctx.Doer.ID { // We block if not the uploader
 			ctx.Error(http.StatusNotFound)
 			return
 		}

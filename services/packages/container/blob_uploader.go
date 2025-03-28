@@ -92,7 +92,7 @@ func (u *BlobUploader) Append(ctx context.Context, r io.Reader) error {
 
 	u.BytesReceived += n
 
-	u.HashStateBytes, err = u.MultiHasher.MarshalBinary()
+	u.HashStateBytes, err = u.MarshalBinary()
 	if err != nil {
 		return err
 	}

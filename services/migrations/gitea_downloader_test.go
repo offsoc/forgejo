@@ -45,7 +45,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	topics, err := downloader.GetTopics()
 	require.NoError(t, err)
 	sort.Strings(topics)
-	assert.EqualValues(t, []string{"ci", "gitea", "migration", "test"}, topics)
+	assert.Equal(t, []string{"ci", "gitea", "migration", "test"}, topics)
 
 	labels, err := downloader.GetLabels()
 	require.NoError(t, err)
@@ -132,7 +132,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, isEnd)
 	assert.Len(t, issues, 7)
-	assert.EqualValues(t, "open", issues[0].State)
+	assert.Equal(t, "open", issues[0].State)
 
 	issues, isEnd, err = downloader.GetIssues(3, 2)
 	require.NoError(t, err)

@@ -17,7 +17,7 @@ import (
 func ToNotificationThread(ctx context.Context, n *activities_model.Notification) *api.NotificationThread {
 	result := &api.NotificationThread{
 		ID:        n.ID,
-		Unread:    !(n.Status == activities_model.NotificationStatusRead || n.Status == activities_model.NotificationStatusPinned),
+		Unread:    n.Status != activities_model.NotificationStatusRead && n.Status != activities_model.NotificationStatusPinned,
 		Pinned:    n.Status == activities_model.NotificationStatusPinned,
 		UpdatedAt: n.UpdatedUnix.AsTime(),
 		URL:       n.APIURL(),

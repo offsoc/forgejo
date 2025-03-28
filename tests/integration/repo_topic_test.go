@@ -32,7 +32,7 @@ func TestTopicSearch(t *testing.T) {
 	res := MakeRequest(t, NewRequest(t, "GET", searchURL.String()), http.StatusOK)
 	DecodeJSON(t, res, &topics)
 	assert.Len(t, topics.TopicNames, 4)
-	assert.EqualValues(t, "6", res.Header().Get("x-total-count"))
+	assert.Equal(t, "6", res.Header().Get("x-total-count"))
 
 	query.Add("q", "topic")
 	searchURL.RawQuery = query.Encode()
@@ -46,8 +46,8 @@ func TestTopicSearch(t *testing.T) {
 	DecodeJSON(t, res, &topics)
 	if assert.Len(t, topics.TopicNames, 1) {
 		assert.EqualValues(t, 2, topics.TopicNames[0].ID)
-		assert.EqualValues(t, "database", topics.TopicNames[0].Name)
-		assert.EqualValues(t, 1, topics.TopicNames[0].RepoCount)
+		assert.Equal(t, "database", topics.TopicNames[0].Name)
+		assert.Equal(t, 1, topics.TopicNames[0].RepoCount)
 	}
 }
 

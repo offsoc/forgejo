@@ -579,7 +579,7 @@ enabled=1`,
 					assert.Equal(t, []int(nil), result.DirIndexes)
 					assert.Equal(t, []string{"hello"}, result.BaseNames)
 					assert.Equal(t, []string{"/usr/local/bin/"}, result.DirNames)
-					assert.Equal(t, "", result.DistTag)
+					assert.Empty(t, result.DistTag)
 					assert.Equal(t, "gitea-test-1.0.2-1.x86_64.rpm", result.AptIndexLegacyFileName)
 					assert.Equal(t, 7116, result.AptIndexLegacyFileSize)
 					assert.Equal(t, "9ea82dd62968719aea19c08cd2ced79a", result.MD5Sum)

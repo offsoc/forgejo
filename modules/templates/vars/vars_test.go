@@ -61,7 +61,7 @@ func TestExpandVars(t *testing.T) {
 	for _, kase := range kases {
 		t.Run(kase.tmpl, func(t *testing.T) {
 			res, err := Expand(kase.tmpl, kase.data)
-			assert.EqualValues(t, kase.out, res)
+			assert.Equal(t, kase.out, res)
 			if kase.error {
 				require.Error(t, err)
 			} else {

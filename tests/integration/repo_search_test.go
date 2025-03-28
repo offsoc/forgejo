@@ -100,7 +100,7 @@ func testSearch(t *testing.T, url string, expected []string, indexer bool) {
 	container := doc.Find(".repository").Find(".ui.container")
 
 	branchDropdown := container.Find(".js-branch-tag-selector")
-	assert.EqualValues(t, indexer, len(branchDropdown.Nodes) == 0)
+	assert.Equal(t, indexer, len(branchDropdown.Nodes) == 0)
 
 	dropdownOptions := container.
 		Find(".menu[data-test-tag=fuzzy-dropdown]").
@@ -112,9 +112,9 @@ func testSearch(t *testing.T, url string, expected []string, indexer bool) {
 		})
 
 	if indexer {
-		assert.EqualValues(t, []string{"exact", "union"}, dropdownOptions)
+		assert.Equal(t, []string{"exact", "union"}, dropdownOptions)
 	} else {
-		assert.EqualValues(t, []string{"exact", "union", "regexp"}, dropdownOptions)
+		assert.Equal(t, []string{"exact", "union", "regexp"}, dropdownOptions)
 	}
 
 	filenames := resultFilenames(t, doc)

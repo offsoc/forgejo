@@ -36,7 +36,7 @@ func assertRepoCreateForm(t *testing.T, htmlDoc *HTMLDoc, owner *user_model.User
 
 	// Verify form header
 	header := strings.TrimSpace(htmlDoc.doc.Find(".form[action='/repo/create'] .header").Text())
-	assert.EqualValues(t, locale.TrString("new_repo.title"), header)
+	assert.Equal(t, locale.TrString("new_repo.title"), header)
 
 	htmlDoc.AssertDropdownHasSelectedOption(t, "uid", strconv.FormatInt(owner.ID, 10))
 
@@ -157,7 +157,7 @@ func TestRepoCreateFormTrimSpace(t *testing.T) {
 	})
 	resp := session.MakeRequest(t, req, http.StatusSeeOther)
 
-	assert.EqualValues(t, "/user2/spaced-name", test.RedirectURL(resp))
+	assert.Equal(t, "/user2/spaced-name", test.RedirectURL(resp))
 	unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: 2, Name: "spaced-name"})
 }
 

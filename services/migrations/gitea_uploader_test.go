@@ -64,7 +64,7 @@ func TestGiteaUploadRepo(t *testing.T) {
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, Name: repoName})
 	assert.True(t, repo.HasWiki())
-	assert.EqualValues(t, repo_model.RepositoryReady, repo.Status)
+	assert.Equal(t, repo_model.RepositoryReady, repo.Status)
 
 	milestones, err := db.Find[issues_model.Milestone](db.DefaultContext, issues_model.FindMilestoneOptions{
 		RepoID:   repo.ID,
@@ -173,7 +173,7 @@ func TestGiteaUploadRemapLocalUser(t *testing.T) {
 	uploader.userMap = make(map[int64]int64)
 	err = uploader.remapUser(&source, &target)
 	require.NoError(t, err)
-	assert.EqualValues(t, user.ID, target.GetUserID())
+	assert.Equal(t, user.ID, target.GetUserID())
 }
 
 func TestGiteaUploadRemapExternalUser(t *testing.T) {
@@ -224,7 +224,7 @@ func TestGiteaUploadRemapExternalUser(t *testing.T) {
 	target = repo_model.Release{}
 	err = uploader.remapUser(&source, &target)
 	require.NoError(t, err)
-	assert.EqualValues(t, linkedUser.ID, target.GetUserID())
+	assert.Equal(t, linkedUser.ID, target.GetUserID())
 }
 
 func TestGiteaUploadUpdateGitForPullRequest(t *testing.T) {
@@ -504,14 +504,14 @@ func TestGiteaUploadUpdateGitForPullRequest(t *testing.T) {
 
 			head, err := uploader.updateGitForPullRequest(&testCase.pr)
 			require.NoError(t, err)
-			assert.EqualValues(t, testCase.head, head)
+			assert.Equal(t, testCase.head, head)
 
 			log.Info(stopMark)
 
 			logFiltered, logStopped := logChecker.Check(5 * time.Second)
 			assert.True(t, logStopped)
 			if len(testCase.logFilter) > 0 {
-				assert.EqualValues(t, testCase.logFiltered, logFiltered, "for log message filters: %v", testCase.logFilter)
+				assert.Equal(t, testCase.logFiltered, logFiltered, "for log message filters: %v", testCase.logFilter)
 			}
 		})
 	}

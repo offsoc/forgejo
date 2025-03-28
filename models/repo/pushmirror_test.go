@@ -67,7 +67,7 @@ func TestPushMirrorPrivatekey(t *testing.T) {
 	t.Run("Normal retrieval", func(t *testing.T) {
 		actualPrivateKey, err := m.Privatekey()
 		require.NoError(t, err)
-		assert.EqualValues(t, privateKey, actualPrivateKey)
+		assert.Equal(t, privateKey, actualPrivateKey)
 	})
 
 	t.Run("Incorrect retrieval", func(t *testing.T) {

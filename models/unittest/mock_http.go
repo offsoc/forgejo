@@ -67,7 +67,7 @@ func NewMockWebServer(t *testing.T, liveServerBaseURL, testDataDir string, liveM
 			for headerName, headerValues := range response.Header {
 				for _, headerValue := range headerValues {
 					if !slices.Contains(ignoredHeaders, strings.ToLower(headerName)) {
-						_, err := fixtureWriter.WriteString(fmt.Sprintf("%s: %s\n", headerName, headerValue))
+						_, err := fmt.Fprintf(fixtureWriter, "%s: %s\n", headerName, headerValue)
 						require.NoError(t, err, "writing the header of the HTTP response to the fixture file failed")
 					}
 				}

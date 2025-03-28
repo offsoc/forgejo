@@ -184,7 +184,7 @@ func (kase *testCase) doTest(t *testing.T) {
 			cmt := issue.Comments[c]
 			t.Logf("%v %v %v\n", cmt.Type, cmt.CreatedUnix, cmt.Content)
 		}
-		assert.EqualValues(t, len(after), len(issue.Comments))
+		assert.Len(t, issue.Comments, len(after))
 		t.Fail()
 		return
 	}
@@ -214,7 +214,7 @@ func (kase *testCase) doTest(t *testing.T) {
 			l.AssigneeTeamID = 0
 		}
 
-		assert.EqualValues(t, (after)[c], issue.Comments[c],
+		assert.Equal(t, (after)[c], issue.Comments[c],
 			"Comment %v is not equal", c,
 		)
 	}
