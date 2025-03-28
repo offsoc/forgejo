@@ -50,17 +50,17 @@ func Normalize(data []byte, size any) []byte {
 	normalized = normalizeVars.reAttrClassPrefix.ReplaceAll(normalized, []byte(` class="`))
 	normalized = bytes.TrimSpace(normalized)
 
-    sizeStr := ""
-    switch v := size.(type) {
-    case string:
-        sizeStr = v
-    case int:
-        sizeStr = fmt.Sprintf("%dpx", v)
-    default:
-        sizeStr = "16px"
-    }
+	sizeStr := ""
+	switch v := size.(type) {
+	case string:
+		sizeStr = v
+	case int:
+		sizeStr = fmt.Sprintf("%dpx", v)
+	default:
+		sizeStr = "16px"
+	}
 
-  normalized = fmt.Appendf(normalized, ` width="%s" height="%s"`, sizeStr, sizeStr)
+	normalized = fmt.Appendf(normalized, ` width="%s" height="%s"`, sizeStr, sizeStr)
 	if !bytes.Contains(normalized, []byte(` class="`)) {
 		normalized = append(normalized, ` class="svg"`...)
 	}
