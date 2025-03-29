@@ -21,56 +21,69 @@ func TestRepoMigrationUI(t *testing.T) {
 	// Note: nothing is tested in plain Git migration form right now
 
 	type Migration struct {
-		Name          string
-		ExpectedItems []string
+		Name                      string
+		ExpectedItems             []string
+		DescriptionHasPlaceholder bool
 	}
 
 	migrations := map[int]Migration{
 		2: {
 			"GitHub",
 			[]string{"issues", "pull_requests", "labels", "milestones", "releases"},
+			false,
 		},
 		3: {
 			"Gitea",
 			[]string{"issues", "pull_requests", "labels", "milestones", "releases"},
+			false,
 		},
 		4: {
 			"GitLab",
 			// Note: the checkbox "Merge requests" has name "pull_requests"
 			[]string{"issues", "pull_requests", "labels", "milestones", "releases"},
+			false,
 		},
 		5: {
 			"Gogs",
 			[]string{"issues", "labels", "milestones"},
+			false,
 		},
 		6: {
 			"OneDev",
 			[]string{"issues", "pull_requests", "labels", "milestones"},
+			false,
 		},
 		7: {
 			"GitBucket",
 			[]string{"issues", "pull_requests", "labels", "milestones", "releases"},
+			false,
 		},
 		8: {
 			"Codebase",
 			// Note: the checkbox "Merge requests" has name "pull_requests"
 			[]string{"issues", "pull_requests", "labels", "milestones"},
+			false,
 		},
 		9: {
-			"Codebase",
+			"Forgejo",
 			[]string{"issues", "pull_requests", "labels", "milestones", "releases"},
+			false,
 		},
 	}
-
-	itemsSelector := "#migrate_items .field .checkbox input"
 
 	for id, migration := range migrations {
 		t.Run(migration.Name, func(t *testing.T) {
 			response := session.MakeRequest(t, NewRequest(t, "GET", fmt.Sprintf("/repo/migrate?service_type=%d", id)), http.StatusOK)
 			page := NewHTMLParser(t, response.Body)
 
-			items := page.Find(itemsSelector)
+			items := page.Find("#migrate_items .field .checkbox input")
 			testRepoMigrationFormItems(t, items, migration.ExpectedItems)
+
+			descriptionInput := page.Find("#description")
+			assert.Equal(t, 1, descriptionInput.Length())
+
+			_, descriptionHasPlaceholder := descriptionInput.Attr("placeholder")
+			assert.Equal(t, migration.DescriptionHasPlaceholder, descriptionHasPlaceholder)
 		})
 	}
 }
