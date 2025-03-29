@@ -7,7 +7,7 @@
 		{{/* Refresh the list every interval (30s) unless the document isn't visible or a dropdown is open; refresh
 		if visibility changes as well. */}}
 		<div
-			hx-get="?workflow={{$.CurWorkflow}}&actor={{$.CurActor}}&status={{$.CurStatus}}&list_inner=true"
+			hx-get="?workflow={{$.CurWorkflow}}&actor={{$.CurActor}}&status={{$.CurStatus}}&page={{$.Page.Paginater.Current}}&list_inner=true"
 			hx-swap="morph:innerHTML"
 			hx-trigger="every 30s [document.visibilityState === 'visible' && noActiveDropdowns()], visibilitychange[document.visibilityState === 'visible'] from:document"
 			hx-indicator="#reloading-indicator">
