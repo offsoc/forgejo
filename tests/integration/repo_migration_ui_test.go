@@ -30,28 +30,28 @@ func TestRepoMigrationUI(t *testing.T) {
 		2: {
 			"GitHub",
 			[]string{"issues", "pull_requests", "labels", "milestones", "releases"},
-			false,
+			true,
 		},
 		3: {
 			"Gitea",
 			[]string{"issues", "pull_requests", "labels", "milestones", "releases"},
-			false,
+			true,
 		},
 		4: {
 			"GitLab",
 			// Note: the checkbox "Merge requests" has name "pull_requests"
 			[]string{"issues", "pull_requests", "labels", "milestones", "releases"},
-			false,
+			true,
 		},
 		5: {
 			"Gogs",
 			[]string{"issues", "labels", "milestones"},
-			false,
+			true,
 		},
 		6: {
 			"OneDev",
 			[]string{"issues", "pull_requests", "labels", "milestones"},
-			false,
+			true,
 		},
 		7: {
 			"GitBucket",
@@ -62,12 +62,12 @@ func TestRepoMigrationUI(t *testing.T) {
 			"Codebase",
 			// Note: the checkbox "Merge requests" has name "pull_requests"
 			[]string{"issues", "pull_requests", "labels", "milestones"},
-			false,
+			true,
 		},
 		9: {
 			"Forgejo",
 			[]string{"issues", "pull_requests", "labels", "milestones", "releases"},
-			false,
+			true,
 		},
 	}
 
