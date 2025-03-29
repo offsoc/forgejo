@@ -51,7 +51,7 @@ test('Migration Progress Page', async ({page, browser}, workerInfo) => {
   await expect(page).toHaveURL(`user2/${repoName}`);
   await save_visual(page);
 
-  const ctx = await test_context(browser);
+  const ctx = await test_context(browser, {storageState: {cookies: [], origins: []}});
   const unauthenticatedPage = await ctx.newPage();
   expect((await unauthenticatedPage.goto(`/user2/${repoName}`))?.status(), 'public migration page should be accessible').toBe(200);
   await expect(unauthenticatedPage.locator('#repo_migrating_progress')).toBeVisible();
