@@ -13,92 +13,78 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestRepoMigrationUI is used to test various form properties of different migration types
 func TestRepoMigrationUI(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-	sessionUser1 := loginUser(t, "user1")
-	// Nothing is tested in plain Git migration form right now
-	testRepoMigrationFormGitHub(t, sessionUser1)
-	testRepoMigrationFormGitea(t, sessionUser1)
-	testRepoMigrationFormGitLab(t, sessionUser1)
-	testRepoMigrationFormGogs(t, sessionUser1)
-	testRepoMigrationFormOneDev(t, sessionUser1)
-	testRepoMigrationFormGitBucket(t, sessionUser1)
-	testRepoMigrationFormCodebase(t, sessionUser1)
-	testRepoMigrationFormForgejo(t, sessionUser1)
-}
+	session := loginUser(t, "user1")
+	// Note: nothing is tested in plain Git migration form right now
 
-func testRepoMigrationFormGitHub(t *testing.T, session *TestSession) {
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=2"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
+	t.Run("GitHub", func(t *testing.T) {
+		response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=2"), http.StatusOK)
+		page := NewHTMLParser(t, response.Body)
 
-	items := page.Find("#migrate_items .field .checkbox input")
-	expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
-	testRepoMigrationFormItems(t, items, expectedItems)
-}
+		items := page.Find("#migrate_items .field .checkbox input")
+		expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
+		testRepoMigrationFormItems(t, items, expectedItems)
+	})
+	t.Run("Gitea", func(t *testing.T) {
+		response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=3"), http.StatusOK)
+		page := NewHTMLParser(t, response.Body)
 
-func testRepoMigrationFormGitea(t *testing.T, session *TestSession) {
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=3"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
+		items := page.Find("#migrate_items .field .checkbox input")
+		expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
+		testRepoMigrationFormItems(t, items, expectedItems)
+	})
+	t.Run("GitLab", func(t *testing.T) {
+		response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=4"), http.StatusOK)
+		page := NewHTMLParser(t, response.Body)
 
-	items := page.Find("#migrate_items .field .checkbox input")
-	expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
-	testRepoMigrationFormItems(t, items, expectedItems)
-}
+		items := page.Find("#migrate_items .field .checkbox input")
+		// Note: the checkbox "Merge requests" has name "pull_requests"
+		expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
+		testRepoMigrationFormItems(t, items, expectedItems)
+	})
+	t.Run("Gogs", func(t *testing.T) {
+		response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=5"), http.StatusOK)
+		page := NewHTMLParser(t, response.Body)
 
-func testRepoMigrationFormGitLab(t *testing.T, session *TestSession) {
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=4"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
+		items := page.Find("#migrate_items .field .checkbox input")
+		expectedItems := []string{"issues", "labels", "milestones"}
+		testRepoMigrationFormItems(t, items, expectedItems)
+	})
+	t.Run("OneDev", func(t *testing.T) {
+		response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=6"), http.StatusOK)
+		page := NewHTMLParser(t, response.Body)
 
-	items := page.Find("#migrate_items .field .checkbox input")
-	// Note: the checkbox "Merge requests" has name "pull_requests"
-	expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
-	testRepoMigrationFormItems(t, items, expectedItems)
-}
+		items := page.Find("#migrate_items .field .checkbox input")
+		expectedItems := []string{"issues", "pull_requests", "labels", "milestones"}
+		testRepoMigrationFormItems(t, items, expectedItems)
+	})
+	t.Run("GitBucket", func(t *testing.T) {
+		response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=7"), http.StatusOK)
+		page := NewHTMLParser(t, response.Body)
 
-func testRepoMigrationFormGogs(t *testing.T, session *TestSession) {
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=5"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
+		items := page.Find("#migrate_items .field .checkbox input")
+		expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
+		testRepoMigrationFormItems(t, items, expectedItems)
+	})
+	t.Run("Codebase", func(t *testing.T) {
+		response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=8"), http.StatusOK)
+		page := NewHTMLParser(t, response.Body)
 
-	items := page.Find("#migrate_items .field .checkbox input")
-	expectedItems := []string{"issues", "labels", "milestones"}
-	testRepoMigrationFormItems(t, items, expectedItems)
-}
+		items := page.Find("#migrate_items .field .checkbox input")
+		// Note: the checkbox "Merge requests" has name "pull_requests"
+		expectedItems := []string{"issues", "pull_requests", "labels", "milestones"}
+		testRepoMigrationFormItems(t, items, expectedItems)
+	})
+	t.Run("Codebase", func(t *testing.T) {
+		response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=9"), http.StatusOK)
+		page := NewHTMLParser(t, response.Body)
 
-func testRepoMigrationFormOneDev(t *testing.T, session *TestSession) {
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=6"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
-
-	items := page.Find("#migrate_items .field .checkbox input")
-	expectedItems := []string{"issues", "pull_requests", "labels", "milestones"}
-	testRepoMigrationFormItems(t, items, expectedItems)
-}
-
-func testRepoMigrationFormGitBucket(t *testing.T, session *TestSession) {
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=7"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
-
-	items := page.Find("#migrate_items .field .checkbox input")
-	expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
-	testRepoMigrationFormItems(t, items, expectedItems)
-}
-
-func testRepoMigrationFormCodebase(t *testing.T, session *TestSession) {
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=8"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
-
-	items := page.Find("#migrate_items .field .checkbox input")
-	// Note: the checkbox "Merge requests" has name "pull_requests"
-	expectedItems := []string{"issues", "pull_requests", "labels", "milestones"}
-	testRepoMigrationFormItems(t, items, expectedItems)
-}
-
-func testRepoMigrationFormForgejo(t *testing.T, session *TestSession) {
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/repo/migrate?service_type=9"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
-
-	items := page.Find("#migrate_items .field .checkbox input")
-	expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
-	testRepoMigrationFormItems(t, items, expectedItems)
+		items := page.Find("#migrate_items .field .checkbox input")
+		expectedItems := []string{"issues", "pull_requests", "labels", "milestones", "releases"}
+		testRepoMigrationFormItems(t, items, expectedItems)
+	})
 }
 
 func testRepoMigrationFormItems(t *testing.T, items *goquery.Selection, expectedItems []string) {
