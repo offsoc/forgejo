@@ -38,21 +38,22 @@ test('Migration Repo Name detection', async ({page}, workerInfo) => {
 test('Migration Progress Page', async ({page, browser}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky actionability checks on Mobile Safari');
 
-  expect((await page.goto('/user2/invalidrepo'))?.status(), 'repo should not exist yet').toBe(404);
+  const repoName = `invalidrepo-${globalThis.crypto.randomUUID()}`;
+  expect((await page.goto(`/user2/${repoName}`))?.status(), 'repo should not exist yet').toBe(404);
 
   await page.goto('/repo/migrate?service_type=1');
 
   const form = page.locator('form');
-  await form.getByRole('textbox', {name: 'Repository Name'}).fill('invalidrepo');
-  await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).fill('https://codeberg.org/forgejo/invalidrepo');
+  await form.getByRole('textbox', {name: 'Repository Name'}).fill(repoName);
+  await form.getByRole('textbox', {name: 'Migrate / Clone from URL'}).fill(`https://codeberg.org/forgejo/${repoName}`);
   await save_visual(page);
   await form.locator('button.primary').click({timeout: 5000});
-  await expect(page).toHaveURL('user2/invalidrepo');
+  await expect(page).toHaveURL(`user2/${repoName}`);
   await save_visual(page);
 
   const ctx = await test_context(browser);
   const unauthenticatedPage = await ctx.newPage();
-  expect((await unauthenticatedPage.goto('/user2/invalidrepo'))?.status(), 'public migration page should be accessible').toBe(200);
+  expect((await unauthenticatedPage.goto(`/user2/${repoName}`))?.status(), 'public migration page should be accessible').toBe(200);
   await expect(unauthenticatedPage.locator('#repo_migrating_progress')).toBeVisible();
 
   await page.reload();
@@ -60,7 +61,7 @@ test('Migration Progress Page', async ({page, browser}, workerInfo) => {
   await save_visual(page);
   await page.getByRole('button', {name: 'Delete this repository'}).click();
   const deleteModal = page.locator('#delete-repo-modal');
-  await deleteModal.getByRole('textbox', {name: 'Confirmation string'}).fill('user2/invalidrepo');
+  await deleteModal.getByRole('textbox', {name: 'Confirmation string'}).fill(`user2/${repoName}`);
   await save_visual(page);
   await deleteModal.getByRole('button', {name: 'Delete repository'}).click();
   await expect(page).toHaveURL('/');
