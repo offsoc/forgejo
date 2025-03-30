@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/git"
+	"forgejo.org/modules/optional"
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/test"
 	"forgejo.org/modules/translation"
@@ -1437,4 +1439,59 @@ func TestBlameDirectory(t *testing.T) {
 	// Blame is not allowed
 	req = NewRequest(t, "GET", "/user2/repo59/blame/branch/master/deep")
 	MakeRequest(t, req, http.StatusNotFound)
+}
+
+func TestInitInstructions(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	session := loginUser(t, user.Name)
+
+	sha256Repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, user, tests.DeclarativeRepoOptions{
+		Name:         optional.Some("sha256-instruction"),
+		AutoInit:     optional.Some(false),
+		EnabledUnits: optional.Some([]unit_model.Type{unit_model.TypeCode}),
+		ObjectFormat: optional.Some("sha256"),
+	})
+	defer f()
+
+	sha1Repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, user, tests.DeclarativeRepoOptions{
+		Name:         optional.Some("sha1-instruction"),
+		AutoInit:     optional.Some(false),
+		EnabledUnits: optional.Some([]unit_model.Type{unit_model.TypeCode}),
+		ObjectFormat: optional.Some("sha1"),
+	})
+	defer f()
+
+	portMatcher := regexp.MustCompile(`localhost:\d+`)
+
+	t.Run("sha256", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		resp := session.MakeRequest(t, NewRequest(t, "GET", "/"+sha256Repo.FullName()), http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		assert.Equal(t, `touch README.md
+git init --object-format=sha256
+git switch -c main
+git add README.md
+git commit -m "first commit"
+git remote add origin http://localhost/user2/sha256-instruction.git
+git push -u origin main`, portMatcher.ReplaceAllString(htmlDoc.Find(".empty-repo-guide code").First().Text(), "localhost"))
+	})
+
+	t.Run("sha1", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		resp := session.MakeRequest(t, NewRequest(t, "GET", "/"+sha1Repo.FullName()), http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		assert.Equal(t, `touch README.md
+git init
+git switch -c main
+git add README.md
+git commit -m "first commit"
+git remote add origin http://localhost/user2/sha1-instruction.git
+git push -u origin main`, portMatcher.ReplaceAllString(htmlDoc.Find(".empty-repo-guide code").First().Text(), "localhost"))
+	})
 }
