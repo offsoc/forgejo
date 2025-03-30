@@ -1938,7 +1938,7 @@ func ViewIssue(ctx *context.Context) {
 		}
 		ctx.Data["UpdateStyle"] = updateStyle
 
-		defaultMergeMessage, defaultMergeBody, err := pull_service.GetDefaultMergeMessage(ctx, ctx.Repo.GitRepo, pull, mergeStyle)
+		defaultMergeMessage, defaultMergeBody, err := pull_service.GetDefaultMergeMessage(ctx, ctx.Repo.GitRepo, pull, repo_model.MergeStyleMerge)
 		if err != nil {
 			ctx.ServerError("GetDefaultMergeMessage", err)
 			return
