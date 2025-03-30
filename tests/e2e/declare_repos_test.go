@@ -25,10 +25,10 @@ import (
 // the following entries define the full file content over time
 type FileChanges struct {
 	Filename  string
-	CommitMsg string
+	CommitMsg string // Defaults to a unique message
 	Versions  []string
-	OldBranch string
-	NewBranch string
+	OldBranch string // Defaults to `main`
+	NewBranch string // Defaults to `main`
 }
 
 // put your Git repo declarations in here
