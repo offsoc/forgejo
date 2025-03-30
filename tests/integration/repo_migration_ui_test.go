@@ -79,10 +79,12 @@ func TestRepoMigrationUI(t *testing.T) {
 			items := page.Find("#migrate_items .field .checkbox input")
 			testRepoMigrationFormItems(t, items, migration.ExpectedItems)
 
-			descriptionInput := page.Find("#description")
-			assert.Equal(t, 1, descriptionInput.Length())
+			page.AssertElement(t, "#clone_addr", true)
+			autocomplete, _ := page.Find("#clone_addr").Attr("autocomplete")
+			assert.Equal(t, "url", autocomplete)
 
-			_, descriptionHasPlaceholder := descriptionInput.Attr("placeholder")
+			page.AssertElement(t, "#description", true)
+			_, descriptionHasPlaceholder := page.Find("#description").Attr("placeholder")
 			assert.Equal(t, migration.DescriptionHasPlaceholder, descriptionHasPlaceholder)
 		})
 	}
