@@ -1426,6 +1426,12 @@ func TestRepoSubmoduleView(t *testing.T) {
 
 		htmlDoc := NewHTMLParser(t, resp.Body)
 		htmlDoc.AssertElement(t, fmt.Sprintf(`tr[data-entryname="repo1"] a[href="%s"]`, u.JoinPath("/user2/repo1").String()), true)
+
+		// Check that a link to the submodule returns a redirect and that the redirect link is correct.
+		req = NewRequest(t, "GET", "/"+repo.FullName()+"/src/branch/"+repo.DefaultBranch+"/repo1")
+		resp = MakeRequest(t, req, http.StatusSeeOther)
+
+		assert.Equal(t, u.JoinPath("/user2/repo1").String(), resp.Header().Get("Location"))
 	})
 }
 
