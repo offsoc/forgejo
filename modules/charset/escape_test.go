@@ -190,5 +190,5 @@ func TestAmbiguousUnicodeDetectionContext(t *testing.T) {
 	assert.EqualValues(t, `a<span class="escaped-code-point" data-escaped="[U+00A0]"><span class="char"> </span></span>test`, out)
 
 	_, out = EscapeControlHTML(input, &translation.MockLocale{}, testContext)
-	assert.EqualValues(t, input, out)
+	assert.Equal(t, input, out)
 }

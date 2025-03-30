@@ -60,7 +60,7 @@ func TestDeleteAvatar(t *testing.T) {
 	err = DeleteAvatar(db.DefaultContext, repo)
 	require.NoError(t, err)
 
-	assert.Equal(t, "", repo.Avatar)
+	assert.Empty(t, repo.Avatar)
 }
 
 func TestTemplateGenerateAvatar(t *testing.T) {

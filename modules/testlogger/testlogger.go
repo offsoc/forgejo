@@ -366,6 +366,9 @@ var ignoredErrorMessage = []string{
 
 	// Test_CmdForgejo_Actions
 	`DB: No dedicated replica host defined; falling back to primary DSN for replica connections`,
+
+	// TestDevtestErrorpages
+	`ErrorPage() [E] Example error: Example error`,
 }
 
 func (w *testLoggerWriterCloser) recordError(msg string) {

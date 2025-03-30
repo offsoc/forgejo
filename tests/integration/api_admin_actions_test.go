@@ -35,5 +35,5 @@ func TestAPISearchActionJobs_GlobalRunner(t *testing.T) {
 	DecodeJSON(t, res, &jobs)
 
 	assert.Len(t, jobs, 1)
-	assert.EqualValues(t, job.ID, jobs[0].ID)
+	assert.Equal(t, job.ID, jobs[0].ID)
 }

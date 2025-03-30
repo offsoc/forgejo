@@ -32,7 +32,7 @@ JWT_SECRET = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 	actual := GetGeneralTokenSigningSecret()
 	expected, _ := generate.DecodeJwtSecret("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
 	assert.Len(t, actual, 32)
-	assert.EqualValues(t, expected, actual)
+	assert.Equal(t, expected, actual)
 }
 
 func TestGetGeneralSigningSecretSave(t *testing.T) {

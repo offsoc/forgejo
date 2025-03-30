@@ -445,6 +445,6 @@ func TestSearchRepositoryIDsByCondition(t *testing.T) {
 		require.NoError(t, err)
 
 		slices.Sort(repoIDs)
-		assert.EqualValues(t, testCase.repoIDs, repoIDs)
+		assert.Equal(t, testCase.repoIDs, repoIDs)
 	}
 }

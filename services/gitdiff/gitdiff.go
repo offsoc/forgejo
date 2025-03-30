@@ -1060,7 +1060,7 @@ func readFileName(rd *strings.Reader) (string, bool) {
 		_, _ = fmt.Fscanf(rd, "%s ", &name)
 		char, _ := rd.ReadByte()
 		_ = rd.UnreadByte()
-		for !(char == 0 || char == '"' || char == 'b') {
+		for char != 0 && char != '"' && char != 'b' {
 			var suffix string
 			_, _ = fmt.Fscanf(rd, "%s ", &suffix)
 			name += " " + suffix

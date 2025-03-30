@@ -14,13 +14,13 @@ func TestCleanUploadFileName(t *testing.T) {
 		name := "this/is/test"
 		cleanName := CleanUploadFileName(name)
 		expectedCleanName := name
-		assert.EqualValues(t, expectedCleanName, cleanName)
+		assert.Equal(t, expectedCleanName, cleanName)
 	})
 
 	t.Run("Clean a .git path", func(t *testing.T) {
 		name := "this/is/test/.git"
 		cleanName := CleanUploadFileName(name)
 		expectedCleanName := ""
-		assert.EqualValues(t, expectedCleanName, cleanName)
+		assert.Equal(t, expectedCleanName, cleanName)
 	})
 }

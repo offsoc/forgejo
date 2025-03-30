@@ -110,9 +110,9 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 				ids := make([]int64, 0, len(res))
 				for _, hit := range res {
 					ids = append(ids, hit.RepoID)
-					assert.EqualValues(t, "# repo1\n\nDescription for repo1", hit.Content)
+					assert.Equal(t, "# repo1\n\nDescription for repo1", hit.Content)
 				}
-				assert.EqualValues(t, kw.IDs, ids)
+				assert.Equal(t, kw.IDs, ids)
 			})
 		}
 
@@ -131,7 +131,7 @@ func TestBleveIndexAndSearch(t *testing.T) {
 		if idx != nil {
 			idx.Close()
 		}
-		assert.FailNow(t, "Unable to create bleve indexer Error: %v", err)
+		require.NoError(t, err)
 	}
 	defer idx.Close()
 
@@ -152,7 +152,7 @@ func TestESIndexAndSearch(t *testing.T) {
 		if indexer != nil {
 			indexer.Close()
 		}
-		assert.FailNow(t, "Unable to init ES indexer Error: %v", err)
+		assert.FailNow(t, "Unable to init ES indexer", "error: %v", err)
 	}
 
 	defer indexer.Close()

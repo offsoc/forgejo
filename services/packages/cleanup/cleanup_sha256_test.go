@@ -78,7 +78,7 @@ func TestCleanupSHA256(t *testing.T) {
 		for range expected {
 			filtered = append(filtered, true)
 		}
-		assert.EqualValues(t, filtered, logFiltered, expected)
+		assert.Equal(t, filtered, logFiltered, expected)
 	}
 
 	ancient := 1 * time.Hour

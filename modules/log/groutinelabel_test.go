@@ -15,18 +15,18 @@ func Test_getGoroutineLabels(t *testing.T) {
 	pprof.Do(t.Context(), pprof.Labels(), func(ctx context.Context) {
 		currentLabels := getGoroutineLabels()
 		pprof.ForLabels(ctx, func(key, value string) bool {
-			assert.EqualValues(t, value, currentLabels[key])
+			assert.Equal(t, value, currentLabels[key])
 			return true
 		})
 
 		pprof.Do(ctx, pprof.Labels("Test_getGoroutineLabels", "Test_getGoroutineLabels_child1"), func(ctx context.Context) {
 			currentLabels := getGoroutineLabels()
 			pprof.ForLabels(ctx, func(key, value string) bool {
-				assert.EqualValues(t, value, currentLabels[key])
+				assert.Equal(t, value, currentLabels[key])
 				return true
 			})
 			if assert.NotNil(t, currentLabels) {
-				assert.EqualValues(t, "Test_getGoroutineLabels_child1", currentLabels["Test_getGoroutineLabels"])
+				assert.Equal(t, "Test_getGoroutineLabels_child1", currentLabels["Test_getGoroutineLabels"])
 			}
 		})
 	})

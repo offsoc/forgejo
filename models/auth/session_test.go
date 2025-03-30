@@ -37,7 +37,7 @@ func TestAuthSession(t *testing.T) {
 		// New session is created.
 		sess, err := auth.ReadSession(db.DefaultContext, key)
 		require.NoError(t, err)
-		assert.EqualValues(t, key, sess.Key)
+		assert.Equal(t, key, sess.Key)
 		assert.Empty(t, sess.Data)
 		assert.EqualValues(t, now.Unix(), sess.Expiry)
 
@@ -67,8 +67,8 @@ func TestAuthSession(t *testing.T) {
 		// Ensure data is updated and expiry is set from the update session call.
 		sess, err := auth.ReadSession(db.DefaultContext, key)
 		require.NoError(t, err)
-		assert.EqualValues(t, key, sess.Key)
-		assert.EqualValues(t, data, sess.Data)
+		assert.Equal(t, key, sess.Key)
+		assert.Equal(t, data, sess.Data)
 		assert.EqualValues(t, now.Unix(), sess.Expiry)
 
 		timeutil.MockSet(now)

@@ -106,7 +106,7 @@ func TestMigrate(t *testing.T) {
 				})
 				resp = session.MakeRequest(t, req, http.StatusSeeOther)
 				// Step 5: a redirection displays the migrated repository
-				assert.EqualValues(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
+				assert.Equal(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
 				// Step 6: check the repo was created
 				unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName})
 			})
@@ -163,7 +163,7 @@ func TestMigrateWithWiki(t *testing.T) {
 				})
 				resp = session.MakeRequest(t, req, http.StatusSeeOther)
 				// Step 5: a redirection displays the migrated repository
-				assert.EqualValues(t, fmt.Sprintf("/%s/%s", user.Name, migratedRepoName), test.RedirectURL(resp))
+				assert.Equal(t, fmt.Sprintf("/%s/%s", user.Name, migratedRepoName), test.RedirectURL(resp))
 				// Step 6: check the repo was created and load the repo
 				migratedRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName, WikiBranch: "obscure-name"})
 				// Step 7: check if the wiki is enabled
@@ -219,7 +219,7 @@ func TestMigrateWithReleases(t *testing.T) {
 				})
 				resp = session.MakeRequest(t, req, http.StatusSeeOther)
 				// Step 5: a redirection displays the migrated repository
-				assert.EqualValues(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
+				assert.Equal(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
 				// Step 6: check the repo was created and load the repo
 				migratedRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName})
 				// Step 7: check if releases are enabled

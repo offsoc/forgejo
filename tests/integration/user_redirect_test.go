@@ -38,7 +38,7 @@ func TestUserRedirect(t *testing.T) {
 
 		flashCookie := session.GetCookie(forgejo_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "success%3DYour%2Bprofile%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
+		assert.Equal(t, "success%3DYour%2Bprofile%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
 
 		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "user2", RedirectUserID: 2})
 	})
@@ -88,7 +88,7 @@ func TestUserRedirect(t *testing.T) {
 		session.MakeRequest(t, req, http.StatusSeeOther)
 		flashCookie := session.GetCookie(forgejo_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "success%3DThe%2Buser%2Baccount%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
+		assert.Equal(t, "success%3DThe%2Buser%2Baccount%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
 
 		unittest.AssertExistsIf(t, true, &user_model.User{LowerName: "user2"})
 		unittest.AssertExistsIf(t, false, &user_model.Redirect{LowerName: "user2", RedirectUserID: 2})
@@ -105,7 +105,7 @@ func TestUserRedirect(t *testing.T) {
 
 		flashCookie := session.GetCookie(forgejo_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "success%3DYour%2Bprofile%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
+		assert.Equal(t, "success%3DYour%2Bprofile%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
 
 		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "user2-new", RedirectUserID: 2})
 
@@ -117,7 +117,7 @@ func TestUserRedirect(t *testing.T) {
 
 		flashCookie = session.GetCookie(forgejo_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "success%3DYour%2Bprofile%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
+		assert.Equal(t, "success%3DYour%2Bprofile%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
 
 		unittest.AssertExistsIf(t, false, &user_model.Redirect{LowerName: "user2-new", RedirectUserID: 2})
 		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "user2-new-2", RedirectUserID: 2})

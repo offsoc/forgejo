@@ -24,7 +24,7 @@ func TestCleanup(t *testing.T) {
 		require.NoError(t, CleanupLogs(db.DefaultContext))
 
 		task := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionTask{ID: 1001})
-		assert.EqualValues(t, "does-not-exist", task.LogFilename)
+		assert.Equal(t, "does-not-exist", task.LogFilename)
 		assert.True(t, task.LogExpired)
 		assert.Nil(t, task.LogIndexes)
 	})

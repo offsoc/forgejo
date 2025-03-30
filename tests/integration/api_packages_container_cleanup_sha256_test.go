@@ -53,7 +53,7 @@ func TestPackagesContainerCleanupSHA256(t *testing.T) {
 		for range expected {
 			filtered = append(filtered, true)
 		}
-		assert.EqualValues(t, filtered, logFiltered, expected)
+		assert.Equal(t, filtered, logFiltered, expected)
 	}
 
 	userToken := ""

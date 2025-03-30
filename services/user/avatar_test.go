@@ -42,7 +42,7 @@ func TestUserDeleteAvatar(t *testing.T) {
 		err := UploadAvatar(db.DefaultContext, user, buff.Bytes())
 		require.NoError(t, err)
 		verification := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-		assert.NotEqual(t, "", verification.Avatar)
+		assert.NotEmpty(t, verification.Avatar)
 
 		// fail to delete ...
 		storage.Avatars = storage.UninitializedStorage
@@ -60,7 +60,7 @@ func TestUserDeleteAvatar(t *testing.T) {
 
 		// ... the avatar is removed from the database
 		verification = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-		assert.Equal(t, "", verification.Avatar)
+		assert.Empty(t, verification.Avatar)
 	})
 
 	t.Run("Success", func(t *testing.T) {
@@ -70,12 +70,12 @@ func TestUserDeleteAvatar(t *testing.T) {
 		err := UploadAvatar(db.DefaultContext, user, buff.Bytes())
 		require.NoError(t, err)
 		verification := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-		assert.NotEqual(t, "", verification.Avatar)
+		assert.NotEmpty(t, verification.Avatar)
 
 		err = DeleteAvatar(db.DefaultContext, user)
 		require.NoError(t, err)
 
 		verification = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-		assert.Equal(t, "", verification.Avatar)
+		assert.Empty(t, verification.Avatar)
 	})
 }

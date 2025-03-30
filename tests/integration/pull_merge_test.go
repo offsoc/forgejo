@@ -84,7 +84,7 @@ func testPullMergeForm(t *testing.T, session *TestSession, expectedCode int, use
 		}{}
 		DecodeJSON(t, resp, &respJSON)
 
-		assert.EqualValues(t, fmt.Sprintf("/%s/%s/pulls/%s", user, repo, pullnum), respJSON.Redirect)
+		assert.Equal(t, fmt.Sprintf("/%s/%s/pulls/%s", user, repo, pullnum), respJSON.Redirect)
 	}
 
 	return resp
@@ -144,7 +144,7 @@ func TestPullMerge(t *testing.T) {
 		resp := testPullCreate(t, session, "user1", "repo1", false, "master", "master", "This is a pull title")
 
 		elem := strings.Split(test.RedirectURL(resp), "/")
-		assert.EqualValues(t, "pulls", elem[3])
+		assert.Equal(t, "pulls", elem[3])
 		testPullMerge(t, session, elem[1], elem[2], elem[4], repo_model.MergeStyleMerge, false)
 
 		hookTasks = retrieveHookTasks(t, 1, false)
@@ -164,7 +164,7 @@ func TestPullRebase(t *testing.T) {
 		resp := testPullCreate(t, session, "user1", "repo1", false, "master", "master", "This is a pull title")
 
 		elem := strings.Split(test.RedirectURL(resp), "/")
-		assert.EqualValues(t, "pulls", elem[3])
+		assert.Equal(t, "pulls", elem[3])
 		testPullMerge(t, session, elem[1], elem[2], elem[4], repo_model.MergeStyleRebase, false)
 
 		hookTasks = retrieveHookTasks(t, 1, false)
@@ -184,7 +184,7 @@ func TestPullRebaseMerge(t *testing.T) {
 		resp := testPullCreate(t, session, "user1", "repo1", false, "master", "master", "This is a pull title")
 
 		elem := strings.Split(test.RedirectURL(resp), "/")
-		assert.EqualValues(t, "pulls", elem[3])
+		assert.Equal(t, "pulls", elem[3])
 		testPullMerge(t, session, elem[1], elem[2], elem[4], repo_model.MergeStyleRebaseMerge, false)
 
 		hookTasks = retrieveHookTasks(t, 1, false)
@@ -205,7 +205,7 @@ func TestPullSquash(t *testing.T) {
 		resp := testPullCreate(t, session, "user1", "repo1", false, "master", "master", "This is a pull title")
 
 		elem := strings.Split(test.RedirectURL(resp), "/")
-		assert.EqualValues(t, "pulls", elem[3])
+		assert.Equal(t, "pulls", elem[3])
 		testPullMerge(t, session, elem[1], elem[2], elem[4], repo_model.MergeStyleSquash, false)
 
 		hookTasks = retrieveHookTasks(t, 1, false)
@@ -222,7 +222,7 @@ func TestPullCleanUpAfterMerge(t *testing.T) {
 		resp := testPullCreate(t, session, "user1", "repo1", false, "master", "feature/test", "This is a pull title")
 
 		elem := strings.Split(test.RedirectURL(resp), "/")
-		assert.EqualValues(t, "pulls", elem[3])
+		assert.Equal(t, "pulls", elem[3])
 		testPullMerge(t, session, elem[1], elem[2], elem[4], repo_model.MergeStyleMerge, false)
 
 		// Check PR branch deletion
@@ -235,7 +235,7 @@ func TestPullCleanUpAfterMerge(t *testing.T) {
 		assert.NotEmpty(t, respJSON.Redirect, "Redirected URL is not found")
 
 		elem = strings.Split(respJSON.Redirect, "/")
-		assert.EqualValues(t, "pulls", elem[3])
+		assert.Equal(t, "pulls", elem[3])
 
 		// Check branch deletion result
 		req := NewRequest(t, "GET", respJSON.Redirect)
@@ -244,7 +244,7 @@ func TestPullCleanUpAfterMerge(t *testing.T) {
 		htmlDoc := NewHTMLParser(t, resp.Body)
 		resultMsg := htmlDoc.doc.Find(".ui.message>p").Text()
 
-		assert.EqualValues(t, "Branch \"user1/repo1:feature/test\" has been deleted.", resultMsg)
+		assert.Equal(t, "Branch \"user1/repo1:feature/test\" has been deleted.", resultMsg)
 	})
 }
 
@@ -573,11 +573,11 @@ func TestPullRetargetChildOnBranchDelete(t *testing.T) {
 
 		respBasePR := testPullCreate(t, session, "user2", "repo1", true, "master", "base-pr", "Base Pull Request")
 		elemBasePR := strings.Split(test.RedirectURL(respBasePR), "/")
-		assert.EqualValues(t, "pulls", elemBasePR[3])
+		assert.Equal(t, "pulls", elemBasePR[3])
 
 		respChildPR := testPullCreate(t, session, "user1", "repo1", false, "base-pr", "child-pr", "Child Pull Request")
 		elemChildPR := strings.Split(test.RedirectURL(respChildPR), "/")
-		assert.EqualValues(t, "pulls", elemChildPR[3])
+		assert.Equal(t, "pulls", elemChildPR[3])
 
 		testPullMerge(t, session, elemBasePR[1], elemBasePR[2], elemBasePR[4], repo_model.MergeStyleMerge, true)
 
@@ -589,8 +589,8 @@ func TestPullRetargetChildOnBranchDelete(t *testing.T) {
 		targetBranch := htmlDoc.doc.Find("#branch_target>a").Text()
 		prStatus := strings.TrimSpace(htmlDoc.doc.Find(".issue-title-meta>.issue-state-label").Text())
 
-		assert.EqualValues(t, "master", targetBranch)
-		assert.EqualValues(t, "Open", prStatus)
+		assert.Equal(t, "master", targetBranch)
+		assert.Equal(t, "Open", prStatus)
 	})
 }
 
@@ -603,11 +603,11 @@ func TestPullDontRetargetChildOnWrongRepo(t *testing.T) {
 
 		respBasePR := testPullCreate(t, session, "user1", "repo1", false, "master", "base-pr", "Base Pull Request")
 		elemBasePR := strings.Split(test.RedirectURL(respBasePR), "/")
-		assert.EqualValues(t, "pulls", elemBasePR[3])
+		assert.Equal(t, "pulls", elemBasePR[3])
 
 		respChildPR := testPullCreate(t, session, "user1", "repo1", true, "base-pr", "child-pr", "Child Pull Request")
 		elemChildPR := strings.Split(test.RedirectURL(respChildPR), "/")
-		assert.EqualValues(t, "pulls", elemChildPR[3])
+		assert.Equal(t, "pulls", elemChildPR[3])
 
 		testPullMerge(t, session, elemBasePR[1], elemBasePR[2], elemBasePR[4], repo_model.MergeStyleMerge, true)
 
@@ -619,8 +619,8 @@ func TestPullDontRetargetChildOnWrongRepo(t *testing.T) {
 		targetBranch := htmlDoc.doc.Find("#branch_target>a").Text()
 		prStatus := strings.TrimSpace(htmlDoc.doc.Find(".issue-title-meta>.issue-state-label").Text())
 
-		assert.EqualValues(t, "base-pr", targetBranch)
-		assert.EqualValues(t, "Closed", prStatus)
+		assert.Equal(t, "base-pr", targetBranch)
+		assert.Equal(t, "Closed", prStatus)
 	})
 }
 
@@ -662,7 +662,7 @@ func TestPullMergeIndexerNotifier(t *testing.T) {
 
 		// merge the pull request
 		elem := strings.Split(test.RedirectURL(createPullResp), "/")
-		assert.EqualValues(t, "pulls", elem[3])
+		assert.Equal(t, "pulls", elem[3])
 		testPullMerge(t, session, elem[1], elem[2], elem[4], repo_model.MergeStyleMerge, false)
 
 		// check if the issue is closed
@@ -696,7 +696,7 @@ func testResetRepo(t *testing.T, repoPath, branch, commitID string) {
 	defer repo.Close()
 	id, err := repo.GetBranchCommitID(branch)
 	require.NoError(t, err)
-	assert.EqualValues(t, commitID, id)
+	assert.Equal(t, commitID, id)
 }
 
 func TestPullMergeBranchProtect(t *testing.T) {
@@ -1186,7 +1186,7 @@ func TestPullDeleteBranchPerms(t *testing.T) {
 
 		flashCookie := user4Session.GetCookie(forgejo_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "error%3DYou%2Bdon%2527t%2Bhave%2Bpermission%2Bto%2Bdelete%2Bthe%2Bhead%2Bbranch.", flashCookie.Value)
+		assert.Equal(t, "error%3DYou%2Bdon%2527t%2Bhave%2Bpermission%2Bto%2Bdelete%2Bthe%2Bhead%2Bbranch.", flashCookie.Value)
 
 		// Check that the branch still exist.
 		req = NewRequest(t, "GET", "/user2/repo1/src/branch/base-pr")

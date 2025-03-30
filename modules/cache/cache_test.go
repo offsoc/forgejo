@@ -48,19 +48,19 @@ func TestGetString(t *testing.T) {
 		return "", fmt.Errorf("some error")
 	})
 	require.Error(t, err)
-	assert.Equal(t, "", data)
+	assert.Empty(t, data)
 
 	data, err = GetString("key", func() (string, error) {
 		return "", nil
 	})
 	require.NoError(t, err)
-	assert.Equal(t, "", data)
+	assert.Empty(t, data)
 
 	data, err = GetString("key", func() (string, error) {
 		return "some data", nil
 	})
 	require.NoError(t, err)
-	assert.Equal(t, "", data)
+	assert.Empty(t, data)
 	Remove("key")
 
 	data, err = GetString("key", func() (string, error) {

@@ -84,5 +84,5 @@ func Test_RemigrateU2FCredentials(t *testing.T) {
 	err = x.Table("webauthn_credential").Select("id, credential_id").Asc("id").Find(&got)
 	require.NoError(t, err)
 
-	assert.EqualValues(t, expected, got)
+	assert.Equal(t, expected, got)
 }

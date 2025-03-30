@@ -159,7 +159,7 @@ func TestBlockUserFromOrganization(t *testing.T) {
 		assert.False(t, unittest.BeanExists(t, &user_model.BlockedUser{BlockID: doer.ID, UserID: org.ID}))
 		flashCookie := session.GetCookie(forgejo_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "error%3DYou%2Bcannot%2Bblock%2Byourself.", flashCookie.Value)
+		assert.Equal(t, "error%3DYou%2Bcannot%2Bblock%2Byourself.", flashCookie.Value)
 	})
 }
 
@@ -393,7 +393,7 @@ func TestBlockActions(t *testing.T) {
 
 			flashCookie := session.GetCookie(forgejo_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "error%3DCannot%2Badd%2Bthe%2Bcollaborator%252C%2Bbecause%2Bthe%2Brepository%2Bowner%2Bhas%2Bblocked%2Bthem.", flashCookie.Value)
+			assert.Equal(t, "error%3DCannot%2Badd%2Bthe%2Bcollaborator%252C%2Bbecause%2Bthe%2Brepository%2Bowner%2Bhas%2Bblocked%2Bthem.", flashCookie.Value)
 		})
 
 		t.Run("BlockedUser Add doer", func(t *testing.T) {
@@ -410,7 +410,7 @@ func TestBlockActions(t *testing.T) {
 
 			flashCookie := session.GetCookie(forgejo_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "error%3DCannot%2Badd%2Bthe%2Bcollaborator%252C%2Bbecause%2Bthey%2Bhave%2Bblocked%2Bthe%2Brepository%2Bowner.", flashCookie.Value)
+			assert.Equal(t, "error%3DCannot%2Badd%2Bthe%2Bcollaborator%252C%2Bbecause%2Bthey%2Bhave%2Bblocked%2Bthe%2Brepository%2Bowner.", flashCookie.Value)
 		})
 	})
 

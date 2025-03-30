@@ -64,6 +64,6 @@ func TestBranchRuleMatch(t *testing.T) {
 
 	for _, kase := range kases {
 		pb := ProtectedBranch{RuleName: kase.Rule}
-		assert.EqualValues(t, kase.ExpectedMatch, pb.Match(kase.BranchName), "%s - %s", kase.BranchName, kase.Rule)
+		assert.Equal(t, kase.ExpectedMatch, pb.Match(kase.BranchName), "%s - %s", kase.BranchName, kase.Rule)
 	}
 }

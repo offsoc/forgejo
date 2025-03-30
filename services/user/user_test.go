@@ -195,7 +195,7 @@ func TestRenameUser(t *testing.T) {
 
 		redirectUID, err := user_model.LookupUserRedirect(db.DefaultContext, oldUsername)
 		require.NoError(t, err)
-		assert.EqualValues(t, user.ID, redirectUID)
+		assert.Equal(t, user.ID, redirectUID)
 
 		unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, OwnerName: user.Name})
 	})

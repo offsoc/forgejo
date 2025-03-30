@@ -31,14 +31,14 @@ func TestManager(t *testing.T) {
 	_ = m.Register(t3)
 
 	require.NoError(t, m.ReleaseReopen())
-	assert.EqualValues(t, 1, t1.count)
-	assert.EqualValues(t, 1, t2.count)
-	assert.EqualValues(t, 1, t3.count)
+	assert.Equal(t, 1, t1.count)
+	assert.Equal(t, 1, t2.count)
+	assert.Equal(t, 1, t3.count)
 
 	c2()
 
 	require.NoError(t, m.ReleaseReopen())
-	assert.EqualValues(t, 2, t1.count)
-	assert.EqualValues(t, 1, t2.count)
-	assert.EqualValues(t, 2, t3.count)
+	assert.Equal(t, 2, t1.count)
+	assert.Equal(t, 1, t2.count)
+	assert.Equal(t, 2, t3.count)
 }
