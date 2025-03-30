@@ -3,7 +3,7 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, save_visual, test_context} from './utils_e2e.ts';
+import {test, save_visual, test_context, dynamic_id} from './utils_e2e.ts';
 
 test.use({user: 'user2'});
 
@@ -38,7 +38,7 @@ test('Migration Repo Name detection', async ({page}, workerInfo) => {
 test('Migration Progress Page', async ({page, browser}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky actionability checks on Mobile Safari');
 
-  const repoName = `invalidrepo-${globalThis.crypto.randomUUID()}`;
+  const repoName = dynamic_id();
   expect((await page.goto(`/user2/${repoName}`))?.status(), 'repo should not exist yet').toBe(404);
 
   await page.goto('/repo/migrate?service_type=1');
