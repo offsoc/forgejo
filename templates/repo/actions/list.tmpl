@@ -5,11 +5,12 @@
 		{{template "base/alert" .}}
 
 		{{/* Refresh the list every interval (30s) unless the document isn't visible or a dropdown is open; refresh
-		if visibility changes as well. */}}
+		if visibility changes as well. simulate-polling-interval is a custom event used for e2e tests to mimic
+		the polling interval and should be defined identically to the `every` clause for accurate testing. */}}
 		<div
 			hx-get="?workflow={{$.CurWorkflow}}&actor={{$.CurActor}}&status={{$.CurStatus}}&page={{$.Page.Paginater.Current}}&list_inner=true"
 			hx-swap="morph:innerHTML"
-			hx-trigger="every 30s [document.visibilityState === 'visible' && noActiveDropdowns()], visibilitychange[document.visibilityState === 'visible'] from:document"
+			hx-trigger="every 30s [pollingOk()], visibilitychange[document.visibilityState === 'visible'] from:document, simulate-polling-interval[pollingOk()] from:document"
 			hx-indicator="#reloading-indicator">
 			{{template "repo/actions/list_inner" .}}
 		</div>
@@ -17,6 +18,10 @@
 </div>
 
 <script type="text/javascript">
+
+function pollingOk() {
+	return document.visibilityState === 'visible' && noActiveDropdowns();
+}
 
 // Intent: If the "Actor" or "Status" dropdowns are currently open and being navigated, or the workflow dispatch
 // dropdown form is open, the htmx refresh would replace them with closed dropdowns.  Instead this prevents the list

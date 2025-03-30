@@ -23,7 +23,7 @@
 			<div id="reloading-indicator" class="htmx-indicator"></div>
 
 			<!-- Actor -->
-			<div class="ui{{if not .Actors}} disabled{{end}} dropdown jump item">
+			<div id="actor_dropdown" class="ui{{if not .Actors}} disabled{{end}} dropdown jump item">
 				<span class="text">{{ctx.Locale.Tr "actions.runs.actor"}}</span>
 				{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 				<div class="menu">
@@ -42,7 +42,7 @@
 				</div>
 			</div>
 			<!-- Status -->
-			<div class="ui dropdown jump item">
+			<div id="status_dropdown" class="ui dropdown jump item">
 				<span class="text">{{ctx.Locale.Tr "actions.runs.status"}}</span>
 				{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 				<div class="menu">
