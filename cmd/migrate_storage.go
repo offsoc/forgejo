@@ -23,6 +23,7 @@ import (
 	"forgejo.org/modules/storage"
 
 	"github.com/urfave/cli/v2"
+	"xorm.io/xorm"
 )
 
 // CmdMigrateStorage represents the available migrate storage sub-command.
@@ -195,7 +196,9 @@ func runMigrateStorage(ctx *cli.Context) error {
 	log.Info("Log path: %s", setting.Log.RootPath)
 	log.Info("Configuration file: %s", setting.CustomConf)
 
-	if err := db.InitEngineWithMigration(context.Background(), migrations.Migrate); err != nil {
+	if err := db.InitEngineWithMigration(context.Background(), func(e db.Engine) error {
+		return migrations.Migrate(e.(*xorm.Engine))
+	}); err != nil {
 		log.Fatal("Failed to initialize ORM engine: %v", err)
 		return err
 	}
