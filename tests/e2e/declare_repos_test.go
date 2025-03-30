@@ -27,6 +27,8 @@ type FileChanges struct {
 	Filename  string
 	CommitMsg string
 	Versions  []string
+	OldBranch string
+	NewBranch string
 }
 
 // put your Git repo declarations in here
@@ -51,6 +53,19 @@ func DeclareGitRepos(t *testing.T) func() {
 				Filename:  "history2.md",
 				Versions:  []string{""},
 				CommitMsg: "Another commit which mentions @user1 in the title\nand @user2 in the text",
+			},
+		}),
+		newRepo(t, 2, "pr-def-merge-style-merge", []FileChanges{
+			{
+				Filename:  "readme.md",
+				Versions:  []string{""},
+				CommitMsg: "Initial commit",
+			},
+			{
+				Filename:  "license.md",
+				Versions:  []string{""},
+				CommitMsg: "Add license",
+				NewBranch: "add-license",
 			},
 		}),
 		// add your repo declarations here
@@ -83,6 +98,16 @@ func newRepo(t *testing.T, userID int64, repoName string, fileChanges []FileChan
 				commitMsg = fmt.Sprintf("Patch: %s-%d", file.Filename, i+1)
 			}
 
+			// default to branch `main`
+			oldBranch := file.OldBranch
+			if oldBranch == "" {
+				oldBranch = "main"
+			}
+			newBranch := file.NewBranch
+			if newBranch == "" {
+				newBranch = "main"
+			}
+
 			resp, err := files_service.ChangeRepoFiles(git.DefaultContext, somerepo, user, &files_service.ChangeRepoFilesOptions{
 				Files: []*files_service.ChangeRepoFile{{
 					Operation:     operation,
@@ -90,8 +115,8 @@ func newRepo(t *testing.T, userID int64, repoName string, fileChanges []FileChan
 					ContentReader: strings.NewReader(version),
 				}},
 				Message:   commitMsg,
-				OldBranch: "main",
-				NewBranch: "main",
+				OldBranch: oldBranch,
+				NewBranch: newBranch,
 				Author: &files_service.IdentityOptions{
 					Name:  user.Name,
 					Email: user.Email,
