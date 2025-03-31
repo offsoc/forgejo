@@ -29,11 +29,12 @@ func (opts mockListOptions) ToConds() builder.Cond {
 
 func TestFind(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
-	xe := unittest.GetXORMEngine()
+	xe, err := unittest.GetXORMEngine()
+	require.NoError(t, err)
 	require.NoError(t, xe.Sync(&repo_model.RepoUnit{}))
 
 	var repoUnitCount int
-	_, err := db.GetEngine(db.DefaultContext).SQL("SELECT COUNT(*) FROM repo_unit").Get(&repoUnitCount)
+	_, err = db.GetEngine(db.DefaultContext).SQL("SELECT COUNT(*) FROM repo_unit").Get(&repoUnitCount)
 	require.NoError(t, err)
 	assert.NotEmpty(t, repoUnitCount)
 
@@ -48,6 +49,6 @@ func TestFind(t *testing.T) {
 
 	repoUnits, newCnt, err := db.FindAndCount[repo_model.RepoUnit](db.DefaultContext, opts)
 	require.NoError(t, err)
-	assert.EqualValues(t, cnt, newCnt)
+	assert.Equal(t, cnt, newCnt)
 	assert.Len(t, repoUnits, repoUnitCount)
 }

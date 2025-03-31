@@ -116,7 +116,7 @@ func TestLTAPasswordChange(t *testing.T) {
 	assert.NotNil(t, rememberCookie)
 
 	// Check if the password really changed.
-	assert.NotEqualValues(t, unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1}).Passwd, user.Passwd)
+	assert.NotEqual(t, unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1}).Passwd, user.Passwd)
 
 	// /user/settings/account should provide with a new LTA cookie, so check for that.
 	// If LTA cookie provides authentication /user/login shouldn't return status 200.

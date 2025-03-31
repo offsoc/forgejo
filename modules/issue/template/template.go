@@ -191,7 +191,7 @@ func validateOptions(field *api.IssueFormField, idx int) error {
 				}
 				for _, visibleType := range visibilityList {
 					visibleType, ok := visibleType.(string)
-					if !ok || !(visibleType == "form" || visibleType == "content") {
+					if !ok || (visibleType != "form" && visibleType != "content") {
 						return position.Errorf("'visible' list can only contain strings of 'form' and 'content'")
 					}
 				}

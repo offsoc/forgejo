@@ -902,7 +902,7 @@ Option 1 of dropdown, Option 2 of dropdown
 				t.Fatal(err)
 			}
 			if got := RenderToMarkdown(template, tt.args.values); got != tt.want {
-				assert.EqualValues(t, tt.want, got)
+				assert.Equal(t, tt.want, got)
 			}
 		})
 	}

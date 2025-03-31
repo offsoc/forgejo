@@ -45,7 +45,7 @@ func TestCatFileBatch(t *testing.T) {
 			sha, typ, size, err := ReadBatchLine(r)
 			require.NoError(t, err)
 			assert.Equal(t, "commit", typ)
-			assert.EqualValues(t, []byte("95bb4d39648ee7e325106df01a621c530863a653"), sha)
+			assert.Equal(t, []byte("95bb4d39648ee7e325106df01a621c530863a653"), sha)
 			assert.EqualValues(t, 144, size)
 		})
 
@@ -60,7 +60,7 @@ func TestCatFileBatch(t *testing.T) {
 		sha, typ, size, err := ReadBatchLine(r)
 		require.NoError(t, err)
 		assert.Equal(t, "commit", typ)
-		assert.EqualValues(t, []byte("95bb4d39648ee7e325106df01a621c530863a653"), sha)
+		assert.Equal(t, []byte("95bb4d39648ee7e325106df01a621c530863a653"), sha)
 		assert.EqualValues(t, 144, size)
 	})
 
@@ -120,7 +120,7 @@ func TestCatFileBatchCheck(t *testing.T) {
 			sha, typ, size, err := ReadBatchLine(r)
 			require.NoError(t, err)
 			assert.Equal(t, "tag", typ)
-			assert.EqualValues(t, []byte("3ad28a9149a2864384548f3d17ed7f38014c9e8a"), sha)
+			assert.Equal(t, []byte("3ad28a9149a2864384548f3d17ed7f38014c9e8a"), sha)
 			assert.EqualValues(t, 807, size)
 		})
 
@@ -135,7 +135,7 @@ func TestCatFileBatchCheck(t *testing.T) {
 		sha, typ, size, err := ReadBatchLine(r)
 		require.NoError(t, err)
 		assert.Equal(t, "tag", typ)
-		assert.EqualValues(t, []byte("3ad28a9149a2864384548f3d17ed7f38014c9e8a"), sha)
+		assert.Equal(t, []byte("3ad28a9149a2864384548f3d17ed7f38014c9e8a"), sha)
 		assert.EqualValues(t, 807, size)
 	})
 

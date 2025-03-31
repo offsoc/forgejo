@@ -363,7 +363,7 @@ func visitNode(ctx *RenderContext, procs []processor, node *html.Node) {
 	// Add user-content- to IDs and "#" links if they don't already have them
 	for idx, attr := range node.Attr {
 		val := strings.TrimPrefix(attr.Val, "#")
-		notHasPrefix := !(strings.HasPrefix(val, "user-content-") || blackfridayExtRegex.MatchString(val))
+		notHasPrefix := !strings.HasPrefix(val, "user-content-") && !blackfridayExtRegex.MatchString(val)
 
 		if attr.Key == "id" && notHasPrefix {
 			node.Attr[idx].Val = "user-content-" + attr.Val

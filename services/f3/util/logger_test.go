@@ -23,7 +23,7 @@ func TestF3UtilMessage(t *testing.T) {
 		actual = fmt.Sprintf(message, args...)
 	}, nil)
 	logger.Message("EXPECTED %s", "MESSAGE")
-	assert.EqualValues(t, expected, actual)
+	assert.Equal(t, expected, actual)
 }
 
 func TestF3UtilLogger(t *testing.T) {

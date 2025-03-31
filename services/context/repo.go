@@ -83,7 +83,7 @@ func (r *Repository) CanEnableEditor(ctx context.Context, user *user_model.User)
 
 // CanCreateBranch returns true if repository is editable and user has proper access level.
 func (r *Repository) CanCreateBranch() bool {
-	return r.Permission.CanWrite(unit_model.TypeCode) && r.Repository.CanCreateBranch()
+	return r.CanWrite(unit_model.TypeCode) && r.Repository.CanCreateBranch()
 }
 
 func (r *Repository) GetObjectFormat() git.ObjectFormat {
@@ -160,12 +160,12 @@ func (r *Repository) CanUseTimetracker(ctx context.Context, issue *issues_model.
 	// 2. Is the user a contributor, admin, poster or assignee and do the repository policies require this?
 	isAssigned, _ := issues_model.IsUserAssignedToIssue(ctx, issue, user)
 	return r.Repository.IsTimetrackerEnabled(ctx) && (!r.Repository.AllowOnlyContributorsToTrackTime(ctx) ||
-		r.Permission.CanWriteIssuesOrPulls(issue.IsPull) || issue.IsPoster(user.ID) || isAssigned)
+		r.CanWriteIssuesOrPulls(issue.IsPull) || issue.IsPoster(user.ID) || isAssigned)
 }
 
 // CanCreateIssueDependencies returns whether or not a user can create dependencies.
 func (r *Repository) CanCreateIssueDependencies(ctx context.Context, user *user_model.User, isPull bool) bool {
-	return r.Repository.IsDependenciesEnabled(ctx) && r.Permission.CanWriteIssuesOrPulls(isPull)
+	return r.Repository.IsDependenciesEnabled(ctx) && r.CanWriteIssuesOrPulls(isPull)
 }
 
 // GetCommitsCount returns cached commit count for current view
@@ -378,7 +378,7 @@ func repoAssignment(ctx *Context, repo *repo_model.Repository) {
 	}
 
 	// Check access.
-	if !ctx.Repo.Permission.HasAccess() {
+	if !ctx.Repo.HasAccess() {
 		if ctx.FormString("go-get") == "1" {
 			EarlyResponseForGoGetMeta(ctx)
 			return

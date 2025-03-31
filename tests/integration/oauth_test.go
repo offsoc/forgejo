@@ -921,7 +921,7 @@ func requireCookieCSRF(t *testing.T, resp http.ResponseWriter) string {
 			return c.Value
 		}
 	}
-	require.True(t, false, "_csrf not found in cookies")
+	require.Fail(t, "_csrf not found in cookies")
 	return ""
 }
 

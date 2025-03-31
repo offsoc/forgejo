@@ -294,7 +294,7 @@ func doAPIMergePullRequestForm(t *testing.T, ctx APITestContext, owner, repo str
 		expected = http.StatusOK
 	}
 
-	if !assert.EqualValues(t, expected, resp.Code,
+	if !assert.Equal(t, expected, resp.Code,
 		"Request: %s %s", req.Method, req.URL.String()) {
 		logUnexpectedResponse(t, resp)
 	}

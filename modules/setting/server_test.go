@@ -84,5 +84,5 @@ func TestUnixSocketAbstractNamespace(t *testing.T) {
 	require.NoError(t, err)
 	loadServerFrom(cfg)
 
-	assert.EqualValues(t, "@forgejo", HTTPAddr)
+	assert.Equal(t, "@forgejo", HTTPAddr)
 }

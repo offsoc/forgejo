@@ -22,7 +22,7 @@ func TestForgejoSemVerSetGet(t *testing.T) {
 	require.NoError(t, SetVersionString(ctx, newVersion.String()))
 	databaseVersion, err := GetVersion(ctx)
 	require.NoError(t, err)
-	assert.EqualValues(t, newVersion.String(), databaseVersion.String())
+	assert.Equal(t, newVersion.String(), databaseVersion.String())
 	assert.True(t, newVersion.Equal(databaseVersion))
 }
 
@@ -36,12 +36,12 @@ func TestForgejoSemVerMissing(t *testing.T) {
 
 	v, err := GetVersion(ctx)
 	require.NoError(t, err)
-	assert.EqualValues(t, "1.0.0", v.String())
+	assert.Equal(t, "1.0.0", v.String())
 
 	_, err = e.Exec("drop table forgejo_sem_ver")
 	require.NoError(t, err)
 
 	v, err = GetVersion(ctx)
 	require.NoError(t, err)
-	assert.EqualValues(t, "1.0.0", v.String())
+	assert.Equal(t, "1.0.0", v.String())
 }

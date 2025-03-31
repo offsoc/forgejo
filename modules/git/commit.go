@@ -220,7 +220,7 @@ func (c *Commit) HasPreviousCommit(objectID ObjectID) (bool, error) {
 	}
 	var exitError *exec.ExitError
 	if errors.As(err, &exitError) {
-		if exitError.ProcessState.ExitCode() == 1 && len(exitError.Stderr) == 0 {
+		if exitError.ExitCode() == 1 && len(exitError.Stderr) == 0 {
 			return false, nil
 		}
 	}

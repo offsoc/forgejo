@@ -272,8 +272,8 @@ func TestGeneratingEd25519Keypair(t *testing.T) {
 
 	publicKey, privateKey, err := util.GenerateSSHKeypair()
 	require.NoError(t, err)
-	assert.EqualValues(t, testPublicKey, string(publicKey))
-	assert.EqualValues(t, testPrivateKey, string(privateKey))
+	assert.Equal(t, testPublicKey, string(publicKey))
+	assert.Equal(t, testPrivateKey, string(privateKey))
 }
 
 func TestOptionalArg(t *testing.T) {

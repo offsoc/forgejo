@@ -57,19 +57,22 @@ var CmdServ = &cli.Command{
 	},
 }
 
-func setup(ctx context.Context, debug bool) {
+func setup(ctx context.Context, debug, gitNeeded bool) {
 	if debug {
 		setupConsoleLogger(log.TRACE, false, os.Stderr)
 	} else {
 		setupConsoleLogger(log.FATAL, false, os.Stderr)
 	}
 	setting.MustInstalled()
+	// Sanity check to ensure path is not relative, see: https://github.com/go-gitea/gitea/pull/19317
 	if _, err := os.Stat(setting.RepoRootPath); err != nil {
 		_ = fail(ctx, "Unable to access repository path", "Unable to access repository path %q, err: %v", setting.RepoRootPath, err)
 		return
 	}
-	if err := git.InitSimple(context.Background()); err != nil {
-		_ = fail(ctx, "Failed to init git", "Failed to init git, err: %v", err)
+	if gitNeeded {
+		if err := git.InitSimple(context.Background()); err != nil {
+			_ = fail(ctx, "Failed to init git", "Failed to init git, err: %v", err)
+		}
 	}
 }
 
@@ -133,7 +136,7 @@ func runServ(c *cli.Context) error {
 	defer cancel()
 
 	// FIXME: This needs to internationalised
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), true)
 
 	if setting.SSH.Disabled {
 		fmt.Println("Forgejo: SSH has been disabled")
@@ -253,11 +256,12 @@ func runServ(c *cli.Context) error {
 	}
 
 	if verb == lfsAuthenticateVerb {
-		if lfsVerb == "upload" {
+		switch lfsVerb {
+		case "upload":
 			requestedMode = perm.AccessModeWrite
-		} else if lfsVerb == "download" {
+		case "download":
 			requestedMode = perm.AccessModeRead
-		} else {
+		default:
 			return fail(ctx, "Unknown LFS verb", "Unknown lfs verb %s", lfsVerb)
 		}
 	}

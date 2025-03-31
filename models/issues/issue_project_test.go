@@ -39,15 +39,15 @@ func TestPrivateIssueProjects(t *testing.T) {
 
 			issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.None[bool]())
 			require.NoError(t, err)
-			assert.EqualValues(t, 2, issuesNum)
+			assert.Equal(t, 2, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.Some(true))
 			require.NoError(t, err)
-			assert.EqualValues(t, 0, issuesNum)
+			assert.Equal(t, 0, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.Some(false))
 			require.NoError(t, err)
-			assert.EqualValues(t, 2, issuesNum)
+			assert.Equal(t, 2, issuesNum)
 		})
 
 		t.Run("Anonymous user", func(t *testing.T) {
@@ -59,15 +59,15 @@ func TestPrivateIssueProjects(t *testing.T) {
 
 			issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, orgProject, nil, org, optional.None[bool]())
 			require.NoError(t, err)
-			assert.EqualValues(t, 1, issuesNum)
+			assert.Equal(t, 1, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, nil, org, optional.Some(true))
 			require.NoError(t, err)
-			assert.EqualValues(t, 0, issuesNum)
+			assert.Equal(t, 0, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, nil, org, optional.Some(false))
 			require.NoError(t, err)
-			assert.EqualValues(t, 1, issuesNum)
+			assert.Equal(t, 1, issuesNum)
 		})
 	})
 
@@ -85,15 +85,15 @@ func TestPrivateIssueProjects(t *testing.T) {
 
 			issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, userProject, user2, nil, optional.None[bool]())
 			require.NoError(t, err)
-			assert.EqualValues(t, 2, issuesNum)
+			assert.Equal(t, 2, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, userProject, user2, nil, optional.Some(true))
 			require.NoError(t, err)
-			assert.EqualValues(t, 0, issuesNum)
+			assert.Equal(t, 0, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, userProject, user2, nil, optional.Some(false))
 			require.NoError(t, err)
-			assert.EqualValues(t, 2, issuesNum)
+			assert.Equal(t, 2, issuesNum)
 		})
 
 		t.Run("Anonymous user", func(t *testing.T) {
@@ -105,15 +105,15 @@ func TestPrivateIssueProjects(t *testing.T) {
 
 			issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, userProject, nil, nil, optional.None[bool]())
 			require.NoError(t, err)
-			assert.EqualValues(t, 1, issuesNum)
+			assert.Equal(t, 1, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, userProject, nil, nil, optional.Some(true))
 			require.NoError(t, err)
-			assert.EqualValues(t, 0, issuesNum)
+			assert.Equal(t, 0, issuesNum)
 
 			issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, userProject, nil, nil, optional.Some(false))
 			require.NoError(t, err)
-			assert.EqualValues(t, 1, issuesNum)
+			assert.Equal(t, 1, issuesNum)
 		})
 	})
 }
@@ -137,15 +137,15 @@ func TestPrivateRepoProjects(t *testing.T) {
 
 		issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, orgProject, user29, org, optional.None[bool]())
 		require.NoError(t, err)
-		assert.EqualValues(t, 1, issuesNum)
+		assert.Equal(t, 1, issuesNum)
 
 		issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user29, org, optional.Some(true))
 		require.NoError(t, err)
-		assert.EqualValues(t, 0, issuesNum)
+		assert.Equal(t, 0, issuesNum)
 
 		issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user29, org, optional.Some(false))
 		require.NoError(t, err)
-		assert.EqualValues(t, 1, issuesNum)
+		assert.Equal(t, 1, issuesNum)
 	})
 
 	t.Run("Full access", func(t *testing.T) {
@@ -160,14 +160,14 @@ func TestPrivateRepoProjects(t *testing.T) {
 
 		issuesNum, err := issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.None[bool]())
 		require.NoError(t, err)
-		assert.EqualValues(t, 2, issuesNum)
+		assert.Equal(t, 2, issuesNum)
 
 		issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.Some(true))
 		require.NoError(t, err)
-		assert.EqualValues(t, 0, issuesNum)
+		assert.Equal(t, 0, issuesNum)
 
 		issuesNum, err = issues.NumIssuesInProject(db.DefaultContext, orgProject, user2, org, optional.Some(false))
 		require.NoError(t, err)
-		assert.EqualValues(t, 2, issuesNum)
+		assert.Equal(t, 2, issuesNum)
 	})
 }

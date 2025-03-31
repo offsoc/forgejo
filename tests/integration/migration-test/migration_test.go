@@ -278,23 +278,36 @@ func doMigrationTest(t *testing.T, version string) {
 
 	setting.InitSQLLoggersForCli(log.INFO)
 
-	err := db.InitEngineWithMigration(t.Context(), wrappedMigrate)
+	err := db.InitEngineWithMigration(t.Context(), func(e db.Engine) error {
+		engine, err := db.GetMasterEngine(e)
+		if err != nil {
+			return err
+		}
+		currentEngine = engine
+		return wrappedMigrate(engine)
+	})
 	require.NoError(t, err)
 	currentEngine.Close()
 
 	beans, _ := db.NamesToBean()
 
-	err = db.InitEngineWithMigration(t.Context(), func(x *xorm.Engine) error {
-		currentEngine = x
-		return migrate_base.RecreateTables(beans...)(x)
+	err = db.InitEngineWithMigration(t.Context(), func(e db.Engine) error {
+		currentEngine, err = db.GetMasterEngine(e)
+		if err != nil {
+			return err
+		}
+		return migrate_base.RecreateTables(beans...)(currentEngine)
 	})
 	require.NoError(t, err)
 	currentEngine.Close()
 
 	// We do this a second time to ensure that there is not a problem with retained indices
-	err = db.InitEngineWithMigration(t.Context(), func(x *xorm.Engine) error {
-		currentEngine = x
-		return migrate_base.RecreateTables(beans...)(x)
+	err = db.InitEngineWithMigration(t.Context(), func(e db.Engine) error {
+		currentEngine, err = db.GetMasterEngine(e)
+		if err != nil {
+			return err
+		}
+		return migrate_base.RecreateTables(beans...)(currentEngine)
 	})
 	require.NoError(t, err)
 

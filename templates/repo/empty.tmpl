@@ -50,8 +50,8 @@
 								<h3>{{ctx.Locale.Tr "repo.create_new_repo_command"}}</h3>
 								<div class="markup">
 									<pre><code>touch README.md
-git init
-{{if ne .Repository.DefaultBranch "master"}}git checkout -b {{.Repository.DefaultBranch}}{{end}}
+git init{{if eq .Repository.ObjectFormatName "sha256"}} --object-format=sha256{{end}}
+{{if ne .Repository.DefaultBranch "master"}}git switch -c {{.Repository.DefaultBranch}}{{end}}
 git add README.md
 git commit -m "first commit"
 git remote add origin <span class="js-clone-url">{{$.CloneButtonOriginLink.HTTPS}}</span>

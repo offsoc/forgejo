@@ -90,7 +90,7 @@ func TestSyncPushCommits(t *testing.T) {
 		var payloadContent structs.PushPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
 		assert.Len(t, payloadContent.Commits, 1)
-		assert.EqualValues(t, "2c54faec6c45d31c1abfaecdab471eac6633738a", payloadContent.Commits[0].ID)
+		assert.Equal(t, "2c54faec6c45d31c1abfaecdab471eac6633738a", payloadContent.Commits[0].ID)
 	})
 }
 
@@ -129,6 +129,6 @@ func TestPushCommits(t *testing.T) {
 		var payloadContent structs.PushPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
 		assert.Len(t, payloadContent.Commits, 1)
-		assert.EqualValues(t, "2c54faec6c45d31c1abfaecdab471eac6633738a", payloadContent.Commits[0].ID)
+		assert.Equal(t, "2c54faec6c45d31c1abfaecdab471eac6633738a", payloadContent.Commits[0].ID)
 	})
 }

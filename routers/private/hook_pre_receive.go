@@ -155,7 +155,7 @@ func (ctx *preReceiveContext) checkQuota() error {
 		return nil
 	}
 
-	ok, err := quota_model.EvaluateForUser(ctx, ctx.PrivateContext.Repo.Repository.OwnerID, quota_model.LimitSubjectSizeReposAll)
+	ok, err := quota_model.EvaluateForUser(ctx, ctx.Repo.Repository.OwnerID, quota_model.LimitSubjectSizeReposAll)
 	if err != nil {
 		log.Error("quota_model.EvaluateForUser: %v", err)
 		ctx.JSON(http.StatusInternalServerError, private.Response{
@@ -531,10 +531,7 @@ func preReceiveFor(ctx *preReceiveContext, oldCommitID, newCommitID string, refF
 
 	baseBranchName := refFullName.ForBranchName()
 
-	baseBranchExist := false
-	if ctx.Repo.GitRepo.IsBranchExist(baseBranchName) {
-		baseBranchExist = true
-	}
+	baseBranchExist := ctx.Repo.GitRepo.IsBranchExist(baseBranchName)
 
 	if !baseBranchExist {
 		for p, v := range baseBranchName {

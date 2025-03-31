@@ -259,6 +259,6 @@ func testStoragePathMatch(t *testing.T, iniStr string, storageType StorageType, 
 	cfg, err := NewConfigProviderFromData(iniStr)
 	require.NoError(t, err, iniStr)
 	require.NoError(t, loadCommonSettingsFrom(cfg), iniStr)
-	assert.EqualValues(t, testSectionToPath(storageType, section), testStorageGetPath(*storage), iniStr)
-	assert.EqualValues(t, storageType, (*storage).Type, iniStr)
+	assert.Equal(t, testSectionToPath(storageType, section), testStorageGetPath(*storage), iniStr)
+	assert.Equal(t, storageType, (*storage).Type, iniStr)
 }

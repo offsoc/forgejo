@@ -49,7 +49,7 @@ func TestRemoveOrgUser(t *testing.T) {
 		require.NoError(t, RemoveOrgUser(db.DefaultContext, orgID, userID))
 		unittest.AssertNotExistsBean(t, &organization.OrgUser{OrgID: orgID, UID: userID})
 		org = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: orgID})
-		assert.EqualValues(t, expectedNumMembers, org.NumMembers)
+		assert.Equal(t, expectedNumMembers, org.NumMembers)
 	}
 	testSuccess(3, 4)
 	testSuccess(3, 4)

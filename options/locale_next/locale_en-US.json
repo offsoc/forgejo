@@ -17,6 +17,7 @@
     "themes.names.forgejo-auto": "Forgejo (follow system theme)",
     "themes.names.forgejo-light": "Forgejo light",
     "themes.names.forgejo-dark": "Forgejo dark",
+    "error.not_found.title": "Page not found",
     "admin.config.moderation_config": "Moderation configuration",
     "moderation.report_abuse": "Report abuse",
     "moderation.report_content": "Report content",

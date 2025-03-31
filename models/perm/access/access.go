@@ -133,7 +133,7 @@ func refreshCollaboratorAccesses(ctx context.Context, repoID int64, accessMap ma
 		return fmt.Errorf("getCollaborations: %w", err)
 	}
 	for _, c := range collaborators {
-		if c.User.IsGhost() {
+		if c.IsGhost() {
 			continue
 		}
 		updateUserAccess(accessMap, c.User, c.Collaboration.Mode)

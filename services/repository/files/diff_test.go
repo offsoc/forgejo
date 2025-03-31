@@ -124,7 +124,7 @@ func TestGetDiffPreview(t *testing.T) {
 		require.NoError(t, err)
 		bs, err := json.Marshal(diff)
 		require.NoError(t, err)
-		assert.EqualValues(t, string(expectedBs), string(bs))
+		assert.Equal(t, string(expectedBs), string(bs))
 	})
 
 	t.Run("empty branch, same results", func(t *testing.T) {
@@ -134,7 +134,7 @@ func TestGetDiffPreview(t *testing.T) {
 		require.NoError(t, err)
 		bs, err := json.Marshal(diff)
 		require.NoError(t, err)
-		assert.EqualValues(t, expectedBs, bs)
+		assert.Equal(t, expectedBs, bs)
 	})
 }
 

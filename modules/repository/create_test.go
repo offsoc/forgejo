@@ -42,5 +42,5 @@ func TestGetDirectorySize(t *testing.T) {
 
 	size, err := getDirectorySize(repo.RepoPath())
 	require.NoError(t, err)
-	assert.EqualValues(t, size, repo.Size)
+	assert.Equal(t, size, repo.Size)
 }

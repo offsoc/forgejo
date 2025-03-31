@@ -73,7 +73,7 @@ func TestRemote_MaybePromoteUserSuccess(t *testing.T) {
 	assert.Equal(t, auth_model.Remote, userBeforeSignIn.LoginType)
 	assert.Equal(t, auth_model.OAuth2, userAfterSignIn.LoginType)
 	// the OAuth2 email was used to set the missing user email
-	assert.Equal(t, "", userBeforeSignIn.Email)
+	assert.Empty(t, userBeforeSignIn.Email)
 	assert.Equal(t, gitlabEmail, userAfterSignIn.Email)
 }
 

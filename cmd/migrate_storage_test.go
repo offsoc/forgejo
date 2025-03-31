@@ -81,8 +81,8 @@ func TestMigratePackages(t *testing.T) {
 	entries, err := os.ReadDir(p)
 	require.NoError(t, err)
 	assert.Len(t, entries, 2)
-	assert.EqualValues(t, "01", entries[0].Name())
-	assert.EqualValues(t, "tmp", entries[1].Name())
+	assert.Equal(t, "01", entries[0].Name())
+	assert.Equal(t, "tmp", entries[1].Name())
 }
 
 func TestMigrateActionsArtifacts(t *testing.T) {

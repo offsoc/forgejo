@@ -29,7 +29,7 @@ func Test_RemoveSSHSignaturesFromReleaseNotes(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, releases, 3)
 
-	assert.Equal(t, "", releases[0].Note)
+	assert.Empty(t, releases[0].Note)
 	assert.Equal(t, "A message.\n", releases[1].Note)
 	assert.Equal(t, "no signature present here", releases[2].Note)
 }

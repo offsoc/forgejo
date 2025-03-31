@@ -136,7 +136,7 @@ func TestIsOrganizationOwner(t *testing.T) {
 	test := func(orgID, userID int64, expected bool) {
 		isOwner, err := organization.IsOrganizationOwner(db.DefaultContext, orgID, userID)
 		require.NoError(t, err)
-		assert.EqualValues(t, expected, isOwner)
+		assert.Equal(t, expected, isOwner)
 	}
 	test(3, 2, true)
 	test(3, 3, false)
@@ -150,7 +150,7 @@ func TestIsOrganizationMember(t *testing.T) {
 	test := func(orgID, userID int64, expected bool) {
 		isMember, err := organization.IsOrganizationMember(db.DefaultContext, orgID, userID)
 		require.NoError(t, err)
-		assert.EqualValues(t, expected, isMember)
+		assert.Equal(t, expected, isMember)
 	}
 	test(3, 2, true)
 	test(3, 3, false)
@@ -165,7 +165,7 @@ func TestIsPublicMembership(t *testing.T) {
 	test := func(orgID, userID int64, expected bool) {
 		isMember, err := organization.IsPublicMembership(db.DefaultContext, orgID, userID)
 		require.NoError(t, err)
-		assert.EqualValues(t, expected, isMember)
+		assert.Equal(t, expected, isMember)
 	}
 	test(3, 2, true)
 	test(3, 3, false)
@@ -188,7 +188,7 @@ func TestGetOrgUsersByOrgID(t *testing.T) {
 	sort.Slice(orgUsers, func(i, j int) bool {
 		return orgUsers[i].ID < orgUsers[j].ID
 	})
-	assert.EqualValues(t, []*organization.OrgUser{{
+	assert.Equal(t, []*organization.OrgUser{{
 		ID:       1,
 		OrgID:    3,
 		UID:      2,
@@ -255,7 +255,7 @@ func TestAccessibleReposEnv_CountRepos(t *testing.T) {
 		require.NoError(t, err)
 		count, err := env.CountRepos()
 		require.NoError(t, err)
-		assert.EqualValues(t, expectedCount, count)
+		assert.Equal(t, expectedCount, count)
 	}
 	testSuccess(2, 3)
 	testSuccess(4, 2)
@@ -494,25 +494,25 @@ func TestUnitPermission(t *testing.T) {
 	user := &user_model.User{ID: 1001}
 	t.Run("Anonymous", func(t *testing.T) {
 		t.Run("Public", func(t *testing.T) {
-			assert.EqualValues(t, perm.AccessModeRead, publicOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
+			assert.Equal(t, perm.AccessModeRead, publicOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
 		})
 		t.Run("Limited", func(t *testing.T) {
-			assert.EqualValues(t, perm.AccessModeNone, limitedOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
+			assert.Equal(t, perm.AccessModeNone, limitedOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
 		})
 		t.Run("Private", func(t *testing.T) {
-			assert.EqualValues(t, perm.AccessModeNone, privateOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
+			assert.Equal(t, perm.AccessModeNone, privateOrg.UnitPermission(db.DefaultContext, nil, unit.TypeCode))
 		})
 	})
 
 	t.Run("Logged in", func(t *testing.T) {
 		t.Run("Public", func(t *testing.T) {
-			assert.EqualValues(t, perm.AccessModeRead, publicOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
+			assert.Equal(t, perm.AccessModeRead, publicOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
 		})
 		t.Run("Limited", func(t *testing.T) {
-			assert.EqualValues(t, perm.AccessModeRead, limitedOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
+			assert.Equal(t, perm.AccessModeRead, limitedOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
 		})
 		t.Run("Private", func(t *testing.T) {
-			assert.EqualValues(t, perm.AccessModeNone, privateOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
+			assert.Equal(t, perm.AccessModeNone, privateOrg.UnitPermission(db.DefaultContext, user, unit.TypeCode))
 		})
 	})
 }

@@ -133,7 +133,7 @@ c=2
 		t.Run(tt.name, func(t *testing.T) {
 			out, lexerName, err := File(tt.name, "", []byte(tt.code))
 			require.NoError(t, err)
-			assert.EqualValues(t, tt.want, out)
+			assert.Equal(t, tt.want, out)
 			assert.Equal(t, tt.lexerName, lexerName)
 		})
 	}
@@ -196,7 +196,7 @@ c=2`),
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := PlainText([]byte(tt.code))
-			assert.EqualValues(t, tt.want, out)
+			assert.Equal(t, tt.want, out)
 		})
 	}
 }

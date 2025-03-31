@@ -39,7 +39,7 @@ func TestAPIUserReposNotLogin(t *testing.T) {
 		unittest.Cond("is_private = ?", false))
 	assert.Len(t, apiRepos, expectedLen)
 	for _, repo := range apiRepos {
-		assert.EqualValues(t, user.ID, repo.Owner.ID)
+		assert.Equal(t, user.ID, repo.Owner.ID)
 		assert.False(t, repo.Private)
 	}
 }
@@ -268,25 +268,25 @@ func TestAPIViewRepo(t *testing.T) {
 	resp := MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &repo)
 	assert.EqualValues(t, 1, repo.ID)
-	assert.EqualValues(t, "repo1", repo.Name)
-	assert.EqualValues(t, 2, repo.Releases)
-	assert.EqualValues(t, 1, repo.OpenIssues)
-	assert.EqualValues(t, 3, repo.OpenPulls)
+	assert.Equal(t, "repo1", repo.Name)
+	assert.Equal(t, 2, repo.Releases)
+	assert.Equal(t, 1, repo.OpenIssues)
+	assert.Equal(t, 3, repo.OpenPulls)
 
 	req = NewRequest(t, "GET", "/api/v1/repos/user12/repo10")
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &repo)
 	assert.EqualValues(t, 10, repo.ID)
-	assert.EqualValues(t, "repo10", repo.Name)
-	assert.EqualValues(t, 1, repo.OpenPulls)
-	assert.EqualValues(t, 1, repo.Forks)
+	assert.Equal(t, "repo10", repo.Name)
+	assert.Equal(t, 1, repo.OpenPulls)
+	assert.Equal(t, 1, repo.Forks)
 
 	req = NewRequest(t, "GET", "/api/v1/repos/user5/repo4")
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &repo)
 	assert.EqualValues(t, 4, repo.ID)
-	assert.EqualValues(t, "repo4", repo.Name)
-	assert.EqualValues(t, 1, repo.Stars)
+	assert.Equal(t, "repo4", repo.Name)
+	assert.Equal(t, 1, repo.Stars)
 }
 
 func TestAPIOrgRepos(t *testing.T) {
@@ -339,9 +339,7 @@ func TestAPIOrgReposWithCodeUnitDisabled(t *testing.T) {
 	var units []unit_model.Type
 	units = append(units, unit_model.TypeCode)
 
-	if err := repo_service.UpdateRepositoryUnits(db.DefaultContext, repo21, nil, units); err != nil {
-		assert.Fail(t, "should have been able to delete code repository unit; failed to %v", err)
-	}
+	require.NoError(t, repo_service.UpdateRepositoryUnits(db.DefaultContext, repo21, nil, units))
 	assert.False(t, repo21.UnitEnabled(db.DefaultContext, unit_model.TypeCode))
 
 	session := loginUser(t, "user2")
@@ -405,12 +403,12 @@ func TestAPIRepoMigrate(t *testing.T) {
 			case "Remote visit addressed rate limitation.":
 				t.Log("test hit github rate limitation")
 			case "You can not import from disallowed hosts.":
-				assert.EqualValues(t, "private-ip", testCase.repoName)
+				assert.Equal(t, "private-ip", testCase.repoName)
 			default:
-				assert.FailNow(t, "unexpected error '%v' on url '%s'", respJSON["message"], testCase.cloneURL)
+				assert.FailNow(t, "unexpected error", "'%v' on url '%s'", respJSON["message"], testCase.cloneURL)
 			}
 		} else {
-			assert.EqualValues(t, testCase.expectedStatus, resp.Code)
+			assert.Equal(t, testCase.expectedStatus, resp.Code)
 		}
 	}
 }
@@ -748,7 +746,7 @@ func TestAPIViewRepoObjectFormat(t *testing.T) {
 	req := NewRequest(t, "GET", "/api/v1/repos/user2/repo1")
 	resp := MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &repo)
-	assert.EqualValues(t, "sha1", repo.ObjectFormatName)
+	assert.Equal(t, "sha1", repo.ObjectFormatName)
 }
 
 func TestAPIRepoCommitPull(t *testing.T) {
@@ -798,12 +796,12 @@ func TestAPIListOwnRepoSorting(t *testing.T) {
 		DecodeJSON(t, resp, &repos)
 
 		assert.Len(t, repos, 2)
-		assert.EqualValues(t, "big_test_private_4", repos[0].Name)
+		assert.Equal(t, "big_test_private_4", repos[0].Name)
 		// Postgres doesn't do ascii sorting.
 		if setting.Database.Type.IsPostgreSQL() {
-			assert.EqualValues(t, "commitsonpr", repos[1].Name)
+			assert.Equal(t, "commitsonpr", repos[1].Name)
 		} else {
-			assert.EqualValues(t, "commits_search_test", repos[1].Name)
+			assert.Equal(t, "commits_search_test", repos[1].Name)
 		}
 	})
 
@@ -815,7 +813,7 @@ func TestAPIListOwnRepoSorting(t *testing.T) {
 		DecodeJSON(t, resp, &repos)
 
 		assert.Len(t, repos, 2)
-		assert.EqualValues(t, "utf8", repos[0].Name)
-		assert.EqualValues(t, "test_workflows", repos[1].Name)
+		assert.Equal(t, "utf8", repos[0].Name)
+		assert.Equal(t, "test_workflows", repos[1].Name)
 	})
 }

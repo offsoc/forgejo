@@ -29,7 +29,7 @@ func TestDict(t *testing.T) {
 	for _, c := range cases {
 		got, err := dict(c.args...)
 		require.NoError(t, err)
-		assert.EqualValues(t, c.want, got)
+		assert.Equal(t, c.want, got)
 	}
 
 	bads := []struct {
