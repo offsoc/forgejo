@@ -82,5 +82,6 @@
     "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Triggered because: %[1]s by: %[2]s",
     "discussion.locked": "This discussion has been locked. Commenting is limited to contributors.",
+    "repo.form.cannot_create": "The owner has already reached the repository limit. If you can create repositories in organizations, those organizations have also reached their limits.",
     "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it."
 }

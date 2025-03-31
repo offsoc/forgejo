@@ -8,42 +8,48 @@
 					{{ctx.Locale.Tr "new_repo.title"}}
 				</h3>
 				<div class="ui attached segment">
-					{{template "base/alert" .}}
-					{{template "repo/create_helper" .}}
+					{{if or .CanCreateRepo .Orgs}}
+						{{template "base/alert" .}}
+						{{template "repo/create_helper" .}}
 
-					{{if not .CanCreateRepo}}
+						{{if and (not .CanCreateRepo) (ne .MaxCreationLimit 0)}}
+							<div class="ui negative message">
+								<p>{{ctx.Locale.TrN .MaxCreationLimit "repo.form.reach_limit_of_creation_1" "repo.form.reach_limit_of_creation_n" .MaxCreationLimit}}</p>
+							</div>
+						{{end}}
+						<fieldset>
+							{{template "repo/create_basic" .}}
+						</fieldset>
+
+						<fieldset>
+							<legend>
+								{{ctx.Locale.Tr "repo.new_from_template"}}
+								<span class="help">{{ctx.Locale.Tr "repo.new_from_template_description"}}</span>
+							</legend>
+							{{template "repo/create_from_template" .}}
+						</fieldset>
+
+						<div id="non_template">
+							<fieldset>
+								<legend>{{ctx.Locale.Tr "repo.auto_init"}}</legend>
+								{{template "repo/create_init" .}}
+							</fieldset>
+
+							<fieldset>
+								<legend>{{ctx.Locale.Tr "repo.new_advanced"}}</legend>
+								<details><summary>{{ctx.Locale.Tr "repo.new_advanced_expand"}}</summary>
+									{{template "repo/create_advanced" .}}
+								</details>
+							</fieldset>
+						</div>
+						<button class="ui primary button">
+							{{ctx.Locale.Tr "repo.create_repo"}}
+						</button>
+					{{else}}
 						<div class="ui negative message">
-							<p>{{ctx.Locale.TrN .MaxCreationLimit "repo.form.reach_limit_of_creation_1" "repo.form.reach_limit_of_creation_n" .MaxCreationLimit}}</p>
+							{{ctx.Locale.Tr "repo.form.cannot_create"}}
 						</div>
 					{{end}}
-					<fieldset>
-						{{template "repo/create_basic" .}}
-					</fieldset>
-
-					<fieldset>
-						<legend>
-							{{ctx.Locale.Tr "repo.new_from_template"}}
-							<span class="help">{{ctx.Locale.Tr "repo.new_from_template_description"}}</span>
-						</legend>
-						{{template "repo/create_from_template" .}}
-					</fieldset>
-
-					<div id="non_template">
-						<fieldset>
-							<legend>{{ctx.Locale.Tr "repo.auto_init"}}</legend>
-							{{template "repo/create_init" .}}
-						</fieldset>
-
-						<fieldset>
-							<legend>{{ctx.Locale.Tr "repo.new_advanced"}}</legend>
-							<details><summary>{{ctx.Locale.Tr "repo.new_advanced_expand"}}</summary>
-								{{template "repo/create_advanced" .}}
-							</details>
-						</fieldset>
-					</div>
-					<button class="ui primary button{{if not .CanCreateRepo}} disabled{{end}}">
-						{{ctx.Locale.Tr "repo.create_repo"}}
-					</button>
 				</div>
 			</form>
 		</div>
