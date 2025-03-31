@@ -105,6 +105,10 @@ func Units(ctx *context.Context) {
 
 func UnitsPost(ctx *context.Context) {
 	form := web.GetForm(ctx).(*forms.RepoUnitSettingForm)
+	if ctx.HasError() {
+		ctx.Redirect(ctx.Repo.Repository.Link() + "/settings/units")
+		return
+	}
 
 	repo := ctx.Repo.Repository
 

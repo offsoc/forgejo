@@ -188,8 +188,8 @@ type RepoUnitSettingForm struct {
 	PullsAllowSquash                      bool
 	PullsAllowFastForwardOnly             bool
 	PullsAllowManualMerge                 bool
-	PullsDefaultMergeStyle                string
-	PullsDefaultUpdateStyle               string
+	PullsDefaultMergeStyle                string `binding:"In(merge,rebase,rebase-merge,squash,fast-forward-only,manually-merged,rebase-update-only)"`
+	PullsDefaultUpdateStyle               string `binding:"In(merge,rebase)"`
 	EnableAutodetectManualMerge           bool
 	PullsAllowRebaseUpdate                bool
 	DefaultDeleteBranchAfterMerge         bool
