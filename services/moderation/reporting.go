@@ -45,6 +45,10 @@ func CanReport(ctx context.Context, doer *user.User, contentType moderation.Repo
 		}
 
 		hasAccess = user.IsUserVisibleToViewer(ctx, reportedUser, ctx.Doer)
+		if !hasAccess {
+			log.Warn("User #%d wanted to report user/org #%d but they are not able to see that profile.", doer.ID, contentID)
+			return false, ErrDoerNotAllowed
+		}
 	} else {
 		// for comments and issues/pulls we need to get the parent repository
 		switch contentType {
