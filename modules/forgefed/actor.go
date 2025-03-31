@@ -6,7 +6,6 @@ package forgefed
 import (
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"code.gitea.io/gitea/modules/validation"
@@ -21,7 +20,7 @@ type ActorID struct {
 	HostSchema       string
 	Path             string
 	Host             string
-	HostPort         uint16
+	HostPort         string
 	UnvalidatedInput string
 }
 
@@ -39,14 +38,9 @@ func NewActorID(uri string) (ActorID, error) {
 	return result, nil
 }
 
+//Todo: add id.HostPort in case of given https://an.other.host:443/api/v1/activitypub/user-id/1
 func (id ActorID) AsURI() string {
-	var result string
-	if id.HostPort == 0 {
-		result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
-	} else {
-		result = fmt.Sprintf("%s://%s:%d/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
-	}
-	return result
+	return fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
 }
 
 func (id ActorID) Validate() []string {
@@ -55,14 +49,16 @@ func (id ActorID) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(id.HostSchema, "schema")...)
 	result = append(result, validation.ValidateNotEmpty(id.Path, "path")...)
 	result = append(result, validation.ValidateNotEmpty(id.Host, "host")...)
-	//ToDo Port should be >0
 	result = append(result, validation.ValidateNotEmpty(id.HostPort, "HostPort")...)
 	result = append(result, validation.ValidateNotEmpty(id.UnvalidatedInput, "unvalidatedInput")...)
 
-	if id.UnvalidatedInput != id.AsURI() {
+	fmt.Println("id.UnvalidatedInput: ", id.UnvalidatedInput)
+	fmt.Println("id.AsURI: ", id.AsURI())
+
+	//add or 
+	if id.UnvalidatedInput != id.AsURI() || id.HostPort != "443" {
 		result = append(result, fmt.Sprintf("not all input was parsed, \nUnvalidated Input:%q \nParsed URI: %q", id.UnvalidatedInput, id.AsURI()))
 	}
-
 	return result
 }
 
@@ -107,10 +103,20 @@ func (id PersonID) Validate() []string {
 	result := id.ActorID.Validate()
 	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
 	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea"}, "Source")...)
+	result = append(result, validation.ValidateOneOf(id.HostSchema, []any{"https", "http", "HTTPS", "HTTP"}, "Source")...)
+
 	switch id.Source {
 	case "forgejo", "gitea":
 		if strings.ToLower(id.Path) != "api/v1/activitypub/user-id" && strings.ToLower(id.Path) != "api/activitypub/user-id" {
 			result = append(result, fmt.Sprintf("path: %q has to be a person specific api path", id.Path))
+		}
+	}
+	switch id.HostSchema {
+	case "HTTPS", "HTTP":
+		if strings.ToLower(id.HostSchema) == "https" {
+			result = append(result, fmt.Sprintf("-%s", strings.ToLower(id.HostSchema)))
+		} else if strings.ToLower(id.HostSchema) == "http" {
+			result = append(result, fmt.Sprintf("-%s", strings.ToLower(id.HostSchema)))
 		}
 	}
 	return result
@@ -173,6 +179,7 @@ func removeEmptyStrings(ls []string) []string {
 
 func newActorID(uri string) (ActorID, error) {
 	validatedURI, err := url.ParseRequestURI(uri)
+	
 	if err != nil {
 		return ActorID{}, err
 	}
@@ -183,43 +190,24 @@ func newActorID(uri string) (ActorID, error) {
 	length := len(pathWithActorID)
 	pathWithoutActorID := strings.Join(pathWithActorID[0:length-1], "/")
 	id := pathWithActorID[length-1]
-
+	
 	result := ActorID{}
 	result.ID = id
 	result.HostSchema = validatedURI.Scheme
 	result.Host = validatedURI.Hostname()
 	result.Path = pathWithoutActorID
-	//Todo correct type & cond 443|80
-	numPort, err := strconv.ParseUint(validatedURI.Port(), 10, 16)
-	//error
-	//fmt.Printf("\nerror\n numPort= %v\n datatype: %T\n", numPort, numPort)
-	//fmt.Printf("\nerror\n err= %v\n err: %T\n", err, err)
-
-	if err != nil {
-		} else if result.HostSchema == "https" {
-			numPort = 443
-		} else if result.HostSchema == "http" {
-			numPort = 80
-		}
-/* if numPort == 0 then set no value like result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
-	if numPort == 0 && result.HostSchema == "https" {
-			numPort = 443
-	}
-	if numPort == 0 && result.HostSchema == "http" {
-			numPort = 80
-		}
-	*/
-	if numPort == 0 && result.HostSchema == "https" {
-		numPort = 443
-		result.HostPort = uint16(numPort)
-		//result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
-		result.UnvalidatedInput = uri
-		fmt.Printf("\ninside numPort = 0: %v\n datatype: %T\n", result, result)
+	
+	if validatedURI.Port() == "" && result.HostSchema == "https" {
+		result.HostPort = "443"
+		result.UnvalidatedInput = fmt.Sprintf("%s://%s/%s/%s", result.HostSchema, result.Host, result.Path, result.ID)
+		return result, nil
+	} else if validatedURI.Port() == "" && result.HostSchema == "http" {
+		result.HostPort = "80"
+		result.UnvalidatedInput = fmt.Sprintf("%s://%s/%s/%s", result.HostSchema, result.Host, result.Path, result.ID)
 		return result, nil
 	}
 
-	result.HostPort = uint16(numPort)
-	fmt.Printf("\nresult.HostPort: %v\n datatype: %T\n", result.HostPort, result.HostPort)
+	result.HostPort = validatedURI.Port()
 	result.UnvalidatedInput = uri
 	return result, nil
 }

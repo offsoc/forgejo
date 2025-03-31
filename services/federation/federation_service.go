@@ -124,7 +124,7 @@ func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 	if err != nil {
 		return nil, err
 	}
-	result, err := forgefed.NewFederationHost(actorID.Host, nodeInfo, actorID.Port, actorID.Schema)
+	result, err := forgefed.NewFederationHost(actorID.Host, nodeInfo, actorID.HostPort, actorID.HostSchema)
 	if err != nil {
 		return nil, err
 	}

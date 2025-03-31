@@ -18,7 +18,7 @@ type FederationHost struct {
 	ID             int64              `xorm:"pk autoincr"`
 	HostFqdn       string             `xorm:"host_fqdn UNIQUE INDEX VARCHAR(255) NOT NULL"`
 	NodeInfo       NodeInfo           `xorm:"extends NOT NULL"`
-	HostPort       uint16             `xorm:"NOT NULL"`
+	HostPort       string             `xorm:"NOT NULL"`
 	HostSchema     string             `xorm:"NOT NULL"`
 	LatestActivity time.Time          `xorm:"NOT NULL"`
 	Created        timeutil.TimeStamp `xorm:"created"`
@@ -26,7 +26,7 @@ type FederationHost struct {
 }
 
 // Factory function for FederationHost. Created struct is asserted to be valid.
-func NewFederationHost(hostFqdn string, nodeInfo NodeInfo, port uint16, schema string) (FederationHost, error) {
+func NewFederationHost(hostFqdn string, nodeInfo NodeInfo, port string, schema string) (FederationHost, error) {
 	result := FederationHost{
 		HostFqdn:   strings.ToLower(hostFqdn),
 		NodeInfo:   nodeInfo,
