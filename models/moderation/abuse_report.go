@@ -90,7 +90,7 @@ func (t ReportedContentType) IsValid() bool {
 // AbuseReport represents a report of abusive content.
 type AbuseReport struct {
 	ID     int64            `xorm:"pk autoincr"`
-	Status ReportStatusType `xorm:"NOT NULL DEFAULT 1"`
+	Status ReportStatusType `xorm:"INDEX NOT NULL DEFAULT 1"`
 	// The ID of the user who submitted the report.
 	ReporterID int64 `xorm:"NOT NULL"`
 	// Reported content type: user/organization profile, repository, issue/pull or comment.
