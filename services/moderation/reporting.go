@@ -29,10 +29,10 @@ var (
 // to 'TypeIssues', respectively 'TypePullRequests' unit for the repository where the content belongs.
 // When reporting users or organizations doer should be able to view the reported entity.
 func CanReport(ctx context.Context, doer *user.User, contentType moderation.ReportedContentType, contentID int64) (bool, error) {
-	var hasAccess bool = false
+	hasAccess := false
 	var issueID int64 = 0
 	var repoID int64 = 0
-	var unitType unit.Type = unit.TypeInvalid // used when checking access for issues, pull requests or comments
+	unitType := unit.TypeInvalid // used when checking access for issues, pull requests or comments
 
 	if contentType == moderation.ReportedContentTypeUser {
 		reported_user, err := user.GetUserByID(ctx, contentID)

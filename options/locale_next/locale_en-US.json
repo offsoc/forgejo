@@ -33,6 +33,7 @@
     "moderation.report_remarks": "Remarks",
     "moderation.report_remarks.placeholder": "Please provide some details regarding the abuse you are reporting.",
     "moderation.submit_report": "Submit report",
+    "moderation.reported_already": "This has already been reported.",
     "moderation.reporting_failed": "Something went wrong while trying to submit the new abuse report: %v",
     "moderation.reported_thank_you": "Thank you for your report. An administrator will look into it shortly."
 }

@@ -134,6 +134,16 @@ func AlreadyReportedByAndOpen(ctx context.Context, doerID int64, contentType Rep
 	return reported
 }
 
+// AlreadyReported returns if the content with contentID and contentType has already been reported and the report is still open.
+func AlreadyReported(ctx context.Context, contentType ReportedContentType, contentID int64) bool {
+	reported, _ := db.GetEngine(ctx).Exist(&AbuseReport{
+		Status:      ReportStatusTypeOpen,
+		ContentType: contentType,
+		ContentID:   contentID,
+	})
+	return reported
+}
+
 func ReportAbuse(ctx context.Context, report *AbuseReport) error {
 	if report.ContentType == ReportedContentTypeUser && report.ReporterID == report.ContentID {
 		return ErrSelfReporting
