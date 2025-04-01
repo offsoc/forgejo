@@ -22,13 +22,13 @@ func TestNewPersonId(t *testing.T) {
 	expected.Path = "api/v1/activitypub/user-id"
 	expected.Host = "an.other.host"
 	expected.HostPort = "443"
+	expected.IsPortSupplemented = true
 	expected.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1"
 
 	sut, _ := NewPersonID("https://an.other.host/api/v1/activitypub/user-id/1", "forgejo")
 	if sut != expected {
 		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
 	}
-	/*
 	
 	expected = PersonID{}
 	expected.ID = "1"
@@ -37,43 +37,45 @@ func TestNewPersonId(t *testing.T) {
 	expected.Path = "api/v1/activitypub/user-id"
 	expected.Host = "an.other.host"
 	expected.HostPort = "443"
+	expected.IsPortSupplemented = false
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 	
 	sut, _ = NewPersonID("https://an.other.host:443/api/v1/activitypub/user-id/1", "forgejo")
 	if sut != expected {
 		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-		}
-	   //Todo doit with http:80
-	   expected = PersonID{}
-	   expected.ID = "1"
-	   expected.Source = "forgejo"
-	   expected.HostSchema = "http"
-	   expected.Path = "api/v1/activitypub/user-id"
-	   expected.Host = "an.other.host"
-	   expected.HostPort = "80"
-	   expected.UnvalidatedInput = "http://an.other.host:80/api/v1/activitypub/user-id/1"
-
-	   sut, _ = NewPersonID("http://an.other.host:80/api/v1/activitypub/user-id/1", "forgejo")
-	   if sut != expected {
-	   		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	   	}
-
-	   //Todo HTTPS
-	   expected = PersonID{}
-	   expected.ID = "1"
-	   expected.Source = "forgejo"
-	   expected.HostSchema = "HTTPS"
-	   expected.Path = "api/v1/activitypub/user-id"
-	   expected.Host = "an.other.host"
-	   expected.HostPort = "443"
-	   expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
-
-	   sut, _ = NewPersonID("https://an.other.host:443/api/v1/activitypub/user-id/1", "forgejo")
-	   	if sut != expected {
-	   		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	   	}
-	*/
 	}
+	
+	expected = PersonID{}
+	expected.ID = "1"
+	expected.Source = "forgejo"
+	expected.HostSchema = "http"
+	expected.Path = "api/v1/activitypub/user-id"
+	expected.Host = "an.other.host"
+	expected.HostPort = "80"
+	expected.IsPortSupplemented = false
+	expected.UnvalidatedInput = "http://an.other.host:80/api/v1/activitypub/user-id/1"
+
+	sut, _ = NewPersonID("http://an.other.host:80/api/v1/activitypub/user-id/1", "forgejo")
+	if sut != expected {
+			t.Errorf("expected: %v\n but was: %v\n", expected, sut)
+	}
+/*
+	expected = PersonID{}
+	expected.ID = "1"
+	expected.Source = "forgejo"
+	expected.HostSchema = "HTTPS"
+	expected.Path = "api/v1/activitypub/user-id"
+	expected.Host = "an.other.host"
+	expected.HostPort = "443"
+	expected.IsPortSupplemented = false
+	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
+
+	sut, _ = NewPersonID("https://an.other.host:443/api/v1/activitypub/user-id/1", "forgejo")
+	if sut != expected {
+		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
+	}
+*/
+}
 
 func TestNewRepositoryId(t *testing.T) {
 	setting.AppURL = "http://localhost:3000/"

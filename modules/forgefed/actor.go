@@ -39,15 +39,13 @@ func NewActorID(uri string) (ActorID, error) {
 	return result, nil
 }
 
-func (id *ActorID) AsURI() string {
+func (id ActorID) AsURI() string {
 	var result string
 	if id.IsPortSupplemented {
 		result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
 	} else {
 		result = fmt.Sprintf("%s://%s:%s/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
 	}
-	//todo: change struct value in ActorID, line 50 doesn't work, notice line 42 *ActorID / ActorID
-	id.IsPortSupplemented = false
 	return result	
 }
 
@@ -116,6 +114,7 @@ func (id PersonID) Validate() []string {
 			result = append(result, fmt.Sprintf("path: %q has to be a person specific api path", id.Path))
 		}
 	}
+	/*
 	switch id.HostSchema {
 	case "HTTPS", "HTTP":
 		if strings.ToLower(id.HostSchema) == "https" {
@@ -124,6 +123,7 @@ func (id PersonID) Validate() []string {
 			result = append(result, fmt.Sprintf("-%s", strings.ToLower(id.HostSchema)))
 		}
 	}
+		*/
 	return result
 }
 
