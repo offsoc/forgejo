@@ -139,7 +139,7 @@ export function initRepoIssueSidebarList() {
           const filteredResponse = {success: true, results: []};
           const currIssueId = $('#new-dependency-drop-list').data('issue-id');
           // Parse the response from the api to work with our dropdown
-          $.each(response, (_i, issue) => {
+          for (const [_, issue] of Object.entries(response)) {
             // Don't list current issue in the dependency list.
             if (issue.id === currIssueId) {
               return;
@@ -149,7 +149,7 @@ export function initRepoIssueSidebarList() {
               }<div class="text small tw-break-anywhere">${htmlEscape(issue.repository.full_name)}</div>`,
               value: issue.id,
             });
-          });
+          }
           return filteredResponse;
         },
         cache: false,
@@ -345,12 +345,12 @@ export function initRepoIssueReferenceRepositorySearch() {
         url: `${appSubUrl}/repo/search?q={query}&limit=20`,
         onResponse(response) {
           const filteredResponse = {success: true, results: []};
-          $.each(response.data, (_r, repo) => {
+          for (const repo of response.data) {
             filteredResponse.results.push({
               name: htmlEscape(repo.repository.full_name),
               value: repo.repository.full_name,
             });
-          });
+          }
           return filteredResponse;
         },
         cache: false,

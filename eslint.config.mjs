@@ -320,7 +320,7 @@ export default tseslint.config(
       'no-jquery/no-delegate': [2],
       'no-jquery/no-done-fail': [2],
       'no-jquery/no-each-collection': [0],
-      'no-jquery/no-each-util': [0],
+      'no-jquery/no-each-util': [2],
       'no-jquery/no-each': [0],
       'no-jquery/no-error-shorthand': [2],
       'no-jquery/no-error': [2],
