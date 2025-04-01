@@ -352,7 +352,7 @@ export default tseslint.config(
       'no-jquery/no-live': [2],
       'no-jquery/no-load-shorthand': [2],
       'no-jquery/no-load': [2],
-      'no-jquery/no-map-collection': [0],
+      'no-jquery/no-map-collection': [2],
       'no-jquery/no-map-util': [2],
       'no-jquery/no-map': [2],
       'no-jquery/no-merge': [2],
