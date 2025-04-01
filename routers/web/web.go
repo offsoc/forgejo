@@ -1461,7 +1461,7 @@ func registerRoutes(m *web.Route) {
 			}, repo.MustBeNotEmpty, context.RequireRepoReaderOr(unit.TypeCode))
 			m.Group("/recent-commits", func() {
 				m.Get("", repo.RecentCommits)
-				m.Get("/data", repo.RecentCommitsData)
+				m.Get("/data", repo.CodeFrequencyData)
 			}, repo.MustBeNotEmpty, context.RequireRepoReaderOr(unit.TypeCode))
 		}, context.RepoRef(), context.RequireRepoReaderOr(unit.TypeCode, unit.TypePullRequests, unit.TypeIssues, unit.TypeReleases))
 

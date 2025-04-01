@@ -11,7 +11,6 @@ import (
 	"strings"
 	"testing"
 
-	"forgejo.org/modules/optional"
 	"forgejo.org/modules/test"
 	"forgejo.org/modules/util"
 
@@ -179,19 +178,6 @@ func Test_RandomBytes(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.NotEqual(t, bytes3, bytes4)
-}
-
-func TestOptionalBoolParse(t *testing.T) {
-	assert.Equal(t, optional.None[bool](), util.OptionalBoolParse(""))
-	assert.Equal(t, optional.None[bool](), util.OptionalBoolParse("x"))
-
-	assert.Equal(t, optional.Some(false), util.OptionalBoolParse("0"))
-	assert.Equal(t, optional.Some(false), util.OptionalBoolParse("f"))
-	assert.Equal(t, optional.Some(false), util.OptionalBoolParse("False"))
-
-	assert.Equal(t, optional.Some(true), util.OptionalBoolParse("1"))
-	assert.Equal(t, optional.Some(true), util.OptionalBoolParse("t"))
-	assert.Equal(t, optional.Some(true), util.OptionalBoolParse("True"))
 }
 
 // Test case for any function which accepts and returns a single string.
