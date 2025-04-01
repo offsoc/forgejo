@@ -376,7 +376,7 @@ export default tseslint.config(
       'no-jquery/no-selector-prop': [2],
       'no-jquery/no-serialize': [2],
       'no-jquery/no-size': [2],
-      'no-jquery/no-sizzle': [0],
+      'no-jquery/no-sizzle': [2],
       'no-jquery/no-slide': [2],
       'no-jquery/no-sub': [2],
       'no-jquery/no-support': [2],
