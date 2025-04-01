@@ -54,6 +54,12 @@ func NewReport(ctx *context.Context) {
 		return
 	}
 
+	if moderation.AlreadyReported(ctx, contentType, contentID) {
+		setMinimalContextData(ctx)
+		ctx.RenderWithErr(ctx.Tr("moderation.reported_already"), tplSubmitAbuseReport, nil)
+		return
+	}
+
 	setContextDataAndRender(ctx, contentType, contentID)
 }
 
