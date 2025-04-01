@@ -79,6 +79,11 @@ func GetInclude(field reflect.StructField) string {
 	return getRuleBody(field, "Include(")
 }
 
+func GetRange(field reflect.StructField) (string, string) {
+	min, max, _ := strings.Cut(getRuleBody(field, "Range("), ",")
+	return min, max
+}
+
 // Validate populates the data with validation error (if any).
 func Validate(errs binding.Errors, data map[string]any, f any, l translation.Locale) binding.Errors {
 	if errs.Len() == 0 {
@@ -131,6 +136,9 @@ func Validate(errs binding.Errors, data map[string]any, f any, l translation.Loc
 				data["ErrorMsg"] = trName + l.TrString("form.url_error", errs[0].Message)
 			case binding.ERR_INCLUDE:
 				data["ErrorMsg"] = trName + l.TrString("form.include_error", GetInclude(field))
+			case binding.ERR_RANGE:
+				min, max := GetRange(field)
+				data["ErrorMsg"] = trName + l.TrString("alert.range_error", l.PrettyNumber(min), l.PrettyNumber(max))
 			case validation.ErrGlobPattern:
 				data["ErrorMsg"] = trName + l.TrString("form.glob_pattern_error", errs[0].Message)
 			case validation.ErrRegexPattern:
