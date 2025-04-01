@@ -802,6 +802,7 @@ func (g *GiteaLocalUploader) newPullRequest(pr *base.PullRequest) (*issues_model
 		MergeBase:  pr.Base.SHA,
 		Index:      pr.Number,
 		HasMerged:  pr.Merged,
+		Flow:       issues_model.PullRequestFlow(pr.Flow),
 
 		Issue: &issue,
 	}
