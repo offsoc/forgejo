@@ -104,6 +104,10 @@ func TestAPIChangeFiles(t *testing.T) {
 			var filesResponse api.FilesResponse
 			DecodeJSON(t, resp, &filesResponse)
 
+			// Testify cannot assert time.Time correctly.
+			expectedCreateFileResponse.Content.LastCommitWhen = filesResponse.Files[0].LastCommitWhen
+			expectedUpdateFileResponse.Content.LastCommitWhen = filesResponse.Files[1].LastCommitWhen
+
 			// check create file
 			assert.Equal(t, expectedCreateFileResponse.Content, filesResponse.Files[0])
 
