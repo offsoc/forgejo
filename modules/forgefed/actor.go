@@ -15,13 +15,14 @@ import (
 
 // ----------------------------- ActorID --------------------------------------------
 type ActorID struct {
-	ID               string
-	Source           string
-	HostSchema       string
-	Path             string
-	Host             string
-	HostPort         string
-	UnvalidatedInput string
+	ID                 string
+	Source             string
+	HostSchema         string
+	Path               string
+	Host               string
+	HostPort           string
+	UnvalidatedInput   string
+	IsPortSupplemented bool
 }
 
 // Factory function for ActorID. Created struct is asserted to be valid
@@ -38,9 +39,16 @@ func NewActorID(uri string) (ActorID, error) {
 	return result, nil
 }
 
-//Todo: add id.HostPort in case of given https://an.other.host:443/api/v1/activitypub/user-id/1
-func (id ActorID) AsURI() string {
-	return fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
+func (id *ActorID) AsURI() string {
+	var result string
+	if id.IsPortSupplemented {
+		result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
+	} else {
+		result = fmt.Sprintf("%s://%s:%s/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
+	}
+	//todo: change struct value in ActorID, line 50 doesn't work, notice line 42 *ActorID / ActorID
+	id.IsPortSupplemented = false
+	return result	
 }
 
 func (id ActorID) Validate() []string {
@@ -52,11 +60,8 @@ func (id ActorID) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(id.HostPort, "HostPort")...)
 	result = append(result, validation.ValidateNotEmpty(id.UnvalidatedInput, "unvalidatedInput")...)
 
-	fmt.Println("id.UnvalidatedInput: ", id.UnvalidatedInput)
-	fmt.Println("id.AsURI: ", id.AsURI())
-
-	//add or 
-	if id.UnvalidatedInput != id.AsURI() || id.HostPort != "443" {
+	//add or
+	if id.UnvalidatedInput != id.AsURI() {
 		result = append(result, fmt.Sprintf("not all input was parsed, \nUnvalidated Input:%q \nParsed URI: %q", id.UnvalidatedInput, id.AsURI()))
 	}
 	return result
@@ -139,6 +144,7 @@ func NewRepositoryID(uri, source string) (RepositoryID, error) {
 	// validate Person specific
 	repoID := RepositoryID{result}
 	if valid, err := validation.IsValid(repoID); !valid {
+
 		return RepositoryID{}, err
 	}
 
@@ -179,7 +185,7 @@ func removeEmptyStrings(ls []string) []string {
 
 func newActorID(uri string) (ActorID, error) {
 	validatedURI, err := url.ParseRequestURI(uri)
-	
+
 	if err != nil {
 		return ActorID{}, err
 	}
@@ -190,18 +196,20 @@ func newActorID(uri string) (ActorID, error) {
 	length := len(pathWithActorID)
 	pathWithoutActorID := strings.Join(pathWithActorID[0:length-1], "/")
 	id := pathWithActorID[length-1]
-	
+
 	result := ActorID{}
 	result.ID = id
 	result.HostSchema = validatedURI.Scheme
 	result.Host = validatedURI.Hostname()
 	result.Path = pathWithoutActorID
-	
+
 	if validatedURI.Port() == "" && result.HostSchema == "https" {
+		result.IsPortSupplemented = true
 		result.HostPort = "443"
 		result.UnvalidatedInput = fmt.Sprintf("%s://%s/%s/%s", result.HostSchema, result.Host, result.Path, result.ID)
 		return result, nil
 	} else if validatedURI.Port() == "" && result.HostSchema == "http" {
+		result.IsPortSupplemented = true
 		result.HostPort = "80"
 		result.UnvalidatedInput = fmt.Sprintf("%s://%s/%s/%s", result.HostSchema, result.Host, result.Path, result.ID)
 		return result, nil
