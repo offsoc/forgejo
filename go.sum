@@ -610,8 +610,8 @@ cloud.google.com/go/workflows v1.7.0/go.mod h1:JhSrZuVZWuiDfKEFxU0/F1PQjmpnpcoIS
 cloud.google.com/go/workflows v1.8.0/go.mod h1:ysGhmEajwZxGn1OhGOGKsTXc5PyxOc0vfKf5Af+to4M=
 cloud.google.com/go/workflows v1.9.0/go.mod h1:ZGkj1aFIOd9c8Gerkjjq7OW7I5+l6cSvT3ujaO/WwSA=
 cloud.google.com/go/workflows v1.10.0/go.mod h1:fZ8LmRmZQWacon9UCX1r/g/DfAXx5VcPALq2CxzdePw=
-code.forgejo.org/f3/gof3/v3 v3.10.6 h1:Ru/Iz+pqM8IPi7atUHE7+q7v3O3DRbYgMFqrFTsO1m8=
-code.forgejo.org/f3/gof3/v3 v3.10.6/go.mod h1:K6lQCWQIyN/5rjP/OJL9fMA6fd++satndE20w/I6Kss=
+code.forgejo.org/f3/gof3/v3 v3.10.7 h1:cK/iZHPcpxO84bqQxLNZ0PM+6DPV/L6FVIwsGYvfDhU=
+code.forgejo.org/f3/gof3/v3 v3.10.7/go.mod h1:RVxzDq0sLVoiryAreYeWa710mbp1zQGsS+mFDUsa4pE=
 code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251 h1:HTZl3CBk3ABNYtFI6TPLvJgGKFIhKT5CBk0sbOtkDKU=
 code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251/go.mod h1:PphB88CPbx601QrWPMZATeorACeVmQlyv3u+uUMbSaM=
 code.forgejo.org/forgejo/act v1.25.1 h1:T0CsN9iEWIyJzIbmMHMM9pl1KHzmI41q8mtepqVqdCc=

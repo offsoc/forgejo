@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.1
 
 require (
-	code.forgejo.org/f3/gof3/v3 v3.10.6
+	code.forgejo.org/f3/gof3/v3 v3.10.7
 	code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251
 	code.forgejo.org/forgejo/levelqueue v1.0.0
 	code.forgejo.org/forgejo/reply v1.0.2
