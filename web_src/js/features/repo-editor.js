@@ -185,7 +185,7 @@ export function initRepoEditor() {
         $('#edit-empty-content-modal')
           .modal({
             onApprove() {
-              $('.edit.form').trigger('submit');
+              document.querySelector('.edit.form').requestSubmit();
             },
           })
           .modal('show');

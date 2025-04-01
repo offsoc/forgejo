@@ -381,7 +381,7 @@ export default tseslint.config(
       'no-jquery/no-sub': [2],
       'no-jquery/no-support': [2],
       'no-jquery/no-text': [0],
-      'no-jquery/no-trigger': [0],
+      'no-jquery/no-trigger': [2],
       'no-jquery/no-trim': [2],
       'no-jquery/no-type': [2],
       'no-jquery/no-unique': [2],
