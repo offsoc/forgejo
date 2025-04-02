@@ -103,29 +103,10 @@ endif
 FORGEJO_VERSION_MAJOR=$(shell echo $(FORGEJO_VERSION) | sed -e 's/\..*//')
 FORGEJO_VERSION_MINOR=$(shell echo $(FORGEJO_VERSION) | sed -E -e 's/^([0-9]+\.[0-9]+).*/\1/')
 
-.PHONY: verify-version
-verify-version:
-ifeq ($(FORGEJO_VERSION),)
-	@echo "Error: Could not determine FORGEJO_VERSION; version file $(STORED_VERSION_FILE) not present and no suitable git tag found"
-	@false
-endif
-
-show-version-full: verify-version
-	@echo ${FORGEJO_VERSION}
-
-show-version-major: verify-version
-	@echo ${FORGEJO_VERSION_MAJOR}
-
-show-version-minor: verify-version
-	@echo ${FORGEJO_VERSION_MINOR}
-
 RELEASE_VERSION ?= ${FORGEJO_VERSION}
 VERSION ?= ${RELEASE_VERSION}
 
 FORGEJO_VERSION_API ?= ${FORGEJO_VERSION}
-
-show-version-api: verify-version
-	@echo ${FORGEJO_VERSION_API}
 
 # Strip binaries by default to reduce size, allow overriding for debugging
 STRIP ?= 1
@@ -287,6 +268,29 @@ help:
 	@echo " - test[\#TestSpecificName]         run unit test"
 	@echo " - test-sqlite[\#TestSpecificName]  run integration test for sqlite"
 	@echo " - reproduce-build\#version         build a reproducible binary for the specified release version"
+
+.PHONY: verify-version
+verify-version:
+ifeq ($(FORGEJO_VERSION),)
+	@echo "Error: Could not determine FORGEJO_VERSION; version file $(STORED_VERSION_FILE) not present and no suitable git tag found"
+	@false
+endif
+
+.PHONY: show-version-full
+show-version-full: verify-version
+	@echo ${FORGEJO_VERSION}
+
+.PHONY: show-version-major
+show-version-major: verify-version
+	@echo ${FORGEJO_VERSION_MAJOR}
+
+.PHONY: show-version-minor
+show-version-minor: verify-version
+	@echo ${FORGEJO_VERSION_MINOR}
+
+.PHONY: show-version-api
+show-version-api: verify-version
+	@echo ${FORGEJO_VERSION_API}
 
 ###
 # Check system and environment requirements
