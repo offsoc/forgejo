@@ -48,11 +48,12 @@ GPREFIX =
 .endif
 
 .BEGIN: .SILENT
-	which $(GMAKE) || (printf "Error: GNU Make is required!\n\n" 1>&2 && false)
+	which $(GMAKE) >/dev/null || (printf "Error: GNU Make is required!\n\n" 1>&2 && false)
 
-.PHONY: FRC
-$(.TARGETS): FRC
-	$(GMAKE) $(GPREFIX) $(GARGS) $(.TARGETS:S,.DONE,,) $(JARG)
+.PHONY: EMPTY
+EMPTY: .SILENT
+	$(GMAKE) $(GPREFIX) $(GARGS) $(JARG)
 
-.DONE .DEFAULT: .SILENT
-	$(GMAKE) $(GPREFIX) $(GARGS) $(.TARGETS:S,.DONE,,) $(JARG)
+.PHONY: $(.TARGETS)
+$(.TARGETS): .SILENT
+	$(GMAKE) $(GPREFIX) $(GARGS) $(JARG) $@
