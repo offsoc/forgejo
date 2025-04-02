@@ -1,10 +1,13 @@
 // Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-package v1_23 //nolint
+package forgejo_migrations //nolint:revive
 
 import (
-	"code.gitea.io/gitea/models/migrations/base"
+	"time"
+
+	"forgejo.org/models/migrations/base"
+	"forgejo.org/modules/timeutil"
 	"xorm.io/xorm"
 )
 
@@ -20,8 +23,18 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 	type User struct {
 		NormalizedFederatedURI string
 	}
+	type FederationHost struct {
+		ID             int64              `xorm:"pk autoincr"`
+		HostFqdn       string             `xorm:"host_fqdn UNIQUE INDEX VARCHAR(255) NOT NULL"`
+		NodeInfo       NodeInfo           `xorm:"extends NOT NULL"`
+		HostPort       string             `xorm:"NOT NULL DEFAULT '443'"`
+		HostSchema     string             `xorm:"NOT NULL DEFAULT 'https'"`
+		LatestActivity time.Time          `xorm:"NOT NULL"`
+		Created        timeutil.TimeStamp `xorm:"created"`
+		Updated        timeutil.TimeStamp `xorm:"updated"`
+	}
 	// TODO: add new fields to FederationHost
-	if err := x.Sync(new(User), new(FederatedUser)); err != nil {
+	if err := x.Sync(new(User), new(FederatedUser), new(FederationHost)); err != nil {
 		return err
 	}
 

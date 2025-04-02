@@ -1,14 +1,14 @@
 // Copyright 2025 The Forgejo Authors.
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package v1_23 //nolint
+package forgejo_migrations //nolint:revive
 
 import (
 	"testing"
 	"time"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
-	"code.gitea.io/gitea/modules/timeutil"
+	migration_tests "forgejo.org/models/migrations/test"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/require"
 	"xorm.io/xorm/schemas"

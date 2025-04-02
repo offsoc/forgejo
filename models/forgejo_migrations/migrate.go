@@ -94,6 +94,8 @@ var migrations = []*Migration{
 	NewMigration("Add `created_unix` column to `user_redirect` table", AddCreatedUnixToRedirect),
 	// v27 -> v28
 	NewMigration("Add pronoun privacy settings to user", AddHidePronounsOptionToUser),
+	// v28 -> v29
+	NewMigration("Migrate `User.NormalizedFederatedURI` column to extract port & schema into FederatedHost", MigrateNormalizedFederatedURI),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.
