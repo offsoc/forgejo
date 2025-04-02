@@ -41,11 +41,11 @@ export function initRepoCloneLink() {
     return;
   }
 
-  repoCloneSSH.addEventListener('click', () => {
+  repoCloneSSH?.addEventListener('click', () => {
     localStorage.setItem('repo-clone-protocol', 'ssh');
     window.updateCloneStates();
   });
-  repoCloneHTTPS.addEventListener('click', () => {
+  repoCloneHTTPS?.addEventListener('click', () => {
     localStorage.setItem('repo-clone-protocol', 'https');
     window.updateCloneStates();
   });
