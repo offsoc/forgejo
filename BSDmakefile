@@ -36,10 +36,6 @@ GARGS = "--no-print-directory"
     JARG = -j$(.MAKE.JOBS)
 .endif
 
-# bmake prefers out-of-source builds and tries to cd into ./obj (among others)
-# where possible. GNU Make doesn't, so override that value.
-.OBJDIR: ./
-
 # The GNU convention is to use the lowercased `prefix` variable/macro to
 # specify the installation directory. Humor them.
 GPREFIX =
