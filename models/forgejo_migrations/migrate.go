@@ -71,7 +71,7 @@ var migrations = []*Migration{
 	// v15 -> v16
 	NewMigration("Create the `federated_user` table", CreateFederatedUserTable),
 	// v16 -> v17
-	NewMigration("Add `normalized_federated_uri` column to `user` table", AddFederatedURIToUser),
+	NewMigration("Add `normalized_federated_uri` column to `user` table", AddNormalizedFederatedURIToUser),
 	// v17 -> v18
 	NewMigration("Create the `following_repo` table", CreateFollowingRepoTable),
 	// v18 -> v19
