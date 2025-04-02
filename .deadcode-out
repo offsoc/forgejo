@@ -192,6 +192,9 @@ forgejo.org/modules/translation
 	MockLocale.HasKey
 	MockLocale.PrettyNumber
 
+forgejo.org/modules/translation/localeiter
+	IterateMessagesContent
+
 forgejo.org/modules/util
 	OptionalArg
 

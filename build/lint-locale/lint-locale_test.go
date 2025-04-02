@@ -91,4 +91,16 @@ func TestNextLocalizationPolicy(t *testing.T) {
 			"settings.hidden_comment_types_description": "\"<not-an-allowed-key> <label>\""
 		}`)))
 	})
+
+	t.Run("Plural form", func(t *testing.T) {
+		assert.Equal(t, []string{"repo.pulls.title_desc: key = \x1b[31m<a href=\"https://example.com\">\x1b[0m"}, checkLocaleNextContent([]byte(`{"repo.pulls.title_desc": {
+                       "few": "key = <a href=\"%s\">",
+                       "other": "key = <a href=\"https://example.com\">"
+    }}`)))
+
+		assert.Equal(t, []string{"repo.pulls.title_desc.few: key = \x1b[31m<a href=\"https://example.com\">\x1b[0m"}, checkLocaleNextContent([]byte(`{"repo.pulls.title_desc": {
+                       "few": "key = <a href=\"https://example.com\">",
+                       "other": "key = <a href=\"%s\">"
+    }}`)))
+	})
 }
