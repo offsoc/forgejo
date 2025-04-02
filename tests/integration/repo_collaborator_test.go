@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,14 +24,14 @@ func TestRepoCollaborators(t *testing.T) {
 	page := NewHTMLParser(t, response.Body).Find(".repo-setting-content")
 
 	// Veirfy header
-	assert.EqualValues(t, "Collaborators", strings.TrimSpace(page.Find("h4").Text()))
+	assert.Equal(t, "Collaborators", strings.TrimSpace(page.Find("h4").Text()))
 
 	// Veirfy button text
 	page = page.Find("#repo-collab-form")
-	assert.EqualValues(t, "Add collaborator", strings.TrimSpace(page.Find("button.primary").Text()))
+	assert.Equal(t, "Add collaborator", strings.TrimSpace(page.Find("button.primary").Text()))
 
 	// Veirfy placeholder
 	placeholder, exists := page.Find("#search-user-box input").Attr("placeholder")
 	assert.True(t, exists)
-	assert.EqualValues(t, "Search users…", placeholder)
+	assert.Equal(t, "Search users…", placeholder)
 }

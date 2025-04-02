@@ -9,16 +9,16 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models"
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/auth/source/ldap"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/translation"
+	"forgejo.org/services/auth"
+	"forgejo.org/services/auth/source/ldap"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -220,7 +220,7 @@ func TestLDAPAuthChange(t *testing.T) {
 	binddn, _ = doc.Find(`input[name="bind_dn"]`).Attr("value")
 	assert.Equal(t, "uid=gitea,ou=service,dc=planetexpress,dc=com", binddn)
 	domainname, _ := doc.Find(`input[name="default_domain_name"]`).Attr("value")
-	assert.Equal(t, "", domainname)
+	assert.Empty(t, domainname)
 
 	req = NewRequestWithValues(t, "POST", href, buildAuthSourceLDAPPayload(csrf, "", "", "test.org", "", "", "off"))
 	session.MakeRequest(t, req, http.StatusSeeOther)

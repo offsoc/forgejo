@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 )
 
@@ -33,8 +34,8 @@ func (o *root) ToFormat() f3.Interface {
 
 func (o *root) Get(context.Context) bool { return true }
 
-func (o *root) Put(context.Context) generic.NodeID {
-	return generic.NilID
+func (o *root) Put(context.Context) f3_id.NodeID {
+	return f3_id.NilID
 }
 
 func (o *root) Patch(context.Context) {

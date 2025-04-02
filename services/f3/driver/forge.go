@@ -8,9 +8,11 @@ import (
 	"context"
 	"fmt"
 
-	user_model "code.gitea.io/gitea/models/user"
+	user_model "forgejo.org/models/user"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
+	f3_kind "code.forgejo.org/f3/gof3/v3/kind"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	"code.forgejo.org/f3/gof3/v3/util"
@@ -19,16 +21,16 @@ import (
 type forge struct {
 	generic.NullDriver
 
-	ownersKind map[string]generic.Kind
+	ownersKind map[string]f3_kind.Kind
 }
 
 func newForge() generic.NodeDriverInterface {
 	return &forge{
-		ownersKind: make(map[string]generic.Kind),
+		ownersKind: make(map[string]f3_kind.Kind),
 	}
 }
 
-func (o *forge) getOwnersKind(ctx context.Context, id string) generic.Kind {
+func (o *forge) getOwnersKind(ctx context.Context, id string) f3_kind.Kind {
 	kind, ok := o.ownersKind[id]
 	if !ok {
 		user, err := user_model.GetUserByID(ctx, util.ParseInt(id))
@@ -50,7 +52,7 @@ func (o *forge) getOwnersPath(ctx context.Context, id string) f3_tree.Path {
 
 func (o *forge) Equals(context.Context, generic.NodeInterface) bool { return true }
 func (o *forge) Get(context.Context) bool                           { return true }
-func (o *forge) Put(context.Context) generic.NodeID                 { return generic.NewNodeID("forge") }
+func (o *forge) Put(context.Context) f3_id.NodeID                   { return f3_id.NewNodeID("forge") }
 func (o *forge) Patch(context.Context)                              {}
 func (o *forge) Delete(context.Context)                             {}
 func (o *forge) NewFormat() f3.Interface                            { return &f3.Forge{} }

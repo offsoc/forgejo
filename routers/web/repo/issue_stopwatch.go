@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/modules/eventsource"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/modules/eventsource"
+	"forgejo.org/services/context"
 )
 
 // IssueStopwatch creates or stops a stopwatch for the given issue.

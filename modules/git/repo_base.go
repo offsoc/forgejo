@@ -10,7 +10,7 @@ import (
 	"errors"
 	"path/filepath"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 // Repository represents a Git repository.

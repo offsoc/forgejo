@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	user_model "code.gitea.io/gitea/models/user"
-	container_module "code.gitea.io/gitea/modules/packages/container"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	user_model "forgejo.org/models/user"
+	container_module "forgejo.org/modules/packages/container"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )

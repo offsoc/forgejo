@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -38,13 +38,13 @@ func testSelectedTheme(t *testing.T, session *TestSession, expectedTheme, expect
 
 	dataTheme, dataThemeExists := page.Find("html").Attr("data-theme")
 	assert.True(t, dataThemeExists)
-	assert.EqualValues(t, expectedTheme, dataTheme)
+	assert.Equal(t, expectedTheme, dataTheme)
 
 	selectedTheme := page.Find("form[action='/user/settings/appearance/theme'] .menu .item.selected")
 	selectorTheme, selectorThemeExists := selectedTheme.Attr("data-value")
 	assert.True(t, selectorThemeExists)
-	assert.EqualValues(t, expectedTheme, selectorTheme)
-	assert.EqualValues(t, expectedName, strings.TrimSpace(selectedTheme.Text()))
+	assert.Equal(t, expectedTheme, selectorTheme)
+	assert.Equal(t, expectedName, strings.TrimSpace(selectedTheme.Text()))
 }
 
 // testSelectedTheme changes user's theme

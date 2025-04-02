@@ -14,12 +14,12 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/git/pushoptions"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/private"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/git/pushoptions"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/private"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
 
 	"github.com/urfave/cli/v2"
 )
@@ -168,7 +168,7 @@ func runHookPreReceive(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), true)
 
 	if len(os.Getenv("SSH_ORIGINAL_COMMAND")) == 0 {
 		if setting.OnlyAllowPushIfGiteaEnvironmentSet {
@@ -220,10 +220,7 @@ Forgejo or set your environment appropriately.`, "")
 		}
 	}
 
-	supportProcReceive := false
-	if git.CheckGitVersionAtLeast("2.29") == nil {
-		supportProcReceive = true
-	}
+	supportProcReceive := git.CheckGitVersionAtLeast("2.29") == nil
 
 	for scanner.Scan() {
 		// TODO: support news feeds for wiki
@@ -330,7 +327,7 @@ func runHookPostReceive(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), true)
 
 	// First of all run update-server-info no matter what
 	if _, _, err := git.NewCommand(ctx, "update-server-info").RunStdString(nil); err != nil {
@@ -494,7 +491,7 @@ func runHookProcReceive(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), true)
 
 	if len(os.Getenv("SSH_ORIGINAL_COMMAND")) == 0 {
 		if setting.OnlyAllowPushIfGiteaEnvironmentSet {

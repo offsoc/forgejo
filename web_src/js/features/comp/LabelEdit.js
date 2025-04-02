@@ -38,7 +38,7 @@ export function initCompLabelEdit(selector) {
           form.reportValidity();
           return false;
         }
-        $('.new-label.form').trigger('submit');
+        document.querySelector('.new-label.form').requestSubmit();
       },
     }).modal('show');
     return false;
@@ -75,7 +75,7 @@ export function initCompLabelEdit(selector) {
           form.reportValidity();
           return false;
         }
-        $('.edit-label.form').trigger('submit');
+        document.querySelector('.edit-label.form').requestSubmit();
       },
     }).modal('show');
     return false;

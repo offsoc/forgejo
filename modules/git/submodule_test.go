@@ -37,6 +37,6 @@ func TestGetRefURL(t *testing.T) {
 	}
 
 	for _, kase := range kases {
-		assert.EqualValues(t, kase.expect, getRefURL(kase.refURL, kase.prefixURL, kase.parentPath, kase.SSHDomain))
+		assert.Equal(t, kase.expect, getRefURL(kase.refURL, kase.prefixURL, kase.parentPath, kase.SSHDomain))
 	}
 }

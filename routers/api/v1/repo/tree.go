@@ -6,8 +6,8 @@ package repo
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/services/context"
-	files_service "code.gitea.io/gitea/services/repository/files"
+	"forgejo.org/services/context"
+	files_service "forgejo.org/services/repository/files"
 )
 
 // GetTree get the tree of a repository.

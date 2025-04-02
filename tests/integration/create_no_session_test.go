@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
+	"forgejo.org/routers"
+	"forgejo.org/tests"
 
 	"code.forgejo.org/go-chi/session"
 	"github.com/stretchr/testify/assert"

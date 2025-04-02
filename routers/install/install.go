@@ -15,25 +15,25 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	db_install "code.gitea.io/gitea/models/db/install"
-	"code.gitea.io/gitea/models/migrations"
-	system_model "code.gitea.io/gitea/models/system"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/auth/password/hash"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/generate"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
+	"forgejo.org/models/db"
+	db_install "forgejo.org/models/db/install"
+	"forgejo.org/models/migrations"
+	system_model "forgejo.org/models/system"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/auth/password/hash"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/generate"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/templates"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/web"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/routers/common"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
 
 	"code.forgejo.org/go-chi/session"
 )
@@ -361,7 +361,8 @@ func SubmitInstall(ctx *context.Context) {
 	}
 
 	// Init the engine with migration
-	if err = db.InitEngineWithMigration(ctx, migrations.Migrate); err != nil {
+	// Wrap migrations.Migrate into a function of type func(db.Engine) error to fix diagnostics.
+	if err = db.InitEngineWithMigration(ctx, migrations.WrapperMigrate); err != nil {
 		db.UnsetDefaultEngine()
 		ctx.Data["Err_DbSetting"] = true
 		ctx.RenderWithErr(ctx.Tr("install.invalid_db_setting", err), tplInstall, &form)
@@ -587,7 +588,7 @@ func SubmitInstall(ctx *context.Context) {
 
 	go func() {
 		// Sleep for a while to make sure the user's browser has loaded the post-install page and its assets (images, css, js)
-		// What if this duration is not long enough? That's impossible -- if the user can't load the simple page in time, how could they install or use Gitea in the future ....
+		// What if this duration is not long enough? That's impossible -- if the user can't load the simple page in time, how could they install or use Forgejo in the future ....
 		time.Sleep(3 * time.Second)
 
 		// Now get the http.Server from this request and shut it down

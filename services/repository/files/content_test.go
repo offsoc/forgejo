@@ -6,14 +6,14 @@ package files
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/gitrepo"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/gitrepo"
+	api "forgejo.org/modules/structs"
 
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -64,13 +64,13 @@ func TestGetContents(t *testing.T) {
 
 	t.Run("Get README.md contents with GetContents(ctx, )", func(t *testing.T) {
 		fileContentResponse, err := GetContents(db.DefaultContext, repo, treePath, ref, false)
-		assert.EqualValues(t, expectedContentsResponse, fileContentResponse)
+		assert.Equal(t, expectedContentsResponse, fileContentResponse)
 		require.NoError(t, err)
 	})
 
 	t.Run("Get README.md contents with ref as empty string (should then use the repo's default branch) with GetContents(ctx, )", func(t *testing.T) {
 		fileContentResponse, err := GetContents(db.DefaultContext, repo, treePath, "", false)
-		assert.EqualValues(t, expectedContentsResponse, fileContentResponse)
+		assert.Equal(t, expectedContentsResponse, fileContentResponse)
 		require.NoError(t, err)
 	})
 }

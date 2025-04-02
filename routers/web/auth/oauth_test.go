@@ -6,12 +6,12 @@ package auth
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/services/auth/source/oauth2"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/services/auth/source/oauth2"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
@@ -71,7 +71,7 @@ func TestNewAccessTokenResponse_OIDCToken(t *testing.T) {
 	assert.Equal(t, "user5", oidcToken.PreferredUsername)
 	assert.Equal(t, "https://try.gitea.io/user5", oidcToken.Profile)
 	assert.Equal(t, "https://try.gitea.io/assets/img/avatar_default.png", oidcToken.Picture)
-	assert.Equal(t, "", oidcToken.Website)
+	assert.Empty(t, oidcToken.Website)
 	assert.Equal(t, timeutil.TimeStamp(0), oidcToken.UpdatedAt)
 	assert.Equal(t, "user5@example.com", oidcToken.Email)
 	assert.True(t, oidcToken.EmailVerified)

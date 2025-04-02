@@ -6,9 +6,9 @@ package models
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,6 +23,6 @@ func TestGetPendingTransferIDs(t *testing.T) {
 	pendingTransferIDs, err := GetPendingTransferIDs(db.DefaultContext, reciepient.ID, doer.ID)
 	require.NoError(t, err)
 	if assert.Len(t, pendingTransferIDs, 1) {
-		assert.EqualValues(t, pendingTransfer.ID, pendingTransferIDs[0])
+		assert.Equal(t, pendingTransfer.ID, pendingTransferIDs[0])
 	}
 }

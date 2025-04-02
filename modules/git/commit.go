@@ -15,8 +15,8 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/util"
 
 	"github.com/go-git/go-git/v5/config"
 )
@@ -220,7 +220,7 @@ func (c *Commit) HasPreviousCommit(objectID ObjectID) (bool, error) {
 	}
 	var exitError *exec.ExitError
 	if errors.As(err, &exitError) {
-		if exitError.ProcessState.ExitCode() == 1 && len(exitError.Stderr) == 0 {
+		if exitError.ExitCode() == 1 && len(exitError.Stderr) == 0 {
 			return false, nil
 		}
 	}

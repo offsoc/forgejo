@@ -13,7 +13,7 @@ jobs:
     if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
       options: --tmpfs /tmp:exec,noatime
     steps:
       - name: event info
@@ -30,7 +30,7 @@ jobs:
     if: vars.ROLE == 'forgejo-coding' || vars.ROLE == 'forgejo-testing'
     runs-on: docker
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
       options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
@@ -55,7 +55,7 @@ jobs:
     runs-on: docker
     needs: [backend-checks, frontend-checks]
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
       options: --tmpfs /tmp:exec,noatime
     services:
       elasticsearch:
@@ -116,7 +116,7 @@ jobs:
       - uses: ./.forgejo/workflows-composite/build-backend
       - name: Get changed files
         id: changed-files
-        uses: https://data.forgejo.org/tj-actions/changed-files@v45
+        uses: https://data.forgejo.org/tj-actions/changed-files@v46
         with:
           separator: '\n'
       - run: |
@@ -138,7 +138,7 @@ jobs:
     runs-on: docker
     needs: [backend-checks, frontend-checks, test-unit]
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
       options: --tmpfs /tmp:exec,noatime
     name: ${{ format('test-remote-cacher ({0})', matrix.cacher.name) }}
     strategy:
@@ -180,7 +180,7 @@ jobs:
     runs-on: docker
     needs: [backend-checks, frontend-checks]
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
       options: --tmpfs /tmp:exec,noatime
     services:
       mysql:
@@ -211,7 +211,7 @@ jobs:
     runs-on: docker
     needs: [backend-checks, frontend-checks]
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
       options: --tmpfs /tmp:exec,noatime
     services:
       minio:
@@ -223,7 +223,7 @@ jobs:
       ldap:
         image: data.forgejo.org/oci/test-openldap:latest
       pgsql:
-        image: data.forgejo.org/oci/bitnami/postgresql:15
+        image: data.forgejo.org/oci/bitnami/postgresql:16
         env:
           POSTGRESQL_DATABASE: test
           POSTGRESQL_PASSWORD: postgres
@@ -250,7 +250,7 @@ jobs:
     runs-on: docker
     needs: [backend-checks, frontend-checks]
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
       options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4
@@ -278,7 +278,7 @@ jobs:
       - test-remote-cacher
       - test-unit
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
       options: --tmpfs /tmp:exec,noatime
     steps:
       - uses: https://data.forgejo.org/actions/checkout@v4

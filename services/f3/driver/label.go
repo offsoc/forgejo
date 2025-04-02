@@ -9,10 +9,11 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -86,7 +87,7 @@ func (o *label) Patch(ctx context.Context) {
 	}
 }
 
-func (o *label) Put(ctx context.Context) generic.NodeID {
+func (o *label) Put(ctx context.Context) f3_id.NodeID {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
@@ -95,7 +96,7 @@ func (o *label) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("label created %d", o.forgejoLabel.ID)
-	return generic.NewNodeID(o.forgejoLabel.ID)
+	return f3_id.NewNodeID(o.forgejoLabel.ID)
 }
 
 func (o *label) Delete(ctx context.Context) {

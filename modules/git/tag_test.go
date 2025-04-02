@@ -87,21 +87,21 @@ v0
 	for _, test := range testData {
 		tag, err := parseTagData(Sha1ObjectFormat, test.data)
 		require.NoError(t, err)
-		assert.EqualValues(t, test.tag.ID, tag.ID)
-		assert.EqualValues(t, test.tag.Object, tag.Object)
-		assert.EqualValues(t, test.tag.Name, tag.Name)
-		assert.EqualValues(t, test.tag.Message, tag.Message)
-		assert.EqualValues(t, test.tag.Type, tag.Type)
+		assert.Equal(t, test.tag.ID, tag.ID)
+		assert.Equal(t, test.tag.Object, tag.Object)
+		assert.Equal(t, test.tag.Name, tag.Name)
+		assert.Equal(t, test.tag.Message, tag.Message)
+		assert.Equal(t, test.tag.Type, tag.Type)
 		if test.tag.Signature != nil && assert.NotNil(t, tag.Signature) {
-			assert.EqualValues(t, test.tag.Signature.Signature, tag.Signature.Signature)
-			assert.EqualValues(t, test.tag.Signature.Payload, tag.Signature.Payload)
+			assert.Equal(t, test.tag.Signature.Signature, tag.Signature.Signature)
+			assert.Equal(t, test.tag.Signature.Payload, tag.Signature.Payload)
 		} else {
 			assert.Nil(t, tag.Signature)
 		}
 		if test.tag.Tagger != nil && assert.NotNil(t, tag.Tagger) {
-			assert.EqualValues(t, test.tag.Tagger.Name, tag.Tagger.Name)
-			assert.EqualValues(t, test.tag.Tagger.Email, tag.Tagger.Email)
-			assert.EqualValues(t, test.tag.Tagger.When.Unix(), tag.Tagger.When.Unix())
+			assert.Equal(t, test.tag.Tagger.Name, tag.Tagger.Name)
+			assert.Equal(t, test.tag.Tagger.Email, tag.Tagger.Email)
+			assert.Equal(t, test.tag.Tagger.When.Unix(), tag.Tagger.When.Unix())
 		} else {
 			assert.Nil(t, tag.Tagger)
 		}

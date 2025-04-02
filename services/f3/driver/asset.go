@@ -12,14 +12,15 @@ import (
 	"io"
 	"os"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/services/attachment"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/services/attachment"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -131,7 +132,7 @@ func (o *asset) Patch(ctx context.Context) {
 	}
 }
 
-func (o *asset) Put(ctx context.Context) generic.NodeID {
+func (o *asset) Put(ctx context.Context) f3_id.NodeID {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
@@ -154,7 +155,7 @@ func (o *asset) Put(ctx context.Context) generic.NodeID {
 	}
 
 	o.Trace("asset created %d", o.forgejoAsset.ID)
-	return generic.NewNodeID(o.forgejoAsset.ID)
+	return f3_id.NewNodeID(o.forgejoAsset.ID)
 }
 
 func (o *asset) Delete(ctx context.Context) {

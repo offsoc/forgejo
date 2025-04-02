@@ -12,19 +12,19 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	base "code.gitea.io/gitea/modules/migration"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	base "forgejo.org/modules/migration"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -64,7 +64,7 @@ func TestGiteaUploadRepo(t *testing.T) {
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, Name: repoName})
 	assert.True(t, repo.HasWiki())
-	assert.EqualValues(t, repo_model.RepositoryReady, repo.Status)
+	assert.Equal(t, repo_model.RepositoryReady, repo.Status)
 
 	milestones, err := db.Find[issues_model.Milestone](db.DefaultContext, issues_model.FindMilestoneOptions{
 		RepoID:   repo.ID,
@@ -173,7 +173,7 @@ func TestGiteaUploadRemapLocalUser(t *testing.T) {
 	uploader.userMap = make(map[int64]int64)
 	err = uploader.remapUser(&source, &target)
 	require.NoError(t, err)
-	assert.EqualValues(t, user.ID, target.GetUserID())
+	assert.Equal(t, user.ID, target.GetUserID())
 }
 
 func TestGiteaUploadRemapExternalUser(t *testing.T) {
@@ -224,7 +224,7 @@ func TestGiteaUploadRemapExternalUser(t *testing.T) {
 	target = repo_model.Release{}
 	err = uploader.remapUser(&source, &target)
 	require.NoError(t, err)
-	assert.EqualValues(t, linkedUser.ID, target.GetUserID())
+	assert.Equal(t, linkedUser.ID, target.GetUserID())
 }
 
 func TestGiteaUploadUpdateGitForPullRequest(t *testing.T) {
@@ -504,14 +504,14 @@ func TestGiteaUploadUpdateGitForPullRequest(t *testing.T) {
 
 			head, err := uploader.updateGitForPullRequest(&testCase.pr)
 			require.NoError(t, err)
-			assert.EqualValues(t, testCase.head, head)
+			assert.Equal(t, testCase.head, head)
 
 			log.Info(stopMark)
 
 			logFiltered, logStopped := logChecker.Check(5 * time.Second)
 			assert.True(t, logStopped)
 			if len(testCase.logFilter) > 0 {
-				assert.EqualValues(t, testCase.logFiltered, logFiltered, "for log message filters: %v", testCase.logFilter)
+				assert.Equal(t, testCase.logFiltered, logFiltered, "for log message filters: %v", testCase.logFilter)
 			}
 		})
 	}

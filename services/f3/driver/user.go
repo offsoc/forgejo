@@ -9,11 +9,12 @@ import (
 	"fmt"
 	"strings"
 
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/optional"
-	user_service "code.gitea.io/gitea/services/user"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/optional"
+	user_service "forgejo.org/services/user"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -96,9 +97,9 @@ func (o *user) Get(ctx context.Context) bool {
 func (o *user) Patch(context.Context) {
 }
 
-func (o *user) Put(ctx context.Context) generic.NodeID {
+func (o *user) Put(ctx context.Context) f3_id.NodeID {
 	if user := getSystemUserByName(o.forgejoUser.Name); user != nil {
-		return generic.NewNodeID(user.ID)
+		return f3_id.NewNodeID(user.ID)
 	}
 
 	o.forgejoUser.LowerName = strings.ToLower(o.forgejoUser.Name)
@@ -111,7 +112,7 @@ func (o *user) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 
-	return generic.NewNodeID(o.forgejoUser.ID)
+	return f3_id.NewNodeID(o.forgejoUser.ID)
 }
 
 func (o *user) Delete(ctx context.Context) {

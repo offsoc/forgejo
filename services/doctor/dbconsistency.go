@@ -6,16 +6,16 @@ package doctor
 import (
 	"context"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	activities_model "code.gitea.io/gitea/models/activities"
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/migrations"
-	org_model "code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	actions_model "forgejo.org/models/actions"
+	activities_model "forgejo.org/models/activities"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/migrations"
+	org_model "forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 )
 
 type consistencyCheck struct {
@@ -78,7 +78,14 @@ func genericOrphanCheck(name, subject, refobject, joincond string) consistencyCh
 
 func checkDBConsistency(ctx context.Context, logger log.Logger, autofix bool) error {
 	// make sure DB version is up-to-date
-	if err := db.InitEngineWithMigration(ctx, migrations.EnsureUpToDate); err != nil {
+	ensureUpToDateWrapper := func(e db.Engine) error {
+		engine, err := db.GetMasterEngine(e)
+		if err != nil {
+			return err
+		}
+		return migrations.EnsureUpToDate(engine)
+	}
+	if err := db.InitEngineWithMigration(ctx, ensureUpToDateWrapper); err != nil {
 		logger.Critical("Model version on the database does not match the current Gitea version. Model consistency will not be checked until the database is upgraded")
 		return err
 	}

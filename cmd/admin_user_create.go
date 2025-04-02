@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	pwd "code.gitea.io/gitea/modules/auth/password"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	pwd "forgejo.org/modules/auth/password"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
 
 	"github.com/urfave/cli/v2"
 )

@@ -8,9 +8,10 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
 
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 )
@@ -34,13 +35,13 @@ func (o *users) ListPage(ctx context.Context, page int) generic.ChildrenSlice {
 	return f3_tree.ConvertListed(ctx, o.GetNode(), f3_tree.ConvertToAny(users...)...)
 }
 
-func (o *users) GetIDFromName(ctx context.Context, name string) generic.NodeID {
+func (o *users) GetIDFromName(ctx context.Context, name string) f3_id.NodeID {
 	user, err := user_model.GetUserByName(ctx, name)
 	if err != nil {
 		panic(fmt.Errorf("GetUserByName: %v", err))
 	}
 
-	return generic.NewNodeID(user.ID)
+	return f3_id.NewNodeID(user.ID)
 }
 
 func newUsers() generic.NodeDriverInterface {

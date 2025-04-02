@@ -11,11 +11,11 @@ import (
 	"strings"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	git_model "code.gitea.io/gitea/models/git"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	api "code.gitea.io/gitea/modules/structs"
+	auth_model "forgejo.org/models/auth"
+	git_model "forgejo.org/models/git"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	api "forgejo.org/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -86,7 +86,7 @@ func TestPullCreate_CommitStatus(t *testing.T) {
 			commitURL, exists = doc.doc.Find("#commits-table tbody tr td.sha a").Last().Attr("href")
 			assert.True(t, exists)
 			assert.NotEmpty(t, commitURL)
-			assert.EqualValues(t, commitID, path.Base(commitURL))
+			assert.Equal(t, commitID, path.Base(commitURL))
 
 			cls, ok := doc.doc.Find("#commits-table tbody tr td.message .commit-status").Last().Attr("class")
 			assert.True(t, ok)
@@ -95,7 +95,7 @@ func TestPullCreate_CommitStatus(t *testing.T) {
 
 		repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerName: "user1", Name: "repo1"})
 		css := unittest.AssertExistsAndLoadBean(t, &git_model.CommitStatusSummary{RepoID: repo1.ID, SHA: commitID})
-		assert.EqualValues(t, api.CommitStatusWarning, css.State)
+		assert.Equal(t, api.CommitStatusWarning, css.State)
 	})
 }
 

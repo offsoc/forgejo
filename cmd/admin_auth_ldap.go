@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/services/auth/source/ldap"
+	"forgejo.org/models/auth"
+	"forgejo.org/services/auth/source/ldap"
 
 	"github.com/urfave/cli/v2"
 )

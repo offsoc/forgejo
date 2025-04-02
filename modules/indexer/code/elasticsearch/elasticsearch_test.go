@@ -11,6 +11,6 @@ import (
 
 func TestIndexPos(t *testing.T) {
 	startIdx, endIdx := indexPos("test index start and end", "start", "end")
-	assert.EqualValues(t, 11, startIdx)
-	assert.EqualValues(t, 24, endIdx)
+	assert.Equal(t, 11, startIdx)
+	assert.Equal(t, 24, endIdx)
 }

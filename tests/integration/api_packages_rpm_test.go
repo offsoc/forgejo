@@ -15,14 +15,14 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	rpm_module "forgejo.org/modules/packages/rpm"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	"forgejo.org/tests"
 
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/sassoftware/go-rpmutils"
@@ -317,7 +317,7 @@ gpgkey=%sapi/packages/%s/rpm/repository.key`,
 					var result Metadata
 					decodeGzipXML(t, resp, &result)
 
-					assert.EqualValues(t, 1, result.PackageCount)
+					assert.Equal(t, 1, result.PackageCount)
 					assert.Len(t, result.Packages, 1)
 					p := result.Packages[0]
 					assert.Equal(t, "rpm", p.Type)
@@ -366,7 +366,7 @@ gpgkey=%sapi/packages/%s/rpm/repository.key`,
 					var result Filelists
 					decodeGzipXML(t, resp, &result)
 
-					assert.EqualValues(t, 1, result.PackageCount)
+					assert.Equal(t, 1, result.PackageCount)
 					assert.Len(t, result.Packages, 1)
 					p := result.Packages[0]
 					assert.NotEmpty(t, p.Pkgid)
@@ -403,7 +403,7 @@ gpgkey=%sapi/packages/%s/rpm/repository.key`,
 					var result Other
 					decodeGzipXML(t, resp, &result)
 
-					assert.EqualValues(t, 1, result.PackageCount)
+					assert.Equal(t, 1, result.PackageCount)
 					assert.Len(t, result.Packages, 1)
 					p := result.Packages[0]
 					assert.NotEmpty(t, p.Pkgid)

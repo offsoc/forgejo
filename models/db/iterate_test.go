@@ -7,9 +7,9 @@ import (
 	"context"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,7 +17,8 @@ import (
 
 func TestIterate(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
-	xe := unittest.GetXORMEngine()
+	xe, err := unittest.GetXORMEngine()
+	require.NoError(t, err)
 	require.NoError(t, xe.Sync(&repo_model.RepoUnit{}))
 
 	cnt, err := db.GetEngine(db.DefaultContext).Count(&repo_model.RepoUnit{})

@@ -31,7 +31,7 @@ type CreateFileOptions struct {
 
 // Branch returns branch name
 func (o *CreateFileOptions) Branch() string {
-	return o.FileOptions.BranchName
+	return o.BranchName
 }
 
 // DeleteFileOptions options for deleting files (used for other File structs below)
@@ -45,7 +45,7 @@ type DeleteFileOptions struct {
 
 // Branch returns branch name
 func (o *DeleteFileOptions) Branch() string {
-	return o.FileOptions.BranchName
+	return o.BranchName
 }
 
 // UpdateFileOptions options for updating files
@@ -61,7 +61,7 @@ type UpdateFileOptions struct {
 
 // Branch returns branch name
 func (o *UpdateFileOptions) Branch() string {
-	return o.FileOptions.BranchName
+	return o.BranchName
 }
 
 // ChangeFileOperation for creating, updating or deleting a file
@@ -92,7 +92,7 @@ type ChangeFilesOptions struct {
 
 // Branch returns branch name
 func (o *ChangeFilesOptions) Branch() string {
-	return o.FileOptions.BranchName
+	return o.BranchName
 }
 
 // FileOptionInterface provides a unified interface for the different file options

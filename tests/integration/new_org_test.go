@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/translation"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -32,6 +32,6 @@ func TestNewOrganizationForm(t *testing.T) {
 
 		// Verify page header
 		header := strings.TrimSpace(page.Find(".form[action='/org/create'] .header").Text())
-		assert.EqualValues(t, locale.TrString("new_org.title"), header)
+		assert.Equal(t, locale.TrString("new_org.title"), header)
 	})
 }

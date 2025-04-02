@@ -12,14 +12,14 @@ import (
 	"strings"
 	"sync"
 
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	container_model "code.gitea.io/gitea/models/packages/container"
-	"code.gitea.io/gitea/modules/log"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	container_module "code.gitea.io/gitea/modules/packages/container"
-	"code.gitea.io/gitea/modules/util"
-	packages_service "code.gitea.io/gitea/services/packages"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	container_model "forgejo.org/models/packages/container"
+	"forgejo.org/modules/log"
+	packages_module "forgejo.org/modules/packages"
+	container_module "forgejo.org/modules/packages/container"
+	"forgejo.org/modules/util"
+	packages_service "forgejo.org/services/packages"
 )
 
 var uploadVersionMutex sync.Mutex

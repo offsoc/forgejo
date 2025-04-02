@@ -15,9 +15,9 @@ import (
 	"syscall"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/proxyprotocol"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/proxyprotocol"
+	"forgejo.org/modules/setting"
 )
 
 // GetListener returns a net listener
@@ -260,7 +260,7 @@ func (w *wrappedConn) Write(p []byte) (n int, err error) {
 		if minDeadline.After(w.deadline) {
 			w.deadline = minDeadline
 		}
-		_ = w.Conn.SetWriteDeadline(w.deadline)
+		_ = w.SetWriteDeadline(w.deadline)
 	}
 	return w.Conn.Write(p)
 }

@@ -59,19 +59,6 @@
       ]
     },
     {
-      "description": "Group nodejs packages",
-      "matchPackageNames": [
-        "code.forgejo.org/oci/node",
-        "data.forgejo.org/oci/node",
-        "docker.io/library/node",
-        "docker.io/node",
-        "node"
-      ],
-      "groupName": "nodejs packages",
-      "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
-      "versioning": "node"
-    },
-    {
       "description": "x/tools/* are used in the CI only and upgraded together",
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true,
@@ -116,7 +103,7 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": ["data.forgejo.org/renovate/renovate"],
       "reviewers": ["viceice"],
-      "addLabels": ["forgejo/ci", "test/not-needed"]
+      "addLabels": ["forgejo/ci"]
     },
     {
       "description": "Disable renovate self-updates for release branches",
@@ -137,6 +124,8 @@
         "@playwright/**",
         "@stoplight/spectral-cli",
         "@stylistic/**",
+        "@vitejs/plugin-vue",
+        "@vue/test-utils",
         "djlint",
         "github.com/editorconfig-checker/editorconfig-checker/v2/cmd/editorconfig-checker",
         "github.com/golangci/golangci-lint/cmd/golangci-lint",
@@ -148,7 +137,7 @@
         "mvdan.cc/gofumpt",
         "updates",
         "vite-string-plugin",
-        "@vue/test-utils"
+        "yamllint"
       ],
       "automerge": true
     },
@@ -165,14 +154,6 @@
     }
   ],
   "customManagers": [
-    {
-      "description": "Update node-version in forgejo workflows",
-      "customType": "regex",
-      "fileMatch": ["^.forgejo/workflows/.+\\.yml$"],
-      "matchStrings": ["\\s+node-version: ['\"]?(?<currentValue>.+?)['\"]?\\s"],
-      "depNameTemplate": "node",
-      "datasourceTemplate": "node-version"
-    },
     {
       "description": "Update deps inside Makefile",
       "customType": "regex",

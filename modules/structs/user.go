@@ -6,7 +6,7 @@ package structs
 import (
 	"time"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 )
 
 // User represents a user
@@ -27,7 +27,7 @@ type User struct {
 	Email string `json:"email"`
 	// URL to the user's avatar
 	AvatarURL string `json:"avatar_url"`
-	// URL to the user's gitea page
+	// URL to the user's profile page
 	HTMLURL string `json:"html_url"`
 	// User locale
 	Language string `json:"language"`

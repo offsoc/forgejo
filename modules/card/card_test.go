@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/test"
 
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"

@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/optional"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
@@ -341,6 +341,9 @@ func issuePullAccessibleRepoCond(repoIDstr string, userID int64, org *organizati
 				builder.Or(
 					repo_model.UserOrgUnitRepoCond(repoIDstr, userID, org.ID, unitType), // team member repos
 					repo_model.UserOrgPublicUnitRepoCond(userID, org.ID),                // user org public non-member repos, TODO: check repo has issues
+					builder.And(
+						builder.In("issue.repo_id", builder.Select("id").From("repository").Where(builder.Eq{"owner_id": org.ID})),
+						repo_model.UserAccessRepoCond(repoIDstr, userID)), // user can access org repo in a unit independent way
 				),
 			)
 		}

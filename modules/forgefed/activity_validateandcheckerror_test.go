@@ -6,7 +6,7 @@ package forgefed
 import (
 	"fmt"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 )
 
 func validateAndCheckError(subject validation.Validateable, expectedError string) *string {

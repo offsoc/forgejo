@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/indexer/issues/internal"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -93,7 +93,7 @@ var cases = []*testIndexerCase{
 		Name:          "default",
 		SearchOptions: &internal.SearchOptions{},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 		},
 	},
@@ -557,7 +557,7 @@ var cases = []*testIndexerCase{
 			SortBy:    internal.SortByCreatedDesc,
 		},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {
@@ -573,7 +573,7 @@ var cases = []*testIndexerCase{
 			SortBy:    internal.SortByUpdatedDesc,
 		},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {
@@ -589,7 +589,7 @@ var cases = []*testIndexerCase{
 			SortBy:    internal.SortByCommentsDesc,
 		},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {
@@ -605,7 +605,7 @@ var cases = []*testIndexerCase{
 			SortBy:    internal.SortByDeadlineDesc,
 		},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {
@@ -621,7 +621,7 @@ var cases = []*testIndexerCase{
 			SortBy:    internal.SortByScore,
 		},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {
@@ -637,7 +637,7 @@ var cases = []*testIndexerCase{
 			SortBy:    internal.SortByCreatedAsc,
 		},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {
@@ -653,7 +653,7 @@ var cases = []*testIndexerCase{
 			SortBy:    internal.SortByUpdatedAsc,
 		},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {
@@ -669,7 +669,7 @@ var cases = []*testIndexerCase{
 			SortBy:    internal.SortByCommentsAsc,
 		},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {
@@ -685,7 +685,7 @@ var cases = []*testIndexerCase{
 			SortBy:    internal.SortByDeadlineAsc,
 		},
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
-			assert.Equal(t, len(data), len(result.Hits))
+			assert.Len(t, result.Hits, len(data))
 			assert.Equal(t, len(data), int(result.Total))
 			for i, v := range result.Hits {
 				if i < len(result.Hits)-1 {

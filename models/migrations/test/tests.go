@@ -15,14 +15,14 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/testlogger"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/testlogger"
+	"forgejo.org/modules/util"
 
 	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
@@ -175,7 +175,10 @@ func newXORMEngine() (*xorm.Engine, error) {
 	if err := db.InitEngine(context.Background()); err != nil {
 		return nil, err
 	}
-	x := unittest.GetXORMEngine()
+	x, err := unittest.GetXORMEngine()
+	if err != nil {
+		return nil, err
+	}
 	return x, nil
 }
 

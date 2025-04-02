@@ -6,9 +6,9 @@ package system_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/system"
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/db"
+	"forgejo.org/models/system"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,24 +22,24 @@ func TestSettings(t *testing.T) {
 
 	rev, settings, err := system.GetAllSettings(db.DefaultContext)
 	require.NoError(t, err)
-	assert.EqualValues(t, 1, rev)
+	assert.Equal(t, 1, rev)
 	assert.Len(t, settings, 1) // there is only one "revision" key
 
 	err = system.SetSettings(db.DefaultContext, map[string]string{keyName: "true"})
 	require.NoError(t, err)
 	rev, settings, err = system.GetAllSettings(db.DefaultContext)
 	require.NoError(t, err)
-	assert.EqualValues(t, 2, rev)
+	assert.Equal(t, 2, rev)
 	assert.Len(t, settings, 2)
-	assert.EqualValues(t, "true", settings[keyName])
+	assert.Equal(t, "true", settings[keyName])
 
 	err = system.SetSettings(db.DefaultContext, map[string]string{keyName: "false"})
 	require.NoError(t, err)
 	rev, settings, err = system.GetAllSettings(db.DefaultContext)
 	require.NoError(t, err)
-	assert.EqualValues(t, 3, rev)
+	assert.Equal(t, 3, rev)
 	assert.Len(t, settings, 2)
-	assert.EqualValues(t, "false", settings[keyName])
+	assert.Equal(t, "false", settings[keyName])
 
 	// setting the same value should not trigger DuplicateKey error, and the "version" should be increased
 	err = system.SetSettings(db.DefaultContext, map[string]string{keyName: "false"})
@@ -48,5 +48,5 @@ func TestSettings(t *testing.T) {
 	rev, settings, err = system.GetAllSettings(db.DefaultContext)
 	require.NoError(t, err)
 	assert.Len(t, settings, 2)
-	assert.EqualValues(t, 4, rev)
+	assert.Equal(t, 4, rev)
 }

@@ -8,16 +8,16 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/json"
-	api "code.gitea.io/gitea/modules/structs"
-	issue_service "code.gitea.io/gitea/services/issue"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/json"
+	api "forgejo.org/modules/structs"
+	issue_service "forgejo.org/services/issue"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -85,7 +85,7 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 				resp := MakeRequest(t, req, http.StatusOK)
 				DecodeJSON(t, resp, &review)
 				require.EqualValues(t, string(event), review.State)
-				require.EqualValues(t, 0, review.CodeCommentsCount)
+				require.Equal(t, 0, review.CodeCommentsCount)
 			}
 
 			{
@@ -94,7 +94,7 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 				resp := MakeRequest(t, req, http.StatusOK)
 				var getReview api.PullReview
 				DecodeJSON(t, resp, &getReview)
-				require.EqualValues(t, getReview, review)
+				require.Equal(t, getReview, review)
 			}
 			requireReviewCount(2)
 
@@ -109,11 +109,11 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 				}).AddTokenAuth(token)
 				resp := MakeRequest(t, req, http.StatusOK)
 				DecodeJSON(t, resp, &reviewComment)
-				assert.EqualValues(t, review.ID, reviewComment.ReviewID)
-				assert.EqualValues(t, newCommentBody, reviewComment.Body)
+				assert.Equal(t, review.ID, reviewComment.ReviewID)
+				assert.Equal(t, newCommentBody, reviewComment.Body)
 				assert.EqualValues(t, reviewLine, reviewComment.OldLineNum)
 				assert.EqualValues(t, 0, reviewComment.LineNum)
-				assert.EqualValues(t, path, reviewComment.Path)
+				assert.Equal(t, path, reviewComment.Path)
 			}
 
 			{
@@ -123,7 +123,7 @@ func TestAPIPullReviewCreateDeleteComment(t *testing.T) {
 
 				var comment api.PullReviewComment
 				DecodeJSON(t, resp, &comment)
-				assert.EqualValues(t, reviewComment, comment)
+				assert.Equal(t, reviewComment, comment)
 			}
 
 			{
@@ -167,17 +167,17 @@ func TestAPIPullReview(t *testing.T) {
 		return
 	}
 	for _, r := range reviews {
-		assert.EqualValues(t, pullIssue.HTMLURL(), r.HTMLPullURL)
+		assert.Equal(t, pullIssue.HTMLURL(), r.HTMLPullURL)
 	}
 	assert.EqualValues(t, 8, reviews[3].ID)
 	assert.EqualValues(t, "APPROVED", reviews[3].State)
-	assert.EqualValues(t, 0, reviews[3].CodeCommentsCount)
+	assert.Equal(t, 0, reviews[3].CodeCommentsCount)
 	assert.True(t, reviews[3].Stale)
 	assert.False(t, reviews[3].Official)
 
 	assert.EqualValues(t, 10, reviews[5].ID)
 	assert.EqualValues(t, "REQUEST_CHANGES", reviews[5].State)
-	assert.EqualValues(t, 1, reviews[5].CodeCommentsCount)
+	assert.Equal(t, 1, reviews[5].CodeCommentsCount)
 	assert.EqualValues(t, -1, reviews[5].Reviewer.ID) // ghost user
 	assert.False(t, reviews[5].Stale)
 	assert.True(t, reviews[5].Official)
@@ -188,13 +188,13 @@ func TestAPIPullReview(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 	var review api.PullReview
 	DecodeJSON(t, resp, &review)
-	assert.EqualValues(t, *reviews[3], review)
+	assert.Equal(t, *reviews[3], review)
 
 	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/pulls/%d/reviews/%d", repo.OwnerName, repo.Name, pullIssue.Index, reviews[5].ID).
 		AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &review)
-	assert.EqualValues(t, *reviews[5], review)
+	assert.Equal(t, *reviews[5], review)
 
 	// test GetPullReviewComments
 	comment := unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: 7})
@@ -204,11 +204,11 @@ func TestAPIPullReview(t *testing.T) {
 	var reviewComments []*api.PullReviewComment
 	DecodeJSON(t, resp, &reviewComments)
 	assert.Len(t, reviewComments, 1)
-	assert.EqualValues(t, "Ghost", reviewComments[0].Poster.UserName)
-	assert.EqualValues(t, "a review from a deleted user", reviewComments[0].Body)
-	assert.EqualValues(t, comment.ID, reviewComments[0].ID)
+	assert.Equal(t, "Ghost", reviewComments[0].Poster.UserName)
+	assert.Equal(t, "a review from a deleted user", reviewComments[0].Body)
+	assert.Equal(t, comment.ID, reviewComments[0].ID)
 	assert.EqualValues(t, comment.UpdatedUnix, reviewComments[0].Updated.Unix())
-	assert.EqualValues(t, comment.HTMLURL(db.DefaultContext), reviewComments[0].HTMLURL)
+	assert.Equal(t, comment.HTMLURL(db.DefaultContext), reviewComments[0].HTMLURL)
 
 	// test CreatePullReview
 	req = NewRequestWithJSON(t, http.MethodPost, fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d/reviews", repo.OwnerName, repo.Name, pullIssue.Index), &api.CreatePullReviewOptions{
@@ -237,7 +237,7 @@ func TestAPIPullReview(t *testing.T) {
 	DecodeJSON(t, resp, &review)
 	assert.EqualValues(t, 6, review.ID)
 	assert.EqualValues(t, "PENDING", review.State)
-	assert.EqualValues(t, 3, review.CodeCommentsCount)
+	assert.Equal(t, 3, review.CodeCommentsCount)
 
 	// test SubmitPullReview
 	req = NewRequestWithJSON(t, http.MethodPost, fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d/reviews/%d", repo.OwnerName, repo.Name, pullIssue.Index, review.ID), &api.SubmitPullReviewOptions{
@@ -248,7 +248,7 @@ func TestAPIPullReview(t *testing.T) {
 	DecodeJSON(t, resp, &review)
 	assert.EqualValues(t, 6, review.ID)
 	assert.EqualValues(t, "APPROVED", review.State)
-	assert.EqualValues(t, 3, review.CodeCommentsCount)
+	assert.Equal(t, 3, review.CodeCommentsCount)
 
 	// test dismiss review
 	req = NewRequestWithJSON(t, http.MethodPost, fmt.Sprintf("/api/v1/repos/%s/%s/pulls/%d/reviews/%d/dismissals", repo.OwnerName, repo.Name, pullIssue.Index, review.ID), &api.DismissPullReviewOptions{
@@ -275,7 +275,7 @@ func TestAPIPullReview(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &review)
 	assert.EqualValues(t, "COMMENT", review.State)
-	assert.EqualValues(t, 0, review.CodeCommentsCount)
+	assert.Equal(t, 0, review.CodeCommentsCount)
 	req = NewRequestf(t, http.MethodDelete, "/api/v1/repos/%s/%s/pulls/%d/reviews/%d", repo.OwnerName, repo.Name, pullIssue.Index, review.ID).
 		AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusNoContent)
@@ -303,7 +303,7 @@ func TestAPIPullReview(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &commentReview)
 	assert.EqualValues(t, "COMMENT", commentReview.State)
-	assert.EqualValues(t, 2, commentReview.CodeCommentsCount)
+	assert.Equal(t, 2, commentReview.CodeCommentsCount)
 	assert.Empty(t, commentReview.Body)
 	assert.False(t, commentReview.Dismissed)
 
@@ -318,8 +318,8 @@ func TestAPIPullReview(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &commentReview)
 	assert.EqualValues(t, "COMMENT", commentReview.State)
-	assert.EqualValues(t, 0, commentReview.CodeCommentsCount)
-	assert.EqualValues(t, commentBody, commentReview.Body)
+	assert.Equal(t, 0, commentReview.CodeCommentsCount)
+	assert.Equal(t, commentBody, commentReview.Body)
 	assert.False(t, commentReview.Dismissed)
 
 	// test CreatePullReview Comment without body and no comments
@@ -331,7 +331,7 @@ func TestAPIPullReview(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusUnprocessableEntity)
 	errMap := make(map[string]any)
 	json.Unmarshal(resp.Body.Bytes(), &errMap)
-	assert.EqualValues(t, "review event COMMENT requires a body or a comment", errMap["message"].(string))
+	assert.Equal(t, "review event COMMENT requires a body or a comment", errMap["message"].(string))
 
 	// test get review requests
 	// to make it simple, use same api with get review
@@ -345,14 +345,14 @@ func TestAPIPullReview(t *testing.T) {
 	DecodeJSON(t, resp, &reviews)
 	assert.EqualValues(t, 11, reviews[0].ID)
 	assert.EqualValues(t, "REQUEST_REVIEW", reviews[0].State)
-	assert.EqualValues(t, 0, reviews[0].CodeCommentsCount)
+	assert.Equal(t, 0, reviews[0].CodeCommentsCount)
 	assert.False(t, reviews[0].Stale)
 	assert.True(t, reviews[0].Official)
-	assert.EqualValues(t, "test_team", reviews[0].ReviewerTeam.Name)
+	assert.Equal(t, "test_team", reviews[0].ReviewerTeam.Name)
 
 	assert.EqualValues(t, 12, reviews[1].ID)
 	assert.EqualValues(t, "REQUEST_REVIEW", reviews[1].State)
-	assert.EqualValues(t, 0, reviews[0].CodeCommentsCount)
+	assert.Equal(t, 0, reviews[0].CodeCommentsCount)
 	assert.False(t, reviews[1].Stale)
 	assert.True(t, reviews[1].Official)
 	assert.EqualValues(t, 1, reviews[1].Reviewer.ID)

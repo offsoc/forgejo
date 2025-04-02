@@ -6,12 +6,12 @@ package files
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/services/contexttest"
-	"code.gitea.io/gitea/services/gitdiff"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/json"
+	"forgejo.org/services/contexttest"
+	"forgejo.org/services/gitdiff"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -124,7 +124,7 @@ func TestGetDiffPreview(t *testing.T) {
 		require.NoError(t, err)
 		bs, err := json.Marshal(diff)
 		require.NoError(t, err)
-		assert.EqualValues(t, string(expectedBs), string(bs))
+		assert.Equal(t, string(expectedBs), string(bs))
 	})
 
 	t.Run("empty branch, same results", func(t *testing.T) {
@@ -134,7 +134,7 @@ func TestGetDiffPreview(t *testing.T) {
 		require.NoError(t, err)
 		bs, err := json.Marshal(diff)
 		require.NoError(t, err)
-		assert.EqualValues(t, expectedBs, bs)
+		assert.Equal(t, expectedBs, bs)
 	})
 }
 

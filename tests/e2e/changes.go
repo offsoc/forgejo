@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 
 	"github.com/gobwas/glob"
 )

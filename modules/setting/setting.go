@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/user"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/user"
 )
 
 var ForgejoVersion = "1.0.0"
@@ -162,7 +162,7 @@ func loadRunModeFrom(rootCfg ConfigProvider) {
 	// The following is a purposefully undocumented option. Please do not run Forgejo as root. It will only cause future headaches.
 	// Please don't use root as a bandaid to "fix" something that is broken, instead the broken thing should instead be fixed properly.
 	unsafeAllowRunAsRoot := ConfigSectionKeyBool(rootSec, "I_AM_BEING_UNSAFE_RUNNING_AS_ROOT")
-	unsafeAllowRunAsRoot = unsafeAllowRunAsRoot || util.OptionalBoolParse(os.Getenv("GITEA_I_AM_BEING_UNSAFE_RUNNING_AS_ROOT")).Value()
+	unsafeAllowRunAsRoot = unsafeAllowRunAsRoot || optional.ParseBool(os.Getenv("GITEA_I_AM_BEING_UNSAFE_RUNNING_AS_ROOT")).Value()
 	RunMode = os.Getenv("GITEA_RUN_MODE")
 	if RunMode == "" {
 		RunMode = rootSec.Key("RUN_MODE").MustString("prod")

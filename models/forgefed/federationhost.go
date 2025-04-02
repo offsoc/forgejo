@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/validation"
 )
 
 // FederationHost data type

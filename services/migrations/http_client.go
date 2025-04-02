@@ -7,9 +7,9 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"code.gitea.io/gitea/modules/hostmatcher"
-	"code.gitea.io/gitea/modules/proxy"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/hostmatcher"
+	"forgejo.org/modules/proxy"
+	"forgejo.org/modules/setting"
 )
 
 // NewMigrationHTTPClient returns a HTTP client for migration

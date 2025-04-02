@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	org_model "code.gitea.io/gitea/models/organization"
-	project_model "code.gitea.io/gitea/models/project"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/tests"
+	org_model "forgejo.org/models/organization"
+	project_model "forgejo.org/models/project"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -48,19 +48,19 @@ func TestPrivateIssueProject(t *testing.T) {
 		htmlDoc = NewHTMLParser(t, resp.Body)
 		issueCardsLen := htmlDoc.Find(".project-column .issue-card").Length()
 		if hasAccess {
-			assert.EqualValues(t, 2, issueCardsLen)
+			assert.Equal(t, 2, issueCardsLen)
 		} else {
-			assert.EqualValues(t, 1, issueCardsLen)
+			assert.Equal(t, 1, issueCardsLen)
 			// Ensure that the public issue is shown.
-			assert.EqualValues(t, publicIssueHref[0], htmlDoc.Find(".project-column .issue-card .issue-card-title").AttrOr("href", ""))
+			assert.Equal(t, publicIssueHref[0], htmlDoc.Find(".project-column .issue-card .issue-card-title").AttrOr("href", ""))
 		}
 
 		// And that the issue count is correct.
 		issueCount := strings.TrimSpace(htmlDoc.Find(".project-column-issue-count").Text())
 		if hasAccess {
-			assert.EqualValues(t, "2", issueCount)
+			assert.Equal(t, "2", issueCount)
 		} else {
-			assert.EqualValues(t, "1", issueCount)
+			assert.Equal(t, "1", issueCount)
 		}
 	}
 

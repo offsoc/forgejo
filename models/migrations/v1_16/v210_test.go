@@ -7,8 +7,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
-	"code.gitea.io/gitea/modules/timeutil"
+	migration_tests "forgejo.org/models/migrations/test"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -84,5 +84,5 @@ func Test_RemigrateU2FCredentials(t *testing.T) {
 	err = x.Table("webauthn_credential").Select("id, credential_id").Asc("id").Find(&got)
 	require.NoError(t, err)
 
-	assert.EqualValues(t, expected, got)
+	assert.Equal(t, expected, got)
 }

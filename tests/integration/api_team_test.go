@@ -9,17 +9,17 @@ import (
 	"sort"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/convert"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	"forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/convert"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,9 +41,9 @@ func TestAPITeam(t *testing.T) {
 
 	var apiTeam api.Team
 	DecodeJSON(t, resp, &apiTeam)
-	assert.EqualValues(t, team.ID, apiTeam.ID)
+	assert.Equal(t, team.ID, apiTeam.ID)
 	assert.Equal(t, team.Name, apiTeam.Name)
-	assert.EqualValues(t, convert.ToOrganization(db.DefaultContext, org), apiTeam.Organization)
+	assert.Equal(t, convert.ToOrganization(db.DefaultContext, org), apiTeam.Organization)
 
 	// non team member user will not access the teams details
 	teamUser2 := unittest.AssertExistsAndLoadBean(t, &organization.TeamUser{ID: 3})
@@ -248,10 +248,10 @@ func checkTeamResponse(t *testing.T, testName string, apiTeam *api.Team, name, d
 		if units != nil {
 			sort.StringSlice(units).Sort()
 			sort.StringSlice(apiTeam.Units).Sort()
-			assert.EqualValues(t, units, apiTeam.Units, "units")
+			assert.Equal(t, units, apiTeam.Units, "units")
 		}
 		if unitsMap != nil {
-			assert.EqualValues(t, unitsMap, apiTeam.UnitsMap, "unitsMap")
+			assert.Equal(t, unitsMap, apiTeam.UnitsMap, "unitsMap")
 		}
 	})
 }

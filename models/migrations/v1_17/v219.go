@@ -6,8 +6,8 @@ package v1_17 //nolint
 import (
 	"time"
 
-	"code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/repo"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm"
 )

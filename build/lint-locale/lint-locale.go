@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/json" //nolint:depguard
 	"fmt"
 	"html"
 	"io/fs"
@@ -15,9 +14,10 @@ import (
 	"slices"
 	"strings"
 
+	"forgejo.org/modules/translation/localeiter"
+
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/sergi/go-diff/diffmatchpatch"
-	"gopkg.in/ini.v1" //nolint:depguard
 )
 
 var (
@@ -98,49 +98,32 @@ func checkValue(trKey, value string) []string {
 }
 
 func checkLocaleContent(localeContent []byte) []string {
-	// Same configuration as Forgejo uses.
-	cfg := ini.Empty(ini.LoadOptions{
-		IgnoreContinuation: true,
-	})
-	cfg.NameMapper = ini.SnackCase
+	errors := []string{}
 
-	if err := cfg.Append(localeContent); err != nil {
+	if err := localeiter.IterateMessagesContent(localeContent, func(trKey, trValue string) error {
+		errors = append(errors, checkValue(trKey, trValue)...)
+		return nil
+	}); err != nil {
 		panic(err)
 	}
 
-	errors := []string{}
-	for _, section := range cfg.Sections() {
-		for _, key := range section.Keys() {
-			var trKey string
-			if section.Name() == "" || section.Name() == "DEFAULT" || section.Name() == "common" {
-				trKey = key.Name()
-			} else {
-				trKey = section.Name() + "." + key.Name()
-			}
-
-			errors = append(errors, checkValue(trKey, key.Value())...)
-		}
-	}
 	return errors
 }
 
-func checkLocaleNextContent(data map[string]any, trKey ...string) []string {
+func checkLocaleNextContent(localeContent []byte) []string {
 	errors := []string{}
-	for key, value := range data {
-		currentKey := key
-		if len(trKey) == 1 {
-			currentKey = trKey[0] + "." + key
-		}
 
-		switch value := value.(type) {
-		case string:
-			errors = append(errors, checkValue(currentKey, value)...)
-		case map[string]any:
-			errors = append(errors, checkLocaleNextContent(value, currentKey)...)
-		default:
-			panic(fmt.Sprintf("Unexpected type during linting locale next: %s - %T", currentKey, value))
+	if err := localeiter.IterateMessagesNextContent(localeContent, func(trKey, pluralForm, trValue string) error {
+		fullKey := trKey
+		if pluralForm != "" {
+			fullKey = trKey + "." + pluralForm
 		}
+		errors = append(errors, checkValue(fullKey, trValue)...)
+		return nil
+	}); err != nil {
+		panic(err)
 	}
+
 	return errors
 }
 
@@ -168,6 +151,7 @@ func main() {
 
 		localeContent, err := os.ReadFile(filepath.Join(localeDir, localeFile.Name()))
 		if err != nil {
+			fmt.Println(localeFile.Name())
 			panic(err)
 		}
 
@@ -195,15 +179,11 @@ func main() {
 	for _, localeFile := range localeFiles {
 		localeContent, err := os.ReadFile(filepath.Join(localeDir, localeFile.Name()))
 		if err != nil {
+			fmt.Println(localeFile.Name())
 			panic(err)
 		}
 
-		var localeData map[string]any
-		if err := json.Unmarshal(localeContent, &localeData); err != nil {
-			panic(err)
-		}
-
-		if err := checkLocaleNextContent(localeData); len(err) > 0 {
+		if err := checkLocaleNextContent(localeContent); len(err) > 0 {
 			fmt.Println(localeFile.Name())
 			fmt.Println(strings.Join(err, "\n"))
 			fmt.Println()

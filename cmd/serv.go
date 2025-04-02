@@ -18,18 +18,18 @@ import (
 	"time"
 	"unicode"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	git_model "code.gitea.io/gitea/models/git"
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/pprof"
-	"code.gitea.io/gitea/modules/private"
-	"code.gitea.io/gitea/modules/process"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/lfs"
+	asymkey_model "forgejo.org/models/asymkey"
+	git_model "forgejo.org/models/git"
+	"forgejo.org/models/perm"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/pprof"
+	"forgejo.org/modules/private"
+	"forgejo.org/modules/process"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/lfs"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/kballard/go-shellquote"
@@ -57,19 +57,22 @@ var CmdServ = &cli.Command{
 	},
 }
 
-func setup(ctx context.Context, debug bool) {
+func setup(ctx context.Context, debug, gitNeeded bool) {
 	if debug {
 		setupConsoleLogger(log.TRACE, false, os.Stderr)
 	} else {
 		setupConsoleLogger(log.FATAL, false, os.Stderr)
 	}
 	setting.MustInstalled()
+	// Sanity check to ensure path is not relative, see: https://github.com/go-gitea/gitea/pull/19317
 	if _, err := os.Stat(setting.RepoRootPath); err != nil {
 		_ = fail(ctx, "Unable to access repository path", "Unable to access repository path %q, err: %v", setting.RepoRootPath, err)
 		return
 	}
-	if err := git.InitSimple(context.Background()); err != nil {
-		_ = fail(ctx, "Failed to init git", "Failed to init git, err: %v", err)
+	if gitNeeded {
+		if err := git.InitSimple(context.Background()); err != nil {
+			_ = fail(ctx, "Failed to init git", "Failed to init git, err: %v", err)
+		}
 	}
 }
 
@@ -133,7 +136,7 @@ func runServ(c *cli.Context) error {
 	defer cancel()
 
 	// FIXME: This needs to internationalised
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), true)
 
 	if setting.SSH.Disabled {
 		fmt.Println("Forgejo: SSH has been disabled")
@@ -253,11 +256,12 @@ func runServ(c *cli.Context) error {
 	}
 
 	if verb == lfsAuthenticateVerb {
-		if lfsVerb == "upload" {
+		switch lfsVerb {
+		case "upload":
 			requestedMode = perm.AccessModeWrite
-		} else if lfsVerb == "download" {
+		case "download":
 			requestedMode = perm.AccessModeRead
-		} else {
+		default:
 			return fail(ctx, "Unknown LFS verb", "Unknown lfs verb %s", lfsVerb)
 		}
 	}

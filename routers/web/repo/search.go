@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/git"
-	code_indexer "code.gitea.io/gitea/modules/indexer/code"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/git"
+	code_indexer "forgejo.org/modules/indexer/code"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/context"
 )
 
 const tplSearch base.TplName = "repo/search"

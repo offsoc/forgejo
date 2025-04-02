@@ -9,8 +9,8 @@ import (
 	"net/url"
 	"regexp"
 
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/setting"
 )
 
 func init() {

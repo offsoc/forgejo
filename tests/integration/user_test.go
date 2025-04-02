@@ -15,20 +15,20 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/translation"
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/mailer"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/translation"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/services/mailer"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/pquerna/otp/totp"
@@ -318,12 +318,12 @@ func TestGetUserRss(t *testing.T) {
 		user34 := "the_34-user.with.all.allowedChars"
 		req := NewRequestf(t, "GET", "/%s.rss", user34)
 		resp := MakeRequest(t, req, http.StatusOK)
-		if assert.EqualValues(t, "application/rss+xml;charset=utf-8", resp.Header().Get("Content-Type")) {
+		if assert.Equal(t, "application/rss+xml;charset=utf-8", resp.Header().Get("Content-Type")) {
 			rssDoc := NewHTMLParser(t, resp.Body).Find("channel")
 			title, _ := rssDoc.ChildrenFiltered("title").Html()
-			assert.EqualValues(t, "Feed of &#34;the_1-user.with.all.allowedChars&#34;", title)
+			assert.Equal(t, "Feed of &#34;the_1-user.with.all.allowedChars&#34;", title)
 			description, _ := rssDoc.ChildrenFiltered("description").Html()
-			assert.EqualValues(t, "&lt;p dir=&#34;auto&#34;&gt;some &lt;a href=&#34;https://commonmark.org/&#34; rel=&#34;nofollow&#34;&gt;commonmark&lt;/a&gt;!&lt;/p&gt;\n", description)
+			assert.Equal(t, "&lt;p dir=&#34;auto&#34;&gt;some &lt;a href=&#34;https://commonmark.org/&#34; rel=&#34;nofollow&#34;&gt;commonmark&lt;/a&gt;!&lt;/p&gt;\n", description)
 		}
 	})
 	t.Run("Non-existent user", func(t *testing.T) {
@@ -347,11 +347,11 @@ func TestListStopWatches(t *testing.T) {
 	stopwatch := unittest.AssertExistsAndLoadBean(t, &issues_model.Stopwatch{UserID: owner.ID})
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: stopwatch.IssueID})
 	if assert.Len(t, apiWatches, 1) {
-		assert.EqualValues(t, stopwatch.CreatedUnix.AsTime().Unix(), apiWatches[0].Created.Unix())
-		assert.EqualValues(t, issue.Index, apiWatches[0].IssueIndex)
-		assert.EqualValues(t, issue.Title, apiWatches[0].IssueTitle)
-		assert.EqualValues(t, repo.Name, apiWatches[0].RepoName)
-		assert.EqualValues(t, repo.OwnerName, apiWatches[0].RepoOwnerName)
+		assert.Equal(t, stopwatch.CreatedUnix.AsTime().Unix(), apiWatches[0].Created.Unix())
+		assert.Equal(t, issue.Index, apiWatches[0].IssueIndex)
+		assert.Equal(t, issue.Title, apiWatches[0].IssueTitle)
+		assert.Equal(t, repo.Name, apiWatches[0].RepoName)
+		assert.Equal(t, repo.OwnerName, apiWatches[0].RepoOwnerName)
 		assert.Positive(t, apiWatches[0].Seconds)
 	}
 }
@@ -450,7 +450,7 @@ func TestUserHints(t *testing.T) {
 			assert.Equal(t, enabled, hintChecked)
 
 			link, _ := htmlDoc.Find("form[action='/user/settings/appearance/language'] a").Attr("href")
-			assert.EqualValues(t, "https://forgejo.org/docs/next/contributor/localization/", link)
+			assert.Equal(t, "https://forgejo.org/docs/next/contributor/localization/", link)
 		}
 
 		t.Run("view", func(t *testing.T) {
@@ -706,7 +706,7 @@ func TestUserPronouns(t *testing.T) {
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
 		userName := strings.TrimSpace(htmlDoc.Find(".profile-avatar-name .username").Text())
-		assert.EqualValues(t, "user2", userName)
+		assert.Equal(t, "user2", userName)
 	})
 }
 
@@ -934,7 +934,7 @@ func TestUserRepos(t *testing.T) {
 		sel := htmlDoc.doc.Find("a.name")
 		assert.Len(t, repos, len(sel.Nodes))
 		for i := 0; i < len(repos); i++ {
-			assert.EqualValues(t, repos[i], strings.TrimSpace(sel.Eq(i).Text()))
+			assert.Equal(t, repos[i], strings.TrimSpace(sel.Eq(i).Text()))
 		}
 	}
 }
@@ -982,7 +982,7 @@ func TestUserActivate(t *testing.T) {
 	authToken, err := auth_model.FindAuthToken(db.DefaultContext, lookupKey, auth_model.UserActivation)
 	require.NoError(t, err)
 	assert.False(t, authToken.IsExpired())
-	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
+	assert.Equal(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
 
 	t.Run("No password", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
@@ -1052,7 +1052,7 @@ func TestUserPasswordReset(t *testing.T) {
 	authToken, err := auth_model.FindAuthToken(db.DefaultContext, lookupKey, auth_model.PasswordReset)
 	require.NoError(t, err)
 	assert.False(t, authToken.IsExpired())
-	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
+	assert.Equal(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
 
 	req = NewRequestWithValues(t, "POST", "/user/recover_account", map[string]string{
 		"_csrf":    GetCSRF(t, session, "/user/recover_account"),
@@ -1111,7 +1111,7 @@ func TestActivateEmailAddress(t *testing.T) {
 	authToken, err := auth_model.FindAuthToken(db.DefaultContext, lookupKey, auth_model.EmailActivation("newemail@example.org"))
 	require.NoError(t, err)
 	assert.False(t, authToken.IsExpired())
-	assert.EqualValues(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
+	assert.Equal(t, authToken.HashedValidator, auth_model.HashValidator(rawValidator))
 
 	req = NewRequestWithValues(t, "POST", "/user/activate_email", map[string]string{
 		"code":  code,

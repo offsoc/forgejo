@@ -12,5 +12,9 @@
     "home.explore_repos": "Repositorys erkunden",
     "home.explore_users": "Benutzer erkunden",
     "home.explore_orgs": "Organisationen erkunden",
-    "home.welcome.activity_hint": "Es gibt noch nichts in deinem Feed. Deine Aktionen und Aktivitäten aus Repositorys, die du beobachtest, werden hier auftauchen."
+    "home.welcome.activity_hint": "Es gibt noch nichts in deinem Feed. Deine Aktionen und Aktivitäten aus Repositorys, die du beobachtest, werden hier auftauchen.",
+    "incorrect_root_url": "Diese Forgejo-Instanz ist konfiguriert, auf „%s“ bereitgestellt zu werden. Du rufst Forgejo über einen anderen URL auf, was dazu führen könnte, dass einige Bereiche nicht funktionieren. Der anerkannte URL wird durch die Forgejo-Admins mittels der Einstellung ROOT_URL in der app.ini kontrolliert.",
+    "themes.names.forgejo-auto": "Forgejo (folge Systemthema)",
+    "themes.names.forgejo-light": "Forgejo hell",
+    "themes.names.forgejo-dark": "Forgejo dunkel"
 }

@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -42,8 +42,8 @@ func TestAPIGetTrackedTimes(t *testing.T) {
 
 	for i, time := range expect {
 		assert.Equal(t, time.ID, apiTimes[i].ID)
-		assert.EqualValues(t, issue2.Title, apiTimes[i].Issue.Title)
-		assert.EqualValues(t, issue2.ID, apiTimes[i].IssueID)
+		assert.Equal(t, issue2.Title, apiTimes[i].Issue.Title)
+		assert.Equal(t, issue2.ID, apiTimes[i].IssueID)
 		assert.Equal(t, time.Created.Unix(), apiTimes[i].Created.Unix())
 		assert.Equal(t, time.Time, apiTimes[i].Time)
 		user, err := user_model.GetUserByID(db.DefaultContext, time.UserID)
@@ -126,6 +126,6 @@ func TestAPIAddTrackedTimes(t *testing.T) {
 	DecodeJSON(t, resp, &apiNewTime)
 
 	assert.EqualValues(t, 33, apiNewTime.Time)
-	assert.EqualValues(t, user2.ID, apiNewTime.UserID)
+	assert.Equal(t, user2.ID, apiNewTime.UserID)
 	assert.EqualValues(t, 947688818, apiNewTime.Created.Unix())
 }

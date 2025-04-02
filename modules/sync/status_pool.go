@@ -6,7 +6,7 @@ package sync
 import (
 	"sync"
 
-	"code.gitea.io/gitea/modules/container"
+	"forgejo.org/modules/container"
 )
 
 // StatusTable is a table maintains true/false values.

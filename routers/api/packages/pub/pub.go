@@ -13,16 +13,16 @@ import (
 	"strings"
 	"time"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	pub_module "code.gitea.io/gitea/modules/packages/pub"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/api/packages/helper"
-	"code.gitea.io/gitea/services/context"
-	packages_service "code.gitea.io/gitea/services/packages"
+	packages_model "forgejo.org/models/packages"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	packages_module "forgejo.org/modules/packages"
+	pub_module "forgejo.org/modules/packages/pub"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/api/packages/helper"
+	"forgejo.org/services/context"
+	packages_service "forgejo.org/services/packages"
 )
 
 func jsonResponse(ctx *context.Context, status int, obj any) {

@@ -16,39 +16,39 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models"
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/organization"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	pull_model "code.gitea.io/gitea/models/pull"
-	quota_model "code.gitea.io/gitea/models/quota"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/emoji"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	issue_template "code.gitea.io/gitea/modules/issue/template"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/utils"
-	asymkey_service "code.gitea.io/gitea/services/asymkey"
-	"code.gitea.io/gitea/services/automerge"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/context/upload"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/gitdiff"
-	notify_service "code.gitea.io/gitea/services/notify"
-	pull_service "code.gitea.io/gitea/services/pull"
-	repo_service "code.gitea.io/gitea/services/repository"
+	"forgejo.org/models"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/organization"
+	access_model "forgejo.org/models/perm/access"
+	pull_model "forgejo.org/models/pull"
+	quota_model "forgejo.org/models/quota"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/emoji"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	issue_template "forgejo.org/modules/issue/template"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/utils"
+	asymkey_service "forgejo.org/services/asymkey"
+	"forgejo.org/services/automerge"
+	"forgejo.org/services/context"
+	"forgejo.org/services/context/upload"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/gitdiff"
+	notify_service "forgejo.org/services/notify"
+	pull_service "forgejo.org/services/pull"
+	repo_service "forgejo.org/services/repository"
 
 	"github.com/gobwas/glob"
 )
@@ -892,7 +892,7 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 		foundStartCommit := len(specifiedStartCommit) == 0
 		foundEndCommit := len(specifiedEndCommit) == 0
 
-		if !(foundStartCommit && foundEndCommit) {
+		if !foundStartCommit || !foundEndCommit {
 			for _, commit := range prInfo.Commits {
 				if commit.ID.String() == specifiedStartCommit {
 					foundStartCommit = true
@@ -907,7 +907,7 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 			}
 		}
 
-		if !(foundStartCommit && foundEndCommit) {
+		if !foundStartCommit || !foundEndCommit {
 			ctx.NotFound("Given SHA1 not found for this PR", nil)
 			return
 		}
@@ -1321,8 +1321,8 @@ func MergePullRequest(ctx *context.Context) {
 		} else if models.IsErrMergeConflicts(err) {
 			conflictError := err.(models.ErrMergeConflicts)
 			flashError, err := ctx.RenderToHTML(tplAlertDetails, map[string]any{
-				"Message": ctx.Tr("repo.editor.merge_conflict"),
-				"Summary": ctx.Tr("repo.editor.merge_conflict_summary"),
+				"Message": ctx.Tr("repo.pulls.merge_conflict"),
+				"Summary": ctx.Tr("repo.pulls.merge_conflict_summary"),
 				"Details": utils.SanitizeFlashErrorString(conflictError.StdErr) + "<br>" + utils.SanitizeFlashErrorString(conflictError.StdOut),
 			})
 			if err != nil {

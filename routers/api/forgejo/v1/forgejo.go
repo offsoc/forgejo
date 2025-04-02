@@ -5,8 +5,8 @@ package v1
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
 )
 
 type Forgejo struct{}

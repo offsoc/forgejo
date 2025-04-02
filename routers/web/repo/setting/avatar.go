@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"io"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/typesniffer"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
-	repo_service "code.gitea.io/gitea/services/repository"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/typesniffer"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
+	repo_service "forgejo.org/services/repository"
 )
 
 // UpdateAvatarSetting update repo's avatar
@@ -46,7 +46,7 @@ func UpdateAvatarSetting(ctx *context.Context, form forms.AvatarForm) error {
 		return fmt.Errorf("io.ReadAll: %w", err)
 	}
 	st := typesniffer.DetectContentType(data)
-	if !(st.IsImage() && !st.IsSvgImage()) {
+	if !st.IsImage() || st.IsSvgImage() {
 		return errors.New(ctx.Locale.TrString("settings.uploaded_avatar_not_a_image"))
 	}
 	if err = repo_service.UploadAvatar(ctx, ctxRepo, data); err != nil {

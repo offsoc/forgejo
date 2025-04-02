@@ -6,7 +6,7 @@
 package options
 
 import (
-	"code.gitea.io/gitea/modules/assetfs"
+	"forgejo.org/modules/assetfs"
 )
 
 func BuiltinAssets() *assetfs.Layer {

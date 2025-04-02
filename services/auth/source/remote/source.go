@@ -4,8 +4,8 @@
 package remote
 
 import (
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/models/auth"
+	"forgejo.org/modules/json"
 )
 
 type Source struct {

@@ -3,7 +3,7 @@
 
 package swagger
 
-import api "code.gitea.io/gitea/modules/structs"
+import api "forgejo.org/modules/structs"
 
 // SecretList
 // swagger:response SecretList
@@ -38,4 +38,11 @@ type swaggerResponseVariableList struct {
 type swaggerRunJobList struct {
 	// in:body
 	Body []*api.ActionRunJob `json:"body"`
+}
+
+// DispatchWorkflowRun is a Workflow Run after dispatching
+// swagger:response DispatchWorkflowRun
+type swaggerDispatchWorkflowRun struct {
+	// in:body
+	Body *api.DispatchWorkflowRun `json:"body"`
 }

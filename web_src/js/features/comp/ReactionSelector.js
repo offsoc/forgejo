@@ -23,7 +23,7 @@ export function initCompReactionSelector($parent) {
         $react.remove();
       }
       if (!data.empty) {
-        const $attachments = $content.find('.segment.bottom:first');
+        const $attachments = $content.find('.segment.bottom').first();
         $react = $(data.html);
         if ($attachments.length > 0) {
           $react.insertBefore($attachments);

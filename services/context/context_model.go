@@ -4,7 +4,7 @@
 package context
 
 import (
-	"code.gitea.io/gitea/models/unit"
+	"forgejo.org/models/unit"
 )
 
 // IsUserSiteAdmin returns true if current user is a site admin

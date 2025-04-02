@@ -7,3 +7,12 @@
   last_used_passcode:
   created_unix: 1564253724
   updated_unix: 1564253724
+-
+  id: 2
+  uid: 23
+  secret: badbad
+  scratch_salt: badbad
+  scratch_hash: badbad
+  last_used_passcode:
+  created_unix: 1564253724
+  updated_unix: 1564253724

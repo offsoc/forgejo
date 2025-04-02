@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/private"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/private"
 
 	"github.com/urfave/cli/v2"
 )
@@ -71,7 +71,7 @@ func runKeys(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), true)
 
 	authorizedString, extra := private.AuthorizedPublicKeyByContent(ctx, content)
 	// do not use handleCliResponseExtra or cli.NewExitError, if it exists immediately, it breaks some tests like Test_CmdKeys

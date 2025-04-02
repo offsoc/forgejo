@@ -11,8 +11,8 @@ import (
 	"io"
 	"os"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/storage"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/storage"
 )
 
 var (
@@ -79,7 +79,7 @@ func (s *ContentStore) Put(pointer Pointer, r io.Reader) error {
 
 // Exists returns true if the object exists in the content store.
 func (s *ContentStore) Exists(pointer Pointer) (bool, error) {
-	_, err := s.ObjectStorage.Stat(pointer.RelativePath())
+	_, err := s.Stat(pointer.RelativePath())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
@@ -92,7 +92,7 @@ func (s *ContentStore) Exists(pointer Pointer) (bool, error) {
 // Verify returns true if the object exists in the content store and size is correct.
 func (s *ContentStore) Verify(pointer Pointer) (bool, error) {
 	p := pointer.RelativePath()
-	fi, err := s.ObjectStorage.Stat(p)
+	fi, err := s.Stat(p)
 	if os.IsNotExist(err) || (err == nil && fi.Size() != pointer.Size) {
 		return false, nil
 	} else if err != nil {

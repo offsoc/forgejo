@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -50,7 +50,7 @@ func TestBuildLocalPath(t *testing.T) {
 		t.Run(k.path, func(t *testing.T) {
 			l := LocalStorage{dir: k.localDir}
 
-			assert.EqualValues(t, k.expected, l.buildLocalPath(k.path))
+			assert.Equal(t, k.expected, l.buildLocalPath(k.path))
 		})
 	}
 }

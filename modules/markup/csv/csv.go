@@ -10,11 +10,11 @@ import (
 	"regexp"
 	"strconv"
 
-	"code.gitea.io/gitea/modules/csv"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/csv"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/util"
 )
 
 func init() {

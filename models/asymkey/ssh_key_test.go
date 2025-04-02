@@ -12,9 +12,9 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
 
 	"github.com/42wim/sshsig"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +44,7 @@ func Test_SSHParsePublicKey(t *testing.T) {
 				keyTypeN, lengthN, err := SSHNativeParsePublicKey(tc.content)
 				require.NoError(t, err)
 				assert.Equal(t, tc.keyType, keyTypeN)
-				assert.EqualValues(t, tc.length, lengthN)
+				assert.Equal(t, tc.length, lengthN)
 			})
 			if tc.skipSSHKeygen {
 				return
@@ -54,19 +54,19 @@ func Test_SSHParsePublicKey(t *testing.T) {
 				if err != nil {
 					// Some servers do not support ecdsa format.
 					if !strings.Contains(err.Error(), "line 1 too long:") {
-						assert.FailNow(t, "%v", err)
+						require.NoError(t, err)
 					}
 				}
 				assert.Equal(t, tc.keyType, keyTypeK)
-				assert.EqualValues(t, tc.length, lengthK)
+				assert.Equal(t, tc.length, lengthK)
 			})
 			t.Run("SSHParseKeyNative", func(t *testing.T) {
 				keyTypeK, lengthK, err := SSHNativeParsePublicKey(tc.content)
 				if err != nil {
-					assert.FailNow(t, "%v", err)
+					require.NoError(t, err)
 				}
 				assert.Equal(t, tc.keyType, keyTypeK)
-				assert.EqualValues(t, tc.length, lengthK)
+				assert.Equal(t, tc.length, lengthK)
 			})
 		})
 	}

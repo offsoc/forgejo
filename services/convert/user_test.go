@@ -6,10 +6,10 @@ package convert
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,11 +31,11 @@ func TestUser_ToUser(t *testing.T) {
 
 	apiUser = toUser(db.DefaultContext, user1, false, false)
 	assert.False(t, apiUser.IsAdmin)
-	assert.EqualValues(t, api.VisibleTypePublic.String(), apiUser.Visibility)
+	assert.Equal(t, api.VisibleTypePublic.String(), apiUser.Visibility)
 
 	user31 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 31, IsAdmin: false, Visibility: api.VisibleTypePrivate})
 
 	apiUser = toUser(db.DefaultContext, user31, true, true)
 	assert.False(t, apiUser.IsAdmin)
-	assert.EqualValues(t, api.VisibleTypePrivate.String(), apiUser.Visibility)
+	assert.Equal(t, api.VisibleTypePrivate.String(), apiUser.Visibility)
 }

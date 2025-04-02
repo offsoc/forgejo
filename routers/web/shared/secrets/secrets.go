@@ -4,14 +4,14 @@
 package secrets
 
 import (
-	"code.gitea.io/gitea/models/db"
-	secret_model "code.gitea.io/gitea/models/secret"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
-	secret_service "code.gitea.io/gitea/services/secrets"
+	"forgejo.org/models/db"
+	secret_model "forgejo.org/models/secret"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
+	secret_service "forgejo.org/services/secrets"
 )
 
 func SetSecretsContext(ctx *context.Context, ownerID, repoID int64) {

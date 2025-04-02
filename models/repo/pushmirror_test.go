@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -67,7 +67,7 @@ func TestPushMirrorPrivatekey(t *testing.T) {
 	t.Run("Normal retrieval", func(t *testing.T) {
 		actualPrivateKey, err := m.Privatekey()
 		require.NoError(t, err)
-		assert.EqualValues(t, privateKey, actualPrivateKey)
+		assert.Equal(t, privateKey, actualPrivateKey)
 	})
 
 	t.Run("Incorrect retrieval", func(t *testing.T) {
