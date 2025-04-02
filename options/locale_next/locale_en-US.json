@@ -19,6 +19,7 @@
     "themes.names.forgejo-dark": "Forgejo dark",
     "error.not_found.title": "Page not found",
     "alert.asset_load_failed": "Failed to load asset files from {path}. Please make sure the asset files can be accessed.",
+    "alert.range_error": " must be a number between %[1]s and %[2]s.",
     "settings.adopt": "Adopt",
     "install.invalid_lfs_path": "Unable to create the LFS root at the specified path: %[1]s",
     "install.lfs_jwt_secret_failed": "Unable to generate a LFS JWT secret: %[1]s"
