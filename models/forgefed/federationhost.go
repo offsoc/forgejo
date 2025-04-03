@@ -18,7 +18,7 @@ type FederationHost struct {
 	ID             int64              `xorm:"pk autoincr"`
 	HostFqdn       string             `xorm:"host_fqdn UNIQUE INDEX VARCHAR(255) NOT NULL"`
 	NodeInfo       NodeInfo           `xorm:"extends NOT NULL"`
-	HostPort       uint16             `xorm:"NOT NULL DEFAULT '443'"`
+	HostPort       uint16             `xorm:"NOT NULL DEFAULT 443"`
 	HostSchema     string             `xorm:"NOT NULL DEFAULT 'https'"`
 	LatestActivity time.Time          `xorm:"NOT NULL"`
 	Created        timeutil.TimeStamp `xorm:"created"`
