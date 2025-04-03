@@ -27,7 +27,7 @@ type FederationHost struct {
 }
 
 // Factory function for FederationHost. Created struct is asserted to be valid.
-func NewFederationHost(hostFqdn string, nodeInfo NodeInfo, port string, schema string) (FederationHost, error) {
+func NewFederationHost(hostFqdn string, nodeInfo NodeInfo, port, schema string) (FederationHost, error) {
 	result := FederationHost{
 		HostFqdn:   strings.ToLower(hostFqdn),
 		NodeInfo:   nodeInfo,
