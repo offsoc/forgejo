@@ -4,16 +4,18 @@
 package forgejo_migrations //nolint:revive
 
 import (
+	"fmt"
 	"time"
 
 	"forgejo.org/models/migrations/base"
+	"forgejo.org/modules/forgefed"
 	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm"
 )
 
 func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
-	// New Fields
+	// Update schema
 	type FederatedUser struct {
 		ID                    int64  `xorm:"pk autoincr"`
 		UserID                int64  `xorm:"NOT NULL"`
@@ -22,6 +24,7 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 		NormalizedOriginalURL string
 	}
 	type User struct {
+		ID                     int64 `xorm:"pk autoincr"`
 		NormalizedFederatedURI string
 	}
 	type FederationHost struct {
@@ -34,26 +37,53 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 		Created        timeutil.TimeStamp `xorm:"created"`
 		Updated        timeutil.TimeStamp `xorm:"updated"`
 	}
-	// TODO: add new fields to FederationHost
 	if err := x.Sync(new(User), new(FederatedUser), new(FederationHost)); err != nil {
 		return err
 	}
 
-	// Migrate User.NormalizedFederatedURI -> FederatedUser.NormalizedOriginalUrl
+	// Migrate
 	sessMigration := x.NewSession()
 	defer sessMigration.Close()
 	if err := sessMigration.Begin(); err != nil {
 		return err
 	}
-	if _, err := sessMigration.Exec("UPDATE `federated_user` SET `normalized_original_url` = (SELECT normalized_federated_uri FROM `user` WHERE `user`.id = federated_user.user_id)"); err != nil {
-		return err
-	}
-	if err := sessMigration.Commit(); err != nil {
+	federatedUsers := make([]*FederatedUser, 0)
+	err := sessMigration.Where("normalized_original_url=''").OrderBy("id").Find(&federatedUsers)
+	if err != nil {
 		return err
 	}
 
-	// Migrate (Port, Schema) FederatedUser.NormalizedOriginalUrl -> FederationHost.(Port, Schema)
-	// TODO
+	for _, federatedUser := range federatedUsers {
+		user := &User{}
+		has, err := sessMigration.Where("id=?", federatedUser.UserID).Get(user)
+		if err != nil {
+			return err
+		}
+		if !has {
+			return fmt.Errorf("user not found %v", federatedUser.UserID)
+		}
+		fmt.Printf("user: %v\nfederatedUser: %v\n", user, federatedUser)
+
+		// Migrate User.NormalizedFederatedURI -> FederatedUser.NormalizedOriginalUrl
+		sql := "UPDATE `federated_user` SET `normalized_original_url` = ? WHERE `id` = ?"
+		if _, err := sessMigration.Exec(sql, user.NormalizedFederatedURI, federatedUser.FederationHostID); err != nil {
+			return err
+		}
+
+		// Migrate (Port, Schema) FederatedUser.NormalizedOriginalUrl -> FederationHost.(Port, Schema)
+		actorId, err := forgefed.NewActorID(user.NormalizedFederatedURI)
+		if err != nil {
+			return err
+		}
+		sql = "UPDATE `federation_host` SET `host_port` = ?, `host_schema` = ? WHERE `id` = ?"
+		if _, err := sessMigration.Exec(sql, actorId.HostPort, actorId.HostSchema, federatedUser.FederationHostID); err != nil {
+			return err
+		}
+	}
+
+	if err := sessMigration.Commit(); err != nil {
+		return err
+	}
 
 	// Drop User.NormalizedFederatedURI field in extra transaction
 	sessSchema := x.NewSession()
