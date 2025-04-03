@@ -47,28 +47,26 @@ func Test_MigrateNormalizedFederatedURI(t *testing.T) {
 	}
 
 	// test for expected results
-	getColumn := func() *schemas.Column {
+	getColumn := func(tn string, co string) *schemas.Column {
 		tables, err := x.DBMetas()
 		require.NoError(t, err)
 		var table *schemas.Table
 		for _, elem := range tables {
-			if elem.Name == "user" {
+			if elem.Name == tn {
 				table = elem
 				break
 			}
 		}
-		require.Equal(t, "user", table.Name)
-		return table.GetColumn("normalized_federated_uri")
+		return table.GetColumn(co)
 	}
 
-	require.NotNil(t, getColumn(), "NormalizedFederatedURI column exists")
+	require.NotNil(t, getColumn("user", "normalized_federated_uri"))
+	require.Nil(t, getColumn("federation_host", "host_port"))
+	require.Nil(t, getColumn("federation_host", "host_schema"))
 	require.NoError(t, MigrateNormalizedFederatedURI(x))
-	require.Nil(t, getColumn(), "NormalizedFederatedURI column was deleted")
+	require.Nil(t, getColumn("user", "normalized_federated_uri"))
+	require.NotNil(t, getColumn("federation_host", "host_port"))
+	require.NotNil(t, getColumn("federation_host", "host_schema"))
 	// idempotent
 	require.NoError(t, MigrateNormalizedFederatedURI(x))
-
-	// TODO: Find a good way to test
-	// res, err := x.Query("SELECT normalized_original_url FROM federated_user WHERE user_id= ?", 3)
-	// require.NoError(t, err)
-	// assert.EqualValues(t, "https://my.host.x/api/activitypub/user-id/18", string(res[0]["normalized_original_url"]))
 }
