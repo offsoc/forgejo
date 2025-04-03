@@ -46,19 +46,18 @@ func (id ActorID) AsURI() string {
 	} else {
 		result = fmt.Sprintf("%s://%s:%s/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
 	}
-	return result	
+	return result
 }
 
 func (id ActorID) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(id.ID, "userId")...)
-	result = append(result, validation.ValidateNotEmpty(id.HostSchema, "schema")...)
+	result = append(result, validation.ValidateNotEmpty(id.HostSchema, "HostSchema")...)
 	result = append(result, validation.ValidateNotEmpty(id.Path, "path")...)
 	result = append(result, validation.ValidateNotEmpty(id.Host, "host")...)
 	result = append(result, validation.ValidateNotEmpty(id.HostPort, "HostPort")...)
 	result = append(result, validation.ValidateNotEmpty(id.UnvalidatedInput, "unvalidatedInput")...)
 
-	//add or
 	if id.UnvalidatedInput != id.AsURI() {
 		result = append(result, fmt.Sprintf("not all input was parsed, \nUnvalidated Input:%q \nParsed URI: %q", id.UnvalidatedInput, id.AsURI()))
 	}
@@ -106,7 +105,6 @@ func (id PersonID) Validate() []string {
 	result := id.ActorID.Validate()
 	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
 	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea"}, "Source")...)
-	result = append(result, validation.ValidateOneOf(id.HostSchema, []any{"https", "http", "HTTPS", "HTTP"}, "Source")...)
 
 	switch id.Source {
 	case "forgejo", "gitea":
@@ -114,16 +112,7 @@ func (id PersonID) Validate() []string {
 			result = append(result, fmt.Sprintf("path: %q has to be a person specific api path", id.Path))
 		}
 	}
-	/*
-	switch id.HostSchema {
-	case "HTTPS", "HTTP":
-		if strings.ToLower(id.HostSchema) == "https" {
-			result = append(result, fmt.Sprintf("-%s", strings.ToLower(id.HostSchema)))
-		} else if strings.ToLower(id.HostSchema) == "http" {
-			result = append(result, fmt.Sprintf("-%s", strings.ToLower(id.HostSchema)))
-		}
-	}
-		*/
+
 	return result
 }
 
@@ -144,7 +133,6 @@ func NewRepositoryID(uri, source string) (RepositoryID, error) {
 	// validate Person specific
 	repoID := RepositoryID{result}
 	if valid, err := validation.IsValid(repoID); !valid {
-
 		return RepositoryID{}, err
 	}
 
@@ -185,7 +173,6 @@ func removeEmptyStrings(ls []string) []string {
 
 func newActorID(uri string) (ActorID, error) {
 	validatedURI, err := url.ParseRequestURI(uri)
-
 	if err != nil {
 		return ActorID{}, err
 	}
@@ -216,7 +203,7 @@ func newActorID(uri string) (ActorID, error) {
 	}
 
 	result.HostPort = validatedURI.Port()
-	result.UnvalidatedInput = uri
+	result.UnvalidatedInput = fmt.Sprintf("%s://%s:%s/%s/%s", result.HostSchema, result.Host, result.HostPort, result.Path, result.ID)
 	return result, nil
 }
 
