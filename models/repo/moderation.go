@@ -45,9 +45,13 @@ func newRepositoryData(repo *Repository) RepositoryData {
 // and if found a shadow copy of relevant repository fields will be stored into DB and linked to the above report(s).
 // This function should be called when a repository is deleted or updated.
 func IfNeededCreateShadowCopyForRepository(ctx context.Context, repo *Repository, forUpdates bool) error {
-	if moderation.IsReported(ctx, moderation.ReportedContentTypeRepository, repo.ID) {
+	shadowCopyNeeded, err := moderation.IsShadowCopyNeeded(ctx, moderation.ReportedContentTypeRepository, repo.ID)
+	if err != nil {
+		return err
+	}
+
+	if shadowCopyNeeded {
 		if forUpdates {
-			var err error
 			// get the unmodified repository fields
 			repo, err = GetRepositoryByID(ctx, repo.ID)
 			if err != nil {

@@ -115,12 +115,12 @@ func init() {
 	db.RegisterModel(new(AbuseReport))
 }
 
-// IsReported reports whether one or more reports were already submitted for contentType and contentID
-// (regardless the status of the reports).
-func IsReported(ctx context.Context, contentType ReportedContentType, contentID int64) bool {
-	// TODO: only consider the reports with 'New' status (and adjust the function name)?!
-	reported, _ := db.GetEngine(ctx).Exist(&AbuseReport{ContentType: contentType, ContentID: contentID})
-	return reported
+// IsShadowCopyNeeded reports whether one or more reports were already submitted
+// for contentType and contentID and not yet linked to a shadow copy (regardless their status).
+func IsShadowCopyNeeded(ctx context.Context, contentType ReportedContentType, contentID int64) (bool, error) {
+	return db.GetEngine(ctx).Cols("id").Where(builder.IsNull{"shadow_copy_id"}).Exist(
+		&AbuseReport{ContentType: contentType, ContentID: contentID},
+	)
 }
 
 // AlreadyReportedByAndOpen returns if doerID has already submitted a report for contentType and contentID that is still Open.

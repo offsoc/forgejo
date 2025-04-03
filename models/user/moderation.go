@@ -71,7 +71,7 @@ var userDataColumnNames = sync.OnceValue(func() []string {
 
 // IfNeededCreateShadowCopyForUser checks if for the given user there are any reports of abusive content submitted
 // and if found a shadow copy of relevant user fields will be stored into DB and linked to the above report(s).
-// This function should be called when a user is deleted or updated.
+// This function should be called before a user is deleted or updated.
 //
 // For deletions alteredCols argument must be omitted.
 //
@@ -80,17 +80,26 @@ var userDataColumnNames = sync.OnceValue(func() []string {
 func IfNeededCreateShadowCopyForUser(ctx context.Context, user *User, alteredCols ...string) error {
 	// TODO: this can be triggered quite often (e.g. by routers/web/repo/middlewares.go SetDiffViewStyle())
 
-	shouldCheckIfReported := len(alteredCols) == 0 // no columns being updated, therefore a deletion
-	if !shouldCheckIfReported {
+	shouldCheckIfNeeded := len(alteredCols) == 0 // no columns being updated, therefore a deletion
+	if !shouldCheckIfNeeded {
 		// for updates we need to go further only if certain column are being changed
 		for _, colName := range userDataColumnNames() {
-			if shouldCheckIfReported = slices.Contains(alteredCols, colName); shouldCheckIfReported {
+			if shouldCheckIfNeeded = slices.Contains(alteredCols, colName); shouldCheckIfNeeded {
 				break
 			}
 		}
 	}
 
-	if shouldCheckIfReported && moderation.IsReported(ctx, moderation.ReportedContentTypeUser, user.ID) {
+	if !shouldCheckIfNeeded {
+		return nil
+	}
+
+	shadowCopyNeeded, err := moderation.IsShadowCopyNeeded(ctx, moderation.ReportedContentTypeUser, user.ID)
+	if err != nil {
+		return err
+	}
+
+	if shadowCopyNeeded {
 		userData := newUserData(user)
 		content, err := json.Marshal(userData)
 		if err != nil {
