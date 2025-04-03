@@ -15,9 +15,10 @@ import (
 // FederationHost data type
 // swagger:model
 type FederationHost struct {
-	ID             int64              `xorm:"pk autoincr"`
-	HostFqdn       string             `xorm:"host_fqdn UNIQUE INDEX VARCHAR(255) NOT NULL"`
-	NodeInfo       NodeInfo           `xorm:"extends NOT NULL"`
+	ID       int64    `xorm:"pk autoincr"`
+	HostFqdn string   `xorm:"host_fqdn UNIQUE INDEX VARCHAR(255) NOT NULL"`
+	NodeInfo NodeInfo `xorm:"extends NOT NULL"`
+	//TODO: why is this not a number?
 	HostPort       string             `xorm:"NOT NULL DEFAULT '443'"`
 	HostSchema     string             `xorm:"NOT NULL DEFAULT 'https'"`
 	LatestActivity time.Time          `xorm:"NOT NULL"`
