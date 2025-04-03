@@ -98,14 +98,14 @@ const sfc = {
           $(`#${this.branchForm} input[name="refType"]`).val('branch');
         }
         if (this.submitForm) {
-          $(`#${this.branchForm}`).trigger('submit');
+          document.getElementById(this.branchForm).requestSubmit();
         }
         this.menuVisible = false;
       }
     },
     createNewBranch() {
       if (!this.showCreateNewBranch) return;
-      $(this.$refs.newBranchForm).trigger('submit');
+      this.$refs.newBranchForm.requestSubmit();
     },
     focusSearchField() {
       nextTick(() => {

@@ -1,4 +1,4 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024-2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 package integration
@@ -14,7 +14,6 @@ import (
 	unit_model "forgejo.org/models/unit"
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
-	"forgejo.org/modules/translation"
 	issue_service "forgejo.org/services/issue"
 	files_service "forgejo.org/services/repository/files"
 	"forgejo.org/tests"
@@ -23,20 +22,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestUserDashboardActionLinks(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-
-	session := loginUser(t, "user1")
-	locale := translation.NewLocale("en-US")
-
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
-	links := page.Find("#navbar .dropdown[data-tooltip-content='Create…'] .menu")
-	assert.Equal(t, locale.TrString("new_repo.link"), strings.TrimSpace(links.Find("a[href='/repo/create']").Text()))
-	assert.Equal(t, locale.TrString("new_migrate.link"), strings.TrimSpace(links.Find("a[href='/repo/migrate']").Text()))
-	assert.Equal(t, locale.TrString("new_org.link"), strings.TrimSpace(links.Find("a[href='/org/create']").Text()))
-}
 
 func TestUserDashboardFeedWelcome(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())

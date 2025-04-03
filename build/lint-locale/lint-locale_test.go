@@ -60,7 +60,7 @@ func TestLocalizationPolicy(t *testing.T) {
 	t.Run("Escaped HTML characters", func(t *testing.T) {
 		assert.Empty(t, checkLocaleContent([]byte("activity.git_stats_push_to_branch = `إلى %s و\"`")))
 
-		assert.Equal(t, []string{"key: و\x1b[31m&nbsp\x1b[0m\x1b[32m\u00a0\x1b[0m"}, checkLocaleContent([]byte(`key = و&nbsp;`)))
+		assert.Equal(t, []string{"key: و\x1b[31m&nbsp;\x1b[0m\x1b[32m\u00a0\x1b[0m"}, checkLocaleContent([]byte(`key = و&nbsp;`)))
 	})
 }
 
@@ -90,5 +90,17 @@ func TestNextLocalizationPolicy(t *testing.T) {
 		assert.Equal(t, []string{"settings.hidden_comment_types_description: \"\x1b[31m<not-an-allowed-key>\x1b[0m REPLACED-TAG\""}, checkLocaleNextContent([]byte(`{
 			"settings.hidden_comment_types_description": "\"<not-an-allowed-key> <label>\""
 		}`)))
+	})
+
+	t.Run("Plural form", func(t *testing.T) {
+		assert.Equal(t, []string{"repo.pulls.title_desc: key = \x1b[31m<a href=\"https://example.com\">\x1b[0m"}, checkLocaleNextContent([]byte(`{"repo.pulls.title_desc": {
+                       "few": "key = <a href=\"%s\">",
+                       "other": "key = <a href=\"https://example.com\">"
+    }}`)))
+
+		assert.Equal(t, []string{"repo.pulls.title_desc.few: key = \x1b[31m<a href=\"https://example.com\">\x1b[0m"}, checkLocaleNextContent([]byte(`{"repo.pulls.title_desc": {
+                       "few": "key = <a href=\"https://example.com\">",
+                       "other": "key = <a href=\"%s\">"
+    }}`)))
 	})
 }

@@ -28,7 +28,7 @@ func Actor(ctx *context.APIContext) {
 	//   "200":
 	//     "$ref": "#/responses/ActivityPub"
 
-	link := user_model.APActorUserAPActorID()
+	link := user_model.APServerActorID()
 	actor := ap.ActorNew(ap.IRI(link), ap.ApplicationType)
 
 	actor.PreferredUsername = ap.NaturalLanguageValuesNew()
@@ -46,7 +46,7 @@ func Actor(ctx *context.APIContext) {
 	actor.PublicKey.ID = ap.IRI(link + "#main-key")
 	actor.PublicKey.Owner = ap.IRI(link)
 
-	publicKeyPem, err := activitypub.GetPublicKey(ctx, user_model.NewAPActorUser())
+	publicKeyPem, err := activitypub.GetPublicKey(ctx, user_model.NewAPServerActor())
 	if err != nil {
 		ctx.ServerError("GetPublicKey", err)
 		return

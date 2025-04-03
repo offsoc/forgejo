@@ -757,10 +757,6 @@ img.ui.avatar,
   box-shadow: 0 6px 18px var(--color-shadow) !important;
 }
 
-.ui.dimmer {
-  background: var(--color-overlay-backdrop);
-}
-
 /* Override semantic selector '.ui.menu:not(.vertical) .item > .button' */
 /* This fixes the commit graph button on the commits page */
 /* modal svg icons, copied from fomantic except width and height */

@@ -8,9 +8,9 @@ import (
 	"html/template"
 	"slices"
 
-	"forgejo.org/modules/json"
 	"forgejo.org/modules/log"
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation/localeiter"
 	"forgejo.org/modules/util"
 )
 
@@ -94,55 +94,20 @@ func (store *localeStore) AddLocaleByIni(langName, langDesc string, pluralRule P
 	return nil
 }
 
-func RecursivelyAddTranslationsFromJSON(locale *locale, object map[string]any, prefix string) error {
-	for key, value := range object {
-		var fullkey string
-		if prefix != "" {
-			fullkey = prefix + "." + key
-		} else {
-			fullkey = key
-		}
-
-		switch v := value.(type) {
-		case string:
-			// Check whether we are adding a plural form to the parent object, or a new nested JSON object.
-
-			switch key {
-			case "zero", "one", "two", "few", "many":
-				locale.newStyleMessages[prefix+PluralFormSeparator+key] = v
-			case "other":
-				locale.newStyleMessages[prefix] = v
-			default:
-				locale.newStyleMessages[fullkey] = v
-			}
-
-		case map[string]any:
-			err := RecursivelyAddTranslationsFromJSON(locale, v, fullkey)
-			if err != nil {
-				return err
-			}
-
-		case nil:
-		default:
-			return fmt.Errorf("Unrecognized JSON value '%s'", value)
-		}
-	}
-
-	return nil
-}
-
 func (store *localeStore) AddToLocaleFromJSON(langName string, source []byte) error {
 	locale, ok := store.localeMap[langName]
 	if !ok {
 		return ErrLocaleDoesNotExist
 	}
 
-	var result map[string]any
-	if err := json.Unmarshal(source, &result); err != nil {
-		return err
-	}
-
-	return RecursivelyAddTranslationsFromJSON(locale, result, "")
+	return localeiter.IterateMessagesNextContent(source, func(key, pluralForm, value string) error {
+		msgKey := key
+		if pluralForm != "" {
+			msgKey = key + PluralFormSeparator + pluralForm
+		}
+		locale.newStyleMessages[msgKey] = value
+		return nil
+	})
 }
 
 func (l *locale) LookupNewStyleMessage(trKey string) string {

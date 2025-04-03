@@ -4,6 +4,7 @@
 package forgefed
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 	"time"
@@ -15,12 +16,14 @@ import (
 // FederationHost data type
 // swagger:model
 type FederationHost struct {
-	ID             int64              `xorm:"pk autoincr"`
-	HostFqdn       string             `xorm:"host_fqdn UNIQUE INDEX VARCHAR(255) NOT NULL"`
-	NodeInfo       NodeInfo           `xorm:"extends NOT NULL"`
-	LatestActivity time.Time          `xorm:"NOT NULL"`
-	Created        timeutil.TimeStamp `xorm:"created"`
-	Updated        timeutil.TimeStamp `xorm:"updated"`
+	ID             int64                  `xorm:"pk autoincr"`
+	HostFqdn       string                 `xorm:"host_fqdn UNIQUE INDEX VARCHAR(255) NOT NULL"`
+	NodeInfo       NodeInfo               `xorm:"extends NOT NULL"`
+	LatestActivity time.Time              `xorm:"NOT NULL"`
+	Created        timeutil.TimeStamp     `xorm:"created"`
+	Updated        timeutil.TimeStamp     `xorm:"updated"`
+	KeyID          sql.NullString         `xorm:"key_id UNIQUE"`
+	PublicKey      sql.Null[sql.RawBytes] `xorm:"BLOB"`
 }
 
 // Factory function for FederationHost. Created struct is asserted to be valid.
