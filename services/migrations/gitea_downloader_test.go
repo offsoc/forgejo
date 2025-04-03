@@ -307,3 +307,46 @@ func TestGiteaDownloadRepo(t *testing.T) {
 		},
 	}, reviews)
 }
+
+func TestForgejoDownloadRepo(t *testing.T) {
+	token := os.Getenv("CODE_FORGEJO_TOKEN")
+
+	fixturePath := "./testdata/code-forgejo-org/full_download"
+	server := unittest.NewMockWebServer(t, "https://code.forgejo.org", fixturePath, token != "")
+	defer server.Close()
+
+	downloader, err := NewGiteaDownloader(t.Context(), server.URL, "Gusted/agit-test", "", "", token)
+	require.NoError(t, err)
+	require.NotNil(t, downloader)
+
+	prs, _, err := downloader.GetPullRequests(1, 50)
+	require.NoError(t, err)
+	assert.Len(t, prs, 1)
+
+	assertPullRequestEqual(t, &base.PullRequest{
+		Number:      1,
+		PosterID:    63,
+		PosterName:  "Gusted",
+		PosterEmail: "postmaster@gusted.xyz",
+		Title:       "Add extra information",
+		State:       "open",
+		Created:     time.Date(2025, time.April, 1, 20, 28, 45, 0, time.UTC),
+		Updated:     time.Date(2025, time.April, 1, 20, 28, 45, 0, time.UTC),
+		Base: base.PullRequestBranch{
+			CloneURL:  "",
+			Ref:       "main",
+			SHA:       "79ebb873a6497c8847141ba9706b3f757196a1e6",
+			RepoName:  "agit-test",
+			OwnerName: "Gusted",
+		},
+		Head: base.PullRequestBranch{
+			CloneURL:  server.URL + "/Gusted/agit-test.git",
+			Ref:       "refs/pull/1/head",
+			SHA:       "667e9317ec37b977e6d3d7d43e3440636970563c",
+			RepoName:  "agit-test",
+			OwnerName: "Gusted",
+		},
+		PatchURL: server.URL + "/Gusted/agit-test/pulls/1.patch",
+		Flow:     1,
+	}, prs[0])
+}
