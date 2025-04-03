@@ -95,7 +95,7 @@ func (mock *FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
 			})
 	}
 	for _, repository := range mock.Repositories {
-		federatedRoutes.HandleFunc(fmt.Sprintf("/api/v1/activitypub/repository-id/%v/inbox/", repository.ID),
+		federatedRoutes.HandleFunc(fmt.Sprintf("/api/v1/activitypub/repository-id/%v/inbox", repository.ID),
 			func(res http.ResponseWriter, req *http.Request) {
 				if req.Method != "POST" {
 					t.Errorf("POST expected at: %q", req.URL.EscapedPath())

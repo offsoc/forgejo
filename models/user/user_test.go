@@ -139,9 +139,21 @@ func TestAPActorID(t *testing.T) {
 	user := user_model.User{ID: 1}
 	url := user.APActorID()
 	expected := "https://try.gitea.io/api/v1/activitypub/user-id/1"
-	if url != expected {
-		t.Errorf("unexpected APActorID, expected: %q, actual: %q", expected, url)
-	}
+	assert.Equal(t, expected, url)
+}
+
+func TestAPActorID_APActorID(t *testing.T) {
+	user := user_model.User{ID: user_model.APServerActorUserID}
+	url := user.APActorID()
+	expected := "https://try.gitea.io/api/v1/activitypub/actor"
+	assert.Equal(t, expected, url)
+}
+
+func TestAPActorKeyID(t *testing.T) {
+	user := user_model.User{ID: 1}
+	url := user.APActorKeyID()
+	expected := "https://try.gitea.io/api/v1/activitypub/user-id/1#main-key"
+	assert.Equal(t, expected, url)
 }
 
 func TestSearchUsers(t *testing.T) {

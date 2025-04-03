@@ -1313,7 +1313,7 @@ func roleDescriptor(ctx stdCtx.Context, repo *repo_model.Repository, poster *use
 	}
 
 	// Special user that can't have associated contributions and permissions in the repo.
-	if poster.IsGhost() || poster.IsActions() || poster.IsAPActor() {
+	if poster.IsGhost() || poster.IsActions() || poster.IsAPServerActor() {
 		return roleDescriptor, nil
 	}
 
