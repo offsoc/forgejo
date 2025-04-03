@@ -6,6 +6,7 @@ package forgefed
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"forgejo.org/modules/validation"
@@ -20,7 +21,7 @@ type ActorID struct {
 	HostSchema         string
 	Path               string
 	Host               string
-	HostPort           string
+	HostPort           uint16
 	UnvalidatedInput   string
 	IsPortSupplemented bool
 }
@@ -44,7 +45,7 @@ func (id ActorID) AsURI() string {
 	if id.IsPortSupplemented {
 		result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
 	} else {
-		result = fmt.Sprintf("%s://%s:%s/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
+		result = fmt.Sprintf("%s://%s:%d/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
 	}
 	return result
 }
@@ -192,18 +193,20 @@ func newActorID(uri string) (ActorID, error) {
 
 	if validatedURI.Port() == "" && result.HostSchema == "https" {
 		result.IsPortSupplemented = true
-		result.HostPort = "443"
+		result.HostPort = 443
 		result.UnvalidatedInput = fmt.Sprintf("%s://%s/%s/%s", result.HostSchema, result.Host, result.Path, result.ID)
 		return result, nil
 	} else if validatedURI.Port() == "" && result.HostSchema == "http" {
 		result.IsPortSupplemented = true
-		result.HostPort = "80"
+		result.HostPort = 80
 		result.UnvalidatedInput = fmt.Sprintf("%s://%s/%s/%s", result.HostSchema, result.Host, result.Path, result.ID)
 		return result, nil
 	}
 
-	result.HostPort = validatedURI.Port()
-	result.UnvalidatedInput = fmt.Sprintf("%s://%s:%s/%s/%s", result.HostSchema, result.Host, result.HostPort, result.Path, result.ID)
+	numPort, _ := strconv.ParseUint(validatedURI.Port(), 10, 16)
+	result.HostPort = uint16(numPort)
+
+	result.UnvalidatedInput = fmt.Sprintf("%s://%s:%d/%s/%s", result.HostSchema, result.Host, result.HostPort, result.Path, result.ID)
 	return result, nil
 }
 
