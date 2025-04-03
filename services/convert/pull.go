@@ -95,6 +95,7 @@ func ToAPIPullRequest(ctx context.Context, pr *issues_model.PullRequest, doer *u
 		RequestedReviewersTeams: []*api.Team{},
 
 		AllowMaintainerEdit: pr.AllowMaintainerEdit,
+		Flow:                int64(pr.Flow),
 
 		Base: &api.PRBranchInfo{
 			Name:       pr.BaseBranch,
