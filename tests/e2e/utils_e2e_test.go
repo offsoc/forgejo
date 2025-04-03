@@ -5,7 +5,6 @@ package e2e
 
 import (
 	"context"
-	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"net"
@@ -23,6 +22,7 @@ import (
 	"forgejo.org/modules/json"
 	modules_session "forgejo.org/modules/session"
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 	"forgejo.org/tests"
 
 	"code.forgejo.org/go-chi/session"
@@ -153,11 +153,7 @@ func stateHelper(t testing.TB) func(stateFile string, user *user_model.User) {
 	require.NoError(t, err)
 
 	return func(stateFile string, user *user_model.User) {
-		buf := make([]byte, opt.IDLength/2)
-		_, err = rand.Read(buf)
-		require.NoError(t, err)
-
-		sessionID := hex.EncodeToString(buf)
+		sessionID := hex.EncodeToString(util.CryptoRandomBytes(int64(opt.IDLength) / 2))
 
 		s, err := vsp.Read(sessionID)
 		require.NoError(t, err)

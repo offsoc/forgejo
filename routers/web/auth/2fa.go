@@ -133,11 +133,7 @@ func TwoFactorScratchPost(ctx *context.Context) {
 	// Validate the passcode with the stored TOTP secret.
 	if twofa.VerifyScratchToken(form.Token) {
 		// Invalidate the scratch token.
-		_, err = twofa.GenerateScratchToken()
-		if err != nil {
-			ctx.ServerError("UserSignIn", err)
-			return
-		}
+		twofa.GenerateScratchToken()
 		if err = auth.UpdateTwoFactor(ctx, twofa); err != nil {
 			ctx.ServerError("UserSignIn", err)
 			return
