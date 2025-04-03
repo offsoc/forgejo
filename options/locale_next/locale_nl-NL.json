@@ -4,17 +4,22 @@
         "other": "heeft %[1]d commits samengevoegd van <code>%[2]s</code> naar <code>%[3]s</code> %[4]s"
     },
     "repo.pulls.title_desc": {
-        "one": "wilt %[1]d commit van <code>%[2]s</code> samenvoegen in <code id=\"%[4]s\">%[3]s</code>",
-        "other": "wilt %[1]d commits van <code>%[2]s</code> samenvoegen met <code id=\"%[4]s\">%[3]s</code>"
+        "one": "wil %[1]d commit van <code>%[2]s</code> samenvoegen in <code id=\"%[4]s\">%[3]s</code>",
+        "other": "wil %[1]d commits van <code>%[2]s</code> samenvoegen met <code id=\"%[4]s\">%[3]s</code>"
     },
     "search.milestone_kind": "Zoek mijlpalen…",
     "home.welcome.no_activity": "Geen activiteit",
-    "home.welcome.activity_hint": "Er staat nog niets in uw feed. Uw acties en activiteiten van repositories die u bekijkt zullen hier verschijnen.",
-    "home.explore_repos": "Ontdek repositories",
-    "home.explore_users": "Ontdek gebruikers",
-    "home.explore_orgs": "Ontdek organisaties",
+    "home.welcome.activity_hint": "Er staat nog niets in uw feed. Uw acties en activiteiten van repositories die u monitort zullen hier verschijnen.",
+    "home.explore_repos": "Verken repositories",
+    "home.explore_users": "Verken gebruikers",
+    "home.explore_orgs": "Verken organisaties",
     "incorrect_root_url": "Deze Forgejo-instantie is geconfigureerd om geserveerd te worden op \"%s\". U bekijkt Forgejo momenteel via een andere URL, waardoor onderdelen van de applicatie kunnen breken. De canonieke URL kan worden gewijzigd door Forgejo admins via de ROOT_URL instelling in de app.ini.",
     "themes.names.forgejo-auto": "Forgejo (volg het systeemthema)",
     "themes.names.forgejo-light": "Forgejo licht",
-    "themes.names.forgejo-dark": "Forgejo donker"
+    "themes.names.forgejo-dark": "Forgejo donker",
+    "error.not_found.title": "Pagina niet gevonden",
+    "alert.asset_load_failed": "Het laden van asset-bestanden van {path} is mislukt. Controleer of de asset-bestanden toegankelijk zijn.",
+    "settings.adopt": "Adopteer",
+    "install.invalid_lfs_path": "Kan de LFS-root niet aanmaken op het opgegeven pad: %[1]s",
+    "install.lfs_jwt_secret_failed": "Kan geen LFS JWT-geheim genereren: %[1]s"
 }
