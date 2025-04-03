@@ -275,6 +275,11 @@ func ChangeIssueContent(ctx context.Context, issue *Issue, doer *user_model.User
 		}
 	}
 
+	// If the issue was reported as abusive, a shadow copy should be created before first update.
+	if err := IfNeededCreateShadowCopyForIssue(ctx, issue); err != nil {
+		return err
+	}
+
 	issue.Content = content
 	issue.ContentVersion = contentVersion + 1
 

@@ -59,7 +59,6 @@ func NewIssue(ctx context.Context, repo *repo_model.Repository, issue *issues_mo
 // ChangeTitle changes the title of this issue, as the given user.
 func ChangeTitle(ctx context.Context, issue *issues_model.Issue, doer *user_model.User, title string) error {
 	oldTitle := issue.Title
-	issue.Title = title
 
 	if oldTitle == title {
 		return nil
@@ -73,6 +72,12 @@ func ChangeTitle(ctx context.Context, issue *issues_model.Issue, doer *user_mode
 		return user_model.ErrBlockedByUser
 	}
 
+	// If the issue was reported as abusive, a shadow copy should be created before first update.
+	if err := issues_model.IfNeededCreateShadowCopyForIssue(ctx, issue); err != nil {
+		return err
+	}
+
+	issue.Title = title
 	if err := issues_model.ChangeIssueTitle(ctx, issue, doer, oldTitle); err != nil {
 		return err
 	}
@@ -252,6 +257,12 @@ func deleteIssue(ctx context.Context, issue *issues_model.Issue) error {
 	defer committer.Close()
 
 	e := db.GetEngine(ctx)
+
+	// If the issue was reported as abusive, a shadow copy should be created before deletion.
+	if err := issues_model.IfNeededCreateShadowCopyForIssue(ctx, issue); err != nil {
+		return err
+	}
+
 	if _, err := e.ID(issue.ID).NoAutoCondition().Delete(issue); err != nil {
 		return err
 	}

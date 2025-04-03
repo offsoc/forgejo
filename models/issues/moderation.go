@@ -11,6 +11,34 @@ import (
 	"forgejo.org/modules/timeutil"
 )
 
+// IssueData represents a trimmed down issue that is used for preserving
+// only the fields needed for abusive content reports (mainly string fields).
+type IssueData struct {
+	RepoID         int64
+	Index          int64
+	PosterID       int64
+	Title          string
+	Content        string
+	ContentVersion int
+	CreatedUnix    timeutil.TimeStamp
+	UpdatedUnix    timeutil.TimeStamp
+}
+
+// newIssueData creates a trimmed down issue to be used just to create a JSON structure
+// (keeping only the fields relevant for moderation purposes)
+func newIssueData(issue *Issue) IssueData {
+	return IssueData{
+		RepoID:         issue.RepoID,
+		Index:          issue.Index,
+		PosterID:       issue.PosterID,
+		Content:        issue.Content,
+		Title:          issue.Title,
+		ContentVersion: issue.ContentVersion,
+		CreatedUnix:    issue.CreatedUnix,
+		UpdatedUnix:    issue.UpdatedUnix,
+	}
+}
+
 // CommentData represents a trimmed down comment that is used for preserving
 // only the fields needed for abusive content reports (mainly string fields).
 type CommentData struct {
@@ -33,6 +61,22 @@ func newCommentData(comment *Comment) CommentData {
 		CreatedUnix:    comment.CreatedUnix,
 		UpdatedUnix:    comment.UpdatedUnix,
 	}
+}
+
+// IfNeededCreateShadowCopyForIssue checks if for the given issue there are any reports of abusive content submitted
+// and if found a shadow copy of relevant issue fields will be stored into DB and linked to the above report(s).
+// This function should be called before a issue is deleted or updated.
+func IfNeededCreateShadowCopyForIssue(ctx context.Context, issue *Issue) error {
+	if moderation.IsReported(ctx, moderation.ReportedContentTypeIssue, issue.ID) {
+		issueData := newIssueData(issue)
+		content, err := json.Marshal(issueData)
+		if err != nil {
+			return err
+		}
+		return moderation.CreateShadowCopyForIssue(ctx, issue.ID, string(content))
+	}
+
+	return nil
 }
 
 // IfNeededCreateShadowCopyForComment checks if for the given comment there are any reports of abusive content submitted
