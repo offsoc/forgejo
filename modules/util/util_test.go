@@ -163,20 +163,18 @@ func Test_RandomString(t *testing.T) {
 }
 
 func Test_RandomBytes(t *testing.T) {
-	bytes1, err := util.CryptoRandomBytes(32)
-	require.NoError(t, err)
+	bytes1 := util.CryptoRandomBytes(32)
+	bytes2 := util.CryptoRandomBytes(32)
 
-	bytes2, err := util.CryptoRandomBytes(32)
-	require.NoError(t, err)
-
+	assert.Len(t, bytes1, 32)
+	assert.Len(t, bytes2, 32)
 	assert.NotEqual(t, bytes1, bytes2)
 
-	bytes3, err := util.CryptoRandomBytes(256)
-	require.NoError(t, err)
+	bytes3 := util.CryptoRandomBytes(256)
+	bytes4 := util.CryptoRandomBytes(256)
 
-	bytes4, err := util.CryptoRandomBytes(256)
-	require.NoError(t, err)
-
+	assert.Len(t, bytes3, 256)
+	assert.Len(t, bytes4, 256)
 	assert.NotEqual(t, bytes3, bytes4)
 }
 

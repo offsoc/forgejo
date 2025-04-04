@@ -242,12 +242,8 @@ func ResetPasswdPost(ctx *context.Context) {
 
 	if regenerateScratchToken {
 		// Invalidate the scratch token.
-		_, err := twofa.GenerateScratchToken()
-		if err != nil {
-			ctx.ServerError("UserSignIn", err)
-			return
-		}
-		if err = auth.UpdateTwoFactor(ctx, twofa); err != nil {
+		twofa.GenerateScratchToken()
+		if err := auth.UpdateTwoFactor(ctx, twofa); err != nil {
 			ctx.ServerError("UserSignIn", err)
 			return
 		}

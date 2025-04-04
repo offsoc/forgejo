@@ -14,7 +14,7 @@
     "@github/text-expander-element": "2.8.0",
     "@mcaptcha/vanilla-glue": "0.1.0-alpha-3",
     "@primer/octicons": "19.14.0",
-    "ansi_up": "6.0.2",
+    "ansi_up": "6.0.3",
     "asciinema-player": "3.8.2",
     "chart.js": "4.4.5",
     "chartjs-adapter-dayjs-4": "1.0.4",
