@@ -56,7 +56,8 @@ func NewReport(ctx *context.Context) {
 
 	if moderation.AlreadyReported(ctx, contentType, contentID) {
 		setMinimalContextData(ctx)
-		ctx.RenderWithErr(ctx.Tr("moderation.reported_already"), tplSubmitAbuseReport, nil)
+		ctx.Flash.Error(ctx.Tr("moderation.reported_already"))
+		ctx.Redirect(ctx.Doer.DashboardLink())
 		return
 	}
 
