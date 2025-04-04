@@ -30,7 +30,7 @@
 				<input required placeholder="{{ctx.Locale.Tr "repo.issues.due_date_form"}}" {{if gt .Issue.DeadlineUnix 0}}value="{{.Issue.DeadlineUnix.FormatDate}}"{{end}} type="date" name="deadlineDate" id="deadlineDate">
 				<button class="ui icon button">
 					{{if ne .Issue.DeadlineUnix 0}}
-						{{svg "octicon-pencil"}}
+						{{svg "octicon-check"}}
 					{{else}}
 						{{svg "octicon-plus"}}
 					{{end}}
