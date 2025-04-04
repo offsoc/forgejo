@@ -184,7 +184,8 @@ export function initRepoCodeView() {
           $('html, body').scrollTop($first.offset().top - 200);
         }
       }
-    }).trigger('hashchange');
+    });
+    window.dispatchEvent(new Event('hashchange'));
   }
   $(document).on('click', '.fold-file', ({currentTarget}) => {
     invertFileFolding(currentTarget.closest('.file-content'), currentTarget);

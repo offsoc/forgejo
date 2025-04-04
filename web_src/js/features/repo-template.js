@@ -32,12 +32,12 @@ export function initRepoTemplateSearch() {
               value: '',
             });
             // Parse the response from the api to work with our dropdown
-            $.each(response.data, (_r, repo) => {
+            for (const repo of response.data) {
               filteredResponse.results.push({
                 name: htmlEscape(repo.repository.full_name),
                 value: repo.repository.id,
               });
-            });
+            }
             return filteredResponse;
           },
           cache: false,

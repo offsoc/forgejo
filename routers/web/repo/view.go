@@ -1044,7 +1044,15 @@ func renderHomeCode(ctx *context.Context) {
 		return
 	}
 
-	if entry.IsDir() {
+	if entry.IsSubModule() {
+		subModuleURL, err := ctx.Repo.Commit.GetSubModule(entry.Name())
+		if err != nil {
+			HandleGitError(ctx, "Repo.Commit.GetSubModule", err)
+			return
+		}
+		subModuleFile := git.NewSubModuleFile(ctx.Repo.Commit, subModuleURL, entry.ID.String())
+		ctx.Redirect(subModuleFile.RefURL(setting.AppURL, ctx.Repo.Repository.FullName(), setting.SSH.Domain))
+	} else if entry.IsDir() {
 		renderDirectory(ctx)
 	} else {
 		renderFile(ctx, entry)

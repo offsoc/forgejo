@@ -110,6 +110,6 @@ func TestWikiTOC(t *testing.T) {
 		resp := MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
-		assert.EqualValues(t, "Helpdesk", htmlDoc.Find(".wiki-content-toc a").Text())
+		assert.Equal(t, "Helpdesk", htmlDoc.Find(".wiki-content-toc a").Text())
 	})
 }

@@ -122,23 +122,24 @@ func ExecuteCleanupRules(outerCtx context.Context) error {
 		}
 
 		if anyVersionDeleted {
-			if pcr.Type == packages_model.TypeDebian {
+			switch pcr.Type {
+			case packages_model.TypeDebian:
 				if err := debian_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: debian.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
-			} else if pcr.Type == packages_model.TypeAlpine {
+			case packages_model.TypeAlpine:
 				if err := alpine_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: alpine.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
-			} else if pcr.Type == packages_model.TypeRpm {
+			case packages_model.TypeRpm:
 				if err := rpm_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: rpm.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
-			} else if pcr.Type == packages_model.TypeArch {
+			case packages_model.TypeArch:
 				if err := arch_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: arch.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
-			} else if pcr.Type == packages_model.TypeAlt {
+			case packages_model.TypeAlt:
 				if err := alt_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: alt.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}

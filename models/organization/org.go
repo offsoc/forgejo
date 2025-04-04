@@ -195,7 +195,7 @@ type FindOrgMembersOpts struct {
 }
 
 func (opts FindOrgMembersOpts) PublicOnly() bool {
-	return opts.Doer == nil || !(opts.IsDoerMember || opts.Doer.IsAdmin)
+	return opts.Doer == nil || (!opts.IsDoerMember && !opts.Doer.IsAdmin)
 }
 
 // CountOrgMembers counts the organization's members
@@ -289,12 +289,8 @@ func CreateOrganization(ctx context.Context, org *Organization, owner *user_mode
 	}
 
 	org.LowerName = strings.ToLower(org.Name)
-	if org.Rands, err = user_model.GetUserSalt(); err != nil {
-		return err
-	}
-	if org.Salt, err = user_model.GetUserSalt(); err != nil {
-		return err
-	}
+	org.Rands = user_model.GetUserSalt()
+	org.Salt = user_model.GetUserSalt()
 	org.UseCustomAvatar = true
 	org.MaxRepoCreation = -1
 	org.NumTeams = 1
@@ -478,7 +474,7 @@ func GetOrgUsersByOrgID(ctx context.Context, opts *FindOrgMembersOpts) ([]*OrgUs
 		sess.And("is_public = ?", true)
 	}
 
-	if opts.ListOptions.PageSize > 0 {
+	if opts.PageSize > 0 {
 		sess = db.SetSessionPagination(sess, opts)
 
 		ous := make([]*OrgUser, 0, opts.PageSize)

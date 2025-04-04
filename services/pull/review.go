@@ -232,7 +232,7 @@ func CreateCodeCommentKnownReviewID(ctx context.Context, doer *user_model.User, 
 			commit, err := gitRepo.LineBlame(head, gitRepo.Path, treePath, uint(line))
 			if err == nil {
 				commitID = commit.ID.String()
-			} else if !(strings.Contains(err.Error(), "exit status 128 - fatal: no such path") || notEnoughLines.MatchString(err.Error())) {
+			} else if !strings.Contains(err.Error(), "exit status 128 - fatal: no such path") && !notEnoughLines.MatchString(err.Error()) {
 				return nil, fmt.Errorf("LineBlame[%s, %s, %s, %d]: %w", pr.GetGitRefName(), gitRepo.Path, treePath, line, err)
 			}
 		}

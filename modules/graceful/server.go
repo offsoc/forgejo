@@ -260,7 +260,7 @@ func (w *wrappedConn) Write(p []byte) (n int, err error) {
 		if minDeadline.After(w.deadline) {
 			w.deadline = minDeadline
 		}
-		_ = w.Conn.SetWriteDeadline(w.deadline)
+		_ = w.SetWriteDeadline(w.deadline)
 	}
 	return w.Conn.Write(p)
 }

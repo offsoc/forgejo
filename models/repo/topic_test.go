@@ -53,7 +53,7 @@ func TestAddTopic(t *testing.T) {
 	repo2NrOfTopics = 2
 	totalNrOfTopics++
 	topic := unittest.AssertExistsAndLoadBean(t, &repo_model.Topic{Name: "gitea"})
-	assert.EqualValues(t, 1, topic.RepoCount)
+	assert.Equal(t, 1, topic.RepoCount)
 
 	topics, _, err = repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{})
 	require.NoError(t, err)

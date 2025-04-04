@@ -115,7 +115,7 @@ func TestAPICreateComment(t *testing.T) {
 
 	var updatedComment api.Comment
 	DecodeJSON(t, resp, &updatedComment)
-	assert.EqualValues(t, commentBody, updatedComment.Body)
+	assert.Equal(t, commentBody, updatedComment.Body)
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: updatedComment.ID, IssueID: issue.ID, Content: commentBody})
 
 	urlStr = fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/comments",
@@ -373,8 +373,8 @@ func TestAPIEditComment(t *testing.T) {
 
 	var updatedComment api.Comment
 	DecodeJSON(t, resp, &updatedComment)
-	assert.EqualValues(t, comment.ID, updatedComment.ID)
-	assert.EqualValues(t, newCommentBody, updatedComment.Body)
+	assert.Equal(t, comment.ID, updatedComment.ID)
+	assert.Equal(t, newCommentBody, updatedComment.Body)
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: comment.ID, IssueID: issue.ID, Content: newCommentBody})
 }
 

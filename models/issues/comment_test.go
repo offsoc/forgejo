@@ -36,10 +36,10 @@ func TestCreateComment(t *testing.T) {
 	require.NoError(t, err)
 	then := time.Now().Unix()
 
-	assert.EqualValues(t, issues_model.CommentTypeComment, comment.Type)
-	assert.EqualValues(t, "Hello", comment.Content)
-	assert.EqualValues(t, issue.ID, comment.IssueID)
-	assert.EqualValues(t, doer.ID, comment.PosterID)
+	assert.Equal(t, issues_model.CommentTypeComment, comment.Type)
+	assert.Equal(t, "Hello", comment.Content)
+	assert.Equal(t, issue.ID, comment.IssueID)
+	assert.Equal(t, doer.ID, comment.PosterID)
 	unittest.AssertInt64InRange(t, now, then, int64(comment.CreatedUnix))
 	unittest.AssertExistsAndLoadBean(t, comment) // assert actually added to DB
 
@@ -95,7 +95,7 @@ func TestMigrate_InsertIssueComments(t *testing.T) {
 	require.NoError(t, err)
 
 	issueModified := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1})
-	assert.EqualValues(t, issue.NumComments+1, issueModified.NumComments)
+	assert.Equal(t, issue.NumComments+1, issueModified.NumComments)
 
 	unittest.CheckConsistencyFor(t, &issues_model.Issue{})
 }
@@ -132,5 +132,5 @@ func Test_UpdateIssueNumComments(t *testing.T) {
 
 	require.NoError(t, issues_model.UpdateIssueNumComments(db.DefaultContext, issue2.ID))
 	issue2 = unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 2})
-	assert.EqualValues(t, 1, issue2.NumComments)
+	assert.Equal(t, 1, issue2.NumComments)
 }

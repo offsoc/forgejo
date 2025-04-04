@@ -68,7 +68,7 @@ func MockContext(t *testing.T, reqPath string, opts ...MockContextOption) (*cont
 	ctx.PageData = map[string]any{}
 	ctx.Data["PageStartTime"] = time.Now()
 	chiCtx := chi.NewRouteContext()
-	ctx.Base.AppendContextValue(chi.RouteCtxKey, chiCtx)
+	ctx.AppendContextValue(chi.RouteCtxKey, chiCtx)
 	return ctx, resp
 }
 
@@ -83,7 +83,7 @@ func MockAPIContext(t *testing.T, reqPath string) (*context.APIContext, *httptes
 	_ = baseCleanUp // during test, it doesn't need to do clean up. TODO: this can be improved later
 
 	chiCtx := chi.NewRouteContext()
-	ctx.Base.AppendContextValue(chi.RouteCtxKey, chiCtx)
+	ctx.AppendContextValue(chi.RouteCtxKey, chiCtx)
 	return ctx, resp
 }
 
@@ -96,7 +96,7 @@ func MockPrivateContext(t *testing.T, reqPath string) (*context.PrivateContext, 
 	ctx := &context.PrivateContext{Base: base}
 	_ = baseCleanUp // during test, it doesn't need to do clean up. TODO: this can be improved later
 	chiCtx := chi.NewRouteContext()
-	ctx.Base.AppendContextValue(chi.RouteCtxKey, chiCtx)
+	ctx.AppendContextValue(chi.RouteCtxKey, chiCtx)
 	return ctx, resp
 }
 

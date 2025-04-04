@@ -403,7 +403,7 @@ func TestRebuildCargo(t *testing.T) {
 
 			flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "error%3DCannot%2Brebuild%252C%2Bno%2Bindex%2Bis%2Binitialized.", flashCookie.Value)
+			assert.Equal(t, "error%3DCannot%2Brebuild%252C%2Bno%2Bindex%2Bis%2Binitialized.", flashCookie.Value)
 			unittest.AssertExistsIf(t, false, &repo_model.Repository{OwnerID: user.ID, Name: cargo_service.IndexRepositoryName})
 		})
 
@@ -441,7 +441,7 @@ func TestRebuildCargo(t *testing.T) {
 
 			flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2BCargo%2Bindex%2Bwas%2Bsuccessfully%2Brebuild.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2BCargo%2Bindex%2Bwas%2Bsuccessfully%2Brebuild.", flashCookie.Value)
 		})
 	})
 }

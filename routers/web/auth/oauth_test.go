@@ -71,7 +71,7 @@ func TestNewAccessTokenResponse_OIDCToken(t *testing.T) {
 	assert.Equal(t, "user5", oidcToken.PreferredUsername)
 	assert.Equal(t, "https://try.gitea.io/user5", oidcToken.Profile)
 	assert.Equal(t, "https://try.gitea.io/assets/img/avatar_default.png", oidcToken.Picture)
-	assert.Equal(t, "", oidcToken.Website)
+	assert.Empty(t, oidcToken.Website)
 	assert.Equal(t, timeutil.TimeStamp(0), oidcToken.UpdatedAt)
 	assert.Equal(t, "user5@example.com", oidcToken.Email)
 	assert.True(t, oidcToken.EmailVerified)

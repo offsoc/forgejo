@@ -28,5 +28,5 @@ func TestSyncRepoBranches(t *testing.T) {
 	assert.Equal(t, "sha1", repo.ObjectFormatName)
 	branch, err := git_model.GetBranch(db.DefaultContext, 1, "master")
 	require.NoError(t, err)
-	assert.EqualValues(t, "master", branch.Name)
+	assert.Equal(t, "master", branch.Name)
 }

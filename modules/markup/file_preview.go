@@ -341,7 +341,7 @@ func (p *FilePreview) CreateHTML(locale translation.Locale) *html.Node {
 	psubtitle := &html.Node{
 		Type: html.ElementNode,
 		Data: atom.Span.String(),
-		Attr: []html.Attribute{{Key: "class", Val: "text small grey"}},
+		Attr: []html.Attribute{{Key: "class", Val: "text grey"}},
 	}
 	psubtitle.AppendChild(&html.Node{
 		Type: html.RawNode,

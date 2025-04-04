@@ -17,7 +17,7 @@ import (
 )
 
 // ReportStatusType defines the statuses a report (of abusive content) can have.
-type ReportStatusType int //revive:disable-line:exported
+type ReportStatusType int
 
 const (
 	// ReportStatusTypeOpen represents the status of open reports that were not yet handled in any way.
@@ -30,7 +30,7 @@ const (
 
 type (
 	// AbuseCategoryType defines the categories in which a user can include the reported content.
-	AbuseCategoryType int //revive:disable-line:exported
+	AbuseCategoryType int
 
 	// AbuseCategoryItem defines a pair of value and it's corresponding translation key
 	// (used to add options within the dropdown shown when new reports are submitted).
@@ -60,7 +60,7 @@ func GetAbuseCategoriesList() []AbuseCategoryItem {
 
 // ReportedContentType defines the types of content that can be reported
 // (i.e. user/organization profile, repository, issue/pull, comment).
-type ReportedContentType int //revive:disable-line:exported
+type ReportedContentType int
 
 const (
 	// ReportedContentTypeUser should be used when reporting abusive users or organizations.
@@ -90,7 +90,7 @@ func (t ReportedContentType) IsValid() bool {
 // AbuseReport represents a report of abusive content.
 type AbuseReport struct {
 	ID     int64            `xorm:"pk autoincr"`
-	Status ReportStatusType `xorm:"NOT NULL DEFAULT 1"`
+	Status ReportStatusType `xorm:"INDEX NOT NULL DEFAULT 1"`
 	// The ID of the user who submitted the report.
 	ReporterID int64 `xorm:"NOT NULL"`
 	// Reported content type: user/organization profile, repository, issue/pull or comment.
@@ -115,12 +115,12 @@ func init() {
 	db.RegisterModel(new(AbuseReport))
 }
 
-// IsReported reports whether one or more reports were already submitted for contentType and contentID
-// (regardless the status of the reports).
-func IsReported(ctx context.Context, contentType ReportedContentType, contentID int64) bool {
-	// TODO: only consider the reports with 'New' status (and adjust the function name)?!
-	reported, _ := db.GetEngine(ctx).Exist(&AbuseReport{ContentType: contentType, ContentID: contentID})
-	return reported
+// IsShadowCopyNeeded reports whether one or more reports were already submitted
+// for contentType and contentID and not yet linked to a shadow copy (regardless their status).
+func IsShadowCopyNeeded(ctx context.Context, contentType ReportedContentType, contentID int64) (bool, error) {
+	return db.GetEngine(ctx).Cols("id").Where(builder.IsNull{"shadow_copy_id"}).Exist(
+		&AbuseReport{ContentType: contentType, ContentID: contentID},
+	)
 }
 
 // AlreadyReportedByAndOpen returns if doerID has already submitted a report for contentType and contentID that is still Open.

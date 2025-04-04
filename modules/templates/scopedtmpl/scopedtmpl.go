@@ -192,21 +192,21 @@ func newScopedTemplateSet(all *template.Template, name string) (*scopedTemplateS
 				collectTemplates(nodeList.Nodes)
 			} else if node.Type() == parse.NodeIf {
 				nodeIf := node.(*parse.IfNode)
-				collectTemplates(nodeIf.BranchNode.List.Nodes)
-				if nodeIf.BranchNode.ElseList != nil {
-					collectTemplates(nodeIf.BranchNode.ElseList.Nodes)
+				collectTemplates(nodeIf.List.Nodes)
+				if nodeIf.ElseList != nil {
+					collectTemplates(nodeIf.ElseList.Nodes)
 				}
 			} else if node.Type() == parse.NodeRange {
 				nodeRange := node.(*parse.RangeNode)
-				collectTemplates(nodeRange.BranchNode.List.Nodes)
-				if nodeRange.BranchNode.ElseList != nil {
-					collectTemplates(nodeRange.BranchNode.ElseList.Nodes)
+				collectTemplates(nodeRange.List.Nodes)
+				if nodeRange.ElseList != nil {
+					collectTemplates(nodeRange.ElseList.Nodes)
 				}
 			} else if node.Type() == parse.NodeWith {
 				nodeWith := node.(*parse.WithNode)
-				collectTemplates(nodeWith.BranchNode.List.Nodes)
-				if nodeWith.BranchNode.ElseList != nil {
-					collectTemplates(nodeWith.BranchNode.ElseList.Nodes)
+				collectTemplates(nodeWith.List.Nodes)
+				if nodeWith.ElseList != nil {
+					collectTemplates(nodeWith.ElseList.Nodes)
 				}
 			}
 		}

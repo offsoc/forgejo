@@ -28,7 +28,7 @@ func TestReleaseFeed(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		resp := MakeRequest(t, NewRequest(t, "GET", "/user2/repo1/releases.rss"), http.StatusOK)
-		assert.EqualValues(t, `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+		assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Releases for user2/repo1</title>
     <link>http://localhost/user2/repo1/release</link>
@@ -60,7 +60,7 @@ func TestReleaseFeed(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		resp := MakeRequest(t, NewRequest(t, "GET", "/user2/repo1/releases.atom"), http.StatusOK)
-		assert.EqualValues(t, `<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">
+		assert.Equal(t, `<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">
   <title>Releases for user2/repo1</title>
   <id>http://localhost/user2/repo1/release</id>
   <updated></updated>

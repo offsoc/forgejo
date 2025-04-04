@@ -231,9 +231,9 @@ func CreateBranch(ctx *context.APIContext) {
 			ctx.Error(http.StatusInternalServerError, "GetCommit", err)
 			return
 		}
-	} else if len(opt.OldBranchName) > 0 { //nolint
-		if ctx.Repo.GitRepo.IsBranchExist(opt.OldBranchName) { //nolint
-			oldCommit, err = ctx.Repo.GitRepo.GetBranchCommit(opt.OldBranchName) //nolint
+	} else if len(opt.OldBranchName) > 0 { //nolint:staticcheck
+		if ctx.Repo.GitRepo.IsBranchExist(opt.OldBranchName) { //nolint:staticcheck
+			oldCommit, err = ctx.Repo.GitRepo.GetBranchCommit(opt.OldBranchName) //nolint:staticcheck
 			if err != nil {
 				ctx.Error(http.StatusInternalServerError, "GetBranchCommit", err)
 				return

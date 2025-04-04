@@ -6,12 +6,10 @@ package install
 import (
 	"forgejo.org/models/db"
 	"forgejo.org/modules/setting"
-
-	"xorm.io/xorm"
 )
 
-func getXORMEngine() *xorm.Engine {
-	return db.DefaultContext.(*db.Context).Engine().(*xorm.Engine)
+func getXORMEngine() db.Engine {
+	return db.DefaultContext.(*db.Context).Engine()
 }
 
 // CheckDatabaseConnection checks the database connection

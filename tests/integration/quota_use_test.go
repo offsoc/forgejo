@@ -697,7 +697,7 @@ func (ctx *quotaWebEnvAsContext) ExpectFlashMessage(value string) {
 	htmlDoc := NewHTMLParser(ctx.t, ctx.response.Body)
 	flashMessage := strings.TrimSpace(htmlDoc.Find(`.flash-message`).Text())
 
-	assert.EqualValues(ctx.t, value, flashMessage)
+	assert.Equal(ctx.t, value, flashMessage)
 }
 
 func (ctx *quotaWebEnvAsContext) ExpectFlashMessageContains(parts ...string) {

@@ -89,6 +89,11 @@ func DeleteRepositoryDirectly(ctx context.Context, doer *user_model.User, repoID
 		}
 	}
 
+	// If the repository was reported as abusive, a shadow copy should be created before deletion.
+	if err := repo_model.IfNeededCreateShadowCopyForRepository(ctx, repo, false); err != nil {
+		return err
+	}
+
 	if cnt, err := sess.ID(repoID).Delete(&repo_model.Repository{}); err != nil {
 		return err
 	} else if cnt != 1 {

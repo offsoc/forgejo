@@ -377,7 +377,7 @@ func TestAPIQuotaError(t *testing.T) {
 		var msg context.APIQuotaExceeded
 		DecodeJSON(t, resp, &msg)
 
-		assert.EqualValues(t, env.Orgs.Limited.ID, msg.UserID)
+		assert.Equal(t, env.Orgs.Limited.ID, msg.UserID)
 		assert.Equal(t, env.Orgs.Limited.UserName, msg.UserName)
 	})
 }

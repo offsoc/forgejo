@@ -87,9 +87,10 @@ func (r *ActionRunner) BelongsToOwnerType() types.OwnerType {
 		return types.OwnerTypeRepository
 	}
 	if r.OwnerID != 0 {
-		if r.Owner.Type == user_model.UserTypeOrganization {
+		switch r.Owner.Type {
+		case user_model.UserTypeOrganization:
 			return types.OwnerTypeOrganization
-		} else if r.Owner.Type == user_model.UserTypeIndividual {
+		case user_model.UserTypeIndividual:
 			return types.OwnerTypeIndividual
 		}
 	}
@@ -167,12 +168,7 @@ func (r *ActionRunner) GenerateToken() (err error) {
 // UpdateSecret updates the hash based on the specified token. It does not
 // ensure that the runner's UUID matches the first 16 bytes of the token.
 func (r *ActionRunner) UpdateSecret(token string) error {
-	saltBytes, err := util.CryptoRandomBytes(16)
-	if err != nil {
-		return fmt.Errorf("CryptoRandomBytes %v", err)
-	}
-
-	salt := hex.EncodeToString(saltBytes)
+	salt := hex.EncodeToString(util.CryptoRandomBytes(16))
 
 	r.Token = token
 	r.TokenSalt = salt

@@ -81,7 +81,7 @@ func TestUserAvatar(t *testing.T) {
 
 	req = NewRequestf(t, "GET", "/%s.png", user2.Name)
 	resp := MakeRequest(t, req, http.StatusSeeOther)
-	assert.EqualValues(t, fmt.Sprintf("/avatars/%s", user2.Avatar), resp.Header().Get("location"))
+	assert.Equal(t, fmt.Sprintf("/avatars/%s", user2.Avatar), resp.Header().Get("location"))
 
 	// Can't test if the response matches because the image is re-generated on upload but checking that this at least doesn't give a 404 should be enough.
 }

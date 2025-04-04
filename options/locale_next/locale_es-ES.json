@@ -9,5 +9,10 @@
         "many": "quiere fusionar %[1]d commits de <code>%[2]s</code> en <code id=\"%[4]s\">%[3]s</code>",
         "other": ""
     },
-    "search.milestone_kind": "Buscar hitos…"
+    "search.milestone_kind": "Buscar hitos…",
+    "error.not_found.title": "Página no encontrada",
+    "themes.names.forgejo-auto": "Forgejo (seguir el tema del sistema)",
+    "themes.names.forgejo-dark": "Forgejo oscuro",
+    "themes.names.forgejo-light": "Forgejo claro",
+    "home.welcome.no_activity": "Sin actividad"
 }

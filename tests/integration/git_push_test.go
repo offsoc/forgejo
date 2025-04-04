@@ -176,7 +176,7 @@ func runTestGitPush(t *testing.T, u *url.URL, objectFormat git.ObjectFormat, git
 
 	dbBranches := make([]*git_model.Branch, 0)
 	require.NoError(t, db.GetEngine(db.DefaultContext).Where("repo_id=?", repo.ID).Find(&dbBranches))
-	assert.Equalf(t, len(pushedBranches), len(dbBranches), "mismatched number of branches in db")
+	assert.Lenf(t, dbBranches, len(pushedBranches), "mismatched number of branches in db")
 	dbBranchesMap := make(map[string]*git_model.Branch, len(dbBranches))
 	for _, branch := range dbBranches {
 		dbBranchesMap[branch.Name] = branch

@@ -175,7 +175,10 @@ func newXORMEngine() (*xorm.Engine, error) {
 	if err := db.InitEngine(context.Background()); err != nil {
 		return nil, err
 	}
-	x := unittest.GetXORMEngine()
+	x, err := unittest.GetXORMEngine()
+	if err != nil {
+		return nil, err
+	}
 	return x, nil
 }
 

@@ -115,7 +115,7 @@ func TestPackageAPI(t *testing.T) {
 			var ap2 *api.Package
 			DecodeJSON(t, resp, &ap2)
 			assert.NotNil(t, ap2.Repository)
-			assert.EqualValues(t, repo.ID, ap2.Repository.ID)
+			assert.Equal(t, repo.ID, ap2.Repository.ID)
 
 			// link to repository without write access, should fail
 			req = NewRequest(t, "POST", fmt.Sprintf("/api/v1/packages/%s/generic/%s/-/link/%s", user.Name, packageName, "repo3")).AddTokenAuth(tokenWritePackage)
@@ -486,7 +486,7 @@ func TestPackageCleanup(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		// Upload and delete a generic package and upload a container blob
-		data, _ := util.CryptoRandomBytes(5)
+		data := util.CryptoRandomBytes(5)
 		url := fmt.Sprintf("/api/packages/%s/generic/cleanup-test/1.1.1/file.bin", user.Name)
 		req := NewRequestWithBody(t, "PUT", url, bytes.NewReader(data)).
 			AddBasicAuth(user.Name)
@@ -496,7 +496,7 @@ func TestPackageCleanup(t *testing.T) {
 			AddBasicAuth(user.Name)
 		MakeRequest(t, req, http.StatusNoContent)
 
-		data, _ = util.CryptoRandomBytes(5)
+		data = util.CryptoRandomBytes(5)
 		url = fmt.Sprintf("/v2/%s/cleanup-test/blobs/uploads?digest=sha256:%x", user.Name, sha256.Sum256(data))
 		req = NewRequestWithBody(t, "POST", url, bytes.NewReader(data)).
 			AddBasicAuth(user.Name)

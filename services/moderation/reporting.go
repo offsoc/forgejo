@@ -30,12 +30,12 @@ var (
 // When reporting users or organizations doer should be able to view the reported entity.
 func CanReport(ctx context.Context, doer *user.User, contentType moderation.ReportedContentType, contentID int64) (bool, error) {
 	hasAccess := false
-	var issueID int64 = 0
-	var repoID int64 = 0
+	var issueID int64
+	var repoID int64
 	unitType := unit.TypeInvalid // used when checking access for issues, pull requests or comments
 
 	if contentType == moderation.ReportedContentTypeUser {
-		reported_user, err := user.GetUserByID(ctx, contentID)
+		reportedUser, err := user.GetUserByID(ctx, contentID)
 		if err != nil {
 			if user.IsErrUserNotExist(err) {
 				log.Warn("User #%d wanted to report user #%d but it does not exist.", doer.ID, contentID)
@@ -44,10 +44,15 @@ func CanReport(ctx context.Context, doer *user.User, contentType moderation.Repo
 			return false, err
 		}
 
-		hasAccess = user.IsUserVisibleToViewer(ctx, reported_user, ctx.Doer)
+		hasAccess = user.IsUserVisibleToViewer(ctx, reportedUser, ctx.Doer)
+		if !hasAccess {
+			log.Warn("User #%d wanted to report user/org #%d but they are not able to see that profile.", doer.ID, contentID)
+			return false, ErrDoerNotAllowed
+		}
 	} else {
 		// for comments and issues/pulls we need to get the parent repository
-		if contentType == moderation.ReportedContentTypeComment {
+		switch contentType {
+		case moderation.ReportedContentTypeComment:
 			comment, err := issues.GetCommentByID(ctx, contentID)
 			if err != nil {
 				if issues.IsErrCommentNotExist(err) {
@@ -62,9 +67,9 @@ func CanReport(ctx context.Context, doer *user.User, contentType moderation.Repo
 				return false, nil
 			}
 			issueID = comment.IssueID
-		} else if contentType == moderation.ReportedContentTypeIssue {
+		case moderation.ReportedContentTypeIssue:
 			issueID = contentID
-		} else if contentType == moderation.ReportedContentTypeRepository {
+		case moderation.ReportedContentTypeRepository:
 			repoID = contentID
 		}
 

@@ -234,7 +234,7 @@ func (repo *Repository) GetLanguageStats(commitID string) (map[string]int64, err
 			sizes[language] += f.Size()
 		} else if len(sizes) == 0 && (firstExcludedLanguage == "" || firstExcludedLanguage == language) {
 			// Only consider Programming or Markup languages as fallback
-			if !(langType == enry.Programming || langType == enry.Markup) {
+			if langType != enry.Programming && langType != enry.Markup {
 				continue
 			}
 			firstExcludedLanguage = language

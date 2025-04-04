@@ -53,16 +53,6 @@ func createShadowCopy(ctx context.Context, contentType ReportedContentType, cont
 	err := db.WithTx(ctx, func(ctx context.Context) error {
 		sess := db.GetEngine(ctx)
 
-		notLinkedFound, err := sess.Cols("id").Where(builder.IsNull{"shadow_copy_id"}).Exist(
-			&AbuseReport{ContentType: contentType, ContentID: contentID},
-		)
-		if err != nil {
-			return err
-		} else if !notLinkedFound {
-			log.Warn("Requested to create a shadow copy for reported content with type %d and ID %d but there is no such report without a shadow copy ID.", contentType, contentID)
-			return nil
-		}
-
 		shadowCopy := &AbuseReportShadowCopy{RawValue: content}
 		affected, err := sess.Insert(shadowCopy)
 		if err != nil {

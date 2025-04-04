@@ -721,7 +721,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -755,7 +755,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<a href="http://localhost:3000/gogits/gogs/" rel="nofollow">gogits/gogs</a> – `+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">gogits/gogs@190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -791,7 +791,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<a href="http://localhost:3000/gogits/gogs/" rel="nofollow">gogits/gogs</a> – `+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/4c1aaf56bcb9f39dcf65f3f250726850aed13cd6/single-line.txt#L1" class="muted" rel="nofollow">single-line.txt</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Line 1 in <a href="http://localhost:3000/gogits/gogs/src/commit/4c1aaf56bcb9f39dcf65f3f250726850aed13cd6" class="text black" rel="nofollow">gogits/gogs@4c1aaf5</a>`+
 				`</span>`+
 				`</div>`+
@@ -834,7 +834,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/sub/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/sub/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -865,7 +865,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/sub/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/sub/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -898,7 +898,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -923,7 +923,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -954,7 +954,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -979,7 +979,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -1004,7 +1004,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -1039,7 +1039,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/c9913120ed2c1e27c1d7752ecdb7a504dc7cf6be/path/to/file.md?display=source#L1-L2" class="muted" rel="nofollow">path/to/file.md</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 1 to 2 in <a href="http://localhost:3000/gogits/gogs/src/commit/c9913120ed2c1e27c1d7752ecdb7a504dc7cf6be" class="text black" rel="nofollow">c991312</a>`+
 				`</span>`+
 				`</div>`+
@@ -1072,7 +1072,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/c9913120ed2c1e27c1d7752ecdb7a504dc7cf6be/path/to/file.md?display=source#L1-L2" class="muted" rel="nofollow">path/to/file.md</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 1 to 2 in <a href="http://localhost:3000/gogits/gogs/src/commit/c9913120ed2c1e27c1d7752ecdb7a504dc7cf6be" class="text black" rel="nofollow">c991312</a>`+
 				`</span>`+
 				`</div>`+
@@ -1107,7 +1107,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20/path/to/file.go?display=source#L2-L3" class="muted" rel="nofollow">path/to/file.go</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Lines 2 to 3 in <a href="http://localhost:3000/gogits/gogs/src/commit/190d9492934af498c3f669d6a2431dc5459e5b20" class="text black" rel="nofollow">190d949</a>`+
 				`</span>`+
 				`</div>`+
@@ -1142,7 +1142,7 @@ func TestRender_FilePreview(t *testing.T) {
 				`<div>`+
 				`<a href="http://localhost:3000/gogits/gogs/src/commit/eeb243c3395e1921c5d90e73bd739827251fc99d/path/to/file%20%23.txt#L1" class="muted" rel="nofollow">path/to/file #.txt</a>`+
 				`</div>`+
-				`<span class="text small grey">`+
+				`<span class="text grey">`+
 				`Line 1 in <a href="http://localhost:3000/gogits/gogs/src/commit/eeb243c3395e1921c5d90e73bd739827251fc99d" class="text black" rel="nofollow">eeb243c</a>`+
 				`</span>`+
 				`</div>`+

@@ -192,6 +192,9 @@ forgejo.org/modules/translation
 	MockLocale.HasKey
 	MockLocale.PrettyNumber
 
+forgejo.org/modules/translation/localeiter
+	IterateMessagesContent
+
 forgejo.org/modules/util
 	OptionalArg
 
@@ -209,9 +212,6 @@ forgejo.org/modules/zstd
 	NewWriter
 	Writer.Write
 	Writer.Close
-
-forgejo.org/routers/web
-	NotFound
 
 forgejo.org/routers/web/org
 	MustEnableProjects

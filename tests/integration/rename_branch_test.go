@@ -165,7 +165,7 @@ func testRenameBranch(t *testing.T, u *url.URL) {
 
 		flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "error%3DCannot%2Brename%2Bbranch%2Bmain2%2Bbecause%2Bit%2Bis%2Ba%2Bprotected%2Bbranch.", flashCookie.Value)
+		assert.Equal(t, "error%3DCannot%2Brename%2Bbranch%2Bmain2%2Bbecause%2Bit%2Bis%2Ba%2Bprotected%2Bbranch.", flashCookie.Value)
 
 		// Verify it didn't change.
 		repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})

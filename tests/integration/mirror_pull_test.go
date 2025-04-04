@@ -88,7 +88,7 @@ func TestMirrorPull(t *testing.T) {
 
 	count, err := db.Count[repo_model.Release](db.DefaultContext, findOptions)
 	require.NoError(t, err)
-	assert.EqualValues(t, initCount+1, count)
+	assert.Equal(t, initCount+1, count)
 
 	release, err := repo_model.GetRelease(db.DefaultContext, repo.ID, "v0.2")
 	require.NoError(t, err)
@@ -99,5 +99,5 @@ func TestMirrorPull(t *testing.T) {
 
 	count, err = db.Count[repo_model.Release](db.DefaultContext, findOptions)
 	require.NoError(t, err)
-	assert.EqualValues(t, initCount, count)
+	assert.Equal(t, initCount, count)
 }

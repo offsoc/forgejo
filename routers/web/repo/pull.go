@@ -892,7 +892,7 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 		foundStartCommit := len(specifiedStartCommit) == 0
 		foundEndCommit := len(specifiedEndCommit) == 0
 
-		if !(foundStartCommit && foundEndCommit) {
+		if !foundStartCommit || !foundEndCommit {
 			for _, commit := range prInfo.Commits {
 				if commit.ID.String() == specifiedStartCommit {
 					foundStartCommit = true
@@ -907,7 +907,7 @@ func viewPullFiles(ctx *context.Context, specifiedStartCommit, specifiedEndCommi
 			}
 		}
 
-		if !(foundStartCommit && foundEndCommit) {
+		if !foundStartCommit || !foundEndCommit {
 			ctx.NotFound("Given SHA1 not found for this PR", nil)
 			return
 		}
@@ -1321,8 +1321,8 @@ func MergePullRequest(ctx *context.Context) {
 		} else if models.IsErrMergeConflicts(err) {
 			conflictError := err.(models.ErrMergeConflicts)
 			flashError, err := ctx.RenderToHTML(tplAlertDetails, map[string]any{
-				"Message": ctx.Tr("repo.editor.merge_conflict"),
-				"Summary": ctx.Tr("repo.editor.merge_conflict_summary"),
+				"Message": ctx.Tr("repo.pulls.merge_conflict"),
+				"Summary": ctx.Tr("repo.pulls.merge_conflict_summary"),
 				"Details": utils.SanitizeFlashErrorString(conflictError.StdErr) + "<br>" + utils.SanitizeFlashErrorString(conflictError.StdOut),
 			})
 			if err != nil {

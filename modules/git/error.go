@@ -120,10 +120,7 @@ func (err *ErrPushRejected) GenerateMessage() {
 		err.Message = ""
 		return
 	}
-	for {
-		if len(err.StdErr) <= i+8 {
-			break
-		}
+	for len(err.StdErr) > i+8 {
 		if err.StdErr[i:i+8] != "remote: " {
 			break
 		}

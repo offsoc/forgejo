@@ -2,7 +2,7 @@ module forgejo.org
 
 go 1.24
 
-toolchain go1.24.1
+toolchain go1.24.2
 
 require (
 	code.forgejo.org/f3/gof3/v3 v3.10.6
@@ -14,7 +14,7 @@ require (
 	code.forgejo.org/go-chi/captcha v1.0.1
 	code.forgejo.org/go-chi/session v1.0.1
 	code.gitea.io/actions-proto-go v0.4.0
-	code.gitea.io/sdk/gitea v0.20.0
+	code.gitea.io/sdk/gitea v0.21.0
 	codeberg.org/gusted/mcaptcha v0.0.0-20220723083913-4f3072e1d570
 	connectrpc.com/connect v1.17.0
 	github.com/42wim/httpsig v1.2.2
@@ -23,7 +23,7 @@ require (
 	github.com/ProtonMail/go-crypto v1.1.6
 	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/SaveTheRbtz/zstd-seekable-format-go/pkg v0.7.2
-	github.com/alecthomas/chroma/v2 v2.15.0
+	github.com/alecthomas/chroma/v2 v2.16.0
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/blevesearch/bleve/v2 v2.4.4
 	github.com/buildkite/terminal-to-html/v3 v3.16.8
@@ -49,14 +49,14 @@ require (
 	github.com/go-openapi/spec v0.20.14
 	github.com/go-sql-driver/mysql v1.9.1
 	github.com/go-testfixtures/testfixtures/v3 v3.14.0
-	github.com/go-webauthn/webauthn v0.12.2
+	github.com/go-webauthn/webauthn v0.12.3
 	github.com/gobwas/glob v0.2.3
 	github.com/gogs/chardet v0.0.0-20211120154057-b7413eaefb8f
 	github.com/gogs/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-github/v64 v64.0.0
-	github.com/google/pprof v0.0.0-20241017200806-017d972448fc
+	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/feeds v1.2.0
 	github.com/gorilla/sessions v1.4.0
@@ -72,7 +72,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/markbates/goth v1.80.0
 	github.com/mattn/go-isatty v0.0.20
-	github.com/mattn/go-sqlite3 v1.14.24
+	github.com/mattn/go-sqlite3 v1.14.27
 	github.com/meilisearch/meilisearch-go v0.31.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/microcosm-cc/bluemonday v1.0.27
@@ -103,7 +103,7 @@ require (
 	go.uber.org/mock v0.5.0
 	golang.org/x/crypto v0.36.0
 	golang.org/x/image v0.25.0
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	golang.org/x/oauth2 v0.28.0
 	golang.org/x/sync v0.12.0
 	golang.org/x/sys v0.31.0
@@ -170,14 +170,14 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/dlclark/regexp2 v1.11.4 // indirect
+	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/emersion/go-sasl v0.0.0-20231106173351-e73c9f7bad43 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.32.4 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
+	github.com/fxamacker/cbor/v2 v2.8.0 // indirect
 	github.com/go-ap/errors v0.0.0-20231003111023-183eef4b31b7 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.5 // indirect
 	github.com/go-enry/go-oniguruma v1.2.1 // indirect
@@ -190,7 +190,7 @@ require (
 	github.com/go-openapi/jsonpointer v0.20.2 // indirect
 	github.com/go-openapi/jsonreference v0.20.4 // indirect
 	github.com/go-openapi/swag v0.22.7 // indirect
-	github.com/go-webauthn/x v0.1.19 // indirect
+	github.com/go-webauthn/x v0.1.20 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
 	github.com/golang/geo v0.0.0-20230421003525-6adc56603217 // indirect

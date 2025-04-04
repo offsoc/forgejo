@@ -25,7 +25,7 @@ func (a *Auth) Name() string {
 func (a *Auth) Verify(req *http.Request, w http.ResponseWriter, store auth.DataStore, sess auth.SessionStore) (*user_model.User, error) {
 	token, err := auth_model.GetAccessTokenBySHA(req.Context(), req.Header.Get("X-NuGet-ApiKey"))
 	if err != nil {
-		if !(auth_model.IsErrAccessTokenNotExist(err) || auth_model.IsErrAccessTokenEmpty(err)) {
+		if !auth_model.IsErrAccessTokenNotExist(err) && !auth_model.IsErrAccessTokenEmpty(err) {
 			log.Error("GetAccessTokenBySHA: %v", err)
 			return nil, err
 		}

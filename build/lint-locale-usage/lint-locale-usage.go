@@ -18,8 +18,8 @@ import (
 	tmplParser "text/template/parse"
 
 	"forgejo.org/modules/container"
-	"forgejo.org/modules/locale"
 	fjTemplates "forgejo.org/modules/templates"
+	"forgejo.org/modules/translation/localeiter"
 	"forgejo.org/modules/util"
 )
 
@@ -264,7 +264,7 @@ func (handler Handler) HandleTemplateFile(fname string, src any) error {
 			Err:      err,
 		}
 	}
-	handler.handleTemplateFileNodes(fset, tmplParsed.Tree.Root.Nodes)
+	handler.handleTemplateFileNodes(fset, tmplParsed.Root.Nodes)
 	return nil
 }
 
@@ -300,10 +300,6 @@ func main() {
 	}
 
 	msgids := make(container.Set[string])
-	onMsgid := func(trKey, trValue string) error {
-		msgids[trKey] = struct{}{}
-		return nil
-	}
 
 	localeFile := filepath.Join(filepath.Join("options", "locale"), "locale_en-US.ini")
 	localeContent, err := os.ReadFile(localeFile)
@@ -312,7 +308,10 @@ func main() {
 		os.Exit(2)
 	}
 
-	if err = locale.IterateMessagesContent(localeContent, onMsgid); err != nil {
+	if err = localeiter.IterateMessagesContent(localeContent, func(trKey, trValue string) error {
+		msgids[trKey] = struct{}{}
+		return nil
+	}); err != nil {
 		fmt.Printf("%s:\tERROR: %s\n", localeFile, err.Error())
 		os.Exit(2)
 	}
@@ -324,7 +323,11 @@ func main() {
 		os.Exit(2)
 	}
 
-	if err := locale.IterateMessagesNextContent(localeContent, onMsgid); err != nil {
+	if err := localeiter.IterateMessagesNextContent(localeContent, func(trKey, pluralForm, trValue string) error {
+		// ignore plural form
+		msgids[trKey] = struct{}{}
+		return nil
+	}); err != nil {
 		fmt.Printf("%s:\tERROR: %s\n", localeFile, err.Error())
 		os.Exit(2)
 	}

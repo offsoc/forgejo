@@ -261,7 +261,7 @@ func TestSSHPushMirror(t *testing.T) {
 				htmlDoc := NewHTMLParser(t, resp.Body)
 
 				publickey = htmlDoc.Find(".ui.table td a[data-clipboard-text]").AttrOr("data-clipboard-text", "")
-				assert.EqualValues(t, publickey, pushMirror.GetPublicKey())
+				assert.Equal(t, publickey, pushMirror.GetPublicKey())
 			})
 
 			t.Run("Add deploy key", func(t *testing.T) {

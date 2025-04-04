@@ -100,7 +100,7 @@ func GetValidateContext(req *http.Request) (ctx *ValidateContext) {
 
 func NewTemplateContextForWeb(ctx *Context) TemplateContext {
 	tmplCtx := NewTemplateContext(ctx)
-	tmplCtx["Locale"] = ctx.Base.Locale
+	tmplCtx["Locale"] = ctx.Locale
 	tmplCtx["AvatarUtils"] = templates.NewAvatarUtils(ctx)
 	return tmplCtx
 }
@@ -151,8 +151,8 @@ func Contexter() func(next http.Handler) http.Handler {
 			ctx.PageData = map[string]any{}
 			ctx.Data["PageData"] = ctx.PageData
 
-			ctx.Base.AppendContextValue(WebContextKey, ctx)
-			ctx.Base.AppendContextValueFunc(gitrepo.RepositoryContextKey, func() any { return ctx.Repo.GitRepo })
+			ctx.AppendContextValue(WebContextKey, ctx)
+			ctx.AppendContextValueFunc(gitrepo.RepositoryContextKey, func() any { return ctx.Repo.GitRepo })
 
 			ctx.Csrf = NewCSRFProtector(csrfOpts)
 

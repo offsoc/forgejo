@@ -355,6 +355,7 @@ type DeclarativeRepoOptions struct {
 	WikiBranch    optional.Option[string]
 	AutoInit      optional.Option[bool]
 	IsTemplate    optional.Option[bool]
+	ObjectFormat  optional.Option[string]
 }
 
 func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts DeclarativeRepoOptions) (*repo_model.Repository, string, func()) {
@@ -378,14 +379,15 @@ func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts
 
 	// Create the repository
 	repo, err := repo_service.CreateRepository(db.DefaultContext, owner, owner, repo_service.CreateRepoOptions{
-		Name:          repoName,
-		Description:   "Temporary Repo",
-		AutoInit:      autoInit,
-		Gitignores:    "",
-		License:       "WTFPL",
-		Readme:        "Default",
-		DefaultBranch: "main",
-		IsTemplate:    opts.IsTemplate.Value(),
+		Name:             repoName,
+		Description:      "Temporary Repo",
+		AutoInit:         autoInit,
+		Gitignores:       "",
+		License:          "WTFPL",
+		Readme:           "Default",
+		DefaultBranch:    "main",
+		IsTemplate:       opts.IsTemplate.Value(),
+		ObjectFormatName: opts.ObjectFormat.Value(),
 	})
 	require.NoError(t, err)
 	assert.NotEmpty(t, repo)

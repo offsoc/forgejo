@@ -437,7 +437,7 @@ func canWriteFiles(ctx *context.APIContext, branch string) bool {
 
 // canReadFiles returns true if repository is readable and user has proper access level.
 func canReadFiles(r *context.Repository) bool {
-	return r.Permission.CanRead(unit.TypeCode)
+	return r.CanRead(unit.TypeCode)
 }
 
 func base64Reader(s string) (io.ReadSeeker, error) {
