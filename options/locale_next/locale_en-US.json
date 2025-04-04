@@ -20,5 +20,6 @@
     "error.not_found.title": "Page not found",
     "alert.asset_load_failed": "Failed to load asset files from {path}. Please make sure the asset files can be accessed.",
     "alert.range_error": " must be a number between %[1]s and %[2]s.",
-    "install.invalid_lfs_path": "Unable to create the LFS root at the specified path: %[1]s"
+    "install.invalid_lfs_path": "Unable to create the LFS root at the specified path: %[1]s",
+    "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it."
 }
