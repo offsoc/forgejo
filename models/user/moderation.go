@@ -18,7 +18,7 @@ import (
 
 // UserData represents a trimmed down user that is used for preserving
 // only the fields needed for abusive content reports (mainly string fields).
-type UserData struct {
+type UserData struct { //revive:disable-line:exported
 	Name        string
 	FullName    string
 	Email       string

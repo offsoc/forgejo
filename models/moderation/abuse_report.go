@@ -17,7 +17,7 @@ import (
 )
 
 // ReportStatusType defines the statuses a report (of abusive content) can have.
-type ReportStatusType int //revive:disable-line:exported
+type ReportStatusType int
 
 const (
 	// ReportStatusTypeOpen represents the status of open reports that were not yet handled in any way.
@@ -30,7 +30,7 @@ const (
 
 type (
 	// AbuseCategoryType defines the categories in which a user can include the reported content.
-	AbuseCategoryType int //revive:disable-line:exported
+	AbuseCategoryType int
 
 	// AbuseCategoryItem defines a pair of value and it's corresponding translation key
 	// (used to add options within the dropdown shown when new reports are submitted).
@@ -60,7 +60,7 @@ func GetAbuseCategoriesList() []AbuseCategoryItem {
 
 // ReportedContentType defines the types of content that can be reported
 // (i.e. user/organization profile, repository, issue/pull, comment).
-type ReportedContentType int //revive:disable-line:exported
+type ReportedContentType int
 
 const (
 	// ReportedContentTypeUser should be used when reporting abusive users or organizations.
