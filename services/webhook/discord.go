@@ -151,6 +151,18 @@ var (
 	redColor         = color("ff3232")
 )
 
+// https://discord.com/developers/docs/resources/message#embed-object-embed-limits
+// Discord has some limits in place for the embeds.
+// According to some tests, there is no consistent limit for different character sets.
+// For example: 4096 ASCII letters are allowed, but only 2490 emoji characters are allowed.
+// To keep it simple, we currently truncate at 2000.
+const discordDescriptionCharactersLimit = 2000
+
+type discordConvertor struct {
+	Username  string
+	AvatarURL string
+}
+
 // Create implements PayloadConvertor Create method
 func (d discordConvertor) Create(p *api.CreatePayload) (DiscordPayload, error) {
 	// created tag/branch
@@ -312,11 +324,6 @@ func (d discordConvertor) Package(p *api.PackagePayload) (DiscordPayload, error)
 	return d.createPayload(p.Sender, text, "", p.Package.HTMLURL, color), nil
 }
 
-type discordConvertor struct {
-	Username  string
-	AvatarURL string
-}
-
 var _ shared.PayloadConvertor[DiscordPayload] = discordConvertor{}
 
 func (discordHandler) NewRequest(ctx context.Context, w *webhook_model.Webhook, t *webhook_model.HookTask) (*http.Request, []byte, error) {
@@ -357,7 +364,7 @@ func (d discordConvertor) createPayload(s *api.User, title, text, url string, co
 		Embeds: []DiscordEmbed{
 			{
 				Title:       title,
-				Description: text,
+				Description: util.TruncateRunes(text, discordDescriptionCharactersLimit),
 				URL:         url,
 				Color:       color,
 				Author: DiscordEmbedAuthor{
