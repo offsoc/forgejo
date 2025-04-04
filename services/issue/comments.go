@@ -126,7 +126,7 @@ func DeleteComment(ctx context.Context, doer *user_model.User, comment *issues_m
 			found, err := db.GetEngine(ctx).Table("comment").Where("review_id = ?", reviewID).Exist()
 			if err != nil {
 				return err
-			} else if found {
+			} else if !found {
 				_, err := db.GetEngine(ctx).Table("review").Where("id = ?", reviewID).Delete()
 				if err != nil {
 					return err
