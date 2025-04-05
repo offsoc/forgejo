@@ -68,6 +68,32 @@ func DeclareGitRepos(t *testing.T) func() {
 				NewBranch: "add-license",
 			},
 		}),
+		//[]FileChanges{
+		// {
+		// 	Filename:  "readme.md",
+		// 	Versions:  []string{""},
+		// 	CommitMsg: "Initial commit",
+		// },
+		// {
+		// 	Filename:  "license.md",
+		// 	Versions:  []string{""},
+		// 	CommitMsg: "Add license",
+		// 	NewBranch: "add-license",
+		// },
+
+		func() {
+			_, _, cleanupFunc := tests.CreateDeclarativeRepo(t,
+				unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2}),
+				"pr-def-merge-style-squash",
+				nil, nil, []*files_service.ChangeRepoFile{
+					{
+						Operation: "create",
+						TreePath:  "readme.md",
+					},
+				},
+			)
+			cleanupFunc()
+		},
 		// add your repo declarations here
 	}
 
