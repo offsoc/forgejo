@@ -277,3 +277,43 @@ test('text expander has higher prio then prefix continuation', async ({page}) =>
   await textarea.press('Enter');
   await expect(textarea).toHaveValue(`* first\n* 😸\n* @user2 \n* `);
 });
+
+test('Combo Markdown: preview mode switch', async ({page}) => {
+  // Load page with editor
+  const response = await page.goto('/user2/repo1/issues/new');
+  expect(response?.status()).toBe(200);
+
+  const toolbarItem = page.locator('md-header');
+  const editorPanel = page.locator('[data-tab-panel="markdown-writer"]');
+  const previewPanel = page.locator('[data-tab-panel="markdown-previewer"]');
+
+  // Verify correct visibility of related UI elements
+  await expect(toolbarItem).toBeVisible();
+  await expect(editorPanel).toBeVisible();
+  await expect(previewPanel).toBeHidden();
+
+  // Fill some content
+  const textarea = page.locator('textarea.markdown-text-editor');
+  await textarea.fill('**Content** :100: _100_');
+
+  // Switch to preview mode
+  await page.locator('a[data-tab-for="markdown-previewer"]').click();
+
+  // Verify that the related UI elements were switched correctly
+  await expect(toolbarItem).toBeHidden();
+  await expect(editorPanel).toBeHidden();
+  await expect(previewPanel).toBeVisible();
+  await save_visual(page);
+
+  // Verify that some content rendered
+  await expect(page.locator('[data-tab-panel="markdown-previewer"] .emoji[data-alias="100"]')).toBeVisible();
+
+  // Switch back to edit mode
+  await page.locator('a[data-tab-for="markdown-writer"]').click();
+
+  // Verify that the related UI elements were switched back correctly
+  await expect(toolbarItem).toBeVisible();
+  await expect(editorPanel).toBeVisible();
+  await expect(previewPanel).toBeHidden();
+  await save_visual(page);
+});
