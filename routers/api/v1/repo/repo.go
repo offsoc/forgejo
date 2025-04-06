@@ -34,6 +34,7 @@ import (
 	actions_service "forgejo.org/services/actions"
 	"forgejo.org/services/context"
 	"forgejo.org/services/convert"
+	funding_service "forgejo.org/services/funding"
 	"forgejo.org/services/issue"
 	repo_service "forgejo.org/services/repository"
 	wiki_service "forgejo.org/services/wiki"

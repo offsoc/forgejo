@@ -6,8 +6,8 @@ package setting
 import (
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/log"
+	api "forgejo.org/modules/structs"
 )
 
 var FundingProviders []*api.FundingProvider

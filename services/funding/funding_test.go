@@ -6,7 +6,7 @@ package funding_test
 import (
 	"testing"
 
-	funding_service "code.gitea.io/gitea/services/funding"
+	funding_service "forgejo.org/services/funding"
 
 	"github.com/stretchr/testify/assert"
 )

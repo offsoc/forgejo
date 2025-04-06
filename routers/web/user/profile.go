@@ -22,6 +22,7 @@ import (
 	"forgejo.org/modules/markup/markdown"
 	"forgejo.org/modules/optional"
 	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
 	"forgejo.org/modules/util"
 	"forgejo.org/routers/web/feed"
 	"forgejo.org/routers/web/org"

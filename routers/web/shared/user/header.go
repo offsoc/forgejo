@@ -22,7 +22,9 @@ import (
 	"forgejo.org/modules/markup/markdown"
 	"forgejo.org/modules/optional"
 	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
 	"forgejo.org/services/context"
+	funding_service "forgejo.org/services/funding"
 )
 
 // prepareContextForCommonProfile store some common data into context data for user's profile related pages (including the nav menu)

@@ -51,6 +51,7 @@ import (
 	"forgejo.org/modules/util"
 	"forgejo.org/routers/web/feed"
 	"forgejo.org/services/context"
+	funding_service "forgejo.org/services/funding"
 	issue_service "forgejo.org/services/issue"
 	files_service "forgejo.org/services/repository/files"
 
