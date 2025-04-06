@@ -15,6 +15,10 @@ markdown-toolbar .switch .item {
   padding: 0.25em 1em;
 }
 
+.markdown-toolbar-hidden .markdown-toolbar-button {
+  display: none;
+}
+
 .combo-markdown-editor .markdown-toolbar-group {
   display: flex;
 }
