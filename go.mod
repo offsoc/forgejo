@@ -25,7 +25,7 @@ require (
 	github.com/SaveTheRbtz/zstd-seekable-format-go/pkg v0.7.2
 	github.com/alecthomas/chroma/v2 v2.16.0
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
-	github.com/blevesearch/bleve/v2 v2.4.4
+	github.com/blevesearch/bleve/v2 v2.5.0
 	github.com/buildkite/terminal-to-html/v3 v3.16.8
 	github.com/caddyserver/certmagic v0.22.2
 	github.com/chi-middleware/proxy v1.1.1
@@ -134,30 +134,30 @@ require (
 	github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.5.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.25.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/RoaringBitmap/roaring v1.9.3 // indirect
+	github.com/RoaringBitmap/roaring/v2 v2.4.5 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bits-and-blooms/bitset v1.13.0 // indirect
-	github.com/blevesearch/bleve_index_api v1.1.12 // indirect
+	github.com/bits-and-blooms/bitset v1.22.0 // indirect
+	github.com/blevesearch/bleve_index_api v1.2.7 // indirect
 	github.com/blevesearch/geo v0.1.20 // indirect
-	github.com/blevesearch/go-faiss v1.0.24 // indirect
+	github.com/blevesearch/go-faiss v1.0.25 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
 	github.com/blevesearch/gtreap v0.1.1 // indirect
 	github.com/blevesearch/mmap-go v1.0.4 // indirect
-	github.com/blevesearch/scorch_segment_api/v2 v2.2.16 // indirect
+	github.com/blevesearch/scorch_segment_api/v2 v2.3.9 // indirect
 	github.com/blevesearch/segment v0.9.1 // indirect
 	github.com/blevesearch/snowballstem v0.9.0 // indirect
 	github.com/blevesearch/upsidedown_store_api v1.0.2 // indirect
-	github.com/blevesearch/vellum v1.0.10 // indirect
-	github.com/blevesearch/zapx/v11 v11.3.10 // indirect
-	github.com/blevesearch/zapx/v12 v12.3.10 // indirect
-	github.com/blevesearch/zapx/v13 v13.3.10 // indirect
-	github.com/blevesearch/zapx/v14 v14.3.10 // indirect
-	github.com/blevesearch/zapx/v15 v15.3.16 // indirect
-	github.com/blevesearch/zapx/v16 v16.1.9-0.20241217210638-a0519e7caf3b // indirect
+	github.com/blevesearch/vellum v1.1.0 // indirect
+	github.com/blevesearch/zapx/v11 v11.4.1 // indirect
+	github.com/blevesearch/zapx/v12 v12.4.1 // indirect
+	github.com/blevesearch/zapx/v13 v13.4.1 // indirect
+	github.com/blevesearch/zapx/v14 v14.4.1 // indirect
+	github.com/blevesearch/zapx/v15 v15.4.1 // indirect
+	github.com/blevesearch/zapx/v16 v16.2.2 // indirect
 	github.com/boombuler/barcode v1.0.1 // indirect
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874 // indirect
 	github.com/caddyserver/zerossl v0.1.3 // indirect
@@ -253,7 +253,7 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
-	go.etcd.io/bbolt v1.3.9 // indirect
+	go.etcd.io/bbolt v1.4.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.34.0 // indirect
