@@ -52,14 +52,14 @@ func TestAPIRepoFunding(t *testing.T) {
 	session := loginUser(t, owner.Name)
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadRepository)
 
-	assert.Len(t, getRepoFundingConfig(t, repo, token), 0)
+	assert.Empty(t, getRepoFundingConfig(t, repo, token))
 
 	t.Run("Empty", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		funding := getRepoFundingConfig(t, repo, token)
 
-		assert.Len(t, funding, 0)
+		assert.Empty(t, funding)
 	})
 
 	t.Run("SimpleConfig", func(t *testing.T) {
