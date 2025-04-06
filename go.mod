@@ -70,7 +70,7 @@ require (
 	github.com/klauspost/compress v1.17.11
 	github.com/klauspost/cpuid/v2 v2.2.10
 	github.com/lib/pq v1.10.9
-	github.com/markbates/goth v1.80.0
+	github.com/markbates/goth v1.81.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-sqlite3 v1.14.27
 	github.com/meilisearch/meilisearch-go v0.31.0
