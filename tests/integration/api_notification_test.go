@@ -8,14 +8,14 @@ import (
 	"net/http"
 	"testing"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	activities_model "forgejo.org/models/activities"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -105,10 +105,10 @@ func TestAPINotification(t *testing.T) {
 	assert.EqualValues(t, 5, apiN.ID)
 	assert.False(t, apiN.Pinned)
 	assert.True(t, apiN.Unread)
-	assert.EqualValues(t, "issue4", apiN.Subject.Title)
+	assert.Equal(t, "issue4", apiN.Subject.Title)
 	assert.EqualValues(t, "Issue", apiN.Subject.Type)
-	assert.EqualValues(t, thread5.Issue.APIURL(db.DefaultContext), apiN.Subject.URL)
-	assert.EqualValues(t, thread5.Repository.HTMLURL(), apiN.Repository.HTMLURL)
+	assert.Equal(t, thread5.Issue.APIURL(db.DefaultContext), apiN.Subject.URL)
+	assert.Equal(t, thread5.Repository.HTMLURL(), apiN.Repository.HTMLURL)
 
 	MakeRequest(t, NewRequest(t, "GET", "/api/v1/notifications/new"), http.StatusUnauthorized)
 

@@ -13,8 +13,8 @@ import (
 	"strings"
 	"sync"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
 )
 
 // CatFileBatchCheck runs cat-file with --batch-check

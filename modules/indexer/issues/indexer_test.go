@@ -4,20 +4,19 @@
 package issues
 
 import (
-	"context"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/indexer/issues/internal"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
 
-	_ "code.gitea.io/gitea/models"
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/activities"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/activities"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -82,7 +81,7 @@ func searchIssueWithKeyword(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 
 		assert.Equal(t, test.expectedIDs, issueIDs)
@@ -127,7 +126,7 @@ func searchIssueInRepo(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 
 		assert.Equal(t, test.expectedIDs, issueIDs)
@@ -198,7 +197,7 @@ func searchIssueByID(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 		assert.Equal(t, test.expectedIDs, issueIDs)
 	}
@@ -223,7 +222,7 @@ func searchIssueIsPull(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 
 		assert.Equal(t, test.expectedIDs, issueIDs)
@@ -249,7 +248,7 @@ func searchIssueIsClosed(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 		assert.Equal(t, test.expectedIDs, issueIDs)
 	}
@@ -274,7 +273,7 @@ func searchIssueByMilestoneID(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 
 		assert.Equal(t, test.expectedIDs, issueIDs)
@@ -306,7 +305,7 @@ func searchIssueByLabelID(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 
 		assert.Equal(t, test.expectedIDs, issueIDs)
@@ -326,7 +325,7 @@ func searchIssueByTime(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 
 		assert.Equal(t, test.expectedIDs, issueIDs)
@@ -346,7 +345,7 @@ func searchIssueWithOrder(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 
 		assert.Equal(t, test.expectedIDs, issueIDs)
@@ -378,7 +377,7 @@ func searchIssueInProject(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		issueIDs, _, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, _, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 
 		assert.Equal(t, test.expectedIDs, issueIDs)
@@ -402,7 +401,7 @@ func searchIssueWithPaginator(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		issueIDs, total, err := SearchIssues(context.TODO(), &test.opts)
+		issueIDs, total, err := SearchIssues(t.Context(), &test.opts)
 		require.NoError(t, err)
 
 		assert.Equal(t, test.expectedIDs, issueIDs)

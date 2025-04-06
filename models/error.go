@@ -7,9 +7,9 @@ package models
 import (
 	"fmt"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/util"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/util"
 )
 
 // ErrUserOwnRepos represents a "UserOwnRepos" kind of error.
@@ -149,25 +149,6 @@ func (err *ErrInvalidCloneAddr) Error() string {
 
 func (err *ErrInvalidCloneAddr) Unwrap() error {
 	return util.ErrInvalidArgument
-}
-
-// ErrUpdateTaskNotExist represents a "UpdateTaskNotExist" kind of error.
-type ErrUpdateTaskNotExist struct {
-	UUID string
-}
-
-// IsErrUpdateTaskNotExist checks if an error is a ErrUpdateTaskNotExist.
-func IsErrUpdateTaskNotExist(err error) bool {
-	_, ok := err.(ErrUpdateTaskNotExist)
-	return ok
-}
-
-func (err ErrUpdateTaskNotExist) Error() string {
-	return fmt.Sprintf("update task does not exist [uuid: %s]", err.UUID)
-}
-
-func (err ErrUpdateTaskNotExist) Unwrap() error {
-	return util.ErrNotExist
 }
 
 // ErrInvalidTagName represents a "InvalidTagName" kind of error.

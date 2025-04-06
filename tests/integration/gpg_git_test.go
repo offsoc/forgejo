@@ -10,15 +10,15 @@ import (
 	"os"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/tests"
 
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/ProtonMail/go-crypto/openpgp/armor"
@@ -103,7 +103,7 @@ func TestGPGGit(t *testing.T) {
 				t, testCtx, user, "master", "always", "signed-always.txt", func(t *testing.T, response api.FileResponse) {
 					assert.NotNil(t, response.Verification)
 					if response.Verification == nil {
-						assert.FailNow(t, "no verification provided with response! %v", response)
+						assert.FailNow(t, "no verification provided with response", "response: %v", response)
 					}
 					assert.True(t, response.Verification.Verified)
 					if !response.Verification.Verified {
@@ -115,7 +115,7 @@ func TestGPGGit(t *testing.T) {
 				t, testCtx, user, "parentsigned", "parentsigned-always", "signed-parent2.txt", func(t *testing.T, response api.FileResponse) {
 					assert.NotNil(t, response.Verification)
 					if response.Verification == nil {
-						assert.FailNow(t, "no verification provided with response! %v", response)
+						assert.FailNow(t, "no verification provided with response", "response: %v", response)
 					}
 					assert.True(t, response.Verification.Verified)
 					if !response.Verification.Verified {
@@ -133,7 +133,7 @@ func TestGPGGit(t *testing.T) {
 				t, testCtx, user, "always", "always-parentsigned", "signed-always-parentsigned.txt", func(t *testing.T, response api.FileResponse) {
 					assert.NotNil(t, response.Verification)
 					if response.Verification == nil {
-						assert.FailNow(t, "no verification provided with response! %v", response)
+						assert.FailNow(t, "no verification provided with response", "response: %v", response)
 					}
 					assert.True(t, response.Verification.Verified)
 					if !response.Verification.Verified {
@@ -151,11 +151,11 @@ func TestGPGGit(t *testing.T) {
 			t.Run("CheckMasterBranchSigned", doAPIGetBranch(testCtx, "master", func(t *testing.T, branch api.Branch) {
 				assert.NotNil(t, branch.Commit)
 				if branch.Commit == nil {
-					assert.FailNow(t, "no commit provided with branch! %v", branch)
+					assert.FailNow(t, "no commit provided with branch", "branch: %v", branch)
 				}
 				assert.NotNil(t, branch.Commit.Verification)
 				if branch.Commit.Verification == nil {
-					assert.FailNow(t, "no verification provided with branch commit! %v", branch.Commit)
+					assert.FailNow(t, "no verification provided with branch commit", "commit: %v", branch.Commit)
 				}
 				assert.True(t, branch.Commit.Verification.Verified)
 				if !branch.Commit.Verification.Verified {

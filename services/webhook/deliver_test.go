@@ -4,38 +4,30 @@
 package webhook
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/hostmatcher"
-	"code.gitea.io/gitea/modules/setting"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/hostmatcher"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestWebhookProxy(t *testing.T) {
-	oldWebhook := setting.Webhook
-	oldHTTPProxy := os.Getenv("http_proxy")
-	oldHTTPSProxy := os.Getenv("https_proxy")
-	t.Cleanup(func() {
-		setting.Webhook = oldWebhook
-		os.Setenv("http_proxy", oldHTTPProxy)
-		os.Setenv("https_proxy", oldHTTPSProxy)
-	})
-	os.Unsetenv("http_proxy")
-	os.Unsetenv("https_proxy")
+	defer test.MockProtect(&setting.Webhook)()
+	t.Setenv("http_proxy", "")
+	t.Setenv("https_proxy", "")
 
 	setting.Webhook.ProxyURL = "http://localhost:8080"
 	setting.Webhook.ProxyURLFixed, _ = url.Parse(setting.Webhook.ProxyURL)
@@ -124,7 +116,7 @@ func TestWebhookDeliverAuthorizationHeader(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, hookTask)
 
-	require.NoError(t, Deliver(context.Background(), hookTask))
+	require.NoError(t, Deliver(t.Context(), hookTask))
 	select {
 	case <-done:
 	case <-time.After(5 * time.Second):
@@ -145,17 +137,17 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 		case "/webhook/66d222a5d6349e1311f551e50722d837e30fce98":
 			// Version 1
 			assert.Equal(t, "push", r.Header.Get("X-GitHub-Event"))
-			assert.Equal(t, "", r.Header.Get("Content-Type"))
+			assert.Empty(t, r.Header.Get("Content-Type"))
 			body, err := io.ReadAll(r.Body)
 			require.NoError(t, err)
 			assert.Equal(t, `{"data": 42}`, string(body))
 
-		case "/webhook/6db5dc1e282529a8c162c7fe93dd2667494eeb51":
+		case "/webhook/86aaa4d69df5aa487cb0148af4ae7e546933057b":
 			// Version 2
 			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 			body, err := io.ReadAll(r.Body)
 			require.NoError(t, err)
-			assert.Len(t, body, 2147)
+			assert.Len(t, body, 1909)
 
 		default:
 			w.WriteHeader(404)
@@ -190,7 +182,7 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotNil(t, hookTask)
 
-		require.NoError(t, Deliver(context.Background(), hookTask))
+		require.NoError(t, Deliver(t.Context(), hookTask))
 		select {
 		case <-done:
 		case <-time.After(5 * time.Second):
@@ -216,7 +208,7 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotNil(t, hookTask)
 
-		require.NoError(t, Deliver(context.Background(), hookTask))
+		require.NoError(t, Deliver(t.Context(), hookTask))
 		select {
 		case <-done:
 		case <-time.After(5 * time.Second):
@@ -317,7 +309,7 @@ func TestWebhookDeliverSpecificTypes(t *testing.T) {
 			require.NoError(t, err)
 			assert.NotNil(t, hookTask)
 
-			require.NoError(t, Deliver(context.Background(), hookTask))
+			require.NoError(t, Deliver(t.Context(), hookTask))
 			select {
 			case gotBody := <-hc.gotBody:
 				assert.NotEqual(t, string(data), string(gotBody), "request body must be different from the event payload")

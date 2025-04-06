@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -13,14 +12,14 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/perm"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/queue"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/forms"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/perm"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/queue"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/forms"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -286,7 +285,7 @@ func doAPIMergePullRequestForm(t *testing.T, ctx APITestContext, owner, repo str
 		if err.Message != "Please try again later" {
 			break
 		}
-		queue.GetManager().FlushAll(context.Background(), 5*time.Second)
+		queue.GetManager().FlushAll(t.Context(), 5*time.Second)
 		<-time.After(1 * time.Second)
 	}
 
@@ -295,7 +294,7 @@ func doAPIMergePullRequestForm(t *testing.T, ctx APITestContext, owner, repo str
 		expected = http.StatusOK
 	}
 
-	if !assert.EqualValues(t, expected, resp.Code,
+	if !assert.Equal(t, expected, resp.Code,
 		"Request: %s %s", req.Method, req.URL.String()) {
 		logUnexpectedResponse(t, resp)
 	}

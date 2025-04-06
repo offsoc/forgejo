@@ -250,15 +250,17 @@ test('For anyone', async ({page}) => {
 If you need a user account, you can use something like:
 
 ~~~js
-import {test, login_user, login} from './utils_e2e.ts';
+import {test} from './utils_e2e.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2'); // or another user
-});
+// reuse user2 token from scope `shared`
+test.use({user: 'user2', authScope: 'shared'})
 
-test('For signed users only', async ({browser}, workerInfo) => {
-  const page = await login({browser}, workerInfo);
+test('For signed users only', async ({page}) => {
+
+})
 ~~~
+
+users are created in [utils_e2e_test.go](utils_e2e_test.go)
 
 ### Run tests very selectively
 

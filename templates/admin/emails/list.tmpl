@@ -66,6 +66,8 @@
 								</div>
 							</td>
 						</tr>
+					{{else}}
+						<tr><td class="tw-text-center" colspan="6">{{ctx.Locale.Tr "repo.pulls.no_results"}}</td></tr>
 					{{end}}
 				</tbody>
 			</table>

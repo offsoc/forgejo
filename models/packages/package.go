@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
@@ -51,6 +51,7 @@ const (
 	TypePub       Type = "pub"
 	TypePyPI      Type = "pypi"
 	TypeRpm       Type = "rpm"
+	TypeAlt       Type = "alt"
 	TypeRubyGems  Type = "rubygems"
 	TypeSwift     Type = "swift"
 	TypeVagrant   Type = "vagrant"
@@ -76,6 +77,7 @@ var TypeList = []Type{
 	TypePub,
 	TypePyPI,
 	TypeRpm,
+	TypeAlt,
 	TypeRubyGems,
 	TypeSwift,
 	TypeVagrant,
@@ -122,6 +124,8 @@ func (pt Type) Name() string {
 		return "PyPI"
 	case TypeRpm:
 		return "RPM"
+	case TypeAlt:
+		return "Alt"
 	case TypeRubyGems:
 		return "RubyGems"
 	case TypeSwift:
@@ -173,6 +177,8 @@ func (pt Type) SVGName() string {
 		return "gitea-python"
 	case TypeRpm:
 		return "gitea-rpm"
+	case TypeAlt:
+		return "gitea-alt"
 	case TypeRubyGems:
 		return "gitea-rubygems"
 	case TypeSwift:
@@ -233,6 +239,11 @@ func SetRepositoryLink(ctx context.Context, packageID, repoID int64) error {
 	if n == 0 && err == nil {
 		return ErrPackageNotExist
 	}
+	return err
+}
+
+func UnlinkRepository(ctx context.Context, packageID int64) error {
+	_, err := db.GetEngine(ctx).ID(packageID).Cols("repo_id").Update(&Package{RepoID: 0})
 	return err
 }
 

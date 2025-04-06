@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"code.gitea.io/gitea/modules/private"
+	"forgejo.org/modules/private"
 
 	"github.com/urfave/cli/v2"
 )
@@ -112,7 +112,7 @@ func runShutdown(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	extra := private.Shutdown(ctx)
 	return handleCliResponseExtra(extra)
 }
@@ -121,7 +121,7 @@ func runRestart(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	extra := private.Restart(ctx)
 	return handleCliResponseExtra(extra)
 }
@@ -130,7 +130,7 @@ func runReloadTemplates(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	extra := private.ReloadTemplates(ctx)
 	return handleCliResponseExtra(extra)
 }
@@ -139,7 +139,7 @@ func runFlushQueues(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	extra := private.FlushQueues(ctx, c.Duration("timeout"), c.Bool("non-blocking"))
 	return handleCliResponseExtra(extra)
 }
@@ -148,7 +148,7 @@ func runProcesses(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	extra := private.Processes(ctx, os.Stdout, c.Bool("flat"), c.Bool("no-system"), c.Bool("stacktraces"), c.Bool("json"), c.String("cancel"))
 	return handleCliResponseExtra(extra)
 }

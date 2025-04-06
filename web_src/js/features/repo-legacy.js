@@ -405,6 +405,7 @@ async function onEditContent(event) {
     e.preventDefault();
     showElem(renderContent);
     hideElem(editContentZone);
+    comboMarkdownEditor.value(rawContent.textContent);
     comboMarkdownEditor.attachedDropzoneInst?.emit('reload');
   };
 

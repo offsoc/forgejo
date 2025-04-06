@@ -4,17 +4,17 @@
 package sourcehut
 
 import (
-	"context"
+	"strings"
 	"testing"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
-	"code.gitea.io/gitea/services/webhook/shared"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	webhook_module "forgejo.org/modules/webhook"
+	"forgejo.org/services/webhook/shared"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,7 +25,7 @@ func gitInit(t testing.TB) {
 		return
 	}
 	t.Cleanup(test.MockVariableValue(&setting.Git.HomePath, t.TempDir()))
-	require.NoError(t, git.InitSimple(context.Background()))
+	require.NoError(t, git.InitSimple(t.Context()))
 }
 
 func TestSourcehutBuildsPayload(t *testing.T) {
@@ -371,7 +371,7 @@ func TestSourcehutJSONPayload(t *testing.T) {
 		PayloadVersion: 2,
 	}
 
-	req, reqBody, err := BuildsHandler{}.NewRequest(context.Background(), hook, task)
+	req, reqBody, err := BuildsHandler{}.NewRequest(t.Context(), hook, task)
 	require.NoError(t, err)
 	require.NotNil(t, req)
 	require.NotNil(t, reqBody)
@@ -383,4 +383,135 @@ func TestSourcehutJSONPayload(t *testing.T) {
 	err = json.NewDecoder(req.Body).Decode(&body)
 	require.NoError(t, err)
 	assert.Equal(t, "json test", body.Variables.Note)
+}
+
+func TestSourcehutAdjustManifest(t *testing.T) {
+	defer test.MockVariableValue(&setting.AppURL, "https://example.forgejo.org/")()
+	t.Run("without sources", func(t *testing.T) {
+		repo := &api.Repository{
+			CloneURL: "http://localhost:3000/testdata/repo.git",
+		}
+
+		manifest, err := adjustManifest(repo, "58771003157b81abc6bf41df0c5db4147a3e3c83", "refs/heads/main", strings.NewReader(`image: alpine/edge
+tasks:
+    - say-hello: |
+        echo hello
+    - say-world: echo world`), ".build.yml")
+
+		require.NoError(t, err)
+		assert.Equal(t, `sources:
+    - http://localhost:3000/testdata/repo.git#58771003157b81abc6bf41df0c5db4147a3e3c83
+environment:
+    BUILD_SUBMITTER: forgejo
+    BUILD_SUBMITTER_URL: https://example.forgejo.org/
+    GIT_REF: refs/heads/main
+image: alpine/edge
+tasks:
+    - say-hello: |
+        echo hello
+    - say-world: echo world
+`, string(manifest))
+	})
+
+	t.Run("with other sources", func(t *testing.T) {
+		repo := &api.Repository{
+			CloneURL: "http://localhost:3000/testdata/repo.git",
+		}
+
+		manifest, err := adjustManifest(repo, "58771003157b81abc6bf41df0c5db4147a3e3c83", "refs/heads/main", strings.NewReader(`image: alpine/edge
+sources:
+- http://other.example.conm/repo.git
+tasks:
+    - hello: echo world`), ".build.yml")
+
+		require.NoError(t, err)
+		assert.Equal(t, `sources:
+    - http://other.example.conm/repo.git
+    - http://localhost:3000/testdata/repo.git#58771003157b81abc6bf41df0c5db4147a3e3c83
+environment:
+    BUILD_SUBMITTER: forgejo
+    BUILD_SUBMITTER_URL: https://example.forgejo.org/
+    GIT_REF: refs/heads/main
+image: alpine/edge
+tasks:
+    - hello: echo world
+`, string(manifest))
+	})
+
+	t.Run("with same source", func(t *testing.T) {
+		repo := &api.Repository{
+			CloneURL: "http://localhost:3000/testdata/repo.git",
+		}
+
+		manifest, err := adjustManifest(repo, "58771003157b81abc6bf41df0c5db4147a3e3c83", "refs/heads/main", strings.NewReader(`image: alpine/edge
+sources:
+- http://localhost:3000/testdata/repo.git
+- http://other.example.conm/repo.git
+tasks:
+    - hello: echo world`), ".build.yml")
+
+		require.NoError(t, err)
+		assert.Equal(t, `sources:
+    - http://localhost:3000/testdata/repo.git#58771003157b81abc6bf41df0c5db4147a3e3c83
+    - http://other.example.conm/repo.git
+environment:
+    BUILD_SUBMITTER: forgejo
+    BUILD_SUBMITTER_URL: https://example.forgejo.org/
+    GIT_REF: refs/heads/main
+image: alpine/edge
+tasks:
+    - hello: echo world
+`, string(manifest))
+	})
+
+	t.Run("with ssh source", func(t *testing.T) {
+		repo := &api.Repository{
+			CloneURL: "http://localhost:3000/testdata/repo.git",
+			SSHURL:   "git@localhost:testdata/repo.git",
+		}
+
+		manifest, err := adjustManifest(repo, "58771003157b81abc6bf41df0c5db4147a3e3c83", "refs/heads/main", strings.NewReader(`image: alpine/edge
+sources:
+- git@localhost:testdata/repo.git
+- http://other.example.conm/repo.git
+tasks:
+    - hello: echo world`), ".build.yml")
+
+		require.NoError(t, err)
+		assert.Equal(t, `sources:
+    - git@localhost:testdata/repo.git#58771003157b81abc6bf41df0c5db4147a3e3c83
+    - http://other.example.conm/repo.git
+environment:
+    BUILD_SUBMITTER: forgejo
+    BUILD_SUBMITTER_URL: https://example.forgejo.org/
+    GIT_REF: refs/heads/main
+image: alpine/edge
+tasks:
+    - hello: echo world
+`, string(manifest))
+	})
+
+	t.Run("private without source", func(t *testing.T) {
+		repo := &api.Repository{
+			CloneURL: "http://localhost:3000/testdata/repo.git",
+			SSHURL:   "git@localhost:testdata/repo.git",
+			Private:  true,
+		}
+
+		manifest, err := adjustManifest(repo, "58771003157b81abc6bf41df0c5db4147a3e3c83", "refs/heads/main", strings.NewReader(`image: alpine/edge
+tasks:
+    - hello: echo world`), ".build.yml")
+
+		require.NoError(t, err)
+		assert.Equal(t, `sources:
+    - git@localhost:testdata/repo.git#58771003157b81abc6bf41df0c5db4147a3e3c83
+environment:
+    BUILD_SUBMITTER: forgejo
+    BUILD_SUBMITTER_URL: https://example.forgejo.org/
+    GIT_REF: refs/heads/main
+image: alpine/edge
+tasks:
+    - hello: echo world
+`, string(manifest))
+	})
 }

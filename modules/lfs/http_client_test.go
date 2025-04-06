@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -249,7 +249,7 @@ func TestHTTPClientDownload(t *testing.T) {
 				},
 			}
 
-			err := client.Download(context.Background(), []Pointer{p}, func(p Pointer, content io.ReadCloser, objectError error) error {
+			err := client.Download(t.Context(), []Pointer{p}, func(p Pointer, content io.ReadCloser, objectError error) error {
 				if objectError != nil {
 					return objectError
 				}
@@ -349,7 +349,7 @@ func TestHTTPClientUpload(t *testing.T) {
 				},
 			}
 
-			err := client.Upload(context.Background(), []Pointer{p}, func(p Pointer, objectError error) (io.ReadCloser, error) {
+			err := client.Upload(t.Context(), []Pointer{p}, func(p Pointer, objectError error) (io.ReadCloser, error) {
 				return io.NopCloser(new(bytes.Buffer)), objectError
 			})
 			if c.expectedError != "" {

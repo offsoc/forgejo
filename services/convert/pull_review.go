@@ -7,9 +7,9 @@ import (
 	"context"
 	"strings"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
+	issues_model "forgejo.org/models/issues"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
 )
 
 // ToPullReview convert a review to api format
@@ -66,7 +66,7 @@ func ToPullReviewList(ctx context.Context, rl []*issues_model.Review, doer *user
 	result := make([]*api.PullReview, 0, len(rl))
 	for i := range rl {
 		// show pending reviews only for the user who created them
-		if rl[i].Type == issues_model.ReviewTypePending && (doer == nil || !(doer.IsAdmin || doer.ID == rl[i].ReviewerID)) {
+		if rl[i].Type == issues_model.ReviewTypePending && (doer == nil || (!doer.IsAdmin && doer.ID != rl[i].ReviewerID)) {
 			continue
 		}
 		r, err := ToPullReview(ctx, rl[i], doer)

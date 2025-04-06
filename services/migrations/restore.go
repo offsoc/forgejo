@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	base "code.gitea.io/gitea/modules/migration"
+	base "forgejo.org/modules/migration"
 
 	"gopkg.in/yaml.v3"
 )
@@ -85,6 +85,7 @@ func (r *RepositoryRestorer) GetRepoInfo() (*base.Repository, error) {
 		OriginalURL:   opts["original_url"],
 		CloneURL:      filepath.Join(r.baseDir, "git"),
 		DefaultBranch: opts["default_branch"],
+		Website:       opts["website"],
 	}, nil
 }
 

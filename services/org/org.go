@@ -7,15 +7,15 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/db"
-	org_model "code.gitea.io/gitea/models/organization"
-	packages_model "code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/util"
-	repo_service "code.gitea.io/gitea/services/repository"
+	"forgejo.org/models"
+	"forgejo.org/models/db"
+	org_model "forgejo.org/models/organization"
+	packages_model "forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/util"
+	repo_service "forgejo.org/services/repository"
 )
 
 // DeleteOrganization completely and permanently deletes everything of organization.

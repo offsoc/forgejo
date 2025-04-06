@@ -9,18 +9,18 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/models/auth"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	auth_service "code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/auth/source/oauth2"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/externalaccount"
-	"code.gitea.io/gitea/services/forms"
+	"forgejo.org/models/auth"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	auth_service "forgejo.org/services/auth"
+	"forgejo.org/services/auth/source/oauth2"
+	"forgejo.org/services/context"
+	"forgejo.org/services/externalaccount"
+	"forgejo.org/services/forms"
 
 	"github.com/markbates/goth"
 )
@@ -44,6 +44,7 @@ func LinkAccount(ctx *context.Context) {
 	ctx.Data["DisableRegistration"] = setting.Service.DisableRegistration
 	ctx.Data["AllowOnlyInternalRegistration"] = setting.Service.AllowOnlyInternalRegistration
 	ctx.Data["ShowRegistrationButton"] = false
+	ctx.Data["EnableInternalSignIn"] = true
 
 	// use this to set the right link into the signIn and signUp templates in the link_account template
 	ctx.Data["SignInLink"] = setting.AppSubURL + "/user/link_account_signin"
@@ -99,16 +100,6 @@ func handleSignInError(ctx *context.Context, userName string, ptrForm any, tmpl 
 		log.Info("Failed authentication attempt for %s from %s: %v", userName, ctx.RemoteAddr(), err)
 		ctx.Data["Title"] = ctx.Tr("auth.prohibit_login")
 		ctx.HTML(http.StatusOK, "user/auth/prohibit_login")
-	} else if user_model.IsErrUserInactive(err) {
-		ctx.Data["user_exists"] = true
-		if setting.Service.RegisterEmailConfirm {
-			ctx.Data["Title"] = ctx.Tr("auth.active_your_account")
-			ctx.HTML(http.StatusOK, TplActivate)
-		} else {
-			log.Info("Failed authentication attempt for %s from %s: %v", userName, ctx.RemoteAddr(), err)
-			ctx.Data["Title"] = ctx.Tr("auth.prohibit_login")
-			ctx.HTML(http.StatusOK, "user/auth/prohibit_login")
-		}
 	} else {
 		ctx.ServerError(invoker, err)
 	}
@@ -132,6 +123,7 @@ func LinkAccountPostSignIn(ctx *context.Context) {
 	ctx.Data["CfTurnstileSitekey"] = setting.Service.CfTurnstileSitekey
 	ctx.Data["DisableRegistration"] = setting.Service.DisableRegistration
 	ctx.Data["ShowRegistrationButton"] = false
+	ctx.Data["EnableInternalSignIn"] = true
 
 	// use this to set the right link into the signIn and signUp templates in the link_account template
 	ctx.Data["SignInLink"] = setting.AppSubURL + "/user/link_account_signin"

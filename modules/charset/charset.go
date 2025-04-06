@@ -10,9 +10,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 
 	"github.com/gogs/chardet"
 	"golang.org/x/net/html/charset"
@@ -134,7 +134,7 @@ func DetectEncoding(content []byte) (string, error) {
 	// First we check if the content represents valid utf8 content excepting a truncated character at the end.
 
 	// Now we could decode all the runes in turn but this is not necessarily the cheapest thing to do
-	// instead we walk backwards from the end to trim off a the incomplete character
+	// instead we walk backwards from the end to trim off the incomplete character
 	toValidate := content
 	end := len(toValidate) - 1
 

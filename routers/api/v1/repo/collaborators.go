@@ -8,18 +8,18 @@ import (
 	"errors"
 	"net/http"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	repo_service "code.gitea.io/gitea/services/repository"
+	"forgejo.org/models/db"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	repo_module "forgejo.org/modules/repository"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	repo_service "forgejo.org/services/repository"
 )
 
 // ListCollaborators list a repository's collaborators
@@ -82,6 +82,7 @@ func IsCollaborator(ctx *context.APIContext) {
 	// swagger:operation GET /repos/{owner}/{repo}/collaborators/{collaborator} repository repoCheckCollaborator
 	// ---
 	// summary: Check if a user is a collaborator of a repository
+	// description: If the user is a collaborator, return 204. If the user is not a collaborator, return 404.
 	// produces:
 	// - application/json
 	// parameters:
@@ -281,11 +282,6 @@ func GetRepoPermissions(ctx *context.APIContext) {
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
 
-	if !ctx.Doer.IsAdmin && ctx.Doer.LoginName != ctx.Params(":collaborator") && !ctx.IsUserRepoAdmin() {
-		ctx.Error(http.StatusForbidden, "User", "Only admins can query all permissions, repo admins can query all repo permissions, collaborators can query only their own")
-		return
-	}
-
 	collaborator, err := user_model.GetUserByName(ctx, ctx.Params(":collaborator"))
 	if err != nil {
 		if user_model.IsErrUserNotExist(err) {
@@ -293,6 +289,15 @@ func GetRepoPermissions(ctx *context.APIContext) {
 		} else {
 			ctx.Error(http.StatusInternalServerError, "GetUserByName", err)
 		}
+		return
+	}
+
+	// Only allow the request in any of the following situations:
+	// - The user is the instance admin.
+	// - The user is the repository admin.
+	// - The user is querying the permissions of themselves.
+	if !ctx.IsUserSiteAdmin() && ctx.Doer.ID != collaborator.ID && !ctx.IsUserRepoAdmin() {
+		ctx.Error(http.StatusForbidden, "User", "Only admins can query all permissions, repo admins can query all repo permissions, collaborators can query only their own")
 		return
 	}
 

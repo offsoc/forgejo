@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/translation"
 )
 
 // AmbiguousTablesForLocale provides the table of ambiguous characters for this locale.

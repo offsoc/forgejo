@@ -6,10 +6,10 @@ package mirror
 import (
 	"context"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/repository"
-	notify_service "code.gitea.io/gitea/services/notify"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/repository"
+	notify_service "forgejo.org/services/notify"
 )
 
 func init() {

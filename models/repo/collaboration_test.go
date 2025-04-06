@@ -6,12 +6,12 @@ package repo_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,8 +27,8 @@ func TestRepository_GetCollaborators(t *testing.T) {
 		require.NoError(t, err)
 		assert.Len(t, collaborators, int(expectedLen))
 		for _, collaborator := range collaborators {
-			assert.EqualValues(t, collaborator.User.ID, collaborator.Collaboration.UserID)
-			assert.EqualValues(t, repoID, collaborator.Collaboration.RepoID)
+			assert.Equal(t, collaborator.User.ID, collaborator.Collaboration.UserID)
+			assert.Equal(t, repoID, collaborator.Collaboration.RepoID)
 		}
 	}
 	test(1)
@@ -47,7 +47,7 @@ func TestRepository_GetCollaborators(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, collaborators2, 1)
 
-	assert.NotEqualValues(t, collaborators1[0].ID, collaborators2[0].ID)
+	assert.NotEqual(t, collaborators1[0].ID, collaborators2[0].ID)
 }
 
 func TestRepository_IsCollaborator(t *testing.T) {
@@ -72,10 +72,10 @@ func TestRepository_ChangeCollaborationAccessMode(t *testing.T) {
 	require.NoError(t, repo_model.ChangeCollaborationAccessMode(db.DefaultContext, repo, 4, perm.AccessModeAdmin))
 
 	collaboration := unittest.AssertExistsAndLoadBean(t, &repo_model.Collaboration{RepoID: repo.ID, UserID: 4})
-	assert.EqualValues(t, perm.AccessModeAdmin, collaboration.Mode)
+	assert.Equal(t, perm.AccessModeAdmin, collaboration.Mode)
 
 	access := unittest.AssertExistsAndLoadBean(t, &access_model.Access{UserID: 4, RepoID: repo.ID})
-	assert.EqualValues(t, perm.AccessModeAdmin, access.Mode)
+	assert.Equal(t, perm.AccessModeAdmin, access.Mode)
 
 	require.NoError(t, repo_model.ChangeCollaborationAccessMode(db.DefaultContext, repo, 4, perm.AccessModeAdmin))
 

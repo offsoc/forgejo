@@ -5,18 +5,17 @@ package repository_test
 
 import (
 	"bytes"
-	"context"
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	repo_service "code.gitea.io/gitea/services/repository"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	repo_service "forgejo.org/services/repository"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,7 +40,7 @@ func TestGarbageCollectLFSMetaObjects(t *testing.T) {
 	lfsOid := storeObjectInRepo(t, repo.ID, &lfsContent)
 
 	// gc
-	err = repo_service.GarbageCollectLFSMetaObjects(context.Background(), repo_service.GarbageCollectLFSMetaObjectsOptions{
+	err = repo_service.GarbageCollectLFSMetaObjects(t.Context(), repo_service.GarbageCollectLFSMetaObjectsOptions{
 		AutoFix:                 true,
 		OlderThan:               time.Now().Add(7 * 24 * time.Hour).Add(5 * 24 * time.Hour),
 		UpdatedLessRecentlyThan: time.Time{}, // ensure that the models/fixtures/lfs_meta_object.yml objects are considered as well

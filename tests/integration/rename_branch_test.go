@@ -8,11 +8,11 @@ import (
 	"net/url"
 	"testing"
 
-	git_model "code.gitea.io/gitea/models/git"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/tests"
+	git_model "forgejo.org/models/git"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -165,7 +165,7 @@ func testRenameBranch(t *testing.T, u *url.URL) {
 
 		flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "error%3DCannot%2Brename%2Bbranch%2Bmain2%2Bbecause%2Bit%2Bis%2Ba%2Bprotected%2Bbranch.", flashCookie.Value)
+		assert.Equal(t, "error%3DCannot%2Brename%2Bbranch%2Bmain2%2Bbecause%2Bit%2Bis%2Ba%2Bprotected%2Bbranch.", flashCookie.Value)
 
 		// Verify it didn't change.
 		repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})

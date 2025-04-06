@@ -59,18 +59,6 @@
       ]
     },
     {
-      "description": "Group nodejs packages",
-      "matchPackageNames": [
-        "code.forgejo.org/oci/node",
-        "docker.io/library/node",
-        "docker.io/node",
-        "node"
-      ],
-      "groupName": "nodejs packages",
-      "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
-      "versioning": "node"
-    },
-    {
       "description": "x/tools/* are used in the CI only and upgraded together",
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true,
@@ -111,33 +99,18 @@
       "automerge": true
     },
     {
-      "description": "Automerge renovate updates",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
-      "automerge": true
-    },
-    {
       "description": "Add reviewer and additional labels to renovate PRs",
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
+      "matchPackageNames": ["data.forgejo.org/renovate/renovate"],
       "reviewers": ["viceice"],
-      "addLabels": ["forgejo/ci", "test/not-needed"]
-    },
-    {
-      "description": "Update renovate with higher prio to come through rate limit",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["code.forgejo.org/forgejo-contrib/renovate"],
-      "extends": ["schedule:weekly"],
-      "prPriority": 10,
-      "groupName": "renovate"
+      "addLabels": ["forgejo/ci"]
     },
     {
       "description": "Disable renovate self-updates for release branches",
       "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
-      "matchDatasources": ["docker"],
       "matchPackageNames": [
         "code.forgejo.org/forgejo-contrib/renovate",
+        "data.forgejo.org/renovate/renovate",
         "ghcr.io/visualon/renovate"
       ],
       "enabled": false
@@ -151,6 +124,8 @@
         "@playwright/**",
         "@stoplight/spectral-cli",
         "@stylistic/**",
+        "@vitejs/plugin-vue",
+        "@vue/test-utils",
         "djlint",
         "github.com/editorconfig-checker/editorconfig-checker/v2/cmd/editorconfig-checker",
         "github.com/golangci/golangci-lint/cmd/golangci-lint",
@@ -162,7 +137,7 @@
         "mvdan.cc/gofumpt",
         "updates",
         "vite-string-plugin",
-        "@vue/test-utils"
+        "yamllint"
       ],
       "automerge": true
     },
@@ -179,14 +154,6 @@
     }
   ],
   "customManagers": [
-    {
-      "description": "Update node-version in forgejo workflows",
-      "customType": "regex",
-      "fileMatch": ["^.forgejo/workflows/.+\\.yml$"],
-      "matchStrings": ["\\s+node-version: ['\"]?(?<currentValue>.+?)['\"]?\\s"],
-      "depNameTemplate": "node",
-      "datasourceTemplate": "node-version"
-    },
     {
       "description": "Update deps inside Makefile",
       "customType": "regex",

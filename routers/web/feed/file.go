@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/repo"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/context"
 
 	"github.com/gorilla/feeds"
 )
@@ -55,6 +55,7 @@ func ShowFileFeed(ctx *context.Context, repo *repo.Repository, formatType string
 			},
 			Description: commit.Message(),
 			Content:     commit.Message(),
+			Created:     commit.Committer.When,
 		})
 	}
 

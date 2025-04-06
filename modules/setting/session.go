@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
 )
 
 // SessionConfig defines Session settings
@@ -73,6 +73,4 @@ func loadSessionFrom(rootCfg ConfigProvider) {
 	SessionConfig.ProviderConfig = string(shadowConfig)
 	SessionConfig.OriginalProvider = SessionConfig.Provider
 	SessionConfig.Provider = "VirtualSession"
-
-	log.Info("Session Service Enabled")
 }

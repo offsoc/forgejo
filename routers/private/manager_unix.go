@@ -1,15 +1,13 @@
 // Copyright 2020 The Gitea Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-//go:build !windows
-
 package private
 
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/services/context"
 )
 
 // Restart causes the server to perform a graceful restart

@@ -4,8 +4,8 @@
 package user
 
 import (
-	"code.gitea.io/gitea/routers/api/v1/shared"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/routers/api/v1/shared"
+	"forgejo.org/services/context"
 )
 
 // GetQuota returns the quota information for the authenticated user

@@ -6,10 +6,10 @@ package models
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,7 +49,7 @@ func TestRemoveOrgUser(t *testing.T) {
 		require.NoError(t, RemoveOrgUser(db.DefaultContext, orgID, userID))
 		unittest.AssertNotExistsBean(t, &organization.OrgUser{OrgID: orgID, UID: userID})
 		org = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: orgID})
-		assert.EqualValues(t, expectedNumMembers, org.NumMembers)
+		assert.Equal(t, expectedNumMembers, org.NumMembers)
 	}
 	testSuccess(3, 4)
 	testSuccess(3, 4)

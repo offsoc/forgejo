@@ -5,13 +5,12 @@
 package migrations
 
 import (
-	"context"
 	"os"
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/unittest"
-	base "code.gitea.io/gitea/modules/migration"
+	"forgejo.org/models/unittest"
+	base "forgejo.org/modules/migration"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,7 +24,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 	server := unittest.NewMockWebServer(t, "https://api.github.com", fixturePath, token != "")
 	defer server.Close()
 
-	downloader := NewGithubDownloaderV3(context.Background(), server.URL, "", "", token, "go-gitea", "test_repo")
+	downloader := NewGithubDownloaderV3(t.Context(), server.URL, "", "", token, "go-gitea", "test_repo")
 	err := downloader.RefreshRate()
 	require.NoError(t, err)
 
@@ -38,6 +37,7 @@ func TestGitHubDownloadRepo(t *testing.T) {
 		CloneURL:      server.URL + "/go-gitea/test_repo.git",
 		OriginalURL:   server.URL + "/go-gitea/test_repo",
 		DefaultBranch: "master",
+		Website:       "https://codeberg.org/forgejo/forgejo/",
 	}, repo)
 
 	topics, err := downloader.GetTopics()

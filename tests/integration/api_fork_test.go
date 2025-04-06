@@ -9,14 +9,14 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/routers"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -123,7 +123,7 @@ func TestAPIForkListPrivateRepo(t *testing.T) {
 	}).AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusAccepted)
 
-	t.Run("Anomynous", func(t *testing.T) {
+	t.Run("Anonymous", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		req := NewRequest(t, "GET", "/api/v1/repos/user2/repo1/forks")
@@ -133,7 +133,7 @@ func TestAPIForkListPrivateRepo(t *testing.T) {
 		DecodeJSON(t, resp, &forks)
 
 		assert.Empty(t, forks)
-		assert.EqualValues(t, "0", resp.Header().Get("X-Total-Count"))
+		assert.Equal(t, "0", resp.Header().Get("X-Total-Count"))
 	})
 
 	t.Run("Logged in", func(t *testing.T) {
@@ -146,6 +146,6 @@ func TestAPIForkListPrivateRepo(t *testing.T) {
 		DecodeJSON(t, resp, &forks)
 
 		assert.Len(t, forks, 1)
-		assert.EqualValues(t, "1", resp.Header().Get("X-Total-Count"))
+		assert.Equal(t, "1", resp.Header().Get("X-Total-Count"))
 	})
 }

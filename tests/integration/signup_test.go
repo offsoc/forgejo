@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -9,13 +10,13 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/cache"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/translation"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -206,4 +207,29 @@ func TestSignupImageCaptcha(t *testing.T) {
 	loginUserWithPassword(t, "captcha-test", "examplePassword!1")
 
 	unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "captcha-test", IsActive: true})
+}
+
+func TestSignupFormUI(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	t.Run("UI", func(t *testing.T) {
+		// Mock alternative auth ways as enabled
+		defer test.MockVariableValue(&setting.Service.EnableOpenIDSignIn, true)()
+		defer test.MockVariableValue(&setting.Service.EnableOpenIDSignUp, true)()
+		t.Run("Internal registration enabled", func(t *testing.T) {
+			defer test.MockVariableValue(&setting.Service.AllowOnlyExternalRegistration, false)()
+			req := NewRequest(t, "GET", "/user/sign_up")
+			resp := MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+			htmlDoc.AssertElement(t, "form[action='/user/sign_up'] input#user_name", true)
+			htmlDoc.AssertElement(t, ".divider-text", true)
+		})
+		t.Run("Internal registration disabled", func(t *testing.T) {
+			defer test.MockVariableValue(&setting.Service.AllowOnlyExternalRegistration, true)()
+			req := NewRequest(t, "GET", "/user/sign_up")
+			resp := MakeRequest(t, req, http.StatusOK)
+			htmlDoc := NewHTMLParser(t, resp.Body)
+			htmlDoc.AssertElement(t, "form[action='/user/sign_up'] input#user_name", false)
+			htmlDoc.AssertElement(t, ".divider-text", false)
+		})
+	})
 }

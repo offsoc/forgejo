@@ -6,9 +6,9 @@ package bleve
 import (
 	"context"
 
-	indexer_internal "code.gitea.io/gitea/modules/indexer/internal"
-	inner_bleve "code.gitea.io/gitea/modules/indexer/internal/bleve"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
+	indexer_internal "forgejo.org/modules/indexer/internal"
+	inner_bleve "forgejo.org/modules/indexer/internal/bleve"
+	"forgejo.org/modules/indexer/issues/internal"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
@@ -156,25 +156,27 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 	var queries []query.Query
 
 	if options.Keyword != "" {
-		if options.IsFuzzyKeyword {
-			fuzziness := 1
-			if kl := len(options.Keyword); kl > 3 {
-				fuzziness = 2
-			} else if kl < 2 {
-				fuzziness = 0
-			}
-			queries = append(queries, bleve.NewDisjunctionQuery([]query.Query{
-				inner_bleve.MatchQuery(options.Keyword, "title", issueIndexerAnalyzer, fuzziness),
-				inner_bleve.MatchQuery(options.Keyword, "content", issueIndexerAnalyzer, fuzziness),
-				inner_bleve.MatchQuery(options.Keyword, "comments", issueIndexerAnalyzer, fuzziness),
-			}...))
-		} else {
-			queries = append(queries, bleve.NewDisjunctionQuery([]query.Query{
-				inner_bleve.MatchPhraseQuery(options.Keyword, "title", issueIndexerAnalyzer, 0),
-				inner_bleve.MatchPhraseQuery(options.Keyword, "content", issueIndexerAnalyzer, 0),
-				inner_bleve.MatchPhraseQuery(options.Keyword, "comments", issueIndexerAnalyzer, 0),
-			}...))
+		tokens, err := options.Tokens()
+		if err != nil {
+			return nil, err
 		}
+		q := bleve.NewBooleanQuery()
+		for _, token := range tokens {
+			innerQ := bleve.NewDisjunctionQuery(
+				inner_bleve.MatchPhraseQuery(token.Term, "title", issueIndexerAnalyzer, token.Fuzzy),
+				inner_bleve.MatchPhraseQuery(token.Term, "content", issueIndexerAnalyzer, token.Fuzzy),
+				inner_bleve.MatchPhraseQuery(token.Term, "comments", issueIndexerAnalyzer, token.Fuzzy))
+
+			switch token.Kind {
+			case internal.BoolOptMust:
+				q.AddMust(innerQ)
+			case internal.BoolOptShould:
+				q.AddShould(innerQ)
+			case internal.BoolOptNot:
+				q.AddMustNot(innerQ)
+			}
+		}
+		queries = append(queries, q)
 	}
 
 	if len(options.RepoIDs) > 0 || options.AllPublic {

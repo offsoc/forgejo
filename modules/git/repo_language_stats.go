@@ -10,9 +10,9 @@ import (
 	"strings"
 	"unicode"
 
-	"code.gitea.io/gitea/modules/analyze"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/modules/analyze"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
 
 	"github.com/go-enry/go-enry/v2"
 )
@@ -234,7 +234,7 @@ func (repo *Repository) GetLanguageStats(commitID string) (map[string]int64, err
 			sizes[language] += f.Size()
 		} else if len(sizes) == 0 && (firstExcludedLanguage == "" || firstExcludedLanguage == language) {
 			// Only consider Programming or Markup languages as fallback
-			if !(langType == enry.Programming || langType == enry.Markup) {
+			if langType != enry.Programming && langType != enry.Markup {
 				continue
 			}
 			firstExcludedLanguage = language

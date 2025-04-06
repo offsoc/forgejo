@@ -10,7 +10,7 @@ import (
 	"os"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/assert"
@@ -52,19 +52,19 @@ func TestVirtualHostMinioStorage(t *testing.T) {
 
 func TestMinioStoragePath(t *testing.T) {
 	m := &MinioStorage{basePath: ""}
-	assert.Equal(t, "", m.buildMinioPath("/"))
-	assert.Equal(t, "", m.buildMinioPath("."))
+	assert.Empty(t, m.buildMinioPath("/"))
+	assert.Empty(t, m.buildMinioPath("."))
 	assert.Equal(t, "a", m.buildMinioPath("/a"))
 	assert.Equal(t, "a/b", m.buildMinioPath("/a/b/"))
-	assert.Equal(t, "", m.buildMinioDirPrefix(""))
+	assert.Empty(t, m.buildMinioDirPrefix(""))
 	assert.Equal(t, "a/", m.buildMinioDirPrefix("/a/"))
 
 	m = &MinioStorage{basePath: "/"}
-	assert.Equal(t, "", m.buildMinioPath("/"))
-	assert.Equal(t, "", m.buildMinioPath("."))
+	assert.Empty(t, m.buildMinioPath("/"))
+	assert.Empty(t, m.buildMinioPath("."))
 	assert.Equal(t, "a", m.buildMinioPath("/a"))
 	assert.Equal(t, "a/b", m.buildMinioPath("/a/b/"))
-	assert.Equal(t, "", m.buildMinioDirPrefix(""))
+	assert.Empty(t, m.buildMinioDirPrefix(""))
 	assert.Equal(t, "a/", m.buildMinioDirPrefix("/a/"))
 
 	m = &MinioStorage{basePath: "/base"}

@@ -11,19 +11,19 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	pull_service "code.gitea.io/gitea/services/pull"
-	repo_service "code.gitea.io/gitea/services/repository"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	pull_service "forgejo.org/services/pull"
+	repo_service "forgejo.org/services/repository"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,8 +39,8 @@ func TestAPIPullUpdate(t *testing.T) {
 		// Test GetDiverging
 		diffCount, err := pull_service.GetDiverging(git.DefaultContext, pr)
 		require.NoError(t, err)
-		assert.EqualValues(t, 1, diffCount.Behind)
-		assert.EqualValues(t, 1, diffCount.Ahead)
+		assert.Equal(t, 1, diffCount.Behind)
+		assert.Equal(t, 1, diffCount.Ahead)
 		require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
 		require.NoError(t, pr.LoadIssue(db.DefaultContext))
 
@@ -53,8 +53,8 @@ func TestAPIPullUpdate(t *testing.T) {
 		// Test GetDiverging after update
 		diffCount, err = pull_service.GetDiverging(git.DefaultContext, pr)
 		require.NoError(t, err)
-		assert.EqualValues(t, 0, diffCount.Behind)
-		assert.EqualValues(t, 2, diffCount.Ahead)
+		assert.Equal(t, 0, diffCount.Behind)
+		assert.Equal(t, 2, diffCount.Ahead)
 	})
 }
 
@@ -68,8 +68,8 @@ func TestAPIPullUpdateByRebase(t *testing.T) {
 		// Test GetDiverging
 		diffCount, err := pull_service.GetDiverging(git.DefaultContext, pr)
 		require.NoError(t, err)
-		assert.EqualValues(t, 1, diffCount.Behind)
-		assert.EqualValues(t, 1, diffCount.Ahead)
+		assert.Equal(t, 1, diffCount.Behind)
+		assert.Equal(t, 1, diffCount.Ahead)
 		require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
 		require.NoError(t, pr.LoadIssue(db.DefaultContext))
 
@@ -82,8 +82,8 @@ func TestAPIPullUpdateByRebase(t *testing.T) {
 		// Test GetDiverging after update
 		diffCount, err = pull_service.GetDiverging(git.DefaultContext, pr)
 		require.NoError(t, err)
-		assert.EqualValues(t, 0, diffCount.Behind)
-		assert.EqualValues(t, 1, diffCount.Ahead)
+		assert.Equal(t, 0, diffCount.Behind)
+		assert.Equal(t, 1, diffCount.Ahead)
 	})
 }
 
@@ -98,8 +98,8 @@ func TestAPIViewUpdateSettings(t *testing.T) {
 		// Test GetDiverging
 		diffCount, err := pull_service.GetDiverging(git.DefaultContext, pr)
 		require.NoError(t, err)
-		assert.EqualValues(t, 1, diffCount.Behind)
-		assert.EqualValues(t, 1, diffCount.Ahead)
+		assert.Equal(t, 1, diffCount.Behind)
+		assert.Equal(t, 1, diffCount.Ahead)
 		require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
 		require.NoError(t, pr.LoadIssue(db.DefaultContext))
 
@@ -145,8 +145,8 @@ func testViewPullUpdate(t *testing.T, updateStyle string) {
 	// Test GetDiverging
 	diffCount, err := pull_service.GetDiverging(git.DefaultContext, pr)
 	require.NoError(t, err)
-	assert.EqualValues(t, 1, diffCount.Behind)
-	assert.EqualValues(t, 1, diffCount.Ahead)
+	assert.Equal(t, 1, diffCount.Behind)
+	assert.Equal(t, 1, diffCount.Ahead)
 	require.NoError(t, pr.LoadBaseRepo(db.DefaultContext))
 	require.NoError(t, pr.LoadIssue(db.DefaultContext))
 

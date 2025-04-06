@@ -6,7 +6,7 @@ package v1_22 //nolint
 import (
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
+	migration_tests "forgejo.org/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -109,11 +109,11 @@ func Test_RepositoryFormat(t *testing.T) {
 	ok, err := x.ID(2).Get(repo)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.EqualValues(t, "sha1", repo.ObjectFormatName)
+	assert.Equal(t, "sha1", repo.ObjectFormatName)
 
 	repo = new(Repository)
 	ok, err = x.ID(id).Get(repo)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.EqualValues(t, "sha256", repo.ObjectFormatName)
+	assert.Equal(t, "sha256", repo.ObjectFormatName)
 }

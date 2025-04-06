@@ -6,7 +6,7 @@ package i18n_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/translation/i18n"
+	"forgejo.org/modules/translation/i18n"
 
 	"github.com/stretchr/testify/assert"
 )

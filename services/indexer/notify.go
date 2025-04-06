@@ -6,16 +6,16 @@ package indexer
 import (
 	"context"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	code_indexer "code.gitea.io/gitea/modules/indexer/code"
-	issue_indexer "code.gitea.io/gitea/modules/indexer/issues"
-	stats_indexer "code.gitea.io/gitea/modules/indexer/stats"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	notify_service "code.gitea.io/gitea/services/notify"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	code_indexer "forgejo.org/modules/indexer/code"
+	issue_indexer "forgejo.org/modules/indexer/issues"
+	stats_indexer "forgejo.org/modules/indexer/stats"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	notify_service "forgejo.org/services/notify"
 )
 
 type indexerNotifier struct {

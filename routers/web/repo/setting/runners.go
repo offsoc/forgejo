@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"net/url"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/setting"
-	actions_shared "code.gitea.io/gitea/routers/web/shared/actions"
-	shared_user "code.gitea.io/gitea/routers/web/shared/user"
-	"code.gitea.io/gitea/services/context"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/setting"
+	actions_shared "forgejo.org/routers/web/shared/actions"
+	shared_user "forgejo.org/routers/web/shared/user"
+	"forgejo.org/services/context"
 )
 
 const (
@@ -179,7 +179,7 @@ func RunnerDeletePost(ctx *context.Context) {
 		ctx.ServerError("getRunnersCtx", err)
 		return
 	}
-	actions_shared.RunnerDeletePost(ctx, ctx.ParamsInt64(":runnerid"), rCtx.RedirectLink, rCtx.RedirectLink+url.PathEscape(ctx.Params(":runnerid")))
+	actions_shared.RunnerDeletePost(ctx, ctx.ParamsInt64(":runnerid"), rCtx.OwnerID, rCtx.RepoID, rCtx.RedirectLink, rCtx.RedirectLink+url.PathEscape(ctx.Params(":runnerid")))
 }
 
 func RedirectToDefaultSetting(ctx *context.Context) {

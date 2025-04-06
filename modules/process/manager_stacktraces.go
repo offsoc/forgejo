@@ -4,8 +4,8 @@
 package process
 
 import (
+	"bytes"
 	"fmt"
-	"io"
 	"runtime/pprof"
 	"sort"
 	"time"
@@ -175,13 +175,12 @@ func (pm *Manager) ProcessStacktraces(flat, noSystem bool) ([]*Process, int, int
 	// Now from within the lock we need to get the goroutines.
 	// Why? If we release the lock then between between filling the above map and getting
 	// the stacktraces another process could be created which would then look like a dead process below
-	reader, writer := io.Pipe()
-	defer reader.Close()
-	go func() {
-		err := pprof.Lookup("goroutine").WriteTo(writer, 0)
-		_ = writer.CloseWithError(err)
-	}()
-	stacks, err = profile.Parse(reader)
+	var buf bytes.Buffer
+	if err := pprof.Lookup("goroutine").WriteTo(&buf, 0); err != nil {
+		return nil, 0, 0, err
+	}
+
+	stacks, err = profile.ParseData(buf.Bytes())
 	if err != nil {
 		return nil, 0, 0, err
 	}

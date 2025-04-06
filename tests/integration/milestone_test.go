@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +21,7 @@ func TestViewMilestones(t *testing.T) {
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	search := htmlDoc.doc.Find(".list-header-search > .search > .input > input")
 	placeholder, _ := search.Attr("placeholder")
-	assert.Equal(t, "Search milestones...", placeholder)
+	assert.Equal(t, "Search milestones…", placeholder)
 }
 
 func TestMilestonesCount(t *testing.T) {

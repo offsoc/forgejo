@@ -12,17 +12,17 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	packages_cleanup "code.gitea.io/gitea/services/packages/cleanup"
-	packages_container "code.gitea.io/gitea/services/packages/container"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	packages_module "forgejo.org/modules/packages"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	packages_cleanup "forgejo.org/services/packages/cleanup"
+	packages_container "forgejo.org/services/packages/container"
+	"forgejo.org/tests"
 
 	oci "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/stretchr/testify/assert"
@@ -53,7 +53,7 @@ func TestPackagesContainerCleanupSHA256(t *testing.T) {
 		for range expected {
 			filtered = append(filtered, true)
 		}
-		assert.EqualValues(t, filtered, logFiltered, expected)
+		assert.Equal(t, filtered, logFiltered, expected)
 	}
 
 	userToken := ""

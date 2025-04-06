@@ -12,15 +12,15 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/system"
-	"code.gitea.io/gitea/modules/auth/password/hash"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/setting/config"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/models/system"
+	"forgejo.org/modules/auth/password/hash"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/setting/config"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/util"
 
 	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
@@ -59,6 +59,13 @@ func InitSettings() {
 	_ = hash.Register("dummy", hash.NewDummyHasher)
 
 	setting.PasswordHashAlgo, _ = hash.SetDefaultPasswordHashAlgorithm("dummy")
+	setting.InitGiteaEnvVars()
+
+	// Avoid loading the git's system config.
+	// On macOS, system config sets the osxkeychain credential helper, which will cause tests to freeze with a dialog.
+	// But we do not set it in production at the moment, because it might be a "breaking" change,
+	// more details are in "modules/git.commonBaseEnvs".
+	_ = os.Setenv("GIT_CONFIG_NOSYSTEM", "true")
 }
 
 // TestOptions represents test options

@@ -4,7 +4,7 @@
 package migrations
 
 import (
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/structs"
 )
 
 func init() {

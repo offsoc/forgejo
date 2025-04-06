@@ -1,7 +1,7 @@
 {{if .EnableCaptcha}}{{if eq .CaptchaType "image"}}
 	<div class="inline field tw-text-center">
 		<input type="hidden" name="img-captcha-id" value="{{.Captcha}}">
-		<img style="transform: scaleX(-1)" onclick="this.src=`{{AppSubUrl}}/captcha/{{.Captcha}}.png?reload=${Date.now()}`" class="captcha-img" src="{{AppSubUrl}}/captcha/{{.Captcha}}.png">
+		<img style="transform: scaleX(-1);background-color: white" onclick="this.src=`{{AppSubUrl}}/captcha/{{.Captcha}}.png?reload=${Date.now()}`" class="captcha-img" src="{{AppSubUrl}}/captcha/{{.Captcha}}.png" alt="{{ctx.Locale.Tr "captcha"}}">
 	</div>
 	<div class="required field {{if .Err_Captcha}}error{{end}}">
 		<label for="captcha">{{ctx.Locale.Tr "captcha"}}</label>
@@ -11,12 +11,12 @@
 	<div class="inline field tw-text-center required">
 		<div id="captcha" data-captcha-type="g-recaptcha" class="g-recaptcha-style" data-sitekey="{{.RecaptchaSitekey}}"></div>
 	</div>
-	<script src='{{URLJoin .RecaptchaURL "api.js"}}'></script>
+	<script defer src='{{URLJoin .RecaptchaURL "api.js"}}'></script>
 {{else if eq .CaptchaType "hcaptcha"}}
 	<div class="inline field tw-text-center required">
 		<div id="captcha" data-captcha-type="h-captcha" class="h-captcha-style" data-sitekey="{{.HcaptchaSitekey}}"></div>
 	</div>
-	<script src='https://hcaptcha.com/1/api.js'></script>
+	<script defer src='https://hcaptcha.com/1/api.js'></script>
 {{else if eq .CaptchaType "mcaptcha"}}
 	<div class="inline field tw-text-center">
 		<div class="m-captcha-style" id="mcaptcha__widget-container"></div>
@@ -26,5 +26,5 @@
 	<div class="inline field tw-text-center">
 		<div id="captcha" data-captcha-type="cf-turnstile" data-sitekey="{{.CfTurnstileSitekey}}"></div>
 	</div>
-	<script src='https://challenges.cloudflare.com/turnstile/v0/api.js'></script>
+	<script defer src='https://challenges.cloudflare.com/turnstile/v0/api.js'></script>
 {{end}}{{end}}

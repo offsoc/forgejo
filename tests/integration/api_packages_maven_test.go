@@ -8,14 +8,15 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/packages/maven"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/packages/maven"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -252,5 +253,37 @@ func TestPackageMaven(t *testing.T) {
 		req := NewRequest(t, "GET", pkgUIURL)
 		resp := MakeRequest(t, req, http.StatusOK)
 		assert.NotContains(t, resp.Body.String(), "Internal server error")
+	})
+}
+
+func TestPackageMavenConcurrent(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+
+	groupID := "com.gitea"
+	artifactID := "test-project"
+	packageVersion := "1.0.1"
+
+	root := fmt.Sprintf("/api/packages/%s/maven/%s/%s", user.Name, strings.ReplaceAll(groupID, ".", "/"), artifactID)
+
+	putFile := func(t *testing.T, path, content string, expectedStatus int) {
+		req := NewRequestWithBody(t, "PUT", root+path, strings.NewReader(content)).
+			AddBasicAuth(user.Name)
+		MakeRequest(t, req, expectedStatus)
+	}
+
+	t.Run("Concurrent Upload", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		var wg sync.WaitGroup
+		for i := 0; i < 10; i++ {
+			wg.Add(1)
+			go func(i int) {
+				putFile(t, fmt.Sprintf("/%s/%s.jar", packageVersion, strconv.Itoa(i)), "test", http.StatusCreated)
+				wg.Done()
+			}(i)
+		}
+		wg.Wait()
 	})
 }

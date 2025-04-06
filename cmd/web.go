@@ -12,17 +12,18 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "net/http/pprof" // Used for debugging if enabled and a web server is running
 
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/public"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/routers/install"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/public"
+	"forgejo.org/modules/setting"
+	"forgejo.org/routers"
+	"forgejo.org/routers/install"
 
 	"github.com/felixge/fgprof"
 	"github.com/urfave/cli/v2"
@@ -115,6 +116,16 @@ func showWebStartupMessage(msg string) {
 	log.Info("* CustomPath: %s", setting.CustomPath)
 	log.Info("* ConfigFile: %s", setting.CustomConf)
 	log.Info("%s", msg) // show startup message
+
+	if setting.CORSConfig.Enabled {
+		log.Info("CORS Service Enabled")
+	}
+	if setting.DefaultUILocation != time.Local {
+		log.Info("Default UI Location is %v", setting.DefaultUILocation.String())
+	}
+	if setting.MailService != nil {
+		log.Info("Mail Service Enabled: RegisterEmailConfirm=%v, Service.EnableNotifyMail=%v", setting.Service.RegisterEmailConfirm, setting.Service.EnableNotifyMail)
+	}
 }
 
 func serveInstall(ctx *cli.Context) error {
@@ -184,11 +195,8 @@ func serveInstalled(ctx *cli.Context) error {
 	publicFilesSet.Remove(".well-known")
 	publicFilesSet.Remove("assets")
 	publicFilesSet.Remove("robots.txt")
-	for _, fn := range publicFilesSet.Values() {
+	for fn := range publicFilesSet.Seq() {
 		log.Error("Found legacy public asset %q in CustomPath. Please move it to %s/public/assets/%s", fn, setting.CustomPath, fn)
-	}
-	if _, err := os.Stat(filepath.Join(setting.CustomPath, "robots.txt")); err == nil {
-		log.Error(`Found legacy public asset "robots.txt" in CustomPath. Please move it to %s/public/robots.txt`, setting.CustomPath)
 	}
 
 	routers.InitWebInstalled(graceful.GetManager().HammerContext())

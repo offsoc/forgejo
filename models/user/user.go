@@ -21,20 +21,20 @@ import (
 
 	_ "image/jpeg" // Needed for jpeg support
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/auth/openid"
-	"code.gitea.io/gitea/modules/auth/password/hash"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/auth/openid"
+	"forgejo.org/modules/auth/password/hash"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
 
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
@@ -154,6 +154,7 @@ type User struct {
 	DiffViewStyle       string `xorm:"NOT NULL DEFAULT ''"`
 	Theme               string `xorm:"NOT NULL DEFAULT ''"`
 	KeepActivityPrivate bool   `xorm:"NOT NULL DEFAULT false"`
+	KeepPronounsPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	EnableRepoUnitHints bool   `xorm:"NOT NULL DEFAULT true"`
 }
 
@@ -310,11 +311,6 @@ func (u *User) HTMLURL() string {
 	return setting.AppURL + url.PathEscape(u.Name)
 }
 
-// APActorID returns the IRI to the api endpoint of the user
-func (u *User) APActorID() string {
-	return fmt.Sprintf("%vapi/v1/activitypub/user-id/%v", setting.AppURL, url.PathEscape(fmt.Sprintf("%v", u.ID)))
-}
-
 // OrganisationLink returns the organization sub page link.
 func (u *User) OrganisationLink() string {
 	return setting.AppSubURL + "/org/" + url.PathEscape(u.Name)
@@ -391,9 +387,7 @@ func (u *User) SetPassword(passwd string) (err error) {
 		return err
 	}
 
-	if u.Salt, err = GetUserSalt(); err != nil {
-		return err
-	}
+	u.Salt = GetUserSalt()
 	if u.Passwd, err = hash.Parse(setting.PasswordHashAlgo).Hash(passwd, u.Salt); err != nil {
 		return err
 	}
@@ -500,6 +494,16 @@ func (u *User) GetCompleteName() string {
 	return u.Name
 }
 
+// GetPronouns returns an empty string, if the user has set to keep his
+// pronouns private from non-logged in users, otherwise the pronouns
+// are returned.
+func (u *User) GetPronouns(signed bool) string {
+	if u.KeepPronounsPrivate && !signed {
+		return ""
+	}
+	return u.Pronouns
+}
+
 func gitSafeName(name string) string {
 	return strings.TrimSpace(strings.NewReplacer("\n", "", "<", "", ">", "").Replace(name))
 }
@@ -553,13 +557,9 @@ func IsUserExist(ctx context.Context, uid int64, name string) (bool, error) {
 const SaltByteLength = 16
 
 // GetUserSalt returns a random user salt token.
-func GetUserSalt() (string, error) {
-	rBytes, err := util.CryptoRandomBytes(SaltByteLength)
-	if err != nil {
-		return "", err
-	}
+func GetUserSalt() string {
 	// Returns a 32 bytes long string.
-	return hex.EncodeToString(rBytes), nil
+	return hex.EncodeToString(util.CryptoRandomBytes(SaltByteLength))
 }
 
 // Note: The set of characters here can safely expand without a breaking change,
@@ -669,6 +669,18 @@ func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefa
 		return err
 	}
 
+	// Check if the new username can be claimed.
+	// Skip this check if done by an admin.
+	if !createdByAdmin {
+		if ok, expireTime, err := CanClaimUsername(ctx, u.Name, -1); err != nil {
+			return err
+		} else if !ok {
+			return ErrCooldownPeriod{
+				ExpireTime: expireTime,
+			}
+		}
+	}
+
 	// set system defaults
 	u.KeepEmailPrivate = setting.Service.DefaultKeepEmailPrivate
 	u.Visibility = setting.Service.DefaultUserVisibilityMode
@@ -677,7 +689,7 @@ func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefa
 	u.MaxRepoCreation = -1
 	u.Theme = setting.UI.DefaultTheme
 	u.IsRestricted = setting.Service.DefaultUserIsRestricted
-	u.IsActive = !(setting.Service.RegisterEmailConfirm || setting.Service.RegisterManualConfirm)
+	u.IsActive = !setting.Service.RegisterEmailConfirm && !setting.Service.RegisterManualConfirm
 
 	// Ensure consistency of the dates.
 	if u.UpdatedUnix < u.CreatedUnix {
@@ -754,9 +766,7 @@ func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefa
 
 	u.LowerName = strings.ToLower(u.Name)
 	u.AvatarEmail = u.Email
-	if u.Rands, err = GetUserSalt(); err != nil {
-		return err
-	}
+	u.Rands = GetUserSalt()
 	if u.Passwd != "" {
 		if err = u.SetPassword(u.Passwd); err != nil {
 			return err
@@ -842,48 +852,46 @@ func countUsers(ctx context.Context, opts *CountUserFilter) int64 {
 
 // VerifyUserActiveCode verifies that the code is valid for the given purpose for this user.
 // If delete is specified, the token will be deleted.
-func VerifyUserAuthorizationToken(ctx context.Context, code string, purpose auth.AuthorizationPurpose, delete bool) (*User, error) {
+func VerifyUserAuthorizationToken(ctx context.Context, code string, purpose auth.AuthorizationPurpose) (user *User, deleteToken func() error, err error) {
 	lookupKey, validator, found := strings.Cut(code, ":")
 	if !found {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	authToken, err := auth.FindAuthToken(ctx, lookupKey, purpose)
 	if err != nil {
 		if errors.Is(err, util.ErrNotExist) {
-			return nil, nil
+			return nil, nil, nil
 		}
-		return nil, err
+		return nil, nil, err
 	}
 
 	if authToken.IsExpired() {
-		return nil, auth.DeleteAuthToken(ctx, authToken)
+		return nil, nil, auth.DeleteAuthToken(ctx, authToken)
 	}
 
 	rawValidator, err := hex.DecodeString(validator)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if subtle.ConstantTimeCompare([]byte(authToken.HashedValidator), []byte(auth.HashValidator(rawValidator))) == 0 {
-		return nil, errors.New("validator doesn't match")
+		return nil, nil, errors.New("validator doesn't match")
 	}
 
 	u, err := GetUserByID(ctx, authToken.UID)
 	if err != nil {
 		if IsErrUserNotExist(err) {
-			return nil, nil
+			return nil, nil, nil
 		}
-		return nil, err
+		return nil, nil, err
 	}
 
-	if delete {
-		if err := auth.DeleteAuthToken(ctx, authToken); err != nil {
-			return nil, err
-		}
+	deleteToken = func() error {
+		return auth.DeleteAuthToken(ctx, authToken)
 	}
 
-	return u, nil
+	return u, deleteToken, nil
 }
 
 // ValidateUser check if user is valid to insert / update into database
@@ -1031,22 +1039,6 @@ func GetUserByName(ctx context.Context, name string) (*User, error) {
 	return u, nil
 }
 
-// GetUserEmailsByNames returns a list of e-mails corresponds to names of users
-// that have their email notifications set to enabled or onmention.
-func GetUserEmailsByNames(ctx context.Context, names []string) []string {
-	mails := make([]string, 0, len(names))
-	for _, name := range names {
-		u, err := GetUserByName(ctx, name)
-		if err != nil {
-			continue
-		}
-		if u.IsMailable() && u.EmailNotificationsPreference != EmailNotificationsDisabled {
-			mails = append(mails, u.Email)
-		}
-	}
-	return mails
-}
-
 // GetMaileableUsersByIDs gets users from ids, but only if they can receive mails
 func GetMaileableUsersByIDs(ctx context.Context, ids []int64, isMention bool) ([]*User, error) {
 	if len(ids) == 0 {
@@ -1071,17 +1063,6 @@ func GetMaileableUsersByIDs(ctx context.Context, ids []int64, isMention bool) ([
 		And("`is_active` = ?", true).
 		In("`email_notifications_preference`", EmailNotificationsEnabled, EmailNotificationsAndYourOwn).
 		Find(&ous)
-}
-
-// GetUserNamesByIDs returns usernames for all resolved users from a list of Ids.
-func GetUserNamesByIDs(ctx context.Context, ids []int64) ([]string, error) {
-	unames := make([]string, 0, len(ids))
-	err := db.GetEngine(ctx).In("id", ids).
-		Table("user").
-		Asc("name").
-		Cols("name").
-		Find(&unames)
-	return unames, err
 }
 
 // GetUserNameByID returns username for the id

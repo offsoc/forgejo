@@ -4,12 +4,14 @@
 package organization_test
 
 import (
+	"slices"
+	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -71,6 +73,18 @@ func TestGetUserOrgsList(t *testing.T) {
 	if assert.Len(t, orgs, 1) {
 		assert.EqualValues(t, 3, orgs[0].ID)
 		// repo_id: 3 is in the team, 32 is public, 5 is private with no team
-		assert.EqualValues(t, 2, orgs[0].NumRepos)
+		assert.Equal(t, 2, orgs[0].NumRepos)
 	}
+}
+
+func TestGetUserOrgsListSorting(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	orgs, err := organization.GetUserOrgsList(db.DefaultContext, &user_model.User{ID: 1})
+	require.NoError(t, err)
+
+	isSorted := slices.IsSortedFunc(orgs, func(a, b *organization.MinimalOrg) int {
+		return strings.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
+	})
+
+	assert.True(t, isSorted)
 }

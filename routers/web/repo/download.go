@@ -5,18 +5,17 @@
 package repo
 
 import (
-	"path"
 	"time"
 
-	git_model "code.gitea.io/gitea/models/git"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/httpcache"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/services/context"
+	git_model "forgejo.org/models/git"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/httpcache"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/routers/common"
+	"forgejo.org/services/context"
 )
 
 // ServeBlobOrLFS download a git.Blob redirecting to LFS if necessary
@@ -82,7 +81,7 @@ func ServeBlobOrLFS(ctx *context.Context, blob *git.Blob, lastModified *time.Tim
 	return common.ServeBlob(ctx.Base, ctx.Repo.TreePath, blob, lastModified)
 }
 
-func getBlobForEntry(ctx *context.Context) (blob *git.Blob, lastModified *time.Time) {
+func getBlobForEntry(ctx *context.Context) (*git.Blob, *time.Time) {
 	entry, err := ctx.Repo.Commit.GetTreeEntryByPath(ctx.Repo.TreePath)
 	if err != nil {
 		if git.IsErrNotExist(err) {
@@ -98,19 +97,14 @@ func getBlobForEntry(ctx *context.Context) (blob *git.Blob, lastModified *time.T
 		return nil, nil
 	}
 
-	info, _, err := git.Entries([]*git.TreeEntry{entry}).GetCommitsInfo(ctx, ctx.Repo.Commit, path.Dir("/" + ctx.Repo.TreePath)[1:])
+	latestCommit, err := ctx.Repo.GitRepo.GetTreePathLatestCommit(ctx.Repo.Commit.ID.String(), ctx.Repo.TreePath)
 	if err != nil {
-		ctx.ServerError("GetCommitsInfo", err)
+		ctx.ServerError("GetTreePathLatestCommit", err)
 		return nil, nil
 	}
+	lastModified := &latestCommit.Committer.When
 
-	if len(info) == 1 {
-		// Not Modified
-		lastModified = &info[0].Commit.Committer.When
-	}
-	blob = entry.Blob()
-
-	return blob, lastModified
+	return entry.Blob(), lastModified
 }
 
 // SingleDownload download a file by repos path

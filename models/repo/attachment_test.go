@@ -6,9 +6,9 @@ package repo_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -46,11 +46,7 @@ func TestGetByCommentOrIssueID(t *testing.T) {
 func TestDeleteAttachments(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
-	count, err := repo_model.DeleteAttachmentsByIssue(db.DefaultContext, 4, false)
-	require.NoError(t, err)
-	assert.Equal(t, 2, count)
-
-	count, err = repo_model.DeleteAttachmentsByComment(db.DefaultContext, 2, false)
+	count, err := repo_model.DeleteAttachmentsByComment(db.DefaultContext, 2, false)
 	require.NoError(t, err)
 	assert.Equal(t, 2, count)
 

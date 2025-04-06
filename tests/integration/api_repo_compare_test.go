@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -35,6 +35,7 @@ func TestAPICompareBranches(t *testing.T) {
 
 	assert.Equal(t, 2, apiResp.TotalCommits)
 	assert.Len(t, apiResp.Commits, 2)
+	assert.Len(t, apiResp.Files, 3)
 }
 
 func TestAPICompareCommits(t *testing.T) {
@@ -54,4 +55,5 @@ func TestAPICompareCommits(t *testing.T) {
 
 	assert.Equal(t, 2, apiResp.TotalCommits)
 	assert.Len(t, apiResp.Commits, 2)
+	assert.Len(t, apiResp.Files, 3)
 }

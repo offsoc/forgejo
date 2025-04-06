@@ -7,13 +7,13 @@ package org
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	shared_user "code.gitea.io/gitea/routers/web/shared/user"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models"
+	"forgejo.org/models/organization"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	shared_user "forgejo.org/routers/web/shared/user"
+	"forgejo.org/services/context"
 )
 
 const (
@@ -60,8 +60,8 @@ func Members(ctx *context.Context) {
 	}
 
 	pager := context.NewPagination(int(total), setting.UI.MembersPagingNum, page, 5)
-	opts.ListOptions.Page = page
-	opts.ListOptions.PageSize = setting.UI.MembersPagingNum
+	opts.Page = page
+	opts.PageSize = setting.UI.MembersPagingNum
 	members, membersIsPublic, err := organization.FindOrgMembers(ctx, opts)
 	if err != nil {
 		ctx.ServerError("GetMembers", err)

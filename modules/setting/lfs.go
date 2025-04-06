@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/modules/generate"
+	"forgejo.org/modules/generate"
 )
 
 // LFS represents the server-side configuration for Git LFS.
@@ -80,10 +80,7 @@ func loadLFSFrom(rootCfg ConfigProvider) error {
 	jwtSecretBase64 := loadSecret(rootCfg.Section("server"), "LFS_JWT_SECRET_URI", "LFS_JWT_SECRET")
 	LFS.JWTSecretBytes, err = generate.DecodeJwtSecret(jwtSecretBase64)
 	if err != nil {
-		LFS.JWTSecretBytes, jwtSecretBase64, err = generate.NewJwtSecret()
-		if err != nil {
-			return fmt.Errorf("error generating JWT Secret for custom config: %v", err)
-		}
+		LFS.JWTSecretBytes, jwtSecretBase64 = generate.NewJwtSecret()
 
 		// Save secret
 		saveCfg, err := rootCfg.PrepareSaving()

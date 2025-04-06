@@ -39,28 +39,6 @@ func Enabled(enable ...bool) Option {
 	})
 }
 
-// WithInlineDollarParser enables or disables the parsing of $...$
-func WithInlineDollarParser(enable ...bool) Option {
-	value := true
-	if len(enable) > 0 {
-		value = enable[0]
-	}
-	return extensionFunc(func(e *Extension) {
-		e.parseDollarInline = value
-	})
-}
-
-// WithBlockDollarParser enables or disables the parsing of $$...$$
-func WithBlockDollarParser(enable ...bool) Option {
-	value := true
-	if len(enable) > 0 {
-		value = enable[0]
-	}
-	return extensionFunc(func(e *Extension) {
-		e.parseDollarBlock = value
-	})
-}
-
 // Math represents a math extension with default rendered delimiters
 var Math = &Extension{
 	enabled:           true,

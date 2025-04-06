@@ -9,8 +9,8 @@ import (
 	"net/url"
 	"strings"
 
-	"code.gitea.io/gitea/modules/session"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/session"
+	"forgejo.org/modules/setting"
 )
 
 // SetRedirectToCookie convenience function to set the RedirectTo cookie consistently

@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/util"
 )
 
 // Use at most this many bytes to determine Content Type.

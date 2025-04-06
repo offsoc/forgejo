@@ -1,0 +1,24 @@
+{
+    "repo.pulls.merged_title_desc": {
+        "one": "sloučil/a %[1]d revizi z větve <code>%[2]s</code> do větve <code>%[3]s</code> %[4]s",
+        "few": "sloučil/a %[1]d revize z větve <code>%[2]s</code> do větve <code>%[3]s</code> před %[4]s",
+        "other": "sloučil/a %[1]d revizí z větve <code>%[2]s</code> do větve <code>%[3]s</code> před %[4]s"
+    },
+    "repo.pulls.title_desc": {
+        "one": "žádá o sloučení %[1]d revize z větve <code>%[2]s</code> do větve <code id=\"%[4]s\">%[3]s</code>",
+        "few": "žádá o sloučení %[1]d revizí z větve <code>%[2]s</code> do větve <code id=\"%[4]s\">%[3]s</code>",
+        "other": "žádá o sloučení %[1]d revizí z větve <code>%[2]s</code> do větve <code id=\"%[4]s\">%[3]s</code>"
+    },
+    "search.milestone_kind": "Hledat milníky…",
+    "home.welcome.no_activity": "Žádná aktivita",
+    "home.welcome.activity_hint": "Váš feed je zatím prázdný. Zde se budou zobrazovat vaše akce a aktivity z repozitářů, které sledujete.",
+    "home.explore_repos": "Procházet repozitáře",
+    "home.explore_users": "Procházet uživatele",
+    "home.explore_orgs": "Procházet organizace",
+    "incorrect_root_url": "Tato instance Forgejo je nastavena tak, aby běžela na adrese „%s“. Vy si momentálně prohlížíte Forgejo na jiné adrese, což může způsobit rozbití některých částí aplikace. Správná adresa je ovládána správci Forgejo pomocí nastavení ROOT_URL v souboru app.ini.",
+    "themes.names.forgejo-auto": "Forgejo (podle motivu systému)",
+    "themes.names.forgejo-light": "Forgejo – světlé",
+    "themes.names.forgejo-dark": "Forgejo – tmavé",
+    "error.not_found.title": "Stránka nenalezena",
+    "alert.asset_load_failed": "Nepodařilo se načíst soubory příloh z {path}. Ujistěte se, že jsou dané soubory přístupné."
+}

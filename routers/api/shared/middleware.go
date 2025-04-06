@@ -6,13 +6,11 @@ package shared
 import (
 	"net/http"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/routers/common"
+	"forgejo.org/services/auth"
+	"forgejo.org/services/context"
 
 	"github.com/go-chi/cors"
 )
@@ -49,10 +47,6 @@ func buildAuthGroup() *auth.Group {
 	)
 	if setting.Service.EnableReverseProxyAuthAPI {
 		group.Add(&auth.ReverseProxy{})
-	}
-
-	if setting.IsWindows && auth_model.IsSSPIEnabled(db.DefaultContext) {
-		group.Add(&auth.SSPI{}) // it MUST be the last, see the comment of SSPI
 	}
 
 	return group

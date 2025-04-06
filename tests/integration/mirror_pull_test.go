@@ -4,20 +4,19 @@
 package integration
 
 import (
-	"context"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/migration"
-	mirror_service "code.gitea.io/gitea/services/mirror"
-	release_service "code.gitea.io/gitea/services/release"
-	repo_service "code.gitea.io/gitea/services/repository"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/migration"
+	mirror_service "forgejo.org/services/mirror"
+	release_service "forgejo.org/services/release"
+	repo_service "forgejo.org/services/repository"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -50,7 +49,7 @@ func TestMirrorPull(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, mirrorRepo.IsMirror, "expected pull-mirror repo to be marked as a mirror immediately after its creation")
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	mirror, err := repo_service.MigrateRepositoryGitData(ctx, user, mirrorRepo, opts, nil)
 	require.NoError(t, err)
@@ -89,7 +88,7 @@ func TestMirrorPull(t *testing.T) {
 
 	count, err := db.Count[repo_model.Release](db.DefaultContext, findOptions)
 	require.NoError(t, err)
-	assert.EqualValues(t, initCount+1, count)
+	assert.Equal(t, initCount+1, count)
 
 	release, err := repo_model.GetRelease(db.DefaultContext, repo.ID, "v0.2")
 	require.NoError(t, err)
@@ -100,5 +99,5 @@ func TestMirrorPull(t *testing.T) {
 
 	count, err = db.Count[repo_model.Release](db.DefaultContext, findOptions)
 	require.NoError(t, err)
-	assert.EqualValues(t, initCount, count)
+	assert.Equal(t, initCount, count)
 }

@@ -326,8 +326,8 @@ i.grey.icon.icon.icon.icon {
 .ui.ui.ui.basic.primary.label {
   color: var(--color-text-dark) !important;
 }
-.ui.basic.yellow.label.pending-label {
-  background: var(--color-light) !important;
+.ui.yellow.label.pending-label {
+  color: var(--color-warning-text) !important;
 }
 ::selection {
   background: var(--steel-100) !important;

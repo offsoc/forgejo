@@ -6,9 +6,9 @@ package actions
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/builder"
 )
@@ -50,7 +50,7 @@ type FindTaskOptions struct {
 	RepoID        int64
 	OwnerID       int64
 	CommitSHA     string
-	Status        Status
+	Status        []Status
 	UpdatedBefore timeutil.TimeStamp
 	StartedBefore timeutil.TimeStamp
 	RunnerID      int64
@@ -67,8 +67,8 @@ func (opts FindTaskOptions) ToConds() builder.Cond {
 	if opts.CommitSHA != "" {
 		cond = cond.And(builder.Eq{"commit_sha": opts.CommitSHA})
 	}
-	if opts.Status > StatusUnknown {
-		cond = cond.And(builder.Eq{"status": opts.Status})
+	if opts.Status != nil {
+		cond = cond.And(builder.In("status", opts.Status))
 	}
 	if opts.UpdatedBefore > 0 {
 		cond = cond.And(builder.Lt{"updated": opts.UpdatedBefore})

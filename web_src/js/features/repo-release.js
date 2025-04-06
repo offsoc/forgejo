@@ -32,6 +32,7 @@ function initTagNameEditor() {
   const newTagHelperText = el.getAttribute('data-tag-helper-new');
   const existingTagHelperText = el.getAttribute('data-tag-helper-existing');
 
+  let previousTag = '';
   document.getElementById('tag-name').addEventListener('keyup', (e) => {
     const value = e.target.value;
     const tagHelper = document.getElementById('tag-helper');
@@ -43,6 +44,12 @@ function initTagNameEditor() {
       showElem('#tag-target-selector');
       tagHelper.textContent = value ? newTagHelperText : defaultTagHelperText;
     }
+
+    const title_input = document.getElementById('release-title');
+    if (!title_input.value || previousTag === title_input.value) {
+      title_input.value = value;
+    }
+    previousTag = value;
   });
 }
 

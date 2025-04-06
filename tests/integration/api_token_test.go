@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -27,6 +27,23 @@ func TestAPICreateAndDeleteToken(t *testing.T) {
 	deleteAPIAccessToken(t, newAccessToken, user)
 
 	newAccessToken = createAPIAccessTokenWithoutCleanUp(t, "test-key-2", user, []auth_model.AccessTokenScope{auth_model.AccessTokenScopeAll})
+	deleteAPIAccessToken(t, newAccessToken, user)
+}
+
+func TestAPIGetTokens(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+
+	// with basic auth...
+	req := NewRequest(t, "GET", "/api/v1/users/user2/tokens").
+		AddBasicAuth(user.Name)
+	MakeRequest(t, req, http.StatusOK)
+
+	// ... or with a token.
+	newAccessToken := createAPIAccessTokenWithoutCleanUp(t, "test-key-1", user, []auth_model.AccessTokenScope{auth_model.AccessTokenScopeAll})
+	req = NewRequest(t, "GET", "/api/v1/users/user2/tokens").
+		AddTokenAuth(newAccessToken.Token)
+	MakeRequest(t, req, http.StatusOK)
 	deleteAPIAccessToken(t, newAccessToken, user)
 }
 
@@ -507,7 +524,7 @@ func runTestCase(t *testing.T, testCase *requiredScopeTestCase, user *user_model
 				} else if minRequiredLevel == auth_model.Write {
 					unauthorizedLevel = auth_model.Read
 				} else {
-					assert.FailNow(t, "Invalid test case: Unknown access token scope level: %v", minRequiredLevel)
+					assert.FailNow(t, "Invalid test case", "Unknown access token scope level: %v", minRequiredLevel)
 				}
 			}
 

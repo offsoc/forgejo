@@ -9,13 +9,13 @@ import (
 	"html"
 	"html/template"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/avatars"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	gitea_html "code.gitea.io/gitea/modules/html"
-	"code.gitea.io/gitea/modules/setting"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/avatars"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	gitea_html "forgejo.org/modules/html"
+	"forgejo.org/modules/setting"
 )
 
 type AvatarUtils struct {
@@ -34,7 +34,7 @@ func AvatarHTML(src string, size int, class, name string) template.HTML {
 		name = "avatar"
 	}
 
-	return template.HTML(`<img loading="lazy" class="` + class + `" src="` + src + `" title="` + html.EscapeString(name) + `" width="` + sizeStr + `" height="` + sizeStr + `"/>`)
+	return template.HTML(`<img loading="lazy" alt="" class="` + class + `" src="` + src + `" title="` + html.EscapeString(name) + `" width="` + sizeStr + `" height="` + sizeStr + `"/>`)
 }
 
 // Avatar renders user avatars. args: user, size (int), class (string)

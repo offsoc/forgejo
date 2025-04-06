@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
 
 	"github.com/stretchr/testify/require"
 )

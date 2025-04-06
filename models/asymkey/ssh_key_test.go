@@ -12,9 +12,9 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
 
 	"github.com/42wim/sshsig"
 	"github.com/stretchr/testify/assert"
@@ -35,6 +35,7 @@ func Test_SSHParsePublicKey(t *testing.T) {
 		{"ecdsa-384", false, "ecdsa", 384, "ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBINmioV+XRX1Fm9Qk2ehHXJ2tfVxW30ypUWZw670Zyq5GQfBAH6xjygRsJ5wWsHXBsGYgFUXIHvMKVAG1tpw7s6ax9oA+dJOJ7tj+vhn8joFqT+sg3LYHgZkHrfqryRasQ== nocomment"},
 		{"ecdsa-sk", true, "ecdsa-sk", 256, "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBGXEEzWmm1dxb+57RoK5KVCL0w2eNv9cqJX2AGGVlkFsVDhOXHzsadS3LTK4VlEbbrDMJdoti9yM8vclA8IeRacAAAAEc3NoOg== nocomment"},
 		{"ed25519-sk", true, "ed25519-sk", 256, "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIE7kM1R02+4ertDKGKEDcKG0s+2vyDDcIvceJ0Gqv5f1AAAABHNzaDo= nocomment"},
+		{"ed25519-cert-v01", true, "ed25519", 256, "ssh-ed25519-cert-v01@openssh.com AAAAIHNzaC1lZDI1NTE5LWNlcnQtdjAxQG9wZW5zc2guY29tAAAAIAlIAPlEj0mYQzQo8Ks0Nm/Ct8ceNkyJSf4DLuF5l7+5AAAAIEuWAoaBo2tT29/oMNnoDfdAPRCIdM2RGapKUhY4nDfLRgPQwfnRoc0AAAABAAAAcHZhdWx0LW9pZGMtNmRhYjdiZDgtNDg5YS00MDFkLTg3ZmItNjdjNTlhMDZkZDkxLTNjNTk2M2YyMGRmMDM3MDkyMzc1YmNiYmNiNzkxY2EyZWIxM2I0NGZhMzc2NTcwMWI0MjMwODU0MWFmNjhkNTgAAAALAAAAB2Zvcmdlam8AAAAAZ6/RUQAAAABn115vAAAAAAAAAAAAAAAAAAACFwAAAAdzc2gtcnNhAAAAAwEAAQAAAgEAySnM/TvD117GyKgOgMatDB2t+fCHORFaWVmH5SaadAzNJ2DfDAauRSLfnim1xdgAOMTzsPEEHH47zyYMjE85o2AiJxrfUBMw3O/7AbNc6+HyLr/txH4+vD9tWQknKnpVWM+3Z9wiHDcOdKRoXCmFZKJH1vxs16GNWjwbrfNiimv7Oi0fadgvTDKX603gpLTuVDXqs9eQFLCONptei86JYBAJqaHvg51k8YUCKt9WFqKAj7BJUWmrDvhv5VFMOsnZieJjqxkoxnpsQNlXfPzxK0vIpJofbYfWwscv/g9WZypHwO1ZR2PqzKm99YrSdr8w5256l0f44vsF0NSP0N7bDQEfYYnRGj8zWTYCBFD+uYF7AxIeaRUpZoTQO8MvCHOLMIDinNgEeCUvNA2v9zHl4BGq+PQjzUKAgJiKj0MZeiCDAmQ22g83ggQlB6BOrBb1fNa/S1cmTbGHQ2oAN358aqkmHVCBhPOyA2Rf65D2M2vzDlUdOsNDUIWAHk7GbwSNGDgcYfTWqtR5fTzp2MJovMh1dDUDXjOvojbhzjJtSy9+rzUYIv18aXdOitzVBgPMWdeVCZFZv4OKF+5MiqxQvedUvfiSjsdxZWLxyT1CJ88G3MzxNMS/Djm86T8h/Oa55bdvFtqpsLfvpIqq0pnXq1V/vF2j1MWwRB5z5Xh/HtEAAAIUAAAADHJzYS1zaGEyLTI1NgAAAgB2I2gzqemQl8/ETxtakALlm/2BpUcbhADcFWuoH6BCPnWHuTSwf3OayM6KXv1PQfL3YFRoi9Afrp8kVFL6DePsmKH+0BUEMz71sZ7v1ty7pwfzibItGnpTbQXhzbEiNYAFoz77rl7oaXF7pV6JNZhj3DVAB5gVA2oN5KRNVxijz+6uyuFJEw1HIl1C7GworvGwZcN7BThTEh3i72/Vntejy9Z8uGVjSFjS0rjRo2oXK1LKN0rVt66p3TmCWHouLkVnOTk0qrhLGlL2HVyo24OYHbkAAObD9b6aMDYlmluk6NsaiTKsSTsvMrbIbjtFQlh7nNyoPhZ0VMwaT1l10pDQ5uxWWZjKGIkz4xM1ZfpBszjJNPo+ivYQnTSjj9LwkbLAT9a/5LawSj80TGcLEMO+0eyPdJsP0wYmOVRFAZeRiBgwb3HrzcF6Wqr8icj1EjYkKSy9YFHGTnFBGknpdh3HGwghRXrCUwAnSM76db9pv4/qowT8LthtJ3dY5Epe0OJ1Tqm+q8bkGH4gB+7uqLSqM5pIHSKLp7lfHQBt1J6xa7H2saiweaWjU+QGTgQ2Lg+uUC5DXJrmm60CeFJ4BoGhUenDlgijbQpjH/l6330PbwefgjWtUK/pqaEA4lCoPyvJ+eF2DbYfPiAIBAFQnhVJJae4AH+XoCt29nb2j30ztg== nocomment"},
 	}
 
 	for _, tc := range testCases {
@@ -43,7 +44,7 @@ func Test_SSHParsePublicKey(t *testing.T) {
 				keyTypeN, lengthN, err := SSHNativeParsePublicKey(tc.content)
 				require.NoError(t, err)
 				assert.Equal(t, tc.keyType, keyTypeN)
-				assert.EqualValues(t, tc.length, lengthN)
+				assert.Equal(t, tc.length, lengthN)
 			})
 			if tc.skipSSHKeygen {
 				return
@@ -53,19 +54,19 @@ func Test_SSHParsePublicKey(t *testing.T) {
 				if err != nil {
 					// Some servers do not support ecdsa format.
 					if !strings.Contains(err.Error(), "line 1 too long:") {
-						assert.FailNow(t, "%v", err)
+						require.NoError(t, err)
 					}
 				}
 				assert.Equal(t, tc.keyType, keyTypeK)
-				assert.EqualValues(t, tc.length, lengthK)
+				assert.Equal(t, tc.length, lengthK)
 			})
 			t.Run("SSHParseKeyNative", func(t *testing.T) {
 				keyTypeK, lengthK, err := SSHNativeParsePublicKey(tc.content)
 				if err != nil {
-					assert.FailNow(t, "%v", err)
+					require.NoError(t, err)
 				}
 				assert.Equal(t, tc.keyType, keyTypeK)
-				assert.EqualValues(t, tc.length, lengthK)
+				assert.Equal(t, tc.length, lengthK)
 			})
 		})
 	}

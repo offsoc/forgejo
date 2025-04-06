@@ -34,6 +34,7 @@ _testmain.go
 
 *coverage.out
 coverage.all
+coverage/
 cpu.out
 
 /modules/migration/bindata.go

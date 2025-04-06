@@ -7,20 +7,20 @@ import (
 	"net/http"
 	"time"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/context"
+	issues_model "forgejo.org/models/issues"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/services/context"
 )
 
 const cacheKeyNodeInfoUsage = "API_NodeInfoUsage"
 
-// NodeInfo returns the NodeInfo for the Gitea instance to allow for federation
+// NodeInfo returns the NodeInfo for the Forgejo instance to allow for federation
 func NodeInfo(ctx *context.APIContext) {
 	// swagger:operation GET /nodeinfo miscellaneous getNodeInfo
 	// ---
-	// summary: Returns the nodeinfo of the Gitea application
+	// summary: Returns the nodeinfo of the Forgejo application
 	// produces:
 	// - application/json
 	// responses:

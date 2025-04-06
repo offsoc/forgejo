@@ -7,8 +7,8 @@ import (
 	"bytes"
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
 
 	"github.com/42wim/sshsig"
 )

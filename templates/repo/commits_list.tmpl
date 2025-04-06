@@ -81,6 +81,14 @@
 						<td class="text right aligned tw-py-0">
 							<button class="btn interact-bg tw-p-2" data-tooltip-content="{{ctx.Locale.Tr "copy_hash"}}" data-clipboard-text="{{.ID}}">{{svg "octicon-copy"}}</button>
 							{{if not $.PageIsWiki}}
+							{{if $.FileName}}
+							<a
+								class="btn interact-bg tw-p-2"
+								data-tooltip-content="{{ctx.Locale.Tr "repo.commits.view_single_diff"}}"
+								href="{{printf "%s/commit/%s?files=%s" $commitRepoLink (PathEscape .ID.String) (PathEscapeSegments $.FileName)}}">
+								{{svg "octicon-file-diff"}}
+							</a>
+							{{end}}
 							<a
 								class="btn interact-bg tw-p-2"
 								data-tooltip-content="{{ctx.Locale.Tr "repo.commits.view_path"}}"

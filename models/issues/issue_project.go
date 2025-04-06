@@ -6,10 +6,12 @@ package issues
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	project_model "code.gitea.io/gitea/models/project"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	org_model "forgejo.org/models/organization"
+	project_model "forgejo.org/models/project"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/util"
 )
 
 // LoadProject load the project the issue was assigned to
@@ -48,22 +50,28 @@ func (issue *Issue) ProjectColumnID(ctx context.Context) int64 {
 }
 
 // LoadIssuesFromColumn load issues assigned to this column
-func LoadIssuesFromColumn(ctx context.Context, b *project_model.Column) (IssueList, error) {
-	issueList, err := Issues(ctx, &IssuesOptions{
+func LoadIssuesFromColumn(ctx context.Context, b *project_model.Column, doer *user_model.User, org *org_model.Organization, isClosed optional.Option[bool]) (IssueList, error) {
+	issueOpts := &IssuesOptions{
 		ProjectColumnID: b.ID,
 		ProjectID:       b.ProjectID,
 		SortType:        "project-column-sorting",
-	})
+		IsClosed:        isClosed,
+		AllPublic:       true,
+	}
+	if doer != nil {
+		issueOpts.User = doer
+		issueOpts.Org = org
+	}
+
+	issueList, err := Issues(ctx, issueOpts)
 	if err != nil {
 		return nil, err
 	}
 
 	if b.Default {
-		issues, err := Issues(ctx, &IssuesOptions{
-			ProjectColumnID: db.NoConditionID,
-			ProjectID:       b.ProjectID,
-			SortType:        "project-column-sorting",
-		})
+		issueOpts.ProjectColumnID = db.NoConditionID
+
+		issues, err := Issues(ctx, issueOpts)
 		if err != nil {
 			return nil, err
 		}
@@ -78,10 +86,10 @@ func LoadIssuesFromColumn(ctx context.Context, b *project_model.Column) (IssueLi
 }
 
 // LoadIssuesFromColumnList load issues assigned to the columns
-func LoadIssuesFromColumnList(ctx context.Context, bs project_model.ColumnList) (map[int64]IssueList, error) {
+func LoadIssuesFromColumnList(ctx context.Context, bs project_model.ColumnList, doer *user_model.User, org *org_model.Organization, isClosed optional.Option[bool]) (map[int64]IssueList, error) {
 	issuesMap := make(map[int64]IssueList, len(bs))
 	for i := range bs {
-		il, err := LoadIssuesFromColumn(ctx, bs[i])
+		il, err := LoadIssuesFromColumn(ctx, bs[i], doer, org, isClosed)
 		if err != nil {
 			return nil, err
 		}
@@ -159,4 +167,37 @@ func IssueAssignOrRemoveProject(ctx context.Context, issue *Issue, doer *user_mo
 			Sorting:         newSorting,
 		})
 	})
+}
+
+// NumIssuesInProjects returns the amount of issues assigned to one of the project
+// in the list which the doer can access.
+func NumIssuesInProjects(ctx context.Context, pl []*project_model.Project, doer *user_model.User, org *org_model.Organization, isClosed optional.Option[bool]) (map[int64]int, error) {
+	numMap := make(map[int64]int, len(pl))
+	for _, p := range pl {
+		num, err := NumIssuesInProject(ctx, p, doer, org, isClosed)
+		if err != nil {
+			return nil, err
+		}
+		numMap[p.ID] = num
+	}
+
+	return numMap, nil
+}
+
+// NumIssuesInProject returns the amount of issues assigned to the project which
+// the doer can access.
+func NumIssuesInProject(ctx context.Context, p *project_model.Project, doer *user_model.User, org *org_model.Organization, isClosed optional.Option[bool]) (int, error) {
+	numIssuesInProject := int(0)
+	bs, err := p.GetColumns(ctx)
+	if err != nil {
+		return 0, err
+	}
+	im, err := LoadIssuesFromColumnList(ctx, bs, doer, org, isClosed)
+	if err != nil {
+		return 0, err
+	}
+	for _, il := range im {
+		numIssuesInProject += len(il)
+	}
+	return numIssuesInProject, nil
 }

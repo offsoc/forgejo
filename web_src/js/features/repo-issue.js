@@ -37,27 +37,27 @@ export function initRepoIssueTimeTracking() {
     $('.issue-start-time-modal').modal({
       duration: 200,
       onApprove() {
-        $('#add_time_manual_form').trigger('submit');
+        document.getElementById('add_time_manual_form').requestSubmit();
       },
     }).modal('show');
     $('.issue-start-time-modal input').on('keydown', (e) => {
       if ((e.keyCode || e.key) === 13) {
-        $('#add_time_manual_form').trigger('submit');
+        document.getElementById('add_time_manual_form').requestSubmit();
       }
     });
   });
   $(document).on('click', '.issue-start-time, .issue-stop-time', () => {
-    $('#toggle_stopwatch_form').trigger('submit');
+    document.getElementById('toggle_stopwatch_form').requestSubmit();
   });
   $(document).on('click', '.issue-cancel-time', () => {
-    $('#cancel_stopwatch_form').trigger('submit');
+    document.getElementById('cancel_stopwatch_form').requestSubmit();
   });
   $(document).on('click', 'button.issue-delete-time', function () {
     const sel = `.issue-delete-time-modal[data-id="${$(this).data('id')}"]`;
     $(sel).modal({
       duration: 200,
       onApprove() {
-        $(`${sel} form`).trigger('submit');
+        document.getElementById(`${sel} form`).requestSubmit();
       },
     }).modal('show');
   });
@@ -139,7 +139,7 @@ export function initRepoIssueSidebarList() {
           const filteredResponse = {success: true, results: []};
           const currIssueId = $('#new-dependency-drop-list').data('issue-id');
           // Parse the response from the api to work with our dropdown
-          $.each(response, (_i, issue) => {
+          for (const [_, issue] of Object.entries(response)) {
             // Don't list current issue in the dependency list.
             if (issue.id === currIssueId) {
               return;
@@ -149,7 +149,7 @@ export function initRepoIssueSidebarList() {
               }<div class="text small tw-break-anywhere">${htmlEscape(issue.repository.full_name)}</div>`,
               value: issue.id,
             });
-          });
+          }
           return filteredResponse;
         },
         cache: false,
@@ -247,7 +247,7 @@ export function initRepoIssueDependencyDelete() {
       onApprove: () => {
         $('#removeDependencyID').val(id);
         $('#dependencyType').val(type);
-        $('#removeDependencyForm').trigger('submit');
+        document.getElementById('removeDependencyForm').requestSubmit();
       },
     }).modal('show');
   });
@@ -345,12 +345,12 @@ export function initRepoIssueReferenceRepositorySearch() {
         url: `${appSubUrl}/repo/search?q={query}&limit=20`,
         onResponse(response) {
           const filteredResponse = {success: true, results: []};
-          $.each(response.data, (_r, repo) => {
+          for (const repo of response.data) {
             filteredResponse.results.push({
               name: htmlEscape(repo.repository.full_name),
               value: repo.repository.full_name,
             });
-          });
+          }
           return filteredResponse;
         },
         cache: false,
@@ -369,9 +369,9 @@ export function initRepoIssueWipTitle() {
   $('.title_wip_desc > a').on('click', (e) => {
     e.preventDefault();
 
-    const $issueTitle = $('#issue_title');
-    $issueTitle.trigger('focus');
-    const value = $issueTitle.val().trim().toUpperCase();
+    const issueTitleEl = document.getElementById('issue_title');
+    issueTitleEl.focus();
+    const value = issueTitleEl.value.trim().toUpperCase();
 
     const wipPrefixes = $('.title_wip_desc').data('wip-prefixes');
     for (const prefix of wipPrefixes) {
@@ -380,7 +380,7 @@ export function initRepoIssueWipTitle() {
       }
     }
 
-    $issueTitle.val(`${wipPrefixes[0]} ${$issueTitle.val()}`);
+    issueTitleEl.value = `${wipPrefixes[0]} ${issueTitleEl.value}`;
   });
 }
 
@@ -517,8 +517,8 @@ export function initRepoPullRequestReview() {
   // The following part is only for diff views
   if (!$('.repository.pull.diff').length) return;
 
-  const $reviewBtn = $('.js-btn-review');
-  const $panel = $reviewBtn.parent().find('.review-box-panel');
+  const $reviewBtn = $reviewBox.parent().find('.js-btn-review');
+  const $panel = $reviewBox.parent().find('.review-box-panel');
   const $closeBtn = $panel.find('.close');
 
   if ($reviewBtn.length && $panel.length) {
@@ -631,9 +631,11 @@ export function initRepoIssueTitleEdit() {
 
   const issueTitleInput = issueTitleEditor.querySelector('input');
   const oldTitle = issueTitleInput.getAttribute('data-old-title');
+  const normalModeElements = [issueTitleDisplay, '#pull-desc-display', '#agit-label', '#editable-label'];
   issueTitleDisplay.querySelector('#issue-title-edit-show').addEventListener('click', () => {
-    hideElem(issueTitleDisplay);
-    hideElem('#pull-desc-display');
+    for (const element of normalModeElements) {
+      hideElem(element);
+    }
     showElem(issueTitleEditor);
     showElem('#pull-desc-editor');
     if (!issueTitleInput.value.trim()) {
@@ -644,8 +646,9 @@ export function initRepoIssueTitleEdit() {
   issueTitleEditor.querySelector('.ui.cancel.button').addEventListener('click', () => {
     hideElem(issueTitleEditor);
     hideElem('#pull-desc-editor');
-    showElem(issueTitleDisplay);
-    showElem('#pull-desc-display');
+    for (const element of normalModeElements) {
+      showElem(element);
+    }
   });
 
   const pullDescEditor = document.querySelector('#pull-desc-editor'); // it may not exist for a merged PR

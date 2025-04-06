@@ -9,14 +9,14 @@ import (
 	"net/url"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/activitypub"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/activitypub"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/routers"
+	"forgejo.org/tests"
 
 	ap "github.com/go-ap/activitypub"
 	"github.com/stretchr/testify/assert"
@@ -26,33 +26,47 @@ import (
 func TestActivityPubPerson(t *testing.T) {
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
-	defer tests.PrepareTestEnv(t)()
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		userID := 2
+		username := "user2"
+		userURL := fmt.Sprintf("%sapi/v1/activitypub/user-id/%d", u, userID)
 
-	userID := 2
-	username := "user2"
-	req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/activitypub/user-id/%v", userID))
-	resp := MakeRequest(t, req, http.StatusOK)
-	assert.Contains(t, resp.Body.String(), "@context")
+		user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
-	var person ap.Person
-	err := person.UnmarshalJSON(resp.Body.Bytes())
-	require.NoError(t, err)
+		clientFactory, err := activitypub.GetClientFactory(db.DefaultContext)
+		require.NoError(t, err)
 
-	assert.Equal(t, ap.PersonType, person.Type)
-	assert.Equal(t, username, person.PreferredUsername.String())
-	keyID := person.GetID().String()
-	assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v$", userID), keyID)
-	assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v/outbox$", userID), person.Outbox.GetID().String())
-	assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%v/inbox$", userID), person.Inbox.GetID().String())
+		apClient, err := clientFactory.WithKeys(db.DefaultContext, user1, user1.APActorKeyID())
+		require.NoError(t, err)
 
-	pubKey := person.PublicKey
-	assert.NotNil(t, pubKey)
-	publicKeyID := keyID + "#main-key"
-	assert.Equal(t, pubKey.ID.String(), publicKeyID)
+		// Unsigned request
+		t.Run("UnsignedRequest", func(t *testing.T) {
+			req := NewRequest(t, "GET", userURL)
+			MakeRequest(t, req, http.StatusBadRequest)
+		})
 
-	pubKeyPem := pubKey.PublicKeyPem
-	assert.NotNil(t, pubKeyPem)
-	assert.Regexp(t, "^-----BEGIN PUBLIC KEY-----", pubKeyPem)
+		t.Run("SignedRequestValidation", func(t *testing.T) {
+			// Signed requset
+			resp, err := apClient.GetBody(userURL)
+			require.NoError(t, err)
+
+			var person ap.Person
+			err = person.UnmarshalJSON(resp)
+			require.NoError(t, err)
+
+			assert.Equal(t, ap.PersonType, person.Type)
+			assert.Equal(t, username, person.PreferredUsername.String())
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d$", userID), person.GetID())
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/outbox$", userID), person.Outbox.GetID().String())
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/inbox$", userID), person.Inbox.GetID().String())
+
+			assert.NotNil(t, person.PublicKey)
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d#main-key$", userID), person.PublicKey.ID)
+
+			assert.NotNil(t, person.PublicKey.PublicKeyPem)
+			assert.Regexp(t, "^-----BEGIN PUBLIC KEY-----", person.PublicKey.PublicKeyPem)
+		})
+	})
 }
 
 func TestActivityPubMissingPerson(t *testing.T) {

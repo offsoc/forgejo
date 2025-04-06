@@ -29,6 +29,13 @@
   justify-content: space-between;
 }
 
+.milestone-header h3 {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  gap: 0.5rem;
+}
+
 .milestone-toolbar {
   padding-top: 5px;
   display: flex;

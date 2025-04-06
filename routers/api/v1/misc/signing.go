@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
-	asymkey_service "code.gitea.io/gitea/services/asymkey"
-	"code.gitea.io/gitea/services/context"
+	asymkey_service "forgejo.org/services/asymkey"
+	"forgejo.org/services/context"
 )
 
 // SigningKey returns the public key of the default signing key if it exists

@@ -6,13 +6,13 @@ package system_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/unittest"
 
-	_ "code.gitea.io/gitea/models" // register models
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/activities"
-	_ "code.gitea.io/gitea/models/forgefed"
-	_ "code.gitea.io/gitea/models/system" // register models of system
+	_ "forgejo.org/models" // register models
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/activities"
+	_ "forgejo.org/models/forgefed"
+	_ "forgejo.org/models/system" // register models of system
 )
 
 func TestMain(m *testing.M) {

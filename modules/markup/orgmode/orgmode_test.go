@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -152,8 +152,8 @@ func HelloWorld() {
 }
 #+end_src
 `, `<div class="src src-go">
-<pre><code class="chroma language-go"><span class="c1">// HelloWorld prints &#34;Hello World&#34;
-</span><span class="c1"></span><span class="kd">func</span> <span class="nf">HelloWorld</span><span class="p">()</span> <span class="p">{</span>
+<pre><code class="chroma language-go"><span class="c1">// HelloWorld prints &#34;Hello World&#34;</span>
+<span class="kd">func</span> <span class="nf">HelloWorld</span><span class="p">()</span> <span class="p">{</span>
 	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;Hello World&#34;</span><span class="p">)</span>
 <span class="p">}</span></code></pre>
 </div>`)

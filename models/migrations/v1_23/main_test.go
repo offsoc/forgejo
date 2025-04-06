@@ -6,7 +6,7 @@ package v1_23 //nolint
 import (
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
+	migration_tests "forgejo.org/models/migrations/test"
 )
 
 func TestMain(m *testing.M) {

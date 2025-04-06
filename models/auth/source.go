@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"reflect"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
@@ -32,7 +32,7 @@ const (
 	PAM         // 4
 	DLDAP       // 5
 	OAuth2      // 6
-	SSPI        // 7
+	_           // 7 (was SSPI)
 	Remote      // 8
 )
 
@@ -53,7 +53,6 @@ var Names = map[Type]string{
 	SMTP:   "SMTP",
 	PAM:    "PAM",
 	OAuth2: "OAuth2",
-	SSPI:   "SPNEGO with SSPI",
 	Remote: "Remote",
 }
 
@@ -178,11 +177,6 @@ func (source *Source) IsOAuth2() bool {
 	return source.Type == OAuth2
 }
 
-// IsSSPI returns true of this source is of the SSPI type.
-func (source *Source) IsSSPI() bool {
-	return source.Type == SSPI
-}
-
 func (source *Source) IsRemote() bool {
 	return source.Type == Remote
 }
@@ -265,20 +259,6 @@ func (opts FindSourcesOptions) ToConds() builder.Cond {
 	return conds
 }
 
-// IsSSPIEnabled returns true if there is at least one activated login
-// source of type LoginSSPI
-func IsSSPIEnabled(ctx context.Context) bool {
-	exist, err := db.Exist[Source](ctx, FindSourcesOptions{
-		IsActive:  optional.Some(true),
-		LoginType: SSPI,
-	}.ToConds())
-	if err != nil {
-		log.Error("IsSSPIEnabled: failed to query active SSPI sources: %v", err)
-		return false
-	}
-	return exist
-}
-
 // GetSourceByID returns login source by given ID.
 func GetSourceByID(ctx context.Context, id int64) (*Source, error) {
 	source := new(Source)
@@ -295,17 +275,6 @@ func GetSourceByID(ctx context.Context, id int64) (*Source, error) {
 		return nil, err
 	} else if !has {
 		return nil, ErrSourceNotExist{id}
-	}
-	return source, nil
-}
-
-func GetSourceByName(ctx context.Context, name string) (*Source, error) {
-	source := &Source{}
-	has, err := db.GetEngine(ctx).Where("name = ?", name).Get(source)
-	if err != nil {
-		return nil, err
-	} else if !has {
-		return nil, ErrSourceNotExist{}
 	}
 	return source, nil
 }

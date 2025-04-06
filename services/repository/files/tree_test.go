@@ -6,9 +6,9 @@ package files
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/contexttest"
+	"forgejo.org/models/unittest"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,5 +48,5 @@ func TestGetTreeBySHA(t *testing.T) {
 		TotalCount: 1,
 	}
 
-	assert.EqualValues(t, expectedTree, tree)
+	assert.Equal(t, expectedTree, tree)
 }

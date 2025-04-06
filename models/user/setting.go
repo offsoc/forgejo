@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/cache"
-	setting_module "code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/cache"
+	setting_module "forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )

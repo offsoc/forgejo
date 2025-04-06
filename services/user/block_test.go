@@ -6,11 +6,12 @@ package user
 import (
 	"testing"
 
-	model "code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	model "forgejo.org/models"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -88,5 +89,25 @@ func TestBlockUser(t *testing.T) {
 		// Don't use AssertExistsIf, as it doesn't include the zero values in the condition such as `repo_model.RepositoryReady`.
 		repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 3, OwnerID: blockedUser.ID})
 		assert.Equal(t, repo_model.RepositoryReady, repo.Status)
+	})
+
+	t.Run("Issues", func(t *testing.T) {
+		doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+		blockedUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 4})
+		defer user_model.UnblockUser(db.DefaultContext, doer.ID, blockedUser.ID)
+
+		repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 2, OwnerID: doer.ID})
+		issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 4, RepoID: repo.ID}, "is_closed = true")
+
+		_, err := issues_model.ChangeIssueStatus(db.DefaultContext, issue, blockedUser, false)
+		require.NoError(t, err)
+
+		_, err = issues_model.ChangeIssueStatus(db.DefaultContext, issue, doer, true)
+		require.NoError(t, err)
+
+		require.NoError(t, BlockUser(db.DefaultContext, doer.ID, blockedUser.ID))
+
+		_, err = issues_model.ChangeIssueStatus(db.DefaultContext, issue, blockedUser, false)
+		require.Error(t, err)
 	})
 }

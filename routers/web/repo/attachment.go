@@ -7,18 +7,18 @@ import (
 	"fmt"
 	"net/http"
 
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/httpcache"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/services/attachment"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/context/upload"
-	repo_service "code.gitea.io/gitea/services/repository"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/httpcache"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/common"
+	"forgejo.org/services/attachment"
+	"forgejo.org/services/context"
+	"forgejo.org/services/context/upload"
+	repo_service "forgejo.org/services/repository"
 )
 
 // UploadIssueAttachment response for Issue/PR attachments
@@ -106,7 +106,7 @@ func ServeAttachment(ctx *context.Context, uuid string) {
 	}
 
 	if repository == nil { // If not linked
-		if !(ctx.IsSigned && attach.UploaderID == ctx.Doer.ID) { // We block if not the uploader
+		if !ctx.IsSigned || attach.UploaderID != ctx.Doer.ID { // We block if not the uploader
 			ctx.Error(http.StatusNotFound)
 			return
 		}

@@ -3,7 +3,7 @@
 
 package internal
 
-import "code.gitea.io/gitea/modules/indexer/internal"
+import "forgejo.org/modules/indexer/internal"
 
 func FilenameIndexerID(repoID int64, filename string) string {
 	return internal.Base36(repoID) + "_" + filename

@@ -1,21 +1,34 @@
 import {expect, test as baseTest, type Browser, type BrowserContextOptions, type APIRequestContext, type TestInfo, type Page} from '@playwright/test';
 
-export const test = baseTest.extend({
-  context: async ({browser}, use) => {
-    return use(await test_context(browser));
-  },
-  // see https://playwright.dev/docs/test-fixtures#adding-global-beforeeachaftereach-hooks
-  forEachTest: [async ({page}, use) => {
-    await use();
-    // some tests create a new page which is not yet available here
-    // only operate on tests that make the URL available
-    if (page.url() !== 'about:blank') {
-      await save_visual(page);
+import * as path from 'node:path';
+
+const AUTH_PATH = 'tests/e2e/.auth';
+
+type AuthScope = 'logout' | 'shared' | 'webauthn';
+
+export type TestOptions = {
+  forEachTest: void
+  user: string | null;
+  authScope: AuthScope;
+};
+
+export const test = baseTest.extend<TestOptions>({
+  context: async ({browser, user, authScope, contextOptions}, use, {project}) => {
+    if (user && authScope) {
+      const browserName = project.name.toLowerCase().replace(' ', '-');
+      contextOptions.storageState = path.join(AUTH_PATH, `state-${browserName}-${user}-${authScope}.json`);
+    } else {
+      // if no user is given, ensure to have clean state
+      contextOptions.storageState = {cookies: [], origins: []};
     }
-  }, {auto: true}],
+
+    return use(await test_context(browser, contextOptions));
+  },
+  user: null,
+  authScope: 'shared',
 });
 
-async function test_context(browser: Browser, options?: BrowserContextOptions) {
+export async function test_context(browser: Browser, options?: BrowserContextOptions) {
   const context = await browser.newContext(options);
 
   context.on('page', (page) => {
@@ -106,6 +119,7 @@ export async function save_visual(page: Page) {
         // update order of recently created repos is not fully deterministic
         page.locator('.flex-item-main').filter({hasText: 'relative time in repo'}),
         page.locator('#activity-feed'),
+        page.locator('#user-heatmap'),
         // dynamic IDs in fixed-size inputs
         page.locator('input[value*="dyn-id-"]'),
       ],

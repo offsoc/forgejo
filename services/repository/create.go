@@ -12,18 +12,18 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/options"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/templates/vars"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/options"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/templates/vars"
+	"forgejo.org/modules/util"
 )
 
 // CreateRepoOptions contains the create repository options
@@ -45,6 +45,7 @@ type CreateRepoOptions struct {
 	TrustModel       repo_model.TrustModelType
 	MirrorInterval   string
 	ObjectFormatName string
+	Website          string
 }
 
 func prepareRepoCommit(ctx context.Context, repo *repo_model.Repository, tmpDir, repoPath string, opts CreateRepoOptions) error {
@@ -238,6 +239,7 @@ func CreateRepositoryDirectly(ctx context.Context, doer, u *user_model.User, opt
 		DefaultBranch:                   opts.DefaultBranch,
 		WikiBranch:                      setting.Repository.DefaultBranch,
 		ObjectFormatName:                opts.ObjectFormatName,
+		Website:                         opts.Website,
 	}
 
 	var rollbackRepo *repo_model.Repository

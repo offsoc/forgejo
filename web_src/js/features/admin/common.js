@@ -123,9 +123,9 @@ export function initAdminCommon() {
   // New authentication
   if (document.querySelector('.admin.new.authentication')) {
     document.getElementById('auth_type')?.addEventListener('change', function () {
-      hideElem('.ldap, .dldap, .smtp, .pam, .oauth2, .has-tls, .search-page-size, .sspi');
+      hideElem('.ldap, .dldap, .smtp, .pam, .oauth2, .has-tls, .search-page-size');
 
-      for (const input of document.querySelectorAll('.ldap input[required], .binddnrequired input[required], .dldap input[required], .smtp input[required], .pam input[required], .oauth2 input[required], .has-tls input[required], .sspi input[required]')) {
+      for (const input of document.querySelectorAll('.ldap input[required], .binddnrequired input[required], .dldap input[required], .smtp input[required], .pam input[required], .oauth2 input[required], .has-tls input[required]')) {
         input.removeAttribute('required');
       }
 
@@ -166,12 +166,6 @@ export function initAdminCommon() {
           }
           onOAuth2Change(true);
           break;
-        case '7': // SSPI
-          showElem('.sspi');
-          for (const input of document.querySelectorAll('.sspi div.required input')) {
-            input.setAttribute('required', 'required');
-          }
-          break;
       }
       if (authType === '2' || authType === '5') {
         onSecurityProtocolChange();
@@ -181,7 +175,7 @@ export function initAdminCommon() {
         onUsePagedSearchChange();
       }
     });
-    $('#auth_type').trigger('change');
+    document.getElementById('auth_type').dispatchEvent(new Event('change'));
     document.getElementById('security_protocol')?.addEventListener('change', onSecurityProtocolChange);
     document.getElementById('use_paged_search')?.addEventListener('change', onUsePagedSearchChange);
     document.getElementById('oauth2_provider')?.addEventListener('change', () => onOAuth2Change(true));
@@ -205,11 +199,13 @@ export function initAdminCommon() {
     }
   }
 
-  if (document.querySelector('.admin.authentication')) {
-    $('#auth_name').on('input', function () {
+  if (document.querySelector('.admin.edit.authentication, .admin.new.authentication')) {
+    const authNameEl = document.getElementById('auth_name');
+    authNameEl.addEventListener('input', (el) => {
       // appSubUrl is either empty or is a path that starts with `/` and doesn't have a trailing slash.
-      document.getElementById('oauth2-callback-url').textContent = `${window.location.origin}${appSubUrl}/user/oauth2/${encodeURIComponent(this.value)}/callback`;
-    }).trigger('input');
+      document.getElementById('oauth2-callback-url').textContent = `${window.location.origin}${appSubUrl}/user/oauth2/${encodeURIComponent(el.target.value)}/callback`;
+    });
+    authNameEl.dispatchEvent(new Event('input'));
   }
 
   // Notice

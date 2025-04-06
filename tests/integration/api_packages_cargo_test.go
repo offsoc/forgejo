@@ -12,19 +12,19 @@ import (
 	neturl "net/url"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/json"
-	cargo_module "code.gitea.io/gitea/modules/packages/cargo"
-	"code.gitea.io/gitea/modules/setting"
-	cargo_router "code.gitea.io/gitea/routers/api/packages/cargo"
-	gitea_context "code.gitea.io/gitea/services/context"
-	cargo_service "code.gitea.io/gitea/services/packages/cargo"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/json"
+	cargo_module "forgejo.org/modules/packages/cargo"
+	"forgejo.org/modules/setting"
+	cargo_router "forgejo.org/routers/api/packages/cargo"
+	gitea_context "forgejo.org/services/context"
+	cargo_service "forgejo.org/services/packages/cargo"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -403,7 +403,7 @@ func TestRebuildCargo(t *testing.T) {
 
 			flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "error%3DCannot%2Brebuild%252C%2Bno%2Bindex%2Bis%2Binitialized.", flashCookie.Value)
+			assert.Equal(t, "error%3DCannot%2Brebuild%252C%2Bno%2Bindex%2Bis%2Binitialized.", flashCookie.Value)
 			unittest.AssertExistsIf(t, false, &repo_model.Repository{OwnerID: user.ID, Name: cargo_service.IndexRepositoryName})
 		})
 
@@ -441,7 +441,7 @@ func TestRebuildCargo(t *testing.T) {
 
 			flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2BCargo%2Bindex%2Bwas%2Bsuccessfully%2Brebuild.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2BCargo%2Bindex%2Bwas%2Bsuccessfully%2Brebuild.", flashCookie.Value)
 		})
 	})
 }

@@ -12,18 +12,19 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	container_model "code.gitea.io/gitea/models/packages/container"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	packages_service "code.gitea.io/gitea/services/packages"
-	packages_cleanup_service "code.gitea.io/gitea/services/packages/cleanup"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	container_model "forgejo.org/models/packages/container"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	packages_service "forgejo.org/services/packages"
+	packages_cleanup_service "forgejo.org/services/packages/cleanup"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -35,7 +36,7 @@ func TestPackageAPI(t *testing.T) {
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 4})
 	session := loginUser(t, user.Name)
 	tokenReadPackage := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadPackage)
-	tokenDeletePackage := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWritePackage)
+	tokenWritePackage := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWritePackage)
 
 	packageName := "test-package"
 	packageVersion := "1.0.3"
@@ -99,8 +100,13 @@ func TestPackageAPI(t *testing.T) {
 			DecodeJSON(t, resp, &ap1)
 			assert.Nil(t, ap1.Repository)
 
+			// create a repository
+			repo, _, f := tests.CreateDeclarativeRepo(t, user, "", []unit_model.Type{unit_model.TypeCode}, nil, nil)
+			defer f()
+
 			// link to public repository
-			require.NoError(t, packages_model.SetRepositoryLink(db.DefaultContext, p.ID, 1))
+			req = NewRequest(t, "POST", fmt.Sprintf("/api/v1/packages/%s/generic/%s/-/link/%s", user.Name, packageName, repo.Name)).AddTokenAuth(tokenWritePackage)
+			MakeRequest(t, req, http.StatusCreated)
 
 			req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
 				AddTokenAuth(tokenReadPackage)
@@ -109,10 +115,15 @@ func TestPackageAPI(t *testing.T) {
 			var ap2 *api.Package
 			DecodeJSON(t, resp, &ap2)
 			assert.NotNil(t, ap2.Repository)
-			assert.EqualValues(t, 1, ap2.Repository.ID)
+			assert.Equal(t, repo.ID, ap2.Repository.ID)
 
-			// link to private repository
-			require.NoError(t, packages_model.SetRepositoryLink(db.DefaultContext, p.ID, 2))
+			// link to repository without write access, should fail
+			req = NewRequest(t, "POST", fmt.Sprintf("/api/v1/packages/%s/generic/%s/-/link/%s", user.Name, packageName, "repo3")).AddTokenAuth(tokenWritePackage)
+			MakeRequest(t, req, http.StatusNotFound)
+
+			// remove link
+			req = NewRequest(t, "POST", fmt.Sprintf("/api/v1/packages/%s/generic/%s/-/unlink", user.Name, packageName)).AddTokenAuth(tokenWritePackage)
+			MakeRequest(t, req, http.StatusNoContent)
 
 			req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
 				AddTokenAuth(tokenReadPackage)
@@ -122,7 +133,18 @@ func TestPackageAPI(t *testing.T) {
 			DecodeJSON(t, resp, &ap3)
 			assert.Nil(t, ap3.Repository)
 
-			require.NoError(t, packages_model.UnlinkRepositoryFromAllPackages(db.DefaultContext, 2))
+			// force link to a repository the currently logged-in user doesn't have access to
+			privateRepoID := int64(6)
+			require.NoError(t, packages_model.SetRepositoryLink(db.DefaultContext, p.ID, privateRepoID))
+
+			req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).AddTokenAuth(tokenReadPackage)
+			resp = MakeRequest(t, req, http.StatusOK)
+
+			var ap4 *api.Package
+			DecodeJSON(t, resp, &ap4)
+			assert.Nil(t, ap4.Repository)
+
+			require.NoError(t, packages_model.UnlinkRepositoryFromAllPackages(db.DefaultContext, privateRepoID))
 		})
 	})
 
@@ -153,11 +175,11 @@ func TestPackageAPI(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		req := NewRequest(t, "DELETE", fmt.Sprintf("/api/v1/packages/%s/dummy/%s/%s", user.Name, packageName, packageVersion)).
-			AddTokenAuth(tokenDeletePackage)
+			AddTokenAuth(tokenWritePackage)
 		MakeRequest(t, req, http.StatusNotFound)
 
 		req = NewRequest(t, "DELETE", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
-			AddTokenAuth(tokenDeletePackage)
+			AddTokenAuth(tokenWritePackage)
 		MakeRequest(t, req, http.StatusNoContent)
 	})
 }
@@ -464,7 +486,7 @@ func TestPackageCleanup(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
 		// Upload and delete a generic package and upload a container blob
-		data, _ := util.CryptoRandomBytes(5)
+		data := util.CryptoRandomBytes(5)
 		url := fmt.Sprintf("/api/packages/%s/generic/cleanup-test/1.1.1/file.bin", user.Name)
 		req := NewRequestWithBody(t, "PUT", url, bytes.NewReader(data)).
 			AddBasicAuth(user.Name)
@@ -474,7 +496,7 @@ func TestPackageCleanup(t *testing.T) {
 			AddBasicAuth(user.Name)
 		MakeRequest(t, req, http.StatusNoContent)
 
-		data, _ = util.CryptoRandomBytes(5)
+		data = util.CryptoRandomBytes(5)
 		url = fmt.Sprintf("/v2/%s/cleanup-test/blobs/uploads?digest=sha256:%x", user.Name, sha256.Sum256(data))
 		req = NewRequestWithBody(t, "POST", url, bytes.NewReader(data)).
 			AddBasicAuth(user.Name)

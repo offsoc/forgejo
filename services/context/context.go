@@ -15,17 +15,17 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	mc "code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/httpcache"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/modules/web/middleware"
-	web_types "code.gitea.io/gitea/modules/web/types"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	mc "forgejo.org/modules/cache"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/httpcache"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/templates"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/web"
+	"forgejo.org/modules/web/middleware"
+	web_types "forgejo.org/modules/web/types"
 
 	"code.forgejo.org/go-chi/cache"
 	"code.forgejo.org/go-chi/session"
@@ -100,7 +100,7 @@ func GetValidateContext(req *http.Request) (ctx *ValidateContext) {
 
 func NewTemplateContextForWeb(ctx *Context) TemplateContext {
 	tmplCtx := NewTemplateContext(ctx)
-	tmplCtx["Locale"] = ctx.Base.Locale
+	tmplCtx["Locale"] = ctx.Locale
 	tmplCtx["AvatarUtils"] = templates.NewAvatarUtils(ctx)
 	return tmplCtx
 }
@@ -151,8 +151,8 @@ func Contexter() func(next http.Handler) http.Handler {
 			ctx.PageData = map[string]any{}
 			ctx.Data["PageData"] = ctx.PageData
 
-			ctx.Base.AppendContextValue(WebContextKey, ctx)
-			ctx.Base.AppendContextValueFunc(gitrepo.RepositoryContextKey, func() any { return ctx.Repo.GitRepo })
+			ctx.AppendContextValue(WebContextKey, ctx)
+			ctx.AppendContextValueFunc(gitrepo.RepositoryContextKey, func() any { return ctx.Repo.GitRepo })
 
 			ctx.Csrf = NewCSRFProtector(csrfOpts)
 

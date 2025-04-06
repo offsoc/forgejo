@@ -11,12 +11,12 @@ import (
 	"io"
 	"strings"
 
-	"code.gitea.io/gitea/models/avatars"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/avatar"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
+	"forgejo.org/models/avatars"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/avatar"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
 )
 
 // CustomAvatarRelativePath returns user custom avatar relative path.
@@ -38,14 +38,18 @@ func GenerateRandomAvatar(ctx context.Context, u *User) error {
 
 	u.Avatar = avatars.HashEmail(seed)
 
-	// Don't share the images so that we can delete them easily
-	if err := storage.SaveFrom(storage.Avatars, u.CustomAvatarRelativePath(), func(w io.Writer) error {
-		if err := png.Encode(w, img); err != nil {
-			log.Error("Encode: %v", err)
+	_, err = storage.Avatars.Stat(u.CustomAvatarRelativePath())
+	if err != nil {
+		// If unable to Stat the avatar file (usually it means non-existing), then try to save a new one
+		// Don't share the images so that we can delete them easily
+		if err := storage.SaveFrom(storage.Avatars, u.CustomAvatarRelativePath(), func(w io.Writer) error {
+			if err := png.Encode(w, img); err != nil {
+				log.Error("Encode: %v", err)
+			}
+			return nil
+		}); err != nil {
+			return fmt.Errorf("failed to save avatar %s: %w", u.CustomAvatarRelativePath(), err)
 		}
-		return err
-	}); err != nil {
-		return fmt.Errorf("Failed to create dir %s: %w", u.CustomAvatarRelativePath(), err)
 	}
 
 	if _, err := db.GetEngine(ctx).ID(u.ID).Cols("avatar").Update(u); err != nil {

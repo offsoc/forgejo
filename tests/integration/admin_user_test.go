@@ -4,21 +4,20 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,13 +25,36 @@ import (
 func TestAdminViewUsers(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	session := loginUser(t, "user1")
-	req := NewRequest(t, "GET", "/admin/users")
-	session.MakeRequest(t, req, http.StatusOK)
+	t.Run("Admin user", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
 
-	session = loginUser(t, "user2")
-	req = NewRequest(t, "GET", "/admin/users")
-	session.MakeRequest(t, req, http.StatusForbidden)
+		session := loginUser(t, "user1")
+		req := NewRequest(t, "GET", "/admin/users")
+		session.MakeRequest(t, req, http.StatusOK)
+
+		req = NewRequest(t, "GET", "/admin/users?status_filter[is_2fa_enabled]=1")
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		// 6th column is the 2FA column.
+		// One user that has TOTP and another user that has WebAuthn.
+		assert.Equal(t, 2, htmlDoc.Find(".admin-setting-content table tbody tr td:nth-child(6) .octicon-check").Length())
+	})
+
+	t.Run("Normal user", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		session := loginUser(t, "user2")
+		req := NewRequest(t, "GET", "/admin/users")
+		session.MakeRequest(t, req, http.StatusForbidden)
+	})
+
+	t.Run("Anonymous user", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		req := NewRequest(t, "GET", "/admin/users")
+		MakeRequest(t, req, http.StatusSeeOther)
+	})
 }
 
 func TestAdminViewUser(t *testing.T) {
@@ -108,7 +130,7 @@ func TestSourceId(t *testing.T) {
 		LoginType:   auth_model.Plain,
 		LoginSource: 23,
 	}
-	defer createUser(context.Background(), t, testUser23)()
+	defer createUser(t.Context(), t, testUser23)()
 
 	session := loginUser(t, "user1")
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadAdmin)
@@ -140,7 +162,7 @@ func TestAdminViewUsersSorted(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	createTimestamp := time.Now().Unix() - 1000
 	updateTimestamp := time.Now().Unix() - 500
-	sess := db.GetEngine(context.Background())
+	sess := db.GetEngine(t.Context())
 
 	// Create 10 users with login source 44
 	for i := int64(1); i <= 10; i++ {

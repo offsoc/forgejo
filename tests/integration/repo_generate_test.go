@@ -12,15 +12,15 @@ import (
 	"strings"
 	"testing"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/translation"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/translation"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -36,7 +36,7 @@ func assertRepoCreateForm(t *testing.T, htmlDoc *HTMLDoc, owner *user_model.User
 
 	// Verify form header
 	header := strings.TrimSpace(htmlDoc.doc.Find(".form[action='/repo/create'] .header").Text())
-	assert.EqualValues(t, locale.TrString("new_repo.title"), header)
+	assert.Equal(t, locale.TrString("new_repo.title"), header)
 
 	htmlDoc.AssertDropdownHasSelectedOption(t, "uid", strconv.FormatInt(owner.ID, 10))
 
@@ -157,7 +157,7 @@ func TestRepoCreateFormTrimSpace(t *testing.T) {
 	})
 	resp := session.MakeRequest(t, req, http.StatusSeeOther)
 
-	assert.EqualValues(t, "/user2/spaced-name", test.RedirectURL(resp))
+	assert.Equal(t, "/user2/spaced-name", test.RedirectURL(resp))
 	unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: 2, Name: "spaced-name"})
 }
 
@@ -194,7 +194,7 @@ func TestRepoGenerateTemplating(t *testing.T) {
 		})
 		defer f()
 
-		// The repo.TemplateID field is not initalized. Luckly the ID field holds the expected value
+		// The repo.TemplateID field is not initialized. Luckily, the ID field holds the expected value
 		templateID := strconv.FormatInt(template.ID, 10)
 
 		testRepoGenerate(

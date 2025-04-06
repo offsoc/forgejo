@@ -12,17 +12,17 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	issue_service "code.gitea.io/gitea/services/issue"
-	pull_service "code.gitea.io/gitea/services/pull"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	issue_service "forgejo.org/services/issue"
+	pull_service "forgejo.org/services/pull"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -133,7 +133,7 @@ func testPullRequestListIcon(t *testing.T, doc *HTMLDoc, name, expectedColor, ex
 }
 
 func createOpenPullRequest(ctx context.Context, t *testing.T, user *user_model.User, repo *repo_model.Repository) *issues_model.PullRequest {
-	pull := createPullRequest(t, user, repo, "open")
+	pull := createPullRequest(t, user, repo, "branch-open", "open")
 
 	assert.False(t, pull.Issue.IsClosed)
 	assert.False(t, pull.HasMerged)
@@ -143,7 +143,7 @@ func createOpenPullRequest(ctx context.Context, t *testing.T, user *user_model.U
 }
 
 func createOpenWipPullRequest(ctx context.Context, t *testing.T, user *user_model.User, repo *repo_model.Repository) *issues_model.PullRequest {
-	pull := createPullRequest(t, user, repo, "open-wip")
+	pull := createPullRequest(t, user, repo, "branch-open-wip", "open-wip")
 
 	err := issue_service.ChangeTitle(ctx, pull.Issue, user, "WIP: "+pull.Issue.Title)
 	require.NoError(t, err)
@@ -156,7 +156,7 @@ func createOpenWipPullRequest(ctx context.Context, t *testing.T, user *user_mode
 }
 
 func createClosedPullRequest(ctx context.Context, t *testing.T, user *user_model.User, repo *repo_model.Repository) *issues_model.PullRequest {
-	pull := createPullRequest(t, user, repo, "closed")
+	pull := createPullRequest(t, user, repo, "branch-closed", "closed")
 
 	err := issue_service.ChangeStatus(ctx, pull.Issue, user, "", true)
 	require.NoError(t, err)
@@ -169,7 +169,7 @@ func createClosedPullRequest(ctx context.Context, t *testing.T, user *user_model
 }
 
 func createClosedWipPullRequest(ctx context.Context, t *testing.T, user *user_model.User, repo *repo_model.Repository) *issues_model.PullRequest {
-	pull := createPullRequest(t, user, repo, "closed-wip")
+	pull := createPullRequest(t, user, repo, "branch-closed-wip", "closed-wip")
 
 	err := issue_service.ChangeTitle(ctx, pull.Issue, user, "WIP: "+pull.Issue.Title)
 	require.NoError(t, err)
@@ -185,7 +185,7 @@ func createClosedWipPullRequest(ctx context.Context, t *testing.T, user *user_mo
 }
 
 func createMergedPullRequest(ctx context.Context, t *testing.T, user *user_model.User, repo *repo_model.Repository) *issues_model.PullRequest {
-	pull := createPullRequest(t, user, repo, "merged")
+	pull := createPullRequest(t, user, repo, "branch-merged", "merged")
 
 	gitRepo, err := git.OpenRepository(ctx, repo.RepoPath())
 	defer gitRepo.Close()
@@ -202,10 +202,7 @@ func createMergedPullRequest(ctx context.Context, t *testing.T, user *user_model
 	return pull
 }
 
-func createPullRequest(t *testing.T, user *user_model.User, repo *repo_model.Repository, name string) *issues_model.PullRequest {
-	branch := "branch-" + name
-	title := "Testing " + name
-
+func createPullRequest(t *testing.T, user *user_model.User, repo *repo_model.Repository, branch, title string) *issues_model.PullRequest {
 	_, err := files_service.ChangeRepoFiles(git.DefaultContext, repo, user, &files_service.ChangeRepoFilesOptions{
 		Files: []*files_service.ChangeRepoFile{
 			{

@@ -8,17 +8,17 @@ import (
 	"fmt"
 	"net/http"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	pull_model "code.gitea.io/gitea/models/pull"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/context/upload"
-	"code.gitea.io/gitea/services/forms"
-	pull_service "code.gitea.io/gitea/services/pull"
+	issues_model "forgejo.org/models/issues"
+	pull_model "forgejo.org/models/pull"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/context/upload"
+	"forgejo.org/services/forms"
+	pull_service "forgejo.org/services/pull"
 )
 
 const (
@@ -82,6 +82,24 @@ func CreateCodeComment(ctx *context.Context) {
 		attachments = form.Files
 	}
 
+	// If the reply is made to a comment that is part of a pending review, then
+	// this comment also should be seen as part of that pending review. Consider
+	// it to be a pending review by default, except when `single_review` was
+	// passed.
+	pendingReview := !form.SingleReview
+	if form.Reply > 0 {
+		r, err := issues_model.GetReviewByID(ctx, form.Reply)
+		if err != nil {
+			ctx.ServerError("GetReviewByID", err)
+			return
+		}
+		if r.IssueID != issue.ID {
+			ctx.NotFound("Review does not belong to pull request", nil)
+			return
+		}
+		pendingReview = r.Type == issues_model.ReviewTypePending
+	}
+
 	comment, err := pull_service.CreateCodeComment(ctx,
 		ctx.Doer,
 		ctx.Repo.GitRepo,
@@ -89,7 +107,7 @@ func CreateCodeComment(ctx *context.Context) {
 		signedLine,
 		form.Content,
 		form.TreePath,
-		!form.SingleReview,
+		pendingReview,
 		form.Reply,
 		form.LatestCommitID,
 		attachments,
@@ -193,9 +211,10 @@ func renderConversation(ctx *context.Context, comment *issues_model.Comment, ori
 		return
 	}
 	ctx.Data["AfterCommitID"] = pullHeadCommitID
-	if origin == "diff" {
+	switch origin {
+	case "diff":
 		ctx.HTML(http.StatusOK, tplDiffConversation)
-	} else if origin == "timeline" {
+	case "timeline":
 		ctx.HTML(http.StatusOK, tplTimelineConversation)
 	}
 }

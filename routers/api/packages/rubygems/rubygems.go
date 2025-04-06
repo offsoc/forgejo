@@ -13,14 +13,14 @@ import (
 	"net/http"
 	"strings"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/modules/optional"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	rubygems_module "code.gitea.io/gitea/modules/packages/rubygems"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/api/packages/helper"
-	"code.gitea.io/gitea/services/context"
-	packages_service "code.gitea.io/gitea/services/packages"
+	packages_model "forgejo.org/models/packages"
+	"forgejo.org/modules/optional"
+	packages_module "forgejo.org/modules/packages"
+	rubygems_module "forgejo.org/modules/packages/rubygems"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/api/packages/helper"
+	"forgejo.org/services/context"
+	packages_service "forgejo.org/services/packages"
 )
 
 const (
@@ -105,9 +105,11 @@ func ServePackageInfo(ctx *context.Context) {
 		ctx, ctx.Package.Owner.ID, packages_model.TypeRubyGems, packageName)
 	if err != nil {
 		apiError(ctx, http.StatusInternalServerError, err)
+		return
 	}
 	if len(versions) == 0 {
 		apiError(ctx, http.StatusNotFound, fmt.Sprintf("Could not find package %s", packageName))
+		return
 	}
 
 	result, err := buildInfoFileForPackage(ctx, versions)
@@ -135,6 +137,7 @@ func ServeVersionsFile(ctx *context.Context) {
 			ctx, ctx.Package.Owner.ID, packages_model.TypeRubyGems, pack.Name)
 		if err != nil {
 			apiError(ctx, http.StatusInternalServerError, err)
+			return
 		}
 		if len(versions) == 0 {
 			// No versions left for this package, we should continue.
@@ -144,6 +147,20 @@ func ServeVersionsFile(ctx *context.Context) {
 		fmt.Fprintf(result, "%s ", pack.Name)
 		for i, v := range versions {
 			result.WriteString(v.Version)
+
+			pd, err := packages_model.GetPackageDescriptor(ctx, v)
+			if err != nil {
+				apiError(ctx, http.StatusInternalServerError, err)
+				return
+			}
+
+			metadata := pd.Metadata.(*rubygems_module.Metadata)
+
+			if metadata.Platform != "ruby" {
+				result.WriteString("_")
+				result.WriteString(metadata.Platform)
+			}
+
 			if i != len(versions)-1 {
 				result.WriteString(",")
 			}
@@ -152,6 +169,7 @@ func ServeVersionsFile(ctx *context.Context) {
 		info, err := buildInfoFileForPackage(ctx, versions)
 		if err != nil {
 			apiError(ctx, http.StatusInternalServerError, err)
+			return
 		}
 
 		checksum := md5.Sum([]byte(*info))
@@ -413,6 +431,11 @@ func buildRequirementStringFromVersion(ctx *context.Context, version *packages_m
 		additionalRequirements.WriteString(",rubygems:")
 		writeRequirements(metadata.RequiredRubygemsVersion, additionalRequirements)
 	}
+
+	if metadata.Platform != "ruby" {
+		return fmt.Sprintf("%s-%s %s|%s", version.Version, metadata.Platform, dependencyRequirements, additionalRequirements), nil
+	}
+
 	return fmt.Sprintf("%s %s|%s", version.Version, dependencyRequirements, additionalRequirements), nil
 }
 

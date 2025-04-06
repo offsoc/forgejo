@@ -4,22 +4,21 @@
 package integration
 
 import (
-	"context"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models"
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/auth/source/ldap"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/translation"
+	"forgejo.org/services/auth"
+	"forgejo.org/services/auth/source/ldap"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -221,7 +220,7 @@ func TestLDAPAuthChange(t *testing.T) {
 	binddn, _ = doc.Find(`input[name="bind_dn"]`).Attr("value")
 	assert.Equal(t, "uid=gitea,ou=service,dc=planetexpress,dc=com", binddn)
 	domainname, _ := doc.Find(`input[name="default_domain_name"]`).Attr("value")
-	assert.Equal(t, "", domainname)
+	assert.Empty(t, domainname)
 
 	req = NewRequestWithValues(t, "POST", href, buildAuthSourceLDAPPayload(csrf, "", "", "test.org", "", "", "off"))
 	session.MakeRequest(t, req, http.StatusSeeOther)
@@ -244,7 +243,7 @@ func TestLDAPUserSync(t *testing.T) {
 	}
 	defer tests.PrepareTestEnv(t)()
 	addAuthSourceLDAP(t, "", "", "", "")
-	auth.SyncExternalUsers(context.Background(), true)
+	auth.SyncExternalUsers(t.Context(), true)
 
 	// Check if users exists
 	for _, gitLDAPUser := range gitLDAPUsers {
@@ -283,7 +282,7 @@ func TestLDAPUserSyncWithEmptyUsernameAttribute(t *testing.T) {
 
 		htmlDoc := NewHTMLParser(t, resp.Body)
 
-		tr := htmlDoc.doc.Find("table.table tbody tr")
+		tr := htmlDoc.doc.Find("table.table tbody tr:not(.no-results-row)")
 		assert.Equal(t, 0, tr.Length())
 	}
 
@@ -296,7 +295,7 @@ func TestLDAPUserSyncWithEmptyUsernameAttribute(t *testing.T) {
 		MakeRequest(t, req, http.StatusSeeOther)
 	}
 
-	auth.SyncExternalUsers(context.Background(), true)
+	auth.SyncExternalUsers(t.Context(), true)
 
 	authSource := unittest.AssertExistsAndLoadBean(t, &auth_model.Source{
 		Name: payload["name"],
@@ -331,7 +330,7 @@ func TestLDAPUserSyncWithGroupFilter(t *testing.T) {
 	u := otherLDAPUsers[0]
 	testLoginFailed(t, u.UserName, u.Password, translation.NewLocale("en-US").TrString("form.username_password_incorrect"))
 
-	auth.SyncExternalUsers(context.Background(), true)
+	auth.SyncExternalUsers(t.Context(), true)
 
 	// Assert members of LDAP group "cn=git" are added
 	for _, gitLDAPUser := range gitLDAPUsers {
@@ -354,7 +353,7 @@ func TestLDAPUserSyncWithGroupFilter(t *testing.T) {
 	ldapConfig.GroupFilter = "(cn=ship_crew)"
 	auth_model.UpdateSource(db.DefaultContext, ldapSource)
 
-	auth.SyncExternalUsers(context.Background(), true)
+	auth.SyncExternalUsers(t.Context(), true)
 
 	for _, gitLDAPUser := range gitLDAPUsers {
 		if gitLDAPUser.UserName == "fry" || gitLDAPUser.UserName == "leela" || gitLDAPUser.UserName == "bender" {
@@ -393,7 +392,7 @@ func TestLDAPUserSSHKeySync(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	addAuthSourceLDAP(t, "sshPublicKey", "", "", "")
 
-	auth.SyncExternalUsers(context.Background(), true)
+	auth.SyncExternalUsers(t.Context(), true)
 
 	// Check if users has SSH keys synced
 	for _, u := range gitLDAPUsers {
@@ -429,7 +428,7 @@ func TestLDAPGroupTeamSyncAddMember(t *testing.T) {
 	require.NoError(t, err)
 	team, err := organization.GetTeam(db.DefaultContext, org.ID, "team11")
 	require.NoError(t, err)
-	auth.SyncExternalUsers(context.Background(), true)
+	auth.SyncExternalUsers(t.Context(), true)
 	for _, gitLDAPUser := range gitLDAPUsers {
 		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{
 			Name: gitLDAPUser.UserName,
@@ -518,7 +517,7 @@ func TestLDAPUserSyncInvalidMail(t *testing.T) {
 	}
 	defer tests.PrepareTestEnv(t)()
 	addAuthSourceLDAP(t, "", "nonexisting", "", "")
-	auth.SyncExternalUsers(context.Background(), true)
+	auth.SyncExternalUsers(t.Context(), true)
 
 	// Check if users exists
 	for _, gitLDAPUser := range gitLDAPUsers {
@@ -544,7 +543,7 @@ func TestLDAPUserSyncInvalidMailDefaultDomain(t *testing.T) {
 	}
 	defer tests.PrepareTestEnv(t)()
 	addAuthSourceLDAP(t, "", "nonexisting", "test.org", "")
-	auth.SyncExternalUsers(context.Background(), true)
+	auth.SyncExternalUsers(t.Context(), true)
 
 	// Check if users exists
 	for _, gitLDAPUser := range gitLDAPUsers {

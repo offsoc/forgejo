@@ -6,7 +6,7 @@ package v1_13 //nolint
 import (
 	"fmt"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/xorm"
 )

@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/migrations/base"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/migrations/base"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm"
 )

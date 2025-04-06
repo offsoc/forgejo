@@ -23,17 +23,17 @@ func TestRoute1(t *testing.T) {
 	r := NewRoute()
 	r.Get("/{username}/{reponame}/{type:issues|pulls}", func(resp http.ResponseWriter, req *http.Request) {
 		username := chi.URLParam(req, "username")
-		assert.EqualValues(t, "gitea", username)
+		assert.Equal(t, "gitea", username)
 		reponame := chi.URLParam(req, "reponame")
-		assert.EqualValues(t, "gitea", reponame)
+		assert.Equal(t, "gitea", reponame)
 		tp := chi.URLParam(req, "type")
-		assert.EqualValues(t, "issues", tp)
+		assert.Equal(t, "issues", tp)
 	})
 
 	req, err := http.NewRequest("GET", "http://localhost:8000/gitea/gitea/issues", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, http.StatusOK, recorder.Code)
 }
 
 func TestRoute2(t *testing.T) {
@@ -48,23 +48,23 @@ func TestRoute2(t *testing.T) {
 		r.Group("", func() {
 			r.Get("/{type:issues|pulls}", func(resp http.ResponseWriter, req *http.Request) {
 				username := chi.URLParam(req, "username")
-				assert.EqualValues(t, "gitea", username)
+				assert.Equal(t, "gitea", username)
 				reponame := chi.URLParam(req, "reponame")
-				assert.EqualValues(t, "gitea", reponame)
+				assert.Equal(t, "gitea", reponame)
 				tp := chi.URLParam(req, "type")
-				assert.EqualValues(t, "issues", tp)
+				assert.Equal(t, "issues", tp)
 				hit = 0
 			})
 
 			r.Get("/{type:issues|pulls}/{index}", func(resp http.ResponseWriter, req *http.Request) {
 				username := chi.URLParam(req, "username")
-				assert.EqualValues(t, "gitea", username)
+				assert.Equal(t, "gitea", username)
 				reponame := chi.URLParam(req, "reponame")
-				assert.EqualValues(t, "gitea", reponame)
+				assert.Equal(t, "gitea", reponame)
 				tp := chi.URLParam(req, "type")
-				assert.EqualValues(t, "issues", tp)
+				assert.Equal(t, "issues", tp)
 				index := chi.URLParam(req, "index")
-				assert.EqualValues(t, "1", index)
+				assert.Equal(t, "1", index)
 				hit = 1
 			})
 		}, func(resp http.ResponseWriter, req *http.Request) {
@@ -77,11 +77,11 @@ func TestRoute2(t *testing.T) {
 		r.Group("/issues/{index}", func() {
 			r.Get("/view", func(resp http.ResponseWriter, req *http.Request) {
 				username := chi.URLParam(req, "username")
-				assert.EqualValues(t, "gitea", username)
+				assert.Equal(t, "gitea", username)
 				reponame := chi.URLParam(req, "reponame")
-				assert.EqualValues(t, "gitea", reponame)
+				assert.Equal(t, "gitea", reponame)
 				index := chi.URLParam(req, "index")
-				assert.EqualValues(t, "1", index)
+				assert.Equal(t, "1", index)
 				hit = 2
 			})
 		})
@@ -90,26 +90,26 @@ func TestRoute2(t *testing.T) {
 	req, err := http.NewRequest("GET", "http://localhost:8000/gitea/gitea/issues", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code)
-	assert.EqualValues(t, 0, hit)
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, 0, hit)
 
 	req, err = http.NewRequest("GET", "http://localhost:8000/gitea/gitea/issues/1", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code)
-	assert.EqualValues(t, 1, hit)
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, 1, hit)
 
 	req, err = http.NewRequest("GET", "http://localhost:8000/gitea/gitea/issues/1?stop=100", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code)
-	assert.EqualValues(t, 100, hit)
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, 100, hit)
 
 	req, err = http.NewRequest("GET", "http://localhost:8000/gitea/gitea/issues/1/view", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code)
-	assert.EqualValues(t, 2, hit)
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, 2, hit)
 }
 
 func TestRoute3(t *testing.T) {
@@ -150,30 +150,30 @@ func TestRoute3(t *testing.T) {
 	req, err := http.NewRequest("GET", "http://localhost:8000/api/v1/repos/gitea/gitea/branch_protections", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code)
-	assert.EqualValues(t, 0, hit)
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, 0, hit)
 
 	req, err = http.NewRequest("POST", "http://localhost:8000/api/v1/repos/gitea/gitea/branch_protections", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code, http.StatusOK)
-	assert.EqualValues(t, 1, hit)
+	assert.Equal(t, http.StatusOK, recorder.Code, http.StatusOK)
+	assert.Equal(t, 1, hit)
 
 	req, err = http.NewRequest("GET", "http://localhost:8000/api/v1/repos/gitea/gitea/branch_protections/master", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code)
-	assert.EqualValues(t, 2, hit)
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, 2, hit)
 
 	req, err = http.NewRequest("PATCH", "http://localhost:8000/api/v1/repos/gitea/gitea/branch_protections/master", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code)
-	assert.EqualValues(t, 3, hit)
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, 3, hit)
 
 	req, err = http.NewRequest("DELETE", "http://localhost:8000/api/v1/repos/gitea/gitea/branch_protections/master", nil)
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
-	assert.EqualValues(t, http.StatusOK, recorder.Code)
-	assert.EqualValues(t, 4, hit)
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, 4, hit)
 }

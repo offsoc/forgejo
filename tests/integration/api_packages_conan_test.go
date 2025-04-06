@@ -11,16 +11,16 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	conan_model "code.gitea.io/gitea/models/packages/conan"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	conan_module "code.gitea.io/gitea/modules/packages/conan"
-	"code.gitea.io/gitea/modules/setting"
-	conan_router "code.gitea.io/gitea/routers/api/packages/conan"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	conan_model "forgejo.org/models/packages/conan"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	conan_module "forgejo.org/modules/packages/conan"
+	"forgejo.org/modules/setting"
+	conan_router "forgejo.org/routers/api/packages/conan"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -328,7 +328,7 @@ func TestPackageConan(t *testing.T) {
 
 						assert.Equal(t, int64(len(contentConaninfo)), pb.Size)
 					} else {
-						assert.FailNow(t, "unknown file: %s", pf.Name)
+						assert.FailNow(t, "unknown file", "name: %s", pf.Name)
 					}
 				}
 			})

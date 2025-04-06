@@ -8,11 +8,11 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
 
 	"xorm.io/builder"
 )
@@ -133,7 +133,7 @@ func refreshCollaboratorAccesses(ctx context.Context, repoID int64, accessMap ma
 		return fmt.Errorf("getCollaborations: %w", err)
 	}
 	for _, c := range collaborators {
-		if c.User.IsGhost() {
+		if c.IsGhost() {
 			continue
 		}
 		updateUserAccess(accessMap, c.User, c.Collaboration.Mode)

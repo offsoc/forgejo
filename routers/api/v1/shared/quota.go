@@ -6,10 +6,10 @@ package shared
 import (
 	"net/http"
 
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 func GetQuota(ctx *context.APIContext, userID int64) {

@@ -4,21 +4,20 @@
 package integration
 
 import (
-	"context"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/indexer/stats"
-	"code.gitea.io/gitea/modules/queue"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/indexer/stats"
+	"forgejo.org/modules/queue"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -82,7 +81,7 @@ func TestLinguistSupport(t *testing.T) {
 			err := stats.UpdateRepoIndexer(repo)
 			require.NoError(t, err)
 
-			require.NoError(t, queue.GetManager().FlushAll(context.Background(), 10*time.Second))
+			require.NoError(t, queue.GetManager().FlushAll(t.Context(), 10*time.Second))
 
 			status, err := repo_model.GetIndexerStatus(db.DefaultContext, repo, repo_model.RepoIndexerTypeStats)
 			require.NoError(t, err)

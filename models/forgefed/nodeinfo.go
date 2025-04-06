@@ -6,7 +6,7 @@ package forgefed
 import (
 	"net/url"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 
 	"github.com/valyala/fastjson"
 )

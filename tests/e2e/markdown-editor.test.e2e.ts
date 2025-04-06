@@ -5,21 +5,17 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, save_visual, load_logged_in_context, login_user} from './utils_e2e.ts';
+import {accessibilityCheck} from './shared/accessibility.ts';
+import {save_visual, test} from './utils_e2e.ts';
 
-test.beforeAll(async ({browser}, workerInfo) => {
-  await login_user(browser, workerInfo, 'user2');
-});
+test.use({user: 'user2'});
 
-test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
+test('Markdown image preview behaviour', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky behaviour on mobile safari;');
-
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
 
   // Editing the root README.md file for image preview
   const editPath = '/user2/repo1/src/branch/master/README.md';
 
-  const page = await context.newPage();
   const response = await page.goto(editPath, {waitUntil: 'domcontentloaded'});
   expect(response?.status()).toBe(200);
 
@@ -43,12 +39,9 @@ test('Markdown image preview behaviour', async ({browser}, workerInfo) => {
   await save_visual(page);
 });
 
-test('markdown indentation', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-
+test('markdown indentation', async ({page}) => {
   const initText = `* first\n* second\n* third\n* last`;
 
-  const page = await context.newPage();
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 
@@ -116,12 +109,9 @@ test('markdown indentation', async ({browser}, workerInfo) => {
   await expect(textarea).toHaveValue(initText);
 });
 
-test('markdown list continuation', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
+test('markdown list continuation', async ({page}) => {
+  const initText = `* first\n* second`;
 
-  const initText = `* first\n* second\n* third\n* last`;
-
-  const page = await context.newPage();
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 
@@ -130,25 +120,20 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
   const indent = page.locator('button[data-md-action="indent"]');
   await textarea.fill(initText);
 
-  // Test continuation of '* ' prefix
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('cond'), it.value.indexOf('cond')));
+  // Test continuation of '    * ' prefix
+  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('rst'), it.value.indexOf('rst')));
+  await indent.click();
   await textarea.press('End');
   await textarea.press('Enter');
-  await textarea.pressSequentially('middle');
-  await expect(textarea).toHaveValue(`* first\n* second\n* middle\n* third\n* last`);
-
-  // Test continuation of '    * ' prefix
-  await indent.click();
-  await textarea.press('Enter');
   await textarea.pressSequentially('muddle');
-  await expect(textarea).toHaveValue(`* first\n* second\n${tab}* middle\n${tab}* muddle\n* third\n* last`);
+  await expect(textarea).toHaveValue(`${tab}* first\n${tab}* muddle\n* second`);
 
   // Test breaking in the middle of a line
   await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.lastIndexOf('ddle'), it.value.lastIndexOf('ddle')));
   await textarea.pressSequentially('tate');
   await textarea.press('Enter');
   await textarea.pressSequentially('me');
-  await expect(textarea).toHaveValue(`* first\n* second\n${tab}* middle\n${tab}* mutate\n${tab}* meddle\n* third\n* last`);
+  await expect(textarea).toHaveValue(`${tab}* first\n${tab}* mutate\n${tab}* meddle\n* second`);
 
   // Test not triggering when Shift held
   await textarea.fill(initText);
@@ -156,35 +141,36 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
   await textarea.press('Shift+Enter');
   await textarea.press('Enter');
   await textarea.pressSequentially('...but not least');
-  await expect(textarea).toHaveValue(`* first\n* second\n* third\n* last\n\n...but not least`);
+  await expect(textarea).toHaveValue(`* first\n* second\n\n...but not least`);
 
   // Test continuation of ordered list
-  await textarea.fill(`1. one\n2. two`);
+  await textarea.fill(`1. one`);
   await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
+  await textarea.pressSequentially(' ');
+  await textarea.press('Enter');
   await textarea.pressSequentially('three');
-  await expect(textarea).toHaveValue(`1. one\n2. two\n3. three`);
+  await textarea.press('Enter');
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`1. one\n2.  \n3. three\n\n`);
 
   // Test continuation of alternative ordered list syntax
-  await textarea.fill(`1) one\n2) two`);
+  await textarea.fill(`1) one`);
   await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
+  await textarea.press('Enter');
+  await textarea.pressSequentially(' ');
   await textarea.press('Enter');
   await textarea.pressSequentially('three');
-  await expect(textarea).toHaveValue(`1) one\n2) two\n3) three`);
-
-  // Test continuation of blockquote
-  await textarea.fill(`> knowledge is power`);
-  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
-  await textarea.pressSequentially('france is bacon');
-  await expect(textarea).toHaveValue(`> knowledge is power\n> france is bacon`);
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`1) one\n2)  \n3) three\n\n`);
 
   // Test continuation of checklists
-  await textarea.fill(`- [ ] have a problem\n- [x] create a solution`);
+  await textarea.fill(`- [ ]have a problem\n- [x]create a solution`);
   await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
   await textarea.press('Enter');
   await textarea.pressSequentially('write a test');
-  await expect(textarea).toHaveValue(`- [ ] have a problem\n- [x] create a solution\n- [ ] write a test`);
+  await expect(textarea).toHaveValue(`- [ ]have a problem\n- [x]create a solution\n- [ ]write a test`);
 
   // Test all conceivable syntax (except ordered lists)
   const prefixes = [
@@ -200,7 +186,6 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
     '> ',
     '> > ',
     '- [ ] ',
-    '- [ ]', // This does seem to render, so allow.
     '* [ ] ',
     '+ [ ] ',
   ];
@@ -208,15 +193,16 @@ test('markdown list continuation', async ({browser}, workerInfo) => {
     await textarea.fill(`${prefix}one`);
     await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.length, it.value.length));
     await textarea.press('Enter');
+    await textarea.pressSequentially(' ');
+    await textarea.press('Enter');
     await textarea.pressSequentially('two');
-    await expect(textarea).toHaveValue(`${prefix}one\n${prefix}two`);
+    await textarea.press('Enter');
+    await textarea.press('Enter');
+    await expect(textarea).toHaveValue(`${prefix}one\n${prefix} \n${prefix}two\n\n`);
   }
 });
 
-test('markdown insert table', async ({browser}, workerInfo) => {
-  const context = await load_logged_in_context(browser, workerInfo, 'user2');
-
-  const page = await context.newPage();
+test('markdown insert table', async ({page}) => {
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 
@@ -237,4 +223,57 @@ test('markdown insert table', async ({browser}, workerInfo) => {
   const textarea = page.locator('textarea[name=content]');
   await expect(textarea).toHaveValue('| Header  | Header  |\n|---------|---------|\n| Content | Content |\n| Content | Content |\n| Content | Content |\n');
   await save_visual(page);
+});
+
+test('markdown insert link', async ({page}) => {
+  const response = await page.goto('/user2/repo1/issues/new');
+  expect(response?.status()).toBe(200);
+
+  const newLinkButton = page.locator('button[data-md-action="new-link"]');
+  await newLinkButton.click();
+
+  const newLinkModal = page.locator('div[data-markdown-link-modal-id="0"]');
+  await expect(newLinkModal).toBeVisible();
+  await accessibilityCheck({page}, ['[data-modal-name="new-markdown-link"]'], [], []);
+  await save_visual(page);
+
+  const url = 'https://example.com';
+  const description = 'Where does this lead?';
+
+  await newLinkModal.locator('input[name="link-url"]').fill(url);
+  await newLinkModal.locator('input[name="link-description"]').fill(description);
+
+  await newLinkModal.locator('button[data-selector-name="ok-button"]').click();
+
+  await expect(newLinkModal).toBeHidden();
+
+  const textarea = page.locator('textarea[name=content]');
+  await expect(textarea).toHaveValue(`[${description}](${url})`);
+  await save_visual(page);
+});
+
+test('text expander has higher prio then prefix continuation', async ({page}) => {
+  const response = await page.goto('/user2/repo1/issues/new');
+  expect(response?.status()).toBe(200);
+
+  const textarea = page.locator('textarea[name=content]');
+  const initText = `* first`;
+  await textarea.fill(initText);
+  await textarea.evaluate((it:HTMLTextAreaElement) => it.setSelectionRange(it.value.indexOf('rst'), it.value.indexOf('rst')));
+  await textarea.press('End');
+
+  // Test emoji completion
+  await textarea.press('Enter');
+  await textarea.pressSequentially(':smile_c');
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`* first\n* 😸`);
+
+  // Test username completion
+  await textarea.press('Enter');
+  await textarea.pressSequentially('@user');
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`* first\n* 😸\n* @user2 `);
+
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`* first\n* 😸\n* @user2 \n* `);
 });

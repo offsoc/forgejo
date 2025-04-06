@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/migrations"
-	system_model "code.gitea.io/gitea/models/system"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/setting/config"
+	"forgejo.org/models/db"
+	"forgejo.org/models/migrations"
+	system_model "forgejo.org/models/system"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/setting/config"
 
 	"xorm.io/xorm"
 )
@@ -28,7 +28,7 @@ func InitDBEngine(ctx context.Context) (err error) {
 		default:
 		}
 		log.Info("ORM engine initialization attempt #%d/%d...", i+1, setting.Database.DBConnectRetries)
-		if err = db.InitEngineWithMigration(ctx, migrateWithSetting); err == nil {
+		if err = db.InitEngineWithMigration(ctx, func(eng db.Engine) error { return migrateWithSetting(eng.(*xorm.Engine)) }); err == nil {
 			break
 		} else if i == setting.Database.DBConnectRetries-1 {
 			return err

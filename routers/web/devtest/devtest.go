@@ -1,17 +1,19 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package devtest
 
 import (
+	"errors"
 	"net/http"
 	"path"
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/templates"
+	"forgejo.org/services/context"
 )
 
 // List all devtest templates, they will be used for e2e tests for the UI components
@@ -40,6 +42,17 @@ func FetchActionTest(ctx *context.Context) {
 	)
 	time.Sleep(2 * time.Second)
 	ctx.JSONRedirect("")
+}
+
+func ErrorPage(ctx *context.Context) {
+	if ctx.Params("errcode") == "404" {
+		ctx.NotFound("Example error", errors.New("Example error"))
+		return
+	} else if ctx.Params("errcode") == "413" {
+		ctx.HTML(http.StatusRequestEntityTooLarge, base.TplName("status/413"))
+		return
+	}
+	ctx.ServerError("Example error", errors.New("Example error"))
 }
 
 func Tmpl(ctx *context.Context) {

@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/util"
 )
 
 // Scheme describes protocol types
@@ -265,7 +265,7 @@ func loadServerFrom(rootCfg ConfigProvider) {
 		}
 
 		UnixSocketPermission = uint32(UnixSocketPermissionParsed)
-		if !filepath.IsAbs(HTTPAddr) {
+		if HTTPAddr[0] != '@' && !filepath.IsAbs(HTTPAddr) {
 			HTTPAddr = filepath.Join(AppWorkPath, HTTPAddr)
 		}
 	}

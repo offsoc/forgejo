@@ -13,14 +13,14 @@ import (
 	"strings"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -99,7 +99,7 @@ func createNewReleaseUsingAPI(t *testing.T, token string, owner *user_model.User
 		Title:   newRelease.Title,
 	}
 	unittest.AssertExistsAndLoadBean(t, rel)
-	assert.EqualValues(t, newRelease.Note, rel.Note)
+	assert.Equal(t, newRelease.Note, rel.Note)
 
 	return &newRelease
 }
@@ -157,7 +157,7 @@ func TestAPICreateAndUpdateRelease(t *testing.T) {
 		Title:   newRelease.Title,
 	}
 	unittest.AssertExistsAndLoadBean(t, rel)
-	assert.EqualValues(t, rel.Note, newRelease.Note)
+	assert.Equal(t, rel.Note, newRelease.Note)
 	assert.True(t, newRelease.HideArchiveLinks)
 }
 
@@ -336,7 +336,7 @@ func TestAPIUploadAssetRelease(t *testing.T) {
 		var attachment *api.Attachment
 		DecodeJSON(t, resp, &attachment)
 
-		assert.EqualValues(t, filename, attachment.Name)
+		assert.Equal(t, filename, attachment.Name)
 		assert.EqualValues(t, 104, attachment.Size)
 
 		req = NewRequestWithBody(t, http.MethodPost, assetURL+"?name=test-asset", bytes.NewReader(body.Bytes())).
@@ -347,7 +347,7 @@ func TestAPIUploadAssetRelease(t *testing.T) {
 		var attachment2 *api.Attachment
 		DecodeJSON(t, resp, &attachment2)
 
-		assert.EqualValues(t, "test-asset", attachment2.Name)
+		assert.Equal(t, "test-asset", attachment2.Name)
 		assert.EqualValues(t, 104, attachment2.Size)
 	})
 
@@ -365,9 +365,9 @@ func TestAPIUploadAssetRelease(t *testing.T) {
 		var attachment *api.Attachment
 		DecodeJSON(t, resp, &attachment)
 
-		assert.EqualValues(t, "stream.bin", attachment.Name)
+		assert.Equal(t, "stream.bin", attachment.Name)
 		assert.EqualValues(t, 104, attachment.Size)
-		assert.EqualValues(t, "attachment", attachment.Type)
+		assert.Equal(t, "attachment", attachment.Type)
 	})
 }
 
@@ -424,10 +424,10 @@ func TestAPIExternalAssetRelease(t *testing.T) {
 	var attachment *api.Attachment
 	DecodeJSON(t, resp, &attachment)
 
-	assert.EqualValues(t, "test-asset", attachment.Name)
+	assert.Equal(t, "test-asset", attachment.Name)
 	assert.EqualValues(t, 0, attachment.Size)
-	assert.EqualValues(t, "https://forgejo.org/", attachment.DownloadURL)
-	assert.EqualValues(t, "external", attachment.Type)
+	assert.Equal(t, "https://forgejo.org/", attachment.DownloadURL)
+	assert.Equal(t, "external", attachment.Type)
 }
 
 func TestAPIDuplicateAssetRelease(t *testing.T) {

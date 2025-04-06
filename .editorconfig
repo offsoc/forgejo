@@ -12,6 +12,9 @@ insert_final_newline = true
 [{*.{go,tmpl,html},Makefile,go.mod}]
 indent_style = tab
 
+[go.*]
+indent_style = tab
+
 [templates/custom/*.tmpl]
 insert_final_newline = false
 
@@ -26,3 +29,8 @@ insert_final_newline = false
 
 [options/locale/locale_*.ini]
 insert_final_newline = false
+
+# Weblate JSON output defaults to four spaces
+[options/locale_next/locale_*.json]
+indent_style = space
+indent_size = 4

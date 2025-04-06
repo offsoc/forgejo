@@ -25,23 +25,23 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/cmd"
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/testlogger"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/services/auth/source/remote"
-	gitea_context "code.gitea.io/gitea/services/context"
-	user_service "code.gitea.io/gitea/services/user"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/cmd"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/testlogger"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers"
+	"forgejo.org/services/auth/source/remote"
+	gitea_context "forgejo.org/services/context"
+	user_service "forgejo.org/services/user"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/markbates/goth"
@@ -158,18 +158,6 @@ func TestMain(m *testing.M) {
 			testlogger.SlowFlush = duration
 		}
 	}
-
-	os.Unsetenv("GIT_AUTHOR_NAME")
-	os.Unsetenv("GIT_AUTHOR_EMAIL")
-	os.Unsetenv("GIT_AUTHOR_DATE")
-	os.Unsetenv("GIT_COMMITTER_NAME")
-	os.Unsetenv("GIT_COMMITTER_EMAIL")
-	os.Unsetenv("GIT_COMMITTER_DATE")
-
-	// Avoid loading the default system config. On MacOS, this config
-	// sets the osxkeychain credential helper, which will cause tests
-	// to freeze with a dialog.
-	os.Setenv("GIT_CONFIG_NOSYSTEM", "true")
 
 	err := unittest.InitFixtures(
 		unittest.FixturesOptions{
@@ -310,9 +298,7 @@ func addAuthSource(t *testing.T, payload map[string]string) *auth.Source {
 	payload["_csrf"] = GetCSRF(t, session, "/admin/auths/new")
 	req := NewRequestWithValues(t, "POST", "/admin/auths/new", payload)
 	session.MakeRequest(t, req, http.StatusSeeOther)
-	source, err := auth.GetSourceByName(context.Background(), payload["name"])
-	require.NoError(t, err)
-	return source
+	return unittest.AssertExistsAndLoadBean(t, &auth.Source{Name: payload["name"]})
 }
 
 func authSourcePayloadOAuth2(name string) map[string]string {
@@ -361,7 +347,7 @@ func authSourcePayloadGitHubCustom(name string) map[string]string {
 }
 
 func createRemoteAuthSource(t *testing.T, name, url, matchingSource string) *auth.Source {
-	require.NoError(t, auth.CreateSource(context.Background(), &auth.Source{
+	require.NoError(t, auth.CreateSource(t.Context(), &auth.Source{
 		Type:     auth.Remote,
 		Name:     name,
 		IsActive: true,
@@ -370,9 +356,7 @@ func createRemoteAuthSource(t *testing.T, name, url, matchingSource string) *aut
 			MatchingSource: matchingSource,
 		},
 	}))
-	source, err := auth.GetSourceByName(context.Background(), name)
-	require.NoError(t, err)
-	return source
+	return unittest.AssertExistsAndLoadBean(t, &auth.Source{Name: name})
 }
 
 func createUser(ctx context.Context, t testing.TB, user *user_model.User) func() {
@@ -437,7 +421,15 @@ var tokenCounter int64
 // but without the "scope_" prefix.
 func getTokenForLoggedInUser(t testing.TB, session *TestSession, scopes ...auth.AccessTokenScope) string {
 	t.Helper()
-	var token string
+	accessTokenName := fmt.Sprintf("api-testing-token-%d", atomic.AddInt64(&tokenCounter, 1))
+	createApplicationSettingsToken(t, session, accessTokenName, scopes...)
+	token := assertAccessToken(t, session)
+	return token
+}
+
+// createApplicationSettingsToken creates a token with given name and scopes for the currently logged in user.
+// It will assert CSRF token and redirect to the application settings page.
+func createApplicationSettingsToken(t testing.TB, session *TestSession, name string, scopes ...auth.AccessTokenScope) {
 	req := NewRequest(t, "GET", "/user/settings/applications")
 	resp := session.MakeRequest(t, req, http.StatusOK)
 	var csrf string
@@ -455,7 +447,7 @@ func getTokenForLoggedInUser(t testing.TB, session *TestSession, scopes ...auth.
 	assert.NotEmpty(t, csrf)
 	urlValues := url.Values{}
 	urlValues.Add("_csrf", csrf)
-	urlValues.Add("name", fmt.Sprintf("api-testing-token-%d", atomic.AddInt64(&tokenCounter, 1)))
+	urlValues.Add("name", name)
 	for _, scope := range scopes {
 		urlValues.Add("scope", string(scope))
 	}
@@ -474,11 +466,15 @@ func getTokenForLoggedInUser(t testing.TB, session *TestSession, scopes ...auth.
 			}
 		}
 	}
+}
 
-	req = NewRequest(t, "GET", "/user/settings/applications")
-	resp = session.MakeRequest(t, req, http.StatusOK)
+// assertAccessToken retrieves a token from "/user/settings/applications" and returns it.
+// It will also assert that the page contains a token.
+func assertAccessToken(t testing.TB, session *TestSession) string {
+	req := NewRequest(t, "GET", "/user/settings/applications")
+	resp := session.MakeRequest(t, req, http.StatusOK)
 	htmlDoc := NewHTMLParser(t, resp.Body)
-	token = htmlDoc.doc.Find(".ui.info p").Text()
+	token := htmlDoc.doc.Find(".ui.info p").Text()
 	assert.NotEmpty(t, token)
 	return token
 }
@@ -565,7 +561,7 @@ func MakeRequest(t testing.TB, rw *RequestWrapper, expectedStatus int) *httptest
 	}
 	testWebRoutes.ServeHTTP(recorder, req)
 	if expectedStatus != NoExpectedStatus {
-		if !assert.EqualValues(t, expectedStatus, recorder.Code, "Request: %s %s", req.Method, req.URL.String()) {
+		if !assert.Equal(t, expectedStatus, recorder.Code, "Request: %s %s", req.Method, req.URL.String()) {
 			logUnexpectedResponse(t, recorder)
 		}
 	}
@@ -578,7 +574,7 @@ func MakeRequestNilResponseRecorder(t testing.TB, rw *RequestWrapper, expectedSt
 	recorder := NewNilResponseRecorder()
 	testWebRoutes.ServeHTTP(recorder, req)
 	if expectedStatus != NoExpectedStatus {
-		if !assert.EqualValues(t, expectedStatus, recorder.Code,
+		if !assert.Equal(t, expectedStatus, recorder.Code,
 			"Request: %s %s", req.Method, req.URL.String()) {
 			logUnexpectedResponse(t, &recorder.ResponseRecorder)
 		}
@@ -592,7 +588,7 @@ func MakeRequestNilResponseHashSumRecorder(t testing.TB, rw *RequestWrapper, exp
 	recorder := NewNilResponseHashSumRecorder()
 	testWebRoutes.ServeHTTP(recorder, req)
 	if expectedStatus != NoExpectedStatus {
-		if !assert.EqualValues(t, expectedStatus, recorder.Code,
+		if !assert.Equal(t, expectedStatus, recorder.Code,
 			"Request: %s %s", req.Method, req.URL.String()) {
 			logUnexpectedResponse(t, &recorder.ResponseRecorder)
 		}

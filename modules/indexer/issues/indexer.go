@@ -8,22 +8,23 @@ import (
 	"fmt"
 	"os"
 	"runtime/pprof"
+	"strings"
 	"sync/atomic"
 	"time"
 
-	db_model "code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/indexer/issues/bleve"
-	"code.gitea.io/gitea/modules/indexer/issues/db"
-	"code.gitea.io/gitea/modules/indexer/issues/elasticsearch"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
-	"code.gitea.io/gitea/modules/indexer/issues/meilisearch"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/queue"
-	"code.gitea.io/gitea/modules/setting"
+	db_model "forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/indexer/issues/bleve"
+	"forgejo.org/modules/indexer/issues/db"
+	"forgejo.org/modules/indexer/issues/elasticsearch"
+	"forgejo.org/modules/indexer/issues/internal"
+	"forgejo.org/modules/indexer/issues/meilisearch"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/queue"
+	"forgejo.org/modules/setting"
 )
 
 // IndexerMetadata is used to send data to the queue, so it contains only the ids.
@@ -279,6 +280,33 @@ const (
 	SortByCommentsAsc  = internal.SortByCommentsAsc
 	SortByDeadlineAsc  = internal.SortByDeadlineAsc
 )
+
+// ParseSortBy parses the `sortBy` string and returns the associated `SortBy`
+// value, if one exists. Otherwise return `defaultSortBy`.
+func ParseSortBy(sortBy string, defaultSortBy internal.SortBy) internal.SortBy {
+	switch strings.ToLower(sortBy) {
+	case "relevance":
+		return SortByScore
+	case "latest":
+		return SortByCreatedDesc
+	case "oldest":
+		return SortByCreatedAsc
+	case "recentupdate":
+		return SortByUpdatedDesc
+	case "leastupdate":
+		return SortByUpdatedAsc
+	case "mostcomment":
+		return SortByCommentsDesc
+	case "leastcomment":
+		return SortByCommentsAsc
+	case "nearduedate":
+		return SortByDeadlineAsc
+	case "farduedate":
+		return SortByDeadlineDesc
+	default:
+		return defaultSortBy
+	}
+}
 
 // SearchIssues search issues by options.
 func SearchIssues(ctx context.Context, opts *SearchOptions) ([]int64, int64, error) {

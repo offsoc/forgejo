@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/validation"
 
 	ap "github.com/go-ap/activitypub"
 )
