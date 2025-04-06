@@ -1,4 +1,4 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repo
@@ -6,9 +6,9 @@ package repo
 import (
 	"net/http"
 
-	git_model "code.gitea.io/gitea/models/git"
-	"code.gitea.io/gitea/services/context"
-	repo_service "code.gitea.io/gitea/services/repository"
+	git_model "forgejo.org/models/git"
+	"forgejo.org/services/context"
+	repo_service "forgejo.org/services/repository"
 )
 
 func getSyncForkInfo(ctx *context.APIContext, branch string) {
