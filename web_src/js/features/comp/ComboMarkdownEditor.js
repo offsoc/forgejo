@@ -151,7 +151,7 @@ class ComboMarkdownEditor {
 
   setupTab() {
     const $container = $(this.container);
-    const tabs = $container[0].querySelectorAll('.tabular.menu > .item');
+    const tabs = $container[0].querySelectorAll('.switch > .item');
 
     // Fomantic Tab requires the "data-tab" to be globally unique.
     // So here it uses our defined "data-tab-for" and "data-tab-panel" to generate the "data-tab" attribute for Fomantic.

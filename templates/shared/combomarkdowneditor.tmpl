@@ -13,14 +13,14 @@ Template Attributes:
 * EasyMDE: whether to display button for switching to legacy editor
 */}}
 <div {{if .ContainerId}}id="{{.ContainerId}}"{{end}} class="combo-markdown-editor {{.ContainerClasses}}" data-dropzone-parent-container="{{.DropzoneParentContainer}}">
-	{{if .MarkdownPreviewUrl}}
-	<div class="ui top tabular menu">
-		<a href="#" class="active item" data-tab-for="markdown-writer">{{ctx.Locale.Tr "write"}}</a>
-		<a href="#" class="item" data-tab-for="markdown-previewer" data-preview-url="{{.MarkdownPreviewUrl}}" data-preview-context="{{.MarkdownPreviewContext}}">{{ctx.Locale.Tr "preview"}}</a>
-	</div>
-	{{end}}
 
 	<markdown-toolbar>
+		{{if .MarkdownPreviewUrl}}
+		<div class="switch">
+			<a href="#" class="active item" data-tab-for="markdown-writer">{{ctx.Locale.Tr "write"}}</a>
+			<a href="#" class="item" data-tab-for="markdown-previewer" data-preview-url="{{.MarkdownPreviewUrl}}" data-preview-context="{{.MarkdownPreviewContext}}">{{ctx.Locale.Tr "preview"}}</a>
+		</div>
+		{{end}}
 		<div class="markdown-toolbar-group">
 			<md-header class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.heading.tooltip"}}">{{svg "octicon-heading"}}</md-header>
 			<md-bold class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.bold.tooltip"}}">{{svg "octicon-bold"}}</md-bold>
