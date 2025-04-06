@@ -39,7 +39,7 @@ test('Markdown image preview behaviour', async ({page}, workerInfo) => {
   await save_visual(page);
 });
 
-test('markdown indentation', async ({page}) => {
+test('Markdown indentation', async ({page}) => {
   const initText = `* first\n* second\n* third\n* last`;
 
   const response = await page.goto('/user2/repo1/issues/new');
@@ -109,7 +109,7 @@ test('markdown indentation', async ({page}) => {
   await expect(textarea).toHaveValue(initText);
 });
 
-test('markdown list continuation', async ({page}) => {
+test('Markdown list continuation', async ({page}) => {
   const initText = `* first\n* second`;
 
   const response = await page.goto('/user2/repo1/issues/new');
@@ -202,7 +202,7 @@ test('markdown list continuation', async ({page}) => {
   }
 });
 
-test('markdown insert table', async ({page}) => {
+test('Markdown insert table', async ({page}) => {
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 
@@ -225,7 +225,7 @@ test('markdown insert table', async ({page}) => {
   await save_visual(page);
 });
 
-test('markdown insert link', async ({page}) => {
+test('Markdown insert link', async ({page}) => {
   const response = await page.goto('/user2/repo1/issues/new');
   expect(response?.status()).toBe(200);
 
