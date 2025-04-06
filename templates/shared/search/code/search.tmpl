@@ -8,7 +8,6 @@
 			"Selected" $.CodeSearchMode
 			"Options" $.CodeSearchOptions}}
 </form>
-<div class="divider"></div>
 <div class="ui user list">
 	{{if .CodeIndexerUnavailable}}
 		<div class="ui error message">
@@ -30,11 +29,6 @@
 						<span class="section"><a href="?q={{$.Keyword}}&mode={{$.CodeSearchMode}}&path={{$href}}">{{$path}}</a></span>
 					{{- end -}}
 				</span>
-			</div>
-		{{end}}
-		{{if .CodeIndexerDisabled}}
-			<div class="ui message" data-test-tag="grep">
-				<p>{{ctx.Locale.Tr "search.code_search_by_git_grep"}}</p>
 			</div>
 		{{end}}
 		{{if .SearchResults}}

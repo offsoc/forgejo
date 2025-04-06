@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	base "code.gitea.io/gitea/modules/migration"
-	"code.gitea.io/gitea/modules/proxy"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	base "forgejo.org/modules/migration"
+	"forgejo.org/modules/proxy"
+	"forgejo.org/modules/structs"
 
 	"github.com/google/go-github/v64/github"
 	"golang.org/x/oauth2"
@@ -220,6 +220,7 @@ func (g *GithubDownloaderV3) GetRepoInfo() (*base.Repository, error) {
 		OriginalURL:   gr.GetHTMLURL(),
 		CloneURL:      gr.GetCloneURL(),
 		DefaultBranch: gr.GetDefaultBranch(),
+		Website:       gr.GetHomepage(),
 	}, nil
 }
 

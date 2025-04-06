@@ -4,13 +4,12 @@
 package migrations
 
 import (
-	"context"
 	"net/url"
 	"os"
 	"testing"
 	"time"
 
-	base "code.gitea.io/gitea/modules/migration"
+	base "forgejo.org/modules/migration"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,7 +32,7 @@ func TestCodebaseDownloadRepo(t *testing.T) {
 	}
 
 	factory := &CodebaseDownloaderFactory{}
-	downloader, err := factory.New(context.Background(), base.MigrateOptions{
+	downloader, err := factory.New(t.Context(), base.MigrateOptions{
 		CloneAddr:    u.String(),
 		AuthUsername: apiUser,
 		AuthPassword: apiPassword,

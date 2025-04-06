@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/routers/api/actions"
-	actions_service "code.gitea.io/gitea/services/actions"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/storage"
+	"forgejo.org/routers/api/actions"
+	actions_service "forgejo.org/services/actions"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

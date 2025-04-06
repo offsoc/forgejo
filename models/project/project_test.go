@@ -6,9 +6,9 @@ package project
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -75,7 +75,7 @@ func TestProject(t *testing.T) {
 
 	assert.Equal(t, project.Title, projectFromDB.Title)
 
-	require.NoError(t, ChangeProjectStatus(db.DefaultContext, project, true))
+	require.NoError(t, ChangeProjectStatusByRepoIDAndID(db.DefaultContext, project.RepoID, project.ID, true))
 
 	// Retrieve from DB afresh to check if it is truly closed
 	projectFromDB, err = GetProjectByID(db.DefaultContext, project.ID)
@@ -114,10 +114,10 @@ func TestProjectsSort(t *testing.T) {
 			OrderBy: GetSearchOrderByBySortType(tt.sortType),
 		})
 		require.NoError(t, err)
-		assert.EqualValues(t, int64(6), count)
+		assert.Equal(t, int64(6), count)
 		if assert.Len(t, projects, 6) {
 			for i := range projects {
-				assert.EqualValues(t, tt.wants[i], projects[i].ID)
+				assert.Equal(t, tt.wants[i], projects[i].ID)
 			}
 		}
 	}

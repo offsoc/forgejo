@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
+	migration_tests "forgejo.org/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

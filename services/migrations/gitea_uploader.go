@@ -14,26 +14,26 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	base_module "code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/label"
-	"code.gitea.io/gitea/modules/log"
-	base "code.gitea.io/gitea/modules/migration"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/uri"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/pull"
-	repo_service "code.gitea.io/gitea/services/repository"
+	"forgejo.org/models"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	base_module "forgejo.org/modules/base"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/label"
+	"forgejo.org/modules/log"
+	base "forgejo.org/modules/migration"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/uri"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/pull"
+	repo_service "forgejo.org/services/repository"
 
 	"github.com/google/uuid"
 )
@@ -105,6 +105,7 @@ func (g *GiteaLocalUploader) CreateRepo(repo *base.Repository, opts base.Migrate
 		r, err = repo_service.CreateRepositoryDirectly(g.ctx, g.doer, owner, repo_service.CreateRepoOptions{
 			Name:           g.repoName,
 			Description:    repo.Description,
+			Website:        repo.Website,
 			OriginalURL:    repo.OriginalURL,
 			GitServiceType: opts.GitServiceType,
 			IsPrivate:      opts.Private || setting.Repository.ForcePrivate,
@@ -119,20 +120,17 @@ func (g *GiteaLocalUploader) CreateRepo(repo *base.Repository, opts base.Migrate
 	}
 	r.DefaultBranch = repo.DefaultBranch
 	r.Description = repo.Description
+	r.Website = repo.Website
 
 	r, err = repo_service.MigrateRepositoryGitData(g.ctx, owner, r, base.MigrateOptions{
-		RepoName:       g.repoName,
-		Description:    repo.Description,
-		OriginalURL:    repo.OriginalURL,
-		GitServiceType: opts.GitServiceType,
-		Mirror:         repo.IsMirror,
+		CloneAddr:      repo.CloneURL, // SECURITY: we will assume that this has already been checked
 		LFS:            opts.LFS,
 		LFSEndpoint:    opts.LFSEndpoint,
-		CloneAddr:      repo.CloneURL, // SECURITY: we will assume that this has already been checked
-		Private:        repo.IsPrivate,
-		Wiki:           opts.Wiki,
-		Releases:       opts.Releases, // if didn't get releases, then sync them from tags
+		Mirror:         repo.IsMirror,
 		MirrorInterval: opts.MirrorInterval,
+		Releases:       opts.Releases, // if didn't get releases, then sync them from tags
+		RepoName:       g.repoName,
+		Wiki:           opts.Wiki,
 	}, NewMigrationHTTPTransport())
 
 	g.sameApp = strings.HasPrefix(repo.OriginalURL, setting.AppURL)
@@ -804,6 +802,7 @@ func (g *GiteaLocalUploader) newPullRequest(pr *base.PullRequest) (*issues_model
 		MergeBase:  pr.Base.SHA,
 		Index:      pr.Number,
 		HasMerged:  pr.Merged,
+		Flow:       issues_model.PullRequestFlow(pr.Flow),
 
 		Issue: &issue,
 	}

@@ -8,18 +8,18 @@ import (
 	"fmt"
 	"time"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/actions"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
 )
 
 // StopZombieTasks stops the task which have running status, but haven't been updated for a long time
 func StopZombieTasks(ctx context.Context) error {
 	return stopTasks(ctx, actions_model.FindTaskOptions{
-		Status:        actions_model.StatusRunning,
+		Status:        []actions_model.Status{actions_model.StatusRunning},
 		UpdatedBefore: timeutil.TimeStamp(time.Now().Add(-setting.Actions.ZombieTaskTimeout).Unix()),
 	})
 }
@@ -27,7 +27,7 @@ func StopZombieTasks(ctx context.Context) error {
 // StopEndlessTasks stops the tasks which have running status and continuous updates, but don't end for a long time
 func StopEndlessTasks(ctx context.Context) error {
 	return stopTasks(ctx, actions_model.FindTaskOptions{
-		Status:        actions_model.StatusRunning,
+		Status:        []actions_model.Status{actions_model.StatusRunning},
 		StartedBefore: timeutil.TimeStamp(time.Now().Add(-setting.Actions.EndlessTaskTimeout).Unix()),
 	})
 }

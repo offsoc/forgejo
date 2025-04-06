@@ -9,15 +9,15 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/secret"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/secret"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"xorm.io/builder"
 )
@@ -170,139 +170,139 @@ func (w *Webhook) UpdateEvent() error {
 // HasCreateEvent returns true if hook enabled create event.
 func (w *Webhook) HasCreateEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.Create)
+		(w.ChooseEvents && w.Create)
 }
 
 // HasDeleteEvent returns true if hook enabled delete event.
 func (w *Webhook) HasDeleteEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.Delete)
+		(w.ChooseEvents && w.Delete)
 }
 
 // HasForkEvent returns true if hook enabled fork event.
 func (w *Webhook) HasForkEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.Fork)
+		(w.ChooseEvents && w.Fork)
 }
 
 // HasIssuesEvent returns true if hook enabled issues event.
 func (w *Webhook) HasIssuesEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.Issues)
+		(w.ChooseEvents && w.Issues)
 }
 
 // HasIssuesAssignEvent returns true if hook enabled issues assign event.
 func (w *Webhook) HasIssuesAssignEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.IssueAssign)
+		(w.ChooseEvents && w.IssueAssign)
 }
 
 // HasIssuesLabelEvent returns true if hook enabled issues label event.
 func (w *Webhook) HasIssuesLabelEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.IssueLabel)
+		(w.ChooseEvents && w.IssueLabel)
 }
 
 // HasIssuesMilestoneEvent returns true if hook enabled issues milestone event.
 func (w *Webhook) HasIssuesMilestoneEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.IssueMilestone)
+		(w.ChooseEvents && w.IssueMilestone)
 }
 
 // HasIssueCommentEvent returns true if hook enabled issue_comment event.
 func (w *Webhook) HasIssueCommentEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.IssueComment)
+		(w.ChooseEvents && w.IssueComment)
 }
 
 // HasPushEvent returns true if hook enabled push event.
 func (w *Webhook) HasPushEvent() bool {
 	return w.PushOnly || w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.Push)
+		(w.ChooseEvents && w.Push)
 }
 
 // HasPullRequestEvent returns true if hook enabled pull request event.
 func (w *Webhook) HasPullRequestEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequest)
+		(w.ChooseEvents && w.PullRequest)
 }
 
 // HasPullRequestAssignEvent returns true if hook enabled pull request assign event.
 func (w *Webhook) HasPullRequestAssignEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequestAssign)
+		(w.ChooseEvents && w.PullRequestAssign)
 }
 
 // HasPullRequestLabelEvent returns true if hook enabled pull request label event.
 func (w *Webhook) HasPullRequestLabelEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequestLabel)
+		(w.ChooseEvents && w.PullRequestLabel)
 }
 
 // HasPullRequestMilestoneEvent returns true if hook enabled pull request milestone event.
 func (w *Webhook) HasPullRequestMilestoneEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequestMilestone)
+		(w.ChooseEvents && w.PullRequestMilestone)
 }
 
 // HasPullRequestCommentEvent returns true if hook enabled pull_request_comment event.
 func (w *Webhook) HasPullRequestCommentEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequestComment)
+		(w.ChooseEvents && w.PullRequestComment)
 }
 
 // HasPullRequestApprovedEvent returns true if hook enabled pull request review event.
 func (w *Webhook) HasPullRequestApprovedEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequestReview)
+		(w.ChooseEvents && w.PullRequestReview)
 }
 
 // HasPullRequestRejectedEvent returns true if hook enabled pull request review event.
 func (w *Webhook) HasPullRequestRejectedEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequestReview)
+		(w.ChooseEvents && w.PullRequestReview)
 }
 
 // HasPullRequestReviewCommentEvent returns true if hook enabled pull request review event.
 func (w *Webhook) HasPullRequestReviewCommentEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequestReview)
+		(w.ChooseEvents && w.PullRequestReview)
 }
 
 // HasPullRequestSyncEvent returns true if hook enabled pull request sync event.
 func (w *Webhook) HasPullRequestSyncEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequestSync)
+		(w.ChooseEvents && w.PullRequestSync)
 }
 
 // HasWikiEvent returns true if hook enabled wiki event.
 func (w *Webhook) HasWikiEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvent.Wiki)
+		(w.ChooseEvents && w.Wiki)
 }
 
 // HasReleaseEvent returns if hook enabled release event.
 func (w *Webhook) HasReleaseEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.Release)
+		(w.ChooseEvents && w.Release)
 }
 
 // HasRepositoryEvent returns if hook enabled repository event.
 func (w *Webhook) HasRepositoryEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.Repository)
+		(w.ChooseEvents && w.Repository)
 }
 
 // HasPackageEvent returns if hook enabled package event.
 func (w *Webhook) HasPackageEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.Package)
+		(w.ChooseEvents && w.Package)
 }
 
 // HasPullRequestReviewRequestEvent returns true if hook enabled pull request review request event.
 func (w *Webhook) HasPullRequestReviewRequestEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.HookEvents.PullRequestReviewRequest)
+		(w.ChooseEvents && w.PullRequestReviewRequest)
 }
 
 // EventCheckers returns event checkers

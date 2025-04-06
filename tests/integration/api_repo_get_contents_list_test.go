@@ -9,15 +9,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	repo_service "code.gitea.io/gitea/services/repository"
+	auth_model "forgejo.org/models/auth"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	repo_service "forgejo.org/services/repository"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -100,7 +100,7 @@ func testAPIGetContentsList(t *testing.T, u *url.URL) {
 	lastCommit, err := gitRepo.GetCommitByPath("README.md")
 	require.NoError(t, err)
 	expectedContentsListResponse := getExpectedContentsListResponseForContents(ref, refType, lastCommit.ID.String())
-	assert.EqualValues(t, expectedContentsListResponse, contentsListResponse)
+	assert.Equal(t, expectedContentsListResponse, contentsListResponse)
 
 	// No ref
 	refType = "branch"
@@ -110,7 +110,7 @@ func testAPIGetContentsList(t *testing.T, u *url.URL) {
 	assert.NotNil(t, contentsListResponse)
 
 	expectedContentsListResponse = getExpectedContentsListResponseForContents(repo1.DefaultBranch, refType, lastCommit.ID.String())
-	assert.EqualValues(t, expectedContentsListResponse, contentsListResponse)
+	assert.Equal(t, expectedContentsListResponse, contentsListResponse)
 
 	// ref is the branch we created above in setup
 	ref = newBranch
@@ -124,7 +124,7 @@ func testAPIGetContentsList(t *testing.T, u *url.URL) {
 	lastCommit, err = branchCommit.GetCommitByPath("README.md")
 	require.NoError(t, err)
 	expectedContentsListResponse = getExpectedContentsListResponseForContents(ref, refType, lastCommit.ID.String())
-	assert.EqualValues(t, expectedContentsListResponse, contentsListResponse)
+	assert.Equal(t, expectedContentsListResponse, contentsListResponse)
 
 	// ref is the new tag we created above in setup
 	ref = newTag
@@ -138,7 +138,7 @@ func testAPIGetContentsList(t *testing.T, u *url.URL) {
 	lastCommit, err = tagCommit.GetCommitByPath("README.md")
 	require.NoError(t, err)
 	expectedContentsListResponse = getExpectedContentsListResponseForContents(ref, refType, lastCommit.ID.String())
-	assert.EqualValues(t, expectedContentsListResponse, contentsListResponse)
+	assert.Equal(t, expectedContentsListResponse, contentsListResponse)
 
 	// ref is a commit
 	ref = commitID
@@ -148,7 +148,7 @@ func testAPIGetContentsList(t *testing.T, u *url.URL) {
 	DecodeJSON(t, resp, &contentsListResponse)
 	assert.NotNil(t, contentsListResponse)
 	expectedContentsListResponse = getExpectedContentsListResponseForContents(ref, refType, commitID)
-	assert.EqualValues(t, expectedContentsListResponse, contentsListResponse)
+	assert.Equal(t, expectedContentsListResponse, contentsListResponse)
 
 	// Test file contents a file with a bad ref
 	ref = "badref"

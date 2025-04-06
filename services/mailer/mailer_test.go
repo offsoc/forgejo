@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -72,7 +72,7 @@ func TestToMessage(t *testing.T) {
 	_, err := m1.ToMessage().WriteTo(buf)
 	require.NoError(t, err)
 	header, _ := extractMailHeaderAndContent(t, buf.String())
-	assert.EqualValues(t, map[string]string{
+	assert.Equal(t, map[string]string{
 		"Content-Type":             "multipart/alternative;",
 		"Date":                     "Mon, 01 Jan 0001 00:00:00 +0000",
 		"From":                     "\"Test Gitea\" <test@gitea.com>",
@@ -92,7 +92,7 @@ func TestToMessage(t *testing.T) {
 	_, err = m1.ToMessage().WriteTo(buf)
 	require.NoError(t, err)
 	header, _ = extractMailHeaderAndContent(t, buf.String())
-	assert.EqualValues(t, map[string]string{
+	assert.Equal(t, map[string]string{
 		"Content-Type":             "multipart/alternative;",
 		"Date":                     "Mon, 01 Jan 0001 00:00:00 +0000",
 		"From":                     "\"Test Gitea\" <test@gitea.com>",

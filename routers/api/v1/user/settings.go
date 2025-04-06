@@ -6,12 +6,12 @@ package user
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/optional"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	user_service "code.gitea.io/gitea/services/user"
+	"forgejo.org/modules/optional"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	user_service "forgejo.org/services/user"
 )
 
 // GetUserSettings returns user settings
@@ -63,6 +63,7 @@ func UpdateUserSettings(ctx *context.APIContext) {
 		Theme:               optional.FromPtr(form.Theme),
 		DiffViewStyle:       optional.FromPtr(form.DiffViewStyle),
 		KeepEmailPrivate:    optional.FromPtr(form.HideEmail),
+		KeepPronounsPrivate: optional.FromPtr(form.HidePronouns),
 		KeepActivityPrivate: optional.FromPtr(form.HideActivity),
 		EnableRepoUnitHints: optional.FromPtr(form.EnableRepoUnitHints),
 	}

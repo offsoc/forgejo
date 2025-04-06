@@ -6,9 +6,9 @@ package repo
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/git"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/git"
+	api "forgejo.org/modules/structs"
 )
 
 // RepoArchiveDownloadCount counts all archive downloads for a tag
@@ -24,7 +24,7 @@ func init() {
 	db.RegisterModel(new(RepoArchiveDownloadCount))
 }
 
-// CountArchiveDownload adds one download the the given archive
+// CountArchiveDownload adds one download the given archive
 func CountArchiveDownload(ctx context.Context, repoID, releaseID int64, tp git.ArchiveType) error {
 	updateCount, err := db.GetEngine(ctx).Where("repo_id = ?", repoID).And("release_id = ?", releaseID).And("`type` = ?", tp).Incr("count").Update(new(RepoArchiveDownloadCount))
 	if err != nil {

@@ -5,31 +5,22 @@
 package generate
 
 import (
-	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"io"
 	"time"
 
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/util"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // NewInternalToken generate a new value intended to be used by INTERNAL_TOKEN.
 func NewInternalToken() (string, error) {
-	secretBytes := make([]byte, 32)
-	_, err := io.ReadFull(rand.Reader, secretBytes)
-	if err != nil {
-		return "", err
-	}
-
-	secretKey := base64.RawURLEncoding.EncodeToString(secretBytes)
+	secretKey := base64.RawURLEncoding.EncodeToString(util.CryptoRandomBytes(32))
 
 	now := time.Now()
 
-	var internalToken string
-	internalToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	internalToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"nbf": now.Unix(),
 	}).SignedString([]byte(secretKey))
 	if err != nil {
@@ -54,14 +45,9 @@ func DecodeJwtSecret(src string) ([]byte, error) {
 }
 
 // NewJwtSecret generates a new base64 encoded value intended to be used for JWT secrets.
-func NewJwtSecret() ([]byte, string, error) {
-	bytes := make([]byte, 32)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		return nil, "", err
-	}
-
-	return bytes, base64.RawURLEncoding.EncodeToString(bytes), nil
+func NewJwtSecret() ([]byte, string) {
+	bytes := util.CryptoRandomBytes(32)
+	return bytes, base64.RawURLEncoding.EncodeToString(bytes)
 }
 
 // NewSecretKey generate a new value intended to be used by SECRET_KEY.

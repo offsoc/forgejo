@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
-	"code.gitea.io/gitea/modules/indexer/issues/internal/tests"
+	"forgejo.org/modules/indexer/issues/internal"
+	"forgejo.org/modules/indexer/issues/internal/tests"
 
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/stretchr/testify/assert"
@@ -85,13 +85,13 @@ func TestConvertHits(t *testing.T) {
 	}
 	hits, err := convertHits(validResponse)
 	require.NoError(t, err)
-	assert.EqualValues(t, []internal.Match{{ID: 11}, {ID: 22}, {ID: 33}}, hits)
+	assert.Equal(t, []internal.Match{{ID: 11}, {ID: 22}, {ID: 33}}, hits)
 }
 
 func TestDoubleQuoteKeyword(t *testing.T) {
-	assert.EqualValues(t, "", doubleQuoteKeyword(""))
-	assert.EqualValues(t, `"a" "b" "c"`, doubleQuoteKeyword("a b c"))
-	assert.EqualValues(t, `"a" "d" "g"`, doubleQuoteKeyword("a  d g"))
-	assert.EqualValues(t, `"a" "d" "g"`, doubleQuoteKeyword("a  d g"))
-	assert.EqualValues(t, `"a" "d" "g"`, doubleQuoteKeyword(`a  "" "d" """g`))
+	assert.Empty(t, doubleQuoteKeyword(""))
+	assert.Equal(t, `"a" "b" "c"`, doubleQuoteKeyword("a b c"))
+	assert.Equal(t, `"a" "d" "g"`, doubleQuoteKeyword("a  d g"))
+	assert.Equal(t, `"a" "d" "g"`, doubleQuoteKeyword("a  d g"))
+	assert.Equal(t, `"a" "d" "g"`, doubleQuoteKeyword(`a  "" "d" """g`))
 }

@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"sync/atomic"
 
-	"code.gitea.io/gitea/modules/generate"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/generate"
+	"forgejo.org/modules/log"
 )
 
 // OAuth2UsernameType is enum describing the way gitea 'name' should be generated from oauth2 data
@@ -138,10 +138,7 @@ func loadOAuth2From(rootCfg ConfigProvider) {
 	if InstallLock {
 		jwtSecretBytes, err := generate.DecodeJwtSecret(jwtSecretBase64)
 		if err != nil {
-			jwtSecretBytes, jwtSecretBase64, err = generate.NewJwtSecret()
-			if err != nil {
-				log.Fatal("error generating JWT secret: %v", err)
-			}
+			jwtSecretBytes, jwtSecretBase64 = generate.NewJwtSecret()
 			saveCfg, err := rootCfg.PrepareSaving()
 			if err != nil {
 				log.Fatal("save oauth2.JWT_SECRET failed: %v", err)
@@ -161,10 +158,7 @@ var generalSigningSecret atomic.Pointer[[]byte]
 func GetGeneralTokenSigningSecret() []byte {
 	old := generalSigningSecret.Load()
 	if old == nil || len(*old) == 0 {
-		jwtSecret, _, err := generate.NewJwtSecret()
-		if err != nil {
-			log.Fatal("Unable to generate general JWT secret: %v", err)
-		}
+		jwtSecret, _ := generate.NewJwtSecret()
 		if generalSigningSecret.CompareAndSwap(old, &jwtSecret) {
 			return jwtSecret
 		}

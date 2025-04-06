@@ -6,9 +6,9 @@ package project
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/unittest"
 
-	_ "code.gitea.io/gitea/models/repo"
+	_ "forgejo.org/models/repo"
 )
 
 func TestMain(m *testing.M) {

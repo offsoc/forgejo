@@ -5,7 +5,7 @@
 package driver
 
 import (
-	driver_options "code.gitea.io/gitea/services/f3/driver/options"
+	driver_options "forgejo.org/services/f3/driver/options"
 
 	"code.forgejo.org/f3/gof3/v3/options"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"

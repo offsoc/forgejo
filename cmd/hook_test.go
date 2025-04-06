@@ -6,7 +6,6 @@ package cmd
 import (
 	"bufio"
 	"bytes"
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -15,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -42,7 +41,7 @@ func captureOutput(t *testing.T, stdFD *os.File) (finish func() (output string))
 }
 
 func TestPktLine(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	t.Run("Read", func(t *testing.T) {
 		s := strings.NewReader("0000")

@@ -3,7 +3,6 @@
 package integration
 
 import (
-	gocontext "context"
 	"io"
 	"net/url"
 	"os"
@@ -11,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/tests"
+	actions_model "forgejo.org/models/actions"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -70,7 +69,7 @@ func Test_CmdForgejo_Actions(t *testing.T) {
 			t.Run(testCase.testName, func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 				output, err := runMainApp("forgejo-cli", "actions", "register", "--secret", testCase.secret, "--scope", testCase.scope)
-				assert.EqualValues(t, "", output)
+				assert.Empty(t, output)
 
 				var exitErr *exec.ExitError
 				require.ErrorAs(t, err, &exitErr)
@@ -111,7 +110,7 @@ func Test_CmdForgejo_Actions(t *testing.T) {
 			t.Run(testCase.testName, func(t *testing.T) {
 				uuid, err := runMainAppWithStdin(testCase.stdin, "forgejo-cli", "actions", "register", testCase.secretOption(), "--scope=org26")
 				require.NoError(t, err)
-				assert.EqualValues(t, expecteduuid, uuid)
+				assert.Equal(t, expecteduuid, uuid)
 			})
 		}
 
@@ -187,9 +186,9 @@ func Test_CmdForgejo_Actions(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					uuid, err := runMainApp("forgejo-cli", cmd...)
 					require.NoError(t, err)
-					if assert.EqualValues(t, testCase.uuid, uuid) {
+					if assert.Equal(t, testCase.uuid, uuid) {
 						ownerName, repoName, found := strings.Cut(testCase.scope, "/")
-						action, err := actions_model.GetRunnerByUUID(gocontext.Background(), uuid)
+						action, err := actions_model.GetRunnerByUUID(t.Context(), uuid)
 						require.NoError(t, err)
 
 						user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: action.OwnerID})
@@ -200,14 +199,14 @@ func Test_CmdForgejo_Actions(t *testing.T) {
 							assert.Equal(t, repoName, repo.Name, action.RepoID)
 						}
 						if testCase.name != "" {
-							assert.EqualValues(t, testCase.name, action.Name)
+							assert.Equal(t, testCase.name, action.Name)
 						}
 						if testCase.labels != "" {
 							labels := strings.Split(testCase.labels, ",")
-							assert.EqualValues(t, labels, action.AgentLabels)
+							assert.Equal(t, labels, action.AgentLabels)
 						}
 						if testCase.version != "" {
-							assert.EqualValues(t, testCase.version, action.Version)
+							assert.Equal(t, testCase.version, action.Version)
 						}
 					}
 				}

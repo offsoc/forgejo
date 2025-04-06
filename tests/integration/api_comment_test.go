@@ -10,20 +10,22 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/references"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/convert"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/references"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/convert"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+const IssueIDNotExist = 10000
 
 func TestAPIListRepoComments(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
@@ -89,6 +91,10 @@ func TestAPIListIssueComments(t *testing.T) {
 	expectedCount := unittest.GetCount(t, &issues_model.Comment{IssueID: issue.ID},
 		unittest.Cond("type = ?", issues_model.CommentTypeComment))
 	assert.Len(t, comments, expectedCount)
+
+	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/%d/comments", repoOwner.Name, repo.Name, IssueIDNotExist).
+		AddTokenAuth(token)
+	MakeRequest(t, req, http.StatusNotFound)
 }
 
 func TestAPICreateComment(t *testing.T) {
@@ -109,8 +115,15 @@ func TestAPICreateComment(t *testing.T) {
 
 	var updatedComment api.Comment
 	DecodeJSON(t, resp, &updatedComment)
-	assert.EqualValues(t, commentBody, updatedComment.Body)
+	assert.Equal(t, commentBody, updatedComment.Body)
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: updatedComment.ID, IssueID: issue.ID, Content: commentBody})
+
+	urlStr = fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/comments",
+		repoOwner.Name, repo.Name, IssueIDNotExist)
+	req = NewRequestWithValues(t, "POST", urlStr, map[string]string{
+		"body": commentBody,
+	}).AddTokenAuth(token)
+	MakeRequest(t, req, http.StatusNotFound)
 }
 
 func TestAPICreateCommentAutoDate(t *testing.T) {
@@ -360,8 +373,8 @@ func TestAPIEditComment(t *testing.T) {
 
 	var updatedComment api.Comment
 	DecodeJSON(t, resp, &updatedComment)
-	assert.EqualValues(t, comment.ID, updatedComment.ID)
-	assert.EqualValues(t, newCommentBody, updatedComment.Body)
+	assert.Equal(t, comment.ID, updatedComment.ID)
+	assert.Equal(t, newCommentBody, updatedComment.Body)
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: comment.ID, IssueID: issue.ID, Content: newCommentBody})
 }
 
@@ -464,4 +477,7 @@ func TestAPIListIssueTimeline(t *testing.T) {
 	DecodeJSON(t, resp, &comments)
 	expectedCount := unittest.GetCount(t, &issues_model.Comment{IssueID: issue.ID})
 	assert.Len(t, comments, expectedCount)
+
+	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/issues/%d/timeline", repoOwner.Name, repo.Name, IssueIDNotExist)
+	MakeRequest(t, req, http.StatusNotFound)
 }

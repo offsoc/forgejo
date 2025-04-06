@@ -16,12 +16,13 @@
 package keying
 
 import (
-	"crypto/rand"
+	"crypto/hkdf"
 	"crypto/sha256"
 	"encoding/binary"
 
+	"forgejo.org/modules/util"
+
 	"golang.org/x/crypto/chacha20poly1305"
-	"golang.org/x/crypto/hkdf"
 )
 
 var (
@@ -41,7 +42,11 @@ const (
 // Set the main IKM for this module.
 func Init(ikm []byte) {
 	// Salt is intentionally left empty, it's not useful to Forgejo's use case.
-	prk = hkdf.Extract(hash, ikm, nil)
+	var err error
+	prk, err = hkdf.Extract(hash, ikm, nil)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // Specifies the context for which a subkey should be derived for.
@@ -62,11 +67,8 @@ func DeriveKey(context Context) *Key {
 		panic("keying: not initialized")
 	}
 
-	r := hkdf.Expand(hash, prk, []byte(context))
-
-	key := make([]byte, aeadKeySize)
-	// This should never return an error, but if it does, panic.
-	if n, err := r.Read(key); err != nil || n != aeadKeySize {
+	key, err := hkdf.Expand(hash, prk, string(context), aeadKeySize)
+	if err != nil {
 		panic(err)
 	}
 
@@ -94,10 +96,7 @@ func (k *Key) Encrypt(plaintext, additionalData []byte) []byte {
 	}
 
 	// Generate a random nonce.
-	nonce := make([]byte, aeadNonceSize)
-	if n, err := rand.Read(nonce); err != nil || n != aeadNonceSize {
-		panic(err)
-	}
+	nonce := util.CryptoRandomBytes(aeadNonceSize)
 
 	// Returns the ciphertext of this plaintext.
 	return e.Seal(nonce, nonce, plaintext, additionalData)

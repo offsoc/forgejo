@@ -6,9 +6,9 @@ package convert
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,6 +24,6 @@ func TestRelease_ToRelease(t *testing.T) {
 	apiRelease := ToAPIRelease(db.DefaultContext, repo1, release1)
 	assert.NotNil(t, apiRelease)
 	assert.EqualValues(t, 1, apiRelease.ID)
-	assert.EqualValues(t, "https://try.gitea.io/api/v1/repos/user2/repo1/releases/1", apiRelease.URL)
-	assert.EqualValues(t, "https://try.gitea.io/api/v1/repos/user2/repo1/releases/1/assets", apiRelease.UploadURL)
+	assert.Equal(t, "https://try.gitea.io/api/v1/repos/user2/repo1/releases/1", apiRelease.URL)
+	assert.Equal(t, "https://try.gitea.io/api/v1/repos/user2/repo1/releases/1/assets", apiRelease.UploadURL)
 }

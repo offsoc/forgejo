@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/optional"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
@@ -49,9 +49,13 @@ type IssuesOptions struct { //nolint
 	// prioritize issues from this repo
 	PriorityRepoID int64
 	IsArchived     optional.Option[bool]
-	Org            *organization.Organization // issues permission scope
-	Team           *organization.Team         // issues permission scope
-	User           *user_model.User           // issues permission scope
+
+	// If combined with AllPublic, then private as well as public issues
+	// that matches the criteria will be returned, if AllPublic is false
+	// only the private issues will be returned.
+	Org  *organization.Organization // issues permission scope
+	Team *organization.Team         // issues permission scope
+	User *user_model.User           // issues permission scope
 }
 
 // applySorts sort an issues-related session based on the provided
@@ -196,7 +200,8 @@ func applyRepoConditions(sess *xorm.Session, opts *IssuesOptions) {
 	} else if len(opts.RepoIDs) > 1 {
 		opts.RepoCond = builder.In("issue.repo_id", opts.RepoIDs)
 	}
-	if opts.AllPublic {
+	// If permission scoping is set, then we set this condition at a later stage.
+	if opts.AllPublic && opts.User == nil {
 		if opts.RepoCond == nil {
 			opts.RepoCond = builder.NewCond()
 		}
@@ -268,7 +273,14 @@ func applyConditions(sess *xorm.Session, opts *IssuesOptions) {
 	applyLabelsCondition(sess, opts)
 
 	if opts.User != nil {
-		sess.And(issuePullAccessibleRepoCond("issue.repo_id", opts.User.ID, opts.Org, opts.Team, opts.IsPull.Value()))
+		cond := issuePullAccessibleRepoCond("issue.repo_id", opts.User.ID, opts.Org, opts.Team, opts.IsPull.Value())
+		// If AllPublic was set, then also consider all issues in public
+		// repositories in addition to the private repositories the user has access
+		// to.
+		if opts.AllPublic {
+			cond = cond.Or(builder.In("issue.repo_id", builder.Select("id").From("repository").Where(builder.Eq{"is_private": false})))
+		}
+		sess.And(cond)
 	}
 }
 
@@ -329,6 +341,9 @@ func issuePullAccessibleRepoCond(repoIDstr string, userID int64, org *organizati
 				builder.Or(
 					repo_model.UserOrgUnitRepoCond(repoIDstr, userID, org.ID, unitType), // team member repos
 					repo_model.UserOrgPublicUnitRepoCond(userID, org.ID),                // user org public non-member repos, TODO: check repo has issues
+					builder.And(
+						builder.In("issue.repo_id", builder.Select("id").From("repository").Where(builder.Eq{"owner_id": org.ID})),
+						repo_model.UserAccessRepoCond(repoIDstr, userID)), // user can access org repo in a unit independent way
 				),
 			)
 		}

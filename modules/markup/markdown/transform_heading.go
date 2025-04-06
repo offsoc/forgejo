@@ -6,8 +6,9 @@ package markdown
 import (
 	"fmt"
 
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/markup"
+	mdutil "forgejo.org/modules/markup/markdown/util"
+	"forgejo.org/modules/util"
 
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"
@@ -19,7 +20,7 @@ func (g *ASTTransformer) transformHeading(_ *markup.RenderContext, v *ast.Headin
 			v.SetAttribute(attr.Name, []byte(fmt.Sprintf("%v", attr.Value)))
 		}
 	}
-	txt := v.Lines().Value(reader.Source())
+	txt := mdutil.Text(v, reader.Source())
 	header := markup.Header{
 		Text:  util.UnsafeBytesToString(txt),
 		Level: v.Level,

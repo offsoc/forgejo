@@ -8,10 +8,11 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	org_model "code.gitea.io/gitea/models/organization"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	org_model "forgejo.org/models/organization"
+	user_model "forgejo.org/models/user"
 
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 )
@@ -36,13 +37,13 @@ func (o *organizations) ListPage(ctx context.Context, page int) generic.Children
 	return f3_tree.ConvertListed(ctx, o.GetNode(), f3_tree.ConvertToAny(organizations...)...)
 }
 
-func (o *organizations) GetIDFromName(ctx context.Context, name string) generic.NodeID {
+func (o *organizations) GetIDFromName(ctx context.Context, name string) f3_id.NodeID {
 	organization, err := org_model.GetOrgByName(ctx, name)
 	if err != nil {
 		panic(fmt.Errorf("GetOrganizationByName: %v", err))
 	}
 
-	return generic.NewNodeID(organization.ID)
+	return f3_id.NewNodeID(organization.ID)
 }
 
 func newOrganizations() generic.NodeDriverInterface {

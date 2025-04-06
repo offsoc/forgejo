@@ -1,0 +1,23 @@
+-
+  id: 1001
+  issue_id: 6
+  project_id: 1001
+  project_board_id: 1001
+
+-
+  id: 1002
+  issue_id: 7
+  project_id: 1002
+  project_board_id: 1002
+
+-
+  id: 1003
+  issue_id: 16
+  project_id: 1001
+  project_board_id: 1001
+
+-
+  id: 1004
+  issue_id: 1
+  project_id: 1002
+  project_board_id: 1002

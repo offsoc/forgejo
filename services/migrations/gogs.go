@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	base "code.gitea.io/gitea/modules/migration"
-	"code.gitea.io/gitea/modules/proxy"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/log"
+	base "forgejo.org/modules/migration"
+	"forgejo.org/modules/proxy"
+	"forgejo.org/modules/structs"
 
 	"github.com/gogs/go-gogs-client"
 )
@@ -151,6 +151,7 @@ func (g *GogsDownloader) GetRepoInfo() (*base.Repository, error) {
 		CloneURL:      gr.CloneURL,
 		OriginalURL:   gr.HTMLURL,
 		DefaultBranch: gr.DefaultBranch,
+		Website:       gr.Website,
 	}, nil
 }
 

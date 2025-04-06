@@ -11,16 +11,15 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/migrations"
-	migrate_base "code.gitea.io/gitea/models/migrations/base"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/doctor"
+	"forgejo.org/models/db"
+	"forgejo.org/models/migrations"
+	migrate_base "forgejo.org/models/migrations/base"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/doctor"
 
 	"github.com/urfave/cli/v2"
-	"xorm.io/xorm"
 )
 
 // CmdDoctor represents the available doctor sub-command.
@@ -120,7 +119,7 @@ func runRecreateTable(ctx *cli.Context) error {
 
 	args := ctx.Args()
 	names := make([]string, 0, ctx.NArg())
-	for i := 0; i < ctx.NArg(); i++ {
+	for i := range ctx.NArg() {
 		names = append(names, args.Get(i))
 	}
 
@@ -130,11 +129,17 @@ func runRecreateTable(ctx *cli.Context) error {
 	}
 	recreateTables := migrate_base.RecreateTables(beans...)
 
-	return db.InitEngineWithMigration(stdCtx, func(x *xorm.Engine) error {
-		if err := migrations.EnsureUpToDate(x); err != nil {
+	return db.InitEngineWithMigration(stdCtx, func(x db.Engine) error {
+		engine, err := db.GetMasterEngine(x)
+		if err != nil {
 			return err
 		}
-		return recreateTables(x)
+
+		if err := migrations.EnsureUpToDate(engine); err != nil {
+			return err
+		}
+
+		return recreateTables(engine)
 	})
 }
 
@@ -143,11 +148,12 @@ func setupDoctorDefaultLogger(ctx *cli.Context, colorize bool) {
 	setupConsoleLogger(log.FATAL, log.CanColorStderr, os.Stderr)
 
 	logFile := ctx.String("log-file")
-	if logFile == "" {
+	switch logFile {
+	case "":
 		return // if no doctor log-file is set, do not show any log from default logger
-	} else if logFile == "-" {
+	case "-":
 		setupConsoleLogger(log.TRACE, colorize, os.Stdout)
-	} else {
+	default:
 		logFile, _ = filepath.Abs(logFile)
 		writeMode := log.WriterMode{Level: log.TRACE, WriterOption: log.WriterFileOption{FileName: logFile}}
 		writer, err := log.NewEventWriter("console-to-file", "file", writeMode)

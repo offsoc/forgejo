@@ -7,12 +7,12 @@ import (
 	go_context "context"
 	"net/http"
 
-	"code.gitea.io/gitea/models/db"
-	quota_model "code.gitea.io/gitea/models/quota"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
+	"forgejo.org/models/db"
+	quota_model "forgejo.org/models/quota"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
 )
 
 // ListQuotaGroups returns all the quota groups

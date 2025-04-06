@@ -9,10 +9,10 @@ import (
 	"html/template"
 	"strings"
 
-	"code.gitea.io/gitea/modules/highlight"
-	"code.gitea.io/gitea/modules/indexer/code/internal"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/services/gitdiff"
+	"forgejo.org/modules/highlight"
+	"forgejo.org/modules/indexer/code/internal"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/services/gitdiff"
 )
 
 // Result a search result to display
@@ -35,7 +35,14 @@ type SearchResultLanguages = internal.SearchResultLanguages
 
 type SearchOptions = internal.SearchOptions
 
-var CodeSearchOptions = [2]string{"exact", "fuzzy"}
+var CodeSearchOptions = [2]string{"exact", "union"}
+
+type SearchMode = internal.CodeSearchMode
+
+const (
+	SearchModeExact = internal.CodeSearchModeExact
+	SearchModeUnion = internal.CodeSearchModeUnion
+)
 
 func indices(content string, selectionStartIndex, selectionEndIndex int) (int, int) {
 	startIndex := selectionStartIndex
@@ -206,7 +213,6 @@ func searchResult(result *internal.SearchResult, startIndex, endIndex int) (*Res
 }
 
 // PerformSearch perform a search on a repository
-// if isFuzzy is true set the Damerau-Levenshtein distance from 0 to 2
 func PerformSearch(ctx context.Context, opts *SearchOptions) (int, []*Result, []*SearchResultLanguages, error) {
 	if opts == nil || len(opts.Keyword) == 0 {
 		return 0, nil, nil, nil

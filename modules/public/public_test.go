@@ -6,7 +6,7 @@ package public
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/container"
+	"forgejo.org/modules/container"
 
 	"github.com/stretchr/testify/assert"
 )

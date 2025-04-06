@@ -1,5 +1,5 @@
 {{if and .ShowRole.IsPoster (not .IgnorePoster)}}
-	<div class="ui basic label role-label" data-tooltip-content="
+	<div class="ui label role-label" data-tooltip-content="
 		{{if .IsPull}}
 			{{ctx.Locale.Tr "repo.issues.author.tooltip.pr"}}
 		{{else}}
@@ -9,7 +9,7 @@
 	</div>
 {{end}}
 {{if .ShowRole.RoleInRepo}}
-	<div class="ui basic label role-label" data-tooltip-content="{{.ShowRole.RoleInRepo.LocaleHelper ctx.Locale}}">
+	<div class="ui label role-label" data-tooltip-content="{{.ShowRole.RoleInRepo.LocaleHelper ctx.Locale}}">
 		{{.ShowRole.RoleInRepo.LocaleString ctx.Locale}}
 	</div>
 {{end}}

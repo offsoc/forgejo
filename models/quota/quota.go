@@ -6,8 +6,8 @@ package quota
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
 )
 
 func init() {
@@ -32,5 +32,6 @@ func EvaluateForUser(ctx context.Context, userID int64, subject LimitSubject) (b
 		return false, err
 	}
 
-	return groups.Evaluate(*used, subject), nil
+	acceptable, _ := groups.Evaluate(*used, subject)
+	return acceptable, nil
 }

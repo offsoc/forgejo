@@ -6,14 +6,14 @@ package repository
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	perm_model "code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	perm_model "forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -272,8 +272,7 @@ func TestRepoPermissionPrivateOrgRepo(t *testing.T) {
 
 	// update team information and then check permission
 	team := unittest.AssertExistsAndLoadBean(t, &organization.Team{ID: 5})
-	err = organization.UpdateTeamUnits(db.DefaultContext, team, nil)
-	require.NoError(t, err)
+	unittest.AssertSuccessfulDelete(t, &organization.TeamUnit{TeamID: team.ID})
 	perm, err = access_model.GetUserRepoPermission(db.DefaultContext, repo, owner)
 	require.NoError(t, err)
 	for _, unit := range repo.Units {

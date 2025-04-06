@@ -9,11 +9,12 @@ import (
 	"fmt"
 	"strings"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	repo_service "code.gitea.io/gitea/services/repository"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	repo_service "forgejo.org/services/repository"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -121,7 +122,7 @@ func (o *project) Patch(ctx context.Context) {
 	}
 }
 
-func (o *project) Put(ctx context.Context) generic.NodeID {
+func (o *project) Put(ctx context.Context) f3_id.NodeID {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
@@ -166,7 +167,7 @@ func (o *project) Put(ctx context.Context) generic.NodeID {
 		o.forgejoProject = repo
 		o.Trace("project created %d", o.forgejoProject.ID)
 	}
-	return generic.NewNodeID(o.forgejoProject.ID)
+	return f3_id.NewNodeID(o.forgejoProject.ID)
 }
 
 func (o *project) Delete(ctx context.Context) {

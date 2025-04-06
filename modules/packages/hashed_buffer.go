@@ -6,7 +6,7 @@ package packages
 import (
 	"io"
 
-	"code.gitea.io/gitea/modules/util/filebuffer"
+	"forgejo.org/modules/util/filebuffer"
 )
 
 // HashedSizeReader provide methods to read, sum hashes and a Size method
@@ -75,7 +75,7 @@ func (b *HashedBuffer) Write(p []byte) (int, error) {
 	return b.combinedWriter.Write(p)
 }
 
-// Sums gets the MD5, SHA1, SHA256 and SHA512 checksums of the data
-func (b *HashedBuffer) Sums() (hashMD5, hashSHA1, hashSHA256, hashSHA512 []byte) {
+// Sums gets the MD5, SHA1, SHA256, SHA512 and BLAKE2B checksums of the data
+func (b *HashedBuffer) Sums() (hashMD5, hashSHA1, hashSHA256, hashSHA512, hashBlake2b []byte) {
 	return b.hash.Sums()
 }

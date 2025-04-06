@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/assetfs"
+	"forgejo.org/modules/assetfs"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -66,7 +66,7 @@ func TestHandleError(t *testing.T) {
 		_, err = tmpl.Parse(s)
 		require.Error(t, err)
 		msg := h(err)
-		assert.EqualValues(t, strings.TrimSpace(expect), strings.TrimSpace(msg))
+		assert.Equal(t, strings.TrimSpace(expect), strings.TrimSpace(msg))
 	}
 
 	test("{{", p.handleGenericTemplateError, `
@@ -103,5 +103,5 @@ god knows XXX
 ----------------------------------------------------------------------
 `
 	actualMsg := p.handleExpectedEndError(errors.New("template: test:1: expected end; found XXX"))
-	assert.EqualValues(t, strings.TrimSpace(expectedMsg), strings.TrimSpace(actualMsg))
+	assert.Equal(t, strings.TrimSpace(expectedMsg), strings.TrimSpace(actualMsg))
 }

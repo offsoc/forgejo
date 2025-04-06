@@ -11,11 +11,11 @@ import (
 	"regexp"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,14 +34,14 @@ func TestAPIDownloadArchive(t *testing.T) {
 	bs, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	assert.Len(t, bs, 320)
-	assert.EqualValues(t, "application/zip", resp.Header().Get("Content-Type"))
+	assert.Equal(t, "application/zip", resp.Header().Get("Content-Type"))
 
 	link, _ = url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/archive/master.tar.gz", user2.Name, repo.Name))
 	resp = MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusOK)
 	bs, err = io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	assert.Len(t, bs, 266)
-	assert.EqualValues(t, "application/gzip", resp.Header().Get("Content-Type"))
+	assert.Equal(t, "application/gzip", resp.Header().Get("Content-Type"))
 
 	// Must return a link to a commit ID as the "immutable" archive link
 	linkHeaderRe := regexp.MustCompile(`<(?P<url>https?://.*/api/v1/repos/user2/repo1/archive/[a-f0-9]+\.tar\.gz.*)>; rel="immutable"`)
@@ -51,14 +51,14 @@ func TestAPIDownloadArchive(t *testing.T) {
 	bs2, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	// The locked URL should give the same bytes as the non-locked one
-	assert.EqualValues(t, bs, bs2)
+	assert.Equal(t, bs, bs2)
 
 	link, _ = url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/archive/master.bundle", user2.Name, repo.Name))
 	resp = MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusOK)
 	bs, err = io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	assert.Len(t, bs, 382)
-	assert.EqualValues(t, "application/octet-stream", resp.Header().Get("Content-Type"))
+	assert.Equal(t, "application/octet-stream", resp.Header().Get("Content-Type"))
 
 	link, _ = url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/archive/master", user2.Name, repo.Name))
 	MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusBadRequest)
@@ -92,7 +92,7 @@ func TestAPIDownloadArchive2(t *testing.T) {
 	bs2, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	// The locked URL should give the same bytes as the non-locked one
-	assert.EqualValues(t, bs, bs2)
+	assert.Equal(t, bs, bs2)
 
 	link, _ = url.Parse(fmt.Sprintf("/api/v1/repos/%s/%s/bundle/master", user2.Name, repo.Name))
 	resp = MakeRequest(t, NewRequest(t, "GET", link.String()).AddTokenAuth(token), http.StatusOK)

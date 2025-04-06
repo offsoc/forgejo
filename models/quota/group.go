@@ -5,10 +5,11 @@ package quota
 
 import (
 	"context"
+	"math"
 
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/builder"
 )
@@ -199,15 +200,20 @@ var affectsMap = map[LimitSubject]LimitSubjects{
 	},
 }
 
-func (g *Group) Evaluate(used Used, forSubject LimitSubject) (bool, bool) {
+// Evaluate returns whether the size used is acceptable for the topic if a rule
+// was found, and returns the smallest limit of all applicable rules or the
+// first limit found to be unacceptable for the size used.
+func (g *Group) Evaluate(used Used, forSubject LimitSubject) (bool, bool, int64) {
 	var found bool
+	foundLimit := int64(math.MaxInt64)
 	for _, rule := range g.Rules {
 		ok, has := rule.Evaluate(used, forSubject)
 		if has {
-			found = true
 			if !ok {
-				return false, true
+				return false, true, rule.Limit
 			}
+			found = true
+			foundLimit = min(foundLimit, rule.Limit)
 		}
 	}
 
@@ -216,32 +222,35 @@ func (g *Group) Evaluate(used Used, forSubject LimitSubject) (bool, bool) {
 		// subjects below
 
 		for _, subject := range affectsMap[forSubject] {
-			ok, has := g.Evaluate(used, subject)
+			ok, has, limit := g.Evaluate(used, subject)
 			if has {
-				found = true
 				if !ok {
-					return false, true
+					return false, true, limit
 				}
+				found = true
+				foundLimit = min(foundLimit, limit)
 			}
 		}
 	}
 
-	return true, found
+	return true, found, foundLimit
 }
 
-func (gl *GroupList) Evaluate(used Used, forSubject LimitSubject) bool {
+// Evaluate returns if the used size is acceptable for the subject and the
+// lowest limit that is acceptable for the subject.
+func (gl *GroupList) Evaluate(used Used, forSubject LimitSubject) (bool, int64) {
 	// If there are no groups, use the configured defaults:
 	if gl == nil || len(*gl) == 0 {
 		return EvaluateDefault(used, forSubject)
 	}
 
 	for _, group := range *gl {
-		ok, has := group.Evaluate(used, forSubject)
+		ok, has, limit := group.Evaluate(used, forSubject)
 		if has && ok {
-			return true
+			return true, limit
 		}
 	}
-	return false
+	return false, 0
 }
 
 func GetGroupByName(ctx context.Context, name string) (*Group, error) {

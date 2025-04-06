@@ -5,9 +5,9 @@
 package swagger
 
 import (
-	ffed "code.gitea.io/gitea/modules/forgefed"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/forms"
+	ffed "forgejo.org/modules/forgefed"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/forms"
 )
 
 // not actually a response, just a hack to get go-swagger to include definitions
@@ -215,6 +215,9 @@ type swaggerParameterBodies struct {
 
 	// in:body
 	CreateVariableOption api.CreateVariableOption
+
+	// in:body
+	RenameOrgOption api.RenameOrgOption
 
 	// in:body
 	UpdateVariableOption api.UpdateVariableOption

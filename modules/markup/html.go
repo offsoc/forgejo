@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors.
 // SPDX-License-Identifier: MIT
 
 package markup
@@ -13,17 +14,17 @@ import (
 	"strings"
 	"sync"
 
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/emoji"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup/common"
-	"code.gitea.io/gitea/modules/references"
-	"code.gitea.io/gitea/modules/regexplru"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/templates/vars"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/emoji"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup/common"
+	"forgejo.org/modules/references"
+	"forgejo.org/modules/regexplru"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/templates/vars"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/util"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -48,13 +49,13 @@ var (
 	// hashCurrentPattern matches string that represents a commit SHA, e.g. d8a994ef243349f321568f9e36d5c3f444b99cae
 	// Although SHA1 hashes are 40 chars long, SHA256 are 64, the regex matches the hash from 7 to 64 chars in length
 	// so that abbreviated hash links can be used as well. This matches git and GitHub usability.
-	hashCurrentPattern = regexp.MustCompile(`(?:\s|^|\(|\[)([0-9a-f]{7,64})(?:\s|$|\)|\]|[.,:](\s|$))`)
+	hashCurrentPattern = regexp.MustCompile(`(?:^|\s)[^\w\d]{0,2}([0-9a-f]{7,64})[^\w\d]{0,2}(?:\s|$)`)
 
 	// shortLinkPattern matches short but difficult to parse [[name|link|arg=test]] syntax
 	shortLinkPattern = regexp.MustCompile(`\[\[(.*?)\]\](\w*)`)
 
-	// anySHA1Pattern splits url containing SHA into parts
-	anyHashPattern = regexp.MustCompile(`https?://(?:\S+/){4,5}([0-9a-f]{40,64})(/[-+~_%.a-zA-Z0-9/]+)?(\?[-+~_%\.a-zA-Z0-9=&]+)?(#[-+~_%.a-zA-Z0-9]+)?`)
+	// anyHashPattern splits url containing SHA into parts
+	anyHashPattern = regexp.MustCompile(`https?://(?:\S+/){4,5}([0-9a-f]{7,64})(/[-+~_%.a-zA-Z0-9/]+)?(\?[-+~_%\.a-zA-Z0-9=&]+)?(#[-+~_%.a-zA-Z0-9]+)?`)
 
 	// comparePattern matches "http://domain/org/repo/compare/COMMIT1...COMMIT2#hash"
 	comparePattern = regexp.MustCompile(`https?://(?:\S+/){4,5}([0-9a-f]{7,64})(\.\.\.?)([0-9a-f]{7,64})?(#[-+~_%.a-zA-Z0-9]+)?`)
@@ -362,7 +363,7 @@ func visitNode(ctx *RenderContext, procs []processor, node *html.Node) {
 	// Add user-content- to IDs and "#" links if they don't already have them
 	for idx, attr := range node.Attr {
 		val := strings.TrimPrefix(attr.Val, "#")
-		notHasPrefix := !(strings.HasPrefix(val, "user-content-") || blackfridayExtRegex.MatchString(val))
+		notHasPrefix := !strings.HasPrefix(val, "user-content-") && !blackfridayExtRegex.MatchString(val)
 
 		if attr.Key == "id" && notHasPrefix {
 			node.Attr[idx].Val = "user-content-" + attr.Val
@@ -759,9 +760,6 @@ func shortLinkProcessor(ctx *RenderContext, node *html.Node) {
 				title = path.Base(name)
 			}
 			alt := props["alt"]
-			if alt == "" {
-				alt = name
-			}
 
 			// make the childNode an image - if we can, we also place the alt
 			childNode.Type = html.ElementNode
@@ -771,9 +769,6 @@ func shortLinkProcessor(ctx *RenderContext, node *html.Node) {
 				{Key: "src", Val: link},
 				{Key: "title", Val: title},
 				{Key: "alt", Val: alt},
-			}
-			if alt == "" {
-				childNode.Attr = childNode.Attr[:2]
 			}
 		} else {
 			if !absoluteLink {
@@ -1180,7 +1175,7 @@ func emojiProcessor(ctx *RenderContext, node *html.Node) {
 	}
 }
 
-// hashCurrentPatternProcessor renders SHA1 strings to corresponding links that
+// hashCurrentPatternProcessor renders SHA1/SHA256 strings to corresponding links that
 // are assumed to be in the same repository.
 func hashCurrentPatternProcessor(ctx *RenderContext, node *html.Node) {
 	if ctx.Metas == nil || ctx.Metas["user"] == "" || ctx.Metas["repo"] == "" || ctx.Metas["repoPath"] == "" {

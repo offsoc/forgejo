@@ -5,6 +5,7 @@ package structs
 
 // Compare represents a comparison between two commits.
 type Compare struct {
-	TotalCommits int       `json:"total_commits"` // Total number of commits in the comparison.
-	Commits      []*Commit `json:"commits"`       // List of commits in the comparison.
+	TotalCommits int                    `json:"total_commits"` // Total number of commits in the comparison.
+	Commits      []*Commit              `json:"commits"`       // List of commits in the comparison.
+	Files        []*CommitAffectedFiles `json:"files"`         // Total files modified in this comparison.
 }

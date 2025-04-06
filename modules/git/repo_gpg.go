@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/modules/process"
+	"forgejo.org/modules/process"
 )
 
 // LoadPublicKeyContent will load the key from gpg

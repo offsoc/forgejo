@@ -7,10 +7,10 @@ import (
 	"context"
 	"sync/atomic"
 
-	"code.gitea.io/gitea/modules/nosql"
-	"code.gitea.io/gitea/modules/queue/lqinternal"
+	"forgejo.org/modules/nosql"
+	"forgejo.org/modules/queue/lqinternal"
 
-	"gitea.com/lunny/levelqueue"
+	"code.forgejo.org/forgejo/levelqueue"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

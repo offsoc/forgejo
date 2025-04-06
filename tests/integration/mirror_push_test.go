@@ -5,7 +5,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -17,23 +16,23 @@ import (
 	"testing"
 	"time"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	gitea_context "code.gitea.io/gitea/services/context"
-	doctor "code.gitea.io/gitea/services/doctor"
-	"code.gitea.io/gitea/services/migrations"
-	mirror_service "code.gitea.io/gitea/services/mirror"
-	repo_service "code.gitea.io/gitea/services/repository"
-	"code.gitea.io/gitea/tests"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	gitea_context "forgejo.org/services/context"
+	doctor "forgejo.org/services/doctor"
+	"forgejo.org/services/migrations"
+	mirror_service "forgejo.org/services/mirror"
+	repo_service "forgejo.org/services/repository"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -66,7 +65,7 @@ func testMirrorPush(t *testing.T, u *url.URL) {
 	require.NoError(t, err)
 	assert.Len(t, mirrors, 2)
 
-	ok := mirror_service.SyncPushMirror(context.Background(), mirrors[0].ID)
+	ok := mirror_service.SyncPushMirror(t.Context(), mirrors[0].ID)
 	assert.True(t, ok)
 
 	srcGitRepo, err := gitrepo.OpenRepository(git.DefaultContext, srcRepo)
@@ -262,7 +261,7 @@ func TestSSHPushMirror(t *testing.T) {
 				htmlDoc := NewHTMLParser(t, resp.Body)
 
 				publickey = htmlDoc.Find(".ui.table td a[data-clipboard-text]").AttrOr("data-clipboard-text", "")
-				assert.EqualValues(t, publickey, pushMirror.GetPublicKey())
+				assert.Equal(t, publickey, pushMirror.GetPublicKey())
 			})
 
 			t.Run("Add deploy key", func(t *testing.T) {

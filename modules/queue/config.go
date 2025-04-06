@@ -4,7 +4,7 @@
 package queue
 
 import (
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 )
 
 type BaseConfig struct {

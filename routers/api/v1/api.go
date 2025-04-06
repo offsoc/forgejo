@@ -71,37 +71,37 @@ import (
 	"net/http"
 	"strings"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	auth_model "code.gitea.io/gitea/models/auth"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	quota_model "code.gitea.io/gitea/models/quota"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/forgefed"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/shared"
-	"code.gitea.io/gitea/routers/api/v1/activitypub"
-	"code.gitea.io/gitea/routers/api/v1/admin"
-	"code.gitea.io/gitea/routers/api/v1/misc"
-	"code.gitea.io/gitea/routers/api/v1/notify"
-	"code.gitea.io/gitea/routers/api/v1/org"
-	"code.gitea.io/gitea/routers/api/v1/packages"
-	"code.gitea.io/gitea/routers/api/v1/repo"
-	"code.gitea.io/gitea/routers/api/v1/settings"
-	"code.gitea.io/gitea/routers/api/v1/user"
-	"code.gitea.io/gitea/services/actions"
-	"code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
+	actions_model "forgejo.org/models/actions"
+	auth_model "forgejo.org/models/auth"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	quota_model "forgejo.org/models/quota"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/forgefed"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/shared"
+	"forgejo.org/routers/api/v1/activitypub"
+	"forgejo.org/routers/api/v1/admin"
+	"forgejo.org/routers/api/v1/misc"
+	"forgejo.org/routers/api/v1/notify"
+	"forgejo.org/routers/api/v1/org"
+	"forgejo.org/routers/api/v1/packages"
+	"forgejo.org/routers/api/v1/repo"
+	"forgejo.org/routers/api/v1/settings"
+	"forgejo.org/routers/api/v1/user"
+	"forgejo.org/services/actions"
+	"forgejo.org/services/auth"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
 
-	_ "code.gitea.io/gitea/routers/api/v1/swagger" // for swagger generation
+	_ "forgejo.org/routers/api/v1/swagger" // for swagger generation
 
 	"code.forgejo.org/go-chi/binding"
 )
@@ -203,19 +203,19 @@ func repoAssignment() func(ctx *context.APIContext) {
 			}
 
 			if task.IsForkPullRequest {
-				ctx.Repo.Permission.AccessMode = perm.AccessModeRead
+				ctx.Repo.AccessMode = perm.AccessModeRead
 			} else {
-				ctx.Repo.Permission.AccessMode = perm.AccessModeWrite
+				ctx.Repo.AccessMode = perm.AccessModeWrite
 			}
 
 			if err := ctx.Repo.Repository.LoadUnits(ctx); err != nil {
 				ctx.Error(http.StatusInternalServerError, "LoadUnits", err)
 				return
 			}
-			ctx.Repo.Permission.Units = ctx.Repo.Repository.Units
-			ctx.Repo.Permission.UnitsMode = make(map[unit.Type]perm.AccessMode)
+			ctx.Repo.Units = ctx.Repo.Repository.Units
+			ctx.Repo.UnitsMode = make(map[unit.Type]perm.AccessMode)
 			for _, u := range ctx.Repo.Repository.Units {
-				ctx.Repo.Permission.UnitsMode[u.Type] = ctx.Repo.Permission.AccessMode
+				ctx.Repo.UnitsMode[u.Type] = ctx.Repo.AccessMode
 			}
 		} else {
 			ctx.Repo.Permission, err = access_model.GetUserRepoPermission(ctx, repo, ctx.Doer)
@@ -692,7 +692,7 @@ func mustEnableIssues(ctx *context.APIContext) {
 }
 
 func mustAllowPulls(ctx *context.APIContext) {
-	if !(ctx.Repo.Repository.CanEnablePulls() && ctx.Repo.CanRead(unit.TypePullRequests)) {
+	if !ctx.Repo.Repository.CanEnablePulls() || !ctx.Repo.CanRead(unit.TypePullRequests) {
 		if ctx.Repo.Repository.CanEnablePulls() && log.IsTrace() {
 			if ctx.IsSigned {
 				log.Trace("Permission Denied: User %-v cannot read %-v in Repo %-v\n"+
@@ -716,7 +716,7 @@ func mustAllowPulls(ctx *context.APIContext) {
 
 func mustEnableIssuesOrPulls(ctx *context.APIContext) {
 	if !ctx.Repo.CanRead(unit.TypeIssues) &&
-		!(ctx.Repo.Repository.CanEnablePulls() && ctx.Repo.CanRead(unit.TypePullRequests)) {
+		(!ctx.Repo.Repository.CanEnablePulls() || !ctx.Repo.CanRead(unit.TypePullRequests)) {
 		if ctx.Repo.Repository.CanEnablePulls() && log.IsTrace() {
 			if ctx.IsSigned {
 				log.Trace("Permission Denied: User %-v cannot read %-v and %-v in Repo %-v\n"+
@@ -777,13 +777,13 @@ func bind[T any](_ T) any {
 func individualPermsChecker(ctx *context.APIContext) {
 	// org permissions have been checked in context.OrgAssignment(), but individual permissions haven't been checked.
 	if ctx.ContextUser.IsIndividual() {
-		switch {
-		case ctx.ContextUser.Visibility == api.VisibleTypePrivate:
+		switch ctx.ContextUser.Visibility {
+		case api.VisibleTypePrivate:
 			if ctx.Doer == nil || (ctx.ContextUser.ID != ctx.Doer.ID && !ctx.Doer.IsAdmin) {
 				ctx.NotFound("Visit Project", nil)
 				return
 			}
-		case ctx.ContextUser.Visibility == api.VisibleTypeLimited:
+		case api.VisibleTypeLimited:
 			if ctx.Doer == nil {
 				ctx.NotFound("Visit Project", nil)
 				return
@@ -822,6 +822,7 @@ func Routes() *web.Route {
 
 			m.Group("/runners", func() {
 				m.Get("/registration-token", reqToken(), reqChecker, act.GetRegistrationToken)
+				m.Get("/jobs", reqToken(), reqChecker, act.SearchActionRunJobs)
 			})
 		})
 	}
@@ -839,22 +840,22 @@ func Routes() *web.Route {
 			m.Group("/activitypub", func() {
 				// deprecated, remove in 1.20, use /user-id/{user-id} instead
 				m.Group("/user/{username}", func() {
-					m.Get("", activitypub.Person)
+					m.Get("", activitypub.ReqHTTPSignature(), activitypub.Person)
 					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.PersonInbox)
 				}, context.UserAssignmentAPI(), checkTokenPublicOnly())
 				m.Group("/user-id/{user-id}", func() {
-					m.Get("", activitypub.Person)
+					m.Get("", activitypub.ReqHTTPSignature(), activitypub.Person)
 					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.PersonInbox)
 				}, context.UserIDAssignmentAPI(), checkTokenPublicOnly())
 				m.Group("/actor", func() {
 					m.Get("", activitypub.Actor)
-					m.Post("/inbox", activitypub.ActorInbox)
+					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.ActorInbox)
 				})
 				m.Group("/repository-id/{repository-id}", func() {
-					m.Get("", activitypub.Repository)
+					m.Get("", activitypub.ReqHTTPSignature(), activitypub.Repository)
 					m.Post("/inbox",
 						bind(forgefed.ForgeLike{}),
-						// TODO: activitypub.ReqHTTPSignature(),
+						activitypub.ReqHTTPSignature(),
 						activitypub.RepositoryInbox)
 				}, context.RepositoryIDAssignmentAPI())
 			}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryActivityPub))
@@ -908,9 +909,9 @@ func Routes() *web.Route {
 				m.Get("/repos", tokenRequiresScopes(auth_model.AccessTokenScopeCategoryRepository), reqExploreSignIn(), user.ListUserRepos)
 				m.Group("/tokens", func() {
 					m.Combo("").Get(user.ListAccessTokens).
-						Post(bind(api.CreateAccessTokenOption{}), reqToken(), user.CreateAccessToken)
-					m.Combo("/{id}").Delete(reqToken(), user.DeleteAccessToken)
-				}, reqSelfOrAdmin(), reqBasicOrRevProxyAuth())
+						Post(bind(api.CreateAccessTokenOption{}), reqBasicOrRevProxyAuth(), reqToken(), user.CreateAccessToken)
+					m.Combo("/{id}").Delete(reqBasicOrRevProxyAuth(), reqToken(), user.DeleteAccessToken)
+				}, reqSelfOrAdmin())
 
 				m.Get("/activities/feeds", user.ListUserActivityFeeds)
 			}, context.UserAssignmentAPI(), checkTokenPublicOnly(), individualPermsChecker)
@@ -976,6 +977,7 @@ func Routes() *web.Route {
 
 				m.Group("/runners", func() {
 					m.Get("/registration-token", reqToken(), user.GetRegistrationToken)
+					m.Get("/jobs", reqToken(), user.SearchActionRunJobs)
 				})
 			})
 
@@ -1486,13 +1488,19 @@ func Routes() *web.Route {
 
 		// NOTE: these are Gitea package management API - see packages.CommonRoutes and packages.DockerContainerRoutes for endpoints that implement package manager APIs
 		m.Group("/packages/{username}", func() {
-			m.Group("/{type}/{name}/{version}", func() {
-				m.Get("", reqToken(), packages.GetPackage)
-				m.Delete("", reqToken(), reqPackageAccess(perm.AccessModeWrite), packages.DeletePackage)
-				m.Get("/files", reqToken(), packages.ListPackageFiles)
+			m.Group("/{type}/{name}", func() {
+				m.Group("/{version}", func() {
+					m.Get("", packages.GetPackage)
+					m.Delete("", reqPackageAccess(perm.AccessModeWrite), packages.DeletePackage)
+					m.Get("/files", packages.ListPackageFiles)
+				})
+
+				m.Post("/-/link/{repo_name}", reqPackageAccess(perm.AccessModeWrite), packages.LinkPackage)
+				m.Post("/-/unlink", reqPackageAccess(perm.AccessModeWrite), packages.UnlinkPackage)
 			})
-			m.Get("/", reqToken(), packages.ListPackages)
-		}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryPackage), context.UserAssignmentAPI(), context.PackageAssignmentAPI(), reqPackageAccess(perm.AccessModeRead), checkTokenPublicOnly())
+
+			m.Get("/", packages.ListPackages)
+		}, reqToken(), tokenRequiresScopes(auth_model.AccessTokenScopeCategoryPackage), context.UserAssignmentAPI(), context.PackageAssignmentAPI(), reqPackageAccess(perm.AccessModeRead), checkTokenPublicOnly())
 
 		// Organizations
 		m.Get("/user/orgs", reqToken(), tokenRequiresScopes(auth_model.AccessTokenScopeCategoryUser, auth_model.AccessTokenScopeCategoryOrganization), org.ListMyOrgs)
@@ -1506,6 +1514,7 @@ func Routes() *web.Route {
 			m.Combo("").Get(org.Get).
 				Patch(reqToken(), reqOrgOwnership(), bind(api.EditOrgOption{}), org.Edit).
 				Delete(reqToken(), reqOrgOwnership(), org.Delete)
+			m.Post("/rename", reqToken(), reqOrgOwnership(), bind(api.RenameOrgOption{}), org.Rename)
 			m.Combo("/repos").Get(user.ListOrgRepos).
 				Post(reqToken(), bind(api.CreateRepoOption{}), context.EnforceQuotaAPI(quota_model.LimitSubjectSizeReposAll, context.QuotaTargetOrg), repo.CreateOrgRepo)
 			m.Group("/members", func() {
@@ -1634,6 +1643,7 @@ func Routes() *web.Route {
 			})
 			m.Group("/runners", func() {
 				m.Get("/registration-token", admin.GetRegistrationToken)
+				m.Get("/jobs", admin.SearchActionRunJobs)
 			})
 			if setting.Quota.Enabled {
 				m.Group("/quota", func() {

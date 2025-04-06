@@ -6,9 +6,9 @@ package convert
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/perm"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/perm"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
 )
 
 // ToUser convert user_model.User to api.User
@@ -57,7 +57,7 @@ func toUser(ctx context.Context, user *user_model.User, signed, authed bool) *ap
 		Created:     user.CreatedUnix.AsTime(),
 		Restricted:  user.IsRestricted,
 		Location:    user.Location,
-		Pronouns:    user.Pronouns,
+		Pronouns:    user.GetPronouns(signed),
 		Website:     user.Website,
 		Description: user.Description,
 		// counter's
@@ -97,6 +97,7 @@ func User2UserSettings(user *user_model.User) api.UserSettings {
 		Description:         user.Description,
 		Theme:               user.Theme,
 		HideEmail:           user.KeepEmailPrivate,
+		HidePronouns:        user.KeepPronounsPrivate,
 		HideActivity:        user.KeepActivityPrivate,
 		DiffViewStyle:       user.DiffViewStyle,
 		EnableRepoUnitHints: user.EnableRepoUnitHints,

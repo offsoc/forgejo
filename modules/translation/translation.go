@@ -10,11 +10,11 @@ import (
 	"strings"
 	"sync"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/options"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation/i18n"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/options"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation/i18n"
+	"forgejo.org/modules/util"
 
 	"github.com/dustin/go-humanize"
 	"golang.org/x/text/language"
@@ -27,14 +27,23 @@ type contextKey struct{}
 var ContextKey any = &contextKey{}
 
 // Locale represents an interface to translation
+//
+// If this gets modified, remember to also adjust
+// build/lint-locale-usage/lint-locale-usage.go's InitLocaleTrFunctions(),
+// which requires to know in what argument positions `trKey`'s are given.
 type Locale interface {
 	Language() string
 	TrString(string, ...any) string
 
 	Tr(key string, args ...any) template.HTML
+	// New-style pluralized strings
+	TrPluralString(count any, trKey string, trArgs ...any) template.HTML
+	// Old-style pseudo-pluralized strings, deprecated
 	TrN(cnt any, key1, keyN string, args ...any) template.HTML
 
 	TrSize(size int64) ReadableSize
+
+	HasKey(trKey string) bool
 
 	PrettyNumber(v any) string
 }
@@ -100,8 +109,17 @@ func InitLocales(ctx context.Context) {
 			}
 
 			key := "locale_" + setting.Langs[i] + ".ini"
-			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], localeDataBase, localeData[key]); err != nil {
-				log.Error("Failed to set messages to %s: %v", setting.Langs[i], err)
+			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], PluralRules[GetPluralRuleImpl(setting.Langs[i])], localeDataBase, localeData[key]); err != nil {
+				log.Error("Failed to set old-style messages to %s: %v", setting.Langs[i], err)
+			}
+
+			key = "locale_next/locale_" + setting.Langs[i] + ".json"
+			if bytes, err := options.AssetFS().ReadFile(key); err == nil {
+				if err = i18n.DefaultLocales.AddToLocaleFromJSON(setting.Langs[i], bytes); err != nil {
+					log.Error("Failed to add new-style messages to %s: %v", setting.Langs[i], err)
+				}
+			} else {
+				log.Error("Failed to open new-style messages for %s: %v", setting.Langs[i], err)
 			}
 		}
 		if len(setting.Langs) != 0 {

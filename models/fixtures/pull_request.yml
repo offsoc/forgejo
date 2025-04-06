@@ -64,6 +64,7 @@
   base_branch: branch2
   merge_base: 985f0301dba5e7b34be866819cd15ad3d8f508ee
   has_merged: false
+  allow_maintainer_edit: true
 
 -
   id: 6

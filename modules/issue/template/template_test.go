@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/json"
+	api "forgejo.org/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -902,7 +902,7 @@ Option 1 of dropdown, Option 2 of dropdown
 				t.Fatal(err)
 			}
 			if got := RenderToMarkdown(template, tt.args.values); got != tt.want {
-				assert.EqualValues(t, tt.want, got)
+				assert.Equal(t, tt.want, got)
 			}
 		})
 	}

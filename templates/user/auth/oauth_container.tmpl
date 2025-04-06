@@ -1,8 +1,8 @@
 {{if or .OAuth2Providers .EnableOpenIDSignIn}}
-{{if .EnableInternalSignIn}}
-<div class="divider divider-text">
-	{{ctx.Locale.Tr "sign_in_or"}}
-</div>
+{{if or (and .PageIsSignUp (not .DisableRegistration)) (and .PageIsSignIn .EnableInternalSignIn)}}
+	<div class="divider divider-text">
+		{{ctx.Locale.Tr "sign_in_or"}}
+	</div>
 {{end}}
 <div id="oauth2-login-navigator" class="tw-py-1">
 	<div class="tw-flex tw-flex-col tw-justify-center">
@@ -17,12 +17,6 @@
 				<a class="openid ui button tw-flex tw-items-center tw-justify-center tw-py-2 tw-w-full" href="{{AppSubUrl}}/user/login/openid">
 				{{svg "fontawesome-openid" 28 "tw-mr-2"}}
 				{{ctx.Locale.Tr "auth.sign_in_openid"}}
-				</a>
-			{{end}}
-			{{if .EnableSSPI}}
-				<a class="ui button tw-flex tw-items-center tw-justify-center tw-py-2 tw-w-full" rel="nofollow" href="{{AppSubUrl}}/user/login?auth_with_sspi=1">
-					{{svg "fontawesome-windows"}}
-					&nbsp;SSPI
 				</a>
 			{{end}}
 		</div>

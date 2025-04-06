@@ -24,6 +24,8 @@
 						<td nowrap>{{DateUtils.AbsoluteShort .CreatedUnix}}</td>
 						<td class="view-detail"><a href="#">{{svg "octicon-note" 16}}</a></td>
 					</tr>
+				{{else}}
+					<tr><td class="tw-text-center" colspan="6">{{ctx.Locale.Tr "repo.pulls.no_results"}}</td></tr>
 				{{end}}
 			</tbody>
 			{{if .Notices}}

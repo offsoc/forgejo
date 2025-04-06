@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,8 +23,8 @@ func TestGetActivityStats(t *testing.T) {
 	stats, err := GetActivityStats(db.DefaultContext, repo, time.Unix(0, 0), true, true, true, true)
 	require.NoError(t, err)
 
-	assert.EqualValues(t, 2, stats.ActiveIssueCount())
-	assert.EqualValues(t, 2, stats.OpenedIssueCount())
-	assert.EqualValues(t, 0, stats.ClosedIssueCount())
-	assert.EqualValues(t, 3, stats.ActivePRCount())
+	assert.Equal(t, 2, stats.ActiveIssueCount())
+	assert.Equal(t, 2, stats.OpenedIssueCount())
+	assert.Equal(t, 0, stats.ClosedIssueCount())
+	assert.Equal(t, 3, stats.ActivePRCount())
 }

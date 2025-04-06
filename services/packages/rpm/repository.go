@@ -16,15 +16,15 @@ import (
 	"strings"
 	"time"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	rpm_model "code.gitea.io/gitea/models/packages/rpm"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
-	"code.gitea.io/gitea/modules/util"
-	packages_service "code.gitea.io/gitea/services/packages"
+	packages_model "forgejo.org/models/packages"
+	rpm_model "forgejo.org/models/packages/rpm"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	packages_module "forgejo.org/modules/packages"
+	rpm_module "forgejo.org/modules/packages/rpm"
+	"forgejo.org/modules/util"
+	packages_service "forgejo.org/services/packages"
 
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/ProtonMail/go-crypto/openpgp/armor"
@@ -622,7 +622,7 @@ func addDataAsFileToRepo(ctx context.Context, pv *packages_model.PackageVersion,
 		return nil, err
 	}
 
-	_, _, hashSHA256, _ := content.Sums()
+	_, _, hashSHA256, _, _ := content.Sums()
 
 	return &repoData{
 		Type: filetype,

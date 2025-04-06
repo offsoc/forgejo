@@ -8,10 +8,10 @@ import (
 	"html/template"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/translation"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -46,13 +46,13 @@ var testMetas = map[string]string{
 }
 
 func TestApostrophesInMentions(t *testing.T) {
-	rendered := RenderMarkdownToHtml(context.Background(), "@mention-user's comment")
-	assert.EqualValues(t, template.HTML("<p><a href=\"/mention-user\" class=\"mention\" rel=\"nofollow\">@mention-user</a>&#39;s comment</p>\n"), rendered)
+	rendered := RenderMarkdownToHtml(t.Context(), "@mention-user's comment")
+	assert.Equal(t, template.HTML("<p><a href=\"/mention-user\" class=\"mention\" rel=\"nofollow\">@mention-user</a>&#39;s comment</p>\n"), rendered)
 }
 
 func TestNonExistantUserMention(t *testing.T) {
-	rendered := RenderMarkdownToHtml(context.Background(), "@ThisUserDoesNotExist @mention-user")
-	assert.EqualValues(t, template.HTML("<p>@ThisUserDoesNotExist <a href=\"/mention-user\" class=\"mention\" rel=\"nofollow\">@mention-user</a></p>\n"), rendered)
+	rendered := RenderMarkdownToHtml(t.Context(), "@ThisUserDoesNotExist @mention-user")
+	assert.Equal(t, template.HTML("<p>@ThisUserDoesNotExist <a href=\"/mention-user\" class=\"mention\" rel=\"nofollow\">@mention-user</a></p>\n"), rendered)
 }
 
 func TestRenderCommitBody(t *testing.T) {
@@ -69,7 +69,7 @@ func TestRenderCommitBody(t *testing.T) {
 		{
 			name: "multiple lines",
 			args: args{
-				ctx: context.Background(),
+				ctx: t.Context(),
 				msg: "first line\nsecond line",
 			},
 			want: "second line",
@@ -77,7 +77,7 @@ func TestRenderCommitBody(t *testing.T) {
 		{
 			name: "multiple lines with leading newlines",
 			args: args{
-				ctx: context.Background(),
+				ctx: t.Context(),
 				msg: "\n\n\n\nfirst line\nsecond line",
 			},
 			want: "second line",
@@ -85,7 +85,7 @@ func TestRenderCommitBody(t *testing.T) {
 		{
 			name: "multiple lines with trailing newlines",
 			args: args{
-				ctx: context.Background(),
+				ctx: t.Context(),
 				msg: "first line\nsecond line\n\n\n",
 			},
 			want: "second line",
@@ -117,19 +117,19 @@ com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit
 <a href="/user13/repo11/issues/123" class="ref-issue">#123</a>
   space
 ` + "`code <span class=\"emoji\" aria-label=\"thumbs up\" data-alias=\"+1\">👍</span> <a href=\"/user13/repo11/issues/123\" class=\"ref-issue\">#123</a> code`"
-	assert.EqualValues(t, expected, RenderCommitBody(context.Background(), testInput, testMetas))
+	assert.EqualValues(t, expected, RenderCommitBody(t.Context(), testInput, testMetas))
 }
 
 func TestRenderCommitMessage(t *testing.T) {
 	expected := `space <a href="/mention-user" class="mention">@mention-user</a>  `
 
-	assert.EqualValues(t, expected, RenderCommitMessage(context.Background(), testInput, testMetas))
+	assert.EqualValues(t, expected, RenderCommitMessage(t.Context(), testInput, testMetas))
 }
 
 func TestRenderCommitMessageLinkSubject(t *testing.T) {
 	expected := `<a href="https://example.com/link" class="default-link muted">space </a><a href="/mention-user" class="mention">@mention-user</a>`
 
-	assert.EqualValues(t, expected, RenderCommitMessageLinkSubject(context.Background(), testInput, "https://example.com/link", testMetas))
+	assert.EqualValues(t, expected, RenderCommitMessageLinkSubject(t.Context(), testInput, "https://example.com/link", testMetas))
 }
 
 func TestRenderIssueTitle(t *testing.T) {
@@ -155,7 +155,7 @@ mail@domain.com
   space
 <code class="inline-code-block">code :+1: #123 code</code>
 `
-	assert.EqualValues(t, expected, RenderIssueTitle(context.Background(), testInput, testMetas))
+	assert.EqualValues(t, expected, RenderIssueTitle(t.Context(), testInput, testMetas))
 }
 
 func TestRenderRefIssueTitle(t *testing.T) {
@@ -181,7 +181,7 @@ mail@domain.com
   space
 <code class="inline-code-block">code :+1: #123 code</code>
 `
-	assert.EqualValues(t, expected, RenderRefIssueTitle(context.Background(), testInput))
+	assert.EqualValues(t, expected, RenderRefIssueTitle(t.Context(), testInput))
 }
 
 func TestRenderMarkdownToHtml(t *testing.T) {
@@ -194,8 +194,8 @@ func TestRenderMarkdownToHtml(t *testing.T) {
 <a href="https://example.com" rel="nofollow">remote link</a>
 <a href="/image.jpg" target="_blank" rel="nofollow noopener"><img src="/image.jpg" alt="local image"/></a>
 <a href="https://example.com/image.jpg" target="_blank" rel="nofollow noopener"><img src="https://example.com/image.jpg" alt="remote image"/></a>
-<a href="/image.jpg" rel="nofollow"><img src="/image.jpg" title="local image" alt="local image"/></a>
-<a href="https://example.com/image.jpg" rel="nofollow"><img src="https://example.com/image.jpg" title="remote link" alt="remote link"/></a>
+<a href="/image.jpg" rel="nofollow"><img src="/image.jpg" title="local image" alt=""/></a>
+<a href="https://example.com/image.jpg" rel="nofollow"><img src="https://example.com/image.jpg" title="remote link" alt=""/></a>
 <a href="https://example.com/user/repo/compare/88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb#hash" rel="nofollow"><code>88fc37a3c0...12fc37a3c0 (hash)</code></a>
 com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb...12fc37a3c0a4dda553bdcfc80c178a58247f42fb pare
 <a href="https://example.com/user/repo/commit/88fc37a3c0a4dda553bdcfc80c178a58247f42fb" rel="nofollow"><code>88fc37a3c0</code></a>
@@ -207,7 +207,7 @@ com 88fc37a3c0a4dda553bdcfc80c178a58247f42fb mit
 space
 <code>code :+1: #123 code</code></p>
 `
-	assert.EqualValues(t, expected, RenderMarkdownToHtml(context.Background(), testInput))
+	assert.EqualValues(t, expected, RenderMarkdownToHtml(t.Context(), testInput))
 }
 
 func TestRenderLabels(t *testing.T) {

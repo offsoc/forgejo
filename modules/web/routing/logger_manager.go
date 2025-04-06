@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/process"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/process"
 )
 
 // Event indicates when the printer is triggered

@@ -11,19 +11,19 @@ import (
 	"strconv"
 	"strings"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/analyze"
-	"code.gitea.io/gitea/modules/charset"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/indexer/code/internal"
-	indexer_internal "code.gitea.io/gitea/modules/indexer/internal"
-	inner_elasticsearch "code.gitea.io/gitea/modules/indexer/internal/elasticsearch"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/typesniffer"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/analyze"
+	"forgejo.org/modules/charset"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/indexer/code/internal"
+	indexer_internal "forgejo.org/modules/indexer/internal"
+	inner_elasticsearch "forgejo.org/modules/indexer/internal/elasticsearch"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/typesniffer"
 
 	"github.com/go-enry/go-enry/v2"
 	"github.com/olivere/elastic/v7"
@@ -33,8 +33,8 @@ const (
 	esRepoIndexerLatestVersion = 2
 	// multi-match-types, currently only 2 types are used
 	// Reference: https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-multi-match-query.html#multi-match-types
-	esMultiMatchTypeBestFields   = "best_fields"
-	esMultiMatchTypePhrasePrefix = "phrase_prefix"
+	esMultiMatchTypeBestFields = "best_fields"
+	esMultiMatchTypePhrase     = "phrase"
 )
 
 var _ internal.Indexer = &Indexer{}
@@ -334,8 +334,8 @@ func extractAggs(searchResult *elastic.SearchResult) []*internal.SearchResultLan
 
 // Search searches for codes and language stats by given conditions.
 func (b *Indexer) Search(ctx context.Context, opts *internal.SearchOptions) (int64, []*internal.SearchResult, []*internal.SearchResultLanguages, error) {
-	searchType := esMultiMatchTypePhrasePrefix
-	if opts.IsKeywordFuzzy {
+	searchType := esMultiMatchTypePhrase
+	if opts.Mode == internal.CodeSearchModeUnion {
 		searchType = esMultiMatchTypeBestFields
 	}
 

@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/services/contexttest"
+	"forgejo.org/models/unittest"
+	"forgejo.org/models/webhook"
+	"forgejo.org/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +25,7 @@ func TestTestHook(t *testing.T) {
 	defer ctx.Repo.GitRepo.Close()
 	contexttest.LoadRepoCommit(t, ctx)
 	TestHook(ctx)
-	assert.EqualValues(t, http.StatusNoContent, ctx.Resp.Status())
+	assert.Equal(t, http.StatusNoContent, ctx.Resp.Status())
 
 	unittest.AssertExistsAndLoadBean(t, &webhook.HookTask{
 		HookID: 1,

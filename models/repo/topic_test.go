@@ -6,9 +6,9 @@ package repo_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -52,9 +52,8 @@ func TestAddTopic(t *testing.T) {
 	require.NoError(t, repo_model.SaveTopics(db.DefaultContext, 2, "golang", "gitea"))
 	repo2NrOfTopics = 2
 	totalNrOfTopics++
-	topic, err := repo_model.GetTopicByName(db.DefaultContext, "gitea")
-	require.NoError(t, err)
-	assert.EqualValues(t, 1, topic.RepoCount)
+	topic := unittest.AssertExistsAndLoadBean(t, &repo_model.Topic{Name: "gitea"})
+	assert.Equal(t, 1, topic.RepoCount)
 
 	topics, _, err = repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{})
 	require.NoError(t, err)

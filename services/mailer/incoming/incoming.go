@@ -7,15 +7,17 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"mime"
 	net_mail "net/mail"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/mailer/token"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/mailer/token"
 
 	"code.forgejo.org/forgejo/reply"
 	"github.com/emersion/go-imap"
@@ -297,6 +299,10 @@ func isAutomaticReply(env *enmime.Envelope) bool {
 	if autoReply == "yes" {
 		return true
 	}
+	precedence := env.GetHeader("Precedence")
+	if precedence == "auto_reply" {
+		return true
+	}
 	autoRespond := env.GetHeader("X-Autorespond")
 	return autoRespond != ""
 }
@@ -370,25 +376,56 @@ type Attachment struct {
 // getContentFromMailReader grabs the plain content and the attachments from the mail.
 // A potential reply/signature gets stripped from the content.
 func getContentFromMailReader(env *enmime.Envelope) *MailContent {
+	// get attachments
 	attachments := make([]*Attachment, 0, len(env.Attachments))
 	for _, attachment := range env.Attachments {
 		attachments = append(attachments, &Attachment{
-			Name:    attachment.FileName,
+			Name:    constructFilename(attachment),
 			Content: attachment.Content,
 		})
 	}
+	// get inlines
 	inlineAttachments := make([]*Attachment, 0, len(env.Inlines))
 	for _, inline := range env.Inlines {
 		if inline.FileName != "" && inline.ContentType != "text/plain" {
 			inlineAttachments = append(inlineAttachments, &Attachment{
-				Name:    inline.FileName,
+				Name:    constructFilename(inline),
 				Content: inline.Content,
 			})
 		}
 	}
+	// get other parts (mostly multipart/related files, these are for example embedded images in an html mail)
+	otherParts := make([]*Attachment, 0, len(env.Inlines))
+	for _, otherPart := range env.OtherParts {
+		otherParts = append(otherParts, &Attachment{
+			Name:    constructFilename(otherPart),
+			Content: otherPart.Content,
+		})
+	}
 
 	return &MailContent{
 		Content:     reply.FromText(env.Text),
-		Attachments: append(attachments, inlineAttachments...),
+		Attachments: slices.Concat(attachments, inlineAttachments, otherParts),
 	}
+}
+
+// constructFilename interprets the mime part as an (inline) attachment and returns its filename
+// If no filename is given it guesses a sensible filename for it based on the filetype.
+func constructFilename(part *enmime.Part) string {
+	if strings.TrimSpace(part.FileName) != "" {
+		return part.FileName
+	}
+
+	filenameWOExtension := "unnamed_file"
+	if strings.TrimSpace(part.ContentID) != "" {
+		filenameWOExtension = part.ContentID
+	}
+
+	fileExtension := ".unknown"
+	mimeExtensions, err := mime.ExtensionsByType(part.ContentType)
+	if err == nil && len(mimeExtensions) != 0 {
+		// just use the first one we find
+		fileExtension = mimeExtensions[0]
+	}
+	return filenameWOExtension + fileExtension
 }

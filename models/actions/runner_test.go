@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,7 +34,7 @@ func TestDeleteRunner(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	before := unittest.AssertExistsAndLoadBean(t, &ActionRunner{ID: recordID})
 
-	err := DeleteRunner(db.DefaultContext, recordID)
+	err := DeleteRunner(db.DefaultContext, &ActionRunner{ID: recordID})
 	require.NoError(t, err)
 
 	var after ActionRunner

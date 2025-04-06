@@ -11,13 +11,13 @@ import (
 	"net/http"
 	"strings"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 
-	"github.com/go-fed/httpsig"
+	"github.com/42wim/httpsig"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -205,7 +205,7 @@ func doVerify(verifier httpsig.Verifier, sshPublicKeys []ssh.PublicKey) error {
 		case strings.HasPrefix(publicKey.Type(), "ssh-ed25519"):
 			algos = []httpsig.Algorithm{httpsig.ED25519}
 		case strings.HasPrefix(publicKey.Type(), "ssh-rsa"):
-			algos = []httpsig.Algorithm{httpsig.RSA_SHA1, httpsig.RSA_SHA256, httpsig.RSA_SHA512}
+			algos = []httpsig.Algorithm{httpsig.RSA_SHA256, httpsig.RSA_SHA512}
 		}
 		for _, algo := range algos {
 			if err := verifier.Verify(cryptoPubkey, algo); err == nil {

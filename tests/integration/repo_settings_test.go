@@ -5,27 +5,26 @@ package integration
 
 import (
 	"fmt"
-	"io"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/forgefed"
-	git_model "code.gitea.io/gitea/models/git"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	fm "code.gitea.io/gitea/modules/forgefed"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/validation"
-	gitea_context "code.gitea.io/gitea/services/context"
-	repo_service "code.gitea.io/gitea/services/repository"
-	user_service "code.gitea.io/gitea/services/user"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/forgefed"
+	git_model "forgejo.org/models/git"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	fm "forgejo.org/modules/forgefed"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/validation"
+	gitea_context "forgejo.org/services/context"
+	repo_service "forgejo.org/services/repository"
+	user_service "forgejo.org/services/user"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -264,7 +263,7 @@ func TestProtectedBranch(t *testing.T) {
 		session.MakeRequest(t, req, http.StatusSeeOther)
 		flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "error%3DThere%2Bis%2Balready%2Ba%2Brule%2Bfor%2Bthis%2Bset%2Bof%2Bbranches", flashCookie.Value)
+		assert.Equal(t, "error%3DThere%2Bis%2Balready%2Ba%2Brule%2Bfor%2Bthis%2Bset%2Bof%2Bbranches", flashCookie.Value)
 
 		// Verify it wasn't added.
 		unittest.AssertCount(t, &git_model.ProtectedBranch{RuleName: "master", RepoID: repo.ID}, 1)
@@ -278,59 +277,8 @@ func TestRepoFollowing(t *testing.T) {
 		setting.Federation.Enabled = false
 	}()
 
-	federatedRoutes := http.NewServeMux()
-	federatedRoutes.HandleFunc("/.well-known/nodeinfo",
-		func(res http.ResponseWriter, req *http.Request) {
-			// curl -H "Accept: application/json" https://federated-repo.prod.meissa.de/.well-known/nodeinfo
-			responseBody := fmt.Sprintf(`{"links":[{"href":"http://%s/api/v1/nodeinfo","rel":"http://nodeinfo.diaspora.software/ns/schema/2.1"}]}`, req.Host)
-			t.Logf("response: %s", responseBody)
-			// TODO: as soon as content-type will become important:  content-type: application/json;charset=utf-8
-			fmt.Fprint(res, responseBody)
-		})
-	federatedRoutes.HandleFunc("/api/v1/nodeinfo",
-		func(res http.ResponseWriter, req *http.Request) {
-			// curl -H "Accept: application/json" https://federated-repo.prod.meissa.de/api/v1/nodeinfo
-			responseBody := fmt.Sprintf(`{"version":"2.1","software":{"name":"forgejo","version":"1.20.0+dev-3183-g976d79044",` +
-				`"repository":"https://codeberg.org/forgejo/forgejo.git","homepage":"https://forgejo.org/"},` +
-				`"protocols":["activitypub"],"services":{"inbound":[],"outbound":["rss2.0"]},` +
-				`"openRegistrations":true,"usage":{"users":{"total":14,"activeHalfyear":2}},"metadata":{}}`)
-			fmt.Fprint(res, responseBody)
-		})
-	repo1InboxReceivedLike := false
-	federatedRoutes.HandleFunc("/api/v1/activitypub/repository-id/1/inbox/",
-		func(res http.ResponseWriter, req *http.Request) {
-			if req.Method != "POST" {
-				t.Errorf("Unhandled request: %q", req.URL.EscapedPath())
-			}
-			buf := new(strings.Builder)
-			_, err := io.Copy(buf, req.Body)
-			if err != nil {
-				t.Errorf("Error reading body: %q", err)
-			}
-			like := fm.ForgeLike{}
-			err = like.UnmarshalJSON([]byte(buf.String()))
-			if err != nil {
-				t.Errorf("Error unmarshalling ForgeLike: %q", err)
-			}
-			if isValid, err := validation.IsValid(like); !isValid {
-				t.Errorf("ForgeLike is not valid: %q", err)
-			}
-
-			activityType := like.Type
-			object := like.Object.GetLink().String()
-			isLikeType := activityType == "Like"
-			isCorrectObject := strings.HasSuffix(object, "/api/v1/activitypub/repository-id/1")
-			if !isLikeType || !isCorrectObject {
-				t.Errorf("Activity is not a like for this repo")
-			}
-
-			repo1InboxReceivedLike = true
-		})
-	federatedRoutes.HandleFunc("/",
-		func(res http.ResponseWriter, req *http.Request) {
-			t.Errorf("Unhandled request: %q", req.URL.EscapedPath())
-		})
-	federatedSrv := httptest.NewServer(federatedRoutes)
+	mock := test.NewFederationServerMock()
+	federatedSrv := mock.DistantServer(t)
 	defer federatedSrv.Close()
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
@@ -363,8 +311,24 @@ func TestRepoFollowing(t *testing.T) {
 		req := NewRequestWithValues(t, "POST", link, map[string]string{
 			"_csrf": GetCSRF(t, session, repoLink),
 		})
-		assert.False(t, repo1InboxReceivedLike)
+
 		session.MakeRequest(t, req, http.StatusOK)
-		assert.True(t, repo1InboxReceivedLike)
+
+		// Verify distant server received a like activity
+		like := fm.ForgeLike{}
+		err := like.UnmarshalJSON([]byte(mock.LastPost))
+		if err != nil {
+			t.Errorf("Error unmarshalling ForgeLike: %q", err)
+		}
+		if isValid, err := validation.IsValid(like); !isValid {
+			t.Errorf("ForgeLike is not valid: %q", err)
+		}
+		activityType := like.Type
+		object := like.Object.GetLink().String()
+		isLikeType := activityType == "Like"
+		isCorrectObject := strings.HasSuffix(object, "/api/v1/activitypub/repository-id/1")
+		if !isLikeType || !isCorrectObject {
+			t.Errorf("Activity is not a like for this repo")
+		}
 	})
 }

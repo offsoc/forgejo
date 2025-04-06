@@ -40,6 +40,10 @@
 							</div>
 						</div>
 						<div class="flex-item-trailing">
+								<button class="ui primary tiny button delete-button" data-modal-id="regenerate-token" data-url="{{$.Link}}/regenerate" data-id="{{.ID}}">
+									{{svg "octicon-issue-reopened" 16 "tw-mr-1"}}
+									{{ctx.Locale.Tr "settings.regenerate_token"}}
+								</button>
 								<button class="ui red tiny button delete-button" data-modal-id="delete-token" data-url="{{$.Link}}/delete" data-id="{{.ID}}">
 									{{svg "octicon-trash" 16 "tw-mr-1"}}
 									{{ctx.Locale.Tr "settings.delete_token"}}
@@ -99,6 +103,17 @@
 		{{end}}
 	</div>
 
+<div class="ui g-modal-confirm delete modal" id="regenerate-token">
+	<div class="header">
+		{{svg "octicon-issue-reopened" 16 "tw-mr-1"}}
+		{{ctx.Locale.Tr "settings.access_token_regeneration"}}
+	</div>
+	<div class="content">
+		<p>{{ctx.Locale.Tr "settings.access_token_regeneration_desc"}}</p>
+	</div>
+	{{template "base/modal_actions_confirm" (dict "ModalButtonColors" "primary")}}
+</div>
+
 <div class="ui g-modal-confirm delete modal" id="delete-token">
 	<div class="header">
 		{{svg "octicon-trash"}}
@@ -107,7 +122,7 @@
 	<div class="content">
 		<p>{{ctx.Locale.Tr "settings.access_token_deletion_desc"}}</p>
 	</div>
-	{{template "base/modal_actions_confirm" (dict "ModalButtonColors" "primary")}}
+	{{template "base/modal_actions_confirm"}}
 </div>
 
 {{template "user/settings/layout_footer" .}}

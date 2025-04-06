@@ -8,22 +8,20 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/migration"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/migration"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 )
 
 // MigrateRepositoryGitData starts migrating git related data after created migrating repository
@@ -98,7 +96,7 @@ func MigrateRepositoryGitData(ctx context.Context, u *user_model.User,
 				}
 				defer gitRepo.Close()
 
-				branch, err := gitrepo.GetDefaultBranch(ctx, repo)
+				branch, err := gitRepo.GetHEADBranch()
 				if err != nil {
 					log.Warn("Failed to get the default branch of a migrated wiki repo: %v", err)
 					if err := util.RemoveAll(wikiPath); err != nil {
@@ -107,7 +105,7 @@ func MigrateRepositoryGitData(ctx context.Context, u *user_model.User,
 
 					return repo, err
 				}
-				repo.WikiBranch = branch
+				repo.WikiBranch = branch.Name
 
 				if err := git.WriteCommitGraph(ctx, wikiPath); err != nil {
 					return repo, err
@@ -253,10 +251,10 @@ func MigrateRepositoryGitData(ctx context.Context, u *user_model.User,
 func cleanUpMigrateGitConfig(ctx context.Context, repoPath string) error {
 	cmd := git.NewCommand(ctx, "remote", "rm", "origin")
 	// if the origin does not exist
-	_, stderr, err := cmd.RunStdString(&git.RunOpts{
+	_, _, err := cmd.RunStdString(&git.RunOpts{
 		Dir: repoPath,
 	})
-	if err != nil && !strings.HasPrefix(stderr, "fatal: No such remote") {
+	if err != nil && !git.IsRemoteNotExistError(err) {
 		return err
 	}
 	return nil
@@ -275,7 +273,7 @@ func CleanUpMigrateInfo(ctx context.Context, repo *repo_model.Repository) (*repo
 	}
 
 	_, _, err := git.NewCommand(ctx, "remote", "rm", "origin").RunStdString(&git.RunOpts{Dir: repoPath})
-	if err != nil && !strings.HasPrefix(err.Error(), "exit status 128 - fatal: No such remote ") {
+	if err != nil && !git.IsRemoteNotExistError(err) {
 		return repo, fmt.Errorf("CleanUpMigrateInfo: %w", err)
 	}
 

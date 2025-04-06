@@ -5,7 +5,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -16,22 +15,22 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	project_model "code.gitea.io/gitea/models/project"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/indexer/issues"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/references"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	project_model "forgejo.org/models/project"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/indexer/issues"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/references"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -40,7 +39,7 @@ import (
 
 func getIssuesSelection(t testing.TB, htmlDoc *HTMLDoc) *goquery.Selection {
 	issueList := htmlDoc.doc.Find("#issue-list")
-	assert.EqualValues(t, 1, issueList.Length())
+	assert.Equal(t, 1, issueList.Length())
 	return issueList.Find(".flex-item").Find(".issue-title")
 }
 
@@ -81,7 +80,7 @@ func TestViewIssues(t *testing.T) {
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	search := htmlDoc.doc.Find(".list-header-search > .search > .input > input")
 	placeholder, _ := search.Attr("placeholder")
-	assert.Equal(t, "Search issues...", placeholder)
+	assert.Equal(t, "Search issues…", placeholder)
 }
 
 func TestViewIssuesSortByType(t *testing.T) {
@@ -104,11 +103,11 @@ func TestViewIssuesSortByType(t *testing.T) {
 	if expectedNumIssues > setting.UI.IssuePagingNum {
 		expectedNumIssues = setting.UI.IssuePagingNum
 	}
-	assert.EqualValues(t, expectedNumIssues, issuesSelection.Length())
+	assert.Equal(t, expectedNumIssues, issuesSelection.Length())
 
 	issuesSelection.Each(func(_ int, selection *goquery.Selection) {
 		issue := getIssue(t, repo.ID, selection)
-		assert.EqualValues(t, user.ID, issue.PosterID)
+		assert.Equal(t, user.ID, issue.PosterID)
 	})
 }
 
@@ -120,7 +119,7 @@ func TestViewIssuesKeyword(t *testing.T) {
 		RepoID: repo.ID,
 		Index:  1,
 	})
-	issues.UpdateIssueIndexer(context.Background(), issue.ID)
+	issues.UpdateIssueIndexer(t.Context(), issue.ID)
 	time.Sleep(time.Second * 1)
 
 	const keyword = "first"
@@ -129,7 +128,7 @@ func TestViewIssuesKeyword(t *testing.T) {
 
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	issuesSelection := getIssuesSelection(t, htmlDoc)
-	assert.EqualValues(t, 1, issuesSelection.Length())
+	assert.Equal(t, 1, issuesSelection.Length())
 	issuesSelection.Each(func(_ int, selection *goquery.Selection) {
 		issue := getIssue(t, repo.ID, selection)
 		assert.False(t, issue.IsClosed)
@@ -138,27 +137,25 @@ func TestViewIssuesKeyword(t *testing.T) {
 	})
 
 	// keyword: 'firstt'
-	// should not match when fuzzy searching is disabled
-	req = NewRequestf(t, "GET", "%s/issues?q=%st&fuzzy=false", repo.Link(), keyword)
+	// should not match when using phrase search
+	req = NewRequestf(t, "GET", "%s/issues?q=\"%st\"", repo.Link(), keyword)
 	resp = MakeRequest(t, req, http.StatusOK)
 	htmlDoc = NewHTMLParser(t, resp.Body)
 	issuesSelection = getIssuesSelection(t, htmlDoc)
-	assert.EqualValues(t, 0, issuesSelection.Length())
+	assert.Equal(t, 0, issuesSelection.Length())
 
-	// should match as 'first' when fuzzy seaeching is enabled
-	for _, fmt := range []string{"%s/issues?q=%st&fuzzy=true", "%s/issues?q=%st"} {
-		req = NewRequestf(t, "GET", fmt, repo.Link(), keyword)
-		resp = MakeRequest(t, req, http.StatusOK)
-		htmlDoc = NewHTMLParser(t, resp.Body)
-		issuesSelection = getIssuesSelection(t, htmlDoc)
-		assert.EqualValues(t, 1, issuesSelection.Length())
-		issuesSelection.Each(func(_ int, selection *goquery.Selection) {
-			issue := getIssue(t, repo.ID, selection)
-			assert.False(t, issue.IsClosed)
-			assert.False(t, issue.IsPull)
-			assertMatch(t, issue, keyword)
-		})
-	}
+	// should match as 'first' when using a standard query
+	req = NewRequestf(t, "GET", "%s/issues?q=%st", repo.Link(), keyword)
+	resp = MakeRequest(t, req, http.StatusOK)
+	htmlDoc = NewHTMLParser(t, resp.Body)
+	issuesSelection = getIssuesSelection(t, htmlDoc)
+	assert.Equal(t, 1, issuesSelection.Length())
+	issuesSelection.Each(func(_ int, selection *goquery.Selection) {
+		issue := getIssue(t, repo.ID, selection)
+		assert.False(t, issue.IsClosed)
+		assert.False(t, issue.IsPull)
+		assertMatch(t, issue, keyword)
+	})
 }
 
 func TestViewIssuesSearchOptions(t *testing.T) {
@@ -175,7 +172,7 @@ func TestViewIssuesSearchOptions(t *testing.T) {
 		resp := MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 		issuesSelection := getIssuesSelection(t, htmlDoc)
-		assert.EqualValues(t, 3, issuesSelection.Length())
+		assert.Equal(t, 3, issuesSelection.Length())
 	})
 
 	t.Run("Issues with no project", func(t *testing.T) {
@@ -183,7 +180,7 @@ func TestViewIssuesSearchOptions(t *testing.T) {
 		resp := MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 		issuesSelection := getIssuesSelection(t, htmlDoc)
-		assert.EqualValues(t, 1, issuesSelection.Length())
+		assert.Equal(t, 1, issuesSelection.Length())
 		issuesSelection.Each(func(_ int, selection *goquery.Selection) {
 			issue := getIssue(t, repo.ID, selection)
 			assert.Equal(t, issueNoProject.ID, issue.ID)
@@ -197,7 +194,7 @@ func TestViewIssuesSearchOptions(t *testing.T) {
 		resp := MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 		issuesSelection := getIssuesSelection(t, htmlDoc)
-		assert.EqualValues(t, 2, issuesSelection.Length())
+		assert.Equal(t, 2, issuesSelection.Length())
 		found := map[int64]bool{
 			1: false,
 			5: false,
@@ -392,7 +389,7 @@ func TestIssueDependencies(t *testing.T) {
 
 		if hasDependency {
 			assert.NotEmpty(t, issues)
-			assert.EqualValues(t, issues[0].Index, dependencyID)
+			assert.Equal(t, issues[0].Index, dependencyID)
 		} else {
 			assert.Empty(t, issues)
 		}
@@ -572,7 +569,7 @@ func TestIssueCommentUpdate(t *testing.T) {
 	session.MakeRequest(t, req, http.StatusOK)
 
 	comment = unittest.AssertExistsAndLoadBean(t, &issues_model.Comment{ID: commentID})
-	assert.Equal(t, "", comment.Content)
+	assert.Empty(t, comment.Content)
 }
 
 func TestIssueCommentUpdateSimultaneously(t *testing.T) {
@@ -801,7 +798,7 @@ func TestSearchIssues(t *testing.T) {
 	req = NewRequest(t, "GET", link.String())
 	resp = session.MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiIssues)
-	assert.EqualValues(t, "22", resp.Header().Get("X-Total-Count"))
+	assert.Equal(t, "22", resp.Header().Get("X-Total-Count"))
 	assert.Len(t, apiIssues, 20)
 
 	query.Add("limit", "5")
@@ -809,7 +806,7 @@ func TestSearchIssues(t *testing.T) {
 	req = NewRequest(t, "GET", link.String())
 	resp = session.MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiIssues)
-	assert.EqualValues(t, "22", resp.Header().Get("X-Total-Count"))
+	assert.Equal(t, "22", resp.Header().Get("X-Total-Count"))
 	assert.Len(t, apiIssues, 5)
 
 	query = url.Values{"assigned": {"true"}, "state": {"all"}}
@@ -933,14 +930,14 @@ func TestGetIssueInfo(t *testing.T) {
 	var apiIssue api.Issue
 	DecodeJSON(t, resp, &apiIssue)
 
-	assert.EqualValues(t, issue.ID, apiIssue.ID)
+	assert.Equal(t, issue.ID, apiIssue.ID)
 }
 
 func TestIssuePinMove(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	session := loginUser(t, "user2")
 	issueURL, issue := testIssueWithBean(t, "user2", 1, "Title", "Content")
-	assert.EqualValues(t, 0, issue.PinOrder)
+	assert.Equal(t, 0, issue.PinOrder)
 
 	req := NewRequestWithValues(t, "POST", fmt.Sprintf("%s/pin", issueURL), map[string]string{
 		"_csrf": GetCSRF(t, session, issueURL),
@@ -949,7 +946,7 @@ func TestIssuePinMove(t *testing.T) {
 	issue = unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: issue.ID})
 
 	position := 1
-	assert.EqualValues(t, position, issue.PinOrder)
+	assert.Equal(t, position, issue.PinOrder)
 
 	newPosition := 2
 
@@ -964,7 +961,7 @@ func TestIssuePinMove(t *testing.T) {
 		session5.MakeRequest(t, req, http.StatusNotFound)
 
 		issue = unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: issue.ID})
-		assert.EqualValues(t, position, issue.PinOrder)
+		assert.Equal(t, position, issue.PinOrder)
 	}
 
 	movePinURL := issueURL[:strings.LastIndexByte(issueURL, '/')] + "/move_pin?_csrf=" + GetCSRF(t, session, issueURL)
@@ -975,7 +972,7 @@ func TestIssuePinMove(t *testing.T) {
 	session.MakeRequest(t, req, http.StatusNoContent)
 
 	issue = unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: issue.ID})
-	assert.EqualValues(t, newPosition, issue.PinOrder)
+	assert.Equal(t, newPosition, issue.PinOrder)
 }
 
 func TestUpdateIssueDeadline(t *testing.T) {
@@ -1004,7 +1001,7 @@ func TestUpdateIssueDeadline(t *testing.T) {
 	var apiIssue api.IssueDeadline
 	DecodeJSON(t, resp, &apiIssue)
 
-	assert.EqualValues(t, "2022-04-06", apiIssue.Deadline.Format("2006-01-02"))
+	assert.Equal(t, "2022-04-06", apiIssue.Deadline.Format("2006-01-02"))
 }
 
 func TestUpdateIssueTitle(t *testing.T) {
@@ -1062,7 +1059,7 @@ func TestUpdateIssueTitle(t *testing.T) {
 			}{}
 
 			DecodeJSON(t, resp, &issueAfter)
-			assert.EqualValues(t, issueTitleUpdateTest.title, issueAfter.Title)
+			assert.Equal(t, issueTitleUpdateTest.title, issueAfter.Title)
 		}
 	}
 }
@@ -1080,10 +1077,10 @@ func TestIssueReferenceURL(t *testing.T) {
 
 	// the "reference" uses relative URLs, then JS code will convert them to absolute URLs for current origin, in case users are using multiple domains
 	ref, _ := htmlDoc.Find(`.timeline-item.comment.first .reference-issue`).Attr("data-reference")
-	assert.EqualValues(t, "/user2/repo1/issues/1#issue-1", ref)
+	assert.Equal(t, "/user2/repo1/issues/1#issue-1", ref)
 
 	ref, _ = htmlDoc.Find(`.timeline-item.comment:not(.first) .reference-issue`).Attr("data-reference")
-	assert.EqualValues(t, "/user2/repo1/issues/1#issuecomment-2", ref)
+	assert.Equal(t, "/user2/repo1/issues/1#issuecomment-2", ref)
 }
 
 func TestGetContentHistory(t *testing.T) {
@@ -1112,7 +1109,7 @@ func TestGetContentHistory(t *testing.T) {
 		var respJSON contentHistoryResp
 		DecodeJSON(t, resp, &respJSON)
 
-		assert.EqualValues(t, canDelete, respJSON.CanSoftDelete)
+		assert.Equal(t, canDelete, respJSON.CanSoftDelete)
 		assert.EqualValues(t, contentHistory.ID, respJSON.HistoryID)
 		assert.EqualValues(t, contentHistory.ID-1, respJSON.PrevHistoryID)
 	}
@@ -1335,4 +1332,47 @@ func TestIssueCount(t *testing.T) {
 
 	allCount := htmlDoc.doc.Find("a[data-test-name='all-issue-count']").Text()
 	assert.Contains(t, allCount, "2\u00a0All")
+}
+
+func TestIssuePostersSearch(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	type userSearchInfo struct {
+		UserID   int64  `json:"user_id"`
+		UserName string `json:"username"`
+	}
+
+	type userSearchResponse struct {
+		Results []*userSearchInfo `json:"results"`
+	}
+
+	t.Run("Name search", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.UI.DefaultShowFullName, false)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues/posters?q=USer2")
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		var data userSearchResponse
+		DecodeJSON(t, resp, &data)
+
+		assert.Len(t, data.Results, 1)
+		assert.Equal(t, "user2", data.Results[0].UserName)
+		assert.EqualValues(t, 2, data.Results[0].UserID)
+	})
+
+	t.Run("Full name search", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.UI.DefaultShowFullName, true)()
+
+		req := NewRequest(t, "GET", "/user2/repo1/issues/posters?q=OnE")
+		resp := MakeRequest(t, req, http.StatusOK)
+
+		var data userSearchResponse
+		DecodeJSON(t, resp, &data)
+
+		assert.Len(t, data.Results, 1)
+		assert.Equal(t, "user1", data.Results[0].UserName)
+		assert.EqualValues(t, 1, data.Results[0].UserID)
+	})
 }

@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,7 +30,7 @@ func TestLoadOrCreateAsymmetricKey(t *testing.T) {
 
 		block, _ := pem.Decode(fileContent)
 		assert.NotNil(t, block)
-		assert.EqualValues(t, "PRIVATE KEY", block.Type)
+		assert.Equal(t, "PRIVATE KEY", block.Type)
 
 		parsedKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 		require.NoError(t, err)
@@ -44,14 +44,14 @@ func TestLoadOrCreateAsymmetricKey(t *testing.T) {
 		parsedKey := loadKey(t)
 
 		rsaPrivateKey := parsedKey.(*rsa.PrivateKey)
-		assert.EqualValues(t, 2048, rsaPrivateKey.N.BitLen())
+		assert.Equal(t, 2048, rsaPrivateKey.N.BitLen())
 
 		t.Run("Load key with differ specified algorithm", func(t *testing.T) {
 			defer test.MockVariableValue(&setting.OAuth2.JWTSigningAlgorithm, "EdDSA")()
 
 			parsedKey := loadKey(t)
 			rsaPrivateKey := parsedKey.(*rsa.PrivateKey)
-			assert.EqualValues(t, 2048, rsaPrivateKey.N.BitLen())
+			assert.Equal(t, 2048, rsaPrivateKey.N.BitLen())
 		})
 	})
 
@@ -62,7 +62,7 @@ func TestLoadOrCreateAsymmetricKey(t *testing.T) {
 		parsedKey := loadKey(t)
 
 		rsaPrivateKey := parsedKey.(*rsa.PrivateKey)
-		assert.EqualValues(t, 3072, rsaPrivateKey.N.BitLen())
+		assert.Equal(t, 3072, rsaPrivateKey.N.BitLen())
 	})
 
 	t.Run("RSA-4096", func(t *testing.T) {
@@ -72,7 +72,7 @@ func TestLoadOrCreateAsymmetricKey(t *testing.T) {
 		parsedKey := loadKey(t)
 
 		rsaPrivateKey := parsedKey.(*rsa.PrivateKey)
-		assert.EqualValues(t, 4096, rsaPrivateKey.N.BitLen())
+		assert.Equal(t, 4096, rsaPrivateKey.N.BitLen())
 	})
 
 	t.Run("ECDSA-256", func(t *testing.T) {
@@ -82,7 +82,7 @@ func TestLoadOrCreateAsymmetricKey(t *testing.T) {
 		parsedKey := loadKey(t)
 
 		ecdsaPrivateKey := parsedKey.(*ecdsa.PrivateKey)
-		assert.EqualValues(t, 256, ecdsaPrivateKey.Params().BitSize)
+		assert.Equal(t, 256, ecdsaPrivateKey.Params().BitSize)
 	})
 
 	t.Run("ECDSA-384", func(t *testing.T) {
@@ -92,7 +92,7 @@ func TestLoadOrCreateAsymmetricKey(t *testing.T) {
 		parsedKey := loadKey(t)
 
 		ecdsaPrivateKey := parsedKey.(*ecdsa.PrivateKey)
-		assert.EqualValues(t, 384, ecdsaPrivateKey.Params().BitSize)
+		assert.Equal(t, 384, ecdsaPrivateKey.Params().BitSize)
 	})
 
 	t.Run("ECDSA-512", func(t *testing.T) {
@@ -102,7 +102,7 @@ func TestLoadOrCreateAsymmetricKey(t *testing.T) {
 		parsedKey := loadKey(t)
 
 		ecdsaPrivateKey := parsedKey.(*ecdsa.PrivateKey)
-		assert.EqualValues(t, 521, ecdsaPrivateKey.Params().BitSize)
+		assert.Equal(t, 521, ecdsaPrivateKey.Params().BitSize)
 	})
 
 	t.Run("EdDSA", func(t *testing.T) {

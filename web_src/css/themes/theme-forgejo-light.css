@@ -314,10 +314,9 @@
 .ui.ui.ui.basic.primary.label {
   color: var(--color-text-dark) !important;
 }
-.ui.basic.yellow.label.pending-label {
+.ui.yellow.label.pending-label {
   background: var(--color-warning-bg) !important;
-  color: var(--color-warning-text) !important;
-  border-color: var(--color-yellow-light) !important;
+  color: var(--color-text-dark) !important;
 }
 ::selection {
   background: var(--steel-450) !important;

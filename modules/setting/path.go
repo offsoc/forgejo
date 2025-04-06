@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 var (
@@ -34,11 +34,7 @@ var (
 func getAppPath() (string, error) {
 	var appPath string
 	var err error
-	if IsWindows && filepath.IsAbs(os.Args[0]) {
-		appPath = filepath.Clean(os.Args[0])
-	} else {
-		appPath, err = exec.LookPath(os.Args[0])
-	}
+	appPath, err = exec.LookPath(os.Args[0])
 	if err != nil {
 		if !errors.Is(err, exec.ErrDot) {
 			return "", err

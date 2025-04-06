@@ -16,10 +16,10 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -219,8 +219,13 @@ func SSHNativeParsePublicKey(keyLine string) (string, int, error) {
 		return "", 0, fmt.Errorf("ParsePublicKey: %w", err)
 	}
 
+	pkeyType := pkey.Type()
+	if certPkey, ok := pkey.(*ssh.Certificate); ok {
+		pkeyType = certPkey.Key.Type()
+	}
+
 	// The ssh library can parse the key, so next we find out what key exactly we have.
-	switch pkey.Type() {
+	switch pkeyType {
 	case ssh.KeyAlgoDSA:
 		rawPub := struct {
 			Name       string

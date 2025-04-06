@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,8 +41,8 @@ func TestAPIModifyLabels(t *testing.T) {
 	apiLabel := new(api.Label)
 	DecodeJSON(t, resp, &apiLabel)
 	dbLabel := unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: apiLabel.ID, RepoID: repo.ID})
-	assert.EqualValues(t, dbLabel.Name, apiLabel.Name)
-	assert.EqualValues(t, strings.TrimLeft(dbLabel.Color, "#"), apiLabel.Color)
+	assert.Equal(t, dbLabel.Name, apiLabel.Name)
+	assert.Equal(t, strings.TrimLeft(dbLabel.Color, "#"), apiLabel.Color)
 
 	req = NewRequestWithJSON(t, "POST", urlStr, &api.CreateLabelOption{
 		Name:        "TestL 2",
@@ -70,7 +70,7 @@ func TestAPIModifyLabels(t *testing.T) {
 		AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiLabel)
-	assert.EqualValues(t, strings.TrimLeft(dbLabel.Color, "#"), apiLabel.Color)
+	assert.Equal(t, strings.TrimLeft(dbLabel.Color, "#"), apiLabel.Color)
 
 	// EditLabel
 	newName := "LabelNewName"
@@ -82,7 +82,7 @@ func TestAPIModifyLabels(t *testing.T) {
 	}).AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiLabel)
-	assert.EqualValues(t, newColor, apiLabel.Color)
+	assert.Equal(t, newColor, apiLabel.Color)
 	req = NewRequestWithJSON(t, "PATCH", singleURLStr, &api.EditLabelOption{
 		Color: &newColorWrong,
 	}).AddTokenAuth(token)
@@ -211,7 +211,7 @@ func TestAPIReplaceIssueLabels(t *testing.T) {
 	var apiLabels []*api.Label
 	DecodeJSON(t, resp, &apiLabels)
 	if assert.Len(t, apiLabels, 1) {
-		assert.EqualValues(t, label.ID, apiLabels[0].ID)
+		assert.Equal(t, label.ID, apiLabels[0].ID)
 	}
 
 	unittest.AssertCount(t, &issues_model.IssueLabel{IssueID: issue.ID}, 1)
@@ -237,7 +237,7 @@ func TestAPIReplaceIssueLabelsWithLabelNames(t *testing.T) {
 	var apiLabels []*api.Label
 	DecodeJSON(t, resp, &apiLabels)
 	if assert.Len(t, apiLabels, 1) {
-		assert.EqualValues(t, label.Name, apiLabels[0].Name)
+		assert.Equal(t, label.Name, apiLabels[0].Name)
 	}
 }
 
@@ -261,8 +261,8 @@ func TestAPIModifyOrgLabels(t *testing.T) {
 	apiLabel := new(api.Label)
 	DecodeJSON(t, resp, &apiLabel)
 	dbLabel := unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: apiLabel.ID, OrgID: owner.ID})
-	assert.EqualValues(t, dbLabel.Name, apiLabel.Name)
-	assert.EqualValues(t, strings.TrimLeft(dbLabel.Color, "#"), apiLabel.Color)
+	assert.Equal(t, dbLabel.Name, apiLabel.Name)
+	assert.Equal(t, strings.TrimLeft(dbLabel.Color, "#"), apiLabel.Color)
 
 	req = NewRequestWithJSON(t, "POST", urlStr, &api.CreateLabelOption{
 		Name:        "TestL 2",
@@ -290,7 +290,7 @@ func TestAPIModifyOrgLabels(t *testing.T) {
 		AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiLabel)
-	assert.EqualValues(t, strings.TrimLeft(dbLabel.Color, "#"), apiLabel.Color)
+	assert.Equal(t, strings.TrimLeft(dbLabel.Color, "#"), apiLabel.Color)
 
 	// EditLabel
 	newName := "LabelNewName"
@@ -302,7 +302,7 @@ func TestAPIModifyOrgLabels(t *testing.T) {
 	}).AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiLabel)
-	assert.EqualValues(t, newColor, apiLabel.Color)
+	assert.Equal(t, newColor, apiLabel.Color)
 	req = NewRequestWithJSON(t, "PATCH", singleURLStr, &api.EditLabelOption{
 		Color: &newColorWrong,
 	}).AddTokenAuth(token)

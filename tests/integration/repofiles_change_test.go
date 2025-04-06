@@ -10,15 +10,15 @@ import (
 	"testing"
 	"time"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -265,11 +265,11 @@ func TestChangeRepoFiles(t *testing.T) {
 			lastCommit, err := gitRepo.GetCommitByPath("new/file.txt")
 			require.NoError(t, err)
 			expectedFileResponse := getExpectedFileResponseForRepofilesCreate(commitID, lastCommit.ID.String())
-			assert.EqualValues(t, expectedFileResponse.Content, filesResponse.Files[0])
-			assert.EqualValues(t, expectedFileResponse.Commit.SHA, filesResponse.Commit.SHA)
-			assert.EqualValues(t, expectedFileResponse.Commit.HTMLURL, filesResponse.Commit.HTMLURL)
-			assert.EqualValues(t, expectedFileResponse.Commit.Author.Email, filesResponse.Commit.Author.Email)
-			assert.EqualValues(t, expectedFileResponse.Commit.Author.Name, filesResponse.Commit.Author.Name)
+			assert.Equal(t, expectedFileResponse.Content, filesResponse.Files[0])
+			assert.Equal(t, expectedFileResponse.Commit.SHA, filesResponse.Commit.SHA)
+			assert.Equal(t, expectedFileResponse.Commit.HTMLURL, filesResponse.Commit.HTMLURL)
+			assert.Equal(t, expectedFileResponse.Commit.Author.Email, filesResponse.Commit.Author.Email)
+			assert.Equal(t, expectedFileResponse.Commit.Author.Name, filesResponse.Commit.Author.Name)
 		})
 
 		t.Run("Update", func(t *testing.T) {
@@ -283,11 +283,11 @@ func TestChangeRepoFiles(t *testing.T) {
 			lastCommit, err := commit.GetCommitByPath(opts.Files[0].TreePath)
 			require.NoError(t, err)
 			expectedFileResponse := getExpectedFileResponseForRepofilesUpdate(commit.ID.String(), opts.Files[0].TreePath, lastCommit.ID.String())
-			assert.EqualValues(t, expectedFileResponse.Content, filesResponse.Files[0])
-			assert.EqualValues(t, expectedFileResponse.Commit.SHA, filesResponse.Commit.SHA)
-			assert.EqualValues(t, expectedFileResponse.Commit.HTMLURL, filesResponse.Commit.HTMLURL)
-			assert.EqualValues(t, expectedFileResponse.Commit.Author.Email, filesResponse.Commit.Author.Email)
-			assert.EqualValues(t, expectedFileResponse.Commit.Author.Name, filesResponse.Commit.Author.Name)
+			assert.Equal(t, expectedFileResponse.Content, filesResponse.Files[0])
+			assert.Equal(t, expectedFileResponse.Commit.SHA, filesResponse.Commit.SHA)
+			assert.Equal(t, expectedFileResponse.Commit.HTMLURL, filesResponse.Commit.HTMLURL)
+			assert.Equal(t, expectedFileResponse.Commit.Author.Email, filesResponse.Commit.Author.Email)
+			assert.Equal(t, expectedFileResponse.Commit.Author.Name, filesResponse.Commit.Author.Name)
 		})
 
 		t.Run("Update and move", func(t *testing.T) {
@@ -318,12 +318,12 @@ func TestChangeRepoFiles(t *testing.T) {
 			assert.Nil(t, fromEntry)  // Should no longer exist here
 			assert.NotNil(t, toEntry) // Should exist here
 			// assert SHA has remained the same but paths use the new file name
-			assert.EqualValues(t, expectedFileResponse.Content.SHA, filesResponse.Files[0].SHA)
-			assert.EqualValues(t, expectedFileResponse.Content.Name, filesResponse.Files[0].Name)
-			assert.EqualValues(t, expectedFileResponse.Content.Path, filesResponse.Files[0].Path)
-			assert.EqualValues(t, expectedFileResponse.Content.URL, filesResponse.Files[0].URL)
-			assert.EqualValues(t, expectedFileResponse.Commit.SHA, filesResponse.Commit.SHA)
-			assert.EqualValues(t, expectedFileResponse.Commit.HTMLURL, filesResponse.Commit.HTMLURL)
+			assert.Equal(t, expectedFileResponse.Content.SHA, filesResponse.Files[0].SHA)
+			assert.Equal(t, expectedFileResponse.Content.Name, filesResponse.Files[0].Name)
+			assert.Equal(t, expectedFileResponse.Content.Path, filesResponse.Files[0].Path)
+			assert.Equal(t, expectedFileResponse.Content.URL, filesResponse.Files[0].URL)
+			assert.Equal(t, expectedFileResponse.Commit.SHA, filesResponse.Commit.SHA)
+			assert.Equal(t, expectedFileResponse.Commit.HTMLURL, filesResponse.Commit.HTMLURL)
 		})
 
 		t.Run("Change without branch names", func(t *testing.T) {
@@ -340,7 +340,7 @@ func TestChangeRepoFiles(t *testing.T) {
 			commit, _ := gitRepo.GetBranchCommit(repo.DefaultBranch)
 			lastCommit, _ := commit.GetCommitByPath(opts.Files[0].TreePath)
 			expectedFileResponse := getExpectedFileResponseForRepofilesUpdate(commit.ID.String(), opts.Files[0].TreePath, lastCommit.ID.String())
-			assert.EqualValues(t, expectedFileResponse.Content, filesResponse.Files[0])
+			assert.Equal(t, expectedFileResponse.Content, filesResponse.Files[0])
 		})
 
 		t.Run("Delete files", func(t *testing.T) {
@@ -352,10 +352,10 @@ func TestChangeRepoFiles(t *testing.T) {
 			expectedFileResponse := getExpectedFileResponseForRepofilesDelete()
 			assert.NotNil(t, filesResponse)
 			assert.Nil(t, filesResponse.Files[0])
-			assert.EqualValues(t, expectedFileResponse.Commit.Message, filesResponse.Commit.Message)
-			assert.EqualValues(t, expectedFileResponse.Commit.Author.Identity, filesResponse.Commit.Author.Identity)
-			assert.EqualValues(t, expectedFileResponse.Commit.Committer.Identity, filesResponse.Commit.Committer.Identity)
-			assert.EqualValues(t, expectedFileResponse.Verification, filesResponse.Verification)
+			assert.Equal(t, expectedFileResponse.Commit.Message, filesResponse.Commit.Message)
+			assert.Equal(t, expectedFileResponse.Commit.Author.Identity, filesResponse.Commit.Author.Identity)
+			assert.Equal(t, expectedFileResponse.Commit.Committer.Identity, filesResponse.Commit.Committer.Identity)
+			assert.Equal(t, expectedFileResponse.Verification, filesResponse.Verification)
 
 			filesResponse, err = files_service.ChangeRepoFiles(git.DefaultContext, repo, doer, opts)
 			assert.Nil(t, filesResponse)
@@ -376,10 +376,10 @@ func TestChangeRepoFiles(t *testing.T) {
 			expectedFileResponse := getExpectedFileResponseForRepofilesDelete()
 			assert.NotNil(t, filesResponse)
 			assert.Nil(t, filesResponse.Files[0])
-			assert.EqualValues(t, expectedFileResponse.Commit.Message, filesResponse.Commit.Message)
-			assert.EqualValues(t, expectedFileResponse.Commit.Author.Identity, filesResponse.Commit.Author.Identity)
-			assert.EqualValues(t, expectedFileResponse.Commit.Committer.Identity, filesResponse.Commit.Committer.Identity)
-			assert.EqualValues(t, expectedFileResponse.Verification, filesResponse.Verification)
+			assert.Equal(t, expectedFileResponse.Commit.Message, filesResponse.Commit.Message)
+			assert.Equal(t, expectedFileResponse.Commit.Author.Identity, filesResponse.Commit.Author.Identity)
+			assert.Equal(t, expectedFileResponse.Commit.Committer.Identity, filesResponse.Commit.Committer.Identity)
+			assert.Equal(t, expectedFileResponse.Verification, filesResponse.Verification)
 		})
 	})
 }

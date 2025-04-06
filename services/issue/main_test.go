@@ -6,11 +6,11 @@ package issue
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/webhook"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/webhook"
 
-	_ "code.gitea.io/gitea/models/actions"
+	_ "forgejo.org/models/actions"
 )
 
 func TestMain(m *testing.M) {

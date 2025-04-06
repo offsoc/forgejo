@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/forgejo/semver"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/models/db"
+	"forgejo.org/models/forgejo/semver"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/log"
 
 	"github.com/stretchr/testify/require"
 )

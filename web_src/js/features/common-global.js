@@ -57,7 +57,7 @@ export function initGlobalEnterQuickSubmit() {
 export function initGlobalButtonClickOnEnter() {
   $(document).on('keypress', 'div.ui.button,span.ui.button', (e) => {
     if (e.code === ' ' || e.code === 'Enter') {
-      $(e.target).trigger('click');
+      e.target.click();
       e.preventDefault();
     }
   });
@@ -314,7 +314,7 @@ export function initGlobalLinkActions() {
       closable: false,
       onApprove: async () => {
         if ($this.data('type') === 'form') {
-          $($this.data('form')).trigger('submit');
+          document.querySelector($this.data('form')).requestSubmit();
           return;
         }
         if ($this[0].getAttribute('hx-confirm')) {
@@ -458,6 +458,6 @@ export function checkAppUrl() {
   if (curUrl.startsWith(appUrl) || `${curUrl}/` === appUrl) {
     return;
   }
-  showGlobalErrorMessage(`Your ROOT_URL in app.ini is "${appUrl}", it's unlikely matching the site you are visiting.
-Mismatched ROOT_URL config causes wrong URL links for web UI/mail content/webhook notification/OAuth2 sign-in.`);
+
+  showGlobalErrorMessage(i18n.incorrect_root_url);
 }

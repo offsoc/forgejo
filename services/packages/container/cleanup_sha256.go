@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	container_module "code.gitea.io/gitea/modules/packages/container"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	container_module "forgejo.org/modules/packages/container"
+	"forgejo.org/modules/timeutil"
 )
 
 var (

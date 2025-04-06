@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -35,9 +35,9 @@ func TestRouteMock(t *testing.T) {
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
 	assert.Len(t, recorder.Header(), 3)
-	assert.EqualValues(t, "m1", recorder.Header().Get("X-Test-Middleware1"))
-	assert.EqualValues(t, "m2", recorder.Header().Get("X-Test-Middleware2"))
-	assert.EqualValues(t, "h", recorder.Header().Get("X-Test-Handler"))
+	assert.Equal(t, "m1", recorder.Header().Get("X-Test-Middleware1"))
+	assert.Equal(t, "m2", recorder.Header().Get("X-Test-Middleware2"))
+	assert.Equal(t, "h", recorder.Header().Get("X-Test-Handler"))
 	RouteMockReset()
 
 	// mock at "mock-point"
@@ -50,8 +50,8 @@ func TestRouteMock(t *testing.T) {
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
 	assert.Len(t, recorder.Header(), 2)
-	assert.EqualValues(t, "m1", recorder.Header().Get("X-Test-Middleware1"))
-	assert.EqualValues(t, "a", recorder.Header().Get("X-Test-MockPoint"))
+	assert.Equal(t, "m1", recorder.Header().Get("X-Test-Middleware1"))
+	assert.Equal(t, "a", recorder.Header().Get("X-Test-MockPoint"))
 	RouteMockReset()
 
 	// mock at MockAfterMiddlewares
@@ -64,8 +64,8 @@ func TestRouteMock(t *testing.T) {
 	require.NoError(t, err)
 	r.ServeHTTP(recorder, req)
 	assert.Len(t, recorder.Header(), 3)
-	assert.EqualValues(t, "m1", recorder.Header().Get("X-Test-Middleware1"))
-	assert.EqualValues(t, "m2", recorder.Header().Get("X-Test-Middleware2"))
-	assert.EqualValues(t, "b", recorder.Header().Get("X-Test-MockPoint"))
+	assert.Equal(t, "m1", recorder.Header().Get("X-Test-Middleware1"))
+	assert.Equal(t, "m2", recorder.Header().Get("X-Test-Middleware2"))
+	assert.Equal(t, "b", recorder.Header().Get("X-Test-MockPoint"))
 	RouteMockReset()
 }

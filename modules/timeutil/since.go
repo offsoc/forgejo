@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/translation"
 )
 
 // Seconds-based time units
@@ -96,11 +96,7 @@ func timeSincePro(then, now time.Time, lang translation.Locale) string {
 	}
 
 	var timeStr, diffStr string
-	for {
-		if diff == 0 {
-			break
-		}
-
+	for diff != 0 {
 		diff, diffStr = computeTimeDiffFloor(diff, lang)
 		timeStr += ", " + diffStr
 	}

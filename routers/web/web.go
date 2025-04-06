@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2023 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package web
@@ -8,48 +9,46 @@ import (
 	"net/http"
 	"strings"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/perm"
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/metrics"
-	"code.gitea.io/gitea/modules/public"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/validation"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/modules/web/routing"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/routers/web/admin"
-	"code.gitea.io/gitea/routers/web/auth"
-	"code.gitea.io/gitea/routers/web/devtest"
-	"code.gitea.io/gitea/routers/web/events"
-	"code.gitea.io/gitea/routers/web/explore"
-	"code.gitea.io/gitea/routers/web/feed"
-	"code.gitea.io/gitea/routers/web/healthcheck"
-	"code.gitea.io/gitea/routers/web/misc"
-	"code.gitea.io/gitea/routers/web/org"
-	org_setting "code.gitea.io/gitea/routers/web/org/setting"
-	"code.gitea.io/gitea/routers/web/repo"
-	"code.gitea.io/gitea/routers/web/repo/actions"
-	"code.gitea.io/gitea/routers/web/repo/badges"
-	repo_flags "code.gitea.io/gitea/routers/web/repo/flags"
-	repo_setting "code.gitea.io/gitea/routers/web/repo/setting"
-	"code.gitea.io/gitea/routers/web/shared/project"
-	"code.gitea.io/gitea/routers/web/user"
-	user_setting "code.gitea.io/gitea/routers/web/user/setting"
-	"code.gitea.io/gitea/routers/web/user/setting/security"
-	auth_service "code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/lfs"
+	"forgejo.org/models/perm"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/models/unit"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/metrics"
+	"forgejo.org/modules/public"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/templates"
+	"forgejo.org/modules/validation"
+	"forgejo.org/modules/web"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/modules/web/routing"
+	"forgejo.org/routers/common"
+	"forgejo.org/routers/web/admin"
+	"forgejo.org/routers/web/auth"
+	"forgejo.org/routers/web/devtest"
+	"forgejo.org/routers/web/events"
+	"forgejo.org/routers/web/explore"
+	"forgejo.org/routers/web/feed"
+	"forgejo.org/routers/web/healthcheck"
+	"forgejo.org/routers/web/misc"
+	"forgejo.org/routers/web/org"
+	org_setting "forgejo.org/routers/web/org/setting"
+	"forgejo.org/routers/web/repo"
+	"forgejo.org/routers/web/repo/actions"
+	"forgejo.org/routers/web/repo/badges"
+	repo_flags "forgejo.org/routers/web/repo/flags"
+	repo_setting "forgejo.org/routers/web/repo/setting"
+	"forgejo.org/routers/web/shared/project"
+	"forgejo.org/routers/web/user"
+	user_setting "forgejo.org/routers/web/user/setting"
+	"forgejo.org/routers/web/user/setting/security"
+	auth_service "forgejo.org/services/auth"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/lfs"
 
-	_ "code.gitea.io/gitea/modules/session" // to registers all internal adapters
+	_ "forgejo.org/modules/session" // to registers all internal adapters
 
 	"code.forgejo.org/go-chi/captcha"
 	chi_middleware "github.com/go-chi/chi/v5/middleware"
@@ -109,10 +108,6 @@ func buildAuthGroup() *auth_service.Group {
 		group.Add(&auth_service.ReverseProxy{}) // reverseproxy should before Session, otherwise the header will be ignored if user has login
 	}
 	group.Add(&auth_service.Session{})
-
-	if setting.IsWindows && auth_model.IsSSPIEnabled(db.DefaultContext) {
-		group.Add(&auth_service.SSPI{}) // it MUST be the last, see the comment of SSPI
-	}
 
 	return group
 }
@@ -592,6 +587,7 @@ func registerRoutes(m *web.Route) {
 			m.Combo("").Get(user_setting.Applications).
 				Post(web.Bind(forms.NewAccessTokenForm{}), user_setting.ApplicationsPost)
 			m.Post("/delete", user_setting.DeleteApplication)
+			m.Post("/regenerate", user_setting.RegenerateApplication)
 		})
 
 		m.Combo("/keys").Get(user_setting.Keys).
@@ -644,7 +640,8 @@ func registerRoutes(m *web.Route) {
 			m.Get("", user_setting.BlockedUsers)
 			m.Post("/unblock", user_setting.UnblockUser)
 		})
-	}, reqSignIn, ctxDataSet("PageIsUserSettings", true, "AllThemes", setting.UI.Themes, "EnablePackages", setting.Packages.Enabled))
+		m.Get("/storage_overview", user_setting.StorageOverview)
+	}, reqSignIn, ctxDataSet("PageIsUserSettings", true, "EnablePackages", setting.Packages.Enabled, "EnableQuota", setting.Quota.Enabled))
 
 	m.Group("/user", func() {
 		m.Get("/activate", auth.Activate)
@@ -815,13 +812,13 @@ func registerRoutes(m *web.Route) {
 	individualPermsChecker := func(ctx *context.Context) {
 		// org permissions have been checked in context.OrgAssignment(), but individual permissions haven't been checked.
 		if ctx.ContextUser.IsIndividual() {
-			switch {
-			case ctx.ContextUser.Visibility == structs.VisibleTypePrivate:
+			switch ctx.ContextUser.Visibility {
+			case structs.VisibleTypePrivate:
 				if ctx.Doer == nil || (ctx.ContextUser.ID != ctx.Doer.ID && !ctx.Doer.IsAdmin) {
 					ctx.NotFound("Visit Project", nil)
 					return
 				}
-			case ctx.ContextUser.Visibility == structs.VisibleTypeLimited:
+			case structs.VisibleTypeLimited:
 				if ctx.Doer == nil {
 					ctx.NotFound("Visit Project", nil)
 					return
@@ -930,6 +927,7 @@ func registerRoutes(m *web.Route) {
 					m.Post("/block", org_setting.BlockedUsersBlock)
 					m.Post("/unblock", org_setting.BlockedUsersUnblock)
 				})
+				m.Get("/storage_overview", org_setting.StorageOverview)
 
 				m.Group("/packages", func() {
 					m.Get("", org.Packages)
@@ -949,7 +947,7 @@ func registerRoutes(m *web.Route) {
 						m.Post("/rebuild", org.RebuildCargoIndex)
 					})
 				}, packagesEnabled)
-			}, ctxDataSet("EnableOAuth2", setting.OAuth2.Enabled, "EnablePackages", setting.Packages.Enabled, "PageIsOrgSettings", true))
+			}, ctxDataSet("EnableOAuth2", setting.OAuth2.Enabled, "EnablePackages", setting.Packages.Enabled, "EnableQuota", setting.Quota.Enabled, "PageIsOrgSettings", true))
 		}, context.OrgAssignment(true, true))
 	}, reqSignIn)
 	// ***** END: Organization *****
@@ -1457,7 +1455,7 @@ func registerRoutes(m *web.Route) {
 			}, repo.MustBeNotEmpty, context.RequireRepoReaderOr(unit.TypeCode))
 			m.Group("/recent-commits", func() {
 				m.Get("", repo.RecentCommits)
-				m.Get("/data", repo.RecentCommitsData)
+				m.Get("/data", repo.CodeFrequencyData)
 			}, repo.MustBeNotEmpty, context.RequireRepoReaderOr(unit.TypeCode))
 		}, context.RepoRef(), context.RequireRepoReaderOr(unit.TypeCode, unit.TypePullRequests, unit.TypeIssues, unit.TypeReleases))
 
@@ -1664,6 +1662,7 @@ func registerRoutes(m *web.Route) {
 		m.Any("/devtest", devtest.List)
 		m.Any("/devtest/fetch-action-test", devtest.FetchActionTest)
 		m.Any("/devtest/{sub}", devtest.Tmpl)
+		m.Get("/devtest/error/{errcode}", devtest.ErrorPage)
 	}
 
 	m.NotFound(func(w http.ResponseWriter, req *http.Request) {

@@ -6,9 +6,9 @@ package metrics
 import (
 	"runtime"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
 
 	"github.com/prometheus/client_golang/prometheus"
 )

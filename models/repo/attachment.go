@@ -9,12 +9,12 @@ import (
 	"net/url"
 	"path"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
 )
 
 // Attachment represent a attachment of issue/comment/release.
@@ -217,16 +217,6 @@ func DeleteAttachments(ctx context.Context, attachments []*Attachment, remove bo
 		}
 	}
 	return int(cnt), nil
-}
-
-// DeleteAttachmentsByIssue deletes all attachments associated with the given issue.
-func DeleteAttachmentsByIssue(ctx context.Context, issueID int64, remove bool) (int, error) {
-	attachments, err := GetAttachmentsByIssueID(ctx, issueID)
-	if err != nil {
-		return 0, err
-	}
-
-	return DeleteAttachments(ctx, attachments, remove)
 }
 
 // DeleteAttachmentsByComment deletes all attachments associated with the given comment.

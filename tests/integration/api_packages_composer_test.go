@@ -11,14 +11,15 @@ import (
 	neturl "net/url"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	composer_module "code.gitea.io/gitea/modules/packages/composer"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/routers/api/packages/composer"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	composer_module "forgejo.org/modules/packages/composer"
+	"forgejo.org/modules/setting"
+	"forgejo.org/routers/api/packages/composer"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -218,5 +219,39 @@ func TestPackageComposer(t *testing.T) {
 		assert.Equal(t, "4f5fa464c3cb808a1df191dbf6cb75363f8b7072", pkgs[0].Dist.Checksum)
 		assert.Len(t, pkgs[0].Bin, 1)
 		assert.Equal(t, packageBin, pkgs[0].Bin[0])
+
+		// Test package linked to repository
+		repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+		userPkgs, err := packages.GetPackagesByType(db.DefaultContext, user.ID, packages.TypeComposer)
+		require.NoError(t, err)
+		assert.Len(t, userPkgs, 1)
+		assert.EqualValues(t, 0, userPkgs[0].RepoID)
+
+		err = packages.SetRepositoryLink(db.DefaultContext, userPkgs[0].ID, repo1.ID)
+		require.NoError(t, err)
+
+		req = NewRequest(t, "GET", fmt.Sprintf("%s/p2/%s/%s.json", url, vendorName, projectName)).
+			AddBasicAuth(user.Name)
+		resp = MakeRequest(t, req, http.StatusOK)
+
+		result = composer.PackageMetadataResponse{}
+		DecodeJSON(t, resp, &result)
+
+		assert.Contains(t, result.Packages, packageName)
+		pkgs = result.Packages[packageName]
+		assert.Len(t, pkgs, 1)
+		assert.Equal(t, packageName, pkgs[0].Name)
+		assert.Equal(t, packageVersion, pkgs[0].Version)
+		assert.Equal(t, packageType, pkgs[0].Type)
+		assert.Equal(t, packageDescription, pkgs[0].Description)
+		assert.Len(t, pkgs[0].Authors, 1)
+		assert.Equal(t, packageAuthor, pkgs[0].Authors[0].Name)
+		assert.Equal(t, "zip", pkgs[0].Dist.Type)
+		assert.Equal(t, "4f5fa464c3cb808a1df191dbf6cb75363f8b7072", pkgs[0].Dist.Checksum)
+		assert.Len(t, pkgs[0].Bin, 1)
+		assert.Equal(t, packageBin, pkgs[0].Bin[0])
+		assert.Equal(t, repo1.HTMLURL(), pkgs[0].Source.URL)
+		assert.Equal(t, "git", pkgs[0].Source.Type)
+		assert.Equal(t, packageVersion, pkgs[0].Source.Reference)
 	})
 }

@@ -26,8 +26,7 @@ func TestDecodeJwtSecret(t *testing.T) {
 }
 
 func TestNewJwtSecret(t *testing.T) {
-	secret, encoded, err := NewJwtSecret()
-	require.NoError(t, err)
+	secret, encoded := NewJwtSecret()
 	assert.Len(t, secret, 32)
 	decoded, err := DecodeJwtSecret(encoded)
 	require.NoError(t, err)

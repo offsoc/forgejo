@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -14,15 +13,15 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/require"
 )
@@ -48,7 +47,7 @@ func TestCodeOwner(t *testing.T) {
 		r := fmt.Sprintf("%suser2/%s.git", u.String(), repo.Name)
 		cloneURL, _ := url.Parse(r)
 		cloneURL.User = url.UserPassword("user2", userPassword)
-		require.NoError(t, git.CloneWithArgs(context.Background(), nil, cloneURL.String(), dstPath, git.CloneRepoOptions{}))
+		require.NoError(t, git.CloneWithArgs(t.Context(), nil, cloneURL.String(), dstPath, git.CloneRepoOptions{}))
 
 		t.Run("Normal", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()

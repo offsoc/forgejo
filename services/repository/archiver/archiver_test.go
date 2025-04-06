@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/services/contexttest"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/git"
+	"forgejo.org/services/contexttest"
 
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,7 +36,7 @@ func TestArchive_Basic(t *testing.T) {
 	bogusReq, err := NewRequest(ctx, ctx.Repo.Repository.ID, ctx.Repo.GitRepo, firstCommit, git.ZIP)
 	require.NoError(t, err)
 	assert.NotNil(t, bogusReq)
-	assert.EqualValues(t, firstCommit+".zip", bogusReq.GetArchiveName())
+	assert.Equal(t, firstCommit+".zip", bogusReq.GetArchiveName())
 
 	// Check a series of bogus requests.
 	// Step 1, valid commit with a bad extension.
@@ -57,12 +57,12 @@ func TestArchive_Basic(t *testing.T) {
 	bogusReq, err = NewRequest(ctx, ctx.Repo.Repository.ID, ctx.Repo.GitRepo, "master", git.ZIP)
 	require.NoError(t, err)
 	assert.NotNil(t, bogusReq)
-	assert.EqualValues(t, "master.zip", bogusReq.GetArchiveName())
+	assert.Equal(t, "master.zip", bogusReq.GetArchiveName())
 
 	bogusReq, err = NewRequest(ctx, ctx.Repo.Repository.ID, ctx.Repo.GitRepo, "test/archive", git.ZIP)
 	require.NoError(t, err)
 	assert.NotNil(t, bogusReq)
-	assert.EqualValues(t, "test-archive.zip", bogusReq.GetArchiveName())
+	assert.Equal(t, "test-archive.zip", bogusReq.GetArchiveName())
 
 	// Now two valid requests, firstCommit with valid extensions.
 	zipReq, err := NewRequest(ctx, ctx.Repo.Repository.ID, ctx.Repo.GitRepo, firstCommit, git.ZIP)

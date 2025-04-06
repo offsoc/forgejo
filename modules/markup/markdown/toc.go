@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/url"
 
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/translation"
 
 	"github.com/yuin/goldmark/ast"
 )

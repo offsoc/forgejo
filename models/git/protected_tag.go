@@ -9,9 +9,9 @@ import (
 	"slices"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/gobwas/glob"
 )

@@ -51,6 +51,11 @@
 		<a class="{{if .PageIsSettingsRepos}}active {{end}}item" href="{{AppSubUrl}}/user/settings/repos">
 			{{ctx.Locale.Tr "settings.repos"}}
 		</a>
+		{{if .EnableQuota}}
+			<a class="{{if .PageIsStorageOverview}}active {{end}}item" href="{{AppSubUrl}}/user/settings/storage_overview">
+				{{ctx.Locale.Tr "settings.storage_overview"}}
+			</a>
+		{{end}}
 		<a class="{{if .PageIsBlockedUsers}}active {{end}}item" href="{{AppSubUrl}}/user/settings/blocked_users">
 			{{ctx.Locale.Tr "settings.blocked_users"}}
 		</a>

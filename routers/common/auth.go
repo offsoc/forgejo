@@ -4,10 +4,10 @@
 package common
 
 import (
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/web/middleware"
-	auth_service "code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/context"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/web/middleware"
+	auth_service "forgejo.org/services/auth"
+	"forgejo.org/services/context"
 )
 
 type AuthResult struct {
@@ -31,6 +31,7 @@ func AuthShared(ctx *context.Base, sessionStore auth_service.SessionStore, authM
 		ctx.Data["SignedUserID"] = ar.Doer.ID
 		ctx.Data["IsAdmin"] = ar.Doer.IsAdmin
 	} else {
+		ctx.Data["IsSigned"] = false
 		ctx.Data["SignedUserID"] = int64(0)
 	}
 	return ar, nil

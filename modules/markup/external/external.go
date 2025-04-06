@@ -9,15 +9,14 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 )
 
 // RegisterRenderers registers all supported third part renderers according settings
@@ -70,9 +69,6 @@ func (p *Renderer) DisplayInIFrame() bool {
 }
 
 func envMark(envName string) string {
-	if runtime.GOOS == "windows" {
-		return "%" + envName + "%"
-	}
 	return "$" + envName
 }
 

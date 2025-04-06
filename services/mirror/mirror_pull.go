@@ -9,21 +9,21 @@ import (
 	"strings"
 	"time"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	system_model "code.gitea.io/gitea/models/system"
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/git"
-	giturl "code.gitea.io/gitea/modules/git/url"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/proxy"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	notify_service "code.gitea.io/gitea/services/notify"
+	repo_model "forgejo.org/models/repo"
+	system_model "forgejo.org/models/system"
+	"forgejo.org/modules/cache"
+	"forgejo.org/modules/git"
+	giturl "forgejo.org/modules/git/url"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/proxy"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	notify_service "forgejo.org/services/notify"
 )
 
 // gitShortEmptySha Git short empty SHA
@@ -40,7 +40,7 @@ func UpdateAddress(ctx context.Context, m *repo_model.Mirror, addr string) error
 	repoPath := m.GetRepository(ctx).RepoPath()
 	// Remove old remote
 	_, _, err = git.NewCommand(ctx, "remote", "rm").AddDynamicArguments(remoteName).RunStdString(&git.RunOpts{Dir: repoPath})
-	if err != nil && !strings.HasPrefix(err.Error(), "exit status 128 - fatal: No such remote ") {
+	if err != nil && !git.IsRemoteNotExistError(err) {
 		return err
 	}
 
@@ -51,7 +51,7 @@ func UpdateAddress(ctx context.Context, m *repo_model.Mirror, addr string) error
 		cmd.SetDescription(fmt.Sprintf("remote add %s --mirror=fetch %s [repo_path: %s]", remoteName, addr, repoPath))
 	}
 	_, _, err = cmd.RunStdString(&git.RunOpts{Dir: repoPath})
-	if err != nil && !strings.HasPrefix(err.Error(), "exit status 128 - fatal: No such remote ") {
+	if err != nil && !git.IsRemoteNotExistError(err) {
 		return err
 	}
 
@@ -60,7 +60,7 @@ func UpdateAddress(ctx context.Context, m *repo_model.Mirror, addr string) error
 		wikiRemotePath := repo_module.WikiRemoteURL(ctx, addr)
 		// Remove old remote of wiki
 		_, _, err = git.NewCommand(ctx, "remote", "rm").AddDynamicArguments(remoteName).RunStdString(&git.RunOpts{Dir: wikiPath})
-		if err != nil && !strings.HasPrefix(err.Error(), "exit status 128 - fatal: No such remote ") {
+		if err != nil && !git.IsRemoteNotExistError(err) {
 			return err
 		}
 
@@ -71,7 +71,7 @@ func UpdateAddress(ctx context.Context, m *repo_model.Mirror, addr string) error
 			cmd.SetDescription(fmt.Sprintf("remote add %s --mirror=fetch %s [repo_path: %s]", remoteName, wikiRemotePath, wikiPath))
 		}
 		_, _, err = cmd.RunStdString(&git.RunOpts{Dir: wikiPath})
-		if err != nil && !strings.HasPrefix(err.Error(), "exit status 128 - fatal: No such remote ") {
+		if err != nil && !git.IsRemoteNotExistError(err) {
 			return err
 		}
 	}
@@ -96,6 +96,7 @@ type mirrorSyncResult struct {
 /*
 // * [new tag]         v0.1.8     -> v0.1.8
 // * [new branch]      master     -> origin/master
+// * [new ref]         refs/pull/2/head  -> refs/pull/2/head"
 // - [deleted]         (none)     -> origin/test // delete a branch
 // - [deleted]         (none)     -> 1 // delete a tag
 //   957a993..a87ba5f  test       -> origin/test
@@ -126,10 +127,17 @@ func parseRemoteUpdateOutput(output, remoteName string) []*mirrorSyncResult {
 				refName:     git.RefNameFromBranch(refName),
 				oldCommitID: gitShortEmptySha,
 			})
+		case strings.HasPrefix(lines[i], " * [new ref]"): // new reference
+			results = append(results, &mirrorSyncResult{
+				refName:     git.RefName(refName),
+				oldCommitID: gitShortEmptySha,
+			})
 		case strings.HasPrefix(lines[i], " - "): // Delete reference
 			isTag := !strings.HasPrefix(refName, remoteName+"/")
 			var refFullName git.RefName
-			if isTag {
+			if strings.HasPrefix(refName, "refs/") {
+				refFullName = git.RefName(refName)
+			} else if isTag {
 				refFullName = git.RefNameFromTag(refName)
 			} else {
 				refFullName = git.RefNameFromBranch(strings.TrimPrefix(refName, remoteName+"/"))
@@ -152,8 +160,15 @@ func parseRemoteUpdateOutput(output, remoteName string) []*mirrorSyncResult {
 				log.Error("Expect two SHAs but not what found: %q", lines[i])
 				continue
 			}
+			var refFullName git.RefName
+			if strings.HasPrefix(refName, "refs/") {
+				refFullName = git.RefName(refName)
+			} else {
+				refFullName = git.RefNameFromBranch(strings.TrimPrefix(refName, remoteName+"/"))
+			}
+
 			results = append(results, &mirrorSyncResult{
-				refName:     git.RefNameFromBranch(strings.TrimPrefix(refName, remoteName+"/")),
+				refName:     refFullName,
 				oldCommitID: shas[0],
 				newCommitID: shas[1],
 			})
@@ -168,8 +183,15 @@ func parseRemoteUpdateOutput(output, remoteName string) []*mirrorSyncResult {
 				log.Error("Expect two SHAs but not what found: %q", lines[i])
 				continue
 			}
+			var refFullName git.RefName
+			if strings.HasPrefix(refName, "refs/") {
+				refFullName = git.RefName(refName)
+			} else {
+				refFullName = git.RefNameFromBranch(strings.TrimPrefix(refName, remoteName+"/"))
+			}
+
 			results = append(results, &mirrorSyncResult{
-				refName:     git.RefNameFromBranch(strings.TrimPrefix(refName, remoteName+"/")),
+				refName:     refFullName,
 				oldCommitID: shas[0],
 				newCommitID: shas[1],
 			})
@@ -222,6 +244,24 @@ func pruneBrokenReferences(ctx context.Context,
 	return pruneErr
 }
 
+// checkRecoverableSyncError takes an error message from a git fetch command and returns false if it should be a fatal/blocking error
+func checkRecoverableSyncError(stderrMessage string) bool {
+	switch {
+	case strings.Contains(stderrMessage, "unable to resolve reference") && strings.Contains(stderrMessage, "reference broken"):
+		return true
+	case strings.Contains(stderrMessage, "remote error") && strings.Contains(stderrMessage, "not our ref"):
+		return true
+	case strings.Contains(stderrMessage, "cannot lock ref") && strings.Contains(stderrMessage, "but expected"):
+		return true
+	case strings.Contains(stderrMessage, "cannot lock ref") && strings.Contains(stderrMessage, "unable to resolve reference"):
+		return true
+	case strings.Contains(stderrMessage, "Unable to create") && strings.Contains(stderrMessage, ".lock"):
+		return true
+	default:
+		return false
+	}
+}
+
 // runSync returns true if sync finished without error.
 func runSync(ctx context.Context, m *repo_model.Mirror) ([]*mirrorSyncResult, bool) {
 	repoPath := m.Repo.RepoPath()
@@ -264,7 +304,7 @@ func runSync(ctx context.Context, m *repo_model.Mirror) ([]*mirrorSyncResult, bo
 		stdoutMessage := util.SanitizeCredentialURLs(stdout)
 
 		// Now check if the error is a resolve reference due to broken reference
-		if strings.Contains(stderr, "unable to resolve reference") && strings.Contains(stderr, "reference broken") {
+		if checkRecoverableSyncError(stderr) {
 			log.Warn("SyncMirrors [repo: %-v]: failed to update mirror repository due to broken references:\nStdout: %s\nStderr: %s\nErr: %v\nAttempting Prune", m.Repo, stdoutMessage, stderrMessage, err)
 			err = nil
 
@@ -315,6 +355,15 @@ func runSync(ctx context.Context, m *repo_model.Mirror) ([]*mirrorSyncResult, bo
 		return nil, false
 	}
 
+	if m.LFS && setting.LFS.StartServer {
+		log.Trace("SyncMirrors [repo: %-v]: syncing LFS objects...", m.Repo)
+		endpoint := lfs.DetermineEndpoint(remoteURL.String(), m.LFSEndpoint)
+		lfsClient := lfs.NewClient(endpoint, nil)
+		if err = repo_module.StoreMissingLfsObjectsInRepository(ctx, m.Repo, gitRepo, lfsClient); err != nil {
+			log.Error("SyncMirrors [repo: %-v]: failed to synchronize LFS objects for repository: %v", m.Repo, err)
+		}
+	}
+
 	log.Trace("SyncMirrors [repo: %-v]: syncing branches...", m.Repo)
 	if _, err = repo_module.SyncRepoBranchesWithRepo(ctx, m.Repo, gitRepo, 0); err != nil {
 		log.Error("SyncMirrors [repo: %-v]: failed to synchronize branches: %v", m.Repo, err)
@@ -323,15 +372,6 @@ func runSync(ctx context.Context, m *repo_model.Mirror) ([]*mirrorSyncResult, bo
 	log.Trace("SyncMirrors [repo: %-v]: syncing releases with tags...", m.Repo)
 	if err = repo_module.SyncReleasesWithTags(ctx, m.Repo, gitRepo); err != nil {
 		log.Error("SyncMirrors [repo: %-v]: failed to synchronize tags to releases: %v", m.Repo, err)
-	}
-
-	if m.LFS && setting.LFS.StartServer {
-		log.Trace("SyncMirrors [repo: %-v]: syncing LFS objects...", m.Repo)
-		endpoint := lfs.DetermineEndpoint(remoteURL.String(), m.LFSEndpoint)
-		lfsClient := lfs.NewClient(endpoint, nil)
-		if err = repo_module.StoreMissingLfsObjectsInRepository(ctx, m.Repo, gitRepo, lfsClient); err != nil {
-			log.Error("SyncMirrors [repo: %-v]: failed to synchronize LFS objects for repository: %v", m.Repo, err)
-		}
 	}
 	gitRepo.Close()
 
@@ -360,7 +400,7 @@ func runSync(ctx context.Context, m *repo_model.Mirror) ([]*mirrorSyncResult, bo
 			stdoutMessage := util.SanitizeCredentialURLs(stdout)
 
 			// Now check if the error is a resolve reference due to broken reference
-			if strings.Contains(stderrMessage, "unable to resolve reference") && strings.Contains(stderrMessage, "reference broken") {
+			if checkRecoverableSyncError(stderrMessage) {
 				log.Warn("SyncMirrors [repo: %-v Wiki]: failed to update mirror wiki repository due to broken references:\nStdout: %s\nStderr: %s\nErr: %v\nAttempting Prune", m.Repo, stdoutMessage, stderrMessage, err)
 				err = nil
 

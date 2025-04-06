@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 
 	"github.com/gobwas/glob"
 )
@@ -109,7 +109,7 @@ func IndexerGlobFromString(globstr string) []Glob {
 		expr = strings.TrimSpace(expr)
 		if expr != "" {
 			if g, err := glob.Compile(expr, '.', '/'); err != nil {
-				log.Info("Invalid glob expression '%s' (skipped): %v", expr, err)
+				log.Warn("Invalid glob expression '%s' (skipped): %v", expr, err)
 			} else {
 				extarr = append(extarr, Glob{glob: g, pattern: expr})
 			}

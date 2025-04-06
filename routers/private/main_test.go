@@ -6,7 +6,7 @@ package private
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/unittest"
 )
 
 func TestMain(m *testing.M) {

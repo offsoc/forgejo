@@ -6,14 +6,13 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -114,37 +113,17 @@ func TestCliCmd(t *testing.T) {
 		_, _ = fmt.Fprint(ctx.App.Writer, makePathOutput(setting.AppWorkPath, setting.CustomPath, setting.CustomConf))
 		return nil
 	})
-	var envBackup []string
-	for _, s := range os.Environ() {
-		if strings.HasPrefix(s, "GITEA_") && strings.Contains(s, "=") {
-			envBackup = append(envBackup, s)
-		}
-	}
-	clearGiteaEnv := func() {
-		for _, s := range os.Environ() {
-			if strings.HasPrefix(s, "GITEA_") {
-				_ = os.Unsetenv(s)
-			}
-		}
-	}
-	defer func() {
-		clearGiteaEnv()
-		for _, s := range envBackup {
-			k, v, _ := strings.Cut(s, "=")
-			_ = os.Setenv(k, v)
-		}
-	}()
-
 	for _, c := range cases {
-		clearGiteaEnv()
-		for k, v := range c.env {
-			_ = os.Setenv(k, v)
-		}
-		args := strings.Split(c.cmd, " ") // for test only, "split" is good enough
-		r, err := runTestApp(app, args...)
-		require.NoError(t, err, c.cmd)
-		assert.NotEmpty(t, c.exp, c.cmd)
-		assert.Contains(t, r.Stdout, c.exp, c.cmd)
+		t.Run(c.cmd, func(t *testing.T) {
+			for k, v := range c.env {
+				t.Setenv(k, v)
+			}
+			args := strings.Split(c.cmd, " ") // for test only, "split" is good enough
+			r, err := runTestApp(app, args...)
+			require.NoError(t, err, c.cmd)
+			assert.NotEmpty(t, c.exp, c.cmd)
+			assert.Contains(t, r.Stdout, c.exp, c.cmd)
+		})
 	}
 }
 
@@ -153,14 +132,14 @@ func TestCliCmdError(t *testing.T) {
 	r, err := runTestApp(app, "./gitea", "test-cmd")
 	require.Error(t, err)
 	assert.Equal(t, 1, r.ExitCode)
-	assert.Equal(t, "", r.Stdout)
+	assert.Empty(t, r.Stdout)
 	assert.Equal(t, "Command error: normal error\n", r.Stderr)
 
 	app = newTestApp(func(ctx *cli.Context) error { return cli.Exit("exit error", 2) })
 	r, err = runTestApp(app, "./gitea", "test-cmd")
 	require.Error(t, err)
 	assert.Equal(t, 2, r.ExitCode)
-	assert.Equal(t, "", r.Stdout)
+	assert.Empty(t, r.Stdout)
 	assert.Equal(t, "exit error\n", r.Stderr)
 
 	app = newTestApp(func(ctx *cli.Context) error { return nil })
@@ -168,12 +147,12 @@ func TestCliCmdError(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, 1, r.ExitCode)
 	assert.Equal(t, "Incorrect Usage: flag provided but not defined: -no-such\n\n", r.Stdout)
-	assert.Equal(t, "", r.Stderr) // the cli package's strange behavior, the error message is not in stderr ....
+	assert.Empty(t, r.Stderr) // the cli package's strange behavior, the error message is not in stderr ....
 
 	app = newTestApp(func(ctx *cli.Context) error { return nil })
 	r, err = runTestApp(app, "./gitea", "test-cmd")
 	require.NoError(t, err)
 	assert.Equal(t, -1, r.ExitCode) // the cli.OsExiter is not called
-	assert.Equal(t, "", r.Stdout)
-	assert.Equal(t, "", r.Stderr)
+	assert.Empty(t, r.Stdout)
+	assert.Empty(t, r.Stderr)
 }

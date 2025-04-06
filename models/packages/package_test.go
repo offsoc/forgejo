@@ -7,16 +7,16 @@ package packages_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
-	_ "code.gitea.io/gitea/models"
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/activities"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/activities"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/require"
 )

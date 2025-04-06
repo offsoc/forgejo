@@ -15,27 +15,26 @@ import (
 	"path"
 	"strings"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	packages_model "code.gitea.io/gitea/models/packages"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/card"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	code_indexer "code.gitea.io/gitea/modules/indexer/code"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	asymkey_service "code.gitea.io/gitea/services/asymkey"
-	funding_service "code.gitea.io/gitea/services/funding"
+	"forgejo.org/models"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	packages_model "forgejo.org/models/packages"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/cache"
+	"forgejo.org/modules/card"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	code_indexer "forgejo.org/modules/indexer/code"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	asymkey_service "forgejo.org/services/asymkey"
 
 	"github.com/editorconfig/editorconfig-core-go/v2"
 )
@@ -84,7 +83,7 @@ func (r *Repository) CanEnableEditor(ctx context.Context, user *user_model.User)
 
 // CanCreateBranch returns true if repository is editable and user has proper access level.
 func (r *Repository) CanCreateBranch() bool {
-	return r.Permission.CanWrite(unit_model.TypeCode) && r.Repository.CanCreateBranch()
+	return r.CanWrite(unit_model.TypeCode) && r.Repository.CanCreateBranch()
 }
 
 func (r *Repository) GetObjectFormat() git.ObjectFormat {
@@ -161,12 +160,12 @@ func (r *Repository) CanUseTimetracker(ctx context.Context, issue *issues_model.
 	// 2. Is the user a contributor, admin, poster or assignee and do the repository policies require this?
 	isAssigned, _ := issues_model.IsUserAssignedToIssue(ctx, issue, user)
 	return r.Repository.IsTimetrackerEnabled(ctx) && (!r.Repository.AllowOnlyContributorsToTrackTime(ctx) ||
-		r.Permission.CanWriteIssuesOrPulls(issue.IsPull) || issue.IsPoster(user.ID) || isAssigned)
+		r.CanWriteIssuesOrPulls(issue.IsPull) || issue.IsPoster(user.ID) || isAssigned)
 }
 
 // CanCreateIssueDependencies returns whether or not a user can create dependencies.
 func (r *Repository) CanCreateIssueDependencies(ctx context.Context, user *user_model.User, isPull bool) bool {
-	return r.Repository.IsDependenciesEnabled(ctx) && r.Permission.CanWriteIssuesOrPulls(isPull)
+	return r.Repository.IsDependenciesEnabled(ctx) && r.CanWriteIssuesOrPulls(isPull)
 }
 
 // GetCommitsCount returns cached commit count for current view
@@ -362,7 +361,9 @@ func RedirectToRepo(ctx *Base, redirectRepoID int64) {
 	if ctx.Req.URL.RawQuery != "" {
 		redirectPath += "?" + ctx.Req.URL.RawQuery
 	}
-	ctx.Redirect(path.Join(setting.AppSubURL, redirectPath), http.StatusTemporaryRedirect)
+	// Git client needs a 301 redirect by default to follow the new location
+	// It's not documentated in git documentation, but it's the behavior of git client
+	ctx.Redirect(path.Join(setting.AppSubURL, redirectPath), http.StatusMovedPermanently)
 }
 
 func repoAssignment(ctx *Context, repo *repo_model.Repository) {
@@ -379,7 +380,7 @@ func repoAssignment(ctx *Context, repo *repo_model.Repository) {
 	}
 
 	// Check access.
-	if !ctx.Repo.Permission.HasAccess() {
+	if !ctx.Repo.HasAccess() {
 		if ctx.FormString("go-get") == "1" {
 			EarlyResponseForGoGetMeta(ctx)
 			return
@@ -635,6 +636,10 @@ func RepoAssignment(ctx *Context) context.CancelFunc {
 	}
 
 	cardWidth, cardHeight := card.DefaultSize()
+	ctx.Data["OpenGraphTitle"] = repo.Name
+	ctx.Data["OpenGraphURL"] = repo.HTMLURL()
+	ctx.Data["OpenGraphType"] = "object"
+	ctx.Data["OpenGraphDescription"] = repo.Description
 	ctx.Data["OpenGraphImageURL"] = repo.SummaryCardURL()
 	ctx.Data["OpenGraphImageWidth"] = cardWidth
 	ctx.Data["OpenGraphImageHeight"] = cardHeight
@@ -936,6 +941,9 @@ func getRefName(ctx *Base, repo *Repository, pathType RepoRefType) string {
 // of repository reference
 func RepoRefByType(refType RepoRefType, ignoreNotExistErr ...bool) func(*Context) context.CancelFunc {
 	return func(ctx *Context) (cancel context.CancelFunc) {
+		if ctx.Repo.Repository.IsBeingCreated() {
+			return nil // no git repo, so do nothing
+		}
 		// Empty repository does not have reference information.
 		if ctx.Repo.Repository.IsEmpty {
 			// assume the user is viewing the (non-existent) default branch

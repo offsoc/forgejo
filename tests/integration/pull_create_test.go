@@ -14,17 +14,17 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/test"
-	repo_service "code.gitea.io/gitea/services/repository"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/test"
+	repo_service "forgejo.org/services/repository"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -539,16 +539,16 @@ func TestRecentlyPushed(t *testing.T) {
 
 			respChildPR := testPullCreateDirectly(t, session, "user2", "repo1", "master", "user1", "repo1", "recent-push", "Child Pull Request")
 			elemChildPR := strings.Split(test.RedirectURL(respChildPR), "/")
-			assert.EqualValues(t, "user2", elemChildPR[1])
-			assert.EqualValues(t, "repo1", elemChildPR[2])
-			assert.EqualValues(t, "pulls", elemChildPR[3])
+			assert.Equal(t, "user2", elemChildPR[1])
+			assert.Equal(t, "repo1", elemChildPR[2])
+			assert.Equal(t, "pulls", elemChildPR[3])
 			session2 := loginUser(t, "user2")
 			// Merge the PR from the fork
 			testPullMerge(t, session2, elemChildPR[1], elemChildPR[2], elemChildPR[4], repo_model.MergeStyleSquash, false)
 
 			respBasePR := testPullCreate(t, session, "user2", "repo1", true, "master", "recent-push-base", "Base Pull Request")
 			elemBasePR := strings.Split(test.RedirectURL(respBasePR), "/")
-			assert.EqualValues(t, "pulls", elemBasePR[3])
+			assert.Equal(t, "pulls", elemBasePR[3])
 			// Leave the PR from the base repo open (it conflicts with the PR from the fork anyway)
 
 			// Count recently pushed branches on the base repo

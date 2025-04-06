@@ -7,14 +7,18 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"forgejo.org/modules/web"
+
+	chi "github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestStripSlashesMiddleware(t *testing.T) {
 	type test struct {
-		name         string
-		expectedPath string
-		inputPath    string
+		name               string
+		expectedPath       string
+		expectedNormalPath string
+		inputPath          string
 	}
 
 	tests := []test{
@@ -44,27 +48,50 @@ func TestStripSlashesMiddleware(t *testing.T) {
 			expectedPath: "/user2/repo1",
 		},
 		{
+			name:         "path with slashes in the beginning",
+			inputPath:    "https://codeberg.org//user2/repo1/",
+			expectedPath: "/user2/repo1",
+		},
+		{
 			name:         "path with slashes and query params",
 			inputPath:    "/repo//migrate?service_type=3",
 			expectedPath: "/repo/migrate",
 		},
 		{
-			name:         "path with encoded slash",
-			inputPath:    "/user2/%2F%2Frepo1",
-			expectedPath: "/user2/%2F%2Frepo1",
+			name:               "path with encoded slash",
+			inputPath:          "/user2/%2F%2Frepo1",
+			expectedPath:       "/user2/%2F%2Frepo1",
+			expectedNormalPath: "/user2/repo1",
+		},
+		{
+			name:               "path with space",
+			inputPath:          "/assets/css/theme%20cappuccino.css",
+			expectedPath:       "/assets/css/theme%20cappuccino.css",
+			expectedNormalPath: "/assets/css/theme cappuccino.css",
 		},
 	}
 
 	for _, tt := range tests {
-		testMiddleware := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, tt.expectedPath, r.URL.Path)
+		r := web.NewRoute()
+		r.Use(stripSlashesMiddleware)
+
+		called := false
+		r.Get("*", func(w http.ResponseWriter, r *http.Request) {
+			if tt.expectedNormalPath != "" {
+				assert.Equal(t, tt.expectedNormalPath, r.URL.Path)
+			} else {
+				assert.Equal(t, tt.expectedPath, r.URL.Path)
+			}
+
+			rctx := chi.RouteContext(r.Context())
+			assert.Equal(t, tt.expectedPath, rctx.RoutePath)
+
+			called = true
 		})
 
-		// pass the test middleware to validate the changes
-		handlerToTest := stripSlashesMiddleware(testMiddleware)
 		// create a mock request to use
 		req := httptest.NewRequest("GET", tt.inputPath, nil)
-		// call the handler using a mock response recorder
-		handlerToTest.ServeHTTP(httptest.NewRecorder(), req)
+		r.ServeHTTP(httptest.NewRecorder(), req)
+		assert.True(t, called)
 	}
 }

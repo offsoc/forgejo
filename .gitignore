@@ -37,6 +37,7 @@ _testmain.go
 
 *coverage.out
 coverage.all
+coverage/
 cpu.out
 
 /modules/migration/bindata.go
@@ -56,6 +57,7 @@ cpu.out
 /gitea-vet
 /debug
 /integrations.test
+/forgejo
 
 /bin
 /dist
@@ -72,6 +74,7 @@ cpu.out
 /tests/e2e/reports
 /tests/e2e/test-artifacts
 /tests/e2e/test-snapshots
+/tests/e2e/.auth
 /tests/*.ini
 /tests/**/*.git/**/*.sample
 /node_modules

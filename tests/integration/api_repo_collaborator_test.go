@@ -8,12 +8,12 @@ import (
 	"net/url"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/perm"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/perm"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -52,6 +52,20 @@ func TestAPIRepoCollaboratorPermission(t *testing.T) {
 			DecodeJSON(t, resp, &repoPermission)
 
 			assert.Equal(t, "read", repoPermission.Permission)
+
+			t.Run("CollaboratorCanReadTheirPermission", func(t *testing.T) {
+				session := loginUser(t, user4.Name)
+				token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadRepository)
+
+				req := NewRequestf(t, "GET", "/api/v1/repos/%s/%s/collaborators/%s/permission", repo2Owner.Name, repo2.Name, user4.Name).
+					AddTokenAuth(token)
+				resp := MakeRequest(t, req, http.StatusOK)
+
+				var repoPermission api.RepoCollaboratorPermission
+				DecodeJSON(t, resp, &repoPermission)
+
+				assert.Equal(t, "read", repoPermission.Permission)
+			})
 		})
 
 		t.Run("CollaboratorWithWriteAccess", func(t *testing.T) {

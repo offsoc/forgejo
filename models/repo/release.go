@@ -13,13 +13,13 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )
@@ -140,7 +140,7 @@ func (r *Release) LoadArchiveDownloadCount(ctx context.Context) error {
 	return err
 }
 
-// GetTotalDownloadCount returns the summary of all dowload count of files attached to the release
+// GetTotalDownloadCount returns the summary of all download count of files attached to the release
 func (r *Release) GetTotalDownloadCount(ctx context.Context) (int64, error) {
 	var archiveCount int64
 	if !r.HideArchiveLinks {
@@ -194,7 +194,7 @@ func (r *Release) SummaryCardURL() string {
 	return fmt.Sprintf("%s/releases/summary-card/%s", r.Repo.HTMLURL(), util.PathEscapeSegments(r.TagName))
 }
 
-// DisplayName retruns the name of the release
+// DisplayName returns the name of the release
 func (r *Release) DisplayName() string {
 	if r.IsTag && r.Title == "" {
 		return r.TagName

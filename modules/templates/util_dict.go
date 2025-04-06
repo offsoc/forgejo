@@ -9,9 +9,9 @@ import (
 	"html/template"
 	"reflect"
 
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
 )
 
 func dictMerge(base map[string]any, arg any) bool {

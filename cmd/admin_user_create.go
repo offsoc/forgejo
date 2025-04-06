@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	pwd "code.gitea.io/gitea/modules/auth/password"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	pwd "forgejo.org/modules/auth/password"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
 
 	"github.com/urfave/cli/v2"
 )
@@ -69,6 +69,10 @@ var microcmdUserCreate = &cli.Command{
 }
 
 func runCreateUser(c *cli.Context) error {
+	// this command highly depends on the many setting options (create org, visibility, etc.), so it must have a full setting load first
+	// duplicate setting loading should be safe at the moment, but it should be refactored & improved in the future.
+	setting.LoadSettings()
+
 	if err := argsSet(c, "email"); err != nil {
 		return err
 	}

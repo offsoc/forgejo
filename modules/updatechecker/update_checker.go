@@ -11,10 +11,10 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/proxy"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/system"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/proxy"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/system"
 
 	"github.com/hashicorp/go-version"
 )

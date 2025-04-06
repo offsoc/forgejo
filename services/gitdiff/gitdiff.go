@@ -17,19 +17,19 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	pull_model "code.gitea.io/gitea/models/pull"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/analyze"
-	"code.gitea.io/gitea/modules/charset"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/highlight"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	pull_model "forgejo.org/models/pull"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/analyze"
+	"forgejo.org/modules/charset"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/highlight"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
 	stdcharset "golang.org/x/net/html/charset"
@@ -1060,7 +1060,7 @@ func readFileName(rd *strings.Reader) (string, bool) {
 		_, _ = fmt.Fscanf(rd, "%s ", &name)
 		char, _ := rd.ReadByte()
 		_ = rd.UnreadByte()
-		for !(char == 0 || char == '"' || char == 'b') {
+		for char != 0 && char != '"' && char != 'b' {
 			var suffix string
 			_, _ = fmt.Fscanf(rd, "%s ", &suffix)
 			name += " " + suffix
@@ -1117,7 +1117,10 @@ func GetDiff(ctx context.Context, gitRepo *git.Repository, opts *DiffOptions, fi
 	} else {
 		actualBeforeCommitID := opts.BeforeCommitID
 		if len(actualBeforeCommitID) == 0 {
-			parentCommit, _ := commit.Parent(0)
+			parentCommit, err := commit.Parent(0)
+			if err != nil {
+				return nil, err
+			}
 			actualBeforeCommitID = parentCommit.ID.String()
 		}
 
@@ -1126,7 +1129,6 @@ func GetDiff(ctx context.Context, gitRepo *git.Repository, opts *DiffOptions, fi
 			AddDynamicArguments(actualBeforeCommitID, opts.AfterCommitID)
 		opts.BeforeCommitID = actualBeforeCommitID
 
-		var err error
 		beforeCommit, err = gitRepo.GetCommit(opts.BeforeCommitID)
 		if err != nil {
 			return nil, err
@@ -1379,10 +1381,8 @@ func GetWhitespaceFlag(whitespaceBehavior string) git.TrustedCmdArgs {
 		"ignore-eol":    {"--ignore-space-at-eol"},
 		"show-all":      nil,
 	}
-
 	if flag, ok := whitespaceFlags[whitespaceBehavior]; ok {
 		return flag
 	}
-	log.Warn("unknown whitespace behavior: %q, default to 'show-all'", whitespaceBehavior)
 	return nil
 }

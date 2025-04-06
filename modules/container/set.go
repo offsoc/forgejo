@@ -3,6 +3,11 @@
 
 package container
 
+import (
+	"iter"
+	"maps"
+)
+
 type Set[T comparable] map[T]struct{}
 
 // SetOf creates a set and adds the specified elements to it.
@@ -29,6 +34,15 @@ func (s Set[T]) AddMultiple(values ...T) {
 	}
 }
 
+func (s Set[T]) IsSubset(subset []T) bool {
+	for _, v := range subset {
+		if !s.Contains(v) {
+			return false
+		}
+	}
+	return true
+}
+
 // Contains determines whether a set contains the specified element.
 // Returns true if the set contains the specified element; otherwise, false.
 func (s Set[T]) Contains(value T) bool {
@@ -53,4 +67,10 @@ func (s Set[T]) Values() []T {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// Seq returns a iterator over the elements in the set.
+// It returns a single-use iterator.
+func (s Set[T]) Seq() iter.Seq[T] {
+	return maps.Keys(s)
 }

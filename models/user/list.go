@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
 )
 
 // UserList is a list of user.

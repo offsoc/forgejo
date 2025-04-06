@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/tests"
 
 	"github.com/pquerna/otp/totp"
 	"github.com/stretchr/testify/assert"
@@ -77,5 +77,5 @@ func TestAPIWebAuthn(t *testing.T) {
 
 	DecodeJSON(t, resp, &userParsed)
 
-	assert.EqualValues(t, "Basic authorization is not allowed while having security keys enrolled", userParsed.Message)
+	assert.Equal(t, "Basic authorization is not allowed while having security keys enrolled", userParsed.Message)
 }

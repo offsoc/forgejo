@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	forgejo_log "code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/test"
+	forgejo_log "forgejo.org/modules/log"
+	"forgejo.org/modules/test"
 
 	"code.forgejo.org/f3/gof3/v3/logger"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +23,7 @@ func TestF3UtilMessage(t *testing.T) {
 		actual = fmt.Sprintf(message, args...)
 	}, nil)
 	logger.Message("EXPECTED %s", "MESSAGE")
-	assert.EqualValues(t, expected, actual)
+	assert.Equal(t, expected, actual)
 }
 
 func TestF3UtilLogger(t *testing.T) {

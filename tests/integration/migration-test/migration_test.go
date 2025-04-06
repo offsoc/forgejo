@@ -5,7 +5,6 @@ package migrations
 
 import (
 	"compress/gzip"
-	"context"
 	"database/sql"
 	"fmt"
 	"io"
@@ -17,18 +16,18 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/migrations"
-	migrate_base "code.gitea.io/gitea/models/migrations/base"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/charset"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/testlogger"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/migrations"
+	migrate_base "forgejo.org/models/migrations/base"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/charset"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/testlogger"
+	"forgejo.org/modules/util"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -87,7 +86,7 @@ func initMigrationTest(t *testing.T) func() {
 		}
 	}
 
-	require.NoError(t, git.InitFull(context.Background()))
+	require.NoError(t, git.InitFull(t.Context()))
 	setting.LoadDBSetting()
 	setting.InitLoggersForTest()
 	return deferFn
@@ -279,23 +278,36 @@ func doMigrationTest(t *testing.T, version string) {
 
 	setting.InitSQLLoggersForCli(log.INFO)
 
-	err := db.InitEngineWithMigration(context.Background(), wrappedMigrate)
+	err := db.InitEngineWithMigration(t.Context(), func(e db.Engine) error {
+		engine, err := db.GetMasterEngine(e)
+		if err != nil {
+			return err
+		}
+		currentEngine = engine
+		return wrappedMigrate(engine)
+	})
 	require.NoError(t, err)
 	currentEngine.Close()
 
 	beans, _ := db.NamesToBean()
 
-	err = db.InitEngineWithMigration(context.Background(), func(x *xorm.Engine) error {
-		currentEngine = x
-		return migrate_base.RecreateTables(beans...)(x)
+	err = db.InitEngineWithMigration(t.Context(), func(e db.Engine) error {
+		currentEngine, err = db.GetMasterEngine(e)
+		if err != nil {
+			return err
+		}
+		return migrate_base.RecreateTables(beans...)(currentEngine)
 	})
 	require.NoError(t, err)
 	currentEngine.Close()
 
 	// We do this a second time to ensure that there is not a problem with retained indices
-	err = db.InitEngineWithMigration(context.Background(), func(x *xorm.Engine) error {
-		currentEngine = x
-		return migrate_base.RecreateTables(beans...)(x)
+	err = db.InitEngineWithMigration(t.Context(), func(e db.Engine) error {
+		currentEngine, err = db.GetMasterEngine(e)
+		if err != nil {
+			return err
+		}
+		return migrate_base.RecreateTables(beans...)(currentEngine)
 	})
 	require.NoError(t, err)
 

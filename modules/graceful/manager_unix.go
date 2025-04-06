@@ -1,8 +1,6 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-//go:build !windows
-
 package graceful
 
 import (
@@ -15,10 +13,10 @@ import (
 	"syscall"
 	"time"
 
-	"code.gitea.io/gitea/modules/graceful/releasereopen"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/graceful/releasereopen"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/setting"
 )
 
 func pidMsg() systemdNotifyMsg {

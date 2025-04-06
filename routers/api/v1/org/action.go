@@ -7,17 +7,17 @@ import (
 	"errors"
 	"net/http"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	secret_model "code.gitea.io/gitea/models/secret"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/v1/shared"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	actions_service "code.gitea.io/gitea/services/actions"
-	"code.gitea.io/gitea/services/context"
-	secret_service "code.gitea.io/gitea/services/secrets"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	secret_model "forgejo.org/models/secret"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/v1/shared"
+	"forgejo.org/routers/api/v1/utils"
+	actions_service "forgejo.org/services/actions"
+	"forgejo.org/services/context"
+	secret_service "forgejo.org/services/secrets"
 )
 
 // ListActionsSecrets list an organization's actions secrets
@@ -187,6 +187,31 @@ func (Action) GetRegistrationToken(ctx *context.APIContext) {
 	//     "$ref": "#/responses/RegistrationToken"
 
 	shared.GetRegistrationToken(ctx, ctx.Org.Organization.ID, 0)
+}
+
+// SearchActionRunJobs return a list of actions jobs filtered by the provided parameters
+func (Action) SearchActionRunJobs(ctx *context.APIContext) {
+	// swagger:operation GET /orgs/{org}/actions/runners/jobs organization orgSearchRunJobs
+	// ---
+	// summary: Search for organization's action jobs according filter conditions
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: org
+	//   in: path
+	//   description: name of the organization
+	//   type: string
+	//   required: true
+	// - name: labels
+	//   in: query
+	//   description: a comma separated list of run job labels to search for
+	//   type: string
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/RunJobList"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	shared.GetActionRunJobs(ctx, ctx.Org.Organization.ID, 0)
 }
 
 // ListVariables list org-level variables
@@ -450,7 +475,7 @@ func (Action) UpdateVariable(ctx *context.APIContext) {
 	if opt.Name == "" {
 		opt.Name = ctx.Params("variablename")
 	}
-	if _, err := actions_service.UpdateVariable(ctx, v.ID, opt.Name, opt.Value); err != nil {
+	if _, err := actions_service.UpdateVariable(ctx, v.ID, ctx.Org.Organization.ID, 0, opt.Name, opt.Value); err != nil {
 		if errors.Is(err, util.ErrInvalidArgument) {
 			ctx.Error(http.StatusBadRequest, "UpdateVariable", err)
 		} else {

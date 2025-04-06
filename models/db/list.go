@@ -6,7 +6,7 @@ package db
 import (
 	"context"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"

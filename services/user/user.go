@@ -11,28 +11,37 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models"
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	packages_model "code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
-	system_model "code.gitea.io/gitea/models/system"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/eventsource"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/agit"
-	org_service "code.gitea.io/gitea/services/org"
-	"code.gitea.io/gitea/services/packages"
-	container_service "code.gitea.io/gitea/services/packages/container"
-	repo_service "code.gitea.io/gitea/services/repository"
+	"forgejo.org/models"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	packages_model "forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	system_model "forgejo.org/models/system"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/eventsource"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/agit"
+	org_service "forgejo.org/services/org"
+	"forgejo.org/services/packages"
+	container_service "forgejo.org/services/packages/container"
+	repo_service "forgejo.org/services/repository"
 )
 
 // RenameUser renames a user
 func RenameUser(ctx context.Context, u *user_model.User, newUserName string) error {
+	return renameUser(ctx, u, newUserName, false)
+}
+
+// RenameUser renames a user as an admin.
+func AdminRenameUser(ctx context.Context, u *user_model.User, newUserName string) error {
+	return renameUser(ctx, u, newUserName, true)
+}
+
+func renameUser(ctx context.Context, u *user_model.User, newUserName string, doerIsAdmin bool) error {
 	if newUserName == u.Name {
 		return nil
 	}
@@ -47,6 +56,17 @@ func RenameUser(ctx context.Context, u *user_model.User, newUserName string) err
 
 	if err := user_model.IsUsableUsername(newUserName); err != nil {
 		return err
+	}
+
+	// Check if the new username can be claimed.
+	if !doerIsAdmin {
+		if ok, expireTime, err := user_model.CanClaimUsername(ctx, newUserName, u.ID); err != nil {
+			return err
+		} else if !ok {
+			return user_model.ErrCooldownPeriod{
+				ExpireTime: expireTime,
+			}
+		}
 	}
 
 	onlyCapitalization := strings.EqualFold(newUserName, u.Name)
@@ -83,6 +103,12 @@ func RenameUser(ctx context.Context, u *user_model.User, newUserName string) err
 
 	if err = user_model.NewUserRedirect(ctx, u.ID, oldUserName, newUserName); err != nil {
 		return err
+	}
+
+	if setting.Service.MaxUserRedirects > 0 {
+		if err := user_model.LimitUserRedirects(ctx, u.ID, setting.Service.MaxUserRedirects); err != nil {
+			return err
+		}
 	}
 
 	if err := agit.UserNameChanged(ctx, u, newUserName); err != nil {

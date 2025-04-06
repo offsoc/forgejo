@@ -8,13 +8,13 @@ import (
 	"path"
 	"testing"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/db"
-	issue_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/db"
+	issue_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -56,7 +56,7 @@ func TestGetFeeds(t *testing.T) {
 	require.NoError(t, err)
 	if assert.Len(t, actions, 1) {
 		assert.EqualValues(t, 1, actions[0].ID)
-		assert.EqualValues(t, user.ID, actions[0].UserID)
+		assert.Equal(t, user.ID, actions[0].UserID)
 	}
 	assert.Equal(t, int64(1), count)
 
@@ -133,7 +133,7 @@ func TestGetFeeds2(t *testing.T) {
 	assert.Len(t, actions, 1)
 	if assert.Len(t, actions, 1) {
 		assert.EqualValues(t, 2, actions[0].ID)
-		assert.EqualValues(t, org.ID, actions[0].UserID)
+		assert.Equal(t, org.ID, actions[0].UserID)
 	}
 	assert.Equal(t, int64(1), count)
 
@@ -291,7 +291,7 @@ func TestDeleteIssueActions(t *testing.T) {
 
 	// load an issue
 	issue := unittest.AssertExistsAndLoadBean(t, &issue_model.Issue{ID: 4})
-	assert.NotEqualValues(t, issue.ID, issue.Index) // it needs to use different ID/Index to test the DeleteIssueActions to delete some actions by IssueIndex
+	assert.NotEqual(t, issue.ID, issue.Index) // it needs to use different ID/Index to test the DeleteIssueActions to delete some actions by IssueIndex
 
 	// insert a comment
 	err := db.Insert(db.DefaultContext, &issue_model.Comment{Type: issue_model.CommentTypeComment, IssueID: issue.ID})

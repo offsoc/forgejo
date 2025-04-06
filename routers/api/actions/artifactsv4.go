@@ -98,16 +98,16 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/common"
+	"forgejo.org/services/context"
 
 	"google.golang.org/protobuf/encoding/protojson"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -166,8 +166,8 @@ func (r artifactV4Routes) buildSignature(endp, expires, artifactName string, tas
 	mac.Write([]byte(endp))
 	mac.Write([]byte(expires))
 	mac.Write([]byte(artifactName))
-	mac.Write([]byte(fmt.Sprint(taskID)))
-	mac.Write([]byte(fmt.Sprint(artifactID)))
+	fmt.Fprint(mac, taskID)
+	fmt.Fprint(mac, artifactID)
 	return mac.Sum(nil)
 }
 

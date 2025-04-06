@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/repo"
+	"forgejo.org/services/context"
 
 	"github.com/gorilla/feeds"
 )
@@ -43,6 +43,7 @@ func ShowBranchFeed(ctx *context.Context, repo *repo.Repository, formatType stri
 			},
 			Description: commit.Message(),
 			Content:     commit.Message(),
+			Created:     commit.Committer.When,
 		})
 	}
 

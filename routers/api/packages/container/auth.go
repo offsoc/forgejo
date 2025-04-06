@@ -6,10 +6,10 @@ package container
 import (
 	"net/http"
 
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/packages"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/services/auth"
+	"forgejo.org/services/packages"
 )
 
 var _ auth.Method = &Auth{}

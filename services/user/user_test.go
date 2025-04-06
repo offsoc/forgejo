@@ -11,17 +11,17 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models"
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -195,9 +195,32 @@ func TestRenameUser(t *testing.T) {
 
 		redirectUID, err := user_model.LookupUserRedirect(db.DefaultContext, oldUsername)
 		require.NoError(t, err)
-		assert.EqualValues(t, user.ID, redirectUID)
+		assert.Equal(t, user.ID, redirectUID)
 
 		unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, OwnerName: user.Name})
+	})
+
+	t.Run("Keep N redirects", func(t *testing.T) {
+		defer test.MockProtect(&setting.Service.MaxUserRedirects)()
+		// Start clean
+		unittest.AssertSuccessfulDelete(t, &user_model.Redirect{RedirectUserID: user.ID})
+
+		setting.Service.MaxUserRedirects = 1
+
+		require.NoError(t, RenameUser(db.DefaultContext, user, "redirect-1"))
+		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "user_rename"})
+
+		// The granularity of created_unix is a second.
+		time.Sleep(time.Second)
+		require.NoError(t, RenameUser(db.DefaultContext, user, "redirect-2"))
+		unittest.AssertExistsIf(t, false, &user_model.Redirect{LowerName: "user_rename"})
+		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "redirect-1"})
+
+		setting.Service.MaxUserRedirects = 2
+		time.Sleep(time.Second)
+		require.NoError(t, RenameUser(db.DefaultContext, user, "redirect-3"))
+		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "redirect-1"})
+		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "redirect-2"})
 	})
 }
 

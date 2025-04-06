@@ -6,7 +6,7 @@ package validation
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/modules/timeutil"
 )
 
 type Sut struct {

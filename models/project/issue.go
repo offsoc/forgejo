@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/util"
 )
 
 // ProjectIssue saves relation from issue to a project
@@ -32,20 +32,6 @@ func init() {
 func deleteProjectIssuesByProjectID(ctx context.Context, projectID int64) error {
 	_, err := db.GetEngine(ctx).Where("project_id=?", projectID).Delete(&ProjectIssue{})
 	return err
-}
-
-// NumIssues return counter of all issues assigned to a project
-func (p *Project) NumIssues(ctx context.Context) int {
-	c, err := db.GetEngine(ctx).Table("project_issue").
-		Where("project_id=?", p.ID).
-		GroupBy("issue_id").
-		Cols("issue_id").
-		Count()
-	if err != nil {
-		log.Error("NumIssues: %v", err)
-		return 0
-	}
-	return int(c)
 }
 
 // NumClosedIssues return counter of closed issues assigned to a project

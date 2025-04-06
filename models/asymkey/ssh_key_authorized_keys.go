@@ -14,10 +14,10 @@ import (
 	"sync"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 )
 
 //  _____          __  .__                 .__                  .___
@@ -87,19 +87,16 @@ func appendAuthorizedKeysToFile(keys ...*PublicKey) error {
 	}
 	defer f.Close()
 
-	// Note: chmod command does not support in Windows.
-	if !setting.IsWindows {
-		fi, err := f.Stat()
-		if err != nil {
-			return err
-		}
+	fi, err := f.Stat()
+	if err != nil {
+		return err
+	}
 
-		// .ssh directory should have mode 700, and authorized_keys file should have mode 600.
-		if fi.Mode().Perm() > 0o600 {
-			log.Error("authorized_keys file has unusual permission flags: %s - setting to -rw-------", fi.Mode().Perm().String())
-			if err = f.Chmod(0o600); err != nil {
-				return err
-			}
+	// .ssh directory should have mode 700, and authorized_keys file should have mode 600.
+	if fi.Mode().Perm() > 0o600 {
+		log.Error("authorized_keys file has unusual permission flags: %s - setting to -rw-------", fi.Mode().Perm().String())
+		if err = f.Chmod(0o600); err != nil {
+			return err
 		}
 	}
 

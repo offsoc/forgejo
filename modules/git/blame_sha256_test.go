@@ -14,7 +14,7 @@ import (
 func TestReadingBlameOutputSha256(t *testing.T) {
 	skipIfSHA256NotSupported(t)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 
 	t.Run("Without .git-blame-ignore-revs", func(t *testing.T) {

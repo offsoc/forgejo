@@ -42,6 +42,7 @@ var (
 		LimitSizePub          int64
 		LimitSizePyPI         int64
 		LimitSizeRpm          int64
+		LimitSizeAlt          int64
 		LimitSizeRubyGems     int64
 		LimitSizeSwift        int64
 		LimitSizeVagrant      int64
@@ -106,6 +107,7 @@ func loadPackagesFrom(rootCfg ConfigProvider) (err error) {
 	Packages.LimitSizeSwift = mustBytes(sec, "LIMIT_SIZE_SWIFT")
 	Packages.LimitSizeVagrant = mustBytes(sec, "LIMIT_SIZE_VAGRANT")
 	Packages.DefaultRPMSignEnabled = sec.Key("DEFAULT_RPM_SIGN_ENABLED").MustBool(false)
+	Packages.LimitSizeAlt = mustBytes(sec, "LIMIT_SIZE_ALT")
 	return nil
 }
 

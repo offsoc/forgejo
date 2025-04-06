@@ -11,16 +11,16 @@ import (
 	"regexp"
 	"slices"
 
-	"code.gitea.io/gitea/models/db"
-	project_model "code.gitea.io/gitea/models/project"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	project_model "forgejo.org/models/project"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )
@@ -61,21 +61,6 @@ func IsErrIssueIsClosed(err error) bool {
 
 func (err ErrIssueIsClosed) Error() string {
 	return fmt.Sprintf("issue is closed [id: %d, repo_id: %d, index: %d]", err.ID, err.RepoID, err.Index)
-}
-
-// ErrNewIssueInsert is used when the INSERT statement in newIssue fails
-type ErrNewIssueInsert struct {
-	OriginalError error
-}
-
-// IsErrNewIssueInsert checks if an error is a ErrNewIssueInsert.
-func IsErrNewIssueInsert(err error) bool {
-	_, ok := err.(ErrNewIssueInsert)
-	return ok
-}
-
-func (err ErrNewIssueInsert) Error() string {
-	return err.OriginalError.Error()
 }
 
 // ErrIssueWasClosed is used when close a closed issue
@@ -268,6 +253,9 @@ func (issue *Issue) loadCommentsByType(ctx context.Context, tp CommentType) (err
 		IssueID: issue.ID,
 		Type:    tp,
 	})
+	for _, comment := range issue.Comments {
+		comment.Issue = issue
+	}
 	return err
 }
 
@@ -558,6 +546,9 @@ func GetIssueByID(ctx context.Context, id int64) (*Issue, error) {
 // If keepOrder is true, the order of the returned issues will be the same as the given IDs.
 func GetIssuesByIDs(ctx context.Context, issueIDs []int64, keepOrder ...bool) (IssueList, error) {
 	issues := make([]*Issue, 0, len(issueIDs))
+	if len(issueIDs) == 0 {
+		return issues, nil
+	}
 
 	if err := db.GetEngine(ctx).In("id", issueIDs).Find(&issues); err != nil {
 		return nil, err
@@ -655,7 +646,7 @@ func (issue *Issue) BlockedByDependencies(ctx context.Context, opts db.ListOptio
 	err = sess.Find(&issueDeps)
 
 	for _, depInfo := range issueDeps {
-		depInfo.Issue.Repo = &depInfo.Repository
+		depInfo.Repo = &depInfo.Repository
 	}
 
 	return issueDeps, err
@@ -673,7 +664,7 @@ func (issue *Issue) BlockingDependencies(ctx context.Context) (issueDeps []*Depe
 		Find(&issueDeps)
 
 	for _, depInfo := range issueDeps {
-		depInfo.Issue.Repo = &depInfo.Repository
+		depInfo.Repo = &depInfo.Repository
 	}
 
 	return issueDeps, err

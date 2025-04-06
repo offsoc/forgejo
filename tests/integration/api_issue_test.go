@@ -12,15 +12,15 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -74,6 +74,50 @@ func TestAPIListIssues(t *testing.T) {
 	if assert.Len(t, apiIssues, 1) {
 		assert.EqualValues(t, 1, apiIssues[0].ID)
 	}
+
+	t.Run("Sort", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		link.RawQuery = url.Values{"token": {token}, "sort": {"oldest"}}.Encode()
+		resp = MakeRequest(t, NewRequest(t, "GET", link.String()), http.StatusOK)
+		DecodeJSON(t, resp, &apiIssues)
+		if assert.Len(t, apiIssues, 4) {
+			assert.EqualValues(t, 1, apiIssues[0].ID)
+			assert.EqualValues(t, 2, apiIssues[1].ID)
+			assert.EqualValues(t, 3, apiIssues[2].ID)
+			assert.EqualValues(t, 11, apiIssues[3].ID)
+		}
+
+		link.RawQuery = url.Values{"token": {token}, "sort": {"newest"}}.Encode()
+		resp = MakeRequest(t, NewRequest(t, "GET", link.String()), http.StatusOK)
+		DecodeJSON(t, resp, &apiIssues)
+		if assert.Len(t, apiIssues, 4) {
+			assert.EqualValues(t, 11, apiIssues[0].ID)
+			assert.EqualValues(t, 3, apiIssues[1].ID)
+			assert.EqualValues(t, 2, apiIssues[2].ID)
+			assert.EqualValues(t, 1, apiIssues[3].ID)
+		}
+
+		link.RawQuery = url.Values{"token": {token}, "sort": {"recentupdate"}}.Encode()
+		resp = MakeRequest(t, NewRequest(t, "GET", link.String()), http.StatusOK)
+		DecodeJSON(t, resp, &apiIssues)
+		if assert.Len(t, apiIssues, 4) {
+			assert.EqualValues(t, 11, apiIssues[0].ID)
+			assert.EqualValues(t, 1, apiIssues[1].ID)
+			assert.EqualValues(t, 2, apiIssues[2].ID)
+			assert.EqualValues(t, 3, apiIssues[3].ID)
+		}
+
+		link.RawQuery = url.Values{"token": {token}, "sort": {"leastupdate"}}.Encode()
+		resp = MakeRequest(t, NewRequest(t, "GET", link.String()), http.StatusOK)
+		DecodeJSON(t, resp, &apiIssues)
+		if assert.Len(t, apiIssues, 4) {
+			assert.EqualValues(t, 3, apiIssues[0].ID)
+			assert.EqualValues(t, 2, apiIssues[1].ID)
+			assert.EqualValues(t, 1, apiIssues[2].ID)
+			assert.EqualValues(t, 11, apiIssues[3].ID)
+		}
+	})
 }
 
 func TestAPIListIssuesPublicOnly(t *testing.T) {
@@ -462,7 +506,7 @@ func TestAPISearchIssues(t *testing.T) {
 	req = NewRequest(t, "GET", link.String()).AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiIssues)
-	assert.EqualValues(t, "22", resp.Header().Get("X-Total-Count"))
+	assert.Equal(t, "22", resp.Header().Get("X-Total-Count"))
 	assert.Len(t, apiIssues, 20)
 
 	query.Add("limit", "10")
@@ -470,7 +514,7 @@ func TestAPISearchIssues(t *testing.T) {
 	req = NewRequest(t, "GET", link.String()).AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiIssues)
-	assert.EqualValues(t, "22", resp.Header().Get("X-Total-Count"))
+	assert.Equal(t, "22", resp.Header().Get("X-Total-Count"))
 	assert.Len(t, apiIssues, 10)
 
 	query = url.Values{"assigned": {"true"}, "state": {"all"}}
