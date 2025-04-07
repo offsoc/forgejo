@@ -3,12 +3,12 @@
 	{{ctx.Locale.Tr "sponsor.header_text" .FundingName}}
 </div>
 <div class="content">
-	<ul>
+	<ul class="tw-list-none tw-p-0">
 		{{range .Funding}}
 			<li>
 				<div class="tw-flex tw-gap-2">
 					{{if .Icon}}
-						<img class="tw-h-full tw-align-middle" src="{{.Icon}}" width="24" height="24">
+						<img class="tw-h-full" src="{{.Icon}}" width="24" height="24">
 					{{else}}
 						{{svg "octicon-heart" 24}}
 					{{end}}
