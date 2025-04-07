@@ -77,11 +77,9 @@
 			{{if $.Funding}}
 				<li>
 					<div class="tw-flex tw-justify-center tw-w-full">
-						<div class="ui labeled button">
-							<button class="ui compact small basic show-modal button" data-modal="#funding-modal">
-								{{svg "octicon-heart"}}{{ctx.Locale.Tr "sponsor.button_text"}}
-							</button>
-						</div>
+						<button class="ui compact small basic show-modal button" data-modal="#funding-modal">
+							{{svg "octicon-heart"}}{{ctx.Locale.Tr "sponsor.button_text"}}
+						</button>
 					</div>
 				</li>
 			{{end}}

@@ -61,11 +61,9 @@
 					</a>
 					{{end}}
 					{{if $.Funding}}
-						<div class="ui labeled button">
-							<button class="ui compact small basic show-modal button" data-modal="#funding-modal">
-								{{svg "octicon-heart"}}{{ctx.Locale.Tr "sponsor.button_text"}}
-							</button>
-						</div>
+						<button class="ui compact small basic show-modal button" data-modal="#funding-modal">
+							{{svg "octicon-heart"}}{{ctx.Locale.Tr "sponsor.button_text"}}
+						</button>
 					{{end}}
 					{{template "repo/watch_unwatch" $}}
 					{{if not $.DisableStars}}
