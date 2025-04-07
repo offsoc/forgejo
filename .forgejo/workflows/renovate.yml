@@ -28,7 +28,7 @@ jobs:
 
     runs-on: docker
     container:
-      image: data.forgejo.org/renovate/renovate:39.222.1
+      image: data.forgejo.org/renovate/renovate:39.233.5
 
     steps:
       - name: Load renovate repo cache

@@ -448,3 +448,10 @@ type swaggerCompare struct {
 	// in:body
 	Body api.Compare `json:"body"`
 }
+
+// SyncForkInfo
+// swagger:response SyncForkInfo
+type swaggerSyncForkInfo struct {
+	// in:body
+	Body []api.SyncForkInfo `json:"body"`
+}

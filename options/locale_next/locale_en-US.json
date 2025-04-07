@@ -38,5 +38,6 @@
     "moderation.report_remarks.placeholder": "Please provide some details regarding the abuse you are reporting.",
     "moderation.submit_report": "Submit report",
     "moderation.reporting_failed": "Something went wrong while trying to submit the new abuse report: %v",
-    "moderation.reported_thank_you": "Thank you for your report. An administrator will look into it shortly."
+    "moderation.reported_thank_you": "Thank you for your report. An administrator will look into it shortly.",
+    "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it."
 }
