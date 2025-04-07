@@ -6,11 +6,11 @@
 	<ul>
 		{{range .Funding}}
 			<li>
-				<div class="ui">
+				<div class="tw-flex tw-gap-2">
 					{{if .Icon}}
-						<img class="ui tw-h-full tw-align-middle" src="{{.Icon}}" width="16" height="16">
+						<img class="tw-h-full tw-align-middle" src="{{.Icon}}" width="24" height="24">
 					{{else}}
-						{{svg "octicon-heart"}}
+						{{svg "octicon-heart" 24}}
 					{{end}}
 
 					<a href="{{.URL}}">{{.Text}}</a>
