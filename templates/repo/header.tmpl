@@ -62,7 +62,10 @@
 					{{end}}
 					{{if $.Funding}}
 						<button class="ui compact small basic show-modal button tw-gap-2" data-modal="#funding-modal">
-							{{svg "octicon-heart"}}{{ctx.Locale.Tr "sponsor.button_text"}}
+							{{svg "octicon-heart"}}
+							<span class="text not-mobile">
+								{{ctx.Locale.Tr "sponsor.button_text"}}
+							</span>
 						</button>
 					{{end}}
 					{{template "repo/watch_unwatch" $}}
