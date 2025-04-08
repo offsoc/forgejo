@@ -164,11 +164,10 @@ func TestWebfingerId(t *testing.T) {
 
 func TestShouldThrowErrorOnInvalidInput(t *testing.T) {
 	var err any
-	// TODO: remove after test
-	//_, err = NewPersonID("", "forgejo")
-	//if err == nil {
-	//	t.Errorf("empty input should be invalid.")
-	//}
+	_, err = NewPersonID("", "forgejo")
+	if err == nil {
+		t.Errorf("empty input should be invalid.")
+	}
 	_, err = NewPersonID("http://localhost:3000/api/v1/something", "forgejo")
 	if err == nil {
 		t.Errorf("localhost uris are not external")
@@ -190,7 +189,7 @@ func TestShouldThrowErrorOnInvalidInput(t *testing.T) {
 		t.Errorf("uri may not contain relative path elements")
 	}
 	_, err = NewPersonID("https://myuser@an.other.host/api/v1/activitypub/user-id/1", "forgejo")
-	if err != nil {
+	if err == nil {
 		t.Errorf("uri may not contain unparsed elements")
 	}
 	_, err = NewPersonID("https://an.other.host/api/v1/activitypub/user-id/1", "forgejo")
