@@ -6,6 +6,7 @@ package actions
 import (
 	"context"
 
+	actions_model "forgejo.org/models/actions"
 	issues_model "forgejo.org/models/issues"
 	packages_model "forgejo.org/models/packages"
 	perm_model "forgejo.org/models/perm"
@@ -20,6 +21,8 @@ import (
 	webhook_module "forgejo.org/modules/webhook"
 	"forgejo.org/services/convert"
 	notify_service "forgejo.org/services/notify"
+
+	"xorm.io/builder"
 )
 
 type actionsNotifier struct {
@@ -774,4 +777,70 @@ func (n *actionsNotifier) MigrateRepository(ctx context.Context, doer, u *user_m
 		Organization: convert.ToUser(ctx, u, nil),
 		Sender:       convert.ToUser(ctx, doer, nil),
 	}).Notify(ctx)
+}
+
+func sendActionRunNowDoneNotificationIfNeeded(ctx context.Context, oldRun *actions_model.ActionRun, newRun *actions_model.ActionRun) error {
+	if !oldRun.Status.IsDone() && newRun.Status.IsDone() {
+		lastRun, err := actions_model.GetRunBefore(ctx, newRun.RepoID, newRun.Stopped)
+		// TODO: figure out if this err is only because there simply is no last run
+		if err != nil {
+			lastRun = nil
+		}
+		if err = lastRun.LoadAttributes(ctx); err != nil {
+			return err
+		}
+		if err = newRun.LoadAttributes(ctx); err != nil {
+			return err
+		}
+		notify_service.ActionRunNowDone(ctx, newRun, oldRun.Status, lastRun)
+	}
+	return nil
+}
+
+// wrapper of UpdateRunWithoutNotification with a call to the ActionRunNowDone notification channel
+func UpdateRun(ctx context.Context, run *actions_model.ActionRun, cols ...string) error {
+	// run.ID is the only thing that must be given
+	oldRun, err := actions_model.GetRunByID(ctx, run.ID)
+	if err != nil {
+		return err
+	}
+
+	if err = actions_model.UpdateRunWithoutNotification(ctx, run, cols...); err != nil {
+		return err
+	}
+
+	newRun, err := actions_model.GetRunByID(ctx, run.ID)
+	if err != nil {
+		return err
+	}
+	return sendActionRunNowDoneNotificationIfNeeded(ctx, oldRun, newRun)
+}
+
+// wrapper of UpdateRunJobWithoutNotification with a call to the ActionRunNowDone notification channel
+func UpdateRunJob(ctx context.Context, job *actions_model.ActionRunJob, cond builder.Cond, cols ...string) (int64, error) {
+	var runID = job.RunID
+	if runID == 0 {
+		// job.ID is the only thing that must be given
+		// Don't overwrite job here, we'd loose the change we need to make.
+		oldJob, err := actions_model.GetRunJobByID(ctx, job.ID)
+		if err != nil {
+			return 0, err
+		}
+		runID = oldJob.RunID
+	}
+	oldRun, err := actions_model.GetRunByID(ctx, runID)
+	if err != nil {
+		return 0, err
+	}
+
+	affected, err := actions_model.UpdateRunJobWithoutNotification(ctx, job, cond, cols...)
+	if err != nil {
+		return affected, err
+	}
+
+	newRun, err := actions_model.GetRunByID(ctx, runID)
+	if err != nil {
+		return affected, err
+	}
+	return affected, sendActionRunNowDoneNotificationIfNeeded(ctx, oldRun, newRun)
 }

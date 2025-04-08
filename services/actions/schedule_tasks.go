@@ -198,7 +198,7 @@ func CancelPreviousJobs(ctx context.Context, repoID int64, ref, workflowID strin
 				job.Stopped = timeutil.TimeStampNow()
 
 				// Update the job's status and stopped time in the database.
-				n, err := actions_model.UpdateRunJob(ctx, job, builder.Eq{"task_id": 0}, "status", "stopped")
+				n, err := UpdateRunJob(ctx, job, builder.Eq{"task_id": 0}, "status", "stopped")
 				if err != nil {
 					return err
 				}
