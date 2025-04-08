@@ -5,6 +5,7 @@ package git
 
 import (
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -368,6 +369,23 @@ func TestParseCommitRenames(t *testing.T) {
 
 		assert.Equal(t, testcase.renames, renames)
 	}
+}
+
+func TestGetAllBranches(t *testing.T) {
+	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
+
+	bareRepo1, err := openRepositoryWithDefaultContext(bareRepo1Path)
+	require.NoError(t, err)
+
+	commit, err := bareRepo1.GetCommit("95bb4d39648ee7e325106df01a621c530863a653")
+	require.NoError(t, err)
+
+	branches, err := commit.GetAllBranches()
+	require.NoError(t, err)
+
+	slices.Sort(branches)
+
+	assert.Equal(t, []string{"branch1", "branch2", "master"}, branches)
 }
 
 func Test_parseSubmoduleContent(t *testing.T) {

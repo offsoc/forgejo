@@ -1358,6 +1358,12 @@ func Routes() *web.Route {
 					m.Post("", bind(api.UpdateRepoAvatarOption{}), repo.UpdateAvatar)
 					m.Delete("", repo.DeleteAvatar)
 				}, reqAdmin(), reqToken())
+				m.Group("/sync_fork", func() {
+					m.Get("", reqRepoReader(unit.TypeCode), repo.SyncForkDefaultInfo)
+					m.Post("", mustNotBeArchived, reqRepoWriter(unit.TypeCode), repo.SyncForkDefault)
+					m.Get("/{branch}", reqRepoReader(unit.TypeCode), repo.SyncForkBranchInfo)
+					m.Post("/{branch}", mustNotBeArchived, reqRepoWriter(unit.TypeCode), repo.SyncForkBranch)
+				})
 
 				m.Get("/{ball_type:tarball|zipball|bundle}/*", reqRepoReader(unit.TypeCode), repo.DownloadArchive)
 			}, repoAssignment(), checkTokenPublicOnly())

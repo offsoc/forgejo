@@ -442,6 +442,13 @@ type swaggerCompare struct {
 	Body api.Compare `json:"body"`
 }
 
+// SyncForkInfo
+// swagger:response SyncForkInfo
+type swaggerSyncForkInfo struct {
+	// in:body
+	Body []api.SyncForkInfo `json:"body"`
+}
+
 // RepoFunding
 // swagger:response RepoFunding
 type swaggerRepoFunding struct {
