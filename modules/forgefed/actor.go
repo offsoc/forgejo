@@ -181,8 +181,9 @@ func removeEmptyStrings(ls []string) []string {
 	return rs
 }
 
-func newActorID(uri string) (ActorID, error) {
+// ----------------------------- newActorID --------------------------------------------
 
+func newActorID(uri string) (ActorID, error) {
 	validatedURI, err := url.ParseRequestURI(uri)
 	if err != nil {
 		return ActorID{}, err

@@ -33,6 +33,7 @@ type Validateable interface {
 }
 
 func IsValid(v Validateable) (bool, error) {
+	//todo: refactor to valdationErrors
 	if err := v.Validate(); len(err) > 0 {
 		typeof := reflect.TypeOf(v)
 		errString := strings.Join(err, "\n")

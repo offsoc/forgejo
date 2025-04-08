@@ -12,15 +12,15 @@ type FederatedUser struct {
 	UserID                int64  `xorm:"NOT NULL"`
 	ExternalID            string `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
 	FederationHostID      int64  `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
-	NormalizedOriginalUrl string
+	NormalizedOriginalURL string
 }
 
-func NewFederatedUser(userID int64, externalID string, federationHostID int64, normalizedOriginalUrl string) (FederatedUser, error) {
+func NewFederatedUser(userID int64, externalID string, federationHostID int64, normalizedOriginalURL string) (FederatedUser, error) {
 	result := FederatedUser{
 		UserID:                userID,
 		ExternalID:            externalID,
 		FederationHostID:      federationHostID,
-		NormalizedOriginalUrl: normalizedOriginalUrl,
+		NormalizedOriginalURL: normalizedOriginalURL,
 	}
 	if valid, err := validation.IsValid(result); !valid {
 		return FederatedUser{}, err

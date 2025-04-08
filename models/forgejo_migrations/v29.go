@@ -62,7 +62,7 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 		if !has {
 			return fmt.Errorf("user not found %v", federatedUser.UserID)
 		}
-		fmt.Printf("user: %v\nfederatedUser: %v\n", user, federatedUser)
+		//fmt.Printf("user: %v\nfederatedUser: %v\n", user, federatedUser)
 
 		// Migrate User.NormalizedFederatedURI -> FederatedUser.NormalizedOriginalUrl
 		sql := "UPDATE `federated_user` SET `normalized_original_url` = ? WHERE `id` = ?"
@@ -71,12 +71,12 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 		}
 
 		// Migrate (Port, Schema) FederatedUser.NormalizedOriginalUrl -> FederationHost.(Port, Schema)
-		actorId, err := forgefed.NewActorID(user.NormalizedFederatedURI)
+		actorID, err := forgefed.NewActorID(user.NormalizedFederatedURI)
 		if err != nil {
 			return err
 		}
 		sql = "UPDATE `federation_host` SET `host_port` = ?, `host_schema` = ? WHERE `id` = ?"
-		if _, err := sessMigration.Exec(sql, actorId.HostPort, actorId.HostSchema, federatedUser.FederationHostID); err != nil {
+		if _, err := sessMigration.Exec(sql, actorID.HostPort, actorID.HostSchema, federatedUser.FederationHostID); err != nil {
 			return err
 		}
 	}

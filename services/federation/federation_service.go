@@ -212,7 +212,7 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 	federatedUser := user.FederatedUser{
 		ExternalID:            personID.ID,
 		FederationHostID:      federationHostID,
-		NormalizedOriginalUrl: personID.AsURI(),
+		NormalizedOriginalURL: personID.AsURI(),
 	}
 	err = user.CreateFederatedUser(ctx, &newUser, &federatedUser)
 	if err != nil {
