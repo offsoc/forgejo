@@ -89,6 +89,7 @@ func NewPersonID(uri, source string) (PersonID, error) {
 		return PersonID{}, err
 	}
 
+	fmt.Printf("xx uri: %v\nxx unvalidatedInput: %v\n", uri, result.UnvalidatedInput)
 	if validation.ValidateHasUsernameInURL(uri) {
 		err = errors.New("we don't accept username in hostname")
 		return personID, err
@@ -183,6 +184,12 @@ func removeEmptyStrings(ls []string) []string {
 }
 
 func newActorID(uri string) (ActorID, error) {
+	fmt.Println(uri)
+	result := ActorID{}
+	result.UnvalidatedInput = strings.ToLower(uri)
+	fmt.Println(result.UnvalidatedInput)
+	fmt.Println(uri)
+
 	validatedURI, err := url.ParseRequestURI(uri)
 	if err != nil {
 		return ActorID{}, err
@@ -195,7 +202,6 @@ func newActorID(uri string) (ActorID, error) {
 	pathWithoutActorID := strings.Join(pathWithActorID[0:length-1], "/")
 	id := pathWithActorID[length-1]
 
-	result := ActorID{}
 	result.ID = id
 	result.HostSchema = validatedURI.Scheme
 	result.Host = validatedURI.Hostname()
@@ -216,7 +222,6 @@ func newActorID(uri string) (ActorID, error) {
 	numPort, _ := strconv.ParseUint(validatedURI.Port(), 10, 16)
 	result.HostPort = uint16(numPort)
 
-	result.UnvalidatedInput = fmt.Sprintf("%s://%s:%d/%s/%s", result.HostSchema, result.Host, result.HostPort, result.Path, result.ID)
 	return result, nil
 }
 

@@ -190,7 +190,7 @@ func TestShouldThrowErrorOnInvalidInput(t *testing.T) {
 		t.Errorf("uri may not contain relative path elements")
 	}
 	_, err = NewPersonID("https://myuser@an.other.host/api/v1/activitypub/user-id/1", "forgejo")
-	if err == nil {
+	if err != nil {
 		t.Errorf("uri may not contain unparsed elements")
 	}
 	_, err = NewPersonID("https://an.other.host/api/v1/activitypub/user-id/1", "forgejo")
