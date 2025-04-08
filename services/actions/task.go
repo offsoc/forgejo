@@ -10,6 +10,8 @@ import (
 	actions_model "forgejo.org/models/actions"
 	"forgejo.org/models/db"
 	secret_model "forgejo.org/models/secret"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	runnerv1 "code.gitea.io/actions-proto-go/runner/v1"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -104,4 +106,55 @@ func findTaskNeeds(ctx context.Context, taskJob *actions_model.ActionRunJob) (ma
 		}
 	}
 	return ret, nil
+}
+
+func StopTask(ctx context.Context, taskID int64, status actions_model.Status) error {
+	if !status.IsDone() {
+		return fmt.Errorf("cannot stop task with status %v", status)
+	}
+	e := db.GetEngine(ctx)
+
+	task := &actions_model.ActionTask{}
+	if has, err := e.ID(taskID).Get(task); err != nil {
+		return err
+	} else if !has {
+		return util.ErrNotExist
+	}
+	if task.Status.IsDone() {
+		return nil
+	}
+
+	now := timeutil.TimeStampNow()
+	task.Status = status
+	task.Stopped = now
+	if _, err := actions_model.UpdateRunJob(ctx, &actions_model.ActionRunJob{
+		ID:      task.JobID,
+		Status:  task.Status,
+		Stopped: task.Stopped,
+	}, nil); err != nil {
+		return err
+	}
+
+	if err := actions_model.UpdateTask(ctx, task, "status", "stopped"); err != nil {
+		return err
+	}
+
+	if err := task.LoadAttributes(ctx); err != nil {
+		return err
+	}
+
+	for _, step := range task.Steps {
+		if !step.Status.IsDone() {
+			step.Status = status
+			if step.Started == 0 {
+				step.Started = now
+			}
+			step.Stopped = now
+		}
+		if _, err := e.ID(step.ID).Update(step); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

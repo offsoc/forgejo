@@ -420,57 +420,6 @@ func UpdateTaskByState(ctx context.Context, runnerID int64, state *runnerv1.Task
 	return task, nil
 }
 
-func StopTask(ctx context.Context, taskID int64, status Status) error {
-	if !status.IsDone() {
-		return fmt.Errorf("cannot stop task with status %v", status)
-	}
-	e := db.GetEngine(ctx)
-
-	task := &ActionTask{}
-	if has, err := e.ID(taskID).Get(task); err != nil {
-		return err
-	} else if !has {
-		return util.ErrNotExist
-	}
-	if task.Status.IsDone() {
-		return nil
-	}
-
-	now := timeutil.TimeStampNow()
-	task.Status = status
-	task.Stopped = now
-	if _, err := UpdateRunJob(ctx, &ActionRunJob{
-		ID:      task.JobID,
-		Status:  task.Status,
-		Stopped: task.Stopped,
-	}, nil); err != nil {
-		return err
-	}
-
-	if err := UpdateTask(ctx, task, "status", "stopped"); err != nil {
-		return err
-	}
-
-	if err := task.LoadAttributes(ctx); err != nil {
-		return err
-	}
-
-	for _, step := range task.Steps {
-		if !step.Status.IsDone() {
-			step.Status = status
-			if step.Started == 0 {
-				step.Started = now
-			}
-			step.Stopped = now
-		}
-		if _, err := e.ID(step.ID).Update(step); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func FindOldTasksToExpire(ctx context.Context, olderThan timeutil.TimeStamp, limit int) ([]*ActionTask, error) {
 	e := db.GetEngine(ctx)
 
