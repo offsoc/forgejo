@@ -6,6 +6,7 @@ package validation
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -85,3 +86,14 @@ func ValidateOneOf(value any, allowed []any, name string) []string {
 	}
 	return []string{fmt.Sprintf("Value %v is not contained in allowed values %v", value, allowed)}
 }
+
+func ValidateHasUsernameInURL(url string) bool {
+    regex := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@`)
+    return regex.MatchString(url)
+}
+
+
+// func ValidateIdShouldBeNumber(url string) bool {
+//     regex := regexp.MustCompile(`[a-zA-Z._%+-?!]`)
+//     return regex.MatchString(url)
+// }

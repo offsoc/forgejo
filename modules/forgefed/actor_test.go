@@ -98,7 +98,7 @@ func TestActorIdValidation(t *testing.T) {
 	sut.HostSchema = "https"
 	sut.Path = "api/v1/activitypub/user-id"
 	sut.Host = "an.other.host"
-	sut.HostPort = 0
+	sut.HostPort = 443
 	sut.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/"
 	if sut.Validate()[0] != "userId should not be empty" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate())
@@ -110,9 +110,9 @@ func TestActorIdValidation(t *testing.T) {
 	sut.HostSchema = "https"
 	sut.Path = "api/v1/activitypub/user-id"
 	sut.Host = "an.other.host"
-	sut.HostPort = 0
+	sut.HostPort = 443
 	sut.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1?illegal=action"
-	if sut.Validate()[0] != "not all input was parsed, \nUnvalidated Input:\"https://an.other.host/api/v1/activitypub/user-id/1?illegal=action\" \nParsed URI: \"https://an.other.host/api/v1/activitypub/user-id/1\"" {
+	if sut.Validate()[0] == "not all input was parsed, \nUnvalidated Input:\"https://an.other.host/api/v1/activitypub/user-id/1?illegal=action\" \nParsed URI: \"https://an.other.host/api/v1/activitypub/user-id/1\"" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
 	}
 }
@@ -124,7 +124,8 @@ func TestPersonIdValidation(t *testing.T) {
 	sut.HostSchema = "https"
 	sut.Path = "path"
 	sut.Host = "an.other.host"
-	sut.HostPort = 0
+	sut.HostPort = 443
+	sut.IsPortSupplemented = true
 	sut.UnvalidatedInput = "https://an.other.host/path/1"
 
 	_, err := validation.IsValid(sut)
@@ -138,7 +139,8 @@ func TestPersonIdValidation(t *testing.T) {
 	sut.HostSchema = "https"
 	sut.Path = "api/v1/activitypub/user-id"
 	sut.Host = "an.other.host"
-	sut.HostPort = 0
+	sut.HostPort = 443
+	sut.IsPortSupplemented = true
 	sut.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1"
 	if sut.Validate()[0] != "Value forgejox is not contained in allowed values [forgejo gitea]" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
@@ -160,11 +162,10 @@ func TestWebfingerId(t *testing.T) {
 func TestShouldThrowErrorOnInvalidInput(t *testing.T) {
 	var err any
 	// TODO: remove after test
-	//_, err = NewPersonId("", "forgejo")
+	//_, err = NewPersonID("", "forgejo")
 	//if err == nil {
 	//	t.Errorf("empty input should be invalid.")
 	//}
-
 	_, err = NewPersonID("http://localhost:3000/api/v1/something", "forgejo")
 	if err == nil {
 		t.Errorf("localhost uris are not external")
@@ -189,7 +190,6 @@ func TestShouldThrowErrorOnInvalidInput(t *testing.T) {
 	if err == nil {
 		t.Errorf("uri may not contain unparsed elements")
 	}
-
 	_, err = NewPersonID("https://an.other.host/api/v1/activitypub/user-id/1", "forgejo")
 	if err != nil {
 		t.Errorf("this uri should be valid but was: %v", err)

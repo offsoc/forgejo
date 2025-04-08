@@ -4,6 +4,7 @@
 package forgefed
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -42,26 +43,29 @@ func NewActorID(uri string) (ActorID, error) {
 
 func (id ActorID) AsURI() string {
 	var result string
-	if id.IsPortSupplemented {
+
+	if id.HostPort == 0 || id.IsPortSupplemented {
 		result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
-	} else {
+	} else if !id.IsPortSupplemented{
 		result = fmt.Sprintf("%s://%s:%d/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
 	}
+
 	return result
 }
 
 func (id ActorID) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(id.ID, "userId")...)
-	result = append(result, validation.ValidateNotEmpty(id.HostSchema, "HostSchema")...)
+	result = append(result, validation.ValidateNotEmpty(id.HostSchema, "hostSchema")...)
 	result = append(result, validation.ValidateNotEmpty(id.Path, "path")...)
 	result = append(result, validation.ValidateNotEmpty(id.Host, "host")...)
-	result = append(result, validation.ValidateNotEmpty(id.HostPort, "HostPort")...)
+	result = append(result, validation.ValidateNotEmpty(id.HostPort, "hostPort")...)
 	result = append(result, validation.ValidateNotEmpty(id.UnvalidatedInput, "unvalidatedInput")...)
 
 	if id.UnvalidatedInput != id.AsURI() {
 		result = append(result, fmt.Sprintf("not all input was parsed, \nUnvalidated Input:%q \nParsed URI: %q", id.UnvalidatedInput, id.AsURI()))
 	}
+
 	return result
 }
 
@@ -81,7 +85,13 @@ func NewPersonID(uri, source string) (PersonID, error) {
 	// validate Person specific path
 	personID := PersonID{result}
 	if valid, err := validation.IsValid(personID); !valid {
+		fmt.Println("err:", err)
 		return PersonID{}, err
+	}
+
+	if validation.ValidateHasUsernameInURL(uri) {
+		err = errors.New("we don't accept username in hostname")
+		return personID, err
 	}
 
 	return personID, nil
