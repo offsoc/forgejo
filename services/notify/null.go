@@ -6,6 +6,7 @@ package notify
 import (
 	"context"
 
+	actions_model "forgejo.org/models/actions"
 	issues_model "forgejo.org/models/issues"
 	packages_model "forgejo.org/models/packages"
 	repo_model "forgejo.org/models/repo"
@@ -210,4 +211,8 @@ func (*NullNotifier) PackageDelete(ctx context.Context, doer *user_model.User, p
 
 // ChangeDefaultBranch places a place holder function
 func (*NullNotifier) ChangeDefaultBranch(ctx context.Context, repo *repo_model.Repository) {
+}
+
+// ActionRunNowDone places a place holder function
+func (*NullNotifier) ActionRunNowDone(ctx context.Context, run *actions_model.ActionRun, priorStatus actions_model.Status, lastRun *actions_model.ActionRun) {
 }

@@ -6,6 +6,7 @@ package notify
 import (
 	"context"
 
+	actions_model "forgejo.org/models/actions"
 	issues_model "forgejo.org/models/issues"
 	packages_model "forgejo.org/models/packages"
 	repo_model "forgejo.org/models/repo"
@@ -372,5 +373,15 @@ func PackageDelete(ctx context.Context, doer *user_model.User, pd *packages_mode
 func ChangeDefaultBranch(ctx context.Context, repo *repo_model.Repository) {
 	for _, notifier := range notifiers {
 		notifier.ChangeDefaultBranch(ctx, repo)
+	}
+}
+
+// ActionRunNowDone notifies that the old status priorStatus with (priorStatus.isDone() == false) of an ActionRun changed to run.Status with (run.Status.isDone() == true)
+// lastRun might be nil (e.g. when the run is the first for this workflow). It is the last run of the same workflow for the same repo.
+// It can be used to figure out if a successful run follows a failed one.
+// Both run and lastRun need their attributes loaded.
+func ActionRunNowDone(ctx context.Context, run *actions_model.ActionRun, priorStatus actions_model.Status, lastRun *actions_model.ActionRun) {
+	for _, notifier := range notifiers {
+		notifier.ActionRunNowDone(ctx, run, priorStatus, lastRun)
 	}
 }
