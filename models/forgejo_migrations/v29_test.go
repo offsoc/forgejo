@@ -47,7 +47,7 @@ func Test_MigrateNormalizedFederatedURI(t *testing.T) {
 	}
 
 	// test for expected results
-	getColumn := func(tn string, co string) *schemas.Column {
+	getColumn := func(tn, co string) *schemas.Column {
 		tables, err := x.DBMetas()
 		require.NoError(t, err)
 		var table *schemas.Table
