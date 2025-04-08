@@ -91,9 +91,3 @@ func ValidateHasUsernameInURL(url string) bool {
     regex := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@`)
     return regex.MatchString(url)
 }
-
-
-// func ValidateIdShouldBeNumber(url string) bool {
-//     regex := regexp.MustCompile(`[a-zA-Z._%+-?!]`)
-//     return regex.MatchString(url)
-// }

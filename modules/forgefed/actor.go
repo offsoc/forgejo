@@ -44,9 +44,9 @@ func NewActorID(uri string) (ActorID, error) {
 func (id ActorID) AsURI() string {
 	var result string
 
-	if id.HostPort == 0 || id.IsPortSupplemented {
+	if id.IsPortSupplemented {
 		result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
-	} else if !id.IsPortSupplemented{
+	} else {
 		result = fmt.Sprintf("%s://%s:%d/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
 	}
 

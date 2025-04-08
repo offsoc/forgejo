@@ -85,6 +85,7 @@ func TestNewRepositoryId(t *testing.T) {
 	expected.Path = "api/activitypub/repository-id"
 	expected.Host = "localhost"
 	expected.HostPort = 3000
+	expected.IsPortSupplemented = false
 	expected.UnvalidatedInput = "http://localhost:3000/api/activitypub/repository-id/1"
 	sut, _ := NewRepositoryID("http://localhost:3000/api/activitypub/repository-id/1", "forgejo")
 	if sut != expected {
@@ -99,6 +100,7 @@ func TestActorIdValidation(t *testing.T) {
 	sut.Path = "api/v1/activitypub/user-id"
 	sut.Host = "an.other.host"
 	sut.HostPort = 443
+	sut.IsPortSupplemented = true
 	sut.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/"
 	if sut.Validate()[0] != "userId should not be empty" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate())
@@ -111,8 +113,9 @@ func TestActorIdValidation(t *testing.T) {
 	sut.Path = "api/v1/activitypub/user-id"
 	sut.Host = "an.other.host"
 	sut.HostPort = 443
+	sut.IsPortSupplemented = true
 	sut.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1?illegal=action"
-	if sut.Validate()[0] == "not all input was parsed, \nUnvalidated Input:\"https://an.other.host/api/v1/activitypub/user-id/1?illegal=action\" \nParsed URI: \"https://an.other.host/api/v1/activitypub/user-id/1\"" {
+	if sut.Validate()[0] != "not all input was parsed, \nUnvalidated Input:\"https://an.other.host/api/v1/activitypub/user-id/1?illegal=action\" \nParsed URI: \"https://an.other.host/api/v1/activitypub/user-id/1\"" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
 	}
 }
