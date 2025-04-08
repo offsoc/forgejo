@@ -4,7 +4,6 @@
 package forgefed
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -88,10 +87,11 @@ func NewPersonID(uri, source string) (PersonID, error) {
 		return PersonID{}, err
 	}
 
-	if validation.ValidateHasUsernameInURL(uri) {
-		err = errors.New("we don't accept username in hostname")
-		return personID, err
-	}
+	// TODO: jem - 2025-04-08 Not needed here
+	// if validation.ValidateHasUsernameInURL(uri) {
+	// 	err = errors.New("we don't accept username in hostname")
+	// 	return personID, err
+	// }
 
 	return personID, nil
 }
@@ -193,13 +193,13 @@ func newActorID(uri string) (ActorID, error) {
 	}
 	length := len(pathWithActorID)
 	pathWithoutActorID := strings.Join(pathWithActorID[0:length-1], "/")
-	id := pathWithActorID[length-1]
+	id := strings.ToLower(pathWithActorID[length-1])
 
 	result := ActorID{}
 	result.ID = id
-	result.HostSchema = validatedURI.Scheme
-	result.Host = validatedURI.Hostname()
-	result.Path = pathWithoutActorID
+	result.HostSchema = strings.ToLower(validatedURI.Scheme)
+	result.Host = strings.ToLower(validatedURI.Hostname())
+	result.Path = strings.ToLower(pathWithoutActorID)
 
 	if validatedURI.Port() == "" && result.HostSchema == "https" {
 		result.IsPortSupplemented = true
@@ -213,8 +213,6 @@ func newActorID(uri string) (ActorID, error) {
 	}
 
 	result.UnvalidatedInput = strings.ToLower(uri)
-
-	fmt.Println(result)
 
 	return result, nil
 }
