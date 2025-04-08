@@ -85,11 +85,9 @@ func NewPersonID(uri, source string) (PersonID, error) {
 	// validate Person specific path
 	personID := PersonID{result}
 	if valid, err := validation.IsValid(personID); !valid {
-		fmt.Println("err:", err)
 		return PersonID{}, err
 	}
 
-	fmt.Printf("xx uri: %v\nxx unvalidatedInput: %v\n", uri, result.UnvalidatedInput)
 	if validation.ValidateHasUsernameInURL(uri) {
 		err = errors.New("we don't accept username in hostname")
 		return personID, err
@@ -184,11 +182,6 @@ func removeEmptyStrings(ls []string) []string {
 }
 
 func newActorID(uri string) (ActorID, error) {
-	fmt.Println(uri)
-	result := ActorID{}
-	result.UnvalidatedInput = strings.ToLower(uri)
-	fmt.Println(result.UnvalidatedInput)
-	fmt.Println(uri)
 
 	validatedURI, err := url.ParseRequestURI(uri)
 	if err != nil {
@@ -202,6 +195,7 @@ func newActorID(uri string) (ActorID, error) {
 	pathWithoutActorID := strings.Join(pathWithActorID[0:length-1], "/")
 	id := pathWithActorID[length-1]
 
+	result := ActorID{}
 	result.ID = id
 	result.HostSchema = validatedURI.Scheme
 	result.Host = validatedURI.Hostname()
@@ -210,17 +204,17 @@ func newActorID(uri string) (ActorID, error) {
 	if validatedURI.Port() == "" && result.HostSchema == "https" {
 		result.IsPortSupplemented = true
 		result.HostPort = 443
-		result.UnvalidatedInput = fmt.Sprintf("%s://%s/%s/%s", result.HostSchema, result.Host, result.Path, result.ID)
-		return result, nil
 	} else if validatedURI.Port() == "" && result.HostSchema == "http" {
 		result.IsPortSupplemented = true
 		result.HostPort = 80
-		result.UnvalidatedInput = fmt.Sprintf("%s://%s/%s/%s", result.HostSchema, result.Host, result.Path, result.ID)
-		return result, nil
+	} else {
+		numPort, _ := strconv.ParseUint(validatedURI.Port(), 10, 16)
+		result.HostPort = uint16(numPort)
 	}
 
-	numPort, _ := strconv.ParseUint(validatedURI.Port(), 10, 16)
-	result.HostPort = uint16(numPort)
+	result.UnvalidatedInput = strings.ToLower(uri)
+
+	fmt.Println(result)
 
 	return result, nil
 }
