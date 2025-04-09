@@ -62,7 +62,6 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 		if !has {
 			return fmt.Errorf("user not found %v", federatedUser.UserID)
 		}
-		//fmt.Printf("user: %v\nfederatedUser: %v\n", user, federatedUser)
 
 		// Migrate User.NormalizedFederatedURI -> FederatedUser.NormalizedOriginalUrl
 		sql := "UPDATE `federated_user` SET `normalized_original_url` = ? WHERE `id` = ?"

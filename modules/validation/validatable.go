@@ -6,7 +6,6 @@ package validation
 import (
 	"fmt"
 	"reflect"
-	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -33,10 +32,9 @@ type Validateable interface {
 }
 
 func IsValid(v Validateable) (bool, error) {
-	//todo: refactor to valdationErrors
-	if err := v.Validate(); len(err) > 0 {
+	if valdationErrors := v.Validate(); len(valdationErrors) > 0 {
 		typeof := reflect.TypeOf(v)
-		errString := strings.Join(err, "\n")
+		errString := strings.Join(valdationErrors, "\n")
 		return false, ErrNotValid{fmt.Sprint(typeof, ": ", errString)}
 	}
 
@@ -86,10 +84,4 @@ func ValidateOneOf(value any, allowed []any, name string) []string {
 		}
 	}
 	return []string{fmt.Sprintf("Value %v is not contained in allowed values %v", value, allowed)}
-}
-
-// TODO: jem - 2025-04-08 Not needed here
-func ValidateHasUsernameInURL(url string) bool {
-	regex := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@`)
-	return regex.MatchString(url)
 }

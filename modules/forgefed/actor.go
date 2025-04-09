@@ -87,12 +87,6 @@ func NewPersonID(uri, source string) (PersonID, error) {
 		return PersonID{}, err
 	}
 
-	// TODO: jem - 2025-04-08 Not needed here
-	// if validation.ValidateHasUsernameInURL(uri) {
-	// 	err = errors.New("we don't accept username in hostname")
-	// 	return personID, err
-	// }
-
 	return personID, nil
 }
 
