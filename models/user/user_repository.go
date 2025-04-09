@@ -75,14 +75,14 @@ func FindFederatedUser(ctx context.Context, externalID string, federationHostID 
 	return user, federatedUser, nil
 }
 
-func GetFederatedUserByKeyID(ctx context.Context, keyID string) (*User, *FederatedUser, error) {
+func FindFederatedUserByKeyID(ctx context.Context, keyID string) (*User, *FederatedUser, error) {
 	federatedUser := new(FederatedUser)
 	user := new(User)
 	has, err := db.GetEngine(ctx).Where("key_id=?", keyID).Get(federatedUser)
 	if err != nil {
 		return nil, nil, err
 	} else if !has {
-		return nil, nil, fmt.Errorf("No FederatedUser for keyId %v", keyID)
+		return nil, nil, nil
 	}
 	has, err = db.GetEngine(ctx).ID(federatedUser.UserID).Get(user)
 	if err != nil {
