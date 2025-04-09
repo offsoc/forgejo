@@ -39,7 +39,6 @@ func ProcessLikeActivity(ctx context.Context, form any, repositoryID int64) (int
 	log.Info("Activity validated:%v", activity)
 
 	// parse actorID (person)
-	// Todo: GetFederationHostForURI
 	actorURI := activity.Actor.GetID().String()
 	log.Info("actorURI was: %v", actorURI)
 	federationHost, err := GetFederationHostForURI(ctx, actorURI)
