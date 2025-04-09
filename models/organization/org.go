@@ -289,12 +289,8 @@ func CreateOrganization(ctx context.Context, org *Organization, owner *user_mode
 	}
 
 	org.LowerName = strings.ToLower(org.Name)
-	if org.Rands, err = user_model.GetUserSalt(); err != nil {
-		return err
-	}
-	if org.Salt, err = user_model.GetUserSalt(); err != nil {
-		return err
-	}
+	org.Rands = user_model.GetUserSalt()
+	org.Salt = user_model.GetUserSalt()
 	org.UseCustomAvatar = true
 	org.MaxRepoCreation = -1
 	org.NumTeams = 1

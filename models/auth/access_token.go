@@ -111,12 +111,8 @@ func generateAccessToken(t *AccessToken) error {
 	if err != nil {
 		return err
 	}
-	token, err := util.CryptoRandomBytes(20)
-	if err != nil {
-		return err
-	}
 	t.TokenSalt = salt
-	t.Token = hex.EncodeToString(token)
+	t.Token = hex.EncodeToString(util.CryptoRandomBytes(20))
 	t.TokenHash = HashToken(t.Token, t.TokenSalt)
 	t.TokenLastEight = t.Token[len(t.Token)-8:]
 	return nil
