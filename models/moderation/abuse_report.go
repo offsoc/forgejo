@@ -144,6 +144,10 @@ func AlreadyReported(ctx context.Context, contentType ReportedContentType, conte
 	return reported
 }
 
+// ReportAbuse creates a new abuse report in the DB with 'Open' status.
+// If the reported content is the user profile of the reporter ErrSelfReporting is returned.
+// If there is already an open report submitted by the same user for the same content,
+// the request will be ignored without returning an error (and a warning will be logged).
 func ReportAbuse(ctx context.Context, report *AbuseReport) error {
 	if report.ContentType == ReportedContentTypeUser && report.ReporterID == report.ContentID {
 		return ErrSelfReporting
@@ -160,6 +164,7 @@ func ReportAbuse(ctx context.Context, report *AbuseReport) error {
 	return err
 }
 
+/*
 // MarkAsHandled will change the status to 'Handled' for all reports linked to the same item (user, repository, issue or comment).
 func MarkAsHandled(ctx context.Context, contentType ReportedContentType, contentID int64) error {
 	return updateStatus(ctx, contentType, contentID, ReportStatusTypeHandled)
@@ -179,3 +184,4 @@ func updateStatus(ctx context.Context, contentType ReportedContentType, contentI
 
 	return err
 }
+*/

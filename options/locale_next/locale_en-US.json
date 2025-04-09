@@ -27,9 +27,9 @@
     "moderation.report_abuse_form.header": "Report abuse to administrator",
     "moderation.report_abuse_form.details": "This form should be used to report users who create spam profiles, repositories, issues, comments or behave inappropriately.",
     "moderation.report_abuse_form.invalid": "Invalid arguments",
-    "moderation.report_abuse_form.already_reported": "You already reported this content",
+    "moderation.report_abuse_form.already_reported": "You've already reported this content",
     "moderation.abuse_category": "Category",
-    "moderation.abuse_category.placeholder": "Please select a category",
+    "moderation.abuse_category.placeholder": "Select a category",
     "moderation.abuse_category.spam": "Spam",
     "moderation.abuse_category.malware": "Malware",
     "moderation.abuse_category.illegal_content": "Illegal content",
@@ -38,6 +38,7 @@
     "moderation.report_remarks.placeholder": "Please provide some details regarding the abuse you are reporting.",
     "moderation.submit_report": "Submit report",
     "moderation.reported_already": "This has already been reported.",
-    "moderation.reporting_failed": "Something went wrong while trying to submit the new abuse report: %v",
-    "moderation.reported_thank_you": "Thank you for your report. An administrator will look into it shortly."
+    "moderation.reporting_failed": "Unable to submit the new abuse report: %v",
+    "moderation.reported_thank_you": "Thank you for your report. The administration has been made aware of it.",
+    "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it."
 }

@@ -52,6 +52,7 @@ import (
 	"forgejo.org/routers/web/feed"
 	"forgejo.org/services/context"
 	issue_service "forgejo.org/services/issue"
+	repo_service "forgejo.org/services/repository"
 	files_service "forgejo.org/services/repository/files"
 
 	"github.com/nektos/act/pkg/model"
@@ -1151,6 +1152,21 @@ PostRecentBranchCheck:
 		ctx.Data["HasParentPath"] = true
 		if len(paths)-2 >= 0 {
 			ctx.Data["ParentPath"] = "/" + paths[len(paths)-2]
+		}
+	}
+
+	if ctx.Repo.Repository.IsFork && ctx.Repo.IsViewBranch && len(ctx.Repo.TreePath) == 0 && ctx.Repo.CanWriteToBranch(ctx, ctx.Doer, ctx.Repo.BranchName) {
+		syncForkInfo, err := repo_service.GetSyncForkInfo(ctx, ctx.Repo.Repository, ctx.Repo.BranchName)
+		if err != nil {
+			ctx.ServerError("CanSync", err)
+			return
+		}
+
+		if syncForkInfo.Allowed {
+			ctx.Data["CanSyncFork"] = true
+			ctx.Data["ForkCommitsBehind"] = syncForkInfo.CommitsBehind
+			ctx.Data["SyncForkLink"] = fmt.Sprintf("%s/sync_fork/%s", ctx.Repo.RepoLink, util.PathEscapeSegments(ctx.Repo.BranchName))
+			ctx.Data["BaseBranchLink"] = fmt.Sprintf("%s/src/branch/%s", ctx.Repo.Repository.BaseRepo.HTMLURL(), util.PathEscapeSegments(ctx.Repo.BranchName))
 		}
 	}
 

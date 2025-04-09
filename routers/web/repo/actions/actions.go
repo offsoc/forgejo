@@ -31,8 +31,9 @@ import (
 )
 
 const (
-	tplListActions base.TplName = "repo/actions/list"
-	tplViewActions base.TplName = "repo/actions/view"
+	tplListActions      base.TplName = "repo/actions/list"
+	tplListActionsInner base.TplName = "repo/actions/list_inner"
+	tplViewActions      base.TplName = "repo/actions/view"
 )
 
 type Workflow struct {
@@ -66,6 +67,8 @@ func List(ctx *context.Context) {
 
 	curWorkflow := ctx.FormString("workflow")
 	ctx.Data["CurWorkflow"] = curWorkflow
+
+	listInner := ctx.FormBool("list_inner")
 
 	var workflows []Workflow
 	if empty, err := ctx.Repo.GitRepo.IsEmpty(); err != nil {
@@ -250,7 +253,11 @@ func List(ctx *context.Context) {
 	ctx.Data["Page"] = pager
 	ctx.Data["HasWorkflowsOrRuns"] = len(workflows) > 0 || len(runs) > 0
 
-	ctx.HTML(http.StatusOK, tplListActions)
+	if listInner {
+		ctx.HTML(http.StatusOK, tplListActionsInner)
+	} else {
+		ctx.HTML(http.StatusOK, tplListActions)
+	}
 }
 
 // loadIsRefDeleted loads the IsRefDeleted field for each run in the list.

@@ -1,3 +1,7 @@
+body:has(> .ui.active.dimmer) {
+  overflow: hidden;
+}
+
 .ui.active.dimmer {
   display: flex;
   opacity: 1;
@@ -10,8 +14,9 @@
   display: none;
   flex-direction: column;
   height: 100%;
-  position: absolute;
+  position: fixed;
   opacity: 0;
+  transform-origin: center center;
   justify-content: center;
   user-select: none;
   width: 100%;
