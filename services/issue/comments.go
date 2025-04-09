@@ -122,6 +122,8 @@ func DeleteComment(ctx context.Context, doer *user_model.User, comment *issues_m
 		reviewID := comment.ReviewID
 		reviewType := comment.Review.Type
 
+		deleteComment := issues_model.DeleteComment(ctx, comment)
+
 		if reviewType == issues_model.ReviewTypePending {
 			found, err := db.GetEngine(ctx).Table("comment").Where("review_id = ?", reviewID).Exist()
 			if err != nil {
@@ -131,12 +133,9 @@ func DeleteComment(ctx context.Context, doer *user_model.User, comment *issues_m
 				if err != nil {
 					return err
 				}
-
-				return issues_model.DeleteComment(ctx, comment)
 			}
 		}
-
-		return issues_model.DeleteComment(ctx, comment)
+		return deleteComment
 	})
 
 	if err != nil {
