@@ -203,7 +203,6 @@ forgejo.org/modules/util/filebuffer
 
 forgejo.org/modules/validation
 	IsErrNotValid
-	ValidateHasUsernameInURL
 
 forgejo.org/modules/web
 	RouteMock
