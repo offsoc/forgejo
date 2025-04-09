@@ -54,6 +54,7 @@ forgejo.org/models/user
 	IsErrExternalLoginUserAlreadyExist
 	IsErrExternalLoginUserNotExist
 	NewFederatedUser
+	GetFederatedUserByUserID
 	IsErrUserSettingIsNotExist
 	GetUserAllSettings
 	DeleteUserSetting
