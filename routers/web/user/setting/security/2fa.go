@@ -40,11 +40,7 @@ func RegenerateScratchTwoFactor(ctx *context.Context) {
 		return
 	}
 
-	token, err := t.GenerateScratchToken()
-	if err != nil {
-		ctx.ServerError("SettingsTwoFactor: Failed to GenerateScratchToken", err)
-		return
-	}
+	token := t.GenerateScratchToken()
 
 	if err = auth.UpdateTwoFactor(ctx, t); err != nil {
 		ctx.ServerError("SettingsTwoFactor: Failed to UpdateTwoFactor", err)
@@ -220,11 +216,7 @@ func EnrollTwoFactorPost(ctx *context.Context) {
 	t = &auth.TwoFactor{
 		UID: ctx.Doer.ID,
 	}
-	token, err := t.GenerateScratchToken()
-	if err != nil {
-		ctx.ServerError("SettingsTwoFactor: Failed to generate scratch token", err)
-		return
-	}
+	token := t.GenerateScratchToken()
 
 	// Now we have to delete the secrets - because if we fail to insert then it's highly likely that they have already been used
 	// If we can detect the unique constraint failure below we can move this to after the NewTwoFactor

@@ -54,8 +54,8 @@ func runACME(listenAddr string, m http.Handler) error {
 		altTLSALPNPort = p
 	}
 
-	magic := certmagic.NewDefault()
-	magic.Storage = &certmagic.FileStorage{Path: setting.AcmeLiveDirectory}
+	certmagic.Default.Storage = &certmagic.FileStorage{Path: setting.AcmeLiveDirectory}
+
 	// Try to use private CA root if provided, otherwise defaults to system's trust
 	var certPool *x509.CertPool
 	if setting.AcmeCARoot != "" {
@@ -65,7 +65,8 @@ func runACME(listenAddr string, m http.Handler) error {
 			log.Warn("Failed to parse CA Root certificate, using default CA trust: %v", err)
 		}
 	}
-	myACME := certmagic.NewACMEIssuer(magic, certmagic.ACMEIssuer{
+
+	certmagic.DefaultACME = certmagic.ACMEIssuer{
 		CA:                      setting.AcmeURL,
 		TrustedRoots:            certPool,
 		Email:                   setting.AcmeEmail,
@@ -75,7 +76,11 @@ func runACME(listenAddr string, m http.Handler) error {
 		ListenHost:              setting.HTTPAddr,
 		AltTLSALPNPort:          altTLSALPNPort,
 		AltHTTPPort:             altHTTPPort,
-	})
+	}
+
+	magic := certmagic.NewDefault()
+
+	myACME := certmagic.NewACMEIssuer(magic, certmagic.DefaultACME)
 
 	magic.Issuers = []certmagic.Issuer{myACME}
 

@@ -18,5 +18,7 @@
     "incorrect_root_url": "Šis Forgejo serveris ir konfigurēts darboties \"%s\". Pašlaik Forgejo tiek apmeklēta ar atšķirīgu URL, kas var radīt atsevišķu lietotnes daļu salūšanu. Kanonisko URL pārrauga Forgejo pārvaldītāji ar app.ini iestatījumu ROOT_URL.",
     "themes.names.forgejo-auto": "Forgejo (ievērot sistēmas izskatu)",
     "themes.names.forgejo-light": "Forgejo gaišais",
-    "themes.names.forgejo-dark": "Forgejo tumšais"
+    "themes.names.forgejo-dark": "Forgejo tumšais",
+    "error.not_found.title": "Lapa nav atrasta",
+    "alert.asset_load_failed": "Neizdevās ielādēt līdzekļu datnes no {path}. Lūgums pārliecināties, ka līdzekļu datnēm var piekļūt."
 }

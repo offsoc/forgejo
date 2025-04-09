@@ -60,7 +60,7 @@ func TestLocalizationPolicy(t *testing.T) {
 	t.Run("Escaped HTML characters", func(t *testing.T) {
 		assert.Empty(t, checkLocaleContent([]byte("activity.git_stats_push_to_branch = `إلى %s و\"`")))
 
-		assert.Equal(t, []string{"key: و\x1b[31m&nbsp\x1b[0m\x1b[32m\u00a0\x1b[0m"}, checkLocaleContent([]byte(`key = و&nbsp;`)))
+		assert.Equal(t, []string{"key: و\x1b[31m&nbsp;\x1b[0m\x1b[32m\u00a0\x1b[0m"}, checkLocaleContent([]byte(`key = و&nbsp;`)))
 	})
 }
 

@@ -4,15 +4,21 @@
 package user
 
 import (
+	"context"
+	"database/sql"
+
+	"forgejo.org/models/db"
 	"forgejo.org/modules/validation"
 )
 
 type FederatedUser struct {
-	ID                    int64  `xorm:"pk autoincr"`
-	UserID                int64  `xorm:"NOT NULL"`
-	ExternalID            string `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
-	FederationHostID      int64  `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
-	NormalizedOriginalURL string // This field ist just to keep original information. Pls. do not use for search or as ID!
+	ID                    int64                  `xorm:"pk autoincr"`
+	UserID                int64                  `xorm:"NOT NULL"`
+	ExternalID            string                 `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
+	FederationHostID      int64                  `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
+	KeyID                 sql.NullString         `xorm:"key_id UNIQUE"`
+	PublicKey             sql.Null[sql.RawBytes] `xorm:"BLOB"`
+	NormalizedOriginalURL string                 // This field ist just to keep original information. Pls. do not use for search or as ID!
 }
 
 func NewFederatedUser(userID int64, externalID string, federationHostID int64, normalizedOriginalURL string) (FederatedUser, error) {
@@ -26,6 +32,37 @@ func NewFederatedUser(userID int64, externalID string, federationHostID int64, n
 		return FederatedUser{}, err
 	}
 	return result, nil
+}
+
+// TODO: Move to repo?
+func getFederatedUserFromDB(ctx context.Context, searchKey, searchValue any) (*FederatedUser, error) {
+	federatedUser := new(FederatedUser)
+	has, err := db.GetEngine(ctx).Where(searchKey, searchValue).Get(federatedUser)
+	if err != nil {
+		return nil, err
+	} else if !has {
+		return nil, nil
+	}
+
+	if res, err := validation.IsValid(*federatedUser); !res {
+		return nil, err
+	}
+
+	return federatedUser, nil
+}
+
+// TODO: Move to repo?
+// TODO: provide user in same tx?
+// TODO: Validation is missing
+func GetFederatedUserByKeyID(ctx context.Context, keyID string) (*FederatedUser, error) {
+	return getFederatedUserFromDB(ctx, "key_id=?", keyID)
+}
+
+// TODO: Move to repo?
+// TODO: provide user in same tx?
+// TODO: Validation is missing
+func GetFederatedUserByUserID(ctx context.Context, userID int64) (*FederatedUser, error) {
+	return getFederatedUserFromDB(ctx, "user_id=?", userID)
 }
 
 func (user FederatedUser) Validate() []string {

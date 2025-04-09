@@ -444,10 +444,13 @@ func (repo *Repository) getCommitsBeforeLimit(id ObjectID, num int) ([]*Commit, 
 
 func (repo *Repository) getBranches(commit *Commit, limit int) ([]string, error) {
 	if CheckGitVersionAtLeast("2.7.0") == nil {
-		stdout, _, err := NewCommand(repo.Ctx, "for-each-ref", "--format=%(refname:strip=2)").
-			AddOptionFormat("--count=%d", limit).
-			AddOptionValues("--contains", commit.ID.String(), BranchPrefix).
-			RunStdString(&RunOpts{Dir: repo.Path})
+		command := NewCommand(repo.Ctx, "for-each-ref", "--format=%(refname:strip=2)").AddOptionValues("--contains", commit.ID.String(), BranchPrefix)
+
+		if limit != -1 {
+			command = command.AddOptionFormat("--count=%d", limit)
+		}
+
+		stdout, _, err := command.RunStdString(&RunOpts{Dir: repo.Path})
 		if err != nil {
 			return nil, err
 		}

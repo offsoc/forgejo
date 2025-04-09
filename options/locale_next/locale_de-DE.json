@@ -16,5 +16,7 @@
     "incorrect_root_url": "Diese Forgejo-Instanz ist konfiguriert, auf „%s“ bereitgestellt zu werden. Du rufst Forgejo über einen anderen URL auf, was dazu führen könnte, dass einige Bereiche nicht funktionieren. Der anerkannte URL wird durch die Forgejo-Admins mittels der Einstellung ROOT_URL in der app.ini kontrolliert.",
     "themes.names.forgejo-auto": "Forgejo (folge Systemthema)",
     "themes.names.forgejo-light": "Forgejo hell",
-    "themes.names.forgejo-dark": "Forgejo dunkel"
+    "themes.names.forgejo-dark": "Forgejo dunkel",
+    "error.not_found.title": "Seite nicht gefunden",
+    "alert.asset_load_failed": "Konnte Asset-Dateien nicht von {path} laden. Bitte stelle sicher, dass auf die Asset-Dateien zugegriffen werden kann."
 }

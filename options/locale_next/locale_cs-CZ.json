@@ -18,5 +18,7 @@
     "incorrect_root_url": "Tato instance Forgejo je nastavena tak, aby běžela na adrese „%s“. Vy si momentálně prohlížíte Forgejo na jiné adrese, což může způsobit rozbití některých částí aplikace. Správná adresa je ovládána správci Forgejo pomocí nastavení ROOT_URL v souboru app.ini.",
     "themes.names.forgejo-auto": "Forgejo (podle motivu systému)",
     "themes.names.forgejo-light": "Forgejo – světlé",
-    "themes.names.forgejo-dark": "Forgejo – tmavé"
+    "themes.names.forgejo-dark": "Forgejo – tmavé",
+    "error.not_found.title": "Stránka nenalezena",
+    "alert.asset_load_failed": "Nepodařilo se načíst soubory příloh z {path}. Ujistěte se, že jsou dané soubory přístupné."
 }
