@@ -27,6 +27,7 @@ func (u *User) APActorKeyID() string {
 	return u.APActorID() + "#main-key"
 }
 
+// TODO: refactor to search by ActorId!
 func GetUserByFederatedURI(ctx context.Context, federatedURI string) (*User, error) {
 	user := new(User)
 	has, err := db.GetEngine(ctx).Where("normalized_federated_uri=?", federatedURI).Get(user)
