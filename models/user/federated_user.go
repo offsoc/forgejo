@@ -4,10 +4,8 @@
 package user
 
 import (
-	"context"
 	"database/sql"
 
-	"forgejo.org/models/db"
 	"forgejo.org/modules/validation"
 )
 
@@ -32,37 +30,6 @@ func NewFederatedUser(userID int64, externalID string, federationHostID int64, n
 		return FederatedUser{}, err
 	}
 	return result, nil
-}
-
-// TODO: Move to repo?
-func getFederatedUserFromDB(ctx context.Context, searchKey, searchValue any) (*FederatedUser, error) {
-	federatedUser := new(FederatedUser)
-	has, err := db.GetEngine(ctx).Where(searchKey, searchValue).Get(federatedUser)
-	if err != nil {
-		return nil, err
-	} else if !has {
-		return nil, nil
-	}
-
-	if res, err := validation.IsValid(*federatedUser); !res {
-		return nil, err
-	}
-
-	return federatedUser, nil
-}
-
-// TODO: Move to repo?
-// TODO: provide user in same tx?
-// TODO: Validation is missing
-func GetFederatedUserByKeyID(ctx context.Context, keyID string) (*FederatedUser, error) {
-	return getFederatedUserFromDB(ctx, "key_id=?", keyID)
-}
-
-// TODO: Move to repo?
-// TODO: provide user in same tx?
-// TODO: Validation is missing
-func GetFederatedUserByUserID(ctx context.Context, userID int64) (*FederatedUser, error) {
-	return getFederatedUserFromDB(ctx, "user_id=?", userID)
 }
 
 func (user FederatedUser) Validate() []string {

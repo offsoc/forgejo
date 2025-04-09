@@ -1,234 +1,233 @@
-forgejo.org/cmd
-	NoMainListener
+forgejo.org / cmd
+NoMainListener
 
-forgejo.org/cmd/forgejo
-	ContextSetNoInit
-	ContextSetNoExit
-	ContextSetStderr
-	ContextGetStderr
-	ContextSetStdout
-	ContextSetStdin
+forgejo.org / cmd / forgejo
+ContextSetNoInit
+ContextSetNoExit
+ContextSetStderr
+ContextGetStderr
+ContextSetStdout
+ContextSetStdin
 
-forgejo.org/models
-	IsErrSHANotFound
-	IsErrMergeDivergingFastForwardOnly
+forgejo.org / models
+IsErrSHANotFound
+IsErrMergeDivergingFastForwardOnly
 
-forgejo.org/models/auth
-	WebAuthnCredentials
+forgejo.org / models / auth
+WebAuthnCredentials
 
-forgejo.org/models/db
-	TruncateBeans
-	InTransaction
-	DumpTables
+forgejo.org / models / db
+TruncateBeans
+InTransaction
+DumpTables
 
-forgejo.org/models/dbfs
-	file.renameTo
-	Create
-	Rename
+forgejo.org / models / dbfs
+file.renameTo
+Create
+Rename
 
-forgejo.org/models/forgefed
-	GetFederationHost
+forgejo.org / models / forgefed
+GetFederationHost
 
-forgejo.org/models/forgejo/semver
-	GetVersion
-	SetVersionString
-	SetVersion
+forgejo.org / models / forgejo / semver
+GetVersion
+SetVersionString
+SetVersion
 
-forgejo.org/models/git
-	RemoveDeletedBranchByID
+forgejo.org / models / git
+RemoveDeletedBranchByID
 
-forgejo.org/models/issues
-	IsErrUnknownDependencyType
-	IsErrIssueWasClosed
+forgejo.org / models / issues
+IsErrUnknownDependencyType
+IsErrIssueWasClosed
 
-forgejo.org/models/organization
-	SearchMembersOptions.ToConds
+forgejo.org / models / organization
+SearchMembersOptions.ToConds
 
-forgejo.org/models/perm/access
-	GetRepoWriters
+forgejo.org / models / perm / access
+GetRepoWriters
 
-forgejo.org/models/repo
-	WatchRepoMode
+forgejo.org / models / repo
+WatchRepoMode
 
-forgejo.org/models/user
-	IsErrExternalLoginUserAlreadyExist
-	IsErrExternalLoginUserNotExist
-	NewFederatedUser
-	GetFederatedUserByUserID
-	IsErrUserSettingIsNotExist
-	GetUserAllSettings
-	DeleteUserSetting
+forgejo.org / models / user
+IsErrExternalLoginUserAlreadyExist
+IsErrExternalLoginUserNotExist
+NewFederatedUser
+IsErrUserSettingIsNotExist
+GetUserAllSettings
+DeleteUserSetting
 
-forgejo.org/modules/activitypub
-	NewContext
-	Context.APClientFactory
+forgejo.org / modules / activitypub
+NewContext
+Context.APClientFactory
 
-forgejo.org/modules/assetfs
-	Bindata
+forgejo.org / modules / assetfs
+Bindata
 
-forgejo.org/modules/auth/password/hash
-	DummyHasher.HashWithSaltBytes
-	NewDummyHasher
+forgejo.org / modules / auth / password / hash
+DummyHasher.HashWithSaltBytes
+NewDummyHasher
 
-forgejo.org/modules/auth/password/pwn
-	WithHTTP
+forgejo.org / modules / auth / password / pwn
+WithHTTP
 
-forgejo.org/modules/base
-	SetupGiteaRoot
+forgejo.org / modules / base
+SetupGiteaRoot
 
-forgejo.org/modules/cache
-	GetInt
-	WithNoCacheContext
-	RemoveContextData
+forgejo.org / modules / cache
+GetInt
+WithNoCacheContext
+RemoveContextData
 
-forgejo.org/modules/emoji
-	ReplaceCodes
+forgejo.org / modules / emoji
+ReplaceCodes
 
-forgejo.org/modules/eventsource
-	Event.String
+forgejo.org / modules / eventsource
+Event.String
 
-forgejo.org/modules/forgefed
-	NewForgeUndoLike
-	ForgeUndoLike.UnmarshalJSON
-	ForgeUndoLike.Validate
-	GetItemByType
-	JSONUnmarshalerFn
-	NotEmpty
-	ToRepository
-	OnRepository
+forgejo.org / modules / forgefed
+NewForgeUndoLike
+ForgeUndoLike.UnmarshalJSON
+ForgeUndoLike.Validate
+GetItemByType
+JSONUnmarshalerFn
+NotEmpty
+ToRepository
+OnRepository
 
-forgejo.org/modules/git
-	AllowLFSFiltersArgs
-	AddChanges
-	AddChangesWithArgs
-	CommitChanges
-	CommitChangesWithArgs
-	SetUpdateHook
-	openRepositoryWithDefaultContext
-	ToEntryMode
+forgejo.org / modules / git
+AllowLFSFiltersArgs
+AddChanges
+AddChangesWithArgs
+CommitChanges
+CommitChangesWithArgs
+SetUpdateHook
+openRepositoryWithDefaultContext
+ToEntryMode
 
-forgejo.org/modules/gitrepo
-	GetBranchCommitID
-	GetWikiDefaultBranch
+forgejo.org / modules / gitrepo
+GetBranchCommitID
+GetWikiDefaultBranch
 
-forgejo.org/modules/graceful
-	Manager.TerminateContext
-	Manager.Err
-	Manager.Value
-	Manager.Deadline
+forgejo.org / modules / graceful
+Manager.TerminateContext
+Manager.Err
+Manager.Value
+Manager.Deadline
 
-forgejo.org/modules/hcaptcha
-	WithHTTP
+forgejo.org / modules / hcaptcha
+WithHTTP
 
-forgejo.org/modules/hostmatcher
-	HostMatchList.AppendPattern
+forgejo.org / modules / hostmatcher
+HostMatchList.AppendPattern
 
-forgejo.org/modules/json
-	StdJSON.Marshal
-	StdJSON.Unmarshal
-	StdJSON.NewEncoder
-	StdJSON.NewDecoder
-	StdJSON.Indent
+forgejo.org / modules / json
+StdJSON.Marshal
+StdJSON.Unmarshal
+StdJSON.NewEncoder
+StdJSON.NewDecoder
+StdJSON.Indent
 
-forgejo.org/modules/log
-	NewEventWriterBuffer
+forgejo.org / modules / log
+NewEventWriterBuffer
 
-forgejo.org/modules/markup
-	GetRendererByType
-	RenderString
-	IsMarkupFile
+forgejo.org / modules / markup
+GetRendererByType
+RenderString
+IsMarkupFile
 
-forgejo.org/modules/markup/console
-	Render
-	RenderString
+forgejo.org / modules / markup / console
+Render
+RenderString
 
-forgejo.org/modules/markup/markdown
-	RenderRawString
+forgejo.org / modules / markup / markdown
+RenderRawString
 
-forgejo.org/modules/markup/mdstripper
-	stripRenderer.AddOptions
-	StripMarkdown
+forgejo.org / modules / markup / mdstripper
+stripRenderer.AddOptions
+StripMarkdown
 
-forgejo.org/modules/markup/orgmode
-	RenderString
+forgejo.org / modules / markup / orgmode
+RenderString
 
-forgejo.org/modules/process
-	Manager.ExecTimeout
+forgejo.org / modules / process
+Manager.ExecTimeout
 
-forgejo.org/modules/queue
-	newBaseChannelSimple
-	newBaseChannelUnique
-	newBaseRedisSimple
-	newBaseRedisUnique
-	testStateRecorder.Records
-	testStateRecorder.Reset
-	newWorkerPoolQueueForTest
+forgejo.org / modules / queue
+newBaseChannelSimple
+newBaseChannelUnique
+newBaseRedisSimple
+newBaseRedisUnique
+testStateRecorder.Records
+testStateRecorder.Reset
+newWorkerPoolQueueForTest
 
-forgejo.org/modules/queue/lqinternal
-	QueueItemIDBytes
-	QueueItemKeyBytes
-	ListLevelQueueKeys
+forgejo.org / modules / queue / lqinternal
+QueueItemIDBytes
+QueueItemKeyBytes
+ListLevelQueueKeys
 
-forgejo.org/modules/setting
-	NewConfigProviderFromData
-	GitConfigType.GetOption
-	InitLoggersForTest
+forgejo.org / modules / setting
+NewConfigProviderFromData
+GitConfigType.GetOption
+InitLoggersForTest
 
-forgejo.org/modules/sync
-	StatusTable.Start
-	StatusTable.IsRunning
+forgejo.org / modules / sync
+StatusTable.Start
+StatusTable.IsRunning
 
-forgejo.org/modules/timeutil
-	GetExecutableModTime
-	MockSet
-	MockUnset
+forgejo.org / modules / timeutil
+GetExecutableModTime
+MockSet
+MockUnset
 
-forgejo.org/modules/translation
-	MockLocale.Language
-	MockLocale.TrString
-	MockLocale.Tr
-	MockLocale.TrN
-	MockLocale.TrPluralString
-	MockLocale.TrSize
-	MockLocale.HasKey
-	MockLocale.PrettyNumber
+forgejo.org / modules / translation
+MockLocale.Language
+MockLocale.TrString
+MockLocale.Tr
+MockLocale.TrN
+MockLocale.TrPluralString
+MockLocale.TrSize
+MockLocale.HasKey
+MockLocale.PrettyNumber
 
-forgejo.org/modules/translation/localeiter
-	IterateMessagesContent
+forgejo.org / modules / translation / localeiter
+IterateMessagesContent
 
-forgejo.org/modules/util
-	OptionalArg
+forgejo.org / modules / util
+OptionalArg
 
-forgejo.org/modules/util/filebuffer
-	CreateFromReader
+forgejo.org / modules / util / filebuffer
+CreateFromReader
 
-forgejo.org/modules/validation
-	IsErrNotValid
+forgejo.org / modules / validation
+IsErrNotValid
 
-forgejo.org/modules/web
-	RouteMock
-	RouteMockReset
+forgejo.org / modules / web
+RouteMock
+RouteMockReset
 
-forgejo.org/modules/zstd
-	NewWriter
-	Writer.Write
-	Writer.Close
+forgejo.org / modules / zstd
+NewWriter
+Writer.Write
+Writer.Close
 
-forgejo.org/routers/web/org
-	MustEnableProjects
+forgejo.org / routers / web / org
+MustEnableProjects
 
-forgejo.org/services/context
-	GetPrivateContext
+forgejo.org / services / context
+GetPrivateContext
 
-forgejo.org/services/repository
-	IsErrForkAlreadyExist
+forgejo.org / services / repository
+IsErrForkAlreadyExist
 
-forgejo.org/services/repository/files
-	ContentType.String
+forgejo.org / services / repository / files
+ContentType.String
 
-forgejo.org/services/repository/gitgraph
-	Parser.Reset
+forgejo.org / services / repository / gitgraph
+Parser.Reset
 
-forgejo.org/services/webhook
-	NewNotifier
+forgejo.org / services / webhook
+NewNotifier
 

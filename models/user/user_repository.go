@@ -75,6 +75,32 @@ func FindFederatedUser(ctx context.Context, externalID string, federationHostID 
 	return user, federatedUser, nil
 }
 
+func GetFederatedUserByKeyID(ctx context.Context, keyID string) (*User, *FederatedUser, error) {
+	federatedUser := new(FederatedUser)
+	user := new(User)
+	has, err := db.GetEngine(ctx).Where("key_id=?", keyID).Get(federatedUser)
+	if err != nil {
+		return nil, nil, err
+	} else if !has {
+		return nil, nil, fmt.Errorf("No FederatedUser for keyId %v", keyID)
+	}
+	has, err = db.GetEngine(ctx).ID(federatedUser.UserID).Get(user)
+	if err != nil {
+		return nil, nil, err
+	} else if !has {
+		return nil, nil, fmt.Errorf("User %v for federated user is missing", federatedUser.UserID)
+	}
+
+	if res, err := validation.IsValid(*user); !res {
+		return nil, nil, err
+	}
+	if res, err := validation.IsValid(*federatedUser); !res {
+		return nil, nil, err
+	}
+
+	return user, federatedUser, nil
+}
+
 func DeleteFederatedUser(ctx context.Context, userID int64) error {
 	_, err := db.GetEngine(ctx).Delete(&FederatedUser{UserID: userID})
 	return err

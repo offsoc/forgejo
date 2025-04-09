@@ -151,7 +151,7 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 
 	// 2. Fetch the public key of the other actor
 	// Try if the signing actor is an already known federated user
-	federationUser, err := user.GetFederatedUserByKeyID(ctx, idIRI.String())
+	_, federationUser, err := user.GetFederatedUserByKeyID(ctx, idIRI.String())
 	if err != nil {
 		return false, err
 	}
