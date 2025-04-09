@@ -149,7 +149,7 @@ func GetFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.Fe
 	if err != nil {
 		return nil, err
 	}
-	federationHost, err := forgefed.FindFederationHostByFqdn(ctx, rawActorID.Host)
+	federationHost, err := forgefed.FindFederationHostByFqdnAndPort(ctx, rawActorID.Host, rawActorID.HostPort)
 	if err != nil {
 		return nil, err
 	}
