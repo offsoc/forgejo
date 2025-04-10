@@ -1,5 +1,6 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2025 Informatyka Boguslawski sp. z o.o. sp.k. <https://www.ib.pl>
+// SPDX-License-Identifier: MIT AND GPL-3.0-or-later
 
 package ldap
 
@@ -50,16 +51,37 @@ func (source *Source) Authenticate(ctx context.Context, user *user_model.User, u
 		}
 		if user != nil && !user.ProhibitLogin {
 			opts := &user_service.UpdateOptions{}
+
+			fullName := composeFullName(sr.Name, sr.Surname, sr.Username)
+			if user.FullName != fullName {
+				// Update user fullname if changed.
+				opts.FullName = optional.Some(fullName)
+			}
+
+			if !user.IsActive {
+				// User existing in LDAP should be active in application.
+				opts.IsActive = optional.Some(true)
+			}
+
 			if len(source.AdminFilter) > 0 && user.IsAdmin != sr.IsAdmin {
 				// Change existing admin flag only if AdminFilter option is set
 				opts.IsAdmin = optional.Some(sr.IsAdmin)
 			}
+
 			if !sr.IsAdmin && len(source.RestrictedFilter) > 0 && user.IsRestricted != sr.IsRestricted {
 				// Change existing restricted flag only if RestrictedFilter option is set
 				opts.IsRestricted = optional.Some(sr.IsRestricted)
 			}
-			if opts.IsAdmin.Has() || opts.IsRestricted.Has() {
+
+			if opts.FullName.Has() || opts.IsActive.Has() || opts.IsAdmin.Has() || opts.IsRestricted.Has() {
 				if err := user_service.UpdateUser(ctx, user, opts); err != nil {
+					return nil, err
+				}
+			}
+
+			if !strings.EqualFold(user.Email, sr.Mail) {
+				// Update user e-mail if changed.
+				if err := user_service.ReplacePrimaryEmailAddress(ctx, user, sr.Mail); err != nil {
 					return nil, err
 				}
 			}
