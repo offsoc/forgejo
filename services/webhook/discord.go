@@ -16,6 +16,7 @@ import (
 	"unicode/utf8"
 
 	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/base"
 	"forgejo.org/modules/git"
 	"forgejo.org/modules/json"
 	"forgejo.org/modules/log"
@@ -364,7 +365,7 @@ func (d discordConvertor) createPayload(s *api.User, title, text, url string, co
 		Embeds: []DiscordEmbed{
 			{
 				Title:       title,
-				Description: util.TruncateRunes(text, discordDescriptionCharactersLimit),
+				Description: base.TruncateString(text, discordDescriptionCharactersLimit),
 				URL:         url,
 				Color:       color,
 				Author: DiscordEmbedAuthor{

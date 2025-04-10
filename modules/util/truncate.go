@@ -54,12 +54,3 @@ func SplitTrimSpace(input, sep string) []string {
 
 	return stringList
 }
-
-// TruncateRunes returns a truncated string with given rune limit,
-// it returns input string if its rune length doesn't exceed the limit.
-func TruncateRunes(str string, limit int) string {
-	if utf8.RuneCountInString(str) < limit {
-		return str
-	}
-	return string([]rune(str)[:limit])
-}
