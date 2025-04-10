@@ -91,6 +91,7 @@
     "license-checker-rseidelsohn": "4.4.2",
     "markdownlint-cli": "0.44.0",
     "postcss-html": "1.8.0",
+    "sharp": "0.34.1",
     "stylelint": "16.17.0",
     "stylelint-declaration-block-no-ignored-properties": "2.8.0",
     "stylelint-declaration-strict-value": "1.10.11",
