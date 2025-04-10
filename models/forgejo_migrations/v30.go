@@ -4,7 +4,6 @@
 package forgejo_migrations //nolint:revive
 
 import (
-	"fmt"
 	"time"
 
 	"forgejo.org/models/migrations/base"
@@ -60,23 +59,23 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 			return err
 		}
 		if !has {
-			return fmt.Errorf("user not found %v", federatedUser.UserID)
-		}
+			sessMigration.Delete(federatedUser)
+		} else {
+			// Migrate User.NormalizedFederatedURI -> FederatedUser.NormalizedOriginalUrl
+			sql := "UPDATE `federated_user` SET `normalized_original_url` = ? WHERE `id` = ?"
+			if _, err := sessMigration.Exec(sql, user.NormalizedFederatedURI, federatedUser.FederationHostID); err != nil {
+				return err
+			}
 
-		// Migrate User.NormalizedFederatedURI -> FederatedUser.NormalizedOriginalUrl
-		sql := "UPDATE `federated_user` SET `normalized_original_url` = ? WHERE `id` = ?"
-		if _, err := sessMigration.Exec(sql, user.NormalizedFederatedURI, federatedUser.FederationHostID); err != nil {
-			return err
-		}
-
-		// Migrate (Port, Schema) FederatedUser.NormalizedOriginalUrl -> FederationHost.(Port, Schema)
-		actorID, err := forgefed.NewActorID(user.NormalizedFederatedURI)
-		if err != nil {
-			return err
-		}
-		sql = "UPDATE `federation_host` SET `host_port` = ?, `host_schema` = ? WHERE `id` = ?"
-		if _, err := sessMigration.Exec(sql, actorID.HostPort, actorID.HostSchema, federatedUser.FederationHostID); err != nil {
-			return err
+			// Migrate (Port, Schema) FederatedUser.NormalizedOriginalUrl -> FederationHost.(Port, Schema)
+			actorID, err := forgefed.NewActorID(user.NormalizedFederatedURI)
+			if err != nil {
+				return err
+			}
+			sql = "UPDATE `federation_host` SET `host_port` = ?, `host_schema` = ? WHERE `id` = ?"
+			if _, err := sessMigration.Exec(sql, actorID.HostPort, actorID.HostSchema, federatedUser.FederationHostID); err != nil {
+				return err
+			}
 		}
 	}
 
