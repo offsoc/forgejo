@@ -19,7 +19,7 @@
     "themes.names.forgejo-dark": "Forgejo donker",
     "error.not_found.title": "Pagina niet gevonden",
     "alert.asset_load_failed": "Het laden van asset-bestanden van {path} is mislukt. Controleer of de asset-bestanden toegankelijk zijn.",
-    "settings.adopt": "Adopteer",
     "install.invalid_lfs_path": "Kan de LFS-root niet aanmaken op het opgegeven pad: %[1]s",
-    "install.lfs_jwt_secret_failed": "Kan geen LFS JWT-geheim genereren: %[1]s"
+    "alert.range_error": " moet een getal zijn tussen %[1]s en %[2]s.",
+    "meta.last_line": "Wist je dat de paprika, behalve in de bekende kleuren rood, geel, oranje en groen, ook in de kleuren wit, paars, lila, muntgroen en bruin voorkomt."
 }

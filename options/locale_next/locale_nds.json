@@ -19,8 +19,7 @@
     "themes.names.forgejo-auto": "Forgejo (Systeem-Thema nagahn)",
     "error.not_found.title": "Sied nich funnen",
     "alert.asset_load_failed": "Kunn Objekt-Dateien ut {path} nich laden. Bidde wees wiss, dat up de Objekt-Dateien togriepen worden kann.",
-    "install.lfs_jwt_secret_failed": "Kunn dat LFS-JWT-Geheemst nich maken: %[1]s",
-    "settings.adopt": "Övernehmen",
     "install.invalid_lfs_path": "Kunn de LFS-Ruut an de angeven Padd nich maken: %[1]s",
-    "alert.range_error": " mutt eene Tahl tüsken %[1]s un %[2]s wesen."
+    "alert.range_error": " mutt eene Tahl tüsken %[1]s un %[2]s wesen.",
+    "meta.last_line": "Moin!"
 }

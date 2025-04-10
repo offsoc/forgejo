@@ -18,5 +18,8 @@
     "themes.names.forgejo-light": "Forgejo hell",
     "themes.names.forgejo-dark": "Forgejo dunkel",
     "error.not_found.title": "Seite nicht gefunden",
-    "alert.asset_load_failed": "Konnte Asset-Dateien nicht von {path} laden. Bitte stelle sicher, dass auf die Asset-Dateien zugegriffen werden kann."
+    "alert.asset_load_failed": "Konnte Asset-Dateien nicht von {path} laden. Bitte stelle sicher, dass auf die Asset-Dateien zugegriffen werden kann.",
+    "install.invalid_lfs_path": "Der LFS-Root konnte nicht am angegebenen Pfad erstellt werden: %[1]s",
+    "alert.range_error": " muss eine Zahl zwischen %[1]s und %[2]s sein.",
+    "meta.last_line": "Vielen Dank für die Übersetzung von Forgejo! Diese Zeile wird von den Benutzern nicht gesehen, dient aber anderen Zwecken im Übersetzungsmanagement. Du kannst eine lustige Tatsache in der Übersetzung platzieren, anstatt sie zu übersetzen."
 }

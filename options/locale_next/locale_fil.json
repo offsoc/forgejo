@@ -17,5 +17,9 @@
     "home.explore_repos": "Tuklasin ang mga repositoryo",
     "home.explore_users": "Tuklasin ang mga user",
     "home.explore_orgs": "Tuklasin ang mga organisasyon",
-    "error.not_found.title": "Hindi nahanap ang pahina"
+    "error.not_found.title": "Hindi nahanap ang pahina",
+    "alert.asset_load_failed": "Nabigong i-load ang mga asset file mula sa {path}. Siguraduhin na maa-access ang mga asset file.",
+    "install.invalid_lfs_path": "Nabigong gawin ang LFS root sa tinakdang path: %[1]s",
+    "alert.range_error": " dapat ay numero sa pagitan ng %[1]s at %[2]s.",
+    "meta.last_line": "Sayori... I love you. — MC from Doki Doki Literature Club"
 }
