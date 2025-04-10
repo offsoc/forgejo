@@ -1,6 +1,7 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2020 The Gitea Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2025 Informatyka Boguslawski sp. z o.o. sp.k. <https://www.ib.pl>
+// SPDX-License-Identifier: MIT AND GPL-3.0-or-later
 
 package ldap
 
@@ -13,6 +14,7 @@ import (
 
 	"code.gitea.io/gitea/modules/container"
 	"code.gitea.io/gitea/modules/log"
+	"code.gitea.io/gitea/modules/setting"
 
 	"github.com/go-ldap/ldap/v3"
 )
@@ -251,10 +253,21 @@ func (source *Source) getUserAttributeListedInGroup(entry *ldap.Entry) string {
 // SearchEntry : search an LDAP source if an entry (name, passwd) is valid and in the specific filter
 func (source *Source) SearchEntry(name, passwd string, directBind bool) *SearchResult {
 	// See https://tools.ietf.org/search/rfc4513#section-5.1.2
-	if len(passwd) == 0 {
+	// Don't authenticate against LDAP if already authenticated by reverse proxy.
+	if setting.Service.EnableReverseProxyAuth {
+		if directBind {
+			log.Debug("Cannot bind pre-authenticated user %s. BindDN must be used.", name)
+			return nil
+		}
+		if !source.AttributesInBind {
+			log.Debug("Cannot get attributes for pre-authenticated user %s without --attributes-in-bind.", name)
+			return nil
+		}
+	} else if len(passwd) == 0 {
 		log.Debug("Auth. failed for %s, password cannot be empty", name)
 		return nil
 	}
+
 	l, err := dial(source)
 	if err != nil {
 		log.Error("LDAP Connect error, %s:%v", source.Host, err)
@@ -390,8 +403,8 @@ func (source *Source) SearchEntry(name, passwd string, directBind bool) *SearchR
 		}
 	}
 
-	if !directBind && source.AttributesInBind {
-		// binds user (checking password) after looking-up attributes in BindDN context
+	if !directBind && source.AttributesInBind && !setting.Service.EnableReverseProxyAuth {
+		// binds user (checking password) after looking-up attributes in BindDN context if not already authenticated.
 		err = bindUser(l, userDN, passwd)
 		if err != nil {
 			return nil
