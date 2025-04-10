@@ -1,10 +1,12 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2025 Informatyka Boguslawski sp. z o.o. sp.k. <https://www.ib.pl>
+// SPDX-License-Identifier: MIT AND GPL-3.0-or-later
 
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -67,6 +69,15 @@ func (r *ReverseProxy) getUserFromAuthUser(req *http.Request) (*user_model.User,
 	return user, nil
 }
 
+func (r *ReverseProxy) getUsernameFromAuthUser(req *http.Request) string {
+	username := r.getUserName(req)
+	if len(username) == 0 {
+		return ""
+	}
+	log.Trace("ReverseProxy Authorization: Found username: %s", username)
+	return username
+}
+
 // getEmail extracts the email from the "setting.ReverseProxyAuthEmail" header
 func (r *ReverseProxy) getEmail(req *http.Request) string {
 	return strings.TrimSpace(req.Header.Get(setting.ReverseProxyAuthEmail))
@@ -100,31 +111,108 @@ func (r *ReverseProxy) getUserFromAuthEmail(req *http.Request) *user_model.User 
 	return user
 }
 
+func (r *ReverseProxy) getUsernameFromAuthEmail(req *http.Request) string {
+	if !setting.Service.EnableReverseProxyEmail {
+		return ""
+	}
+	email := r.getEmail(req)
+	if len(email) == 0 {
+		return ""
+	}
+	log.Trace("ReverseProxy Authorization: Found email: %s", email)
+
+	user, err := user_model.GetUserByEmail(req.Context(), email)
+	if err != nil {
+		// Do not allow auto-registration, we don't have a username here
+		if !user_model.IsErrUserNotExist(err) {
+			log.Error("GetUserByEmail: %v", err)
+		}
+		return ""
+	}
+	return user.LoginName
+}
+
 // Verify attempts to load a user object based on headers sent by the reverse proxy.
 // First it will attempt to load it based on the username (see docs for getUserFromAuthUser),
 // and failing that it will attempt to load it based on the email (see docs for getUserFromAuthEmail).
-// Returns nil if the headers are empty or the user is not found.
+// Returns nil if the headers are empty or the user is not found or internal API is being called.
 func (r *ReverseProxy) Verify(req *http.Request, w http.ResponseWriter, store DataStore, sess SessionStore) (*user_model.User, error) {
-	user, err := r.getUserFromAuthUser(req)
-	if err != nil {
-		return nil, err
+
+	// Internal API should not use this auth method.
+	if middleware.IsInternalPath(req) {
+		return nil, nil
 	}
-	if user == nil {
-		user = r.getUserFromAuthEmail(req)
+
+	var user *user_model.User = nil
+
+	if r.isAutoRegisterAllowed() {
+
+		// Use auto registration from reverse proxy if ENABLE_REVERSE_PROXY_AUTO_REGISTRATION enabled.
+
+		user, err := r.getUserFromAuthUser(req)
+		if err != nil {
+			return nil, err
+		}
 		if user == nil {
+			user = r.getUserFromAuthEmail(req)
+			if user == nil {
+				return nil, nil
+			}
+		}
+
+	} else {
+
+		// Use auto registration from other backends if ENABLE_REVERSE_PROXY_AUTO_REGISTRATION not enabled.
+		// UserSignIn is required for user auto registration and update on login from LDAP.
+
+		username := r.getUsernameFromAuthUser(req)
+		if username == "" {
+			username = r.getUsernameFromAuthEmail(req)
+		}
+
+		// Finish if no user found for reverse proxy auth.
+		if username == "" {
 			return nil, nil
 		}
+
+		u, _, err := UserSignIn(req.Context(), username, "")
+		if err != nil {
+			if !user_model.IsErrUserNotExist(err) {
+				log.Error("UserSignIn: %v", err)
+			}
+			return nil, err
+		}
+		user = u
+	}
+
+	if user == nil {
+		return nil, nil
 	}
 
 	// Make sure requests to API paths, attachment downloads, git and LFS do not create a new session
 	if !middleware.IsAPIPath(req) && !isAttachmentDownload(req) && !isGitRawOrAttachOrLFSPath(req) {
 		if sess != nil && (sess.Get("uid") == nil || sess.Get("uid").(int64) != user.ID) {
-			handleSignIn(w, req, sess, user)
-		}
-	}
-	store.GetData()["IsReverseProxy"] = true
 
-	log.Trace("ReverseProxy Authorization: Logged in user %-v", user)
+			// Register last login.
+			user.SetLastLogin()
+
+			if err := user_model.UpdateUserCols(req.Context(), user, "last_login_unix"); err != nil {
+				log.Error(fmt.Sprintf("ReverseProxy Authorization: error updating user last login time [user: %d]", user.ID))
+			}
+
+			// Initialize new session. Will set lang and CSRF cookies.
+			handleSignIn(w, req, sess, user)
+
+			log.Trace("ReverseProxy Authorization: Logged in user %-v", user)
+		}
+
+		// Unfortunatelly we cannot do redirect here (would break git HTTP requests) to
+		// reload page with user locale so first page after login may be displayed in
+		// wrong language. Language handling in SSO mode should be reconsidered
+		// in future gitea versions.
+	}
+
+	store.GetData()["IsReverseProxy"] = true
 	return user, nil
 }
 
