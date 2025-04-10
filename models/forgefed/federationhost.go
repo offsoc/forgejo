@@ -40,7 +40,6 @@ func NewFederationHost(hostFqdn string, nodeInfo NodeInfo, port uint16, schema s
 }
 
 // Validate collects error strings in a slice and returns this
-// ToDo validate port>0, schema{https|http}
 func (host FederationHost) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(host.HostFqdn, "HostFqdn")...)

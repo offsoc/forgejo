@@ -55,10 +55,10 @@ func (id ActorID) AsURI() string {
 func (id ActorID) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(id.ID, "userId")...)
-	result = append(result, validation.ValidateNotEmpty(id.HostSchema, "hostSchema")...)
 	result = append(result, validation.ValidateNotEmpty(id.Path, "path")...)
 	result = append(result, validation.ValidateNotEmpty(id.Host, "host")...)
 	result = append(result, validation.ValidateNotEmpty(id.HostPort, "hostPort")...)
+	result = append(result, validation.ValidateNotEmpty(id.HostSchema, "hostSchema")...)
 	result = append(result, validation.ValidateNotEmpty(id.UnvalidatedInput, "unvalidatedInput")...)
 
 	if id.UnvalidatedInput != id.AsURI() {
