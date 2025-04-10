@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"forgejo.org/models"
-	actions_model "forgejo.org/models/actions"
 	"forgejo.org/models/db"
 	"forgejo.org/models/organization"
 	quota_model "forgejo.org/models/quota"
@@ -1034,7 +1033,7 @@ func SettingsPost(ctx *context.Context) {
 			return
 		}
 
-		if err := actions_model.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
+		if err := actions_service.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
 			log.Error("CleanRepoScheduleTasks for archived repo %s/%s: %v", ctx.Repo.Owner.Name, repo.Name, err)
 		}
 

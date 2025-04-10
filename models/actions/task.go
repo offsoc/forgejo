@@ -17,10 +17,8 @@ import (
 	"forgejo.org/modules/timeutil"
 	"forgejo.org/modules/util"
 
-	runnerv1 "code.gitea.io/actions-proto-go/runner/v1"
 	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/nektos/act/pkg/jobparser"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"xorm.io/builder"
 )
 
@@ -337,140 +335,6 @@ func UpdateTask(ctx context.Context, task *ActionTask, cols ...string) error {
 	return err
 }
 
-// UpdateTaskByState updates the task by the state.
-// It will always update the task if the state is not final, even there is no change.
-// So it will update ActionTask.Updated to avoid the task being judged as a zombie task.
-func UpdateTaskByState(ctx context.Context, runnerID int64, state *runnerv1.TaskState) (*ActionTask, error) {
-	stepStates := map[int64]*runnerv1.StepState{}
-	for _, v := range state.Steps {
-		stepStates[v.Id] = v
-	}
-
-	ctx, commiter, err := db.TxContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer commiter.Close()
-
-	e := db.GetEngine(ctx)
-
-	task := &ActionTask{}
-	if has, err := e.ID(state.Id).Get(task); err != nil {
-		return nil, err
-	} else if !has {
-		return nil, util.ErrNotExist
-	} else if runnerID != task.RunnerID {
-		return nil, fmt.Errorf("invalid runner for task")
-	}
-
-	if task.Status.IsDone() {
-		// the state is final, do nothing
-		return task, nil
-	}
-
-	// state.Result is not unspecified means the task is finished
-	if state.Result != runnerv1.Result_RESULT_UNSPECIFIED {
-		task.Status = Status(state.Result)
-		task.Stopped = timeutil.TimeStamp(state.StoppedAt.AsTime().Unix())
-		if err := UpdateTask(ctx, task, "status", "stopped"); err != nil {
-			return nil, err
-		}
-		if _, err := UpdateRunJob(ctx, &ActionRunJob{
-			ID:      task.JobID,
-			Status:  task.Status,
-			Stopped: task.Stopped,
-		}, nil); err != nil {
-			return nil, err
-		}
-	} else {
-		// Force update ActionTask.Updated to avoid the task being judged as a zombie task
-		task.Updated = timeutil.TimeStampNow()
-		if err := UpdateTask(ctx, task, "updated"); err != nil {
-			return nil, err
-		}
-	}
-
-	if err := task.LoadAttributes(ctx); err != nil {
-		return nil, err
-	}
-
-	for _, step := range task.Steps {
-		var result runnerv1.Result
-		if v, ok := stepStates[step.Index]; ok {
-			result = v.Result
-			step.LogIndex = v.LogIndex
-			step.LogLength = v.LogLength
-			step.Started = convertTimestamp(v.StartedAt)
-			step.Stopped = convertTimestamp(v.StoppedAt)
-		}
-		if result != runnerv1.Result_RESULT_UNSPECIFIED {
-			step.Status = Status(result)
-		} else if step.Started != 0 {
-			step.Status = StatusRunning
-		}
-		if _, err := e.ID(step.ID).Update(step); err != nil {
-			return nil, err
-		}
-	}
-
-	if err := commiter.Commit(); err != nil {
-		return nil, err
-	}
-
-	return task, nil
-}
-
-func StopTask(ctx context.Context, taskID int64, status Status) error {
-	if !status.IsDone() {
-		return fmt.Errorf("cannot stop task with status %v", status)
-	}
-	e := db.GetEngine(ctx)
-
-	task := &ActionTask{}
-	if has, err := e.ID(taskID).Get(task); err != nil {
-		return err
-	} else if !has {
-		return util.ErrNotExist
-	}
-	if task.Status.IsDone() {
-		return nil
-	}
-
-	now := timeutil.TimeStampNow()
-	task.Status = status
-	task.Stopped = now
-	if _, err := UpdateRunJob(ctx, &ActionRunJob{
-		ID:      task.JobID,
-		Status:  task.Status,
-		Stopped: task.Stopped,
-	}, nil); err != nil {
-		return err
-	}
-
-	if err := UpdateTask(ctx, task, "status", "stopped"); err != nil {
-		return err
-	}
-
-	if err := task.LoadAttributes(ctx); err != nil {
-		return err
-	}
-
-	for _, step := range task.Steps {
-		if !step.Status.IsDone() {
-			step.Status = status
-			if step.Started == 0 {
-				step.Started = now
-			}
-			step.Stopped = now
-		}
-		if _, err := e.ID(step.ID).Update(step); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func FindOldTasksToExpire(ctx context.Context, olderThan timeutil.TimeStamp, limit int) ([]*ActionTask, error) {
 	e := db.GetEngine(ctx)
 
@@ -479,13 +343,6 @@ func FindOldTasksToExpire(ctx context.Context, olderThan timeutil.TimeStamp, lim
 	return tasks, e.Where("stopped > 0 AND stopped < ? AND log_expired = ?", olderThan, false).
 		Limit(limit).
 		Find(&tasks)
-}
-
-func convertTimestamp(timestamp *timestamppb.Timestamp) timeutil.TimeStamp {
-	if timestamp.GetSeconds() == 0 && timestamp.GetNanos() == 0 {
-		return timeutil.TimeStamp(0)
-	}
-	return timeutil.TimeStamp(timestamp.AsTime().Unix())
 }
 
 func logFileName(repoFullName string, taskID int64) string {

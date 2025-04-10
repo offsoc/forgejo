@@ -521,7 +521,7 @@ func Cancel(ctx *context_module.Context) {
 				}
 				continue
 			}
-			if err := actions_model.StopTask(ctx, job.TaskID, actions_model.StatusCancelled); err != nil {
+			if err := actions_service.StopTask(ctx, job.TaskID, actions_model.StatusCancelled); err != nil {
 				return err
 			}
 		}
