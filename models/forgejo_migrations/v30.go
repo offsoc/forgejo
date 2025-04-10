@@ -59,7 +59,10 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 			return err
 		}
 		if !has {
-			sessMigration.Delete(federatedUser)
+			_, err := sessMigration.Delete(federatedUser)
+			if err != nil {
+				return err
+			}
 		} else {
 			// Migrate User.NormalizedFederatedURI -> FederatedUser.NormalizedOriginalUrl
 			sql := "UPDATE `federated_user` SET `normalized_original_url` = ? WHERE `id` = ?"
