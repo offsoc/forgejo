@@ -199,7 +199,7 @@ export function initAdminCommon() {
     }
   }
 
-  if (document.querySelector('.admin.authentication')) {
+  if (document.querySelector('.admin.edit.authentication, .admin.new.authentication')) {
     const authNameEl = document.getElementById('auth_name');
     authNameEl.addEventListener('input', (el) => {
       // appSubUrl is either empty or is a path that starts with `/` and doesn't have a trailing slash.

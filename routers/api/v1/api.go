@@ -840,22 +840,22 @@ func Routes() *web.Route {
 			m.Group("/activitypub", func() {
 				// deprecated, remove in 1.20, use /user-id/{user-id} instead
 				m.Group("/user/{username}", func() {
-					m.Get("", activitypub.Person)
+					m.Get("", activitypub.ReqHTTPSignature(), activitypub.Person)
 					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.PersonInbox)
 				}, context.UserAssignmentAPI(), checkTokenPublicOnly())
 				m.Group("/user-id/{user-id}", func() {
-					m.Get("", activitypub.Person)
+					m.Get("", activitypub.ReqHTTPSignature(), activitypub.Person)
 					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.PersonInbox)
 				}, context.UserIDAssignmentAPI(), checkTokenPublicOnly())
 				m.Group("/actor", func() {
 					m.Get("", activitypub.Actor)
-					m.Post("/inbox", activitypub.ActorInbox)
+					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.ActorInbox)
 				})
 				m.Group("/repository-id/{repository-id}", func() {
-					m.Get("", activitypub.Repository)
+					m.Get("", activitypub.ReqHTTPSignature(), activitypub.Repository)
 					m.Post("/inbox",
 						bind(forgefed.ForgeLike{}),
-						// TODO: activitypub.ReqHTTPSignature(),
+						activitypub.ReqHTTPSignature(),
 						activitypub.RepositoryInbox)
 				}, context.RepositoryIDAssignmentAPI())
 			}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryActivityPub))
@@ -1355,6 +1355,12 @@ func Routes() *web.Route {
 					m.Post("", bind(api.UpdateRepoAvatarOption{}), repo.UpdateAvatar)
 					m.Delete("", repo.DeleteAvatar)
 				}, reqAdmin(), reqToken())
+				m.Group("/sync_fork", func() {
+					m.Get("", reqRepoReader(unit.TypeCode), repo.SyncForkDefaultInfo)
+					m.Post("", mustNotBeArchived, reqRepoWriter(unit.TypeCode), repo.SyncForkDefault)
+					m.Get("/{branch}", reqRepoReader(unit.TypeCode), repo.SyncForkBranchInfo)
+					m.Post("/{branch}", mustNotBeArchived, reqRepoWriter(unit.TypeCode), repo.SyncForkBranch)
+				})
 
 				m.Get("/{ball_type:tarball|zipball|bundle}/*", reqRepoReader(unit.TypeCode), repo.DownloadArchive)
 			}, repoAssignment(), checkTokenPublicOnly())

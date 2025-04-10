@@ -308,11 +308,6 @@ func (u *User) HTMLURL() string {
 	return setting.AppURL + url.PathEscape(u.Name)
 }
 
-// APActorID returns the IRI to the api endpoint of the user
-func (u *User) APActorID() string {
-	return fmt.Sprintf("%vapi/v1/activitypub/user-id/%v", setting.AppURL, url.PathEscape(fmt.Sprintf("%v", u.ID)))
-}
-
 // OrganisationLink returns the organization sub page link.
 func (u *User) OrganisationLink() string {
 	return setting.AppSubURL + "/org/" + url.PathEscape(u.Name)
@@ -389,9 +384,7 @@ func (u *User) SetPassword(passwd string) (err error) {
 		return err
 	}
 
-	if u.Salt, err = GetUserSalt(); err != nil {
-		return err
-	}
+	u.Salt = GetUserSalt()
 	if u.Passwd, err = hash.Parse(setting.PasswordHashAlgo).Hash(passwd, u.Salt); err != nil {
 		return err
 	}
@@ -561,13 +554,9 @@ func IsUserExist(ctx context.Context, uid int64, name string) (bool, error) {
 const SaltByteLength = 16
 
 // GetUserSalt returns a random user salt token.
-func GetUserSalt() (string, error) {
-	rBytes, err := util.CryptoRandomBytes(SaltByteLength)
-	if err != nil {
-		return "", err
-	}
+func GetUserSalt() string {
 	// Returns a 32 bytes long string.
-	return hex.EncodeToString(rBytes), nil
+	return hex.EncodeToString(util.CryptoRandomBytes(SaltByteLength))
 }
 
 // Note: The set of characters here can safely expand without a breaking change,
@@ -774,9 +763,7 @@ func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefa
 
 	u.LowerName = strings.ToLower(u.Name)
 	u.AvatarEmail = u.Email
-	if u.Rands, err = GetUserSalt(); err != nil {
-		return err
-	}
+	u.Rands = GetUserSalt()
 	if u.Passwd != "" {
 		if err = u.SetPassword(u.Passwd); err != nil {
 			return err

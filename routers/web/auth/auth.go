@@ -784,11 +784,7 @@ func ActivatePost(ctx *context.Context) {
 
 func handleAccountActivation(ctx *context.Context, user *user_model.User) {
 	user.IsActive = true
-	var err error
-	if user.Rands, err = user_model.GetUserSalt(); err != nil {
-		ctx.ServerError("UpdateUser", err)
-		return
-	}
+	user.Rands = user_model.GetUserSalt()
 	if err := user_model.UpdateUserCols(ctx, user, "is_active", "rands"); err != nil {
 		if user_model.IsErrUserNotExist(err) {
 			ctx.NotFound("UpdateUserCols", err)

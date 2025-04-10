@@ -10,17 +10,12 @@ import (
 	"encoding/json" //nolint:depguard
 	"fmt"
 
-	"gopkg.in/ini.v1" //nolint:depguard
+	"forgejo.org/modules/setting"
 )
 
 func IterateMessagesContent(localeContent []byte, onMsgid func(string, string) error) error {
-	// Same configuration as Forgejo uses.
-	cfg := ini.Empty(ini.LoadOptions{
-		IgnoreContinuation: true,
-	})
-	cfg.NameMapper = ini.SnackCase
-
-	if err := cfg.Append(localeContent); err != nil {
+	cfg, err := setting.NewConfigProviderForLocale(localeContent)
+	if err != nil {
 		return err
 	}
 
