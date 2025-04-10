@@ -20,5 +20,8 @@
     "themes.names.forgejo-light": "Forgejo – světlé",
     "themes.names.forgejo-dark": "Forgejo – tmavé",
     "error.not_found.title": "Stránka nenalezena",
-    "alert.asset_load_failed": "Nepodařilo se načíst soubory příloh z {path}. Ujistěte se, že jsou dané soubory přístupné."
+    "alert.asset_load_failed": "Nepodařilo se načíst soubory příloh z {path}. Ujistěte se, že jsou dané soubory přístupné.",
+    "install.invalid_lfs_path": "Nepodařilo se vytvořit kořen LFS na zvolené cestě: %[1]s",
+    "alert.range_error": " musí být číslo mezi %[1]s a %[2]s.",
+    "meta.last_line": "Díky všem přispěvatelům za pomoc!"
 }

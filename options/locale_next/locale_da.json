@@ -20,7 +20,6 @@
     "error.not_found.title": "Siden blev ikke fundet",
     "alert.asset_load_failed": "Kunne ikke indlæse aktivfiler fra {path}. Sørg for, at aktivfilerne er tilgængelige.",
     "install.invalid_lfs_path": "Kan ikke oprette LFS-roden på den angivne sti: %[1]s",
-    "install.lfs_jwt_secret_failed": "Kan ikke generere en LFS JWT-hemmelighed: %[1]s",
-    "settings.adopt": "Adoptere",
-    "alert.range_error": " skal være et tal mellem %[1]s og %[2]s."
+    "alert.range_error": " skal være et tal mellem %[1]s og %[2]s.",
+    "meta.last_line": "Livet er det dejligste eventyr. - (H.C. Andersen)"
 }
