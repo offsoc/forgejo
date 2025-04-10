@@ -142,6 +142,7 @@ func SlackLinkToRef(repoURL, ref string) string {
 	return SlackLinkFormatter(url, refName)
 }
 
+// TODO: fix spelling to Converter
 // Create implements payloadConvertor Create method
 func (s slackConvertor) Create(p *api.CreatePayload) (SlackPayload, error) {
 	refLink := SlackLinkToRef(p.Repo.HTMLURL, p.Ref)

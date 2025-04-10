@@ -6,6 +6,7 @@ package webhook
 import (
 	"context"
 
+	actions_model "forgejo.org/models/actions"
 	issues_model "forgejo.org/models/issues"
 	packages_model "forgejo.org/models/packages"
 	"forgejo.org/models/perm"
@@ -885,6 +886,27 @@ func (m *webhookNotifier) PackageCreate(ctx context.Context, doer *user_model.Us
 
 func (m *webhookNotifier) PackageDelete(ctx context.Context, doer *user_model.User, pd *packages_model.PackageDescriptor) {
 	notifyPackage(ctx, doer, pd, api.HookPackageDeleted)
+}
+
+func (m *webhookNotifier) ActionRunNowDone(ctx context.Context, run *actions_model.ActionRun, priorStatus actions_model.Status, lastRun *actions_model.ActionRun) {
+	source := EventSource{
+		Repository: run.Repo,
+		Owner:      run.TriggerUser,
+	}
+
+	if run.Status.IsSuccess() {
+		if lastRun.Status.IsSuccess() {
+			return
+		}
+
+		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunSuccessAfterFailure, &api.PackagePayload{}); err != nil {
+			log.Error("PrepareWebhooks: %v", err)
+		}
+	} else {
+		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunFailure, &api.PackagePayload{}); err != nil {
+			log.Error("PrepareWebhooks: %v", err)
+		}
+	}
 }
 
 func notifyPackage(ctx context.Context, sender *user_model.User, pd *packages_model.PackageDescriptor, action api.HookPackageAction) {
