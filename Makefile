@@ -1017,8 +1017,7 @@ generate-gomock:
 
 .PHONY: generate-images
 generate-images: | node_modules
-	npm install --no-save fabric@6 imagemin-zopfli@7
-	node tools/generate-images.js $(TAGS)
+	node tools/generate-images.js
 
 .PHONY: generate-manpage
 generate-manpage:
