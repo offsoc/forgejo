@@ -103,7 +103,9 @@ func DeletePackageVersion(ctx *context.Context) {
 }
 
 func CleanupExpiredData(ctx *context.Context) {
-	if err := packages_cleanup_service.CleanupExpiredData(ctx, time.Duration(0)); err != nil {
+	// Cleanup orphaned packages older than one hour.
+	// Don't cleanup newer packages because it can break docker images if they are pushed at same time.
+	if err := packages_cleanup_service.CleanupExpiredData(ctx, 1*time.Hour); err != nil {
 		ctx.ServerError("CleanupExpiredData", err)
 		return
 	}
