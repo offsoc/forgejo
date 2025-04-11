@@ -160,3 +160,30 @@ func (r *mockRunner) execTask(t *testing.T, task *runnerv1.Task, outcome *mockTa
 	require.NoError(t, err)
 	assert.Equal(t, outcome.result, resp.Msg.State.Result)
 }
+
+// Simply pretend we're running the task and succeed at that.
+// We're that great!
+func (r *mockRunner) succeedAtTask(t *testing.T, task *runnerv1.Task) {
+	resp, err := r.client.runnerServiceClient.UpdateTask(t.Context(), connect.NewRequest(&runnerv1.UpdateTaskRequest{
+		State: &runnerv1.TaskState{
+			Id:        task.Id,
+			Result:    runnerv1.Result_RESULT_SUCCESS,
+			StoppedAt: timestamppb.Now(),
+		},
+	}))
+	require.NoError(t, err)
+	assert.Equal(t, runnerv1.Result_RESULT_SUCCESS, resp.Msg.State.Result)
+}
+
+// Pretend we're running the task, do nothing and fail at that.
+func (r *mockRunner) failAtTask(t *testing.T, task *runnerv1.Task) {
+	resp, err := r.client.runnerServiceClient.UpdateTask(t.Context(), connect.NewRequest(&runnerv1.UpdateTaskRequest{
+		State: &runnerv1.TaskState{
+			Id:        task.Id,
+			Result:    runnerv1.Result_RESULT_FAILURE,
+			StoppedAt: timestamppb.Now(),
+		},
+	}))
+	require.NoError(t, err)
+	assert.Equal(t, runnerv1.Result_RESULT_FAILURE, resp.Msg.State.Result)
+}
