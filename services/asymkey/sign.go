@@ -90,6 +90,13 @@ func SigningKey(ctx context.Context, repoPath string) (string, *git.Signature) {
 		return "", nil
 	}
 
+	if setting.Repository.Signing.Format == "ssh" {
+		return setting.Repository.Signing.SigningKey, &git.Signature{
+			Name:  setting.Repository.Signing.SigningName,
+			Email: setting.Repository.Signing.SigningEmail,
+		}
+	}
+
 	if setting.Repository.Signing.SigningKey == "default" || setting.Repository.Signing.SigningKey == "" {
 		// Can ignore the error here as it means that commit.gpgsign is not set
 		value, _, _ := git.NewCommand(ctx, "config", "--get", "commit.gpgsign").RunStdString(&git.RunOpts{Dir: repoPath})
