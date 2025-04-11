@@ -109,7 +109,7 @@
 											<form class="tw-inline-block" action="{{$.RepoLink}}/settings/tags/delete" method="post">
 												{{$.CsrfTokenHtml}}
 												<input type="hidden" name="id" value="{{.ID}}">
-												<button class="ui tiny red button">{{ctx.Locale.Tr "remove"}}</button>
+												<button class="ui tiny danger button">{{ctx.Locale.Tr "remove"}}</button>
 											</form>
 										</td>
 									</tr>

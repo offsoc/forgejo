@@ -47,10 +47,10 @@
 				<button type="submit" name="type" value="comment" class="ui submit tiny basic button btn-submit">{{ctx.Locale.Tr "repo.diff.review.comment"}}</button>
 				{{if $showSelfTooltip}}
 					<span class="tw-inline-block" data-tooltip-content="{{ctx.Locale.Tr "repo.diff.review.self_reject"}}">
-						<button type="submit" name="type" value="reject" disabled class="ui submit red tiny button btn-submit">{{ctx.Locale.Tr "repo.diff.review.reject"}}</button>
+						<button type="submit" name="type" value="reject" disabled class="ui submit danger tiny button btn-submit">{{ctx.Locale.Tr "repo.diff.review.reject"}}</button>
 					</span>
 				{{else}}
-					<button type="submit" name="type" value="reject" class="ui submit red tiny button btn-submit">{{ctx.Locale.Tr "repo.diff.review.reject"}}</button>
+					<button type="submit" name="type" value="reject" class="ui submit danger tiny button btn-submit">{{ctx.Locale.Tr "repo.diff.review.reject"}}</button>
 				{{end}}
 			</form>
 		</div>

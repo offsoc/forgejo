@@ -82,7 +82,7 @@
 								.DownloadCount)}} · {{.Size | ctx.Locale.TrSize}}</span>
 							{{end}}
 						</div>
-						<a class="ui mini red button remove-rel-attach tw-ml-3" data-id="{{.ID}}" data-uuid="{{.UUID}}">
+						<a class="ui mini danger button remove-rel-attach tw-ml-3" data-id="{{.ID}}" data-uuid="{{.UUID}}">
 							{{ctx.Locale.Tr "remove"}}
 						</a>
 					</div>
@@ -95,7 +95,7 @@
 						<input name="attachment-template-new-name" placeholder="{{ctx.Locale.Tr "repo.release.asset_name"}}" class="attachment_edit">
 						<input name="attachment-template-new-exturl" placeholder="{{ctx.Locale.Tr "repo.release.asset_external_url"}}" class="attachment_edit">
 					</div>
-					<a class="ui mini red button remove-rel-attach tw-ml-3">
+					<a class="ui mini danger button remove-rel-attach tw-ml-3">
 						{{ctx.Locale.Tr "remove"}}
 					</a>
 				</div>
@@ -139,7 +139,7 @@
 							<a class="ui small button" href="{{.RepoLink}}/releases">
 								{{ctx.Locale.Tr "repo.release.cancel"}}
 							</a>
-							<a class="ui small red button delete-button" data-url="{{$.RepoLink}}/releases/delete" data-id="{{.ID}}">
+							<a class="ui small danger button delete-button" data-url="{{$.RepoLink}}/releases/delete" data-id="{{.ID}}">
 								{{ctx.Locale.Tr "repo.release.delete_release"}}
 							</a>
 							{{if .IsDraft}}

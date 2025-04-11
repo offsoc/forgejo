@@ -71,7 +71,7 @@
 					</div>
 				</div>
 				<div class="flex-item-trailing">
-					<button class="ui red tiny button delete-button" data-modal-id="delete-gpg" data-url="{{$.Link}}/delete?type=gpg" data-id="{{.ID}}">
+					<button class="ui danger tiny button delete-button" data-modal-id="delete-gpg" data-url="{{$.Link}}/delete?type=gpg" data-id="{{.ID}}">
 						{{ctx.Locale.Tr "settings.delete_key"}}
 					</button>
 					{{if and (not .Verified) (ne $.VerifyingID .KeyID)}}
@@ -104,7 +104,7 @@
 						<button class="ui primary button">
 							{{ctx.Locale.Tr "settings.gpg_key_verify"}}
 						</button>
-						<a class="ui red button" href="{{$.Link}}">
+						<a class="ui danger button" href="{{$.Link}}">
 							{{ctx.Locale.Tr "settings.cancel"}}
 						</a>
 					</form>

@@ -31,7 +31,7 @@ export default {
   computed: {
     mergeButtonStyleClass() {
       if (this.mergeForm.allOverridableChecksOk) return 'primary';
-      return this.autoMergeWhenSucceed ? 'primary' : 'red';
+      return this.autoMergeWhenSucceed ? 'primary' : 'danger';
     },
     forceMerge() {
       return this.mergeForm.canMergeNow && !this.mergeForm.allOverridableChecksOk;
@@ -138,7 +138,7 @@ export default {
 
     <div v-if="!showActionForm" class="tw-flex">
       <!-- the merge button -->
-      <div class="ui buttons merge-button" :class="[mergeForm.emptyCommit ? 'grey' : mergeForm.allOverridableChecksOk ? 'primary' : 'red']" @click="toggleActionForm(true)">
+      <div class="ui buttons merge-button" :class="[mergeForm.emptyCommit ? 'grey' : mergeForm.allOverridableChecksOk ? 'primary' : 'danger']" @click="toggleActionForm(true)">
         <button class="ui button">
           <svg-icon name="octicon-git-merge"/>
           <span class="button-text">

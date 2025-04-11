@@ -103,7 +103,7 @@
 			{{if and .IsSigned (ne .SignedUserID .ContextUser.ID)}}
 			<li class="follow" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
 				{{if $.IsFollowing}}
-					<button hx-post="{{.ContextUser.HomeLink}}?action=unfollow" class="ui basic red button">
+					<button hx-post="{{.ContextUser.HomeLink}}?action=unfollow" class="ui basic warning button">
 						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unfollow"}}
 					</button>
 				{{else}}
@@ -114,11 +114,11 @@
 			</li>
 			<li class="block" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
 				{{if $.IsBlocked}}
-					<button class="ui basic red button" hx-post="{{.ContextUser.HomeLink}}?action=unblock">
+					<button class="ui basic warning button" hx-post="{{.ContextUser.HomeLink}}?action=unblock">
 						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unblock"}}
 					</button>
 				{{else}}
-					<button type="submit" class="ui basic orange button" data-modal-id="block-user" hx-post="{{.ContextUser.HomeLink}}?action=block" hx-confirm="-">
+					<button type="submit" class="ui basic warning button" data-modal-id="block-user" hx-post="{{.ContextUser.HomeLink}}?action=block" hx-confirm="-">
 						{{svg "octicon-blocked"}} {{ctx.Locale.Tr "user.block"}}
 					</button>
 				{{end}}
