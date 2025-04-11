@@ -13,17 +13,8 @@ import (
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
 
-	_ "forgejo.org/models"
-	_ "forgejo.org/models/actions"
-	_ "forgejo.org/models/activities"
-	_ "forgejo.org/models/forgefed"
-
 	"github.com/stretchr/testify/require"
 )
-
-func TestMain(m *testing.M) {
-	unittest.MainTest(m)
-}
 
 func prepareExamplePackage(t *testing.T) *packages_model.Package {
 	require.NoError(t, unittest.PrepareTestDatabase())
