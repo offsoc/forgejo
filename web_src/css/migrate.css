@@ -1,3 +1,7 @@
+.migrate .svg.gitea-git {
+  color: #f05133;
+}
+
 .migrate-entries {
   display: grid !important;
   grid-template-columns: repeat(4, 1fr);

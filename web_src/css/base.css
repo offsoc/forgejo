@@ -1283,10 +1283,6 @@ svg.text.purple,
   width: 100%;
 }
 
-.migrate .svg.gitea-git {
-  color: var(--color-git);
-}
-
 .color-icon {
   display: inline-block;
   border-radius: var(--border-radius-full);
