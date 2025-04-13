@@ -16,5 +16,6 @@
     "home.welcome.activity_hint": "Wala pang laman ang iyong feed. Makikita dito ang iyong mga aksyon at aktibidad mula sa mga repositoryo na pinapanood mo.",
     "home.explore_repos": "Tuklasin ang mga repositoryo",
     "home.explore_users": "Tuklasin ang mga user",
-    "home.explore_orgs": "Tuklasin ang mga organisasyon"
+    "home.explore_orgs": "Tuklasin ang mga organisasyon",
+    "install.invalid_lfs_path": "Nabigong gawin ang LFS root sa tinakdang path: %[1]s"
 }
