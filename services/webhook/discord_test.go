@@ -175,7 +175,7 @@ func TestDiscordPayload(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Len(t, pl.Embeds, 1)
-		assert.Len(t, pl.Embeds[0].Description, 4096)
+		assert.Len(t, pl.Embeds[0].Description, 2000)
 	})
 
 	t.Run("IssueComment", func(t *testing.T) {
