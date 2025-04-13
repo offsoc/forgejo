@@ -227,8 +227,8 @@
   --color-active: var(--steel-650);
   --color-menu: var(--steel-700);
   --color-card: var(--steel-700);
-  --color-card-secondary: var(--steel-650);
-  --color-card-border: var(--steel-600);
+  --fancy-card-bg: var(--steel-650);
+  --fancy-card-border: var(--steel-600);
   --color-markup-table-row: #ffffff06;
   --color-markup-code-block: var(--steel-800);
   --color-markup-code-inline: var(--steel-850);

@@ -208,8 +208,8 @@
   --color-active: #e8e8ff24;
   --color-menu: #151a1e;
   --color-card: #151a1e;
-  --color-card-secondary: #14171a;
-  --color-card-border: #3b444a;
+  --fancy-card-bg: #14171a;
+  --fancy-card-border: #3b444a;
   --color-markup-table-row: #e8e8ff0f;
   --color-markup-code-block: #e8e8ff12;
   --color-markup-code-inline: #e8e8ff28;

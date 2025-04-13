@@ -19,7 +19,7 @@
   flex-direction: column;
   color: var(--color-text);
   background: var(--color-card);
-  border: 1px solid var(--color-card-border);
+  border: 1px solid var(--fancy-card-border);
   border-radius: var(--border-radius-large);
   transition: all 0.1s ease-in-out;
 }
@@ -48,13 +48,13 @@
   text-wrap: balance;
 }
 
-/* Desktop-only decorations */
+/* Desktop layout features */
 @media (min-width: 501px) {
   .migrate-entry .content {
     text-align: center;
-    border-top: 1px solid var(--color-card-border);
+    border-top: 1px solid var(--fancy-card-border);
     border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
-    background: var(--color-card-secondary);
+    background: var(--fancy-card-bg);
   }
 }
 
@@ -70,7 +70,7 @@
   }
 }
 
-/* Smartphone layout */
+/* Mobile layout features */
 @media (max-width: 500px) {
   .migrate-entries {
     grid-template-columns: repeat(1, 1fr);
@@ -79,7 +79,6 @@
     flex-direction: row;
   }
   .migrate-entry svg {
-    padding: 1.5rem;
     height: 100%;
     width: 100%;
     max-width: 128px;
