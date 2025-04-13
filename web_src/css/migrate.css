@@ -1,5 +1,6 @@
 .migrate .svg.gitea-git {
-  color: #f05133;
+  --git-logo-color: #f05133;
+  color: var(--git-logo-color);
 }
 
 .migrate-entries {
