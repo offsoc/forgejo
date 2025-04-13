@@ -16,5 +16,8 @@
     "home.explore_orgs": "Udforsk organisationer",
     "themes.names.forgejo-light": "Forgejo lys",
     "themes.names.forgejo-dark": "Forgejo mørk",
-    "themes.names.forgejo-auto": "Forgejo (følg systemtema)"
+    "themes.names.forgejo-auto": "Forgejo (følg systemtema)",
+    "settings.adopt": "Adoptere",
+    "install.invalid_lfs_path": "Kan ikke oprette LFS-roden på den angivne sti: %[1]s",
+    "install.lfs_jwt_secret_failed": "Kan ikke generere en LFS JWT-hemmelighed: %[1]s"
 }
