@@ -17,9 +17,9 @@
 							{{svg (printf "gitea-%s" .Name) 184}}
 						{{end}}
 						<div class="content">
-							<div class="header">
+							<h3>
 								{{.Title}}
-							</div>
+							</h3>
 							<div class="description">
 								{{ctx.Locale.Tr (printf "repo.migrate.%s.description" .Name)}}
 							</div>

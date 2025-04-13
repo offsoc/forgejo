@@ -28,12 +28,6 @@
   color: var(--color-text);
 }
 
-.migrate-entry .header {
-  font-weight: var(--font-weight-medium);
-  font-size: 1.28571429rem;
-  line-height: 1.28571429;
-}
-
 .migrate-entry .content {
   width: 100%;
   margin-top: .5rem;
