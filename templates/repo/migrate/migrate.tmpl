@@ -17,10 +17,10 @@
 							{{svg (printf "gitea-%s" .Name) 184}}
 						{{end}}
 						<div class="content">
-							<div class="header tw-text-center">
+							<div class="header">
 								{{.Title}}
 							</div>
-							<div class="description tw-text-center">
+							<div class="description">
 								{{ctx.Locale.Tr (printf "repo.migrate.%s.description" .Name)}}
 							</div>
 						</div>

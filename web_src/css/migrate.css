@@ -51,6 +51,7 @@
 /* Desktop-only decorations */
 @media (min-width: 501px) {
   .migrate-entry .content {
+    text-align: center;
     border-top: 1px solid var(--color-card-border);
     border-radius: 0 0 var(--border-radius-large) var(--border-radius-large);
     background: var(--color-card-secondary);
