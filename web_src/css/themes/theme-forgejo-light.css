@@ -243,6 +243,8 @@
   --color-active: #d4d4d8aa;
   --color-menu: var(--zinc-100);
   --color-card: var(--zinc-50);
+  --color-card-secondary: var(--zinc-100);
+  --color-card-border: var(--zinc-200);
   --color-markup-table-row: #ffffff06;
   --color-markup-code-block: var(--zinc-150);
   --color-markup-code-inline: var(--zinc-200);
