@@ -55,7 +55,7 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 
 	for _, federatedUser := range federatedUsers {
 		if federatedUser.NormalizedOriginalURL != "" {
-			log.Trace("xx: federatedUser was already migrated %v", federatedUser)
+			log.Trace("migration[30]: FederatedUser was already migrated %v", federatedUser)
 		} else {
 			user := &User{}
 			has, err := sessMigration.Where("id=?", federatedUser.UserID).Get(user)
@@ -64,7 +64,7 @@ func MigrateNormalizedFederatedURI(x *xorm.Engine) error {
 			}
 
 			if !has {
-				log.Warn("User missing for federated user: %v", federatedUser)
+				log.Debug("migration[30]: User missing for federated user: %v", federatedUser)
 				_, err := sessMigration.Delete(federatedUser)
 				if err != nil {
 					return err
