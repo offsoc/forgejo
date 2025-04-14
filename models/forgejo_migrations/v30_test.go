@@ -63,10 +63,19 @@ func Test_MigrateNormalizedFederatedURI(t *testing.T) {
 	require.NotNil(t, getColumn("user", "normalized_federated_uri"))
 	require.Nil(t, getColumn("federation_host", "host_port"))
 	require.Nil(t, getColumn("federation_host", "host_schema"))
+	cnt1, err := x.Table("federated_user").Count()
+	require.NoError(t, err)
+	require.Equal(t, int64(2), cnt1)
+
 	require.NoError(t, MigrateNormalizedFederatedURI(x))
+
 	require.Nil(t, getColumn("user", "normalized_federated_uri"))
 	require.NotNil(t, getColumn("federation_host", "host_port"))
 	require.NotNil(t, getColumn("federation_host", "host_schema"))
+	cnt2, err := x.Table("federated_user").Count()
+	require.NoError(t, err)
+	require.Equal(t, int64(1), cnt2)
+
 	// idempotent
 	require.NoError(t, MigrateNormalizedFederatedURI(x))
 }
