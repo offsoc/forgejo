@@ -9,5 +9,11 @@
         "many": "vuole unire %[1]d commit da <code>%[2]s</code> a <code id=\"%[4]s\">%[3]s</code>",
         "other": ""
     },
-    "search.milestone_kind": "Ricerca tappe..."
+    "search.milestone_kind": "Ricerca traguardi…",
+    "home.welcome.no_activity": "Nessun'attività",
+    "home.explore_repos": "Esplora i repositori",
+    "home.explore_users": "Esplora l'utenza",
+    "home.explore_orgs": "Esplora le organizzazioni",
+    "themes.names.forgejo-light": "Forgejo chiaro",
+    "themes.names.forgejo-dark": "Forgejo scuro"
 }

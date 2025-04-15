@@ -10,5 +10,7 @@
     "incorrect_root_url": "此 Forgejo 实例配置为在“%s”上提供服务。您当前正在通过不同的网址查看 Forgejo，这可能会导致应用程序的某些部分损坏。Forgejo 管理员可以通过 app.ini 中的 ROOT_URL 设置控制规范网址。",
     "themes.names.forgejo-auto": "Forgejo（遵循系统主题）",
     "themes.names.forgejo-light": "Forgejo 浅色",
-    "themes.names.forgejo-dark": "Forgejo 深色"
+    "themes.names.forgejo-dark": "Forgejo 深色",
+    "install.invalid_lfs_path": "无法在指定路径创建 LFS 根目录：%[1]s",
+    "install.lfs_jwt_secret_failed": "无法生成 LFS JWT 密钥：%[1]s"
 }
