@@ -12,9 +12,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -35,6 +37,7 @@ import (
 	files_service "forgejo.org/services/repository/files"
 	"forgejo.org/tests"
 
+	"github.com/kballard/go-shellquote"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -113,7 +116,10 @@ func testGit(t *testing.T, u *url.URL) {
 
 			// Setup key the user ssh key
 			withKeyFile(t, keyname, func(keyFile string) {
-				t.Run("CreateUserKey", doAPICreateUserKey(sshContext, "test-key-"+objectFormat.Name(), keyFile))
+				var publicKeyID int64
+				t.Run("CreateUserKey", doAPICreateUserKey(sshContext, "test-key-"+objectFormat.Name(), keyFile, func(t *testing.T, pk api.PublicKey) {
+					publicKeyID = pk.ID
+				}))
 
 				// Setup remote link
 				// TODO: get url from api
@@ -140,6 +146,7 @@ func testGit(t *testing.T, u *url.URL) {
 				})
 
 				t.Run("PushCreate", doPushCreate(sshContext, sshURL, objectFormat))
+				t.Run("LFS no access", doLFSNoAccess(sshContext, publicKeyID, objectFormat))
 			})
 		})
 	})
@@ -1121,4 +1128,31 @@ func TestDataAsync_Issue29101(t *testing.T) {
 		require.NoError(t, err)
 		defer r2.Close()
 	})
+}
+
+func doLFSNoAccess(ctx APITestContext, publicKeyID int64, objectFormat git.ObjectFormat) func(*testing.T) {
+	return func(t *testing.T) {
+		// This is set in withKeyFile
+		sshCommand := os.Getenv("GIT_SSH_COMMAND")
+
+		// Sanity check, because we are going to execute whatever is in here.
+		require.True(t, strings.HasPrefix(sshCommand, "ssh "))
+
+		// We really have to split on the arguments and pass them individually.
+		sshOptions, err := shellquote.Split(strings.TrimPrefix(sshCommand, "ssh "))
+		require.NoError(t, err)
+
+		sshOptions = append(sshOptions, "-p "+strconv.Itoa(setting.SSH.ListenPort), "git@"+setting.SSH.ListenHost)
+
+		cmd := exec.CommandContext(t.Context(), "ssh", append(sshOptions, "git-lfs-authenticate", "user40/repo60.git", "upload")...)
+		stderr := bytes.Buffer{}
+		cmd.Stderr = &stderr
+
+		require.ErrorContains(t, cmd.Run(), "exit status 1")
+		if objectFormat.Name() == "sha1" {
+			assert.Contains(t, stderr.String(), fmt.Sprintf("Forgejo: User: 2:user2 with Key: %d:test-key-sha1 is not authorized to write to user40/repo60.", publicKeyID))
+		} else {
+			assert.Contains(t, stderr.String(), fmt.Sprintf("Forgejo: User: 2:user2 with Key: %d:test-key-sha256 is not authorized to write to user40/repo60.", publicKeyID))
+		}
+	}
 }
