@@ -9,7 +9,7 @@ var defaultI18nLangNames = []string{
 	"zh-CN", "简体中文",
 	"zh-HK", "繁體中文（香港）",
 	"zh-TW", "繁體中文（台灣）",
-	"da", "Danish",
+	"da", "Dansk",
 	"de-DE", "Deutsch",
 	"nds", "Plattdüütsch",
 	"fr-FR", "Français",
