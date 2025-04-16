@@ -58,7 +58,7 @@ export function initRepoCloneLink() {
 export function initRepoCommonBranchOrTagDropdown(selector) {
   $(selector).each(function () {
     const $dropdown = $(this);
-    $dropdown.find('.reference.column').on('click', function () {
+    $dropdown.find('.branch-tag-item').on('click', function () {
       hideElem($dropdown.find('.scrolling.reference-list-menu'));
       showElem($($(this).data('target')));
       return false;
