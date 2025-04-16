@@ -9,7 +9,6 @@
   "baseBranches": [
     "$default",
     "/^v7\\.\\d+/forgejo$/",
-    "/^v10\\.\\d+/forgejo$/",
     "/^v11\\.\\d+/forgejo$/"
   ],
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
