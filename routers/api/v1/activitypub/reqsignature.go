@@ -36,33 +36,25 @@ func decodePublicKeyPem(pubKeyPem string) ([]byte, error) {
 }
 
 func getFederatedUser(ctx *gitea_context.APIContext, person *ap.Person, federationHost *forgefed.FederationHost) (*user.FederatedUser, error) {
-	dbUser, err := user.GetUserByFederatedURI(ctx, person.ID.String())
-	if err != nil {
-		return nil, err
-	}
-
-	if dbUser != nil {
-		federatedUser, err := user.GetFederatedUserByUserID(ctx, dbUser.ID)
-		if err != nil {
-			return nil, err
-		}
-
-		if federatedUser != nil {
-			return federatedUser, nil
-		}
-	}
-
 	personID, err := fm.NewPersonID(person.ID.String(), string(federationHost.NodeInfo.SoftwareName))
 	if err != nil {
 		return nil, err
 	}
-
-	_, federatedUser, err := federation.CreateUserFromAP(ctx, personID, federationHost.ID)
+	_, federatedUser, err := user.FindFederatedUser(ctx, personID.ID, federationHost.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	return federatedUser, nil
+	if federatedUser != nil {
+		return federatedUser, nil
+	}
+
+	_, newFederatedUser, err := federation.CreateUserFromAP(ctx, personID, federationHost.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return newFederatedUser, nil
 }
 
 func storePublicKey(ctx *gitea_context.APIContext, person *ap.Person, pubKeyBytes []byte) error {
@@ -159,7 +151,7 @@ func verifyHTTPSignatures(ctx *gitea_context.APIContext) (authenticated bool, er
 
 	// 2. Fetch the public key of the other actor
 	// Try if the signing actor is an already known federated user
-	federationUser, err := user.GetFederatedUserByKeyID(ctx, idIRI.String())
+	_, federationUser, err := user.FindFederatedUserByKeyID(ctx, idIRI.String())
 	if err != nil {
 		return false, err
 	}

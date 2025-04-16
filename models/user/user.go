@@ -1,6 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package user
@@ -134,9 +134,6 @@ type User struct {
 	Avatar          string `xorm:"VARCHAR(2048) NOT NULL"`
 	AvatarEmail     string `xorm:"NOT NULL"`
 	UseCustomAvatar bool
-
-	// For federation
-	NormalizedFederatedURI string
 
 	// Counters
 	NumFollowers int

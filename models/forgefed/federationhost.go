@@ -1,4 +1,4 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package forgefed
@@ -19,18 +19,22 @@ type FederationHost struct {
 	ID             int64                  `xorm:"pk autoincr"`
 	HostFqdn       string                 `xorm:"host_fqdn UNIQUE INDEX VARCHAR(255) NOT NULL"`
 	NodeInfo       NodeInfo               `xorm:"extends NOT NULL"`
+	HostPort       uint16                 `xorm:"NOT NULL DEFAULT 443"`
+	HostSchema     string                 `xorm:"NOT NULL DEFAULT 'https'"`
 	LatestActivity time.Time              `xorm:"NOT NULL"`
-	Created        timeutil.TimeStamp     `xorm:"created"`
-	Updated        timeutil.TimeStamp     `xorm:"updated"`
 	KeyID          sql.NullString         `xorm:"key_id UNIQUE"`
 	PublicKey      sql.Null[sql.RawBytes] `xorm:"BLOB"`
+	Created        timeutil.TimeStamp     `xorm:"created"`
+	Updated        timeutil.TimeStamp     `xorm:"updated"`
 }
 
 // Factory function for FederationHost. Created struct is asserted to be valid.
-func NewFederationHost(nodeInfo NodeInfo, hostFqdn string) (FederationHost, error) {
+func NewFederationHost(hostFqdn string, nodeInfo NodeInfo, port uint16, schema string) (FederationHost, error) {
 	result := FederationHost{
-		HostFqdn: strings.ToLower(hostFqdn),
-		NodeInfo: nodeInfo,
+		HostFqdn:   strings.ToLower(hostFqdn),
+		NodeInfo:   nodeInfo,
+		HostPort:   port,
+		HostSchema: schema,
 	}
 	if valid, err := validation.IsValid(result); !valid {
 		return FederationHost{}, err
@@ -43,6 +47,8 @@ func (host FederationHost) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(host.HostFqdn, "HostFqdn")...)
 	result = append(result, validation.ValidateMaxLen(host.HostFqdn, 255, "HostFqdn")...)
+	result = append(result, validation.ValidateNotEmpty(host.HostPort, "HostPort")...)
+	result = append(result, validation.ValidateNotEmpty(host.HostSchema, "HostSchema")...)
 	result = append(result, host.NodeInfo.Validate()...)
 	if host.HostFqdn != strings.ToLower(host.HostFqdn) {
 		result = append(result, fmt.Sprintf("HostFqdn has to be lower case but was: %v", host.HostFqdn))

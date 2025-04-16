@@ -1,5 +1,4 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
-// Copyright 2023 The Forgejo Authors. All rights reserved.
+// Copyright 2023, 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package validation
@@ -33,9 +32,9 @@ type Validateable interface {
 }
 
 func IsValid(v Validateable) (bool, error) {
-	if err := v.Validate(); len(err) > 0 {
+	if valdationErrors := v.Validate(); len(valdationErrors) > 0 {
 		typeof := reflect.TypeOf(v)
-		errString := strings.Join(err, "\n")
+		errString := strings.Join(valdationErrors, "\n")
 		return false, ErrNotValid{fmt.Sprint(typeof, ": ", errString)}
 	}
 
@@ -51,6 +50,10 @@ func ValidateNotEmpty(value any, name string) []string {
 		}
 	case timeutil.TimeStamp:
 		if v.IsZero() {
+			isValid = false
+		}
+	case uint16:
+		if v == 0 {
 			isValid = false
 		}
 	case int64:

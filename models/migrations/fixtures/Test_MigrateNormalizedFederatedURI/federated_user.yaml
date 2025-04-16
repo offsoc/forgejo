@@ -1,0 +1,10 @@
+- 
+  id: 1
+  user_id: 3
+  federation_host_id: 1
+  external_id: "18"
+-   
+  id: 2
+  user_id: 999
+  federation_host_id: 1
+  external_id: "19"
