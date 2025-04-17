@@ -61,30 +61,30 @@ func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, ac
 	})
 }
 
-func findFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, *fm.PersonID, error) {
+func findFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
 	federationHost, err := GetFederationHostForURI(ctx.Base, actorURI)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "Wrong FederationHost", err)
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 	actorID, err := fm.NewPersonID(actorURI, string(federationHost.NodeInfo.SoftwareName))
 	if err != nil {
 		ctx.Error(http.StatusNotAcceptable, "Invalid PersonID", err)
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	user, federatedUser, err := user.FindFederatedUser(ctx, actorID.ID, federationHost.ID)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "Searching for user failed", err)
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return user, federatedUser, federationHost, &actorID, nil
+	return user, federatedUser, federationHost, nil
 }
 
 func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
 	// TODO: align this function
-	user, federatedUser, federationHost, _, err := findFederatedUser(ctx, actorURI)
+	user, federatedUser, federationHost, err := findFederatedUser(ctx, actorURI)
 	if err != nil {
 		return nil, nil, nil, err
 	}
