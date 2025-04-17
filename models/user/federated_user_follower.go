@@ -9,11 +9,11 @@ type FederatedUserFollower struct {
 	ID int64 `xorm:"pk autoincr"`
 
 	FollowedUserID int64 `xorm:"NOT NULL unique(fuf_rel)"`
-	//TODO: This ID should point to User and not to FederationUser. As User is a aggregate root!
+	// TODO: This ID should point to User and not to FederationUser. As User is a aggregate root!
 	FollowingUserID int64 `xorm:"NOT NULL unique(fuf_rel)"`
 }
 
-func NewFederatedUserFollower(followedUserID int64, federatedUserID int64) (FederatedUserFollower, error) {
+func NewFederatedUserFollower(followedUserID, federatedUserID int64) (FederatedUserFollower, error) {
 	result := FederatedUserFollower{
 		FollowedUserID:  followedUserID,
 		FollowingUserID: federatedUserID,

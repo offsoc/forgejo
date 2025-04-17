@@ -840,11 +840,12 @@ func Routes() *web.Route {
 			m.Get("/nodeinfo", misc.NodeInfo)
 			m.Group("/activitypub", func() {
 				m.Group("/user-id/{user-id}", func() {
-					m.Get("", activitypub.Person)
+					m.Get("", activitypub.ReqHTTPSignature(), activitypub.Person)
 					m.Post("/inbox",
 						activitypub.ReqHTTPSignature(),
 						bind(ap.Activity{}),
 						activitypub.PersonInbox)
+					// TODO: add signature verification
 					m.Group("/activities/{activity-id}", func() {
 						m.Get("", activitypub.PersonActivityNote)
 						m.Get("/activity", activitypub.PersonActivity)

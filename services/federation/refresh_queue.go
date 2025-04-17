@@ -53,8 +53,8 @@ func refreshSingleItem(item refreshQueueItem) error {
 	}
 
 	// TODO: Do not use NormalizedOriginalURL !
-	if *&federatedUser.NormalizedOriginalURL == "" {
-		return fmt.Errorf("Federated user[%d] (user[%d]) has no NormalizedFederatedURI", federatedUser.ID, federatedUser.UserID)
+	if federatedUser.NormalizedOriginalURL == "" {
+		return fmt.Errorf("federated user[%d] (user[%d]) has no NormalizedFederatedURI", federatedUser.ID, federatedUser.UserID)
 	}
 
 	clientFactory, err := activitypub.GetClientFactory(ctx)

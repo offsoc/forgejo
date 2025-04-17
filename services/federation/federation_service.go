@@ -185,7 +185,7 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 	}
 
 	// TODO: readd new kind of signature checks
-	//var idIRI string
+	// var idIRI string
 
 	// Grab the keyID from the signature
 	// v, err := httpsig.NewVerifier(ctx.Req)

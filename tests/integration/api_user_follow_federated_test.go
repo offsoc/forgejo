@@ -29,11 +29,11 @@ func TestAPIFollowFederated(t *testing.T) {
 	federatedSrv := mock.DistantServer(t)
 	defer federatedSrv.Close()
 
-	//user1 := "user4"
+	// user1 := "user4"
 	user2 := "user10"
 
-	//session1 := loginUser(t, user1)
-	//token1 := getTokenForLoggedInUser(t, session1, auth_model.AccessTokenScopeReadUser)
+	// session1 := loginUser(t, user1)
+	// token1 := getTokenForLoggedInUser(t, session1, auth_model.AccessTokenScopeReadUser)
 
 	session2 := loginUser(t, user2)
 	token2 := getTokenForLoggedInUser(t, session2, auth_model.AccessTokenScopeWriteUser)

@@ -35,16 +35,6 @@ func decodePublicKeyPem(pubKeyPem string) ([]byte, error) {
 	return block.Bytes, nil
 }
 
-func fetch(ctx *gitea_context.APIContext, iri *url.URL) (b []byte, err error) {
-	actionsUser := user.NewAPServerActor()
-	clientFactory, err := activitypub.GetClientFactory(ctx)
-	if err != nil {
-		return nil, err
-	}
-	client, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.APActorKeyID())
-	return client.GetBody(iri.String())
-}
-
 func getFederatedUser(ctx *gitea_context.APIContext, person *ap.Person, federationHost *forgefed.FederationHost) (*user.FederatedUser, error) {
 	personID, err := fm.NewPersonID(person.ID.String(), string(federationHost.NodeInfo.SoftwareName))
 	if err != nil {
