@@ -12,8 +12,8 @@
     "themes.names.forgejo-light": "Forgejo 浅色",
     "themes.names.forgejo-dark": "Forgejo 深色",
     "error.not_found.title": "页面不存在",
-    "alert.asset_load_failed": "无法从 {path} 加载资源文件。请确保可以访问资源文件。",
-    "install.lfs_jwt_secret_failed": "无法生成 LFS JWT 密钥：%[1]s",
+    "alert.asset_load_failed": "无法从 {path} 加载资源文件。请确保资源文件可被访问。",
     "install.invalid_lfs_path": "无法在指定路径创建 LFS 根目录：%[1]s",
-    "alert.range_error": " 必须是一个介于 %[1]s 和 %[2]s 之间的数字。"
+    "alert.range_error": " 必须是一个介于 %[1]s 和 %[2]s 之间的数字。",
+    "meta.last_line": "感谢各位对Forgejo翻译的支持和帮助！不需要翻译这个。"
 }

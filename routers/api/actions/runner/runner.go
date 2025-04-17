@@ -178,7 +178,7 @@ func (s *Service) UpdateTask(
 ) (*connect.Response[runnerv1.UpdateTaskResponse], error) {
 	runner := GetRunner(ctx)
 
-	task, err := actions_model.UpdateTaskByState(ctx, runner.ID, req.Msg.State)
+	task, err := actions_service.UpdateTaskByState(ctx, runner.ID, req.Msg.State)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("update task: %w", err))
 	}

@@ -20,5 +20,8 @@
     "themes.names.forgejo-light": "Forgejo claro",
     "themes.names.forgejo-dark": "Forgejo escuro",
     "error.not_found.title": "Página não encontrada",
-    "alert.asset_load_failed": "Não foi possível carregar arquivos de assets de {path}. Por favor, certifique-se que os arquivos podem ser acessados."
+    "alert.asset_load_failed": "Não foi possível carregar arquivos de assets de {path}. Por favor, certifique-se que os arquivos podem ser acessados.",
+    "install.invalid_lfs_path": "Não foi possível criar um root LFS no caminho especificado: %[1]s",
+    "alert.range_error": " deve ser um número entre %[1]s e %[2]s.",
+    "meta.last_line": "real hot girl shit"
 }

@@ -865,6 +865,7 @@ func Routes() *web.Route {
 		m.Group("", func() {
 			m.Get("/version", misc.Version)
 			m.Get("/signing-key.gpg", misc.SigningKey)
+			m.Get("/signing-key.ssh", misc.SSHSigningKey)
 			m.Post("/markup", reqToken(), bind(api.MarkupOption{}), misc.Markup)
 			m.Post("/markdown", reqToken(), bind(api.MarkdownOption{}), misc.Markdown)
 			m.Post("/markdown/raw", reqToken(), misc.MarkdownRaw)
