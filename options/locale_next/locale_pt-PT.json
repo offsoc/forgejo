@@ -19,5 +19,9 @@
     "themes.names.forgejo-auto": "Forgejo (segue o tema do sistema)",
     "themes.names.forgejo-light": "Forgejo claro",
     "themes.names.forgejo-dark": "Forgejo escuro",
-    "error.not_found.title": "Página não encontrada"
+    "error.not_found.title": "Página não encontrada",
+    "alert.asset_load_failed": "Falha ao carregar ficheiros de recurso de {path}. Certifique-se de que os ficheiros de recurso podem ser acedidos.",
+    "install.invalid_lfs_path": "Não foi possível criar a raiz LFS no caminho especificado: %[1]s",
+    "alert.range_error": " deve ser um número entre %[1]s e %[2]s.",
+    "meta.last_line": "Se programarem em Python, por favor usem o uv e Ruff (e estejam atentos ao Red Knot no repositório do Ruff). E vejam também mise-en-place (https://mise.jdx.dev)."
 }
