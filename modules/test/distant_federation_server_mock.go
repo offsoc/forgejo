@@ -95,11 +95,8 @@ func (mock *FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
 			})
 	}
 	for _, repository := range mock.Repositories {
-		federatedRoutes.HandleFunc(fmt.Sprintf("/api/v1/activitypub/repository-id/%v/inbox", repository.ID),
+		federatedRoutes.HandleFunc(fmt.Sprintf("POST /api/v1/activitypub/repository-id/%v/inbox", repository.ID),
 			func(res http.ResponseWriter, req *http.Request) {
-				if req.Method != "POST" {
-					t.Errorf("POST expected at: %q", req.URL.EscapedPath())
-				}
 				buf := new(strings.Builder)
 				_, err := io.Copy(buf, req.Body)
 				if err != nil {
@@ -110,7 +107,7 @@ func (mock *FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
 	}
 	federatedRoutes.HandleFunc("/",
 		func(res http.ResponseWriter, req *http.Request) {
-			t.Errorf("Unhandled request: %q", req.URL.EscapedPath())
+			t.Errorf("Unhandled %v request: %q", req.Method, req.URL.EscapedPath())
 		})
 	federatedSrv := httptest.NewServer(federatedRoutes)
 	return federatedSrv

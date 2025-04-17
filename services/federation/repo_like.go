@@ -134,7 +134,7 @@ func SendLikeActivities(ctx context.Context, doer user.User, repoID int64) error
 			return err
 		}
 
-		_, err = apclient.Post(json, fmt.Sprintf("%v/inbox/", activity.Object))
+		_, err = apclient.Post(json, fmt.Sprintf("%v/inbox", activity.Object))
 		if err != nil {
 			log.Error("error %v while sending activity: %#v", err, activity)
 		}
