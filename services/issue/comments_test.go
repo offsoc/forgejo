@@ -77,6 +77,8 @@ func TestDeleteComment(t *testing.T) {
 		assert.Equal(t, issue.NumComments, unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: comment.IssueID}).NumComments)
 		// No notification was fired for the deletion of this comment.
 		assert.Equal(t, hookTaskCount, unittest.GetCount(t, &webhook_model.HookTask{}))
+		// The review doesn't exist anymore.
+		unittest.AssertNotExistsBean(t, &issues_model.Review{ID: comment.ReviewID})
 	})
 }
 

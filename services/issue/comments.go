@@ -120,18 +120,20 @@ func UpdateComment(ctx context.Context, c *issues_model.Comment, contentVersion 
 func DeleteComment(ctx context.Context, doer *user_model.User, comment *issues_model.Comment) error {
 	err := db.WithTx(ctx, func(ctx context.Context) error {
 		reviewID := comment.ReviewID
-		reviewType := comment.Review.Type
 
 		deleteComment := issues_model.DeleteComment(ctx, comment)
 
-		if reviewType == issues_model.ReviewTypePending {
-			found, err := db.GetEngine(ctx).Table("comment").Where("review_id = ?", reviewID).Exist()
-			if err != nil {
-				return err
-			} else if !found {
-				_, err := db.GetEngine(ctx).Table("review").Where("id = ?", reviewID).Delete()
+		if comment.Review != nil {
+			reviewType := comment.Review.Type
+			if reviewType == issues_model.ReviewTypePending {
+				found, err := db.GetEngine(ctx).Table("comment").Where("review_id = ?", reviewID).Exist()
 				if err != nil {
 					return err
+				} else if !found {
+					_, err := db.GetEngine(ctx).Table("review").Where("id = ?", reviewID).Delete()
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
