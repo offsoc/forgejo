@@ -11,29 +11,29 @@ import (
 	"testing"
 	"time"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	actions_module "code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
-	actions_service "code.gitea.io/gitea/services/actions"
-	issue_service "code.gitea.io/gitea/services/issue"
-	pull_service "code.gitea.io/gitea/services/pull"
-	release_service "code.gitea.io/gitea/services/release"
-	repo_service "code.gitea.io/gitea/services/repository"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	actions_model "forgejo.org/models/actions"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	actions_module "forgejo.org/modules/actions"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	webhook_module "forgejo.org/modules/webhook"
+	actions_service "forgejo.org/services/actions"
+	issue_service "forgejo.org/services/issue"
+	pull_service "forgejo.org/services/pull"
+	release_service "forgejo.org/services/release"
+	repo_service "forgejo.org/services/repository"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -752,9 +752,18 @@ func TestWorkflowDispatchEvent(t *testing.T) {
 			return ""
 		}
 
-		err = workflow.Dispatch(db.DefaultContext, inputGetter, repo, user2)
+		var r *actions_model.ActionRun
+		var j []string
+		r, j, err = workflow.Dispatch(db.DefaultContext, inputGetter, repo, user2)
 		require.NoError(t, err)
 
 		assert.Equal(t, 1, unittest.GetCount(t, &actions_model.ActionRun{RepoID: repo.ID}))
+
+		assert.Equal(t, "test", r.Title)
+		assert.Equal(t, "dispatch.yml", r.WorkflowID)
+		assert.Equal(t, sha, r.CommitSHA)
+		assert.Equal(t, actions_module.GithubEventWorkflowDispatch, r.TriggerEvent)
+		assert.Len(t, j, 1)
+		assert.Equal(t, "test", j[0])
 	})
 }

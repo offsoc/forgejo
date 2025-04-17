@@ -6,8 +6,8 @@ package actions
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,7 +18,7 @@ func TestGetLatestRunnerToken(t *testing.T) {
 	token := unittest.AssertExistsAndLoadBean(t, &ActionRunnerToken{ID: 3})
 	expectedToken, err := GetLatestRunnerToken(db.DefaultContext, 1, 0)
 	require.NoError(t, err)
-	assert.EqualValues(t, expectedToken, token)
+	assert.Equal(t, expectedToken, token)
 }
 
 func TestNewRunnerToken(t *testing.T) {
@@ -27,7 +27,7 @@ func TestNewRunnerToken(t *testing.T) {
 	require.NoError(t, err)
 	expectedToken, err := GetLatestRunnerToken(db.DefaultContext, 1, 0)
 	require.NoError(t, err)
-	assert.EqualValues(t, expectedToken, token)
+	assert.Equal(t, expectedToken, token)
 }
 
 func TestUpdateRunnerToken(t *testing.T) {
@@ -37,5 +37,5 @@ func TestUpdateRunnerToken(t *testing.T) {
 	require.NoError(t, UpdateRunnerToken(db.DefaultContext, token))
 	expectedToken, err := GetLatestRunnerToken(db.DefaultContext, 1, 0)
 	require.NoError(t, err)
-	assert.EqualValues(t, expectedToken, token)
+	assert.Equal(t, expectedToken, token)
 }

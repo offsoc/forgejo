@@ -1,5 +1,5 @@
 {
-    "search.milestone_kind": "Søg milepæle...",
+    "search.milestone_kind": "Søg milepæle…",
     "repo.pulls.title_desc": {
         "one": "ønsker at flette %[1]d commit fra <code>%[2]s</code> til <code id=\"%[4]s\">%[3]s</code>",
         "other": "ønsker at flette %[1]d commits fra <code>%[2]s</code> til <code id=\"%[4]s\">%[3]s</code>"
@@ -13,5 +13,13 @@
     "home.welcome.activity_hint": "Der er intet i dit feed endnu. Dine handlinger og aktivitet fra depoterne, som du ser, vises her.",
     "home.explore_repos": "Udforsk depoter",
     "home.explore_users": "Udforsk brugere",
-    "home.explore_orgs": "Udforsk organisationer"
+    "home.explore_orgs": "Udforsk organisationer",
+    "themes.names.forgejo-light": "Forgejo lys",
+    "themes.names.forgejo-dark": "Forgejo mørk",
+    "themes.names.forgejo-auto": "Forgejo (følg systemtema)",
+    "error.not_found.title": "Siden blev ikke fundet",
+    "alert.asset_load_failed": "Kunne ikke indlæse aktivfiler fra {path}. Sørg for, at aktivfilerne er tilgængelige.",
+    "install.invalid_lfs_path": "Kan ikke oprette LFS-roden på den angivne sti: %[1]s",
+    "alert.range_error": " skal være et tal mellem %[1]s og %[2]s.",
+    "meta.last_line": "Livet er det dejligste eventyr. - (H.C. Andersen)"
 }

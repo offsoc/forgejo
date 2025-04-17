@@ -6,12 +6,12 @@ package admin
 import (
 	"net/http"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	repo_service "code.gitea.io/gitea/services/repository"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	repo_service "forgejo.org/services/repository"
 )
 
 // ListUnadoptedRepositories lists the unadopted repositories that match the provided names

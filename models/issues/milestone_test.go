@@ -7,14 +7,14 @@ import (
 	"sort"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -70,7 +70,7 @@ func TestGetMilestonesByRepoID(t *testing.T) {
 
 		assert.Len(t, milestones, n)
 		for _, milestone := range milestones {
-			assert.EqualValues(t, repoID, milestone.RepoID)
+			assert.Equal(t, repoID, milestone.RepoID)
 		}
 	}
 	test(1, api.StateOpen)
@@ -327,7 +327,7 @@ func TestUpdateMilestone(t *testing.T) {
 	milestone.Content = "newMilestoneContent"
 	require.NoError(t, issues_model.UpdateMilestone(db.DefaultContext, milestone, milestone.IsClosed))
 	milestone = unittest.AssertExistsAndLoadBean(t, &issues_model.Milestone{ID: 1})
-	assert.EqualValues(t, "newMilestoneName", milestone.Name)
+	assert.Equal(t, "newMilestoneName", milestone.Name)
 	unittest.CheckConsistencyFor(t, &issues_model.Milestone{})
 }
 
@@ -364,7 +364,7 @@ func TestMigrate_InsertMilestones(t *testing.T) {
 	require.NoError(t, err)
 	unittest.AssertExistsAndLoadBean(t, ms)
 	repoModified := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: repo.ID})
-	assert.EqualValues(t, repo.NumMilestones+1, repoModified.NumMilestones)
+	assert.Equal(t, repo.NumMilestones+1, repoModified.NumMilestones)
 
 	unittest.CheckConsistencyFor(t, &issues_model.Milestone{})
 }

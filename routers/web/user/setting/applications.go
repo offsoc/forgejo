@@ -7,14 +7,14 @@ package setting
 import (
 	"net/http"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
 )
 
 const (
@@ -48,6 +48,9 @@ func ApplicationsPost(ctx *context.Context) {
 	if err != nil {
 		ctx.ServerError("GetScope", err)
 		return
+	}
+	if !scope.HasPermissionScope() {
+		ctx.Flash.Error(ctx.Tr("settings.at_least_one_permission"), true)
 	}
 	t := &auth_model.AccessToken{
 		UID:   ctx.Doer.ID,

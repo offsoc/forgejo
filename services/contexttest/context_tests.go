@@ -15,16 +15,16 @@ import (
 	"testing"
 	"time"
 
-	org_model "code.gitea.io/gitea/models/organization"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/services/context"
+	org_model "forgejo.org/models/organization"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/templates"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/services/context"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
@@ -68,7 +68,7 @@ func MockContext(t *testing.T, reqPath string, opts ...MockContextOption) (*cont
 	ctx.PageData = map[string]any{}
 	ctx.Data["PageStartTime"] = time.Now()
 	chiCtx := chi.NewRouteContext()
-	ctx.Base.AppendContextValue(chi.RouteCtxKey, chiCtx)
+	ctx.AppendContextValue(chi.RouteCtxKey, chiCtx)
 	return ctx, resp
 }
 
@@ -83,7 +83,7 @@ func MockAPIContext(t *testing.T, reqPath string) (*context.APIContext, *httptes
 	_ = baseCleanUp // during test, it doesn't need to do clean up. TODO: this can be improved later
 
 	chiCtx := chi.NewRouteContext()
-	ctx.Base.AppendContextValue(chi.RouteCtxKey, chiCtx)
+	ctx.AppendContextValue(chi.RouteCtxKey, chiCtx)
 	return ctx, resp
 }
 
@@ -96,7 +96,7 @@ func MockPrivateContext(t *testing.T, reqPath string) (*context.PrivateContext, 
 	ctx := &context.PrivateContext{Base: base}
 	_ = baseCleanUp // during test, it doesn't need to do clean up. TODO: this can be improved later
 	chiCtx := chi.NewRouteContext()
-	ctx.Base.AppendContextValue(chi.RouteCtxKey, chiCtx)
+	ctx.AppendContextValue(chi.RouteCtxKey, chiCtx)
 	return ctx, resp
 }
 

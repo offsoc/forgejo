@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	lru "github.com/hashicorp/golang-lru/v2"
 	"xorm.io/builder"
@@ -111,12 +111,8 @@ func generateAccessToken(t *AccessToken) error {
 	if err != nil {
 		return err
 	}
-	token, err := util.CryptoRandomBytes(20)
-	if err != nil {
-		return err
-	}
 	t.TokenSalt = salt
-	t.Token = hex.EncodeToString(token)
+	t.Token = hex.EncodeToString(util.CryptoRandomBytes(20))
 	t.TokenHash = HashToken(t.Token, t.TokenSalt)
 	t.TokenLastEight = t.Token[len(t.Token)-8:]
 	return nil

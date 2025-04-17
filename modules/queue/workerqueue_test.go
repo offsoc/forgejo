@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -64,9 +64,9 @@ func TestWorkerPoolQueueUnhandled(t *testing.T) {
 		ok := true
 		for i := 0; i < queueSetting.Length; i++ {
 			if i%2 == 0 {
-				ok = ok && assert.EqualValues(t, 2, m[i], "test %s: item %d", t.Name(), i)
+				ok = ok && assert.Equal(t, 2, m[i], "test %s: item %d", t.Name(), i)
 			} else {
-				ok = ok && assert.EqualValues(t, 1, m[i], "test %s: item %d", t.Name(), i)
+				ok = ok && assert.Equal(t, 1, m[i], "test %s: item %d", t.Name(), i)
 			}
 		}
 		if !ok {
@@ -174,7 +174,7 @@ func testWorkerPoolQueuePersistence(t *testing.T, queueSetting setting.QueueSett
 
 	assert.NotEmpty(t, tasksQ1)
 	assert.NotEmpty(t, tasksQ2)
-	assert.EqualValues(t, testCount, len(tasksQ1)+len(tasksQ2))
+	assert.Equal(t, testCount, len(tasksQ1)+len(tasksQ2))
 }
 
 func TestWorkerPoolQueueActiveWorkers(t *testing.T) {
@@ -192,13 +192,13 @@ func TestWorkerPoolQueueActiveWorkers(t *testing.T) {
 	}
 
 	time.Sleep(50 * time.Millisecond)
-	assert.EqualValues(t, 1, q.GetWorkerNumber())
-	assert.EqualValues(t, 1, q.GetWorkerActiveNumber())
+	assert.Equal(t, 1, q.GetWorkerNumber())
+	assert.Equal(t, 1, q.GetWorkerActiveNumber())
 	time.Sleep(500 * time.Millisecond)
-	assert.EqualValues(t, 1, q.GetWorkerNumber())
-	assert.EqualValues(t, 0, q.GetWorkerActiveNumber())
+	assert.Equal(t, 1, q.GetWorkerNumber())
+	assert.Equal(t, 0, q.GetWorkerActiveNumber())
 	time.Sleep(workerIdleDuration)
-	assert.EqualValues(t, 1, q.GetWorkerNumber()) // there is at least one worker after the queue begins working
+	assert.Equal(t, 1, q.GetWorkerNumber()) // there is at least one worker after the queue begins working
 	stop()
 
 	q, _ = newWorkerPoolQueueForTest("test-workpoolqueue", setting.QueueSettings{Type: "channel", BatchLength: 1, MaxWorkers: 3, Length: 100}, handler, false)
@@ -208,13 +208,13 @@ func TestWorkerPoolQueueActiveWorkers(t *testing.T) {
 	}
 
 	time.Sleep(50 * time.Millisecond)
-	assert.EqualValues(t, 3, q.GetWorkerNumber())
-	assert.EqualValues(t, 3, q.GetWorkerActiveNumber())
+	assert.Equal(t, 3, q.GetWorkerNumber())
+	assert.Equal(t, 3, q.GetWorkerActiveNumber())
 	time.Sleep(500 * time.Millisecond)
-	assert.EqualValues(t, 3, q.GetWorkerNumber())
-	assert.EqualValues(t, 0, q.GetWorkerActiveNumber())
+	assert.Equal(t, 3, q.GetWorkerNumber())
+	assert.Equal(t, 0, q.GetWorkerActiveNumber())
 	time.Sleep(workerIdleDuration)
-	assert.EqualValues(t, 1, q.GetWorkerNumber()) // there is at least one worker after the queue begins working
+	assert.Equal(t, 1, q.GetWorkerNumber()) // there is at least one worker after the queue begins working
 	stop()
 }
 
@@ -241,13 +241,13 @@ func TestWorkerPoolQueueShutdown(t *testing.T) {
 	}
 	<-handlerCalled
 	time.Sleep(200 * time.Millisecond) // wait for a while to make sure all workers are active
-	assert.EqualValues(t, 4, q.GetWorkerActiveNumber())
+	assert.Equal(t, 4, q.GetWorkerActiveNumber())
 	stop() // stop triggers shutdown
-	assert.EqualValues(t, 0, q.GetWorkerActiveNumber())
+	assert.Equal(t, 0, q.GetWorkerActiveNumber())
 
 	// no item was ever handled, so we still get all of them again
 	q, _ = newWorkerPoolQueueForTest("test-workpoolqueue", qs, handler, false)
-	assert.EqualValues(t, 20, q.GetQueueItemNumber())
+	assert.Equal(t, 20, q.GetQueueItemNumber())
 }
 
 func TestWorkerPoolQueueWorkerIdleReset(t *testing.T) {

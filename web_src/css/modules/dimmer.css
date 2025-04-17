@@ -1,0 +1,25 @@
+body:has(> .ui.active.dimmer) {
+  overflow: hidden;
+}
+
+.ui.active.dimmer {
+  display: flex;
+  opacity: 1;
+}
+
+.ui.dimmer {
+  align-items: center;
+  animation-fill-mode: both;
+  background: var(--color-overlay-backdrop);
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  position: fixed;
+  opacity: 0;
+  transform-origin: center center;
+  justify-content: center;
+  user-select: none;
+  width: 100%;
+  will-change: opacity;
+  z-index: 1000;
+}

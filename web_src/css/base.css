@@ -27,6 +27,7 @@
   --checkbox-size: 15px; /* height and width of checkbox and radio inputs */
   --page-spacing: 16px; /* space between page elements */
   --page-margin-x: 32px; /* minimum space on left and right side of page */
+  --button-spacing: 0.33rem;
 }
 
 @media (min-width: 768px) and (max-width: 1200px) {
@@ -38,6 +39,12 @@
 @media (max-width: 767.98px) {
   :root {
     --page-margin-x: 8px;
+  }
+}
+
+@media (pointer: coarse) {
+  :root {
+    --button-spacing: 0.5rem;
   }
 }
 
@@ -247,13 +254,13 @@ h1.error-code {
 }
 
 .button-row {
-  gap: 0.5rem;
+  gap: var(--button-spacing);
 }
 
 .button-sequence {
   display: flex;
   flex-flow: wrap;
-  gap: 0.5em;
+  gap: var(--button-spacing);
 }
 
 .button-sequence.right {
@@ -750,10 +757,6 @@ img.ui.avatar,
   box-shadow: 0 6px 18px var(--color-shadow) !important;
 }
 
-.ui.dimmer {
-  background: var(--color-overlay-backdrop);
-}
-
 /* Override semantic selector '.ui.menu:not(.vertical) .item > .button' */
 /* This fixes the commit graph button on the commits page */
 /* modal svg icons, copied from fomantic except width and height */
@@ -1050,6 +1053,10 @@ overflow-menu .overflow-menu-items {
 
 overflow-menu .overflow-menu-items .item {
   margin-bottom: 0 !important; /* reset fomantic's margin, because the active menu has special bottom border */
+}
+
+overflow-menu .overflow-menu-items .item > .svg {
+  align-self: baseline;
 }
 
 overflow-menu .ui.label {

@@ -10,12 +10,12 @@ import (
 	"os"
 	"time"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	actions_module "code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/timeutil"
+	actions_model "forgejo.org/models/actions"
+	actions_module "forgejo.org/modules/actions"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/timeutil"
 )
 
 // Cleanup removes expired actions logs, data and artifacts

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/indexer/issues/internal/tests"
+	"forgejo.org/modules/indexer/issues/internal/tests"
 )
 
 func TestElasticsearchIndexer(t *testing.T) {

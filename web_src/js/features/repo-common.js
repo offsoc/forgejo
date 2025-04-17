@@ -33,32 +33,32 @@ export function initRepoArchiveLinks() {
 }
 
 export function initRepoCloneLink() {
-  const $repoCloneSsh = $('#repo-clone-ssh');
-  const $repoCloneHttps = $('#repo-clone-https');
-  const $inputLink = $('#repo-clone-url');
+  const repoCloneSSH = document.getElementById('repo-clone-ssh');
+  const repoCloneHTTPS = document.getElementById('repo-clone-https');
+  const inputLink = document.getElementById('repo-clone-url');
 
-  if ((!$repoCloneSsh.length && !$repoCloneHttps.length) || !$inputLink.length) {
+  if ((!repoCloneSSH && !repoCloneHTTPS) || !inputLink) {
     return;
   }
 
-  $repoCloneSsh.on('click', () => {
+  repoCloneSSH?.addEventListener('click', () => {
     localStorage.setItem('repo-clone-protocol', 'ssh');
     window.updateCloneStates();
   });
-  $repoCloneHttps.on('click', () => {
+  repoCloneHTTPS?.addEventListener('click', () => {
     localStorage.setItem('repo-clone-protocol', 'https');
     window.updateCloneStates();
   });
 
-  $inputLink.on('focus', () => {
-    $inputLink.trigger('select');
+  inputLink.addEventListener('focus', () => {
+    inputLink.select();
   });
 }
 
 export function initRepoCommonBranchOrTagDropdown(selector) {
   $(selector).each(function () {
     const $dropdown = $(this);
-    $dropdown.find('.reference.column').on('click', function () {
+    $dropdown.find('.branch-tag-item').on('click', function () {
       hideElem($dropdown.find('.scrolling.reference-list-menu'));
       showElem($($(this).data('target')));
       return false;

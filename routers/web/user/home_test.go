@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/contexttest"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/templates"
+	"forgejo.org/services/context"
+	"forgejo.org/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,15 +40,15 @@ func TestArchivedIssues(t *testing.T) {
 		NumIssues[repo.ID] = repo.NumIssues
 	}
 	assert.False(t, IsArchived[50])
-	assert.EqualValues(t, 1, NumIssues[50])
+	assert.Equal(t, 1, NumIssues[50])
 	assert.True(t, IsArchived[51])
-	assert.EqualValues(t, 1, NumIssues[51])
+	assert.Equal(t, 1, NumIssues[51])
 
 	// Act
 	Issues(ctx)
 
 	// Assert: One Issue (ID 30) from one Repo (ID 50) is retrieved, while nothing from archived Repo 51 is retrieved
-	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
+	assert.Equal(t, http.StatusOK, ctx.Resp.Status())
 
 	assert.Len(t, ctx.Data["Issues"], 1)
 }
@@ -61,7 +61,7 @@ func TestIssues(t *testing.T) {
 	contexttest.LoadUser(t, ctx, 2)
 	ctx.Req.Form.Set("state", "closed")
 	Issues(ctx)
-	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
+	assert.Equal(t, http.StatusOK, ctx.Resp.Status())
 
 	assert.EqualValues(t, true, ctx.Data["IsShowClosed"])
 	assert.Len(t, ctx.Data["Issues"], 1)
@@ -76,7 +76,7 @@ func TestPulls(t *testing.T) {
 	ctx.Req.Form.Set("state", "open")
 	ctx.Req.Form.Set("type", "your_repositories")
 	Pulls(ctx)
-	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
+	assert.Equal(t, http.StatusOK, ctx.Resp.Status())
 
 	assert.Len(t, ctx.Data["Issues"], 5)
 }
@@ -91,15 +91,15 @@ func TestMilestones(t *testing.T) {
 	ctx.Req.Form.Set("state", "closed")
 	ctx.Req.Form.Set("sort", "furthestduedate")
 	Milestones(ctx)
-	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
+	assert.Equal(t, http.StatusOK, ctx.Resp.Status())
 	assert.EqualValues(t, map[int64]int64{1: 1}, ctx.Data["Counts"])
 	assert.EqualValues(t, true, ctx.Data["IsShowClosed"])
 	assert.EqualValues(t, "furthestduedate", ctx.Data["SortType"])
 	assert.EqualValues(t, 1, ctx.Data["Total"])
 	assert.Len(t, ctx.Data["Milestones"], 1)
 	assert.Len(t, ctx.Data["Repos"], 2) // both repo 42 and 1 have milestones and both are owned by user 2
-	assert.EqualValues(t, "user2/glob", ctx.Data["Repos"].(repo_model.RepositoryList)[0].FullName())
-	assert.EqualValues(t, "user2/repo1", ctx.Data["Repos"].(repo_model.RepositoryList)[1].FullName())
+	assert.Equal(t, "user2/glob", ctx.Data["Repos"].(repo_model.RepositoryList)[0].FullName())
+	assert.Equal(t, "user2/repo1", ctx.Data["Repos"].(repo_model.RepositoryList)[1].FullName())
 }
 
 func TestMilestonesForSpecificRepo(t *testing.T) {
@@ -113,7 +113,7 @@ func TestMilestonesForSpecificRepo(t *testing.T) {
 	ctx.Req.Form.Set("state", "closed")
 	ctx.Req.Form.Set("sort", "furthestduedate")
 	Milestones(ctx)
-	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
+	assert.Equal(t, http.StatusOK, ctx.Resp.Status())
 	assert.EqualValues(t, map[int64]int64{1: 1}, ctx.Data["Counts"])
 	assert.EqualValues(t, true, ctx.Data["IsShowClosed"])
 	assert.EqualValues(t, "furthestduedate", ctx.Data["SortType"])
@@ -144,7 +144,7 @@ func TestOrgLabels(t *testing.T) {
 	contexttest.LoadUser(t, ctx, 2)
 	contexttest.LoadOrganization(t, ctx, 3)
 	Issues(ctx)
-	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
+	assert.Equal(t, http.StatusOK, ctx.Resp.Status())
 
 	assert.True(t, ctx.Data["PageIsOrgIssues"].(bool))
 
@@ -163,9 +163,9 @@ func TestOrgLabels(t *testing.T) {
 
 	if assert.Len(t, labels, len(orgLabels)) {
 		for i, label := range labels {
-			assert.EqualValues(t, orgLabels[i].OrgID, label.OrgID)
-			assert.EqualValues(t, orgLabels[i].ID, label.ID)
-			assert.EqualValues(t, orgLabels[i].Name, label.Name)
+			assert.Equal(t, orgLabels[i].OrgID, label.OrgID)
+			assert.Equal(t, orgLabels[i].ID, label.ID)
+			assert.Equal(t, orgLabels[i].Name, label.Name)
 		}
 	}
 }

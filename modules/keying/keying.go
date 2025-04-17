@@ -17,9 +17,10 @@ package keying
 
 import (
 	"crypto/hkdf"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
+
+	"forgejo.org/modules/util"
 
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -95,10 +96,7 @@ func (k *Key) Encrypt(plaintext, additionalData []byte) []byte {
 	}
 
 	// Generate a random nonce.
-	nonce := make([]byte, aeadNonceSize)
-	if n, err := rand.Read(nonce); err != nil || n != aeadNonceSize {
-		panic(err)
-	}
+	nonce := util.CryptoRandomBytes(aeadNonceSize)
 
 	// Returns the ciphertext of this plaintext.
 	return e.Seal(nonce, nonce, plaintext, additionalData)

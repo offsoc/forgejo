@@ -9,14 +9,13 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"xorm.io/xorm"
 )
 
 type TestCollationTbl struct {
@@ -48,11 +47,13 @@ func TestDatabaseCollationSelfCheckUI(t *testing.T) {
 }
 
 func TestDatabaseCollation(t *testing.T) {
-	x := db.GetEngine(db.DefaultContext).(*xorm.Engine)
+	engine, err := db.GetMasterEngine(db.GetEngine(db.DefaultContext))
+	require.NoError(t, err)
+	x := engine
 
 	// all created tables should use case-sensitive collation by default
 	_, _ = x.Exec("DROP TABLE IF EXISTS test_collation_tbl")
-	err := x.Sync(&TestCollationTbl{})
+	err = x.Sync(&TestCollationTbl{})
 	require.NoError(t, err)
 	_, _ = x.Exec("INSERT INTO test_collation_tbl (txt) VALUES ('main')")
 	_, _ = x.Exec("INSERT INTO test_collation_tbl (txt) VALUES ('Main')") // case-sensitive, so it inserts a new row

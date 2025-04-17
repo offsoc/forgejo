@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/queue"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/queue"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -52,7 +52,7 @@ func TestPullRequest_AddToTaskQueue(t *testing.T) {
 
 	select {
 	case id := <-idChan:
-		assert.EqualValues(t, pr.ID, id)
+		assert.Equal(t, pr.ID, id)
 	case <-time.After(time.Second):
 		assert.FailNow(t, "Timeout: nothing was added to pullRequestQueue")
 	}

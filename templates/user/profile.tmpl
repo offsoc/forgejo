@@ -12,12 +12,12 @@
 					{{if eq .SignedUserID .ContextUser.ID}}
 					<p id="visibility-hint">
 						{{if .ContextUser.KeepActivityPrivate}}
-							{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_private" "/user/settings#keep-activity-private"}}
+							{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_private" (print AppSubUrl "/user/settings#keep-activity-private")}}
 						{{else}}
 							{{if eq .ContextUser.Visibility 2}}
-								{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_private_profile" "/user/settings#visibility-setting"}}
+								{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_private_profile" (print AppSubUrl "/user/settings#visibility-setting")}}
 							{{else}}
-								{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_public" "/user/settings#keep-activity-private"}}
+								{{ctx.Locale.Tr "user.public_activity.visibility_hint.self_public" (print AppSubUrl "/user/settings#keep-activity-private")}}
 							{{end}}
 						{{end}}
 					</p>

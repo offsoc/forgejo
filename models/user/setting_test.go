@@ -6,9 +6,9 @@ package user_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,15 +31,15 @@ func TestSettings(t *testing.T) {
 	settings, err := user_model.GetSettings(db.DefaultContext, 99, []string{keyName})
 	require.NoError(t, err)
 	assert.Len(t, settings, 1)
-	assert.EqualValues(t, newSetting.SettingValue, settings[keyName].SettingValue)
+	assert.Equal(t, newSetting.SettingValue, settings[keyName].SettingValue)
 
 	settingValue, err := user_model.GetUserSetting(db.DefaultContext, 99, keyName)
 	require.NoError(t, err)
-	assert.EqualValues(t, newSetting.SettingValue, settingValue)
+	assert.Equal(t, newSetting.SettingValue, settingValue)
 
 	settingValue, err = user_model.GetUserSetting(db.DefaultContext, 99, "no_such")
 	require.NoError(t, err)
-	assert.EqualValues(t, "", settingValue)
+	assert.Empty(t, settingValue)
 
 	// updated setting
 	updatedSetting := &user_model.Setting{UserID: 99, SettingKey: keyName, SettingValue: "Updated"}
@@ -50,7 +50,7 @@ func TestSettings(t *testing.T) {
 	settings, err = user_model.GetUserAllSettings(db.DefaultContext, 99)
 	require.NoError(t, err)
 	assert.Len(t, settings, 1)
-	assert.EqualValues(t, updatedSetting.SettingValue, settings[updatedSetting.SettingKey].SettingValue)
+	assert.Equal(t, updatedSetting.SettingValue, settings[updatedSetting.SettingKey].SettingValue)
 
 	// delete setting
 	err = user_model.DeleteUserSetting(db.DefaultContext, 99, keyName)

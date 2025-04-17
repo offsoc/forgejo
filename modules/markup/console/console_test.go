@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/markup"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/markup"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,6 +28,6 @@ func TestRenderConsole(t *testing.T) {
 		err := render.Render(&markup.RenderContext{Ctx: git.DefaultContext},
 			strings.NewReader(k), &buf)
 		require.NoError(t, err)
-		assert.EqualValues(t, v, buf.String())
+		assert.Equal(t, v, buf.String())
 	}
 }

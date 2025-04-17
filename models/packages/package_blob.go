@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/models/perm"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )
@@ -44,14 +44,19 @@ func GetOrInsertBlob(ctx context.Context, pb *PackageBlob) (*PackageBlob, bool, 
 
 	existing := &PackageBlob{}
 
-	has, err := e.Where(builder.Eq{
-		"size":         pb.Size,
-		"hash_md5":     pb.HashMD5,
-		"hash_sha1":    pb.HashSHA1,
-		"hash_sha256":  pb.HashSHA256,
-		"hash_sha512":  pb.HashSHA512,
-		"hash_blake2b": pb.HashBlake2b,
-	}).Get(existing)
+	has, err := e.Where(builder.And(
+		builder.Eq{
+			"size":        pb.Size,
+			"hash_md5":    pb.HashMD5,
+			"hash_sha1":   pb.HashSHA1,
+			"hash_sha256": pb.HashSHA256,
+			"hash_sha512": pb.HashSHA512,
+		},
+		builder.Or(
+			builder.Eq{"hash_blake2b": pb.HashBlake2b},
+			builder.IsNull{"hash_blake2b"},
+		),
+	)).Get(existing)
 	if err != nil {
 		return nil, false, err
 	}

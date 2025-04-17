@@ -16,7 +16,7 @@ import tailwindcssNesting from 'tailwindcss/nesting/index.js';
 import postcssNesting from 'postcss-nesting';
 
 const {EsbuildPlugin} = EsBuildLoader;
-const {SourceMapDevToolPlugin, DefinePlugin} = webpack;
+const {SourceMapDevToolPlugin, DefinePlugin, ProgressPlugin} = webpack;
 const formatLicenseText = (licenseText) => wrapAnsi(licenseText || '', 80).trim();
 
 const baseDirectory = dirname(fileURLToPath(new URL(import.meta.url)));
@@ -233,6 +233,9 @@ export default {
     ],
   },
   plugins: [
+    new ProgressPlugin({
+      activeModules: true,
+    }),
     new webpack.ProvidePlugin({ // for htmx extensions
       htmx: 'htmx.org',
     }),

@@ -11,11 +11,11 @@ import (
 	"sync"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -101,7 +101,7 @@ func testRepoCommitsWithStatus(t *testing.T, resp, respOne *httptest.ResponseRec
 		assert.Equal(t, api.CommitStatusState(state), statuses[0].State)
 		assert.Equal(t, setting.AppURL+"api/v1/repos/user2/repo1/statuses/65f1bf27bc3bf70f64657658635e66094edbcb4d", statuses[0].URL)
 		assert.Equal(t, "http://test.ci/", statuses[0].TargetURL)
-		assert.Equal(t, "", statuses[0].Description)
+		assert.Empty(t, statuses[0].Description)
 		assert.Equal(t, "testci", statuses[0].Context)
 
 		assert.Len(t, status.Statuses, 1)

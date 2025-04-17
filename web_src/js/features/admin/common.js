@@ -175,7 +175,7 @@ export function initAdminCommon() {
         onUsePagedSearchChange();
       }
     });
-    $('#auth_type').trigger('change');
+    document.getElementById('auth_type').dispatchEvent(new Event('change'));
     document.getElementById('security_protocol')?.addEventListener('change', onSecurityProtocolChange);
     document.getElementById('use_paged_search')?.addEventListener('change', onUsePagedSearchChange);
     document.getElementById('oauth2_provider')?.addEventListener('change', () => onOAuth2Change(true));
@@ -199,11 +199,13 @@ export function initAdminCommon() {
     }
   }
 
-  if (document.querySelector('.admin.authentication')) {
-    $('#auth_name').on('input', function () {
+  if (document.querySelector('.admin.edit.authentication, .admin.new.authentication')) {
+    const authNameEl = document.getElementById('auth_name');
+    authNameEl.addEventListener('input', (el) => {
       // appSubUrl is either empty or is a path that starts with `/` and doesn't have a trailing slash.
-      document.getElementById('oauth2-callback-url').textContent = `${window.location.origin}${appSubUrl}/user/oauth2/${encodeURIComponent(this.value)}/callback`;
-    }).trigger('input');
+      document.getElementById('oauth2-callback-url').textContent = `${window.location.origin}${appSubUrl}/user/oauth2/${encodeURIComponent(el.target.value)}/callback`;
+    });
+    authNameEl.dispatchEvent(new Event('input'));
   }
 
   // Notice

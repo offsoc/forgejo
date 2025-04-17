@@ -15,14 +15,14 @@ import (
 	"path"
 	"testing"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/translation"
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/tests"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/translation"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,7 +43,7 @@ func TestCreateFileOnProtectedBranch(t *testing.T) {
 		// Check if master branch has been locked successfully
 		flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "success%3DBranch%2Bprotection%2Bfor%2Brule%2B%2522master%2522%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
+		assert.Equal(t, "success%3DBranch%2Bprotection%2Bfor%2Brule%2B%2522master%2522%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
 
 		// Request editor page
 		req = NewRequest(t, "GET", "/user2/repo1/_new/master/")
@@ -79,12 +79,12 @@ func TestCreateFileOnProtectedBranch(t *testing.T) {
 
 		res := make(map[string]string)
 		require.NoError(t, json.NewDecoder(resp.Body).Decode(&res))
-		assert.EqualValues(t, "/user2/repo1/settings/branches", res["redirect"])
+		assert.Equal(t, "/user2/repo1/settings/branches", res["redirect"])
 
 		// Check if master branch has been locked successfully
 		flashCookie = session.GetCookie(gitea_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "error%3DRemoving%2Bbranch%2Bprotection%2Brule%2B%25221%2522%2Bfailed.", flashCookie.Value)
+		assert.Equal(t, "error%3DRemoving%2Bbranch%2Bprotection%2Brule%2B%25221%2522%2Bfailed.", flashCookie.Value)
 	})
 }
 
@@ -113,7 +113,7 @@ func testEditFile(t *testing.T, session *TestSession, user, repo, branch, filePa
 	// Verify the change
 	req = NewRequest(t, "GET", path.Join(user, repo, "raw/branch", branch, filePath))
 	resp = session.MakeRequest(t, req, http.StatusOK)
-	assert.EqualValues(t, newContent, resp.Body.String())
+	assert.Equal(t, newContent, resp.Body.String())
 
 	return resp
 }
@@ -144,7 +144,7 @@ func testEditFileToNewBranch(t *testing.T, session *TestSession, user, repo, bra
 	// Verify the change
 	req = NewRequest(t, "GET", path.Join(user, repo, "raw/branch", targetBranch, filePath))
 	resp = session.MakeRequest(t, req, http.StatusOK)
-	assert.EqualValues(t, newContent, resp.Body.String())
+	assert.Equal(t, newContent, resp.Body.String())
 
 	return resp
 }
@@ -173,7 +173,7 @@ func TestEditorAddTranslation(t *testing.T) {
 
 	placeholder, ok := htmlDoc.Find("input[name='commit_summary']").Attr("placeholder")
 	assert.True(t, ok)
-	assert.EqualValues(t, `Add "<filename>"`, placeholder)
+	assert.Equal(t, `Add "<filename>"`, placeholder)
 }
 
 func TestCommitMail(t *testing.T) {
@@ -188,7 +188,7 @@ func TestCommitMail(t *testing.T) {
 		assert.False(t, inactivatedMail.IsActivated)
 
 		otherEmail := unittest.AssertExistsAndLoadBean(t, &user_model.EmailAddress{ID: 1, IsActivated: true})
-		assert.NotEqualValues(t, otherEmail.UID, user.ID)
+		assert.NotEqual(t, otherEmail.UID, user.ID)
 
 		primaryEmail := unittest.AssertExistsAndLoadBean(t, &user_model.EmailAddress{ID: 3, UID: user.ID, IsActivated: true})
 
@@ -277,16 +277,16 @@ func TestCommitMail(t *testing.T) {
 				session.MakeRequest(t, req, http.StatusSeeOther)
 				if !case2.skipLastCommit {
 					newlastCommit, _ := lastCommitAndCSRF(t, case1.link, false)
-					assert.NotEqualValues(t, newlastCommit, lastCommit)
+					assert.NotEqual(t, newlastCommit, lastCommit)
 				}
 
 				commit, err := gitRepo.GetCommitByPath(case1.fileName)
 				require.NoError(t, err)
 
-				assert.EqualValues(t, "user2", commit.Author.Name)
-				assert.EqualValues(t, "user2@noreply.example.org", commit.Author.Email)
-				assert.EqualValues(t, "user2", commit.Committer.Name)
-				assert.EqualValues(t, "user2@noreply.example.org", commit.Committer.Email)
+				assert.Equal(t, "user2", commit.Author.Name)
+				assert.Equal(t, "user2@noreply.example.org", commit.Author.Email)
+				assert.Equal(t, "user2", commit.Committer.Name)
+				assert.Equal(t, "user2@noreply.example.org", commit.Committer.Email)
 			})
 
 			t.Run("Normal", func(t *testing.T) {
@@ -302,16 +302,16 @@ func TestCommitMail(t *testing.T) {
 				session.MakeRequest(t, req, http.StatusSeeOther)
 				if !case2.skipLastCommit {
 					newlastCommit, _ := lastCommitAndCSRF(t, case2.link, false)
-					assert.NotEqualValues(t, newlastCommit, lastCommit)
+					assert.NotEqual(t, newlastCommit, lastCommit)
 				}
 
 				commit, err := gitRepo.GetCommitByPath(case2.fileName)
 				require.NoError(t, err)
 
-				assert.EqualValues(t, "user2", commit.Author.Name)
-				assert.EqualValues(t, primaryEmail.Email, commit.Author.Email)
-				assert.EqualValues(t, "user2", commit.Committer.Name)
-				assert.EqualValues(t, primaryEmail.Email, commit.Committer.Email)
+				assert.Equal(t, "user2", commit.Author.Name)
+				assert.Equal(t, primaryEmail.Email, commit.Author.Email)
+				assert.Equal(t, "user2", commit.Committer.Name)
+				assert.Equal(t, primaryEmail.Email, commit.Committer.Email)
 			})
 		}
 

@@ -6,7 +6,7 @@ package v1_20 //nolint
 import (
 	"strings"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 
 	"xorm.io/xorm"
 )

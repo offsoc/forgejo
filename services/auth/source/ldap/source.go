@@ -6,10 +6,10 @@ package ldap
 import (
 	"strings"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/secret"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/auth"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/secret"
+	"forgejo.org/modules/setting"
 )
 
 // .____     ________      _____ __________

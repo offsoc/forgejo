@@ -8,8 +8,10 @@ import (
 	"strconv"
 	"testing"
 
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -23,6 +25,7 @@ import (
 // - Profile visibility
 // - Public activity visibility
 func TestUserProfileActivity(t *testing.T) {
+	defer test.MockVariableValue(&setting.AppSubURL, "/sub")()
 	defer tests.PrepareTestEnv(t)()
 	// This test needs multiple users with different access statuses to check for all possible states
 	userAdmin := loginUser(t, "user1")
@@ -52,7 +55,7 @@ func TestUserProfileActivity(t *testing.T) {
 
 	// When profile activity is configured as public, but the profile is private, tell the user about this and link to visibility settings.
 	hintLink := testUser2ActivityVisibility(t, userRegular, "Your activity is only visible to you and the instance administrators because your profile is private. Configure.", true)
-	assert.EqualValues(t, "/user/settings#visibility-setting", hintLink)
+	assert.Equal(t, "/sub/user/settings#visibility-setting", hintLink)
 
 	// When the profile is private, tell the admin about this.
 	testUser2ActivityVisibility(t, userAdmin, "This activity is visible to you because you're an administrator, but the user wants it to remain private.", true)
@@ -76,7 +79,7 @@ func TestUserProfileActivity(t *testing.T) {
 	testUser2ActivityVisibility(t, userGuest, "This user has disabled the public visibility of the activity.", false)
 
 	// Verify that Configure link is correct
-	assert.EqualValues(t, "/user/settings#keep-activity-private", hintLink)
+	assert.Equal(t, "/sub/user/settings#keep-activity-private", hintLink)
 }
 
 // testChangeUserActivityVisibility allows to easily change visibility of public activity for a user
@@ -109,14 +112,14 @@ func testUser2ActivityVisibility(t *testing.T, session *TestSession, hint string
 	hintLink, hintLinkExists := page.Find("#visibility-hint a").Attr("href")
 
 	// Check that the hint aligns with the actual feed availability
-	assert.EqualValues(t, availability, page.Find("#activity-feed").Length() > 0)
+	assert.Equal(t, availability, page.Find("#activity-feed").Length() > 0)
 
 	// Check availability of RSS feed button too
-	assert.EqualValues(t, availability, page.Find("#profile-avatar-card a[href='/user2.rss']").Length() > 0)
+	assert.Equal(t, availability, page.Find("#profile-avatar-card a[href='/sub/user2.rss']").Length() > 0)
 
 	// Check that the current tab is displayed and is active regardless of it's actual availability
 	// For example, on /<user> it wouldn't be available to guest, but it should be still present on /<user>?tab=activity
-	assert.Positive(t, page.Find("overflow-menu .active.item[href='/user2?tab=activity']").Length())
+	assert.Positive(t, page.Find("overflow-menu .active.item[href='/sub/user2?tab=activity']").Length())
 	if hintLinkExists {
 		return hintLink
 	}
@@ -128,5 +131,5 @@ func testUser2ActivityButtonsAvailability(t *testing.T, session *TestSession, bu
 	t.Helper()
 	response := session.MakeRequest(t, NewRequest(t, "GET", "/user2"), http.StatusOK)
 	page := NewHTMLParser(t, response.Body)
-	assert.EqualValues(t, buttons, page.Find("overflow-menu .item[href='/user2?tab=activity']").Length() > 0)
+	assert.Equal(t, buttons, page.Find("overflow-menu .item[href='/sub/user2?tab=activity']").Length() > 0)
 }

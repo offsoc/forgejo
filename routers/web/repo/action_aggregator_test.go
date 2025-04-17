@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	issue_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/organization"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/timeutil"
+	issue_model "forgejo.org/models/issues"
+	"forgejo.org/models/organization"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -184,7 +184,7 @@ func (kase *testCase) doTest(t *testing.T) {
 			cmt := issue.Comments[c]
 			t.Logf("%v %v %v\n", cmt.Type, cmt.CreatedUnix, cmt.Content)
 		}
-		assert.EqualValues(t, len(after), len(issue.Comments))
+		assert.Len(t, issue.Comments, len(after))
 		t.Fail()
 		return
 	}
@@ -214,7 +214,7 @@ func (kase *testCase) doTest(t *testing.T) {
 			l.AssigneeTeamID = 0
 		}
 
-		assert.EqualValues(t, (after)[c], issue.Comments[c],
+		assert.Equal(t, (after)[c], issue.Comments[c],
 			"Comment %v is not equal", c,
 		)
 	}

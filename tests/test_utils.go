@@ -16,27 +16,27 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/process"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/testlogger"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers"
-	repo_service "code.gitea.io/gitea/services/repository"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	wiki_service "code.gitea.io/gitea/services/wiki"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/process"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/testlogger"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers"
+	repo_service "forgejo.org/services/repository"
+	files_service "forgejo.org/services/repository/files"
+	wiki_service "forgejo.org/services/wiki"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -355,6 +355,7 @@ type DeclarativeRepoOptions struct {
 	WikiBranch    optional.Option[string]
 	AutoInit      optional.Option[bool]
 	IsTemplate    optional.Option[bool]
+	ObjectFormat  optional.Option[string]
 }
 
 func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts DeclarativeRepoOptions) (*repo_model.Repository, string, func()) {
@@ -378,14 +379,15 @@ func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts
 
 	// Create the repository
 	repo, err := repo_service.CreateRepository(db.DefaultContext, owner, owner, repo_service.CreateRepoOptions{
-		Name:          repoName,
-		Description:   "Temporary Repo",
-		AutoInit:      autoInit,
-		Gitignores:    "",
-		License:       "WTFPL",
-		Readme:        "Default",
-		DefaultBranch: "main",
-		IsTemplate:    opts.IsTemplate.Value(),
+		Name:             repoName,
+		Description:      "Temporary Repo",
+		AutoInit:         autoInit,
+		Gitignores:       "",
+		License:          "WTFPL",
+		Readme:           "Default",
+		DefaultBranch:    "main",
+		IsTemplate:       opts.IsTemplate.Value(),
+		ObjectFormatName: opts.ObjectFormat.Value(),
 	})
 	require.NoError(t, err)
 	assert.NotEmpty(t, repo)

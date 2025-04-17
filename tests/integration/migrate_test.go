@@ -12,20 +12,20 @@ import (
 	"path/filepath"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/services/migrations"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/translation"
+	"forgejo.org/services/migrations"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -106,7 +106,7 @@ func TestMigrate(t *testing.T) {
 				})
 				resp = session.MakeRequest(t, req, http.StatusSeeOther)
 				// Step 5: a redirection displays the migrated repository
-				assert.EqualValues(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
+				assert.Equal(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
 				// Step 6: check the repo was created
 				unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName})
 			})
@@ -163,7 +163,7 @@ func TestMigrateWithWiki(t *testing.T) {
 				})
 				resp = session.MakeRequest(t, req, http.StatusSeeOther)
 				// Step 5: a redirection displays the migrated repository
-				assert.EqualValues(t, fmt.Sprintf("/%s/%s", user.Name, migratedRepoName), test.RedirectURL(resp))
+				assert.Equal(t, fmt.Sprintf("/%s/%s", user.Name, migratedRepoName), test.RedirectURL(resp))
 				// Step 6: check the repo was created and load the repo
 				migratedRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName, WikiBranch: "obscure-name"})
 				// Step 7: check if the wiki is enabled
@@ -219,7 +219,7 @@ func TestMigrateWithReleases(t *testing.T) {
 				})
 				resp = session.MakeRequest(t, req, http.StatusSeeOther)
 				// Step 5: a redirection displays the migrated repository
-				assert.EqualValues(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
+				assert.Equal(t, fmt.Sprintf("/%s/%s", ownerName, migratedRepoName), test.RedirectURL(resp))
 				// Step 6: check the repo was created and load the repo
 				migratedRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{Name: migratedRepoName})
 				// Step 7: check if releases are enabled

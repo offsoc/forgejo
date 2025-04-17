@@ -6,8 +6,8 @@ package v1_10 //nolint
 import (
 	"path/filepath"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 
 	"xorm.io/xorm"
 )

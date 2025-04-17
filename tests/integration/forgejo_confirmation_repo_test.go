@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"code.gitea.io/gitea/modules/translation"
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/translation"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -55,7 +55,7 @@ func TestDangerZoneConfirmation(t *testing.T) {
 
 			flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThis%2Brepository%2Bhas%2Bbeen%2Bmarked%2Bfor%2Btransfer%2Band%2Bawaits%2Bconfirmation%2Bfrom%2B%2522User%2BOne%2522", flashCookie.Value)
+			assert.Equal(t, "success%3DThis%2Brepository%2Bhas%2Bbeen%2Bmarked%2Bfor%2Btransfer%2Band%2Bawaits%2Bconfirmation%2Bfrom%2B%2522User%2BOne%2522", flashCookie.Value)
 		})
 	})
 
@@ -85,7 +85,7 @@ func TestDangerZoneConfirmation(t *testing.T) {
 
 			flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2Bfork%2Bhas%2Bbeen%2Bconverted%2Binto%2Ba%2Bregular%2Brepository.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2Bfork%2Bhas%2Bbeen%2Bconverted%2Binto%2Ba%2Bregular%2Brepository.", flashCookie.Value)
 		})
 	})
 
@@ -118,7 +118,7 @@ func TestDangerZoneConfirmation(t *testing.T) {
 
 			flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2Brepository%2Bwiki%2527s%2Bbranch%2Bname%2Bhas%2Bbeen%2Bsuccessfully%2Bnormalized.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2Brepository%2Bwiki%2527s%2Bbranch%2Bname%2Bhas%2Bbeen%2Bsuccessfully%2Bnormalized.", flashCookie.Value)
 		})
 	})
 
@@ -148,7 +148,7 @@ func TestDangerZoneConfirmation(t *testing.T) {
 
 			flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2Brepository%2Bwiki%2Bdata%2Bhas%2Bbeen%2Bdeleted.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2Brepository%2Bwiki%2Bdata%2Bhas%2Bbeen%2Bdeleted.", flashCookie.Value)
 		})
 	})
 
@@ -178,7 +178,7 @@ func TestDangerZoneConfirmation(t *testing.T) {
 
 			flashCookie := session.GetCookie(gitea_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2Brepository%2Bhas%2Bbeen%2Bdeleted.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2Brepository%2Bhas%2Bbeen%2Bdeleted.", flashCookie.Value)
 		})
 	})
 }

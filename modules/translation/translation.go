@@ -10,11 +10,11 @@ import (
 	"strings"
 	"sync"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/options"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation/i18n"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/options"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation/i18n"
+	"forgejo.org/modules/util"
 
 	"github.com/dustin/go-humanize"
 	"golang.org/x/text/language"
@@ -27,6 +27,10 @@ type contextKey struct{}
 var ContextKey any = &contextKey{}
 
 // Locale represents an interface to translation
+//
+// If this gets modified, remember to also adjust
+// build/lint-locale-usage/lint-locale-usage.go's InitLocaleTrFunctions(),
+// which requires to know in what argument positions `trKey`'s are given.
 type Locale interface {
 	Language() string
 	TrString(string, ...any) string

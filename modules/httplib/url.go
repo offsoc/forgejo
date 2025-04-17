@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 )
 
 // IsRiskyRedirectURL returns true if the URL is considered risky for redirects

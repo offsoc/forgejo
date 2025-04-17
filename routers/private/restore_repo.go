@@ -7,10 +7,10 @@ import (
 	"io"
 	"net/http"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/private"
-	myCtx "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/migrations"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/private"
+	myCtx "forgejo.org/services/context"
+	"forgejo.org/services/migrations"
 )
 
 // RestoreRepo restore a repository from data

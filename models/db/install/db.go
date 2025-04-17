@@ -4,14 +4,12 @@
 package install
 
 import (
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
-
-	"xorm.io/xorm"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
 )
 
-func getXORMEngine() *xorm.Engine {
-	return db.DefaultContext.(*db.Context).Engine().(*xorm.Engine)
+func getXORMEngine() db.Engine {
+	return db.DefaultContext.(*db.Context).Engine()
 }
 
 // CheckDatabaseConnection checks the database connection

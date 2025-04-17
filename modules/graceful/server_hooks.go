@@ -7,7 +7,7 @@ import (
 	"os"
 	"runtime"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 // awaitShutdown waits for the shutdown signal from the Manager
@@ -61,10 +61,7 @@ func (srv *Server) doHammer() {
 		return
 	}
 	log.Warn("Forcefully shutting down parent")
-	for {
-		if srv.getState() == stateTerminate {
-			break
-		}
+	for srv.getState() != stateTerminate {
 		srv.wg.Done()
 
 		// Give other goroutines a chance to finish before we forcibly stop them.

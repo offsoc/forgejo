@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/modules/markup"
-	mdutil "code.gitea.io/gitea/modules/markup/markdown/util"
+	"forgejo.org/modules/markup"
+	mdutil "forgejo.org/modules/markup/markdown/util"
 
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/renderer/html"
@@ -40,7 +40,7 @@ func (r *HTMLRenderer) renderCodeSpan(w util.BufWriter, source []byte, n ast.Nod
 					r.Writer.RawWrite(w, value)
 				}
 			case *ColorPreview:
-				_, _ = w.WriteString(fmt.Sprintf(`<span class="color-preview" style="background-color: %v"></span>`, string(v.Color)))
+				_, _ = fmt.Fprintf(w, `<span class="color-preview" style="background-color: %v"></span>`, string(v.Color))
 			}
 		}
 		return ast.WalkSkipChildren, nil

@@ -16,9 +16,9 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/queue"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/queue"
+	"forgejo.org/modules/util"
 )
 
 var (
@@ -363,6 +363,12 @@ var ignoredErrorMessage = []string{
 
 	// TestDatabaseCollation
 	`[E] [Error SQL Query] INSERT INTO test_collation_tbl (txt) VALUES ('main') []`,
+
+	// Test_CmdForgejo_Actions
+	`DB: No dedicated replica host defined; falling back to primary DSN for replica connections`,
+
+	// TestDevtestErrorpages
+	`ErrorPage() [E] Example error: Example error`,
 }
 
 func (w *testLoggerWriterCloser) recordError(msg string) {

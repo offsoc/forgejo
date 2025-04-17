@@ -13,16 +13,16 @@ import (
 	"net/http"
 	"strings"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	alpine_model "code.gitea.io/gitea/models/packages/alpine"
-	"code.gitea.io/gitea/modules/json"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	alpine_module "code.gitea.io/gitea/modules/packages/alpine"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/api/packages/helper"
-	"code.gitea.io/gitea/services/context"
-	packages_service "code.gitea.io/gitea/services/packages"
-	alpine_service "code.gitea.io/gitea/services/packages/alpine"
+	packages_model "forgejo.org/models/packages"
+	alpine_model "forgejo.org/models/packages/alpine"
+	"forgejo.org/modules/json"
+	packages_module "forgejo.org/modules/packages"
+	alpine_module "forgejo.org/modules/packages/alpine"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/api/packages/helper"
+	"forgejo.org/services/context"
+	packages_service "forgejo.org/services/packages"
+	alpine_service "forgejo.org/services/packages/alpine"
 )
 
 func apiError(ctx *context.Context, status int, obj any) {

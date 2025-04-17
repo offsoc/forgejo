@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,7 +48,7 @@ CONN_STR = redis://
 	assert.Equal(t, filepath.Join(setting.AppDataPath, "queues/common"), q.baseConfig.DataFullDir)
 	assert.Equal(t, 100000, q.baseConfig.Length)
 	assert.Equal(t, 20, q.batchLength)
-	assert.Equal(t, "", q.baseConfig.ConnStr)
+	assert.Empty(t, q.baseConfig.ConnStr)
 	assert.Equal(t, "default_queue", q.baseConfig.QueueFullName)
 	assert.Equal(t, "default_queue_unique", q.baseConfig.SetFullName)
 	assert.NotZero(t, q.GetWorkerMaxNumber())
@@ -102,7 +102,7 @@ MAX_WORKERS = 123
 	assert.Equal(t, filepath.Join(setting.AppDataPath, "queues/dir2"), q2.baseConfig.DataFullDir)
 	assert.Equal(t, 102, q2.baseConfig.Length)
 	assert.Equal(t, 22, q2.batchLength)
-	assert.Equal(t, "", q2.baseConfig.ConnStr)
+	assert.Empty(t, q2.baseConfig.ConnStr)
 	assert.Equal(t, "sub_q2", q2.baseConfig.QueueFullName)
 	assert.Equal(t, "sub_q2_u2", q2.baseConfig.SetFullName)
 	assert.Equal(t, 123, q2.GetWorkerMaxNumber())

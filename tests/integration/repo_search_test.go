@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	code_indexer "code.gitea.io/gitea/modules/indexer/code"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	code_indexer "forgejo.org/modules/indexer/code"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/routers"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -100,7 +100,7 @@ func testSearch(t *testing.T, url string, expected []string, indexer bool) {
 	container := doc.Find(".repository").Find(".ui.container")
 
 	branchDropdown := container.Find(".js-branch-tag-selector")
-	assert.EqualValues(t, indexer, len(branchDropdown.Nodes) == 0)
+	assert.Equal(t, indexer, len(branchDropdown.Nodes) == 0)
 
 	dropdownOptions := container.
 		Find(".menu[data-test-tag=fuzzy-dropdown]").
@@ -112,9 +112,9 @@ func testSearch(t *testing.T, url string, expected []string, indexer bool) {
 		})
 
 	if indexer {
-		assert.EqualValues(t, []string{"exact", "union"}, dropdownOptions)
+		assert.Equal(t, []string{"exact", "union"}, dropdownOptions)
 	} else {
-		assert.EqualValues(t, []string{"exact", "union", "regexp"}, dropdownOptions)
+		assert.Equal(t, []string{"exact", "union", "regexp"}, dropdownOptions)
 	}
 
 	filenames := resultFilenames(t, doc)

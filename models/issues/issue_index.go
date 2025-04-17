@@ -6,7 +6,7 @@ package issues
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
+	"forgejo.org/models/db"
 )
 
 func GetMaxIssueIndexForRepo(ctx context.Context, repoID int64) (int64, error) {

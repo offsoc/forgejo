@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/translation"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -41,8 +41,8 @@ func TestOrgNavigationDashboard(t *testing.T) {
 
 	// Verify the "New repository" and "New migration" buttons
 	links := doc.Find(".organization.profile .grid .column .center")
-	assert.EqualValues(t, locale.TrString("new_repo.link"), strings.TrimSpace(links.Find("a[href^='/repo/create?org=']").Text()))
-	assert.EqualValues(t, locale.TrString("new_migrate.link"), strings.TrimSpace(links.Find("a[href^='/repo/migrate?org=']").Text()))
+	assert.Equal(t, locale.TrString("new_repo.link"), strings.TrimSpace(links.Find("a[href^='/repo/create?org=']").Text()))
+	assert.Equal(t, locale.TrString("new_migrate.link"), strings.TrimSpace(links.Find("a[href^='/repo/migrate?org=']").Text()))
 
 	// Check if the "View <orgname>" button is available on dashboard for the org admin (member)
 	resp = session1.MakeRequest(t, NewRequest(t, "GET", "/org/org_navigation_test/dashboard"), http.StatusOK)

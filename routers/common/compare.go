@@ -4,9 +4,9 @@
 package common
 
 import (
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
 )
 
 // CompareInfo represents the collected results from ParseCompareInfo

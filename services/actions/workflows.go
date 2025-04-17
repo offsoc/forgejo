@@ -10,18 +10,19 @@ import (
 	"fmt"
 	"strconv"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/webhook"
-	"code.gitea.io/gitea/services/convert"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/perm"
+	"forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/actions"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/webhook"
+	"forgejo.org/services/convert"
 
 	"github.com/nektos/act/pkg/jobparser"
 	act_model "github.com/nektos/act/pkg/model"
@@ -49,15 +50,15 @@ type Workflow struct {
 
 type InputValueGetter func(key string) string
 
-func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGetter, repo *repo_model.Repository, doer *user.User) error {
+func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGetter, repo *repo_model.Repository, doer *user.User) (r *actions_model.ActionRun, j []string, err error) {
 	content, err := actions.GetContentFromEntry(entry.GitEntry)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	wf, err := act_model.ReadWorkflow(bytes.NewReader(content))
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	fullWorkflowID := ".forgejo/workflows/" + entry.WorkflowID
@@ -79,7 +80,7 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 						if len(name) == 0 {
 							name = key
 						}
-						return InputRequiredErr{Name: name}
+						return nil, nil, InputRequiredErr{Name: name}
 					}
 					continue
 				}
@@ -92,8 +93,10 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 	}
 
 	if int64(len(inputs)) > setting.Actions.LimitDispatchInputs {
-		return errors.New("to many inputs")
+		return nil, nil, errors.New("to many inputs")
 	}
+
+	jobNames := util.KeysOfMap(wf.Jobs)
 
 	payload := &structs.WorkflowDispatchPayload{
 		Inputs:     inputs,
@@ -105,7 +108,7 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 
 	p, err := json.Marshal(payload)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	run := &actions_model.ActionRun{
@@ -126,15 +129,15 @@ func (entry *Workflow) Dispatch(ctx context.Context, inputGetter InputValueGette
 
 	vars, err := actions_model.GetVariablesOfRun(ctx, run)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	jobs, err := jobparser.Parse(content, jobparser.WithVars(vars))
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	return actions_model.InsertRun(ctx, run, jobs)
+	return run, jobNames, actions_model.InsertRun(ctx, run, jobs)
 }
 
 func GetWorkflowFromCommit(gitRepo *git.Repository, ref, workflowID string) (*Workflow, error) {

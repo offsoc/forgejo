@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"testing"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/contexttest"
-	"code.gitea.io/gitea/services/forms"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/repository"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/contexttest"
+	"forgejo.org/services/forms"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,7 +39,7 @@ func TestInitializeLabels(t *testing.T) {
 	contexttest.LoadRepo(t, ctx, 2)
 	web.SetForm(ctx, &forms.InitializeLabelsForm{TemplateName: "Default"})
 	InitializeLabels(ctx)
-	assert.EqualValues(t, http.StatusSeeOther, ctx.Resp.Status())
+	assert.Equal(t, http.StatusSeeOther, ctx.Resp.Status())
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Label{
 		RepoID: 2,
 		Name:   "enhancement",
@@ -69,7 +69,7 @@ func TestRetrieveLabels(t *testing.T) {
 		assert.True(t, ok)
 		if assert.Len(t, labels, len(testCase.ExpectedLabelIDs)) {
 			for i, label := range labels {
-				assert.EqualValues(t, testCase.ExpectedLabelIDs[i], label.ID)
+				assert.Equal(t, testCase.ExpectedLabelIDs[i], label.ID)
 			}
 		}
 	}
@@ -85,7 +85,7 @@ func TestNewLabel(t *testing.T) {
 		Color: "#abcdef",
 	})
 	NewLabel(ctx)
-	assert.EqualValues(t, http.StatusSeeOther, ctx.Resp.Status())
+	assert.Equal(t, http.StatusSeeOther, ctx.Resp.Status())
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Label{
 		Name:  "newlabel",
 		Color: "#abcdef",
@@ -105,7 +105,7 @@ func TestUpdateLabel(t *testing.T) {
 		IsArchived: true,
 	})
 	UpdateLabel(ctx)
-	assert.EqualValues(t, http.StatusSeeOther, ctx.Resp.Status())
+	assert.Equal(t, http.StatusSeeOther, ctx.Resp.Status())
 	unittest.AssertExistsAndLoadBean(t, &issues_model.Label{
 		ID:    2,
 		Name:  "newnameforlabel",
@@ -121,7 +121,7 @@ func TestDeleteLabel(t *testing.T) {
 	contexttest.LoadRepo(t, ctx, 1)
 	ctx.Req.Form.Set("id", "2")
 	DeleteLabel(ctx)
-	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
+	assert.Equal(t, http.StatusOK, ctx.Resp.Status())
 	unittest.AssertNotExistsBean(t, &issues_model.Label{ID: 2})
 	unittest.AssertNotExistsBean(t, &issues_model.IssueLabel{LabelID: 2})
 	assert.EqualValues(t, ctx.Tr("repo.issues.label_deletion_success"), ctx.Flash.SuccessMsg)
@@ -135,7 +135,7 @@ func TestUpdateIssueLabel_Clear(t *testing.T) {
 	ctx.Req.Form.Set("issue_ids", "1,3")
 	ctx.Req.Form.Set("action", "clear")
 	UpdateIssueLabel(ctx)
-	assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
+	assert.Equal(t, http.StatusOK, ctx.Resp.Status())
 	unittest.AssertNotExistsBean(t, &issues_model.IssueLabel{IssueID: 1})
 	unittest.AssertNotExistsBean(t, &issues_model.IssueLabel{IssueID: 3})
 	unittest.CheckConsistencyFor(t, &issues_model.Label{})
@@ -161,7 +161,7 @@ func TestUpdateIssueLabel_Toggle(t *testing.T) {
 		ctx.Req.Form.Set("action", testCase.Action)
 		ctx.Req.Form.Set("id", strconv.Itoa(int(testCase.LabelID)))
 		UpdateIssueLabel(ctx)
-		assert.EqualValues(t, http.StatusOK, ctx.Resp.Status())
+		assert.Equal(t, http.StatusOK, ctx.Resp.Status())
 		for _, issueID := range testCase.IssueIDs {
 			unittest.AssertExistsIf(t, testCase.ExpectedAdd, &issues_model.IssueLabel{
 				IssueID: issueID,

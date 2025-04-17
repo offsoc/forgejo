@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"os"
 
-	"code.gitea.io/gitea/models/forgejo/semver"
-	forgejo_v1_20 "code.gitea.io/gitea/models/forgejo_migrations/v1_20"
-	forgejo_v1_22 "code.gitea.io/gitea/models/forgejo_migrations/v1_22"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/forgejo/semver"
+	forgejo_v1_20 "forgejo.org/models/forgejo_migrations/v1_20"
+	forgejo_v1_22 "forgejo.org/models/forgejo_migrations/v1_22"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/xorm"
 	"xorm.io/xorm/names"
@@ -95,6 +95,10 @@ var migrations = []*Migration{
 	// v27 -> v28
 	NewMigration("Add pronoun privacy settings to user", AddHidePronounsOptionToUser),
 	// v28 -> v29
+	NewMigration("Add public key information to `FederatedUser` and `FederationHost`", AddPublicKeyInformationForFederation),
+	// v29 -> v30
+	NewMigration("Migrate `User.NormalizedFederatedURI` column to extract port & schema into FederatedHost", MigrateNormalizedFederatedURI),
+	// v30 -> v31
 	NewMigration("Add federated user activity tables & update the `federated_user` table", AddFederatedUserActivityTables),
 }
 

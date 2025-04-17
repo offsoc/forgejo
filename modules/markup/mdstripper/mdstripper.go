@@ -10,9 +10,9 @@ import (
 	"strings"
 	"sync"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup/common"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup/common"
+	"forgejo.org/modules/setting"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -107,11 +107,12 @@ func (r *stripRenderer) processAutoLink(w io.Writer, link []byte) {
 	}
 
 	var sep string
-	if parts[3] == "issues" {
+	switch parts[3] {
+	case "issues":
 		sep = "#"
-	} else if parts[3] == "pulls" {
+	case "pulls":
 		sep = "!"
-	} else {
+	default:
 		// Process out of band
 		r.links = append(r.links, linkStr)
 		return

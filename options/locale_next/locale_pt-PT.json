@@ -9,10 +9,15 @@
         "many": "quer integrar %[1]d cometimentos do ramo <code>%[2]s</code> no ramo <code id=\"%[4]s\">%[3]s</code>",
         "other": ""
     },
-    "search.milestone_kind": "Procurar etapas...",
+    "search.milestone_kind": "Procurar etapas…",
     "home.welcome.no_activity": "Sem atividade",
     "home.welcome.activity_hint": "Ainda não há nada no seu feed. As suas operações e a atividade dos repositórios que vigia aparecerão aqui.",
     "home.explore_repos": "Explorar repositórios",
     "home.explore_users": "Explorar utilizadores",
-    "home.explore_orgs": "Explorar organizações"
+    "home.explore_orgs": "Explorar organizações",
+    "incorrect_root_url": "Esta instância do Forgejo está configurada para ser servida em “%s”. Atualmente, está a visualizar o Forgejo através de um URL diferente, o que pode causar a quebra de partes da aplicação. O URL official é controlado pelos administradores do Forgejo através da configuração ROOT_URL no ficheiro app.ini.",
+    "themes.names.forgejo-auto": "Forgejo (segue o tema do sistema)",
+    "themes.names.forgejo-light": "Forgejo claro",
+    "themes.names.forgejo-dark": "Forgejo escuro",
+    "error.not_found.title": "Página não encontrada"
 }

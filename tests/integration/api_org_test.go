@@ -9,17 +9,17 @@ import (
 	"strings"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	org_model "code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	org_model "forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -76,7 +76,7 @@ func TestAPIOrgCreate(t *testing.T) {
 		AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiOrg)
-	assert.EqualValues(t, org.UserName, apiOrg.Name)
+	assert.Equal(t, org.UserName, apiOrg.Name)
 
 	req = NewRequestf(t, "GET", "/api/v1/orgs/%s/repos", org.UserName).
 		AddTokenAuth(token)
@@ -96,7 +96,7 @@ func TestAPIOrgCreate(t *testing.T) {
 	var users []*api.User
 	DecodeJSON(t, resp, &users)
 	assert.Len(t, users, 1)
-	assert.EqualValues(t, "user1", users[0].UserName)
+	assert.Equal(t, "user1", users[0].UserName)
 }
 
 func TestAPIOrgRename(t *testing.T) {
@@ -238,7 +238,7 @@ func TestAPIOrgSearchEmptyTeam(t *testing.T) {
 	DecodeJSON(t, resp, &data)
 	assert.True(t, data.Ok)
 	if assert.Len(t, data.Data, 1) {
-		assert.EqualValues(t, "Empty", data.Data[0].Name)
+		assert.Equal(t, "Empty", data.Data[0].Name)
 	}
 }
 

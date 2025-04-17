@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/modules/base"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/modules/base"
 )
 
 type QuotaTargetType int
@@ -64,7 +64,7 @@ func QuotaRuleAssignmentAPI() func(ctx *APIContext) {
 
 // ctx.CheckQuota checks whether the user in question is within quota limits (web context)
 func (ctx *Context) CheckQuota(subject quota_model.LimitSubject, userID int64, username string) bool {
-	ok, err := checkQuota(ctx.Base.originCtx, subject, userID, username, func(userID int64, username string) {
+	ok, err := checkQuota(ctx.originCtx, subject, userID, username, func(userID int64, username string) {
 		showHTML := false
 		for _, part := range ctx.Req.Header["Accept"] {
 			if strings.Contains(part, "text/html") {
@@ -91,7 +91,7 @@ func (ctx *Context) CheckQuota(subject quota_model.LimitSubject, userID int64, u
 
 // ctx.CheckQuota checks whether the user in question is within quota limits (API context)
 func (ctx *APIContext) CheckQuota(subject quota_model.LimitSubject, userID int64, username string) bool {
-	ok, err := checkQuota(ctx.Base.originCtx, subject, userID, username, func(userID int64, username string) {
+	ok, err := checkQuota(ctx.originCtx, subject, userID, username, func(userID int64, username string) {
 		ctx.JSON(http.StatusRequestEntityTooLarge, APIQuotaExceeded{
 			Message:  "quota exceeded",
 			UserID:   userID,

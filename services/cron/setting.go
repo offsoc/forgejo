@@ -6,7 +6,7 @@ package cron
 import (
 	"time"
 
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/translation"
 )
 
 // Config represents a basic configuration interface that cron task

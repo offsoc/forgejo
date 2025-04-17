@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"strings"
 
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	chef_module "code.gitea.io/gitea/modules/packages/chef"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	shared "code.gitea.io/gitea/routers/web/shared/packages"
-	"code.gitea.io/gitea/services/context"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	chef_module "forgejo.org/modules/packages/chef"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	shared "forgejo.org/routers/web/shared/packages"
+	"forgejo.org/services/context"
 )
 
 const (

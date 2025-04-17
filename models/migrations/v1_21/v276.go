@@ -4,8 +4,8 @@
 package v1_21 //nolint
 
 import (
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/setting"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/xorm"
 )

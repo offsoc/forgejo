@@ -15,9 +15,9 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/packages"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/packages"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
 
 	"github.com/mholt/archiver/v3"
 )

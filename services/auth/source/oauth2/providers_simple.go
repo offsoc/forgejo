@@ -4,7 +4,7 @@
 package oauth2
 
 import (
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/azuread"

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -127,19 +127,19 @@ func TestGetTagCommit(t *testing.T) {
 
 	aTagID, err := bareRepo1.GetTagCommitID(aTagName)
 	require.NoError(t, err)
-	assert.NotEqualValues(t, aTagCommitID, aTagID)
+	assert.NotEqual(t, aTagCommitID, aTagID)
 
 	lTagID, err := bareRepo1.GetTagCommitID(lTagName)
 	require.NoError(t, err)
-	assert.EqualValues(t, lTagCommitID, lTagID)
+	assert.Equal(t, lTagCommitID, lTagID)
 
 	aTag, err := bareRepo1.GetTagCommit(aTagName)
 	require.NoError(t, err)
-	assert.EqualValues(t, aTagCommitID, aTag.ID.String())
+	assert.Equal(t, aTagCommitID, aTag.ID.String())
 
 	lTag, err := bareRepo1.GetTagCommit(lTagName)
 	require.NoError(t, err)
-	assert.EqualValues(t, lTagCommitID, lTag.ID.String())
+	assert.Equal(t, lTagCommitID, lTag.ID.String())
 }
 
 func TestCommitsByRange(t *testing.T) {

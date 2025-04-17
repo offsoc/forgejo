@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"code.gitea.io/gitea/modules/web"
+	"forgejo.org/modules/web"
 
 	chi "github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
@@ -15,9 +15,10 @@ import (
 
 func TestStripSlashesMiddleware(t *testing.T) {
 	type test struct {
-		name         string
-		expectedPath string
-		inputPath    string
+		name               string
+		expectedPath       string
+		expectedNormalPath string
+		inputPath          string
 	}
 
 	tests := []test{
@@ -57,9 +58,16 @@ func TestStripSlashesMiddleware(t *testing.T) {
 			expectedPath: "/repo/migrate",
 		},
 		{
-			name:         "path with encoded slash",
-			inputPath:    "/user2/%2F%2Frepo1",
-			expectedPath: "/user2/%2F%2Frepo1",
+			name:               "path with encoded slash",
+			inputPath:          "/user2/%2F%2Frepo1",
+			expectedPath:       "/user2/%2F%2Frepo1",
+			expectedNormalPath: "/user2/repo1",
+		},
+		{
+			name:               "path with space",
+			inputPath:          "/assets/css/theme%20cappuccino.css",
+			expectedPath:       "/assets/css/theme%20cappuccino.css",
+			expectedNormalPath: "/assets/css/theme cappuccino.css",
 		},
 	}
 
@@ -69,7 +77,11 @@ func TestStripSlashesMiddleware(t *testing.T) {
 
 		called := false
 		r.Get("*", func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, tt.expectedPath, r.URL.Path)
+			if tt.expectedNormalPath != "" {
+				assert.Equal(t, tt.expectedNormalPath, r.URL.Path)
+			} else {
+				assert.Equal(t, tt.expectedPath, r.URL.Path)
+			}
 
 			rctx := chi.RouteContext(r.Context())
 			assert.Equal(t, tt.expectedPath, rctx.RoutePath)

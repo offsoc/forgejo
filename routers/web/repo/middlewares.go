@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"strconv"
 
-	system_model "code.gitea.io/gitea/models/system"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/services/context"
-	user_service "code.gitea.io/gitea/services/user"
+	system_model "forgejo.org/models/system"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/optional"
+	"forgejo.org/services/context"
+	user_service "forgejo.org/services/user"
 )
 
 // SetEditorconfigIfExists set editor config as render variable

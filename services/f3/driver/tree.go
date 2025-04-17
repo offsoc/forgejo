@@ -8,8 +8,9 @@ import (
 	"context"
 	"fmt"
 
-	forgejo_options "code.gitea.io/gitea/services/f3/driver/options"
+	forgejo_options "forgejo.org/services/f3/driver/options"
 
+	f3_kind "code.forgejo.org/f3/gof3/v3/kind"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 )
@@ -24,7 +25,7 @@ func (o *treeDriver) Init() {
 	o.NullTreeDriver.Init()
 }
 
-func (o *treeDriver) Factory(ctx context.Context, kind generic.Kind) generic.NodeDriverInterface {
+func (o *treeDriver) Factory(ctx context.Context, kind f3_kind.Kind) generic.NodeDriverInterface {
 	switch kind {
 	case f3_tree.KindForge:
 		return newForge()
@@ -88,7 +89,7 @@ func (o *treeDriver) Factory(ctx context.Context, kind generic.Kind) generic.Nod
 		return newRepositories()
 	case f3_tree.KindRepository:
 		return newRepository(ctx)
-	case generic.KindRoot:
+	case f3_kind.KindRoot:
 		return newRoot(o.GetTree().(f3_tree.TreeInterface).NewFormat(kind))
 	default:
 		panic(fmt.Errorf("unexpected kind %s", kind))

@@ -6,9 +6,9 @@ package bleve
 import (
 	"context"
 
-	indexer_internal "code.gitea.io/gitea/modules/indexer/internal"
-	inner_bleve "code.gitea.io/gitea/modules/indexer/internal/bleve"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
+	indexer_internal "forgejo.org/modules/indexer/internal"
+	inner_bleve "forgejo.org/modules/indexer/internal/bleve"
+	"forgejo.org/modules/indexer/issues/internal"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
@@ -162,15 +162,10 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 		}
 		q := bleve.NewBooleanQuery()
 		for _, token := range tokens {
-			fuzziness := 0
-			if token.Fuzzy {
-				// TODO: replace with "auto" after bleve update
-				fuzziness = min(len(token.Term)/4, 2)
-			}
 			innerQ := bleve.NewDisjunctionQuery(
-				inner_bleve.MatchPhraseQuery(token.Term, "title", issueIndexerAnalyzer, fuzziness),
-				inner_bleve.MatchPhraseQuery(token.Term, "content", issueIndexerAnalyzer, fuzziness),
-				inner_bleve.MatchPhraseQuery(token.Term, "comments", issueIndexerAnalyzer, fuzziness))
+				inner_bleve.MatchPhraseQuery(token.Term, "title", issueIndexerAnalyzer, token.Fuzzy),
+				inner_bleve.MatchPhraseQuery(token.Term, "content", issueIndexerAnalyzer, token.Fuzzy),
+				inner_bleve.MatchPhraseQuery(token.Term, "comments", issueIndexerAnalyzer, token.Fuzzy))
 
 			switch token.Kind {
 			case internal.BoolOptMust:

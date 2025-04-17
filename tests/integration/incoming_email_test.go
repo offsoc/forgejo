@@ -12,15 +12,15 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/mailer/incoming"
-	incoming_payload "code.gitea.io/gitea/services/mailer/incoming/payload"
-	token_service "code.gitea.io/gitea/services/mailer/token"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/mailer/incoming"
+	incoming_payload "forgejo.org/services/mailer/incoming/payload"
+	token_service "forgejo.org/services/mailer/token"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -52,12 +52,12 @@ func TestIncomingEmail(t *testing.T) {
 		ref, err := incoming_payload.GetReferenceFromPayload(db.DefaultContext, issuePayload)
 		require.NoError(t, err)
 		assert.IsType(t, ref, new(issues_model.Issue))
-		assert.EqualValues(t, issue.ID, ref.(*issues_model.Issue).ID)
+		assert.Equal(t, issue.ID, ref.(*issues_model.Issue).ID)
 
 		ref, err = incoming_payload.GetReferenceFromPayload(db.DefaultContext, commentPayload)
 		require.NoError(t, err)
 		assert.IsType(t, ref, new(issues_model.Comment))
-		assert.EqualValues(t, comment.ID, ref.(*issues_model.Comment).ID)
+		assert.Equal(t, comment.ID, ref.(*issues_model.Comment).ID)
 	})
 
 	t.Run("Token", func(t *testing.T) {

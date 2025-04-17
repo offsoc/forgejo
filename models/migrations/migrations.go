@@ -8,29 +8,30 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/forgejo_migrations"
-	"code.gitea.io/gitea/models/migrations/v1_10"
-	"code.gitea.io/gitea/models/migrations/v1_11"
-	"code.gitea.io/gitea/models/migrations/v1_12"
-	"code.gitea.io/gitea/models/migrations/v1_13"
-	"code.gitea.io/gitea/models/migrations/v1_14"
-	"code.gitea.io/gitea/models/migrations/v1_15"
-	"code.gitea.io/gitea/models/migrations/v1_16"
-	"code.gitea.io/gitea/models/migrations/v1_17"
-	"code.gitea.io/gitea/models/migrations/v1_18"
-	"code.gitea.io/gitea/models/migrations/v1_19"
-	"code.gitea.io/gitea/models/migrations/v1_20"
-	"code.gitea.io/gitea/models/migrations/v1_21"
-	"code.gitea.io/gitea/models/migrations/v1_22"
-	"code.gitea.io/gitea/models/migrations/v1_23"
-	"code.gitea.io/gitea/models/migrations/v1_6"
-	"code.gitea.io/gitea/models/migrations/v1_7"
-	"code.gitea.io/gitea/models/migrations/v1_8"
-	"code.gitea.io/gitea/models/migrations/v1_9"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	forgejo_services "code.gitea.io/gitea/services/forgejo"
+	"forgejo.org/models/db"
+	"forgejo.org/models/forgejo_migrations"
+	"forgejo.org/models/migrations/v1_10"
+	"forgejo.org/models/migrations/v1_11"
+	"forgejo.org/models/migrations/v1_12"
+	"forgejo.org/models/migrations/v1_13"
+	"forgejo.org/models/migrations/v1_14"
+	"forgejo.org/models/migrations/v1_15"
+	"forgejo.org/models/migrations/v1_16"
+	"forgejo.org/models/migrations/v1_17"
+	"forgejo.org/models/migrations/v1_18"
+	"forgejo.org/models/migrations/v1_19"
+	"forgejo.org/models/migrations/v1_20"
+	"forgejo.org/models/migrations/v1_21"
+	"forgejo.org/models/migrations/v1_22"
+	"forgejo.org/models/migrations/v1_23"
+	"forgejo.org/models/migrations/v1_6"
+	"forgejo.org/models/migrations/v1_7"
+	"forgejo.org/models/migrations/v1_8"
+	"forgejo.org/models/migrations/v1_9"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	forgejo_services "forgejo.org/services/forgejo"
 
 	"xorm.io/xorm"
 	"xorm.io/xorm/names"
@@ -509,4 +510,13 @@ Please try upgrading to a lower version first (suggested v1.6.4), then upgrade t
 
 	// Execute Forgejo specific migrations.
 	return forgejo_migrations.Migrate(x)
+}
+
+// WrapperMigrate is a wrapper for Migrate to be called in diagnostics
+func WrapperMigrate(e db.Engine) error {
+	engine, err := db.GetMasterEngine(e)
+	if err != nil {
+		return err
+	}
+	return Migrate(engine)
 }

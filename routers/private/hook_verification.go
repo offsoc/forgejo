@@ -10,9 +10,9 @@ import (
 	"io"
 	"os"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
 )
 
 // This file contains commit verification functions for refs passed across in hooks

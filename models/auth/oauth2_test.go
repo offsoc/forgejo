@@ -8,10 +8,10 @@ import (
 	"slices"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -130,7 +130,7 @@ func TestOAuth2Application_CreateGrant(t *testing.T) {
 	assert.NotNil(t, grant)
 	assert.Equal(t, int64(2), grant.UserID)
 	assert.Equal(t, int64(1), grant.ApplicationID)
-	assert.Equal(t, "", grant.Scope)
+	assert.Empty(t, grant.Scope)
 }
 
 //////////////////// Grant
@@ -271,7 +271,7 @@ func TestOAuth2AuthorizationCode_TableName(t *testing.T) {
 func TestBuiltinApplicationsClientIDs(t *testing.T) {
 	clientIDs := auth_model.BuiltinApplicationsClientIDs()
 	slices.Sort(clientIDs)
-	assert.EqualValues(t, []string{"a4792ccc-144e-407e-86c9-5e7d8d9c3269", "d57cb8c4-630c-4168-8324-ec79935e18d4", "e90ee53c-94e2-48ac-9358-a874fb9e0662"}, clientIDs)
+	assert.Equal(t, []string{"a4792ccc-144e-407e-86c9-5e7d8d9c3269", "d57cb8c4-630c-4168-8324-ec79935e18d4", "e90ee53c-94e2-48ac-9358-a874fb9e0662"}, clientIDs)
 }
 
 func TestOrphanedOAuth2Applications(t *testing.T) {

@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"testing"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	forgejo_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/tests"
+	actions_model "forgejo.org/models/actions"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	forgejo_context "forgejo.org/services/context"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -64,12 +64,12 @@ func TestActionVariablesModification(t *testing.T) {
 			resp := sess.MakeRequest(t, req, http.StatusBadRequest)
 			var error errorJSON
 			DecodeJSON(t, resp, &error)
-			assert.EqualValues(t, "Failed to find the variable.", error.Error)
+			assert.Equal(t, "Failed to find the variable.", error.Error)
 		} else {
 			sess.MakeRequest(t, req, http.StatusOK)
 			flashCookie := sess.GetCookie(forgejo_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2Bvariable%2Bhas%2Bbeen%2Bedited.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2Bvariable%2Bhas%2Bbeen%2Bedited.", flashCookie.Value)
 		}
 
 		req = NewRequestWithValues(t, "POST", baseURL+fmt.Sprintf("/%d/delete", id), map[string]string{
@@ -79,12 +79,12 @@ func TestActionVariablesModification(t *testing.T) {
 			resp := sess.MakeRequest(t, req, http.StatusBadRequest)
 			var error errorJSON
 			DecodeJSON(t, resp, &error)
-			assert.EqualValues(t, "Failed to find the variable.", error.Error)
+			assert.Equal(t, "Failed to find the variable.", error.Error)
 		} else {
 			sess.MakeRequest(t, req, http.StatusOK)
 			flashCookie := sess.GetCookie(forgejo_context.CookieNameFlash)
 			assert.NotNil(t, flashCookie)
-			assert.EqualValues(t, "success%3DThe%2Bvariable%2Bhas%2Bbeen%2Bremoved.", flashCookie.Value)
+			assert.Equal(t, "success%3DThe%2Bvariable%2Bhas%2Bbeen%2Bremoved.", flashCookie.Value)
 		}
 	}
 

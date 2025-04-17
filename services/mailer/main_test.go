@@ -7,13 +7,13 @@ import (
 	"context"
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/templates"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/translation"
 
-	_ "code.gitea.io/gitea/models/actions"
+	_ "forgejo.org/models/actions"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -98,14 +98,14 @@ const sfc = {
           $(`#${this.branchForm} input[name="refType"]`).val('branch');
         }
         if (this.submitForm) {
-          $(`#${this.branchForm}`).trigger('submit');
+          document.getElementById(this.branchForm).requestSubmit();
         }
         this.menuVisible = false;
       }
     },
     createNewBranch() {
       if (!this.showCreateNewBranch) return;
-      $(this.$refs.newBranchForm).trigger('submit');
+      this.$refs.newBranchForm.requestSubmit();
     },
     focusSearchField() {
       nextTick(() => {
@@ -265,10 +265,10 @@ export default sfc; // activate IDE's Vue plugin
       </div>
       <div v-if="showBranchesInDropdown" class="branch-tag-tab">
         <a class="branch-tag-item muted" :class="{active: mode === 'branches'}" href="#" @click="handleTabSwitch('branches')">
-          <svg-icon name="octicon-git-branch" :size="16" class="tw-mr-1"/>{{ textBranches }}
+          <svg-icon name="octicon-git-branch" :size="16"/>{{ textBranches }}
         </a>
         <a v-if="!noTag" class="branch-tag-item muted" :class="{active: mode === 'tags'}" href="#" @click="handleTabSwitch('tags')">
-          <svg-icon name="octicon-tag" :size="16" class="tw-mr-1"/>{{ textTags }}
+          <svg-icon name="octicon-tag" :size="16"/>{{ textTags }}
         </a>
       </div>
       <div class="branch-tag-divider"/>
@@ -316,17 +316,6 @@ export default sfc; // activate IDE's Vue plugin
   </div>
 </template>
 <style scoped>
-.branch-tag-tab {
-  padding: 0 10px;
-}
-
-.branch-tag-item {
-  display: inline-block;
-  padding: 10px;
-  border: 1px solid transparent;
-  border-bottom: none;
-}
-
 .branch-tag-item.active {
   border-color: var(--color-secondary);
   background: var(--color-menu);

@@ -6,8 +6,8 @@ package issues
 import (
 	"slices"
 
-	"code.gitea.io/gitea/models/organization"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/organization"
+	user_model "forgejo.org/models/user"
 )
 
 type ActionAggregator struct {
@@ -50,11 +50,12 @@ func (agg *ActionAggregator) aggregateAction(c *Comment, index int) {
 	}
 	agg.EndInd = index
 
-	if c.Type == CommentTypeClose {
+	switch c.Type {
+	case CommentTypeClose:
 		agg.IsClosed = true
-	} else if c.Type == CommentTypeReopen {
+	case CommentTypeReopen:
 		agg.IsClosed = false
-	} else if c.Type == CommentTypeReviewRequest {
+	case CommentTypeReviewRequest:
 		if c.AssigneeID > 0 {
 			req := RequestReviewTarget{User: c.Assignee}
 			if c.RemovedAssignee {
@@ -78,13 +79,13 @@ func (agg *ActionAggregator) aggregateAction(c *Comment, index int) {
 		for _, r := range c.AddedRequestReview {
 			agg.addReviewRequest(r)
 		}
-	} else if c.Type == CommentTypeLabel {
+	case CommentTypeLabel:
 		if c.Content == "1" {
 			agg.addLabel(c.Label)
 		} else {
 			agg.delLabel(c.Label)
 		}
-	} else if c.Type == CommentTypeAggregator {
+	case CommentTypeAggregator:
 		agg.Merge(c.Aggregator)
 	}
 }

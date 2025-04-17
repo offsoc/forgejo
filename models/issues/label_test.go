@@ -6,12 +6,12 @@ package issues_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,7 +21,7 @@ func TestLabel_CalOpenIssues(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	label := unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: 1})
 	label.CalOpenIssues()
-	assert.EqualValues(t, 2, label.NumOpenIssues)
+	assert.Equal(t, 2, label.NumOpenIssues)
 }
 
 func TestLabel_LoadSelectedLabelsAfterClick(t *testing.T) {
@@ -156,7 +156,7 @@ func TestGetLabelsByRepoID(t *testing.T) {
 		require.NoError(t, err)
 		assert.Len(t, labels, len(expectedIssueIDs))
 		for i, label := range labels {
-			assert.EqualValues(t, expectedIssueIDs[i], label.ID)
+			assert.Equal(t, expectedIssueIDs[i], label.ID)
 		}
 	}
 	testSuccess(1, "leastissues", []int64{2, 1})
@@ -223,7 +223,7 @@ func TestGetLabelsByOrgID(t *testing.T) {
 		require.NoError(t, err)
 		assert.Len(t, labels, len(expectedIssueIDs))
 		for i, label := range labels {
-			assert.EqualValues(t, expectedIssueIDs[i], label.ID)
+			assert.Equal(t, expectedIssueIDs[i], label.ID)
 		}
 	}
 	testSuccess(3, "leastissues", []int64{3, 4})
@@ -269,10 +269,10 @@ func TestUpdateLabel(t *testing.T) {
 	label.Name = update.Name
 	require.NoError(t, issues_model.UpdateLabel(db.DefaultContext, update))
 	newLabel := unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: 1})
-	assert.EqualValues(t, label.ID, newLabel.ID)
-	assert.EqualValues(t, label.Color, newLabel.Color)
-	assert.EqualValues(t, label.Name, newLabel.Name)
-	assert.EqualValues(t, label.Description, newLabel.Description)
+	assert.Equal(t, label.ID, newLabel.ID)
+	assert.Equal(t, label.Color, newLabel.Color)
+	assert.Equal(t, label.Name, newLabel.Name)
+	assert.Equal(t, label.Description, newLabel.Description)
 	assert.EqualValues(t, 0, newLabel.ArchivedUnix)
 	unittest.CheckConsistencyFor(t, &issues_model.Label{}, &repo_model.Repository{})
 }
@@ -315,7 +315,7 @@ func TestNewIssueLabel(t *testing.T) {
 		Content:  "1",
 	})
 	label = unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: 2})
-	assert.EqualValues(t, prevNumIssues+1, label.NumIssues)
+	assert.Equal(t, prevNumIssues+1, label.NumIssues)
 
 	// re-add existing IssueLabel
 	require.NoError(t, issues_model.NewIssueLabel(db.DefaultContext, issue, label, doer))
@@ -368,11 +368,11 @@ func TestNewIssueLabels(t *testing.T) {
 	})
 	unittest.AssertExistsAndLoadBean(t, &issues_model.IssueLabel{IssueID: issue.ID, LabelID: label1.ID})
 	label1 = unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: 1})
-	assert.EqualValues(t, 3, label1.NumIssues)
-	assert.EqualValues(t, 1, label1.NumClosedIssues)
+	assert.Equal(t, 3, label1.NumIssues)
+	assert.Equal(t, 1, label1.NumClosedIssues)
 	label2 = unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: 2})
-	assert.EqualValues(t, 1, label2.NumIssues)
-	assert.EqualValues(t, 1, label2.NumClosedIssues)
+	assert.Equal(t, 1, label2.NumIssues)
+	assert.Equal(t, 1, label2.NumClosedIssues)
 
 	// corner case: test empty slice
 	require.NoError(t, issues_model.NewIssueLabels(db.DefaultContext, issue, []*issues_model.Label{}, doer))
@@ -410,8 +410,8 @@ func TestDeleteIssueLabel(t *testing.T) {
 			LabelID:  labelID,
 		}, `content=""`)
 		label = unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: labelID})
-		assert.EqualValues(t, expectedNumIssues, label.NumIssues)
-		assert.EqualValues(t, expectedNumClosedIssues, label.NumClosedIssues)
+		assert.Equal(t, expectedNumIssues, label.NumIssues)
+		assert.Equal(t, expectedNumClosedIssues, label.NumClosedIssues)
 	}
 	testSuccess(1, 1, 2)
 	testSuccess(2, 5, 2)

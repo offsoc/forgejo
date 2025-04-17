@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
@@ -19,7 +19,7 @@ func TestCreateAuthorizationToken(t *testing.T) {
 	var taskID int64 = 23
 	token, err := CreateAuthorizationToken(taskID, 1, 2)
 	require.NoError(t, err)
-	assert.NotEqual(t, "", token)
+	assert.NotEmpty(t, token)
 	claims := jwt.MapClaims{}
 	_, err = jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (any, error) {
 		return setting.GetGeneralTokenSigningSecret(), nil
@@ -45,7 +45,7 @@ func TestParseAuthorizationToken(t *testing.T) {
 	var taskID int64 = 23
 	token, err := CreateAuthorizationToken(taskID, 1, 2)
 	require.NoError(t, err)
-	assert.NotEqual(t, "", token)
+	assert.NotEmpty(t, token)
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+token)
 	rTaskID, err := ParseAuthorizationToken(&http.Request{

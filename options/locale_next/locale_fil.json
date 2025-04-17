@@ -1,11 +1,25 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"one": "isinali ang %[1]d commit mula<code>%[2]s</code> patungong <code>%[3]s</code> %[4]s",
-		"other": "isinali ang %[1]d mga commit mula sa <code>%[2]s</code> patungong <code>%[3]s</code> %[4]s"
-	},
-	"repo.pulls.title_desc": {
-		"one": "hinihiling na isama ang %[1]d commit mula <code>%[2]s</code> patungong <code id=\"%[4]s\">%[3]s</code>",
-		"other": "hiniling na isama ang %[1]d mga commit mula sa <code>%[2]s</code> patungong <code id=\"%[4]s\">%[3]s</code>"
-	},
-	"search.milestone_kind": "Maghanap ng mga milestone…"
+    "repo.pulls.merged_title_desc": {
+        "one": "isinali ang %[1]d commit mula<code>%[2]s</code> patungong <code>%[3]s</code> %[4]s",
+        "other": "isinali ang %[1]d mga commit mula sa <code>%[2]s</code> patungong <code>%[3]s</code> %[4]s"
+    },
+    "repo.pulls.title_desc": {
+        "one": "hinihiling na isama ang %[1]d commit mula <code>%[2]s</code> patungong <code id=\"%[4]s\">%[3]s</code>",
+        "other": "hiniling na isama ang %[1]d mga commit mula sa <code>%[2]s</code> patungong <code id=\"%[4]s\">%[3]s</code>"
+    },
+    "search.milestone_kind": "Maghanap ng mga milestone…",
+    "incorrect_root_url": "Ang Forgejo instance na ito ay naka-configure na ma-serve sa \"%s\". Kasalukuyan mong tinitignan ang Forgejo sa pamamagitan ng ibang URL, na maaaring magdulot na ang mga ibang bahagi ng application na masira. Ang canonical URL ay kino-control ng mga tagapangasiwa ng Forgejo sa pamamagitan ng ROOT_URL setting sa app.ini.",
+    "themes.names.forgejo-auto": "Forgejo (sundan ang tema ng sistema)",
+    "themes.names.forgejo-light": "Maliwanag na Forgejo",
+    "themes.names.forgejo-dark": "Madilim na Forgejo",
+    "home.welcome.no_activity": "Walang aktibidad",
+    "home.welcome.activity_hint": "Wala pang laman ang iyong feed. Makikita dito ang iyong mga aksyon at aktibidad mula sa mga repositoryo na pinapanood mo.",
+    "home.explore_repos": "Tuklasin ang mga repositoryo",
+    "home.explore_users": "Tuklasin ang mga user",
+    "home.explore_orgs": "Tuklasin ang mga organisasyon",
+    "error.not_found.title": "Hindi nahanap ang pahina",
+    "alert.asset_load_failed": "Nabigong i-load ang mga asset file mula sa {path}. Siguraduhin na maa-access ang mga asset file.",
+    "install.invalid_lfs_path": "Nabigong gawin ang LFS root sa tinakdang path: %[1]s",
+    "alert.range_error": " dapat ay numero sa pagitan ng %[1]s at %[2]s.",
+    "meta.last_line": "Sayori... I love you. — MC from Doki Doki Literature Club"
 }

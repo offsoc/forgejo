@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 )
 
 func Test_FederationHostValidation(t *testing.T) {
@@ -18,6 +18,8 @@ func Test_FederationHostValidation(t *testing.T) {
 			SoftwareName: "forgejo",
 		},
 		LatestActivity: time.Now(),
+		HostPort:       443,
+		HostSchema:     "https",
 	}
 	if res, err := validation.IsValid(sut); !res {
 		t.Errorf("sut should be valid but was %q", err)
@@ -29,6 +31,8 @@ func Test_FederationHostValidation(t *testing.T) {
 			SoftwareName: "forgejo",
 		},
 		LatestActivity: time.Now(),
+		HostPort:       443,
+		HostSchema:     "https",
 	}
 	if res, _ := validation.IsValid(sut); res {
 		t.Errorf("sut should be invalid: HostFqdn empty")
@@ -40,6 +44,8 @@ func Test_FederationHostValidation(t *testing.T) {
 			SoftwareName: "forgejo",
 		},
 		LatestActivity: time.Now(),
+		HostPort:       443,
+		HostSchema:     "https",
 	}
 	if res, _ := validation.IsValid(sut); res {
 		t.Errorf("sut should be invalid: HostFqdn too long (len=256)")
@@ -49,6 +55,8 @@ func Test_FederationHostValidation(t *testing.T) {
 		HostFqdn:       "host.do.main",
 		NodeInfo:       NodeInfo{},
 		LatestActivity: time.Now(),
+		HostPort:       443,
+		HostSchema:     "https",
 	}
 	if res, _ := validation.IsValid(sut); res {
 		t.Errorf("sut should be invalid: NodeInfo invalid")
@@ -60,6 +68,8 @@ func Test_FederationHostValidation(t *testing.T) {
 			SoftwareName: "forgejo",
 		},
 		LatestActivity: time.Now().Add(1 * time.Hour),
+		HostPort:       443,
+		HostSchema:     "https",
 	}
 	if res, _ := validation.IsValid(sut); res {
 		t.Errorf("sut should be invalid: Future timestamp")
@@ -71,6 +81,8 @@ func Test_FederationHostValidation(t *testing.T) {
 			SoftwareName: "forgejo",
 		},
 		LatestActivity: time.Now(),
+		HostPort:       443,
+		HostSchema:     "https",
 	}
 	if res, _ := validation.IsValid(sut); res {
 		t.Errorf("sut should be invalid: HostFqdn lower case")

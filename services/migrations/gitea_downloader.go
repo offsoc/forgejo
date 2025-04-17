@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	base "code.gitea.io/gitea/modules/migration"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/log"
+	base "forgejo.org/modules/migration"
+	"forgejo.org/modules/structs"
 
 	gitea_sdk "code.gitea.io/sdk/gitea"
 )
@@ -504,6 +504,28 @@ func (g *GiteaDownloader) GetComments(commentable base.Commentable) ([]*base.Com
 	return allComments, true, nil
 }
 
+type ForgejoPullRequest struct {
+	gitea_sdk.PullRequest
+	Flow int64 `json:"flow"`
+}
+
+// Extracted from https://gitea.com/gitea/go-sdk/src/commit/164e3358bc02213954fb4380b821bed80a14824d/gitea/pull.go#L347-L364
+func (g *GiteaDownloader) fixPullHeadSha(pr *ForgejoPullRequest) error {
+	if pr.Base != nil && pr.Base.Repository != nil && pr.Base.Repository.Owner != nil && pr.Head != nil && pr.Head.Ref != "" && pr.Head.Sha == "" {
+		owner := pr.Base.Repository.Owner.UserName
+		repo := pr.Base.Repository.Name
+		refs, _, err := g.client.GetRepoRefs(owner, repo, pr.Head.Ref)
+		if err != nil {
+			return err
+		}
+		if len(refs) == 0 {
+			return fmt.Errorf("unable to resolve PR ref %q", pr.Head.Ref)
+		}
+		pr.Head.Sha = refs[0].Object.SHA
+	}
+	return nil
+}
+
 // GetPullRequests returns pull requests according page and perPage
 func (g *GiteaDownloader) GetPullRequests(page, perPage int) ([]*base.PullRequest, bool, error) {
 	if perPage > g.maxPerPage {
@@ -511,16 +533,30 @@ func (g *GiteaDownloader) GetPullRequests(page, perPage int) ([]*base.PullReques
 	}
 	allPRs := make([]*base.PullRequest, 0, perPage)
 
-	prs, _, err := g.client.ListRepoPullRequests(g.repoOwner, g.repoName, gitea_sdk.ListPullRequestsOptions{
+	prs := make([]*ForgejoPullRequest, 0, perPage)
+	opt := gitea_sdk.ListPullRequestsOptions{
 		ListOptions: gitea_sdk.ListOptions{
 			Page:     page,
 			PageSize: perPage,
 		},
 		State: gitea_sdk.StateAll,
-	})
+	}
+
+	link, _ := url.Parse(fmt.Sprintf("/repos/%s/%s/pulls", url.PathEscape(g.repoOwner), url.PathEscape(g.repoName)))
+	link.RawQuery = opt.QueryEncode()
+	_, err := getParsedResponse(g.client, "GET", link.String(), http.Header{"content-type": []string{"application/json"}}, nil, &prs)
 	if err != nil {
 		return nil, false, fmt.Errorf("error while listing pull requests (page: %d, pagesize: %d). Error: %w", page, perPage, err)
 	}
+
+	if g.client.CheckServerVersionConstraint(">= 1.14.0") != nil {
+		for i := range prs {
+			if err := g.fixPullHeadSha(prs[i]); err != nil {
+				return nil, false, fmt.Errorf("error while listing pull requests (page: %d, pagesize: %d). Error: %w", page, perPage, err)
+			}
+		}
+	}
+
 	for _, pr := range prs {
 		var milestone string
 		if pr.Milestone != nil {
@@ -598,6 +634,7 @@ func (g *GiteaDownloader) GetPullRequests(page, perPage int) ([]*base.PullReques
 			MergeCommitSHA: mergeCommitSHA,
 			IsLocked:       pr.IsLocked,
 			PatchURL:       pr.PatchURL,
+			Flow:           pr.Flow,
 			Head: base.PullRequestBranch{
 				Ref:       headRef,
 				SHA:       headSHA,

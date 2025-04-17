@@ -11,15 +11,15 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/translation"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -64,9 +64,9 @@ func checkLatestReleaseAndCount(t *testing.T, session *TestSession, repoURL, ver
 
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	labelText := htmlDoc.doc.Find("#release-list > li .detail .label").First().Text()
-	assert.EqualValues(t, label, labelText)
+	assert.Equal(t, label, labelText)
 	titleText := htmlDoc.doc.Find("#release-list > li .detail h4 a").First().Text()
-	assert.EqualValues(t, version, titleText)
+	assert.Equal(t, version, titleText)
 
 	// Check release count in the counter on the Release/Tag switch, as well as that the tab is highlighted
 	if count < 10 { // Only check values less than 10, should be enough attempts before this test cracks
@@ -76,7 +76,7 @@ func checkLatestReleaseAndCount(t *testing.T, session *TestSession, repoURL, ver
 	}
 
 	releaseList := htmlDoc.doc.Find("#release-list > li")
-	assert.EqualValues(t, count, releaseList.Length())
+	assert.Equal(t, count, releaseList.Length())
 }
 
 func TestViewReleases(t *testing.T) {
@@ -212,14 +212,14 @@ func TestViewReleaseListNoLogin(t *testing.T) {
 		commitsToMain = append(commitsToMain, s.Find(".ahead > a").Text())
 	})
 
-	assert.EqualValues(t, []string{
+	assert.Equal(t, []string{
 		"/user2/repo-release/releases/tag/empty-target-branch",
 		"/user2/repo-release/releases/tag/non-existing-target-branch",
 		"/user2/repo-release/releases/tag/v2.0",
 		"/user2/repo-release/releases/tag/v1.1",
 		"/user2/repo-release/releases/tag/v1.0",
 	}, links)
-	assert.EqualValues(t, []string{
+	assert.Equal(t, []string{
 		"1 commits", // like v1.1
 		"1 commits", // like v1.1
 		"0 commits",
@@ -237,8 +237,8 @@ func TestViewSingleReleaseNoLogin(t *testing.T) {
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	// check the "number of commits to main since this release"
 	releaseList := htmlDoc.doc.Find("#release-list .ahead > a")
-	assert.EqualValues(t, 1, releaseList.Length())
-	assert.EqualValues(t, "3 commits", releaseList.First().Text())
+	assert.Equal(t, 1, releaseList.Length())
+	assert.Equal(t, "3 commits", releaseList.First().Text())
 }
 
 func TestViewReleaseListLogin(t *testing.T) {
@@ -265,7 +265,7 @@ func TestViewReleaseListLogin(t *testing.T) {
 		links = append(links, link)
 	})
 
-	assert.EqualValues(t, []string{
+	assert.Equal(t, []string{
 		"/user2/repo1/releases/tag/draft-release",
 		"/user2/repo1/releases/tag/v1.0",
 		"/user2/repo1/releases/tag/v1.1",
@@ -296,7 +296,7 @@ func TestViewReleaseListKeyword(t *testing.T) {
 		links = append(links, link)
 	})
 
-	assert.EqualValues(t, []string{
+	assert.Equal(t, []string{
 		"/user2/repo1/releases/tag/v1.1",
 	}, links)
 }
@@ -330,7 +330,7 @@ func TestViewTagsList(t *testing.T) {
 		tagNames = append(tagNames, s.Find(".tag a.tw-flex.tw-items-center").Text())
 	})
 
-	assert.EqualValues(t, []string{"v1.0", "delete-tag", "v1.1"}, tagNames)
+	assert.Equal(t, []string{"v1.0", "delete-tag", "v1.1"}, tagNames)
 }
 
 func TestDownloadReleaseAttachment(t *testing.T) {

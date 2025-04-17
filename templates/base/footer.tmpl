@@ -13,7 +13,7 @@
 
 	{{template "base/footer_content" .}}
 
-	<script src="{{AssetUrlPrefix}}/js/index.js?v={{AssetVersion}}" onerror="alert('Failed to load asset files from ' + this.src + '. Please make sure the asset files can be accessed.')"></script>
+	<script src="{{AssetUrlPrefix}}/js/index.js?v={{AssetVersion}}" onerror="alert('{{ctx.Locale.Tr "alert.asset_load_failed"}}'.replace('{path}', this.src))"></script>
 
 	{{template "custom/footer" .}}
 </body>

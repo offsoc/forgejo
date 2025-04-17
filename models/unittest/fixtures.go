@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/auth/password/hash"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/auth/password/hash"
+	"forgejo.org/modules/setting"
 
 	"github.com/go-testfixtures/testfixtures/v3"
 	"xorm.io/xorm"
@@ -22,11 +22,11 @@ import (
 var fixturesLoader *testfixtures.Loader
 
 // GetXORMEngine gets the XORM engine
-func GetXORMEngine(engine ...*xorm.Engine) (x *xorm.Engine) {
+func GetXORMEngine(engine ...*xorm.Engine) (x *xorm.Engine, err error) {
 	if len(engine) == 1 {
-		return engine[0]
+		return engine[0], nil
 	}
-	return db.DefaultContext.(*db.Context).Engine().(*xorm.Engine)
+	return db.GetMasterEngine(db.DefaultContext.(*db.Context).Engine())
 }
 
 func OverrideFixtures(opts FixturesOptions, engine ...*xorm.Engine) func() {
@@ -41,7 +41,10 @@ func OverrideFixtures(opts FixturesOptions, engine ...*xorm.Engine) func() {
 
 // InitFixtures initialize test fixtures for a test database
 func InitFixtures(opts FixturesOptions, engine ...*xorm.Engine) (err error) {
-	e := GetXORMEngine(engine...)
+	e, err := GetXORMEngine(engine...)
+	if err != nil {
+		return err
+	}
 	var fixtureOptionFiles func(*testfixtures.Loader) error
 	if opts.Dir != "" {
 		fixtureOptionFiles = testfixtures.Directory(opts.Dir)
@@ -93,10 +96,12 @@ func InitFixtures(opts FixturesOptions, engine ...*xorm.Engine) (err error) {
 
 // LoadFixtures load fixtures for a test database
 func LoadFixtures(engine ...*xorm.Engine) error {
-	e := GetXORMEngine(engine...)
-	var err error
+	e, err := GetXORMEngine(engine...)
+	if err != nil {
+		return err
+	}
 	// (doubt) database transaction conflicts could occur and result in ROLLBACK? just try for a few times.
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		if err = fixturesLoader.Load(); err == nil {
 			break
 		}

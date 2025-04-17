@@ -6,9 +6,9 @@ package repo_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -53,7 +53,7 @@ func TestAddTopic(t *testing.T) {
 	repo2NrOfTopics = 2
 	totalNrOfTopics++
 	topic := unittest.AssertExistsAndLoadBean(t, &repo_model.Topic{Name: "gitea"})
-	assert.EqualValues(t, 1, topic.RepoCount)
+	assert.Equal(t, 1, topic.RepoCount)
 
 	topics, _, err = repo_model.FindTopics(db.DefaultContext, &repo_model.FindTopicOptions{})
 	require.NoError(t, err)

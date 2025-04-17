@@ -14,19 +14,19 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/gitrepo"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/test"
-	issue_service "code.gitea.io/gitea/services/issue"
-	"code.gitea.io/gitea/services/mailer"
-	repo_service "code.gitea.io/gitea/services/repository"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/gitrepo"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/test"
+	issue_service "forgejo.org/services/issue"
+	"forgejo.org/services/mailer"
+	repo_service "forgejo.org/services/repository"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -109,7 +109,7 @@ func TestPullView_SelfReviewNotification(t *testing.T) {
 		resp := testPullCreate(t, user2Session, "user2", "test_reviewer", false, repo.DefaultBranch, "codeowner-basebranch", "Test Pull Request")
 		prURL := test.RedirectURL(resp)
 		elem := strings.Split(prURL, "/")
-		assert.EqualValues(t, "pulls", elem[3])
+		assert.Equal(t, "pulls", elem[3])
 
 		req := NewRequest(t, http.MethodGet, prURL)
 		resp = MakeRequest(t, req, http.StatusOK)
@@ -390,13 +390,13 @@ func TestPullView_CodeOwner(t *testing.T) {
 			require.NoError(t, err)
 			prUpdated1 := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: pr.ID})
 			require.NoError(t, prUpdated1.LoadIssue(db.DefaultContext))
-			assert.EqualValues(t, "[WIP] Test Pull Request", prUpdated1.Issue.Title)
+			assert.Equal(t, "[WIP] Test Pull Request", prUpdated1.Issue.Title)
 
 			err = issue_service.ChangeTitle(db.DefaultContext, prUpdated1.Issue, user2, "Test Pull Request2")
 			require.NoError(t, err)
 			prUpdated2 := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: pr.ID})
 			require.NoError(t, prUpdated2.LoadIssue(db.DefaultContext))
-			assert.EqualValues(t, "Test Pull Request2", prUpdated2.Issue.Title)
+			assert.Equal(t, "Test Pull Request2", prUpdated2.Issue.Title)
 		})
 
 		// change the default branch CODEOWNERS file to change README.md's codeowner
@@ -496,7 +496,7 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 			testEditFile(t, user1Session, "user1", "repo1", "master", "README.md", "Hello, World (Edited)\n")
 			resp := testPullCreate(t, user1Session, "user1", "repo1", false, "master", "master", "This is a pull title")
 			elem := strings.Split(test.RedirectURL(resp), "/")
-			assert.EqualValues(t, "pulls", elem[3])
+			assert.Equal(t, "pulls", elem[3])
 			testPullMerge(t, user1Session, elem[1], elem[2], elem[4], repo_model.MergeStyleMerge, false)
 
 			// Get the commit SHA
@@ -528,7 +528,7 @@ func TestPullView_GivenApproveOrRejectReviewOnClosedPR(t *testing.T) {
 			testEditFileToNewBranch(t, user1Session, "user1", "repo1", "master", "a-test-branch", "README.md", "Hello, World (Edited...again)\n")
 			resp := testPullCreate(t, user1Session, "user1", "repo1", false, "master", "a-test-branch", "This is a pull title")
 			elem := strings.Split(test.RedirectURL(resp), "/")
-			assert.EqualValues(t, "pulls", elem[3])
+			assert.Equal(t, "pulls", elem[3])
 			testIssueClose(t, user1Session, elem[1], elem[2], elem[4], true)
 
 			// Get the commit SHA
@@ -713,7 +713,7 @@ func TestPullRequestReplyMail(t *testing.T) {
 			defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
 				assert.Len(t, msgs, 2)
 				assert.Equal(t, "user1@example.com", msgs[0].To)
-				assert.EqualValues(t, "Re: [user2/repo1] issue2 (PR #2)", msgs[0].Subject)
+				assert.Equal(t, "Re: [user2/repo1] issue2 (PR #2)", msgs[0].Subject)
 				assert.Contains(t, msgs[0].Body, "Notification time!")
 				called = true
 			})()
@@ -741,7 +741,7 @@ func TestPullRequestReplyMail(t *testing.T) {
 			defer test.MockVariableValue(&mailer.SendAsync, func(msgs ...*mailer.Message) {
 				assert.Len(t, msgs, 2)
 				assert.Equal(t, "user1@example.com", msgs[0].To)
-				assert.EqualValues(t, "Re: [user2/repo1] issue2 (PR #2)", msgs[0].Subject)
+				assert.Equal(t, "Re: [user2/repo1] issue2 (PR #2)", msgs[0].Subject)
 				assert.Contains(t, msgs[0].Body, "Notification time 2!")
 				called = true
 			})()

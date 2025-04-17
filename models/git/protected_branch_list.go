@@ -7,8 +7,8 @@ import (
 	"context"
 	"sort"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/optional"
 
 	"github.com/gobwas/glob"
 )

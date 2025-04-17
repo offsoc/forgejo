@@ -116,29 +116,17 @@
 				</div>
 				{{else if .Repository.IsArchived}}
 					<div class="ui warning message tw-text-center">
-						{{if .Issue.IsPull}}
-							{{ctx.Locale.Tr "repo.archive.pull.nocomment"}}
-						{{else}}
-							{{ctx.Locale.Tr "repo.archive.issue.nocomment"}}
-						{{end}}
+						{{ctx.Locale.Tr "repo.archive.nocomment"}}
 					</div>
 				{{end}}
 			{{else if .IsBlocked}}
 				<div class="ui warning message">
-					{{if .Issue.IsPull}}
-						{{ctx.Locale.Tr "repo.pulls.comment.blocked_by_user"}}
-					{{else}}
-						{{ctx.Locale.Tr "repo.issues.comment.blocked_by_user"}}
-					{{end}}
+					{{ctx.Locale.Tr "repo.comment.blocked_by_user"}}
 				</div>
 			{{else}} {{/* not .IsSigned */}}
 				{{if .Repository.IsArchived}}
 					<div class="ui warning message tw-text-center">
-						{{if .Issue.IsPull}}
-							{{ctx.Locale.Tr "repo.archive.pull.nocomment"}}
-						{{else}}
-							{{ctx.Locale.Tr "repo.archive.issue.nocomment"}}
-						{{end}}
+						{{ctx.Locale.Tr "repo.archive.nocomment"}}
 					</div>
 				{{else}}
 					<div class="ui warning message">

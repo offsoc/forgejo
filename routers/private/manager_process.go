@@ -11,10 +11,10 @@ import (
 	"runtime"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/private"
-	process_module "code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/private"
+	process_module "forgejo.org/modules/process"
+	"forgejo.org/services/context"
 )
 
 // Processes prints out the processes
