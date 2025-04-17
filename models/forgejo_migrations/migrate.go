@@ -96,6 +96,8 @@ var migrations = []*Migration{
 	NewMigration("Add pronoun privacy settings to user", AddHidePronounsOptionToUser),
 	// v28 -> v29
 	NewMigration("Add public key information to `FederatedUser` and `FederationHost`", AddPublicKeyInformationForFederation),
+	// v29 -> v30
+	NewMigration("Migrate `User.NormalizedFederatedURI` column to extract port & schema into FederatedHost", MigrateNormalizedFederatedURI),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.

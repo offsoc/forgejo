@@ -6,7 +6,6 @@ package forgefed
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"forgejo.org/models/db"
 	"forgejo.org/modules/validation"
@@ -44,8 +43,18 @@ func findFederationHostFromDB(ctx context.Context, searchKey, searchValue string
 	return host, nil
 }
 
-func FindFederationHostByFqdn(ctx context.Context, fqdn string) (*FederationHost, error) {
-	return findFederationHostFromDB(ctx, "host_fqdn=?", strings.ToLower(fqdn))
+func FindFederationHostByFqdnAndPort(ctx context.Context, fqdn string, port uint16) (*FederationHost, error) {
+	host := new(FederationHost)
+	has, err := db.GetEngine(ctx).Where("host_fqdn=? AND host_port=?", fqdn, port).Get(host)
+	if err != nil {
+		return nil, err
+	} else if !has {
+		return nil, nil
+	}
+	if res, err := validation.IsValid(host); !res {
+		return nil, err
+	}
+	return host, nil
 }
 
 func FindFederationHostByKeyID(ctx context.Context, keyID string) (*FederationHost, error) {

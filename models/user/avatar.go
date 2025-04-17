@@ -62,7 +62,7 @@ func GenerateRandomAvatar(ctx context.Context, u *User) error {
 
 // AvatarLinkWithSize returns a link to the user's avatar with size. size <= 0 means default size
 func (u *User) AvatarLinkWithSize(ctx context.Context, size int) string {
-	if u.IsGhost() {
+	if u.IsGhost() || u.ID <= 0 {
 		return avatars.DefaultAvatarLink()
 	}
 

@@ -278,6 +278,49 @@ func syncGitConfig() (err error) {
 		return err
 	}
 
+	switch setting.Repository.Signing.Format {
+	case "ssh":
+		// First do a git version check.
+		if CheckGitVersionAtLeast("2.34.0") != nil {
+			return errors.New("ssh signing requires Git >= 2.34.0")
+		}
+
+		// Get the ssh-keygen binary that Git will use.
+		// This can be overriden in app.ini in [git.config] section, so we must
+		// query this information.
+		sshKeygenPath, err := configGet("gpg.ssh.program")
+		if err != nil {
+			return err
+		}
+		// git is very stubborn and does not give a default value, so we must do
+		// this ourselves.
+		if len(sshKeygenPath) == 0 {
+			// Default value of git, very unlikely to change.
+			// https://github.com/git/git/blob/5b97a56fa0e7d580dc8865b73107407c9b3f0eff/gpg-interface.c#L116
+			sshKeygenPath = "ssh-keygen"
+		}
+
+		// Although there's a version requirement of 8.2p1, there's no cross-version
+		// method to get the version of ssh-keygen. Therefore we do a simple binary
+		// presence check and hope for the best.
+		if _, err := exec.LookPath(sshKeygenPath); err != nil {
+			if errors.Is(err, exec.ErrNotFound) {
+				return errors.New("git signing requires a ssh-keygen binary")
+			}
+			return err
+		}
+
+		if err := configSet("gpg.format", "ssh"); err != nil {
+			return err
+		}
+		// openpgp is already the default value, so in the case of a non SSH format
+		// set the value to openpgp.
+	default:
+		if err := configSet("gpg.format", "openpgp"); err != nil {
+			return err
+		}
+	}
+
 	// By default partial clones are disabled, enable them from git v2.22
 	if !setting.Git.DisablePartialClone && CheckGitVersionAtLeast("2.22") == nil {
 		if err = configSet("uploadpack.allowfilter", "true"); err != nil {
@@ -322,6 +365,15 @@ func CheckGitVersionEqual(equal string) error {
 		return fmt.Errorf("installed git binary version %s is not equal to %s", gitVersion.Original(), equal)
 	}
 	return nil
+}
+
+func configGet(key string) (string, error) {
+	stdout, _, err := NewCommand(DefaultContext, "config", "--global", "--get").AddDynamicArguments(key).RunStdString(nil)
+	if err != nil && !IsErrorExitCode(err, 1) {
+		return "", fmt.Errorf("failed to get git config %s, err: %w", key, err)
+	}
+
+	return strings.TrimSpace(stdout), nil
 }
 
 func configSet(key, value string) error {

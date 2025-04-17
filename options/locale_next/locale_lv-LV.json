@@ -20,5 +20,8 @@
     "themes.names.forgejo-light": "Forgejo gaišais",
     "themes.names.forgejo-dark": "Forgejo tumšais",
     "error.not_found.title": "Lapa nav atrasta",
-    "alert.asset_load_failed": "Neizdevās ielādēt līdzekļu datnes no {path}. Lūgums pārliecināties, ka līdzekļu datnēm var piekļūt."
+    "alert.asset_load_failed": "Neizdevās ielādēt līdzekļu datnes no {path}. Lūgums pārliecināties, ka līdzekļu datnēm var piekļūt.",
+    "install.invalid_lfs_path": "Nav iespējams izveidot LFS pamatmapi norādītajā ceļā: %[1]s",
+    "alert.range_error": " jābūt skaitlin starp %[1]s un %[2]s.",
+    "meta.last_line": "Šis žagaru saišķis nav mans žagaru saišķis."
 }

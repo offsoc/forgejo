@@ -64,7 +64,7 @@ func TestFederationHttpSigValidation(t *testing.T) {
 			assert.NotNil(t, host)
 			assert.True(t, host.PublicKey.Valid)
 
-			user, err := user.GetFederatedUserByKeyID(db.DefaultContext, actorKeyID)
+			_, user, err := user.FindFederatedUserByKeyID(db.DefaultContext, actorKeyID)
 			require.NoError(t, err)
 			assert.NotNil(t, user)
 			assert.True(t, user.PublicKey.Valid)
