@@ -9,14 +9,14 @@ import (
 	"net/http"
 	"time"
 
-	"code.gitea.io/gitea/models/forgefed"
-	"code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/activitypub"
-	fm "code.gitea.io/gitea/modules/forgefed"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/validation"
-	context_service "code.gitea.io/gitea/services/context"
+	"forgejo.org/models/forgefed"
+	"forgejo.org/models/repo"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/activitypub"
+	fm "forgejo.org/modules/forgefed"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/validation"
+	context_service "forgejo.org/services/context"
 )
 
 // ProcessLikeActivity receives a ForgeLike activity and does the following:
@@ -75,7 +75,7 @@ func ProcessLikeActivity(ctx *context_service.APIContext, form any, repositoryID
 func StoreFollowingRepoList(ctx *context_service.Context, localRepoID int64, followingRepoList []string) (int, string, error) {
 	followingRepos := make([]*repo.FollowingRepo, 0, len(followingRepoList))
 	for _, uri := range followingRepoList {
-		federationHost, err := getFederationHostForURI(ctx.Base, uri)
+		federationHost, err := GetFederationHostForURI(ctx.Base, uri)
 		if err != nil {
 			return http.StatusInternalServerError, "Wrong FederationHost", err
 		}

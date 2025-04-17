@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.gitea.io/gitea/models/forgefed"
-	fm "code.gitea.io/gitea/modules/forgefed"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/validation"
-	context_service "code.gitea.io/gitea/services/context"
+	"forgejo.org/models/forgefed"
+	fm "forgejo.org/modules/forgefed"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/validation"
+	context_service "forgejo.org/services/context"
 
 	ap "github.com/go-ap/activitypub"
 )

@@ -22,7 +22,6 @@ import (
 
 	ap "github.com/go-ap/activitypub"
 	"github.com/go-ap/jsonld"
-	"github.com/go-fed/httpsig"
 	"github.com/google/uuid"
 )
 
@@ -63,7 +62,7 @@ func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, ac
 }
 
 func findFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, *fm.PersonID, error) {
-	federationHost, err := getFederationHostForURI(ctx.Base, actorURI)
+	federationHost, err := GetFederationHostForURI(ctx.Base, actorURI)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "Wrong FederationHost", err)
 		return nil, nil, nil, nil, err
@@ -84,7 +83,12 @@ func findFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.
 }
 
 func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
-	user, federatedUser, federationHost, actorID, err := findFederatedUser(ctx, actorURI)
+	// TODO: align this function
+	user, federatedUser, federationHost, _, err := findFederatedUser(ctx, actorURI)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	personID, err := fm.NewPersonID(actorURI, string(federationHost.NodeInfo.SoftwareName))
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -92,7 +96,7 @@ func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	if user != nil {
 		log.Trace("Found local federatedUser: %#v", user)
 	} else {
-		user, federatedUser, err = CreateUserFromAP(ctx.Base, &actorURI, *actorID, federationHost.ID)
+		user, federatedUser, err = CreateUserFromAP(ctx.Base, personID, federationHost.ID)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, "Error creating federatedUser", err)
 			return nil, nil, nil, err
@@ -149,7 +153,7 @@ func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 	return &result, nil
 }
 
-func getFederationHostForURI(ctx *context_service.Base, actorURI string) (*forgefed.FederationHost, error) {
+func GetFederationHostForURI(ctx *context_service.Base, actorURI string) (*forgefed.FederationHost, error) {
 	rawActorID, err := fm.NewActorID(actorURI)
 	if err != nil {
 		return nil, err
@@ -180,19 +184,20 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		return nil, nil, err
 	}
 
-	var idIRI string
+	// TODO: readd new kind of signature checks
+	//var idIRI string
 
 	// Grab the keyID from the signature
-	v, err := httpsig.NewVerifier(ctx.Req)
-	if err != nil {
-		idIRI = personID.AsURI()
-	} else {
-		idIRIURL, err := url.Parse(v.KeyId())
-		if err != nil {
-			return nil, nil, err
-		}
-		idIRI = idIRIURL.String()
-	}
+	// v, err := httpsig.NewVerifier(ctx.Req)
+	// if err != nil {
+	//   idIRI = personID.AsURI()
+	// } else {
+	// 	idIRIURL, err := url.Parse(v.KeyId())
+	// 	if err != nil {
+	// 		return nil, nil, err
+	// 	}
+	// 	idIRI = idIRIURL.String()
+	// }
 
 	body, err := apClient.GetBody(personID.AsURI())
 	if err != nil {

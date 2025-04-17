@@ -4,7 +4,7 @@
 package forgejo_migrations //nolint:revive
 
 import (
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm"
 )

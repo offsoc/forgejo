@@ -3,7 +3,7 @@
 
 package user
 
-import "code.gitea.io/gitea/modules/validation"
+import "forgejo.org/modules/validation"
 
 type FederatedUserFollower struct {
 	ID int64 `xorm:"pk autoincr"`

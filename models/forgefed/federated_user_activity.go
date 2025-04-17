@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	fm "code.gitea.io/gitea/modules/forgefed"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	fm "forgejo.org/modules/forgefed"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/timeutil"
 )
 
 type FederatedUserActivity struct {

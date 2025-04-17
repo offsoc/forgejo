@@ -15,7 +15,6 @@ import (
 	"forgejo.org/models/db"
 	"forgejo.org/models/forgefed"
 	"forgejo.org/models/user"
-	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/activitypub"
 	fm "forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
@@ -37,11 +36,12 @@ func decodePublicKeyPem(pubKeyPem string) ([]byte, error) {
 }
 
 func fetch(ctx *gitea_context.APIContext, iri *url.URL) (b []byte, err error) {
+	actionsUser := user.NewAPServerActor()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return nil, err
 	}
-	client, err := clientFactory.WithKeys(ctx, user_model.NewAPActorUser(), user_model.APActorUserAPActorID()+"#main-key")
+	client, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.APActorKeyID())
 	return client.GetBody(iri.String())
 }
 
@@ -68,7 +68,7 @@ func getFederatedUser(ctx *gitea_context.APIContext, person *ap.Person, federati
 }
 
 func storePublicKey(ctx *gitea_context.APIContext, person *ap.Person, pubKeyBytes []byte) error {
-	federationHost, err := federation.GetFederationHostForURI(ctx, person.ID.String())
+	federationHost, err := federation.GetFederationHostForURI(ctx.Base, person.ID.String())
 	if err != nil {
 		return err
 	}

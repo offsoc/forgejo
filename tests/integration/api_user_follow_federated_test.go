@@ -8,16 +8,16 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/forgefed"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/tests"
-	ttools "code.gitea.io/gitea/tests/tools"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/forgefed"
+	"forgejo.org/models/unittest"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/routers"
+	"forgejo.org/tests"
+	ttools "forgejo.org/tests/tools"
 )
 
 func TestAPIFollowFederated(t *testing.T) {

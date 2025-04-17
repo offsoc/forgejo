@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	context_service "code.gitea.io/gitea/services/context"
+	context_service "forgejo.org/services/context"
 
 	ap "github.com/go-ap/activitypub"
 )

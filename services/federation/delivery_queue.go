@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"io"
 
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/activitypub"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/queue"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/activitypub"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/queue"
 )
 
 type deliveryQueueItem struct {

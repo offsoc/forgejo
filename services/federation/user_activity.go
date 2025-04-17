@@ -6,11 +6,11 @@ package federation
 import (
 	"context"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/convert"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/services/convert"
 
 	ap "github.com/go-ap/activitypub"
 	"github.com/go-ap/jsonld"

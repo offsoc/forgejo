@@ -6,13 +6,13 @@ package federation
 import (
 	"fmt"
 
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/activitypub"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/queue"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/activitypub"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/queue"
 )
 
 type refreshQueueItem struct {
@@ -52,14 +52,9 @@ func refreshSingleItem(item refreshQueueItem) error {
 		return err
 	}
 
-	localUser, err := user.GetUserByID(ctx, federatedUser.UserID)
-	if err != nil {
-		log.Error("GetUserByID: %v", err)
-		return err
-	}
-
-	if localUser.NormalizedFederatedURI == "" {
-		return fmt.Errorf("Federated user[%d] (user[%d]) has no NormalizedFederatedURI", item.FederatedUserID, localUser.ID)
+	// TODO: Do not use NormalizedOriginalURL !
+	if *&federatedUser.NormalizedOriginalURL == "" {
+		return fmt.Errorf("Federated user[%d] (user[%d]) has no NormalizedFederatedURI", federatedUser.ID, federatedUser.UserID)
 	}
 
 	clientFactory, err := activitypub.GetClientFactory(ctx)
@@ -71,7 +66,7 @@ func refreshSingleItem(item refreshQueueItem) error {
 		return err
 	}
 
-	body, err := client.GetBody(localUser.NormalizedFederatedURI)
+	body, err := client.GetBody(federatedUser.NormalizedOriginalURL)
 	if err != nil {
 		return err
 	}

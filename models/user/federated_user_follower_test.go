@@ -6,7 +6,7 @@ package user
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 )
 
 func Test_FederatedUserFollowerValidation(t *testing.T) {

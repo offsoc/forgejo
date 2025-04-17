@@ -10,12 +10,12 @@ import (
 	"net/url"
 	"time"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	issues_model "code.gitea.io/gitea/models/issues"
-	fm "code.gitea.io/gitea/modules/forgefed"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/markup/markdown"
+	activities_model "forgejo.org/models/activities"
+	issues_model "forgejo.org/models/issues"
+	fm "forgejo.org/modules/forgefed"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/markup/markdown"
 )
 
 func ActionToForgeUserActivity(ctx context.Context, action *activities_model.Action) (fm.ForgeUserActivity, error) {

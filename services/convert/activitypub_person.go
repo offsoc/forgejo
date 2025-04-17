@@ -6,10 +6,10 @@ package convert
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/forgefed"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/activitypub"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/forgefed"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/activitypub"
+	api "forgejo.org/modules/structs"
 
 	ap "github.com/go-ap/activitypub"
 )
