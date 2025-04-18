@@ -111,7 +111,7 @@ export function isDocumentFragmentOrElementNode(el) {
 export function autosize(textarea, {viewportMarginBottom = 0} = {}) {
   let isUserResized = false;
   // lastStyleHeight and initialStyleHeight are CSS values like '100px'
-  let lastMouseX, lastMouseY, lastStyleHeight, initialStyleHeight;
+  let lastMouseX, lastMouseY, lastStyleHeight, initialStyleHeight, lastLines;
 
   function onUserResize(event) {
     if (isUserResized) return;
@@ -149,6 +149,11 @@ export function autosize(textarea, {viewportMarginBottom = 0} = {}) {
       const {top, bottom} = overflowOffset();
       const isOutOfViewport = top < 0 || bottom < 0;
 
+      const curLines = textarea.value.split('\n').length;
+      const shouldResize = !isOutOfViewport || curLines < lastLines;
+      lastLines = curLines;
+      if (!shouldResize) return;
+
       const computedStyle = getComputedStyle(textarea);
       const topBorderWidth = parseFloat(computedStyle.borderTopWidth);
       const bottomBorderWidth = parseFloat(computedStyle.borderBottomWidth);
@@ -160,21 +165,7 @@ export function autosize(textarea, {viewportMarginBottom = 0} = {}) {
       const maxHeight = curHeight + bottom - adjustedViewportMarginBottom;
 
       textarea.style.height = 'auto';
-      let newHeight = textarea.scrollHeight + borderAddOn;
-
-      if (isOutOfViewport) {
-        // it is already out of the viewport:
-        // * if the textarea is expanding: do not resize it
-        if (newHeight > curHeight) {
-          newHeight = curHeight;
-        }
-        // * if the textarea is shrinking, shrink line by line (just use the
-        //   scrollHeight). do not apply max-height limit, otherwise the page
-        //   flickers and the textarea jumps
-      } else {
-        // * if it is in the viewport, apply the max-height limit
-        newHeight = Math.min(maxHeight, newHeight);
-      }
+      const newHeight = Math.min(maxHeight, textarea.scrollHeight + borderAddOn);
 
       textarea.style.height = `${newHeight}px`;
       lastStyleHeight = textarea.style.height;
@@ -201,6 +192,7 @@ export function autosize(textarea, {viewportMarginBottom = 0} = {}) {
   textarea.addEventListener('input', resizeToFit);
   textarea.form?.addEventListener('reset', onFormReset);
   initialStyleHeight = textarea.style.height ?? undefined;
+  lastLines = textarea.value.split('\n').length;
   if (textarea.value) resizeToFit();
 
   return {
