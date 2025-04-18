@@ -16,5 +16,10 @@
     "home.explore_orgs": "Udforsk organisationer",
     "themes.names.forgejo-light": "Forgejo lys",
     "themes.names.forgejo-dark": "Forgejo mørk",
-    "themes.names.forgejo-auto": "Forgejo (følg systemtema)"
+    "themes.names.forgejo-auto": "Forgejo (følg systemtema)",
+    "error.not_found.title": "Siden blev ikke fundet",
+    "alert.asset_load_failed": "Kunne ikke indlæse aktivfiler fra {path}. Sørg for, at aktivfilerne er tilgængelige.",
+    "install.invalid_lfs_path": "Kan ikke oprette LFS-roden på den angivne sti: %[1]s",
+    "alert.range_error": " skal være et tal mellem %[1]s og %[2]s.",
+    "meta.last_line": "Livet er det dejligste eventyr. - (H.C. Andersen)"
 }

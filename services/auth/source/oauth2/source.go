@@ -6,8 +6,8 @@ package oauth2
 import (
 	"strings"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/models/auth"
+	"forgejo.org/modules/json"
 )
 
 // Source holds configuration for the OAuth2 login source.

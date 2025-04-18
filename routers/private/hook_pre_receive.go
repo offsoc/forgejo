@@ -9,22 +9,22 @@ import (
 	"net/http"
 	"os"
 
-	"code.gitea.io/gitea/models"
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	perm_model "code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/private"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web"
-	gitea_context "code.gitea.io/gitea/services/context"
-	pull_service "code.gitea.io/gitea/services/pull"
+	"forgejo.org/models"
+	asymkey_model "forgejo.org/models/asymkey"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	perm_model "forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/private"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web"
+	gitea_context "forgejo.org/services/context"
+	pull_service "forgejo.org/services/pull"
 )
 
 type preReceiveContext struct {
@@ -155,7 +155,7 @@ func (ctx *preReceiveContext) checkQuota() error {
 		return nil
 	}
 
-	ok, err := quota_model.EvaluateForUser(ctx, ctx.PrivateContext.Repo.Repository.OwnerID, quota_model.LimitSubjectSizeReposAll)
+	ok, err := quota_model.EvaluateForUser(ctx, ctx.Repo.Repository.OwnerID, quota_model.LimitSubjectSizeReposAll)
 	if err != nil {
 		log.Error("quota_model.EvaluateForUser: %v", err)
 		ctx.JSON(http.StatusInternalServerError, private.Response{
@@ -531,10 +531,7 @@ func preReceiveFor(ctx *preReceiveContext, oldCommitID, newCommitID string, refF
 
 	baseBranchName := refFullName.ForBranchName()
 
-	baseBranchExist := false
-	if ctx.Repo.GitRepo.IsBranchExist(baseBranchName) {
-		baseBranchExist = true
-	}
+	baseBranchExist := ctx.Repo.GitRepo.IsBranchExist(baseBranchName)
 
 	if !baseBranchExist {
 		for p, v := range baseBranchName {

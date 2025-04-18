@@ -6,7 +6,7 @@ package setting
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/container"
+	"forgejo.org/modules/container"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -26,8 +26,8 @@ func Test_loadAdminFrom(t *testing.T) {
 	loadAdminFrom(cfg)
 
 	assert.True(t, Admin.DisableRegularOrgCreation)
-	assert.EqualValues(t, "z", Admin.DefaultEmailNotification)
+	assert.Equal(t, "z", Admin.DefaultEmailNotification)
 	assert.True(t, Admin.SendNotificationEmailOnNewUser)
-	assert.EqualValues(t, container.SetOf("a", "b"), Admin.UserDisabledFeatures)
-	assert.EqualValues(t, container.SetOf("x", "y"), Admin.ExternalUserDisableFeatures)
+	assert.Equal(t, container.SetOf("a", "b"), Admin.UserDisabledFeatures)
+	assert.Equal(t, container.SetOf("x", "y"), Admin.ExternalUserDisableFeatures)
 }

@@ -6,8 +6,8 @@ package v1_16 //nolint
 import (
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
-	"code.gitea.io/gitea/modules/json"
+	migration_tests "forgejo.org/models/migrations/test"
+	"forgejo.org/modules/json"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -76,8 +76,8 @@ func Test_UnwrapLDAPSourceCfg(t *testing.T) {
 				return
 			}
 
-			assert.EqualValues(t, expected, converted, "UnwrapLDAPSourceCfg failed for %d", source.ID)
-			assert.EqualValues(t, source.ID%2 == 0, source.IsActive, "UnwrapLDAPSourceCfg failed for %d", source.ID)
+			assert.Equal(t, expected, converted, "UnwrapLDAPSourceCfg failed for %d", source.ID)
+			assert.Equal(t, source.ID%2 == 0, source.IsActive, "UnwrapLDAPSourceCfg failed for %d", source.ID)
 		}
 	}
 }

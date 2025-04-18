@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/unittest"
-	base "code.gitea.io/gitea/modules/migration"
+	"forgejo.org/models/unittest"
+	base "forgejo.org/modules/migration"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -136,6 +136,7 @@ func assertPullRequestEqual(t *testing.T, expected, actual *base.PullRequest) {
 	assert.ElementsMatch(t, expected.Assignees, actual.Assignees)
 	assert.Equal(t, expected.IsLocked, actual.IsLocked)
 	assertReactionsEqual(t, expected.Reactions, actual.Reactions)
+	assert.Equal(t, expected.Flow, actual.Flow)
 }
 
 func assertPullRequestsEqual(t *testing.T, expected, actual []*base.PullRequest) {

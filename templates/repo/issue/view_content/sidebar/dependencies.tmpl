@@ -19,8 +19,8 @@
 			{{range .BlockingDependencies}}
 				<div class="item dependency{{if .Issue.IsClosed}} is-closed{{end}} tw-flex tw-items-center tw-justify-between">
 					<div class="item-left tw-flex tw-justify-center tw-flex-col tw-flex-1 gt-ellipsis">
-						<a class="title muted" href="{{.Issue.Link}}" data-tooltip-content="#{{.Issue.Index}} {{RenderRefIssueTitle $.Context .Issue.Title}}}">
-							#{{.Issue.Index}} {{RenderRefIssueTitle $.Context .Issue.Title}}}
+						<a class="title muted" href="{{.Issue.Link}}" data-tooltip-content="#{{.Issue.Index}} {{RenderRefIssueTitle $.Context .Issue.Title}}">
+							#{{.Issue.Index}} {{RenderRefIssueTitle $.Context .Issue.Title}}
 						</a>
 						<div class="text small gt-ellipsis" data-tooltip-content="{{.Repository.OwnerName}}/{{.Repository.Name}}">
 							{{.Repository.OwnerName}}/{{.Repository.Name}}

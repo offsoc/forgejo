@@ -6,7 +6,7 @@ package gitrepo
 import (
 	"context"
 
-	"code.gitea.io/gitea/modules/git"
+	"forgejo.org/modules/git"
 )
 
 // GetBranchesByPath returns a branch by its path

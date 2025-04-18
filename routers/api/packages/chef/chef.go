@@ -13,16 +13,16 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/modules/optional"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	chef_module "code.gitea.io/gitea/modules/packages/chef"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/api/packages/helper"
-	"code.gitea.io/gitea/services/context"
-	packages_service "code.gitea.io/gitea/services/packages"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	"forgejo.org/modules/optional"
+	packages_module "forgejo.org/modules/packages"
+	chef_module "forgejo.org/modules/packages/chef"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/api/packages/helper"
+	"forgejo.org/services/context"
+	packages_service "forgejo.org/services/packages"
 )
 
 func apiError(ctx *context.Context, status int, obj any) {
@@ -139,7 +139,7 @@ func EnumeratePackages(ctx *context.Context) {
 		})
 	}
 
-	skip, _ := opts.Paginator.GetSkipTake()
+	skip, _ := opts.GetSkipTake()
 
 	ctx.JSON(http.StatusOK, &Result{
 		Start: skip,

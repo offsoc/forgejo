@@ -9,9 +9,9 @@ import (
 	"os"
 	"strings"
 
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 
 	"github.com/klauspost/cpuid/v2"
 )

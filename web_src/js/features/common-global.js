@@ -57,7 +57,7 @@ export function initGlobalEnterQuickSubmit() {
 export function initGlobalButtonClickOnEnter() {
   $(document).on('keypress', 'div.ui.button,span.ui.button', (e) => {
     if (e.code === ' ' || e.code === 'Enter') {
-      $(e.target).trigger('click');
+      e.target.click();
       e.preventDefault();
     }
   });
@@ -314,7 +314,7 @@ export function initGlobalLinkActions() {
       closable: false,
       onApprove: async () => {
         if ($this.data('type') === 'form') {
-          $($this.data('form')).trigger('submit');
+          document.querySelector($this.data('form')).requestSubmit();
           return;
         }
         if ($this[0].getAttribute('hx-confirm')) {

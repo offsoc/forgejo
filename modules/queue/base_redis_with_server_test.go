@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/nosql"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/nosql"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/suite"
 )

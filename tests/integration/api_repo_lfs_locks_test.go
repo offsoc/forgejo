@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -112,7 +112,7 @@ func TestAPILFSLocksLogged(t *testing.T) {
 			var lfsLock api.LFSLockResponse
 			DecodeJSON(t, resp, &lfsLock)
 			assert.Equal(t, test.user.Name, lfsLock.Lock.Owner.Name)
-			assert.EqualValues(t, lfsLock.Lock.LockedAt.Format(time.RFC3339), lfsLock.Lock.LockedAt.Format(time.RFC3339Nano)) // locked at should be rounded to second
+			assert.Equal(t, lfsLock.Lock.LockedAt.Format(time.RFC3339), lfsLock.Lock.LockedAt.Format(time.RFC3339Nano)) // locked at should be rounded to second
 			for _, id := range test.addTime {
 				resultsTests[id].locksTimes = append(resultsTests[id].locksTimes, time.Now())
 			}
@@ -129,9 +129,9 @@ func TestAPILFSLocksLogged(t *testing.T) {
 		DecodeJSON(t, resp, &lfsLocks)
 		assert.Len(t, lfsLocks.Locks, test.totalCount)
 		for i, lock := range lfsLocks.Locks {
-			assert.EqualValues(t, test.locksOwners[i].Name, lock.Owner.Name)
+			assert.Equal(t, test.locksOwners[i].Name, lock.Owner.Name)
 			assert.WithinDuration(t, test.locksTimes[i], lock.LockedAt, 10*time.Second)
-			assert.EqualValues(t, lock.LockedAt.Format(time.RFC3339), lock.LockedAt.Format(time.RFC3339Nano)) // locked at should be rounded to second
+			assert.Equal(t, lock.LockedAt.Format(time.RFC3339), lock.LockedAt.Format(time.RFC3339Nano)) // locked at should be rounded to second
 		}
 
 		req = NewRequestWithJSON(t, "POST", fmt.Sprintf("/%s.git/info/lfs/locks/verify", test.repo.FullName()), map[string]string{})
@@ -143,7 +143,7 @@ func TestAPILFSLocksLogged(t *testing.T) {
 		assert.Len(t, lfsLocksVerify.Ours, test.oursCount)
 		assert.Len(t, lfsLocksVerify.Theirs, test.theirsCount)
 		for _, lock := range lfsLocksVerify.Ours {
-			assert.EqualValues(t, test.user.Name, lock.Owner.Name)
+			assert.Equal(t, test.user.Name, lock.Owner.Name)
 			deleteTests = append(deleteTests, struct {
 				user   *user_model.User
 				repo   *repo_model.Repository

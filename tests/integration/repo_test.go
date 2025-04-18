@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2023 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -8,22 +9,24 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/translation"
-	repo_service "code.gitea.io/gitea/services/repository"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/translation"
+	repo_service "forgejo.org/services/repository"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -95,7 +98,7 @@ func testViewRepo(t *testing.T) {
 	})
 
 	commitT := time.Date(2017, time.June, 14, 13, 54, 21, 0, time.UTC).In(time.Local).Format(time.RFC1123)
-	assert.EqualValues(t, []file{
+	assert.Equal(t, []file{
 		{
 			fileName:   "doc",
 			commitID:   "2a47ca4b614a9f5a43abbd5ad851a54a616ffee6",
@@ -217,13 +220,13 @@ func TestRepoHTMLTitle(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			htmlTitle := GetHTMLTitle(t, nil, "/user2/repo1")
-			assert.EqualValues(t, "user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+			assert.Equal(t, "user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 		})
 		t.Run("With description", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			htmlTitle := GetHTMLTitle(t, nil, "/user27/repo49")
-			assert.EqualValues(t, "user27/repo49: A wonderful repository with more than just a README.md - Forgejo: Beyond coding. We Forge.", htmlTitle)
+			assert.Equal(t, "user27/repo49: A wonderful repository with more than just a README.md - Forgejo: Beyond coding. We Forge.", htmlTitle)
 		})
 	})
 
@@ -233,25 +236,25 @@ func TestRepoHTMLTitle(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				htmlTitle := GetHTMLTitle(t, nil, "/user2/repo59/src/branch/master/deep/nesting")
-				assert.EqualValues(t, "repo59/deep/nesting at master - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+				assert.Equal(t, "repo59/deep/nesting at master - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 			})
 			t.Run("Non-default branch", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				htmlTitle := GetHTMLTitle(t, nil, "/user2/repo59/src/branch/cake-recipe/deep/nesting")
-				assert.EqualValues(t, "repo59/deep/nesting at cake-recipe - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+				assert.Equal(t, "repo59/deep/nesting at cake-recipe - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 			})
 			t.Run("Commit", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				htmlTitle := GetHTMLTitle(t, nil, "/user2/repo59/src/commit/d8f53dfb33f6ccf4169c34970b5e747511c18beb/deep/nesting/")
-				assert.EqualValues(t, "repo59/deep/nesting at d8f53dfb33f6ccf4169c34970b5e747511c18beb - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+				assert.Equal(t, "repo59/deep/nesting at d8f53dfb33f6ccf4169c34970b5e747511c18beb - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 			})
 			t.Run("Tag", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				htmlTitle := GetHTMLTitle(t, nil, "/user2/repo59/src/tag/v1.0/deep/nesting/")
-				assert.EqualValues(t, "repo59/deep/nesting at v1.0 - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+				assert.Equal(t, "repo59/deep/nesting at v1.0 - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 			})
 		})
 		t.Run("File", func(t *testing.T) {
@@ -259,25 +262,25 @@ func TestRepoHTMLTitle(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				htmlTitle := GetHTMLTitle(t, nil, "/user2/repo59/src/branch/master/deep/nesting/folder/secret_sauce_recipe.txt")
-				assert.EqualValues(t, "repo59/deep/nesting/folder/secret_sauce_recipe.txt at master - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+				assert.Equal(t, "repo59/deep/nesting/folder/secret_sauce_recipe.txt at master - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 			})
 			t.Run("Non-default branch", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				htmlTitle := GetHTMLTitle(t, nil, "/user2/repo59/src/branch/cake-recipe/deep/nesting/folder/secret_sauce_recipe.txt")
-				assert.EqualValues(t, "repo59/deep/nesting/folder/secret_sauce_recipe.txt at cake-recipe - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+				assert.Equal(t, "repo59/deep/nesting/folder/secret_sauce_recipe.txt at cake-recipe - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 			})
 			t.Run("Commit", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				htmlTitle := GetHTMLTitle(t, nil, "/user2/repo59/src/commit/d8f53dfb33f6ccf4169c34970b5e747511c18beb/deep/nesting/folder/secret_sauce_recipe.txt")
-				assert.EqualValues(t, "repo59/deep/nesting/folder/secret_sauce_recipe.txt at d8f53dfb33f6ccf4169c34970b5e747511c18beb - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+				assert.Equal(t, "repo59/deep/nesting/folder/secret_sauce_recipe.txt at d8f53dfb33f6ccf4169c34970b5e747511c18beb - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 			})
 			t.Run("Tag", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
 				htmlTitle := GetHTMLTitle(t, nil, "/user2/repo59/src/tag/v1.0/deep/nesting/folder/secret_sauce_recipe.txt")
-				assert.EqualValues(t, "repo59/deep/nesting/folder/secret_sauce_recipe.txt at v1.0 - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+				assert.Equal(t, "repo59/deep/nesting/folder/secret_sauce_recipe.txt at v1.0 - user2/repo59 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 			})
 		})
 	})
@@ -287,13 +290,13 @@ func TestRepoHTMLTitle(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			htmlTitle := GetHTMLTitle(t, nil, "/user2/repo1/issues")
-			assert.EqualValues(t, "Issues - user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+			assert.Equal(t, "Issues - user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 		})
 		t.Run("View issue page", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			htmlTitle := GetHTMLTitle(t, nil, "/user2/repo1/issues/1")
-			assert.EqualValues(t, "#1 - issue1 - user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+			assert.Equal(t, "#1 - issue1 - user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 		})
 	})
 
@@ -302,13 +305,13 @@ func TestRepoHTMLTitle(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			htmlTitle := GetHTMLTitle(t, nil, "/user2/repo1/pulls")
-			assert.EqualValues(t, "Pull requests - user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+			assert.Equal(t, "Pull requests - user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 		})
 		t.Run("View pull request", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 
 			htmlTitle := GetHTMLTitle(t, nil, "/user2/repo1/pulls/2")
-			assert.EqualValues(t, "#2 - issue2 - user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
+			assert.Equal(t, "#2 - issue2 - user2/repo1 - Forgejo: Beyond coding. We Forge.", htmlTitle)
 		})
 	})
 }
@@ -327,9 +330,9 @@ func TestViewFileInRepo(t *testing.T) {
 	repoTopics := htmlDoc.doc.Find("#repo-topics")
 	repoSummary := htmlDoc.doc.Find(".repository-summary")
 
-	assert.EqualValues(t, 0, description.Length())
-	assert.EqualValues(t, 0, repoTopics.Length())
-	assert.EqualValues(t, 0, repoSummary.Length())
+	assert.Equal(t, 0, description.Length())
+	assert.Equal(t, 0, repoTopics.Length())
+	assert.Equal(t, 0, repoSummary.Length())
 }
 
 func TestViewFileInRepoRSSFeed(t *testing.T) {
@@ -383,9 +386,9 @@ func TestBlameFileInRepo(t *testing.T) {
 		repoTopics := htmlDoc.doc.Find("#repo-topics")
 		repoSummary := htmlDoc.doc.Find(".repository-summary")
 
-		assert.EqualValues(t, 0, description.Length())
-		assert.EqualValues(t, 0, repoTopics.Length())
-		assert.EqualValues(t, 0, repoSummary.Length())
+		assert.Equal(t, 0, description.Length())
+		assert.Equal(t, 0, repoTopics.Length())
+		assert.Equal(t, 0, repoSummary.Length())
 	})
 
 	t.Run("File size", func(t *testing.T) {
@@ -691,7 +694,7 @@ func TestCommitView(t *testing.T) {
 
 		// Really ensure that 404 is being sent back.
 		doc := NewHTMLParser(t, resp.Body)
-		doc.AssertElement(t, `[aria-label="Page Not Found"]`, true)
+		doc.AssertElement(t, `[aria-label="Page not found"]`, true)
 	})
 
 	t.Run("Too short commit ID", func(t *testing.T) {
@@ -884,7 +887,7 @@ func TestRepoFilesList(t *testing.T) {
 			return s.AttrOr("data-entryname", "")
 		})
 
-		assert.EqualValues(t, []string{"Charlie", "alpha", "Beta", "delta", "licensa", "LICENSE", "licensz", "README.md", "zEta"}, filesList)
+		assert.Equal(t, []string{"Charlie", "alpha", "Beta", "delta", "licensa", "LICENSE", "licensz", "README.md", "zEta"}, filesList)
 	})
 }
 
@@ -1423,6 +1426,12 @@ func TestRepoSubmoduleView(t *testing.T) {
 
 		htmlDoc := NewHTMLParser(t, resp.Body)
 		htmlDoc.AssertElement(t, fmt.Sprintf(`tr[data-entryname="repo1"] a[href="%s"]`, u.JoinPath("/user2/repo1").String()), true)
+
+		// Check that a link to the submodule returns a redirect and that the redirect link is correct.
+		req = NewRequest(t, "GET", "/"+repo.FullName()+"/src/branch/"+repo.DefaultBranch+"/repo1")
+		resp = MakeRequest(t, req, http.StatusSeeOther)
+
+		assert.Equal(t, u.JoinPath("/user2/repo1").String(), resp.Header().Get("Location"))
 	})
 }
 
@@ -1436,4 +1445,59 @@ func TestBlameDirectory(t *testing.T) {
 	// Blame is not allowed
 	req = NewRequest(t, "GET", "/user2/repo59/blame/branch/master/deep")
 	MakeRequest(t, req, http.StatusNotFound)
+}
+
+func TestInitInstructions(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+	session := loginUser(t, user.Name)
+
+	sha256Repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, user, tests.DeclarativeRepoOptions{
+		Name:         optional.Some("sha256-instruction"),
+		AutoInit:     optional.Some(false),
+		EnabledUnits: optional.Some([]unit_model.Type{unit_model.TypeCode}),
+		ObjectFormat: optional.Some("sha256"),
+	})
+	defer f()
+
+	sha1Repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, user, tests.DeclarativeRepoOptions{
+		Name:         optional.Some("sha1-instruction"),
+		AutoInit:     optional.Some(false),
+		EnabledUnits: optional.Some([]unit_model.Type{unit_model.TypeCode}),
+		ObjectFormat: optional.Some("sha1"),
+	})
+	defer f()
+
+	portMatcher := regexp.MustCompile(`localhost:\d+`)
+
+	t.Run("sha256", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		resp := session.MakeRequest(t, NewRequest(t, "GET", "/"+sha256Repo.FullName()), http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		assert.Equal(t, `touch README.md
+git init --object-format=sha256
+git switch -c main
+git add README.md
+git commit -m "first commit"
+git remote add origin http://localhost/user2/sha256-instruction.git
+git push -u origin main`, portMatcher.ReplaceAllString(htmlDoc.Find(".empty-repo-guide code").First().Text(), "localhost"))
+	})
+
+	t.Run("sha1", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		resp := session.MakeRequest(t, NewRequest(t, "GET", "/"+sha1Repo.FullName()), http.StatusOK)
+
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		assert.Equal(t, `touch README.md
+git init
+git switch -c main
+git add README.md
+git commit -m "first commit"
+git remote add origin http://localhost/user2/sha1-instruction.git
+git push -u origin main`, portMatcher.ReplaceAllString(htmlDoc.Find(".empty-repo-guide code").First().Text(), "localhost"))
+	})
 }

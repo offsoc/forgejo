@@ -9,23 +9,23 @@ import (
 	"net/http"
 	"time"
 
-	"code.gitea.io/gitea/models"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/auth/password"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/validation"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/auth/source/db"
-	"code.gitea.io/gitea/services/auth/source/smtp"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/mailer"
-	"code.gitea.io/gitea/services/user"
+	"forgejo.org/models"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/auth/password"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/validation"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/auth"
+	"forgejo.org/services/auth/source/db"
+	"forgejo.org/services/auth/source/smtp"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/mailer"
+	"forgejo.org/services/user"
 )
 
 const (
@@ -178,10 +178,10 @@ func EmailPost(ctx *context.Context) {
 	// Set Email Notification Preference
 	if ctx.FormString("_method") == "NOTIFICATION" {
 		preference := ctx.FormString("preference")
-		if !(preference == user_model.EmailNotificationsEnabled ||
-			preference == user_model.EmailNotificationsOnMention ||
-			preference == user_model.EmailNotificationsDisabled ||
-			preference == user_model.EmailNotificationsAndYourOwn) {
+		if preference != user_model.EmailNotificationsEnabled &&
+			preference != user_model.EmailNotificationsOnMention &&
+			preference != user_model.EmailNotificationsDisabled &&
+			preference != user_model.EmailNotificationsAndYourOwn {
 			log.Error("Email notifications preference change returned unrecognized option %s: %s", preference, ctx.Doer.Name)
 			ctx.ServerError("SetEmailPreference", errors.New("option unrecognized"))
 			return

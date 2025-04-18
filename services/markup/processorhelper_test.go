@@ -8,11 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/models/user"
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/contexttest"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/models/user"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -13,17 +13,17 @@ import (
 	"sync"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	container_model "code.gitea.io/gitea/models/packages/container"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	container_module "code.gitea.io/gitea/modules/packages/container"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	container_model "forgejo.org/models/packages/container"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	container_module "forgejo.org/modules/packages/container"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/tests"
 
 	oci "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/stretchr/testify/assert"
@@ -392,7 +392,7 @@ func TestPackageContainer(t *testing.T) {
 								assert.Equal(t, "application/vnd.docker.image.rootfs.diff.tar.gzip", pfd.Properties.GetByName(container_module.PropertyMediaType))
 								assert.Equal(t, blobDigest, pfd.Properties.GetByName(container_module.PropertyDigest))
 							default:
-								assert.FailNow(t, "unknown file: %s", pfd.File.Name)
+								assert.FailNow(t, "unknown file", "name: %s", pfd.File.Name)
 							}
 						}
 

@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 )
 
 func getHookTemplates() (hookNames, hookTpls, giteaHookTpls []string) {

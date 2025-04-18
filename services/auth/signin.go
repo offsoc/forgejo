@@ -7,17 +7,17 @@ import (
 	"context"
 	"strings"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/services/auth/source/oauth2"
-	"code.gitea.io/gitea/services/auth/source/smtp"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/services/auth/source/oauth2"
+	"forgejo.org/services/auth/source/smtp"
 
-	_ "code.gitea.io/gitea/services/auth/source/db"   // register the sources (and below)
-	_ "code.gitea.io/gitea/services/auth/source/ldap" // register the ldap source
-	_ "code.gitea.io/gitea/services/auth/source/pam"  // register the pam source
+	_ "forgejo.org/services/auth/source/db"   // register the sources (and below)
+	_ "forgejo.org/services/auth/source/ldap" // register the ldap source
+	_ "forgejo.org/services/auth/source/pam"  // register the pam source
 )
 
 // UserSignIn validates user name and password.

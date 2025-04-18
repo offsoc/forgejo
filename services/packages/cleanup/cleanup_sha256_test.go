@@ -7,15 +7,15 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	container_module "code.gitea.io/gitea/modules/packages/container"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/timeutil"
-	container_service "code.gitea.io/gitea/services/packages/container"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	container_module "forgejo.org/modules/packages/container"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/timeutil"
+	container_service "forgejo.org/services/packages/container"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -78,7 +78,7 @@ func TestCleanupSHA256(t *testing.T) {
 		for range expected {
 			filtered = append(filtered, true)
 		}
-		assert.EqualValues(t, filtered, logFiltered, expected)
+		assert.Equal(t, filtered, logFiltered, expected)
 	}
 
 	ancient := 1 * time.Hour

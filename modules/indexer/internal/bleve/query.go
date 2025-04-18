@@ -4,7 +4,7 @@
 package bleve
 
 import (
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/modules/optional"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search/query"
@@ -29,11 +29,11 @@ func MatchQuery(matchTerm, field, analyzer string, fuzziness int) *query.MatchQu
 }
 
 // MatchPhraseQuery generates a match phrase query for the given phrase, field and analyzer
-func MatchPhraseQuery(matchPhrase, field, analyzer string, fuzziness int) *query.MatchPhraseQuery {
+func MatchPhraseQuery(matchPhrase, field, analyzer string, autoFuzzy bool) *query.MatchPhraseQuery {
 	q := bleve.NewMatchPhraseQuery(matchPhrase)
 	q.FieldVal = field
 	q.Analyzer = analyzer
-	q.Fuzziness = fuzziness
+	q.SetAutoFuzziness(autoFuzzy)
 	return q
 }
 

@@ -5,7 +5,6 @@ package e2e
 
 import (
 	"context"
-	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"net"
@@ -18,12 +17,13 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/json"
-	modules_session "code.gitea.io/gitea/modules/session"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/json"
+	modules_session "forgejo.org/modules/session"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	"forgejo.org/tests"
 
 	"code.forgejo.org/go-chi/session"
 	"github.com/stretchr/testify/require"
@@ -153,11 +153,7 @@ func stateHelper(t testing.TB) func(stateFile string, user *user_model.User) {
 	require.NoError(t, err)
 
 	return func(stateFile string, user *user_model.User) {
-		buf := make([]byte, opt.IDLength/2)
-		_, err = rand.Read(buf)
-		require.NoError(t, err)
-
-		sessionID := hex.EncodeToString(buf)
+		sessionID := hex.EncodeToString(util.CryptoRandomBytes(int64(opt.IDLength) / 2))
 
 		s, err := vsp.Read(sessionID)
 		require.NoError(t, err)

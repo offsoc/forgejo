@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"

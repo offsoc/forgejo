@@ -6,9 +6,9 @@ package auth
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
 )
 
 // SyncExternalUsers is used to synchronize users with external authorization source

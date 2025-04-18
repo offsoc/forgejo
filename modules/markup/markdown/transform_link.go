@@ -7,9 +7,9 @@ import (
 	"bytes"
 	"slices"
 
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/setting"
-	giteautil "code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/setting"
+	giteautil "forgejo.org/modules/util"
 
 	"github.com/yuin/goldmark/ast"
 )

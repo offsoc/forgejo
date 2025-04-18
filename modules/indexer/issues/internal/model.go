@@ -4,9 +4,9 @@
 package internal
 
 import (
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/timeutil"
 )
 
 // IndexerData data stored in the issue indexer

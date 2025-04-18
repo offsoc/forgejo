@@ -18,5 +18,10 @@
     "incorrect_root_url": "Цей екземпляр Forgejo налаштовано на відвідування з «%s». Зараз ви переглядаєте Forgejo за іншою URL-адресою, що може призвести до збоїв деяких частин програми. Канонічна URL-адреса встановлюється адміністраторами Forgejo за допомогою параметра ROOT_URL у файлі app.ini.",
     "themes.names.forgejo-light": "Forgejo світла",
     "themes.names.forgejo-dark": "Forgejo темна",
-    "themes.names.forgejo-auto": "Forgejo (як у системі)"
+    "themes.names.forgejo-auto": "Forgejo (як у системі)",
+    "error.not_found.title": "Сторінку не знайдено",
+    "alert.asset_load_failed": "Не вдалося завантажити файли ресурсів з {path}. Переконайтеся, що до файлів ресурсів є доступ.",
+    "install.invalid_lfs_path": "Не вдалося створити корінь LFS за вказаним шляхом: %[1]s",
+    "alert.range_error": " має бути числом від %[1]s до %[2]s.",
+    "meta.last_line": "Не зливай злий запити на злиття — зіллється зле."
 }

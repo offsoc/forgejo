@@ -36,7 +36,7 @@ func TestSet(t *testing.T) {
 		called++
 		assert.True(t, slices.Contains(values, value))
 	}
-	assert.EqualValues(t, len(values), called)
+	assert.Equal(t, len(values), called)
 
 	s = SetOf("key6", "key7")
 	assert.False(t, s.Contains("key1"))

@@ -6,11 +6,11 @@ package issue
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,8 +25,8 @@ func TestGetRefEndNamesAndURLs(t *testing.T) {
 	repoLink := "/foo/bar"
 
 	endNames, urls := GetRefEndNamesAndURLs(issues, repoLink)
-	assert.EqualValues(t, map[int64]string{1: "branch1", 2: "tag1", 3: "c0ffee"}, endNames)
-	assert.EqualValues(t, map[int64]string{
+	assert.Equal(t, map[int64]string{1: "branch1", 2: "tag1", 3: "c0ffee"}, endNames)
+	assert.Equal(t, map[int64]string{
 		1: repoLink + "/src/branch/branch1",
 		2: repoLink + "/src/tag/tag1",
 		3: repoLink + "/src/commit/c0ffee",

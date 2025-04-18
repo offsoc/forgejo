@@ -6,12 +6,12 @@ package issues
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	org_model "code.gitea.io/gitea/models/organization"
-	project_model "code.gitea.io/gitea/models/project"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	org_model "forgejo.org/models/organization"
+	project_model "forgejo.org/models/project"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/util"
 )
 
 // LoadProject load the project the issue was assigned to

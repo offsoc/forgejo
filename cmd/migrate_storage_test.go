@@ -9,16 +9,16 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/test"
-	packages_service "code.gitea.io/gitea/services/packages"
+	"forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	packages_module "forgejo.org/modules/packages"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/test"
+	packages_service "forgejo.org/services/packages"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -81,8 +81,8 @@ func TestMigratePackages(t *testing.T) {
 	entries, err := os.ReadDir(p)
 	require.NoError(t, err)
 	assert.Len(t, entries, 2)
-	assert.EqualValues(t, "01", entries[0].Name())
-	assert.EqualValues(t, "tmp", entries[1].Name())
+	assert.Equal(t, "01", entries[0].Name())
+	assert.Equal(t, "tmp", entries[1].Name())
 }
 
 func TestMigrateActionsArtifacts(t *testing.T) {

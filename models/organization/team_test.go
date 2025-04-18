@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -77,7 +77,7 @@ func TestGetTeam(t *testing.T) {
 	testSuccess := func(orgID int64, name string) {
 		team, err := organization.GetTeam(db.DefaultContext, orgID, name)
 		require.NoError(t, err)
-		assert.EqualValues(t, orgID, team.OrgID)
+		assert.Equal(t, orgID, team.OrgID)
 		assert.Equal(t, name, team.Name)
 	}
 	testSuccess(3, "Owners")
@@ -95,7 +95,7 @@ func TestGetTeamByID(t *testing.T) {
 	testSuccess := func(teamID int64) {
 		team, err := organization.GetTeamByID(db.DefaultContext, teamID)
 		require.NoError(t, err)
-		assert.EqualValues(t, teamID, team.ID)
+		assert.Equal(t, teamID, team.ID)
 	}
 	testSuccess(1)
 	testSuccess(2)
@@ -163,7 +163,7 @@ func TestGetUserOrgTeams(t *testing.T) {
 		teams, err := organization.GetUserOrgTeams(db.DefaultContext, orgID, userID)
 		require.NoError(t, err)
 		for _, team := range teams {
-			assert.EqualValues(t, orgID, team.OrgID)
+			assert.Equal(t, orgID, team.OrgID)
 			unittest.AssertExistsAndLoadBean(t, &organization.TeamUser{TeamID: team.ID, UID: userID})
 		}
 	}

@@ -4,10 +4,10 @@
 package common
 
 import (
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/web/middleware"
-	auth_service "code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/context"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/web/middleware"
+	auth_service "forgejo.org/services/auth"
+	"forgejo.org/services/context"
 )
 
 type AuthResult struct {

@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/validation"
 )
 
 func init() {
@@ -50,9 +50,7 @@ func CreateFederatedUser(ctx context.Context, user *User, federatedUser *Federat
 	return committer.Commit()
 }
 
-func FindFederatedUser(ctx context.Context, externalID string,
-	federationHostID int64,
-) (*User, *FederatedUser, error) {
+func FindFederatedUser(ctx context.Context, externalID string, federationHostID int64) (*User, *FederatedUser, error) {
 	federatedUser := new(FederatedUser)
 	user := new(User)
 	has, err := db.GetEngine(ctx).Where("external_id=? and federation_host_id=?", externalID, federationHostID).Get(federatedUser)
@@ -74,6 +72,32 @@ func FindFederatedUser(ctx context.Context, externalID string,
 	if res, err := validation.IsValid(*federatedUser); !res {
 		return nil, nil, err
 	}
+	return user, federatedUser, nil
+}
+
+func FindFederatedUserByKeyID(ctx context.Context, keyID string) (*User, *FederatedUser, error) {
+	federatedUser := new(FederatedUser)
+	user := new(User)
+	has, err := db.GetEngine(ctx).Where("key_id=?", keyID).Get(federatedUser)
+	if err != nil {
+		return nil, nil, err
+	} else if !has {
+		return nil, nil, nil
+	}
+	has, err = db.GetEngine(ctx).ID(federatedUser.UserID).Get(user)
+	if err != nil {
+		return nil, nil, err
+	} else if !has {
+		return nil, nil, fmt.Errorf("User %v for federated user is missing", federatedUser.UserID)
+	}
+
+	if res, err := validation.IsValid(*user); !res {
+		return nil, nil, err
+	}
+	if res, err := validation.IsValid(*federatedUser); !res {
+		return nil, nil, err
+	}
+
 	return user, federatedUser, nil
 }
 

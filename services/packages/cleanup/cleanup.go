@@ -8,20 +8,20 @@ import (
 	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	packages_service "code.gitea.io/gitea/services/packages"
-	alpine_service "code.gitea.io/gitea/services/packages/alpine"
-	alt_service "code.gitea.io/gitea/services/packages/alt"
-	arch_service "code.gitea.io/gitea/services/packages/arch"
-	cargo_service "code.gitea.io/gitea/services/packages/cargo"
-	container_service "code.gitea.io/gitea/services/packages/container"
-	debian_service "code.gitea.io/gitea/services/packages/debian"
-	rpm_service "code.gitea.io/gitea/services/packages/rpm"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	packages_module "forgejo.org/modules/packages"
+	packages_service "forgejo.org/services/packages"
+	alpine_service "forgejo.org/services/packages/alpine"
+	alt_service "forgejo.org/services/packages/alt"
+	arch_service "forgejo.org/services/packages/arch"
+	cargo_service "forgejo.org/services/packages/cargo"
+	container_service "forgejo.org/services/packages/container"
+	debian_service "forgejo.org/services/packages/debian"
+	rpm_service "forgejo.org/services/packages/rpm"
 )
 
 // Task method to execute cleanup rules and cleanup expired package data
@@ -122,23 +122,24 @@ func ExecuteCleanupRules(outerCtx context.Context) error {
 		}
 
 		if anyVersionDeleted {
-			if pcr.Type == packages_model.TypeDebian {
+			switch pcr.Type {
+			case packages_model.TypeDebian:
 				if err := debian_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: debian.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
-			} else if pcr.Type == packages_model.TypeAlpine {
+			case packages_model.TypeAlpine:
 				if err := alpine_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: alpine.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
-			} else if pcr.Type == packages_model.TypeRpm {
+			case packages_model.TypeRpm:
 				if err := rpm_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: rpm.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
-			} else if pcr.Type == packages_model.TypeArch {
+			case packages_model.TypeArch:
 				if err := arch_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: arch.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}
-			} else if pcr.Type == packages_model.TypeAlt {
+			case packages_model.TypeAlt:
 				if err := alt_service.BuildAllRepositoryFiles(ctx, pcr.OwnerID); err != nil {
 					return fmt.Errorf("CleanupRule [%d]: alt.BuildAllRepositoryFiles failed: %w", pcr.ID, err)
 				}

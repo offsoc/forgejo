@@ -9,11 +9,11 @@ import (
 	"path"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	forgejo_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	forgejo_context "forgejo.org/services/context"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -60,7 +60,7 @@ func TestRedirectsNoLogin(t *testing.T) {
 	for link, redirectLink := range redirects {
 		req := NewRequest(t, "GET", link)
 		resp := MakeRequest(t, req, http.StatusSeeOther)
-		assert.EqualValues(t, path.Join(setting.AppSubURL, redirectLink), test.RedirectURL(resp))
+		assert.Equal(t, path.Join(setting.AppSubURL, redirectLink), test.RedirectURL(resp))
 	}
 }
 
@@ -195,7 +195,7 @@ func TestRedirectsWebhooks(t *testing.T) {
 		for _, info := range redirects {
 			req := NewRequest(t, info.verb, info.from)
 			resp := MakeRequest(t, req, http.StatusSeeOther)
-			assert.EqualValues(t, path.Join(setting.AppSubURL, info.to), test.RedirectURL(resp), info.from)
+			assert.Equal(t, path.Join(setting.AppSubURL, info.to), test.RedirectURL(resp), info.from)
 		}
 	}
 

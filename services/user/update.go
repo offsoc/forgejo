@@ -7,14 +7,14 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models"
-	auth_model "code.gitea.io/gitea/models/auth"
-	user_model "code.gitea.io/gitea/models/user"
-	password_module "code.gitea.io/gitea/modules/auth/password"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/mailer"
+	"forgejo.org/models"
+	auth_model "forgejo.org/models/auth"
+	user_model "forgejo.org/models/user"
+	password_module "forgejo.org/modules/auth/password"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/services/mailer"
 )
 
 type UpdateOptions struct {

@@ -4,17 +4,19 @@
 package asymkey
 
 import (
+	"os"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/ssh"
 )
 
 func TestParseCommitWithSSHSignature(t *testing.T) {
@@ -149,5 +151,44 @@ muPLbvEduU+Ze/1Ol1pgk=
 		assert.True(t, commitVerification.Verified)
 		assert.Equal(t, "user2 / SHA256:TKfwbZMR7e9OnlV2l1prfah1TXH8CmqR0PvFEXVCXA4", commitVerification.Reason)
 		assert.Equal(t, sshKey, commitVerification.SigningSSHKey)
+	})
+
+	t.Run("Instance key", func(t *testing.T) {
+		pubKeyContent, err := os.ReadFile("../../tests/integration/ssh-signing-key.pub")
+		require.NoError(t, err)
+		pubKey, _, _, _, err := ssh.ParseAuthorizedKey(pubKeyContent)
+		require.NoError(t, err)
+
+		defer test.MockVariableValue(&setting.Repository.Signing.SigningName, "UwU")()
+		defer test.MockVariableValue(&setting.Repository.Signing.SigningEmail, "fox@example.com")()
+		defer test.MockVariableValue(&setting.SSHInstanceKey, pubKey)()
+
+		gitCommit := &git.Commit{
+			Committer: &git.Signature{
+				Email: "fox@example.com",
+			},
+			Signature: &git.ObjectSignature{
+				Payload: `tree f96f1a4f1a51dc42e2983592f503980b60b8849c
+parent 93f84db542dd8c6e952c8130bc2fcbe2e299b8b4
+author OwO <instance@example.com> 1738961379 +0100
+committer UwU <fox@example.com> 1738961379 +0100
+
+Fox
+`,
+				Signature: `-----BEGIN SSH SIGNATURE-----
+U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgV5ELwZ8XJe2LLR/UTuEu/vsFdb
+t7ry0W8hyzz/b1iocAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5
+AAAAQCnyMRkWVVNoZxZkvi/ZoknUhs4LNBmEwZs9e9214WIt+mhKfc6BiHoE2qeluR2McD
+Y5RzHnA8Ke9wXddEePCQE=
+-----END SSH SIGNATURE-----
+`,
+			},
+		}
+
+		o := commitToGitObject(gitCommit)
+		commitVerification := ParseObjectWithSSHSignature(db.DefaultContext, &o, user2)
+		assert.True(t, commitVerification.Verified)
+		assert.Equal(t, "UwU / SHA256:QttK41r/zMUeAW71b5UgVSb8xGFF/DlZJ6TyADW+uoI", commitVerification.Reason)
+		assert.Equal(t, "SHA256:QttK41r/zMUeAW71b5UgVSb8xGFF/DlZJ6TyADW+uoI", commitVerification.SigningSSHKey.Fingerprint)
 	})
 }

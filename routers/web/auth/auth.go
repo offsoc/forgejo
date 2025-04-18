@@ -11,30 +11,30 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/auth/password"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/eventsource"
-	"code.gitea.io/gitea/modules/httplib"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/session"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/modules/web/middleware"
-	auth_service "code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/auth/source/oauth2"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/externalaccount"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/mailer"
-	notify_service "code.gitea.io/gitea/services/notify"
-	user_service "code.gitea.io/gitea/services/user"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/auth/password"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/eventsource"
+	"forgejo.org/modules/httplib"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/session"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
+	"forgejo.org/modules/web"
+	"forgejo.org/modules/web/middleware"
+	auth_service "forgejo.org/services/auth"
+	"forgejo.org/services/auth/source/oauth2"
+	"forgejo.org/services/context"
+	"forgejo.org/services/externalaccount"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/mailer"
+	notify_service "forgejo.org/services/notify"
+	user_service "forgejo.org/services/user"
 
 	"github.com/markbates/goth"
 )
@@ -512,7 +512,8 @@ func createAndHandleCreatedUser(ctx *context.Context, tpl base.TplName, form any
 func createUserInContext(ctx *context.Context, tpl base.TplName, form any, u *user_model.User, overwrites *user_model.CreateUserOverwriteOptions, gothUser *goth.User, allowLink bool) (ok bool) {
 	if err := user_model.CreateUser(ctx, u, overwrites); err != nil {
 		if allowLink && (user_model.IsErrUserAlreadyExist(err) || user_model.IsErrEmailAlreadyUsed(err)) {
-			if setting.OAuth2Client.AccountLinking == setting.OAuth2AccountLinkingAuto {
+			switch setting.OAuth2Client.AccountLinking {
+			case setting.OAuth2AccountLinkingAuto:
 				var user *user_model.User
 				user = &user_model.User{Name: u.Name}
 				hasUser, err := user_model.GetUser(ctx, user)
@@ -528,7 +529,7 @@ func createUserInContext(ctx *context.Context, tpl base.TplName, form any, u *us
 				// TODO: probably we should respect 'remember' user's choice...
 				linkAccount(ctx, user, *gothUser, true)
 				return false // user is already created here, all redirects are handled
-			} else if setting.OAuth2Client.AccountLinking == setting.OAuth2AccountLinkingLogin {
+			case setting.OAuth2AccountLinkingLogin:
 				showLinkingLogin(ctx, *gothUser)
 				return false // user will be created only after linking login
 			}
@@ -783,11 +784,7 @@ func ActivatePost(ctx *context.Context) {
 
 func handleAccountActivation(ctx *context.Context, user *user_model.User) {
 	user.IsActive = true
-	var err error
-	if user.Rands, err = user_model.GetUserSalt(); err != nil {
-		ctx.ServerError("UpdateUser", err)
-		return
-	}
+	user.Rands = user_model.GetUserSalt()
 	if err := user_model.UpdateUserCols(ctx, user, "is_active", "rands"); err != nil {
 		if user_model.IsErrUserNotExist(err) {
 			ctx.NotFound("UpdateUserCols", err)

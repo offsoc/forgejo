@@ -1,7 +1,7 @@
-code.gitea.io/gitea/cmd
+forgejo.org/cmd
 	NoMainListener
 
-code.gitea.io/gitea/cmd/forgejo
+forgejo.org/cmd/forgejo
 	ContextSetNoInit
 	ContextSetNoExit
 	ContextSetStderr
@@ -9,48 +9,48 @@ code.gitea.io/gitea/cmd/forgejo
 	ContextSetStdout
 	ContextSetStdin
 
-code.gitea.io/gitea/models
+forgejo.org/models
 	IsErrSHANotFound
 	IsErrMergeDivergingFastForwardOnly
 
-code.gitea.io/gitea/models/auth
+forgejo.org/models/auth
 	WebAuthnCredentials
 
-code.gitea.io/gitea/models/db
+forgejo.org/models/db
 	TruncateBeans
 	InTransaction
 	DumpTables
 
-code.gitea.io/gitea/models/dbfs
+forgejo.org/models/dbfs
 	file.renameTo
 	Create
 	Rename
 
-code.gitea.io/gitea/models/forgefed
+forgejo.org/models/forgefed
 	GetFederationHost
 
-code.gitea.io/gitea/models/forgejo/semver
+forgejo.org/models/forgejo/semver
 	GetVersion
 	SetVersionString
 	SetVersion
 
-code.gitea.io/gitea/models/git
+forgejo.org/models/git
 	RemoveDeletedBranchByID
 
-code.gitea.io/gitea/models/issues
+forgejo.org/models/issues
 	IsErrUnknownDependencyType
 	IsErrIssueWasClosed
 
-code.gitea.io/gitea/models/organization
+forgejo.org/models/organization
 	SearchMembersOptions.ToConds
 
-code.gitea.io/gitea/models/perm/access
+forgejo.org/models/perm/access
 	GetRepoWriters
 
-code.gitea.io/gitea/models/repo
+forgejo.org/models/repo
 	WatchRepoMode
 
-code.gitea.io/gitea/models/user
+forgejo.org/models/user
 	IsErrExternalLoginUserAlreadyExist
 	IsErrExternalLoginUserNotExist
 	NewFederatedUser
@@ -58,35 +58,35 @@ code.gitea.io/gitea/models/user
 	GetUserAllSettings
 	DeleteUserSetting
 
-code.gitea.io/gitea/modules/activitypub
+forgejo.org/modules/activitypub
 	NewContext
 	Context.APClientFactory
 
-code.gitea.io/gitea/modules/assetfs
+forgejo.org/modules/assetfs
 	Bindata
 
-code.gitea.io/gitea/modules/auth/password/hash
+forgejo.org/modules/auth/password/hash
 	DummyHasher.HashWithSaltBytes
 	NewDummyHasher
 
-code.gitea.io/gitea/modules/auth/password/pwn
+forgejo.org/modules/auth/password/pwn
 	WithHTTP
 
-code.gitea.io/gitea/modules/base
+forgejo.org/modules/base
 	SetupGiteaRoot
 
-code.gitea.io/gitea/modules/cache
+forgejo.org/modules/cache
 	GetInt
 	WithNoCacheContext
 	RemoveContextData
 
-code.gitea.io/gitea/modules/emoji
+forgejo.org/modules/emoji
 	ReplaceCodes
 
-code.gitea.io/gitea/modules/eventsource
+forgejo.org/modules/eventsource
 	Event.String
 
-code.gitea.io/gitea/modules/forgefed
+forgejo.org/modules/forgefed
 	NewForgeUndoLike
 	ForgeUndoLike.UnmarshalJSON
 	ForgeUndoLike.Validate
@@ -96,7 +96,7 @@ code.gitea.io/gitea/modules/forgefed
 	ToRepository
 	OnRepository
 
-code.gitea.io/gitea/modules/git
+forgejo.org/modules/git
 	AllowLFSFiltersArgs
 	AddChanges
 	AddChangesWithArgs
@@ -106,55 +106,55 @@ code.gitea.io/gitea/modules/git
 	openRepositoryWithDefaultContext
 	ToEntryMode
 
-code.gitea.io/gitea/modules/gitrepo
+forgejo.org/modules/gitrepo
 	GetBranchCommitID
 	GetWikiDefaultBranch
 
-code.gitea.io/gitea/modules/graceful
+forgejo.org/modules/graceful
 	Manager.TerminateContext
 	Manager.Err
 	Manager.Value
 	Manager.Deadline
 
-code.gitea.io/gitea/modules/hcaptcha
+forgejo.org/modules/hcaptcha
 	WithHTTP
 
-code.gitea.io/gitea/modules/hostmatcher
+forgejo.org/modules/hostmatcher
 	HostMatchList.AppendPattern
 
-code.gitea.io/gitea/modules/json
+forgejo.org/modules/json
 	StdJSON.Marshal
 	StdJSON.Unmarshal
 	StdJSON.NewEncoder
 	StdJSON.NewDecoder
 	StdJSON.Indent
 
-code.gitea.io/gitea/modules/log
+forgejo.org/modules/log
 	NewEventWriterBuffer
 
-code.gitea.io/gitea/modules/markup
+forgejo.org/modules/markup
 	GetRendererByType
 	RenderString
 	IsMarkupFile
 
-code.gitea.io/gitea/modules/markup/console
+forgejo.org/modules/markup/console
 	Render
 	RenderString
 
-code.gitea.io/gitea/modules/markup/markdown
+forgejo.org/modules/markup/markdown
 	RenderRawString
 
-code.gitea.io/gitea/modules/markup/mdstripper
+forgejo.org/modules/markup/mdstripper
 	stripRenderer.AddOptions
 	StripMarkdown
 
-code.gitea.io/gitea/modules/markup/orgmode
+forgejo.org/modules/markup/orgmode
 	RenderString
 
-code.gitea.io/gitea/modules/process
+forgejo.org/modules/process
 	Manager.ExecTimeout
 
-code.gitea.io/gitea/modules/queue
+forgejo.org/modules/queue
 	newBaseChannelSimple
 	newBaseChannelUnique
 	newBaseRedisSimple
@@ -163,26 +163,26 @@ code.gitea.io/gitea/modules/queue
 	testStateRecorder.Reset
 	newWorkerPoolQueueForTest
 
-code.gitea.io/gitea/modules/queue/lqinternal
+forgejo.org/modules/queue/lqinternal
 	QueueItemIDBytes
 	QueueItemKeyBytes
 	ListLevelQueueKeys
 
-code.gitea.io/gitea/modules/setting
+forgejo.org/modules/setting
 	NewConfigProviderFromData
 	GitConfigType.GetOption
 	InitLoggersForTest
 
-code.gitea.io/gitea/modules/sync
+forgejo.org/modules/sync
 	StatusTable.Start
 	StatusTable.IsRunning
 
-code.gitea.io/gitea/modules/timeutil
+forgejo.org/modules/timeutil
 	GetExecutableModTime
 	MockSet
 	MockUnset
 
-code.gitea.io/gitea/modules/translation
+forgejo.org/modules/translation
 	MockLocale.Language
 	MockLocale.TrString
 	MockLocale.Tr
@@ -192,42 +192,42 @@ code.gitea.io/gitea/modules/translation
 	MockLocale.HasKey
 	MockLocale.PrettyNumber
 
-code.gitea.io/gitea/modules/util
+forgejo.org/modules/translation/localeiter
+	IterateMessagesContent
+
+forgejo.org/modules/util
 	OptionalArg
 
-code.gitea.io/gitea/modules/util/filebuffer
+forgejo.org/modules/util/filebuffer
 	CreateFromReader
 
-code.gitea.io/gitea/modules/validation
+forgejo.org/modules/validation
 	IsErrNotValid
 
-code.gitea.io/gitea/modules/web
+forgejo.org/modules/web
 	RouteMock
 	RouteMockReset
 
-code.gitea.io/gitea/modules/zstd
+forgejo.org/modules/zstd
 	NewWriter
 	Writer.Write
 	Writer.Close
 
-code.gitea.io/gitea/routers/web
-	NotFound
-
-code.gitea.io/gitea/routers/web/org
+forgejo.org/routers/web/org
 	MustEnableProjects
 
-code.gitea.io/gitea/services/context
+forgejo.org/services/context
 	GetPrivateContext
 
-code.gitea.io/gitea/services/repository
+forgejo.org/services/repository
 	IsErrForkAlreadyExist
 
-code.gitea.io/gitea/services/repository/files
+forgejo.org/services/repository/files
 	ContentType.String
 
-code.gitea.io/gitea/services/repository/gitgraph
+forgejo.org/services/repository/gitgraph
 	Parser.Reset
 
-code.gitea.io/gitea/services/webhook
+forgejo.org/services/webhook
 	NewNotifier
 

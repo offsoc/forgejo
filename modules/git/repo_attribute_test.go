@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -101,7 +101,7 @@ func TestGitAttributeBareNonBare(t *testing.T) {
 		cloneStats, err := gitRepo.GitAttributes(commitID, "i-am-a-python.p", LinguistAttributes...)
 		require.NoError(t, err)
 
-		assert.EqualValues(t, cloneStats, bareStats)
+		assert.Equal(t, cloneStats, bareStats)
 		refStats := cloneStats
 
 		t.Run("GitAttributeChecker/"+commitID+"/SupportBare", func(t *testing.T) {
@@ -111,7 +111,7 @@ func TestGitAttributeBareNonBare(t *testing.T) {
 
 			bareStats, err := bareChecker.CheckPath("i-am-a-python.p")
 			require.NoError(t, err)
-			assert.EqualValues(t, refStats, bareStats)
+			assert.Equal(t, refStats, bareStats)
 		})
 		t.Run("GitAttributeChecker/"+commitID+"/NoBareSupport", func(t *testing.T) {
 			defer test.MockVariableValue(&SupportCheckAttrOnBare, false)()
@@ -122,7 +122,7 @@ func TestGitAttributeBareNonBare(t *testing.T) {
 			cloneStats, err := cloneChecker.CheckPath("i-am-a-python.p")
 			require.NoError(t, err)
 
-			assert.EqualValues(t, refStats, cloneStats)
+			assert.Equal(t, refStats, cloneStats)
 		})
 	}
 }
@@ -135,7 +135,7 @@ func TestGitAttributes(t *testing.T) {
 
 	attr, err := gitRepo.GitAttributes("8fee858da5796dfb37704761701bb8e800ad9ef3", "i-am-a-python.p", LinguistAttributes...)
 	require.NoError(t, err)
-	assert.EqualValues(t, map[string]GitAttribute{
+	assert.Equal(t, map[string]GitAttribute{
 		"gitlab-language":        "unspecified",
 		"linguist-detectable":    "unspecified",
 		"linguist-documentation": "unspecified",
@@ -146,7 +146,7 @@ func TestGitAttributes(t *testing.T) {
 
 	attr, err = gitRepo.GitAttributes("341fca5b5ea3de596dc483e54c2db28633cd2f97", "i-am-a-python.p", LinguistAttributes...)
 	require.NoError(t, err)
-	assert.EqualValues(t, map[string]GitAttribute{
+	assert.Equal(t, map[string]GitAttribute{
 		"gitlab-language":        "unspecified",
 		"linguist-detectable":    "unspecified",
 		"linguist-documentation": "unspecified",
@@ -177,13 +177,13 @@ func TestGitAttributeFirst(t *testing.T) {
 	t.Run("none is specified", func(t *testing.T) {
 		language, err := gitRepo.GitAttributeFirst("8fee858da5796dfb37704761701bb8e800ad9ef3", "i-am-a-python.p", "linguist-detectable", "gitlab-language", "non-existing")
 		require.NoError(t, err)
-		assert.Equal(t, "", language.String())
+		assert.Empty(t, language.String())
 	})
 }
 
 func TestGitAttributeStruct(t *testing.T) {
-	assert.Equal(t, "", GitAttribute("").String())
-	assert.Equal(t, "", GitAttribute("unspecified").String())
+	assert.Empty(t, GitAttribute("").String())
+	assert.Empty(t, GitAttribute("unspecified").String())
 
 	assert.Equal(t, "python", GitAttribute("python").String())
 

@@ -6,8 +6,8 @@ package base
 import (
 	"testing"
 
-	migrations_tests "code.gitea.io/gitea/models/migrations/test"
-	"code.gitea.io/gitea/modules/timeutil"
+	migrations_tests "forgejo.org/models/migrations/test"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm/names"
 )

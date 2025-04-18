@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/unittest"
-	base "code.gitea.io/gitea/modules/migration"
+	"forgejo.org/models/unittest"
+	base "forgejo.org/modules/migration"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -45,7 +45,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	topics, err := downloader.GetTopics()
 	require.NoError(t, err)
 	sort.Strings(topics)
-	assert.EqualValues(t, []string{"ci", "gitea", "migration", "test"}, topics)
+	assert.Equal(t, []string{"ci", "gitea", "migration", "test"}, topics)
 
 	labels, err := downloader.GetLabels()
 	require.NoError(t, err)
@@ -132,7 +132,7 @@ func TestGiteaDownloadRepo(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, isEnd)
 	assert.Len(t, issues, 7)
-	assert.EqualValues(t, "open", issues[0].State)
+	assert.Equal(t, "open", issues[0].State)
 
 	issues, isEnd, err = downloader.GetIssues(3, 2)
 	require.NoError(t, err)
@@ -306,4 +306,47 @@ func TestGiteaDownloadRepo(t *testing.T) {
 			Content:      "looks good",
 		},
 	}, reviews)
+}
+
+func TestForgejoDownloadRepo(t *testing.T) {
+	token := os.Getenv("CODE_FORGEJO_TOKEN")
+
+	fixturePath := "./testdata/code-forgejo-org/full_download"
+	server := unittest.NewMockWebServer(t, "https://code.forgejo.org", fixturePath, token != "")
+	defer server.Close()
+
+	downloader, err := NewGiteaDownloader(t.Context(), server.URL, "Gusted/agit-test", "", "", token)
+	require.NoError(t, err)
+	require.NotNil(t, downloader)
+
+	prs, _, err := downloader.GetPullRequests(1, 50)
+	require.NoError(t, err)
+	assert.Len(t, prs, 1)
+
+	assertPullRequestEqual(t, &base.PullRequest{
+		Number:      1,
+		PosterID:    63,
+		PosterName:  "Gusted",
+		PosterEmail: "postmaster@gusted.xyz",
+		Title:       "Add extra information",
+		State:       "open",
+		Created:     time.Date(2025, time.April, 1, 20, 28, 45, 0, time.UTC),
+		Updated:     time.Date(2025, time.April, 1, 20, 28, 45, 0, time.UTC),
+		Base: base.PullRequestBranch{
+			CloneURL:  "",
+			Ref:       "main",
+			SHA:       "79ebb873a6497c8847141ba9706b3f757196a1e6",
+			RepoName:  "agit-test",
+			OwnerName: "Gusted",
+		},
+		Head: base.PullRequestBranch{
+			CloneURL:  server.URL + "/Gusted/agit-test.git",
+			Ref:       "refs/pull/1/head",
+			SHA:       "667e9317ec37b977e6d3d7d43e3440636970563c",
+			RepoName:  "agit-test",
+			OwnerName: "Gusted",
+		},
+		PatchURL: server.URL + "/Gusted/agit-test/pulls/1.patch",
+		Flow:     1,
+	}, prs[0])
 }

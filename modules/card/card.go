@@ -19,9 +19,9 @@ import (
 	_ "image/jpeg" // for processing jpeg images
 	_ "image/png"  // for processing png images
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/proxy"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/proxy"
+	"forgejo.org/modules/setting"
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"

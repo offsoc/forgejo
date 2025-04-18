@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	base "code.gitea.io/gitea/modules/migration"
+	base "forgejo.org/modules/migration"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -215,9 +215,9 @@ func TestGogsDownloaderFactory_New(t *testing.T) {
 			}
 
 			assert.IsType(t, &GogsDownloader{}, got)
-			assert.EqualValues(t, tt.baseURL, got.(*GogsDownloader).baseURL)
-			assert.EqualValues(t, tt.repoOwner, got.(*GogsDownloader).repoOwner)
-			assert.EqualValues(t, tt.repoName, got.(*GogsDownloader).repoName)
+			assert.Equal(t, tt.baseURL, got.(*GogsDownloader).baseURL)
+			assert.Equal(t, tt.repoOwner, got.(*GogsDownloader).repoOwner)
+			assert.Equal(t, tt.repoName, got.(*GogsDownloader).repoName)
 		})
 	}
 }

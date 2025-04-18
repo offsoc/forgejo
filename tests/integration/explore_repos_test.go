@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +25,7 @@ func TestExploreRepos(t *testing.T) {
 		resp := MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body).Find("#repo-search-form")
 
-		assert.EqualValues(t, "Go", htmlDoc.Find("input[name='language']").AttrOr("value", "not found"))
-		assert.EqualValues(t, "true", htmlDoc.Find("input[name='topic']").AttrOr("value", "not found"))
+		assert.Equal(t, "Go", htmlDoc.Find("input[name='language']").AttrOr("value", "not found"))
+		assert.Equal(t, "true", htmlDoc.Find("input[name='topic']").AttrOr("value", "not found"))
 	})
 }

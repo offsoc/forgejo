@@ -8,16 +8,16 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/routers"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -122,20 +122,20 @@ func TestAPIQuotaCreateGroupWithRules(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, rule)
 	assert.EqualValues(t, -1, rule.Limit)
-	assert.EqualValues(t, quota_model.LimitSubjects{quota_model.LimitSubjectSizeAll}, rule.Subjects)
+	assert.Equal(t, quota_model.LimitSubjects{quota_model.LimitSubjectSizeAll}, rule.Subjects)
 
 	rule, err = quota_model.GetRuleByName(db.DefaultContext, "deny-git-lfs")
 	require.NoError(t, err)
 	assert.NotNil(t, rule)
 	assert.EqualValues(t, 0, rule.Limit)
-	assert.EqualValues(t, quota_model.LimitSubjects{quota_model.LimitSubjectSizeGitLFS}, rule.Subjects)
+	assert.Equal(t, quota_model.LimitSubjects{quota_model.LimitSubjectSizeGitLFS}, rule.Subjects)
 
 	// Verify that the new rule was also created
 	rule, err = quota_model.GetRuleByName(db.DefaultContext, "new-rule")
 	require.NoError(t, err)
 	assert.NotNil(t, rule)
 	assert.EqualValues(t, 0, rule.Limit)
-	assert.EqualValues(t, quota_model.LimitSubjects{quota_model.LimitSubjectSizeAssetsAll}, rule.Subjects)
+	assert.Equal(t, quota_model.LimitSubjects{quota_model.LimitSubjectSizeAssetsAll}, rule.Subjects)
 
 	t.Run("invalid rule spec", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
@@ -176,7 +176,7 @@ func TestAPIQuotaEmptyState(t *testing.T) {
 		var q api.QuotaInfo
 		DecodeJSON(t, resp, &q)
 
-		assert.EqualValues(t, api.QuotaUsed{}, q.Used)
+		assert.Equal(t, api.QuotaUsed{}, q.Used)
 		assert.Empty(t, q.Groups)
 	})
 
@@ -189,7 +189,7 @@ func TestAPIQuotaEmptyState(t *testing.T) {
 		var q api.QuotaInfo
 		DecodeJSON(t, resp, &q)
 
-		assert.EqualValues(t, api.QuotaUsed{}, q.Used)
+		assert.Equal(t, api.QuotaUsed{}, q.Used)
 		assert.Empty(t, q.Groups)
 
 		t.Run("#/user/quota/artifacts", func(t *testing.T) {
@@ -295,7 +295,7 @@ func TestAPIQuotaAdminRoutesRules(t *testing.T) {
 
 		assert.Equal(t, "deny-all", q.Name)
 		assert.EqualValues(t, 0, q.Limit)
-		assert.EqualValues(t, []string{"size:all"}, q.Subjects)
+		assert.Equal(t, []string{"size:all"}, q.Subjects)
 
 		rule, err := quota_model.GetRuleByName(db.DefaultContext, "deny-all")
 		require.NoError(t, err)

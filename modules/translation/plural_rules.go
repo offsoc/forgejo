@@ -12,8 +12,8 @@ package translation
 import (
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/translation/i18n"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/translation/i18n"
 )
 
 // The constants refer to indices below in `PluralRules` and also in i18n.js, keep them in sync!

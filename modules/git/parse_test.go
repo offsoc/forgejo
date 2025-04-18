@@ -57,7 +57,7 @@ func TestParseTreeEntriesLong(t *testing.T) {
 		require.NoError(t, err)
 		assert.Len(t, entries, len(testCase.Expected))
 		for i, entry := range entries {
-			assert.EqualValues(t, testCase.Expected[i], entry)
+			assert.Equal(t, testCase.Expected[i], entry)
 		}
 	}
 }
@@ -90,7 +90,7 @@ func TestParseTreeEntriesShort(t *testing.T) {
 		require.NoError(t, err)
 		assert.Len(t, entries, len(testCase.Expected))
 		for i, entry := range entries {
-			assert.EqualValues(t, testCase.Expected[i], entry)
+			assert.Equal(t, testCase.Expected[i], entry)
 		}
 	}
 }

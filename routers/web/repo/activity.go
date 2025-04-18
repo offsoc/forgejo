@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/services/context"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/unit"
+	"forgejo.org/modules/base"
+	"forgejo.org/services/context"
 )
 
 const (

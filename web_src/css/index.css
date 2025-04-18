@@ -16,6 +16,7 @@
 @import "./modules/card.css";
 @import "./modules/checkbox.css";
 @import "./modules/modal.css";
+@import "./modules/dimmer.css";
 
 @import "./modules/switch.css";
 @import "./modules/select.css";

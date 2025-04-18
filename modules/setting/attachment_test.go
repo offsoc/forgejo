@@ -26,9 +26,9 @@ MINIO_ENDPOINT = my_minio:9000
 	require.NoError(t, loadAttachmentFrom(cfg))
 
 	assert.EqualValues(t, "minio", Attachment.Storage.Type)
-	assert.EqualValues(t, "my_minio:9000", Attachment.Storage.MinioConfig.Endpoint)
-	assert.EqualValues(t, "gitea-attachment", Attachment.Storage.MinioConfig.Bucket)
-	assert.EqualValues(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
+	assert.Equal(t, "my_minio:9000", Attachment.Storage.MinioConfig.Endpoint)
+	assert.Equal(t, "gitea-attachment", Attachment.Storage.MinioConfig.Bucket)
+	assert.Equal(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
 }
 
 func Test_getStorageTypeSectionOverridesStorageSection(t *testing.T) {
@@ -48,8 +48,8 @@ MINIO_BUCKET = gitea
 	require.NoError(t, loadAttachmentFrom(cfg))
 
 	assert.EqualValues(t, "minio", Attachment.Storage.Type)
-	assert.EqualValues(t, "gitea-minio", Attachment.Storage.MinioConfig.Bucket)
-	assert.EqualValues(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
+	assert.Equal(t, "gitea-minio", Attachment.Storage.MinioConfig.Bucket)
+	assert.Equal(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
 }
 
 func Test_getStorageSpecificOverridesStorage(t *testing.T) {
@@ -70,8 +70,8 @@ STORAGE_TYPE = local
 	require.NoError(t, loadAttachmentFrom(cfg))
 
 	assert.EqualValues(t, "minio", Attachment.Storage.Type)
-	assert.EqualValues(t, "gitea-attachment", Attachment.Storage.MinioConfig.Bucket)
-	assert.EqualValues(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
+	assert.Equal(t, "gitea-attachment", Attachment.Storage.MinioConfig.Bucket)
+	assert.Equal(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
 }
 
 func Test_getStorageGetDefaults(t *testing.T) {
@@ -81,7 +81,7 @@ func Test_getStorageGetDefaults(t *testing.T) {
 	require.NoError(t, loadAttachmentFrom(cfg))
 
 	// default storage is local, so bucket is empty
-	assert.EqualValues(t, "", Attachment.Storage.MinioConfig.Bucket)
+	assert.Empty(t, Attachment.Storage.MinioConfig.Bucket)
 }
 
 func Test_getStorageInheritNameSectionType(t *testing.T) {
@@ -116,7 +116,7 @@ MINIO_SECRET_ACCESS_KEY = correct_key
 	storage := Attachment.Storage
 
 	assert.EqualValues(t, "minio", storage.Type)
-	assert.EqualValues(t, "gitea", storage.MinioConfig.Bucket)
+	assert.Equal(t, "gitea", storage.MinioConfig.Bucket)
 }
 
 func Test_AttachmentStorage1(t *testing.T) {
@@ -129,6 +129,6 @@ STORAGE_TYPE = minio
 
 	require.NoError(t, loadAttachmentFrom(cfg))
 	assert.EqualValues(t, "minio", Attachment.Storage.Type)
-	assert.EqualValues(t, "gitea", Attachment.Storage.MinioConfig.Bucket)
-	assert.EqualValues(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
+	assert.Equal(t, "gitea", Attachment.Storage.MinioConfig.Bucket)
+	assert.Equal(t, "attachments/", Attachment.Storage.MinioConfig.BasePath)
 }

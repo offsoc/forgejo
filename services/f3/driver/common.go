@@ -7,6 +7,7 @@ package driver
 import (
 	"context"
 
+	f3_kind "code.forgejo.org/f3/gof3/v3/kind"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 )
 
@@ -37,7 +38,7 @@ func (o *common) getPageSize() int {
 	return o.getTreeDriver().GetPageSize()
 }
 
-func (o *common) getKind() generic.Kind {
+func (o *common) getKind() f3_kind.Kind {
 	return o.GetNode().GetKind()
 }
 

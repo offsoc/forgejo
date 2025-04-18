@@ -6,7 +6,7 @@ package setting
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -84,5 +84,5 @@ func TestUnixSocketAbstractNamespace(t *testing.T) {
 	require.NoError(t, err)
 	loadServerFrom(cfg)
 
-	assert.EqualValues(t, "@forgejo", HTTPAddr)
+	assert.Equal(t, "@forgejo", HTTPAddr)
 }

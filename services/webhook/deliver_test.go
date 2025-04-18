@@ -12,13 +12,13 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/hostmatcher"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/hostmatcher"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -137,7 +137,7 @@ func TestWebhookDeliverHookTask(t *testing.T) {
 		case "/webhook/66d222a5d6349e1311f551e50722d837e30fce98":
 			// Version 1
 			assert.Equal(t, "push", r.Header.Get("X-GitHub-Event"))
-			assert.Equal(t, "", r.Header.Get("Content-Type"))
+			assert.Empty(t, r.Header.Get("Content-Type"))
 			body, err := io.ReadAll(r.Body)
 			require.NoError(t, err)
 			assert.Equal(t, `{"data": 42}`, string(body))

@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
-	_ "code.gitea.io/gitea/cmd" // for TestPrimaryKeys
+	_ "forgejo.org/cmd" // for TestPrimaryKeys
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -56,7 +56,7 @@ func TestDeleteOrphanedObjects(t *testing.T) {
 
 	countAfter, err := db.GetEngine(db.DefaultContext).Count(&issues_model.PullRequest{})
 	require.NoError(t, err)
-	assert.EqualValues(t, countBefore, countAfter)
+	assert.Equal(t, countBefore, countAfter)
 }
 
 func TestPrimaryKeys(t *testing.T) {
@@ -64,7 +64,7 @@ func TestPrimaryKeys(t *testing.T) {
 	//   https://github.com/go-gitea/gitea/issues/21086
 	//   https://github.com/go-gitea/gitea/issues/16802
 	// To avoid creating tables without primary key again, this test will check them.
-	// Import "code.gitea.io/gitea/cmd" to make sure each db.RegisterModel in init functions has been called.
+	// Import "forgejo.org/cmd" to make sure each db.RegisterModel in init functions has been called.
 
 	beans, err := db.NamesToBean()
 	if err != nil {

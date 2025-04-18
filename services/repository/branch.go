@@ -9,28 +9,29 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models"
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/queue"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
-	notify_service "code.gitea.io/gitea/services/notify"
-	pull_service "code.gitea.io/gitea/services/pull"
-	files_service "code.gitea.io/gitea/services/repository/files"
+	"forgejo.org/models"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/queue"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	webhook_module "forgejo.org/modules/webhook"
+	actions_service "forgejo.org/services/actions"
+	notify_service "forgejo.org/services/notify"
+	pull_service "forgejo.org/services/pull"
+	files_service "forgejo.org/services/repository/files"
 
 	"xorm.io/builder"
 )
@@ -377,7 +378,7 @@ func RenameBranch(ctx context.Context, repo *repo_model.Repository, doer *user_m
 				log.Error("DeleteCronTaskByRepo: %v", err)
 			}
 			// cancel running cron jobs of this repository and delete old schedules
-			if err := actions_model.CancelPreviousJobs(
+			if err := actions_service.CancelPreviousJobs(
 				ctx,
 				repo.ID,
 				from,
@@ -578,7 +579,7 @@ func SetRepoDefaultBranch(ctx context.Context, repo *repo_model.Repository, gitR
 			log.Error("DeleteCronTaskByRepo: %v", err)
 		}
 		// cancel running cron jobs of this repository and delete old schedules
-		if err := actions_model.CancelPreviousJobs(
+		if err := actions_service.CancelPreviousJobs(
 			ctx,
 			repo.ID,
 			oldDefaultBranchName,

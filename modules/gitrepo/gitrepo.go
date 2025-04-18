@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/setting"
 )
 
 type Repository interface {

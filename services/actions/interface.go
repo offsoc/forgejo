@@ -3,7 +3,7 @@
 
 package actions
 
-import "code.gitea.io/gitea/services/context"
+import "forgejo.org/services/context"
 
 // API for actions of a repository or organization
 type API interface {

@@ -7,8 +7,8 @@ import (
 	"encoding/xml"
 	"io"
 
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
 
 	"golang.org/x/net/html/charset"
 )

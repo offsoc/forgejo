@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/repo"
+	"forgejo.org/services/context"
 
 	"github.com/gorilla/feeds"
 )

@@ -6,9 +6,9 @@ package forms
 import (
 	"math/big"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/services/context"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/modules/log"
+	"forgejo.org/services/context"
 )
 
 type hiddenCommentTypeGroupsType map[string][]issues_model.CommentType

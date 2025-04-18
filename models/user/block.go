@@ -7,8 +7,8 @@ import (
 	"context"
 	"errors"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/timeutil"
 )
 
 // ErrBlockedByUser defines an error stating that the user is not allowed to perform the action because they are blocked.

@@ -1,21 +1,4 @@
-# Forgejo translations
-
-This directory contains all .INI translations.
-
-## Working on base language
-
-When you work on Forgejo features, you should only modify `locale_en-US.ini`.
-
-* consult https://forgejo.org/docs/next/contributor/localization-english/
-* add strings when your change requires doing so
-* remove strings when your change renders them unused
-
-## Working on other languages
-
-Translations are done on Codeberg Translate and not via individual pull requests.
-
-* consult https://forgejo.org/docs/next/contributor/localization/
-* see the project: https://translate.codeberg.org/projects/forgejo/forgejo/
+See [locale_readme.md](../locale_readme.md) for modification instructions.
 
 ## Attribution
 

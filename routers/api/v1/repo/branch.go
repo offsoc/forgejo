@@ -9,22 +9,22 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	"code.gitea.io/gitea/models/organization"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/optional"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	pull_service "code.gitea.io/gitea/services/pull"
-	repo_service "code.gitea.io/gitea/services/repository"
+	"forgejo.org/models"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	"forgejo.org/models/organization"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/optional"
+	repo_module "forgejo.org/modules/repository"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	pull_service "forgejo.org/services/pull"
+	repo_service "forgejo.org/services/repository"
 )
 
 // GetBranch get a branch of a repository
@@ -231,9 +231,9 @@ func CreateBranch(ctx *context.APIContext) {
 			ctx.Error(http.StatusInternalServerError, "GetCommit", err)
 			return
 		}
-	} else if len(opt.OldBranchName) > 0 { //nolint
-		if ctx.Repo.GitRepo.IsBranchExist(opt.OldBranchName) { //nolint
-			oldCommit, err = ctx.Repo.GitRepo.GetBranchCommit(opt.OldBranchName) //nolint
+	} else if len(opt.OldBranchName) > 0 { //nolint:staticcheck
+		if ctx.Repo.GitRepo.IsBranchExist(opt.OldBranchName) { //nolint:staticcheck
+			oldCommit, err = ctx.Repo.GitRepo.GetBranchCommit(opt.OldBranchName) //nolint:staticcheck
 			if err != nil {
 				ctx.Error(http.StatusInternalServerError, "GetBranchCommit", err)
 				return

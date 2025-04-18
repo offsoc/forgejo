@@ -17,10 +17,10 @@ import (
 	"strings"
 	"time"
 
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/proxy"
-	"code.gitea.io/gitea/modules/setting"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/proxy"
+	"forgejo.org/modules/setting"
 
 	"github.com/42wim/httpsig"
 )
@@ -191,10 +191,17 @@ func (c *Client) GetBody(uri string) ([]byte, error) {
 		return nil, err
 	}
 	defer response.Body.Close()
-	body, err := io.ReadAll(response.Body)
+	if response.ContentLength > setting.Federation.MaxSize {
+		return nil, fmt.Errorf("Request returned %d bytes (max allowed incomming size: %d bytes)", response.ContentLength, setting.Federation.MaxSize)
+	} else if response.ContentLength == -1 {
+		log.Warn("Request to %v returned an unknown content length, response may be truncated to %d bytes", uri, setting.Federation.MaxSize)
+	}
+
+	body, err := io.ReadAll(io.LimitReader(response.Body, setting.Federation.MaxSize))
 	if err != nil {
 		return nil, err
 	}
+
 	log.Debug("Client: got body: %v", charLimiter(string(body), 120))
 	return body, nil
 }

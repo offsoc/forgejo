@@ -11,18 +11,18 @@ import (
 	"strings"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/services/forms"
-	issue_service "code.gitea.io/gitea/services/issue"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/services/forms"
+	issue_service "forgejo.org/services/issue"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -56,9 +56,9 @@ func TestAPIViewPulls(t *testing.T) {
 				if assert.Len(t, files, 1) {
 					assert.Equal(t, "File-WoW", files[0].Filename)
 					assert.Empty(t, files[0].PreviousFilename)
-					assert.EqualValues(t, 1, files[0].Additions)
-					assert.EqualValues(t, 1, files[0].Changes)
-					assert.EqualValues(t, 0, files[0].Deletions)
+					assert.Equal(t, 1, files[0].Additions)
+					assert.Equal(t, 1, files[0].Changes)
+					assert.Equal(t, 0, files[0].Deletions)
 					assert.Equal(t, "added", files[0].Status)
 				}
 			}))
@@ -177,12 +177,12 @@ func TestAPICreatePullWithFieldsSuccess(t *testing.T) {
 	DecodeJSON(t, res, pull)
 
 	assert.NotNil(t, pull.Milestone)
-	assert.EqualValues(t, opts.Milestone, pull.Milestone.ID)
+	assert.Equal(t, opts.Milestone, pull.Milestone.ID)
 	if assert.Len(t, pull.Assignees, 1) {
-		assert.EqualValues(t, opts.Assignees[0], owner10.Name)
+		assert.Equal(t, opts.Assignees[0], owner10.Name)
 	}
 	assert.NotNil(t, pull.Labels)
-	assert.EqualValues(t, opts.Labels[0], pull.Labels[0].ID)
+	assert.Equal(t, opts.Labels[0], pull.Labels[0].ID)
 }
 
 func TestAPICreatePullWithFieldsFailure(t *testing.T) {
@@ -236,7 +236,7 @@ func TestAPIEditPull(t *testing.T) {
 	apiPull := new(api.PullRequest)
 	resp := MakeRequest(t, req, http.StatusCreated)
 	DecodeJSON(t, resp, apiPull)
-	assert.EqualValues(t, "master", apiPull.Base.Name)
+	assert.Equal(t, "master", apiPull.Base.Name)
 
 	newTitle := "edit a this pr"
 	newBody := "edited body"
@@ -248,7 +248,7 @@ func TestAPIEditPull(t *testing.T) {
 	}).AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusCreated)
 	DecodeJSON(t, resp, apiPull)
-	assert.EqualValues(t, "feature/1", apiPull.Base.Name)
+	assert.Equal(t, "feature/1", apiPull.Base.Name)
 	// check comment history
 	pull := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: apiPull.ID})
 	err := pull.LoadIssue(db.DefaultContext)
@@ -264,7 +264,7 @@ func TestAPIEditPull(t *testing.T) {
 	apiPullIdempotent := new(api.PullRequest)
 	resp = MakeRequest(t, req, http.StatusCreated)
 	DecodeJSON(t, resp, apiPullIdempotent)
-	assert.EqualValues(t, apiPull.State, apiPullIdempotent.State)
+	assert.Equal(t, apiPull.State, apiPullIdempotent.State)
 
 	req = NewRequestWithJSON(t, http.MethodPatch, urlStr, &api.EditPullRequestOption{
 		Base: "not-exist",
@@ -340,7 +340,7 @@ func TestAPIPullDeleteBranchPerms(t *testing.T) {
 		var bodyResp userResponse
 		DecodeJSON(t, resp, &bodyResp)
 
-		assert.EqualValues(t, "insufficient permission to delete head branch", bodyResp.Message)
+		assert.Equal(t, "insufficient permission to delete head branch", bodyResp.Message)
 
 		// Check that the branch still exist.
 		req = NewRequest(t, "GET", "/api/v1/repos/user2/repo1/branches/base-pr").AddTokenAuth(token)

@@ -8,10 +8,11 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -79,14 +80,14 @@ func (o *topic) Patch(ctx context.Context) {
 	}
 }
 
-func (o *topic) Put(ctx context.Context) generic.NodeID {
+func (o *topic) Put(ctx context.Context) f3_id.NodeID {
 	sess := db.GetEngine(ctx)
 
 	if _, err := sess.Insert(o.forgejoTopic); err != nil {
 		panic(err)
 	}
 	o.Trace("topic created %d", o.forgejoTopic.ID)
-	return generic.NewNodeID(o.forgejoTopic.ID)
+	return f3_id.NewNodeID(o.forgejoTopic.ID)
 }
 
 func (o *topic) Delete(ctx context.Context) {

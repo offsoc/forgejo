@@ -16,15 +16,15 @@ import (
 	"strings"
 	"time"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	rpm_model "code.gitea.io/gitea/models/packages/rpm"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
-	"code.gitea.io/gitea/modules/util"
-	packages_service "code.gitea.io/gitea/services/packages"
+	packages_model "forgejo.org/models/packages"
+	rpm_model "forgejo.org/models/packages/rpm"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	packages_module "forgejo.org/modules/packages"
+	rpm_module "forgejo.org/modules/packages/rpm"
+	"forgejo.org/modules/util"
+	packages_service "forgejo.org/services/packages"
 
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/ProtonMail/go-crypto/openpgp/armor"
@@ -410,7 +410,6 @@ func buildPrimary(ctx context.Context, pv *packages_model.PackageVersion, pfs []
 				files = append(files, f)
 			}
 		}
-		packageVersion := fmt.Sprintf("%s-%s", pd.FileMetadata.Version, pd.FileMetadata.Release)
 		packages = append(packages, &Package{
 			Type:         "rpm",
 			Name:         pd.Package.Name,
@@ -439,7 +438,7 @@ func buildPrimary(ctx context.Context, pv *packages_model.PackageVersion, pfs []
 				Archive:   pd.FileMetadata.ArchiveSize,
 			},
 			Location: Location{
-				Href: fmt.Sprintf("package/%s/%s/%s/%s-%s.%s.rpm", pd.Package.Name, packageVersion, pd.FileMetadata.Architecture, pd.Package.Name, packageVersion, pd.FileMetadata.Architecture),
+				Href: fmt.Sprintf("package/%s/%s/%s/%s-%s.%s.rpm", pd.Package.Name, pd.Version.Version, pd.FileMetadata.Architecture, pd.Package.Name, pd.Version.Version, pd.FileMetadata.Architecture),
 			},
 			Format: Format{
 				License:   pd.VersionMetadata.License,

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"code.gitea.io/gitea/modules/generate"
+	"forgejo.org/modules/generate"
 
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
@@ -70,10 +70,7 @@ func runGenerateInternalToken(c *cli.Context) error {
 }
 
 func runGenerateLfsJwtSecret(c *cli.Context) error {
-	_, jwtSecretBase64, err := generate.NewJwtSecret()
-	if err != nil {
-		return err
-	}
+	_, jwtSecretBase64 := generate.NewJwtSecret()
 
 	fmt.Printf("%s", jwtSecretBase64)
 

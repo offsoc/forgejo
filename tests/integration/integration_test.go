@@ -25,23 +25,23 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/cmd"
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/testlogger"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/services/auth/source/remote"
-	gitea_context "code.gitea.io/gitea/services/context"
-	user_service "code.gitea.io/gitea/services/user"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/cmd"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/testlogger"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers"
+	"forgejo.org/services/auth/source/remote"
+	gitea_context "forgejo.org/services/context"
+	user_service "forgejo.org/services/user"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/markbates/goth"
@@ -561,7 +561,7 @@ func MakeRequest(t testing.TB, rw *RequestWrapper, expectedStatus int) *httptest
 	}
 	testWebRoutes.ServeHTTP(recorder, req)
 	if expectedStatus != NoExpectedStatus {
-		if !assert.EqualValues(t, expectedStatus, recorder.Code, "Request: %s %s", req.Method, req.URL.String()) {
+		if !assert.Equal(t, expectedStatus, recorder.Code, "Request: %s %s", req.Method, req.URL.String()) {
 			logUnexpectedResponse(t, recorder)
 		}
 	}
@@ -574,7 +574,7 @@ func MakeRequestNilResponseRecorder(t testing.TB, rw *RequestWrapper, expectedSt
 	recorder := NewNilResponseRecorder()
 	testWebRoutes.ServeHTTP(recorder, req)
 	if expectedStatus != NoExpectedStatus {
-		if !assert.EqualValues(t, expectedStatus, recorder.Code,
+		if !assert.Equal(t, expectedStatus, recorder.Code,
 			"Request: %s %s", req.Method, req.URL.String()) {
 			logUnexpectedResponse(t, &recorder.ResponseRecorder)
 		}
@@ -588,7 +588,7 @@ func MakeRequestNilResponseHashSumRecorder(t testing.TB, rw *RequestWrapper, exp
 	recorder := NewNilResponseHashSumRecorder()
 	testWebRoutes.ServeHTTP(recorder, req)
 	if expectedStatus != NoExpectedStatus {
-		if !assert.EqualValues(t, expectedStatus, recorder.Code,
+		if !assert.Equal(t, expectedStatus, recorder.Code,
 			"Request: %s %s", req.Method, req.URL.String()) {
 			logUnexpectedResponse(t, &recorder.ResponseRecorder)
 		}

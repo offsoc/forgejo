@@ -6,10 +6,9 @@ package forgefed
 import (
 	"context"
 	"fmt"
-	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/validation"
 )
 
 func init() {
@@ -30,9 +29,9 @@ func GetFederationHost(ctx context.Context, ID int64) (*FederationHost, error) {
 	return host, nil
 }
 
-func FindFederationHostByFqdn(ctx context.Context, fqdn string) (*FederationHost, error) {
+func findFederationHostFromDB(ctx context.Context, searchKey, searchValue string) (*FederationHost, error) {
 	host := new(FederationHost)
-	has, err := db.GetEngine(ctx).Where("host_fqdn=?", strings.ToLower(fqdn)).Get(host)
+	has, err := db.GetEngine(ctx).Where(searchKey, searchValue).Get(host)
 	if err != nil {
 		return nil, err
 	} else if !has {
@@ -42,6 +41,24 @@ func FindFederationHostByFqdn(ctx context.Context, fqdn string) (*FederationHost
 		return nil, err
 	}
 	return host, nil
+}
+
+func FindFederationHostByFqdnAndPort(ctx context.Context, fqdn string, port uint16) (*FederationHost, error) {
+	host := new(FederationHost)
+	has, err := db.GetEngine(ctx).Where("host_fqdn=? AND host_port=?", fqdn, port).Get(host)
+	if err != nil {
+		return nil, err
+	} else if !has {
+		return nil, nil
+	}
+	if res, err := validation.IsValid(host); !res {
+		return nil, err
+	}
+	return host, nil
+}
+
+func FindFederationHostByKeyID(ctx context.Context, keyID string) (*FederationHost, error) {
+	return findFederationHostFromDB(ctx, "key_id=?", keyID)
 }
 
 func CreateFederationHost(ctx context.Context, host *FederationHost) error {

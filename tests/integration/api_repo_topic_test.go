@@ -10,12 +10,12 @@ import (
 	"net/url"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -62,7 +62,7 @@ func TestAPITopicSearch(t *testing.T) {
 	res := MakeRequest(t, NewRequest(t, "GET", searchURL.String()), http.StatusOK)
 	DecodeJSON(t, res, &topics)
 	assert.Len(t, topics.TopicNames, 4)
-	assert.EqualValues(t, "6", res.Header().Get("x-total-count"))
+	assert.Equal(t, "6", res.Header().Get("x-total-count"))
 
 	query.Add("q", "topic")
 	searchURL.RawQuery = query.Encode()
@@ -76,8 +76,8 @@ func TestAPITopicSearch(t *testing.T) {
 	DecodeJSON(t, res, &topics)
 	if assert.Len(t, topics.TopicNames, 1) {
 		assert.EqualValues(t, 2, topics.TopicNames[0].ID)
-		assert.EqualValues(t, "database", topics.TopicNames[0].Name)
-		assert.EqualValues(t, 1, topics.TopicNames[0].RepoCount)
+		assert.Equal(t, "database", topics.TopicNames[0].Name)
+		assert.Equal(t, 1, topics.TopicNames[0].RepoCount)
 	}
 }
 

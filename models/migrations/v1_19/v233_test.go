@@ -6,11 +6,11 @@ package v1_19 //nolint
 import (
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/secret"
-	"code.gitea.io/gitea/modules/setting"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	migration_tests "forgejo.org/models/migrations/test"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/secret"
+	"forgejo.org/modules/setting"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -63,7 +63,7 @@ func Test_AddHeaderAuthorizationEncryptedColWebhook(t *testing.T) {
 		assert.Equal(t, e.Meta, got[i].Meta)
 
 		if e.HeaderAuthorization == "" {
-			assert.Equal(t, "", got[i].HeaderAuthorizationEncrypted)
+			assert.Empty(t, got[i].HeaderAuthorizationEncrypted)
 		} else {
 			cipherhex := got[i].HeaderAuthorizationEncrypted
 			cleartext, err := secret.DecryptSecret(setting.SecretKey, cipherhex)

@@ -6,7 +6,7 @@ package base
 import (
 	"testing"
 
-	migrations_tests "code.gitea.io/gitea/models/migrations/test"
+	migrations_tests "forgejo.org/models/migrations/test"
 )
 
 func TestMain(m *testing.M) {

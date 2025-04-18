@@ -4,6 +4,8 @@
 
 package structs
 
+import "time"
+
 // FileOptions options for all file APIs
 type FileOptions struct {
 	// message (optional) for the commit of this file. if not supplied, a default message will be used
@@ -31,7 +33,7 @@ type CreateFileOptions struct {
 
 // Branch returns branch name
 func (o *CreateFileOptions) Branch() string {
-	return o.FileOptions.BranchName
+	return o.BranchName
 }
 
 // DeleteFileOptions options for deleting files (used for other File structs below)
@@ -45,7 +47,7 @@ type DeleteFileOptions struct {
 
 // Branch returns branch name
 func (o *DeleteFileOptions) Branch() string {
-	return o.FileOptions.BranchName
+	return o.BranchName
 }
 
 // UpdateFileOptions options for updating files
@@ -61,7 +63,7 @@ type UpdateFileOptions struct {
 
 // Branch returns branch name
 func (o *UpdateFileOptions) Branch() string {
-	return o.FileOptions.BranchName
+	return o.BranchName
 }
 
 // ChangeFileOperation for creating, updating or deleting a file
@@ -92,7 +94,7 @@ type ChangeFilesOptions struct {
 
 // Branch returns branch name
 func (o *ChangeFilesOptions) Branch() string {
-	return o.FileOptions.BranchName
+	return o.BranchName
 }
 
 // FileOptionInterface provides a unified interface for the different file options
@@ -121,6 +123,8 @@ type ContentsResponse struct {
 	Path          string `json:"path"`
 	SHA           string `json:"sha"`
 	LastCommitSHA string `json:"last_commit_sha"`
+	// swagger:strfmt date-time
+	LastCommitWhen time.Time `json:"last_commit_when"`
 	// `type` will be `file`, `dir`, `symlink`, or `submodule`
 	Type string `json:"type"`
 	Size int64  `json:"size"`

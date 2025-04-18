@@ -6,9 +6,9 @@ package webhook
 import (
 	"testing"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/json"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/json"
+	webhook_module "forgejo.org/modules/webhook"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
@@ -237,7 +237,7 @@ func TestOpenProjectPayload(t *testing.T) {
 		assert.Equal(t, 12, j.Get("number").MustBeValid().ToInt())
 		assert.Equal(t, "http://localhost:3000/test/repo/pulls/12", j.Get("html_url").MustBeValid().ToString())
 		assert.Equal(t, jsoniter.NilValue, j.Get("updated_at").ValueType())
-		assert.Equal(t, "", j.Get("state").MustBeValid().ToString())
+		assert.Empty(t, j.Get("state").MustBeValid().ToString())
 		assert.Equal(t, "Fix bug", j.Get("title").MustBeValid().ToString())
 		assert.Equal(t, "fixes bug #2", j.Get("body").MustBeValid().ToString())
 

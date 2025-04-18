@@ -7,17 +7,17 @@ import (
 	"os"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/indexer/code/bleve"
-	"code.gitea.io/gitea/modules/indexer/code/elasticsearch"
-	"code.gitea.io/gitea/modules/indexer/code/internal"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/indexer/code/bleve"
+	"forgejo.org/modules/indexer/code/elasticsearch"
+	"forgejo.org/modules/indexer/code/internal"
 
-	_ "code.gitea.io/gitea/models"
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/activities"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/activities"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -110,9 +110,9 @@ func testIndexer(name string, t *testing.T, indexer internal.Indexer) {
 				ids := make([]int64, 0, len(res))
 				for _, hit := range res {
 					ids = append(ids, hit.RepoID)
-					assert.EqualValues(t, "# repo1\n\nDescription for repo1", hit.Content)
+					assert.Equal(t, "# repo1\n\nDescription for repo1", hit.Content)
 				}
-				assert.EqualValues(t, kw.IDs, ids)
+				assert.Equal(t, kw.IDs, ids)
 			})
 		}
 
@@ -131,7 +131,7 @@ func TestBleveIndexAndSearch(t *testing.T) {
 		if idx != nil {
 			idx.Close()
 		}
-		assert.FailNow(t, "Unable to create bleve indexer Error: %v", err)
+		require.NoError(t, err)
 	}
 	defer idx.Close()
 
@@ -152,7 +152,7 @@ func TestESIndexAndSearch(t *testing.T) {
 		if indexer != nil {
 			indexer.Close()
 		}
-		assert.FailNow(t, "Unable to init ES indexer Error: %v", err)
+		assert.FailNow(t, "Unable to init ES indexer", "error: %v", err)
 	}
 
 	defer indexer.Close()

@@ -7,15 +7,15 @@ package repo
 import (
 	"time"
 
-	git_model "code.gitea.io/gitea/models/git"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/httpcache"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/routers/common"
-	"code.gitea.io/gitea/services/context"
+	git_model "forgejo.org/models/git"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/httpcache"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/routers/common"
+	"forgejo.org/services/context"
 )
 
 // ServeBlobOrLFS download a git.Blob redirecting to LFS if necessary

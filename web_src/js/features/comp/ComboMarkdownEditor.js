@@ -151,7 +151,7 @@ class ComboMarkdownEditor {
 
   setupTab() {
     const $container = $(this.container);
-    const tabs = $container[0].querySelectorAll('.tabular.menu > .item');
+    const tabs = $container[0].querySelectorAll('.switch > .item');
 
     // Fomantic Tab requires the "data-tab" to be globally unique.
     // So here it uses our defined "data-tab-for" and "data-tab-panel" to generate the "data-tab" attribute for Fomantic.
@@ -159,12 +159,14 @@ class ComboMarkdownEditor {
     const tabPreviewer = Array.from(tabs).find((tab) => tab.getAttribute('data-tab-for') === 'markdown-previewer');
     tabEditor.setAttribute('data-tab', `markdown-writer-${elementIdCounter}`);
     tabPreviewer.setAttribute('data-tab', `markdown-previewer-${elementIdCounter}`);
+    const toolbar = $container[0].querySelector('markdown-toolbar');
     const panelEditor = $container[0].querySelector('.ui.tab[data-tab-panel="markdown-writer"]');
     const panelPreviewer = $container[0].querySelector('.ui.tab[data-tab-panel="markdown-previewer"]');
     panelEditor.setAttribute('data-tab', `markdown-writer-${elementIdCounter}`);
     panelPreviewer.setAttribute('data-tab', `markdown-previewer-${elementIdCounter}`);
 
     tabEditor.addEventListener('click', () => {
+      toolbar.classList.remove('markdown-toolbar-hidden');
       requestAnimationFrame(() => {
         this.focus();
       });
@@ -177,6 +179,7 @@ class ComboMarkdownEditor {
     this.previewMode = this.options.previewMode ?? 'comment';
     this.previewWiki = this.options.previewWiki ?? false;
     tabPreviewer.addEventListener('click', async () => {
+      toolbar.classList.add('markdown-toolbar-hidden');
       const formData = new FormData();
       formData.append('mode', this.previewMode);
       formData.append('context', this.previewContext);

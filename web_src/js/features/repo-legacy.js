@@ -72,7 +72,7 @@ export function initRepoCommentForm() {
         $selectBranch.find('.ui .branch-name').text(selectedValue);
       }
     });
-    $selectBranch.find('.reference.column').on('click', function () {
+    $selectBranch.find('.branch-tag-item').on('click', function () {
       hideElem($selectBranch.find('.scrolling.reference-list-menu'));
       $selectBranch.find('.reference .text').removeClass('black');
       showElem($($(this).data('target')));
@@ -469,7 +469,7 @@ async function onEditContent(event) {
     editContentZone.querySelector('button[data-button-name="cancel-edit"]').addEventListener('click', cancelAndReset);
     editContentZone.querySelector('button[data-button-name="save-edit"]').addEventListener('click', saveAndRefresh);
   } else {
-    const tabEditor = editContentZone.querySelector('.combo-markdown-editor').querySelector('.tabular.menu > a[data-tab-for=markdown-writer]');
+    const tabEditor = editContentZone.querySelector('.combo-markdown-editor').querySelector('.switch > a[data-tab-for=markdown-writer]');
     tabEditor?.click();
   }
 

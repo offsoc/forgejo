@@ -16,5 +16,10 @@
     "incorrect_root_url": "Deese Forgejo-Instanz is inricht, unner »%s« besöcht to worden. Du bekiekst Forgejo jüüst dör een anner URL, wat daarto föhren kann, dat ’t deelwies nich richtig warkt. De kanonisk URL word vun de Forgejo-Chefs över de ROOT_URL-Instellen in de app.ini kuntrolleert.",
     "themes.names.forgejo-light": "Forgejo Hell",
     "themes.names.forgejo-dark": "Forgejo Dunker",
-    "themes.names.forgejo-auto": "Forgejo (Systeem-Thema nagahn)"
+    "themes.names.forgejo-auto": "Forgejo (Systeem-Thema nagahn)",
+    "error.not_found.title": "Sied nich funnen",
+    "alert.asset_load_failed": "Kunn Objekt-Dateien ut {path} nich laden. Bidde wees wiss, dat up de Objekt-Dateien togriepen worden kann.",
+    "install.invalid_lfs_path": "Kunn de LFS-Ruut an de angeven Padd nich maken: %[1]s",
+    "alert.range_error": " mutt eene Tahl tüsken %[1]s un %[2]s wesen.",
+    "meta.last_line": "Moin!"
 }

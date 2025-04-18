@@ -10,7 +10,7 @@ import (
 	"path"
 	"strings"
 
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/util"
 )
 
 const (

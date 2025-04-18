@@ -16,15 +16,15 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	rpm_module "code.gitea.io/gitea/modules/packages/rpm"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/packages"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	packages_module "forgejo.org/modules/packages"
+	rpm_module "forgejo.org/modules/packages/rpm"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -579,7 +579,7 @@ enabled=1`,
 					assert.Equal(t, []int(nil), result.DirIndexes)
 					assert.Equal(t, []string{"hello"}, result.BaseNames)
 					assert.Equal(t, []string{"/usr/local/bin/"}, result.DirNames)
-					assert.Equal(t, "", result.DistTag)
+					assert.Empty(t, result.DistTag)
 					assert.Equal(t, "gitea-test-1.0.2-1.x86_64.rpm", result.AptIndexLegacyFileName)
 					assert.Equal(t, 7116, result.AptIndexLegacyFileSize)
 					assert.Equal(t, "9ea82dd62968719aea19c08cd2ced79a", result.MD5Sum)

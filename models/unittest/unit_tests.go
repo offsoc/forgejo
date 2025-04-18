@@ -7,7 +7,7 @@ import (
 	"math"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
+	"forgejo.org/models/db"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

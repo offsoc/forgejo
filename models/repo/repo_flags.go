@@ -6,7 +6,7 @@ package repo
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
+	"forgejo.org/models/db"
 
 	"xorm.io/builder"
 )

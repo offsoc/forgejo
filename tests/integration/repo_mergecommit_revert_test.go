@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -34,5 +34,5 @@ func TestRepoMergeCommitRevert(t *testing.T) {
 	resp = session.MakeRequest(t, req, http.StatusSeeOther)
 
 	// A successful revert redirects to the main branch
-	assert.EqualValues(t, "/user2/test_commit_revert/src/branch/main", resp.Header().Get("Location"))
+	assert.Equal(t, "/user2/test_commit_revert/src/branch/main", resp.Header().Get("Location"))
 }

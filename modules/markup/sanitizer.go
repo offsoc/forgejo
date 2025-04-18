@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"sync"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"github.com/microcosm-cc/bluemonday"
 )
@@ -122,7 +122,7 @@ func createDefaultPolicy() *bluemonday.Policy {
 	policy.AllowAttrs("class").Matching(regexp.MustCompile("^ui table$")).OnElements("div")
 	policy.AllowAttrs("class").Matching(regexp.MustCompile("^header$")).OnElements("div")
 	policy.AllowAttrs("data-line-number").Matching(regexp.MustCompile("^[0-9]+$")).OnElements("span")
-	policy.AllowAttrs("class").Matching(regexp.MustCompile("^text small grey$")).OnElements("span")
+	policy.AllowAttrs("class").Matching(regexp.MustCompile("^text grey$")).OnElements("span")
 	policy.AllowAttrs("class").Matching(regexp.MustCompile("^file-preview$")).OnElements("table")
 	policy.AllowAttrs("class").Matching(regexp.MustCompile("^lines-escape$")).OnElements("td")
 	policy.AllowAttrs("class").Matching(regexp.MustCompile("^toggle-escape-button btn interact-bg$")).OnElements("button")

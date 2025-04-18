@@ -14,11 +14,11 @@ import (
 	"net/url"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	uuid "github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -184,13 +184,9 @@ var base32Lower = base32.NewEncoding(lowerBase32Chars).WithPadding(base32.NoPadd
 
 // GenerateClientSecret will generate the client secret and returns the plaintext and saves the hash at the database
 func (app *OAuth2Application) GenerateClientSecret(ctx context.Context) (string, error) {
-	rBytes, err := util.CryptoRandomBytes(32)
-	if err != nil {
-		return "", err
-	}
 	// Add a prefix to the base32, this is in order to make it easier
 	// for code scanners to grab sensitive tokens.
-	clientSecret := "gto_" + base32Lower.EncodeToString(rBytes)
+	clientSecret := "gto_" + base32Lower.EncodeToString(util.CryptoRandomBytes(32))
 
 	hashedSecret, err := bcrypt.GenerateFromPassword([]byte(clientSecret), bcrypt.DefaultCost)
 	if err != nil {
@@ -475,13 +471,9 @@ func (grant *OAuth2Grant) TableName() string {
 
 // GenerateNewAuthorizationCode generates a new authorization code for a grant and saves it to the database
 func (grant *OAuth2Grant) GenerateNewAuthorizationCode(ctx context.Context, redirectURI, codeChallenge, codeChallengeMethod string) (code *OAuth2AuthorizationCode, err error) {
-	rBytes, err := util.CryptoRandomBytes(32)
-	if err != nil {
-		return &OAuth2AuthorizationCode{}, err
-	}
 	// Add a prefix to the base32, this is in order to make it easier
 	// for code scanners to grab sensitive tokens.
-	codeSecret := "gta_" + base32Lower.EncodeToString(rBytes)
+	codeSecret := "gta_" + base32Lower.EncodeToString(util.CryptoRandomBytes(32))
 
 	code = &OAuth2AuthorizationCode{
 		Grant:               grant,

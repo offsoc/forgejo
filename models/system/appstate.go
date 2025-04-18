@@ -6,7 +6,7 @@ package system
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
+	"forgejo.org/models/db"
 )
 
 // AppState represents a state record in database

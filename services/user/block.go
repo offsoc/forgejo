@@ -5,10 +5,10 @@ package user
 import (
 	"context"
 
-	model "code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
+	model "forgejo.org/models"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
 
 	"xorm.io/builder"
 )

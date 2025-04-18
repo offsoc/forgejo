@@ -7,8 +7,8 @@ import (
 	"bytes"
 	"strings"
 
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
 )
 
 const (

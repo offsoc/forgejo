@@ -6,15 +6,15 @@ package convert
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,7 +29,7 @@ func TestPullRequest_APIFormat(t *testing.T) {
 	require.NoError(t, pr.LoadIssue(db.DefaultContext))
 	apiPullRequest := ToAPIPullRequest(git.DefaultContext, pr, nil)
 	assert.NotNil(t, apiPullRequest)
-	assert.EqualValues(t, &structs.PRBranchInfo{
+	assert.Equal(t, &structs.PRBranchInfo{
 		Name:       "branch1",
 		Ref:        "refs/pull/2/head",
 		Sha:        "4a357436d925b5c974181ff12a994538ddc5a269",

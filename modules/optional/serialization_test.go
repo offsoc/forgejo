@@ -7,8 +7,8 @@ import (
 	std_json "encoding/json" //nolint:depguard
 	"testing"
 
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/optional"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/optional"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -52,11 +52,11 @@ func TestOptionalToJson(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			b, err := json.Marshal(tc.obj)
 			require.NoError(t, err)
-			assert.EqualValues(t, tc.want, string(b), "gitea json module returned unexpected")
+			assert.Equal(t, tc.want, string(b), "gitea json module returned unexpected")
 
 			b, err = std_json.Marshal(tc.obj)
 			require.NoError(t, err)
-			assert.EqualValues(t, tc.want, string(b), "std json module returned unexpected")
+			assert.Equal(t, tc.want, string(b), "std json module returned unexpected")
 		})
 	}
 }
@@ -90,12 +90,12 @@ func TestOptionalFromJson(t *testing.T) {
 			var obj1 testSerializationStruct
 			err := json.Unmarshal([]byte(tc.data), &obj1)
 			require.NoError(t, err)
-			assert.EqualValues(t, tc.want, obj1, "gitea json module returned unexpected")
+			assert.Equal(t, tc.want, obj1, "gitea json module returned unexpected")
 
 			var obj2 testSerializationStruct
 			err = std_json.Unmarshal([]byte(tc.data), &obj2)
 			require.NoError(t, err)
-			assert.EqualValues(t, tc.want, obj2, "std json module returned unexpected")
+			assert.Equal(t, tc.want, obj2, "std json module returned unexpected")
 		})
 	}
 }
@@ -136,7 +136,7 @@ optional_two_string: null
 		t.Run(tc.name, func(t *testing.T) {
 			b, err := yaml.Marshal(tc.obj)
 			require.NoError(t, err)
-			assert.EqualValues(t, tc.want, string(b), "yaml module returned unexpected")
+			assert.Equal(t, tc.want, string(b), "yaml module returned unexpected")
 		})
 	}
 }
@@ -185,7 +185,7 @@ optional_twostring: null
 			var obj testSerializationStruct
 			err := yaml.Unmarshal([]byte(tc.data), &obj)
 			require.NoError(t, err)
-			assert.EqualValues(t, tc.want, obj, "yaml module returned unexpected")
+			assert.Equal(t, tc.want, obj, "yaml module returned unexpected")
 		})
 	}
 }

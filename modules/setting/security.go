@@ -8,10 +8,10 @@ import (
 	"os"
 	"strings"
 
-	"code.gitea.io/gitea/modules/auth/password/hash"
-	"code.gitea.io/gitea/modules/generate"
-	"code.gitea.io/gitea/modules/keying"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/auth/password/hash"
+	"forgejo.org/modules/generate"
+	"forgejo.org/modules/keying"
+	"forgejo.org/modules/log"
 )
 
 var (

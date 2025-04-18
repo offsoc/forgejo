@@ -10,12 +10,12 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/translation"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -32,7 +32,7 @@ func testLoginFailed(t *testing.T, username, password, message string) {
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	resultMsg := htmlDoc.doc.Find(".ui.message>p").Text()
 
-	assert.EqualValues(t, message, resultMsg)
+	assert.Equal(t, message, resultMsg)
 }
 
 func TestSignin(t *testing.T) {

@@ -6,16 +6,16 @@ package misc
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/services/context"
 )
 
 // Version shows the version of the Gitea server
 func Version(ctx *context.APIContext) {
 	// swagger:operation GET /version miscellaneous getVersion
 	// ---
-	// summary: Returns the version of the Gitea application
+	// summary: Returns the version of the running application
 	// produces:
 	// - application/json
 	// responses:

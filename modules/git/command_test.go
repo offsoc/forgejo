@@ -55,10 +55,10 @@ func TestGitArgument(t *testing.T) {
 
 func TestCommandString(t *testing.T) {
 	cmd := NewCommandContextNoGlobals(t.Context(), "a", "-m msg", "it's a test", `say "hello"`)
-	assert.EqualValues(t, cmd.prog+` a "-m msg" "it's a test" "say \"hello\""`, cmd.String())
+	assert.Equal(t, cmd.prog+` a "-m msg" "it's a test" "say \"hello\""`, cmd.String())
 
 	cmd = NewCommandContextNoGlobals(t.Context(), "url: https://a:b@c/")
-	assert.EqualValues(t, cmd.prog+` "url: https://sanitized-credential@c/"`, cmd.toString(true))
+	assert.Equal(t, cmd.prog+` "url: https://sanitized-credential@c/"`, cmd.toString(true))
 }
 
 func TestGrepOnlyFunction(t *testing.T) {

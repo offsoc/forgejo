@@ -12,9 +12,9 @@ import (
 	"io"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 )
 
 func generateSaltedToken() (string, string, string, string, error) {
@@ -22,11 +22,7 @@ func generateSaltedToken() (string, string, string, string, error) {
 	if err != nil {
 		return "", "", "", "", err
 	}
-	buf, err := util.CryptoRandomBytes(20)
-	if err != nil {
-		return "", "", "", "", err
-	}
-	token := hex.EncodeToString(buf)
+	token := hex.EncodeToString(util.CryptoRandomBytes(20))
 	hash := auth_model.HashToken(token, salt)
 	return token, salt, hash, token[len(token)-8:], nil
 }

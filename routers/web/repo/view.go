@@ -24,35 +24,36 @@ import (
 	_ "image/jpeg" // for processing jpeg images
 	_ "image/png"  // for processing png images
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	admin_model "code.gitea.io/gitea/models/admin"
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issue_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/charset"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/highlight"
-	code_indexer "code.gitea.io/gitea/modules/indexer/code"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/svg"
-	"code.gitea.io/gitea/modules/typesniffer"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/routers/web/feed"
-	"code.gitea.io/gitea/services/context"
-	issue_service "code.gitea.io/gitea/services/issue"
-	files_service "code.gitea.io/gitea/services/repository/files"
+	activities_model "forgejo.org/models/activities"
+	admin_model "forgejo.org/models/admin"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issue_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/actions"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/charset"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/highlight"
+	code_indexer "forgejo.org/modules/indexer/code"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/svg"
+	"forgejo.org/modules/typesniffer"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/web/feed"
+	"forgejo.org/services/context"
+	issue_service "forgejo.org/services/issue"
+	repo_service "forgejo.org/services/repository"
+	files_service "forgejo.org/services/repository/files"
 
 	"github.com/nektos/act/pkg/model"
 
@@ -1044,7 +1045,15 @@ func renderHomeCode(ctx *context.Context) {
 		return
 	}
 
-	if entry.IsDir() {
+	if entry.IsSubModule() {
+		subModuleURL, err := ctx.Repo.Commit.GetSubModule(entry.Name())
+		if err != nil {
+			HandleGitError(ctx, "Repo.Commit.GetSubModule", err)
+			return
+		}
+		subModuleFile := git.NewSubModuleFile(ctx.Repo.Commit, subModuleURL, entry.ID.String())
+		ctx.Redirect(subModuleFile.RefURL(setting.AppURL, ctx.Repo.Repository.FullName(), setting.SSH.Domain))
+	} else if entry.IsDir() {
 		renderDirectory(ctx)
 	} else {
 		renderFile(ctx, entry)
@@ -1143,6 +1152,21 @@ PostRecentBranchCheck:
 		ctx.Data["HasParentPath"] = true
 		if len(paths)-2 >= 0 {
 			ctx.Data["ParentPath"] = "/" + paths[len(paths)-2]
+		}
+	}
+
+	if ctx.Repo.Repository.IsFork && ctx.Repo.IsViewBranch && len(ctx.Repo.TreePath) == 0 && ctx.Repo.CanWriteToBranch(ctx, ctx.Doer, ctx.Repo.BranchName) {
+		syncForkInfo, err := repo_service.GetSyncForkInfo(ctx, ctx.Repo.Repository, ctx.Repo.BranchName)
+		if err != nil {
+			ctx.ServerError("CanSync", err)
+			return
+		}
+
+		if syncForkInfo.Allowed {
+			ctx.Data["CanSyncFork"] = true
+			ctx.Data["ForkCommitsBehind"] = syncForkInfo.CommitsBehind
+			ctx.Data["SyncForkLink"] = fmt.Sprintf("%s/sync_fork/%s", ctx.Repo.RepoLink, util.PathEscapeSegments(ctx.Repo.BranchName))
+			ctx.Data["BaseBranchLink"] = fmt.Sprintf("%s/src/branch/%s", ctx.Repo.Repository.BaseRepo.HTMLURL(), util.PathEscapeSegments(ctx.Repo.BranchName))
 		}
 	}
 

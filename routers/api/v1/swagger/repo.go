@@ -4,7 +4,7 @@
 package swagger
 
 import (
-	api "code.gitea.io/gitea/modules/structs"
+	api "forgejo.org/modules/structs"
 )
 
 // Repository
@@ -447,4 +447,11 @@ type swaggerRepoTasksList struct {
 type swaggerCompare struct {
 	// in:body
 	Body api.Compare `json:"body"`
+}
+
+// SyncForkInfo
+// swagger:response SyncForkInfo
+type swaggerSyncForkInfo struct {
+	// in:body
+	Body []api.SyncForkInfo `json:"body"`
 }

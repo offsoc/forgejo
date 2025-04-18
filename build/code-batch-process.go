@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/build/codeformat"
+	"forgejo.org/build/codeformat"
 )
 
 // Windows has a limitation for command line arguments, the size can not exceed 32KB.

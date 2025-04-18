@@ -14,20 +14,20 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	org_model "code.gitea.io/gitea/models/organization"
-	quota_model "code.gitea.io/gitea/models/quota"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/routers"
-	forgejo_context "code.gitea.io/gitea/services/context"
-	repo_service "code.gitea.io/gitea/services/repository"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	org_model "forgejo.org/models/organization"
+	quota_model "forgejo.org/models/quota"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/routers"
+	forgejo_context "forgejo.org/services/context"
+	repo_service "forgejo.org/services/repository"
+	"forgejo.org/tests"
 
 	gouuid "github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -697,7 +697,7 @@ func (ctx *quotaWebEnvAsContext) ExpectFlashMessage(value string) {
 	htmlDoc := NewHTMLParser(ctx.t, ctx.response.Body)
 	flashMessage := strings.TrimSpace(htmlDoc.Find(`.flash-message`).Text())
 
-	assert.EqualValues(ctx.t, value, flashMessage)
+	assert.Equal(ctx.t, value, flashMessage)
 }
 
 func (ctx *quotaWebEnvAsContext) ExpectFlashMessageContains(parts ...string) {

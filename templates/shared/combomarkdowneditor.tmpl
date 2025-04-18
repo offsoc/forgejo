@@ -13,43 +13,46 @@ Template Attributes:
 * EasyMDE: whether to display button for switching to legacy editor
 */}}
 <div {{if .ContainerId}}id="{{.ContainerId}}"{{end}} class="combo-markdown-editor {{.ContainerClasses}}" data-dropzone-parent-container="{{.DropzoneParentContainer}}">
-	{{if .MarkdownPreviewUrl}}
-	<div class="ui top tabular menu">
-		<a href="#" class="active item" data-tab-for="markdown-writer">{{ctx.Locale.Tr "write"}}</a>
-		<a href="#" class="item" data-tab-for="markdown-previewer" data-preview-url="{{.MarkdownPreviewUrl}}" data-preview-context="{{.MarkdownPreviewContext}}">{{ctx.Locale.Tr "preview"}}</a>
-	</div>
-	{{end}}
+
+	<markdown-toolbar>
+		{{if .MarkdownPreviewUrl}}
+		<div class="markdown-toolbar-switch">
+			<div class="switch">
+				<a href="#" class="active item" data-tab-for="markdown-writer">{{ctx.Locale.Tr "write"}}</a>
+				<a href="#" class="item" data-tab-for="markdown-previewer" data-preview-url="{{.MarkdownPreviewUrl}}" data-preview-context="{{.MarkdownPreviewContext}}">{{ctx.Locale.Tr "preview"}}</a>
+			</div>
+		</div>
+		{{end}}
+		<div class="markdown-toolbar-group">
+			<md-header class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.heading.tooltip"}}">{{svg "octicon-heading"}}</md-header>
+			<md-bold class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.bold.tooltip"}}">{{svg "octicon-bold"}}</md-bold>
+			<md-italic class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.italic.tooltip"}}">{{svg "octicon-italic"}}</md-italic>
+		</div>
+		<div class="markdown-toolbar-group">
+			<md-quote class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.quote.tooltip"}}">{{svg "octicon-quote"}}</md-quote>
+			<md-code class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.code.tooltip"}}">{{svg "octicon-code"}}</md-code>
+			<button class="markdown-toolbar-button show-modal button" data-md-button data-md-action="new-link" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.link.tooltip"}}">{{svg "octicon-link"}}</button>
+		</div>
+		<div class="markdown-toolbar-group">
+			<md-unordered-list class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.list.unordered.tooltip"}}">{{svg "octicon-list-unordered"}}</md-unordered-list>
+			<md-ordered-list class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.list.ordered.tooltip"}}">{{svg "octicon-list-ordered"}}</md-ordered-list>
+			<md-task-list class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.list.task.tooltip"}}">{{svg "octicon-tasklist"}}</md-task-list>
+			<button type="button" class="markdown-toolbar-button" data-md-button data-md-action="unindent" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.unindent.tooltip"}}">{{svg "octicon-arrow-left"}}</button>
+			<button type="button" class="markdown-toolbar-button" data-md-button data-md-action="indent" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.indent.tooltip"}}">{{svg "octicon-arrow-right"}}</button>
+		</div>
+		<div class="markdown-toolbar-group">
+			<button type="button" class="markdown-toolbar-button show-modal button" data-md-button data-md-action="new-table" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.new_table.tooltip"}}">{{svg "octicon-table"}}</button>
+			<md-mention class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.mention.tooltip"}}">{{svg "octicon-mention"}}</md-mention>
+			<md-ref class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.ref.tooltip"}}">{{svg "octicon-cross-reference"}}</md-ref>
+		</div>
+		<div class="markdown-toolbar-group">
+			<button class="markdown-toolbar-button markdown-switch-monospace" data-md-button role="switch" data-enable-text="{{ctx.Locale.Tr "editor.buttons.enable_monospace_font"}}" data-disable-text="{{ctx.Locale.Tr "editor.buttons.disable_monospace_font"}}">{{svg "octicon-typography"}}</button>
+			{{if .EasyMDE}}
+				<button class="markdown-toolbar-button markdown-switch-easymde" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.switch_to_legacy.tooltip"}}">{{svg "octicon-arrow-switch"}}</button>
+			{{end}}
+		</div>
+	</markdown-toolbar>
 	<div class="ui tab active" data-tab-panel="markdown-writer">
-		<markdown-toolbar>
-			<div class="markdown-toolbar-group">
-				<md-header class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.heading.tooltip"}}">{{svg "octicon-heading"}}</md-header>
-				<md-bold class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.bold.tooltip"}}">{{svg "octicon-bold"}}</md-bold>
-				<md-italic class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.italic.tooltip"}}">{{svg "octicon-italic"}}</md-italic>
-			</div>
-			<div class="markdown-toolbar-group">
-				<md-quote class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.quote.tooltip"}}">{{svg "octicon-quote"}}</md-quote>
-				<md-code class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.code.tooltip"}}">{{svg "octicon-code"}}</md-code>
-				<button class="markdown-toolbar-button show-modal button" data-md-button data-md-action="new-link" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.link.tooltip"}}">{{svg "octicon-link"}}</button>
-			</div>
-			<div class="markdown-toolbar-group">
-				<md-unordered-list class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.list.unordered.tooltip"}}">{{svg "octicon-list-unordered"}}</md-unordered-list>
-				<md-ordered-list class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.list.ordered.tooltip"}}">{{svg "octicon-list-ordered"}}</md-ordered-list>
-				<md-task-list class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.list.task.tooltip"}}">{{svg "octicon-tasklist"}}</md-task-list>
-				<button type="button" class="markdown-toolbar-button" data-md-button data-md-action="unindent" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.unindent.tooltip"}}">{{svg "octicon-arrow-left"}}</button>
-				<button type="button" class="markdown-toolbar-button" data-md-button data-md-action="indent" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.indent.tooltip"}}">{{svg "octicon-arrow-right"}}</button>
-			</div>
-			<div class="markdown-toolbar-group">
-				<button type="button" class="markdown-toolbar-button show-modal button" data-md-button data-md-action="new-table" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.new_table.tooltip"}}">{{svg "octicon-table"}}</button>
-				<md-mention class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.mention.tooltip"}}">{{svg "octicon-mention"}}</md-mention>
-				<md-ref class="markdown-toolbar-button" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.ref.tooltip"}}">{{svg "octicon-cross-reference"}}</md-ref>
-			</div>
-			<div class="markdown-toolbar-group">
-				<button class="markdown-toolbar-button markdown-switch-monospace" data-md-button role="switch" data-enable-text="{{ctx.Locale.Tr "editor.buttons.enable_monospace_font"}}" data-disable-text="{{ctx.Locale.Tr "editor.buttons.disable_monospace_font"}}">{{svg "octicon-typography"}}</button>
-				{{if .EasyMDE}}
-					<button class="markdown-toolbar-button markdown-switch-easymde" data-tooltip-content="{{ctx.Locale.Tr "editor.buttons.switch_to_legacy.tooltip"}}">{{svg "octicon-arrow-switch"}}</button>
-				{{end}}
-			</div>
-		</markdown-toolbar>
 		<text-expander keys=": @" suffix="">
 			<textarea class="markdown-text-editor js-quick-submit"{{if .TextareaName}} name="{{.TextareaName}}"{{end}}{{if .TextareaPlaceholder}} placeholder="{{.TextareaPlaceholder}}"{{end}}{{if .TextareaAriaLabel}} aria-label="{{.TextareaAriaLabel}}"{{end}}{{if .DisableAutosize}} data-disable-autosize="{{.DisableAutosize}}"{{end}}>{{.TextareaContent}}</textarea>
 		</text-expander>

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.gitea.io/gitea/modules/log"
-	session_module "code.gitea.io/gitea/modules/session"
+	"forgejo.org/modules/log"
+	session_module "forgejo.org/modules/session"
 
 	chiSession "code.forgejo.org/go-chi/session"
 	"github.com/gorilla/sessions"

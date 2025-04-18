@@ -6,10 +6,10 @@ package actions
 import (
 	"testing"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/timeutil"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,7 +24,7 @@ func TestCleanup(t *testing.T) {
 		require.NoError(t, CleanupLogs(db.DefaultContext))
 
 		task := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionTask{ID: 1001})
-		assert.EqualValues(t, "does-not-exist", task.LogFilename)
+		assert.Equal(t, "does-not-exist", task.LogFilename)
 		assert.True(t, task.LogExpired)
 		assert.Nil(t, task.LogIndexes)
 	})

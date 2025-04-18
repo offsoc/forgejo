@@ -1,4 +1,4 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024-2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 package integration
@@ -10,33 +10,18 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/translation"
-	issue_service "code.gitea.io/gitea/services/issue"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	issue_service "forgejo.org/services/issue"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestUserDashboardActionLinks(t *testing.T) {
-	require.NoError(t, unittest.PrepareTestDatabase())
-
-	session := loginUser(t, "user1")
-	locale := translation.NewLocale("en-US")
-
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
-	links := page.Find("#navbar .dropdown[data-tooltip-content='Create…'] .menu")
-	assert.EqualValues(t, locale.TrString("new_repo.link"), strings.TrimSpace(links.Find("a[href='/repo/create']").Text()))
-	assert.EqualValues(t, locale.TrString("new_migrate.link"), strings.TrimSpace(links.Find("a[href='/repo/migrate']").Text()))
-	assert.EqualValues(t, locale.TrString("new_org.link"), strings.TrimSpace(links.Find("a[href='/org/create']").Text()))
-}
 
 func TestUserDashboardFeedWelcome(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
@@ -93,12 +78,12 @@ func TestDashboardTitleRendering(t *testing.T) {
 		htmlDoc.doc.Find("#activity-feed .flex-item-main .title").Each(func(i int, s *goquery.Selection) {
 			count++
 			if s.IsMatcher(goquery.Single("a")) {
-				assert.EqualValues(t, "❗ not rendered", s.Text())
+				assert.Equal(t, "❗ not rendered", s.Text())
 			} else {
-				assert.EqualValues(t, ":exclamation: not rendered", s.Text())
+				assert.Equal(t, ":exclamation: not rendered", s.Text())
 			}
 		})
 
-		assert.EqualValues(t, 6, count)
+		assert.Equal(t, 6, count)
 	})
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	migration_tests "code.gitea.io/gitea/models/migrations/test"
+	migration_tests "forgejo.org/models/migrations/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -97,7 +97,7 @@ func Test_ConvertScopedAccessTokens(t *testing.T) {
 	tokens := make([]AccessToken, 0)
 	err = x.Find(&tokens)
 	require.NoError(t, err)
-	assert.Equal(t, len(tests), len(tokens))
+	assert.Len(t, tokens, len(tests))
 
 	// sort the tokens (insertion order by auto-incrementing primary key)
 	sort.Slice(tokens, func(i, j int) bool {

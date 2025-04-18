@@ -22,8 +22,8 @@ func TestToAndFromMap(t *testing.T) {
 	options.Parse(fmt.Sprintf("%v", RepoPrivate))
 	actual := options.Map()
 	expected := map[string]string{string(RepoPrivate): "true"}
-	assert.EqualValues(t, expected, actual)
-	assert.EqualValues(t, expected, NewFromMap(&actual).Map())
+	assert.Equal(t, expected, actual)
+	assert.Equal(t, expected, NewFromMap(&actual).Map())
 }
 
 func TestChangeRepositorySettings(t *testing.T) {
@@ -46,7 +46,7 @@ func TestParse(t *testing.T) {
 
 		val, ok := options.GetString(RepoPrivate)
 		assert.False(t, ok)
-		assert.Equal(t, "", val)
+		assert.Empty(t, val)
 
 		assert.True(t, options.GetBool(RepoPrivate, true))
 		assert.False(t, options.GetBool(RepoPrivate, false))

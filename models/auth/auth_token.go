@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 )
 
 type AuthorizationPurpose string
@@ -63,10 +63,7 @@ func (authToken *AuthorizationToken) IsExpired() bool {
 func GenerateAuthToken(ctx context.Context, userID int64, expiry timeutil.TimeStamp, purpose AuthorizationPurpose) (lookupKey, validator string, err error) {
 	// Request 64 random bytes. The first 32 bytes will be used for the lookupKey
 	// and the other 32 bytes will be used for the validator.
-	rBytes, err := util.CryptoRandomBytes(64)
-	if err != nil {
-		return "", "", err
-	}
+	rBytes := util.CryptoRandomBytes(64)
 	hexEncoded := hex.EncodeToString(rBytes)
 	validator, lookupKey = hexEncoded[64:], hexEncoded[:64]
 

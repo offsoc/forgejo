@@ -14,14 +14,14 @@ import (
 	"strings"
 	"unicode"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/modules/emoji"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/markup/markdown"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/util"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/modules/emoji"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/markup/markdown"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/util"
 )
 
 // RenderCommitMessage renders commit message with XSS-safe and special links.

@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
-	asymkey_service "code.gitea.io/gitea/services/asymkey"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/setting"
+	asymkey_service "forgejo.org/services/asymkey"
+	"forgejo.org/services/context"
+
+	"golang.org/x/crypto/ssh"
 )
 
 // SigningKey returns the public key of the default signing key if it exists
@@ -59,5 +62,31 @@ func SigningKey(ctx *context.APIContext) {
 	_, err = ctx.Write([]byte(content))
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "gpg export", fmt.Errorf("Error writing key content %w", err))
+	}
+}
+
+// SSHSigningKey returns the public SSH key of the default signing key if it exists
+func SSHSigningKey(ctx *context.APIContext) {
+	// swagger:operation GET /signing-key.ssh miscellaneous getSSHSigningKey
+	// ---
+	// summary: Get default signing-key.ssh
+	// produces:
+	//     - text/plain
+	// responses:
+	//   "200":
+	//     description: "SSH public key in OpenSSH authorized key format"
+	//     schema:
+	//       type: string
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	if setting.SSHInstanceKey == nil {
+		ctx.NotFound()
+		return
+	}
+
+	_, err := ctx.Write(ssh.MarshalAuthorizedKey(setting.SSHInstanceKey))
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "ssh export", err)
 	}
 }

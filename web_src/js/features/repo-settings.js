@@ -55,13 +55,12 @@ export function initRepoSettingSearchTeamBox() {
       headers: {'X-Csrf-Token': csrfToken},
       onResponse(response) {
         const items = [];
-        $.each(response.data, (_i, item) => {
+        for (const item of response.data) {
           items.push({
             title: item.name,
             description: `${item.permission} access`, // TODO: translate this string
           });
-        });
-
+        }
         return {results: items};
       },
     },

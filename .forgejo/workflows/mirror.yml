@@ -11,7 +11,7 @@ jobs:
     if: ${{ secrets.MIRROR_TOKEN != '' }}
     runs-on: docker
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
     steps:
       - name: git push {v*/,}forgejo
         run: |

@@ -11,10 +11,10 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/keying"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/keying"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/pbkdf2"
@@ -61,17 +61,13 @@ func init() {
 }
 
 // GenerateScratchToken recreates the scratch token the user is using.
-func (t *TwoFactor) GenerateScratchToken() (string, error) {
-	tokenBytes, err := util.CryptoRandomBytes(6)
-	if err != nil {
-		return "", err
-	}
+func (t *TwoFactor) GenerateScratchToken() string {
 	// these chars are specially chosen, avoid ambiguous chars like `0`, `O`, `1`, `I`.
 	const base32Chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-	token := base32.NewEncoding(base32Chars).WithPadding(base32.NoPadding).EncodeToString(tokenBytes)
+	token := base32.NewEncoding(base32Chars).WithPadding(base32.NoPadding).EncodeToString(util.CryptoRandomBytes(6))
 	t.ScratchSalt, _ = util.CryptoRandomString(10)
 	t.ScratchHash = HashToken(token, t.ScratchSalt)
-	return token, nil
+	return token
 }
 
 // HashToken return the hashable salt

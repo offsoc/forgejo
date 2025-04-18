@@ -1,6 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package user
@@ -21,20 +21,20 @@ import (
 
 	_ "image/jpeg" // Needed for jpeg support
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/auth/openid"
-	"code.gitea.io/gitea/modules/auth/password/hash"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/auth/openid"
+	"forgejo.org/modules/auth/password/hash"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
 
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
@@ -134,9 +134,6 @@ type User struct {
 	Avatar          string `xorm:"VARCHAR(2048) NOT NULL"`
 	AvatarEmail     string `xorm:"NOT NULL"`
 	UseCustomAvatar bool
-
-	// For federation
-	NormalizedFederatedURI string
 
 	// Counters
 	NumFollowers int
@@ -311,11 +308,6 @@ func (u *User) HTMLURL() string {
 	return setting.AppURL + url.PathEscape(u.Name)
 }
 
-// APActorID returns the IRI to the api endpoint of the user
-func (u *User) APActorID() string {
-	return fmt.Sprintf("%vapi/v1/activitypub/user-id/%v", setting.AppURL, url.PathEscape(fmt.Sprintf("%v", u.ID)))
-}
-
 // OrganisationLink returns the organization sub page link.
 func (u *User) OrganisationLink() string {
 	return setting.AppSubURL + "/org/" + url.PathEscape(u.Name)
@@ -392,9 +384,7 @@ func (u *User) SetPassword(passwd string) (err error) {
 		return err
 	}
 
-	if u.Salt, err = GetUserSalt(); err != nil {
-		return err
-	}
+	u.Salt = GetUserSalt()
 	if u.Passwd, err = hash.Parse(setting.PasswordHashAlgo).Hash(passwd, u.Salt); err != nil {
 		return err
 	}
@@ -564,13 +554,9 @@ func IsUserExist(ctx context.Context, uid int64, name string) (bool, error) {
 const SaltByteLength = 16
 
 // GetUserSalt returns a random user salt token.
-func GetUserSalt() (string, error) {
-	rBytes, err := util.CryptoRandomBytes(SaltByteLength)
-	if err != nil {
-		return "", err
-	}
+func GetUserSalt() string {
 	// Returns a 32 bytes long string.
-	return hex.EncodeToString(rBytes), nil
+	return hex.EncodeToString(util.CryptoRandomBytes(SaltByteLength))
 }
 
 // Note: The set of characters here can safely expand without a breaking change,
@@ -700,7 +686,7 @@ func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefa
 	u.MaxRepoCreation = -1
 	u.Theme = setting.UI.DefaultTheme
 	u.IsRestricted = setting.Service.DefaultUserIsRestricted
-	u.IsActive = !(setting.Service.RegisterEmailConfirm || setting.Service.RegisterManualConfirm)
+	u.IsActive = !setting.Service.RegisterEmailConfirm && !setting.Service.RegisterManualConfirm
 
 	// Ensure consistency of the dates.
 	if u.UpdatedUnix < u.CreatedUnix {
@@ -777,9 +763,7 @@ func createUser(ctx context.Context, u *User, createdByAdmin bool, overwriteDefa
 
 	u.LowerName = strings.ToLower(u.Name)
 	u.AvatarEmail = u.Email
-	if u.Rands, err = GetUserSalt(); err != nil {
-		return err
-	}
+	u.Rands = GetUserSalt()
 	if u.Passwd != "" {
 		if err = u.SetPassword(u.Passwd); err != nil {
 			return err

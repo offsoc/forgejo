@@ -9,12 +9,13 @@ import (
 	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -122,7 +123,7 @@ func (o *milestone) Patch(ctx context.Context) {
 	}
 }
 
-func (o *milestone) Put(ctx context.Context) generic.NodeID {
+func (o *milestone) Put(ctx context.Context) f3_id.NodeID {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
@@ -131,7 +132,7 @@ func (o *milestone) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 	o.Trace("milestone created %d", o.forgejoMilestone.ID)
-	return generic.NewNodeID(o.forgejoMilestone.ID)
+	return f3_id.NewNodeID(o.forgejoMilestone.ID)
 }
 
 func (o *milestone) Delete(ctx context.Context) {

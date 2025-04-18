@@ -7,9 +7,9 @@ import (
 	"log"
 	"sync"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/timeutil"
 
 	"code.forgejo.org/go-chi/session"
 )
