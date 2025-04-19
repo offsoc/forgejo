@@ -54,12 +54,12 @@ const sfc = {
     if (this.viewType === 'tree') {
       this.isViewTree = true;
       this.refNameText = this.commitIdShort;
-    } else if (this.viewType === 'tag') {
-      this.isViewTag = true;
-      this.refNameText = this.tagName;
-    } else {
+    } else if (this.viewType === 'branch') {
       this.isViewBranch = true;
       this.refNameText = this.branchName;
+    } else {
+      this.isViewTag = true;
+      this.refNameText = this.tagName;
     }
 
     document.body.addEventListener('click', (event) => {
@@ -252,7 +252,8 @@ export default sfc; // activate IDE's Vue plugin
         <template v-if="release">{{ textReleaseCompare }}</template>
         <template v-else>
           <svg-icon v-if="isViewTag" name="octicon-tag"/>
-          <svg-icon v-else name="octicon-git-branch"/>
+          <svg-icon v-else-if="isViewBranch" name="octicon-git-branch"/>
+          <svg-icon v-else name="octicon-git-commit"/>
           <strong ref="dropdownRefName" class="tw-ml-2 tw-inline-block gt-ellipsis">{{ refNameText }}</strong>
         </template>
       </span>
