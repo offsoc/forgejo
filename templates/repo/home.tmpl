@@ -3,7 +3,6 @@
 	{{template "repo/header" .}}
 	<div class="ui container {{if .IsBlame}}fluid padded{{end}}">
 		{{template "base/alert" .}}
-		{{template "repo/code/recently_pushed_new_branches" .}}
 		{{if and (not .HideRepoInfo) (not .IsBlame)}}
 		<div class="repo-description">
 			<div id="repo-desc" class="tw-break-anywhere tw-text-16">
@@ -159,16 +158,8 @@
 			</div>
 		</div>
 
-		{{if .CanSyncFork}}
-			<div class="ui positive message tw-flex tw-items-center">
-				<div class="tw-flex-1">
-					{{ctx.Locale.TrN .ForkCommitsBehind "repo.sync_fork.branch_behind_one" "repo.sync_fork.branch_behind_few" .ForkCommitsBehind (printf "<a href='%s'>%s:%s</a>" .BaseBranchLink .Repository.BaseRepo.FullName .BranchName | SafeHTML)}}
-				</div>
-				<a role="button" class="ui compact positive button tw-m-0" href="{{.SyncForkLink}}">
-					{{ctx.Locale.Tr "repo.sync_fork.button"}}
-				</a>
-			</div>
-		{{end}}
+		{{template "repo/code/recently_pushed_new_branches" .}}
+		{{template "repo/code/fork_sync_message" .}}
 
 		{{if .IsViewFile}}
 			{{template "repo/view_file" .}}
