@@ -77,8 +77,10 @@
 				{{else}}
 					{{if eq $type "tag"}}
 						{{svg "octicon-tag"}}
-					{{else}}
+					{{else if eq $type "branch"}}
 						{{svg "octicon-git-branch"}}
+					{{else}}
+						{{svg "octicon-git-commit"}}
 					{{end}}
 					<strong ref="dropdownRefName" class="tw-ml-2 tw-inline-block gt-ellipsis">{{if and .root.IsViewTag (not .noTag)}}{{.root.TagName}}{{else if .root.IsViewBranch}}{{.root.BranchName}}{{else}}{{ShortSha .root.CommitID}}{{end}}</strong>
 				{{end}}
