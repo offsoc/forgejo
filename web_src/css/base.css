@@ -1054,10 +1054,11 @@ overflow-menu .overflow-menu-items {
 
 overflow-menu .overflow-menu-items .item {
   margin-bottom: 0 !important; /* reset fomantic's margin, because the active menu has special bottom border */
+  height: 100%;
 }
 
 overflow-menu .overflow-menu-items .item > .svg {
-  align-self: baseline;
+  align-self: center;
 }
 
 overflow-menu .ui.label {
@@ -1358,10 +1359,6 @@ table th[data-sortt-desc] .svg {
 
 .ui.secondary.pointing.menu {
   border-color: var(--color-secondary);
-}
-
-.ui.tabular.menu .item {
-  height: 100%;
 }
 
 .ui.tabular.menu .item,
