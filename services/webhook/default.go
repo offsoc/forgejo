@@ -36,7 +36,6 @@ func (dh defaultHandler) Type() webhook_module.HookType {
 
 func (dh defaultHandler) Icon(size int) template.HTML {
 	if dh.forgejo {
-		// ToDo: replace `gitea-` branding of product logo svgs
 		return svg.RenderHTML("gitea-forgejo", size, "img")
 	}
 	return svg.RenderHTML("gitea-gitea", size, "img")
