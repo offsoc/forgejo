@@ -56,7 +56,7 @@ const sfc = {
       this.refNameText = this.commitIdShort;
     } else if (this.viewType === 'branch') {
       this.isViewBranch = true;
-      this.refNameText = this.viewType;
+      this.refNameText = this.branchName;
     } else {
       this.isViewTag = true;
       this.refNameText = this.tagName;
