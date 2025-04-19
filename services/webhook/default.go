@@ -36,8 +36,7 @@ func (dh defaultHandler) Type() webhook_module.HookType {
 
 func (dh defaultHandler) Icon(size int) template.HTML {
 	if dh.forgejo {
-		// forgejo.svg is not in web_src/svg/, so svg.RenderHTML does not work
-		return shared.ImgIcon("forgejo.svg", size)
+		return svg.RenderHTML("gitea-forgejo", size, "img")
 	}
 	return svg.RenderHTML("gitea-gitea", size, "img")
 }
