@@ -79,12 +79,6 @@
   padding: 0 4px;
 }
 
-#issue-list .issue-meta .issue-meta-main {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 #issue-list .issue-meta .branch .truncated-name {
   white-space: nowrap;
   overflow: hidden;

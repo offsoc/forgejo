@@ -53,36 +53,34 @@
 					{{end}}
 				</div>
 				<div class="flex-item-body issue-meta">
-					<span class="issue-meta-main">
-						<span>
-							<a class="index" href="{{if .Link}}{{.Link}}{{else}}{{$.Link}}/{{.Index}}{{end}}">
-								{{if eq $.listType "dashboard"}}
-									{{.Repo.FullName}}#{{.Index}}
-								{{else}}
-									#{{.Index}}
-								{{end}}
-							</a>
-							{{$timeStr := DateUtils.TimeSince .GetLastEventTimestamp}}
-							{{if .OriginalAuthor}}
-								{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .OriginalAuthor}}
-							{{else if gt .Poster.ID 0}}
-								{{ctx.Locale.Tr .GetLastEventLabel $timeStr .Poster.HomeLink .Poster.GetDisplayName}}
+					<span>
+						<a class="index" href="{{if .Link}}{{.Link}}{{else}}{{$.Link}}/{{.Index}}{{end}}">
+							{{if eq $.listType "dashboard"}}
+								{{.Repo.FullName}}#{{.Index}}
 							{{else}}
-								{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .Poster.GetDisplayName}}
+								#{{.Index}}
 							{{end}}
-						</span>
-						{{if .IsPull}}
-							{{svg "gitea-double-chevron-right" 12}}
-							<div class="flex-text-inline issue-meta-branch">
-								<div class="branch">
-									<a href="{{.PullRequest.BaseRepo.Link}}/src/branch/{{PathEscapeSegments .PullRequest.BaseBranch}}">
-										{{/* inline to remove the spaces between spans */}}
-										{{if ne .RepoID .PullRequest.BaseRepoID}}<span class="truncated-name">{{.PullRequest.BaseRepo.OwnerName}}</span>:{{end}}<span class="truncated-name">{{.PullRequest.BaseBranch}}</span>
-									</a>
-								</div>
-							</div>
+						</a>
+						{{$timeStr := DateUtils.TimeSince .GetLastEventTimestamp}}
+						{{if .OriginalAuthor}}
+							{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .OriginalAuthor}}
+						{{else if gt .Poster.ID 0}}
+							{{ctx.Locale.Tr .GetLastEventLabel $timeStr .Poster.HomeLink .Poster.GetDisplayName}}
+						{{else}}
+							{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .Poster.GetDisplayName}}
 						{{end}}
 					</span>
+					{{if .IsPull}}
+						{{svg "gitea-double-chevron-right" 12}}
+						<div class="flex-text-inline issue-meta-branch">
+							<div class="branch">
+								<a href="{{.PullRequest.BaseRepo.Link}}/src/branch/{{PathEscapeSegments .PullRequest.BaseBranch}}">
+									{{/* inline to remove the spaces between spans */}}
+									{{if ne .RepoID .PullRequest.BaseRepoID}}<span class="truncated-name">{{.PullRequest.BaseRepo.OwnerName}}</span>:{{end}}<span class="truncated-name">{{.PullRequest.BaseBranch}}</span>
+								</a>
+							</div>
+						</div>
+					{{end}}
 					{{if and .Milestone (ne $.listType "milestone")}}
 						<a class="milestone flex-text-inline tw-max-w-[300px]" {{if $.RepoLink}}href="{{$.RepoLink}}/milestone/{{.Milestone.ID}}"{{else}}href="{{.Repo.Link}}/milestone/{{.Milestone.ID}}"{{end}}>
 							{{svg "octicon-milestone" 14}}
