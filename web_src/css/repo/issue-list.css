@@ -69,6 +69,10 @@
   }
 }
 
+#issue-list .issue-meta {
+  gap: 0.5rem;
+}
+
 #issue-list .issue-meta .branch {
   background-color: var(--color-secondary-alpha-50);
   border-radius: var(--border-radius);
