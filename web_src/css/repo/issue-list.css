@@ -69,17 +69,13 @@
   }
 }
 
-#issue-list .flex-item-body .branches {
-  display: inline-flex;
-}
-
-#issue-list .flex-item-body .branches .branch {
+#issue-list .flex-item-body .branch {
   background-color: var(--color-secondary-alpha-50);
   border-radius: var(--border-radius);
   padding: 0 4px;
 }
 
-#issue-list .flex-item-body .branches .truncated-name {
+#issue-list .flex-item-body .branch .truncated-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

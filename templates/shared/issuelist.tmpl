@@ -70,7 +70,7 @@
 							{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .Poster.GetDisplayName}}
 						{{end}}
 						{{if .IsPull}}
-							<div class="branches flex-text-inline">
+							<div class="flex-text-inline">
 								{{svg "gitea-double-chevron-right" 12}}
 								<div class="branch">
 									<a href="{{.PullRequest.BaseRepo.Link}}/src/branch/{{PathEscapeSegments .PullRequest.BaseBranch}}">
