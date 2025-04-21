@@ -205,6 +205,7 @@ func (l *locale) TrString(trKey string, trArgs ...any) string {
 			if defaultLang, ok := l.store.localeMap[l.store.defaultLang]; ok {
 				if msg := defaultLang.LookupNewStyleMessage(trKey); msg != "" {
 					format = msg
+					found = true
 				} else if foundIndex {
 					// Third fallback: old-style default language
 					if msg, ok := defaultLang.idxToMsgMap[idx]; ok {
