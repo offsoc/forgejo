@@ -30,7 +30,7 @@ func TestMissingTranslationHandling(t *testing.T) {
 	err := i18n.DefaultLocales.AddToLocaleFromJSON("fun", []byte(`{
 		"meta.last_line": "This language only has one line that is never used by the UI. It will never have a translation for incorrect_root_url"
 	}`))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	// Get "fun" locale, make sure it's available
 	funLocale, found := i18n.DefaultLocales.Locale("fun")
