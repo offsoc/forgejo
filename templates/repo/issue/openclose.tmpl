@@ -1,21 +1,21 @@
 <div class="switch">
 	<a class="{{if eq .State "open"}}active {{end}}item" href="{{.OpenLink}}" data-test-name="open-issue-count">
 		{{if .PageIsMilestones}}
-			{{svg "octicon-milestone" 16 "tw-mr-2"}}
+			{{svg "octicon-milestone" 16}}
 		{{else if .PageIsPullList}}
-			{{svg "octicon-git-pull-request" 16 "tw-mr-2"}}
+			{{svg "octicon-git-pull-request" 16}}
 		{{else}}
-			{{svg "octicon-issue-opened" 16 "tw-mr-2"}}
+			{{svg "octicon-issue-opened" 16}}
 		{{end}}
 		{{ctx.Locale.PrettyNumber .OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
 	</a>
 	<a class="{{if eq .State "closed"}}active {{end}}item" href="{{.ClosedLink}}" data-test-name="closed-issue-count">
-		{{svg "octicon-issue-closed" 16 "tw-mr-2"}}
+		{{svg "octicon-issue-closed" 16}}
 		{{ctx.Locale.PrettyNumber .ClosedCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
 	</a>
 	{{if not .PageIsMilestones}}
 		<a class="{{if eq .State "all"}}active {{end}}item" href="{{.AllStatesLink}}" data-test-name="all-issue-count">
-			{{svg "octicon-eye" 16 "tw-mr-2"}}
+			{{svg "octicon-eye" 16}}
 			{{ctx.Locale.PrettyNumber (.AllCount)}}&nbsp;{{ctx.Locale.Tr "repo.issues.all_title"}}
 		</a>
 	{{end}}
