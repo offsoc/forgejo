@@ -44,6 +44,7 @@ import (
 	webhook_service "forgejo.org/services/webhook"
 	"forgejo.org/tests"
 
+	"github.com/hashicorp/go-version"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -306,9 +307,22 @@ func TestCantMergeConflict(t *testing.T) {
 		require.Error(t, err, "Merge should return an error due to conflict")
 		assert.True(t, models.IsErrMergeConflicts(err), "Merge error is not a conflict error")
 
-		err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleRebase, "", "CONFLICT", false)
-		require.Error(t, err, "Merge should return an error due to conflict")
-		assert.True(t, models.IsErrRebaseConflicts(err), "Merge error is not a conflict error")
+		t.Run("Git version with replay", func(t *testing.T) {
+			require.NoError(t, git.CheckGitVersionAtLeast("2.44"))
+
+			err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleRebase, "", "CONFLICT", false)
+			require.Error(t, err, "Merge should return an error due to conflict")
+			assert.True(t, models.IsErrRebaseConflicts(err), "Merge error is not a conflict error")
+		})
+		t.Run("Git version without replay", func(t *testing.T) {
+			oldVersion, err := version.NewVersion("2.43.0")
+			require.NoError(t, err)
+			defer test.MockVariableValue(&git.GitVersion, oldVersion)()
+
+			err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleRebase, "", "CONFLICT", false)
+			require.Error(t, err, "Merge should return an error due to conflict")
+			assert.True(t, models.IsErrRebaseConflicts(err), "Merge error is not a conflict error")
+		})
 		gitRepo.Close()
 	})
 }
