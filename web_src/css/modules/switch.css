@@ -11,6 +11,7 @@
 
 .switch .item {
   display: flex;
+  gap: 0.5rem;
   align-items: center;
   padding: .5em 1.125em;
   color: var(--color-text);
