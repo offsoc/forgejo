@@ -43,6 +43,7 @@ func TestMissingTranslationHandling(t *testing.T) {
 	assert.True(t, strings.HasPrefix(s, "This Forgejo instance"))
 }
 
+// TestDataSizeTranslation is a test for usage of TrSize in file size display
 func TestDataSizeTranslation(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
 		testUser := "user2"
@@ -126,14 +127,14 @@ func testFileSizeTranslated(t *testing.T, session *TestSession, filePath, correc
 	resp := session.MakeRequest(t, req, http.StatusOK)
 
 	// Check if file size is translated
-	sizeCorrent := false
+	sizeCorrect := false
 	fileInfo := NewHTMLParser(t, resp.Body).Find(".file-info .file-info-entry")
 	fileInfo.Each(func(i int, info *goquery.Selection) {
 		infoText := strings.TrimSpace(info.Text())
 		if infoText == correctSize {
-			sizeCorrent = true
+			sizeCorrect = true
 		}
 	})
 
-	assert.True(t, sizeCorrent)
+	assert.True(t, sizeCorrect)
 }
