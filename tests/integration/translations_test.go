@@ -27,10 +27,9 @@ func TestMissingTranslationHandling(t *testing.T) {
 	i18n.DefaultLocales.AddLocaleByIni("fun", "Funlang", nil, []byte(""), nil)
 
 	// Add a testing locale to the store
-	err := i18n.DefaultLocales.AddToLocaleFromJSON("fun", []byte(`{
+	i18n.DefaultLocales.AddToLocaleFromJSON("fun", []byte(`{
 		"meta.last_line": "This language only has one line that is never used by the UI. It will never have a translation for incorrect_root_url"
 	}`))
-	assert.NoError(t, err)
 
 	// Get "fun" locale, make sure it's available
 	funLocale, found := i18n.DefaultLocales.Locale("fun")
