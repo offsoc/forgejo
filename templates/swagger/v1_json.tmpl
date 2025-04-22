@@ -17315,6 +17315,29 @@
         }
       }
     },
+    "/signing-key.ssh": {
+      "get": {
+        "produces": [
+          "text/plain"
+        ],
+        "tags": [
+          "miscellaneous"
+        ],
+        "summary": "Get default signing-key.ssh",
+        "operationId": "getSSHSigningKey",
+        "responses": {
+          "200": {
+            "description": "SSH public key in OpenSSH authorized key format",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "$ref": "#/responses/notFound"
+          }
+        }
+      }
+    },
     "/teams/{id}": {
       "get": {
         "produces": [
@@ -21998,6 +22021,11 @@
         "last_commit_sha": {
           "type": "string",
           "x-go-name": "LastCommitSHA"
+        },
+        "last_commit_when": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "LastCommitWhen"
         },
         "name": {
           "type": "string",

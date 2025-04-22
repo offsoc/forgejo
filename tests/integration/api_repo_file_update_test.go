@@ -140,6 +140,8 @@ func TestAPIUpdateFile(t *testing.T) {
 			expectedFileResponse := getExpectedFileResponseForUpdate(commitID, treePath, lasCommit.ID.String())
 			var fileResponse api.FileResponse
 			DecodeJSON(t, resp, &fileResponse)
+			// Testify cannot assert time.Time correctly.
+			expectedFileResponse.Content.LastCommitWhen = fileResponse.Content.LastCommitWhen
 			assert.Equal(t, expectedFileResponse.Content, fileResponse.Content)
 			assert.Equal(t, expectedFileResponse.Commit.SHA, fileResponse.Commit.SHA)
 			assert.Equal(t, expectedFileResponse.Commit.HTMLURL, fileResponse.Commit.HTMLURL)

@@ -1,4 +1,4 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package federation
@@ -129,7 +129,7 @@ func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 		return nil, err
 	}
 
-	result, err := forgefed.NewFederationHost(nodeInfo, actorID.Host)
+	result, err := forgefed.NewFederationHost(actorID.Host, nodeInfo, actorID.HostPort, actorID.HostSchema)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func GetFederationHostForURI(ctx context.Context, actorURI string) (*forgefed.Fe
 	if err != nil {
 		return nil, err
 	}
-	federationHost, err := forgefed.FindFederationHostByFqdn(ctx, rawActorID.Host)
+	federationHost, err := forgefed.FindFederationHostByFqdnAndPort(ctx, rawActorID.Host, rawActorID.HostPort)
 	if err != nil {
 		return nil, err
 	}
@@ -221,12 +221,12 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		LoginName:                    loginName,
 		Type:                         user.UserTypeRemoteUser,
 		IsAdmin:                      false,
-		NormalizedFederatedURI:       personID.AsURI(),
 	}
 
 	federatedUser := user.FederatedUser{
-		ExternalID:       personID.ID,
-		FederationHostID: federationHostID,
+		ExternalID:            personID.ID,
+		FederationHostID:      federationHostID,
+		NormalizedOriginalURL: personID.AsURI(),
 	}
 
 	err = user.CreateFederatedUser(ctx, &newUser, &federatedUser)

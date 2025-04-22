@@ -1,9 +1,8 @@
-#!/usr/bin/env node
-import imageminZopfli from 'imagemin-zopfli'; // eslint-disable-line import-x/no-unresolved
-import {loadSVGFromString, Canvas, Rect, util} from 'fabric/node'; // eslint-disable-line import-x/no-unresolved
 import {optimize} from 'svgo';
 import {readFile, writeFile} from 'node:fs/promises';
-import {argv, exit} from 'node:process';
+import {exit} from 'node:process';
+import SharpConstructor from 'sharp';
+import {fileURLToPath} from 'node:url';
 
 function doExit(err) {
   if (err) console.error(err);
@@ -28,36 +27,14 @@ async function generate(svg, path, {size, bg}) {
     return;
   }
 
-  const {objects, options} = await loadSVGFromString(svg);
-  const canvas = new Canvas();
-  canvas.setDimensions({width: size, height: size});
-  const ctx = canvas.getContext('2d');
-  ctx.scale(options.width ? (size / options.width) : 1, options.height ? (size / options.height) : 1);
-
+  let sharp = (new SharpConstructor(Buffer.from(svg))).resize(size, size).png({compressionLevel: 9, palette: true, effort: 10, quality: 80});
   if (bg) {
-    canvas.add(new Rect({
-      left: 0,
-      top: 0,
-      height: size * (1 / (size / options.height)),
-      width: size * (1 / (size / options.width)),
-      fill: 'white',
-    }));
+    sharp = sharp.flatten({background: 'white'});
   }
-
-  canvas.add(util.groupSVGElements(objects, options));
-  canvas.renderAll();
-
-  let png = Buffer.from([]);
-  for await (const chunk of canvas.createPNGStream()) {
-    png = Buffer.concat([png, chunk]);
-  }
-
-  png = await imageminZopfli({more: true})(png);
-  await writeFile(outputFile, png);
+  sharp.toFile(fileURLToPath(outputFile), (err) => err !== null && console.error(err) && exit(1));
 }
 
 async function main() {
-  const gitea = argv.slice(2).includes('gitea');
   const logoSvg = await readFile(new URL('../assets/logo.svg', import.meta.url), 'utf8');
   const faviconSvg = await readFile(new URL('../assets/favicon.svg', import.meta.url), 'utf8');
 
@@ -68,7 +45,6 @@ async function main() {
     generate(faviconSvg, '../public/assets/img/favicon.png', {size: 180}),
     generate(logoSvg, '../public/assets/img/avatar_default.png', {size: 200}),
     generate(logoSvg, '../public/assets/img/apple-touch-icon.png', {size: 180, bg: true}),
-    gitea && generate(logoSvg, '../public/assets/img/gitea.svg', {size: 32}),
   ]);
 }
 

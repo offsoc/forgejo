@@ -22,7 +22,6 @@
     "error.not_found.title": "Сторінку не знайдено",
     "alert.asset_load_failed": "Не вдалося завантажити файли ресурсів з {path}. Переконайтеся, що до файлів ресурсів є доступ.",
     "install.invalid_lfs_path": "Не вдалося створити корінь LFS за вказаним шляхом: %[1]s",
-    "settings.adopt": "Прийняти",
-    "install.lfs_jwt_secret_failed": "Не вдалося створити секрет LFS JWT: %[1]s",
-    "alert.range_error": " має бути числом від %[1]s до %[2]s."
+    "alert.range_error": " має бути числом від %[1]s до %[2]s.",
+    "meta.last_line": "Не зливай злий запити на злиття — зіллється зле."
 }
