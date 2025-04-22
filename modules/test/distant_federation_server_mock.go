@@ -77,7 +77,7 @@ func (mock *FederationServerMock) recordLastPost(t *testing.T, req *http.Request
 	if err != nil {
 		t.Errorf("Error reading body: %q", err)
 	}
-	mock.LastPost = strings.Replace(buf.String(), req.Host, "DISTANT_FEDERATION_HOST", -1)
+	mock.LastPost = strings.ReplaceAll(buf.String(), req.Host, "DISTANT_FEDERATION_HOST")
 }
 
 func (mock *FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
