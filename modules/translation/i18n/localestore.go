@@ -1,4 +1,5 @@
 // Copyright 2022 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package i18n
@@ -205,6 +206,7 @@ func (l *locale) TrString(trKey string, trArgs ...any) string {
 			if defaultLang, ok := l.store.localeMap[l.store.defaultLang]; ok {
 				if msg := defaultLang.LookupNewStyleMessage(trKey); msg != "" {
 					format = msg
+					found = true
 				} else if foundIndex {
 					// Third fallback: old-style default language
 					if msg, ok := defaultLang.idxToMsgMap[idx]; ok {
