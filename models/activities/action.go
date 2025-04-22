@@ -1,6 +1,7 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2025 Informatyka Boguslawski sp. z o.o. sp.k. <https://www.ib.pl>
+// SPDX-License-Identifier: MIT AND GPL-3.0-or-later
 
 package activities
 
@@ -459,11 +460,8 @@ func GetFeeds(ctx context.Context, opts GetFeedsOptions) (ActionList, int64, err
 		return nil, 0, err
 	}
 
-	sess := db.GetEngine(ctx).Where(cond).
-		Select("`action`.*"). // this line will avoid select other joined table's columns
-		Join("INNER", "repository", "`repository`.id = `action`.repo_id")
-
 	opts.SetDefaultValues()
+	sess := db.GetEngine(ctx).Where(cond)
 	sess = db.SetSessionPagination(sess, &opts)
 
 	actions := make([]*Action, 0, opts.PageSize)

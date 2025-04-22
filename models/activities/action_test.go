@@ -1,5 +1,6 @@
 // Copyright 2020 The Gitea Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2025 Informatyka Boguslawski sp. z o.o. sp.k. <https://www.ib.pl>
+// SPDX-License-Identifier: MIT AND GPL-3.0-or-later
 
 package activities_test
 
@@ -227,6 +228,10 @@ func TestNotifyWatchers(t *testing.T) {
 }
 
 func TestGetFeedsCorrupted(t *testing.T) {
+
+	// Corrupted data in not checked in the feeds for performance reasons.
+	// Users should rather run doctor to fix their data.
+
 	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	unittest.AssertExistsAndLoadBean(t, &activities_model.Action{
@@ -240,8 +245,8 @@ func TestGetFeedsCorrupted(t *testing.T) {
 		IncludePrivate: true,
 	})
 	require.NoError(t, err)
-	assert.Empty(t, actions)
-	assert.Equal(t, int64(0), count)
+	assert.Len(t, actions, 1)
+	assert.Equal(t, int64(1), count)
 }
 
 func TestConsistencyUpdateAction(t *testing.T) {
