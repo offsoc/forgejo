@@ -248,9 +248,13 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		IsAdmin:                      false,
 	}
 
+	inbox := person.Inbox.GetLink().String()
+	log.Info("xxx: inbox: %s", inbox)
+
 	federatedUser := user.FederatedUser{
 		ExternalID:            personID.ID,
 		FederationHostID:      federationHostID,
+		InboxURL:              &inbox,
 		NormalizedOriginalURL: personID.AsURI(),
 	}
 

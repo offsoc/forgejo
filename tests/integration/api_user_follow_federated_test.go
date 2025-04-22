@@ -17,7 +17,7 @@ import (
 	"forgejo.org/modules/test"
 	"forgejo.org/routers"
 	"forgejo.org/tests"
-	ttools "forgejo.org/tests/tools"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAPIFollowFederated(t *testing.T) {
@@ -25,18 +25,14 @@ func TestAPIFollowFederated(t *testing.T) {
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 	defer tests.PrepareTestEnv(t)()
 
-	mock := ttools.NewFederationServerMock()
+	mock := test.NewFederationServerMock()
 	federatedSrv := mock.DistantServer(t)
 	defer federatedSrv.Close()
 
-	// user1 := "user4"
-	user2 := "user10"
+	user10 := "user10"
 
-	// session1 := loginUser(t, user1)
-	// token1 := getTokenForLoggedInUser(t, session1, auth_model.AccessTokenScopeReadUser)
-
-	session2 := loginUser(t, user2)
-	token2 := getTokenForLoggedInUser(t, session2, auth_model.AccessTokenScopeWriteUser)
+	session10 := loginUser(t, user10)
+	token10 := getTokenForLoggedInUser(t, session10, auth_model.AccessTokenScopeWriteUser)
 
 	t.Run("Follow", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
@@ -46,14 +42,11 @@ func TestAPIFollowFederated(t *testing.T) {
 			&structs.APRemoteFollowOption{
 				Target: fmt.Sprintf("%s/api/v1/activitypub/user-id/15", federatedSrv.URL),
 			}).
-			AddTokenAuth(token2)
+			AddTokenAuth(token10)
 		MakeRequest(t, req, http.StatusNoContent)
 		federationHost := unittest.AssertExistsAndLoadBean(t, &forgefed.FederationHost{HostFqdn: "127.0.0.1"})
-		followedUser := unittest.AssertExistsAndLoadBean(t, &user.User{Name: user2})
-		followingFederatedUser := unittest.AssertExistsAndLoadBean(t, &user.FederatedUser{ExternalID: "15", FederationHostID: federationHost.ID})
-		unittest.AssertExistsAndLoadBean(t, &user.FederatedUserFollower{
-			FollowedUserID:  followedUser.ID,
-			FollowingUserID: followingFederatedUser.ID,
-		})
+		unittest.AssertExistsAndLoadBean(t, &user.FederatedUser{ExternalID: "15", FederationHostID: federationHost.ID})
+		assert.Contains(t, mock.LastPost, "\"target\":\"http://DISTANT_FEDERATION_HOST/api/v1/activitypub/user-id/15\"")
+		assert.Contains(t, mock.LastPost, "\"object\":\"http://DISTANT_FEDERATION_HOST/api/v1/activitypub/user-id/15\"")
 	})
 }

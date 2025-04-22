@@ -46,15 +46,15 @@ func NewFederationServerMockRepository(id int64) FederationServerMockRepository 
 
 func (p FederationServerMockPerson) marshal(host string) string {
 	return fmt.Sprintf(`{"@context":["https://www.w3.org/ns/activitystreams","https://w3id.org/security/v1"],`+
-		`"id":"http://%[1]v/api/activitypub/user-id/%[2]v",`+
+		`"id":"http://%[1]v/api/v1/activitypub/user-id/%[2]v",`+
 		`"type":"Person",`+
 		`"icon":{"type":"Image","mediaType":"image/png","url":"http://%[1]v/avatars/1bb05d9a5f6675ed0272af9ea193063c"},`+
 		`"url":"http://%[1]v/%[2]v",`+
-		`"inbox":"http://%[1]v/api/activitypub/user-id/%[2]v/inbox",`+
-		`"outbox":"http://%[1]v/api/activitypub/user-id/%[2]v/outbox",`+
+		`"inbox":"http://%[1]v/api/v1/activitypub/user-id/%[2]v/inbox",`+
+		`"outbox":"http://%[1]v/api/v1/activitypub/user-id/%[2]v/outbox",`+
 		`"preferredUsername":"%[3]v",`+
-		`"publicKey":{"id":"http://%[1]v/api/activitypub/user-id/%[2]v#main-key",`+
-		`"owner":"http://%[1]v/api/activitypub/user-id/%[2]v",`+
+		`"publicKey":{"id":"http://%[1]v/api/v1/activitypub/user-id/%[2]v#main-key",`+
+		`"owner":"http://%[1]v/api/v1/activitypub/user-id/%[2]v",`+
 		`"publicKeyPem":%[4]v}}`, host, p.ID, p.Name, p.PubKey)
 }
 
@@ -71,8 +71,18 @@ func NewFederationServerMock() *FederationServerMock {
 	}
 }
 
+func (mock *FederationServerMock) recordLastPost(t *testing.T, req *http.Request) {
+	buf := new(strings.Builder)
+	_, err := io.Copy(buf, req.Body)
+	if err != nil {
+		t.Errorf("Error reading body: %q", err)
+	}
+	mock.LastPost = strings.Replace(buf.String(), req.Host, "DISTANT_FEDERATION_HOST", -1)
+}
+
 func (mock *FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
 	federatedRoutes := http.NewServeMux()
+
 	federatedRoutes.HandleFunc("/.well-known/nodeinfo",
 		func(res http.ResponseWriter, req *http.Request) {
 			// curl -H "Accept: application/json" https://federated-repo.prod.meissa.de/.well-known/nodeinfo
@@ -87,22 +97,23 @@ func (mock *FederationServerMock) DistantServer(t *testing.T) *httptest.Server {
 				`"protocols":["activitypub"],"services":{"inbound":[],"outbound":["rss2.0"]},`+
 				`"openRegistrations":true,"usage":{"users":{"total":14,"activeHalfyear":2}},"metadata":{}}`)
 		})
+
 	for _, person := range mock.Persons {
 		federatedRoutes.HandleFunc(fmt.Sprintf("/api/v1/activitypub/user-id/%v", person.ID),
 			func(res http.ResponseWriter, req *http.Request) {
 				// curl -H "Accept: application/json" https://federated-repo.prod.meissa.de/api/v1/activitypub/user-id/2
 				fmt.Fprint(res, person.marshal(req.Host))
 			})
+		federatedRoutes.HandleFunc(fmt.Sprintf("POST /api/v1/activitypub/user-id/%v/inbox", person.ID),
+			func(res http.ResponseWriter, req *http.Request) {
+				mock.recordLastPost(t, req)
+			})
 	}
+
 	for _, repository := range mock.Repositories {
 		federatedRoutes.HandleFunc(fmt.Sprintf("POST /api/v1/activitypub/repository-id/%v/inbox", repository.ID),
 			func(res http.ResponseWriter, req *http.Request) {
-				buf := new(strings.Builder)
-				_, err := io.Copy(buf, req.Body)
-				if err != nil {
-					t.Errorf("Error reading body: %q", err)
-				}
-				mock.LastPost = buf.String()
+				mock.recordLastPost(t, req)
 			})
 	}
 	federatedRoutes.HandleFunc("/",

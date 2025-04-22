@@ -8,7 +8,6 @@ import (
 
 	"forgejo.org/models/user"
 	"forgejo.org/modules/graceful"
-	"forgejo.org/modules/log"
 	"forgejo.org/modules/process"
 	"forgejo.org/modules/queue"
 )
@@ -50,27 +49,7 @@ func handlePending(item pendingQueueItem) error {
 		return err
 	}
 
-	log.Warn("XXX handlePending federatedUser: %s", item)
-
 	inbox := federatedUser.InboxURL
-
-	log.Warn("XXX handlePending inbox: %s", inbox)
-
-	// If we have no inbox, queue up an inbox refresh, and requeue via error
-	if inbox == nil || *inbox == "" {
-		if err := refreshQueue.Push(refreshQueueItem{
-			FederatedUserID: item.FederatedUserID,
-			Doer:            item.Doer,
-		}); err != nil {
-			return err
-		}
-		log.Debug("[follow] no inbox found for federated user[%d]", item.FederatedUserID)
-		return fmt.Errorf("No Inbox URL found for federated user[%d]", item.FederatedUserID)
-	}
-
-	log.Warn("XXX handlePending fededeliver")
-
-	// If we have an inbox, queue it into delivery, and don't requeue here
 	return deliveryQueue.Push(deliveryQueueItem{
 		Doer:     item.Doer,
 		Payload:  item.Payload,
