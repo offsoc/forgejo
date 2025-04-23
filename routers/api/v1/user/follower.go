@@ -295,6 +295,8 @@ func ActivityPubFollow(ctx *context.APIContext) {
 	// responses:
 	//   "204":
 	//     "$ref": "#/responses/empty"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
 	//   "403":
