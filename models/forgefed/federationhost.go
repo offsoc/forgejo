@@ -6,6 +6,7 @@ package forgefed
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -40,6 +41,13 @@ func NewFederationHost(hostFqdn string, nodeInfo NodeInfo, port uint16, schema s
 		return FederationHost{}, err
 	}
 	return result, nil
+}
+
+func (host FederationHost) AsURL() url.URL {
+	return url.URL{
+		Scheme: host.HostSchema,
+		Host:   fmt.Sprintf("%v:%v", host.HostFqdn, host.HostPort),
+	}
 }
 
 // Validate collects error strings in a slice and returns this

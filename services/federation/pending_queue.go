@@ -13,9 +13,9 @@ import (
 )
 
 type pendingQueueItem struct {
-	Doer            *user.User
-	FederatedUserID int64
-	Payload         []byte
+	Doer     *user.User
+	InboxURL string
+	Payload  []byte
 }
 
 var pendingQueue *queue.WorkerPoolQueue[pendingQueueItem]
@@ -40,19 +40,13 @@ func pendingQueueHandler(items ...pendingQueueItem) (unhandled []pendingQueueIte
 }
 
 func handlePending(item pendingQueueItem) error {
-	ctx, _, finished := process.GetManager().AddContext(graceful.GetManager().HammerContext(),
-		fmt.Sprintf("Checking delivery eligibility for Activity via user[%d] (%s), to federated user[%d]", item.Doer.ID, item.Doer.Name, item.FederatedUserID))
+	_, _, finished := process.GetManager().AddContext(graceful.GetManager().HammerContext(),
+		fmt.Sprintf("Checking delivery eligibility for Activity via user[%d] (%s), to federated user[%s]", item.Doer.ID, item.Doer.Name, item.InboxURL))
 	defer finished()
 
-	federatedUser, err := user.GetFederatedUserByID(ctx, item.FederatedUserID)
-	if err != nil {
-		return err
-	}
-
-	inbox := federatedUser.InboxURL
 	return deliveryQueue.Push(deliveryQueueItem{
 		Doer:     item.Doer,
 		Payload:  item.Payload,
-		InboxURL: *inbox,
+		InboxURL: item.InboxURL,
 	})
 }

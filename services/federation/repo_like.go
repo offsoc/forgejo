@@ -35,9 +35,9 @@ func ProcessLikeActivity(ctx *context_service.APIContext, form any, repositoryID
 
 	// parse actorID (person)
 	actorURI := activity.Actor.GetID().String()
-	user, _, federationHost, err := findOrCreateFederatedUser(ctx, actorURI)
+	user, _, federationHost, err := FindOrCreateFederatedUser(ctx, actorURI)
 	if err != nil {
-		return http.StatusInternalServerError, "findOrCreateFederatedUser", err
+		return http.StatusInternalServerError, "FindOrCreateFederatedUser", err
 	}
 
 	if !activity.IsNewer(federationHost.LatestActivity) {
@@ -75,7 +75,7 @@ func ProcessLikeActivity(ctx *context_service.APIContext, form any, repositoryID
 func StoreFollowingRepoList(ctx *context_service.Context, localRepoID int64, followingRepoList []string) (int, string, error) {
 	followingRepos := make([]*repo.FollowingRepo, 0, len(followingRepoList))
 	for _, uri := range followingRepoList {
-		federationHost, err := GetFederationHostForURI(ctx.Base, uri)
+		federationHost, err := FindOrCreateFederationHost(ctx.Base, uri)
 		if err != nil {
 			return http.StatusInternalServerError, "Wrong FederationHost", err
 		}
