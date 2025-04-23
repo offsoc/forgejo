@@ -18,12 +18,12 @@ type FederatedUser struct {
 	FederationHostID      int64                  `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
 	KeyID                 sql.NullString         `xorm:"key_id UNIQUE"`
 	PublicKey             sql.Null[sql.RawBytes] `xorm:"BLOB"`
-	InboxURL              *string                // TODO: remove pointer
-	ActorURL              *string                // TODO: remove this!
-	NormalizedOriginalURL string                 // This field ist just to keep original information. Pls. do not use for search or as ID!
+	InboxPath             string
+	ActorURL              *string // TODO: remove this!
+	NormalizedOriginalURL string  // This field ist just to keep original information. Pls. do not use for search or as ID!
 }
 
-func NewFederatedUser(userID int64, externalID string, federationHostID int64, normalizedOriginalURL string) (FederatedUser, error) {
+func NewFederatedUser(userID int64, externalID string, federationHostID int64, inboxPath string, normalizedOriginalURL string) (FederatedUser, error) {
 	result := FederatedUser{
 		UserID:                userID,
 		ExternalID:            externalID,
@@ -41,17 +41,18 @@ func (user FederatedUser) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(user.UserID, "UserID")...)
 	result = append(result, validation.ValidateNotEmpty(user.ExternalID, "ExternalID")...)
 	result = append(result, validation.ValidateNotEmpty(user.FederationHostID, "FederationHostID")...)
-	result = append(result, validation.ValidateNotEmpty(*user.InboxURL, "InboxURL")...)
+	result = append(result, validation.ValidateNotEmpty(user.InboxPath, "InboxPath")...)
 	return result
 }
 
 // TODO: remove this
 func (user *FederatedUser) SetInboxURL(ctx context.Context, url *string) error {
-	user.InboxURL = url
-	_, err := db.GetEngine(ctx).ID(user.ID).Cols("inbox_url").Update(user)
+	user.InboxPath = *url
+	_, err := db.GetEngine(ctx).ID(user.ID).Cols("inbox_path").Update(user)
 	return err
 }
 
+// TODO: remove this
 func GetFederatedUserByID(ctx context.Context, id int64) (*FederatedUser, error) {
 	var user FederatedUser
 	_, err := db.GetEngine(ctx).Where("id = ?", id).Get(&user)
@@ -61,6 +62,7 @@ func GetFederatedUserByID(ctx context.Context, id int64) (*FederatedUser, error)
 	return &user, nil
 }
 
+// TODO: remove this
 func GetUserByActorURL(ctx context.Context, actorURL string) (*User, error) {
 	var user User
 	_, err := db.GetEngine(ctx).Table("`user`").Join("INNER", "`federated_user`", "`user`.id = `federated_user`.user_id").Where("`federated_user`.actor_url = ?", actorURL).Get(&user)

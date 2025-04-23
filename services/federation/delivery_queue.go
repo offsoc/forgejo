@@ -59,8 +59,6 @@ func deliverToInbox(item deliveryQueueItem) error {
 		return err
 	}
 
-	log.Warn("XXX deliverToInbox InboxURL : %s", item.InboxURL)
-
 	res, err := apclient.Post(item.Payload, item.InboxURL)
 	if err != nil {
 		return err

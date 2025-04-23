@@ -80,7 +80,7 @@ func FindOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 }
 
 func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, actorURI string) error {
-	_, federatedUser, _, err := FindOrCreateFederatedUser(ctx, actorURI)
+	_, federatedUser, federationHost, err := FindOrCreateFederatedUser(ctx, actorURI)
 	if err != nil {
 		return err
 	}
@@ -99,10 +99,11 @@ func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, ac
 		return err
 	}
 
+	hostURL := federationHost.AsURL()
 	return pendingQueue.Push(pendingQueueItem{
-		FederatedUserID: federatedUser.ID,
-		Doer:            localUser,
-		Payload:         payload,
+		InboxURL: hostURL.JoinPath(federatedUser.InboxPath).String(),
+		Doer:     localUser,
+		Payload:  payload,
 	})
 }
 
@@ -233,13 +234,15 @@ func createUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		IsAdmin:                      false,
 	}
 
-	inbox := person.Inbox.GetLink().String()
-	log.Info("xxx: inbox: %s", inbox)
+	inbox, err := url.ParseRequestURI(person.Inbox.GetLink().String())
+	if err != nil {
+		return nil, nil, err
+	}
 
 	federatedUser := user.FederatedUser{
 		ExternalID:            personID.ID,
 		FederationHostID:      federationHostID,
-		InboxURL:              &inbox,
+		InboxPath:             inbox.Path,
 		NormalizedOriginalURL: personID.AsURI(),
 	}
 
