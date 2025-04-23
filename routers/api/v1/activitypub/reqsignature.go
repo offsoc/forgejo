@@ -16,7 +16,6 @@ import (
 	"forgejo.org/models/forgefed"
 	"forgejo.org/models/user"
 	"forgejo.org/modules/activitypub"
-	fm "forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
 	"forgejo.org/modules/setting"
 	gitea_context "forgejo.org/services/context"
@@ -35,35 +34,13 @@ func decodePublicKeyPem(pubKeyPem string) ([]byte, error) {
 	return block.Bytes, nil
 }
 
-func getFederatedUser(ctx *gitea_context.APIContext, person *ap.Person, federationHost *forgefed.FederationHost) (*user.FederatedUser, error) {
-	personID, err := fm.NewPersonID(person.ID.String(), string(federationHost.NodeInfo.SoftwareName))
-	if err != nil {
-		return nil, err
-	}
-	_, federatedUser, err := user.FindFederatedUser(ctx, personID.ID, federationHost.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	if federatedUser != nil {
-		return federatedUser, nil
-	}
-
-	_, newFederatedUser, err := federation.CreateUserFromAP(ctx, personID, federationHost.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return newFederatedUser, nil
-}
-
 func storePublicKey(ctx *gitea_context.APIContext, person *ap.Person, pubKeyBytes []byte) error {
-	federationHost, err := federation.GetFederationHostForURI(ctx.Base, person.ID.String())
-	if err != nil {
-		return err
-	}
-
 	if person.Type == ap.ActivityVocabularyType("Application") {
+		federationHost, err := federation.FindOrCreateFederationHost(ctx.Base, person.ID.String())
+		if err != nil {
+			return err
+		}
+
 		federationHost.KeyID = sql.NullString{
 			String: person.PublicKey.ID.String(),
 			Valid:  true,
@@ -79,7 +56,7 @@ func storePublicKey(ctx *gitea_context.APIContext, person *ap.Person, pubKeyByte
 			return err
 		}
 	} else if person.Type == ap.ActivityVocabularyType("Person") {
-		federatedUser, err := getFederatedUser(ctx, person, federationHost)
+		_, federatedUser, _, err := federation.FindOrCreateFederatedUser(ctx, person.ID.String())
 		if err != nil {
 			return err
 		}
