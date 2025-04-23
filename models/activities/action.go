@@ -1,7 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
-// SPDX-FileCopyrightText: 2025 Informatyka Boguslawski sp. z o.o. sp.k. <https://www.ib.pl>
-// SPDX-License-Identifier: MIT AND GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 
 package activities
 
