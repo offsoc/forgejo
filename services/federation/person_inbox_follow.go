@@ -29,7 +29,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 	}
 
 	actorURI := activity.Actor.GetLink().String()
-	_, federatedUser, _, err := findOrCreateFederatedUser(ctx, actorURI)
+	_, federatedUser, federationHost, err := findOrCreateFederatedUser(ctx, actorURI)
 	if err != nil {
 		log.Error("Error finding or creating federated user (%s): %v", actorURI, err)
 		ctx.Error(http.StatusNotAcceptable, "Federated user not found", err)
@@ -76,10 +76,11 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 		return
 	}
 
+	hostURL := federationHost.AsURL()
 	if err := pendingQueue.Push(pendingQueueItem{
-		FederatedUserID: federatedUser.ID,
-		Doer:            ctx.ContextUser,
-		Payload:         payload,
+		InboxURL: hostURL.JoinPath(federatedUser.InboxPath).String(),
+		Doer:     ctx.ContextUser,
+		Payload:  payload,
 	}); err != nil {
 		log.Error("Unable to push to pending queue: %v", err)
 		ctx.ServerError("pendingQueue.Push", err)

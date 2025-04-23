@@ -7,6 +7,7 @@ import (
 	"context"
 
 	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/forgefed"
 	"forgejo.org/models/user"
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/structs"
@@ -35,10 +36,17 @@ func SendUserActivity(ctx context.Context, doer *user.User, activity *activities
 	}
 
 	for _, follower := range followers {
+		// TODO: switch to user id instead of federatedUserID
+		federatedUserFollower, err := user.GetFederatedUserByID(ctx, follower.FollowingUserID)
+		if err != nil {
+			return err
+		}
+		federationHost, err := forgefed.GetFederationHost(ctx, federatedUserFollower.FederationHostID)
+		hostURL := federationHost.AsURL()
 		if err := pendingQueue.Push(pendingQueueItem{
-			FederatedUserID: follower.FollowingUserID,
-			Doer:            doer,
-			Payload:         payload,
+			InboxURL: hostURL.JoinPath(federatedUserFollower.InboxPath).String(),
+			Doer:     doer,
+			Payload:  payload,
 		}); err != nil {
 			return err
 		}
