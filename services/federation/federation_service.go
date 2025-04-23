@@ -48,6 +48,7 @@ func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, ac
 	)
 	followReq.Actor = ap.IRI(localUser.APActorID())
 	followReq.Target = ap.IRI(actorURI)
+
 	payload, err := jsonld.WithContext(jsonld.IRI(ap.ActivityBaseURI)).
 		Marshal(followReq)
 	if err != nil {
@@ -108,7 +109,7 @@ func findOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	return user, federatedUser, federationHost, nil
 }
 
-func CreateFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forgefed.FederationHost, error) {
+func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forgefed.FederationHost, error) {
 	actionsUser := user.NewAPServerActor()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
@@ -163,7 +164,7 @@ func GetFederationHostForURI(ctx *context_service.Base, actorURI string) (*forge
 		return nil, err
 	}
 	if federationHost == nil {
-		result, err := CreateFederationHostFromAP(ctx, rawActorID)
+		result, err := createFederationHostFromAP(ctx, rawActorID)
 		if err != nil {
 			return nil, err
 		}
