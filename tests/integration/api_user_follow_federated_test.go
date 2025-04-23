@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Flow of this test is documeted at: https://codeberg.org/meissa/federation/src/branch/federated-user-activity-following/doc/user-activity-following.md
 func TestAPIFollowFederated(t *testing.T) {
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
