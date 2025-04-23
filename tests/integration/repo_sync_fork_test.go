@@ -28,7 +28,7 @@ func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
 	session := loginUser(t, user.Name)
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
 
-	/// Create a new fork
+	// Create a new fork
 	req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/forks", baseUser.Name, baseRepo.LowerName), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusAccepted)
 
@@ -102,16 +102,24 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		session := loginUser(t, user.Name)
 		token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
 
-		/// Create a new fork
+		// Rename branch "master" to "&amp;"
+		loginUser(t, baseUser.Name).MakeRequest(t, NewRequestWithValues(t, "POST",
+			"/user2/repo1/settings/rename_branch", map[string]string{
+				"_csrf": GetCSRF(t, session, "/user2/repo1/settings/branches"),
+				"from":  "master",
+				"to":    "&amp;",
+			}), http.StatusSeeOther)
+
+		// Create a new fork
 		req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/forks", baseUser.Name, baseRepo.LowerName), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
 		MakeRequest(t, req, http.StatusAccepted)
 
 		// Make a commit on the base branch
-		err := createOrReplaceFileInBranch(baseUser, baseRepo, "sync_fork.txt", "master", "Hello")
+		err := createOrReplaceFileInBranch(baseUser, baseRepo, "sync_fork.txt", "&amp;", "Hello")
 		require.NoError(t, err)
 
 		resp := session.MakeRequest(t, NewRequestf(t, "GET", "/%s/%s", user.Name, forkName), http.StatusOK)
 
-		assert.Contains(t, resp.Body.String(), fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/master'>user2/repo1:master</a>", u.Port()))
+		assert.Contains(t, resp.Body.String(), fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/&amp;'>user2/repo1:master</a>", u.Port()))
 	})
 }
