@@ -66,63 +66,6 @@ func (id ActorID) Validate() []string {
 	return result
 }
 
-// ----------------------------- RepositoryID --------------------------------------------
-
-type RepositoryID struct {
-	ActorID
-}
-
-// Factory function for RepositoryID. Created struct is asserted to be valid.
-func NewRepositoryID(uri, source string) (RepositoryID, error) {
-	result, err := newActorID(uri)
-	if err != nil {
-		return RepositoryID{}, err
-	}
-	result.Source = source
-
-	// validate Person specific
-	repoID := RepositoryID{result}
-	if valid, err := validation.IsValid(repoID); !valid {
-		return RepositoryID{}, err
-	}
-
-	return repoID, nil
-}
-
-func (id RepositoryID) Validate() []string {
-	result := id.ActorID.Validate()
-	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
-	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea"}, "Source")...)
-	switch id.Source {
-	case "forgejo", "gitea":
-		if strings.ToLower(id.Path) != "api/v1/activitypub/repository-id" && strings.ToLower(id.Path) != "api/activitypub/repository-id" {
-			result = append(result, fmt.Sprintf("path: %q has to be a repo specific api path", id.Path))
-		}
-	}
-	return result
-}
-
-func containsEmptyString(ar []string) bool {
-	for _, elem := range ar {
-		if elem == "" {
-			return true
-		}
-	}
-	return false
-}
-
-func removeEmptyStrings(ls []string) []string {
-	var rs []string
-	for _, str := range ls {
-		if str != "" {
-			rs = append(rs, str)
-		}
-	}
-	return rs
-}
-
-// ----------------------------- newActorID --------------------------------------------
-
 func newActorID(uri string) (ActorID, error) {
 	validatedURI, err := url.ParseRequestURI(uri)
 	if err != nil {
@@ -156,4 +99,23 @@ func newActorID(uri string) (ActorID, error) {
 	result.UnvalidatedInput = strings.ToLower(uri)
 
 	return result, nil
+}
+
+func containsEmptyString(ar []string) bool {
+	for _, elem := range ar {
+		if elem == "" {
+			return true
+		}
+	}
+	return false
+}
+
+func removeEmptyStrings(ls []string) []string {
+	var rs []string
+	for _, str := range ls {
+		if str != "" {
+			rs = append(rs, str)
+		}
+	}
+	return rs
 }
