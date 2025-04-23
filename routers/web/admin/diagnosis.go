@@ -5,7 +5,9 @@ package admin
 
 import (
 	"archive/zip"
+	"bytes"
 	"fmt"
+	"io"
 	"runtime"
 	"runtime/pprof"
 	"runtime/trace"
@@ -45,14 +47,9 @@ func MonitorDiagnosis(ctx *context.Context) {
 		_, _ = f.Write([]byte(err.Error()))
 	}
 
-	f, err = zipWriter.CreateHeader(&zip.FileHeader{Name: "trace.dat", Method: zip.Deflate, Modified: time.Now()})
-	if err != nil {
-		ctx.ServerError("Failed to create zip file", err)
-		return
-	}
-
-	if err := trace.Start(f); err != nil {
-		_, _ = f.Write([]byte(err.Error()))
+	traceBuf := &bytes.Buffer{}
+	if err := trace.Start(traceBuf); err != nil {
+		_, _ = traceBuf.Write([]byte(err.Error()))
 	}
 
 	select {
@@ -61,6 +58,17 @@ func MonitorDiagnosis(ctx *context.Context) {
 	}
 	pprof.StopCPUProfile()
 	trace.Stop()
+
+	f, err = zipWriter.CreateHeader(&zip.FileHeader{Name: "trace.dat", Method: zip.Deflate, Modified: time.Now()})
+	if err != nil {
+		ctx.ServerError("Failed to create zip file", err)
+		return
+	}
+
+	if _, err := io.Copy(f, traceBuf); err != nil {
+		ctx.ServerError("Failed to create zip file", err)
+		return
+	}
 
 	f, err = zipWriter.CreateHeader(&zip.FileHeader{Name: "goroutine-after.txt", Method: zip.Deflate, Modified: time.Now()})
 	if err != nil {
