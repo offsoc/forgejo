@@ -227,7 +227,7 @@ func TestNotifyWatchers(t *testing.T) {
 }
 
 func TestGetFeedsCorrupted(t *testing.T) {
-	// Corrupted data in not checked in the feeds for performance reasons.
+	// Corrupted data is not checked in the feeds for performance reasons.
 	// Users should rather run doctor to fix their data.
 	require.NoError(t, unittest.PrepareTestDatabase())
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
