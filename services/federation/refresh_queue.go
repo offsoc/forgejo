@@ -6,18 +6,19 @@ package federation
 import (
 	"fmt"
 
+	"forgejo.org/models/forgefed"
 	"forgejo.org/models/user"
-	"forgejo.org/modules/activitypub"
+	fm "forgejo.org/modules/forgefed"
 	"forgejo.org/modules/graceful"
-	"forgejo.org/modules/json"
 	"forgejo.org/modules/log"
 	"forgejo.org/modules/process"
 	"forgejo.org/modules/queue"
 )
 
 type refreshQueueItem struct {
-	Doer            *user.User
-	FederatedUserID int64
+	Doer                    *user.User
+	FederationHostID        int64
+	FederatedUserExternalID string
 }
 
 var refreshQueue *queue.WorkerPoolQueue[refreshQueueItem]
@@ -43,36 +44,38 @@ func refreshQueueHandler(items ...refreshQueueItem) (unhandled []refreshQueueIte
 
 func refreshSingleItem(item refreshQueueItem) error {
 	ctx, _, finished := process.GetManager().AddContext(graceful.GetManager().HammerContext(),
-		fmt.Sprintf("Refreshing IndexURL for federated user[%d], via user[%d]", item.FederatedUserID, item.Doer.ID))
+		fmt.Sprintf("Refreshing FederatedUser.ExternalID[%v] on FederationHost[%v]", item.FederatedUserExternalID, item.FederationHostID))
 	defer finished()
 
-	federatedUser, err := user.GetFederatedUserByID(ctx, item.FederatedUserID)
+	federationHost, err := forgefed.GetFederationHost(ctx, item.FederationHostID)
 	if err != nil {
-		log.Error("GetFederatedUserByID: %v", err)
+		log.Error("GetFederationHost: %v", err)
+		return err
+	}
+	_, federatedUser, err := user.GetFederatedUser(ctx, item.FederatedUserExternalID, federationHost.ID)
+	if err != nil {
+		log.Error("FindFederatedUser: ", err)
 		return err
 	}
 
-	clientFactory, err := activitypub.GetClientFactory(ctx)
+	personID, err := fm.NewPersonIDFromModel(
+		federationHost.HostFqdn, federationHost.HostSchema,
+		federationHost.HostPort, string(federationHost.NodeInfo.SoftwareName),
+		federatedUser.ExternalID,
+	)
 	if err != nil {
 		return err
 	}
-	client, err := clientFactory.WithKeys(ctx, item.Doer, item.Doer.APActorID()+"#main-key")
+	_, refetchFederatedUser, err := fetchUserFromAP(ctx, personID, federatedUser.FederationHostID)
 	if err != nil {
 		return err
 	}
 
-	body, err := client.GetBody(federatedUser.NormalizedOriginalURL)
-	if err != nil {
-		return err
+	if federatedUser.InboxPath != refetchFederatedUser.InboxPath {
+		federatedUser.InboxPath = refetchFederatedUser.InboxPath
+		if err := federatedUser.UpdateFederatedUser(ctx); err != nil {
+			return err
+		}
 	}
-
-	type personWithInbox struct {
-		Inbox string `json:"inbox"`
-	}
-	var payload personWithInbox
-	if err := json.Unmarshal(body, &payload); err != nil {
-		return err
-	}
-
-	return federatedUser.SetInboxURL(ctx, &payload.Inbox)
+	return nil
 }

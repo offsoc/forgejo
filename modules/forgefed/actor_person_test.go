@@ -13,6 +13,23 @@ import (
 	ap "github.com/go-ap/activitypub"
 )
 
+func TestNewPersonIdFromModel(t *testing.T) {
+	expected := PersonID{}
+	expected.ID = "1"
+	expected.Source = "forgejo"
+	expected.HostSchema = "https"
+	expected.Path = "api/v1/activitypub/user-id"
+	expected.Host = "an.other.host"
+	expected.HostPort = 443
+	expected.IsPortSupplemented = false
+	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
+
+	sut, _ := NewPersonIDFromModel("an.other.host", "https", 443, "forgejo", "1")
+	if sut != expected {
+		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
+	}
+}
+
 func TestNewPersonId(t *testing.T) {
 	expected := PersonID{}
 	expected.ID = "1"

@@ -17,6 +17,11 @@ type PersonID struct {
 	ActorID
 }
 
+const (
+	PERSON_ID_API_PATH_V1     = "api/v1/activitypub/user-id"
+	PERSON_ID_API_PATH_LATEST = "api/activitypub/user-id"
+)
+
 // Factory function for PersonID. Created struct is asserted to be valid
 func NewPersonID(uri, source string) (PersonID, error) {
 	result, err := newActorID(uri)
@@ -32,6 +37,29 @@ func NewPersonID(uri, source string) (PersonID, error) {
 	}
 
 	return personID, nil
+}
+
+func NewPersonIDFromModel(host, schema string, port uint16, softwareName, id string) (PersonID, error) {
+	result := PersonID{}
+	result.ID = id
+	result.Source = softwareName
+	result.Host = host
+	result.HostSchema = schema
+	result.HostPort = port
+	result.IsPortSupplemented = false
+
+	switch softwareName {
+	case "forgejo":
+		result.Path = PERSON_ID_API_PATH_V1
+	}
+	result.UnvalidatedInput = result.AsURI()
+
+	// validate Person specific path
+	if valid, err := validation.IsValid(result); !valid {
+		return PersonID{}, err
+	}
+
+	return result, nil
 }
 
 func (id PersonID) AsWebfinger() string {
@@ -54,8 +82,8 @@ func (id PersonID) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
 	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea", "mastodon", "gotosocial"}, "Source")...)
 	switch id.Source {
-	case "forgejo", "gitea":
-		if strings.ToLower(id.Path) != "api/v1/activitypub/user-id" && strings.ToLower(id.Path) != "api/activitypub/user-id" {
+	case "forgejo":
+		if strings.ToLower(id.Path) != PERSON_ID_API_PATH_V1 && strings.ToLower(id.Path) != PERSON_ID_API_PATH_LATEST {
 			result = append(result, fmt.Sprintf("path: %q has to be a person specific api path", id.Path))
 		}
 	}

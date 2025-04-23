@@ -173,7 +173,7 @@ func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 	return &result, nil
 }
 
-func createUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
+func fetchUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
 	actionsUser := user.NewAPServerActor()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
@@ -246,11 +246,17 @@ func createUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		NormalizedOriginalURL: personID.AsURI(),
 	}
 
-	err = user.CreateFederatedUser(ctx, &newUser, &federatedUser)
+	log.Info("Fetch federatedUser:%q", federatedUser)
+	return &newUser, &federatedUser, nil
+}
+
+func createUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
+	newUser, federatedUser, err := fetchUserFromAP(ctx, personID, federationHostID)
+	err = user.CreateFederatedUser(ctx, newUser, federatedUser)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	log.Info("Created federatedUser:%q", federatedUser)
-	return &newUser, &federatedUser, nil
+	return newUser, federatedUser, nil
 }
