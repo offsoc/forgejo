@@ -41,13 +41,11 @@ func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, ac
 		return err
 	}
 
-	// TODO: Encapsulate Factory and add validation
-	followReq := ap.FollowNew(
-		ap.IRI(localUser.APActorID()+"/follows/"+uuid.New().String()),
-		ap.IRI(actorURI),
-	)
-	followReq.Actor = ap.IRI(localUser.APActorID())
-	followReq.Target = ap.IRI(actorURI)
+	followReq, err := fm.NewForgeFollow(localUser, actorURI)
+	if err != nil {
+		return err
+	}
+
 	payload, err := jsonld.WithContext(jsonld.IRI(ap.ActivityBaseURI)).
 		Marshal(followReq)
 	if err != nil {
