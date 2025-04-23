@@ -28,6 +28,7 @@ func NewFederatedUser(userID int64, externalID string, federationHostID int64, i
 		UserID:                userID,
 		ExternalID:            externalID,
 		FederationHostID:      federationHostID,
+		InboxPath:             inboxPath,
 		NormalizedOriginalURL: normalizedOriginalURL,
 	}
 	if valid, err := validation.IsValid(result); !valid {
