@@ -29,7 +29,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 	}
 
 	actorURI := activity.Actor.GetLink().String()
-	_, federatedUser, _, err := findOrCreateFederatedUser(ctx, actorURI)
+	_, federatedUser, _, err := FindOrCreateFederatedUser(ctx, actorURI)
 	if err != nil {
 		log.Error("Error finding or creating federated user (%s): %v", actorURI, err)
 		ctx.Error(http.StatusNotAcceptable, "Federated user not found", err)
