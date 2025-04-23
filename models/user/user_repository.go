@@ -51,6 +51,14 @@ func CreateFederatedUser(ctx context.Context, user *User, federatedUser *Federat
 	return committer.Commit()
 }
 
+func (federatedUser *FederatedUser) UpdateFederatedUser(ctx context.Context) error {
+	if _, err := validation.IsValid(federatedUser); err != nil {
+		return err
+	}
+	_, err := db.GetEngine(ctx).ID(federatedUser.ID).Cols("inbox_path").Update(federatedUser)
+	return err
+}
+
 func FindFederatedUser(ctx context.Context, externalID string, federationHostID int64) (*User, *FederatedUser, error) {
 	federatedUser := new(FederatedUser)
 	user := new(User)
@@ -72,6 +80,16 @@ func FindFederatedUser(ctx context.Context, externalID string, federationHostID 
 	}
 	if res, err := validation.IsValid(*federatedUser); !res {
 		return nil, nil, err
+	}
+	return user, federatedUser, nil
+}
+
+func GetFederatedUser(ctx context.Context, externalID string, federationHostID int64) (*User, *FederatedUser, error) {
+	user, federatedUser, err := FindFederatedUser(ctx, externalID, federationHostID)
+	if err != nil {
+		return nil, nil, err
+	} else if federatedUser == nil {
+		return nil, nil, fmt.Errorf("FederatedUser for externalId = %v and federationHostId = %v does not exist", externalID, federationHostID)
 	}
 	return user, federatedUser, nil
 }

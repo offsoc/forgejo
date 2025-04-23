@@ -47,13 +47,6 @@ func (user FederatedUser) Validate() []string {
 }
 
 // TODO: remove this
-func (user *FederatedUser) SetInboxURL(ctx context.Context, url *string) error {
-	user.InboxPath = *url
-	_, err := db.GetEngine(ctx).ID(user.ID).Cols("inbox_path").Update(user)
-	return err
-}
-
-// TODO: remove this
 func GetFederatedUserByID(ctx context.Context, id int64) (*FederatedUser, error) {
 	var user FederatedUser
 	_, err := db.GetEngine(ctx).Where("id = ?", id).Get(&user)
