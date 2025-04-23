@@ -75,6 +75,7 @@
 @import "./explore.css";
 @import "./review.css";
 @import "./actions.css";
+@import "./migrate.css";
 
 @tailwind utilities;
 @import "./helpers.css";

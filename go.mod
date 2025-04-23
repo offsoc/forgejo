@@ -23,7 +23,7 @@ require (
 	github.com/ProtonMail/go-crypto v1.1.6
 	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/SaveTheRbtz/zstd-seekable-format-go/pkg v0.7.2
-	github.com/alecthomas/chroma/v2 v2.16.0
+	github.com/alecthomas/chroma/v2 v2.17.0
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/blevesearch/bleve/v2 v2.5.0
 	github.com/buildkite/terminal-to-html/v3 v3.16.8
@@ -76,7 +76,7 @@ require (
 	github.com/meilisearch/meilisearch-go v0.31.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/microcosm-cc/bluemonday v1.0.27
-	github.com/minio/minio-go/v7 v7.0.90
+	github.com/minio/minio-go/v7 v7.0.91
 	github.com/msteinert/pam/v2 v2.0.0
 	github.com/nektos/act v0.2.52
 	github.com/niklasfasching/go-org v1.7.0

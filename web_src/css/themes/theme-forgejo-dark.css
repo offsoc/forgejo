@@ -196,7 +196,6 @@
   --color-orange-badge: #ea580c;
   --color-orange-badge-bg: #ea580c22;
   --color-orange-badge-hover-bg: #ea580c44;
-  --color-git: #f05133;
   /* Icon colors (PR/Issue/...) */
   --color-icon-green: #3fb950;
   --color-icon-red: #f85149;
@@ -228,6 +227,8 @@
   --color-active: var(--steel-650);
   --color-menu: var(--steel-700);
   --color-card: var(--steel-700);
+  --fancy-card-bg: var(--steel-650);
+  --fancy-card-border: var(--steel-600);
   --color-markup-table-row: #ffffff06;
   --color-markup-code-block: var(--steel-800);
   --color-markup-code-inline: var(--steel-850);

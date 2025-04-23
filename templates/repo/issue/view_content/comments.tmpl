@@ -526,7 +526,7 @@
 		{{else if eq .Type 27}}
 			{{if or .AddedRequestReview .RemovedRequestReview}}
 				<div class="timeline-item event" id="{{.HashTag}}">
-					<span class="badge">{{svg "octicon-tag"}}</span>
+					<span class="badge">{{svg "octicon-eye"}}</span>
 					{{template "shared/user/avatarlink" dict "user" .Poster}}
 					<span class="text grey muted-links">
 						{{if and (eq (len .RemovedRequestReview) 1) (eq (len .AddedRequestReview) 0) (eq ((index .RemovedRequestReview 0).ID) .PosterID) (eq ((index .RemovedRequestReview 0).Type) "user")}}
@@ -724,7 +724,7 @@
 
 						{{if or .AddedRequestReview .RemovedRequestReview}}
 						<li>
-						<span class="badge">{{svg "octicon-tag" 20}}</span>
+						<span class="badge">{{svg "octicon-eye" 20}}</span>
 						<span class="text grey muted-links">
 
 						{{if and (eq (len .RemovedRequestReview) 1) (eq (len .AddedRequestReview) 0) (eq ((index .RemovedRequestReview 0).ID) .PosterID) (eq ((index .RemovedRequestReview 0).Type) "user")}}

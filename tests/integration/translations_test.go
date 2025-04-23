@@ -1,6 +1,5 @@
 // Copyright 2024 The Forgejo Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
-
+// SPDX-License-Identifier: GPL-3.0-or-later
 package integration
 
 import (
@@ -13,6 +12,7 @@ import (
 
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/translation/i18n"
 	files_service "forgejo.org/services/repository/files"
 	"forgejo.org/tests"
 
@@ -20,6 +20,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMissingTranslationHandling(t *testing.T) {
+	// Currently new languages can only be added to localestore via AddLocaleByIni
+	// so this line is here to make the other one work. When INI locales are removed,
+	// it will not be needed by this test.
+	i18n.DefaultLocales.AddLocaleByIni("fun", "Funlang", nil, []byte(""), nil)
+
+	// Add a testing locale to the store
+	i18n.DefaultLocales.AddToLocaleFromJSON("fun", []byte(`{
+		"meta.last_line": "This language only has one line that is never used by the UI. It will never have a translation for incorrect_root_url"
+	}`))
+
+	// Get "fun" locale, make sure it's available
+	funLocale, found := i18n.DefaultLocales.Locale("fun")
+	assert.True(t, found)
+
+	// Get translation for a string that this locale doesn't have
+	s := funLocale.TrString("incorrect_root_url")
+
+	// Verify fallback to English
+	assert.True(t, strings.HasPrefix(s, "This Forgejo instance"))
+}
+
+// TestDataSizeTranslation is a test for usage of TrSize in file size display
 func TestDataSizeTranslation(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, giteaURL *url.URL) {
 		testUser := "user2"
@@ -103,14 +126,14 @@ func testFileSizeTranslated(t *testing.T, session *TestSession, filePath, correc
 	resp := session.MakeRequest(t, req, http.StatusOK)
 
 	// Check if file size is translated
-	sizeCorrent := false
+	sizeCorrect := false
 	fileInfo := NewHTMLParser(t, resp.Body).Find(".file-info .file-info-entry")
 	fileInfo.Each(func(i int, info *goquery.Selection) {
 		infoText := strings.TrimSpace(info.Text())
 		if infoText == correctSize {
-			sizeCorrent = true
+			sizeCorrect = true
 		}
 	})
 
-	assert.True(t, sizeCorrent)
+	assert.True(t, sizeCorrect)
 }

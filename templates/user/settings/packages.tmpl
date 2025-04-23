@@ -9,14 +9,14 @@
 		<div class="ui attached segment">
 			<div class="ui form">
 				<div class="field">
-					<label>{{ctx.Locale.Tr "packages.owner.settings.chef.keypair.description"}}</label>
+					<label>{{ctx.Locale.Tr "packages.registry.documentation" "Chef" "https://forgejo.org/docs/latest/user/packages/chef/"}}</label>
 				</div>
 				<form class="field" action="{{.Link}}/chef/regenerate_keypair" method="post">
 					{{.CsrfTokenHtml}}
 					<button class="ui primary button">{{ctx.Locale.Tr "packages.owner.settings.chef.keypair"}}</button>
 				</form>
 				<div class="field">
-					<label>{{ctx.Locale.Tr "packages.registry.documentation" "Chef" "https://forgejo.org/docs/latest/user/packages/chef/"}}</label>
+					<label>{{ctx.Locale.Tr "packages.owner.settings.chef.keypair.description"}}</label>
 				</div>
 			</div>
 		</div>
