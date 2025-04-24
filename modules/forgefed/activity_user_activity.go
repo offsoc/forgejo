@@ -18,11 +18,17 @@ import (
 // swagger:model
 type ForgeUserActivity struct {
 	ap.Activity
+	Note ForgeUserActivityNote
 }
 
-func NewForgeUserActivityFromActivity(activity ap.Activity) (ForgeUserActivity, error) {
+func NewForgeUserActivityFromAp(activity ap.Activity) (ForgeUserActivity, error) {
 	result := ForgeUserActivity{}
 	result.Activity = activity
+	note, err := NewForgeUserActivityNoteFromAp(activity.Object)
+	if err != nil {
+		return ForgeUserActivity{}, err
+	}
+	result.Note = note
 	if valid, err := validation.IsValid(result); !valid {
 		return ForgeUserActivity{}, err
 	}
@@ -59,16 +65,15 @@ func (userActivity ForgeUserActivity) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(string(userActivity.Type), "type")...)
 	result = append(result, validation.ValidateOneOf(string(userActivity.Type), []any{"Create"}, "type")...)
 	result = append(result, validation.ValidateIdExists(userActivity.Actor, "actor")...)
-	result = append(result, validation.ValidateNotEmpty(string(userActivity.ID), "id")...)
 
 	if len(userActivity.To) == 0 {
-		result = append(result, "Missing To")
+		result = append(result, "Missing to")
 	}
-	if userActivity.Object == nil {
-		result = append(result, "Missing Object")
-	} else {
-		result = append(result, validation.ValidateOneOf(string(userActivity.Object.GetType()), []any{"Note"}, "type")...)
+	if len(userActivity.CC) == 0 {
+		result = append(result, "Missing cc")
 	}
+
+	result = append(result, userActivity.Note.Validate()...)
 
 	return result
 }

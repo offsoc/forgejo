@@ -19,6 +19,17 @@ type ForgeUserActivityNote struct {
 	ap.Object
 }
 
+func NewForgeUserActivityNoteFromAp(item ap.Item) (ForgeUserActivityNote, error) {
+	result := ForgeUserActivityNote{}
+	object := item.(*ap.Object)
+	result.Object = *object
+	if valid, err := validation.IsValid(result); !valid {
+		return ForgeUserActivityNote{}, err
+	}
+	return result, nil
+}
+
+// TODO: Unused - might be removed
 func newNote(doer *user_model.User, content, id string, published time.Time) (ForgeUserActivityNote, error) {
 	note := ForgeUserActivityNote{}
 	note.Type = ap.NoteType
@@ -51,9 +62,7 @@ func (note ForgeUserActivityNote) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(string(note.Type), "type")...)
 	result = append(result, validation.ValidateOneOf(string(note.Type), []any{"Note"}, "type")...)
 	result = append(result, validation.ValidateNotEmpty(note.Content.String(), "content")...)
-	if len(note.Content) == 0 {
-		result = append(result, "Content was invalid.")
-	}
+	result = append(result, validation.ValidateIdExists(note.URL, "url")...)
 
 	return result
 }

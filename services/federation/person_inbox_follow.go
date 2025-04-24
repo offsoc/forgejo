@@ -17,7 +17,7 @@ import (
 )
 
 func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity) {
-	follow, err := forgefed.NewForgeFollowFromActivity(*activity)
+	follow, err := forgefed.NewForgeFollowFromAp(*activity)
 	if err != nil {
 		log.Error("Invalid follow activity: %s", err)
 		ctx.Error(http.StatusNotAcceptable, "Invalid follow activity", err)
