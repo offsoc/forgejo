@@ -46,11 +46,15 @@ func (fua *FederatedUserActivity) LoadActor(ctx context.Context) error {
 	return nil
 }
 
-func AddUserActivity(ctx context.Context, userID int64, externalID string, activity *fm.ForgeUserActivityNote) error {
+func AddUserActivity(ctx context.Context, userID int64, externalID string, activity fm.ForgeUserActivityNote) error {
 	json, err := json.Marshal(activity)
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("xxx url %v\n", activity.URL)
+	fmt.Printf("xxx url.id %v\n", activity.URL.GetID())
+
 	_, err = db.GetEngine(ctx).
 		Insert(&FederatedUserActivity{
 			UserID:      userID,

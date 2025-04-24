@@ -17,23 +17,19 @@ import (
 func processPersonInboxCreate(ctx *context_service.APIContext, activity *ap.Activity) {
 	createAct, err := fm.NewForgeUserActivityFromActivity(*activity)
 	if err != nil {
-		log.Error("Invalid user activity: %v", activity)
+		log.Error("Invalid user activity: %v, %v", activity, err)
 		ctx.Error(http.StatusNotAcceptable, "Invalid user activity", err)
 		return
 	}
 
-	a := createAct.Object.(*ap.Object)
-	userActivity := fm.ForgeUserActivityNote{Object: *a}
-	act := fm.ForgeUserActivity{Activity: *activity}
-
-	actorURI := act.Actor.GetLink().String()
+	actorURI := createAct.Actor.GetLink().String()
 	if _, _, _, err := FindOrCreateFederatedUser(ctx, actorURI); err != nil {
 		log.Error("Error finding or creating federated user (%s): %v", actorURI, err)
 		ctx.Error(http.StatusNotAcceptable, "Federated user not found", err)
 		return
 	}
 
-	if err := forgefed.AddUserActivity(ctx, ctx.ContextUser.ID, actorURI, &userActivity); err != nil {
+	if err := forgefed.AddUserActivity(ctx, ctx.ContextUser.ID, actorURI, createAct.Note); err != nil {
 		log.Error("Unable to record activity: %v", err)
 		ctx.Error(http.StatusInternalServerError, "Unable to record activity", err)
 		return
