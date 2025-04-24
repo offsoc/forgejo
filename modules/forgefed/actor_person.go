@@ -18,8 +18,8 @@ type PersonID struct {
 }
 
 const (
-	PERSON_ID_API_PATH_V1     = "api/v1/activitypub/user-id"
-	PERSON_ID_API_PATH_LATEST = "api/activitypub/user-id"
+	personIDapiPathV1       = "api/v1/activitypub/user-id"
+	personIDapiPathV1Latest = "api/activitypub/user-id"
 )
 
 // Factory function for PersonID. Created struct is asserted to be valid
@@ -48,9 +48,8 @@ func NewPersonIDFromModel(host, schema string, port uint16, softwareName, id str
 	result.HostPort = port
 	result.IsPortSupplemented = false
 
-	switch softwareName {
-	case "forgejo":
-		result.Path = PERSON_ID_API_PATH_V1
+	if softwareName == "forgejo" {
+		result.Path = personIDapiPathV1
 	}
 	result.UnvalidatedInput = result.AsURI()
 
@@ -81,9 +80,8 @@ func (id PersonID) Validate() []string {
 	result := id.ActorID.Validate()
 	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
 	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea", "mastodon", "gotosocial"}, "Source")...)
-	switch id.Source {
-	case "forgejo":
-		if strings.ToLower(id.Path) != PERSON_ID_API_PATH_V1 && strings.ToLower(id.Path) != PERSON_ID_API_PATH_LATEST {
+	if id.Source == "forgejo" {
+		if strings.ToLower(id.Path) != personIDapiPathV1 && strings.ToLower(id.Path) != personIDapiPathV1Latest {
 			result = append(result, fmt.Sprintf("path: %q has to be a person specific api path", id.Path))
 		}
 	}

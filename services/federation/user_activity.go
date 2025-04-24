@@ -41,7 +41,12 @@ func SendUserActivity(ctx context.Context, doer *user.User, activity *activities
 		if err != nil {
 			return err
 		}
+
 		federationHost, err := forgefed.GetFederationHost(ctx, federatedUserFollower.FederationHostID)
+		if err != nil {
+			return err
+		}
+
 		hostURL := federationHost.AsURL()
 		if err := pendingQueue.Push(pendingQueueItem{
 			InboxURL: hostURL.JoinPath(federatedUserFollower.InboxPath).String(),
