@@ -8,23 +8,23 @@ import (
 	"net/http"
 
 	"forgejo.org/models/user"
-	fm "forgejo.org/modules/forgefed"
+	"forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
-	"forgejo.org/modules/validation"
 	context_service "forgejo.org/services/context"
 
 	ap "github.com/go-ap/activitypub"
 	"github.com/go-ap/jsonld"
 )
 
-func processPersonFollow(ctx *context_service.APIContext, activity *fm.ForgeFollow) {
-	if res, err := validation.IsValid(activity); !res {
+func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity) {
+	follow, err := forgefed.NewForgeFollowFromActivity(*activity)
+	if err != nil {
 		log.Error("Invalid follow activity: %s", err)
 		ctx.Error(http.StatusNotAcceptable, "Invalid follow activity", err)
 		return
 	}
 
-	actorURI := activity.Actor.GetLink().String()
+	actorURI := follow.Actor.GetLink().String()
 	_, federatedUser, federationHost, err := FindOrCreateFederatedUser(ctx, actorURI)
 	if err != nil {
 		log.Error("Error finding or creating federated user (%s): %v", actorURI, err)
@@ -63,7 +63,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *fm.ForgeFoll
 
 	accept := ap.AcceptNew(ap.IRI(fmt.Sprintf(
 		"%s/follows/%d", ctx.ContextUser.APActorID(), follower.ID,
-	)), activity)
+	)), follow)
 	accept.Actor = ap.IRI(ctx.ContextUser.APActorID())
 	payload, err := jsonld.WithContext(jsonld.IRI(ap.ActivityBaseURI)).Marshal(accept)
 	if err != nil {

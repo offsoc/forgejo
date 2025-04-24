@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"forgejo.org/models/user"
-	fm "forgejo.org/modules/forgefed"
+	"forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
 	context_service "forgejo.org/services/context"
 
@@ -24,7 +24,7 @@ func ProcessPersonInbox(ctx *context_service.APIContext, form any) {
 		processPersonInboxCreate(ctx, activity)
 		return
 	case ap.FollowType:
-		processPersonFollow(ctx, form.(*fm.ForgeFollow))
+		processPersonFollow(ctx, activity)
 		return
 	case ap.UndoType:
 		processPersonInboxUndo(ctx, activity)
@@ -44,7 +44,7 @@ func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, ac
 		return err
 	}
 
-	followReq, err := fm.NewForgeFollow(localUser.APActorID(), actorURI)
+	followReq, err := forgefed.NewForgeFollow(localUser.APActorID(), actorURI)
 	if err != nil {
 		return err
 	}

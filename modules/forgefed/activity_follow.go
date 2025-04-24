@@ -10,24 +10,31 @@ import (
 	"github.com/google/uuid"
 )
 
+// ForgeLike activity data type
+// swagger:model
 type ForgeFollow struct {
 	// swagger:ignore
 	ap.Activity
 }
 
-func NewForgeFollow(actor, object string) (ForgeFollow, error) {
+func NewForgeFollowFromActivity(activity ap.Activity) (ForgeFollow, error) {
 	result := ForgeFollow{}
-	result.Activity = *ap.FollowNew(
-		ap.IRI(actor+"/follows/"+uuid.New().String()),
-		ap.IRI(object),
-	)
-	result.Actor = ap.IRI(actor)
-	result.Object = ap.IRI(object)
-
+	result.Activity = activity
 	if valid, err := validation.IsValid(result); !valid {
 		return ForgeFollow{}, err
 	}
+	return result, nil
+}
 
+func NewForgeFollow(actor, object string) (ForgeFollow, error) {
+	result := ForgeFollow{}
+	result.Type = ap.FollowType
+	result.ID = ap.IRI(actor + "/follows/" + uuid.New().String())
+	result.Actor = ap.IRI(actor)
+	result.Object = ap.IRI(object)
+	if valid, err := validation.IsValid(result); !valid {
+		return ForgeFollow{}, err
+	}
 	return result, nil
 }
 
