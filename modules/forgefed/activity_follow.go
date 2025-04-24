@@ -17,14 +17,14 @@ type ForgeFollow struct {
 	ap.Activity
 }
 
-func NewForgeFollow(localUser *user.User, actorURI string) (ForgeFollow, error) {
+func NewForgeFollow(actor *user.User, object string) (ForgeFollow, error) {
 	result := ForgeFollow{}
 	result.Activity = *ap.FollowNew(
-		ap.IRI(localUser.APActorID()+"/follows/"+uuid.New().String()),
-		ap.IRI(actorURI),
+		ap.IRI(actor.APActorID()+"/follows/"+uuid.New().String()),
+		ap.IRI(object),
 	)
-	result.Actor = ap.IRI(localUser.APActorID())
-	result.Target = ap.IRI(actorURI)
+	result.Actor = ap.IRI(actor.APActorID())
+	result.Object = ap.IRI(object)
 
 	if valid, err := validation.IsValid(result); !valid {
 		return ForgeFollow{}, err
