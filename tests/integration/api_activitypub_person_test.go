@@ -101,6 +101,7 @@ func TestActivityPubPersonInbox(t *testing.T) {
 	})
 }
 
+// Flow of this test is documented at: https://codeberg.org/forgejo-contrib/federation/src/branch/main/doc/user-activity-following.md
 func TestActivityPubPersonInboxFollow(t *testing.T) {
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&setting.Federation.SignatureEnforced, false)()
@@ -136,5 +137,8 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 		resp, err := c.Post(followActivity, localUser2Inbox)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
+
+		unittest.AssertExistsAndLoadBean(t, &user_model.FederatedUser{ExternalID: "15"})
+		assert.Contains(t, mock.LastPost, "\"type\":\"Accept\"")
 	})
 }
