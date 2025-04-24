@@ -4,30 +4,21 @@
 package federation
 
 import (
-	"fmt"
 	"net/http"
 
 	"forgejo.org/models/forgefed"
 	fm "forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
-	"forgejo.org/modules/validation"
 	context_service "forgejo.org/services/context"
 
 	ap "github.com/go-ap/activitypub"
 )
 
 func processPersonInboxCreate(ctx *context_service.APIContext, activity *ap.Activity) {
-	createAct := fm.ForgeUserActivity{Activity: *activity}
-
-	if res, err := validation.IsValid(createAct); !res {
+	createAct, err := fm.NewForgeUserActivityFromActivity(*activity)
+	if err != nil {
 		log.Error("Invalid user activity: %v", activity)
 		ctx.Error(http.StatusNotAcceptable, "Invalid user activity", err)
-		return
-	}
-
-	if createAct.Object.GetType() != ap.NoteType {
-		log.Error("Invalid object type for Create activity: %v", createAct.Object.GetType())
-		ctx.Error(http.StatusNotAcceptable, "Invalid object type for Create activity", fmt.Errorf("Invalid object type for Create activity: %v", createAct.Object.GetType()))
 		return
 	}
 

@@ -1,0 +1,74 @@
+// Copyright 2024 The Forgejo Authors. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package forgefed
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/validation"
+
+	ap "github.com/go-ap/activitypub"
+)
+
+// ForgeFollow activity data type
+// swagger:model
+type ForgeUserActivity struct {
+	ap.Activity
+}
+
+func NewForgeUserActivityFromActivity(activity ap.Activity) (ForgeUserActivity, error) {
+	result := ForgeUserActivity{}
+	result.Activity = activity
+	if valid, err := validation.IsValid(result); !valid {
+		return ForgeUserActivity{}, err
+	}
+	return result, nil
+}
+
+func NewForgeUserActivity(ctx context.Context, doer *user_model.User, actionID int64, content string) (ForgeUserActivity, error) {
+	id := fmt.Sprintf("%s/activities/%d", doer.APActorID(), actionID)
+	published := time.Now()
+
+	result := ForgeUserActivity{}
+	result.ID = ap.IRI(id + "/activity")
+	result.Type = ap.CreateType
+	result.Actor = ap.IRI(doer.APActorID())
+	result.Published = published
+	result.To = ap.ItemCollection{
+		ap.IRI("https://www.w3.org/ns/activitystreams#Public"),
+	}
+	result.CC = ap.ItemCollection{
+		ap.IRI(doer.APActorID() + "/followers"),
+	}
+	note, err := newNote(doer, content, id, published)
+	if err != nil {
+		return ForgeUserActivity{}, err
+	}
+	result.Object = note
+
+	return result, nil
+}
+
+func (userActivity ForgeUserActivity) Validate() []string {
+	// TODO: write test
+	var result []string
+	result = append(result, validation.ValidateNotEmpty(string(userActivity.Type), "type")...)
+	result = append(result, validation.ValidateOneOf(string(userActivity.Type), []any{"Create"}, "type")...)
+	result = append(result, validation.ValidateIdExists(userActivity.Actor, "actor")...)
+	result = append(result, validation.ValidateNotEmpty(string(userActivity.ID), "id")...)
+
+	if len(userActivity.To) == 0 {
+		result = append(result, "Missing To")
+	}
+	if userActivity.Object == nil {
+		result = append(result, "Missing Object")
+	} else {
+		result = append(result, validation.ValidateOneOf(string(userActivity.Object.GetType()), []any{"Note"}, "type")...)
+	}
+
+	return result
+}

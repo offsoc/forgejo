@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// ForgeLike activity data type
+// ForgeFollow activity data type
 // swagger:model
 type ForgeFollow struct {
 	// swagger:ignore
@@ -48,13 +48,10 @@ func (follow *ForgeFollow) UnmarshalJSON(data []byte) error {
 
 func (follow ForgeFollow) Validate() []string {
 	var result []string
-	if follow.Actor == nil {
-		result = append(result, "Actor should not be nil.")
-	} else {
-		result = append(result, validation.ValidateNotEmpty(string(follow.Type), "type")...)
-		result = append(result, validation.ValidateNotEmpty(follow.Actor.GetID().String(), "actor")...)
-		result = append(result, validation.ValidateNotEmpty(follow.Object.GetID().String(), "object")...)
-	}
+	result = append(result, validation.ValidateNotEmpty(string(follow.Type), "type")...)
+	result = append(result, validation.ValidateOneOf(string(follow.Type), []any{"Follow"}, "type")...)
+	result = append(result, validation.ValidateIdExists(follow.Actor, "actor")...)
+	result = append(result, validation.ValidateIdExists(follow.Object, "object")...)
 
 	return result
 }

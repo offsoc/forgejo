@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"forgejo.org/modules/timeutil"
+	ap "github.com/go-ap/activitypub"
 )
 
 // ErrNotValid represents an validation error
@@ -39,6 +40,20 @@ func IsValid(v Validateable) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func ValidateIdExists(value ap.Item, name string) []string {
+	isValid := true
+	if value == nil {
+		isValid = false
+	} else {
+		return ValidateNotEmpty(value.GetID().String(), name)
+	}
+
+	if isValid {
+		return []string{}
+	}
+	return []string{fmt.Sprintf("%v should not be nil", name)}
 }
 
 func ValidateNotEmpty(value any, name string) []string {
