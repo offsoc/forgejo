@@ -14,7 +14,7 @@ func Test_NewForgeFollowValidation(t *testing.T) {
 	sut := ForgeFollow{}
 	sut.Type = "Follow"
 	sut.Actor = ap.IRI("example.org/alice")
-	sut.Target = ap.IRI("example.org/bob")
+	sut.Object = ap.IRI("example.org/bob")
 
 	if err, _ := validation.IsValid(sut); !err {
 		t.Errorf("sut is invalid: %v\n", err)
@@ -22,7 +22,7 @@ func Test_NewForgeFollowValidation(t *testing.T) {
 
 	sut = ForgeFollow{}
 	sut.Actor = ap.IRI("example.org/alice")
-	sut.Target = ap.IRI("example.org/bob")
+	sut.Object = ap.IRI("example.org/bob")
 
 	if err, _ := validation.IsValid(sut); err {
 		t.Errorf("sut is valid: %v\n", err)

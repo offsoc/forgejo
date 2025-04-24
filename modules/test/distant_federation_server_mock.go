@@ -10,6 +10,10 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	user_model "forgejo.org/models/user"
+
+	"forgejo.org/modules/structs"
 )
 
 type FederationServerMockPerson struct {
@@ -20,7 +24,12 @@ type FederationServerMockPerson struct {
 type FederationServerMockRepository struct {
 	ID int64
 }
+type ApActorMock struct {
+	User   *user_model.User
+	PubKey string
+}
 type FederationServerMock struct {
+	ApActor      ApActorMock
 	Persons      []FederationServerMockPerson
 	Repositories []FederationServerMockRepository
 	LastPost     string
@@ -44,6 +53,31 @@ func NewFederationServerMockRepository(id int64) FederationServerMockRepository 
 	}
 }
 
+func NewApActorMock() ApActorMock {
+	return ApActorMock{
+		User: &user_model.User{
+			ID:               -3,
+			Name:             "actor",
+			LowerName:        "actor",
+			IsActive:         true,
+			Email:            "noreply@forgejo.org",
+			KeepEmailPrivate: true,
+			LoginName:        "actor",
+			Type:             user_model.UserTypeIndividual,
+			Visibility:       structs.VisibleTypePublic,
+		},
+		PubKey: `"-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA18H5s7N6ItZUAh9tneII\nIuZdTTa3cZlLa/9ejWAHTkcp3WLW+/zbsumlMrWYfBy2/yTm56qasWt38iY4D6ul\n` +
+			`CPiwhAqX3REvVq8tM79a2CEqZn9ka6vuXoDgBg/sBf/BUWqf7orkjUXwk/U0Egjf\nk5jcurF4vqf1u+rlAHH37dvSBaDjNj6Qnj4OP12bjfaY/yvs7+jue/eNXFHjzN4E\n` +
+			`T2H4B/yeKTJ4UuAwTlLaNbZJul2baLlHelJPAsxiYaziVuV5P+IGWckY6RSerRaZ\nAkc4mmGGtjAyfN9aewe+lNVfwS7ElFx546PlLgdQgjmeSwLX8FWxbPE5A/PmaXCs\n` +
+			`nx+nou+3dD7NluULLtdd7K+2x02trObKXCAzmi5/Dc+yKTzpFqEz+hLNCz7TImP/\ncK//NV9Q+X67J9O27baH9R9ZF4zMw8rv2Pg0WLSw1z7lLXwlgIsDapeMCsrxkVO4\n` +
+			`LXX5AQ1xQNtlssnVoUBqBrvZsX2jUUKUocvZqMGuE4hfAgMBAAE=\n-----END PUBLIC KEY-----\n"`,
+	}
+}
+
+func (u *ApActorMock) APActorKeyID(host string) string {
+	return fmt.Sprintf("http://%[1]v/api/v1/activitypub/actor#main-key", host)
+}
+
 func (p FederationServerMockPerson) marshal(host string) string {
 	return fmt.Sprintf(`{"@context":["https://www.w3.org/ns/activitystreams","https://w3id.org/security/v1"],`+
 		`"id":"http://%[1]v/api/v1/activitypub/user-id/%[2]v",`+
@@ -60,6 +94,7 @@ func (p FederationServerMockPerson) marshal(host string) string {
 
 func NewFederationServerMock() *FederationServerMock {
 	return &FederationServerMock{
+		ApActor: NewApActorMock(),
 		Persons: []FederationServerMockPerson{
 			NewFederationServerMockPerson(15, "stargoose1"),
 			NewFederationServerMockPerson(30, "stargoose2"),

@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"forgejo.org/models/user"
+	"forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
 	context_service "forgejo.org/services/context"
 
@@ -16,19 +17,14 @@ import (
 )
 
 func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity) {
-	if activity.Object.GetLink().String() != ctx.ContextUser.APActorID() {
-		log.Error("User to follow does not match the inbox owner: %s != %s", activity.Object.GetLink().String(), ctx.ContextUser.APActorID())
-		ctx.Error(http.StatusNotAcceptable, "Wrong user to follow", fmt.Errorf("User to follow does not match the inbox owner"))
+	follow, err := forgefed.NewForgeFollowFromActivity(*activity)
+	if err != nil {
+		log.Error("Invalid follow activity: %s", err)
+		ctx.Error(http.StatusNotAcceptable, "Invalid follow activity", err)
 		return
 	}
 
-	if activity.Actor.GetLink().String() == "" {
-		log.Error("Activity is missing an actor: %#v", activity)
-		ctx.Error(http.StatusNotAcceptable, "Missing actor", fmt.Errorf("Missing Actor"))
-		return
-	}
-
-	actorURI := activity.Actor.GetLink().String()
+	actorURI := follow.Actor.GetLink().String()
 	_, federatedUser, federationHost, err := FindOrCreateFederatedUser(ctx, actorURI)
 	if err != nil {
 		log.Error("Error finding or creating federated user (%s): %v", actorURI, err)
@@ -67,7 +63,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 
 	accept := ap.AcceptNew(ap.IRI(fmt.Sprintf(
 		"%s/follows/%d", ctx.ContextUser.APActorID(), follower.ID,
-	)), activity)
+	)), follow)
 	accept.Actor = ap.IRI(ctx.ContextUser.APActorID())
 	payload, err := jsonld.WithContext(jsonld.IRI(ap.ActivityBaseURI)).Marshal(accept)
 	if err != nil {

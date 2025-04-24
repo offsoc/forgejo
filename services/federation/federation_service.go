@@ -20,8 +20,6 @@ import (
 	"forgejo.org/modules/validation"
 	context_service "forgejo.org/services/context"
 
-	ap "github.com/go-ap/activitypub"
-	"github.com/go-ap/jsonld"
 	"github.com/google/uuid"
 )
 
@@ -77,31 +75,6 @@ func FindOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	log.Trace("Got user: %v", user.Name)
 
 	return user, federatedUser, federationHost, nil
-}
-
-func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, actorURI string) error {
-	_, federatedUser, federationHost, err := FindOrCreateFederatedUser(ctx, actorURI)
-	if err != nil {
-		return err
-	}
-
-	followReq, err := fm.NewForgeFollow(localUser, actorURI)
-	if err != nil {
-		return err
-	}
-
-	payload, err := jsonld.WithContext(jsonld.IRI(ap.ActivityBaseURI)).
-		Marshal(followReq)
-	if err != nil {
-		return err
-	}
-
-	hostURL := federationHost.AsURL()
-	return pendingQueue.Push(pendingQueueItem{
-		InboxURL: hostURL.JoinPath(federatedUser.InboxPath).String(),
-		Doer:     localUser,
-		Payload:  payload,
-	})
 }
 
 func findFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
