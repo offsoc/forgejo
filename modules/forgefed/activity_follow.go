@@ -17,7 +17,7 @@ type ForgeFollow struct {
 	ap.Activity
 }
 
-func NewForgeFollowFromActivity(activity ap.Activity) (ForgeFollow, error) {
+func NewForgeFollowFromAp(activity ap.Activity) (ForgeFollow, error) {
 	result := ForgeFollow{}
 	result.Activity = activity
 	if valid, err := validation.IsValid(result); !valid {

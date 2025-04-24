@@ -19,7 +19,7 @@ type ForgeUserActivityNote struct {
 	ap.Object
 }
 
-func NewForgeUserActivityNoteFromOp(item ap.Item) (ForgeUserActivityNote, error) {
+func NewForgeUserActivityNoteFromAp(item ap.Item) (ForgeUserActivityNote, error) {
 	result := ForgeUserActivityNote{}
 	object := item.(*ap.Object)
 	result.Object = *object
@@ -29,6 +29,7 @@ func NewForgeUserActivityNoteFromOp(item ap.Item) (ForgeUserActivityNote, error)
 	return result, nil
 }
 
+// TODO: Unused - might be removed
 func newNote(doer *user_model.User, content, id string, published time.Time) (ForgeUserActivityNote, error) {
 	note := ForgeUserActivityNote{}
 	note.Type = ap.NoteType

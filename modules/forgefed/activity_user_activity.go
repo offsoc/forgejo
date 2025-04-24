@@ -21,10 +21,10 @@ type ForgeUserActivity struct {
 	Note ForgeUserActivityNote
 }
 
-func NewForgeUserActivityFromActivity(activity ap.Activity) (ForgeUserActivity, error) {
+func NewForgeUserActivityFromAp(activity ap.Activity) (ForgeUserActivity, error) {
 	result := ForgeUserActivity{}
 	result.Activity = activity
-	note, err := NewForgeUserActivityNoteFromOp(activity.Object)
+	note, err := NewForgeUserActivityNoteFromAp(activity.Object)
 	if err != nil {
 		return ForgeUserActivity{}, err
 	}

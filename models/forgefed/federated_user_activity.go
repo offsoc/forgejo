@@ -1,6 +1,7 @@
 // Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
+// TODO: create package by its own
 package forgefed
 
 import (
@@ -15,12 +16,17 @@ import (
 )
 
 type FederatedUserActivity struct {
-	ID     int64 `xorm:"pk autoincr"`
+	ID int64 `xorm:"pk autoincr"`
+	// TODO: this should be the only reference to User
 	UserID int64 `xorm:"NOT NULL"`
+	// TODO: Remove
+	ExternalID string `xorm:"NOT NULL"`
 
-	ExternalID  string           `xorm:"NOT NULL"`
-	Actor       *user_model.User `xorm:"-"`
-	Note        string
+	Actor *user_model.User `xorm:"-"`
+
+	Note string
+
+	// TODO: Rename to sth like Normalized ...
 	OriginalURL string
 
 	Original string
@@ -32,6 +38,9 @@ func init() {
 	db.RegisterModel(new(FederatedUserActivity))
 }
 
+// TODO: add construtor fkt & Validation
+
+// TODO: move this to service as the operation crosses the aggregate borders
 func (fua *FederatedUserActivity) LoadActor(ctx context.Context) error {
 	if fua.Actor != nil {
 		return nil

@@ -15,7 +15,7 @@ import (
 )
 
 func processPersonInboxCreate(ctx *context_service.APIContext, activity *ap.Activity) {
-	createAct, err := fm.NewForgeUserActivityFromActivity(*activity)
+	createAct, err := fm.NewForgeUserActivityFromAp(*activity)
 	if err != nil {
 		log.Error("Invalid user activity: %v, %v", activity, err)
 		ctx.Error(http.StatusNotAcceptable, "Invalid user activity", err)
@@ -23,8 +23,8 @@ func processPersonInboxCreate(ctx *context_service.APIContext, activity *ap.Acti
 	}
 
 	actorURI := createAct.Actor.GetLink().String()
-	if _, _, _, err := FindOrCreateFederatedUser(ctx, actorURI); err != nil {
-		log.Error("Error finding or creating federated user (%s): %v", actorURI, err)
+	if _, _, _, err := findFederatedUser(ctx, actorURI); err != nil {
+		log.Error("Error finding federated user (%s): %v", actorURI, err)
 		ctx.Error(http.StatusNotAcceptable, "Federated user not found", err)
 		return
 	}
