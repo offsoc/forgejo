@@ -785,6 +785,12 @@ func sendActionRunNowDoneNotificationIfNeeded(ctx context.Context, oldRun, newRu
 		if err != nil && !errors.Is(err, util.ErrNotExist) {
 			return err
 		}
+		// when no last run was found lastRun is nil
+		if lastRun != nil {
+			if err = lastRun.LoadAttributes(ctx); err != nil {
+				return err
+			}
+		}
 		if err = newRun.LoadAttributes(ctx); err != nil {
 			return err
 		}
