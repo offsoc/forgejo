@@ -820,7 +820,7 @@ func UpdateRun(ctx context.Context, run *actions_model.ActionRun, cols ...string
 
 // wrapper of UpdateRunJobWithoutNotification with a call to the ActionRunNowDone notification channel
 func UpdateRunJob(ctx context.Context, job *actions_model.ActionRunJob, cond builder.Cond, cols ...string) (int64, error) {
-	var runID = job.RunID
+	runID := job.RunID
 	if runID == 0 {
 		// job.ID is the only thing that must be given
 		// Don't overwrite job here, we'd loose the change we need to make.
