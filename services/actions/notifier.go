@@ -782,11 +782,7 @@ func (n *actionsNotifier) MigrateRepository(ctx context.Context, doer, u *user_m
 func sendActionRunNowDoneNotificationIfNeeded(ctx context.Context, oldRun, newRun *actions_model.ActionRun) error {
 	if !oldRun.Status.IsDone() && newRun.Status.IsDone() {
 		lastRun, err := actions_model.GetRunBefore(ctx, newRun.RepoID, newRun.Stopped)
-		// TODO: figure out if this err is only because there simply is no last run
-		if err != nil {
-			lastRun = nil
-		}
-		if err = lastRun.LoadAttributes(ctx); err != nil {
+		if err != nil && !errors.Is(err, util.ErrNotExist) {
 			return err
 		}
 		if err = newRun.LoadAttributes(ctx); err != nil {
