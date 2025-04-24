@@ -61,6 +61,7 @@ func AddUserActivity(ctx context.Context, userID int64, externalID string, activ
 		return err
 	}
 
+	fmt.Printf("xxx externalID %v\n", externalID)
 	fmt.Printf("xxx url %v\n", activity.URL)
 	fmt.Printf("xxx url.id %v\n", activity.URL.GetID())
 
