@@ -98,7 +98,7 @@ func TestActionNowDoneNotification(t *testing.T) {
 			[]*files_service.ChangeRepoFile{
 				{
 					Operation: "create",
-					TreePath:  ".gitea/workflows/dispatch.yml",
+					TreePath:  ".forgejo/workflows/dispatch.yml",
 					ContentReader: strings.NewReader(
 						"name: test\n" +
 							"on: [workflow_dispatch]\n" +
