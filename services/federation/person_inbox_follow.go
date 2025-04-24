@@ -8,25 +8,19 @@ import (
 	"net/http"
 
 	"forgejo.org/models/user"
+	fm "forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
+	"forgejo.org/modules/validation"
 	context_service "forgejo.org/services/context"
 
 	ap "github.com/go-ap/activitypub"
 	"github.com/go-ap/jsonld"
 )
 
-func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity) {
-	// TODO use ForgeFollow to validate!
-	if activity.Object.GetLink().String() != ctx.ContextUser.APActorID() {
-		log.Error("User to follow does not match the inbox owner: %s != %s", activity.Object.GetLink().String(), ctx.ContextUser.APActorID())
-		ctx.Error(http.StatusNotAcceptable, "Wrong user to follow", fmt.Errorf("User to follow does not match the inbox owner"))
-		return
-	}
-
-	// TODO: remove, as this is part of validation
-	if activity.Actor.GetLink().String() == "" {
-		log.Error("Activity is missing an actor: %#v", activity)
-		ctx.Error(http.StatusNotAcceptable, "Missing actor", fmt.Errorf("Missing Actor"))
+func processPersonFollow(ctx *context_service.APIContext, activity *fm.ForgeFollow) {
+	if res, err := validation.IsValid(activity); !res {
+		log.Error("Invalid follow activity: %s", err)
+		ctx.Error(http.StatusNotAcceptable, "Invalid follow activity", err)
 		return
 	}
 

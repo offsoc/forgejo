@@ -24,7 +24,7 @@ func ProcessPersonInbox(ctx *context_service.APIContext, form any) {
 		processPersonInboxCreate(ctx, activity)
 		return
 	case ap.FollowType:
-		processPersonFollow(ctx, activity)
+		processPersonFollow(ctx, form.(*fm.ForgeFollow))
 		return
 	case ap.UndoType:
 		processPersonInboxUndo(ctx, activity)
@@ -44,7 +44,7 @@ func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, ac
 		return err
 	}
 
-	followReq, err := fm.NewForgeFollow(localUser, actorURI)
+	followReq, err := fm.NewForgeFollow(localUser.APActorID(), actorURI)
 	if err != nil {
 		return err
 	}

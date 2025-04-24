@@ -4,8 +4,6 @@
 package forgefed
 
 import (
-	"forgejo.org/models/user"
-
 	"forgejo.org/modules/validation"
 
 	ap "github.com/go-ap/activitypub"
@@ -17,13 +15,13 @@ type ForgeFollow struct {
 	ap.Activity
 }
 
-func NewForgeFollow(actor *user.User, object string) (ForgeFollow, error) {
+func NewForgeFollow(actor, object string) (ForgeFollow, error) {
 	result := ForgeFollow{}
 	result.Activity = *ap.FollowNew(
-		ap.IRI(actor.APActorID()+"/follows/"+uuid.New().String()),
+		ap.IRI(actor+"/follows/"+uuid.New().String()),
 		ap.IRI(object),
 	)
-	result.Actor = ap.IRI(actor.APActorID())
+	result.Actor = ap.IRI(actor)
 	result.Object = ap.IRI(object)
 
 	if valid, err := validation.IsValid(result); !valid {
@@ -31,6 +29,14 @@ func NewForgeFollow(actor *user.User, object string) (ForgeFollow, error) {
 	}
 
 	return result, nil
+}
+
+func (follow ForgeFollow) MarshalJSON() ([]byte, error) {
+	return follow.Activity.MarshalJSON()
+}
+
+func (follow *ForgeFollow) UnmarshalJSON(data []byte) error {
+	return follow.Activity.UnmarshalJSON(data)
 }
 
 func (follow ForgeFollow) Validate() []string {
