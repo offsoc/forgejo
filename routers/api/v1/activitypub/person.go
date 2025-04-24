@@ -71,7 +71,7 @@ func PersonInbox(ctx *context.APIContext) {
 	//   type: integer
 	//   required: true
 	// responses:
-	//   "204":
+	//   "202":
 	//     "$ref": "#/responses/empty"
 
 	form := web.GetForm(ctx)
