@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forgejo.org/models/db"
+	"forgejo.org/models/forgefed"
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/activitypub"
@@ -196,5 +197,6 @@ func TestActivityPubPersonInboxNote(t *testing.T) {
 		resp, err = c.Post(userActivity, localUser2Inbox)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+		unittest.AssertExistsAndLoadBean(t, &forgefed.FederatedUserActivity{OriginalURL: distantNoteUrl})
 	})
 }
