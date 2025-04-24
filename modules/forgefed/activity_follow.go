@@ -1,3 +1,6 @@
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
+// SPDX-License-Identifier: MIT
+
 package forgefed
 
 import (
@@ -14,7 +17,7 @@ type ForgeFollow struct {
 	ap.Activity
 }
 
-func NewForgeFollow(localUser *user.User, actorURI string) (ForgeFollow, error){
+func NewForgeFollow(localUser *user.User, actorURI string) (ForgeFollow, error) {
 	result := ForgeFollow{}
 	result.Activity = *ap.FollowNew(
 		ap.IRI(localUser.APActorID()+"/follows/"+uuid.New().String()),
@@ -32,8 +35,8 @@ func NewForgeFollow(localUser *user.User, actorURI string) (ForgeFollow, error){
 
 func (follow ForgeFollow) Validate() []string {
 	var result []string
-	if follow.Actor == nil || follow.Target == nil || follow.Type == "" {
-		result = append(result, "Actor/Target/Type should not be nil.")
+	if follow.Actor == nil {
+		result = append(result, "Actor should not be nil.")
 	} else {
 		result = append(result, validation.ValidateNotEmpty(string(follow.Type), "type")...)
 		result = append(result, validation.ValidateNotEmpty(follow.Actor.GetID().String(), "actor")...)

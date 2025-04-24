@@ -1,3 +1,6 @@
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
+// SPDX-License-Identifier: MIT
+
 package forgefed
 
 import (
@@ -14,6 +17,14 @@ func Test_NewForgeFollowValidation(t *testing.T) {
 	sut.Target = ap.IRI("example.org/bob")
 
 	if err, _ := validation.IsValid(sut); !err {
-		t.Errorf("sut invalid: %v\n", sut.Validate())
+		t.Errorf("sut is invalid: %v\n", err)
+	}
+
+	sut = ForgeFollow{}
+	sut.Actor = ap.IRI("example.org/alice")
+	sut.Target = ap.IRI("example.org/bob")
+
+	if err, _ := validation.IsValid(sut); err {
+		t.Errorf("sut is valid: %v\n", err)
 	}
 }
