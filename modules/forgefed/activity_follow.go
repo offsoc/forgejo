@@ -40,7 +40,7 @@ func (follow ForgeFollow) Validate() []string {
 	} else {
 		result = append(result, validation.ValidateNotEmpty(string(follow.Type), "type")...)
 		result = append(result, validation.ValidateNotEmpty(follow.Actor.GetID().String(), "actor")...)
-		result = append(result, validation.ValidateNotEmpty(follow.Target.GetID().String(), "target")...)
+		result = append(result, validation.ValidateNotEmpty(follow.Object.GetID().String(), "object")...)
 	}
 
 	return result
