@@ -5,6 +5,7 @@ package actions
 
 import (
 	"context"
+	"errors"
 
 	actions_model "forgejo.org/models/actions"
 	issues_model "forgejo.org/models/issues"
@@ -18,6 +19,7 @@ import (
 	"forgejo.org/modules/repository"
 	"forgejo.org/modules/setting"
 	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
 	webhook_module "forgejo.org/modules/webhook"
 	"forgejo.org/services/convert"
 	notify_service "forgejo.org/services/notify"
