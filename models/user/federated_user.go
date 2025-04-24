@@ -23,7 +23,7 @@ type FederatedUser struct {
 	NormalizedOriginalURL string  // This field ist just to keep original information. Pls. do not use for search or as ID!
 }
 
-func NewFederatedUser(userID int64, externalID string, federationHostID int64, inboxPath string, normalizedOriginalURL string) (FederatedUser, error) {
+func NewFederatedUser(userID int64, externalID string, federationHostID int64, inboxPath, normalizedOriginalURL string) (FederatedUser, error) {
 	result := FederatedUser{
 		UserID:                userID,
 		ExternalID:            externalID,
@@ -37,12 +37,12 @@ func NewFederatedUser(userID int64, externalID string, federationHostID int64, i
 	return result, nil
 }
 
-func (user FederatedUser) Validate() []string {
+func (federatedUser FederatedUser) Validate() []string {
 	var result []string
-	result = append(result, validation.ValidateNotEmpty(user.UserID, "UserID")...)
-	result = append(result, validation.ValidateNotEmpty(user.ExternalID, "ExternalID")...)
-	result = append(result, validation.ValidateNotEmpty(user.FederationHostID, "FederationHostID")...)
-	result = append(result, validation.ValidateNotEmpty(user.InboxPath, "InboxPath")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUser.UserID, "UserID")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUser.ExternalID, "ExternalID")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUser.FederationHostID, "FederationHostID")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUser.InboxPath, "InboxPath")...)
 	return result
 }
 

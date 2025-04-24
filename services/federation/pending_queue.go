@@ -1,4 +1,4 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package federation
@@ -44,6 +44,7 @@ func handlePending(item pendingQueueItem) error {
 		fmt.Sprintf("Checking delivery eligibility for Activity via user[%d] (%s), to federated user[%s]", item.Doer.ID, item.Doer.Name, item.InboxURL))
 	defer finished()
 
+	// TODO: fix linting
 	return deliveryQueue.Push(deliveryQueueItem{
 		Doer:     item.Doer,
 		Payload:  item.Payload,

@@ -249,6 +249,9 @@ func fetchUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID
 
 func createUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID int64) (*user.User, *user.FederatedUser, error) {
 	newUser, federatedUser, err := fetchUserFromAP(ctx, personID, federationHostID)
+	if err != nil {
+		return nil, nil, err
+	}
 	err = user.CreateFederatedUser(ctx, newUser, federatedUser)
 	if err != nil {
 		return nil, nil, err

@@ -17,8 +17,8 @@ type RepositoryID struct {
 }
 
 const (
-	REPOSITORY_ID_API_PATH_V1     = "api/v1/activitypub/repository-id"
-	REPOSITORY_ID_API_PATH_LATEST = "api/activitypub/repository-id"
+	repositoryIDapiPathV1       = "api/v1/activitypub/repository-id"
+	repositoryIDapiPathV1Latest = "api/activitypub/repository-id"
 )
 
 // Factory function for RepositoryID. Created struct is asserted to be valid.
@@ -42,9 +42,8 @@ func (id RepositoryID) Validate() []string {
 	result := id.ActorID.Validate()
 	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
 	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea"}, "Source")...)
-	switch id.Source {
-	case "forgejo":
-		if strings.ToLower(id.Path) != REPOSITORY_ID_API_PATH_V1 && strings.ToLower(id.Path) != REPOSITORY_ID_API_PATH_LATEST {
+	if id.Source == "forgejo" {
+		if strings.ToLower(id.Path) != repositoryIDapiPathV1 && strings.ToLower(id.Path) != repositoryIDapiPathV1Latest {
 			result = append(result, fmt.Sprintf("path: %q has to be a repo specific api path", id.Path))
 		}
 	}
