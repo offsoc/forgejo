@@ -311,7 +311,8 @@ func CreateTaskForRunner(ctx context.Context, runner *ActionRunner) (*ActionTask
 	}
 
 	job.TaskID = task.ID
-	if n, err := UpdateRunJob(ctx, job, builder.Eq{"task_id": 0}); err != nil {
+	// We never have to send a notification here because the job is started with a not done status.
+	if n, err := UpdateRunJobWithoutNotification(ctx, job, builder.Eq{"task_id": 0}); err != nil {
 		return nil, false, err
 	} else if n != 1 {
 		return nil, false, nil

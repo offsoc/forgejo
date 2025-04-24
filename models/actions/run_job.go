@@ -101,7 +101,9 @@ func GetRunJobsByRunID(ctx context.Context, runID int64) ([]*ActionRunJob, error
 	return jobs, nil
 }
 
-func UpdateRunJob(ctx context.Context, job *ActionRunJob, cond builder.Cond, cols ...string) (int64, error) {
+// All calls to UpdateRunJobWithoutNotification that change run.Status for any run from a not done status to a done status must call the ActionRunNowDone notification channel.
+// Use the wrapper function UpdateRunJob instead.
+func UpdateRunJobWithoutNotification(ctx context.Context, job *ActionRunJob, cond builder.Cond, cols ...string) (int64, error) {
 	e := db.GetEngine(ctx)
 
 	sess := e.ID(job.ID)
@@ -154,7 +156,8 @@ func UpdateRunJob(ctx context.Context, job *ActionRunJob, cond builder.Cond, col
 		if run.Stopped.IsZero() && run.Status.IsDone() {
 			run.Stopped = timeutil.TimeStampNow()
 		}
-		if err := UpdateRun(ctx, run, "status", "started", "stopped"); err != nil {
+		// As the caller has to ensure the ActionRunNowDone notification is sent we can ignore doing so here.
+		if err := UpdateRunWithoutNotification(ctx, run, "status", "started", "stopped"); err != nil {
 			return 0, fmt.Errorf("update run %d: %w", run.ID, err)
 		}
 	}
