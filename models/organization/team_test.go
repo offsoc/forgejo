@@ -4,14 +4,12 @@
 package organization_test
 
 import (
-	"path/filepath"
 	"testing"
 
 	"forgejo.org/models/db"
 	"forgejo.org/models/organization"
 	"forgejo.org/models/perm"
 	"forgejo.org/models/unittest"
-	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -189,13 +187,7 @@ func TestHasTeamRepo(t *testing.T) {
 }
 
 func TestInconsistentOwnerTeam(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"models/organization/TestInconsistentOwnerTeam/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("models/organization/TestInconsistentOwnerTeam")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	unittest.AssertExistsAndLoadBean(t, &organization.TeamUnit{ID: 1000, TeamID: 1000, AccessMode: perm.AccessModeNone})
