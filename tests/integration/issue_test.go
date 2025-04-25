@@ -1084,7 +1084,7 @@ func TestIssueReferenceURL(t *testing.T) {
 }
 
 func TestGetContentHistory(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestGetContentHistory/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestGetContentHistory")()
 	defer tests.PrepareTestEnv(t)()
 
 	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 1})
@@ -1136,7 +1136,7 @@ func TestGetContentHistory(t *testing.T) {
 }
 
 func TestCommitRefComment(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestCommitRefComment/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestCommitRefComment")()
 	defer tests.PrepareTestEnv(t)()
 
 	t.Run("Pull request", func(t *testing.T) {

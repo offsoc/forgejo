@@ -4,7 +4,6 @@
 package webhook
 
 import (
-	"path/filepath"
 	"testing"
 
 	"forgejo.org/models/db"
@@ -56,13 +55,7 @@ func pushCommits() *repository.PushCommits {
 }
 
 func TestSyncPushCommits(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"services/webhook/TestPushCommits"},
-		},
-	)()
+	defer unittest.OverrideFixtures("services/webhook/TestPushCommits")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
@@ -95,13 +88,7 @@ func TestSyncPushCommits(t *testing.T) {
 }
 
 func TestPushCommits(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"services/webhook/TestPushCommits"},
-		},
-	)()
+	defer unittest.OverrideFixtures("services/webhook/TestPushCommits")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})

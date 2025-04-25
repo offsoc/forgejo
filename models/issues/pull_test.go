@@ -14,7 +14,6 @@ import (
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/setting"
-	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -161,7 +160,7 @@ func TestGetUnmergedPullRequestsByHeadInfo(t *testing.T) {
 }
 
 func TestGetUnmergedPullRequestsByHeadInfoMax(t *testing.T) {
-	defer tests.AddFixtures("models/fixtures/TestGetUnmergedPullRequestsByHeadInfoMax/")()
+	defer unittest.OverrideFixtures("models/fixtures/TestGetUnmergedPullRequestsByHeadInfoMax")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	repoID := int64(1)

@@ -4,7 +4,6 @@
 package repo_test
 
 import (
-	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -14,7 +13,6 @@ import (
 	"forgejo.org/models/unittest"
 	"forgejo.org/models/user"
 	"forgejo.org/modules/optional"
-	"forgejo.org/modules/setting"
 	"forgejo.org/modules/structs"
 
 	"github.com/stretchr/testify/assert"
@@ -410,13 +408,7 @@ func TestSearchRepositoryByTopicName(t *testing.T) {
 }
 
 func TestSearchRepositoryIDsByCondition(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"models/repo/TestSearchRepositoryIDsByCondition/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("models/repo/TestSearchRepositoryIDsByCondition")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 	// Sanity check of the database
 	limitedUser := unittest.AssertExistsAndLoadBean(t, &user.User{ID: 33, Visibility: structs.VisibleTypeLimited})

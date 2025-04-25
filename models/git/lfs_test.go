@@ -5,7 +5,6 @@ package git
 
 import (
 	"context"
-	"path/filepath"
 	"testing"
 
 	"forgejo.org/models/db"
@@ -18,13 +17,7 @@ import (
 )
 
 func TestIterateRepositoryIDsWithLFSMetaObjects(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"models/git/TestIterateRepositoryIDsWithLFSMetaObjects/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("models/git/TestIterateRepositoryIDsWithLFSMetaObjects")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	type repocount struct {

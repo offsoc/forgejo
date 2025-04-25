@@ -4,14 +4,12 @@
 package issues_test
 
 import (
-	"path/filepath"
 	"testing"
 
 	"forgejo.org/models/db"
 	issues_model "forgejo.org/models/issues"
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
-	"forgejo.org/modules/setting"
 	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
@@ -81,13 +79,7 @@ func TestCreateOrStopIssueStopwatch(t *testing.T) {
 }
 
 func TestGetUIDsAndStopwatch(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"models/issues/TestGetUIDsAndStopwatch/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("models/issues/TestGetUIDsAndStopwatch")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	uidStopwatches, err := issues_model.GetUIDsAndStopwatch(db.DefaultContext)

@@ -167,7 +167,7 @@ func TestBlockUserFromOrganization(t *testing.T) {
 // and as a blocked user and are handled cleanly after the blocking has taken
 // place.
 func TestBlockActions(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestBlockActions/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestBlockActions")()
 	defer tests.PrepareTestEnv(t)()
 
 	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
@@ -438,7 +438,7 @@ func TestBlockActions(t *testing.T) {
 }
 
 func TestBlockedNotification(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestBlockedNotifications")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestBlockedNotifications")()
 	defer tests.PrepareTestEnv(t)()
 
 	doer := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
