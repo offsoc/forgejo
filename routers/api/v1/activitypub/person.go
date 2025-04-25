@@ -6,6 +6,7 @@ package activitypub
 import (
 	"net/http"
 
+	"forgejo.org/models/activities"
 	activities_model "forgejo.org/models/activities"
 	"forgejo.org/modules/activitypub"
 	"forgejo.org/modules/forgefed"
@@ -17,7 +18,6 @@ import (
 	"forgejo.org/services/convert"
 	"forgejo.org/services/federation"
 
-	fa "forgejo.org/models/federated_user_activity"
 	ap "github.com/go-ap/activitypub"
 	"github.com/go-ap/jsonld"
 )
@@ -98,11 +98,11 @@ func PersonFeed(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 
 	listOptions := utils.GetListOptions(ctx)
-	opts := fa.GetFollowingFeedsOptions{
+	opts := activities.GetFollowingFeedsOptions{
 		Actor:       ctx.Doer,
 		ListOptions: listOptions,
 	}
-	items, count, err := fa.GetFollowingFeeds(ctx, opts)
+	items, count, err := activities.GetFollowingFeeds(ctx, opts)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "GetFollowingFeeds", err)
 		return
