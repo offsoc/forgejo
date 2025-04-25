@@ -6,11 +6,11 @@ package federation
 import (
 	"net/http"
 
-	"forgejo.org/models/forgefed"
 	fm "forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
 	context_service "forgejo.org/services/context"
 
+	fa "forgejo.org/models/federated_user_activity"
 	ap "github.com/go-ap/activitypub"
 )
 
@@ -30,7 +30,7 @@ func processPersonInboxCreate(ctx *context_service.APIContext, activity *ap.Acti
 		return
 	}
 
-	federatedUserActivity, err := forgefed.NewFederatedUserActivity(
+	federatedUserActivity, err := fa.NewFederatedUserActivity(
 		user.ID, actorURI,
 		createAct.Note.Content.String(),
 		createAct.Note.URL.GetID().String(),
@@ -42,7 +42,7 @@ func processPersonInboxCreate(ctx *context_service.APIContext, activity *ap.Acti
 		return
 	}
 
-	if err := forgefed.CreateUserActivity(ctx, &federatedUserActivity); err != nil {
+	if err := fa.CreateUserActivity(ctx, &federatedUserActivity); err != nil {
 		log.Error("Unable to record activity: %v", err)
 		ctx.Error(http.StatusInternalServerError, "Unable to record activity", err)
 		return

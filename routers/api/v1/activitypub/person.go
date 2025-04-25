@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	activities_model "forgejo.org/models/activities"
-	forgefed_model "forgejo.org/models/forgefed"
 	"forgejo.org/modules/activitypub"
 	"forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
@@ -18,6 +17,7 @@ import (
 	"forgejo.org/services/convert"
 	"forgejo.org/services/federation"
 
+	fa "forgejo.org/models/federated_user_activity"
 	ap "github.com/go-ap/activitypub"
 	"github.com/go-ap/jsonld"
 )
@@ -98,11 +98,11 @@ func PersonFeed(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 
 	listOptions := utils.GetListOptions(ctx)
-	opts := forgefed_model.GetFollowingFeedsOptions{
+	opts := fa.GetFollowingFeedsOptions{
 		Actor:       ctx.Doer,
 		ListOptions: listOptions,
 	}
-	items, count, err := forgefed_model.GetFollowingFeeds(ctx, opts)
+	items, count, err := fa.GetFollowingFeeds(ctx, opts)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "GetFollowingFeeds", err)
 		return

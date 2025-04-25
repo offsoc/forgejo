@@ -13,7 +13,7 @@ import (
 
 	activities_model "forgejo.org/models/activities"
 	"forgejo.org/models/db"
-	forgefed_model "forgejo.org/models/forgefed"
+	fa "forgejo.org/models/federated_user_activity"
 	repo_model "forgejo.org/models/repo"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/base"
@@ -177,7 +177,7 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 		ctx.Data["CardsTitle"] = ctx.TrN(total, "user.following.title.one", "user.following.title.few")
 	case "feed":
 		pagingNum = setting.UI.FeedPagingNum
-		items, count, err := forgefed_model.GetFollowingFeeds(ctx, forgefed_model.GetFollowingFeedsOptions{
+		items, count, err := fa.GetFollowingFeeds(ctx, fa.GetFollowingFeedsOptions{
 			Actor: ctx.Doer,
 			ListOptions: db.ListOptions{
 				PageSize: pagingNum,
