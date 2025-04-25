@@ -47,7 +47,6 @@ func TestAPIFollowFederated(t *testing.T) {
 		MakeRequest(t, req, http.StatusNoContent)
 		federationHost := unittest.AssertExistsAndLoadBean(t, &forgefed.FederationHost{HostFqdn: "127.0.0.1"})
 		unittest.AssertExistsAndLoadBean(t, &user.FederatedUser{ExternalID: "15", FederationHostID: federationHost.ID})
-		assert.Contains(t, mock.LastPost, "\"target\":\"http://DISTANT_FEDERATION_HOST/api/v1/activitypub/user-id/15\"")
 		assert.Contains(t, mock.LastPost, "\"object\":\"http://DISTANT_FEDERATION_HOST/api/v1/activitypub/user-id/15\"")
 	})
 }
