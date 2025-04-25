@@ -179,7 +179,7 @@ func AddFollower(ctx context.Context, followedUser *User, followingUser *Federat
 		return nil, err
 	}
 
-	federatedUserFollower, err := NewFederatedUserFollower(followedUser.ID, followingUser.ID)
+	federatedUserFollower, err := NewFederatedUserFollower(followedUser.ID, followingUser.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func RemoveFollower(ctx context.Context, followedUser *User, followingUser *Fede
 
 	_, err := db.GetEngine(ctx).Delete(&FederatedUserFollower{
 		FollowedUserID:  followedUser.ID,
-		FollowingUserID: followingUser.ID,
+		FollowingUserID: followingUser.UserID,
 	})
 	return err
 }
@@ -217,6 +217,6 @@ func IsFollowingAp(ctx context.Context, followedUser *User, followingUser *Feder
 
 	return db.GetEngine(ctx).Get(&FederatedUserFollower{
 		FollowedUserID:  followedUser.ID,
-		FollowingUserID: followingUser.ID,
+		FollowingUserID: followingUser.UserID,
 	})
 }
