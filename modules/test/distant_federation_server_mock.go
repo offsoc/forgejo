@@ -11,9 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	user_model "forgejo.org/models/user"
-
-	"forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
 )
 
 type FederationServerMockPerson struct {
@@ -25,8 +23,8 @@ type FederationServerMockRepository struct {
 	ID int64
 }
 type ApActorMock struct {
-	User   *user_model.User
-	PubKey string
+	PrivKey string
+	PubKey  string
 }
 type FederationServerMock struct {
 	ApActor      ApActorMock
@@ -54,23 +52,10 @@ func NewFederationServerMockRepository(id int64) FederationServerMockRepository 
 }
 
 func NewApActorMock() ApActorMock {
+	priv, pub, _ := util.GenerateKeyPair(3072)
 	return ApActorMock{
-		User: &user_model.User{
-			ID:               -3,
-			Name:             "actor",
-			LowerName:        "actor",
-			IsActive:         true,
-			Email:            "noreply@forgejo.org",
-			KeepEmailPrivate: true,
-			LoginName:        "actor",
-			Type:             user_model.UserTypeIndividual,
-			Visibility:       structs.VisibleTypePublic,
-		},
-		PubKey: `"-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA18H5s7N6ItZUAh9tneII\nIuZdTTa3cZlLa/9ejWAHTkcp3WLW+/zbsumlMrWYfBy2/yTm56qasWt38iY4D6ul\n` +
-			`CPiwhAqX3REvVq8tM79a2CEqZn9ka6vuXoDgBg/sBf/BUWqf7orkjUXwk/U0Egjf\nk5jcurF4vqf1u+rlAHH37dvSBaDjNj6Qnj4OP12bjfaY/yvs7+jue/eNXFHjzN4E\n` +
-			`T2H4B/yeKTJ4UuAwTlLaNbZJul2baLlHelJPAsxiYaziVuV5P+IGWckY6RSerRaZ\nAkc4mmGGtjAyfN9aewe+lNVfwS7ElFx546PlLgdQgjmeSwLX8FWxbPE5A/PmaXCs\n` +
-			`nx+nou+3dD7NluULLtdd7K+2x02trObKXCAzmi5/Dc+yKTzpFqEz+hLNCz7TImP/\ncK//NV9Q+X67J9O27baH9R9ZF4zMw8rv2Pg0WLSw1z7lLXwlgIsDapeMCsrxkVO4\n` +
-			`LXX5AQ1xQNtlssnVoUBqBrvZsX2jUUKUocvZqMGuE4hfAgMBAAE=\n-----END PUBLIC KEY-----\n"`,
+		PrivKey: priv,
+		PubKey:  pub,
 	}
 }
 

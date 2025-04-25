@@ -89,6 +89,7 @@ func NewClientFactory() (c *ClientFactory, err error) {
 
 type APClientFactory interface {
 	WithKeys(ctx context.Context, user *user_model.User, pubID string) (APClient, error)
+	WithKeysDirect(ctx context.Context, privateKey, pubID string) (APClient, error)
 }
 
 // Client struct
@@ -103,12 +104,8 @@ type Client struct {
 }
 
 // NewRequest function
-func (cf *ClientFactory) WithKeys(ctx context.Context, user *user_model.User, pubID string) (APClient, error) {
-	priv, err := GetPrivateKey(ctx, user)
-	if err != nil {
-		return nil, err
-	}
-	privPem, _ := pem.Decode([]byte(priv))
+func (cf *ClientFactory) WithKeysDirect(ctx context.Context, privateKey, pubID string) (APClient, error) {
+	privPem, _ := pem.Decode([]byte(privateKey))
 	privParsed, err := x509.ParsePKCS1PrivateKey(privPem.Bytes)
 	if err != nil {
 		return nil, err
@@ -124,6 +121,14 @@ func (cf *ClientFactory) WithKeys(ctx context.Context, user *user_model.User, pu
 		pubID:       pubID,
 	}
 	return &c, nil
+}
+
+func (cf *ClientFactory) WithKeys(ctx context.Context, user *user_model.User, pubID string) (APClient, error) {
+	priv, err := GetPrivateKey(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	return cf.WithKeysDirect(ctx, priv, pubID)
 }
 
 // NewRequest function

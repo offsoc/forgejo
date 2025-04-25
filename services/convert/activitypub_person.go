@@ -6,7 +6,7 @@ package convert
 import (
 	"context"
 
-	"forgejo.org/models/forgefed"
+	fa "forgejo.org/models/federated_user_activity"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/activitypub"
 	api "forgejo.org/modules/structs"
@@ -14,12 +14,12 @@ import (
 	ap "github.com/go-ap/activitypub"
 )
 
-func ToActivityPubPersonFeedItem(item *forgefed.FederatedUserActivity) api.APPersonFollowItem {
+func ToActivityPubPersonFeedItem(item *fa.FederatedUserActivity) api.APPersonFollowItem {
 	return api.APPersonFollowItem{
-		ActorID:      item.ExternalID,
-		Note:         item.Note,
-		OriginalURL:  item.OriginalURL,
-		OriginalItem: item.Original,
+		ActorID:      item.ActorID,
+		Note:         item.NoteContent,
+		OriginalURL:  item.NoteURL,
+		OriginalItem: item.OriginalNote,
 	}
 }
 

@@ -14,16 +14,13 @@ import (
 
 func AddFederatedUserActivityTables(x *xorm.Engine) error {
 	type FederatedUserActivity struct {
-		ID     int64 `xorm:"pk autoincr"`
-		UserID int64 `xorm:"NOT NULL"`
-
-		ExternalID  string `xorm:"NOT NULL"`
-		Note        string
-		OriginalURL string
-
-		Original string
-
-		Created timeutil.TimeStamp `xorm:"created"`
+		ID           int64 `xorm:"pk autoincr"`
+		UserID       int64 `xorm:"NOT NULL"`
+		ActorID      string
+		NoteContent  string
+		NoteURL      string
+		OriginalNote string
+		Created      timeutil.TimeStamp `xorm:"created"`
 	}
 
 	type FederatedUserFollower struct {

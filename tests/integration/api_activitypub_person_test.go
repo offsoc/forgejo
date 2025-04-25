@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"forgejo.org/models/db"
-	"forgejo.org/models/forgefed"
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/activitypub"
@@ -19,6 +18,7 @@ import (
 	"forgejo.org/routers"
 	"forgejo.org/tests"
 
+	fa "forgejo.org/models/federated_user_activity"
 	ap "github.com/go-ap/activitypub"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -132,7 +132,7 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
-		c, err := cf.WithKeys(db.DefaultContext, mock.ApActor.User,
+		c, err := cf.WithKeysDirect(db.DefaultContext, mock.ApActor.PrivKey,
 			mock.ApActor.APActorKeyID(federatedSrv.URL))
 		require.NoError(t, err)
 		resp, err := c.Post(followActivity, localUser2Inbox)
@@ -174,7 +174,7 @@ func TestActivityPubPersonInboxNote(t *testing.T) {
 		))
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
-		c, err := cf.WithKeys(db.DefaultContext, mock.ApActor.User,
+		c, err := cf.WithKeysDirect(db.DefaultContext, mock.ApActor.PrivKey,
 			mock.ApActor.APActorKeyID(federatedSrv.URL))
 		require.NoError(t, err)
 		resp, err := c.Post(followActivity, localUser2Inbox)
@@ -197,6 +197,6 @@ func TestActivityPubPersonInboxNote(t *testing.T) {
 		resp, err = c.Post(userActivity, localUser2Inbox)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
-		unittest.AssertExistsAndLoadBean(t, &forgefed.FederatedUserActivity{OriginalURL: distantNoteUrl})
+		unittest.AssertExistsAndLoadBean(t, &fa.FederatedUserActivity{NoteURL: distantNoteUrl})
 	})
 }
