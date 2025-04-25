@@ -25,7 +25,6 @@ import (
 	"forgejo.org/modules/timeutil"
 	"forgejo.org/modules/util"
 	"forgejo.org/modules/validation"
-	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -73,7 +72,7 @@ func TestGetUserFromMap(t *testing.T) {
 }
 
 func TestGetUserByName(t *testing.T) {
-	defer tests.AddFixtures("models/user/fixtures/")()
+	defer unittest.OverrideFixtures("models/user/fixtures")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	{
@@ -120,7 +119,7 @@ func TestCanCreateOrganization(t *testing.T) {
 }
 
 func TestGetAllUsers(t *testing.T) {
-	defer tests.AddFixtures("models/user/fixtures/")()
+	defer unittest.OverrideFixtures("models/user/fixtures")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	users, err := user_model.GetAllUsers(db.DefaultContext)
@@ -157,7 +156,7 @@ func TestAPActorKeyID(t *testing.T) {
 }
 
 func TestSearchUsers(t *testing.T) {
-	defer tests.AddFixtures("models/user/fixtures/")()
+	defer unittest.OverrideFixtures("models/user/fixtures")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 	testSuccess := func(opts *user_model.SearchUserOptions, expectedUserOrOrgIDs []int64) {
 		users, _, err := user_model.SearchUsers(db.DefaultContext, opts)
