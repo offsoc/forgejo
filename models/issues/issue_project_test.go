@@ -20,7 +20,7 @@ import (
 )
 
 func TestPrivateIssueProjects(t *testing.T) {
-	defer tests.AddFixtures("models/fixtures/PrivateIssueProjects/")()
+	defer unittest.OverrideFixtures("models/fixtures/PrivateIssueProjects")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
@@ -119,7 +119,7 @@ func TestPrivateIssueProjects(t *testing.T) {
 }
 
 func TestPrivateRepoProjects(t *testing.T) {
-	defer tests.AddFixtures("models/fixtures/TestPrivateRepoProjects/")()
+	defer unittest.OverrideFixtures("models/fixtures/TestPrivateRepoProjects")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	org := unittest.AssertExistsAndLoadBean(t, &organization.Organization{ID: 3})

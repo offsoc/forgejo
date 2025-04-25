@@ -19,7 +19,7 @@ import (
 // As it is not possible to do actions as system users, the tests are done using fixtures.
 
 func TestSystemCommentRoles(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestSystemCommentRoles/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestSystemCommentRoles")()
 	defer tests.PrepareTestEnv(t)()
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})

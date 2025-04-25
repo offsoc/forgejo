@@ -337,16 +337,6 @@ func Printf(format string, args ...any) {
 	testlogger.Printf(format, args...)
 }
 
-func AddFixtures(dirs ...string) func() {
-	return unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: dirs,
-		},
-	)
-}
-
 type DeclarativeRepoOptions struct {
 	Name          optional.Option[string]
 	EnabledUnits  optional.Option[[]unit_model.Type]
