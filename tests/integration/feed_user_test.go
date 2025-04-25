@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/tests"
 
@@ -33,7 +34,7 @@ type RSS struct {
 }
 
 func TestFeed(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestFeed/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestFeed")()
 	defer tests.PrepareTestEnv(t)()
 
 	t.Run("User", func(t *testing.T) {

@@ -29,9 +29,14 @@ func GetXORMEngine(engine ...*xorm.Engine) (x *xorm.Engine) {
 	return db.DefaultContext.(*db.Context).Engine().(*xorm.Engine)
 }
 
-func OverrideFixtures(opts FixturesOptions, engine ...*xorm.Engine) func() {
+func OverrideFixtures(dir string) func() {
 	old := fixturesLoader
-	if err := InitFixtures(opts, engine...); err != nil {
+	opts := FixturesOptions{
+		Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
+		Base: setting.AppWorkPath,
+		Dirs: []string{dir},
+	}
+	if err := InitFixtures(opts); err != nil {
 		panic(err)
 	}
 	return func() {

@@ -18,7 +18,7 @@ import (
 )
 
 func TestPrivateIssueProject(t *testing.T) {
-	defer tests.AddFixtures("models/fixtures/PrivateIssueProjects/")()
+	defer unittest.OverrideFixtures("models/fixtures/PrivateIssueProjects")()
 	defer tests.PrepareTestEnv(t)()
 
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})

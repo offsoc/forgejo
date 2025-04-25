@@ -4,14 +4,12 @@
 package auth_test
 
 import (
-	"path/filepath"
 	"slices"
 	"testing"
 
 	auth_model "forgejo.org/models/auth"
 	"forgejo.org/models/db"
 	"forgejo.org/models/unittest"
-	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -275,13 +273,7 @@ func TestBuiltinApplicationsClientIDs(t *testing.T) {
 }
 
 func TestOrphanedOAuth2Applications(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"models/auth/TestOrphanedOAuth2Applications/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("models/auth/TestOrphanedOAuth2Applications")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	count, err := auth_model.CountOrphanedOAuth2Applications(db.DefaultContext)

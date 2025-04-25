@@ -67,13 +67,7 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestPurgeUser(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"services/user/TestPurgeUser/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("services/user/TestPurgeUser")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 	defer test.MockVariableValue(&setting.SSH.RootPath, t.TempDir())()
 	defer test.MockVariableValue(&setting.SSH.CreateAuthorizedKeysFile, true)()

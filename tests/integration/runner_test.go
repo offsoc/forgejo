@@ -19,7 +19,7 @@ import (
 )
 
 func TestRunnerModification(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestRunnerModification")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestRunnerModification")()
 	defer tests.PrepareTestEnv(t)()
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
