@@ -69,6 +69,7 @@ func TestDeleteComment(t *testing.T) {
 		}))
 		hookTaskCount := unittest.GetCount(t, &webhook_model.HookTask{})
 
+		require.NoError(t, comment.LoadReview(t.Context()))
 		require.NoError(t, issue_service.DeleteComment(db.DefaultContext, nil, comment))
 
 		// The comment doesn't exist anymore.
