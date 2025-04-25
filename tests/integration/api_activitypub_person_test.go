@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"testing"
 
+	"forgejo.org/models/activities"
 	"forgejo.org/models/db"
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
@@ -18,7 +19,6 @@ import (
 	"forgejo.org/routers"
 	"forgejo.org/tests"
 
-	fa "forgejo.org/models/federated_user_activity"
 	ap "github.com/go-ap/activitypub"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -197,6 +197,6 @@ func TestActivityPubPersonInboxNote(t *testing.T) {
 		resp, err = c.Post(userActivity, localUser2Inbox)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
-		unittest.AssertExistsAndLoadBean(t, &fa.FederatedUserActivity{NoteURL: distantNoteUrl})
+		unittest.AssertExistsAndLoadBean(t, &activities.FederatedUserActivity{NoteURL: distantNoteUrl})
 	})
 }
