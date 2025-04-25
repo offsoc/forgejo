@@ -35,7 +35,6 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 		ID        int64 `xorm:"pk autoincr"`
 		UserID    int64 `xorm:"NOT NULL"`
 		InboxPath string
-		ActorURL  *string
 	}
 
 	err := x.Sync(&FederatedUserActivity{})
