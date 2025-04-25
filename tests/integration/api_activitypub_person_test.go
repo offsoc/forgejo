@@ -132,7 +132,7 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
-		c, err := cf.WithKeys(db.DefaultContext, mock.ApActor.User,
+		c, err := cf.WithKeysDirect(db.DefaultContext, mock.ApActor.PrivKey,
 			mock.ApActor.APActorKeyID(federatedSrv.URL))
 		require.NoError(t, err)
 		resp, err := c.Post(followActivity, localUser2Inbox)
@@ -174,7 +174,7 @@ func TestActivityPubPersonInboxNote(t *testing.T) {
 		))
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
-		c, err := cf.WithKeys(db.DefaultContext, mock.ApActor.User,
+		c, err := cf.WithKeysDirect(db.DefaultContext, mock.ApActor.PrivKey,
 			mock.ApActor.APActorKeyID(federatedSrv.URL))
 		require.NoError(t, err)
 		resp, err := c.Post(followActivity, localUser2Inbox)
@@ -197,6 +197,6 @@ func TestActivityPubPersonInboxNote(t *testing.T) {
 		resp, err = c.Post(userActivity, localUser2Inbox)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
-		unittest.AssertExistsAndLoadBean(t, &forgefed.FederatedUserActivity{OriginalURL: distantNoteUrl})
+		unittest.AssertExistsAndLoadBean(t, &forgefed.FederatedUserActivity{NoteURL: distantNoteUrl})
 	})
 }
