@@ -10,69 +10,61 @@ import (
 
 	"forgejo.org/models/db"
 	user_model "forgejo.org/models/user"
-	fm "forgejo.org/modules/forgefed"
 	"forgejo.org/modules/json"
 	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/validation"
+	ap "github.com/go-ap/activitypub"
 )
 
 type FederatedUserActivity struct {
-	ID int64 `xorm:"pk autoincr"`
-	// TODO: this should be the only reference to User
-	UserID int64 `xorm:"NOT NULL"`
-	// TODO: Remove
-	ExternalID string `xorm:"NOT NULL"`
-
-	Actor *user_model.User `xorm:"-"`
-
-	Note string
-
-	// TODO: Rename to sth like Normalized ...
-	OriginalURL string
-
-	Original string
-
-	Created timeutil.TimeStamp `xorm:"created"`
+	ID           int64 `xorm:"pk autoincr"`
+	UserID       int64 `xorm:"NOT NULL"`
+	ActorID      string
+	Actor        *user_model.User `xorm:"-"` // transient
+	NoteContent  string
+	NoteURL      string
+	OriginalNote string
+	Created      timeutil.TimeStamp `xorm:"created"`
 }
 
 func init() {
 	db.RegisterModel(new(FederatedUserActivity))
 }
 
-// TODO: add construtor fkt & Validation
-
-// TODO: move this to service as the operation crosses the aggregate borders
-func (fua *FederatedUserActivity) LoadActor(ctx context.Context) error {
-	if fua.Actor != nil {
-		return nil
-	}
-
-	actor, err := user_model.GetUserByActorURL(ctx, fua.ExternalID)
+func NewFederatedUserActivity(userID int64, actorID, noteContent, noteURL string, originalNote ap.Activity) (FederatedUserActivity, error) {
+	json, err := json.Marshal(originalNote)
 	if err != nil {
-		return err
+		return FederatedUserActivity{}, err
 	}
-	fua.Actor = actor
-
-	return nil
+	result := FederatedUserActivity{
+		UserID:       userID,
+		ActorID:      actorID,
+		NoteContent:  noteContent,
+		NoteURL:      noteURL,
+		OriginalNote: string(json),
+	}
+	if valid, err := validation.IsValid(result); !valid {
+		return FederatedUserActivity{}, err
+	}
+	return result, nil
 }
 
-func AddUserActivity(ctx context.Context, userID int64, externalID string, activity fm.ForgeUserActivityNote) error {
-	json, err := json.Marshal(activity)
-	if err != nil {
+// TODO: add tests
+func (federatedUser FederatedUserActivity) Validate() []string {
+	var result []string
+	result = append(result, validation.ValidateNotEmpty(federatedUser.UserID, "UserID")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUser.ActorID, "ActorID")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUser.NoteContent, "NoteContent")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUser.NoteURL, "NoteURL")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUser.OriginalNote, "OriginalNote")...)
+	return result
+}
+
+func CreateUserActivity(ctx context.Context, federatedUserActivity *FederatedUserActivity) error {
+	if valid, err := validation.IsValid(federatedUserActivity); !valid {
 		return err
 	}
-
-	fmt.Printf("xxx externalID %v\n", externalID)
-	fmt.Printf("xxx url %v\n", activity.URL)
-	fmt.Printf("xxx url.id %v\n", activity.URL.GetID())
-
-	_, err = db.GetEngine(ctx).
-		Insert(&FederatedUserActivity{
-			UserID:      userID,
-			ExternalID:  externalID,
-			Note:        activity.Content.String(),
-			OriginalURL: activity.URL.GetID().String(),
-			Original:    string(json),
-		})
+	_, err := db.GetEngine(ctx).Insert(federatedUserActivity)
 	return err
 }
 
@@ -92,9 +84,20 @@ func GetFollowingFeeds(ctx context.Context, opts GetFollowingFeedsOptions) ([]*F
 		return nil, 0, fmt.Errorf("FindAndCount: %w", err)
 	}
 	for _, act := range actions {
-		if err := act.LoadActor(ctx); err != nil {
+		if err := act.loadActor(ctx); err != nil {
 			return nil, 0, err
 		}
 	}
 	return actions, count, err
+}
+
+// TODO: move this to service as the operation crosses the aggregate borders
+func (fua *FederatedUserActivity) loadActor(ctx context.Context) error {
+	actorUser, _, err := user_model.GetFederatedUserByUserId(ctx, fua.UserID)
+	if err != nil {
+		return err
+	}
+	fua.Actor = actorUser
+
+	return nil
 }

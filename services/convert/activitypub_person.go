@@ -16,10 +16,10 @@ import (
 
 func ToActivityPubPersonFeedItem(item *forgefed.FederatedUserActivity) api.APPersonFollowItem {
 	return api.APPersonFollowItem{
-		ActorID:      item.ExternalID,
-		Note:         item.Note,
-		OriginalURL:  item.OriginalURL,
-		OriginalItem: item.Original,
+		ActorID:      item.ActorID,
+		Note:         item.NoteContent,
+		OriginalURL:  item.NoteURL,
+		OriginalItem: item.OriginalNote,
 	}
 }
 
