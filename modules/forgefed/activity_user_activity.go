@@ -59,8 +59,6 @@ func NewForgeUserActivity(doer *user_model.User, actionID int64, content string)
 }
 
 func (userActivity ForgeUserActivity) Validate() []string {
-	// TODO: write test
-	// _SOURCE?
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(string(userActivity.Type), "type")...)
 	result = append(result, validation.ValidateOneOf(string(userActivity.Type), []any{"Create"}, "type")...)

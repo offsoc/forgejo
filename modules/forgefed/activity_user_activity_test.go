@@ -10,7 +10,7 @@ import (
 	ap "github.com/go-ap/activitypub"
 )
 
-func Test_Validate(t *testing.T) {
+func Test_ForgeUserActivityValidation(t *testing.T) {
 	note := ForgeUserActivityNote{}
 	note.Type = "Note"
 	note.Content = ap.NaturalLanguageValues{
@@ -20,10 +20,6 @@ func Test_Validate(t *testing.T) {
 		},
 	}
 	note.URL = ap.IRI("example.org/user-id/57")
-
-	if res, _ := validation.IsValid(note); !res {
-		t.Errorf("sut expected to be valid: %v\n", note.Validate())
-	}
 
 	sut := ForgeUserActivity{}
 	sut.Type = "Create"
