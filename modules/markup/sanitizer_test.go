@@ -28,6 +28,11 @@ func Test_Sanitizer(t *testing.T) {
 		`<input type="checkbox">`, `<input type="checkbox">`,
 		`<input checked disabled autofocus>`, `<input checked="" disabled="">`,
 
+		// Button
+		`<button type="submit">Test</button>`, `Test`,
+		`<button></button>`, ``,
+		`<button><input type="checkbox"></button>`, `<input type="checkbox">`,
+
 		// Code highlight injection
 		`<code class="language-random&#32;ui&#32;tab&#32;active&#32;menu&#32;attached&#32;animating&#32;sidebar&#32;following&#32;bar&#32;center"></code>`, `<code></code>`,
 		`<code class="language-lol&#32;ui&#32;tab&#32;active&#32;menu&#32;attached&#32;animating&#32;sidebar&#32;following&#32;bar&#32;center">
