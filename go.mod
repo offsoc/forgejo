@@ -56,7 +56,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-github/v64 v64.0.0
-	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e
+	github.com/google/pprof v0.0.0-20250423184734-337e5dd93bb4
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/feeds v1.2.0
 	github.com/gorilla/sessions v1.4.0
