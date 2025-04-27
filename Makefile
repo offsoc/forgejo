@@ -92,28 +92,21 @@ else
     FORGEJO_VERSION_API ?= $(GITEA_VERSION)+${GITEA_COMPATIBILITY}
   else
     # drop the "g" prefix prepended by git describe to the commit hash
-    FORGEJO_VERSION ?= $(shell git describe --exclude '*-test' --tags --always | sed 's/^v//' | sed 's/\-g/-/')+${GITEA_COMPATIBILITY}
+    FORGEJO_VERSION ?= $(shell git describe --exclude '*-test' --tags --always 2>/dev/null | sed 's/^v//' | sed 's/\-g/-/')
+    ifneq ($(FORGEJO_VERSION),)
+      ifneq ($(GITEA_COMPATIBILITY),)
+        FORGEJO_VERSION := $(FORGEJO_VERSION)+$(GITEA_COMPATIBILITY)
+      endif
+    endif
   endif
 endif
 FORGEJO_VERSION_MAJOR=$(shell echo $(FORGEJO_VERSION) | sed -e 's/\..*//')
 FORGEJO_VERSION_MINOR=$(shell echo $(FORGEJO_VERSION) | sed -E -e 's/^([0-9]+\.[0-9]+).*/\1/')
 
-show-version-full:
-	@echo ${FORGEJO_VERSION}
-
-show-version-major:
-	@echo ${FORGEJO_VERSION_MAJOR}
-
-show-version-minor:
-	@echo ${FORGEJO_VERSION_MINOR}
-
 RELEASE_VERSION ?= ${FORGEJO_VERSION}
 VERSION ?= ${RELEASE_VERSION}
 
 FORGEJO_VERSION_API ?= ${FORGEJO_VERSION}
-
-show-version-api:
-	@echo ${FORGEJO_VERSION_API}
 
 # Strip binaries by default to reduce size, allow overriding for debugging
 STRIP ?= 1
@@ -208,7 +201,7 @@ all: build
 .PHONY: help
 help:
 	@echo "Make Routines:"
-	@echo " - \"\"                             equivalent to \"build\""
+	@echo " - \"\"                               equivalent to \"build\""
 	@echo " - build                            build everything"
 	@echo " - frontend                         build frontend files"
 	@echo " - backend                          build backend files"
@@ -275,6 +268,30 @@ help:
 	@echo " - test[\#TestSpecificName]         run unit test"
 	@echo " - test-sqlite[\#TestSpecificName]  run integration test for sqlite"
 	@echo " - reproduce-build\#version         build a reproducible binary for the specified release version"
+
+.PHONY: verify-version
+verify-version:
+ifeq ($(FORGEJO_VERSION),)
+	@echo "Error: Could not determine FORGEJO_VERSION; version file $(STORED_VERSION_FILE) not present and no suitable git tag found"
+	@echo 'In most cases this likely means you forgot to fetch git tags, you can fix this by executing `git fetch --tags`. If this is not possible and this is part of a custom build process, then you can set a specific version by writing it to $(STORED_VERSION_FILE) (This must be a semver compatible version).'
+	@false
+endif
+
+.PHONY: show-version-full
+show-version-full: verify-version
+	@echo ${FORGEJO_VERSION}
+
+.PHONY: show-version-major
+show-version-major: verify-version
+	@echo ${FORGEJO_VERSION_MAJOR}
+
+.PHONY: show-version-minor
+show-version-minor: verify-version
+	@echo ${FORGEJO_VERSION_MINOR}
+
+.PHONY: show-version-api
+show-version-api: verify-version
+	@echo ${FORGEJO_VERSION_API}
 
 ###
 # Check system and environment requirements
@@ -816,7 +833,7 @@ check: test
 ###
 
 .PHONY: install $(TAGS_PREREQ)
-install: $(wildcard *.go)
+install: $(wildcard *.go) | verify-version
 	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) install -v -tags '$(TAGS)' -ldflags '$(LDFLAGS)'
 
 .PHONY: build
@@ -844,13 +861,13 @@ generate-go: $(TAGS_PREREQ)
 merge-locales:
 	@echo "NOT NEEDED: THIS IS A NOOP AS OF Forgejo 7.0 BUT KEPT FOR BACKWARD COMPATIBILITY"
 
-$(EXECUTABLE): $(GO_SOURCES) $(TAGS_PREREQ)
+$(EXECUTABLE): $(GO_SOURCES) $(TAGS_PREREQ) | verify-version
 	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -o $@
 
 forgejo: $(EXECUTABLE)
 	ln -f $(EXECUTABLE) forgejo
 
-static-executable: $(GO_SOURCES) $(TAGS_PREREQ)
+static-executable: $(GO_SOURCES) $(TAGS_PREREQ) | verify-version
 	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -o $(EXECUTABLE)
 
 .PHONY: release
@@ -863,18 +880,18 @@ $(DIST_DIRS):
 	mkdir -p $(DIST_DIRS)
 
 .PHONY: release-linux
-release-linux: | $(DIST_DIRS)
+release-linux: | $(DIST_DIRS) verify-version
 	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) run $(XGO_PACKAGE) -go $(XGO_VERSION) -dest $(DIST)/binaries -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external -extldflags "-static" $(LDFLAGS)' -targets '$(LINUX_ARCHS)' -out forgejo-$(VERSION) .
 ifeq ($(CI),true)
 	cp /build/* $(DIST)/binaries
 endif
 
 .PHONY: release-darwin
-release-darwin: | $(DIST_DIRS)
+release-darwin: | $(DIST_DIRS) verify-version
 	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) run $(XGO_PACKAGE) -go $(XGO_VERSION) -dest $(DIST)/binaries -tags 'netgo osusergo $(TAGS)' -ldflags '$(LDFLAGS)' -targets 'darwin-10.12/amd64,darwin-10.12/arm64' -out gitea-$(VERSION) .
 
 .PHONY: release-freebsd
-release-freebsd: | $(DIST_DIRS)
+release-freebsd: | $(DIST_DIRS) verify-version
 	CGO_CFLAGS="$(CGO_CFLAGS)" $(GO) run $(XGO_PACKAGE) -go $(XGO_VERSION) -dest $(DIST)/binaries -tags 'netgo osusergo $(TAGS)' -ldflags '$(LDFLAGS)' -targets 'freebsd/amd64' -out gitea-$(VERSION) .
 
 .PHONY: release-copy
