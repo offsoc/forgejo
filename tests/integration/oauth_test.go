@@ -1431,3 +1431,28 @@ func TestOAuth_GrantScopesReadPublicGroupsWithTheReadScope(t *testing.T) {
 		assert.Contains(t, parsedUserInfo.Groups, privOrg)
 	}
 }
+
+func TestSignUpViaOAuthDefaultRestricted(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.OAuth2Client.EnableAutoRegistration, true)()
+	defer test.MockVariableValue(&setting.Service.DefaultUserIsRestricted, true)()
+
+	gitlabName := "gitlab"
+	addAuthSource(t, authSourcePayloadGitLabCustom(gitlabName))
+	userGitLabUserID := "BB(5)=47176870"
+
+	defer mockCompleteUserAuth(func(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+		return goth.User{
+			Provider: gitlabName,
+			UserID:   userGitLabUserID,
+			Name:     "gitlab-user",
+			NickName: "gitlab-user",
+			Email:    "gitlab@example.com",
+		}, nil
+	})()
+	req := NewRequest(t, "GET", fmt.Sprintf("/user/oauth2/%s/callback?code=XYZ&state=XYZ", gitlabName))
+	resp := MakeRequest(t, req, http.StatusSeeOther)
+	assert.Equal(t, "/", test.RedirectURL(resp))
+
+	unittest.AssertExistsIf(t, true, &user_model.User{Name: "gitlab-user"}, "is_restricted = true")
+}
