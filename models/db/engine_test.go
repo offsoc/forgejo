@@ -103,8 +103,8 @@ func TestSlowQuery(t *testing.T) {
 	// It's not possible to clean this up with XORM, but it's luckily not harmful
 	// to leave around.
 	engine.AddHook(&db.SlowQueryHook{
-		Treshold: time.Second * 10,
-		Logger:   log.GetLogger("slow-query"),
+		Threshold: time.Second * 10,
+		Logger:    log.GetLogger("slow-query"),
 	})
 
 	// NOOP query.
@@ -114,8 +114,8 @@ func TestSlowQuery(t *testing.T) {
 	assert.False(t, stopped)
 
 	engine.AddHook(&db.SlowQueryHook{
-		Treshold: 0, // Every query should be logged.
-		Logger:   log.GetLogger("slow-query"),
+		Threshold: 0, // Every query should be logged.
+		Logger:    log.GetLogger("slow-query"),
 	})
 
 	// NOOP query.
