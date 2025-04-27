@@ -286,7 +286,7 @@ func syncGitConfig() (err error) {
 		}
 
 		// Get the ssh-keygen binary that Git will use.
-		// This can be overriden in app.ini in [git.config] section, so we must
+		// This can be overridden in app.ini in [git.config] section, so we must
 		// query this information.
 		sshKeygenPath, err := configGet("gpg.ssh.program")
 		if err != nil {

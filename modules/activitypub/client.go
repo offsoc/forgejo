@@ -192,7 +192,7 @@ func (c *Client) GetBody(uri string) ([]byte, error) {
 	}
 	defer response.Body.Close()
 	if response.ContentLength > setting.Federation.MaxSize {
-		return nil, fmt.Errorf("Request returned %d bytes (max allowed incomming size: %d bytes)", response.ContentLength, setting.Federation.MaxSize)
+		return nil, fmt.Errorf("Request returned %d bytes (max allowed incoming size: %d bytes)", response.ContentLength, setting.Federation.MaxSize)
 	} else if response.ContentLength == -1 {
 		log.Warn("Request to %v returned an unknown content length, response may be truncated to %d bytes", uri, setting.Federation.MaxSize)
 	}
