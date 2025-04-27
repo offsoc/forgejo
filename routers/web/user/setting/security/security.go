@@ -55,7 +55,7 @@ func DeleteAccountLink(ctx *context.Context) {
 }
 
 func loadSecurityData(ctx *context.Context) {
-	enrolled, err := auth_model.HasTwoFactorByUID(ctx, ctx.Doer.ID)
+	enrolled, err := auth_model.HasTOTPByUID(ctx, ctx.Doer.ID)
 	if err != nil {
 		ctx.ServerError("SettingsTwoFactor", err)
 		return
