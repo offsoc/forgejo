@@ -120,42 +120,42 @@ func TestAPIGetListActionRun(t *testing.T) {
 	testqueries := []struct {
 		name        string
 		query       string
-		expectedIds []int64
+		expectedIDs []int64
 	}{
 		{
 			name:        "No query parameters",
 			query:       "",
-			expectedIds: runIds,
+			expectedIDs: runIds,
 		},
 		{
 			name:        "Search for workflow_dispatch events",
 			query:       "?event=workflow_dispatch",
-			expectedIds: []int64{894},
+			expectedIDs: []int64{894},
 		},
 		{
 			name:        "Search for multiple events",
 			query:       "?event=workflow_dispatch&event=push",
-			expectedIds: []int64{892, 894},
+			expectedIDs: []int64{892, 894},
 		},
 		{
 			name:        "Search for failed status",
 			query:       "?status=failure",
-			expectedIds: []int64{893},
+			expectedIDs: []int64{893},
 		},
 		{
 			name:        "Search for multiple statuses",
 			query:       "?status=failure&status=running",
-			expectedIds: []int64{893, 894},
+			expectedIDs: []int64{893, 894},
 		},
 		{
 			name:        "Search for num_nr",
 			query:       "?run_number=1",
-			expectedIds: []int64{892},
+			expectedIDs: []int64{892},
 		},
 		{
 			name:        "Search for sha",
 			query:       "?head_sha=494f3d9c26828c27972d8b7e1f907d3610e5211d",
-			expectedIds: []int64{893},
+			expectedIDs: []int64{893},
 		},
 	}
 
@@ -172,15 +172,15 @@ func TestAPIGetListActionRun(t *testing.T) {
 			apiRuns := new(api.ListActionRunResponse)
 			DecodeJSON(t, res, apiRuns)
 
-			assert.Equal(t, int64(len(tt.expectedIds)), apiRuns.TotalCount)
-			assert.Len(t, apiRuns.Entries, len(tt.expectedIds))
+			assert.Equal(t, int64(len(tt.expectedIDs)), apiRuns.TotalCount)
+			assert.Len(t, apiRuns.Entries, len(tt.expectedIDs))
 
 			resultIds := make([]int64, apiRuns.TotalCount)
 			for i, run := range apiRuns.Entries {
 				resultIds[i] = run.ID
 			}
 
-			assert.ElementsMatch(t, tt.expectedIds, resultIds)
+			assert.ElementsMatch(t, tt.expectedIDs, resultIds)
 		})
 	}
 }
