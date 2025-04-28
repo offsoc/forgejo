@@ -107,7 +107,6 @@ func TestActivityPubPersonInboxNoteToDistant(t *testing.T) {
 		localUser2Inbox := localUrl.JoinPath("/api/v1/activitypub/user-id/2/inbox").String()
 		localSession2 := loginUser(t, localUser2.LoginName)
 		localSecssion2Token := getTokenForLoggedInUser(t, localSession2, auth_model.AccessTokenScopeWriteIssue)
-		println(localSecssion2Token)
 
 		repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, localUser2, tests.DeclarativeRepoOptions{})
 		defer f()
@@ -138,6 +137,6 @@ func TestActivityPubPersonInboxNoteToDistant(t *testing.T) {
 		MakeRequest(t, req, http.StatusCreated)
 
 		// check for activity on distant inbox
-		assert.Equal(t, "", mock.LastPost)
+		assert.Contains(t, mock.LastPost, "user2</a> opened issue")
 	})
 }

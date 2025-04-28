@@ -34,7 +34,6 @@ func initDeliveryQueue() error {
 }
 
 func deliveryQueueHandler(items ...deliveryQueueItem) (unhandled []deliveryQueueItem) {
-	log.Warn("XXX deliveryQueueHandler")
 	for _, item := range items {
 		if err := deliverToInbox(item); err != nil {
 			unhandled = append(unhandled, item)
@@ -44,8 +43,6 @@ func deliveryQueueHandler(items ...deliveryQueueItem) (unhandled []deliveryQueue
 }
 
 func deliverToInbox(item deliveryQueueItem) error {
-	log.Warn("XXX deliverToInbox item : %s", item)
-
 	ctx, _, finished := process.GetManager().AddContext(graceful.GetManager().HammerContext(),
 		fmt.Sprintf("Delivering an Activity via user[%d] (%s), to %s", item.Doer.ID, item.Doer.Name, item.InboxURL))
 	defer finished()
