@@ -25,7 +25,6 @@ func TestAPIFollowFederated(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
-	defer tests.PrepareTestEnv(t)()
 
 	mock := test.NewFederationServerMock()
 	federatedSrv := mock.DistantServer(t)
@@ -38,18 +37,19 @@ func TestAPIFollowFederated(t *testing.T) {
 	distantUrl := federatedSrv.URL
 	distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantUrl)
 
-	t.Run("Follow", func(t *testing.T) {
-		defer tests.PrintCurrentTest(t)()
+	// local user follow distant
+	req := NewRequestWithJSON(t, "POST",
+		"/api/v1/user/activitypub/follow",
+		&structs.APRemoteFollowOption{
+			Target: distantUser15URL,
+		}).
+		AddTokenAuth(localSecssion10Token)
+	MakeRequest(t, req, http.StatusNoContent)
 
-		req := NewRequestWithJSON(t, "POST",
-			"/api/v1/user/activitypub/follow",
-			&structs.APRemoteFollowOption{
-				Target: distantUser15URL,
-			}).
-			AddTokenAuth(localSecssion10Token)
-		MakeRequest(t, req, http.StatusNoContent)
-		federationHost := unittest.AssertExistsAndLoadBean(t, &forgefed.FederationHost{HostFqdn: "127.0.0.1"})
-		unittest.AssertExistsAndLoadBean(t, &user.FederatedUser{ExternalID: "15", FederationHostID: federationHost.ID})
-		assert.Contains(t, mock.LastPost, "\"object\":\"http://DISTANT_FEDERATION_HOST/api/v1/activitypub/user-id/15\"")
-	})
+	// check: federated actors now exist local
+	federationHost := unittest.AssertExistsAndLoadBean(t, &forgefed.FederationHost{HostFqdn: "127.0.0.1"})
+	unittest.AssertExistsAndLoadBean(t, &user.FederatedUser{ExternalID: "15", FederationHostID: federationHost.ID})
+
+	// check: follow request arrived at distant
+	assert.Contains(t, mock.LastPost, "\"object\":\"http://DISTANT_FEDERATION_HOST/api/v1/activitypub/user-id/15\"")
 }
