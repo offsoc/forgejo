@@ -16,7 +16,7 @@ type FederatedUser struct {
 	FederationHostID      int64                  `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
 	KeyID                 sql.NullString         `xorm:"key_id UNIQUE"`
 	PublicKey             sql.Null[sql.RawBytes] `xorm:"BLOB"`
-	NormalizedOriginalURL string                 // This field ist just to keep original information. Pls. do not use for search or as ID!
+	NormalizedOriginalURL string                 // This field is just to keep original information. Pls. do not use for search or as ID!
 }
 
 func NewFederatedUser(userID int64, externalID string, federationHostID int64, normalizedOriginalURL string) (FederatedUser, error) {
