@@ -105,8 +105,8 @@ jobs:
 func TestAPIGetListActionRun(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	var (
-		runIDs []int64                            = []int64{892, 893, 894}
-		dbRuns map[int64]*actions_model.ActionRun = make(map[int64]*actions_model.ActionRun, 3)
+		runIDs = []int64{892, 893, 894}
+		dbRuns = make(map[int64]*actions_model.ActionRun, 3)
 	)
 
 	for _, id := range runIDs {
@@ -187,9 +187,8 @@ func TestAPIGetListActionRun(t *testing.T) {
 
 func TestAPIGetActionRun(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-	var (
-		runID int64 = 892
-	)
+	var runID int64 = 892
+
 	dbRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: runID})
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: dbRun.RepoID})
