@@ -175,12 +175,12 @@ func TestAPIGetListActionRun(t *testing.T) {
 			assert.Equal(t, int64(len(tt.expectedIDs)), apiRuns.TotalCount)
 			assert.Len(t, apiRuns.Entries, len(tt.expectedIDs))
 
-			resultIds := make([]int64, apiRuns.TotalCount)
+			resultIDs := make([]int64, apiRuns.TotalCount)
 			for i, run := range apiRuns.Entries {
-				resultIds[i] = run.ID
+				resultIDs[i] = run.ID
 			}
 
-			assert.ElementsMatch(t, tt.expectedIDs, resultIds)
+			assert.ElementsMatch(t, tt.expectedIDs, resultIDs)
 		})
 	}
 }
