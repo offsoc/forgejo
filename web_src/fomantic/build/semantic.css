@@ -379,14 +379,6 @@
   font-size: 1.28571429rem;
 }
 
-.ui.huge.buttons .dropdown,
-.ui.huge.buttons .dropdown .menu > .item,
-.ui.huge.buttons .button,
-.ui.huge.buttons .or,
-.ui.ui.ui.ui.huge.button {
-  font-size: 1.42857143rem;
-}
-
 /*--------------
     Icon Only
 ---------------*/
@@ -4205,11 +4197,6 @@ select.ui.dropdown {
   font-size: 1.28571429rem;
 }
 
-.ui.huge.dropdown,
-.ui.huge.dropdown .menu > .item {
-  font-size: 1.42857143rem;
-}
-
 /*******************************
          Theme Overrides
 *******************************/
@@ -6086,12 +6073,6 @@ select.ui.dropdown {
 .ui.big.form .field .dropdown,
 .ui.big.form .field .dropdown .menu > .item {
   font-size: 1.28571429rem;
-}
-
-.ui.huge.form,
-.ui.huge.form .field .dropdown,
-.ui.huge.form .field .dropdown .menu > .item {
-  font-size: 1.42857143rem;
 }
 
 /*******************************
@@ -8050,16 +8031,6 @@ Floated Menu / Item
   width: 20rem;
 }
 
-.ui.huge.menu,
-.ui.huge.menu .dropdown,
-.ui.huge.menu .dropdown .menu > .item {
-  font-size: 1.21428571rem;
-}
-
-.ui.huge.vertical.menu:not(.icon) {
-  width: 22rem;
-}
-
 /*-------------------
   Inverted dropdowns
 --------------------*/
@@ -8812,45 +8783,6 @@ Floated Menu / Item
   }
 }
 
-.ui.huge.modal > .header:not(.ui) {
-  font-size: 1.6em;
-}
-
-@media only screen and (max-width: 767.98px) {
-  .ui.huge.modal {
-    width: 95%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  .ui.huge.modal {
-    width: 88%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 992px) {
-  .ui.huge.modal {
-    width: 1360px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1200px) {
-  .ui.huge.modal {
-    width: 1440px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1920px) {
-  .ui.huge.modal {
-    width: 1520px;
-    margin: 0 0 0 0;
-  }
-}
-
 /*******************************
          Theme Overrides
 *******************************/
@@ -9400,11 +9332,6 @@ Floated Menu / Item
 .ui.big.search {
   font-size: 1.28571429em;
 }
-
-.ui.huge.search {
-  font-size: 1.42857143em;
-}
-
 
 /*--------------
       Mobile
