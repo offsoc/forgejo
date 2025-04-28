@@ -101,3 +101,114 @@ jobs:
 		assert.Len(t, run.Jobs, 2)
 	})
 }
+
+func TestAPIGetListActionRun(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	var (
+		runIds []int64                            = []int64{892, 893, 894}
+		dbRuns map[int64]*actions_model.ActionRun = make(map[int64]*actions_model.ActionRun, 3)
+	)
+
+	for _, id := range runIds {
+		dbRuns[id] = unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: id})
+	}
+
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: dbRuns[runIds[0]].RepoID})
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+	token := getUserToken(t, user.LowerName, auth_model.AccessTokenScopeWriteRepository)
+
+	testqueries := []struct {
+		name        string
+		query       string
+		expectedIds []int64
+	}{
+		{
+			name:        "No query parameters",
+			query:       "",
+			expectedIds: runIds,
+		},
+		{
+			name:        "Search for workflow_dispatch events",
+			query:       "?event=workflow_dispatch",
+			expectedIds: []int64{894},
+		},
+		{
+			name:        "Search for multiple events",
+			query:       "?event=workflow_dispatch&event=push",
+			expectedIds: []int64{892, 894},
+		},
+		{
+			name:        "Search for failed status",
+			query:       "?status=failure",
+			expectedIds: []int64{893},
+		},
+		{
+			name:        "Search for multiple statuses",
+			query:       "?status=failure&status=running",
+			expectedIds: []int64{893, 894},
+		},
+		{
+			name:        "Search for num_nr",
+			query:       "?run_number=1",
+			expectedIds: []int64{892},
+		},
+		{
+			name:        "Search for sha",
+			query:       "?head_sha=494f3d9c26828c27972d8b7e1f907d3610e5211d",
+			expectedIds: []int64{893},
+		},
+	}
+
+	for _, tt := range testqueries {
+		t.Run(tt.name, func(t *testing.T) {
+			req := NewRequest(t, http.MethodGet,
+				fmt.Sprintf("/api/v1/repos/%s/%s/actions/runs%s",
+					repo.OwnerName, repo.Name, tt.query,
+				),
+			)
+			req.AddTokenAuth(token)
+
+			res := MakeRequest(t, req, http.StatusOK)
+			apiRuns := new(api.ListActionRunResponse)
+			DecodeJSON(t, res, apiRuns)
+
+			assert.Equal(t, int64(len(tt.expectedIds)), apiRuns.TotalCount)
+			assert.Len(t, apiRuns.Entries, len(tt.expectedIds))
+
+			resultIds := make([]int64, apiRuns.TotalCount)
+			for i, run := range apiRuns.Entries {
+				resultIds[i] = run.ID
+			}
+
+			assert.ElementsMatch(t, tt.expectedIds, resultIds)
+		})
+	}
+}
+
+func TestAPIGetActionRun(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	var (
+		runId int64 = 892
+	)
+	dbRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: runId})
+
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: dbRun.RepoID})
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+	token := getUserToken(t, user.LowerName, auth_model.AccessTokenScopeWriteRepository)
+
+	req := NewRequest(t, http.MethodGet,
+		fmt.Sprintf("/api/v1/repos/%s/%s/actions/runs/%d",
+			repo.OwnerName, repo.Name, runId,
+		),
+	)
+	req.AddTokenAuth(token)
+
+	res := MakeRequest(t, req, http.StatusOK)
+	apiRun := new(api.ActionRun)
+	DecodeJSON(t, res, apiRun)
+
+	assert.Equal(t, dbRun.Index, apiRun.RunNumber)
+	assert.Equal(t, dbRun.Status.String(), apiRun.Status)
+	assert.Equal(t, dbRun.CommitSHA, apiRun.HeadSHA)
+	assert.Equal(t, dbRun.TriggerUserID, apiRun.TriggeringActor.ID)
+}

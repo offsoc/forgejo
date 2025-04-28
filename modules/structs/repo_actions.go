@@ -32,3 +32,23 @@ type ActionTaskResponse struct {
 	Entries    []*ActionTask `json:"workflow_runs"`
 	TotalCount int64         `json:"total_count"`
 }
+
+// ActionRun represents an ActionRun
+type ActionRun struct {
+	ID              int64  `json:"id"`
+	Name            string `json:"name"`
+	RunNumber       int64  `json:"run_number"`
+	Event           string `json:"event"`
+	Status          string `json:"status"`
+	HeadBranch      string `json:"head_branch"`
+	HeadSHA         string `json:"head_sha"`
+	WorkflowID      string `json:"workflow_id"`
+	URL             string `json:"url"`
+	TriggeringActor *User  `json:"triggering_actor"`
+}
+
+// ListActionRunResponse return a list of ActionRun
+type ListActionRunResponse struct {
+	Entries    []*ActionRun `json:"workflow_runs"`
+	TotalCount int64        `json:"total_count"`
+}
