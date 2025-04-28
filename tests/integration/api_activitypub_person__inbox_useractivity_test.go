@@ -28,6 +28,7 @@ import (
 
 // Flow of this test is documented at: https://codeberg.org/forgejo-contrib/federation/src/branch/main/doc/user-activity-following.md
 func TestActivityPubPersonInboxNoteFromDistant(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&setting.Federation.SignatureEnforced, false)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
@@ -85,6 +86,7 @@ func TestActivityPubPersonInboxNoteFromDistant(t *testing.T) {
 }
 
 func TestActivityPubPersonInboxNoteToDistant(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&setting.Federation.SignatureEnforced, false)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
@@ -103,7 +105,8 @@ func TestActivityPubPersonInboxNoteToDistant(t *testing.T) {
 		localUser2URL := localUrl.JoinPath("/api/v1/activitypub/user-id/2").String()
 		localUser2Inbox := localUrl.JoinPath("/api/v1/activitypub/user-id/2/inbox").String()
 		localSession2 := loginUser(t, localUser2.LoginName)
-		localSecssion2Token := getTokenForLoggedInUser(t, localSession2, auth_model.AccessTokenScopeWriteUser)
+		localSecssion2Token := getTokenForLoggedInUser(t, localSession2, auth_model.AccessTokenScopeWriteIssue)
+		println(localSecssion2Token)
 
 		repo, _, f := tests.CreateDeclarativeRepoWithOptions(t, localUser2, tests.DeclarativeRepoOptions{})
 		defer f()
@@ -126,15 +129,12 @@ func TestActivityPubPersonInboxNoteToDistant(t *testing.T) {
 		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
 		// local action which triggers an user activity
-		createIssue := func(t *testing.T) {
-			urlStr := fmt.Sprintf("/api/v1/repos/%s/issues?state=all", repo.FullName())
-			req := NewRequestWithJSON(t, "POST", urlStr, &api.CreateIssueOption{
-				Title: "ActivityFeed test",
-				Body:  "Nothing to see here!",
-			}).AddTokenAuth(localSecssion2Token)
-			MakeRequest(t, req, http.StatusCreated)
-		}
-		println(createIssue)
+		IssueURL := fmt.Sprintf("/api/v1/repos/%s/issues?state=all", repo.FullName())
+		req := NewRequestWithJSON(t, "POST", IssueURL, &api.CreateIssueOption{
+			Title: "ActivityFeed test",
+			Body:  "Nothing to see here!",
+		}).AddTokenAuth(localSecssion2Token)
+		MakeRequest(t, req, http.StatusCreated)
 
 		// check for activity on distant inbox
 		assert.Equal(t, "", mock.LastPost)

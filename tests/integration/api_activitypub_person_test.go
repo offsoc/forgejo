@@ -24,6 +24,7 @@ import (
 )
 
 func TestActivityPubPerson(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
@@ -70,6 +71,7 @@ func TestActivityPubPerson(t *testing.T) {
 }
 
 func TestActivityPubMissingPerson(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 	defer tests.PrepareTestEnv(t)()
@@ -80,6 +82,7 @@ func TestActivityPubMissingPerson(t *testing.T) {
 }
 
 func TestActivityPubPersonInbox(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 
@@ -103,6 +106,7 @@ func TestActivityPubPersonInbox(t *testing.T) {
 
 // Flow of this test is documented at: https://codeberg.org/forgejo-contrib/federation/src/branch/main/doc/user-activity-following.md
 func TestActivityPubPersonInboxFollow(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&setting.Federation.SignatureEnforced, false)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()

@@ -22,6 +22,7 @@ import (
 
 // Flow of this test is documented at: https://codeberg.org/forgejo-contrib/federation/src/branch/main/doc/user-activity-following.md
 func TestAPIFollowFederated(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 	defer tests.PrepareTestEnv(t)()
