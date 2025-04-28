@@ -194,7 +194,7 @@ func TestPackageSwift(t *testing.T) {
 
 			// Read the source archive content
 			sourceContent, err := io.ReadAll(sr)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			mpw.WriteField("source-archive", string(sourceContent))
 
 			if metadata != "" {
@@ -239,11 +239,11 @@ func TestPackageSwift(t *testing.T) {
 		)
 
 		pvs, err := packages.GetVersionsByPackageType(db.DefaultContext, user.ID, packages.TypeSwift)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		require.Len(t, pvs, 2) // ATTENTION: many subtests are unable to run separately, they depend on the results of previous tests
 		thisPackageVersion := pvs[0]
 		pd, err := packages.GetPackageDescriptor(db.DefaultContext, thisPackageVersion)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, pd.SemVer)
 		assert.Equal(t, packageID, pd.Package.Name)
 		assert.Equal(t, packageVersion2, pd.Version.Version)
@@ -257,7 +257,7 @@ func TestPackageSwift(t *testing.T) {
 		assert.Equal(t, packageRepositoryURL, pd.VersionProperties.GetByName(swift_module.PropertyRepositoryURL))
 
 		pfs, err := packages.GetFilesByVersionID(db.DefaultContext, thisPackageVersion.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, pfs, 1)
 		assert.Equal(t, fmt.Sprintf("%s-%s.zip", packageName, packageVersion2), pfs[0].Name)
 		assert.True(t, pfs[0].IsLead)
