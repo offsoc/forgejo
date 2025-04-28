@@ -142,7 +142,7 @@ $.api = $.fn.api = function(parameters) {
                response = JSON.parse(response);
               }
               catch(e) {
-                // isnt json string
+                // isn't json string
               }
             }
             return response;
@@ -344,7 +344,7 @@ $.api = $.fn.api = function(parameters) {
           cancelled: function() {
             return (module.cancelled || false);
           },
-          succesful: function() {
+          succesful: function() {  // codespell:ignore
             module.verbose('This behavior will be deleted due to typo. Use "was successful" instead.');
             return module.was.successful();
           },
@@ -1737,7 +1737,7 @@ $.fn.dropdown = function(parameters) {
             if(settings.onHide.call(element) !== false) {
               module.animate.hide(function() {
                 module.remove.visible();
-                // hidding search focus
+                // hiddng search focus
                 if ( module.is.focusedOnSearch() && preventBlur !== true ) {
                   $search.blur();
                 }
@@ -8102,7 +8102,7 @@ $.fn.modal = function(parameters) {
               $module
                   .off('mousedown' + elementEventNamespace)
               ;
-            }           
+            }
             $dimmer
               .off('mousedown' + elementEventNamespace)
             ;
@@ -8338,7 +8338,7 @@ $.fn.modal = function(parameters) {
                       ? $(document).scrollTop() + settings.padding
                       : $(document).scrollTop() + (module.cache.contextHeight - module.cache.height - settings.padding),
                   marginLeft: -(module.cache.width / 2)
-                }) 
+                })
               ;
             } else {
               $module
@@ -8347,7 +8347,7 @@ $.fn.modal = function(parameters) {
                     ? -(module.cache.height / 2)
                     : settings.padding / 2,
                   marginLeft: -(module.cache.width / 2)
-                }) 
+                })
               ;
             }
             module.verbose('Setting modal offset for legacy mode');
@@ -8932,7 +8932,7 @@ $.fn.search = function(parameters) {
           resultsHeight = $results.height()
             parseInt($results.css('paddingTop'), 0) +
             parseInt($results.css('paddingBottom'), 0);
-            
+
           if (elTop < 0) {
             $results.scrollTop(resultsScrollTop + elTop);
           }
@@ -9329,10 +9329,10 @@ $.fn.search = function(parameters) {
                 ;
                 if(fieldExists) {
                   var text;
-                  if (typeof content[field] === 'string'){  
+                  if (typeof content[field] === 'string'){
                       text = module.remove.diacritics(content[field]);
                   } else {
-                      text = content[field].toString(); 
+                      text = content[field].toString();
                   }
                   if( text.search(matchRegExp) !== -1) {
                     // content starts with value (first in results)
