@@ -387,14 +387,6 @@
   font-size: 1.42857143rem;
 }
 
-.ui.massive.buttons .dropdown,
-.ui.massive.buttons .dropdown .menu > .item,
-.ui.massive.buttons .button,
-.ui.massive.buttons .or,
-.ui.ui.ui.ui.massive.button {
-  font-size: 1.71428571rem;
-}
-
 /*--------------
     Icon Only
 ---------------*/
@@ -4218,11 +4210,6 @@ select.ui.dropdown {
   font-size: 1.42857143rem;
 }
 
-.ui.massive.dropdown,
-.ui.massive.dropdown .menu > .item {
-  font-size: 1.71428571rem;
-}
-
 /*******************************
          Theme Overrides
 *******************************/
@@ -6105,12 +6092,6 @@ select.ui.dropdown {
 .ui.huge.form .field .dropdown,
 .ui.huge.form .field .dropdown .menu > .item {
   font-size: 1.42857143rem;
-}
-
-.ui.massive.form,
-.ui.massive.form .field .dropdown,
-.ui.massive.form .field .dropdown .menu > .item {
-  font-size: 1.71428571rem;
 }
 
 /*******************************
@@ -8079,16 +8060,6 @@ Floated Menu / Item
   width: 22rem;
 }
 
-.ui.massive.menu,
-.ui.massive.menu .dropdown,
-.ui.massive.menu .dropdown .menu > .item {
-  font-size: 1.28571429rem;
-}
-
-.ui.massive.vertical.menu:not(.icon) {
-  width: 25rem;
-}
-
 /*-------------------
   Inverted dropdowns
 --------------------*/
@@ -8880,45 +8851,6 @@ Floated Menu / Item
   }
 }
 
-.ui.massive.modal > .header:not(.ui) {
-  font-size: 1.8em;
-}
-
-@media only screen and (max-width: 767.98px) {
-  .ui.massive.modal {
-    width: 95%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  .ui.massive.modal {
-    width: 88%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 992px) {
-  .ui.massive.modal {
-    width: 1530px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1200px) {
-  .ui.massive.modal {
-    width: 1620px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1920px) {
-  .ui.massive.modal {
-    width: 1710px;
-    margin: 0 0 0 0;
-  }
-}
-
 /*******************************
          Theme Overrides
 *******************************/
@@ -9473,9 +9405,6 @@ Floated Menu / Item
   font-size: 1.42857143em;
 }
 
-.ui.massive.search {
-  font-size: 1.71428571em;
-}
 
 /*--------------
       Mobile
