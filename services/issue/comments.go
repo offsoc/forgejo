@@ -139,7 +139,6 @@ func DeleteComment(ctx context.Context, doer *user_model.User, comment *issues_m
 		}
 		return deleteComment
 	})
-
 	if err != nil {
 		return err
 	}
