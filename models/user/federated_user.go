@@ -4,10 +4,8 @@
 package user
 
 import (
-	"context"
 	"database/sql"
 
-	"forgejo.org/models/db"
 	"forgejo.org/modules/validation"
 )
 
@@ -19,8 +17,7 @@ type FederatedUser struct {
 	KeyID                 sql.NullString         `xorm:"key_id UNIQUE"`
 	PublicKey             sql.Null[sql.RawBytes] `xorm:"BLOB"`
 	InboxPath             string
-	ActorURL              *string // TODO: remove this!
-	NormalizedOriginalURL string  // This field ist just to keep original information. Pls. do not use for search or as ID!
+	NormalizedOriginalURL string // This field ist just to keep original information. Pls. do not use for search or as ID!
 }
 
 func NewFederatedUser(userID int64, externalID string, federationHostID int64, inboxPath, normalizedOriginalURL string) (FederatedUser, error) {
@@ -44,14 +41,4 @@ func (federatedUser FederatedUser) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(federatedUser.FederationHostID, "FederationHostID")...)
 	result = append(result, validation.ValidateNotEmpty(federatedUser.InboxPath, "InboxPath")...)
 	return result
-}
-
-// TODO: remove this
-func GetUserByActorURL(ctx context.Context, actorURL string) (*User, error) {
-	var user User
-	_, err := db.GetEngine(ctx).Table("`user`").Join("INNER", "`federated_user`", "`user`.id = `federated_user`.user_id").Where("`federated_user`.actor_url = ?", actorURL).Get(&user)
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
 }
