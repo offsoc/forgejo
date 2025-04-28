@@ -3,7 +3,7 @@ FROM --platform=$BUILDPLATFORM docker.io/tonistiigi/xx AS xx
 FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.23-alpine3.19 as build-env
 
 ARG GOPROXY
-ENV GOPROXY ${GOPROXY:-direct}
+ENV GOPROXY=${GOPROXY:-https://proxy.golang.org,direct}
 
 ARG RELEASE_VERSION
 ARG TAGS="sqlite sqlite_unlock_notify"
