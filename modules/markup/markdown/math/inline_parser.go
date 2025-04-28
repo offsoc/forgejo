@@ -96,12 +96,12 @@ func (parser *inlineParser) Parse(parent ast.Node, block text.Reader, pc parser.
 		if len(line) <= pos {
 			break
 		}
-		suceedingCharacter := line[pos]
+		succeedingCharacter := line[pos]
 		// check valid ending character
-		if !isPunctuation(suceedingCharacter) &&
-			(suceedingCharacter != ' ') &&
-			(suceedingCharacter != '\n') &&
-			!isBracket(suceedingCharacter) {
+		if !isPunctuation(succeedingCharacter) &&
+			(succeedingCharacter != ' ') &&
+			(succeedingCharacter != '\n') &&
+			!isBracket(succeedingCharacter) {
 			return nil
 		}
 		if line[ender-1] != '\\' {

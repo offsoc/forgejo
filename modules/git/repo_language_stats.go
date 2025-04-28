@@ -204,7 +204,13 @@ func (repo *Repository) GetLanguageStats(commitID string) (map[string]int64, err
 				return nil, err
 			}
 		}
-		if !isTrue(isGenerated) && enry.IsGenerated(f.Name(), content) {
+
+		// We consider three cases:
+		// 1. linguist-generated=true, then we ignore the file.
+		// 2. linguist-generated=false, we don't ignore the file.
+		// 3. linguist-generated is not set, then `enry.IsGenerated` determines if the file is generated.
+		if isTrue(isGenerated) || !isFalse(isGenerated) && enry.IsGenerated(f.Name(), content) {
+			log.Trace("Ignore %q for language stats, because it is generated", f.Name())
 			continue
 		}
 

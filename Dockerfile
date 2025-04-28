@@ -3,7 +3,7 @@ FROM --platform=$BUILDPLATFORM data.forgejo.org/oci/xx AS xx
 FROM --platform=$BUILDPLATFORM data.forgejo.org/oci/golang:1.24-alpine3.21 AS build-env
 
 ARG GOPROXY
-ENV GOPROXY=${GOPROXY:-direct}
+ENV GOPROXY=${GOPROXY:-https://proxy.golang.org,direct}
 
 ARG RELEASE_VERSION
 ARG TAGS="sqlite sqlite_unlock_notify"
