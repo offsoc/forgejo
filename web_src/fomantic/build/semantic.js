@@ -142,7 +142,7 @@ $.api = $.fn.api = function(parameters) {
                response = JSON.parse(response);
               }
               catch(e) {
-                // isn't json string
+                // isnt json string
               }
             }
             return response;
@@ -344,7 +344,7 @@ $.api = $.fn.api = function(parameters) {
           cancelled: function() {
             return (module.cancelled || false);
           },
-          succesful: function() {  // codespell:ignore
+          succesful: function() {
             module.verbose('This behavior will be deleted due to typo. Use "was successful" instead.');
             return module.was.successful();
           },
@@ -1737,7 +1737,7 @@ $.fn.dropdown = function(parameters) {
             if(settings.onHide.call(element) !== false) {
               module.animate.hide(function() {
                 module.remove.visible();
-                // hiding search focus
+                // hidding search focus
                 if ( module.is.focusedOnSearch() && preventBlur !== true ) {
                   $search.blur();
                 }
