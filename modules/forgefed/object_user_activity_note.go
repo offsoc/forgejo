@@ -62,7 +62,7 @@ func (note ForgeUserActivityNote) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(string(note.Type), "type")...)
 	result = append(result, validation.ValidateOneOf(string(note.Type), []any{"Note"}, "type")...)
 	result = append(result, validation.ValidateNotEmpty(note.Content.String(), "content")...)
-	result = append(result, validation.ValidateIdExists(note.URL, "url")...)
+	result = append(result, validation.ValidateIDExists(note.URL, "url")...)
 
 	return result
 }

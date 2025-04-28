@@ -50,8 +50,8 @@ func (follow ForgeFollow) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(string(follow.Type), "type")...)
 	result = append(result, validation.ValidateOneOf(string(follow.Type), []any{"Follow"}, "type")...)
-	result = append(result, validation.ValidateIdExists(follow.Actor, "actor")...)
-	result = append(result, validation.ValidateIdExists(follow.Object, "object")...)
+	result = append(result, validation.ValidateIDExists(follow.Actor, "actor")...)
+	result = append(result, validation.ValidateIDExists(follow.Object, "object")...)
 
 	return result
 }

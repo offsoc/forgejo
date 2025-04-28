@@ -34,8 +34,8 @@ func TestAPIFollowFederated(t *testing.T) {
 	localSession10 := loginUser(t, localUser10Name)
 	localSecssion10Token := getTokenForLoggedInUser(t, localSession10, auth_model.AccessTokenScopeWriteUser)
 
-	distantUrl := federatedSrv.URL
-	distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantUrl)
+	distantURL := federatedSrv.URL
+	distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantURL)
 
 	// local user follow distant
 	req := NewRequestWithJSON(t, "POST",

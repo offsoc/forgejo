@@ -42,8 +42,8 @@ func IsValid(v Validateable) (bool, error) {
 	return true, nil
 }
 
-func ValidateIdExists(value ap.Item, name string) []string {
-	isValid := true
+func ValidateIDExists(value ap.Item, name string) []string {
+	var isValid bool
 	if value == nil {
 		isValid = false
 	} else {

@@ -95,7 +95,7 @@ func GetFederatedUser(ctx context.Context, externalID string, federationHostID i
 	return user, federatedUser, nil
 }
 
-func GetFederatedUserByUserId(ctx context.Context, userID int64) (*User, *FederatedUser, error) {
+func GetFederatedUserByUserID(ctx context.Context, userID int64) (*User, *FederatedUser, error) {
 	federatedUser := new(FederatedUser)
 	user := new(User)
 	has, err := db.GetEngine(ctx).Where("user_id=?", userID).Get(federatedUser)
