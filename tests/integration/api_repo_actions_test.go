@@ -105,15 +105,15 @@ jobs:
 func TestAPIGetListActionRun(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	var (
-		runIds []int64                            = []int64{892, 893, 894}
+		runIDs []int64                            = []int64{892, 893, 894}
 		dbRuns map[int64]*actions_model.ActionRun = make(map[int64]*actions_model.ActionRun, 3)
 	)
 
-	for _, id := range runIds {
+	for _, id := range runIDs {
 		dbRuns[id] = unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: id})
 	}
 
-	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: dbRuns[runIds[0]].RepoID})
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: dbRuns[runIDs[0]].RepoID})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
 	token := getUserToken(t, user.LowerName, auth_model.AccessTokenScopeWriteRepository)
 
@@ -125,7 +125,7 @@ func TestAPIGetListActionRun(t *testing.T) {
 		{
 			name:        "No query parameters",
 			query:       "",
-			expectedIDs: runIds,
+			expectedIDs: runIDs,
 		},
 		{
 			name:        "Search for workflow_dispatch events",
