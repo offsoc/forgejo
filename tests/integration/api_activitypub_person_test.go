@@ -118,7 +118,7 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 		distantUrl := federatedSrv.URL
 		distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantUrl)
 
-		unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+		localUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 		localUser2URL := localUrl.JoinPath("/api/v1/activitypub/user-id/2").String()
 		localUser2Inbox := localUrl.JoinPath("/api/v1/activitypub/user-id/2/inbox").String()
 
@@ -139,7 +139,13 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
-		unittest.AssertExistsAndLoadBean(t, &user_model.FederatedUser{ExternalID: "15"})
+		distantFederatedUser := unittest.AssertExistsAndLoadBean(t, &user_model.FederatedUser{ExternalID: "15"})
+		unittest.AssertExistsAndLoadBean(t,
+			&user_model.FederatedUserFollower{
+				FollowedUserID:  localUser.ID,
+				FollowingUserID: distantFederatedUser.UserID,
+			},
+		)
 		assert.Contains(t, mock.LastPost, "\"type\":\"Accept\"")
 	})
 }
