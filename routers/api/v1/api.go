@@ -845,7 +845,6 @@ func Routes() *web.Route {
 						activitypub.ReqHTTPSignature(),
 						bind(ap.Activity{}),
 						activitypub.PersonInbox)
-					// TODO: add signature verification
 					m.Group("/activities/{activity-id}", func() {
 						m.Get("", activitypub.PersonActivityNote)
 						m.Get("/activity", activitypub.PersonActivity)

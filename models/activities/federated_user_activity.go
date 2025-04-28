@@ -48,7 +48,6 @@ func NewFederatedUserActivity(userID int64, actorID, noteContent, noteURL string
 	return result, nil
 }
 
-// TODO: add tests
 func (federatedUser FederatedUserActivity) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(federatedUser.UserID, "UserID")...)
@@ -90,7 +89,6 @@ func GetFollowingFeeds(ctx context.Context, opts GetFollowingFeedsOptions) ([]*F
 	return actions, count, err
 }
 
-// TODO: move this to service as the operation crosses the aggregate borders
 func (fua *FederatedUserActivity) loadActor(ctx context.Context) error {
 	actorUser, _, err := user_model.GetFederatedUserByUserId(ctx, fua.UserID)
 	if err != nil {
