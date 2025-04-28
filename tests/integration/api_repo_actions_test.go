@@ -188,9 +188,9 @@ func TestAPIGetListActionRun(t *testing.T) {
 func TestAPIGetActionRun(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	var (
-		runId int64 = 892
+		runID int64 = 892
 	)
-	dbRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: runId})
+	dbRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: runID})
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: dbRun.RepoID})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
@@ -198,7 +198,7 @@ func TestAPIGetActionRun(t *testing.T) {
 
 	req := NewRequest(t, http.MethodGet,
 		fmt.Sprintf("/api/v1/repos/%s/%s/actions/runs/%d",
-			repo.OwnerName, repo.Name, runId,
+			repo.OwnerName, repo.Name, runID,
 		),
 	)
 	req.AddTokenAuth(token)
