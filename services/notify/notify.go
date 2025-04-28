@@ -377,6 +377,8 @@ func ChangeDefaultBranch(ctx context.Context, repo *repo_model.Repository) {
 }
 
 // ActionRunNowDone notifies that the old status priorStatus with (priorStatus.isDone() == false) of an ActionRun changed to run.Status with (run.Status.isDone() == true)
+// run represents the new state of the ActionRun.
+// lastRun represents the ActionRun of the same workflow that finished before run.
 // lastRun might be nil (e.g. when the run is the first for this workflow). It is the last run of the same workflow for the same repo.
 // It can be used to figure out if a successful run follows a failed one.
 // Both run and lastRun need their attributes loaded.

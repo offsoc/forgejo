@@ -781,9 +781,14 @@ func (n *actionsNotifier) MigrateRepository(ctx context.Context, doer, u *user_m
 	}).Notify(ctx)
 }
 
-func sendActionRunNowDoneNotificationIfNeeded(ctx context.Context, oldRun, newRun *actions_model.ActionRun) error {
-	if !oldRun.Status.IsDone() && newRun.Status.IsDone() {
-		lastRun, err := actions_model.GetRunBefore(ctx, newRun.RepoID, newRun.Stopped)
+// Call this sendActionRunNowDoneNotificationIfNeeded when there has been an update for an ActionRun.
+// priorRun and updatedRun represent the very same ActionRun, just at different times:
+// priorRun before the update and updatedRun after.
+// The parameter lastRun in the ActionRunNowDone notification represents an entirely different ActionRun:
+// the ActionRun of the same workflow that finished before priorRun/updatedRun.
+func sendActionRunNowDoneNotificationIfNeeded(ctx context.Context, priorRun, updatedRun *actions_model.ActionRun) error {
+	if !priorRun.Status.IsDone() && updatedRun.Status.IsDone() {
+		lastRun, err := actions_model.GetRunBefore(ctx, updatedRun.RepoID, updatedRun.Stopped)
 		if err != nil && !errors.Is(err, util.ErrNotExist) {
 			return err
 		}
@@ -793,10 +798,10 @@ func sendActionRunNowDoneNotificationIfNeeded(ctx context.Context, oldRun, newRu
 				return err
 			}
 		}
-		if err = newRun.LoadAttributes(ctx); err != nil {
+		if err = updatedRun.LoadAttributes(ctx); err != nil {
 			return err
 		}
-		notify_service.ActionRunNowDone(ctx, newRun, oldRun.Status, lastRun)
+		notify_service.ActionRunNowDone(ctx, updatedRun, priorRun.Status, lastRun)
 	}
 	return nil
 }
@@ -804,7 +809,7 @@ func sendActionRunNowDoneNotificationIfNeeded(ctx context.Context, oldRun, newRu
 // wrapper of UpdateRunWithoutNotification with a call to the ActionRunNowDone notification channel
 func UpdateRun(ctx context.Context, run *actions_model.ActionRun, cols ...string) error {
 	// run.ID is the only thing that must be given
-	oldRun, err := actions_model.GetRunByID(ctx, run.ID)
+	priorRun, err := actions_model.GetRunByID(ctx, run.ID)
 	if err != nil {
 		return err
 	}
@@ -813,11 +818,11 @@ func UpdateRun(ctx context.Context, run *actions_model.ActionRun, cols ...string
 		return err
 	}
 
-	newRun, err := actions_model.GetRunByID(ctx, run.ID)
+	updatedRun, err := actions_model.GetRunByID(ctx, run.ID)
 	if err != nil {
 		return err
 	}
-	return sendActionRunNowDoneNotificationIfNeeded(ctx, oldRun, newRun)
+	return sendActionRunNowDoneNotificationIfNeeded(ctx, priorRun, updatedRun)
 }
 
 // wrapper of UpdateRunJobWithoutNotification with a call to the ActionRunNowDone notification channel
@@ -832,7 +837,7 @@ func UpdateRunJob(ctx context.Context, job *actions_model.ActionRunJob, cond bui
 		}
 		runID = oldJob.RunID
 	}
-	oldRun, err := actions_model.GetRunByID(ctx, runID)
+	priorRun, err := actions_model.GetRunByID(ctx, runID)
 	if err != nil {
 		return 0, err
 	}
@@ -842,9 +847,9 @@ func UpdateRunJob(ctx context.Context, job *actions_model.ActionRunJob, cond bui
 		return affected, err
 	}
 
-	newRun, err := actions_model.GetRunByID(ctx, runID)
+	updatedRun, err := actions_model.GetRunByID(ctx, runID)
 	if err != nil {
 		return affected, err
 	}
-	return affected, sendActionRunNowDoneNotificationIfNeeded(ctx, oldRun, newRun)
+	return affected, sendActionRunNowDoneNotificationIfNeeded(ctx, priorRun, updatedRun)
 }
