@@ -40,7 +40,7 @@ func ActionToForgeUserActivity(ctx context.Context, action *activities_model.Act
 	}
 
 	makeUserActivity := func(format string, args ...any) (fm.ForgeUserActivity, error) {
-		return fm.NewForgeUserActivity(ctx, action.ActUser, action.ID, render(format, args...))
+		return fm.NewForgeUserActivity(action.ActUser, action.ID, render(format, args...))
 	}
 
 	switch action.OpType {

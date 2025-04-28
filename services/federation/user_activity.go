@@ -36,8 +36,7 @@ func SendUserActivity(ctx context.Context, doer *user.User, activity *activities
 	}
 
 	for _, follower := range followers {
-		// TODO: switch to user id instead of federatedUserID
-		federatedUserFollower, err := user.GetFederatedUserByID(ctx, follower.FollowingUserID)
+		_, federatedUserFollower, err := user.GetFederatedUserByUserId(ctx, follower.FollowingUserID)
 		if err != nil {
 			return err
 		}

@@ -4,10 +4,8 @@
 package user
 
 import (
-	"context"
 	"database/sql"
 
-	"forgejo.org/models/db"
 	"forgejo.org/modules/validation"
 )
 
@@ -43,14 +41,4 @@ func (federatedUser FederatedUser) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(federatedUser.FederationHostID, "FederationHostID")...)
 	result = append(result, validation.ValidateNotEmpty(federatedUser.InboxPath, "InboxPath")...)
 	return result
-}
-
-// TODO: remove this
-func GetFederatedUserByID(ctx context.Context, id int64) (*FederatedUser, error) {
-	var user FederatedUser
-	_, err := db.GetEngine(ctx).Where("id = ?", id).Get(&user)
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
 }

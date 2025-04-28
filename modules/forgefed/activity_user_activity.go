@@ -1,10 +1,9 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package forgefed
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -35,7 +34,7 @@ func NewForgeUserActivityFromAp(activity ap.Activity) (ForgeUserActivity, error)
 	return result, nil
 }
 
-func NewForgeUserActivity(ctx context.Context, doer *user_model.User, actionID int64, content string) (ForgeUserActivity, error) {
+func NewForgeUserActivity(doer *user_model.User, actionID int64, content string) (ForgeUserActivity, error) {
 	id := fmt.Sprintf("%s/activities/%d", doer.APActorID(), actionID)
 	published := time.Now()
 
@@ -60,7 +59,6 @@ func NewForgeUserActivity(ctx context.Context, doer *user_model.User, actionID i
 }
 
 func (userActivity ForgeUserActivity) Validate() []string {
-	// TODO: write test
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(string(userActivity.Type), "type")...)
 	result = append(result, validation.ValidateOneOf(string(userActivity.Type), []any{"Create"}, "type")...)

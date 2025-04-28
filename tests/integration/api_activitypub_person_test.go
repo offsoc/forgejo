@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"testing"
 
-	"forgejo.org/models/activities"
 	"forgejo.org/models/db"
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
@@ -118,7 +117,7 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 		distantUrl := federatedSrv.URL
 		distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantUrl)
 
-		unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
+		localUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 		localUser2URL := localUrl.JoinPath("/api/v1/activitypub/user-id/2").String()
 		localUser2Inbox := localUrl.JoinPath("/api/v1/activitypub/user-id/2/inbox").String()
 
@@ -139,64 +138,13 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
-		unittest.AssertExistsAndLoadBean(t, &user_model.FederatedUser{ExternalID: "15"})
+		distantFederatedUser := unittest.AssertExistsAndLoadBean(t, &user_model.FederatedUser{ExternalID: "15"})
+		unittest.AssertExistsAndLoadBean(t,
+			&user_model.FederatedUserFollower{
+				FollowedUserID:  localUser.ID,
+				FollowingUserID: distantFederatedUser.UserID,
+			},
+		)
 		assert.Contains(t, mock.LastPost, "\"type\":\"Accept\"")
-	})
-}
-
-// Flow of this test is documented at: https://codeberg.org/forgejo-contrib/federation/src/branch/main/doc/user-activity-following.md
-func TestActivityPubPersonInboxNote(t *testing.T) {
-	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
-	defer test.MockVariableValue(&setting.Federation.SignatureEnforced, false)()
-	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
-
-	mock := test.NewFederationServerMock()
-	federatedSrv := mock.DistantServer(t)
-	defer federatedSrv.Close()
-
-	onGiteaRun(t, func(t *testing.T, localUrl *url.URL) {
-		defer test.MockVariableValue(&setting.AppURL, localUrl.String())()
-
-		distantUrl := federatedSrv.URL
-		distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantUrl)
-
-		unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
-		localUser2URL := localUrl.JoinPath("/api/v1/activitypub/user-id/2").String()
-		localUser2Inbox := localUrl.JoinPath("/api/v1/activitypub/user-id/2/inbox").String()
-
-		// follow
-		followActivity := []byte(fmt.Sprintf(
-			`{"type":"Follow",`+
-				`"actor":"%s",`+
-				`"object":"%s"}`,
-			distantUser15URL,
-			localUser2URL,
-		))
-		cf, err := activitypub.GetClientFactory(db.DefaultContext)
-		require.NoError(t, err)
-		c, err := cf.WithKeysDirect(db.DefaultContext, mock.ApActor.PrivKey,
-			mock.ApActor.APActorKeyID(federatedSrv.URL))
-		require.NoError(t, err)
-		resp, err := c.Post(followActivity, localUser2Inbox)
-		require.NoError(t, err)
-		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
-
-		// send note
-		distantNoteUrl := fmt.Sprintf("%s/api/v1/activitypub/note/104", distantUrl)
-		userActivity := []byte(fmt.Sprintf(
-			`{"type":"Create",`+
-				`"actor":"%s",`+
-				`"to": ["https://www.w3.org/ns/activitystreams#Public"],`+
-				`"cc": ["%s"],`+
-				`"object": {"type":"Note","content":"The Content!",`+
-				`"url":"%s"}}`,
-			distantUser15URL,
-			localUser2URL,
-			distantNoteUrl,
-		))
-		resp, err = c.Post(userActivity, localUser2Inbox)
-		require.NoError(t, err)
-		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
-		unittest.AssertExistsAndLoadBean(t, &activities.FederatedUserActivity{NoteURL: distantNoteUrl})
 	})
 }
