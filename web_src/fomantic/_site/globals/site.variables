@@ -7,7 +7,7 @@
 @disabledOpacity: var(--opacity-disabled);
 @linkHoverUnderline: underline;
 @pageOverflowX: visible;
-@variationAllSizes: mini, tiny, small, large, big;
+@variationAllSizes: mini, tiny, small, large;
 
 @variationAccordionInverted: false;
 @variationBreadcrumbInverted: false;
