@@ -154,8 +154,8 @@ func TestAPIGetListActionRun(t *testing.T) {
 		},
 		{
 			name:        "Search for sha",
-			query:       "?head_sha=494f3d9c26828c27972d8b7e1f907d3610e5211d",
-			expectedIDs: []int64{893},
+			query:       "?head_sha=97f29ee599c373c729132a5c46a046978311e0ee",
+			expectedIDs: []int64{892, 894},
 		},
 	}
 
