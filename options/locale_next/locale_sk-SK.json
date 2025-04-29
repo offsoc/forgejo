@@ -1,1 +1,16 @@
-{}
+{
+    "error.not_found.title": "Stránka nebola nájedná",
+    "incorrect_root_url": "Táto inštancia Forgejo je nakonfigurovaná tak, aby bola obsluhovaná na „%s“. Momentálne zobrazujete Forgejo prostredníctvom inej adresy URL, čo môže spôsobiť poruchu niektorých častí aplikácie. Kanonickú adresu URL kontrolujú správcovia aplikácie Forgejo prostredníctvom nastavenia ROOT_URL v súbore app.ini.",
+    "themes.names.forgejo-auto": "Forgejo (sleduj systémovú tému)",
+    "themes.names.forgejo-light": "Forgejo svetlé",
+    "themes.names.forgejo-dark": "Forgejo tmavé",
+    "alert.asset_load_failed": "Nepodarilo sa načítať súbory z {path}. Uistite sa, že súbory sú prístupné.",
+    "install.invalid_lfs_path": "Nie je možné vytvoriť koreňový systém LFS na zadanej ceste: %[1]s",
+    "alert.range_error": " musí byť číslo medzi %[1]s a %[2]s.",
+    "home.welcome.no_activity": "Žiadna aktivita",
+    "home.welcome.activity_hint": "Vo vašom kanáli zatiaľ nič nie je. Tu sa budú zobrazovať vaše akcie a aktivity z repozitárov, ktoré sledujete.",
+    "home.explore_repos": "Preskúmajte repozitáre",
+    "home.explore_users": "Preskúmajte používateľov",
+    "home.explore_orgs": "Preskúmajte organizácie",
+    "search.milestone_kind": "Hľadať v míľnikoch…"
+}

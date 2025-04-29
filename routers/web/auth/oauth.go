@@ -1079,7 +1079,7 @@ func SignInOAuthCallback(ctx *context.Context) {
 
 			isAdmin, isRestricted := getUserAdminAndRestrictedFromGroupClaims(source, &gothUser)
 			u.IsAdmin = isAdmin.ValueOrDefault(false)
-			u.IsRestricted = isRestricted.ValueOrDefault(false)
+			u.IsRestricted = isRestricted.ValueOrDefault(setting.Service.DefaultUserIsRestricted)
 
 			if !createAndHandleCreatedUser(ctx, base.TplName(""), nil, u, overwriteDefault, &gothUser, setting.OAuth2Client.AccountLinking != setting.OAuth2AccountLinkingDisabled) {
 				// error already handled

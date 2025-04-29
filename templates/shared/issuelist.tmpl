@@ -52,25 +52,27 @@
 					</div>
 					{{end}}
 				</div>
-				<div class="flex-item-body">
-					<a class="index" href="{{if .Link}}{{.Link}}{{else}}{{$.Link}}/{{.Index}}{{end}}">
-						{{if eq $.listType "dashboard"}}
-							{{.Repo.FullName}}#{{.Index}}
+				<div class="flex-item-body issue-meta">
+					<span>
+						<a class="index" href="{{if .Link}}{{.Link}}{{else}}{{$.Link}}/{{.Index}}{{end}}">
+							{{if eq $.listType "dashboard"}}
+								{{.Repo.FullName}}#{{.Index}}
+							{{else}}
+								#{{.Index}}
+							{{end}}
+						</a>
+						{{$timeStr := DateUtils.TimeSince .GetLastEventTimestamp}}
+						{{if .OriginalAuthor}}
+							{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .OriginalAuthor}}
+						{{else if gt .Poster.ID 0}}
+							{{ctx.Locale.Tr .GetLastEventLabel $timeStr .Poster.HomeLink .Poster.GetDisplayName}}
 						{{else}}
-							#{{.Index}}
+							{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .Poster.GetDisplayName}}
 						{{end}}
-					</a>
-					{{$timeStr := DateUtils.TimeSince .GetLastEventTimestamp}}
-					{{if .OriginalAuthor}}
-						{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .OriginalAuthor}}
-					{{else if gt .Poster.ID 0}}
-						{{ctx.Locale.Tr .GetLastEventLabel $timeStr .Poster.HomeLink .Poster.GetDisplayName}}
-					{{else}}
-						{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .Poster.GetDisplayName}}
-					{{end}}
+					</span>
 					{{if .IsPull}}
-						<div class="branches flex-text-inline">
-							{{svg "gitea-double-chevron-right" 12}}
+						{{svg "gitea-double-chevron-right" 12}}
+						<div class="flex-text-inline issue-meta-branch">
 							<div class="branch">
 								<a href="{{.PullRequest.BaseRepo.Link}}/src/branch/{{PathEscapeSegments .PullRequest.BaseBranch}}">
 									{{/* inline to remove the spaces between spans */}}

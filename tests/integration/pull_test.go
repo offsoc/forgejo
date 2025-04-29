@@ -67,7 +67,7 @@ func TestPullManuallyMergeWarning(t *testing.T) {
 }
 
 func TestPullCombinedReviewRequest(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestPullCombinedReviewRequest/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestPullCombinedReviewRequest")()
 	defer tests.PrepareTestEnv(t)()
 
 	session := loginUser(t, "user2")

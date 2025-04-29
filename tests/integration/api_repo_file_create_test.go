@@ -177,6 +177,8 @@ func TestAPICreateFile(t *testing.T) {
 			expectedFileResponse := getExpectedFileResponseForCreate("user2/repo1", commitID, treePath, latestCommit.ID.String())
 			var fileResponse api.FileResponse
 			DecodeJSON(t, resp, &fileResponse)
+			// Testify cannot assert time.Time correctly.
+			expectedFileResponse.Content.LastCommitWhen = fileResponse.Content.LastCommitWhen
 			assert.Equal(t, expectedFileResponse.Content, fileResponse.Content)
 			assert.Equal(t, expectedFileResponse.Commit.SHA, fileResponse.Commit.SHA)
 			assert.Equal(t, expectedFileResponse.Commit.HTMLURL, fileResponse.Commit.HTMLURL)
@@ -296,6 +298,8 @@ func TestAPICreateFile(t *testing.T) {
 			latestCommit, _ := gitRepo.GetCommitByPath(treePath)
 			expectedFileResponse := getExpectedFileResponseForCreate("user2/"+reponame, commitID, treePath, latestCommit.ID.String())
 			DecodeJSON(t, resp, &fileResponse)
+			// Testify cannot assert time.Time correctly.
+			expectedFileResponse.Content.LastCommitWhen = fileResponse.Content.LastCommitWhen
 			assert.Equal(t, expectedFileResponse.Content, fileResponse.Content)
 			assert.Equal(t, expectedFileResponse.Commit.SHA, fileResponse.Commit.SHA)
 			assert.Equal(t, expectedFileResponse.Commit.HTMLURL, fileResponse.Commit.HTMLURL)

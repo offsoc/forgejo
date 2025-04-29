@@ -13,7 +13,7 @@ import (
 )
 
 func TestPackagesGetOrInsertBlob(t *testing.T) {
-	defer AddFixtures("models/fixtures/TestPackagesGetOrInsertBlob/")()
+	defer unittest.OverrideFixtures("models/fixtures/TestPackagesGetOrInsertBlob")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	blake2bIsSet := unittest.AssertExistsAndLoadBean(t, &PackageBlob{ID: 1})

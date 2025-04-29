@@ -47,7 +47,7 @@ func TestActivityPubPerson(t *testing.T) {
 		})
 
 		t.Run("SignedRequestValidation", func(t *testing.T) {
-			// Signed requset
+			// Signed request
 			resp, err := apClient.GetBody(userURL)
 			require.NoError(t, err)
 

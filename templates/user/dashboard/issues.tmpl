@@ -6,11 +6,11 @@
 		<div class="list-header">
 			<div class="switch list-header-toggle">
 				<a class="item{{if not .IsShowClosed}} active{{end}}" href="?type={{$.ViewType}}&sort={{$.SortType}}&state=open&labels={{.SelectLabels}}&q={{$.Keyword}}">
-					{{svg "octicon-issue-opened" 16 "tw-mr-2"}}
+					{{svg "octicon-issue-opened" 16}}
 					{{ctx.Locale.PrettyNumber .IssueStats.OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
 				</a>
 				<a class="item{{if .IsShowClosed}} active{{end}}" href="?type={{$.ViewType}}&sort={{$.SortType}}&state=closed&labels={{.SelectLabels}}&q={{$.Keyword}}">
-					{{svg "octicon-issue-closed" 16 "tw-mr-2"}}
+					{{svg "octicon-issue-closed" 16}}
 					{{ctx.Locale.PrettyNumber .IssueStats.ClosedCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
 				</a>
 			</div>

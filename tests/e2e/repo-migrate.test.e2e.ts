@@ -7,6 +7,24 @@ import {test, save_visual, test_context, dynamic_id} from './utils_e2e.ts';
 
 test.use({user: 'user2'});
 
+test('Migration type seleciton screen', async ({page}) => {
+  await page.goto('/repo/migrate');
+
+  // For branding purposes, it is desired that `gitea-` prefixes in SVGs are
+  // replaced with something like `productlogo-`.
+  await expect(page.locator('svg.gitea-git')).toBeVisible();
+  await expect(page.locator('svg.octicon-mark-github')).toBeVisible();
+  await expect(page.locator('svg.gitea-gitlab')).toBeVisible();
+  await expect(page.locator('svg.gitea-forgejo')).toBeVisible();
+  await expect(page.locator('svg.gitea-gitea')).toBeVisible();
+  await expect(page.locator('svg.gitea-gogs')).toBeVisible();
+  await expect(page.locator('svg.gitea-onedev')).toBeVisible();
+  await expect(page.locator('svg.gitea-gitbucket')).toBeVisible();
+  await expect(page.locator('svg.gitea-codebase')).toBeVisible();
+
+  await save_visual(page);
+});
+
 test('Migration Repo Name detection', async ({page}, workerInfo) => {
   test.skip(workerInfo.project.name === 'Mobile Safari', 'Flaky actionability checks on Mobile Safari');
 

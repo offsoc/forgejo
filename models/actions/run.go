@@ -187,6 +187,7 @@ func updateRepoRunsNumbers(ctx context.Context, repo *repo_model.Repository) err
 
 // InsertRun inserts a run
 // The title will be cut off at 255 characters if it's longer than 255 characters.
+// We don't have to send the ActionRunNowDone notification here because there are no runs that start in a not done status.
 func InsertRun(ctx context.Context, run *ActionRun, jobs []*jobparser.SingleWorkflow) error {
 	ctx, commiter, err := db.TxContext(ctx)
 	if err != nil {
@@ -272,6 +273,18 @@ func GetLatestRun(ctx context.Context, repoID int64) (*ActionRun, error) {
 	return &run, nil
 }
 
+// GetRunBefore returns the last run that completed a given timestamp (not inclusive).
+func GetRunBefore(ctx context.Context, repoID int64, timestamp timeutil.TimeStamp) (*ActionRun, error) {
+	var run ActionRun
+	has, err := db.GetEngine(ctx).Where("repo_id=? AND stopped IS NOT NULL AND stopped<?", repoID, timestamp).OrderBy("stopped DESC").Limit(1).Get(&run)
+	if err != nil {
+		return nil, err
+	} else if !has {
+		return nil, fmt.Errorf("run before: %w", util.ErrNotExist)
+	}
+	return &run, nil
+}
+
 func GetLatestRunForBranchAndWorkflow(ctx context.Context, repoID int64, branch, workflowFile, event string) (*ActionRun, error) {
 	var run ActionRun
 	q := db.GetEngine(ctx).Where("repo_id=?", repoID).And("workflow_id=?", workflowFile)
@@ -320,7 +333,9 @@ func GetRunByIndex(ctx context.Context, repoID, index int64) (*ActionRun, error)
 // UpdateRun updates a run.
 // It requires the inputted run has Version set.
 // It will return error if the version is not matched (it means the run has been changed after loaded).
-func UpdateRun(ctx context.Context, run *ActionRun, cols ...string) error {
+// All calls to UpdateRunWithoutNotification that change run.Status from a not done status to a done status must call the ActionRunNowDone notification channel.
+// Use the wrapper function UpdateRun instead.
+func UpdateRunWithoutNotification(ctx context.Context, run *ActionRun, cols ...string) error {
 	sess := db.GetEngine(ctx).ID(run.ID)
 	if len(cols) > 0 {
 		sess.Cols(cols...)

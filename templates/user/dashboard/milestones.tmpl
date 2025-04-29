@@ -37,11 +37,11 @@
 				<div class="list-header">
 					<div class="switch list-header-toggle">
 						<a class="item{{if not .IsShowClosed}} active{{end}}" href="?repos=[{{range $.RepoIDs}}{{.}}%2C{{end}}]&sort={{$.SortType}}&state=open&q={{$.Keyword}}">
-							{{svg "octicon-milestone" 16 "tw-mr-2"}}
+							{{svg "octicon-milestone" 16}}
 							{{ctx.Locale.PrettyNumber .MilestoneStats.OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
 						</a>
 						<a class="item{{if .IsShowClosed}} active{{end}}" href="?repos=[{{range $.RepoIDs}}{{.}}%2C{{end}}]&sort={{$.SortType}}&state=closed&q={{$.Keyword}}">
-							{{svg "octicon-check" 16 "tw-mr-2"}}
+							{{svg "octicon-check" 16}}
 							{{ctx.Locale.PrettyNumber .MilestoneStats.ClosedCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
 						</a>
 					</div>
@@ -114,7 +114,7 @@
 											{{ctx.Locale.Tr "repo.milestones.closed" $closedDate}}
 										{{else}}
 											{{if .DeadlineString}}
-												<span{{if .IsOverdue}} class="text red"{{end}}>
+												<span class="flex-text-inline {{if .IsOverdue}}text red{{end}}">
 													{{svg "octicon-calendar" 14}}
 													{{DateUtils.AbsoluteShort (.DeadlineString|DateUtils.ParseLegacy)}}
 												</span>
