@@ -6,6 +6,7 @@ package user
 import (
 	"context"
 	"fmt"
+
 	"forgejo.org/modules/log"
 
 	"forgejo.org/models/db"
@@ -40,7 +41,6 @@ func CreateFederatedUser(ctx context.Context, user *User, federatedUser *Federat
 	}(committer)
 
 	if err := CreateUser(ctx, user, &overwrite); err != nil {
-
 		return err
 	}
 

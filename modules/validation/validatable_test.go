@@ -44,7 +44,7 @@ func Test_ValidateNotEmpty_ForString(t *testing.T) {
 
 	sut = "not empty"
 	res = ValidateNotEmpty(sut, "dummyField")
-	assert.Len(t, res, 0)
+	assert.Empty(t, res, 0)
 }
 
 func Test_ValidateNotEmpty_ForTimestamp(t *testing.T) {
@@ -54,7 +54,7 @@ func Test_ValidateNotEmpty_ForTimestamp(t *testing.T) {
 
 	sut = timeutil.TimeStampNow()
 	res = ValidateNotEmpty(sut, "dummyField")
-	assert.Len(t, res, 0)
+	assert.Empty(t, res, 0)
 }
 
 func Test_ValidateIDExists_ForItem(t *testing.T) {
@@ -74,7 +74,7 @@ func Test_ValidateIDExists_ForItem(t *testing.T) {
 		Object: ap.IRI("https://dummy.link/id"),
 	}
 	res = ValidateIDExists(sut.Object, "dummyField")
-	assert.Len(t, res, 0)
+	assert.Empty(t, res, 0)
 }
 
 func Test_ValidateMaxLen(t *testing.T) {
@@ -84,5 +84,5 @@ func Test_ValidateMaxLen(t *testing.T) {
 
 	sut = "0123456789"
 	res = ValidateMaxLen(sut, 11, "dummyField")
-	assert.Len(t, res, 0)
+	assert.Empty(t, res, 0)
 }
