@@ -98,7 +98,7 @@ func getRemoteUserToPromote(ctx context.Context, source *auth_model.Source, logi
 		return nil, NewReason(log.ERROR, ReasonErrorLoginName, "getUserByLoginName('%s') %v", loginName, err), err
 	}
 	if len(users) == 0 {
-		return nil, NewReason(log.ERROR, ReasonLoginNameNotExists, "no user with LoginType UserTypeRemoteUser and LoginName '%s'", loginName), nil
+		return nil, NewReason(log.DEBUG, ReasonLoginNameNotExists, "no user with LoginType UserTypeRemoteUser and LoginName '%s'", loginName), nil
 	}
 
 	reason := ReasonNoSource
