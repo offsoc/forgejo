@@ -1,4 +1,4 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package validation
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forgejo.org/modules/timeutil"
+	ap "github.com/go-ap/activitypub"
 )
 
 type Sut struct {
@@ -53,6 +54,27 @@ func Test_ValidateNotEmpty_ForTimestamp(t *testing.T) {
 	}
 	sut = timeutil.TimeStampNow()
 	if res := ValidateNotEmpty(sut, "dummyField"); len(res) > 0 {
+		t.Errorf("sut should be valid but was %q", res)
+	}
+}
+
+func Test_ValidateIDExists_ForItem(t *testing.T) {
+	sut := ap.Activity{
+		Object: nil,
+	}
+	if res := ValidateIDExists(sut.Object, "dummyField"); len(res) == 0 {
+		t.Errorf("sut should be invalid")
+	}
+	sut = ap.Activity{
+		Object: ap.IRI(""),
+	}
+	if res := ValidateIDExists(sut.Object, "dummyField"); len(res) == 0 {
+		t.Errorf("sut should be invalid")
+	}
+	sut = ap.Activity{
+		Object: ap.IRI("https://dummy.link/id"),
+	}
+	if res := ValidateIDExists(sut.Object, "dummyField"); len(res) > 0 {
 		t.Errorf("sut should be valid but was %q", res)
 	}
 }
