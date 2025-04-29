@@ -14,7 +14,7 @@ import (
 
 // CountDivergingCommits determines how many commits a branch is ahead or behind the repository's base branch
 func CountDivergingCommits(ctx context.Context, repo *repo_model.Repository, branch string) (*git.DivergeObject, error) {
-	divergence, err := git.GetDivergingCommits(ctx, repo.RepoPath(), repo.DefaultBranch, branch)
+	divergence, err := git.GetDivergingCommits(ctx, repo.RepoPath(), repo.DefaultBranch, branch, nil)
 	if err != nil {
 		return nil, err
 	}
