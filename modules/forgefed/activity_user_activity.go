@@ -62,7 +62,7 @@ func (userActivity ForgeUserActivity) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(string(userActivity.Type), "type")...)
 	result = append(result, validation.ValidateOneOf(string(userActivity.Type), []any{"Create"}, "type")...)
-	result = append(result, validation.ValidateIdExists(userActivity.Actor, "actor")...)
+	result = append(result, validation.ValidateIDExists(userActivity.Actor, "actor")...)
 
 	if len(userActivity.To) == 0 {
 		result = append(result, "Missing to")

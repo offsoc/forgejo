@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"forgejo.org/models/activities"
-	activities_model "forgejo.org/models/activities"
 	"forgejo.org/models/db"
 	repo_model "forgejo.org/models/repo"
 	user_model "forgejo.org/models/user"
@@ -72,13 +71,13 @@ func userProfile(ctx *context.Context) {
 
 	// prepare heatmap data
 	if setting.Service.EnableUserHeatmap {
-		data, err := activities_model.GetUserHeatmapDataByUser(ctx, ctx.ContextUser, ctx.Doer)
+		data, err := activities.GetUserHeatmapDataByUser(ctx, ctx.ContextUser, ctx.Doer)
 		if err != nil {
 			ctx.ServerError("GetUserHeatmapDataByUser", err)
 			return
 		}
 		ctx.Data["HeatmapData"] = data
-		ctx.Data["HeatmapTotalContributions"] = activities_model.GetTotalContributionsInHeatmap(data)
+		ctx.Data["HeatmapTotalContributions"] = activities.GetTotalContributionsInHeatmap(data)
 	}
 
 	profileDbRepo, profileGitRepo, profileReadmeBlob, profileClose := shared_user.FindUserProfileReadme(ctx, ctx.Doer)
@@ -193,7 +192,7 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 	case "activity":
 		date := ctx.FormString("date")
 		pagingNum = setting.UI.FeedPagingNum
-		items, count, err := activities_model.GetFeeds(ctx, activities_model.GetFeedsOptions{
+		items, count, err := activities.GetFeeds(ctx, activities.GetFeedsOptions{
 			RequestedUser:   ctx.ContextUser,
 			Actor:           ctx.Doer,
 			IncludePrivate:  showPrivate,

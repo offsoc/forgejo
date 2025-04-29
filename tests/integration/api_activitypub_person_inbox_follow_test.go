@@ -36,8 +36,8 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, localUrl *url.URL) {
 		defer test.MockVariableValue(&setting.AppURL, localUrl.String())()
 
-		distantUrl := federatedSrv.URL
-		distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantUrl)
+		distantURL := federatedSrv.URL
+		distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantURL)
 
 		localUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 		localUser2URL := localUrl.JoinPath("/api/v1/activitypub/user-id/2").String()

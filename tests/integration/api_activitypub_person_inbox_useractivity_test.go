@@ -1,4 +1,4 @@
-// Copyright 2022 The Gitea Authors. All rights reserved.
+// Copyright 2022, 2025 The Gitea Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -17,7 +17,6 @@ import (
 	"forgejo.org/modules/activitypub"
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/structs"
-	api "forgejo.org/modules/structs"
 	"forgejo.org/modules/test"
 	"forgejo.org/routers"
 	"forgejo.org/tests"
@@ -40,8 +39,8 @@ func TestActivityPubPersonInboxNoteFromDistant(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, localUrl *url.URL) {
 		defer test.MockVariableValue(&setting.AppURL, localUrl.String())()
 
-		distantUrl := federatedSrv.URL
-		distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantUrl)
+		distantURL := federatedSrv.URL
+		distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantURL)
 
 		localUser2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 		localUser2URL := localUrl.JoinPath("/api/v1/activitypub/user-id/2").String()
@@ -59,7 +58,7 @@ func TestActivityPubPersonInboxNoteFromDistant(t *testing.T) {
 		MakeRequest(t, req, http.StatusNoContent)
 
 		// send note (distant -> local)
-		distantNoteUrl := fmt.Sprintf("%s/api/v1/activitypub/note/104", distantUrl)
+		distantNoteURL := fmt.Sprintf("%s/api/v1/activitypub/note/104", distantURL)
 		userActivity := []byte(fmt.Sprintf(
 			`{"type":"Create",`+
 				`"actor":"%s",`+
@@ -69,7 +68,7 @@ func TestActivityPubPersonInboxNoteFromDistant(t *testing.T) {
 				`"url":"%s"}}`,
 			distantUser15URL,
 			localUser2URL,
-			distantNoteUrl,
+			distantNoteURL,
 		))
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
@@ -81,7 +80,7 @@ func TestActivityPubPersonInboxNoteFromDistant(t *testing.T) {
 		assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 
 		// check user activity exists on local
-		unittest.AssertExistsAndLoadBean(t, &activities.FederatedUserActivity{NoteURL: distantNoteUrl})
+		unittest.AssertExistsAndLoadBean(t, &activities.FederatedUserActivity{NoteURL: distantNoteURL})
 	})
 }
 
@@ -99,8 +98,8 @@ func TestActivityPubPersonInboxNoteToDistant(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, localUrl *url.URL) {
 		defer test.MockVariableValue(&setting.AppURL, localUrl.String())()
 
-		distantUrl := federatedSrv.URL
-		distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantUrl)
+		distantURL := federatedSrv.URL
+		distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantURL)
 
 		localUser2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 		localUser2URL := localUrl.JoinPath("/api/v1/activitypub/user-id/2").String()
@@ -128,9 +127,9 @@ func TestActivityPubPersonInboxNoteToDistant(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusAccepted, resp.StatusCode)
 
-		// local action which triggers an user activity
+		// local action which triggers a user activity
 		IssueURL := fmt.Sprintf("/api/v1/repos/%s/issues?state=all", repo.FullName())
-		req := NewRequestWithJSON(t, "POST", IssueURL, &api.CreateIssueOption{
+		req := NewRequestWithJSON(t, "POST", IssueURL, &structs.CreateIssueOption{
 			Title: "ActivityFeed test",
 			Body:  "Nothing to see here!",
 		}).AddTokenAuth(localSecssion2Token)

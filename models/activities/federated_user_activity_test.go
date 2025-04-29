@@ -5,6 +5,7 @@ package activities
 
 import (
 	"testing"
+
 	"forgejo.org/modules/validation"
 )
 

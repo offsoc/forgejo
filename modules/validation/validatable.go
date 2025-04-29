@@ -42,18 +42,12 @@ func IsValid(v Validateable) (bool, error) {
 	return true, nil
 }
 
-func ValidateIdExists(value ap.Item, name string) []string {
-	isValid := true
+func ValidateIDExists(value ap.Item, name string) []string {
 	if value == nil {
-		isValid = false
+		return []string{fmt.Sprintf("%v should not be nil", name)}
 	} else {
 		return ValidateNotEmpty(value.GetID().String(), name)
 	}
-
-	if isValid {
-		return []string{}
-	}
-	return []string{fmt.Sprintf("%v should not be nil", name)}
 }
 
 func ValidateNotEmpty(value any, name string) []string {
@@ -98,5 +92,5 @@ func ValidateOneOf(value any, allowed []any, name string) []string {
 			return []string{}
 		}
 	}
-	return []string{fmt.Sprintf("Value %v is not contained in allowed values %v", value, allowed)}
+	return []string{fmt.Sprintf("Field %s does contain value %v, which is not in allowed subset %v", name, value, allowed)}
 }

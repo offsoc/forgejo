@@ -6,6 +6,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"forgejo.org/modules/log"
 
 	"forgejo.org/models/db"
 	"forgejo.org/modules/optional"
@@ -31,9 +32,15 @@ func CreateFederatedUser(ctx context.Context, user *User, federatedUser *Federat
 	if err != nil {
 		return err
 	}
-	defer committer.Close()
+	defer func(committer db.Committer) {
+		err := committer.Close()
+		if err != nil {
+			log.Error("Error closing committer: %v", err)
+		}
+	}(committer)
 
 	if err := CreateUser(ctx, user, &overwrite); err != nil {
+
 		return err
 	}
 
@@ -95,7 +102,7 @@ func GetFederatedUser(ctx context.Context, externalID string, federationHostID i
 	return user, federatedUser, nil
 }
 
-func GetFederatedUserByUserId(ctx context.Context, userID int64) (*User, *FederatedUser, error) {
+func GetFederatedUserByUserID(ctx context.Context, userID int64) (*User, *FederatedUser, error) {
 	federatedUser := new(FederatedUser)
 	user := new(User)
 	has, err := db.GetEngine(ctx).Where("user_id=?", userID).Get(federatedUser)

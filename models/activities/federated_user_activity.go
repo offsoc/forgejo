@@ -31,7 +31,7 @@ func init() {
 }
 
 func NewFederatedUserActivity(userID int64, actorID, noteContent, noteURL string, originalNote ap.Activity) (FederatedUserActivity, error) {
-	json, err := json.Marshal(originalNote)
+	jsonString, err := json.Marshal(originalNote)
 	if err != nil {
 		return FederatedUserActivity{}, err
 	}
@@ -40,7 +40,7 @@ func NewFederatedUserActivity(userID int64, actorID, noteContent, noteURL string
 		ActorID:      actorID,
 		NoteContent:  noteContent,
 		NoteURL:      noteURL,
-		OriginalNote: string(json),
+		OriginalNote: string(jsonString),
 	}
 	if valid, err := validation.IsValid(result); !valid {
 		return FederatedUserActivity{}, err
@@ -89,12 +89,12 @@ func GetFollowingFeeds(ctx context.Context, opts GetFollowingFeedsOptions) ([]*F
 	return actions, count, err
 }
 
-func (fua *FederatedUserActivity) loadActor(ctx context.Context) error {
-	actorUser, _, err := user_model.GetFederatedUserByUserId(ctx, fua.UserID)
+func (federatedUser *FederatedUserActivity) loadActor(ctx context.Context) error {
+	actorUser, _, err := user_model.GetFederatedUserByUserID(ctx, federatedUser.UserID)
 	if err != nil {
 		return err
 	}
-	fua.Actor = actorUser
+	federatedUser.Actor = actorUser
 
 	return nil
 }

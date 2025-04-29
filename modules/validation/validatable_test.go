@@ -1,4 +1,4 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package validation
@@ -58,23 +58,23 @@ func Test_ValidateNotEmpty_ForTimestamp(t *testing.T) {
 	}
 }
 
-func Test_ValidateIdExists_ForItem(t *testing.T) {
+func Test_ValidateIDExists_ForItem(t *testing.T) {
 	sut := ap.Activity{
 		Object: nil,
 	}
-	if res := ValidateIdExists(sut.Object, "dummyField"); len(res) == 0 {
+	if res := ValidateIDExists(sut.Object, "dummyField"); len(res) == 0 {
 		t.Errorf("sut should be invalid")
 	}
 	sut = ap.Activity{
 		Object: ap.IRI(""),
 	}
-	if res := ValidateIdExists(sut.Object, "dummyField"); len(res) == 0 {
+	if res := ValidateIDExists(sut.Object, "dummyField"); len(res) == 0 {
 		t.Errorf("sut should be invalid")
 	}
 	sut = ap.Activity{
 		Object: ap.IRI("https://dummy.link/id"),
 	}
-	if res := ValidateIdExists(sut.Object, "dummyField"); len(res) > 0 {
+	if res := ValidateIDExists(sut.Object, "dummyField"); len(res) > 0 {
 		t.Errorf("sut should be valid but was %q", res)
 	}
 }

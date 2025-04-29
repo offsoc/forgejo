@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"forgejo.org/models/activities"
-	activities_model "forgejo.org/models/activities"
 	"forgejo.org/modules/activitypub"
 	"forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
@@ -118,7 +117,7 @@ func PersonFeed(ctx *context.APIContext) {
 }
 
 func getActivity(ctx *context.APIContext, id int64) (*forgefed.ForgeUserActivity, error) {
-	action, err := activities_model.GetActivityByID(ctx, id)
+	action, err := activities.GetActivityByID(ctx, id)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "GetActivityByID", err.Error())
 		return nil, err
@@ -129,7 +128,7 @@ func getActivity(ctx *context.APIContext, id int64) (*forgefed.ForgeUserActivity
 		return nil, err
 	}
 
-	actions := activities_model.ActionList{action}
+	actions := activities.ActionList{action}
 	if err := actions.LoadAttributes(ctx); err != nil {
 		ctx.Error(http.StatusInternalServerError, "action.LoadAttributes", err.Error())
 		return nil, err
