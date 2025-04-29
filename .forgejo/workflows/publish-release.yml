@@ -2,6 +2,8 @@
 #
 # See also https://forgejo.org/docs/next/contributor/release/#stable-release-process
 #
+# TOKEN_NEXT_DIGEST is a token with write repository access to https://invisible.forgejo.org/infrastructure/next-digest issued by https://invisible.forgejo.org/forgejo-next-digest
+#
 # https://codeberg.org/forgejo-experimental/forgejo
 #
 #  Copies a release from codeberg.org/forgejo-integration to codeberg.org/forgejo-experimental
@@ -14,7 +16,7 @@
 #  vars.DOER: forgejo-experimental-ci
 #  secrets.TOKEN: <generated from codeberg.org/forgejo-experimental-ci>
 #
-# http://private.forgejo.org/forgejo/forgejo
+# http://invisible.forgejo.org/forgejo/forgejo
 #
 #  Copies & sign a release from codeberg.org/forgejo-integration to codeberg.org/forgejo
 #
@@ -80,7 +82,7 @@ jobs:
       - name: upgrade v*.next.forgejo.org
         uses: https://data.forgejo.org/infrastructure/next-digest@v1.1.0
         with:
-          url: https://placeholder:${{ secrets.TOKEN_NEXT_DIGEST }}@code.forgejo.org/infrastructure/next-digest
+          url: https://placeholder:${{ secrets.TOKEN_NEXT_DIGEST }}@invisible.forgejo.org/infrastructure/next-digest
           ref_name: '${{ github.ref_name }}'
           image: 'codeberg.org/forgejo-experimental/forgejo'
           tag_suffix: '-rootless'
