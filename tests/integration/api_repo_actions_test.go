@@ -187,27 +187,58 @@ func TestAPIGetListActionRun(t *testing.T) {
 
 func TestAPIGetActionRun(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-	var runID int64 = 892
 
-	dbRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: runID})
-
-	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: dbRun.RepoID})
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 63})
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
 	token := getUserToken(t, user.LowerName, auth_model.AccessTokenScopeWriteRepository)
 
-	req := NewRequest(t, http.MethodGet,
-		fmt.Sprintf("/api/v1/repos/%s/%s/actions/runs/%d",
-			repo.OwnerName, repo.Name, runID,
-		),
-	)
-	req.AddTokenAuth(token)
+	testqueries := []struct {
+		name           string
+		runID          int64
+		expectedStatus int
+	}{
+		{
+			name:           "existing return ok",
+			runID:          892,
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "non existing run",
+			runID:          9876543210, // I hope this run will not exists, else just change it to another.
+			expectedStatus: http.StatusNotFound,
+		},
+		{
+			name:           "existing run but wrong repo should not be found",
+			runID:          891,
+			expectedStatus: http.StatusNotFound,
+		},
+	}
 
-	res := MakeRequest(t, req, http.StatusOK)
-	apiRun := new(api.ActionRun)
-	DecodeJSON(t, res, apiRun)
+	for _, tt := range testqueries {
+		t.Run(tt.name, func(t *testing.T) {
+			req := NewRequest(t, http.MethodGet,
+				fmt.Sprintf("/api/v1/repos/%s/%s/actions/runs/%d",
+					repo.OwnerName, repo.Name, tt.runID,
+				),
+			)
+			req.AddTokenAuth(token)
 
-	assert.Equal(t, dbRun.Index, apiRun.RunNumber)
-	assert.Equal(t, dbRun.Status.String(), apiRun.Status)
-	assert.Equal(t, dbRun.CommitSHA, apiRun.HeadSHA)
-	assert.Equal(t, dbRun.TriggerUserID, apiRun.TriggeringActor.ID)
+			res := MakeRequest(t, req, tt.expectedStatus)
+
+			// Only interested in the data if 200 OK
+			if tt.expectedStatus != http.StatusOK {
+				return
+			}
+
+			dbRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: tt.runID})
+			apiRun := new(api.ActionRun)
+			DecodeJSON(t, res, apiRun)
+
+			assert.Equal(t, dbRun.Index, apiRun.RunNumber)
+			assert.Equal(t, dbRun.Status.String(), apiRun.Status)
+			assert.Equal(t, dbRun.CommitSHA, apiRun.HeadSHA)
+			assert.Equal(t, dbRun.TriggerUserID, apiRun.TriggeringActor.ID)
+		})
+	}
+
 }

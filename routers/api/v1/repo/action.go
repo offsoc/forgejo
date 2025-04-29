@@ -831,7 +831,16 @@ func GetActionRun(ctx *context.APIContext) {
 
 	run, err := actions_model.GetRunByID(ctx, ctx.ParamsInt64(":run_id"))
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "GetRunByID", err)
+		if errors.Is(err, util.ErrNotExist) {
+			ctx.Error(http.StatusNotFound, "GetRunById", err)
+		} else {
+			ctx.Error(http.StatusInternalServerError, "GetRunByID", err)
+		}
+		return
+	}
+
+	if ctx.Repo.Repository.ID != run.RepoID {
+		ctx.Error(http.StatusNotFound, "GetRunById", util.ErrNotExist)
 		return
 	}
 
