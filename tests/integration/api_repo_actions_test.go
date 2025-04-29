@@ -240,5 +240,4 @@ func TestAPIGetActionRun(t *testing.T) {
 			assert.Equal(t, dbRun.TriggerUserID, apiRun.TriggeringActor.ID)
 		})
 	}
-
 }
