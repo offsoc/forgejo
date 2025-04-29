@@ -8,6 +8,7 @@ import (
 
 	"forgejo.org/modules/timeutil"
 	ap "github.com/go-ap/activitypub"
+	"github.com/stretchr/testify/assert"
 )
 
 type Sut struct {
@@ -38,54 +39,50 @@ func Test_IsValid(t *testing.T) {
 
 func Test_ValidateNotEmpty_ForString(t *testing.T) {
 	sut := ""
-	if len(ValidateNotEmpty(sut, "dummyField")) == 0 {
-		t.Errorf("sut should be invalid")
-	}
+	res := ValidateNotEmpty(sut, "dummyField")
+	assert.Len(t, res, 1)
+
 	sut = "not empty"
-	if res := ValidateNotEmpty(sut, "dummyField"); len(res) > 0 {
-		t.Errorf("sut should be valid but was %q", res)
-	}
+	res = ValidateNotEmpty(sut, "dummyField")
+	assert.Len(t, res, 0)
 }
 
 func Test_ValidateNotEmpty_ForTimestamp(t *testing.T) {
 	sut := timeutil.TimeStamp(0)
-	if res := ValidateNotEmpty(sut, "dummyField"); len(res) == 0 {
-		t.Errorf("sut should be invalid")
-	}
+	res := ValidateNotEmpty(sut, "dummyField")
+	assert.Len(t, res, 1)
+
 	sut = timeutil.TimeStampNow()
-	if res := ValidateNotEmpty(sut, "dummyField"); len(res) > 0 {
-		t.Errorf("sut should be valid but was %q", res)
-	}
+	res = ValidateNotEmpty(sut, "dummyField")
+	assert.Len(t, res, 0)
 }
 
 func Test_ValidateIDExists_ForItem(t *testing.T) {
 	sut := ap.Activity{
 		Object: nil,
 	}
-	if res := ValidateIDExists(sut.Object, "dummyField"); len(res) == 0 {
-		t.Errorf("sut should be invalid")
-	}
+	res := ValidateIDExists(sut.Object, "dummyField")
+	assert.Len(t, res, 1)
+
 	sut = ap.Activity{
 		Object: ap.IRI(""),
 	}
-	if res := ValidateIDExists(sut.Object, "dummyField"); len(res) == 0 {
-		t.Errorf("sut should be invalid")
-	}
+	res = ValidateIDExists(sut.Object, "dummyField")
+	assert.Len(t, res, 1)
+
 	sut = ap.Activity{
 		Object: ap.IRI("https://dummy.link/id"),
 	}
-	if res := ValidateIDExists(sut.Object, "dummyField"); len(res) > 0 {
-		t.Errorf("sut should be valid but was %q", res)
-	}
+	res = ValidateIDExists(sut.Object, "dummyField")
+	assert.Len(t, res, 0)
 }
 
 func Test_ValidateMaxLen(t *testing.T) {
 	sut := "0123456789"
-	if len(ValidateMaxLen(sut, 9, "dummyField")) == 0 {
-		t.Errorf("sut should be invalid")
-	}
+	res := ValidateMaxLen(sut, 9, "dummyField")
+	assert.Len(t, res, 1)
+
 	sut = "0123456789"
-	if res := ValidateMaxLen(sut, 11, "dummyField"); len(res) > 0 {
-		t.Errorf("sut should be valid but was %q", res)
-	}
+	res = ValidateMaxLen(sut, 11, "dummyField")
+	assert.Len(t, res, 0)
 }
