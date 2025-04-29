@@ -7,7 +7,9 @@ import (
 	"context"
 	"testing"
 
+	"forgejo.org/models/db"
 	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/templates"
 	"forgejo.org/modules/test"
@@ -44,5 +46,11 @@ func MockMailSettings(send func(msgs ...*Message)) func() {
 		for _, cleanup := range cleanups {
 			cleanup()
 		}
+	}
+}
+
+func CleanUpUsers(ctx context.Context, users []*user_model.User) {
+	for _, u := range users {
+		db.DeleteByID[user_model.User](ctx, u.ID)
 	}
 }
