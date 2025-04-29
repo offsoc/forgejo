@@ -85,7 +85,7 @@ func TestActivityPubPersonInboxNoteFromDistant(t *testing.T) {
 }
 
 func TestActivityPubPersonInboxNoteToDistant(t *testing.T) {
-	// defer tests.AddFixtures("tests/integration/fixtures/TestActivityPubPersonInboxNoteToDistant")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestActivityPubPersonInboxNoteToDistant")()
 	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&setting.Federation.SignatureEnforced, false)()
