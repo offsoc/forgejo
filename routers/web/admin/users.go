@@ -247,7 +247,7 @@ func prepareUserInfo(ctx *context.Context) *user_model.User {
 	}
 	ctx.Data["Sources"] = sources
 
-	hasTOTP, err := auth.HasTwoFactorByUID(ctx, u.ID)
+	hasTOTP, err := auth.HasTOTPByUID(ctx, u.ID)
 	if err != nil {
 		ctx.ServerError("auth.HasTwoFactorByUID", err)
 		return nil

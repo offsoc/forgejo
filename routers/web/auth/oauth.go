@@ -1124,14 +1124,14 @@ func updateAvatarIfNeed(ctx *context.Context, url string, u *user_model.User) {
 func handleOAuth2SignIn(ctx *context.Context, source *auth.Source, u *user_model.User, gothUser goth.User) {
 	updateAvatarIfNeed(ctx, gothUser.AvatarURL, u)
 
+	var err error
 	needs2FA := false
 	if !source.Cfg.(*oauth2.Source).SkipLocalTwoFA {
-		_, err := auth.GetTwoFactorByUID(ctx, u.ID)
-		if err != nil && !auth.IsErrTwoFactorNotEnrolled(err) {
+		needs2FA, err = auth.HasTwoFactorByUID(ctx, u.ID)
+		if err != nil {
 			ctx.ServerError("UserSignIn", err)
 			return
 		}
-		needs2FA = err == nil
 	}
 
 	oauth2Source := source.Cfg.(*oauth2.Source)
