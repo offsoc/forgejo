@@ -6,6 +6,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"forgejo.org/modules/log"
 
 	"forgejo.org/models/db"
 	"forgejo.org/modules/optional"
@@ -31,9 +32,15 @@ func CreateFederatedUser(ctx context.Context, user *User, federatedUser *Federat
 	if err != nil {
 		return err
 	}
-	defer committer.Close()
+	defer func(committer db.Committer) {
+		err := committer.Close()
+		if err != nil {
+			log.Error("Error closing committer: %v", err)
+		}
+	}(committer)
 
 	if err := CreateUser(ctx, user, &overwrite); err != nil {
+
 		return err
 	}
 
