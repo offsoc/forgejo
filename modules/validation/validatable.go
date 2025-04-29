@@ -45,9 +45,8 @@ func IsValid(v Validateable) (bool, error) {
 func ValidateIDExists(value ap.Item, name string) []string {
 	if value == nil {
 		return []string{fmt.Sprintf("%v should not be nil", name)}
-	} else {
-		return ValidateNotEmpty(value.GetID().String(), name)
 	}
+	return ValidateNotEmpty(value.GetID().String(), name)
 }
 
 func ValidateNotEmpty(value any, name string) []string {
