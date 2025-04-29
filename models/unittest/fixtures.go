@@ -6,7 +6,6 @@ package unittest
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -14,12 +13,11 @@ import (
 	"forgejo.org/modules/auth/password/hash"
 	"forgejo.org/modules/setting"
 
-	"github.com/go-testfixtures/testfixtures/v3"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 )
 
-var fixturesLoader *testfixtures.Loader
+var fixturesLoader *loader
 
 // GetXORMEngine gets the XORM engine
 func GetXORMEngine(engine ...*xorm.Engine) (x *xorm.Engine, err error) {
@@ -31,6 +29,7 @@ func GetXORMEngine(engine ...*xorm.Engine) (x *xorm.Engine, err error) {
 
 func OverrideFixtures(dir string) func() {
 	old := fixturesLoader
+
 	opts := FixturesOptions{
 		Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
 		Base: setting.AppWorkPath,
@@ -39,6 +38,7 @@ func OverrideFixtures(dir string) func() {
 	if err := InitFixtures(opts); err != nil {
 		panic(err)
 	}
+
 	return func() {
 		fixturesLoader = old
 	}
@@ -50,19 +50,20 @@ func InitFixtures(opts FixturesOptions, engine ...*xorm.Engine) (err error) {
 	if err != nil {
 		return err
 	}
-	var fixtureOptionFiles func(*testfixtures.Loader) error
+
+	fixturePaths := []string{}
 	if opts.Dir != "" {
-		fixtureOptionFiles = testfixtures.Directory(opts.Dir)
+		fixturePaths = append(fixturePaths, opts.Dir)
 	} else {
-		fixtureOptionFiles = testfixtures.Files(opts.Files...)
+		fixturePaths = append(fixturePaths, opts.Files...)
 	}
-	var fixtureOptionDirs []func(*testfixtures.Loader) error
 	if opts.Dirs != nil {
 		for _, dir := range opts.Dirs {
-			fixtureOptionDirs = append(fixtureOptionDirs, testfixtures.Directory(filepath.Join(opts.Base, dir)))
+			fixturePaths = append(fixturePaths, filepath.Join(opts.Base, dir))
 		}
 	}
-	dialect := "unknown"
+
+	var dialect string
 	switch e.Dialect().URI().DBType {
 	case schemas.POSTGRES:
 		dialect = "postgres"
@@ -71,22 +72,10 @@ func InitFixtures(opts FixturesOptions, engine ...*xorm.Engine) (err error) {
 	case schemas.SQLITE:
 		dialect = "sqlite3"
 	default:
-		fmt.Println("Unsupported RDBMS for integration tests")
-		os.Exit(1)
-	}
-	loaderOptions := []func(loader *testfixtures.Loader) error{
-		testfixtures.Database(e.DB().DB),
-		testfixtures.Dialect(dialect),
-		testfixtures.DangerousSkipTestDatabaseCheck(),
-		fixtureOptionFiles,
-	}
-	loaderOptions = append(loaderOptions, fixtureOptionDirs...)
-
-	if e.Dialect().URI().DBType == schemas.POSTGRES {
-		loaderOptions = append(loaderOptions, testfixtures.SkipResetSequences())
+		panic("Unsupported RDBMS for test")
 	}
 
-	fixturesLoader, err = testfixtures.New(loaderOptions...)
+	fixturesLoader, err = newFixtureLoader(e.DB().DB, dialect, fixturePaths)
 	if err != nil {
 		return err
 	}
