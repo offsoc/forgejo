@@ -242,7 +242,7 @@ func SignInPost(ctx *context.Context) {
 
 	// If this user is enrolled in 2FA TOTP, we can't sign the user in just yet.
 	// Instead, redirect them to the 2FA authentication page.
-	hasTOTPtwofa, err := auth.HasTwoFactorByUID(ctx, u.ID)
+	hasTOTPtwofa, err := auth.HasTOTPByUID(ctx, u.ID)
 	if err != nil {
 		ctx.ServerError("UserSignIn", err)
 		return
