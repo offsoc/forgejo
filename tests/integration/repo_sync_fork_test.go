@@ -136,7 +136,10 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		assert.Contains(t, raw, fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/%s'>user2/repo1:%s</a>",
 			u.Port(), branchURLEscaped, branchHTMLEscaped))
 
-		// Verify that the link in the button does not error out
-		MakeRequest(t, NewRequest(t, "GET", updateLink), http.StatusSeeOther)
+		// Verify that the button link doesn't do anything for a GET request
+		MakeRequest(t, NewRequest(t, "GET", updateLink), http.StatusMethodNotAllowed)
+
+		// Verify that the button link does not error out
+		MakeRequest(t, NewRequest(t, "POST", updateLink), http.StatusSeeOther)
 	})
 }

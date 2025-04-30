@@ -4,8 +4,11 @@
 			{{$baseBranchHTML := HTMLFormat "<a href='%s'>%s:%s</a>" .BaseBranchLink .Repository.BaseRepo.FullName .BranchName }}
 			{{ctx.Locale.TrN .ForkCommitsBehind "repo.sync_fork.branch_behind_one" "repo.sync_fork.branch_behind_few" .ForkCommitsBehind $baseBranchHTML}}
 		</div>
-		<a role="button" class="ui compact positive button tw-m-0" href="{{.SyncForkLink}}">
-			{{ctx.Locale.Tr "repo.sync_fork.button"}}
-		</a>
+		<form method="post" action="{{.SyncForkLink}}">
+			{{.CsrfTokenHtml}}
+			<button class="ui compact positive button tw-m-0">
+				{{ctx.Locale.Tr "repo.sync_fork.button"}}
+			</button>
+		</form>
 	</div>
 {{end}}
