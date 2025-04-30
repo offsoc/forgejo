@@ -99,13 +99,14 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		baseRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 		baseUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: baseRepo.OwnerID})
 
-		session := loginUser(t, user.Name)
-		token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
+		upstreamOwnerSession := loginUser(t, baseUser.Name)
+		forkOwnersession := loginUser(t, user.Name)
+		token := getTokenForLoggedInUser(t, forkOwnersession, auth_model.AccessTokenScopeWriteRepository)
 
 		// Rename branch "master" to "&amp;"
-		loginUser(t, baseUser.Name).MakeRequest(t, NewRequestWithValues(t, "POST",
+		upstreamOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST",
 			"/user2/repo1/settings/rename_branch", map[string]string{
-				"_csrf": GetCSRF(t, session, "/user2/repo1/settings/branches"),
+				"_csrf": GetCSRF(t, upstreamOwnerSession, "/user2/repo1/settings/branches"),
 				"from":  "master",
 				"to":    "&amp;",
 			}), http.StatusSeeOther)
@@ -118,7 +119,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		err := createOrReplaceFileInBranch(baseUser, baseRepo, "sync_fork.txt", "&amp;", "Hello")
 		require.NoError(t, err)
 
-		resp := session.MakeRequest(t, NewRequestf(t, "GET", "/%s/%s", user.Name, forkName), http.StatusOK)
+		resp := forkOwnersession.MakeRequest(t, NewRequestf(t, "GET", "/%s/%s", user.Name, forkName), http.StatusOK)
 
 		assert.Contains(t, resp.Body.String(), fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/&amp;'>user2/repo1:master</a>", u.Port()))
 	})
