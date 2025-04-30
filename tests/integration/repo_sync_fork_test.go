@@ -93,34 +93,38 @@ func TestWebRepoSyncForkBranch(t *testing.T) {
 
 func TestWebRepoSyncForkHomepage(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		forkName := "SyncForkHomepage"
-		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 20})
-
 		baseRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
-		baseUser := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: baseRepo.OwnerID})
+		baseOwner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: baseRepo.OwnerID})
+		baseOwnerSession := loginUser(t, baseOwner.Name)
 
-		upstreamOwnerSession := loginUser(t, baseUser.Name)
-		forkOwnersession := loginUser(t, user.Name)
+		forkOwner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 20})
+		forkOwnersession := loginUser(t, forkOwner.Name)
 		token := getTokenForLoggedInUser(t, forkOwnersession, auth_model.AccessTokenScopeWriteRepository)
 
 		// Rename branch "master" to "&amp;"
-		upstreamOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST",
+		baseOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST",
 			"/user2/repo1/settings/rename_branch", map[string]string{
-				"_csrf": GetCSRF(t, upstreamOwnerSession, "/user2/repo1/settings/branches"),
+				"_csrf": GetCSRF(t, baseOwnerSession, "/user2/repo1/settings/branches"),
 				"from":  "master",
 				"to":    "&amp;",
 			}), http.StatusSeeOther)
 
+		forkName := "SyncForkHomepage"
+		forkFullName := fmt.Sprintf("/%s/%s", forkOwner.Name, forkName)
+
 		// Create a new fork
-		req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/forks", baseUser.Name, baseRepo.LowerName), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
+		req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/forks", baseOwner.Name, baseRepo.LowerName), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
 		MakeRequest(t, req, http.StatusAccepted)
 
 		// Make a commit on the base branch
-		err := createOrReplaceFileInBranch(baseUser, baseRepo, "sync_fork.txt", "&amp;", "Hello")
+		err := createOrReplaceFileInBranch(baseOwner, baseRepo, "sync_fork.txt", "&amp;", "Hello")
 		require.NoError(t, err)
 
-		resp := forkOwnersession.MakeRequest(t, NewRequestf(t, "GET", "/%s/%s", user.Name, forkName), http.StatusOK)
-
-		assert.Contains(t, resp.Body.String(), fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/&amp;'>user2/repo1:master</a>", u.Port()))
+		resp := forkOwnersession.MakeRequest(t, NewRequest(t, "GET", forkFullName), http.StatusOK)
+		doc := NewHTMLParser(t, resp.Body)
+		message := doc.Find("*")
+		raw, _ := message.Html()
+		//raw := resp.Body.String()
+		assert.Contains(t, raw, fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/&amp;'>user2/repo1:master</a>", u.Port()))
 	})
 }
