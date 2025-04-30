@@ -57,7 +57,7 @@ func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
 
 	// Sync the fork
 	if webSync {
-		session.MakeRequest(t, NewRequestf(t, "GET", "/%s/%s/sync_fork/master", user.Name, forkName), http.StatusSeeOther)
+		session.MakeRequest(t, NewRequestf(t, "POST", "/%s/%s/sync_fork/master", user.Name, forkName), http.StatusSeeOther)
 	} else {
 		req = NewRequestf(t, "POST", "/api/v1/repos/%s/%s/%s", user.Name, forkName, urlPart).AddTokenAuth(token)
 		MakeRequest(t, req, http.StatusNoContent)
@@ -98,8 +98,8 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		baseOwnerSession := loginUser(t, baseOwner.Name)
 
 		forkOwner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 20})
-		forkOwnersession := loginUser(t, forkOwner.Name)
-		token := getTokenForLoggedInUser(t, forkOwnersession, auth_model.AccessTokenScopeWriteRepository)
+		forkOwnerSession := loginUser(t, forkOwner.Name)
+		token := getTokenForLoggedInUser(t, forkOwnerSession, auth_model.AccessTokenScopeWriteRepository)
 
 		forkName := "SyncForkHomepage"
 		branchName := "<script>alert('0ko')</script>&amp;"
@@ -123,7 +123,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		err := createOrReplaceFileInBranch(baseOwner, baseRepo, "sync_fork.txt", branchName, "Hello")
 		require.NoError(t, err)
 
-		doc := NewHTMLParser(t, forkOwnersession.MakeRequest(t,
+		doc := NewHTMLParser(t, forkOwnerSession.MakeRequest(t,
 			NewRequest(t, "GET", fmt.Sprintf("/%s/%s", forkOwner.Name, forkName)), http.StatusOK).Body)
 
 		// Verify correct URL escaping of branch name in the form
@@ -138,9 +138,10 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 			u.Port(), branchURLEscaped, branchHTMLEscaped))
 
 		// Verify that the form link doesn't do anything for a GET request
-		MakeRequest(t, NewRequest(t, "GET", updateLink), http.StatusMethodNotAllowed)
+		forkOwnerSession.MakeRequest(t, NewRequest(t, "GET", updateLink), http.StatusMethodNotAllowed)
 
 		// Verify that the form link does not error out
-		MakeRequest(t, NewRequest(t, "POST", updateLink), http.StatusSeeOther)
+		forkOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST", updateLink, map[string]string{
+			"_csrf": GetCSRF(t, forkOwnerSession, "/user2/repo1")}), http.StatusSeeOther)
 	})
 }
