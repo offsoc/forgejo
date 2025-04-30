@@ -124,7 +124,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		doc := NewHTMLParser(t, resp.Body)
 		message := doc.Find("*")
 		raw, _ := message.Html()
-		//raw := resp.Body.String()
+		// raw := resp.Body.String()
 		assert.Contains(t, raw, fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/&amp;'>user2/repo1:master</a>", u.Port()))
 	})
 }
