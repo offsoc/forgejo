@@ -79,8 +79,19 @@
 				{{template "repo/issue/view_content/pull".}}
 			{{end}}
 
-			{{if and .IsSigned (not .IsBlocked)}}
-				{{if and (or .IsRepoAdmin .HasIssuesOrPullsWritePermission (not .Issue.IsLocked)) (not .Repository.IsArchived)}}
+			{{if .Repository.IsArchived}}
+				<div class="ui warning message tw-text-center">
+					{{ctx.Locale.Tr "repo.archive.nocomment"}}
+				</div>
+			{{else if .IsBlocked}}
+				<div class="ui warning message">
+					{{ctx.Locale.Tr "repo.comment.blocked_by_user"}}
+				</div>
+			{{else if and .Issue.IsLocked (not (or .IsRepoAdmin .HasIssuesOrPullsWritePermission))}}
+				<div class="ui warning message">
+					{{ctx.Locale.Tr "discussion.locked"}}
+				</div>
+			{{else if .IsSigned}}
 				<div class="timeline-item comment form">
 					<a class="timeline-avatar" href="{{.SignedUser.HomeLink}}">
 						{{ctx.AvatarUtils.Avatar .SignedUser 40}}
@@ -114,26 +125,11 @@
 						</form>
 					</div>
 				</div>
-				{{else if .Repository.IsArchived}}
-					<div class="ui warning message tw-text-center">
-						{{ctx.Locale.Tr "repo.archive.nocomment"}}
-					</div>
-				{{end}}
-			{{else if .IsBlocked}}
-				<div class="ui warning message">
-					{{ctx.Locale.Tr "repo.comment.blocked_by_user"}}
-				</div>
 			{{else}} {{/* not .IsSigned */}}
-				{{if .Repository.IsArchived}}
-					<div class="ui warning message tw-text-center">
-						{{ctx.Locale.Tr "repo.archive.nocomment"}}
-					</div>
-				{{else}}
-					<div class="ui warning message">
-						{{ctx.Locale.Tr "repo.issues.sign_in_require_desc" .SignInLink}}
-					</div>
-				{{end}}
-			{{end}}{{/* end if: .IsSigned */}}
+				<div class="ui warning message">
+					{{ctx.Locale.Tr "repo.issues.sign_in_require_desc" .SignInLink}}
+				</div>
+			{{end}}
 		</div>
 	</div>
 
