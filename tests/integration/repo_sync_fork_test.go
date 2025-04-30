@@ -101,30 +101,42 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		forkOwnersession := loginUser(t, forkOwner.Name)
 		token := getTokenForLoggedInUser(t, forkOwnersession, auth_model.AccessTokenScopeWriteRepository)
 
-		// Rename branch "master" to "&amp;"
+		forkName := "SyncForkHomepage"
+		branchName := "<script>alert('0ko')</script>&amp;"
+		branchHTMLEscaped := "&lt;script&gt;alert(&#39;0ko&#39;)&lt;/script&gt;&amp;amp;"
+		branchURLEscaped := "<script>alert('0ko')</script>%26amp%3B"
+
+		// Rename branch "master" to test name escaping in the UI
 		baseOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST",
 			"/user2/repo1/settings/rename_branch", map[string]string{
 				"_csrf": GetCSRF(t, baseOwnerSession, "/user2/repo1/settings/branches"),
 				"from":  "master",
-				"to":    "&amp;",
+				"to":    branchName,
 			}), http.StatusSeeOther)
-
-		forkName := "SyncForkHomepage"
-		forkFullName := fmt.Sprintf("/%s/%s", forkOwner.Name, forkName)
 
 		// Create a new fork
 		req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/forks", baseOwner.Name, baseRepo.LowerName), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
 		MakeRequest(t, req, http.StatusAccepted)
 
 		// Make a commit on the base branch
-		err := createOrReplaceFileInBranch(baseOwner, baseRepo, "sync_fork.txt", "&amp;", "Hello")
+		err := createOrReplaceFileInBranch(baseOwner, baseRepo, "sync_fork.txt", branchName, "Hello")
 		require.NoError(t, err)
 
-		resp := forkOwnersession.MakeRequest(t, NewRequest(t, "GET", forkFullName), http.StatusOK)
-		doc := NewHTMLParser(t, resp.Body)
-		message := doc.Find("*")
-		raw, _ := message.Html()
-		// raw := resp.Body.String()
-		assert.Contains(t, raw, fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/&amp;'>user2/repo1:master</a>", u.Port()))
+		doc := NewHTMLParser(t, forkOwnersession.MakeRequest(t,
+			NewRequest(t, "GET", fmt.Sprintf("/%s/%s", forkOwner.Name, forkName)), http.StatusOK).Body)
+
+		// Verify correct URL escaping of branch name in the button
+		btn := doc.Find(fmt.Sprintf("#sync_fork_msg a[href$='/sync_fork/%s']", branchURLEscaped))
+		assert.Equal(t, btn.Length(), 1)
+		updateLink, exists := btn.Attr("href")
+		assert.True(t, exists)
+
+		// Verify correct escaping of branch name in the message
+		raw, _ := doc.Find("#sync_fork_msg").Html()
+		assert.Contains(t, raw, fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/%s'>user2/repo1:%s</a>",
+			u.Port(), branchURLEscaped, branchHTMLEscaped))
+
+		// Verify that the link in the button does not error out
+		MakeRequest(t, NewRequest(t, "GET", updateLink), http.StatusSeeOther)
 	})
 }
