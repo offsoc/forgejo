@@ -102,6 +102,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		token := getTokenForLoggedInUser(t, forkOwnerSession, auth_model.AccessTokenScopeWriteRepository)
 
 		forkName := "SyncForkHomepage"
+		forkLink := fmt.Sprintf("/%s/%s", forkOwner.Name, forkName)
 		branchName := "<script>alert('0ko')</script>&amp;"
 		branchHTMLEscaped := "&lt;script&gt;alert(&#39;0ko&#39;)&lt;/script&gt;&amp;amp;"
 		// branchURLEscaped_ := "<script>alert('0ko')</script>%26amp%3B"
@@ -124,7 +125,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		require.NoError(t, err)
 
 		doc := NewHTMLParser(t, forkOwnerSession.MakeRequest(t,
-			NewRequest(t, "GET", fmt.Sprintf("/%s/%s", forkOwner.Name, forkName)), http.StatusOK).Body)
+			NewRequest(t, "GET", forkLink), http.StatusOK).Body)
 
 		// Verify correct URL escaping of branch name in the form
 		form := doc.Find(fmt.Sprintf("#sync_fork_msg form[action$='/sync_fork/%s']", branchURLEscaped))
@@ -142,7 +143,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 
 		// Verify that the form link does not error out
 		forkOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST", updateLink, map[string]string{
-			"_csrf": GetCSRF(t, forkOwnerSession, "/user2/repo1"),
+			"_csrf": GetCSRF(t, forkOwnerSession, forkLink),
 		}), http.StatusSeeOther)
 	})
 }
