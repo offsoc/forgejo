@@ -303,26 +303,37 @@ func TestCantMergeConflict(t *testing.T) {
 		gitRepo, err := gitrepo.OpenRepository(git.DefaultContext, repo1)
 		require.NoError(t, err)
 
-		err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleMerge, "", "CONFLICT", false)
-		require.Error(t, err, "Merge should return an error due to conflict")
-		assert.True(t, models.IsErrMergeConflicts(err), "Merge error is not a conflict error")
+		t.Run("Rebase", func(t *testing.T) {
+			t.Run("Git version without replay", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+				oldVersion, err := version.NewVersion("2.43.0")
+				require.NoError(t, err)
+				defer test.MockVariableValue(&git.GitVersion, oldVersion)()
 
-		t.Run("Git version with replay", func(t *testing.T) {
-			require.NoError(t, git.CheckGitVersionAtLeast("2.44"))
+				err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleRebase, "", "CONFLICT", false)
+				require.Error(t, err, "Merge should return an error due to conflict")
+				assert.True(t, models.IsErrRebaseConflicts(err), "Merge error is not a conflict error")
+			})
+			t.Run("Git version with replay", func(t *testing.T) {
+				defer tests.PrintCurrentTest(t)()
+				if git.CheckGitVersionAtLeast("2.44") != nil {
+					t.SkipNow()
+				}
 
-			err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleRebase, "", "CONFLICT", false)
-			require.Error(t, err, "Merge should return an error due to conflict")
-			assert.True(t, models.IsErrRebaseConflicts(err), "Merge error is not a conflict error")
+				err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleRebase, "", "CONFLICT", false)
+				require.Error(t, err, "Merge should return an error due to conflict")
+				assert.True(t, models.IsErrRebaseConflicts(err), "Merge error is not a conflict error")
+			})
 		})
-		t.Run("Git version without replay", func(t *testing.T) {
-			oldVersion, err := version.NewVersion("2.43.0")
-			require.NoError(t, err)
-			defer test.MockVariableValue(&git.GitVersion, oldVersion)()
 
-			err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleRebase, "", "CONFLICT", false)
+		t.Run("Merge", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			err = pull.Merge(t.Context(), pr, user1, gitRepo, repo_model.MergeStyleMerge, "", "CONFLICT", false)
 			require.Error(t, err, "Merge should return an error due to conflict")
-			assert.True(t, models.IsErrRebaseConflicts(err), "Merge error is not a conflict error")
+			assert.True(t, models.IsErrMergeConflicts(err), "Merge error is not a conflict error")
 		})
+
 		gitRepo.Close()
 	})
 }
