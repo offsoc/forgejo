@@ -104,7 +104,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		forkName := "SyncForkHomepage"
 		branchName := "<script>alert('0ko')</script>&amp;"
 		branchHTMLEscaped := "&lt;script&gt;alert(&#39;0ko&#39;)&lt;/script&gt;&amp;amp;"
-		//branchURLEscaped_ := "<script>alert('0ko')</script>%26amp%3B"
+		// branchURLEscaped_ := "<script>alert('0ko')</script>%26amp%3B"
 		branchURLEscaped := "%3Cscript%3Ealert%28%270ko%27%29%3C/script%3E&amp%3B"
 
 		// Rename branch "master" to test name escaping in the UI
