@@ -50,8 +50,7 @@ func TestPackageAPI(t *testing.T) {
 	t.Run("ListPackages", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
-		req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s", user.Name)).
-			AddTokenAuth(tokenReadPackage)
+		req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s", user.Name))
 		resp := MakeRequest(t, req, http.StatusOK)
 
 		var apiPackages []*api.Package
@@ -68,12 +67,10 @@ func TestPackageAPI(t *testing.T) {
 	t.Run("GetPackage", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
-		req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/dummy/%s/%s", user.Name, packageName, packageVersion)).
-			AddTokenAuth(tokenReadPackage)
+		req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/dummy/%s/%s", user.Name, packageName, packageVersion))
 		MakeRequest(t, req, http.StatusNotFound)
 
-		req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
-			AddTokenAuth(tokenReadPackage)
+		req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion))
 		resp := MakeRequest(t, req, http.StatusOK)
 
 		var p *api.Package
@@ -108,6 +105,9 @@ func TestPackageAPI(t *testing.T) {
 			req = NewRequest(t, "POST", fmt.Sprintf("/api/v1/packages/%s/generic/%s/-/link/%s", user.Name, packageName, repo.Name)).AddTokenAuth(tokenWritePackage)
 			MakeRequest(t, req, http.StatusCreated)
 
+			req = NewRequest(t, "POST", fmt.Sprintf("/api/v1/packages/%s/generic/%s/-/link/%s", user.Name, packageName, repo.Name))
+			MakeRequest(t, req, http.StatusUnauthorized)
+
 			req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
 				AddTokenAuth(tokenReadPackage)
 			resp = MakeRequest(t, req, http.StatusOK)
@@ -125,6 +125,9 @@ func TestPackageAPI(t *testing.T) {
 			req = NewRequest(t, "POST", fmt.Sprintf("/api/v1/packages/%s/generic/%s/-/unlink", user.Name, packageName)).AddTokenAuth(tokenWritePackage)
 			MakeRequest(t, req, http.StatusNoContent)
 
+			req = NewRequest(t, "POST", fmt.Sprintf("/api/v1/packages/%s/generic/%s/-/unlink", user.Name, packageName))
+			MakeRequest(t, req, http.StatusUnauthorized)
+
 			req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
 				AddTokenAuth(tokenReadPackage)
 			resp = MakeRequest(t, req, http.StatusOK)
@@ -137,7 +140,7 @@ func TestPackageAPI(t *testing.T) {
 			privateRepoID := int64(6)
 			require.NoError(t, packages_model.SetRepositoryLink(db.DefaultContext, p.ID, privateRepoID))
 
-			req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).AddTokenAuth(tokenReadPackage)
+			req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion))
 			resp = MakeRequest(t, req, http.StatusOK)
 
 			var ap4 *api.Package
@@ -177,6 +180,9 @@ func TestPackageAPI(t *testing.T) {
 		req := NewRequest(t, "DELETE", fmt.Sprintf("/api/v1/packages/%s/dummy/%s/%s", user.Name, packageName, packageVersion)).
 			AddTokenAuth(tokenWritePackage)
 		MakeRequest(t, req, http.StatusNotFound)
+
+		req = NewRequest(t, "DELETE", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion))
+		MakeRequest(t, req, http.StatusUnauthorized)
 
 		req = NewRequest(t, "DELETE", fmt.Sprintf("/api/v1/packages/%s/generic/%s/%s", user.Name, packageName, packageVersion)).
 			AddTokenAuth(tokenWritePackage)
