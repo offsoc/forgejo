@@ -94,6 +94,11 @@ code.gitea.io/gitea/models/repo
 code.gitea.io/gitea/models/unittest
 	CheckConsistencyFor
 	checkForConsistency
+	newFixtureLoader
+	loader.quoteKeyword
+	loader.placeholder
+	loader.buildFixtureFile
+	loader.Load
 	GetXORMEngine
 	OverrideFixtures
 	InitFixtures
