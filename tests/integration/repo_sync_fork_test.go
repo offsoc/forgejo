@@ -142,6 +142,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 
 		// Verify that the form link does not error out
 		forkOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST", updateLink, map[string]string{
-			"_csrf": GetCSRF(t, forkOwnerSession, "/user2/repo1")}), http.StatusSeeOther)
+			"_csrf": GetCSRF(t, forkOwnerSession, "/user2/repo1"),
+		}), http.StatusSeeOther)
 	})
 }
