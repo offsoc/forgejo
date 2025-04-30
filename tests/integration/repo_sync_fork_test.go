@@ -104,7 +104,8 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		forkName := "SyncForkHomepage"
 		branchName := "<script>alert('0ko')</script>&amp;"
 		branchHTMLEscaped := "&lt;script&gt;alert(&#39;0ko&#39;)&lt;/script&gt;&amp;amp;"
-		branchURLEscaped := "<script>alert('0ko')</script>%26amp%3B"
+		//branchURLEscaped_ := "<script>alert('0ko')</script>%26amp%3B"
+		branchURLEscaped := "%3Cscript%3Ealert%28%270ko%27%29%3C/script%3E&amp%3B"
 
 		// Rename branch "master" to test name escaping in the UI
 		baseOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST",
@@ -125,10 +126,10 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		doc := NewHTMLParser(t, forkOwnersession.MakeRequest(t,
 			NewRequest(t, "GET", fmt.Sprintf("/%s/%s", forkOwner.Name, forkName)), http.StatusOK).Body)
 
-		// Verify correct URL escaping of branch name in the button
-		btn := doc.Find(fmt.Sprintf("#sync_fork_msg a[href$='/sync_fork/%s']", branchURLEscaped))
-		assert.Equal(t, btn.Length(), 1)
-		updateLink, exists := btn.Attr("href")
+		// Verify correct URL escaping of branch name in the form
+		form := doc.Find(fmt.Sprintf("#sync_fork_msg form[action$='/sync_fork/%s']", branchURLEscaped))
+		assert.Equal(t, 1, form.Length())
+		updateLink, exists := form.Attr("action")
 		assert.True(t, exists)
 
 		// Verify correct escaping of branch name in the message
@@ -136,10 +137,10 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		assert.Contains(t, raw, fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/%s'>user2/repo1:%s</a>",
 			u.Port(), branchURLEscaped, branchHTMLEscaped))
 
-		// Verify that the button link doesn't do anything for a GET request
+		// Verify that the form link doesn't do anything for a GET request
 		MakeRequest(t, NewRequest(t, "GET", updateLink), http.StatusMethodNotAllowed)
 
-		// Verify that the button link does not error out
+		// Verify that the form link does not error out
 		MakeRequest(t, NewRequest(t, "POST", updateLink), http.StatusSeeOther)
 	})
 }
