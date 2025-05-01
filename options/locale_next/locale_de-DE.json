@@ -21,5 +21,14 @@
     "alert.asset_load_failed": "Konnte Asset-Dateien nicht von {path} laden. Bitte stelle sicher, dass auf die Asset-Dateien zugegriffen werden kann.",
     "install.invalid_lfs_path": "Der LFS-Root konnte nicht am angegebenen Pfad erstellt werden: %[1]s",
     "alert.range_error": " muss eine Zahl zwischen %[1]s und %[2]s sein.",
-    "meta.last_line": "Vielen Dank für die Übersetzung von Forgejo! Diese Zeile wird von den Benutzern nicht gesehen, dient aber anderen Zwecken im Übersetzungsmanagement. Du kannst eine lustige Tatsache in der Übersetzung platzieren, anstatt sie zu übersetzen."
+    "meta.last_line": "Vielen Dank für die Übersetzung von Forgejo! Diese Zeile wird von den Benutzern nicht gesehen, dient aber anderen Zwecken im Übersetzungsmanagement. Du kannst eine lustige Tatsache in der Übersetzung platzieren, anstatt sie zu übersetzen.",
+    "mail.actions.successful_run_after_failure_subject": "Arbeitsablauf %[1]s in Repository %[2]s wiederhergestellt",
+    "mail.actions.not_successful_run_subject": "Arbeitsablauf %[1]s in Repository %[2]s fehlgeschlagen",
+    "mail.actions.successful_run_after_failure": "Arbeitsablauf %[1]s in Repository %[2]s wiederhergestellt",
+    "mail.actions.not_successful_run": "Arbeitsablauf %[1]s in Repository %[2]s fehlgeschlagen",
+    "mail.actions.run_info_previous_status": "Vorheriger Status des Runs: %[1]s",
+    "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
+    "mail.actions.run_info_trigger": "Ausgelöst, weil: %[1]s durch: %[2]s",
+    "mail.actions.run_info_cur_status": "Status dieses Runs: %[1]s (gerade eben von %[2]s aktualisiert)",
+    "discussion.locked": "Diese Diskussion wurde gesperrt. Nur Mitwirkende können kommentieren."
 }
