@@ -208,19 +208,22 @@ export function initGlobalDropzone() {
   }
 }
 
-export function initDropzone(el) {
-  const $dropzone = $(el);
-  const _promise = createDropzone(el, {
-    url: $dropzone.data('upload-url'),
+export async function initDropzone(dropzoneEl, zone = undefined) {
+  if (!dropzoneEl) return;
+
+  let disableRemovedfileEvent = false; // when resetting the dropzone (removeAllFiles), disable the "removedfile" event
+  let fileUuidDict = {}; // to record: if a comment has been saved, then the uploaded files won't be deleted from server when clicking the Remove in the dropzone
+  const dz = await createDropzone(dropzoneEl, {
+    url: dropzoneEl.getAttribute('data-upload-url'),
     headers: {'X-Csrf-Token': csrfToken},
-    maxFiles: $dropzone.data('max-file'),
-    maxFilesize: $dropzone.data('max-size'),
-    acceptedFiles: (['*/*', ''].includes($dropzone.data('accepts'))) ? null : $dropzone.data('accepts'),
+    maxFiles: dropzoneEl.getAttribute('data-max-file'),
+    maxFilesize: dropzoneEl.getAttribute('data-max-size'),
+    acceptedFiles: (['*/*', ''].includes(dropzoneEl.getAttribute('data-accepts')) ? null : dropzoneEl.getAttribute('data-accepts')),
     addRemoveLinks: true,
-    dictDefaultMessage: $dropzone.data('default-message'),
-    dictInvalidFileType: $dropzone.data('invalid-input-type'),
-    dictFileTooBig: $dropzone.data('file-too-big'),
-    dictRemoveFile: $dropzone.data('remove-file'),
+    dictDefaultMessage: dropzoneEl.getAttribute('data-default-message'),
+    dictInvalidFileType: dropzoneEl.getAttribute('data-invalid-input-type'),
+    dictFileTooBig: dropzoneEl.getAttribute('data-file-too-big'),
+    dictRemoveFile: dropzoneEl.getAttribute('data-remove-file'),
     timeout: 0,
     thumbnailMethod: 'contain',
     thumbnailWidth: 480,
@@ -228,8 +231,14 @@ export function initDropzone(el) {
     init() {
       this.on('success', (file, data) => {
         file.uuid = data.uuid;
-        const $input = $(`<input id="${data.uuid}" name="files" type="hidden">`).val(data.uuid);
-        $dropzone.find('.files').append($input);
+        fileUuidDict[file.uuid] = {submitted: false};
+        const input = document.createElement('input');
+        input.id = data.uuid;
+        input.name = 'files';
+        input.type = 'hidden';
+        input.value = data.uuid;
+        dropzoneEl.querySelector('.files').append(input);
+
         // Create a "Copy Link" element, to conveniently copy the image
         // or file link as Markdown to the clipboard
         const copyLinkElement = document.createElement('div');
@@ -249,17 +258,48 @@ export function initDropzone(el) {
         });
         file.previewTemplate.append(copyLinkElement);
       });
-      this.on('removedfile', (file) => {
-        $(`#${file.uuid}`).remove();
-        if ($dropzone.data('remove-url')) {
-          POST($dropzone.data('remove-url'), {
-            data: new URLSearchParams({file: file.uuid}),
-          });
+      this.on('removedfile', async (file) => {
+        document.getElementById(file.uuid)?.remove();
+        if (disableRemovedfileEvent) return;
+        if (dropzoneEl.getAttribute('data-remove-url') && !fileUuidDict[file.uuid].submitted) {
+          try {
+            await POST(dropzoneEl.getAttribute('data-remove-url'), {data: new URLSearchParams({file: file.uuid})});
+          } catch (error) {
+            console.error(error);
+          }
         }
       });
       this.on('error', function (file, message) {
         showErrorToast(message);
         this.removeFile(file);
+      });
+      this.on('reload', async () => {
+        if (!zone || !dz.removeAllFiles) return;
+        try {
+          const response = await GET(zone.getAttribute('data-attachment-url'));
+          const data = await response.json();
+          // do not trigger the "removedfile" event, otherwise the attachments would be deleted from server
+          disableRemovedfileEvent = true;
+          dz.removeAllFiles(true);
+          dropzoneEl.querySelector('.files').innerHTML = '';
+          for (const element of dropzoneEl.querySelectorAll('.dz-preview')) element.remove();
+          fileUuidDict = {};
+          disableRemovedfileEvent = false;
+
+          for (const attachment of data) {
+            const imgSrc = `${dropzoneEl.getAttribute('data-link-url')}/${attachment.uuid}`;
+            dz.emit('addedfile', attachment);
+            dz.emit('thumbnail', attachment, imgSrc);
+            dz.emit('complete', attachment);
+            dz.emit('success', attachment, {uuid: attachment.uuid});
+            fileUuidDict[attachment.uuid] = {submitted: true};
+          }
+          if (!dropzoneEl.querySelector('.dz-preview')) {
+            dropzoneEl.classList.remove('dz-started');
+          }
+        } catch (error) {
+          console.error(error);
+        }
       });
     },
   });

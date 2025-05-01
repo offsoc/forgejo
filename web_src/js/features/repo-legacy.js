@@ -16,7 +16,6 @@ import {
 import {initCitationFileCopyContent} from './citation.js';
 import {initCompLabelEdit} from './comp/LabelEdit.js';
 import {initRepoDiffConversationNav} from './repo-diff.js';
-import {createDropzone} from './dropzone.js';
 import {showErrorToast} from '../modules/toast.js';
 import {initCommentContent, initMarkupContent} from '../markup/content.js';
 import {initCompReactionSelector} from './comp/ReactionSelector.js';
@@ -26,12 +25,10 @@ import {initRepoPullRequestCommitStatus} from './repo-issue-pr-status.js';
 import {hideElem, showElem} from '../utils/dom.js';
 import {getComboMarkdownEditor, initComboMarkdownEditor} from './comp/ComboMarkdownEditor.js';
 import {attachRefIssueContextPopup} from './contextpopup.js';
-import {POST, GET} from '../modules/fetch.js';
+import {POST} from '../modules/fetch.js';
 import {MarkdownQuote} from '@github/quote-selection';
 import {toAbsoluteUrl} from '../utils.js';
-import {initGlobalShowModal} from './common-global.js';
-
-const {csrfToken} = window.config;
+import {initDropzone, initGlobalShowModal} from './common-global.js';
 
 export function initRepoCommentForm() {
   const $commentForm = $('.comment.form');
@@ -312,115 +309,26 @@ async function onEditContent(event) {
 
   let comboMarkdownEditor;
 
-  /**
-   * @param {HTMLElement} dropzone
-   */
-  const setupDropzone = async (dropzone) => {
-    if (!dropzone) return null;
-
-    let disableRemovedfileEvent = false; // when resetting the dropzone (removeAllFiles), disable the "removedfile" event
-    let fileUuidDict = {}; // to record: if a comment has been saved, then the uploaded files won't be deleted from server when clicking the Remove in the dropzone
-    const dz = await createDropzone(dropzone, {
-      url: dropzone.getAttribute('data-upload-url'),
-      headers: {'X-Csrf-Token': csrfToken},
-      maxFiles: dropzone.getAttribute('data-max-file'),
-      maxFilesize: dropzone.getAttribute('data-max-size'),
-      acceptedFiles: ['*/*', ''].includes(dropzone.getAttribute('data-accepts')) ? null : dropzone.getAttribute('data-accepts'),
-      addRemoveLinks: true,
-      dictDefaultMessage: dropzone.getAttribute('data-default-message'),
-      dictInvalidFileType: dropzone.getAttribute('data-invalid-input-type'),
-      dictFileTooBig: dropzone.getAttribute('data-file-too-big'),
-      dictRemoveFile: dropzone.getAttribute('data-remove-file'),
-      timeout: 0,
-      thumbnailMethod: 'contain',
-      thumbnailWidth: 480,
-      thumbnailHeight: 480,
-      init() {
-        this.on('success', (file, data) => {
-          file.uuid = data.uuid;
-          fileUuidDict[file.uuid] = {submitted: false};
-          const input = document.createElement('input');
-          input.id = data.uuid;
-          input.name = 'files';
-          input.type = 'hidden';
-          input.value = data.uuid;
-          dropzone.querySelector('.files').append(input);
-        });
-        this.on('removedfile', async (file) => {
-          document.getElementById(file.uuid)?.remove();
-          if (disableRemovedfileEvent) return;
-          if (dropzone.getAttribute('data-remove-url') && !fileUuidDict[file.uuid].submitted) {
-            try {
-              await POST(dropzone.getAttribute('data-remove-url'), {data: new URLSearchParams({file: file.uuid})});
-            } catch (error) {
-              console.error(error);
-            }
-          }
-        });
-        this.on('submit', () => {
-          for (const fileUuid of Object.keys(fileUuidDict)) {
-            fileUuidDict[fileUuid].submitted = true;
-          }
-        });
-        this.on('reload', async () => {
-          try {
-            const response = await GET(editContentZone.getAttribute('data-attachment-url'));
-            const data = await response.json();
-            // do not trigger the "removedfile" event, otherwise the attachments would be deleted from server
-            disableRemovedfileEvent = true;
-            dz.removeAllFiles(true);
-            dropzone.querySelector('.files').innerHTML = '';
-            for (const el of dropzone.querySelectorAll('.dz-preview')) el.remove();
-            fileUuidDict = {};
-            disableRemovedfileEvent = false;
-
-            for (const attachment of data) {
-              const imgSrc = `${dropzone.getAttribute('data-link-url')}/${attachment.uuid}`;
-              dz.emit('addedfile', attachment);
-              dz.emit('thumbnail', attachment, imgSrc);
-              dz.emit('complete', attachment);
-              fileUuidDict[attachment.uuid] = {submitted: true};
-              dropzone.querySelector(`img[src='${imgSrc}']`).style.maxWidth = '100%';
-              const input = document.createElement('input');
-              input.id = attachment.uuid;
-              input.name = 'files';
-              input.type = 'hidden';
-              input.value = attachment.uuid;
-              dropzone.querySelector('.files').append(input);
-            }
-            if (!dropzone.querySelector('.dz-preview')) {
-              dropzone.classList.remove('dz-started');
-            }
-          } catch (error) {
-            console.error(error);
-          }
-        });
-      },
-    });
-    dz.emit('reload');
-    return dz;
-  };
-
   const cancelAndReset = (e) => {
     e.preventDefault();
     showElem(renderContent);
     hideElem(editContentZone);
     comboMarkdownEditor.value(rawContent.textContent);
-    comboMarkdownEditor.attachedDropzoneInst?.emit('reload');
+    editContentZone.querySelector('.dropzone')?.dropzone?.emit('reload');
   };
 
   const saveAndRefresh = async (e) => {
     e.preventDefault();
     showElem(renderContent);
     hideElem(editContentZone);
-    const dropzoneInst = comboMarkdownEditor.attachedDropzoneInst;
+    const dropzone = editContentZone.querySelector('.dropzone')?.dropzone;
     try {
       const params = new URLSearchParams({
         content: comboMarkdownEditor.value(),
         context: editContentZone.getAttribute('data-context'),
         content_version: editContentZone.getAttribute('data-content-version'),
       });
-      const files = dropzoneInst?.element?.querySelectorAll('.files [name=files]') ?? [];
+      const files = dropzone?.element?.querySelectorAll('.files [name=files]') ?? [];
       for (const fileInput of files) {
         params.append('files[]', fileInput.value);
       }
@@ -451,8 +359,7 @@ async function onEditContent(event) {
       } else {
         content.querySelector('.dropzone-attachments').outerHTML = data.attachments;
       }
-      dropzoneInst?.emit('submit');
-      dropzoneInst?.emit('reload');
+      dropzone?.emit('submit');
       initMarkupContent();
       initCommentContent();
     } catch (error) {
@@ -463,8 +370,10 @@ async function onEditContent(event) {
   comboMarkdownEditor = getComboMarkdownEditor(editContentZone.querySelector('.combo-markdown-editor'));
   if (!comboMarkdownEditor) {
     editContentZone.innerHTML = document.getElementById('issue-comment-editor-template').innerHTML;
+    const dropzone = editContentZone.querySelector('.dropzone');
+    if (!dropzone.dropzone) await initDropzone(dropzone, editContentZone);
     comboMarkdownEditor = await initComboMarkdownEditor(editContentZone.querySelector('.combo-markdown-editor'));
-    comboMarkdownEditor.attachedDropzoneInst = await setupDropzone(editContentZone.querySelector('.dropzone'));
+    dropzone.dropzone.emit('reload');
     editContentZone.addEventListener('ce-quick-submit', saveAndRefresh);
     editContentZone.querySelector('button[data-button-name="cancel-edit"]').addEventListener('click', cancelAndReset);
     editContentZone.querySelector('button[data-button-name="save-edit"]').addEventListener('click', saveAndRefresh);

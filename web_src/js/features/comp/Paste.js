@@ -82,9 +82,8 @@ class CodeMirrorEditor {
 
 async function handleClipboardImages(editor, dropzone, images, e) {
   const uploadUrl = dropzone.getAttribute('data-upload-url');
-  const filesContainer = dropzone.querySelector('.files');
 
-  if (!dropzone || !uploadUrl || !filesContainer || !images.length) return;
+  if (!dropzone || !uploadUrl || !images.length) return;
 
   e.preventDefault();
   e.stopPropagation();
@@ -101,12 +100,12 @@ async function handleClipboardImages(editor, dropzone, images, e) {
     const text = `![${name}](${url})`;
     editor.replacePlaceholder(placeholder, text);
 
-    const input = document.createElement('input');
-    input.setAttribute('name', 'files');
-    input.setAttribute('type', 'hidden');
-    input.setAttribute('id', uuid);
-    input.value = uuid;
-    filesContainer.append(input);
+    const imgSrc = `${dropzone.getAttribute('data-link-url')}/${uuid}`;
+    const attachment = {uuid, name, browser_download_url: url, size: img.size};
+    dropzone.dropzone.emit('addedfile', attachment);
+    dropzone.dropzone.emit('thumbnail', attachment, imgSrc);
+    dropzone.dropzone.emit('complete', attachment);
+    dropzone.dropzone.emit('success', attachment, {uuid});
   }
 }
 

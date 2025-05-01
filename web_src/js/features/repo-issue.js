@@ -439,7 +439,7 @@ export async function handleReply($el) {
     // When the page is loaded, the dropzone is initialized by initGlobalDropzone, but the editor is not initialized.
     // When the form is submitted and partially reload, none of them is initialized.
     const dropzone = $form.find('.dropzone')[0];
-    if (!dropzone.dropzone) initDropzone(dropzone);
+    if (!dropzone.dropzone) await initDropzone(dropzone);
     editor = await initComboMarkdownEditor($form.find('.combo-markdown-editor'));
   }
   editor.focus();
@@ -574,7 +574,7 @@ export function initRepoPullRequestReview() {
         $td.find("input[name='side']").val(side === 'left' ? 'previous' : 'proposed');
         $td.find("input[name='path']").val(path);
 
-        initDropzone($td.find('.dropzone')[0]);
+        await initDropzone($td.find('.dropzone')[0]);
         const editor = await initComboMarkdownEditor($td.find('.combo-markdown-editor'));
         editor.focus();
       } catch (error) {
