@@ -10,5 +10,6 @@
     "home.explore_users": "Tutki käyttäjiä",
     "home.explore_orgs": "Tutki organisaatioita",
     "themes.names.forgejo-light": "Forgejo, vaalea",
-    "themes.names.forgejo-dark": "Forgejo, tumma"
+    "themes.names.forgejo-dark": "Forgejo, tumma",
+    "install.invalid_lfs_path": "LFS juurta ei voitu luoda polkuun: %[1]s"
 }
