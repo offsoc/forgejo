@@ -23,5 +23,14 @@
     "alert.asset_load_failed": "Не вдалося завантажити файли ресурсів з {path}. Переконайтеся, що до файлів ресурсів є доступ.",
     "install.invalid_lfs_path": "Не вдалося створити корінь LFS за вказаним шляхом: %[1]s",
     "alert.range_error": " має бути числом від %[1]s до %[2]s.",
-    "meta.last_line": "Не зливай злий запити на злиття — зіллється зле."
+    "meta.last_line": "Не зливай злий запити на злиття — зіллється зле.",
+    "mail.actions.successful_run_after_failure": "Робочий потік %[1]s відновлено в репозиторії %[2]s",
+    "mail.actions.run_info_ref": "Гілка: %[1]s (%[2]s)",
+    "mail.actions.successful_run_after_failure_subject": "Робочий потік %[1]s відновлено в репозиторії %[2]s",
+    "mail.actions.run_info_previous_status": "Стан попереднього запуску: %[1]s",
+    "mail.actions.run_info_cur_status": "Стан цього запуску: %[1]s (щойно оновлено з %[2]s)",
+    "mail.actions.run_info_trigger": "Запущено %[2]s, оскільки: %[1]s",
+    "mail.actions.not_successful_run_subject": "Помилка робочого потоку %[1]s в репозиторії %[2]s",
+    "mail.actions.not_successful_run": "Помилка робочого потоку %[1]s в репозиторії %[2]s",
+    "discussion.locked": "Це обговорення було закрито. Коментувати можуть лише учасники."
 }
