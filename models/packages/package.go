@@ -48,6 +48,7 @@ const (
 	TypeMaven     Type = "maven"
 	TypeNpm       Type = "npm"
 	TypeNuGet     Type = "nuget"
+	TypeOpenTofu  Type = "opentofu"
 	TypePub       Type = "pub"
 	TypePyPI      Type = "pypi"
 	TypeRpm       Type = "rpm"
@@ -74,6 +75,7 @@ var TypeList = []Type{
 	TypeMaven,
 	TypeNpm,
 	TypeNuGet,
+	TypeOpenTofu,
 	TypePub,
 	TypePyPI,
 	TypeRpm,
@@ -118,6 +120,8 @@ func (pt Type) Name() string {
 		return "npm"
 	case TypeNuGet:
 		return "NuGet"
+	case TypeOpenTofu:
+		return "OpenTofu/Terraform"
 	case TypePub:
 		return "Pub"
 	case TypePyPI:
@@ -171,6 +175,8 @@ func (pt Type) SVGName() string {
 		return "gitea-npm"
 	case TypeNuGet:
 		return "gitea-nuget"
+	case TypeOpenTofu:
+		return "opentofu"
 	case TypePub:
 		return "gitea-pub"
 	case TypePyPI:
