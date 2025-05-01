@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
+func syncForkTest(t *testing.T, forkName, branchName string, webSync bool) {
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 20})
 
 	baseRepo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
@@ -32,7 +32,7 @@ func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
 	req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/forks", baseRepo.FullName()), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusAccepted)
 
-	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/%s", user.Name, forkName, urlPart).AddTokenAuth(token)
+	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/sync_fork/%s", user.Name, forkName, branchName).AddTokenAuth(token)
 	resp := MakeRequest(t, req, http.StatusOK)
 
 	var syncForkInfo *api.SyncForkInfo
@@ -43,10 +43,10 @@ func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
 	assert.Equal(t, syncForkInfo.BaseCommit, syncForkInfo.ForkCommit)
 
 	// Make a commit on the base branch
-	err := createOrReplaceFileInBranch(baseUser, baseRepo, "sync_fork.txt", "master", "Hello")
+	err := createOrReplaceFileInBranch(baseUser, baseRepo, "sync_fork.txt", branchName, "Hello")
 	require.NoError(t, err)
 
-	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/%s", user.Name, forkName, urlPart).AddTokenAuth(token)
+	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/sync_fork/%s", user.Name, forkName, branchName).AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 
 	DecodeJSON(t, resp, &syncForkInfo)
@@ -57,15 +57,16 @@ func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
 
 	// Sync the fork
 	if webSync {
-		session.MakeRequest(t, NewRequestWithValues(t, "POST", fmt.Sprintf("/%s/%s/sync_fork/master", user.Name, forkName), map[string]string{
-			"_csrf": GetCSRF(t, session, fmt.Sprintf("/%s/%s", user.Name, forkName)),
+		session.MakeRequest(t, NewRequestWithValues(t, "POST", fmt.Sprintf("/%s/%s/sync_fork/%s", user.Name, forkName, branchName), map[string]string{
+			"_csrf":  GetCSRF(t, session, fmt.Sprintf("/%s/%s", user.Name, forkName)),
+			"branch": branchName,
 		}), http.StatusSeeOther)
 	} else {
-		req = NewRequestf(t, "POST", "/api/v1/repos/%s/%s/%s", user.Name, forkName, urlPart).AddTokenAuth(token)
+		req = NewRequestf(t, "POST", "/api/v1/repos/%s/%s/sync_fork/%s", user.Name, forkName, branchName).AddTokenAuth(token)
 		MakeRequest(t, req, http.StatusNoContent)
 	}
 
-	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/%s", user.Name, forkName, urlPart).AddTokenAuth(token)
+	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/sync_fork/%s", user.Name, forkName, branchName).AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 
 	DecodeJSON(t, resp, &syncForkInfo)
@@ -77,19 +78,19 @@ func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
 
 func TestAPIRepoSyncForkDefault(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		syncForkTest(t, "SyncForkDefault", "sync_fork", false)
+		syncForkTest(t, "SyncForkDefault", "master", false)
 	})
 }
 
 func TestAPIRepoSyncForkBranch(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		syncForkTest(t, "SyncForkBranch", "sync_fork/master", false)
+		syncForkTest(t, "SyncForkBranch", "master", false)
 	})
 }
 
 func TestWebRepoSyncForkBranch(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		syncForkTest(t, "SyncForkBranch", "sync_fork/master", true)
+		syncForkTest(t, "SyncForkBranch", "master", true)
 	})
 }
 
@@ -145,7 +146,8 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 
 		// Verify that the form link does not error out
 		forkOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST", updateLink, map[string]string{
-			"_csrf": GetCSRF(t, forkOwnerSession, forkLink),
+			"_csrf":  GetCSRF(t, forkOwnerSession, forkLink),
+			"branch": branchName,
 		}), http.StatusSeeOther)
 	})
 }
