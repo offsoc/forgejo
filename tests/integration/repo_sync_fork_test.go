@@ -111,7 +111,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		// Rename branch "master" to test name escaping in the UI
 		baseOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST",
 			"/user2/repo1/settings/rename_branch", map[string]string{
-				"_csrf": GetCSRF(t, baseOwnerSession, "/user2/repo1/settings/branches"),
+				"_csrf": GetCSRF(t, baseOwnerSession, "/user2/repo1/branches"),
 				"from":  "master",
 				"to":    branchName,
 			}), http.StatusSeeOther)
@@ -128,7 +128,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 			NewRequest(t, "GET", forkLink), http.StatusOK).Body)
 
 		// Verify correct URL escaping of branch name in the form
-		form := doc.Find(fmt.Sprintf("#sync_fork_msg form[action$='/sync_fork/%s']", branchURLEscaped))
+		form := doc.Find("#sync_fork_msg form")
 		assert.Equal(t, 1, form.Length())
 		updateLink, exists := form.Attr("action")
 		assert.True(t, exists)
