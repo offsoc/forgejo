@@ -904,10 +904,12 @@ td .commit-summary {
   background: var(--color-orange-badge-hover-bg) !important;
 }
 
-.repository.view.issue .comment-list .timeline-item .forced-push {
-  display: grid;
-  grid-auto-flow: column;
-  column-gap: 1rem;
+@media (min-width: 768px) {
+  .repository.view.issue .comment-list .timeline-item .forced-push {
+    display: grid;
+    grid-auto-flow: column;
+    column-gap: 1rem;
+  }
 }
 
 .repository.view.issue .comment-list .timeline-item .compare.label {
