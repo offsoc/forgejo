@@ -29,7 +29,7 @@ func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeWriteRepository)
 
 	// Create a new fork
-	req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/forks", baseUser.Name, baseRepo.LowerName), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
+	req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/forks", baseRepo.FullName()), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusAccepted)
 
 	req = NewRequestf(t, "GET", "/api/v1/repos/%s/%s/%s", user.Name, forkName, urlPart).AddTokenAuth(token)
@@ -57,7 +57,9 @@ func syncForkTest(t *testing.T, forkName, urlPart string, webSync bool) {
 
 	// Sync the fork
 	if webSync {
-		session.MakeRequest(t, NewRequestf(t, "POST", "/%s/%s/sync_fork/master", user.Name, forkName), http.StatusSeeOther)
+		session.MakeRequest(t, NewRequestWithValues(t, "POST", fmt.Sprintf("/%s/%s/sync_fork/master", user.Name, forkName), map[string]string{
+			"_csrf": GetCSRF(t, session, fmt.Sprintf("/%s/%s", user.Name, forkName)),
+		}), http.StatusSeeOther)
 	} else {
 		req = NewRequestf(t, "POST", "/api/v1/repos/%s/%s/%s", user.Name, forkName, urlPart).AddTokenAuth(token)
 		MakeRequest(t, req, http.StatusNoContent)
@@ -117,7 +119,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 			}), http.StatusSeeOther)
 
 		// Create a new fork
-		req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/%s/forks", baseOwner.Name, baseRepo.LowerName), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
+		req := NewRequestWithJSON(t, "POST", fmt.Sprintf("/api/v1/repos/%s/forks", baseRepo.FullName()), &api.CreateForkOption{Name: &forkName}).AddTokenAuth(token)
 		MakeRequest(t, req, http.StatusAccepted)
 
 		// Make a commit on the base branch
