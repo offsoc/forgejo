@@ -39,5 +39,14 @@
     "moderation.submit_report": "Submit report",
     "moderation.reporting_failed": "Unable to submit the new abuse report: %v",
     "moderation.reported_thank_you": "Thank you for your report. The administration has been made aware of it.",
+    "mail.actions.successful_run_after_failure_subject": "Workflow %[1]s recovered in repository %[2]s",
+    "mail.actions.not_successful_run_subject": "Workflow %[1]s failed in repository %[2]s",
+    "mail.actions.successful_run_after_failure": "Workflow %[1]s recovered in repository %[2]s",
+    "mail.actions.not_successful_run": "Workflow %[1]s failed in repository %[2]s",
+    "mail.actions.run_info_cur_status": "This Run's Status: %[1]s (just updated from %[2]s)",
+    "mail.actions.run_info_previous_status": "Previous Run's Status: %[1]s",
+    "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
+    "mail.actions.run_info_trigger": "Triggered because: %[1]s by: %[2]s",
+    "discussion.locked": "This discussion has been locked. Commenting is limited to contributors.",
     "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it."
 }

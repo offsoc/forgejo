@@ -128,7 +128,7 @@ func StopTask(ctx context.Context, taskID int64, status actions_model.Status) er
 	now := timeutil.TimeStampNow()
 	task.Status = status
 	task.Stopped = now
-	if _, err := actions_model.UpdateRunJob(ctx, &actions_model.ActionRunJob{
+	if _, err := UpdateRunJob(ctx, &actions_model.ActionRunJob{
 		ID:      task.JobID,
 		Status:  task.Status,
 		Stopped: task.Stopped,
@@ -198,7 +198,7 @@ func UpdateTaskByState(ctx context.Context, runnerID int64, state *runnerv1.Task
 		if err := actions_model.UpdateTask(ctx, task, "status", "stopped"); err != nil {
 			return nil, err
 		}
-		if _, err := actions_model.UpdateRunJob(ctx, &actions_model.ActionRunJob{
+		if _, err := UpdateRunJob(ctx, &actions_model.ActionRunJob{
 			ID:      task.JobID,
 			Status:  task.Status,
 			Stopped: task.Stopped,

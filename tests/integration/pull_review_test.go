@@ -652,7 +652,7 @@ func getUserNotificationCount(t *testing.T, session *TestSession, csrf string) s
 }
 
 func TestPullRequestReplyMail(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestPullRequestReplyMail/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestPullRequestReplyMail")()
 	defer tests.PrepareTestEnv(t)()
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})

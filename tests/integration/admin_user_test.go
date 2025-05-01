@@ -98,7 +98,7 @@ func makeRequest(t *testing.T, formData user_model.User, headerCode int) {
 }
 
 func TestAdminDeleteUser(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestAdminDeleteUser/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestAdminDeleteUser")()
 	defer tests.PrepareTestEnv(t)()
 
 	session := loginUser(t, "user1")

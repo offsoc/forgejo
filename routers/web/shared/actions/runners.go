@@ -79,7 +79,6 @@ func RunnerDetails(ctx *context.Context, page int, runnerID, ownerID, repoID int
 			Page:     page,
 			PageSize: 30,
 		},
-		Status:   []actions_model.Status{actions_model.StatusUnknown}, // Unknown means all
 		RunnerID: runner.ID,
 	}
 

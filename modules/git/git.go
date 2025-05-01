@@ -40,13 +40,13 @@ var (
 
 	HasSSHExecutable bool
 
-	gitVersion *version.Version
+	GitVersion *version.Version
 )
 
 // loadGitVersion returns current Git version from shell. Internal usage only.
 func loadGitVersion() error {
 	// doesn't need RWMutex because it's executed by Init()
-	if gitVersion != nil {
+	if GitVersion != nil {
 		return nil
 	}
 	stdout, _, runErr := NewCommand(DefaultContext, "version").RunStdString(nil)
@@ -62,7 +62,7 @@ func loadGitVersion() error {
 	versionString := fields[2]
 
 	var err error
-	gitVersion, err = version.NewVersion(versionString)
+	GitVersion, err = version.NewVersion(versionString)
 	return err
 }
 
@@ -88,7 +88,7 @@ func SetExecutablePath(path string) error {
 		return err
 	}
 
-	if gitVersion.LessThan(versionRequired) {
+	if GitVersion.LessThan(versionRequired) {
 		moreHint := "get git: https://git-scm.com/downloads"
 		if runtime.GOOS == "linux" {
 			// there are a lot of CentOS/RHEL users using old git, so we add a special hint for them
@@ -97,7 +97,7 @@ func SetExecutablePath(path string) error {
 				moreHint = "get git: https://git-scm.com/downloads/linux and https://ius.io"
 			}
 		}
-		return fmt.Errorf("installed git version %q is not supported, Gitea requires git version >= %q, %s", gitVersion.Original(), RequiredVersion, moreHint)
+		return fmt.Errorf("installed git version %q is not supported, Gitea requires git version >= %q, %s", GitVersion.Original(), RequiredVersion, moreHint)
 	}
 
 	return nil
@@ -105,11 +105,11 @@ func SetExecutablePath(path string) error {
 
 // VersionInfo returns git version information
 func VersionInfo() string {
-	if gitVersion == nil {
+	if GitVersion == nil {
 		return "(git not found)"
 	}
 	format := "%s"
-	args := []any{gitVersion.Original()}
+	args := []any{GitVersion.Original()}
 	// Since git wire protocol has been released from git v2.18
 	if setting.Git.EnableAutoGitWireProtocol && CheckGitVersionAtLeast("2.18") == nil {
 		format += ", Wire Protocol %s Enabled"
@@ -286,7 +286,7 @@ func syncGitConfig() (err error) {
 		}
 
 		// Get the ssh-keygen binary that Git will use.
-		// This can be overriden in app.ini in [git.config] section, so we must
+		// This can be overridden in app.ini in [git.config] section, so we must
 		// query this information.
 		sshKeygenPath, err := configGet("gpg.ssh.program")
 		if err != nil {
@@ -346,8 +346,8 @@ func CheckGitVersionAtLeast(atLeast string) error {
 	if err != nil {
 		return err
 	}
-	if gitVersion.Compare(atLeastVersion) < 0 {
-		return fmt.Errorf("installed git binary version %s is not at least %s", gitVersion.Original(), atLeast)
+	if GitVersion.Compare(atLeastVersion) < 0 {
+		return fmt.Errorf("installed git binary version %s is not at least %s", GitVersion.Original(), atLeast)
 	}
 	return nil
 }
@@ -361,8 +361,8 @@ func CheckGitVersionEqual(equal string) error {
 	if err != nil {
 		return err
 	}
-	if !gitVersion.Equal(atLeastVersion) {
-		return fmt.Errorf("installed git binary version %s is not equal to %s", gitVersion.Original(), equal)
+	if !GitVersion.Equal(atLeastVersion) {
+		return fmt.Errorf("installed git binary version %s is not equal to %s", GitVersion.Original(), equal)
 	}
 	return nil
 }

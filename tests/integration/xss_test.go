@@ -68,7 +68,7 @@ func TestXSSWikiLastCommitInfo(t *testing.T) {
 }
 
 func TestXSSReviewDismissed(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestXSSReviewDismissed/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestXSSReviewDismissed")()
 	defer tests.PrepareTestEnv(t)()
 
 	review := unittest.AssertExistsAndLoadBean(t, &issues_model.Review{ID: 1000})
