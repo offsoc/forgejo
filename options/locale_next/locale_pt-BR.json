@@ -18,5 +18,6 @@
     "incorrect_root_url": "Esta instância do Forgejo está configurada para o endereço \"%s\". Você está atualmente vendo o Forgejo através de uma URL diferente, o que pode causar erros em algumas partes da aplicação. A URL oficial é controlada pela administração do Forgejo através da configuração ROOT_URL no arquivo app.ini.",
     "themes.names.forgejo-auto": "Forgejo (usar o tema do sistema)",
     "themes.names.forgejo-light": "Forgejo claro",
-    "themes.names.forgejo-dark": "Forgejo escuro"
+    "themes.names.forgejo-dark": "Forgejo escuro",
+    "install.invalid_lfs_path": "Não foi possível criar um root LFS no caminho especificado: %[1]s"
 }
