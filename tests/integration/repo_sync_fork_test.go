@@ -57,7 +57,7 @@ func syncForkTest(t *testing.T, forkName, branchName string, webSync bool) {
 
 	// Sync the fork
 	if webSync {
-		session.MakeRequest(t, NewRequestWithValues(t, "POST", fmt.Sprintf("/%s/%s/sync_fork/%s", user.Name, forkName, branchName), map[string]string{
+		session.MakeRequest(t, NewRequestWithValues(t, "POST", fmt.Sprintf("/%s/%s/sync_fork", user.Name, forkName), map[string]string{
 			"_csrf":  GetCSRF(t, session, fmt.Sprintf("/%s/%s", user.Name, forkName)),
 			"branch": branchName,
 		}), http.StatusSeeOther)
@@ -108,8 +108,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 		forkLink := fmt.Sprintf("/%s/%s", forkOwner.Name, forkName)
 		branchName := "<script>alert('0ko')</script>&amp;"
 		branchHTMLEscaped := "&lt;script&gt;alert(&#39;0ko&#39;)&lt;/script&gt;&amp;amp;"
-		// branchURLEscaped_ := "<script>alert('0ko')</script>%26amp%3B"
-		branchURLEscaped := "%3Cscript%3Ealert%28%270ko%27%29%3C/script%3E&amp%3B"
+		branchURLEscaped := "%3Cscript%3Ealert%28%270ko%27%29%3C/script%3E&amp;amp%3B"
 
 		// Rename branch "master" to test name escaping in the UI
 		baseOwnerSession.MakeRequest(t, NewRequestWithValues(t, "POST",
@@ -138,7 +137,7 @@ func TestWebRepoSyncForkHomepage(t *testing.T) {
 
 		// Verify correct escaping of branch name in the message
 		raw, _ := doc.Find("#sync_fork_msg").Html()
-		assert.Contains(t, raw, fmt.Sprintf("This branch is 1 commit behind <a href='http://localhost:%s/user2/repo1/src/branch/%s'>user2/repo1:%s</a>",
+		assert.Contains(t, raw, fmt.Sprintf(`This branch is 1 commit behind <a href="http://localhost:%s/user2/repo1/src/branch/%s">user2/repo1:%s</a>`,
 			u.Port(), branchURLEscaped, branchHTMLEscaped))
 
 		// Verify that the form link doesn't do anything for a GET request
