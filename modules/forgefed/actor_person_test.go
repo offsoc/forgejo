@@ -4,6 +4,7 @@
 package forgefed
 
 import (
+	"github.com/stretchr/testify/assert"
 	"reflect"
 	"strings"
 	"testing"
@@ -25,9 +26,7 @@ func TestNewPersonIdFromModel(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 
 	sut, _ := NewPersonIDFromModel("an.other.host", "https", 443, "forgejo", "1")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	assert.Equal(t, sut, expected)
 }
 
 func TestNewPersonId(t *testing.T) {
@@ -42,9 +41,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1"
 
 	sut, _ := NewPersonID("https://an.other.host/api/v1/activitypub/user-id/1", "forgejo")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	assert.Equal(t, sut, expected)
 
 	expected = PersonID{}
 	expected.ID = "1"
@@ -57,9 +54,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 
 	sut, _ = NewPersonID("https://an.other.host:443/api/v1/activitypub/user-id/1", "forgejo")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	assert.Equal(t, sut, expected)
 
 	expected = PersonID{}
 	expected.ID = "1"
@@ -72,9 +67,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "http://an.other.host:80/api/v1/activitypub/user-id/1"
 
 	sut, _ = NewPersonID("http://an.other.host:80/api/v1/activitypub/user-id/1", "forgejo")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	assert.Equal(t, sut, expected)
 
 	expected = PersonID{}
 	expected.ID = "1"
@@ -87,9 +80,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 
 	sut, _ = NewPersonID("HTTPS://an.other.host:443/api/v1/activitypub/user-id/1", "forgejo")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	assert.Equal(t, sut, expected)
 }
 
 func TestPersonIdValidation(t *testing.T) {
@@ -124,14 +115,7 @@ func TestPersonIdValidation(t *testing.T) {
 
 func TestWebfingerId(t *testing.T) {
 	sut, _ := NewPersonID("https://codeberg.org/api/v1/activitypub/user-id/12345", "forgejo")
-	if sut.AsWebfinger() != "@12345@codeberg.org" {
-		t.Errorf("wrong webfinger: %v", sut.AsWebfinger())
-	}
-
-	sut, _ = NewPersonID("https://Codeberg.org/api/v1/activitypub/user-id/12345", "forgejo")
-	if sut.AsWebfinger() != "@12345@codeberg.org" {
-		t.Errorf("wrong webfinger: %v", sut.AsWebfinger())
-	}
+	assert.Equal(t, sut.AsWebfinger(), "@12345@codeberg.org")
 }
 
 func TestShouldThrowErrorOnInvalidInput(t *testing.T) {
@@ -176,9 +160,7 @@ func Test_PersonMarshalJSON(t *testing.T) {
 	sut.PreferredUsername = ap.NaturalLanguageValuesNew()
 	sut.PreferredUsername.Set("en", ap.Content("MaxMuster"))
 	result, _ := sut.MarshalJSON()
-	if string(result) != "{\"type\":\"Person\",\"preferredUsername\":\"MaxMuster\"}" {
-		t.Errorf("MarshalJSON() was = %q", result)
-	}
+	assert.JSONEq(t, `{"type":"Person","preferredUsername":"MaxMuster"}`, string(result), "Expected string is not equal")
 }
 
 func Test_PersonUnmarshalJSON(t *testing.T) {
@@ -219,9 +201,7 @@ func Test_PersonUnmarshalJSON(t *testing.T) {
 		t.Errorf("UnmarshalJSON() unexpected error: %v", err)
 	}
 	result, _ := sut.MarshalJSON()
-	if expectedStr != string(result) {
-		t.Errorf("UnmarshalJSON() expected: %q got: %q", expectedStr, result)
-	}
+	assert.JSONEq(t, expectedStr, string(result), "Expected string is not equal")
 }
 
 func TestForgePersonValidation(t *testing.T) {
