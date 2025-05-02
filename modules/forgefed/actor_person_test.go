@@ -8,11 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"forgejo.org/modules/validation"
 
 	ap "github.com/go-ap/activitypub"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewPersonIdFromModel(t *testing.T) {
