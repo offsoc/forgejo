@@ -689,7 +689,7 @@ func SendRemovedSecurityKey(ctx context.Context, u *user_model.User, securityKey
 	if err != nil {
 		return err
 	}
-	hasTOTP, err := auth_model.HasTwoFactorByUID(ctx, u.ID)
+	hasTOTP, err := auth_model.HasTOTPByUID(ctx, u.ID)
 	if err != nil {
 		return err
 	}
