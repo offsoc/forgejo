@@ -39,6 +39,7 @@ var (
 		LimitSizeMaven        int64
 		LimitSizeNpm          int64
 		LimitSizeNuGet        int64
+		LimitSizeOpenTofu     int64
 		LimitSizePub          int64
 		LimitSizePyPI         int64
 		LimitSizeRpm          int64
@@ -100,6 +101,7 @@ func loadPackagesFrom(rootCfg ConfigProvider) (err error) {
 	Packages.LimitSizeMaven = mustBytes(sec, "LIMIT_SIZE_MAVEN")
 	Packages.LimitSizeNpm = mustBytes(sec, "LIMIT_SIZE_NPM")
 	Packages.LimitSizeNuGet = mustBytes(sec, "LIMIT_SIZE_NUGET")
+	Packages.LimitSizeOpenTofu = mustBytes(sec, "LIMIT_SIZE_OPENTOFU")
 	Packages.LimitSizePub = mustBytes(sec, "LIMIT_SIZE_PUB")
 	Packages.LimitSizePyPI = mustBytes(sec, "LIMIT_SIZE_PYPI")
 	Packages.LimitSizeRpm = mustBytes(sec, "LIMIT_SIZE_RPM")

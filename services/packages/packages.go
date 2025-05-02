@@ -390,6 +390,8 @@ func CheckSizeQuotaExceeded(ctx context.Context, doer, owner *user_model.User, p
 		typeSpecificSize = setting.Packages.LimitSizeNpm
 	case packages_model.TypeNuGet:
 		typeSpecificSize = setting.Packages.LimitSizeNuGet
+	case packages_model.TypeOpenTofu:
+		typeSpecificSize = setting.Packages.LimitSizeOpenTofu
 	case packages_model.TypePub:
 		typeSpecificSize = setting.Packages.LimitSizePub
 	case packages_model.TypePyPI:
