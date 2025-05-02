@@ -5,7 +5,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 import {VueLoaderPlugin} from 'vue-loader';
 import EsBuildLoader from 'esbuild-loader';
-import {parse, dirname} from 'node:path';
+import {parse} from 'node:path';
 import webpack from 'webpack';
 import {fileURLToPath} from 'node:url';
 import {readFileSync, writeFileSync} from 'node:fs';
@@ -19,7 +19,7 @@ const {EsbuildPlugin} = EsBuildLoader;
 const {SourceMapDevToolPlugin, DefinePlugin, ProgressPlugin} = webpack;
 const formatLicenseText = (licenseText) => wrapAnsi(licenseText || '', 80).trim();
 
-const baseDirectory = dirname(fileURLToPath(new URL(import.meta.url)));
+const baseDirectory = import.meta.dirname;
 const glob = (pattern) => fastGlob.sync(pattern, {
   cwd: baseDirectory,
   absolute: true,

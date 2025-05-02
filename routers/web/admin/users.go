@@ -248,17 +248,12 @@ func prepareUserInfo(ctx *context.Context) *user_model.User {
 	}
 	ctx.Data["Sources"] = sources
 
-	hasTOTP, err := auth.HasTwoFactorByUID(ctx, u.ID)
+	hasTwoFactor, err := auth.HasTwoFactorByUID(ctx, u.ID)
 	if err != nil {
-		ctx.ServerError("auth.HasTwoFactorByUID", err)
+		ctx.ServerError("HasTwoFactorByUID", err)
 		return nil
 	}
-	hasWebAuthn, err := auth.HasWebAuthnRegistrationsByUID(ctx, u.ID)
-	if err != nil {
-		ctx.ServerError("auth.HasWebAuthnRegistrationsByUID", err)
-		return nil
-	}
-	ctx.Data["TwoFactorEnabled"] = hasTOTP || hasWebAuthn
+	ctx.Data["TwoFactorEnabled"] = hasTwoFactor
 
 	return u
 }
