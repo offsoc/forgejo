@@ -50,11 +50,39 @@ func TestViewRepo(t *testing.T) {
 	assert.True(t, repoTopics.HasClass("repo-topic"))
 	assert.True(t, repoSummary.HasClass("repository-menu"))
 
-	req = NewRequest(t, "GET", "/org3/repo3")
-	MakeRequest(t, req, http.StatusNotFound)
+	t.Run("Without 404 redirect", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.Service.Redirect404ToSignIn, false)()
 
-	session = loginUser(t, "user1")
-	session.MakeRequest(t, req, http.StatusNotFound)
+		// Unauthenticated, you get a 404
+		req = NewRequest(t, "GET", "/org3/repo3")
+		MakeRequest(t, req, http.StatusNotFound)
+
+		// Authenticated and can view, 200
+		session = loginUser(t, "user1")
+		session.MakeRequest(t, NewRequest(t, "GET", "/org3/repo3"), http.StatusOK)
+
+		// Authenticated and can't view, 404
+		session = loginUser(t, "user5")
+		session.MakeRequest(t, NewRequest(t, "GET", "/org3/repo3"), http.StatusNotFound)
+	})
+
+	t.Run("With 404 redirect", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		defer test.MockVariableValue(&setting.Service.Redirect404ToSignIn, true)()
+
+		// Unauthenticated, you get a redirect to login page
+		req = NewRequest(t, "GET", "/org3/repo3")
+		MakeRequest(t, req, http.StatusSeeOther)
+
+		// Authenticated and can view, 200
+		session = loginUser(t, "user1")
+		session.MakeRequest(t, NewRequest(t, "GET", "/org3/repo3"), http.StatusOK)
+
+		// Authenticated and can't view, 404
+		session = loginUser(t, "user5")
+		session.MakeRequest(t, NewRequest(t, "GET", "/org3/repo3"), http.StatusNotFound)
+	})
 }
 
 func testViewRepo(t *testing.T) {

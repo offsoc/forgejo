@@ -89,6 +89,7 @@ var Service = struct {
 	ValidSiteURLSchemes                     []string
 	UsernameCooldownPeriod                  int64
 	MaxUserRedirects                        int64
+	Redirect404ToSignIn                     bool
 
 	// OpenID settings
 	EnableOpenIDSignIn bool
@@ -296,6 +297,7 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 		maxUserRedirectsDefault = 5
 	}
 	Service.MaxUserRedirects = sec.Key("MAX_USER_REDIRECTS").MustInt64(maxUserRedirectsDefault)
+	Service.Redirect404ToSignIn = sec.Key("REDIRECT_404_TO_SIGN_IN").MustBool(false)
 
 	mustMapSetting(rootCfg, "service.explore", &Service.Explore)
 

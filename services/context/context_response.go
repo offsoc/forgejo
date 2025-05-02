@@ -131,6 +131,10 @@ func (ctx *Context) RenderWithErr(msg any, tpl base.TplName, form any) {
 
 // NotFound displays a 404 (Not Found) page and prints the given error, if any.
 func (ctx *Context) NotFound(logMsg string, logErr error) {
+	if !ctx.IsSigned && setting.Service.Redirect404ToSignIn {
+		ctx.Redirect(setting.AppSubURL+"/user/login?redirect_to="+url.QueryEscape(ctx.Req.RequestURI), http.StatusSeeOther)
+		return
+	}
 	ctx.notFoundInternal(logMsg, logErr)
 }
 
