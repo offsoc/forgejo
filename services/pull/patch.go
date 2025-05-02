@@ -5,7 +5,6 @@
 package pull
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -16,14 +15,11 @@ import (
 	"forgejo.org/models"
 	git_model "forgejo.org/models/git"
 	issues_model "forgejo.org/models/issues"
-	"forgejo.org/models/unit"
-	"forgejo.org/modules/container"
 	"forgejo.org/modules/git"
 	"forgejo.org/modules/gitrepo"
 	"forgejo.org/modules/graceful"
 	"forgejo.org/modules/log"
 	"forgejo.org/modules/process"
-	"forgejo.org/modules/setting"
 	"forgejo.org/modules/util"
 
 	"github.com/gobwas/glob"
@@ -47,15 +43,6 @@ func DownloadDiffOrPatch(ctx context.Context, pr *issues_model.PullRequest, w io
 		return fmt.Errorf("Unable to get patch file from %s to %s in %s Error: %w", pr.MergeBase, pr.HeadBranch, pr.BaseRepo.FullName(), err)
 	}
 	return nil
-}
-
-var patchErrorSuffices = []string{
-	": already exists in index",
-	": patch does not apply",
-	": already exists in working directory",
-	"unrecognized input",
-	": No such file or directory",
-	": does not exist in index",
 }
 
 // TestPatch will test whether a simple patch will apply
@@ -335,171 +322,11 @@ func checkConflicts(ctx context.Context, pr *issues_model.PullRequest, gitRepo *
 		return false, nil
 	}
 
-	// 3. OK the three-way merge method has detected conflicts
-	// 3a. Are still testing with GitApply? If not set the conflict status and move on
-	if !setting.Repository.PullRequest.TestConflictingPatchesWithGitApply {
-		pr.Status = issues_model.PullRequestStatusConflict
-		pr.ConflictedFiles = conflictFiles
+	pr.Status = issues_model.PullRequestStatusConflict
+	pr.ConflictedFiles = conflictFiles
 
-		log.Trace("Found %d files conflicted: %v", len(pr.ConflictedFiles), pr.ConflictedFiles)
-		return true, nil
-	}
-
-	// 3b. Create a plain patch from head to base
-	tmpPatchFile, err := os.CreateTemp("", "patch")
-	if err != nil {
-		log.Error("Unable to create temporary patch file! Error: %v", err)
-		return false, fmt.Errorf("unable to create temporary patch file! Error: %w", err)
-	}
-	defer func() {
-		_ = util.Remove(tmpPatchFile.Name())
-	}()
-
-	if err := gitRepo.GetDiffBinary(pr.MergeBase, "tracking", tmpPatchFile); err != nil {
-		tmpPatchFile.Close()
-		log.Error("Unable to get patch file from %s to %s in %s Error: %v", pr.MergeBase, pr.HeadBranch, pr.BaseRepo.FullName(), err)
-		return false, fmt.Errorf("unable to get patch file from %s to %s in %s Error: %w", pr.MergeBase, pr.HeadBranch, pr.BaseRepo.FullName(), err)
-	}
-	stat, err := tmpPatchFile.Stat()
-	if err != nil {
-		tmpPatchFile.Close()
-		return false, fmt.Errorf("unable to stat patch file: %w", err)
-	}
-	patchPath := tmpPatchFile.Name()
-	tmpPatchFile.Close()
-
-	// 3c. if the size of that patch is 0 - there can be no conflicts!
-	if stat.Size() == 0 {
-		log.Debug("PullRequest[%d]: Patch is empty - ignoring", pr.ID)
-		pr.Status = issues_model.PullRequestStatusEmpty
-		return false, nil
-	}
-
-	log.Trace("PullRequest[%d].testPatch (patchPath): %s", pr.ID, patchPath)
-
-	// 4. Read the base branch in to the index of the temporary repository
-	_, _, err = git.NewCommand(gitRepo.Ctx, "read-tree", "base").RunStdString(&git.RunOpts{Dir: tmpBasePath})
-	if err != nil {
-		return false, fmt.Errorf("git read-tree %s: %w", pr.BaseBranch, err)
-	}
-
-	// 5. Now get the pull request configuration to check if we need to ignore whitespace
-	prUnit, err := pr.BaseRepo.GetUnit(ctx, unit.TypePullRequests)
-	if err != nil {
-		return false, err
-	}
-	prConfig := prUnit.PullRequestsConfig()
-
-	// 6. Prepare the arguments to apply the patch against the index
-	cmdApply := git.NewCommand(gitRepo.Ctx, "apply", "--check", "--cached")
-	if prConfig.IgnoreWhitespaceConflicts {
-		cmdApply.AddArguments("--ignore-whitespace")
-	}
-	is3way := false
-	if git.CheckGitVersionAtLeast("2.32.0") == nil {
-		cmdApply.AddArguments("--3way")
-		is3way = true
-	}
-	cmdApply.AddDynamicArguments(patchPath)
-
-	// 7. Prep the pipe:
-	//   - Here we could do the equivalent of:
-	//  `git apply --check --cached patch_file > conflicts`
-	//     Then iterate through the conflicts. However, that means storing all the conflicts
-	//     in memory - which is very wasteful.
-	//   - alternatively we can do the equivalent of:
-	//  `git apply --check ... | grep ...`
-	//     meaning we don't store all of the conflicts unnecessarily.
-	stderrReader, stderrWriter, err := os.Pipe()
-	if err != nil {
-		log.Error("Unable to open stderr pipe: %v", err)
-		return false, fmt.Errorf("unable to open stderr pipe: %w", err)
-	}
-	defer func() {
-		_ = stderrReader.Close()
-		_ = stderrWriter.Close()
-	}()
-
-	// 8. Run the check command
-	conflict = false
-	err = cmdApply.Run(&git.RunOpts{
-		Dir:    tmpBasePath,
-		Stderr: stderrWriter,
-		PipelineFunc: func(ctx context.Context, cancel context.CancelFunc) error {
-			// Close the writer end of the pipe to begin processing
-			_ = stderrWriter.Close()
-			defer func() {
-				// Close the reader on return to terminate the git command if necessary
-				_ = stderrReader.Close()
-			}()
-
-			const prefix = "error: patch failed:"
-			const errorPrefix = "error: "
-			const threewayFailed = "Failed to perform three-way merge..."
-			const appliedPatchPrefix = "Applied patch to '"
-			const withConflicts = "' with conflicts."
-
-			conflicts := make(container.Set[string])
-
-			// Now scan the output from the command
-			scanner := bufio.NewScanner(stderrReader)
-			for scanner.Scan() {
-				line := scanner.Text()
-				log.Trace("PullRequest[%d].testPatch: stderr: %s", pr.ID, line)
-				if strings.HasPrefix(line, prefix) {
-					conflict = true
-					filepath := strings.TrimSpace(strings.Split(line[len(prefix):], ":")[0])
-					conflicts.Add(filepath)
-				} else if is3way && line == threewayFailed {
-					conflict = true
-				} else if strings.HasPrefix(line, errorPrefix) {
-					conflict = true
-					for _, suffix := range patchErrorSuffices {
-						if strings.HasSuffix(line, suffix) {
-							filepath := strings.TrimSpace(strings.TrimSuffix(line[len(errorPrefix):], suffix))
-							if filepath != "" {
-								conflicts.Add(filepath)
-							}
-							break
-						}
-					}
-				} else if is3way && strings.HasPrefix(line, appliedPatchPrefix) && strings.HasSuffix(line, withConflicts) {
-					conflict = true
-					filepath := strings.TrimPrefix(strings.TrimSuffix(line, withConflicts), appliedPatchPrefix)
-					if filepath != "" {
-						conflicts.Add(filepath)
-					}
-				}
-				// only list 10 conflicted files
-				if len(conflicts) >= 10 {
-					break
-				}
-			}
-
-			if len(conflicts) > 0 {
-				pr.ConflictedFiles = make([]string, 0, len(conflicts))
-				for key := range conflicts {
-					pr.ConflictedFiles = append(pr.ConflictedFiles, key)
-				}
-			}
-
-			return nil
-		},
-	})
-
-	// 9. Check if the found conflictedfiles is non-zero, "err" could be non-nil, so we should ignore it if we found conflicts.
-	// Note: `"err" could be non-nil` is due that if enable 3-way merge, it doesn't return any error on found conflicts.
-	if len(pr.ConflictedFiles) > 0 {
-		if conflict {
-			pr.Status = issues_model.PullRequestStatusConflict
-			log.Trace("Found %d files conflicted: %v", len(pr.ConflictedFiles), pr.ConflictedFiles)
-
-			return true, nil
-		}
-	} else if err != nil {
-		return false, fmt.Errorf("git apply --check: %w", err)
-	}
-	return false, nil
+	log.Trace("Found %d files conflicted: %v", len(pr.ConflictedFiles), pr.ConflictedFiles)
+	return true, nil
 }
 
 // CheckFileProtection check file Protection

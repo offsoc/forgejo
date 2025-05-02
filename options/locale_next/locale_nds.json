@@ -21,5 +21,14 @@
     "alert.asset_load_failed": "Kunn Objekt-Dateien ut {path} nich laden. Bidde wees wiss, dat up de Objekt-Dateien togriepen worden kann.",
     "install.invalid_lfs_path": "Kunn de LFS-Ruut an de angeven Padd nich maken: %[1]s",
     "alert.range_error": " mutt eene Tahl tüsken %[1]s un %[2]s wesen.",
-    "meta.last_line": "Moin!"
+    "meta.last_line": "Moin!",
+    "mail.actions.successful_run_after_failure_subject": "Warkwies %[1]s in Repositorium %[2]s verhaalt",
+    "mail.actions.not_successful_run_subject": "Warkwies %[1]s in Repositorium %[2]s fehlslagen",
+    "mail.actions.successful_run_after_failure": "Warkwies %[1]s in Repositorium %[2]s hett sik verhaalt",
+    "mail.actions.not_successful_run": "Warkwies %[1]s in Repositorium %[2]s is fehlslagen",
+    "mail.actions.run_info_cur_status": "Tostand vun deesem Utföhren: %[1]s (jüüst vun %[2]s verneeit)",
+    "mail.actions.run_info_previous_status": "Tostand vun de vörig Utföhren: %[1]s",
+    "mail.actions.run_info_ref": "Twieg: %[1]s (%[2]s)",
+    "mail.actions.run_info_trigger": "Utlööst um: %[1]s vun: %[2]s",
+    "discussion.locked": "Deeser Snack is tosloten worden. Blots Bidragers könen kommenteren."
 }

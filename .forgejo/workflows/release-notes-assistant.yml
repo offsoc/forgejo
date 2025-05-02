@@ -7,6 +7,9 @@ on:
       - synchronize
       - labeled
 
+env:
+  RNA_VERSION: v1.2.5 # renovate: datasource=gitea-releases depName=forgejo/release-notes-assistant registryUrl=https://code.forgejo.org
+
 jobs:
   release-notes:
     if: ( vars.ROLE == 'forgejo-coding' ) && contains(github.event.pull_request.labels.*.name, 'worth a release-note')
@@ -38,4 +41,4 @@ jobs:
 
       - name: release-notes-assistant preview
         run: |
-          go run code.forgejo.org/forgejo/release-notes-assistant@v1.1.1 --config .release-notes-assistant.yaml --storage pr --storage-location ${{ github.event.pull_request.number }}  --forgejo-url $GITHUB_SERVER_URL --repository $GITHUB_REPOSITORY --token ${{ secrets.RELEASE_NOTES_ASSISTANT_TOKEN }} preview ${{ github.event.pull_request.number }}
+          go run code.forgejo.org/forgejo/release-notes-assistant@$RNA_VERSION --config .release-notes-assistant.yaml --storage pr --storage-location ${{ github.event.pull_request.number }}  --forgejo-url $GITHUB_SERVER_URL --repository $GITHUB_REPOSITORY --token ${{ secrets.RELEASE_NOTES_ASSISTANT_TOKEN }} preview ${{ github.event.pull_request.number }}

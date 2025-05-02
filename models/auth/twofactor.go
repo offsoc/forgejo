@@ -135,9 +135,9 @@ func GetTwoFactorByUID(ctx context.Context, uid int64) (*TwoFactor, error) {
 	return twofa, nil
 }
 
-// HasTwoFactorByUID returns the two-factor authentication token associated with
-// the user, if any.
-func HasTwoFactorByUID(ctx context.Context, uid int64) (bool, error) {
+// HasTOTPByUID returns the TOTP authentication token associated with
+// the user, if the user has TOTP enabled for their account.
+func HasTOTPByUID(ctx context.Context, uid int64) (bool, error) {
 	return db.GetEngine(ctx).Where("uid=?", uid).Exist(&TwoFactor{})
 }
 
