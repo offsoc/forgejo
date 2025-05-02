@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	auth_model "code.gitea.io/gitea/models/auth"
+	"code.gitea.io/gitea/models/db"
 	"code.gitea.io/gitea/models/unittest"
 	user_model "code.gitea.io/gitea/models/user"
 	"code.gitea.io/gitea/modules/json"
@@ -634,4 +635,70 @@ func TestOAuth_GrantApplicationOAuth(t *testing.T) {
 	})
 	resp = ctx.MakeRequest(t, req, http.StatusSeeOther)
 	assert.Contains(t, test.RedirectURL(resp), "error=access_denied&error_description=the+request+is+denied")
+}
+
+func TestSignUpViaOAuthLinking2FA(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.OAuth2Client.EnableAutoRegistration, true)()
+	defer test.MockVariableValue(&setting.OAuth2Client.AccountLinking, setting.OAuth2AccountLinkingAuto)()
+
+	// Fake that user 2 is enrolled into WebAuthn.
+	t.Cleanup(func() {
+		require.NoError(t, db.DeleteBeans(db.DefaultContext, &auth_model.WebAuthnCredential{UserID: 2}))
+	})
+	unittest.AssertSuccessfulInsert(t, &auth_model.WebAuthnCredential{UserID: 2})
+
+	gitlabName := "gitlab"
+	addAuthSource(t, authSourcePayloadGitLabCustom(gitlabName))
+	userGitLabUserID := "107"
+
+	defer mockCompleteUserAuth(func(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+		return goth.User{
+			Provider: gitlabName,
+			UserID:   userGitLabUserID,
+			NickName: "user2",
+			Email:    "user2@example.com",
+		}, nil
+	})()
+	req := NewRequest(t, "GET", fmt.Sprintf("/user/oauth2/%s/callback?code=XYZ&state=XYZ", gitlabName))
+	resp := MakeRequest(t, req, http.StatusSeeOther)
+
+	// Make sure the user has to go through 2FA after linking.
+	assert.Equal(t, "/user/webauthn", test.RedirectURL(resp))
+}
+
+func TestSignUpViaOAuth2FA(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.OAuth2Client.EnableAutoRegistration, true)()
+	defer test.MockVariableValue(&setting.OAuth2Client.AccountLinking, setting.OAuth2AccountLinkingAuto)()
+
+	gitlabName := "gitlab"
+	addAuthSource(t, authSourcePayloadGitLabCustom(gitlabName))
+	userGitLabUserID := "21"
+
+	defer mockCompleteUserAuth(func(res http.ResponseWriter, req *http.Request) (goth.User, error) {
+		return goth.User{
+			Provider: gitlabName,
+			UserID:   userGitLabUserID,
+			NickName: "user2",
+			Email:    "user2@example.com",
+		}, nil
+	})()
+	req := NewRequest(t, "GET", fmt.Sprintf("/user/oauth2/%s/callback?code=XYZ&state=XYZ", gitlabName))
+	resp := MakeRequest(t, req, http.StatusSeeOther)
+
+	// Make sure the user can login normally and is linked.
+	assert.Equal(t, "/", test.RedirectURL(resp))
+
+	// Fake that user 2 is enrolled into WebAuthn.
+	t.Cleanup(func() {
+		require.NoError(t, db.DeleteBeans(db.DefaultContext, &auth_model.WebAuthnCredential{UserID: 2}))
+	})
+	unittest.AssertSuccessfulInsert(t, &auth_model.WebAuthnCredential{UserID: 2})
+
+	req = NewRequest(t, "GET", fmt.Sprintf("/user/oauth2/%s/callback?code=XYZ&state=XYZ", gitlabName))
+	resp = MakeRequest(t, req, http.StatusSeeOther)
+
+	// Make sure user has to go through 2FA.
+	assert.Equal(t, "/user/webauthn", test.RedirectURL(resp))
 }
