@@ -4,10 +4,11 @@
 package forgefed
 
 import (
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"forgejo.org/modules/validation"
 
@@ -26,7 +27,7 @@ func TestNewPersonIdFromModel(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 
 	sut, _ := NewPersonIDFromModel("an.other.host", "https", 443, "forgejo", "1")
-	assert.Equal(t, sut, expected)
+	assert.Equal(t, expected, sut)
 }
 
 func TestNewPersonId(t *testing.T) {
@@ -41,7 +42,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1"
 
 	sut, _ := NewPersonID("https://an.other.host/api/v1/activitypub/user-id/1", "forgejo")
-	assert.Equal(t, sut, expected)
+	assert.Equal(t, expected, sut)
 
 	expected = PersonID{}
 	expected.ID = "1"
@@ -54,7 +55,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 
 	sut, _ = NewPersonID("https://an.other.host:443/api/v1/activitypub/user-id/1", "forgejo")
-	assert.Equal(t, sut, expected)
+	assert.Equal(t, expected, sut)
 
 	expected = PersonID{}
 	expected.ID = "1"
@@ -67,7 +68,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "http://an.other.host:80/api/v1/activitypub/user-id/1"
 
 	sut, _ = NewPersonID("http://an.other.host:80/api/v1/activitypub/user-id/1", "forgejo")
-	assert.Equal(t, sut, expected)
+	assert.Equal(t, expected, sut)
 
 	expected = PersonID{}
 	expected.ID = "1"
@@ -80,7 +81,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 
 	sut, _ = NewPersonID("HTTPS://an.other.host:443/api/v1/activitypub/user-id/1", "forgejo")
-	assert.Equal(t, sut, expected)
+	assert.Equal(t, expected, sut)
 }
 
 func TestPersonIdValidation(t *testing.T) {
@@ -115,7 +116,7 @@ func TestPersonIdValidation(t *testing.T) {
 
 func TestWebfingerId(t *testing.T) {
 	sut, _ := NewPersonID("https://codeberg.org/api/v1/activitypub/user-id/12345", "forgejo")
-	assert.Equal(t, sut.AsWebfinger(), "@12345@codeberg.org")
+	assert.Equal(t, "@12345@codeberg.org", sut.AsWebfinger())
 }
 
 func TestShouldThrowErrorOnInvalidInput(t *testing.T) {
