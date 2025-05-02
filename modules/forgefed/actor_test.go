@@ -145,7 +145,7 @@ func TestPersonIdValidation(t *testing.T) {
 	sut.HostPort = 443
 	sut.IsPortSupplemented = true
 	sut.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1"
-	if sut.Validate()[0] != "Field Source does contain value forgejox, which is not in allowed subset [forgejo gitea]" {
+	if sut.Validate()[0] != "Field Source contains the value forgejox, which is not in allowed subset [forgejo gitea]" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
 	}
 }

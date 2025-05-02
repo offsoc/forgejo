@@ -92,5 +92,5 @@ func ValidateOneOf(value any, allowed []any, name string) []string {
 			return []string{}
 		}
 	}
-	return []string{fmt.Sprintf("Field %s does contain value %v, which is not in allowed subset %v", name, value, allowed)}
+	return []string{fmt.Sprintf("Field %s contains the value %v, which is not in allowed subset %v", name, value, allowed)}
 }
