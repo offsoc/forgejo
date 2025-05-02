@@ -20,7 +20,7 @@ env:
   RENOVATE_REPOSITORIES: ${{ github.repository }}
   # fix because 10.0.0-58-7e1df53+gitea-1.22.0 < 10.0.0 for semver
   # and codeberg api returns such versions from `git describe --tags`
-  RENOVATE_X_PLATFORM_VERSION: 10.0.0+gitea-1.22.0
+  # RENOVATE_X_PLATFORM_VERSION: 10.0.0+gitea-1.22.0 currently not needed
 
 jobs:
   renovate:

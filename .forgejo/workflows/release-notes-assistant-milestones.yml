@@ -5,7 +5,7 @@ on:
     - cron: '@daily'
 
 env:
-  RNA_VERSION: 'v1.1.1' # renovate: datasource=go depName=forgejo/release-notes-assistant packageName=code.forgejo.org/forgejo/release-notes-assistant
+  RNA_VERSION: v1.1.1 # renovate: datasource=gitea-releases depName=forgejo/release-notes-assistant registryUrl=https://code.forgejo.org
 
 jobs:
   release-notes:
