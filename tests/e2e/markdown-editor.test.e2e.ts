@@ -166,8 +166,9 @@ test('markdown indentation with Tab', async ({page}) => {
   await textarea.press('ArrowRight');
   await textarea.press('ArrowRight');
   await textarea.press('Tab');
-  // Nothing should happen and a toast should be shown
-  await expect(textarea).toHaveValue(initText);
+  // Whole line should be indented.
+  await expect(textarea).toHaveValue(`${tab}* first\n* second\n* third\n* last`);
+  await textarea.press('Shift+Tab');
 
   // Subsequently, select a chunk of 2nd and 3rd line and indent both, preserving the cursor position in relation to text
   const line3 = `* first\n* second\n${tab}* third\n* last`;

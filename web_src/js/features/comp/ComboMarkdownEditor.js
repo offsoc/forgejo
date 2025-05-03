@@ -503,10 +503,6 @@ class ComboMarkdownEditor {
 
     // If there is no selection and this is an ambiguous command (Tab handling), only (un)indent if already in a code/list.
     if (!unindent && validOnly && start === end) {
-      // Only allow adding indent if cursor within the leading whitespace / quote prefix.
-      if (editStart !== start && !/^[\s>]*$/.test(line.slice(0, start - editStart))) {
-        return false;
-      }
       // Check there's any indentation or prefix at all.
       const match = line.match(listPrefixRegex);
       if (!match || !match[0].length) return false;
