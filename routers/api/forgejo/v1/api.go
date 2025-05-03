@@ -4,8 +4,8 @@
 package v1
 
 import (
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/shared"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/shared"
 )
 
 func Routes() *web.Route {

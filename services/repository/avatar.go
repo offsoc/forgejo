@@ -9,11 +9,11 @@ import (
 	"io"
 	"strconv"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/avatar"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/storage"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/avatar"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/storage"
 )
 
 // UploadAvatar saves custom avatar for repository.

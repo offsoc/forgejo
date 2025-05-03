@@ -1,4 +1,5 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repository
@@ -8,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -63,9 +64,9 @@ func TestPushCommits_ToAPIPayloadCommits(t *testing.T) {
 	assert.Equal(t, "user2", payloadCommits[0].Committer.UserName)
 	assert.Equal(t, "User2", payloadCommits[0].Author.Name)
 	assert.Equal(t, "user2", payloadCommits[0].Author.UserName)
-	assert.EqualValues(t, []string{}, payloadCommits[0].Added)
-	assert.EqualValues(t, []string{}, payloadCommits[0].Removed)
-	assert.EqualValues(t, []string{"readme.md"}, payloadCommits[0].Modified)
+	assert.Equal(t, []string{}, payloadCommits[0].Added)
+	assert.Equal(t, []string{}, payloadCommits[0].Removed)
+	assert.Equal(t, []string{"readme.md"}, payloadCommits[0].Modified)
 
 	assert.Equal(t, "27566bd", payloadCommits[1].ID)
 	assert.Equal(t, "good signed commit (with not yet validated email)", payloadCommits[1].Message)
@@ -74,9 +75,9 @@ func TestPushCommits_ToAPIPayloadCommits(t *testing.T) {
 	assert.Equal(t, "user2", payloadCommits[1].Committer.UserName)
 	assert.Equal(t, "User2", payloadCommits[1].Author.Name)
 	assert.Equal(t, "user2", payloadCommits[1].Author.UserName)
-	assert.EqualValues(t, []string{}, payloadCommits[1].Added)
-	assert.EqualValues(t, []string{}, payloadCommits[1].Removed)
-	assert.EqualValues(t, []string{"readme.md"}, payloadCommits[1].Modified)
+	assert.Equal(t, []string{}, payloadCommits[1].Added)
+	assert.Equal(t, []string{}, payloadCommits[1].Removed)
+	assert.Equal(t, []string{"readme.md"}, payloadCommits[1].Modified)
 
 	assert.Equal(t, "5099b81", payloadCommits[2].ID)
 	assert.Equal(t, "good signed commit", payloadCommits[2].Message)
@@ -85,9 +86,9 @@ func TestPushCommits_ToAPIPayloadCommits(t *testing.T) {
 	assert.Equal(t, "user2", payloadCommits[2].Committer.UserName)
 	assert.Equal(t, "User2", payloadCommits[2].Author.Name)
 	assert.Equal(t, "user2", payloadCommits[2].Author.UserName)
-	assert.EqualValues(t, []string{"readme.md"}, payloadCommits[2].Added)
-	assert.EqualValues(t, []string{}, payloadCommits[2].Removed)
-	assert.EqualValues(t, []string{}, payloadCommits[2].Modified)
+	assert.Equal(t, []string{"readme.md"}, payloadCommits[2].Added)
+	assert.Equal(t, []string{}, payloadCommits[2].Removed)
+	assert.Equal(t, []string{}, payloadCommits[2].Modified)
 
 	assert.Equal(t, "69554a6", headCommit.ID)
 	assert.Equal(t, "not signed commit", headCommit.Message)
@@ -96,9 +97,9 @@ func TestPushCommits_ToAPIPayloadCommits(t *testing.T) {
 	assert.Equal(t, "user2", headCommit.Committer.UserName)
 	assert.Equal(t, "User2", headCommit.Author.Name)
 	assert.Equal(t, "user2", headCommit.Author.UserName)
-	assert.EqualValues(t, []string{}, headCommit.Added)
-	assert.EqualValues(t, []string{}, headCommit.Removed)
-	assert.EqualValues(t, []string{"readme.md"}, headCommit.Modified)
+	assert.Equal(t, []string{}, headCommit.Added)
+	assert.Equal(t, []string{}, headCommit.Removed)
+	assert.Equal(t, []string{"readme.md"}, headCommit.Modified)
 }
 
 func TestPushCommits_AvatarLink(t *testing.T) {
@@ -131,6 +132,50 @@ func TestPushCommits_AvatarLink(t *testing.T) {
 	assert.Equal(t,
 		"/assets/img/avatar_default.png",
 		pushCommits.AvatarLink(db.DefaultContext, "nonexistent@example.com"))
+}
+
+func TestPushCommitToCommit(t *testing.T) {
+	now := time.Now()
+	sig := &git.Signature{
+		Email: "example@example.com",
+		Name:  "John Doe",
+		When:  now,
+	}
+	const hexString = "0123456789abcdef0123456789abcdef01234567"
+	sha1, err := git.NewIDFromString(hexString)
+	require.NoError(t, err)
+	commit, err := PushCommitToCommit(&PushCommit{
+		Sha1:           sha1.String(),
+		Message:        "Commit Message",
+		AuthorEmail:    "example@example.com",
+		AuthorName:     "John Doe",
+		CommitterEmail: "example@example.com",
+		CommitterName:  "John Doe",
+		Signature:      nil,
+		Timestamp:      now,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, sha1, commit.ID)
+	assert.Equal(t, "Commit Message", commit.CommitMessage)
+	assert.Equal(t, sig, commit.Author)
+	assert.Equal(t, sig, commit.Committer)
+	assert.Nil(t, commit.Signature)
+}
+
+func TestPushCommitToCommitInvalidSha(t *testing.T) {
+	now := time.Now()
+	const hexString = "012"
+	_, err := PushCommitToCommit(&PushCommit{
+		Sha1:           hexString,
+		Message:        "Commit Message",
+		AuthorEmail:    "example@example.com",
+		AuthorName:     "John Doe",
+		CommitterEmail: "example@example.com",
+		CommitterName:  "John Doe",
+		Signature:      nil,
+		Timestamp:      now,
+	})
+	require.Error(t, err)
 }
 
 func TestCommitToPushCommit(t *testing.T) {

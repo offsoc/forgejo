@@ -10,7 +10,7 @@ import (
 	"path"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
+	"forgejo.org/models/db"
 )
 
 /*

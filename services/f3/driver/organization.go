@@ -8,11 +8,12 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	org_model "code.gitea.io/gitea/models/organization"
-	user_model "code.gitea.io/gitea/models/user"
+	"forgejo.org/models/db"
+	org_model "forgejo.org/models/organization"
+	user_model "forgejo.org/models/user"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
@@ -81,7 +82,7 @@ func (o *organization) Patch(ctx context.Context) {
 	}
 }
 
-func (o *organization) Put(ctx context.Context) generic.NodeID {
+func (o *organization) Put(ctx context.Context) f3_id.NodeID {
 	node := o.GetNode()
 	o.Trace("%s", node.GetID())
 
@@ -94,7 +95,7 @@ func (o *organization) Put(ctx context.Context) generic.NodeID {
 		panic(err)
 	}
 
-	return generic.NewNodeID(o.forgejoOrganization.ID)
+	return f3_id.NewNodeID(o.forgejoOrganization.ID)
 }
 
 func (o *organization) Delete(ctx context.Context) {

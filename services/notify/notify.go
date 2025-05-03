@@ -6,13 +6,14 @@ package notify
 import (
 	"context"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	packages_model "code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/repository"
+	actions_model "forgejo.org/models/actions"
+	issues_model "forgejo.org/models/issues"
+	packages_model "forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/repository"
 )
 
 var notifiers []Notifier
@@ -372,5 +373,17 @@ func PackageDelete(ctx context.Context, doer *user_model.User, pd *packages_mode
 func ChangeDefaultBranch(ctx context.Context, repo *repo_model.Repository) {
 	for _, notifier := range notifiers {
 		notifier.ChangeDefaultBranch(ctx, repo)
+	}
+}
+
+// ActionRunNowDone notifies that the old status priorStatus with (priorStatus.isDone() == false) of an ActionRun changed to run.Status with (run.Status.isDone() == true)
+// run represents the new state of the ActionRun.
+// lastRun represents the ActionRun of the same workflow that finished before run.
+// lastRun might be nil (e.g. when the run is the first for this workflow). It is the last run of the same workflow for the same repo.
+// It can be used to figure out if a successful run follows a failed one.
+// Both run and lastRun need their attributes loaded.
+func ActionRunNowDone(ctx context.Context, run *actions_model.ActionRun, priorStatus actions_model.Status, lastRun *actions_model.ActionRun) {
+	for _, notifier := range notifiers {
+		notifier.ActionRunNowDone(ctx, run, priorStatus, lastRun)
 	}
 }

@@ -7,12 +7,11 @@ import (
 	"context"
 	"slices"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/modules/log"
-	actions_service "code.gitea.io/gitea/services/actions"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	"forgejo.org/modules/log"
+	actions_service "forgejo.org/services/actions"
 )
 
 // UpdateRepositoryUnits updates a repository's units
@@ -29,7 +28,7 @@ func UpdateRepositoryUnits(ctx context.Context, repo *repo_model.Repository, uni
 	}
 
 	if slices.Contains(deleteUnitTypes, unit.TypeActions) {
-		if err := actions_model.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
+		if err := actions_service.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
 			log.Error("CleanRepoScheduleTasks: %v", err)
 		}
 	}

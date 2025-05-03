@@ -9,12 +9,13 @@ import (
 	"testing"
 	"time"
 
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/indexer/stats"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -35,6 +36,10 @@ func DeclareGitRepos(t *testing.T) func() {
 		newRepo(t, 2, "diff-test", []FileChanges{{
 			Filename: "testfile",
 			Versions: []string{"hello", "hallo", "hola", "native", "ubuntu-latest", "- runs-on: ubuntu-latest", "- runs-on: debian-latest"},
+		}}),
+		newRepo(t, 2, "language-stats-test", []FileChanges{{
+			Filename: "main.rs",
+			Versions: []string{"fn main() {", "println!(\"Hello World!\");", "}"},
 		}}),
 		newRepo(t, 2, "mentions-highlighted", []FileChanges{
 			{
@@ -104,6 +109,9 @@ func newRepo(t *testing.T, userID int64, repoName string, fileChanges []FileChan
 			assert.NotEmpty(t, resp)
 		}
 	}
+
+	err := stats.UpdateRepoIndexer(somerepo)
+	require.NoError(t, err)
 
 	return cleanupFunc
 }

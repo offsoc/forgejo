@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 
 	"github.com/redis/go-redis/v9"
 )

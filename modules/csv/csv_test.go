@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/translation"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -101,10 +101,10 @@ j, ,\x20
 	for n, c := range cases {
 		rd, err := CreateReaderAndDetermineDelimiter(nil, strings.NewReader(decodeSlashes(t, c.csv)))
 		require.NoError(t, err, "case %d: should not throw error: %v\n", n, err)
-		assert.EqualValues(t, c.expectedDelimiter, rd.Comma, "case %d: delimiter should be '%c', got '%c'", n, c.expectedDelimiter, rd.Comma)
+		assert.Equal(t, c.expectedDelimiter, rd.Comma, "case %d: delimiter should be '%c', got '%c'", n, c.expectedDelimiter, rd.Comma)
 		rows, err := rd.ReadAll()
 		require.NoError(t, err, "case %d: should not throw error: %v\n", n, err)
-		assert.EqualValues(t, c.expectedRows, rows, "case %d: rows should be equal", n)
+		assert.Equal(t, c.expectedRows, rows, "case %d: rows should be equal", n)
 	}
 }
 
@@ -236,7 +236,7 @@ John Doe	john@doe.com	This,note,had,a,lot,of,commas,to,test,delimiters`,
 			Ctx:          git.DefaultContext,
 			RelativePath: c.filename,
 		}, []byte(decodeSlashes(t, c.csv)))
-		assert.EqualValues(t, c.expectedDelimiter, delimiter, "case %d: delimiter should be equal, expected '%c' got '%c'", n, c.expectedDelimiter, delimiter)
+		assert.Equal(t, c.expectedDelimiter, delimiter, "case %d: delimiter should be equal, expected '%c' got '%c'", n, c.expectedDelimiter, delimiter)
 	}
 }
 
@@ -301,7 +301,7 @@ abc   | |123
 
 	for n, c := range cases {
 		modifiedText := removeQuotedString(decodeSlashes(t, c.text))
-		assert.EqualValues(t, c.expectedText, modifiedText, "case %d: modified text should be equal", n)
+		assert.Equal(t, c.expectedText, modifiedText, "case %d: modified text should be equal", n)
 	}
 }
 
@@ -456,7 +456,7 @@ jkl`,
 
 	for n, c := range cases {
 		delimiter := guessDelimiter([]byte(decodeSlashes(t, c.csv)))
-		assert.EqualValues(t, c.expectedDelimiter, delimiter, "case %d: delimiter should be equal, expected '%c' got '%c'", n, c.expectedDelimiter, delimiter)
+		assert.Equal(t, c.expectedDelimiter, delimiter, "case %d: delimiter should be equal, expected '%c' got '%c'", n, c.expectedDelimiter, delimiter)
 	}
 }
 
@@ -548,7 +548,7 @@ a|"he said, ""here I am"""`,
 
 	for n, c := range cases {
 		delimiter := guessFromBeforeAfterQuotes([]byte(decodeSlashes(t, c.csv)))
-		assert.EqualValues(t, c.expectedDelimiter, delimiter, "case %d: delimiter should be equal, expected '%c' got '%c'", n, c.expectedDelimiter, delimiter)
+		assert.Equal(t, c.expectedDelimiter, delimiter, "case %d: delimiter should be equal, expected '%c' got '%c'", n, c.expectedDelimiter, delimiter)
 	}
 }
 
@@ -584,7 +584,7 @@ func TestFormatError(t *testing.T) {
 			require.Error(t, err, "case %d: expected an error to be returned", n)
 		} else {
 			require.NoError(t, err, "case %d: no error was expected, got error: %v", n, err)
-			assert.EqualValues(t, c.expectedMessage, message, "case %d: messages should be equal, expected '%s' got '%s'", n, c.expectedMessage, message)
+			assert.Equal(t, c.expectedMessage, message, "case %d: messages should be equal, expected '%s' got '%s'", n, c.expectedMessage, message)
 		}
 	}
 }

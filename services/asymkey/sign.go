@@ -8,18 +8,17 @@ import (
 	"fmt"
 	"strings"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/setting"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/auth"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/setting"
 )
 
 type signingMode string
@@ -90,6 +89,13 @@ func SigningKey(ctx context.Context, repoPath string) (string, *git.Signature) {
 		return "", nil
 	}
 
+	if setting.Repository.Signing.Format == "ssh" {
+		return setting.Repository.Signing.SigningKey, &git.Signature{
+			Name:  setting.Repository.Signing.SigningName,
+			Email: setting.Repository.Signing.SigningEmail,
+		}
+	}
+
 	if setting.Repository.Signing.SigningKey == "default" || setting.Repository.Signing.SigningKey == "" {
 		// Can ignore the error here as it means that commit.gpgsign is not set
 		value, _, _ := git.NewCommand(ctx, "config", "--get", "commit.gpgsign").RunStdString(&git.RunOpts{Dir: repoPath})
@@ -145,22 +151,19 @@ Loop:
 		case always:
 			break Loop
 		case pubkey:
-			keys, err := db.Find[asymkey_model.GPGKey](ctx, asymkey_model.FindGPGKeyOptions{
-				OwnerID:        u.ID,
-				IncludeSubKeys: true,
-			})
+			hasPubKey, err := asymkey_model.HasAsymKeyByUID(ctx, u.ID)
 			if err != nil {
 				return false, "", nil, err
 			}
-			if len(keys) == 0 {
+			if !hasPubKey {
 				return false, "", nil, &ErrWontSign{pubkey}
 			}
 		case twofa:
-			twofaModel, err := auth.GetTwoFactorByUID(ctx, u.ID)
-			if err != nil && !auth.IsErrTwoFactorNotEnrolled(err) {
+			hasTwoFactor, err := auth.HasTwoFactorByUID(ctx, u.ID)
+			if err != nil {
 				return false, "", nil, err
 			}
-			if twofaModel == nil {
+			if !hasTwoFactor {
 				return false, "", nil, &ErrWontSign{twofa}
 			}
 		}
@@ -185,22 +188,19 @@ Loop:
 		case always:
 			break Loop
 		case pubkey:
-			keys, err := db.Find[asymkey_model.GPGKey](ctx, asymkey_model.FindGPGKeyOptions{
-				OwnerID:        u.ID,
-				IncludeSubKeys: true,
-			})
+			hasPubKey, err := asymkey_model.HasAsymKeyByUID(ctx, u.ID)
 			if err != nil {
 				return false, "", nil, err
 			}
-			if len(keys) == 0 {
+			if !hasPubKey {
 				return false, "", nil, &ErrWontSign{pubkey}
 			}
 		case twofa:
-			twofaModel, err := auth.GetTwoFactorByUID(ctx, u.ID)
-			if err != nil && !auth.IsErrTwoFactorNotEnrolled(err) {
+			hasTwoFactor, err := auth.HasTwoFactorByUID(ctx, u.ID)
+			if err != nil {
 				return false, "", nil, err
 			}
-			if twofaModel == nil {
+			if !hasTwoFactor {
 				return false, "", nil, &ErrWontSign{twofa}
 			}
 		case parentSigned:
@@ -241,22 +241,19 @@ Loop:
 		case always:
 			break Loop
 		case pubkey:
-			keys, err := db.Find[asymkey_model.GPGKey](ctx, asymkey_model.FindGPGKeyOptions{
-				OwnerID:        u.ID,
-				IncludeSubKeys: true,
-			})
+			hasPubKey, err := asymkey_model.HasAsymKeyByUID(ctx, u.ID)
 			if err != nil {
 				return false, "", nil, err
 			}
-			if len(keys) == 0 {
+			if !hasPubKey {
 				return false, "", nil, &ErrWontSign{pubkey}
 			}
 		case twofa:
-			twofaModel, err := auth.GetTwoFactorByUID(ctx, u.ID)
-			if err != nil && !auth.IsErrTwoFactorNotEnrolled(err) {
+			hasTwoFactor, err := auth.HasTwoFactorByUID(ctx, u.ID)
+			if err != nil {
 				return false, "", nil, err
 			}
-			if twofaModel == nil {
+			if !hasTwoFactor {
 				return false, "", nil, &ErrWontSign{twofa}
 			}
 		case parentSigned:
@@ -306,22 +303,19 @@ Loop:
 		case always:
 			break Loop
 		case pubkey:
-			keys, err := db.Find[asymkey_model.GPGKey](ctx, asymkey_model.FindGPGKeyOptions{
-				OwnerID:        u.ID,
-				IncludeSubKeys: true,
-			})
+			hasPubKey, err := asymkey_model.HasAsymKeyByUID(ctx, u.ID)
 			if err != nil {
 				return false, "", nil, err
 			}
-			if len(keys) == 0 {
+			if !hasPubKey {
 				return false, "", nil, &ErrWontSign{pubkey}
 			}
 		case twofa:
-			twofaModel, err := auth.GetTwoFactorByUID(ctx, u.ID)
-			if err != nil && !auth.IsErrTwoFactorNotEnrolled(err) {
+			hasTwoFactor, err := auth.HasTwoFactorByUID(ctx, u.ID)
+			if err != nil {
 				return false, "", nil, err
 			}
-			if twofaModel == nil {
+			if !hasTwoFactor {
 				return false, "", nil, &ErrWontSign{twofa}
 			}
 		case approved:

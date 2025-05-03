@@ -10,11 +10,11 @@ import (
 	"os"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -42,7 +42,7 @@ func TestUserDeleteAvatar(t *testing.T) {
 		err := UploadAvatar(db.DefaultContext, user, buff.Bytes())
 		require.NoError(t, err)
 		verification := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-		assert.NotEqual(t, "", verification.Avatar)
+		assert.NotEmpty(t, verification.Avatar)
 
 		// fail to delete ...
 		storage.Avatars = storage.UninitializedStorage
@@ -60,7 +60,7 @@ func TestUserDeleteAvatar(t *testing.T) {
 
 		// ... the avatar is removed from the database
 		verification = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-		assert.Equal(t, "", verification.Avatar)
+		assert.Empty(t, verification.Avatar)
 	})
 
 	t.Run("Success", func(t *testing.T) {
@@ -70,12 +70,12 @@ func TestUserDeleteAvatar(t *testing.T) {
 		err := UploadAvatar(db.DefaultContext, user, buff.Bytes())
 		require.NoError(t, err)
 		verification := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-		assert.NotEqual(t, "", verification.Avatar)
+		assert.NotEmpty(t, verification.Avatar)
 
 		err = DeleteAvatar(db.DefaultContext, user)
 		require.NoError(t, err)
 
 		verification = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
-		assert.Equal(t, "", verification.Avatar)
+		assert.Empty(t, verification.Avatar)
 	})
 }

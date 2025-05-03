@@ -6,22 +6,21 @@ package runner
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/util"
-	actions_service "code.gitea.io/gitea/services/actions"
+	actions_model "forgejo.org/models/actions"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/actions"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/util"
+	actions_service "forgejo.org/services/actions"
 
 	runnerv1 "code.gitea.io/actions-proto-go/runner/v1"
 	"code.gitea.io/actions-proto-go/runner/v1/runnerv1connect"
 	"connectrpc.com/connect"
 	gouuid "github.com/google/uuid"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func NewRunnerServiceHandler() (string, http.Handler) {
@@ -44,27 +43,27 @@ func (s *Service) Register(
 	req *connect.Request[runnerv1.RegisterRequest],
 ) (*connect.Response[runnerv1.RegisterResponse], error) {
 	if req.Msg.Token == "" || req.Msg.Name == "" {
-		return nil, errors.New("missing runner token, name")
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("missing runner token, name"))
 	}
 
 	runnerToken, err := actions_model.GetRunnerToken(ctx, req.Msg.Token)
 	if err != nil {
-		return nil, errors.New("runner registration token not found")
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("runner registration token not found"))
 	}
 
 	if !runnerToken.IsActive {
-		return nil, errors.New("runner registration token has been invalidated, please use the latest one")
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("runner registration token has been invalidated, please use the latest one"))
 	}
 
 	if runnerToken.OwnerID > 0 {
 		if _, err := user_model.GetUserByID(ctx, runnerToken.OwnerID); err != nil {
-			return nil, errors.New("owner of the token not found")
+			return nil, connect.NewError(connect.CodeInternal, errors.New("owner of the token not found"))
 		}
 	}
 
 	if runnerToken.RepoID > 0 {
 		if _, err := repo_model.GetRepositoryByID(ctx, runnerToken.RepoID); err != nil {
-			return nil, errors.New("repository of the token not found")
+			return nil, connect.NewError(connect.CodeInternal, errors.New("repository of the token not found"))
 		}
 	}
 
@@ -81,18 +80,18 @@ func (s *Service) Register(
 		AgentLabels: labels,
 	}
 	if err := runner.GenerateToken(); err != nil {
-		return nil, errors.New("can't generate token")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("can't generate token"))
 	}
 
 	// create new runner
 	if err := actions_model.CreateRunner(ctx, runner); err != nil {
-		return nil, errors.New("can't create new runner")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("can't create new runner"))
 	}
 
 	// update token status
 	runnerToken.IsActive = true
 	if err := actions_model.UpdateRunnerToken(ctx, runnerToken, "is_active"); err != nil {
-		return nil, errors.New("can't update runner token status")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("can't update runner token status"))
 	}
 
 	res := connect.NewResponse(&runnerv1.RegisterResponse{
@@ -117,7 +116,7 @@ func (s *Service) Declare(
 	runner.AgentLabels = req.Msg.Labels
 	runner.Version = req.Msg.Version
 	if err := actions_model.UpdateRunner(ctx, runner, "agent_labels", "version"); err != nil {
-		return nil, status.Errorf(codes.Internal, "update runner: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("update runner: %w", err))
 	}
 
 	return connect.NewResponse(&runnerv1.DeclareResponse{
@@ -143,10 +142,10 @@ func (s *Service) FetchTask(
 	tasksVersion := req.Msg.TasksVersion // task version from runner
 	latestVersion, err := actions_model.GetTasksVersionByScope(ctx, runner.OwnerID, runner.RepoID)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "query tasks version failed: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("query tasks version failed: %w", err))
 	} else if latestVersion == 0 {
 		if err := actions_model.IncreaseTaskVersion(ctx, runner.OwnerID, runner.RepoID); err != nil {
-			return nil, status.Errorf(codes.Internal, "fail to increase task version: %v", err)
+			return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("fail to increase task version: %w", err))
 		}
 		// if we don't increase the value of `latestVersion` here,
 		// the response of FetchTask will return tasksVersion as zero.
@@ -158,9 +157,9 @@ func (s *Service) FetchTask(
 		// if the task version in request is not equal to the version in db,
 		// it means there may still be some tasks not be assigned.
 		// try to pick a task for the runner that send the request.
-		if t, ok, err := pickTask(ctx, runner); err != nil {
+		if t, ok, err := actions_service.PickTask(ctx, runner); err != nil {
 			log.Error("pick task failed: %v", err)
-			return nil, status.Errorf(codes.Internal, "pick task: %v", err)
+			return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("pick task: %w", err))
 		} else if ok {
 			task = t
 		}
@@ -179,9 +178,9 @@ func (s *Service) UpdateTask(
 ) (*connect.Response[runnerv1.UpdateTaskResponse], error) {
 	runner := GetRunner(ctx)
 
-	task, err := actions_model.UpdateTaskByState(ctx, runner.ID, req.Msg.State)
+	task, err := actions_service.UpdateTaskByState(ctx, runner.ID, req.Msg.State)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "update task: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("update task: %w", err))
 	}
 
 	for k, v := range req.Msg.Outputs {
@@ -210,10 +209,10 @@ func (s *Service) UpdateTask(
 	}
 
 	if err := task.LoadJob(ctx); err != nil {
-		return nil, status.Errorf(codes.Internal, "load job: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("load job: %w", err))
 	}
 	if err := task.Job.LoadRun(ctx); err != nil {
-		return nil, status.Errorf(codes.Internal, "load run: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("load run: %w", err))
 	}
 
 	// don't create commit status for cron job
@@ -247,9 +246,9 @@ func (s *Service) UpdateLog(
 
 	task, err := actions_model.GetTaskByID(ctx, req.Msg.TaskId)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "get task: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("get task: %w", err))
 	} else if runner.ID != task.RunnerID {
-		return nil, status.Errorf(codes.Internal, "invalid runner for task")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("invalid runner for task"))
 	}
 	ack := task.LogLength
 
@@ -259,13 +258,13 @@ func (s *Service) UpdateLog(
 	}
 
 	if task.LogInStorage {
-		return nil, status.Errorf(codes.AlreadyExists, "log file has been archived")
+		return nil, connect.NewError(connect.CodeAlreadyExists, errors.New("log file has been archived"))
 	}
 
 	rows := req.Msg.Rows[ack-req.Msg.Index:]
 	ns, err := actions.WriteLogs(ctx, task.LogFilename, task.LogSize, rows)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "write logs: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("write logs: %w", err))
 	}
 	task.LogLength += int64(len(rows))
 	for _, n := range ns {
@@ -280,12 +279,12 @@ func (s *Service) UpdateLog(
 		task.LogInStorage = true
 		remove, err = actions.TransferLogs(ctx, task.LogFilename)
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "transfer logs: %v", err)
+			return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("transfer logs: %w", err))
 		}
 	}
 
 	if err := actions_model.UpdateTask(ctx, task, "log_indexes", "log_length", "log_size", "log_in_storage"); err != nil {
-		return nil, status.Errorf(codes.Internal, "update task: %v", err)
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("update task: %w", err))
 	}
 	if remove != nil {
 		remove()

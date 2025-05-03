@@ -96,12 +96,12 @@ func (parser *inlineParser) Parse(parent ast.Node, block text.Reader, pc parser.
 		if len(line) <= pos {
 			break
 		}
-		suceedingCharacter := line[pos]
+		succeedingCharacter := line[pos]
 		// check valid ending character
-		if !isPunctuation(suceedingCharacter) &&
-			!(suceedingCharacter == ' ') &&
-			!(suceedingCharacter == '\n') &&
-			!isBracket(suceedingCharacter) {
+		if !isPunctuation(succeedingCharacter) &&
+			(succeedingCharacter != ' ') &&
+			(succeedingCharacter != '\n') &&
+			!isBracket(succeedingCharacter) {
 			return nil
 		}
 		if line[ender-1] != '\\' {
@@ -139,12 +139,12 @@ func trimBlock(node *Inline, block text.Reader) {
 
 	// trim first space and last space
 	first := node.FirstChild().(*ast.Text)
-	if !(!first.Segment.IsEmpty() && block.Source()[first.Segment.Start] == ' ') {
+	if first.Segment.IsEmpty() || block.Source()[first.Segment.Start] != ' ' {
 		return
 	}
 
 	last := node.LastChild().(*ast.Text)
-	if !(!last.Segment.IsEmpty() && block.Source()[last.Segment.Stop-1] == ' ') {
+	if last.Segment.IsEmpty() || block.Source()[last.Segment.Stop-1] != ' ' {
 		return
 	}
 

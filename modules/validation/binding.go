@@ -8,9 +8,9 @@ import (
 	"regexp"
 	"strings"
 
-	"code.gitea.io/gitea/modules/auth"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/auth"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/util"
 
 	"code.forgejo.org/go-chi/binding"
 	"github.com/gobwas/glob"

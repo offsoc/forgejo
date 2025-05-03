@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/private"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/private"
 
 	"github.com/urfave/cli/v2"
 )
@@ -199,7 +199,7 @@ func runRemoveLogger(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	logger := c.String("logger")
 	if len(logger) == 0 {
 		logger = log.DEFAULT
@@ -214,7 +214,7 @@ func runAddConnLogger(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	vals := map[string]any{}
 	mode := "conn"
 	vals["net"] = "tcp"
@@ -244,7 +244,7 @@ func runAddFileLogger(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	vals := map[string]any{}
 	mode := "file"
 	if c.IsSet("filename") {
@@ -311,7 +311,7 @@ func runPauseLogging(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	userMsg := private.PauseLogging(ctx)
 	_, _ = fmt.Fprintln(os.Stdout, userMsg)
 	return nil
@@ -321,7 +321,7 @@ func runResumeLogging(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	userMsg := private.ResumeLogging(ctx)
 	_, _ = fmt.Fprintln(os.Stdout, userMsg)
 	return nil
@@ -331,7 +331,7 @@ func runReleaseReopenLogging(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
 
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 	userMsg := private.ReleaseReopenLogging(ctx)
 	_, _ = fmt.Fprintln(os.Stdout, userMsg)
 	return nil
@@ -340,7 +340,7 @@ func runReleaseReopenLogging(c *cli.Context) error {
 func runSetLogSQL(c *cli.Context) error {
 	ctx, cancel := installSignals()
 	defer cancel()
-	setup(ctx, c.Bool("debug"))
+	setup(ctx, c.Bool("debug"), false)
 
 	extra := private.SetLogSQL(ctx, !c.Bool("off"))
 	return handleCliResponseExtra(extra)

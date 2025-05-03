@@ -57,6 +57,7 @@ cpu.out
 /gitea-vet
 /debug
 /integrations.test
+/forgejo
 
 /bin
 /dist

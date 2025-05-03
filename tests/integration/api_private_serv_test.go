@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"testing"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/modules/private"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/perm"
+	"forgejo.org/modules/private"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,7 +18,7 @@ import (
 
 func TestAPIPrivateNoServ(t *testing.T) {
 	onGiteaRun(t, func(*testing.T, *url.URL) {
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(t.Context())
 		defer cancel()
 		key, user, err := private.ServNoCommand(ctx, 1)
 		require.NoError(t, err)
@@ -40,7 +40,7 @@ func TestAPIPrivateNoServ(t *testing.T) {
 
 func TestAPIPrivateServ(t *testing.T) {
 	onGiteaRun(t, func(*testing.T, *url.URL) {
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(t.Context())
 		defer cancel()
 
 		// Can push to a repo we own

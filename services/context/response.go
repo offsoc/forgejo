@@ -6,7 +6,7 @@ package context
 import (
 	"net/http"
 
-	web_types "code.gitea.io/gitea/modules/web/types"
+	web_types "forgejo.org/modules/web/types"
 )
 
 // ResponseWriter represents a response writer for HTTP

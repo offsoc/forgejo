@@ -13,12 +13,12 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/util"
 
 	"code.forgejo.org/go-chi/session"
 	"github.com/mholt/archiver/v3"
@@ -122,7 +122,6 @@ It can be used for backup and capture Forgejo server image to send to maintainer
 		&cli.StringFlag{
 			Name:    "tempdir",
 			Aliases: []string{"t"},
-			Value:   os.TempDir(),
 			Usage:   "Temporary dir path",
 		},
 		&cli.StringFlag{
@@ -288,18 +287,31 @@ func runDump(ctx *cli.Context) error {
 	}
 
 	tmpDir := ctx.String("tempdir")
+	if tmpDir == "" {
+		tmpDir, err = os.MkdirTemp("", "forgejo-dump-*")
+		if err != nil {
+			fatal("Failed to create temporary directory: %v", err)
+		}
+
+		defer func() {
+			if err := util.Remove(tmpDir); err != nil {
+				log.Warn("Failed to remove temporary directory: %s: Error: %v", tmpDir, err)
+			}
+		}()
+	}
+
 	if _, err := os.Stat(tmpDir); os.IsNotExist(err) {
 		fatal("Path does not exist: %s", tmpDir)
 	}
 
 	dbDump, err := os.CreateTemp(tmpDir, "forgejo-db.sql")
 	if err != nil {
-		fatal("Failed to create tmp file: %v", err)
+		fatal("Failed to create temporary file: %v", err)
 	}
 	defer func() {
 		_ = dbDump.Close()
 		if err := util.Remove(dbDump.Name()); err != nil {
-			log.Warn("Failed to remove temporary file: %s: Error: %v", dbDump.Name(), err)
+			log.Warn("Failed to remove temporary database file: %s: Error: %v", dbDump.Name(), err)
 		}
 	}()
 

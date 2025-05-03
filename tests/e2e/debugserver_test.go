@@ -17,7 +17,7 @@ import (
 	"syscall"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 )
 
 func TestDebugserver(t *testing.T) {

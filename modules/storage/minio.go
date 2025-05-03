@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -231,7 +231,7 @@ type minioFileInfo struct {
 }
 
 func (m minioFileInfo) Name() string {
-	return path.Base(m.ObjectInfo.Key)
+	return path.Base(m.Key)
 }
 
 func (m minioFileInfo) Size() int64 {
@@ -243,7 +243,7 @@ func (m minioFileInfo) ModTime() time.Time {
 }
 
 func (m minioFileInfo) IsDir() bool {
-	return strings.HasSuffix(m.ObjectInfo.Key, "/")
+	return strings.HasSuffix(m.Key, "/")
 }
 
 func (m minioFileInfo) Mode() os.FileMode {

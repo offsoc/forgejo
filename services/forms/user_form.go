@@ -9,12 +9,12 @@ import (
 	"net/http"
 	"strings"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/validation"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/services/context"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/validation"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/services/context"
 
 	"code.forgejo.org/go-chi/binding"
 )
@@ -224,6 +224,7 @@ type UpdateProfileForm struct {
 	Biography           string `binding:"MaxSize(255)"`
 	Visibility          structs.VisibleType
 	KeepActivityPrivate bool
+	KeepPronounsPrivate bool
 }
 
 // Validate validates the fields

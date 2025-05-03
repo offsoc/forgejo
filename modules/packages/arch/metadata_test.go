@@ -12,7 +12,7 @@ import (
 	"testing/fstest"
 	"time"
 
-	"code.gitea.io/gitea/modules/packages"
+	"forgejo.org/modules/packages"
 
 	"github.com/mholt/archiver/v3"
 	"github.com/stretchr/testify/require"

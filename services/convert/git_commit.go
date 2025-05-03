@@ -8,14 +8,14 @@ import (
 	"net/url"
 	"time"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	ctx "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/gitdiff"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	ctx "forgejo.org/services/context"
+	"forgejo.org/services/gitdiff"
 )
 
 // ToCommitUser convert a git.Signature to an api.CommitUser
@@ -210,7 +210,7 @@ func ToCommit(ctx context.Context, repo *repo_model.Repository, gitRepo *git.Rep
 
 	// Get diff stats for commit
 	if opts.Stat {
-		diff, err := gitdiff.GetDiff(ctx, gitRepo, &gitdiff.DiffOptions{
+		diff, _, err := gitdiff.GetDiffSimple(ctx, gitRepo, &gitdiff.DiffOptions{
 			AfterCommitID: commit.ID.String(),
 		})
 		if err != nil {

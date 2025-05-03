@@ -5,22 +5,21 @@
 package integration
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/optional"
-	api "code.gitea.io/gitea/modules/structs"
-	repo_service "code.gitea.io/gitea/services/repository"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/optional"
+	api "forgejo.org/modules/structs"
+	repo_service "forgejo.org/services/repository"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -320,7 +319,7 @@ func TestAPIEditOtherWikiPage(t *testing.T) {
 	testCreateWiki(http.StatusForbidden)
 
 	// Update the repo settings for user2's repo to enable globally writeable wiki
-	ctx := context.Background()
+	ctx := t.Context()
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
 	var units []repo_model.RepoUnit
 	units = append(units, repo_model.RepoUnit{

@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"testing"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/routers/api/v1/shared"
-	"code.gitea.io/gitea/tests"
+	actions_model "forgejo.org/models/actions"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/unittest"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -31,9 +31,9 @@ func TestAPISearchActionJobs_GlobalRunner(t *testing.T) {
 	).AddTokenAuth(token)
 	res := MakeRequest(t, req, http.StatusOK)
 
-	var jobs shared.RunJobList
+	var jobs []*api.ActionRunJob
 	DecodeJSON(t, res, &jobs)
 
-	assert.Len(t, jobs.Body, 1)
-	assert.EqualValues(t, job.ID, jobs.Body[0].ID)
+	assert.Len(t, jobs, 1)
+	assert.Equal(t, job.ID, jobs[0].ID)
 }

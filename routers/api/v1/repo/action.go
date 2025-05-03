@@ -7,18 +7,18 @@ import (
 	"errors"
 	"net/http"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	secret_model "code.gitea.io/gitea/models/secret"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/v1/shared"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	actions_service "code.gitea.io/gitea/services/actions"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	secret_service "code.gitea.io/gitea/services/secrets"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	secret_model "forgejo.org/models/secret"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/v1/shared"
+	"forgejo.org/routers/api/v1/utils"
+	actions_service "forgejo.org/services/actions"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	secret_service "forgejo.org/services/secrets"
 )
 
 // ListActionsSecrets list an repo's actions secrets
@@ -414,7 +414,7 @@ func (Action) UpdateVariable(ctx *context.APIContext) {
 	if opt.Name == "" {
 		opt.Name = ctx.Params("variablename")
 	}
-	if _, err := actions_service.UpdateVariable(ctx, v.ID, opt.Name, opt.Value); err != nil {
+	if _, err := actions_service.UpdateVariable(ctx, v.ID, 0, ctx.Repo.Repository.ID, opt.Name, opt.Value); err != nil {
 		if errors.Is(err, util.ErrInvalidArgument) {
 			ctx.Error(http.StatusBadRequest, "UpdateVariable", err)
 		} else {
@@ -640,6 +640,8 @@ func DispatchWorkflow(ctx *context.APIContext) {
 	//   schema:
 	//     "$ref": "#/definitions/DispatchWorkflowOption"
 	// responses:
+	//   "201":
+	//     "$ref": "#/responses/DispatchWorkflowRun"
 	//   "204":
 	//     "$ref": "#/responses/empty"
 	//   "404":
@@ -670,7 +672,8 @@ func DispatchWorkflow(ctx *context.APIContext) {
 		return opt.Inputs[key]
 	}
 
-	if err := workflow.Dispatch(ctx, inputGetter, ctx.Repo.Repository, ctx.Doer); err != nil {
+	run, jobs, err := workflow.Dispatch(ctx, inputGetter, ctx.Repo.Repository, ctx.Doer)
+	if err != nil {
 		if actions_service.IsInputRequiredErr(err) {
 			ctx.Error(http.StatusBadRequest, "workflow.Dispatch", err)
 		} else {
@@ -679,5 +682,15 @@ func DispatchWorkflow(ctx *context.APIContext) {
 		return
 	}
 
-	ctx.JSON(http.StatusNoContent, nil)
+	workflowRun := &api.DispatchWorkflowRun{
+		ID:        run.ID,
+		RunNumber: run.Index,
+		Jobs:      jobs,
+	}
+
+	if opt.ReturnRunInfo {
+		ctx.JSON(http.StatusCreated, workflowRun)
+	} else {
+		ctx.JSON(http.StatusNoContent, nil)
+	}
 }

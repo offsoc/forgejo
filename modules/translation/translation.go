@@ -10,11 +10,11 @@ import (
 	"strings"
 	"sync"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/options"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation/i18n"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/options"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation/i18n"
+	"forgejo.org/modules/util"
 
 	"github.com/dustin/go-humanize"
 	"golang.org/x/text/language"
@@ -27,6 +27,10 @@ type contextKey struct{}
 var ContextKey any = &contextKey{}
 
 // Locale represents an interface to translation
+//
+// If this gets modified, remember to also adjust
+// build/lint-locale-usage/lint-locale-usage.go's InitLocaleTrFunctions(),
+// which requires to know in what argument positions `trKey`'s are given.
 type Locale interface {
 	Language() string
 	TrString(string, ...any) string
@@ -39,7 +43,11 @@ type Locale interface {
 
 	TrSize(size int64) ReadableSize
 
+	HasKey(trKey string) bool
+
 	PrettyNumber(v any) string
+
+	TrPluralStringAllForms(trKey string) ([]string, []string)
 }
 
 // LangType represents a lang type
@@ -102,8 +110,9 @@ func InitLocales(ctx context.Context) {
 				}
 			}
 
+			pluralRuleIndex := GetPluralRuleImpl(setting.Langs[i])
 			key := "locale_" + setting.Langs[i] + ".ini"
-			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], PluralRules[GetPluralRuleImpl(setting.Langs[i])], localeDataBase, localeData[key]); err != nil {
+			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], PluralRules[pluralRuleIndex], UsedPluralForms[pluralRuleIndex], localeDataBase, localeData[key]); err != nil {
 				log.Error("Failed to set old-style messages to %s: %v", setting.Langs[i], err)
 			}
 
@@ -316,6 +325,14 @@ func (l *locale) PrettyNumber(v any) string {
 		}
 	}
 	return l.msgPrinter.Sprintf("%v", number.Decimal(v))
+}
+
+func GetPluralRule(l Locale) int {
+	return GetPluralRuleImpl(l.Language())
+}
+
+func GetDefaultPluralRule() int {
+	return GetPluralRuleImpl(i18n.DefaultLocales.GetDefaultLang())
 }
 
 func init() {

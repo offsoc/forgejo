@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code.gitea.io/gitea/modules/packages"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/packages"
+	"forgejo.org/modules/util"
 )
 
 var (

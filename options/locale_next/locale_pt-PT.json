@@ -1,11 +1,27 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"one": "integrou %[1]d cometimento do ramo <code>%[2]s</code> no ramo <code>%[3]s</code> %[4]s",
-		"other": "integrou %[1]d cometimento(s) do ramo <code>%[2]s</code> no ramo <code>%[3]s</code> %[4]s"
-	},
-	"repo.pulls.title_desc": {
-		"one": "quer integrar %[1]d cometimento do ramo <code>%[2]s</code> no ramo <code id=\"%[4]s\">%[3]s</code>",
-		"other": "quer integrar %[1]d cometimento(s) do ramo <code>%[2]s</code> no ramo <code id=\"%[4]s\">%[3]s</code>"
-	},
-	"search.milestone_kind": "Procurar etapas..."
+    "repo.pulls.merged_title_desc": {
+        "one": "integrou %[1]d cometimento do ramo <code>%[2]s</code> no ramo <code>%[3]s</code> %[4]s",
+        "many": "integrou %[1]d cometimentos do ramo <code>%[2]s</code> no ramo <code>%[3]s</code> %[4]s",
+        "other": ""
+    },
+    "repo.pulls.title_desc": {
+        "one": "quer integrar %[1]d cometimento do ramo <code>%[2]s</code> no ramo <code id=\"%[4]s\">%[3]s</code>",
+        "many": "quer integrar %[1]d cometimentos do ramo <code>%[2]s</code> no ramo <code id=\"%[4]s\">%[3]s</code>",
+        "other": ""
+    },
+    "search.milestone_kind": "Procurar etapas…",
+    "home.welcome.no_activity": "Sem atividade",
+    "home.welcome.activity_hint": "Ainda não há nada no seu feed. As suas operações e a atividade dos repositórios que vigia aparecerão aqui.",
+    "home.explore_repos": "Explorar repositórios",
+    "home.explore_users": "Explorar utilizadores",
+    "home.explore_orgs": "Explorar organizações",
+    "incorrect_root_url": "Esta instância do Forgejo está configurada para ser servida em “%s”. Atualmente, está a visualizar o Forgejo através de um URL diferente, o que pode causar a quebra de partes da aplicação. O URL official é controlado pelos administradores do Forgejo através da configuração ROOT_URL no ficheiro app.ini.",
+    "themes.names.forgejo-auto": "Forgejo (segue o tema do sistema)",
+    "themes.names.forgejo-light": "Forgejo claro",
+    "themes.names.forgejo-dark": "Forgejo escuro",
+    "error.not_found.title": "Página não encontrada",
+    "alert.asset_load_failed": "Falha ao carregar ficheiros de recurso de {path}. Certifique-se de que os ficheiros de recurso podem ser acedidos.",
+    "install.invalid_lfs_path": "Não foi possível criar a raiz LFS no caminho especificado: %[1]s",
+    "alert.range_error": " deve ser um número entre %[1]s e %[2]s.",
+    "meta.last_line": "Se programarem em Python, por favor usem o uv e Ruff (e estejam atentos ao Red Knot no repositório do Ruff). E vejam também mise-en-place (https://mise.jdx.dev)."
 }

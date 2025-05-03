@@ -15,17 +15,18 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/webhook/shared"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	webhook_module "forgejo.org/modules/webhook"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/webhook/shared"
 
 	"code.forgejo.org/go-chi/binding"
 )
@@ -150,6 +151,18 @@ var (
 	orangeColorLight = color("e68d60")
 	redColor         = color("ff3232")
 )
+
+// https://discord.com/developers/docs/resources/message#embed-object-embed-limits
+// Discord has some limits in place for the embeds.
+// According to some tests, there is no consistent limit for different character sets.
+// For example: 4096 ASCII letters are allowed, but only 2490 emoji characters are allowed.
+// To keep it simple, we currently truncate at 2000.
+const discordDescriptionCharactersLimit = 2000
+
+type discordConvertor struct {
+	Username  string
+	AvatarURL string
+}
 
 // Create implements PayloadConvertor Create method
 func (d discordConvertor) Create(p *api.CreatePayload) (DiscordPayload, error) {
@@ -312,11 +325,6 @@ func (d discordConvertor) Package(p *api.PackagePayload) (DiscordPayload, error)
 	return d.createPayload(p.Sender, text, "", p.Package.HTMLURL, color), nil
 }
 
-type discordConvertor struct {
-	Username  string
-	AvatarURL string
-}
-
 var _ shared.PayloadConvertor[DiscordPayload] = discordConvertor{}
 
 func (discordHandler) NewRequest(ctx context.Context, w *webhook_model.Webhook, t *webhook_model.HookTask) (*http.Request, []byte, error) {
@@ -357,7 +365,7 @@ func (d discordConvertor) createPayload(s *api.User, title, text, url string, co
 		Embeds: []DiscordEmbed{
 			{
 				Title:       title,
-				Description: text,
+				Description: base.TruncateString(text, discordDescriptionCharactersLimit),
 				URL:         url,
 				Color:       color,
 				Author: DiscordEmbedAuthor{

@@ -8,37 +8,37 @@ import (
 	"regexp"
 	"strings"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/perm"
-	quota_model "code.gitea.io/gitea/models/quota"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/packages/alpine"
-	"code.gitea.io/gitea/routers/api/packages/alt"
-	"code.gitea.io/gitea/routers/api/packages/arch"
-	"code.gitea.io/gitea/routers/api/packages/cargo"
-	"code.gitea.io/gitea/routers/api/packages/chef"
-	"code.gitea.io/gitea/routers/api/packages/composer"
-	"code.gitea.io/gitea/routers/api/packages/conan"
-	"code.gitea.io/gitea/routers/api/packages/conda"
-	"code.gitea.io/gitea/routers/api/packages/container"
-	"code.gitea.io/gitea/routers/api/packages/cran"
-	"code.gitea.io/gitea/routers/api/packages/debian"
-	"code.gitea.io/gitea/routers/api/packages/generic"
-	"code.gitea.io/gitea/routers/api/packages/goproxy"
-	"code.gitea.io/gitea/routers/api/packages/helm"
-	"code.gitea.io/gitea/routers/api/packages/maven"
-	"code.gitea.io/gitea/routers/api/packages/npm"
-	"code.gitea.io/gitea/routers/api/packages/nuget"
-	"code.gitea.io/gitea/routers/api/packages/pub"
-	"code.gitea.io/gitea/routers/api/packages/pypi"
-	"code.gitea.io/gitea/routers/api/packages/rpm"
-	"code.gitea.io/gitea/routers/api/packages/rubygems"
-	"code.gitea.io/gitea/routers/api/packages/swift"
-	"code.gitea.io/gitea/routers/api/packages/vagrant"
-	"code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/context"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/perm"
+	quota_model "forgejo.org/models/quota"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/packages/alpine"
+	"forgejo.org/routers/api/packages/alt"
+	"forgejo.org/routers/api/packages/arch"
+	"forgejo.org/routers/api/packages/cargo"
+	"forgejo.org/routers/api/packages/chef"
+	"forgejo.org/routers/api/packages/composer"
+	"forgejo.org/routers/api/packages/conan"
+	"forgejo.org/routers/api/packages/conda"
+	"forgejo.org/routers/api/packages/container"
+	"forgejo.org/routers/api/packages/cran"
+	"forgejo.org/routers/api/packages/debian"
+	"forgejo.org/routers/api/packages/generic"
+	"forgejo.org/routers/api/packages/goproxy"
+	"forgejo.org/routers/api/packages/helm"
+	"forgejo.org/routers/api/packages/maven"
+	"forgejo.org/routers/api/packages/npm"
+	"forgejo.org/routers/api/packages/nuget"
+	"forgejo.org/routers/api/packages/pub"
+	"forgejo.org/routers/api/packages/pypi"
+	"forgejo.org/routers/api/packages/rpm"
+	"forgejo.org/routers/api/packages/rubygems"
+	"forgejo.org/routers/api/packages/swift"
+	"forgejo.org/routers/api/packages/vagrant"
+	"forgejo.org/services/auth"
+	"forgejo.org/services/context"
 )
 
 func reqPackageAccess(accessMode perm.AccessMode) func(ctx *context.Context) {
@@ -48,13 +48,14 @@ func reqPackageAccess(accessMode perm.AccessMode) func(ctx *context.Context) {
 			if ok { // it's a personal access token but not oauth2 token
 				scopeMatched := false
 				var err error
-				if accessMode == perm.AccessModeRead {
+				switch accessMode {
+				case perm.AccessModeRead:
 					scopeMatched, err = scope.HasScope(auth_model.AccessTokenScopeReadPackage)
 					if err != nil {
 						ctx.Error(http.StatusInternalServerError, "HasScope", err.Error())
 						return
 					}
-				} else if accessMode == perm.AccessModeWrite {
+				case perm.AccessModeWrite:
 					scopeMatched, err = scope.HasScope(auth_model.AccessTokenScopeWritePackage)
 					if err != nil {
 						ctx.Error(http.StatusInternalServerError, "HasScope", err.Error())

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/xorm"
 )

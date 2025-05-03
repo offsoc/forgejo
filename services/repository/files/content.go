@@ -10,13 +10,13 @@ import (
 	"path"
 	"strings"
 
-	"code.gitea.io/gitea/models"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
 )
 
 // ContentType repo content type
@@ -178,12 +178,13 @@ func GetContents(ctx context.Context, repo *repo_model.Repository, treePath, ref
 
 	// All content types have these fields in populated
 	contentsResponse := &api.ContentsResponse{
-		Name:          entry.Name(),
-		Path:          treePath,
-		SHA:           entry.ID.String(),
-		LastCommitSHA: lastCommit.ID.String(),
-		Size:          entry.Size(),
-		URL:           &selfURLString,
+		Name:           entry.Name(),
+		Path:           treePath,
+		SHA:            entry.ID.String(),
+		LastCommitSHA:  lastCommit.ID.String(),
+		LastCommitWhen: lastCommit.Committer.When,
+		Size:           entry.Size(),
+		URL:            &selfURLString,
 		Links: &api.FileLinksResponse{
 			Self: &selfURLString,
 		},

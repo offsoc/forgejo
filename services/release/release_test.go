@@ -8,16 +8,16 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/services/attachment"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/services/attachment"
 
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -138,9 +138,9 @@ func TestRelease_Create(t *testing.T) {
 	}))
 	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, &release))
 	assert.Len(t, release.Attachments, 1)
-	assert.EqualValues(t, attach.UUID, release.Attachments[0].UUID)
-	assert.EqualValues(t, attach.Name, release.Attachments[0].Name)
-	assert.EqualValues(t, attach.ExternalURL, release.Attachments[0].ExternalURL)
+	assert.Equal(t, attach.UUID, release.Attachments[0].UUID)
+	assert.Equal(t, attach.Name, release.Attachments[0].Name)
+	assert.Equal(t, attach.ExternalURL, release.Attachments[0].ExternalURL)
 
 	release = repo_model.Release{
 		RepoID:       repo.ID,
@@ -165,8 +165,8 @@ func TestRelease_Create(t *testing.T) {
 	}))
 	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, &release))
 	assert.Len(t, release.Attachments, 1)
-	assert.EqualValues(t, "test", release.Attachments[0].Name)
-	assert.EqualValues(t, "https://forgejo.org/", release.Attachments[0].ExternalURL)
+	assert.Equal(t, "test", release.Attachments[0].Name)
+	assert.Equal(t, "https://forgejo.org/", release.Attachments[0].ExternalURL)
 
 	release = repo_model.Release{
 		RepoID:       repo.ID,
@@ -318,10 +318,10 @@ func TestRelease_Update(t *testing.T) {
 	}))
 	require.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
 	assert.Len(t, release.Attachments, 1)
-	assert.EqualValues(t, attach.UUID, release.Attachments[0].UUID)
-	assert.EqualValues(t, release.ID, release.Attachments[0].ReleaseID)
-	assert.EqualValues(t, attach.Name, release.Attachments[0].Name)
-	assert.EqualValues(t, attach.ExternalURL, release.Attachments[0].ExternalURL)
+	assert.Equal(t, attach.UUID, release.Attachments[0].UUID)
+	assert.Equal(t, release.ID, release.Attachments[0].ReleaseID)
+	assert.Equal(t, attach.Name, release.Attachments[0].Name)
+	assert.Equal(t, attach.ExternalURL, release.Attachments[0].ExternalURL)
 
 	// update the attachment name
 	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{
@@ -334,10 +334,10 @@ func TestRelease_Update(t *testing.T) {
 	release.Attachments = nil
 	require.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
 	assert.Len(t, release.Attachments, 1)
-	assert.EqualValues(t, attach.UUID, release.Attachments[0].UUID)
-	assert.EqualValues(t, release.ID, release.Attachments[0].ReleaseID)
-	assert.EqualValues(t, "test2.txt", release.Attachments[0].Name)
-	assert.EqualValues(t, attach.ExternalURL, release.Attachments[0].ExternalURL)
+	assert.Equal(t, attach.UUID, release.Attachments[0].UUID)
+	assert.Equal(t, release.ID, release.Attachments[0].ReleaseID)
+	assert.Equal(t, "test2.txt", release.Attachments[0].Name)
+	assert.Equal(t, attach.ExternalURL, release.Attachments[0].ExternalURL)
 
 	// delete the attachment
 	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{
@@ -361,9 +361,9 @@ func TestRelease_Update(t *testing.T) {
 	}))
 	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
 	assert.Len(t, release.Attachments, 1)
-	assert.EqualValues(t, release.ID, release.Attachments[0].ReleaseID)
-	assert.EqualValues(t, "test", release.Attachments[0].Name)
-	assert.EqualValues(t, "https://forgejo.org/", release.Attachments[0].ExternalURL)
+	assert.Equal(t, release.ID, release.Attachments[0].ReleaseID)
+	assert.Equal(t, "test", release.Attachments[0].Name)
+	assert.Equal(t, "https://forgejo.org/", release.Attachments[0].ExternalURL)
 	externalAttachmentUUID := release.Attachments[0].UUID
 
 	// update the attachment name
@@ -378,10 +378,10 @@ func TestRelease_Update(t *testing.T) {
 	release.Attachments = nil
 	assert.NoError(t, repo_model.GetReleaseAttachments(db.DefaultContext, release))
 	assert.Len(t, release.Attachments, 1)
-	assert.EqualValues(t, externalAttachmentUUID, release.Attachments[0].UUID)
-	assert.EqualValues(t, release.ID, release.Attachments[0].ReleaseID)
-	assert.EqualValues(t, "test2", release.Attachments[0].Name)
-	assert.EqualValues(t, "https://about.gitea.com/", release.Attachments[0].ExternalURL)
+	assert.Equal(t, externalAttachmentUUID, release.Attachments[0].UUID)
+	assert.Equal(t, release.ID, release.Attachments[0].ReleaseID)
+	assert.Equal(t, "test2", release.Attachments[0].Name)
+	assert.Equal(t, "https://about.gitea.com/", release.Attachments[0].ExternalURL)
 }
 
 func TestRelease_createTag(t *testing.T) {

@@ -1,9 +1,28 @@
 {
-	"repo.pulls.merged_title_desc": {
-		"other": "于 %[4]s 将 %[1]d 次代码提交从 <code>%[2]s</code>合并至 <code>%[3]s</code>"
-	},
-	"repo.pulls.title_desc": {
-		"other": "请求将 %[1]d 次代码提交从 <code>%[2]s</code> 合并至 <code id=\"%[4]s\">%[3]s</code>"
-	},
-	"search.milestone_kind": "搜索里程碑…"
+    "repo.pulls.merged_title_desc": "于 %[4]s 将 %[1]d 次代码提交从 <code>%[2]s</code> 合并至 <code>%[3]s</code>",
+    "repo.pulls.title_desc": "请求将 %[1]d 次代码提交从 <code>%[2]s</code> 合并至 <code id=\"%[4]s\">%[3]s</code>",
+    "search.milestone_kind": "搜索里程碑…",
+    "home.welcome.no_activity": "无活动",
+    "home.welcome.activity_hint": "您的订阅中还没有任何内容。您关注的仓库中的操作和活动将显示在此处。",
+    "home.explore_repos": "探索仓库",
+    "home.explore_users": "探索用户",
+    "home.explore_orgs": "探索组织",
+    "incorrect_root_url": "此 Forgejo 实例配置为在“%s”上提供服务。您当前正在通过不同的网址查看 Forgejo，这可能会导致应用程序的某些部分损坏。Forgejo 管理员可以通过 app.ini 中的 ROOT_URL 设置控制规范网址。",
+    "themes.names.forgejo-auto": "Forgejo（遵循系统主题）",
+    "themes.names.forgejo-light": "Forgejo 浅色",
+    "themes.names.forgejo-dark": "Forgejo 深色",
+    "error.not_found.title": "页面不存在",
+    "alert.asset_load_failed": "无法从 {path} 加载资源文件。请确保资源文件可被访问。",
+    "install.invalid_lfs_path": "无法在指定路径创建 LFS 根目录：%[1]s",
+    "alert.range_error": " 必须是一个介于 %[1]s 和 %[2]s 之间的数字。",
+    "meta.last_line": "感谢各位对Forgejo翻译的支持和帮助！不需要翻译这个。",
+    "mail.actions.successful_run_after_failure_subject": "仓库 %[2]s 中的工作流 %[1]s 已恢复",
+    "mail.actions.not_successful_run_subject": "仓库 %[2]s 中的工作流 %[1]s 已失败",
+    "mail.actions.successful_run_after_failure": "仓库 %[2]s 中的工作流 %[1]s 已恢复",
+    "mail.actions.run_info_previous_status": "上次运行的状态：%[1]s",
+    "mail.actions.run_info_ref": "分支：%[1]s（%[2]s）",
+    "mail.actions.run_info_cur_status": "此次运行的状态：%[1]s（从 %[2]s 更新）",
+    "mail.actions.run_info_trigger": "由 %[2]s %[1]s 触发",
+    "mail.actions.not_successful_run": "仓库 %[2]s 中的工作流 %[1]s 已失败",
+    "discussion.locked": "讨论已被锁定。仅贡献者能够发表评论。"
 }

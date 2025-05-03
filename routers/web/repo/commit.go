@@ -12,26 +12,26 @@ import (
 	"path"
 	"strings"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/charset"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitgraph"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/gitdiff"
-	git_service "code.gitea.io/gitea/services/repository"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/charset"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/gitdiff"
+	git_service "forgejo.org/services/repository"
+	"forgejo.org/services/repository/gitgraph"
 )
 
 const (
@@ -315,11 +315,7 @@ func Diff(ctx *context.Context) {
 
 	commit, err := gitRepo.GetCommit(commitID)
 	if err != nil {
-		if git.IsErrNotExist(err) {
-			ctx.NotFound("Repo.GitRepo.GetCommit", err)
-		} else {
-			ctx.ServerError("Repo.GitRepo.GetCommit", err)
-		}
+		ctx.NotFoundOrServerError("gitRepo.GetCommit", git.IsErrNotExist, err)
 		return
 	}
 	if len(commitID) != commit.ID.Type().FullLength() {
@@ -333,7 +329,7 @@ func Diff(ctx *context.Context) {
 		maxLines, maxFiles = -1, -1
 	}
 
-	diff, err := gitdiff.GetDiff(ctx, gitRepo, &gitdiff.DiffOptions{
+	diff, err := gitdiff.GetDiffFull(ctx, gitRepo, &gitdiff.DiffOptions{
 		AfterCommitID:      commitID,
 		SkipTo:             ctx.FormString("skip-to"),
 		MaxLines:           maxLines,
@@ -343,7 +339,7 @@ func Diff(ctx *context.Context) {
 		FileOnly:           fileOnly,
 	}, files...)
 	if err != nil {
-		ctx.NotFound("GetDiff", err)
+		ctx.ServerError("GetDiff", err)
 		return
 	}
 

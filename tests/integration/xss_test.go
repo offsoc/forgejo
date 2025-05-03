@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"testing"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/tests"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -34,8 +34,8 @@ func TestXSSUserFullName(t *testing.T) {
 	req = NewRequestf(t, "GET", "/%s", user.Name)
 	resp := session.MakeRequest(t, req, http.StatusOK)
 	htmlDoc := NewHTMLParser(t, resp.Body)
-	assert.EqualValues(t, 0, htmlDoc.doc.Find("script.evil").Length())
-	assert.EqualValues(t, fullName,
+	assert.Equal(t, 0, htmlDoc.doc.Find("script.evil").Length())
+	assert.Equal(t, fullName,
 		htmlDoc.doc.Find("div.content").Find(".header.text.center").Text(),
 	)
 }
@@ -68,7 +68,7 @@ func TestXSSWikiLastCommitInfo(t *testing.T) {
 }
 
 func TestXSSReviewDismissed(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestXSSReviewDismissed/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestXSSReviewDismissed")()
 	defer tests.PrepareTestEnv(t)()
 
 	review := unittest.AssertExistsAndLoadBean(t, &issues_model.Review{ID: 1000})

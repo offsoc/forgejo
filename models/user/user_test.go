@@ -5,7 +5,6 @@
 package user_test
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -13,20 +12,19 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/auth/password/hash"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/auth/password/hash"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -74,7 +72,7 @@ func TestGetUserFromMap(t *testing.T) {
 }
 
 func TestGetUserByName(t *testing.T) {
-	defer tests.AddFixtures("models/user/fixtures/")()
+	defer unittest.OverrideFixtures("models/user/fixtures")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	{
@@ -121,7 +119,7 @@ func TestCanCreateOrganization(t *testing.T) {
 }
 
 func TestGetAllUsers(t *testing.T) {
-	defer tests.AddFixtures("models/user/fixtures/")()
+	defer unittest.OverrideFixtures("models/user/fixtures")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	users, err := user_model.GetAllUsers(db.DefaultContext)
@@ -140,13 +138,25 @@ func TestAPActorID(t *testing.T) {
 	user := user_model.User{ID: 1}
 	url := user.APActorID()
 	expected := "https://try.gitea.io/api/v1/activitypub/user-id/1"
-	if url != expected {
-		t.Errorf("unexpected APActorID, expected: %q, actual: %q", expected, url)
-	}
+	assert.Equal(t, expected, url)
+}
+
+func TestAPActorID_APActorID(t *testing.T) {
+	user := user_model.User{ID: user_model.APServerActorUserID}
+	url := user.APActorID()
+	expected := "https://try.gitea.io/api/v1/activitypub/actor"
+	assert.Equal(t, expected, url)
+}
+
+func TestAPActorKeyID(t *testing.T) {
+	user := user_model.User{ID: 1}
+	url := user.APActorKeyID()
+	expected := "https://try.gitea.io/api/v1/activitypub/user-id/1#main-key"
+	assert.Equal(t, expected, url)
 }
 
 func TestSearchUsers(t *testing.T) {
-	defer tests.AddFixtures("models/user/fixtures/")()
+	defer unittest.OverrideFixtures("models/user/fixtures")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 	testSuccess := func(opts *user_model.SearchUserOptions, expectedUserOrOrgIDs []int64) {
 		users, _, err := user_model.SearchUsers(db.DefaultContext, opts)
@@ -154,7 +164,7 @@ func TestSearchUsers(t *testing.T) {
 		cassText := fmt.Sprintf("ids: %v, opts: %v", expectedUserOrOrgIDs, opts)
 		if assert.Len(t, users, len(expectedUserOrOrgIDs), "case: %s", cassText) {
 			for i, expectedID := range expectedUserOrOrgIDs {
-				assert.EqualValues(t, expectedID, users[i].ID, "case: %s", cassText)
+				assert.Equal(t, expectedID, users[i].ID, "case: %s", cassText)
 			}
 		}
 	}
@@ -346,7 +356,7 @@ func TestCreateUserCustomTimestamps(t *testing.T) {
 	err := user_model.CreateUser(db.DefaultContext, user)
 	require.NoError(t, err)
 
-	fetched, err := user_model.GetUserByID(context.Background(), user.ID)
+	fetched, err := user_model.GetUserByID(t.Context(), user.ID)
 	require.NoError(t, err)
 	assert.Equal(t, creationTimestamp, fetched.CreatedUnix)
 	assert.Equal(t, creationTimestamp, fetched.UpdatedUnix)
@@ -373,7 +383,7 @@ func TestCreateUserWithoutCustomTimestamps(t *testing.T) {
 
 	timestampEnd := time.Now().Unix()
 
-	fetched, err := user_model.GetUserByID(context.Background(), user.ID)
+	fetched, err := user_model.GetUserByID(t.Context(), user.ID)
 	require.NoError(t, err)
 
 	assert.LessOrEqual(t, timestampStart, fetched.CreatedUnix)
@@ -617,7 +627,7 @@ func Test_ValidateUser(t *testing.T) {
 		{ID: 2, Visibility: structs.VisibleTypePrivate}: true,
 	}
 	for kase, expected := range kases {
-		assert.EqualValues(t, expected, nil == user_model.ValidateUser(kase))
+		assert.Equal(t, expected, nil == user_model.ValidateUser(kase))
 	}
 }
 
@@ -645,7 +655,7 @@ func Test_NormalizeUserFromEmail(t *testing.T) {
 	for _, testCase := range testCases {
 		normalizedName, err := user_model.NormalizeUserName(testCase.Input)
 		require.NoError(t, err)
-		assert.EqualValues(t, testCase.Expected, normalizedName)
+		assert.Equal(t, testCase.Expected, normalizedName)
 		if testCase.IsNormalizedValid {
 			require.NoError(t, user_model.IsUsableUsername(normalizedName))
 		} else {
@@ -665,7 +675,7 @@ func TestEmailTo(t *testing.T) {
 		{"Hi Its <Mee>", "ee@mail.box", `"Hi Its Mee" <ee@mail.box>`},
 		{"Sinéad.O'Connor", "sinead.oconnor@gmail.com", "=?utf-8?b?U2luw6lhZC5PJ0Nvbm5vcg==?= <sinead.oconnor@gmail.com>"},
 		{"Æsir", "aesir@gmx.de", "=?utf-8?q?=C3=86sir?= <aesir@gmx.de>"},
-		{"new😀user", "new.user@alo.com", "=?utf-8?q?new=F0=9F=98=80user?= <new.user@alo.com>"}, // codespell-ignore
+		{"new😀user", "new.user@alo.com", "=?utf-8?q?new=F0=9F=98=80user?= <new.user@alo.com>"}, // codespell:ignore
 		{`"quoted"`, "quoted@test.com", `"quoted" <quoted@test.com>`},
 		{`gusted`, "gusted@test.com", `"gusted" <gusted@test.com>`},
 		{`Joe Q. Public`, "john.q.public@example.com", `"Joe Q. Public" <john.q.public@example.com>`},
@@ -675,13 +685,13 @@ func TestEmailTo(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.result, func(t *testing.T) {
 			testUser := &user_model.User{FullName: testCase.fullName, Email: testCase.mail}
-			assert.EqualValues(t, testCase.result, testUser.EmailTo())
+			assert.Equal(t, testCase.result, testUser.EmailTo())
 		})
 	}
 
 	t.Run("Override user's email", func(t *testing.T) {
 		testUser := &user_model.User{FullName: "Christine Jorgensen", Email: "christine@test.com"}
-		assert.EqualValues(t, `"Christine Jorgensen" <christine@example.org>`, testUser.EmailTo("christine@example.org"))
+		assert.Equal(t, `"Christine Jorgensen" <christine@example.org>`, testUser.EmailTo("christine@example.org"))
 	})
 }
 
@@ -737,7 +747,7 @@ func TestGenerateEmailAuthorizationCode(t *testing.T) {
 	authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
 	require.NoError(t, err)
 	assert.False(t, authToken.IsExpired())
-	assert.EqualValues(t, authToken.HashedValidator, auth.HashValidator(rawValidator))
+	assert.Equal(t, authToken.HashedValidator, auth.HashValidator(rawValidator))
 
 	authToken.Expiry = authToken.Expiry.Add(-int64(setting.Service.ActiveCodeLives) * 60)
 	assert.True(t, authToken.IsExpired())
@@ -756,15 +766,15 @@ func TestVerifyUserAuthorizationToken(t *testing.T) {
 	assert.True(t, ok)
 
 	t.Run("Wrong purpose", func(t *testing.T) {
-		u, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.PasswordReset, false)
+		u, _, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.PasswordReset)
 		require.NoError(t, err)
 		assert.Nil(t, u)
 	})
 
 	t.Run("No delete", func(t *testing.T) {
-		u, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation, false)
+		u, _, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation)
 		require.NoError(t, err)
-		assert.EqualValues(t, user.ID, u.ID)
+		assert.Equal(t, user.ID, u.ID)
 
 		authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
 		require.NoError(t, err)
@@ -772,9 +782,10 @@ func TestVerifyUserAuthorizationToken(t *testing.T) {
 	})
 
 	t.Run("Delete", func(t *testing.T) {
-		u, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation, true)
+		u, deleteToken, err := user_model.VerifyUserAuthorizationToken(db.DefaultContext, code, auth.UserActivation)
 		require.NoError(t, err)
-		assert.EqualValues(t, user.ID, u.ID)
+		assert.Equal(t, user.ID, u.ID)
+		require.NoError(t, deleteToken())
 
 		authToken, err := auth.FindAuthToken(db.DefaultContext, lookupKey, auth.UserActivation)
 		require.ErrorIs(t, err, util.ErrNotExist)
@@ -794,4 +805,43 @@ func TestGetInactiveUsers(t *testing.T) {
 	users, err = user_model.GetInactiveUsers(db.DefaultContext, time.Duration(interval*int64(time.Second)))
 	require.NoError(t, err)
 	require.Empty(t, users)
+}
+
+func TestPronounsPrivacy(t *testing.T) {
+	require.NoError(t, unittest.PrepareTestDatabase())
+	t.Run("EmptyPronounsIfNoneSet", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = ""
+		user.KeepPronounsPrivate = false
+
+		assert.Empty(t, user.GetPronouns(false))
+	})
+	t.Run("EmptyPronounsIfSetButPrivateAndNotLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = true
+
+		assert.Empty(t, user.GetPronouns(false))
+	})
+	t.Run("ReturnPronounsIfSetAndNotPrivateAndNotLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "any", user.GetPronouns(false))
+	})
+	t.Run("ReturnPronounsIfSetAndPrivateAndLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = false
+
+		assert.Equal(t, "any", user.GetPronouns(true))
+	})
+	t.Run("ReturnPronounsIfSetAndNotPrivateAndLoggedIn", func(t *testing.T) {
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+		user.Pronouns = "any"
+		user.KeepPronounsPrivate = true
+
+		assert.Equal(t, "any", user.GetPronouns(true))
+	})
 }

@@ -4,18 +4,16 @@
 package repo_test
 
 import (
-	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/models/user"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -410,13 +408,7 @@ func TestSearchRepositoryByTopicName(t *testing.T) {
 }
 
 func TestSearchRepositoryIDsByCondition(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"models/repo/TestSearchRepositoryIDsByCondition/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("models/repo/TestSearchRepositoryIDsByCondition")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 	// Sanity check of the database
 	limitedUser := unittest.AssertExistsAndLoadBean(t, &user.User{ID: 33, Visibility: structs.VisibleTypeLimited})
@@ -445,6 +437,6 @@ func TestSearchRepositoryIDsByCondition(t *testing.T) {
 		require.NoError(t, err)
 
 		slices.Sort(repoIDs)
-		assert.EqualValues(t, testCase.repoIDs, repoIDs)
+		assert.Equal(t, testCase.repoIDs, repoIDs)
 	}
 }

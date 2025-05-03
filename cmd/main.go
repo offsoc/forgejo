@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code.gitea.io/gitea/cmd/forgejo"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/cmd/forgejo"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
 
 	"github.com/urfave/cli/v2"
 )
@@ -122,9 +122,9 @@ func NewMainApp(version, versionExtra string) *cli.App {
 	}
 	executable := filepath.Base(path)
 
-	var subCmdsStandalone []*cli.Command = make([]*cli.Command, 0, 10)
-	var subCmdWithConfig []*cli.Command = make([]*cli.Command, 0, 10)
-	var globalFlags []cli.Flag = make([]cli.Flag, 0, 10)
+	subCmdsStandalone := make([]*cli.Command, 0, 10)
+	subCmdWithConfig := make([]*cli.Command, 0, 10)
+	globalFlags := make([]cli.Flag, 0, 10)
 
 	//
 	// If the executable is forgejo-cli, provide a Forgejo specific CLI

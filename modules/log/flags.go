@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"code.gitea.io/gitea/modules/json"
+	"forgejo.org/modules/json"
 )
 
 // These flags define which text to prefix to each log entry generated

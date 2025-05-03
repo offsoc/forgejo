@@ -16,7 +16,7 @@ jobs:
     if: vars.ROLE == 'forgejo-coding'
     runs-on: docker
     container:
-      image: 'data.forgejo.org/oci/node:20-bookworm'
+      image: 'data.forgejo.org/oci/node:22-bookworm'
     steps:
       - name: Debug output
         run: |
@@ -31,7 +31,7 @@ jobs:
             || contains(toJSON(github.event.pull_request.labels), 'test/manual')
           )
         run: |
-          echo "Test label must be set to either 'present', 'not-needed' or 'manual'."
+          echo "A team member must set the label to either 'present', 'not-needed' or 'manual'."
           exit 1
       - name: Missing manual test instructions
         if: >

@@ -7,18 +7,18 @@ import (
 	"context"
 	"time"
 
-	"code.gitea.io/gitea/models"
-	git_model "code.gitea.io/gitea/models/git"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/auth"
-	"code.gitea.io/gitea/services/migrations"
-	mirror_service "code.gitea.io/gitea/services/mirror"
-	packages_cleanup_service "code.gitea.io/gitea/services/packages/cleanup"
-	repo_service "code.gitea.io/gitea/services/repository"
-	archiver_service "code.gitea.io/gitea/services/repository/archiver"
+	"forgejo.org/models"
+	git_model "forgejo.org/models/git"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/models/webhook"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/auth"
+	"forgejo.org/services/migrations"
+	mirror_service "forgejo.org/services/mirror"
+	packages_cleanup_service "forgejo.org/services/packages/cleanup"
+	repo_service "forgejo.org/services/repository"
+	archiver_service "forgejo.org/services/repository/archiver"
 )
 
 func registerUpdateMirrorTask() {
@@ -54,7 +54,7 @@ func registerRepoHealthCheck() {
 			RunAtStart: false,
 			Schedule:   "@midnight",
 		},
-		Timeout: 60 * time.Second,
+		Timeout: time.Duration(setting.Git.Timeout.Default) * time.Second,
 		Args:    []string{},
 	}, func(ctx context.Context, _ *user_model.User, config Config) error {
 		rhcConfig := config.(*RepoHealthCheckConfig)

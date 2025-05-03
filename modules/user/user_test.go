@@ -5,7 +5,6 @@ package user
 
 import (
 	"os/exec"
-	"runtime"
 	"strings"
 	"testing"
 )
@@ -22,10 +21,6 @@ func TestCurrentUsername(t *testing.T) {
 	user := CurrentUsername()
 	if len(user) == 0 {
 		t.Errorf("expected non-empty user, got: %s", user)
-	}
-	// Windows whoami is weird, so just skip remaining tests
-	if runtime.GOOS == "windows" {
-		t.Skip("skipped test because of weird whoami on Windows")
 	}
 	whoami, err := getWhoamiOutput()
 	if err != nil {

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	nuget_module "code.gitea.io/gitea/modules/packages/nuget"
+	packages_model "forgejo.org/models/packages"
+	nuget_module "forgejo.org/modules/packages/nuget"
 )
 
 type AtomTitle struct {
@@ -249,6 +249,9 @@ type FeedEntryProperties struct {
 	Version                  string                `xml:"d:Version"`
 	NormalizedVersion        string                `xml:"d:NormalizedVersion"`
 	Authors                  string                `xml:"d:Authors"`
+	Owners                   string                `xml:"d:Owners,omitempty"`
+	Copyright                string                `xml:"d:Copyright,omitempty"`
+	Language                 string                `xml:"d:Language,omitempty"`
 	Dependencies             string                `xml:"d:Dependencies"`
 	Description              string                `xml:"d:Description"`
 	VersionDownloadCount     TypedValue[int64]     `xml:"d:VersionDownloadCount"`
@@ -258,9 +261,15 @@ type FeedEntryProperties struct {
 	LastUpdated              TypedValue[time.Time] `xml:"d:LastUpdated"`
 	Published                TypedValue[time.Time] `xml:"d:Published"`
 	ProjectURL               string                `xml:"d:ProjectUrl,omitempty"`
+	LicenseURL               string                `xml:"d:LicenseUrl,omitempty"`
+	IconURL                  string                `xml:"d:IconUrl,omitempty"`
 	ReleaseNotes             string                `xml:"d:ReleaseNotes,omitempty"`
 	RequireLicenseAcceptance TypedValue[bool]      `xml:"d:RequireLicenseAcceptance"`
-	Title                    string                `xml:"d:Title"`
+	DevelopmentDependency    TypedValue[bool]      `xml:"d:DevelopmentDependency"`
+	Title                    string                `xml:"d:Title,omitempty"`
+	MinClientVersion         string                `xml:"d:MinClientVersion,omitempty"`
+	Tags                     string                `xml:"d:Tags,omitempty"`
+	ID                       string                `xml:"d:Id,omitempty"`
 }
 
 type FeedEntry struct {
@@ -356,6 +365,9 @@ func createEntry(l *linkBuilder, pd *packages_model.PackageDescriptor, withNames
 			Version:                  pd.Version.Version,
 			NormalizedVersion:        pd.Version.Version,
 			Authors:                  metadata.Authors,
+			Owners:                   metadata.Owners,
+			Copyright:                metadata.Copyright,
+			Language:                 metadata.Language,
 			Dependencies:             buildDependencyString(metadata),
 			Description:              metadata.Description,
 			VersionDownloadCount:     TypedValue[int64]{Type: "Edm.Int64", Value: pd.Version.DownloadCount},
@@ -365,9 +377,15 @@ func createEntry(l *linkBuilder, pd *packages_model.PackageDescriptor, withNames
 			LastUpdated:              createdValue,
 			Published:                createdValue,
 			ProjectURL:               metadata.ProjectURL,
+			LicenseURL:               metadata.LicenseURL,
+			IconURL:                  metadata.IconURL,
 			ReleaseNotes:             metadata.ReleaseNotes,
 			RequireLicenseAcceptance: TypedValue[bool]{Type: "Edm.Boolean", Value: metadata.RequireLicenseAcceptance},
-			Title:                    pd.Package.Name,
+			DevelopmentDependency:    TypedValue[bool]{Type: "Edm.Boolean", Value: metadata.DevelopmentDependency},
+			Title:                    metadata.Title,
+			MinClientVersion:         metadata.MinClientVersion,
+			Tags:                     metadata.Tags,
+			ID:                       pd.Package.Name,
 		},
 	}
 

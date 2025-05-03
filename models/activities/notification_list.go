@@ -6,14 +6,14 @@ package activities
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/log"
 
 	"xorm.io/builder"
 )
@@ -107,7 +107,7 @@ func createOrUpdateIssueNotifications(ctx context.Context, issueID, commentID, n
 			return err
 		}
 		toNotify.AddMultiple(issueWatches...)
-		if !(issue.IsPull && issues_model.HasWorkInProgressPrefix(issue.Title)) {
+		if !issue.IsPull || !issues_model.HasWorkInProgressPrefix(issue.Title) {
 			repoWatches, err := repo_model.GetRepoWatchersIDs(ctx, issue.RepoID)
 			if err != nil {
 				return err

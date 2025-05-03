@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/setting"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -180,7 +180,7 @@ func TestOpenGraphProperties(t *testing.T) {
 				foundProps[prop] = content
 			})
 
-			assert.EqualValues(t, tc.expected, foundProps, "mismatching opengraph properties")
+			assert.Equal(t, tc.expected, foundProps, "mismatching opengraph properties")
 		})
 	}
 }

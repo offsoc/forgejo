@@ -4,23 +4,22 @@
 package integration
 
 import (
-	"context"
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/timeutil"
-	pull_service "code.gitea.io/gitea/services/pull"
-	repo_service "code.gitea.io/gitea/services/repository"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/timeutil"
+	pull_service "forgejo.org/services/pull"
+	repo_service "forgejo.org/services/repository"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -100,7 +99,7 @@ func TestPullRequestSynchronized(t *testing.T) {
 			logChecker.Filter("Updating PR").StopMark("TestPullRequest ")
 			defer cleanup()
 
-			pull_service.TestPullRequest(context.Background(), owner, repo.ID, testCase.olderThan, "branch2", true, pull.HeadCommitID, pull.HeadCommitID)
+			pull_service.TestPullRequest(t.Context(), owner, repo.ID, testCase.olderThan, "branch2", true, pull.HeadCommitID, pull.HeadCommitID)
 			logFiltered, logStopped := logChecker.Check(5 * time.Second)
 			assert.True(t, logStopped)
 			assert.Equal(t, testCase.expected, logFiltered[0])

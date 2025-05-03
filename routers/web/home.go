@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package web
@@ -8,19 +9,19 @@ import (
 	"net/http"
 	"strconv"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/sitemap"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/routers/web/auth"
-	"code.gitea.io/gitea/routers/web/user"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/sitemap"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/routers/web/auth"
+	"forgejo.org/routers/web/user"
+	"forgejo.org/services/context"
 )
 
 const (
@@ -111,10 +112,4 @@ func HomeSitemap(ctx *context.Context) {
 	if _, err := m.WriteTo(ctx.Resp); err != nil {
 		log.Error("Failed writing sitemap: %v", err)
 	}
-}
-
-// NotFound render 404 page
-func NotFound(ctx *context.Context) {
-	ctx.Data["Title"] = "Page Not Found"
-	ctx.NotFound("home.NotFound", nil)
 }

@@ -9,10 +9,10 @@ import (
 	"io"
 	"os"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	packages_model "forgejo.org/models/packages"
+	packages_module "forgejo.org/modules/packages"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 )
 
 var (
@@ -92,7 +92,7 @@ func (u *BlobUploader) Append(ctx context.Context, r io.Reader) error {
 
 	u.BytesReceived += n
 
-	u.HashStateBytes, err = u.MultiHasher.MarshalBinary()
+	u.HashStateBytes, err = u.MarshalBinary()
 	if err != nil {
 		return err
 	}

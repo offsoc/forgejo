@@ -4,16 +4,15 @@
 package markup
 
 import (
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/models/user"
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/contexttest"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/models/user"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,10 +32,10 @@ func TestProcessorHelper(t *testing.T) {
 	unittest.AssertCount(t, &user.User{Name: userNoSuch}, 0)
 
 	// when using general context, use user's visibility to check
-	assert.True(t, ProcessorHelper().IsUsernameMentionable(context.Background(), userPublic))
-	assert.False(t, ProcessorHelper().IsUsernameMentionable(context.Background(), userLimited))
-	assert.False(t, ProcessorHelper().IsUsernameMentionable(context.Background(), userPrivate))
-	assert.False(t, ProcessorHelper().IsUsernameMentionable(context.Background(), userNoSuch))
+	assert.True(t, ProcessorHelper().IsUsernameMentionable(t.Context(), userPublic))
+	assert.False(t, ProcessorHelper().IsUsernameMentionable(t.Context(), userLimited))
+	assert.False(t, ProcessorHelper().IsUsernameMentionable(t.Context(), userPrivate))
+	assert.False(t, ProcessorHelper().IsUsernameMentionable(t.Context(), userNoSuch))
 
 	// when using web context, use user.IsUserVisibleToViewer to check
 	req, err := http.NewRequest("GET", "/", nil)

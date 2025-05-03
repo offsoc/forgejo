@@ -124,7 +124,7 @@ c=2
 		{
 			name:      "test.gradle.kts",
 			code:      "@file:Suppress(\"UnstableApiUsage\")",
-			want:      lines("<span class=\"nd\">@file</span><span class=\"p\">:</span><span class=\"n\">Suppress</span><span class=\"p\">(</span><span class=\"s2\">&#34;</span><span class=\"s2\">UnstableApiUsage</span><span class=\"s2\">&#34;</span><span class=\"p\">)</span>"),
+			want:      lines("<span class=\"nd\">@file</span><span class=\"p\">:</span><span class=\"n\">Suppress</span><span class=\"p\">(</span><span class=\"s2\">&#34;</span><span class=\"s2\">UnstableApiUsage</span><span class=\"s2\">&#34;</span><span class=\"p\">)</span>"), // codespell:ignore
 			lexerName: "Kotlin",
 		},
 	}
@@ -133,7 +133,7 @@ c=2
 		t.Run(tt.name, func(t *testing.T) {
 			out, lexerName, err := File(tt.name, "", []byte(tt.code))
 			require.NoError(t, err)
-			assert.EqualValues(t, tt.want, out)
+			assert.Equal(t, tt.want, out)
 			assert.Equal(t, tt.lexerName, lexerName)
 		})
 	}
@@ -196,7 +196,7 @@ c=2`),
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := PlainText([]byte(tt.code))
-			assert.EqualValues(t, tt.want, out)
+			assert.Equal(t, tt.want, out)
 		})
 	}
 }

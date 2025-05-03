@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/convert"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/convert"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -40,8 +40,8 @@ func TestAPITeamUser(t *testing.T) {
 	expectedUser := convert.ToUser(db.DefaultContext, user, user)
 
 	// test time via unix timestamp
-	assert.EqualValues(t, expectedUser.LastLogin.Unix(), user2.LastLogin.Unix())
-	assert.EqualValues(t, expectedUser.Created.Unix(), user2.Created.Unix())
+	assert.Equal(t, expectedUser.LastLogin.Unix(), user2.LastLogin.Unix())
+	assert.Equal(t, expectedUser.Created.Unix(), user2.Created.Unix())
 	expectedUser.LastLogin = user2.LastLogin
 	expectedUser.Created = user2.Created
 

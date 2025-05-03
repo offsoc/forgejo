@@ -4,15 +4,13 @@
 package issues_test
 
 import (
-	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -81,18 +79,12 @@ func TestCreateOrStopIssueStopwatch(t *testing.T) {
 }
 
 func TestGetUIDsAndStopwatch(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"models/issues/TestGetUIDsAndStopwatch/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("models/issues/TestGetUIDsAndStopwatch")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	uidStopwatches, err := issues_model.GetUIDsAndStopwatch(db.DefaultContext)
 	require.NoError(t, err)
-	assert.EqualValues(t, map[int64][]*issues_model.Stopwatch{
+	assert.Equal(t, map[int64][]*issues_model.Stopwatch{
 		1: {
 			{
 				ID:          1,

@@ -11,15 +11,15 @@ import (
 	"net/url"
 	"strings"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup"
-	api "code.gitea.io/gitea/modules/structs"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/webhook/shared"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup"
+	api "forgejo.org/modules/structs"
+	webhook_module "forgejo.org/modules/webhook"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/webhook/shared"
 )
 
 type telegramHandler struct{}
@@ -79,7 +79,7 @@ func (telegramHandler) Metadata(w *webhook_model.Webhook) any {
 func (t telegramConvertor) Create(p *api.CreatePayload) (TelegramPayload, error) {
 	// created tag/branch
 	refName := git.RefName(p.Ref).ShortName()
-	title := fmt.Sprintf(`[<a href="%s">%s</a>] %s <a href="%s">%s</a> created`, p.Repo.HTMLURL, p.Repo.FullName, p.RefType,
+	title := fmt.Sprintf(`[%s] %s <a href="%s">%s</a> created`, p.Repo.FullName, p.RefType,
 		p.Repo.HTMLURL+"/src/"+refName, refName)
 
 	return createTelegramPayload(title), nil
@@ -89,7 +89,7 @@ func (t telegramConvertor) Create(p *api.CreatePayload) (TelegramPayload, error)
 func (t telegramConvertor) Delete(p *api.DeletePayload) (TelegramPayload, error) {
 	// created tag/branch
 	refName := git.RefName(p.Ref).ShortName()
-	title := fmt.Sprintf(`[<a href="%s">%s</a>] %s <a href="%s">%s</a> deleted`, p.Repo.HTMLURL, p.Repo.FullName, p.RefType,
+	title := fmt.Sprintf(`[%s] %s <a href="%s">%s</a> deleted`, p.Repo.FullName, p.RefType,
 		p.Repo.HTMLURL+"/src/"+refName, refName)
 
 	return createTelegramPayload(title), nil
@@ -108,19 +108,13 @@ func (t telegramConvertor) Push(p *api.PushPayload) (TelegramPayload, error) {
 		branchName = git.RefName(p.Ref).ShortName()
 		commitDesc string
 	)
-
-	var titleLink string
 	if p.TotalCommits == 1 {
 		commitDesc = "1 new commit"
-		titleLink = p.Commits[0].URL
 	} else {
 		commitDesc = fmt.Sprintf("%d new commits", p.TotalCommits)
-		titleLink = p.CompareURL
 	}
-	if titleLink == "" {
-		titleLink = p.Repo.HTMLURL + "/src/" + branchName
-	}
-	title := fmt.Sprintf(`[<a href="%s">%s</a>:<a href="%s">%s</a>] %s`, p.Repo.HTMLURL, p.Repo.FullName, titleLink, branchName, commitDesc)
+
+	title := fmt.Sprintf(`[%s:%s] %s`, p.Repo.FullName, branchName, commitDesc)
 
 	var text string
 	// for each commit, generate attachment text

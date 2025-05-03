@@ -6,10 +6,10 @@ package repository
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,5 +28,5 @@ func TestSyncRepoBranches(t *testing.T) {
 	assert.Equal(t, "sha1", repo.ObjectFormatName)
 	branch, err := git_model.GetBranch(db.DefaultContext, 1, "master")
 	require.NoError(t, err)
-	assert.EqualValues(t, "master", branch.Name)
+	assert.Equal(t, "master", branch.Name)
 }

@@ -5,19 +5,18 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	actions_model "forgejo.org/models/actions"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -71,12 +70,12 @@ func TestActionsWebRouteLatestWorkflowRun(t *testing.T) {
 
 			// Verify that each points to the correct workflow.
 			workflowOne := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID, Index: 1})
-			err := workflowOne.LoadAttributes(context.Background())
+			err := workflowOne.LoadAttributes(t.Context())
 			require.NoError(t, err)
 			assert.Equal(t, workflowOneURI, workflowOne.HTMLURL())
 
 			workflowTwo := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID, Index: 2})
-			err = workflowTwo.LoadAttributes(context.Background())
+			err = workflowTwo.LoadAttributes(t.Context())
 			require.NoError(t, err)
 			assert.Equal(t, workflowTwoURI, workflowTwo.HTMLURL())
 		})
@@ -141,7 +140,7 @@ func TestActionsWebRouteLatestRun(t *testing.T) {
 
 		// Verify that it redirects to the run we just created
 		workflow := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID})
-		err := workflow.LoadAttributes(context.Background())
+		err := workflow.LoadAttributes(t.Context())
 		require.NoError(t, err)
 
 		assert.Equal(t, workflow.HTMLURL(), resp.Header().Get("Location"))
@@ -170,7 +169,7 @@ func TestActionsArtifactDeletion(t *testing.T) {
 
 		// Load the run we just created
 		run := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{RepoID: repo.ID})
-		err := run.LoadAttributes(context.Background())
+		err := run.LoadAttributes(t.Context())
 		require.NoError(t, err)
 
 		// Visit it's web view

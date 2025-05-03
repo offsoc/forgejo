@@ -6,8 +6,8 @@ package alpine
 import (
 	"context"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	alpine_module "code.gitea.io/gitea/modules/packages/alpine"
+	packages_model "forgejo.org/models/packages"
+	alpine_module "forgejo.org/modules/packages/alpine"
 )
 
 // GetBranches gets all available branches

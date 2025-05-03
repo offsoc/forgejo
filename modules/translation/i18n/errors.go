@@ -4,7 +4,7 @@
 package i18n
 
 import (
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/util"
 )
 
 var (

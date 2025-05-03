@@ -4,14 +4,13 @@
 package webhook
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/json"
-	api "code.gitea.io/gitea/modules/structs"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/json"
+	api "forgejo.org/modules/structs"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -53,7 +52,7 @@ func TestPackagistPayload(t *testing.T) {
 				PayloadVersion: 2,
 			}
 
-			req, reqBody, err := packagistHandler{}.NewRequest(context.Background(), hook, task)
+			req, reqBody, err := packagistHandler{}.NewRequest(t.Context(), hook, task)
 			require.NotNil(t, req)
 			require.NotNil(t, reqBody)
 			require.NoError(t, err)

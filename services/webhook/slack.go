@@ -11,16 +11,15 @@ import (
 	"regexp"
 	"strings"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/webhook/shared"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	api "forgejo.org/modules/structs"
+	webhook_module "forgejo.org/modules/webhook"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/webhook/shared"
 
 	"code.forgejo.org/go-chi/binding"
 )
@@ -145,9 +144,8 @@ func SlackLinkToRef(repoURL, ref string) string {
 
 // Create implements payloadConvertor Create method
 func (s slackConvertor) Create(p *api.CreatePayload) (SlackPayload, error) {
-	repoLink := SlackLinkFormatter(p.Repo.HTMLURL, p.Repo.FullName)
 	refLink := SlackLinkToRef(p.Repo.HTMLURL, p.Ref)
-	text := fmt.Sprintf("[%s:%s] %s created by %s", repoLink, refLink, p.RefType, p.Sender.UserName)
+	text := fmt.Sprintf("[%s:%s] %s created by %s", p.Repo.FullName, refLink, p.RefType, p.Sender.UserName)
 
 	return s.createPayload(text, nil), nil
 }
@@ -240,9 +238,8 @@ func (s slackConvertor) Push(p *api.PushPayload) (SlackPayload, error) {
 		commitString = commitDesc
 	}
 
-	repoLink := SlackLinkFormatter(p.Repo.HTMLURL, p.Repo.FullName)
 	branchLink := SlackLinkToRef(p.Repo.HTMLURL, p.Ref)
-	text := fmt.Sprintf("[%s:%s] %s pushed by %s", repoLink, branchLink, commitString, p.Pusher.UserName)
+	text := fmt.Sprintf("[%s:%s] %s pushed by %s", p.Repo.FullName, branchLink, commitString, p.Pusher.UserName)
 
 	var attachmentText string
 	// for each commit, generate attachment text
@@ -283,10 +280,8 @@ func (s slackConvertor) PullRequest(p *api.PullRequestPayload) (SlackPayload, er
 
 // Review implements payloadConvertor Review method
 func (s slackConvertor) Review(p *api.PullRequestPayload, event webhook_module.HookEventType) (SlackPayload, error) {
-	senderLink := SlackLinkFormatter(setting.AppURL+p.Sender.UserName, p.Sender.UserName)
 	title := fmt.Sprintf("#%d %s", p.Index, p.PullRequest.Title)
 	titleLink := fmt.Sprintf("%s/pulls/%d", p.Repository.HTMLURL, p.Index)
-	repoLink := SlackLinkFormatter(p.Repository.HTMLURL, p.Repository.FullName)
 	var text string
 
 	if p.Action == api.HookIssueReviewed {
@@ -295,7 +290,7 @@ func (s slackConvertor) Review(p *api.PullRequestPayload, event webhook_module.H
 			return SlackPayload{}, err
 		}
 
-		text = fmt.Sprintf("[%s] Pull request review %s: [%s](%s) by %s", repoLink, action, title, titleLink, senderLink)
+		text = fmt.Sprintf("[%s] Pull request review %s: [%s](%s) by %s", p.Repository.FullName, action, title, titleLink, p.Sender.UserName)
 	}
 
 	return s.createPayload(text, nil), nil
@@ -303,15 +298,14 @@ func (s slackConvertor) Review(p *api.PullRequestPayload, event webhook_module.H
 
 // Repository implements payloadConvertor Repository method
 func (s slackConvertor) Repository(p *api.RepositoryPayload) (SlackPayload, error) {
-	senderLink := SlackLinkFormatter(setting.AppURL+p.Sender.UserName, p.Sender.UserName)
 	repoLink := SlackLinkFormatter(p.Repository.HTMLURL, p.Repository.FullName)
 	var text string
 
 	switch p.Action {
 	case api.HookRepoCreated:
-		text = fmt.Sprintf("[%s] Repository created by %s", repoLink, senderLink)
+		text = fmt.Sprintf("[%s] Repository created by %s", repoLink, p.Sender.UserName)
 	case api.HookRepoDeleted:
-		text = fmt.Sprintf("[%s] Repository deleted by %s", repoLink, senderLink)
+		text = fmt.Sprintf("[%s] Repository deleted by %s", repoLink, p.Sender.UserName)
 	}
 
 	return s.createPayload(text, nil), nil

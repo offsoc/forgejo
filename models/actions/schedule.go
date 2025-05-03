@@ -5,15 +5,14 @@ package actions
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"xorm.io/builder"
 )
@@ -45,13 +44,10 @@ func init() {
 // GetSchedulesMapByIDs returns the schedules by given id slice.
 func GetSchedulesMapByIDs(ctx context.Context, ids []int64) (map[int64]*ActionSchedule, error) {
 	schedules := make(map[int64]*ActionSchedule, len(ids))
+	if len(ids) == 0 {
+		return schedules, nil
+	}
 	return schedules, db.GetEngine(ctx).In("id", ids).Find(&schedules)
-}
-
-// GetReposMapByIDs returns the repos by given id slice.
-func GetReposMapByIDs(ctx context.Context, ids []int64) (map[int64]*repo_model.Repository, error) {
-	repos := make(map[int64]*repo_model.Repository, len(ids))
-	return repos, db.GetEngine(ctx).In("id", ids).Find(&repos)
 }
 
 // CreateScheduleTask creates new schedule task.
@@ -120,27 +116,6 @@ func DeleteScheduleTaskByRepo(ctx context.Context, id int64) error {
 	}
 
 	return committer.Commit()
-}
-
-func CleanRepoScheduleTasks(ctx context.Context, repo *repo_model.Repository, cancelPreviousJobs bool) error {
-	// If actions disabled when there is schedule task, this will remove the outdated schedule tasks
-	// There is no other place we can do this because the app.ini will be changed manually
-	if err := DeleteScheduleTaskByRepo(ctx, repo.ID); err != nil {
-		return fmt.Errorf("DeleteCronTaskByRepo: %v", err)
-	}
-	if cancelPreviousJobs {
-		// cancel running cron jobs of this repository and delete old schedules
-		if err := CancelPreviousJobs(
-			ctx,
-			repo.ID,
-			repo.DefaultBranch,
-			"",
-			webhook_module.HookEventSchedule,
-		); err != nil {
-			return fmt.Errorf("CancelPreviousJobs: %v", err)
-		}
-	}
-	return nil
 }
 
 type FindScheduleOptions struct {

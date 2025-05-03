@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )
@@ -279,9 +279,7 @@ func (opts *PackageSearchOptions) configureOrderBy(e db.Engine) {
 	default:
 		e.Desc("package_version.created_unix")
 	}
-
-	// Sort by id for stable order with duplicates in the other field
-	e.Asc("package_version.id")
+	e.Desc("package_version.id") // Sort by id for stable order with duplicates in the other field
 }
 
 // SearchVersions gets all versions of packages matching the search options

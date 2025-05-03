@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/container"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/container"
+	api "forgejo.org/modules/structs"
 
 	"code.forgejo.org/go-chi/binding"
 )
@@ -191,7 +191,7 @@ func validateOptions(field *api.IssueFormField, idx int) error {
 				}
 				for _, visibleType := range visibilityList {
 					visibleType, ok := visibleType.(string)
-					if !ok || !(visibleType == "form" || visibleType == "content") {
+					if !ok || (visibleType != "form" && visibleType != "content") {
 						return position.Errorf("'visible' list can only contain strings of 'form' and 'content'")
 					}
 				}

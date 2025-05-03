@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -71,7 +71,7 @@ func TestAPIIssuesMilestone(t *testing.T) {
 		AddTokenAuth(token)
 	resp = MakeRequest(t, req, http.StatusOK)
 	DecodeJSON(t, resp, &apiMilestone)
-	assert.EqualValues(t, apiMilestones[2], apiMilestone)
+	assert.Equal(t, apiMilestones[2], apiMilestone)
 
 	req = NewRequest(t, "GET", fmt.Sprintf("/api/v1/repos/%s/%s/milestones?state=%s&name=%s", owner.Name, repo.Name, "all", "milestone2")).
 		AddTokenAuth(token)

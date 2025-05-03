@@ -5,7 +5,6 @@ package git
 
 import (
 	"bytes"
-	"context"
 	"os"
 	"path"
 	"path/filepath"
@@ -20,7 +19,7 @@ func TestGrepSearch(t *testing.T) {
 	require.NoError(t, err)
 	defer repo.Close()
 
-	res, err := GrepSearch(context.Background(), repo, "public", GrepOptions{})
+	res, err := GrepSearch(t.Context(), repo, "public", GrepOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, []*GrepResult{
 		{
@@ -43,7 +42,7 @@ func TestGrepSearch(t *testing.T) {
 		},
 	}, res)
 
-	res, err = GrepSearch(context.Background(), repo, "void", GrepOptions{MaxResultLimit: 1, ContextLineNumber: 2})
+	res, err = GrepSearch(t.Context(), repo, "void", GrepOptions{MaxResultLimit: 1, ContextLineNumber: 2})
 	require.NoError(t, err)
 	assert.Equal(t, []*GrepResult{
 		{
@@ -60,7 +59,7 @@ func TestGrepSearch(t *testing.T) {
 		},
 	}, res)
 
-	res, err = GrepSearch(context.Background(), repo, "world", GrepOptions{MatchesPerFile: 1})
+	res, err = GrepSearch(t.Context(), repo, "world", GrepOptions{MatchesPerFile: 1})
 	require.NoError(t, err)
 	assert.Equal(t, []*GrepResult{
 		{
@@ -89,7 +88,7 @@ func TestGrepSearch(t *testing.T) {
 		},
 	}, res)
 
-	res, err = GrepSearch(context.Background(), repo, "world", GrepOptions{
+	res, err = GrepSearch(t.Context(), repo, "world", GrepOptions{
 		MatchesPerFile: 1,
 		Filename:       "java-hello/",
 	})
@@ -103,11 +102,11 @@ func TestGrepSearch(t *testing.T) {
 		},
 	}, res)
 
-	res, err = GrepSearch(context.Background(), repo, "no-such-content", GrepOptions{})
+	res, err = GrepSearch(t.Context(), repo, "no-such-content", GrepOptions{})
 	require.NoError(t, err)
 	assert.Empty(t, res)
 
-	res, err = GrepSearch(context.Background(), &Repository{Path: "no-such-git-repo"}, "no-such-content", GrepOptions{})
+	res, err = GrepSearch(t.Context(), &Repository{Path: "no-such-git-repo"}, "no-such-content", GrepOptions{})
 	require.Error(t, err)
 	assert.Empty(t, res)
 }
@@ -131,7 +130,7 @@ func TestGrepDashesAreFine(t *testing.T) {
 	err = CommitChanges(tmpDir, CommitChangesOptions{Message: "Dashes are cool sometimes"})
 	require.NoError(t, err)
 
-	res, err := GrepSearch(context.Background(), gitRepo, "--", GrepOptions{})
+	res, err := GrepSearch(t.Context(), gitRepo, "--", GrepOptions{})
 	require.NoError(t, err)
 	assert.Len(t, res, 1)
 	assert.Equal(t, "with-dashes", res[0].Filename)
@@ -156,7 +155,7 @@ func TestGrepNoBinary(t *testing.T) {
 	err = CommitChanges(tmpDir, CommitChangesOptions{Message: "Binary and text files"})
 	require.NoError(t, err)
 
-	res, err := GrepSearch(context.Background(), gitRepo, "BINARY", GrepOptions{})
+	res, err := GrepSearch(t.Context(), gitRepo, "BINARY", GrepOptions{})
 	require.NoError(t, err)
 	assert.Len(t, res, 1)
 	assert.Equal(t, "TEXT", res[0].Filename)
@@ -180,7 +179,7 @@ func TestGrepLongFiles(t *testing.T) {
 	err = CommitChanges(tmpDir, CommitChangesOptions{Message: "Long file"})
 	require.NoError(t, err)
 
-	res, err := GrepSearch(context.Background(), gitRepo, "a", GrepOptions{})
+	res, err := GrepSearch(t.Context(), gitRepo, "a", GrepOptions{})
 	require.NoError(t, err)
 	assert.Len(t, res, 1)
 	assert.Len(t, res[0].LineCodes[0], 65*1024)
@@ -210,7 +209,7 @@ func TestGrepRefs(t *testing.T) {
 	err = CommitChanges(tmpDir, CommitChangesOptions{Message: "add BCD"})
 	require.NoError(t, err)
 
-	res, err := GrepSearch(context.Background(), gitRepo, "a", GrepOptions{RefName: "v1"})
+	res, err := GrepSearch(t.Context(), gitRepo, "a", GrepOptions{RefName: "v1"})
 	require.NoError(t, err)
 	assert.Len(t, res, 1)
 	assert.Equal(t, "A", res[0].LineCodes[0])
@@ -236,12 +235,12 @@ func TestGrepCanHazRegexOnDemand(t *testing.T) {
 	require.NoError(t, err)
 
 	// should find nothing by default...
-	res, err := GrepSearch(context.Background(), gitRepo, "\\bmatch\\b", GrepOptions{})
+	res, err := GrepSearch(t.Context(), gitRepo, "\\bmatch\\b", GrepOptions{})
 	require.NoError(t, err)
 	assert.Empty(t, res)
 
 	// ... unless configured explicitly
-	res, err = GrepSearch(context.Background(), gitRepo, "\\bmatch\\b", GrepOptions{Mode: RegExpGrepMode})
+	res, err = GrepSearch(t.Context(), gitRepo, "\\bmatch\\b", GrepOptions{Mode: RegExpGrepMode})
 	require.NoError(t, err)
 	assert.Len(t, res, 1)
 	assert.Equal(t, "matching", res[0].Filename)

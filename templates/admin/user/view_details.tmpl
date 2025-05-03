@@ -27,6 +27,14 @@
 				{{end}}
 			</div>
 			<div class="flex-item-body">
+				<b>{{ctx.Locale.Tr "admin.users.prohibit_login"}}:</b>
+				{{if .User.ProhibitLogin}}
+					{{svg "octicon-check"}}
+				{{else}}
+					{{svg "octicon-x"}}
+				{{end}}
+			</div>
+			<div class="flex-item-body">
 				<b>{{ctx.Locale.Tr "admin.users.restricted"}}:</b>
 				{{if .User.IsRestricted}}
 					{{svg "octicon-check"}}

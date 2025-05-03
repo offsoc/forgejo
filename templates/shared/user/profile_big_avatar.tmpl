@@ -4,7 +4,7 @@
 <div id="profile-avatar-card" class="ui card" hx-swap="morph">
 	<div id="profile-avatar" class="content tw-flex">
 	{{if eq .SignedUserID .ContextUser.ID}}
-		<a class="image" href="{{AppSubUrl}}/user/settings" data-tooltip-content="{{ctx.Locale.Tr "user.change_avatar"}}">
+		<a class="image" href="{{AppSubUrl}}/user/settings#avatar-settings" data-tooltip-content="{{ctx.Locale.Tr "user.change_avatar"}}">
 			{{/* the size doesn't take affect (and no need to take affect), image size(width) should be controlled by the parent container since this is not a flex layout*/}}
 			{{ctx.AvatarUtils.Avatar .ContextUser 256}}
 		</a>
@@ -16,7 +16,7 @@
 	</div>
 	<div class="content tw-break-anywhere profile-avatar-name">
 		{{if .ContextUser.FullName}}<span class="header text center">{{.ContextUser.FullName}}</span>{{end}}
-		<span class="username text center">{{.ContextUser.Name}}{{if .ContextUser.Pronouns}} · {{.ContextUser.Pronouns}}{{end}} {{if .IsAdmin}}
+		<span class="username text center">{{.ContextUser.Name}} {{if .ContextUser.GetPronouns .IsSigned}} · {{.ContextUser.GetPronouns .IsSigned}}{{end}} {{if .IsAdmin}}
 					<a class="muted" href="{{AppSubUrl}}/admin/users/{{.ContextUser.ID}}" data-tooltip-content="{{ctx.Locale.Tr "admin.users.details"}}">
 						{{svg "octicon-gear" 18}}
 					</a>

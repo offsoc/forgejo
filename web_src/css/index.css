@@ -16,6 +16,7 @@
 @import "./modules/card.css";
 @import "./modules/checkbox.css";
 @import "./modules/modal.css";
+@import "./modules/dimmer.css";
 
 @import "./modules/switch.css";
 @import "./modules/select.css";
@@ -74,6 +75,7 @@
 @import "./explore.css";
 @import "./review.css";
 @import "./actions.css";
+@import "./migrate.css";
 
 @tailwind utilities;
 @import "./helpers.css";

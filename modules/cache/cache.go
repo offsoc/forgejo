@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	mc "code.forgejo.org/go-chi/cache"
 

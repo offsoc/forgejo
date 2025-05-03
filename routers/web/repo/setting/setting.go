@@ -13,34 +13,33 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models"
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	quota_model "code.gitea.io/gitea/models/quota"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/indexer/code"
-	"code.gitea.io/gitea/modules/indexer/stats"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/validation"
-	"code.gitea.io/gitea/modules/web"
-	actions_service "code.gitea.io/gitea/services/actions"
-	asymkey_service "code.gitea.io/gitea/services/asymkey"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/federation"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/migrations"
-	mirror_service "code.gitea.io/gitea/services/mirror"
-	repo_service "code.gitea.io/gitea/services/repository"
-	wiki_service "code.gitea.io/gitea/services/wiki"
+	"forgejo.org/models"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	quota_model "forgejo.org/models/quota"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/indexer/code"
+	"forgejo.org/modules/indexer/stats"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
+	"forgejo.org/modules/web"
+	actions_service "forgejo.org/services/actions"
+	asymkey_service "forgejo.org/services/asymkey"
+	"forgejo.org/services/context"
+	"forgejo.org/services/federation"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/migrations"
+	mirror_service "forgejo.org/services/mirror"
+	repo_service "forgejo.org/services/repository"
+	wiki_service "forgejo.org/services/wiki"
 )
 
 const (
@@ -105,6 +104,10 @@ func Units(ctx *context.Context) {
 
 func UnitsPost(ctx *context.Context) {
 	form := web.GetForm(ctx).(*forms.RepoUnitSettingForm)
+	if ctx.HasError() {
+		ctx.Redirect(ctx.Repo.Repository.Link() + "/settings/units")
+		return
+	}
 
 	repo := ctx.Repo.Repository
 
@@ -651,7 +654,7 @@ func SettingsPost(ctx *context.Context) {
 
 		address, err := forms.ParseRemoteAddr(form.PushMirrorAddress, form.PushMirrorUsername, form.PushMirrorPassword)
 		if err == nil {
-			err = migrations.IsMigrateURLAllowed(address, ctx.Doer)
+			err = migrations.IsPushMirrorURLAllowed(address, ctx.Doer)
 		}
 		if err != nil {
 			ctx.Data["Err_PushMirrorAddress"] = true
@@ -1030,7 +1033,7 @@ func SettingsPost(ctx *context.Context) {
 			return
 		}
 
-		if err := actions_model.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
+		if err := actions_service.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
 			log.Error("CleanRepoScheduleTasks for archived repo %s/%s: %v", ctx.Repo.Owner.Name, repo.Name, err)
 		}
 

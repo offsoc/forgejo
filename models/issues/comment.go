@@ -12,22 +12,22 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	"code.gitea.io/gitea/models/organization"
-	project_model "code.gitea.io/gitea/models/project"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/references"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	"forgejo.org/models/organization"
+	project_model "forgejo.org/models/project"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/references"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )
@@ -114,6 +114,8 @@ const (
 
 	CommentTypePin   // 36 pin Issue
 	CommentTypeUnpin // 37 unpin Issue
+
+	CommentTypeAggregator // 38 Aggregator of comments
 )
 
 var commentStrings = []string{
@@ -155,6 +157,7 @@ var commentStrings = []string{
 	"pull_cancel_scheduled_merge",
 	"pin",
 	"unpin",
+	"action_aggregator",
 }
 
 func (t CommentType) String() string {
@@ -236,12 +239,6 @@ func (r RoleInRepo) LocaleHelper(lang translation.Locale) string {
 	return lang.TrString("repo.issues.role." + string(r) + "_helper")
 }
 
-type RequestReviewTarget interface {
-	ID() int64
-	Name() string
-	Type() string
-}
-
 // Comment represents a comment in commit and issue page.
 type Comment struct {
 	ID                   int64            `xorm:"pk autoincr"`
@@ -254,6 +251,7 @@ type Comment struct {
 	Issue                *Issue `xorm:"-"`
 	LabelID              int64
 	Label                *Label                `xorm:"-"`
+	Aggregator           *ActionAggregator     `xorm:"-"`
 	AddedLabels          []*Label              `xorm:"-"`
 	RemovedLabels        []*Label              `xorm:"-"`
 	AddedRequestReview   []RequestReviewTarget `xorm:"-"`

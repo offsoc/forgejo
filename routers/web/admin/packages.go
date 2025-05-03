@@ -8,14 +8,14 @@ import (
 	"net/url"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	packages_model "code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/context"
-	packages_service "code.gitea.io/gitea/services/packages"
-	packages_cleanup_service "code.gitea.io/gitea/services/packages/cleanup"
+	"forgejo.org/models/db"
+	packages_model "forgejo.org/models/packages"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/context"
+	packages_service "forgejo.org/services/packages"
+	packages_cleanup_service "forgejo.org/services/packages/cleanup"
 )
 
 const (

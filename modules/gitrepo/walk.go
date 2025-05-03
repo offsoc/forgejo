@@ -6,7 +6,7 @@ package gitrepo
 import (
 	"context"
 
-	"code.gitea.io/gitea/modules/git"
+	"forgejo.org/modules/git"
 )
 
 // WalkReferences walks all the references from the repository

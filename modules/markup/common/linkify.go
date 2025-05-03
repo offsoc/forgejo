@@ -17,7 +17,7 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-var wwwURLRegxp = regexp.MustCompile(`^www\.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}((?:/|[#?])[-a-zA-Z0-9@:%_\+.~#!?&//=\(\);,'">\^{}\[\]` + "`" + `]*)?`)
+var wwwURLRegexp = regexp.MustCompile(`^www\.[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}((?:/|[#?])[-a-zA-Z0-9@:%_\+.~#!?&//=\(\);,'">\^{}\[\]` + "`" + `]*)?`)
 
 type linkifyParser struct{}
 
@@ -63,7 +63,7 @@ func (s *linkifyParser) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 		m = LinkRegex.FindSubmatchIndex(line)
 	}
 	if m == nil && bytes.HasPrefix(line, domainWWW) {
-		m = wwwURLRegxp.FindSubmatchIndex(line)
+		m = wwwURLRegexp.FindSubmatchIndex(line)
 		protocol = []byte("http")
 	}
 	if m != nil {
@@ -73,9 +73,10 @@ func (s *linkifyParser) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 		} else if lastChar == ')' {
 			closing := 0
 			for i := m[1] - 1; i >= m[0]; i-- {
-				if line[i] == ')' {
+				switch line[i] {
+				case ')':
 					closing++
-				} else if line[i] == '(' {
+				case '(':
 					closing--
 				}
 			}

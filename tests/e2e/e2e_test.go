@@ -16,15 +16,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/testlogger"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/testlogger"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers"
+	"forgejo.org/tests"
 )
 
 var testE2eWebRoutes *web.Route
@@ -37,6 +37,7 @@ func TestMain(m *testing.M) {
 	defer cancel()
 
 	tests.InitTest(true)
+	setting.Quota.Enabled = true
 	initChangedFiles()
 	testE2eWebRoutes = routers.NormalRoutes()
 

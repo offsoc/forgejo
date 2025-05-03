@@ -10,15 +10,15 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/nektos/act/pkg/jobparser"
 	"xorm.io/builder"
@@ -185,77 +185,9 @@ func updateRepoRunsNumbers(ctx context.Context, repo *repo_model.Repository) err
 	return err
 }
 
-// CancelPreviousJobs cancels all previous jobs of the same repository, reference, workflow, and event.
-// It's useful when a new run is triggered, and all previous runs needn't be continued anymore.
-func CancelPreviousJobs(ctx context.Context, repoID int64, ref, workflowID string, event webhook_module.HookEventType) error {
-	// Find all runs in the specified repository, reference, and workflow with non-final status
-	runs, total, err := db.FindAndCount[ActionRun](ctx, FindRunOptions{
-		RepoID:       repoID,
-		Ref:          ref,
-		WorkflowID:   workflowID,
-		TriggerEvent: event,
-		Status:       []Status{StatusRunning, StatusWaiting, StatusBlocked},
-	})
-	if err != nil {
-		return err
-	}
-
-	// If there are no runs found, there's no need to proceed with cancellation, so return nil.
-	if total == 0 {
-		return nil
-	}
-
-	// Iterate over each found run and cancel its associated jobs.
-	for _, run := range runs {
-		// Find all jobs associated with the current run.
-		jobs, err := db.Find[ActionRunJob](ctx, FindRunJobOptions{
-			RunID: run.ID,
-		})
-		if err != nil {
-			return err
-		}
-
-		// Iterate over each job and attempt to cancel it.
-		for _, job := range jobs {
-			// Skip jobs that are already in a terminal state (completed, cancelled, etc.).
-			status := job.Status
-			if status.IsDone() {
-				continue
-			}
-
-			// If the job has no associated task (probably an error), set its status to 'Cancelled' and stop it.
-			if job.TaskID == 0 {
-				job.Status = StatusCancelled
-				job.Stopped = timeutil.TimeStampNow()
-
-				// Update the job's status and stopped time in the database.
-				n, err := UpdateRunJob(ctx, job, builder.Eq{"task_id": 0}, "status", "stopped")
-				if err != nil {
-					return err
-				}
-
-				// If the update affected 0 rows, it means the job has changed in the meantime, so we need to try again.
-				if n == 0 {
-					return fmt.Errorf("job has changed, try again")
-				}
-
-				// Continue with the next job.
-				continue
-			}
-
-			// If the job has an associated task, try to stop the task, effectively cancelling the job.
-			if err := StopTask(ctx, job.TaskID, StatusCancelled); err != nil {
-				return err
-			}
-		}
-	}
-
-	// Return nil to indicate successful cancellation of all running and waiting jobs.
-	return nil
-}
-
 // InsertRun inserts a run
 // The title will be cut off at 255 characters if it's longer than 255 characters.
+// We don't have to send the ActionRunNowDone notification here because there are no runs that start in a not done status.
 func InsertRun(ctx context.Context, run *ActionRun, jobs []*jobparser.SingleWorkflow) error {
 	ctx, commiter, err := db.TxContext(ctx)
 	if err != nil {
@@ -341,6 +273,18 @@ func GetLatestRun(ctx context.Context, repoID int64) (*ActionRun, error) {
 	return &run, nil
 }
 
+// GetRunBefore returns the last run that completed a given timestamp (not inclusive).
+func GetRunBefore(ctx context.Context, repoID int64, timestamp timeutil.TimeStamp) (*ActionRun, error) {
+	var run ActionRun
+	has, err := db.GetEngine(ctx).Where("repo_id=? AND stopped IS NOT NULL AND stopped<?", repoID, timestamp).OrderBy("stopped DESC").Limit(1).Get(&run)
+	if err != nil {
+		return nil, err
+	} else if !has {
+		return nil, fmt.Errorf("run before: %w", util.ErrNotExist)
+	}
+	return &run, nil
+}
+
 func GetLatestRunForBranchAndWorkflow(ctx context.Context, repoID int64, branch, workflowFile, event string) (*ActionRun, error) {
 	var run ActionRun
 	q := db.GetEngine(ctx).Where("repo_id=?", repoID).And("workflow_id=?", workflowFile)
@@ -389,7 +333,9 @@ func GetRunByIndex(ctx context.Context, repoID, index int64) (*ActionRun, error)
 // UpdateRun updates a run.
 // It requires the inputted run has Version set.
 // It will return error if the version is not matched (it means the run has been changed after loaded).
-func UpdateRun(ctx context.Context, run *ActionRun, cols ...string) error {
+// All calls to UpdateRunWithoutNotification that change run.Status from a not done status to a done status must call the ActionRunNowDone notification channel.
+// Use the wrapper function UpdateRun instead.
+func UpdateRunWithoutNotification(ctx context.Context, run *ActionRun, cols ...string) error {
 	sess := db.GetEngine(ctx).ID(run.ID)
 	if len(cols) > 0 {
 		sess.Cols(cols...)

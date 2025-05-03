@@ -5,7 +5,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 import {VueLoaderPlugin} from 'vue-loader';
 import EsBuildLoader from 'esbuild-loader';
-import {parse, dirname} from 'node:path';
+import {parse} from 'node:path';
 import webpack from 'webpack';
 import {fileURLToPath} from 'node:url';
 import {readFileSync, writeFileSync} from 'node:fs';
@@ -16,10 +16,10 @@ import tailwindcssNesting from 'tailwindcss/nesting/index.js';
 import postcssNesting from 'postcss-nesting';
 
 const {EsbuildPlugin} = EsBuildLoader;
-const {SourceMapDevToolPlugin, DefinePlugin} = webpack;
+const {SourceMapDevToolPlugin, DefinePlugin, ProgressPlugin} = webpack;
 const formatLicenseText = (licenseText) => wrapAnsi(licenseText || '', 80).trim();
 
-const baseDirectory = dirname(fileURLToPath(new URL(import.meta.url)));
+const baseDirectory = import.meta.dirname;
 const glob = (pattern) => fastGlob.sync(pattern, {
   cwd: baseDirectory,
   absolute: true,
@@ -80,12 +80,13 @@ if ('ENABLE_SOURCEMAP' in env) {
 // define which web components we use for Vue to not interpret them as Vue components
 const webComponents = new Set([
   // our own, in web_src/js/webcomponents
+  'i18n',
   'overflow-menu',
   'origin-url',
   'absolute-date',
+  'relative-time',
   // from dependencies
   'markdown-toolbar',
-  'relative-time',
   'text-expander',
 ]);
 
@@ -233,6 +234,9 @@ export default {
     ],
   },
   plugins: [
+    new ProgressPlugin({
+      activeModules: true,
+    }),
     new webpack.ProvidePlugin({ // for htmx extensions
       htmx: 'htmx.org',
     }),

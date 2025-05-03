@@ -13,9 +13,9 @@ import (
 	"slices"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation"
 )
 
 // RuneNBSP is the codepoint for NBSP

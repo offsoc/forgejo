@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,7 +30,7 @@ func TestFeedRepo(t *testing.T) {
 		assert.Contains(t, rss.Channel.Link, "/user2/repo1")
 		assert.NotEmpty(t, rss.Channel.PubDate)
 		assert.Len(t, rss.Channel.Items, 1)
-		assert.EqualValues(t, "issue5", rss.Channel.Items[0].Description)
+		assert.Equal(t, "issue5", rss.Channel.Items[0].Description)
 		assert.NotEmpty(t, rss.Channel.Items[0].PubDate)
 	})
 }

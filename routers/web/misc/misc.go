@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"path"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/httpcache"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/httpcache"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/util"
 )
 
 func SSHInfo(rw http.ResponseWriter, req *http.Request) {
@@ -33,17 +33,96 @@ func DummyOK(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func RobotsTxt(w http.ResponseWriter, req *http.Request) {
-	robotsTxt := util.FilePathJoinAbs(setting.CustomPath, "public/robots.txt")
-	if ok, _ := util.IsExist(robotsTxt); !ok {
-		robotsTxt = util.FilePathJoinAbs(setting.CustomPath, "robots.txt") // the legacy "robots.txt"
-	}
-	httpcache.SetCacheControlInHeader(w.Header(), setting.StaticCacheTime)
-	http.ServeFile(w, req, robotsTxt)
-}
-
 func StaticRedirect(target string) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, path.Join(setting.StaticURLPrefix, target), http.StatusMovedPermanently)
+	}
+}
+
+var defaultRobotsTxt = []byte(`# The default Forgejo robots.txt
+# For more information: https://forgejo.org/docs/latest/admin/search-engines-indexation/
+
+User-agent: *
+Disallow: /api/
+Disallow: /avatars/
+Disallow: /user/
+Disallow: /swagger.*.json
+Disallow: /explore/*?*
+
+Disallow: /repo/create
+Disallow: /repo/migrate
+Disallow: /org/create
+Disallow: /*/*/fork
+
+Disallow: /*/*/watchers
+Disallow: /*/*/stargazers
+Disallow: /*/*/forks
+
+Disallow: /*/*/src/
+Disallow: /*/*/blame/
+Disallow: /*/*/commit/
+Disallow: /*/*/commits/
+Disallow: /*/*/raw/
+Disallow: /*/*/media/
+Disallow: /*/*/tags
+Disallow: /*/*/graph
+Disallow: /*/*/branches
+Disallow: /*/*/compare
+Disallow: /*/*/lastcommit/
+Disallow: /*/*/rss/branch/
+Disallow: /*/*/atom/branch/
+
+Disallow: /*/*/activity
+Disallow: /*/*/activity_author_data
+
+Disallow: /*/*/actions
+Disallow: /*/*/projects
+Disallow: /*/*/labels
+Disallow: /*/*/milestones
+
+Disallow: /*/*/find/
+Disallow: /*/*/tree-list/
+Disallow: /*/*/search/
+Disallow: /*/-/code
+
+Disallow: /*/*/issues/new
+Disallow: /*/*/pulls/*/files
+Disallow: /*/*/pulls/*/commits
+
+Disallow: /attachments/
+Disallow: /*/*/attachments/
+Disallow: /*/*/issues/*/attachments/
+Disallow: /*/*/pulls/*/attachments/
+Disallow: /*/*/releases/attachments
+Disallow: /*/*/releases/download
+
+Disallow: /*/*/archive/
+Disallow: /*.bundle$
+Disallow: /*.patch$
+Disallow: /*.diff$
+Disallow: /*.atom$
+Disallow: /*.rss$
+
+Disallow: /*lang=*
+Disallow: /*redirect_to=*
+Disallow: /*tab=*
+Disallow: /*q=*
+Disallow: /*sort=*
+Disallow: /*repo-search-archived=*
+`)
+
+func RobotsTxt(w http.ResponseWriter, req *http.Request) {
+	httpcache.SetCacheControlInHeader(w.Header(), setting.StaticCacheTime)
+	w.Header().Set("Content-Type", "text/plain")
+
+	robotsTxt := util.FilePathJoinAbs(setting.CustomPath, "public/robots.txt")
+	if ok, _ := util.IsExist(robotsTxt); ok {
+		http.ServeFile(w, req, robotsTxt)
+		return
+	}
+
+	_, err := w.Write(defaultRobotsTxt)
+	if err != nil {
+		log.Error("failed to write robots.txt: %v", err)
 	}
 }

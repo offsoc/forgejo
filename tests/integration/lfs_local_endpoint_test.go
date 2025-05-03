@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )

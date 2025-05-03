@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,9 +12,9 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/util"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -31,7 +30,7 @@ func assertFileExist(t *testing.T, p string) {
 func assertFileEqual(t *testing.T, p string, content []byte) {
 	bs, err := os.ReadFile(p)
 	require.NoError(t, err)
-	assert.EqualValues(t, content, bs)
+	assert.Equal(t, content, bs)
 }
 
 func TestRepoCloneWiki(t *testing.T) {
@@ -42,7 +41,7 @@ func TestRepoCloneWiki(t *testing.T) {
 		u, _ = url.Parse(r)
 		u.User = url.UserPassword("user2", userPassword)
 		t.Run("Clone", func(t *testing.T) {
-			require.NoError(t, git.CloneWithArgs(context.Background(), git.AllowLFSFiltersArgs(), u.String(), dstPath, git.CloneRepoOptions{}))
+			require.NoError(t, git.CloneWithArgs(t.Context(), git.AllowLFSFiltersArgs(), u.String(), dstPath, git.CloneRepoOptions{}))
 			assertFileEqual(t, filepath.Join(dstPath, "Home.md"), []byte("# Home page\n\nThis is the home page!\n"))
 			assertFileExist(t, filepath.Join(dstPath, "Page-With-Image.md"))
 			assertFileExist(t, filepath.Join(dstPath, "Page-With-Spaced-Name.md"))
@@ -68,6 +67,6 @@ func Test_RepoWikiPages(t *testing.T) {
 		href, _ := firstAnchor.Attr("href")
 		pagePath := strings.TrimPrefix(href, "/user2/repo1/wiki/")
 
-		assert.EqualValues(t, expectedPagePaths[i], pagePath)
+		assert.Equal(t, expectedPagePaths[i], pagePath)
 	})
 }

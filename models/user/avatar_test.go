@@ -4,16 +4,15 @@
 package user
 
 import (
-	"context"
 	"io"
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -37,7 +36,7 @@ func TestUserAvatarGenerate(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 	var err error
 	tmpDir := t.TempDir()
-	storage.Avatars, err = storage.NewLocalStorage(context.Background(), &setting.Storage{Path: tmpDir})
+	storage.Avatars, err = storage.NewLocalStorage(t.Context(), &setting.Storage{Path: tmpDir})
 	require.NoError(t, err)
 
 	u := unittest.AssertExistsAndLoadBean(t, &User{ID: 2})

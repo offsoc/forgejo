@@ -15,8 +15,8 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/util"
 
 	"github.com/go-git/go-git/v5/config"
 )
@@ -220,7 +220,7 @@ func (c *Commit) HasPreviousCommit(objectID ObjectID) (bool, error) {
 	}
 	var exitError *exec.ExitError
 	if errors.As(err, &exitError) {
-		if exitError.ProcessState.ExitCode() == 1 && len(exitError.Stderr) == 0 {
+		if exitError.ExitCode() == 1 && len(exitError.Stderr) == 0 {
 			return false, nil
 		}
 	}
@@ -430,6 +430,11 @@ func (c *Commit) GetBranchName() (string, error) {
 
 	// name-rev commitID output will be "master" or "master~12"
 	return strings.SplitN(strings.TrimSpace(data), "~", 2)[0], nil
+}
+
+// GetAllBranches returns a slice with all branches that contains this commit
+func (c *Commit) GetAllBranches() ([]string, error) {
+	return c.repo.getBranches(c, -1)
 }
 
 // CommitFileStatus represents status of files in a commit.

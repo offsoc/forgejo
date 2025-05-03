@@ -7,10 +7,10 @@ import (
 	"html/template"
 	"net/http"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
-	"code.gitea.io/gitea/services/forms"
-	"code.gitea.io/gitea/services/webhook/shared"
+	webhook_model "forgejo.org/models/webhook"
+	webhook_module "forgejo.org/modules/webhook"
+	"forgejo.org/services/forms"
+	"forgejo.org/services/webhook/shared"
 )
 
 type gogsHandler struct{ defaultHandler }

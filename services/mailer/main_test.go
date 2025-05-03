@@ -7,13 +7,15 @@ import (
 	"context"
 	"testing"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/templates"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/translation"
 
-	_ "code.gitea.io/gitea/models/actions"
+	_ "forgejo.org/models/actions"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -44,5 +46,11 @@ func MockMailSettings(send func(msgs ...*Message)) func() {
 		for _, cleanup := range cleanups {
 			cleanup()
 		}
+	}
+}
+
+func CleanUpUsers(ctx context.Context, users []*user_model.User) {
+	for _, u := range users {
+		db.DeleteByID[user_model.User](ctx, u.ID)
 	}
 }

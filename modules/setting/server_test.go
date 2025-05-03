@@ -6,7 +6,7 @@ package setting
 import (
 	"testing"
 
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -72,4 +72,17 @@ MAX_USER_REDIRECTS = 8`
 
 	assert.EqualValues(t, 3, Service.UsernameCooldownPeriod)
 	assert.EqualValues(t, 8, Service.MaxUserRedirects)
+}
+
+func TestUnixSocketAbstractNamespace(t *testing.T) {
+	iniStr := `
+	[server]
+	PROTOCOL=http+unix
+	HTTP_ADDR=@forgejo
+	`
+	cfg, err := NewConfigProviderFromData(iniStr)
+	require.NoError(t, err)
+	loadServerFrom(cfg)
+
+	assert.Equal(t, "@forgejo", HTTPAddr)
 }

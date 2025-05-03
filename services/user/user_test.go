@@ -11,17 +11,17 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models"
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/modules/timeutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -67,13 +67,7 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestPurgeUser(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"services/user/TestPurgeUser/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("services/user/TestPurgeUser")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 	defer test.MockVariableValue(&setting.SSH.RootPath, t.TempDir())()
 	defer test.MockVariableValue(&setting.SSH.CreateAuthorizedKeysFile, true)()
@@ -195,7 +189,7 @@ func TestRenameUser(t *testing.T) {
 
 		redirectUID, err := user_model.LookupUserRedirect(db.DefaultContext, oldUsername)
 		require.NoError(t, err)
-		assert.EqualValues(t, user.ID, redirectUID)
+		assert.Equal(t, user.ID, redirectUID)
 
 		unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, OwnerName: user.Name})
 	})

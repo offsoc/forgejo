@@ -22,8 +22,8 @@ import (
 	"sync"
 	"time"
 
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/nosql"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/nosql"
 
 	"code.forgejo.org/go-chi/session"
 )

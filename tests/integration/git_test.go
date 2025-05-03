@@ -12,29 +12,32 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/perm"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	gitea_context "code.gitea.io/gitea/services/context"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/perm"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	gitea_context "forgejo.org/services/context"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
+	"github.com/kballard/go-shellquote"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -113,7 +116,10 @@ func testGit(t *testing.T, u *url.URL) {
 
 			// Setup key the user ssh key
 			withKeyFile(t, keyname, func(keyFile string) {
-				t.Run("CreateUserKey", doAPICreateUserKey(sshContext, "test-key-"+objectFormat.Name(), keyFile))
+				var publicKeyID int64
+				t.Run("CreateUserKey", doAPICreateUserKey(sshContext, "test-key-"+objectFormat.Name(), keyFile, func(t *testing.T, pk api.PublicKey) {
+					publicKeyID = pk.ID
+				}))
 
 				// Setup remote link
 				// TODO: get url from api
@@ -140,6 +146,7 @@ func testGit(t *testing.T, u *url.URL) {
 				})
 
 				t.Run("PushCreate", doPushCreate(sshContext, sshURL, objectFormat))
+				t.Run("LFS no access", doLFSNoAccess(sshContext, publicKeyID, objectFormat))
 			})
 		})
 	})
@@ -462,7 +469,7 @@ func doProtectBranch(ctx APITestContext, branch string, addParameter ...paramete
 		// Check if master branch has been locked successfully
 		flashCookie := ctx.Session.GetCookie(gitea_context.CookieNameFlash)
 		assert.NotNil(t, flashCookie)
-		assert.EqualValues(t, "success%3DBranch%2Bprotection%2Bfor%2Brule%2B%2522"+url.QueryEscape(branch)+"%2522%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
+		assert.Equal(t, "success%3DBranch%2Bprotection%2Bfor%2Brule%2B%2522"+url.QueryEscape(branch)+"%2522%2Bhas%2Bbeen%2Bupdated.", flashCookie.Value)
 	}
 }
 
@@ -578,7 +585,7 @@ func doEnsureCanSeePull(ctx APITestContext, pr api.PullRequest, editable bool) f
 		doc := NewHTMLParser(t, resp.Body)
 		editButtonCount := doc.doc.Find("div.diff-file-header-actions a[href*='/_edit/']").Length()
 		if editable {
-			assert.Positive(t, editButtonCount, 0, "Expected to find a button to edit a file in the PR diff view but there were none")
+			assert.Positive(t, editButtonCount, "Expected to find a button to edit a file in the PR diff view but there were none")
 		} else {
 			assert.Equal(t, 0, editButtonCount, "Expected not to find any buttons to edit files in PR diff view but there were some")
 		}
@@ -1035,7 +1042,7 @@ func doCreateAgitFlowPull(dstPath string, ctx *APITestContext, headBranch string
 
 				currentHeadCommitID, err := upstreamGitRepo.GetRefCommitID(pr.GetGitRefName())
 				require.NoError(t, err)
-				assert.EqualValues(t, headCommitID, currentHeadCommitID)
+				assert.Equal(t, headCommitID, currentHeadCommitID)
 			})
 			t.Run("Succeeds", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
@@ -1045,7 +1052,7 @@ func doCreateAgitFlowPull(dstPath string, ctx *APITestContext, headBranch string
 
 				currentHeadCommitID, err := upstreamGitRepo.GetRefCommitID(pr.GetGitRefName())
 				require.NoError(t, err)
-				assert.NotEqualValues(t, headCommitID, currentHeadCommitID)
+				assert.NotEqual(t, headCommitID, currentHeadCommitID)
 			})
 		})
 
@@ -1121,4 +1128,31 @@ func TestDataAsync_Issue29101(t *testing.T) {
 		require.NoError(t, err)
 		defer r2.Close()
 	})
+}
+
+func doLFSNoAccess(ctx APITestContext, publicKeyID int64, objectFormat git.ObjectFormat) func(*testing.T) {
+	return func(t *testing.T) {
+		// This is set in withKeyFile
+		sshCommand := os.Getenv("GIT_SSH_COMMAND")
+
+		// Sanity check, because we are going to execute whatever is in here.
+		require.True(t, strings.HasPrefix(sshCommand, "ssh "))
+
+		// We really have to split on the arguments and pass them individually.
+		sshOptions, err := shellquote.Split(strings.TrimPrefix(sshCommand, "ssh "))
+		require.NoError(t, err)
+
+		sshOptions = append(sshOptions, "-p "+strconv.Itoa(setting.SSH.ListenPort), "git@"+setting.SSH.ListenHost)
+
+		cmd := exec.CommandContext(t.Context(), "ssh", append(sshOptions, "git-lfs-authenticate", "user40/repo60.git", "upload")...)
+		stderr := bytes.Buffer{}
+		cmd.Stderr = &stderr
+
+		require.ErrorContains(t, cmd.Run(), "exit status 1")
+		if objectFormat.Name() == "sha1" {
+			assert.Contains(t, stderr.String(), fmt.Sprintf("Forgejo: User: 2:user2 with Key: %d:test-key-sha1 is not authorized to write to user40/repo60.", publicKeyID))
+		} else {
+			assert.Contains(t, stderr.String(), fmt.Sprintf("Forgejo: User: 2:user2 with Key: %d:test-key-sha256 is not authorized to write to user40/repo60.", publicKeyID))
+		}
+	}
 }

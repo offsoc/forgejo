@@ -8,10 +8,10 @@ import (
 	"errors"
 	"fmt"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/graceful"
-	"code.gitea.io/gitea/modules/queue"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/graceful"
+	"forgejo.org/modules/queue"
 
 	"github.com/nektos/act/pkg/jobparser"
 	"xorm.io/builder"
@@ -59,7 +59,7 @@ func checkJobsOfRun(ctx context.Context, runID int64) error {
 		for _, job := range jobs {
 			if status, ok := updates[job.ID]; ok {
 				job.Status = status
-				if n, err := actions_model.UpdateRunJob(ctx, job, builder.Eq{"status": actions_model.StatusBlocked}, "status"); err != nil {
+				if n, err := UpdateRunJob(ctx, job, builder.Eq{"status": actions_model.StatusBlocked}, "status"); err != nil {
 					return err
 				} else if n != 1 {
 					return fmt.Errorf("no affected for updating blocked job %v", job.ID)

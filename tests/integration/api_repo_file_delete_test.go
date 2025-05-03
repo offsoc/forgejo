@@ -9,11 +9,11 @@ import (
 	"net/url"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
+	auth_model "forgejo.org/models/auth"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -87,7 +87,7 @@ func TestAPIDeleteFile(t *testing.T) {
 		DecodeJSON(t, resp, &fileResponse)
 		assert.NotNil(t, fileResponse)
 		assert.Nil(t, fileResponse.Content)
-		assert.EqualValues(t, deleteFileOptions.Message+"\n", fileResponse.Commit.Message)
+		assert.Equal(t, deleteFileOptions.Message+"\n", fileResponse.Commit.Message)
 
 		// Test deleting file without a message
 		fileID++
@@ -100,7 +100,7 @@ func TestAPIDeleteFile(t *testing.T) {
 		resp = MakeRequest(t, req, http.StatusOK)
 		DecodeJSON(t, resp, &fileResponse)
 		expectedMessage := "Delete " + treePath + "\n"
-		assert.EqualValues(t, expectedMessage, fileResponse.Commit.Message)
+		assert.Equal(t, expectedMessage, fileResponse.Commit.Message)
 
 		// Test deleting a file with the wrong SHA
 		fileID++

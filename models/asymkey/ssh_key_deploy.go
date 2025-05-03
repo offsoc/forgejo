@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/perm"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/models/perm"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/builder"
 )

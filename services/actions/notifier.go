@@ -5,21 +5,26 @@ package actions
 
 import (
 	"context"
+	"errors"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	packages_model "code.gitea.io/gitea/models/packages"
-	perm_model "code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
-	"code.gitea.io/gitea/services/convert"
-	notify_service "code.gitea.io/gitea/services/notify"
+	actions_model "forgejo.org/models/actions"
+	issues_model "forgejo.org/models/issues"
+	packages_model "forgejo.org/models/packages"
+	perm_model "forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	webhook_module "forgejo.org/modules/webhook"
+	"forgejo.org/services/convert"
+	notify_service "forgejo.org/services/notify"
+
+	"xorm.io/builder"
 )
 
 type actionsNotifier struct {
@@ -774,4 +779,77 @@ func (n *actionsNotifier) MigrateRepository(ctx context.Context, doer, u *user_m
 		Organization: convert.ToUser(ctx, u, nil),
 		Sender:       convert.ToUser(ctx, doer, nil),
 	}).Notify(ctx)
+}
+
+// Call this sendActionRunNowDoneNotificationIfNeeded when there has been an update for an ActionRun.
+// priorRun and updatedRun represent the very same ActionRun, just at different times:
+// priorRun before the update and updatedRun after.
+// The parameter lastRun in the ActionRunNowDone notification represents an entirely different ActionRun:
+// the ActionRun of the same workflow that finished before priorRun/updatedRun.
+func sendActionRunNowDoneNotificationIfNeeded(ctx context.Context, priorRun, updatedRun *actions_model.ActionRun) error {
+	if !priorRun.Status.IsDone() && updatedRun.Status.IsDone() {
+		lastRun, err := actions_model.GetRunBefore(ctx, updatedRun.RepoID, updatedRun.Stopped)
+		if err != nil && !errors.Is(err, util.ErrNotExist) {
+			return err
+		}
+		// when no last run was found lastRun is nil
+		if lastRun != nil {
+			if err = lastRun.LoadAttributes(ctx); err != nil {
+				return err
+			}
+		}
+		if err = updatedRun.LoadAttributes(ctx); err != nil {
+			return err
+		}
+		notify_service.ActionRunNowDone(ctx, updatedRun, priorRun.Status, lastRun)
+	}
+	return nil
+}
+
+// wrapper of UpdateRunWithoutNotification with a call to the ActionRunNowDone notification channel
+func UpdateRun(ctx context.Context, run *actions_model.ActionRun, cols ...string) error {
+	// run.ID is the only thing that must be given
+	priorRun, err := actions_model.GetRunByID(ctx, run.ID)
+	if err != nil {
+		return err
+	}
+
+	if err = actions_model.UpdateRunWithoutNotification(ctx, run, cols...); err != nil {
+		return err
+	}
+
+	updatedRun, err := actions_model.GetRunByID(ctx, run.ID)
+	if err != nil {
+		return err
+	}
+	return sendActionRunNowDoneNotificationIfNeeded(ctx, priorRun, updatedRun)
+}
+
+// wrapper of UpdateRunJobWithoutNotification with a call to the ActionRunNowDone notification channel
+func UpdateRunJob(ctx context.Context, job *actions_model.ActionRunJob, cond builder.Cond, cols ...string) (int64, error) {
+	runID := job.RunID
+	if runID == 0 {
+		// job.ID is the only thing that must be given
+		// Don't overwrite job here, we'd loose the change we need to make.
+		oldJob, err := actions_model.GetRunJobByID(ctx, job.ID)
+		if err != nil {
+			return 0, err
+		}
+		runID = oldJob.RunID
+	}
+	priorRun, err := actions_model.GetRunByID(ctx, runID)
+	if err != nil {
+		return 0, err
+	}
+
+	affected, err := actions_model.UpdateRunJobWithoutNotification(ctx, job, cond, cols...)
+	if err != nil {
+		return affected, err
+	}
+
+	updatedRun, err := actions_model.GetRunByID(ctx, runID)
+	if err != nil {
+		return affected, err
+	}
+	return affected, sendActionRunNowDoneNotificationIfNeeded(ctx, priorRun, updatedRun)
 }

@@ -12,15 +12,14 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"runtime"
 	"runtime/trace"
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/git/internal" //nolint:depguard // only this file can use the internal type CmdArg, other files and packages should use AddXxx functions
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/git/internal" //nolint:depguard // only this file can use the internal type CmdArg, other files and packages should use AddXxx functions
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/util"
 )
 
 // TrustedCmdArgs returns the trusted arguments for git command.
@@ -357,17 +356,6 @@ func (c *Command) Run(opts *RunOpts) error {
 	elapsed := time.Since(startTime)
 	if elapsed > time.Second {
 		log.Debug("slow git.Command.Run: %s (%s)", c, elapsed)
-	}
-
-	// We need to check if the context is canceled by the program on Windows.
-	// This is because Windows does not have signal checking when terminating the process.
-	// It always returns exit code 1, unlike Linux, which has many exit codes for signals.
-	if runtime.GOOS == "windows" &&
-		err != nil &&
-		err.Error() == "" &&
-		cmd.ProcessState.ExitCode() == 1 &&
-		ctx.Err() == context.Canceled {
-		return ctx.Err()
 	}
 
 	if err != nil && ctx.Err() != context.DeadlineExceeded {

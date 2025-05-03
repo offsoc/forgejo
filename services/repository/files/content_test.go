@@ -5,15 +5,16 @@ package files
 
 import (
 	"testing"
+	"time"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/gitrepo"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/gitrepo"
+	api "forgejo.org/modules/structs"
 
-	_ "code.gitea.io/gitea/models/actions"
-	_ "code.gitea.io/gitea/models/forgefed"
+	_ "forgejo.org/models/actions"
+	_ "forgejo.org/models/forgefed"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,18 +34,19 @@ func getExpectedReadmeContentsResponse() *api.ContentsResponse {
 	gitURL := "https://try.gitea.io/api/v1/repos/user2/repo1/git/blobs/" + sha
 	downloadURL := "https://try.gitea.io/user2/repo1/raw/branch/master/" + treePath
 	return &api.ContentsResponse{
-		Name:          treePath,
-		Path:          treePath,
-		SHA:           "4b4851ad51df6a7d9f25c979345979eaeb5b349f",
-		LastCommitSHA: "65f1bf27bc3bf70f64657658635e66094edbcb4d",
-		Type:          "file",
-		Size:          30,
-		Encoding:      &encoding,
-		Content:       &content,
-		URL:           &selfURL,
-		HTMLURL:       &htmlURL,
-		GitURL:        &gitURL,
-		DownloadURL:   &downloadURL,
+		Name:           treePath,
+		Path:           treePath,
+		SHA:            "4b4851ad51df6a7d9f25c979345979eaeb5b349f",
+		LastCommitSHA:  "65f1bf27bc3bf70f64657658635e66094edbcb4d",
+		LastCommitWhen: time.Date(2017, time.March, 19, 16, 47, 59, 0, time.FixedZone("", -14400)),
+		Type:           "file",
+		Size:           30,
+		Encoding:       &encoding,
+		Content:        &content,
+		URL:            &selfURL,
+		HTMLURL:        &htmlURL,
+		GitURL:         &gitURL,
+		DownloadURL:    &downloadURL,
 		Links: &api.FileLinksResponse{
 			Self:    &selfURL,
 			GitURL:  &gitURL,
@@ -64,13 +66,13 @@ func TestGetContents(t *testing.T) {
 
 	t.Run("Get README.md contents with GetContents(ctx, )", func(t *testing.T) {
 		fileContentResponse, err := GetContents(db.DefaultContext, repo, treePath, ref, false)
-		assert.EqualValues(t, expectedContentsResponse, fileContentResponse)
+		assert.Equal(t, expectedContentsResponse, fileContentResponse)
 		require.NoError(t, err)
 	})
 
 	t.Run("Get README.md contents with ref as empty string (should then use the repo's default branch) with GetContents(ctx, )", func(t *testing.T) {
 		fileContentResponse, err := GetContents(db.DefaultContext, repo, treePath, "", false)
-		assert.EqualValues(t, expectedContentsResponse, fileContentResponse)
+		assert.Equal(t, expectedContentsResponse, fileContentResponse)
 		require.NoError(t, err)
 	})
 }

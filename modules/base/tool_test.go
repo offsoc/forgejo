@@ -73,7 +73,7 @@ func TestEllipsisString(t *testing.T) {
 }
 
 func TestTruncateString(t *testing.T) {
-	assert.Equal(t, "", TruncateString("foobar", 0))
+	assert.Empty(t, TruncateString("foobar", 0))
 	assert.Equal(t, "f", TruncateString("foobar", 1))
 	assert.Equal(t, "fo", TruncateString("foobar", 2))
 	assert.Equal(t, "foo", TruncateString("foobar", 3))
@@ -125,5 +125,5 @@ func TestFormatNumberSI(t *testing.T) {
 	assert.Equal(t, "1.3k", FormatNumberSI(int64(1317)))
 	assert.Equal(t, "21.3M", FormatNumberSI(21317675))
 	assert.Equal(t, "45.7G", FormatNumberSI(45721317675))
-	assert.Equal(t, "", FormatNumberSI("test"))
+	assert.Empty(t, FormatNumberSI("test"))
 }

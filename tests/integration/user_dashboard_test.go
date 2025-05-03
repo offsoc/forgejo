@@ -1,5 +1,5 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// Copyright 2024-2025 The Forgejo Authors. All rights reserved.
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 package integration
 
@@ -10,32 +10,36 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	unit_model "code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/translation"
-	issue_service "code.gitea.io/gitea/services/issue"
-	files_service "code.gitea.io/gitea/services/repository/files"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	issue_service "forgejo.org/services/issue"
+	files_service "forgejo.org/services/repository/files"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestUserDashboardActionLinks(t *testing.T) {
+func TestUserDashboardFeedWelcome(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
 
-	session := loginUser(t, "user1")
-	locale := translation.NewLocale("en-US")
+	// User2 has some activity in feed
+	session := loginUser(t, "user2")
+	page := NewHTMLParser(t, session.MakeRequest(t, NewRequest(t, "GET", "/"), http.StatusOK).Body)
+	testUserDashboardFeedType(t, page, false)
 
-	response := session.MakeRequest(t, NewRequest(t, "GET", "/"), http.StatusOK)
-	page := NewHTMLParser(t, response.Body)
-	links := page.Find("#navbar .dropdown[data-tooltip-content='Create…'] .menu")
-	assert.EqualValues(t, locale.TrString("new_repo.link"), strings.TrimSpace(links.Find("a[href='/repo/create']").Text()))
-	assert.EqualValues(t, locale.TrString("new_migrate.link"), strings.TrimSpace(links.Find("a[href='/repo/migrate']").Text()))
-	assert.EqualValues(t, locale.TrString("new_org.link"), strings.TrimSpace(links.Find("a[href='/org/create']").Text()))
+	// User1 doesn't have any activity in feed
+	session = loginUser(t, "user1")
+	page = NewHTMLParser(t, session.MakeRequest(t, NewRequest(t, "GET", "/"), http.StatusOK).Body)
+	testUserDashboardFeedType(t, page, true)
+}
+
+func testUserDashboardFeedType(t *testing.T, page *HTMLDoc, isEmpty bool) {
+	page.AssertElement(t, "#activity-feed", !isEmpty)
+	page.AssertElement(t, "#empty-feed", isEmpty)
 }
 
 func TestDashboardTitleRendering(t *testing.T) {
@@ -73,9 +77,13 @@ func TestDashboardTitleRendering(t *testing.T) {
 		count := 0
 		htmlDoc.doc.Find("#activity-feed .flex-item-main .title").Each(func(i int, s *goquery.Selection) {
 			count++
-			assert.EqualValues(t, ":exclamation: not rendered", s.Text())
+			if s.IsMatcher(goquery.Single("a")) {
+				assert.Equal(t, "❗ not rendered", s.Text())
+			} else {
+				assert.Equal(t, ":exclamation: not rendered", s.Text())
+			}
 		})
 
-		assert.EqualValues(t, 6, count)
+		assert.Equal(t, 6, count)
 	})
 }

@@ -16,21 +16,21 @@ import (
 	texttmpl "text/template"
 	"time"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	auth_model "code.gitea.io/gitea/models/auth"
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/emoji"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/markup/markdown"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/translation"
-	incoming_payload "code.gitea.io/gitea/services/mailer/incoming/payload"
-	"code.gitea.io/gitea/services/mailer/token"
+	activities_model "forgejo.org/models/activities"
+	auth_model "forgejo.org/models/auth"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/emoji"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/markup/markdown"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/translation"
+	incoming_payload "forgejo.org/services/mailer/incoming/payload"
+	"forgejo.org/services/mailer/token"
 
 	"gopkg.in/gomail.v2"
 )
@@ -685,19 +685,14 @@ func SendRemovedSecurityKey(ctx context.Context, u *user_model.User, securityKey
 	}
 	locale := translation.NewLocale(u.Language)
 
-	hasWebAuthn, err := auth_model.HasWebAuthnRegistrationsByUID(ctx, u.ID)
-	if err != nil {
-		return err
-	}
-	hasTOTP, err := auth_model.HasTwoFactorByUID(ctx, u.ID)
+	hasTwoFactor, err := auth_model.HasTwoFactorByUID(ctx, u.ID)
 	if err != nil {
 		return err
 	}
 
 	data := map[string]any{
 		"locale":          locale,
-		"HasWebAuthn":     hasWebAuthn,
-		"HasTOTP":         hasTOTP,
+		"HasTwoFactor":    hasTwoFactor,
 		"SecurityKeyName": securityKeyName,
 		"DisplayName":     u.DisplayName(),
 		"Username":        u.Name,

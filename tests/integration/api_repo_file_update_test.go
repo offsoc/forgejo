@@ -1,10 +1,10 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
 
 import (
-	stdCtx "context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -12,14 +12,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/asymkey"
+	auth_model "forgejo.org/models/auth"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/services/context"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -98,7 +99,7 @@ func getExpectedFileResponseForUpdate(commitID, treePath, lastCommitSHA string) 
 		},
 		Verification: &api.PayloadCommitVerification{
 			Verified:  false,
-			Reason:    "gpg.error.not_signed_commit",
+			Reason:    asymkey.NotSigned,
 			Signature: "",
 			Payload:   "",
 		},
@@ -135,17 +136,19 @@ func TestAPIUpdateFile(t *testing.T) {
 			req := NewRequestWithJSON(t, "PUT", fmt.Sprintf("/api/v1/repos/%s/%s/contents/%s", user2.Name, repo1.Name, treePath), &updateFileOptions).
 				AddTokenAuth(token2)
 			resp := MakeRequest(t, req, http.StatusOK)
-			gitRepo, _ := gitrepo.OpenRepository(stdCtx.Background(), repo1)
+			gitRepo, _ := gitrepo.OpenRepository(t.Context(), repo1)
 			commitID, _ := gitRepo.GetBranchCommitID(updateFileOptions.NewBranchName)
 			lasCommit, _ := gitRepo.GetCommitByPath(treePath)
 			expectedFileResponse := getExpectedFileResponseForUpdate(commitID, treePath, lasCommit.ID.String())
 			var fileResponse api.FileResponse
 			DecodeJSON(t, resp, &fileResponse)
-			assert.EqualValues(t, expectedFileResponse.Content, fileResponse.Content)
-			assert.EqualValues(t, expectedFileResponse.Commit.SHA, fileResponse.Commit.SHA)
-			assert.EqualValues(t, expectedFileResponse.Commit.HTMLURL, fileResponse.Commit.HTMLURL)
-			assert.EqualValues(t, expectedFileResponse.Commit.Author.Email, fileResponse.Commit.Author.Email)
-			assert.EqualValues(t, expectedFileResponse.Commit.Author.Name, fileResponse.Commit.Author.Name)
+			// Testify cannot assert time.Time correctly.
+			expectedFileResponse.Content.LastCommitWhen = fileResponse.Content.LastCommitWhen
+			assert.Equal(t, expectedFileResponse.Content, fileResponse.Content)
+			assert.Equal(t, expectedFileResponse.Commit.SHA, fileResponse.Commit.SHA)
+			assert.Equal(t, expectedFileResponse.Commit.HTMLURL, fileResponse.Commit.HTMLURL)
+			assert.Equal(t, expectedFileResponse.Commit.Author.Email, fileResponse.Commit.Author.Email)
+			assert.Equal(t, expectedFileResponse.Commit.Author.Name, fileResponse.Commit.Author.Name)
 			gitRepo.Close()
 		}
 
@@ -164,10 +167,10 @@ func TestAPIUpdateFile(t *testing.T) {
 		expectedSHA := "08bd14b2e2852529157324de9c226b3364e76136"
 		expectedHTMLURL := fmt.Sprintf(setting.AppURL+"user2/repo1/src/branch/new_branch/update/file%d.txt", fileID)
 		expectedDownloadURL := fmt.Sprintf(setting.AppURL+"user2/repo1/raw/branch/new_branch/update/file%d.txt", fileID)
-		assert.EqualValues(t, expectedSHA, fileResponse.Content.SHA)
-		assert.EqualValues(t, expectedHTMLURL, *fileResponse.Content.HTMLURL)
-		assert.EqualValues(t, expectedDownloadURL, *fileResponse.Content.DownloadURL)
-		assert.EqualValues(t, updateFileOptions.Message+"\n", fileResponse.Commit.Message)
+		assert.Equal(t, expectedSHA, fileResponse.Content.SHA)
+		assert.Equal(t, expectedHTMLURL, *fileResponse.Content.HTMLURL)
+		assert.Equal(t, expectedDownloadURL, *fileResponse.Content.DownloadURL)
+		assert.Equal(t, updateFileOptions.Message+"\n", fileResponse.Commit.Message)
 
 		// Test updating a file and renaming it
 		updateFileOptions = getUpdateFileOptions()
@@ -184,9 +187,9 @@ func TestAPIUpdateFile(t *testing.T) {
 		expectedSHA = "08bd14b2e2852529157324de9c226b3364e76136"
 		expectedHTMLURL = fmt.Sprintf(setting.AppURL+"user2/repo1/src/branch/master/rename/update/file%d.txt", fileID)
 		expectedDownloadURL = fmt.Sprintf(setting.AppURL+"user2/repo1/raw/branch/master/rename/update/file%d.txt", fileID)
-		assert.EqualValues(t, expectedSHA, fileResponse.Content.SHA)
-		assert.EqualValues(t, expectedHTMLURL, *fileResponse.Content.HTMLURL)
-		assert.EqualValues(t, expectedDownloadURL, *fileResponse.Content.DownloadURL)
+		assert.Equal(t, expectedSHA, fileResponse.Content.SHA)
+		assert.Equal(t, expectedHTMLURL, *fileResponse.Content.HTMLURL)
+		assert.Equal(t, expectedDownloadURL, *fileResponse.Content.DownloadURL)
 
 		// Test updating a file without a message
 		updateFileOptions = getUpdateFileOptions()
@@ -200,7 +203,7 @@ func TestAPIUpdateFile(t *testing.T) {
 		resp = MakeRequest(t, req, http.StatusOK)
 		DecodeJSON(t, resp, &fileResponse)
 		expectedMessage := "Update " + treePath + "\n"
-		assert.EqualValues(t, expectedMessage, fileResponse.Commit.Message)
+		assert.Equal(t, expectedMessage, fileResponse.Commit.Message)
 
 		// Test updating a file with the wrong SHA
 		fileID++

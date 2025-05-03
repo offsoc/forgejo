@@ -24,5 +24,5 @@ func TestMetadata(t *testing.T) {
 
 	meta, err = readIndexMetadata(dir)
 	require.NoError(t, err)
-	assert.EqualValues(t, 24, meta.Version)
+	assert.Equal(t, 24, meta.Version)
 }

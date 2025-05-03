@@ -6,8 +6,8 @@ package util
 import (
 	"fmt"
 
-	forgejo_log "code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/migration"
+	forgejo_log "forgejo.org/modules/log"
+	"forgejo.org/modules/migration"
 
 	"code.forgejo.org/f3/gof3/v3/logger"
 )

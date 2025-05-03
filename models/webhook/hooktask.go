@@ -8,12 +8,12 @@ import (
 	"errors"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	webhook_module "forgejo.org/modules/webhook"
 
 	gouuid "github.com/google/uuid"
 	"xorm.io/builder"
@@ -198,7 +198,8 @@ func MarkTaskDelivered(ctx context.Context, task *HookTask) (bool, error) {
 func CleanupHookTaskTable(ctx context.Context, cleanupType HookTaskCleanupType, olderThan time.Duration, numberToKeep int) error {
 	log.Trace("Doing: CleanupHookTaskTable")
 
-	if cleanupType == OlderThan {
+	switch cleanupType {
+	case OlderThan:
 		deleteOlderThan := time.Now().Add(-olderThan).UnixNano()
 		deletes, err := db.GetEngine(ctx).
 			Where("is_delivered = ? and delivered < ?", true, deleteOlderThan).
@@ -207,7 +208,7 @@ func CleanupHookTaskTable(ctx context.Context, cleanupType HookTaskCleanupType, 
 			return err
 		}
 		log.Trace("Deleted %d rows from hook_task", deletes)
-	} else if cleanupType == PerWebhook {
+	case PerWebhook:
 		hookIDs := make([]int64, 0, 10)
 		err := db.GetEngine(ctx).
 			Table("webhook").

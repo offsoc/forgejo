@@ -13,7 +13,7 @@ import (
 	"io"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 )
 
 // BranchPrefix base dir of the branch information file store on git

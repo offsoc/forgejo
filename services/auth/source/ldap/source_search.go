@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/log"
 
 	"github.com/go-ldap/ldap/v3"
 )

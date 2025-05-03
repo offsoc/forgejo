@@ -69,17 +69,17 @@
   }
 }
 
-#issue-list .flex-item-body .branches {
-  display: inline-flex;
+#issue-list .issue-meta {
+  gap: 0 0.5rem;
 }
 
-#issue-list .flex-item-body .branches .branch {
+#issue-list .issue-meta .branch {
   background-color: var(--color-secondary-alpha-50);
   border-radius: var(--border-radius);
   padding: 0 4px;
 }
 
-#issue-list .flex-item-body .branches .truncated-name {
+#issue-list .issue-meta .branch .truncated-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -88,18 +88,18 @@
   vertical-align: top;
 }
 
-#issue-list .flex-item-body .checklist progress {
+#issue-list .issue-meta .checklist progress {
   margin-left: 2px;
   width: 80px;
   height: 6px;
   display: inline-block;
 }
 
-#issue-list .flex-item-body .checklist progress::-webkit-progress-value {
+#issue-list .issue-meta .checklist progress::-webkit-progress-value {
   background-color: var(--color-secondary-dark-4);
 }
 
-#issue-list .flex-item-body .checklist progress::-moz-progress-bar {
+#issue-list .issue-meta .checklist progress::-moz-progress-bar {
   background-color: var(--color-secondary-dark-4);
 }
 

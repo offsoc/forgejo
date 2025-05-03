@@ -7,27 +7,29 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models"
-	actions_model "code.gitea.io/gitea/models/actions"
-	activities_model "code.gitea.io/gitea/models/activities"
-	admin_model "code.gitea.io/gitea/models/admin"
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/organization"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	project_model "code.gitea.io/gitea/models/project"
-	repo_model "code.gitea.io/gitea/models/repo"
-	secret_model "code.gitea.io/gitea/models/secret"
-	system_model "code.gitea.io/gitea/models/system"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/models/webhook"
-	actions_module "code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
+	"forgejo.org/models"
+	actions_model "forgejo.org/models/actions"
+	activities_model "forgejo.org/models/activities"
+	admin_model "forgejo.org/models/admin"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/organization"
+	packages_model "forgejo.org/models/packages"
+	access_model "forgejo.org/models/perm/access"
+	project_model "forgejo.org/models/project"
+	repo_model "forgejo.org/models/repo"
+	secret_model "forgejo.org/models/secret"
+	system_model "forgejo.org/models/system"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/models/webhook"
+	actions_module "forgejo.org/modules/actions"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	federation_service "forgejo.org/services/federation"
 
 	"xorm.io/builder"
 )
@@ -286,6 +288,15 @@ func DeleteRepositoryDirectly(ctx context.Context, doer *user_model.User, repoID
 	}
 
 	if _, err := sess.Where("repo_id=?", repo.ID).Delete(new(repo_model.Attachment)); err != nil {
+		return err
+	}
+
+	if err := federation_service.DeleteFollowingRepos(ctx, repo.ID); err != nil {
+		return err
+	}
+
+	// unlink packages linked to this repository
+	if err = packages_model.UnlinkRepositoryFromAllPackages(ctx, repoID); err != nil {
 		return err
 	}
 

@@ -10,14 +10,14 @@ import (
 	"os"
 	"strings"
 
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	base "code.gitea.io/gitea/modules/migration"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/convert"
-	"code.gitea.io/gitea/services/migrations"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	base "forgejo.org/modules/migration"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/convert"
+	"forgejo.org/services/migrations"
 
 	"github.com/urfave/cli/v2"
 )

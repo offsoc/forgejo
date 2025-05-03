@@ -13,27 +13,27 @@ import (
 	"strconv"
 	"strings"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/container"
-	issue_indexer "code.gitea.io/gitea/modules/indexer/issues"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/markup/markdown"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/routers/web/feed"
-	"code.gitea.io/gitea/services/context"
-	issue_service "code.gitea.io/gitea/services/issue"
-	pull_service "code.gitea.io/gitea/services/pull"
+	activities_model "forgejo.org/models/activities"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/container"
+	issue_indexer "forgejo.org/modules/indexer/issues"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/markup/markdown"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/routers/web/feed"
+	"forgejo.org/services/context"
+	issue_service "forgejo.org/services/issue"
+	pull_service "forgejo.org/services/pull"
 
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/ProtonMail/go-crypto/openpgp/armor"
@@ -90,6 +90,8 @@ func Dashboard(ctx *context.Context) {
 	cnt, _ := organization.GetOrganizationCount(ctx, ctxUser)
 	ctx.Data["UserOrgsCount"] = cnt
 	ctx.Data["MirrorsEnabled"] = setting.Mirror.Enabled
+	ctx.Data["UsersPageIsDisabled"] = setting.Service.Explore.DisableUsersPage
+	ctx.Data["OrganizationsPageIsDisabled"] = setting.Service.Explore.DisableOrganizationsPage
 	ctx.Data["Date"] = date
 
 	var uid int64
@@ -463,8 +465,6 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 		User:       ctx.Doer,
 	}
 
-	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
-
 	// Search all repositories which
 	//
 	// As user:
@@ -594,9 +594,7 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	// USING FINAL STATE OF opts FOR A QUERY.
 	var issues issues_model.IssueList
 	{
-		issueIDs, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts).Copy(
-			func(o *issue_indexer.SearchOptions) { o.IsFuzzyKeyword = isFuzzy },
-		))
+		issueIDs, _, err := issue_indexer.SearchIssues(ctx, issue_indexer.ToSearchOptions(keyword, opts))
 		if err != nil {
 			ctx.ServerError("issueIDsFromSearch", err)
 			return
@@ -622,9 +620,7 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	// -------------------------------
 	// Fill stats to post to ctx.Data.
 	// -------------------------------
-	issueStats, err := getUserIssueStats(ctx, ctxUser, filterMode, issue_indexer.ToSearchOptions(keyword, opts).Copy(
-		func(o *issue_indexer.SearchOptions) { o.IsFuzzyKeyword = isFuzzy },
-	))
+	issueStats, err := getUserIssueStats(ctx, ctxUser, filterMode, issue_indexer.ToSearchOptions(keyword, opts))
 	if err != nil {
 		ctx.ServerError("getUserIssueStats", err)
 		return
@@ -659,9 +655,10 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 			return 0
 		}
 		reviewTyp := issues_model.ReviewTypeApprove
-		if typ == "reject" {
+		switch typ {
+		case "reject":
 			reviewTyp = issues_model.ReviewTypeReject
-		} else if typ == "waiting" {
+		case "waiting":
 			reviewTyp = issues_model.ReviewTypeRequest
 		}
 		for _, count := range counts {
@@ -679,7 +676,6 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	ctx.Data["IsShowClosed"] = isShowClosed
 	ctx.Data["SelectLabels"] = selectedLabels
 	ctx.Data["PageIsOrgIssues"] = org != nil
-	ctx.Data["IsFuzzy"] = isFuzzy
 
 	if isShowClosed {
 		ctx.Data["State"] = "closed"
@@ -695,7 +691,6 @@ func buildIssueOverview(ctx *context.Context, unitType unit.Type) {
 	pager.AddParam(ctx, "labels", "SelectLabels")
 	pager.AddParam(ctx, "milestone", "MilestoneID")
 	pager.AddParam(ctx, "assignee", "AssigneeID")
-	pager.AddParam(ctx, "fuzzy", "IsFuzzy")
 	ctx.Data["Page"] = pager
 
 	ctx.HTML(http.StatusOK, tplIssues)

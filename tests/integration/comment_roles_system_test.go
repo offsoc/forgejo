@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"testing"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/tests"
+	issues_model "forgejo.org/models/issues"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +19,7 @@ import (
 // As it is not possible to do actions as system users, the tests are done using fixtures.
 
 func TestSystemCommentRoles(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestSystemCommentRoles/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestSystemCommentRoles")()
 	defer tests.PrepareTestEnv(t)()
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
@@ -49,7 +49,7 @@ func TestSystemCommentRoles(t *testing.T) {
 			resp := MakeRequest(t, req, http.StatusOK)
 			htmlDoc := NewHTMLParser(t, resp.Body)
 
-			assert.EqualValues(t, tc.username, htmlDoc.Find("a.author").Text())
+			assert.Equal(t, tc.username, htmlDoc.Find("a.author").Text())
 			assert.EqualValues(t, tc.roleCount, htmlDoc.Find(".role-label").Length())
 		})
 	}

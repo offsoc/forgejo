@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
 	"github.com/stretchr/testify/assert"
@@ -293,7 +293,7 @@ heiQvzkApQup5c+BhH5zFDFdKJ2CBByxw9+7QjMFI/wgLixKuE0Ob2kAokXf7RlB
 	require.NoError(t, err)
 	assert.Len(t, keys, 1)
 	assert.Len(t, keys[0].Emails, 1)
-	assert.EqualValues(t, "no-reply@golang.com", keys[0].Emails[0].Email)
+	assert.Equal(t, "no-reply@golang.com", keys[0].Emails[0].Email)
 
 	primaryKeyID := "D68172F48E9C5283"
 	// Assert primary key

@@ -5,12 +5,12 @@
 		{{template "base/alert" .}}
 		<div class="list-header">
 			<div class="switch list-header-toggle">
-				<a class="item{{if not .IsShowClosed}} active{{end}}" href="?type={{$.ViewType}}&sort={{$.SortType}}&state=open&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
-					{{svg "octicon-issue-opened" 16 "tw-mr-2"}}
+				<a class="item{{if not .IsShowClosed}} active{{end}}" href="?type={{$.ViewType}}&sort={{$.SortType}}&state=open&labels={{.SelectLabels}}&q={{$.Keyword}}">
+					{{svg "octicon-issue-opened" 16}}
 					{{ctx.Locale.PrettyNumber .IssueStats.OpenCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.open_title"}}
 				</a>
-				<a class="item{{if .IsShowClosed}} active{{end}}" href="?type={{$.ViewType}}&sort={{$.SortType}}&state=closed&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
-					{{svg "octicon-issue-closed" 16 "tw-mr-2"}}
+				<a class="item{{if .IsShowClosed}} active{{end}}" href="?type={{$.ViewType}}&sort={{$.SortType}}&state=closed&labels={{.SelectLabels}}&q={{$.Keyword}}">
+					{{svg "octicon-issue-closed" 16}}
 					{{ctx.Locale.PrettyNumber .IssueStats.ClosedCount}}&nbsp;{{ctx.Locale.Tr "repo.issues.closed_title"}}
 				</a>
 			</div>
@@ -20,9 +20,9 @@
 					<input type="hidden" name="sort" value="{{$.SortType}}">
 					<input type="hidden" name="state" value="{{$.State}}">
 					{{if .PageIsPulls}}
-						{{template "shared/search/combo_fuzzy" dict "Value" $.Keyword "IsFuzzy" $.IsFuzzy "Placeholder" (ctx.Locale.Tr "search.pull_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
+						{{template "shared/search/combo" dict "Value" $.Keyword "Placeholder" (ctx.Locale.Tr "search.pull_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
 					{{else}}
-						{{template "shared/search/combo_fuzzy" dict "Value" $.Keyword "IsFuzzy" $.IsFuzzy "Placeholder" (ctx.Locale.Tr "search.issue_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
+						{{template "shared/search/combo" dict "Value" $.Keyword "Placeholder" (ctx.Locale.Tr "search.issue_kind") "Tooltip" (ctx.Locale.Tr "explore.go_to")}}
 					{{end}}
 				</div>
 			</form>
@@ -38,29 +38,29 @@
 						{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 					</span>
 					<div class="ui menu">
-						<a class="{{if eq .ViewType "created_by"}}active{{end}} item" href="?type=created_by&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
+						<a class="{{if eq .ViewType "created_by"}}active{{end}} item" href="?type=created_by&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}">
 							<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.CreateCount}}</div>
 							{{ctx.Locale.Tr "repo.issues.filter_type.created_by_you"}}
 						</a>
-						<a class="{{if eq .ViewType "your_repositories"}}active{{end}} item" href="?type=your_repositories&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
+						<a class="{{if eq .ViewType "your_repositories"}}active{{end}} item" href="?type=your_repositories&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}">
 							<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.YourRepositoriesCount}}</div>
 							{{ctx.Locale.Tr "home.issues.in_your_repos"}}
 						</a>
-						<a class="{{if eq .ViewType "assigned"}}active{{end}} item" href="?type=assigned&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
+						<a class="{{if eq .ViewType "assigned"}}active{{end}} item" href="?type=assigned&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}">
 							<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.AssignCount}}</div>
 							{{ctx.Locale.Tr "repo.issues.filter_type.assigned_to_you"}}
 						</a>
 						{{if .PageIsPulls}}
-							<a class="{{if eq .ViewType "review_requested"}}active{{end}} item" href="?type=review_requested&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
+							<a class="{{if eq .ViewType "review_requested"}}active{{end}} item" href="?type=review_requested&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}">
 								<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.ReviewRequestedCount}}</div>
 								{{ctx.Locale.Tr "repo.issues.filter_type.review_requested"}}
 							</a>
-							<a class="{{if eq .ViewType "reviewed_by"}}active{{end}} item" href="?type=reviewed_by&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
+							<a class="{{if eq .ViewType "reviewed_by"}}active{{end}} item" href="?type=reviewed_by&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}">
 								<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.ReviewedCount}}</div>
 								{{ctx.Locale.Tr "repo.issues.filter_type.reviewed_by_you"}}
 							</a>
 						{{end}}
-						<a class="{{if eq .ViewType "mentioned"}}active{{end}} item" href="?type=mentioned&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">
+						<a class="{{if eq .ViewType "mentioned"}}active{{end}} item" href="?type=mentioned&sort={{$.SortType}}&state={{.State}}&q={{$.Keyword}}">
 							<div class="ui circular mini label tw-ml-0">{{CountFmt .IssueStats.MentionCount}}</div>
 							{{ctx.Locale.Tr "repo.issues.filter_type.mentioning_you"}}
 						</a>
@@ -73,14 +73,13 @@
 						{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 					</span>
 					<div class="menu">
-						<a class="{{if eq .SortType "recentupdate"}}active {{end}}item" href="?type={{$.ViewType}}&sort=recentupdate&state={{$.State}}&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">{{ctx.Locale.Tr "repo.issues.filter_sort.recentupdate"}}</a>
-						<a class="{{if eq .SortType "leastupdate"}}active {{end}}item" href="?type={{$.ViewType}}&sort=leastupdate&state={{$.State}}&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">{{ctx.Locale.Tr "repo.issues.filter_sort.leastupdate"}}</a>
-						<a class="{{if or (eq .SortType "latest") (not .SortType)}}active {{end}}item" href="?type={{$.ViewType}}&sort=latest&state={{$.State}}&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">{{ctx.Locale.Tr "repo.issues.filter_sort.latest"}}</a>
-						<a class="{{if eq .SortType "oldest"}}active {{end}}item" href="?type={{$.ViewType}}&sort=oldest&state={{$.State}}&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">{{ctx.Locale.Tr "repo.issues.filter_sort.oldest"}}</a>
-						<a class="{{if eq .SortType "mostcomment"}}active {{end}}item" href="?type={{$.ViewType}}&sort=mostcomment&state={{$.State}}&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">{{ctx.Locale.Tr "repo.issues.filter_sort.mostcomment"}}</a>
-						<a class="{{if eq .SortType "leastcomment"}}active {{end}}item" href="?type={{$.ViewType}}&sort=leastcomment&state={{$.State}}&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">{{ctx.Locale.Tr "repo.issues.filter_sort.leastcomment"}}</a>
-						<a class="{{if eq .SortType "nearduedate"}}active {{end}}item" href="?type={{$.ViewType}}&sort=nearduedate&state={{$.State}}&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">{{ctx.Locale.Tr "repo.issues.filter_sort.nearduedate"}}</a>
-						<a class="{{if eq .SortType "farduedate"}}active {{end}}item" href="?type={{$.ViewType}}&sort=farduedate&state={{$.State}}&labels={{.SelectLabels}}&q={{$.Keyword}}&fuzzy={{.IsFuzzy}}">{{ctx.Locale.Tr "repo.issues.filter_sort.farduedate"}}</a>
+						{{$o := .}}
+						{{range $opt := StringUtils.Make "recentupdate" "leastupdate" "latest" "oldest" "mostcomment" "leastcomment" "nearduedate" "farduedate"}}
+							{{$text := ctx.Locale.Tr (printf "repo.issues.filter_sort.%s" $opt)}}
+							<a class="{{if or (eq $o.SortType $opt) (and (eq $opt "latest") (not $o.SortType))}}active {{end}}item" href="?type={{$.ViewType}}&sort={{$opt}}&state={{$.State}}&labels={{$o.SelectLabels}}&q={{$.Keyword}}">{{
+								$text
+							}}</a>
+						{{end}}
 					</div>
 				</div>
 			</div>

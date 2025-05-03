@@ -18,24 +18,24 @@ import (
 	"strings"
 	"time"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/storage"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/common"
-	actions_service "code.gitea.io/gitea/services/actions"
-	context_module "code.gitea.io/gitea/services/context"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	"forgejo.org/modules/actions"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/storage"
+	"forgejo.org/modules/templates"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/common"
+	actions_service "forgejo.org/services/actions"
+	context_module "forgejo.org/services/context"
 
 	"xorm.io/builder"
 )
@@ -383,7 +383,7 @@ func Rerun(ctx *context_module.Context) {
 		run.PreviousDuration = run.Duration()
 		run.Started = 0
 		run.Stopped = 0
-		if err := actions_model.UpdateRun(ctx, run, "started", "stopped", "previous_duration"); err != nil {
+		if err := actions_service.UpdateRun(ctx, run, "started", "stopped", "previous_duration"); err != nil {
 			ctx.Error(http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -436,7 +436,7 @@ func rerunJob(ctx *context_module.Context, job *actions_model.ActionRunJob, shou
 	job.Stopped = 0
 
 	if err := db.WithTx(ctx, func(ctx context.Context) error {
-		_, err := actions_model.UpdateRunJob(ctx, job, builder.Eq{"status": status}, "task_id", "status", "started", "stopped")
+		_, err := actions_service.UpdateRunJob(ctx, job, builder.Eq{"status": status}, "task_id", "status", "started", "stopped")
 		return err
 	}); err != nil {
 		return err
@@ -512,7 +512,7 @@ func Cancel(ctx *context_module.Context) {
 			if job.TaskID == 0 {
 				job.Status = actions_model.StatusCancelled
 				job.Stopped = timeutil.TimeStampNow()
-				n, err := actions_model.UpdateRunJob(ctx, job, builder.Eq{"task_id": 0}, "status", "stopped")
+				n, err := actions_service.UpdateRunJob(ctx, job, builder.Eq{"task_id": 0}, "status", "stopped")
 				if err != nil {
 					return err
 				}
@@ -521,7 +521,7 @@ func Cancel(ctx *context_module.Context) {
 				}
 				continue
 			}
-			if err := actions_model.StopTask(ctx, job.TaskID, actions_model.StatusCancelled); err != nil {
+			if err := actions_service.StopTask(ctx, job.TaskID, actions_model.StatusCancelled); err != nil {
 				return err
 			}
 		}
@@ -549,13 +549,13 @@ func Approve(ctx *context_module.Context) {
 	if err := db.WithTx(ctx, func(ctx context.Context) error {
 		run.NeedApproval = false
 		run.ApprovedBy = doer.ID
-		if err := actions_model.UpdateRun(ctx, run, "need_approval", "approved_by"); err != nil {
+		if err := actions_service.UpdateRun(ctx, run, "need_approval", "approved_by"); err != nil {
 			return err
 		}
 		for _, job := range jobs {
 			if len(job.Needs) == 0 && job.Status.IsBlocked() {
 				job.Status = actions_model.StatusWaiting
-				_, err := actions_model.UpdateRunJob(ctx, job, nil, "status")
+				_, err := actions_service.UpdateRunJob(ctx, job, nil, "status")
 				if err != nil {
 					return err
 				}

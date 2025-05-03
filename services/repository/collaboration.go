@@ -7,10 +7,10 @@ package repository
 import (
 	"context"
 
-	"code.gitea.io/gitea/models"
-	"code.gitea.io/gitea/models/db"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
+	"forgejo.org/models"
+	"forgejo.org/models/db"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
 )
 
 // DeleteCollaboration removes collaboration relation between the user and repository.

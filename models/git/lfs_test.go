@@ -5,26 +5,19 @@ package git
 
 import (
 	"context"
-	"path/filepath"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestIterateRepositoryIDsWithLFSMetaObjects(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"models/git/TestIterateRepositoryIDsWithLFSMetaObjects/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("models/git/TestIterateRepositoryIDsWithLFSMetaObjects")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 
 	type repocount struct {
@@ -42,7 +35,7 @@ func TestIterateRepositoryIDsWithLFSMetaObjects(t *testing.T) {
 			return nil
 		})
 		require.NoError(t, err)
-		assert.EqualValues(t, expected, cases)
+		assert.Equal(t, expected, cases)
 	})
 
 	t.Run("Low batch size", func(t *testing.T) {
@@ -54,7 +47,7 @@ func TestIterateRepositoryIDsWithLFSMetaObjects(t *testing.T) {
 			return nil
 		})
 		require.NoError(t, err)
-		assert.EqualValues(t, expected, cases)
+		assert.Equal(t, expected, cases)
 	})
 }
 
@@ -72,7 +65,7 @@ func TestIterateLFSMetaObjectsForRepo(t *testing.T) {
 			return nil
 		}, &IterateLFSMetaObjectsForRepoOptions{})
 		require.NoError(t, err)
-		assert.EqualValues(t, expectedIDs, actualIDs)
+		assert.Equal(t, expectedIDs, actualIDs)
 	})
 
 	t.Run("Low batch size", func(t *testing.T) {
@@ -84,7 +77,7 @@ func TestIterateLFSMetaObjectsForRepo(t *testing.T) {
 			return nil
 		}, &IterateLFSMetaObjectsForRepoOptions{})
 		require.NoError(t, err)
-		assert.EqualValues(t, expectedIDs, actualIDs)
+		assert.Equal(t, expectedIDs, actualIDs)
 
 		t.Run("Batch handles updates", func(t *testing.T) {
 			actualIDs := []int64{}
@@ -96,7 +89,7 @@ func TestIterateLFSMetaObjectsForRepo(t *testing.T) {
 				return nil
 			}, &IterateLFSMetaObjectsForRepoOptions{})
 			require.NoError(t, err)
-			assert.EqualValues(t, expectedIDs, actualIDs)
+			assert.Equal(t, expectedIDs, actualIDs)
 		})
 	})
 }

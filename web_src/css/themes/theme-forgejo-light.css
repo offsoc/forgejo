@@ -212,7 +212,6 @@
   --color-orange-badge: #ea580c;
   --color-orange-badge-bg: #ea580c22;
   --color-orange-badge-hover-bg: #ea580c44;
-  --color-git: #f05133;
   /* Icon colors (PR/Issue/...) */
   --color-icon-green: var(--color-green-light);
   --color-icon-red: var(--color-red-light);
@@ -244,6 +243,8 @@
   --color-active: #d4d4d8aa;
   --color-menu: var(--zinc-100);
   --color-card: var(--zinc-50);
+  --fancy-card-bg: var(--zinc-100);
+  --fancy-card-border: var(--zinc-200);
   --color-markup-table-row: #ffffff06;
   --color-markup-code-block: var(--zinc-150);
   --color-markup-code-inline: var(--zinc-200);
@@ -314,10 +315,9 @@
 .ui.ui.ui.basic.primary.label {
   color: var(--color-text-dark) !important;
 }
-.ui.basic.yellow.label.pending-label {
+.ui.yellow.label.pending-label {
   background: var(--color-warning-bg) !important;
-  color: var(--color-warning-text) !important;
-  border-color: var(--color-yellow-light) !important;
+  color: var(--color-text-dark) !important;
 }
 ::selection {
   background: var(--steel-450) !important;

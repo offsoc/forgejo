@@ -4,10 +4,9 @@
 package log_test
 
 import (
-	"context"
 	"testing"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +22,7 @@ func TestBufferLogger(t *testing.T) {
 		Expression: expected,
 	})
 
-	logger := log.NewLoggerWithWriters(context.Background(), "test", bufferWriter)
+	logger := log.NewLoggerWithWriters(t.Context(), "test", bufferWriter)
 
 	logger.SendLogEvent(&log.Event{
 		Level:         log.INFO,

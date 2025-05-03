@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
@@ -239,6 +239,11 @@ func SetRepositoryLink(ctx context.Context, packageID, repoID int64) error {
 	if n == 0 && err == nil {
 		return ErrPackageNotExist
 	}
+	return err
+}
+
+func UnlinkRepository(ctx context.Context, packageID int64) error {
+	_, err := db.GetEngine(ctx).ID(packageID).Cols("repo_id").Update(&Package{RepoID: 0})
 	return err
 }
 

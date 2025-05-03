@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"time"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/actions"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/actions"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
 )
 
 // StopZombieTasks stops the task which have running status, but haven't been updated for a long time
@@ -41,7 +41,7 @@ func stopTasks(ctx context.Context, opts actions_model.FindTaskOptions) error {
 	jobs := make([]*actions_model.ActionRunJob, 0, len(tasks))
 	for _, task := range tasks {
 		if err := db.WithTx(ctx, func(ctx context.Context) error {
-			if err := actions_model.StopTask(ctx, task.ID, actions_model.StatusFailure); err != nil {
+			if err := StopTask(ctx, task.ID, actions_model.StatusFailure); err != nil {
 				return err
 			}
 			if err := task.LoadJob(ctx); err != nil {
@@ -88,7 +88,7 @@ func CancelAbandonedJobs(ctx context.Context) error {
 		job.Status = actions_model.StatusCancelled
 		job.Stopped = now
 		if err := db.WithTx(ctx, func(ctx context.Context) error {
-			_, err := actions_model.UpdateRunJob(ctx, job, nil, "status", "stopped")
+			_, err := UpdateRunJob(ctx, job, nil, "status", "stopped")
 			return err
 		}); err != nil {
 			log.Warn("cancel abandoned job %v: %v", job.ID, err)

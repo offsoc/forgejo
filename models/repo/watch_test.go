@@ -6,10 +6,10 @@ package repo_test
 import (
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,7 +36,7 @@ func TestGetWatchers(t *testing.T) {
 	// One watchers are inactive, thus minus 1
 	assert.Len(t, watches, repo.NumWatches-1)
 	for _, watch := range watches {
-		assert.EqualValues(t, repo.ID, watch.RepoID)
+		assert.Equal(t, repo.ID, watch.RepoID)
 	}
 
 	watches, err = repo_model.GetWatchers(db.DefaultContext, unittest.NonexistentID)

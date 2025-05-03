@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,5 +24,5 @@ func TestPullCompare(t *testing.T) {
 
 	req = NewRequest(t, "GET", link)
 	resp = session.MakeRequest(t, req, http.StatusOK)
-	assert.EqualValues(t, http.StatusOK, resp.Code)
+	assert.Equal(t, http.StatusOK, resp.Code)
 }

@@ -6,8 +6,8 @@ package organization
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
 )
 
 // GetOrgRepositories get repos belonging to the given organization

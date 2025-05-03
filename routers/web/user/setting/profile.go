@@ -12,27 +12,26 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/avatars"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/typesniffer"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
-	user_service "code.gitea.io/gitea/services/user"
+	"forgejo.org/models/avatars"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/typesniffer"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
+	user_service "forgejo.org/services/user"
 )
 
 const (
@@ -42,8 +41,7 @@ const (
 	tplSettingsRepositories base.TplName = "user/settings/repos"
 )
 
-// must be kept in sync with `web_src/js/features/user-settings.js`
-var recognisedPronouns = []string{"", "he/him", "she/her", "they/them", "it/its", "any pronouns"}
+var commonPronouns = []string{"he/him", "she/her", "they/them", "it/its", "any pronouns"}
 
 // Profile render user's profile page
 func Profile(ctx *context.Context) {
@@ -51,8 +49,8 @@ func Profile(ctx *context.Context) {
 	ctx.Data["PageIsSettingsProfile"] = true
 	ctx.Data["AllowedUserVisibilityModes"] = setting.Service.AllowedUserVisibilityModesSlice.ToVisibleTypeSlice()
 	ctx.Data["DisableGravatar"] = setting.Config().Picture.DisableGravatar.Value(ctx)
-	ctx.Data["PronounsAreCustom"] = !slices.Contains(recognisedPronouns, ctx.Doer.Pronouns)
 	ctx.Data["CooldownPeriod"] = setting.Service.UsernameCooldownPeriod
+	ctx.Data["CommonPronouns"] = commonPronouns
 
 	ctx.HTML(http.StatusOK, tplSettingsProfile)
 }
@@ -63,8 +61,8 @@ func ProfilePost(ctx *context.Context) {
 	ctx.Data["PageIsSettingsProfile"] = true
 	ctx.Data["AllowedUserVisibilityModes"] = setting.Service.AllowedUserVisibilityModesSlice.ToVisibleTypeSlice()
 	ctx.Data["DisableGravatar"] = setting.Config().Picture.DisableGravatar.Value(ctx)
-	ctx.Data["PronounsAreCustom"] = !slices.Contains(recognisedPronouns, ctx.Doer.Pronouns)
 	ctx.Data["CooldownPeriod"] = setting.Service.UsernameCooldownPeriod
+	ctx.Data["CommonPronouns"] = commonPronouns
 
 	if ctx.HasError() {
 		ctx.HTML(http.StatusOK, tplSettingsProfile)
@@ -106,6 +104,7 @@ func ProfilePost(ctx *context.Context) {
 		Location:            optional.Some(form.Location),
 		Visibility:          optional.Some(form.Visibility),
 		KeepActivityPrivate: optional.Some(form.KeepActivityPrivate),
+		KeepPronounsPrivate: optional.Some(form.KeepPronounsPrivate),
 	}
 	if err := user_service.UpdateUser(ctx, ctx.Doer, opts); err != nil {
 		ctx.ServerError("UpdateUser", err)
@@ -147,7 +146,7 @@ func UpdateAvatarSetting(ctx *context.Context, form *forms.AvatarForm, ctxUser *
 		}
 
 		st := typesniffer.DetectContentType(data)
-		if !(st.IsImage() && !st.IsSvgImage()) {
+		if !st.IsImage() || st.IsSvgImage() {
 			return errors.New(ctx.Locale.TrString("settings.uploaded_avatar_not_a_image"))
 		}
 		if err = user_service.UploadAvatar(ctx, ctxUser, data); err != nil {
@@ -330,6 +329,14 @@ func Repos(ctx *context.Context) {
 func Appearance(ctx *context.Context) {
 	ctx.Data["Title"] = ctx.Tr("settings.appearance")
 	ctx.Data["PageIsSettingsAppearance"] = true
+	ctx.Data["AllThemes"] = setting.UI.Themes
+	ctx.Data["ThemeName"] = func(themeName string) string {
+		fullThemeName := "themes.names." + themeName
+		if ctx.Locale.HasKey(fullThemeName) {
+			return ctx.Locale.TrString(fullThemeName)
+		}
+		return themeName
+	}
 
 	var hiddenCommentTypes *big.Int
 	val, err := user_model.GetUserSetting(ctx, ctx.Doer.ID, user_model.SettingsKeyHiddenCommentTypes)

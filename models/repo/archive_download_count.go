@@ -6,9 +6,9 @@ package repo
 import (
 	"context"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/git"
-	api "code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/git"
+	api "forgejo.org/modules/structs"
 )
 
 // RepoArchiveDownloadCount counts all archive downloads for a tag

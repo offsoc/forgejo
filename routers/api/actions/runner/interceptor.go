@@ -9,15 +9,13 @@ import (
 	"errors"
 	"strings"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	actions_model "forgejo.org/models/actions"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"connectrpc.com/connect"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -37,12 +35,12 @@ var withRunner = connect.WithInterceptors(connect.UnaryInterceptorFunc(func(unar
 		runner, err := actions_model.GetRunnerByUUID(ctx, uuid)
 		if err != nil {
 			if errors.Is(err, util.ErrNotExist) {
-				return nil, status.Error(codes.Unauthenticated, "unregistered runner")
+				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("unregistered runner"))
 			}
-			return nil, status.Error(codes.Internal, err.Error())
+			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 		if subtle.ConstantTimeCompare([]byte(runner.TokenHash), []byte(auth_model.HashToken(token, runner.TokenSalt))) != 1 {
-			return nil, status.Error(codes.Unauthenticated, "unregistered runner")
+			return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("unregistered runner"))
 		}
 
 		cols := []string{"last_online"}

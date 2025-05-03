@@ -12,16 +12,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code.gitea.io/gitea/models"
-	repo_model "code.gitea.io/gitea/models/repo"
-	system_model "code.gitea.io/gitea/models/system"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/hostmatcher"
-	"code.gitea.io/gitea/modules/log"
-	base "code.gitea.io/gitea/modules/migration"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models"
+	repo_model "forgejo.org/models/repo"
+	system_model "forgejo.org/models/system"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/hostmatcher"
+	"forgejo.org/modules/log"
+	base "forgejo.org/modules/migration"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
 )
 
 // MigrateOptions is equal to base.MigrateOptions
@@ -39,8 +39,17 @@ func RegisterDownloaderFactory(factory base.DownloaderFactory) {
 	factories = append(factories, factory)
 }
 
-// IsMigrateURLAllowed checks if an URL is allowed to be migrated from
+// IsPushMirrorURLAllowed checks if an URL is allowed to be pushed to.
+func IsPushMirrorURLAllowed(remoteURL string, doer *user_model.User) error {
+	return isURLAllowed(remoteURL, doer, true)
+}
+
+// IsMigrateURLAllowed checks if an URL is allowed to be migrated from.
 func IsMigrateURLAllowed(remoteURL string, doer *user_model.User) error {
+	return isURLAllowed(remoteURL, doer, false)
+}
+
+func isURLAllowed(remoteURL string, doer *user_model.User, isPushMirror bool) error {
 	// Remote address can be HTTP/HTTPS/Git URL or local path.
 	u, err := url.Parse(remoteURL)
 	if err != nil {
@@ -71,7 +80,7 @@ func IsMigrateURLAllowed(remoteURL string, doer *user_model.User) error {
 		return &models.ErrInvalidCloneAddr{Host: u.Host, IsURLError: true}
 	}
 
-	if u.Opaque != "" || u.Scheme != "" && u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "git" && u.Scheme != "ssh" {
+	if u.Opaque != "" || u.Scheme != "" && u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "git" && u.Scheme != "ssh" || (!isPushMirror && u.Scheme == "ssh") {
 		return &models.ErrInvalidCloneAddr{Host: u.Host, IsProtocolInvalid: true, IsPermissionDenied: true, IsURLError: true}
 	}
 

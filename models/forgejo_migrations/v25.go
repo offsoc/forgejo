@@ -7,11 +7,13 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/base64"
+	"fmt"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/secret"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/secret"
+	"forgejo.org/modules/setting"
 
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
@@ -57,19 +59,38 @@ func MigrateTwoFactorToKeying(x *xorm.Engine) error {
 
 	oldEncryptionKey := md5.Sum([]byte(setting.SecretKey))
 
-	return db.Iterate(context.Background(), nil, func(ctx context.Context, bean *auth.TwoFactor) error {
+	messages := make([]string, 0, 100)
+	ids := make([]int64, 0, 100)
+
+	err = db.Iterate(context.Background(), nil, func(ctx context.Context, bean *auth.TwoFactor) error {
 		decodedStoredSecret, err := base64.StdEncoding.DecodeString(string(bean.Secret))
 		if err != nil {
-			return err
+			messages = append(messages, fmt.Sprintf("two_factor.id=%d, two_factor.uid=%d: base64.StdEncoding.DecodeString: %v", bean.ID, bean.UID, err))
+			ids = append(ids, bean.ID)
+			return nil
 		}
 
 		secretBytes, err := secret.AesDecrypt(oldEncryptionKey[:], decodedStoredSecret)
 		if err != nil {
-			return err
+			messages = append(messages, fmt.Sprintf("two_factor.id=%d, two_factor.uid=%d: secret.AesDecrypt: %v", bean.ID, bean.UID, err))
+			ids = append(ids, bean.ID)
+			return nil
 		}
 
 		bean.SetSecret(string(secretBytes))
 		_, err = db.GetEngine(ctx).Cols("secret").ID(bean.ID).Update(bean)
 		return err
 	})
+	if err == nil {
+		if len(ids) > 0 {
+			log.Error("Forgejo migration[25]: The following TOTP secrets were found to be corrupted and removed from the database. TOTP is no longer required to login with the associated users. They should be informed because they will need to visit their security settings and configure TOTP again. No other action is required. See https://codeberg.org/forgejo/forgejo/issues/6637 for more context on the various causes for such a corruption.")
+			for _, message := range messages {
+				log.Error("Forgejo migration[25]: %s", message)
+			}
+
+			_, err = db.GetEngine(context.Background()).In("id", ids).NoAutoCondition().NoAutoTime().Delete(&auth.TwoFactor{})
+		}
+	}
+
+	return err
 }

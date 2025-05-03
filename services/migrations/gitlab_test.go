@@ -4,7 +4,6 @@
 package migrations
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -13,13 +12,13 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/json"
-	base "code.gitea.io/gitea/modules/migration"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/json"
+	base "forgejo.org/modules/migration"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/gitlab-org/api/client-go"
+	gitlab "gitlab.com/gitlab-org/api/client-go"
 )
 
 func TestGitlabDownloadRepo(t *testing.T) {
@@ -31,7 +30,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	server := unittest.NewMockWebServer(t, "https://gitlab.com", fixturePath, gitlabPersonalAccessToken != "")
 	defer server.Close()
 
-	downloader, err := NewGitlabDownloader(context.Background(), server.URL, "forgejo/test_repo", "", "", gitlabPersonalAccessToken)
+	downloader, err := NewGitlabDownloader(t.Context(), server.URL, "forgejo/test_repo", "", "", gitlabPersonalAccessToken)
 	if err != nil {
 		t.Fatalf("NewGitlabDownloader is nil: %v", err)
 	}
@@ -50,7 +49,7 @@ func TestGitlabDownloadRepo(t *testing.T) {
 	topics, err := downloader.GetTopics()
 	require.NoError(t, err)
 	assert.Len(t, topics, 2)
-	assert.EqualValues(t, []string{"migration", "test"}, topics)
+	assert.Equal(t, []string{"migration", "test"}, topics)
 
 	milestones, err := downloader.GetMilestones()
 	require.NoError(t, err)
@@ -331,7 +330,7 @@ func TestGitlabSkippedIssueNumber(t *testing.T) {
 	server := unittest.NewMockWebServer(t, "https://gitlab.com", fixturePath, gitlabPersonalAccessToken != "")
 	defer server.Close()
 
-	downloader, err := NewGitlabDownloader(context.Background(), server.URL, "troyengel/archbuild", "", "", gitlabPersonalAccessToken)
+	downloader, err := NewGitlabDownloader(t.Context(), server.URL, "troyengel/archbuild", "", "", gitlabPersonalAccessToken)
 	if err != nil {
 		t.Fatalf("NewGitlabDownloader is nil: %v", err)
 	}
@@ -353,7 +352,7 @@ func TestGitlabSkippedIssueNumber(t *testing.T) {
 	// the only issue in this repository has number 2
 	assert.Len(t, issues, 1)
 	assert.EqualValues(t, 2, issues[0].Number)
-	assert.EqualValues(t, "vpn unlimited errors", issues[0].Title)
+	assert.Equal(t, "vpn unlimited errors", issues[0].Title)
 
 	prs, _, err := downloader.GetPullRequests(1, 10)
 	require.NoError(t, err)
@@ -362,7 +361,7 @@ func TestGitlabSkippedIssueNumber(t *testing.T) {
 	// pull request 3 in Forgejo
 	assert.Len(t, prs, 1)
 	assert.EqualValues(t, 3, prs[0].Number)
-	assert.EqualValues(t, "Review", prs[0].Title)
+	assert.Equal(t, "Review", prs[0].Title)
 }
 
 func gitlabClientMockSetup(t *testing.T) (*http.ServeMux, *httptest.Server, *gitlab.Client) {
@@ -454,7 +453,7 @@ func TestGitlabGetReviews(t *testing.T) {
 	repoID := 1324
 
 	downloader := &GitlabDownloader{
-		ctx:    context.Background(),
+		ctx:    t.Context(),
 		client: client,
 		repoID: repoID,
 	}
@@ -532,7 +531,7 @@ func TestAwardsToReactions(t *testing.T) {
 	require.NoError(t, json.Unmarshal([]byte(testResponse), &awards))
 
 	reactions := downloader.awardsToReactions(awards)
-	assert.EqualValues(t, []*base.Reaction{
+	assert.Equal(t, []*base.Reaction{
 		{
 			UserName: "lafriks",
 			UserID:   1241334,
@@ -624,7 +623,7 @@ func TestNoteToComment(t *testing.T) {
 
 	for i, note := range notes {
 		actualComment := *downloader.convertNoteToComment(17, &note)
-		assert.EqualValues(t, actualComment, comments[i])
+		assert.Equal(t, actualComment, comments[i])
 	}
 }
 

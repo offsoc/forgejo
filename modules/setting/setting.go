@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved
 // SPDX-License-Identifier: MIT
 
 package setting
@@ -7,13 +8,12 @@ package setting
 import (
 	"fmt"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/user"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/user"
 )
 
 var ForgejoVersion = "1.0.0"
@@ -33,7 +33,6 @@ var (
 	RunMode     string
 	RunUser     string
 	IsProd      bool
-	IsWindows   bool
 
 	// IsInTesting indicates whether the testing is running. A lot of unreliable code causes a lot of nonsense error logs during testing
 	// TODO: this is only a temporary solution, we should make the test code more reliable
@@ -41,22 +40,18 @@ var (
 )
 
 func init() {
-	IsWindows = runtime.GOOS == "windows"
 	if AppVer == "" {
 		AppVer = "dev"
 	}
 
-	// We can rely on log.CanColorStdout being set properly because modules/log/console_windows.go comes before modules/setting/setting.go lexicographically
 	// By default set this logger at Info - we'll change it later, but we need to start with something.
 	log.SetConsoleLogger(log.DEFAULT, "console", log.INFO)
 }
 
 // IsRunUserMatchCurrentUser returns false if configured run user does not match
 // actual user that runs the app. The first return value is the actual user name.
-// This check is ignored under Windows since SSH remote login is not the main
-// method to login on Windows.
 func IsRunUserMatchCurrentUser(runUser string) (string, bool) {
-	if IsWindows || SSH.StartBuiltinServer {
+	if SSH.StartBuiltinServer {
 		return "", true
 	}
 
@@ -167,7 +162,7 @@ func loadRunModeFrom(rootCfg ConfigProvider) {
 	// The following is a purposefully undocumented option. Please do not run Forgejo as root. It will only cause future headaches.
 	// Please don't use root as a bandaid to "fix" something that is broken, instead the broken thing should instead be fixed properly.
 	unsafeAllowRunAsRoot := ConfigSectionKeyBool(rootSec, "I_AM_BEING_UNSAFE_RUNNING_AS_ROOT")
-	unsafeAllowRunAsRoot = unsafeAllowRunAsRoot || util.OptionalBoolParse(os.Getenv("GITEA_I_AM_BEING_UNSAFE_RUNNING_AS_ROOT")).Value()
+	unsafeAllowRunAsRoot = unsafeAllowRunAsRoot || optional.ParseBool(os.Getenv("GITEA_I_AM_BEING_UNSAFE_RUNNING_AS_ROOT")).Value()
 	RunMode = os.Getenv("GITEA_RUN_MODE")
 	if RunMode == "" {
 		RunMode = rootSec.Key("RUN_MODE").MustString("prod")
@@ -210,6 +205,7 @@ func LoadSettings() {
 	initAllLoggers()
 
 	loadDBSetting(CfgProvider)
+	loadFederationFrom(CfgProvider)
 	loadServiceFrom(CfgProvider)
 	loadOAuth2ClientFrom(CfgProvider)
 	loadCacheFrom(CfgProvider)
@@ -224,7 +220,6 @@ func LoadSettings() {
 	LoadQueueSettings()
 	loadProjectFrom(CfgProvider)
 	loadMimeTypeMapFrom(CfgProvider)
-	loadFederationFrom(CfgProvider)
 	loadF3From(CfgProvider)
 }
 

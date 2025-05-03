@@ -4,9 +4,9 @@
 package internal
 
 import (
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/timeutil"
 )
 
 // IndexerData data stored in the issue indexer
@@ -73,8 +73,6 @@ type SearchResult struct {
 // Unfortunately, we still use db for the indexer and have to convert between db.NoConditionID and nil for legacy reasons.
 type SearchOptions struct {
 	Keyword string // keyword to search
-
-	IsFuzzyKeyword bool // if false the levenshtein distance is 0
 
 	RepoIDs   []int64 // repository IDs which the issues belong to
 	AllPublic bool    // if include all public repositories

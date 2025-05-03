@@ -8,9 +8,10 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
 
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 )
@@ -19,18 +20,18 @@ type projects struct {
 	container
 }
 
-func (o *projects) GetIDFromName(ctx context.Context, name string) generic.NodeID {
+func (o *projects) GetIDFromName(ctx context.Context, name string) f3_id.NodeID {
 	owner := f3_tree.GetOwnerName(o.GetNode())
 	forgejoProject, err := repo_model.GetRepositoryByOwnerAndName(ctx, owner, name)
 	if repo_model.IsErrRepoNotExist(err) {
-		return generic.NilID
+		return f3_id.NilID
 	}
 
 	if err != nil {
 		panic(fmt.Errorf("error GetRepositoryByOwnerAndName(%s, %s): %v", owner, name, err))
 	}
 
-	return generic.NewNodeID(forgejoProject.ID)
+	return f3_id.NewNodeID(forgejoProject.ID)
 }
 
 func (o *projects) ListPage(ctx context.Context, page int) generic.ChildrenSlice {

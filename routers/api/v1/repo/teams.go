@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	org_service "code.gitea.io/gitea/services/org"
-	repo_service "code.gitea.io/gitea/services/repository"
+	"forgejo.org/models/organization"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	org_service "forgejo.org/services/org"
+	repo_service "forgejo.org/services/repository"
 )
 
 // ListTeams list a repository's teams

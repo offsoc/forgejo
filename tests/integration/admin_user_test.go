@@ -4,21 +4,20 @@
 package integration
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -39,7 +38,7 @@ func TestAdminViewUsers(t *testing.T) {
 
 		// 6th column is the 2FA column.
 		// One user that has TOTP and another user that has WebAuthn.
-		assert.EqualValues(t, 2, htmlDoc.Find(".admin-setting-content table tbody tr td:nth-child(6) .octicon-check").Length())
+		assert.Equal(t, 2, htmlDoc.Find(".admin-setting-content table tbody tr td:nth-child(6) .octicon-check").Length())
 	})
 
 	t.Run("Normal user", func(t *testing.T) {
@@ -99,7 +98,7 @@ func makeRequest(t *testing.T, formData user_model.User, headerCode int) {
 }
 
 func TestAdminDeleteUser(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestAdminDeleteUser/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestAdminDeleteUser")()
 	defer tests.PrepareTestEnv(t)()
 
 	session := loginUser(t, "user1")
@@ -131,7 +130,7 @@ func TestSourceId(t *testing.T) {
 		LoginType:   auth_model.Plain,
 		LoginSource: 23,
 	}
-	defer createUser(context.Background(), t, testUser23)()
+	defer createUser(t.Context(), t, testUser23)()
 
 	session := loginUser(t, "user1")
 	token := getTokenForLoggedInUser(t, session, auth_model.AccessTokenScopeReadAdmin)
@@ -163,7 +162,7 @@ func TestAdminViewUsersSorted(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	createTimestamp := time.Now().Unix() - 1000
 	updateTimestamp := time.Now().Unix() - 500
-	sess := db.GetEngine(context.Background())
+	sess := db.GetEngine(t.Context())
 
 	// Create 10 users with login source 44
 	for i := int64(1); i <= 10; i++ {

@@ -1,4 +1,4 @@
-// Copyright 2023, 2024 The Forgejo Authors. All rights reserved.
+// Copyright 2023, 2024, 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package forgefed
@@ -6,22 +6,24 @@ package forgefed
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 
 	ap "github.com/go-ap/activitypub"
 )
 
 // ----------------------------- ActorID --------------------------------------------
 type ActorID struct {
-	ID               string
-	Source           string
-	Schema           string
-	Path             string
-	Host             string
-	Port             string
-	UnvalidatedInput string
+	ID                 string
+	Source             string
+	HostSchema         string
+	Path               string
+	Host               string
+	HostPort           uint16
+	UnvalidatedInput   string
+	IsPortSupplemented bool
 }
 
 // Factory function for ActorID. Created struct is asserted to be valid
@@ -40,20 +42,23 @@ func NewActorID(uri string) (ActorID, error) {
 
 func (id ActorID) AsURI() string {
 	var result string
-	if id.Port == "" {
-		result = fmt.Sprintf("%s://%s/%s/%s", id.Schema, id.Host, id.Path, id.ID)
+
+	if id.IsPortSupplemented {
+		result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
 	} else {
-		result = fmt.Sprintf("%s://%s:%s/%s/%s", id.Schema, id.Host, id.Port, id.Path, id.ID)
+		result = fmt.Sprintf("%s://%s:%d/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
 	}
+
 	return result
 }
 
 func (id ActorID) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(id.ID, "userId")...)
-	result = append(result, validation.ValidateNotEmpty(id.Schema, "schema")...)
 	result = append(result, validation.ValidateNotEmpty(id.Path, "path")...)
 	result = append(result, validation.ValidateNotEmpty(id.Host, "host")...)
+	result = append(result, validation.ValidateNotEmpty(id.HostPort, "hostPort")...)
+	result = append(result, validation.ValidateNotEmpty(id.HostSchema, "hostSchema")...)
 	result = append(result, validation.ValidateNotEmpty(id.UnvalidatedInput, "unvalidatedInput")...)
 
 	if id.UnvalidatedInput != id.AsURI() {
@@ -104,12 +109,14 @@ func (id PersonID) Validate() []string {
 	result := id.ActorID.Validate()
 	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
 	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea"}, "Source")...)
+
 	switch id.Source {
 	case "forgejo", "gitea":
 		if strings.ToLower(id.Path) != "api/v1/activitypub/user-id" && strings.ToLower(id.Path) != "api/activitypub/user-id" {
 			result = append(result, fmt.Sprintf("path: %q has to be a person specific api path", id.Path))
 		}
 	}
+
 	return result
 }
 
@@ -168,6 +175,8 @@ func removeEmptyStrings(ls []string) []string {
 	return rs
 }
 
+// ----------------------------- newActorID --------------------------------------------
+
 func newActorID(uri string) (ActorID, error) {
 	validatedURI, err := url.ParseRequestURI(uri)
 	if err != nil {
@@ -179,15 +188,27 @@ func newActorID(uri string) (ActorID, error) {
 	}
 	length := len(pathWithActorID)
 	pathWithoutActorID := strings.Join(pathWithActorID[0:length-1], "/")
-	id := pathWithActorID[length-1]
+	id := strings.ToLower(pathWithActorID[length-1])
 
 	result := ActorID{}
 	result.ID = id
-	result.Schema = validatedURI.Scheme
-	result.Host = validatedURI.Hostname()
-	result.Path = pathWithoutActorID
-	result.Port = validatedURI.Port()
-	result.UnvalidatedInput = uri
+	result.HostSchema = strings.ToLower(validatedURI.Scheme)
+	result.Host = strings.ToLower(validatedURI.Hostname())
+	result.Path = strings.ToLower(pathWithoutActorID)
+
+	if validatedURI.Port() == "" && result.HostSchema == "https" {
+		result.IsPortSupplemented = true
+		result.HostPort = 443
+	} else if validatedURI.Port() == "" && result.HostSchema == "http" {
+		result.IsPortSupplemented = true
+		result.HostPort = 80
+	} else {
+		numPort, _ := strconv.ParseUint(validatedURI.Port(), 10, 16)
+		result.HostPort = uint16(numPort)
+	}
+
+	result.UnvalidatedInput = strings.ToLower(uri)
+
 	return result, nil
 }
 

@@ -11,13 +11,13 @@ import (
 	"sort"
 	"strings"
 
-	packages_model "code.gitea.io/gitea/models/packages"
-	packages_module "code.gitea.io/gitea/modules/packages"
-	vagrant_module "code.gitea.io/gitea/modules/packages/vagrant"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/routers/api/packages/helper"
-	"code.gitea.io/gitea/services/context"
-	packages_service "code.gitea.io/gitea/services/packages"
+	packages_model "forgejo.org/models/packages"
+	packages_module "forgejo.org/modules/packages"
+	vagrant_module "forgejo.org/modules/packages/vagrant"
+	"forgejo.org/modules/setting"
+	"forgejo.org/routers/api/packages/helper"
+	"forgejo.org/services/context"
+	packages_service "forgejo.org/services/packages"
 
 	"github.com/hashicorp/go-version"
 )

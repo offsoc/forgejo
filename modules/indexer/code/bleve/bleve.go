@@ -12,18 +12,18 @@ import (
 	"strings"
 	"time"
 
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/analyze"
-	"code.gitea.io/gitea/modules/charset"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	tokenizer_hierarchy "code.gitea.io/gitea/modules/indexer/code/bleve/tokenizer/hierarchy"
-	"code.gitea.io/gitea/modules/indexer/code/internal"
-	indexer_internal "code.gitea.io/gitea/modules/indexer/internal"
-	inner_bleve "code.gitea.io/gitea/modules/indexer/internal/bleve"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/typesniffer"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/analyze"
+	"forgejo.org/modules/charset"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	tokenizer_hierarchy "forgejo.org/modules/indexer/code/bleve/tokenizer/hierarchy"
+	"forgejo.org/modules/indexer/code/internal"
+	indexer_internal "forgejo.org/modules/indexer/internal"
+	inner_bleve "forgejo.org/modules/indexer/internal/bleve"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/typesniffer"
 
 	"github.com/blevesearch/bleve/v2"
 	analyzer_custom "github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
@@ -40,10 +40,6 @@ import (
 const (
 	unicodeNormalizeName = "unicodeNormalize"
 	maxBatchSize         = 16
-	// fuzzyDenominator determines the levenshtein distance per each character of a keyword
-	fuzzyDenominator = 4
-	// see https://github.com/blevesearch/bleve/issues/1563#issuecomment-786822311
-	maxFuzziness = 2
 )
 
 func addUnicodeNormalizeTokenFilter(m *mapping.IndexMappingImpl) error {
@@ -183,7 +179,8 @@ func (b *Indexer) addUpdate(ctx context.Context, batchWriter git.WriteCloserErro
 		return err
 	} else if !typesniffer.DetectContentType(fileContents).IsText() {
 		// FIXME: UTF-16 files will probably fail here
-		return nil
+		// Even if the file is not recognized as a "text file", we could still put its name into the indexers to make the filename become searchable, while leave the content to empty.
+		fileContents = nil
 	}
 
 	if _, err = batchReader.Discard(1); err != nil {
@@ -260,12 +257,14 @@ func (b *Indexer) Search(ctx context.Context, opts *internal.SearchOptions) (int
 		keywordQuery query.Query
 	)
 
-	phraseQuery := bleve.NewMatchPhraseQuery(opts.Keyword)
-	phraseQuery.FieldVal = "Content"
-	phraseQuery.Analyzer = repoIndexerAnalyzer
-	keywordQuery = phraseQuery
-	if opts.IsKeywordFuzzy {
-		phraseQuery.Fuzziness = min(maxFuzziness, len(opts.Keyword)/fuzzyDenominator)
+	if opts.Mode == internal.CodeSearchModeUnion {
+		query := bleve.NewDisjunctionQuery()
+		for _, field := range strings.Fields(opts.Keyword) {
+			query.AddQuery(inner_bleve.MatchPhraseQuery(field, "Content", repoIndexerAnalyzer, false))
+		}
+		keywordQuery = query
+	} else {
+		keywordQuery = inner_bleve.MatchPhraseQuery(opts.Keyword, "Content", repoIndexerAnalyzer, false)
 	}
 
 	if len(opts.RepoIDs) > 0 {
@@ -325,13 +324,16 @@ func (b *Indexer) Search(ctx context.Context, opts *internal.SearchOptions) (int
 	for i, hit := range result.Hits {
 		startIndex, endIndex := -1, -1
 		for _, locations := range hit.Locations["Content"] {
+			if startIndex != -1 && endIndex != -1 {
+				break
+			}
 			location := locations[0]
 			locationStart := int(location.Start)
 			locationEnd := int(location.End)
 			if startIndex < 0 || locationStart < startIndex {
 				startIndex = locationStart
 			}
-			if endIndex < 0 || locationEnd > endIndex {
+			if endIndex < 0 && locationEnd > endIndex {
 				endIndex = locationEnd
 			}
 		}

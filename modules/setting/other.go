@@ -3,7 +3,7 @@
 
 package setting
 
-import "code.gitea.io/gitea/modules/log"
+import "forgejo.org/modules/log"
 
 type OtherConfig struct {
 	ShowFooterVersion          bool

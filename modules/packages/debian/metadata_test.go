@@ -10,7 +10,7 @@ import (
 	"io"
 	"testing"
 
-	"code.gitea.io/gitea/modules/zstd"
+	"forgejo.org/modules/zstd"
 
 	"github.com/blakesmith/ar"
 	"github.com/stretchr/testify/assert"

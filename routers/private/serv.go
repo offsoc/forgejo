@@ -8,19 +8,19 @@ import (
 	"net/http"
 	"strings"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/private"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/context"
-	repo_service "code.gitea.io/gitea/services/repository"
-	wiki_service "code.gitea.io/gitea/services/wiki"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/private"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/context"
+	repo_service "forgejo.org/services/repository"
+	wiki_service "forgejo.org/services/wiki"
 )
 
 // ServNoCommand returns information about the provided keyid
@@ -296,8 +296,14 @@ func ServCommand(ctx *context.PrivateContext) {
 				return
 			}
 		} else {
-			// Because of the special ref "refs/for" we will need to delay write permission check
-			if git.SupportProcReceive && unitType == unit.TypeCode {
+			// We don't know yet which references the Git client wants to write to,
+			// but for AGit flow we have to degrade this check to a read permission.
+			// So if we support proc-receive (needed for AGit flow) and the unit type
+			// is code and we know the Git client wants to write to us, then degrade
+			// the permission check to read. The pre-receive hook will do another
+			// permission check which ensure for non AGit flow references the write
+			// permission is checked.
+			if git.SupportProcReceive && unitType == unit.TypeCode && ctx.FormString("verb") == "git-receive-pack" {
 				mode = perm.AccessModeRead
 			}
 

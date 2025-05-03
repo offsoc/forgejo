@@ -11,32 +11,31 @@ import (
 	"strings"
 	"time"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	"code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	quota_model "code.gitea.io/gitea/models/quota"
-	repo_model "code.gitea.io/gitea/models/repo"
-	unit_model "code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/label"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	repo_module "code.gitea.io/gitea/modules/repository"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/validation"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	actions_service "code.gitea.io/gitea/services/actions"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	"code.gitea.io/gitea/services/issue"
-	repo_service "code.gitea.io/gitea/services/repository"
-	wiki_service "code.gitea.io/gitea/services/wiki"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	quota_model "forgejo.org/models/quota"
+	repo_model "forgejo.org/models/repo"
+	unit_model "forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/label"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	repo_module "forgejo.org/modules/repository"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/validation"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/v1/utils"
+	actions_service "forgejo.org/services/actions"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	"forgejo.org/services/issue"
+	repo_service "forgejo.org/services/repository"
+	wiki_service "forgejo.org/services/wiki"
 )
 
 // Search repositories via options
@@ -85,7 +84,7 @@ func Search(ctx *context.APIContext) {
 	//   type: boolean
 	// - name: is_private
 	//   in: query
-	//   description: show only pubic, private or all repositories (defaults to all)
+	//   description: show only public, private or all repositories (defaults to all)
 	//   type: boolean
 	// - name: template
 	//   in: query
@@ -1065,7 +1064,7 @@ func updateRepoArchivedState(ctx *context.APIContext, opts api.EditRepoOption) e
 				ctx.Error(http.StatusInternalServerError, "ArchiveRepoState", err)
 				return err
 			}
-			if err := actions_model.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
+			if err := actions_service.CleanRepoScheduleTasks(ctx, repo, true); err != nil {
 				log.Error("CleanRepoScheduleTasks for archived repo %s/%s: %v", ctx.Repo.Owner.Name, repo.Name, err)
 			}
 			log.Trace("Repository was archived: %s/%s", ctx.Repo.Owner.Name, repo.Name)

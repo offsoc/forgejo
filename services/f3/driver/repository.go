@@ -7,10 +7,11 @@ package driver
 import (
 	"context"
 
-	repo_model "code.gitea.io/gitea/models/repo"
+	repo_model "forgejo.org/models/repo"
 
 	"code.forgejo.org/f3/gof3/v3/f3"
 	helpers_repository "code.forgejo.org/f3/gof3/v3/forges/helpers/repository"
+	f3_id "code.forgejo.org/f3/gof3/v3/id"
 	f3_tree "code.forgejo.org/f3/gof3/v3/tree/f3"
 	"code.forgejo.org/f3/gof3/v3/tree/generic"
 )
@@ -57,7 +58,7 @@ func (o *repository) Get(ctx context.Context) bool {
 	return o.h.Get(ctx)
 }
 
-func (o *repository) Put(ctx context.Context) generic.NodeID {
+func (o *repository) Put(ctx context.Context) f3_id.NodeID {
 	return o.upsert(ctx)
 }
 
@@ -65,13 +66,13 @@ func (o *repository) Patch(ctx context.Context) {
 	o.upsert(ctx)
 }
 
-func (o *repository) upsert(ctx context.Context) generic.NodeID {
+func (o *repository) upsert(ctx context.Context) f3_id.NodeID {
 	o.Trace("%s", o.GetNativeID())
 	o.h.Upsert(ctx, o.f)
-	return generic.NewNodeID(o.f.Name)
+	return f3_id.NewNodeID(o.f.Name)
 }
 
-func (o *repository) SetFetchFunc(fetchFunc func(ctx context.Context, destination string)) {
+func (o *repository) SetFetchFunc(fetchFunc func(ctx context.Context, destination string, internalRefs []string)) {
 	o.f.FetchFunc = fetchFunc
 }
 
@@ -90,6 +91,10 @@ func (o *repository) GetRepositoryURL() string {
 
 func (o *repository) GetRepositoryPushURL() string {
 	return o.getURL()
+}
+
+func (o *repository) GetRepositoryInternalRefs() []string {
+	return []string{}
 }
 
 func newRepository(_ context.Context) generic.NodeDriverInterface {

@@ -6,12 +6,12 @@ package explore
 import (
 	"net/http"
 
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/modules/base"
-	code_indexer "code.gitea.io/gitea/modules/indexer/code"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/base"
+	code_indexer "forgejo.org/modules/indexer/code"
+	"forgejo.org/modules/setting"
+	"forgejo.org/services/context"
 )
 
 const (
@@ -37,19 +37,17 @@ func Code(ctx *context.Context) {
 	keyword := ctx.FormTrim("q")
 	path := ctx.FormTrim("path")
 
-	isFuzzy := ctx.FormOptionalBool("fuzzy").ValueOrDefault(true)
-	if mode := ctx.FormTrim("mode"); len(mode) > 0 {
-		isFuzzy = mode == "fuzzy"
+	mode := code_indexer.SearchModeExact
+	if m := ctx.FormTrim("mode"); m == "union" ||
+		m == "fuzzy" ||
+		ctx.FormBool("fuzzy") {
+		mode = code_indexer.SearchModeUnion
 	}
 
 	ctx.Data["Keyword"] = keyword
 	ctx.Data["Language"] = language
-	ctx.Data["CodeSearchOptions"] = []string{"exact", "fuzzy"}
-	if isFuzzy {
-		ctx.Data["CodeSearchMode"] = "fuzzy"
-	} else {
-		ctx.Data["CodeSearchMode"] = "exact"
-	}
+	ctx.Data["CodeSearchOptions"] = code_indexer.CodeSearchOptions
+	ctx.Data["CodeSearchMode"] = mode.String()
 	ctx.Data["PageIsViewCode"] = true
 
 	if keyword == "" {
@@ -88,11 +86,11 @@ func Code(ctx *context.Context) {
 
 	if (len(repoIDs) > 0) || isAdmin {
 		total, searchResults, searchResultLanguages, err = code_indexer.PerformSearch(ctx, &code_indexer.SearchOptions{
-			RepoIDs:        repoIDs,
-			Keyword:        keyword,
-			IsKeywordFuzzy: isFuzzy,
-			Language:       language,
-			Filename:       path,
+			RepoIDs:  repoIDs,
+			Keyword:  keyword,
+			Mode:     mode,
+			Language: language,
+			Filename: path,
 			Paginator: &db.ListOptions{
 				Page:     page,
 				PageSize: setting.UI.RepoSearchPagingNum,

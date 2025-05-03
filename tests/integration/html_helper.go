@@ -51,7 +51,7 @@ func (doc *HTMLDoc) AssertDropdownHasOptions(t testing.TB, dropdownName string) 
 	t.Helper()
 
 	options := doc.AssertDropdown(t, dropdownName).Find(".menu [data-value]:not([data-value=''])")
-	assert.Positive(t, options.Length(), 0, fmt.Sprintf("%s dropdown has no options", dropdownName))
+	assert.Positive(t, options.Length(), "%s dropdown has no options", dropdownName)
 }
 
 func (doc *HTMLDoc) AssertDropdownHasSelectedOption(t testing.TB, dropdownName, expectedValue string) {

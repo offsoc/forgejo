@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/util"
 )
 
 // ErrRedirectNotExist represents a "RedirectNotExist" kind of error.

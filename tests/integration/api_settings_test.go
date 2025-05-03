@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -30,7 +30,7 @@ func TestAPIExposedSettings(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 
 	DecodeJSON(t, resp, &apiSettings)
-	assert.EqualValues(t, &api.GeneralAPISettings{
+	assert.Equal(t, &api.GeneralAPISettings{
 		MaxResponseItems:       setting.API.MaxResponseItems,
 		DefaultPagingNum:       setting.API.DefaultPagingNum,
 		DefaultGitTreesPerPage: setting.API.DefaultGitTreesPerPage,
@@ -42,7 +42,7 @@ func TestAPIExposedSettings(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 
 	DecodeJSON(t, resp, &repo)
-	assert.EqualValues(t, &api.GeneralRepoSettings{
+	assert.Equal(t, &api.GeneralRepoSettings{
 		MirrorsDisabled:      !setting.Mirror.Enabled,
 		HTTPGitDisabled:      setting.Repository.DisableHTTPGit,
 		MigrationsDisabled:   setting.Repository.DisableMigrations,
@@ -55,7 +55,7 @@ func TestAPIExposedSettings(t *testing.T) {
 	resp = MakeRequest(t, req, http.StatusOK)
 
 	DecodeJSON(t, resp, &attachment)
-	assert.EqualValues(t, &api.GeneralAttachmentSettings{
+	assert.Equal(t, &api.GeneralAttachmentSettings{
 		Enabled:      setting.Attachment.Enabled,
 		AllowedTypes: setting.Attachment.AllowedTypes,
 		MaxFiles:     setting.Attachment.MaxFiles,

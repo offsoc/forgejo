@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/container"
+	"forgejo.org/modules/container"
 )
 
 // CodeActivityStats represents git statistics data

@@ -4,12 +4,15 @@
 package setting
 
 import (
+	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
+
+	"golang.org/x/crypto/ssh"
 )
 
 // enumerates all the policy repository creating
@@ -25,6 +28,8 @@ var MaxUserCardsPerPage = 36
 
 // MaxForksPerPage sets maximum amount of forks shown per page
 var MaxForksPerPage = 40
+
+var SSHInstanceKey ssh.PublicKey
 
 // Repository settings
 var (
@@ -90,7 +95,6 @@ var (
 			DefaultUpdateStyle                       string
 			PopulateSquashCommentWithCommitMessages  bool
 			AddCoCommitterTrailers                   bool
-			TestConflictingPatchesWithGitApply       bool
 			RetargetChildrenOnMerge                  bool
 		} `ini:"repository.pull-request"`
 
@@ -109,6 +113,7 @@ var (
 			SigningKey        string
 			SigningName       string
 			SigningEmail      string
+			Format            string
 			InitialCommit     []string
 			CRUDActions       []string `ini:"CRUD_ACTIONS"`
 			Merges            []string
@@ -220,7 +225,6 @@ var (
 			DefaultUpdateStyle                       string
 			PopulateSquashCommentWithCommitMessages  bool
 			AddCoCommitterTrailers                   bool
-			TestConflictingPatchesWithGitApply       bool
 			RetargetChildrenOnMerge                  bool
 		}{
 			WorkInProgressPrefixes: []string{"WIP:", "[WIP]"},
@@ -262,6 +266,7 @@ var (
 			SigningKey        string
 			SigningName       string
 			SigningEmail      string
+			Format            string
 			InitialCommit     []string
 			CRUDActions       []string `ini:"CRUD_ACTIONS"`
 			Merges            []string
@@ -271,6 +276,7 @@ var (
 			SigningKey:        "default",
 			SigningName:       "",
 			SigningEmail:      "",
+			Format:            "openpgp",
 			InitialCommit:     []string{"always"},
 			CRUDActions:       []string{"pubkey", "twofa", "parentsigned"},
 			Merges:            []string{"pubkey", "twofa", "basesigned", "commitssigned"},
@@ -289,7 +295,7 @@ func loadRepositoryFrom(rootCfg ConfigProvider) {
 	// Determine and create root git repository path.
 	sec := rootCfg.Section("repository")
 	Repository.DisableHTTPGit = sec.Key("DISABLE_HTTP_GIT").MustBool()
-	Repository.UseCompatSSHURI = sec.Key("USE_COMPAT_SSH_URI").MustBool()
+	Repository.UseCompatSSHURI = sec.Key("USE_COMPAT_SSH_URI").MustBool(true)
 	Repository.GoGetCloneURLProtocol = sec.Key("GO_GET_CLONE_URL_PROTOCOL").MustString("https")
 	Repository.MaxCreationLimit = sec.Key("MAX_CREATION_LIMIT").MustInt(-1)
 	Repository.DefaultBranch = sec.Key("DEFAULT_BRANCH").MustString(Repository.DefaultBranch)
@@ -376,4 +382,15 @@ func loadRepositoryFrom(rootCfg ConfigProvider) {
 		log.Fatal("loadRepoArchiveFrom: %v", err)
 	}
 	Repository.EnableFlags = sec.Key("ENABLE_FLAGS").MustBool()
+
+	if Repository.Signing.Format == "ssh" && Repository.Signing.SigningKey != "none" && Repository.Signing.SigningKey != "" {
+		sshPublicKey, err := os.ReadFile(Repository.Signing.SigningKey)
+		if err != nil {
+			log.Fatal("Could not read repository signing key in %q: %v", Repository.Signing.SigningKey, err)
+		}
+		SSHInstanceKey, _, _, _, err = ssh.ParseAuthorizedKey(sshPublicKey)
+		if err != nil {
+			log.Fatal("Could not parse the SSH signing key %q: %v", sshPublicKey, err)
+		}
+	}
 }

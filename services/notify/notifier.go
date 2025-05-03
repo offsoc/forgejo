@@ -6,12 +6,13 @@ package notify
 import (
 	"context"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	packages_model "code.gitea.io/gitea/models/packages"
-	repo_model "code.gitea.io/gitea/models/repo"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/repository"
+	actions_model "forgejo.org/models/actions"
+	issues_model "forgejo.org/models/issues"
+	packages_model "forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/repository"
 )
 
 // Notifier defines an interface to notify receiver
@@ -76,4 +77,6 @@ type Notifier interface {
 	PackageDelete(ctx context.Context, doer *user_model.User, pd *packages_model.PackageDescriptor)
 
 	ChangeDefaultBranch(ctx context.Context, repo *repo_model.Repository)
+
+	ActionRunNowDone(ctx context.Context, run *actions_model.ActionRun, priorStatus actions_model.Status, lastRun *actions_model.ActionRun)
 }

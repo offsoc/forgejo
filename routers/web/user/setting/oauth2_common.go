@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	shared_user "code.gitea.io/gitea/routers/web/shared/user"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
+	"forgejo.org/models/auth"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	shared_user "forgejo.org/routers/web/shared/user"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
 )
 
 type OAuth2CommonHandlers struct {

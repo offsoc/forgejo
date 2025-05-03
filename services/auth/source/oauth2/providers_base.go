@@ -6,8 +6,8 @@ package oauth2
 import (
 	"html/template"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/svg"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/svg"
 )
 
 // BaseProvider represents a common base for Provider

@@ -1,16 +1,18 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved
 // SPDX-License-Identifier: MIT
 
 package setting
 
 import (
+	"net/url"
 	"regexp"
 	"slices"
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/structs"
 
 	"github.com/gobwas/glob"
 )
@@ -145,6 +147,20 @@ func LoadServiceSetting() {
 	loadServiceFrom(CfgProvider)
 }
 
+func appURLAsGlob(fqdn string) (glob.Glob, error) {
+	localFqdn, err := url.ParseRequestURI(fqdn)
+	if err != nil {
+		log.Error("Error in EmailDomainAllowList: %v", err)
+		return nil, err
+	}
+	appFqdn, err := glob.Compile(localFqdn.Hostname(), ',')
+	if err != nil {
+		log.Error("Error in EmailDomainAllowList: %v", err)
+		return nil, err
+	}
+	return appFqdn, nil
+}
+
 func loadServiceFrom(rootCfg ConfigProvider) {
 	sec := rootCfg.Section("service")
 	Service.ActiveCodeLives = sec.Key("ACTIVE_CODE_LIVE_MINUTES").MustInt(180)
@@ -164,7 +180,15 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 	if sec.HasKey("EMAIL_DOMAIN_WHITELIST") {
 		deprecatedSetting(rootCfg, "service", "EMAIL_DOMAIN_WHITELIST", "service", "EMAIL_DOMAIN_ALLOWLIST", "1.21")
 	}
-	Service.EmailDomainAllowList = CompileEmailGlobList(sec, "EMAIL_DOMAIN_WHITELIST", "EMAIL_DOMAIN_ALLOWLIST")
+	emailDomainAllowList := CompileEmailGlobList(sec, "EMAIL_DOMAIN_WHITELIST", "EMAIL_DOMAIN_ALLOWLIST")
+
+	if len(emailDomainAllowList) > 0 && Federation.Enabled {
+		appURL, err := appURLAsGlob(AppURL)
+		if err == nil {
+			emailDomainAllowList = append(emailDomainAllowList, appURL)
+		}
+	}
+	Service.EmailDomainAllowList = emailDomainAllowList
 	Service.EmailDomainBlockList = CompileEmailGlobList(sec, "EMAIL_DOMAIN_BLOCKLIST")
 	Service.EmailDomainBlockDisposable = sec.Key("EMAIL_DOMAIN_BLOCK_DISPOSABLE").MustBool(false)
 	if Service.EmailDomainBlockDisposable {
@@ -182,7 +206,7 @@ func loadServiceFrom(rootCfg ConfigProvider) {
 		}
 		Service.EmailDomainBlockList = append(Service.EmailDomainBlockList, toAdd...)
 	}
-	Service.ShowRegistrationButton = sec.Key("SHOW_REGISTRATION_BUTTON").MustBool(!(Service.DisableRegistration || Service.AllowOnlyExternalRegistration))
+	Service.ShowRegistrationButton = sec.Key("SHOW_REGISTRATION_BUTTON").MustBool(!Service.DisableRegistration && !Service.AllowOnlyExternalRegistration)
 	Service.EnableInternalSignIn = sec.Key("ENABLE_INTERNAL_SIGNIN").MustBool(true)
 	Service.ShowMilestonesDashboardPage = sec.Key("SHOW_MILESTONES_DASHBOARD_PAGE").MustBool(true)
 	Service.RequireSignInView = sec.Key("REQUIRE_SIGNIN_VIEW").MustBool()

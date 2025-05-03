@@ -6,34 +6,39 @@ package unittest
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/auth/password/hash"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/auth/password/hash"
+	"forgejo.org/modules/setting"
 
-	"github.com/go-testfixtures/testfixtures/v3"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
 )
 
-var fixturesLoader *testfixtures.Loader
+var fixturesLoader *loader
 
 // GetXORMEngine gets the XORM engine
-func GetXORMEngine(engine ...*xorm.Engine) (x *xorm.Engine) {
+func GetXORMEngine(engine ...*xorm.Engine) (x *xorm.Engine, err error) {
 	if len(engine) == 1 {
-		return engine[0]
+		return engine[0], nil
 	}
-	return db.DefaultContext.(*db.Context).Engine().(*xorm.Engine)
+	return db.GetMasterEngine(db.DefaultContext.(*db.Context).Engine())
 }
 
-func OverrideFixtures(opts FixturesOptions, engine ...*xorm.Engine) func() {
+func OverrideFixtures(dir string) func() {
 	old := fixturesLoader
-	if err := InitFixtures(opts, engine...); err != nil {
+
+	opts := FixturesOptions{
+		Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
+		Base: setting.AppWorkPath,
+		Dirs: []string{dir},
+	}
+	if err := InitFixtures(opts); err != nil {
 		panic(err)
 	}
+
 	return func() {
 		fixturesLoader = old
 	}
@@ -41,20 +46,24 @@ func OverrideFixtures(opts FixturesOptions, engine ...*xorm.Engine) func() {
 
 // InitFixtures initialize test fixtures for a test database
 func InitFixtures(opts FixturesOptions, engine ...*xorm.Engine) (err error) {
-	e := GetXORMEngine(engine...)
-	var fixtureOptionFiles func(*testfixtures.Loader) error
-	if opts.Dir != "" {
-		fixtureOptionFiles = testfixtures.Directory(opts.Dir)
-	} else {
-		fixtureOptionFiles = testfixtures.Files(opts.Files...)
+	e, err := GetXORMEngine(engine...)
+	if err != nil {
+		return err
 	}
-	var fixtureOptionDirs []func(*testfixtures.Loader) error
+
+	fixturePaths := []string{}
+	if opts.Dir != "" {
+		fixturePaths = append(fixturePaths, opts.Dir)
+	} else {
+		fixturePaths = append(fixturePaths, opts.Files...)
+	}
 	if opts.Dirs != nil {
 		for _, dir := range opts.Dirs {
-			fixtureOptionDirs = append(fixtureOptionDirs, testfixtures.Directory(filepath.Join(opts.Base, dir)))
+			fixturePaths = append(fixturePaths, filepath.Join(opts.Base, dir))
 		}
 	}
-	dialect := "unknown"
+
+	var dialect string
 	switch e.Dialect().URI().DBType {
 	case schemas.POSTGRES:
 		dialect = "postgres"
@@ -63,22 +72,10 @@ func InitFixtures(opts FixturesOptions, engine ...*xorm.Engine) (err error) {
 	case schemas.SQLITE:
 		dialect = "sqlite3"
 	default:
-		fmt.Println("Unsupported RDBMS for integration tests")
-		os.Exit(1)
-	}
-	loaderOptions := []func(loader *testfixtures.Loader) error{
-		testfixtures.Database(e.DB().DB),
-		testfixtures.Dialect(dialect),
-		testfixtures.DangerousSkipTestDatabaseCheck(),
-		fixtureOptionFiles,
-	}
-	loaderOptions = append(loaderOptions, fixtureOptionDirs...)
-
-	if e.Dialect().URI().DBType == schemas.POSTGRES {
-		loaderOptions = append(loaderOptions, testfixtures.SkipResetSequences())
+		panic("Unsupported RDBMS for test")
 	}
 
-	fixturesLoader, err = testfixtures.New(loaderOptions...)
+	fixturesLoader, err = newFixtureLoader(e.DB().DB, dialect, fixturePaths)
 	if err != nil {
 		return err
 	}
@@ -93,10 +90,12 @@ func InitFixtures(opts FixturesOptions, engine ...*xorm.Engine) (err error) {
 
 // LoadFixtures load fixtures for a test database
 func LoadFixtures(engine ...*xorm.Engine) error {
-	e := GetXORMEngine(engine...)
-	var err error
+	e, err := GetXORMEngine(engine...)
+	if err != nil {
+		return err
+	}
 	// (doubt) database transaction conflicts could occur and result in ROLLBACK? just try for a few times.
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		if err = fixturesLoader.Load(); err == nil {
 			break
 		}

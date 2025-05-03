@@ -9,12 +9,12 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/models/avatars"
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/models/avatars"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/templates"
+	"forgejo.org/services/context"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
@@ -160,15 +160,16 @@ func GetContentHistoryDetail(ctx *context.Context) {
 	diffHTMLBuf := bytes.Buffer{}
 	diffHTMLBuf.WriteString("<pre class='chroma'>")
 	for _, it := range diff {
-		if it.Type == diffmatchpatch.DiffInsert {
+		switch it.Type {
+		case diffmatchpatch.DiffInsert:
 			diffHTMLBuf.WriteString("<span class='gi'>")
 			diffHTMLBuf.WriteString(html.EscapeString(it.Text))
 			diffHTMLBuf.WriteString("</span>")
-		} else if it.Type == diffmatchpatch.DiffDelete {
+		case diffmatchpatch.DiffDelete:
 			diffHTMLBuf.WriteString("<span class='gd'>")
 			diffHTMLBuf.WriteString(html.EscapeString(it.Text))
 			diffHTMLBuf.WriteString("</span>")
-		} else {
+		default:
 			diffHTMLBuf.WriteString(html.EscapeString(it.Text))
 		}
 	}

@@ -21,7 +21,7 @@
 						{{end}}
 						<span class="labels-list tw-ml-1">
 							{{range .Labels}}
-								<a href="?q={{$.Keyword}}&type={{$.ViewType}}&state={{$.State}}&labels={{.ID}}{{if ne $.listType "milestone"}}&milestone={{$.MilestoneID}}{{end}}&assignee={{$.AssigneeID}}&poster={{$.PosterID}}&fuzzy={{$.IsFuzzy}}{{if $.ShowArchivedLabels}}&archived=true{{end}}" rel="nofollow">{{RenderLabel $.Context ctx.Locale .}}</a>
+								<a href="?q={{$.Keyword}}&type={{$.ViewType}}&state={{$.State}}&labels={{.ID}}{{if ne $.listType "milestone"}}&milestone={{$.MilestoneID}}{{end}}&assignee={{$.AssigneeID}}&poster={{$.PosterID}}{{if $.ShowArchivedLabels}}&archived=true{{end}}" rel="nofollow">{{RenderLabel $.Context ctx.Locale .}}</a>
 							{{end}}
 						</span>
 					</div>
@@ -45,32 +45,34 @@
 						{{if .NumComments}}
 						<div class="text grey">
 							<a class="tw-no-underline muted flex-text-block" href="{{if .Link}}{{.Link}}{{else}}{{$.Link}}/{{.Index}}{{end}}">
-								{{svg "octicon-comment" 16}}{{.NumComments}}
+								{{svg "octicon-comment-discussion" 16}}{{.NumComments}}
 							</a>
 						</div>
 						{{end}}
 					</div>
 					{{end}}
 				</div>
-				<div class="flex-item-body">
-					<a class="index" href="{{if .Link}}{{.Link}}{{else}}{{$.Link}}/{{.Index}}{{end}}">
-						{{if eq $.listType "dashboard"}}
-							{{.Repo.FullName}}#{{.Index}}
+				<div class="flex-item-body issue-meta">
+					<span>
+						<a class="index" href="{{if .Link}}{{.Link}}{{else}}{{$.Link}}/{{.Index}}{{end}}">
+							{{if eq $.listType "dashboard"}}
+								{{.Repo.FullName}}#{{.Index}}
+							{{else}}
+								#{{.Index}}
+							{{end}}
+						</a>
+						{{$timeStr := DateUtils.TimeSince .GetLastEventTimestamp}}
+						{{if .OriginalAuthor}}
+							{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .OriginalAuthor}}
+						{{else if gt .Poster.ID 0}}
+							{{ctx.Locale.Tr .GetLastEventLabel $timeStr .Poster.HomeLink .Poster.GetDisplayName}}
 						{{else}}
-							#{{.Index}}
+							{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .Poster.GetDisplayName}}
 						{{end}}
-					</a>
-					{{$timeStr := DateUtils.TimeSince .GetLastEventTimestamp}}
-					{{if .OriginalAuthor}}
-						{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .OriginalAuthor}}
-					{{else if gt .Poster.ID 0}}
-						{{ctx.Locale.Tr .GetLastEventLabel $timeStr .Poster.HomeLink .Poster.GetDisplayName}}
-					{{else}}
-						{{ctx.Locale.Tr .GetLastEventLabelFake $timeStr .Poster.GetDisplayName}}
-					{{end}}
+					</span>
 					{{if .IsPull}}
-						<div class="branches flex-text-inline">
-							{{svg "gitea-double-chevron-right" 12}}
+						{{svg "gitea-double-chevron-right" 12}}
+						<div class="flex-text-inline issue-meta-branch">
 							<div class="branch">
 								<a href="{{.PullRequest.BaseRepo.Link}}/src/branch/{{PathEscapeSegments .PullRequest.BaseBranch}}">
 									{{/* inline to remove the spaces between spans */}}
@@ -144,6 +146,11 @@
 					{{end}}
 				</div>
 			</div>
+		</div>
+	{{else}}
+		<div class="tw-text-center tw-p-8">
+			<h3 class="tw-my-4">{{ctx.Locale.Tr "repo.issues.filter_no_results"}}</h3>
+			<p class="tw-text-placeholder-text">{{ctx.Locale.Tr "repo.issues.filter_no_results_placeholder"}}</p>
 		</div>
 	{{end}}
 	{{if .IssueIndexerUnavailable}}

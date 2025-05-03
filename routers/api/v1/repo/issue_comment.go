@@ -9,18 +9,18 @@ import (
 	"errors"
 	"net/http"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/optional"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	issue_service "code.gitea.io/gitea/services/issue"
+	issues_model "forgejo.org/models/issues"
+	access_model "forgejo.org/models/perm/access"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/optional"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	issue_service "forgejo.org/services/issue"
 )
 
 // ListIssueComments list all the comments of an issue
@@ -62,6 +62,10 @@ func ListIssueComments(ctx *context.APIContext) {
 	//     "$ref": "#/responses/CommentList"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
+	//   "500":
+	//     "$ref": "#/responses/internalServerError"
 
 	before, since, err := context.GetQueryBeforeSince(ctx.Base)
 	if err != nil {
@@ -70,6 +74,10 @@ func ListIssueComments(ctx *context.APIContext) {
 	}
 	issue, err := issues_model.GetIssueByIndex(ctx, ctx.Repo.Repository.ID, ctx.ParamsInt64(":index"))
 	if err != nil {
+		if issues_model.IsErrIssueNotExist(err) {
+			ctx.NotFound("IsErrIssueNotExist", err)
+			return
+		}
 		ctx.Error(http.StatusInternalServerError, "GetRawIssueByIndex", err)
 		return
 	}
@@ -166,6 +174,10 @@ func ListIssueCommentsAndTimeline(ctx *context.APIContext) {
 	//     "$ref": "#/responses/TimelineList"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
+	//   "500":
+	//     "$ref": "#/responses/internalServerError"
 
 	before, since, err := context.GetQueryBeforeSince(ctx.Base)
 	if err != nil {
@@ -174,6 +186,10 @@ func ListIssueCommentsAndTimeline(ctx *context.APIContext) {
 	}
 	issue, err := issues_model.GetIssueByIndex(ctx, ctx.Repo.Repository.ID, ctx.ParamsInt64(":index"))
 	if err != nil {
+		if issues_model.IsErrIssueNotExist(err) {
+			ctx.NotFound("IsErrIssueNotExist", err)
+			return
+		}
 		ctx.Error(http.StatusInternalServerError, "GetRawIssueByIndex", err)
 		return
 	}
@@ -271,6 +287,10 @@ func ListRepoIssueComments(ctx *context.APIContext) {
 	//     "$ref": "#/responses/CommentList"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
+	//   "500":
+	//     "$ref": "#/responses/internalServerError"
 
 	before, since, err := context.GetQueryBeforeSince(ctx.Base)
 	if err != nil {
@@ -378,9 +398,16 @@ func CreateIssueComment(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 	//   "423":
 	//     "$ref": "#/responses/repoArchivedError"
+	//   "500":
+	//     "$ref": "#/responses/internalServerError"
+
 	form := web.GetForm(ctx).(*api.CreateIssueCommentOption)
 	issue, err := issues_model.GetIssueByIndex(ctx, ctx.Repo.Repository.ID, ctx.ParamsInt64(":index"))
 	if err != nil {
+		if issues_model.IsErrIssueNotExist(err) {
+			ctx.NotFound("IsErrIssueNotExist", err)
+			return
+		}
 		ctx.Error(http.StatusInternalServerError, "GetIssueByIndex", err)
 		return
 	}
@@ -449,6 +476,8 @@ func GetIssueComment(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "500":
+	//     "$ref": "#/responses/internalServerError"
 
 	comment := ctx.Comment
 
@@ -511,6 +540,9 @@ func EditIssueComment(ctx *context.APIContext) {
 	//     "$ref": "#/responses/notFound"
 	//   "423":
 	//     "$ref": "#/responses/repoArchivedError"
+	//   "500":
+	//     "$ref": "#/responses/internalServerError"
+
 	form := web.GetForm(ctx).(*api.EditIssueCommentOption)
 	editIssueComment(ctx, *form)
 }
@@ -560,6 +592,8 @@ func EditIssueCommentDeprecated(ctx *context.APIContext) {
 	//     "$ref": "#/responses/forbidden"
 	//   "404":
 	//     "$ref": "#/responses/notFound"
+	//   "500":
+	//     "$ref": "#/responses/internalServerError"
 
 	form := web.GetForm(ctx).(*api.EditIssueCommentOption)
 	editIssueComment(ctx, *form)
@@ -626,8 +660,8 @@ func DeleteIssueComment(ctx *context.APIContext) {
 	//     "$ref": "#/responses/empty"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
-	//   "404":
-	//     "$ref": "#/responses/notFound"
+	//   "500":
+	//     "$ref": "#/responses/internalServerError"
 
 	deleteIssueComment(ctx, issues_model.CommentTypeComment)
 }
@@ -665,8 +699,8 @@ func DeleteIssueCommentDeprecated(ctx *context.APIContext) {
 	//     "$ref": "#/responses/empty"
 	//   "403":
 	//     "$ref": "#/responses/forbidden"
-	//   "404":
-	//     "$ref": "#/responses/notFound"
+	//   "500":
+	//     "$ref": "#/responses/internalServerError"
 
 	deleteIssueComment(ctx, issues_model.CommentTypeComment)
 }

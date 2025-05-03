@@ -8,8 +8,8 @@ import (
 	"regexp"
 	"strings"
 
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/setting"
 
 	"github.com/yuin/goldmark/ast"
 	east "github.com/yuin/goldmark/extension/ast"
@@ -131,7 +131,7 @@ func (r *HTMLRenderer) renderDocument(w util.BufWriter, source []byte, node ast.
 		if entering {
 			_, err = w.WriteString("<div")
 			if err == nil {
-				_, err = w.WriteString(fmt.Sprintf(` lang=%q`, val))
+				_, err = fmt.Fprintf(w, ` lang=%q`, val)
 			}
 			if err == nil {
 				_, err = w.WriteRune('>')
@@ -203,7 +203,7 @@ func (r *HTMLRenderer) renderIcon(w util.BufWriter, source []byte, node ast.Node
 		return ast.WalkContinue, nil
 	}
 
-	_, err := w.WriteString(fmt.Sprintf(`<i class="icon %s"></i>`, name))
+	_, err := fmt.Fprintf(w, `<i class="icon %s"></i>`, name)
 	if err != nil {
 		return ast.WalkStop, err
 	}

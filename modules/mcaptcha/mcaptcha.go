@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"code.gitea.io/gitea/modules/setting"
+	"forgejo.org/modules/setting"
 
 	"codeberg.org/gusted/mcaptcha"
 )

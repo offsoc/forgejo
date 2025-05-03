@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"testing"
 
-	gitea_context "code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/webhook"
-	"code.gitea.io/gitea/tests"
+	gitea_context "forgejo.org/services/context"
+	"forgejo.org/services/webhook"
+	"forgejo.org/tests"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"

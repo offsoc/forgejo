@@ -8,9 +8,10 @@ import (
 	"net/http"
 	"testing"
 
-	"code.gitea.io/gitea/models/db"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,7 +34,7 @@ type RSS struct {
 }
 
 func TestFeed(t *testing.T) {
-	defer tests.AddFixtures("tests/integration/fixtures/TestFeed/")()
+	defer unittest.OverrideFixtures("tests/integration/fixtures/TestFeed")()
 	defer tests.PrepareTestEnv(t)()
 
 	t.Run("User", func(t *testing.T) {
@@ -134,7 +135,7 @@ func TestFeed(t *testing.T) {
 	})
 
 	t.Run("View permission", func(t *testing.T) {
-		t.Run("Anomynous", func(t *testing.T) {
+		t.Run("Anonymous", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
 			req := NewRequest(t, "GET", "/org3/repo3/rss/branch/master")
 			MakeRequest(t, req, http.StatusNotFound)

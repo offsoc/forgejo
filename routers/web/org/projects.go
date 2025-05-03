@@ -9,20 +9,20 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	issues_model "code.gitea.io/gitea/models/issues"
-	project_model "code.gitea.io/gitea/models/project"
-	attachment_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unit"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/templates"
-	"code.gitea.io/gitea/modules/web"
-	shared_user "code.gitea.io/gitea/routers/web/shared/user"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
+	"forgejo.org/models/db"
+	issues_model "forgejo.org/models/issues"
+	project_model "forgejo.org/models/project"
+	attachment_model "forgejo.org/models/repo"
+	"forgejo.org/models/unit"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/templates"
+	"forgejo.org/modules/web"
+	shared_user "forgejo.org/routers/web/shared/user"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
 )
 
 const (
@@ -125,6 +125,19 @@ func Projects(ctx *context.Context) {
 	ctx.Data["IsShowClosed"] = isShowClosed
 	ctx.Data["PageIsViewProjects"] = true
 	ctx.Data["SortType"] = sortType
+
+	numOpenIssues, err := issues_model.NumIssuesInProjects(ctx, projects, ctx.Doer, ctx.Org.Organization, optional.Some(false))
+	if err != nil {
+		ctx.ServerError("NumIssuesInProjects", err)
+		return
+	}
+	numClosedIssues, err := issues_model.NumIssuesInProjects(ctx, projects, ctx.Doer, ctx.Org.Organization, optional.Some(true))
+	if err != nil {
+		ctx.ServerError("NumIssuesInProjects", err)
+		return
+	}
+	ctx.Data["NumOpenIssuesInProject"] = numOpenIssues
+	ctx.Data["NumClosedIssuesInProject"] = numClosedIssues
 
 	ctx.HTML(http.StatusOK, tplProjects)
 }
@@ -332,7 +345,7 @@ func ViewProject(ctx *context.Context) {
 		return
 	}
 
-	issuesMap, err := issues_model.LoadIssuesFromColumnList(ctx, columns)
+	issuesMap, err := issues_model.LoadIssuesFromColumnList(ctx, columns, ctx.Doer, ctx.Org.Organization, optional.None[bool]())
 	if err != nil {
 		ctx.ServerError("LoadIssuesOfColumns", err)
 		return

@@ -8,16 +8,17 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
+	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	repo_service "code.gitea.io/gitea/services/repository"
+	auth_model "forgejo.org/models/auth"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	repo_service "forgejo.org/services/repository"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,18 +34,19 @@ func getExpectedContentsResponseForContents(ref, refType, lastCommitSHA string) 
 	gitURL := setting.AppURL + "api/v1/repos/user2/repo1/git/blobs/" + sha
 	downloadURL := setting.AppURL + "user2/repo1/raw/" + refType + "/" + ref + "/" + treePath
 	return &api.ContentsResponse{
-		Name:          treePath,
-		Path:          treePath,
-		SHA:           sha,
-		LastCommitSHA: lastCommitSHA,
-		Type:          "file",
-		Size:          30,
-		Encoding:      &encoding,
-		Content:       &content,
-		URL:           &selfURL,
-		HTMLURL:       &htmlURL,
-		GitURL:        &gitURL,
-		DownloadURL:   &downloadURL,
+		Name:           treePath,
+		Path:           treePath,
+		SHA:            sha,
+		LastCommitSHA:  lastCommitSHA,
+		LastCommitWhen: time.Date(2017, time.March, 19, 16, 47, 59, 0, time.FixedZone("", -14400)),
+		Type:           "file",
+		Size:           30,
+		Encoding:       &encoding,
+		Content:        &content,
+		URL:            &selfURL,
+		HTMLURL:        &htmlURL,
+		GitURL:         &gitURL,
+		DownloadURL:    &downloadURL,
 		Links: &api.FileLinksResponse{
 			Self:    &selfURL,
 			GitURL:  &gitURL,
@@ -102,7 +104,7 @@ func testAPIGetContents(t *testing.T, u *url.URL) {
 	assert.NotNil(t, contentsResponse)
 	lastCommit, _ := gitRepo.GetCommitByPath("README.md")
 	expectedContentsResponse := getExpectedContentsResponseForContents(ref, refType, lastCommit.ID.String())
-	assert.EqualValues(t, *expectedContentsResponse, contentsResponse)
+	assert.Equal(t, *expectedContentsResponse, contentsResponse)
 
 	// No ref
 	refType = "branch"
@@ -111,7 +113,7 @@ func testAPIGetContents(t *testing.T, u *url.URL) {
 	DecodeJSON(t, resp, &contentsResponse)
 	assert.NotNil(t, contentsResponse)
 	expectedContentsResponse = getExpectedContentsResponseForContents(repo1.DefaultBranch, refType, lastCommit.ID.String())
-	assert.EqualValues(t, *expectedContentsResponse, contentsResponse)
+	assert.Equal(t, *expectedContentsResponse, contentsResponse)
 
 	// ref is the branch we created above  in setup
 	ref = newBranch
@@ -123,7 +125,7 @@ func testAPIGetContents(t *testing.T, u *url.URL) {
 	branchCommit, _ := gitRepo.GetBranchCommit(ref)
 	lastCommit, _ = branchCommit.GetCommitByPath("README.md")
 	expectedContentsResponse = getExpectedContentsResponseForContents(ref, refType, lastCommit.ID.String())
-	assert.EqualValues(t, *expectedContentsResponse, contentsResponse)
+	assert.Equal(t, *expectedContentsResponse, contentsResponse)
 
 	// ref is the new tag we created above in setup
 	ref = newTag
@@ -135,7 +137,7 @@ func testAPIGetContents(t *testing.T, u *url.URL) {
 	tagCommit, _ := gitRepo.GetTagCommit(ref)
 	lastCommit, _ = tagCommit.GetCommitByPath("README.md")
 	expectedContentsResponse = getExpectedContentsResponseForContents(ref, refType, lastCommit.ID.String())
-	assert.EqualValues(t, *expectedContentsResponse, contentsResponse)
+	assert.Equal(t, *expectedContentsResponse, contentsResponse)
 
 	// ref is a commit
 	ref = commitID
@@ -145,7 +147,7 @@ func testAPIGetContents(t *testing.T, u *url.URL) {
 	DecodeJSON(t, resp, &contentsResponse)
 	assert.NotNil(t, contentsResponse)
 	expectedContentsResponse = getExpectedContentsResponseForContents(ref, refType, commitID)
-	assert.EqualValues(t, *expectedContentsResponse, contentsResponse)
+	assert.Equal(t, *expectedContentsResponse, contentsResponse)
 
 	// Test file contents a file with a bad ref
 	ref = "badref"
@@ -181,16 +183,16 @@ func TestAPIGetContentsRefFormats(t *testing.T) {
 		resp := MakeRequest(t, NewRequest(t, http.MethodGet, noRef), http.StatusOK)
 		raw, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
-		assert.EqualValues(t, content, string(raw))
+		assert.Equal(t, content, string(raw))
 
 		resp = MakeRequest(t, NewRequest(t, http.MethodGet, refInPath), http.StatusOK)
 		raw, err = io.ReadAll(resp.Body)
 		require.NoError(t, err)
-		assert.EqualValues(t, content, string(raw))
+		assert.Equal(t, content, string(raw))
 
 		resp = MakeRequest(t, NewRequest(t, http.MethodGet, refInQuery), http.StatusOK)
 		raw, err = io.ReadAll(resp.Body)
 		require.NoError(t, err)
-		assert.EqualValues(t, content, string(raw))
+		assert.Equal(t, content, string(raw))
 	})
 }

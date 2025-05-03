@@ -4,7 +4,7 @@
 package setting
 
 import (
-	"code.gitea.io/gitea/modules/log"
+	"forgejo.org/modules/log"
 
 	"github.com/42wim/httpsig"
 )
@@ -15,18 +15,20 @@ var (
 		Enabled             bool
 		ShareUserStatistics bool
 		MaxSize             int64
-		Algorithms          []string
+		SignatureAlgorithms []string
 		DigestAlgorithm     string
 		GetHeaders          []string
 		PostHeaders         []string
+		SignatureEnforced   bool
 	}{
 		Enabled:             false,
 		ShareUserStatistics: true,
 		MaxSize:             4,
-		Algorithms:          []string{"rsa-sha256", "rsa-sha512", "ed25519"},
+		SignatureAlgorithms: []string{"rsa-sha256", "rsa-sha512", "ed25519"},
 		DigestAlgorithm:     "SHA-256",
 		GetHeaders:          []string{"(request-target)", "Date", "Host"},
 		PostHeaders:         []string{"(request-target)", "Date", "Host", "Digest"},
+		SignatureEnforced:   true,
 	}
 )
 
@@ -44,8 +46,8 @@ func loadFederationFrom(rootCfg ConfigProvider) {
 	// Get MaxSize in bytes instead of MiB
 	Federation.MaxSize = 1 << 20 * Federation.MaxSize
 
-	HttpsigAlgs = make([]httpsig.Algorithm, len(Federation.Algorithms))
-	for i, alg := range Federation.Algorithms {
+	HttpsigAlgs = make([]httpsig.Algorithm, len(Federation.SignatureAlgorithms))
+	for i, alg := range Federation.SignatureAlgorithms {
 		HttpsigAlgs[i] = httpsig.Algorithm(alg)
 	}
 }

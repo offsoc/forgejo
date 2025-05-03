@@ -7,9 +7,9 @@ import (
 	"context"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/timeutil"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/timeutil"
 
 	"xorm.io/builder"
 )
@@ -86,7 +86,7 @@ func FindVariables(ctx context.Context, opts FindVariablesOpts) ([]*ActionVariab
 }
 
 func UpdateVariable(ctx context.Context, variable *ActionVariable) (bool, error) {
-	count, err := db.GetEngine(ctx).ID(variable.ID).Cols("name", "data").
+	count, err := db.GetEngine(ctx).ID(variable.ID).Where("owner_id = ? AND repo_id = ?", variable.OwnerID, variable.RepoID).Cols("name", "data").
 		Update(&ActionVariable{
 			Name: variable.Name,
 			Data: variable.Data,
@@ -94,11 +94,9 @@ func UpdateVariable(ctx context.Context, variable *ActionVariable) (bool, error)
 	return count != 0, err
 }
 
-func DeleteVariable(ctx context.Context, id int64) error {
-	if _, err := db.DeleteByID[ActionVariable](ctx, id); err != nil {
-		return err
-	}
-	return nil
+func DeleteVariable(ctx context.Context, variableID, ownerID, repoID int64) (bool, error) {
+	count, err := db.GetEngine(ctx).Table("action_variable").Where("id = ? AND owner_id = ? AND repo_id = ?", variableID, ownerID, repoID).Delete()
+	return count != 0, err
 }
 
 func GetVariablesOfRun(ctx context.Context, run *ActionRun) (map[string]string, error) {

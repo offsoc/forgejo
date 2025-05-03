@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )
@@ -69,7 +69,7 @@ func init() {
 }
 
 // GetUserRedirect returns the redirect for a given username, this is a
-// case-insenstive operation.
+// case-insensitive operation.
 func GetUserRedirect(ctx context.Context, userName string) (*Redirect, error) {
 	userName = strings.ToLower(userName)
 	redirect := &Redirect{LowerName: userName}

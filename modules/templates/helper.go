@@ -14,14 +14,14 @@ import (
 	"strings"
 	"time"
 
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/svg"
-	"code.gitea.io/gitea/modules/templates/eval"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/gitdiff"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/svg"
+	"forgejo.org/modules/templates/eval"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/gitdiff"
 )
 
 // NewFuncMap returns functions for injecting to templates

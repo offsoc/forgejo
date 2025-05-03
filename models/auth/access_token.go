@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
 
 	lru "github.com/hashicorp/golang-lru/v2"
 	"xorm.io/builder"
@@ -98,20 +98,24 @@ func init() {
 
 // NewAccessToken creates new access token.
 func NewAccessToken(ctx context.Context, t *AccessToken) error {
+	err := generateAccessToken(t)
+	if err != nil {
+		return err
+	}
+	_, err = db.GetEngine(ctx).Insert(t)
+	return err
+}
+
+func generateAccessToken(t *AccessToken) error {
 	salt, err := util.CryptoRandomString(10)
 	if err != nil {
 		return err
 	}
-	token, err := util.CryptoRandomBytes(20)
-	if err != nil {
-		return err
-	}
 	t.TokenSalt = salt
-	t.Token = hex.EncodeToString(token)
+	t.Token = hex.EncodeToString(util.CryptoRandomBytes(20))
 	t.TokenHash = HashToken(t.Token, t.TokenSalt)
 	t.TokenLastEight = t.Token[len(t.Token)-8:]
-	_, err = db.GetEngine(ctx).Insert(t)
-	return err
+	return nil
 }
 
 // DisplayPublicOnly whether to display this as a public-only token.
@@ -233,4 +237,26 @@ func DeleteAccessTokenByID(ctx context.Context, id, userID int64) error {
 		return ErrAccessTokenNotExist{}
 	}
 	return nil
+}
+
+// RegenerateAccessTokenByID regenerates access token by given ID.
+// It regenerates token and salt, as well as updates the creation time.
+func RegenerateAccessTokenByID(ctx context.Context, id, userID int64) (*AccessToken, error) {
+	t := &AccessToken{}
+	found, err := db.GetEngine(ctx).Where("id = ? AND uid = ?", id, userID).Get(t)
+	if err != nil {
+		return nil, err
+	} else if !found {
+		return nil, ErrAccessTokenNotExist{}
+	}
+
+	err = generateAccessToken(t)
+	if err != nil {
+		return nil, err
+	}
+
+	// Reset the creation time, token is unused
+	t.UpdatedUnix = timeutil.TimeStampNow()
+
+	return t, UpdateAccessToken(ctx, t)
 }

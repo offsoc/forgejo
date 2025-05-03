@@ -14,18 +14,18 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/unit"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/markup"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/util"
+	"forgejo.org/models/db"
+	"forgejo.org/models/unit"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/markup"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/util"
 
 	"xorm.io/builder"
 )
@@ -402,27 +402,28 @@ func (repo *Repository) MustGetUnit(ctx context.Context, tp unit.Type) *RepoUnit
 		return ru
 	}
 
-	if tp == unit.TypeExternalWiki {
+	switch tp {
+	case unit.TypeExternalWiki:
 		return &RepoUnit{
 			Type:   tp,
 			Config: new(ExternalWikiConfig),
 		}
-	} else if tp == unit.TypeExternalTracker {
+	case unit.TypeExternalTracker:
 		return &RepoUnit{
 			Type:   tp,
 			Config: new(ExternalTrackerConfig),
 		}
-	} else if tp == unit.TypePullRequests {
+	case unit.TypePullRequests:
 		return &RepoUnit{
 			Type:   tp,
 			Config: new(PullRequestsConfig),
 		}
-	} else if tp == unit.TypeIssues {
+	case unit.TypeIssues:
 		return &RepoUnit{
 			Type:   tp,
 			Config: new(IssuesConfig),
 		}
-	} else if tp == unit.TypeActions {
+	case unit.TypeActions:
 		return &RepoUnit{
 			Type:   tp,
 			Config: new(ActionsConfig),
@@ -529,7 +530,6 @@ func (repo *Repository) ComposeMetas(ctx context.Context) map[string]string {
 				Join("INNER", "team", "team.id = team_repo.team_id").
 				Where("team_repo.repo_id = ?", repo.ID).
 				Select("team.lower_name").
-				OrderBy("team.lower_name").
 				Find(&teams)
 			metas["teams"] = "," + strings.Join(teams, ",") + ","
 			metas["org"] = strings.ToLower(repo.OwnerName)

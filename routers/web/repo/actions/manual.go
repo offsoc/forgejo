@@ -6,8 +6,8 @@ package actions
 import (
 	"net/url"
 
-	actions_service "code.gitea.io/gitea/services/actions"
-	context_module "code.gitea.io/gitea/services/context"
+	actions_service "forgejo.org/services/actions"
+	context_module "forgejo.org/services/context"
 )
 
 func ManualRunWorkflow(ctx *context_module.Context) {
@@ -46,7 +46,8 @@ func ManualRunWorkflow(ctx *context_module.Context) {
 		return ctx.Req.PostFormValue(formKey)
 	}
 
-	if err := workflow.Dispatch(ctx, formKeyGetter, ctx.Repo.Repository, ctx.Doer); err != nil {
+	_, _, err = workflow.Dispatch(ctx, formKeyGetter, ctx.Repo.Repository, ctx.Doer)
+	if err != nil {
 		if actions_service.IsInputRequiredErr(err) {
 			ctx.Flash.Error(ctx.Locale.Tr("actions.workflow.dispatch.input_required", err.(actions_service.InputRequiredErr).Name))
 			ctx.Redirect(location)

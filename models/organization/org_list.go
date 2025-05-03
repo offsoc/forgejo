@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"strings"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/perm"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/structs"
+	"forgejo.org/models/db"
+	"forgejo.org/models/perm"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/structs"
 
 	"xorm.io/builder"
 )
@@ -99,6 +99,7 @@ func GetUserOrgsList(ctx context.Context, user *user_model.User) ([]*MinimalOrg,
 	if err := db.GetEngine(ctx).Select(columnsStr).
 		Table("user").
 		Where(builder.In("`user`.`id`", queryUserOrgIDs(user.ID, true))).
+		OrderBy("`user`.lower_name ASC").
 		Find(&orgs); err != nil {
 		return nil, err
 	}

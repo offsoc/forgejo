@@ -11,15 +11,15 @@ import (
 	"strings"
 	"time"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/db"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/shared/types"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/translation"
-	"code.gitea.io/gitea/modules/util"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/shared/types"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/translation"
+	"forgejo.org/modules/util"
 
 	runnerv1 "code.gitea.io/actions-proto-go/runner/v1"
 	"xorm.io/builder"
@@ -87,9 +87,10 @@ func (r *ActionRunner) BelongsToOwnerType() types.OwnerType {
 		return types.OwnerTypeRepository
 	}
 	if r.OwnerID != 0 {
-		if r.Owner.Type == user_model.UserTypeOrganization {
+		switch r.Owner.Type {
+		case user_model.UserTypeOrganization:
 			return types.OwnerTypeOrganization
-		} else if r.Owner.Type == user_model.UserTypeIndividual {
+		case user_model.UserTypeIndividual:
 			return types.OwnerTypeIndividual
 		}
 	}
@@ -167,12 +168,7 @@ func (r *ActionRunner) GenerateToken() (err error) {
 // UpdateSecret updates the hash based on the specified token. It does not
 // ensure that the runner's UUID matches the first 16 bytes of the token.
 func (r *ActionRunner) UpdateSecret(token string) error {
-	saltBytes, err := util.CryptoRandomBytes(16)
-	if err != nil {
-		return fmt.Errorf("CryptoRandomBytes %v", err)
-	}
-
-	salt := hex.EncodeToString(saltBytes)
+	salt := hex.EncodeToString(util.CryptoRandomBytes(16))
 
 	r.Token = token
 	r.TokenSalt = salt
@@ -282,27 +278,22 @@ func UpdateRunner(ctx context.Context, r *ActionRunner, cols ...string) error {
 }
 
 // DeleteRunner deletes a runner by given ID.
-func DeleteRunner(ctx context.Context, id int64) error {
-	runner, err := GetRunnerByID(ctx, id)
-	if err != nil {
-		return err
-	}
-
+func DeleteRunner(ctx context.Context, r *ActionRunner) error {
 	// Replace the UUID, which was either based on the secret's first 16 bytes or an UUIDv4,
 	// with a sequence of 8 0xff bytes followed by the little-endian version of the record's
 	// identifier. This will prevent the deleted record's identifier from colliding with any
 	// new record.
 	b := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b, uint64(id))
-	runner.UUID = fmt.Sprintf("ffffffff-ffff-ffff-%.2x%.2x-%.2x%.2x%.2x%.2x%.2x%.2x",
+	binary.LittleEndian.PutUint64(b, uint64(r.ID))
+	r.UUID = fmt.Sprintf("ffffffff-ffff-ffff-%.2x%.2x-%.2x%.2x%.2x%.2x%.2x%.2x",
 		b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7])
 
-	err = UpdateRunner(ctx, runner, "UUID")
+	err := UpdateRunner(ctx, r, "UUID")
 	if err != nil {
 		return err
 	}
 
-	_, err = db.DeleteByID[ActionRunner](ctx, id)
+	_, err = db.DeleteByID[ActionRunner](ctx, r.ID)
 	return err
 }
 

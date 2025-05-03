@@ -6,11 +6,11 @@ package admin
 import (
 	"testing"
 
-	activities_model "code.gitea.io/gitea/models/activities"
-	"code.gitea.io/gitea/models/unittest"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/services/contexttest"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/unittest"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+	"forgejo.org/services/contexttest"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -69,7 +69,7 @@ func TestShadowPassword(t *testing.T) {
 	}
 
 	for _, k := range kases {
-		assert.EqualValues(t, k.Result, shadowPassword(k.Provider, k.CfgItem))
+		assert.Equal(t, k.Result, shadowPassword(k.Provider, k.CfgItem))
 	}
 }
 

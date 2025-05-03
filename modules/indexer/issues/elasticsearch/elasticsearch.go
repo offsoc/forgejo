@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/gitea/modules/graceful"
-	indexer_internal "code.gitea.io/gitea/modules/indexer/internal"
-	inner_elasticsearch "code.gitea.io/gitea/modules/indexer/internal/elasticsearch"
-	"code.gitea.io/gitea/modules/indexer/issues/internal"
+	"forgejo.org/modules/graceful"
+	indexer_internal "forgejo.org/modules/indexer/internal"
+	inner_elasticsearch "forgejo.org/modules/indexer/internal/elasticsearch"
+	"forgejo.org/modules/indexer/issues/internal"
 
 	"github.com/olivere/elastic/v7"
 )
@@ -23,6 +23,10 @@ const (
 	// Reference: https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-multi-match-query.html#multi-match-types
 	esMultiMatchTypeBestFields   = "best_fields"
 	esMultiMatchTypePhrasePrefix = "phrase_prefix"
+
+	// fuzziness options
+	// Reference: https://www.elastic.co/guide/en/elasticsearch/reference/7.0/common-options.html#fuzziness
+	esFuzzyAuto = "AUTO"
 )
 
 var _ internal.Indexer = &Indexer{}
@@ -145,12 +149,30 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 	query := elastic.NewBoolQuery()
 
 	if options.Keyword != "" {
-		searchType := esMultiMatchTypePhrasePrefix
-		if options.IsFuzzyKeyword {
-			searchType = esMultiMatchTypeBestFields
+		q := elastic.NewBoolQuery()
+		tokens, err := options.Tokens()
+		if err != nil {
+			return nil, err
 		}
+		for _, token := range tokens {
+			innerQ := elastic.NewMultiMatchQuery(token.Term, "title", "content", "comments")
+			if token.Fuzzy {
+				// If the term is not a phrase use fuzziness set to AUTO
+				innerQ = innerQ.Type(esMultiMatchTypeBestFields).Fuzziness(esFuzzyAuto)
+			} else {
+				innerQ = innerQ.Type(esMultiMatchTypePhrasePrefix)
+			}
 
-		query.Must(elastic.NewMultiMatchQuery(options.Keyword, "title", "content", "comments").Type(searchType))
+			switch token.Kind {
+			case internal.BoolOptMust:
+				q.Must(innerQ)
+			case internal.BoolOptShould:
+				q.Should(innerQ)
+			case internal.BoolOptNot:
+				q.MustNot(innerQ)
+			}
+		}
+		query.Must(q)
 	}
 
 	if len(options.RepoIDs) > 0 {

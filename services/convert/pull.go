@@ -7,15 +7,15 @@ import (
 	"context"
 	"fmt"
 
-	issues_model "code.gitea.io/gitea/models/issues"
-	"code.gitea.io/gitea/models/perm"
-	access_model "code.gitea.io/gitea/models/perm/access"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/gitrepo"
-	"code.gitea.io/gitea/modules/log"
-	api "code.gitea.io/gitea/modules/structs"
+	issues_model "forgejo.org/models/issues"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/cache"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/log"
+	api "forgejo.org/modules/structs"
 )
 
 // ToAPIPullRequest assumes following fields have been assigned with valid values:
@@ -66,33 +66,36 @@ func ToAPIPullRequest(ctx context.Context, pr *issues_model.PullRequest, doer *u
 	}
 
 	apiPullRequest := &api.PullRequest{
-		ID:             pr.ID,
-		URL:            pr.Issue.HTMLURL(),
-		Index:          pr.Index,
-		Poster:         apiIssue.Poster,
-		Title:          apiIssue.Title,
-		Body:           apiIssue.Body,
-		Labels:         apiIssue.Labels,
-		Milestone:      apiIssue.Milestone,
-		Assignee:       apiIssue.Assignee,
-		Assignees:      apiIssue.Assignees,
-		State:          apiIssue.State,
-		Draft:          pr.IsWorkInProgress(ctx),
-		IsLocked:       apiIssue.IsLocked,
-		Comments:       apiIssue.Comments,
-		ReviewComments: pr.GetReviewCommentsCount(ctx),
-		HTMLURL:        pr.Issue.HTMLURL(),
-		DiffURL:        pr.Issue.DiffURL(),
-		PatchURL:       pr.Issue.PatchURL(),
-		HasMerged:      pr.HasMerged,
-		MergeBase:      pr.MergeBase,
-		Mergeable:      pr.Mergeable(ctx),
-		Deadline:       apiIssue.Deadline,
-		Created:        pr.Issue.CreatedUnix.AsTimePtr(),
-		Updated:        pr.Issue.UpdatedUnix.AsTimePtr(),
-		PinOrder:       apiIssue.PinOrder,
+		ID:                      pr.ID,
+		URL:                     pr.Issue.HTMLURL(),
+		Index:                   pr.Index,
+		Poster:                  apiIssue.Poster,
+		Title:                   apiIssue.Title,
+		Body:                    apiIssue.Body,
+		Labels:                  apiIssue.Labels,
+		Milestone:               apiIssue.Milestone,
+		Assignee:                apiIssue.Assignee,
+		Assignees:               apiIssue.Assignees,
+		State:                   apiIssue.State,
+		Draft:                   pr.IsWorkInProgress(ctx),
+		IsLocked:                apiIssue.IsLocked,
+		Comments:                apiIssue.Comments,
+		ReviewComments:          pr.GetReviewCommentsCount(ctx),
+		HTMLURL:                 pr.Issue.HTMLURL(),
+		DiffURL:                 pr.Issue.DiffURL(),
+		PatchURL:                pr.Issue.PatchURL(),
+		HasMerged:               pr.HasMerged,
+		MergeBase:               pr.MergeBase,
+		Mergeable:               pr.Mergeable(ctx),
+		Deadline:                apiIssue.Deadline,
+		Created:                 pr.Issue.CreatedUnix.AsTimePtr(),
+		Updated:                 pr.Issue.UpdatedUnix.AsTimePtr(),
+		PinOrder:                apiIssue.PinOrder,
+		RequestedReviewers:      []*api.User{},
+		RequestedReviewersTeams: []*api.Team{},
 
 		AllowMaintainerEdit: pr.AllowMaintainerEdit,
+		Flow:                int64(pr.Flow),
 
 		Base: &api.PRBranchInfo{
 			Name:       pr.BaseBranch,

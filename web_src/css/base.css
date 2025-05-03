@@ -18,6 +18,7 @@
   /* other variables */
   --border-radius: 4px;
   --border-radius-medium: 6px;
+  --border-radius-large: 25px;
   --border-radius-full: 99999px; /* TODO: use calc(infinity * 1px) */
   --opacity-disabled: 0.55;
   --height-loading: 16rem;
@@ -27,6 +28,7 @@
   --checkbox-size: 15px; /* height and width of checkbox and radio inputs */
   --page-spacing: 16px; /* space between page elements */
   --page-margin-x: 32px; /* minimum space on left and right side of page */
+  --button-spacing: 0.33rem;
 }
 
 @media (min-width: 768px) and (max-width: 1200px) {
@@ -38,6 +40,12 @@
 @media (max-width: 767.98px) {
   :root {
     --page-margin-x: 8px;
+  }
+}
+
+@media (pointer: coarse) {
+  :root {
+    --button-spacing: 0.5rem;
   }
 }
 
@@ -247,13 +255,13 @@ h1.error-code {
 }
 
 .button-row {
-  gap: 0.5rem;
+  gap: var(--button-spacing);
 }
 
 .button-sequence {
   display: flex;
   flex-flow: wrap;
-  gap: 0.5em;
+  gap: var(--button-spacing);
 }
 
 .button-sequence.right {
@@ -750,10 +758,6 @@ img.ui.avatar,
   box-shadow: 0 6px 18px var(--color-shadow) !important;
 }
 
-.ui.dimmer {
-  background: var(--color-overlay-backdrop);
-}
-
 /* Override semantic selector '.ui.menu:not(.vertical) .item > .button' */
 /* This fixes the commit graph button on the commits page */
 /* modal svg icons, copied from fomantic except width and height */
@@ -948,7 +952,15 @@ img.ui.avatar,
 @media (max-width: 767.98px) {
   .ui.pagination.menu .item:not(.active,.navigation),
   .ui.pagination.menu .item.navigation span.navigation_label {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 }
 
@@ -1050,6 +1062,11 @@ overflow-menu .overflow-menu-items {
 
 overflow-menu .overflow-menu-items .item {
   margin-bottom: 0 !important; /* reset fomantic's margin, because the active menu has special bottom border */
+  height: 100%;
+}
+
+overflow-menu .overflow-menu-items .item > .svg {
+  align-self: center;
 }
 
 overflow-menu .ui.label {
@@ -1273,10 +1290,6 @@ svg.text.purple,
 
 .code-view table {
   width: 100%;
-}
-
-.migrate .svg.gitea-git {
-  color: var(--color-git);
 }
 
 .color-icon {

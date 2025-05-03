@@ -8,15 +8,15 @@ import (
 	"errors"
 	"net/http"
 
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/models/organization"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/forms"
+	"forgejo.org/models/db"
+	"forgejo.org/models/organization"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/forms"
 )
 
 const (
@@ -27,11 +27,14 @@ const (
 // Create render the page for create organization
 func Create(ctx *context.Context) {
 	ctx.Data["Title"] = ctx.Tr("new_org.title")
-	ctx.Data["DefaultOrgVisibilityMode"] = setting.Service.DefaultOrgVisibilityMode
 	if !ctx.Doer.CanCreateOrganization() {
 		ctx.ServerError("Not allowed", errors.New(ctx.Locale.TrString("org.form.create_org_not_allowed")))
 		return
 	}
+
+	ctx.Data["visibility"] = setting.Service.DefaultOrgVisibilityMode
+	ctx.Data["repo_admin_change_team_access"] = true
+
 	ctx.HTML(http.StatusOK, tplCreateOrg)
 }
 

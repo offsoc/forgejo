@@ -17,19 +17,19 @@ import (
 	"strings"
 	"time"
 
-	"code.gitea.io/gitea/models/db"
-	git_model "code.gitea.io/gitea/models/git"
-	issues_model "code.gitea.io/gitea/models/issues"
-	pull_model "code.gitea.io/gitea/models/pull"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/analyze"
-	"code.gitea.io/gitea/modules/charset"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/highlight"
-	"code.gitea.io/gitea/modules/lfs"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/translation"
+	"forgejo.org/models/db"
+	git_model "forgejo.org/models/git"
+	issues_model "forgejo.org/models/issues"
+	pull_model "forgejo.org/models/pull"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/analyze"
+	"forgejo.org/modules/charset"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/highlight"
+	"forgejo.org/modules/lfs"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/translation"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
 	stdcharset "golang.org/x/net/html/charset"
@@ -1060,7 +1060,7 @@ func readFileName(rd *strings.Reader) (string, bool) {
 		_, _ = fmt.Fscanf(rd, "%s ", &name)
 		char, _ := rd.ReadByte()
 		_ = rd.UnreadByte()
-		for !(char == 0 || char == '"' || char == 'b') {
+		for char != 0 && char != '"' && char != 'b' {
 			var suffix string
 			_, _ = fmt.Fscanf(rd, "%s ", &suffix)
 			name += " " + suffix
@@ -1088,52 +1088,52 @@ type DiffOptions struct {
 	FileOnly           bool
 }
 
-// GetDiff builds a Diff between two commits of a repository.
+// GetDiffSimple builds a Diff between two commits of a repository.
 // Passing the empty string as beforeCommitID returns a diff from the parent commit.
-// The whitespaceBehavior is either an empty string or a git flag
-func GetDiff(ctx context.Context, gitRepo *git.Repository, opts *DiffOptions, files ...string) (*Diff, error) {
-	repoPath := gitRepo.Path
-
-	var beforeCommit *git.Commit
-	commit, err := gitRepo.GetCommit(opts.AfterCommitID)
+// The whitespaceBehavior is either an empty string or a git flag.
+func GetDiffSimple(ctx context.Context, gitRepo *git.Repository, opts *DiffOptions, files ...string) (diff *Diff, afterCommit *git.Commit, err error) {
+	afterCommit, err = gitRepo.GetCommit(opts.AfterCommitID)
 	if err != nil {
-		return nil, err
+		return nil, nil, fmt.Errorf("unable to get the after commit %q: %w", opts.AfterCommitID, err)
 	}
 
 	cmdCtx, cmdCancel := context.WithCancel(ctx)
 	defer cmdCancel()
 
-	cmdDiff := git.NewCommand(cmdCtx)
+	cmdDiff := git.NewCommand(cmdCtx).
+		AddArguments("diff", "--src-prefix=\\a/", "--dst-prefix=\\b/", "-M").
+		AddArguments(opts.WhitespaceBehavior...)
+
 	objectFormat, err := gitRepo.GetObjectFormat()
 	if err != nil {
-		return nil, err
+		return nil, nil, fmt.Errorf("not able to determine the object format: %w", err)
 	}
 
-	if (len(opts.BeforeCommitID) == 0 || opts.BeforeCommitID == objectFormat.EmptyObjectID().String()) && commit.ParentCount() == 0 {
-		cmdDiff.AddArguments("diff", "--src-prefix=\\a/", "--dst-prefix=\\b/", "-M").
-			AddArguments(opts.WhitespaceBehavior...).
-			AddDynamicArguments(objectFormat.EmptyTree().String()).
-			AddDynamicArguments(opts.AfterCommitID)
+	// If before commit is empty or the empty object and the after commit has no
+	// parents, then use the empty tree as before commit.
+	//
+	// This is the case for a 'initial commit' of a Git tree, which obviously has
+	// no parents.
+	if (len(opts.BeforeCommitID) == 0 || opts.BeforeCommitID == objectFormat.EmptyObjectID().String()) && afterCommit.ParentCount() == 0 {
+		// Reset before commit ID to indicate empty tree was used.
+		opts.BeforeCommitID = ""
+		// Add enpty tree as before commit.
+		cmdDiff.AddDynamicArguments(objectFormat.EmptyTree().String())
 	} else {
-		actualBeforeCommitID := opts.BeforeCommitID
-		if len(actualBeforeCommitID) == 0 {
-			parentCommit, err := commit.Parent(0)
+		// If before commit ID is empty, use the first parent of the after commit.
+		if len(opts.BeforeCommitID) == 0 {
+			parentCommit, err := afterCommit.Parent(0)
 			if err != nil {
-				return nil, err
+				return nil, nil, fmt.Errorf("not able to get first parent of %q: %w", afterCommit.ID.String(), err)
 			}
-			actualBeforeCommitID = parentCommit.ID.String()
+			opts.BeforeCommitID = parentCommit.ID.String()
 		}
 
-		cmdDiff.AddArguments("diff", "--src-prefix=\\a/", "--dst-prefix=\\b/", "-M").
-			AddArguments(opts.WhitespaceBehavior...).
-			AddDynamicArguments(actualBeforeCommitID, opts.AfterCommitID)
-		opts.BeforeCommitID = actualBeforeCommitID
-
-		beforeCommit, err = gitRepo.GetCommit(opts.BeforeCommitID)
-		if err != nil {
-			return nil, err
-		}
+		cmdDiff.AddDynamicArguments(opts.BeforeCommitID)
 	}
+
+	// Add the after commit to the diff command.
+	cmdDiff.AddDynamicArguments(opts.AfterCommitID)
 
 	// In git 2.31, git diff learned --skip-to which we can use to shortcut skip to file
 	// so if we are using at least this version of git we don't have to tell ParsePatch to do
@@ -1144,6 +1144,7 @@ func GetDiff(ctx context.Context, gitRepo *git.Repository, opts *DiffOptions, fi
 		parsePatchSkipToFile = ""
 	}
 
+	// If we only want to diff for some files, add that as well.
 	cmdDiff.AddDashesAndList(files...)
 
 	reader, writer := io.Pipe()
@@ -1153,6 +1154,7 @@ func GetDiff(ctx context.Context, gitRepo *git.Repository, opts *DiffOptions, fi
 	}()
 
 	go func() {
+		repoPath := gitRepo.Path
 		stderr := &bytes.Buffer{}
 		cmdDiff.SetDescription(fmt.Sprintf("GetDiffRange [repo_path: %s]", repoPath))
 		if err := cmdDiff.Run(&git.RunOpts{
@@ -1167,13 +1169,32 @@ func GetDiff(ctx context.Context, gitRepo *git.Repository, opts *DiffOptions, fi
 		_ = writer.Close()
 	}()
 
-	diff, err := ParsePatch(cmdCtx, opts.MaxLines, opts.MaxLineCharacters, opts.MaxFiles, reader, parsePatchSkipToFile)
+	diff, err = ParsePatch(cmdCtx, opts.MaxLines, opts.MaxLineCharacters, opts.MaxFiles, reader, parsePatchSkipToFile)
 	// Ensure the git process is killed if it didn't exit already
 	cmdCancel()
 	if err != nil {
-		return nil, fmt.Errorf("unable to ParsePatch: %w", err)
+		return nil, nil, fmt.Errorf("unable to parse a git diff: %w", err)
 	}
 	diff.Start = opts.SkipTo
+
+	return diff, afterCommit, nil
+}
+
+func GetDiffFull(ctx context.Context, gitRepo *git.Repository, opts *DiffOptions, files ...string) (*Diff, error) {
+	diff, afterCommit, err := GetDiffSimple(ctx, gitRepo, opts, files...)
+	if err != nil {
+		return nil, err
+	}
+
+	// If there's a before commit, then GetDiffSimple will set it, otherwise it
+	// is empty.
+	var beforeCommit *git.Commit
+	if len(opts.BeforeCommitID) != 0 {
+		beforeCommit, err = gitRepo.GetCommit(opts.BeforeCommitID)
+		if err != nil {
+			return nil, fmt.Errorf("unable to get before commit %q: %w", opts.BeforeCommitID, err)
+		}
+	}
 
 	checker, err := gitRepo.GitAttributeChecker(opts.AfterCommitID, git.LinguistAttributes...)
 	if err != nil {
@@ -1210,7 +1231,7 @@ func GetDiff(ctx context.Context, gitRepo *git.Repository, opts *DiffOptions, fi
 			diffFile.IsGenerated = analyze.IsGenerated(diffFile.Name)
 		}
 
-		tailSection := diffFile.GetTailSection(gitRepo, beforeCommit, commit)
+		tailSection := diffFile.GetTailSection(gitRepo, beforeCommit, afterCommit)
 		if tailSection != nil {
 			diffFile.Sections = append(diffFile.Sections, tailSection)
 		}
@@ -1272,7 +1293,7 @@ func GetPullDiffStats(gitRepo *git.Repository, opts *DiffOptions) (*PullDiffStat
 // SyncAndGetUserSpecificDiff is like GetDiff, except that user specific data such as which files the given user has already viewed on the given PR will also be set
 // Additionally, the database asynchronously is updated if files have changed since the last review
 func SyncAndGetUserSpecificDiff(ctx context.Context, userID int64, pull *issues_model.PullRequest, gitRepo *git.Repository, opts *DiffOptions, files ...string) (*Diff, error) {
-	diff, err := GetDiff(ctx, gitRepo, opts, files...)
+	diff, err := GetDiffFull(ctx, gitRepo, opts, files...)
 	if err != nil {
 		return nil, err
 	}
@@ -1381,10 +1402,8 @@ func GetWhitespaceFlag(whitespaceBehavior string) git.TrustedCmdArgs {
 		"ignore-eol":    {"--ignore-space-at-eol"},
 		"show-all":      nil,
 	}
-
 	if flag, ok := whitespaceFlags[whitespaceBehavior]; ok {
 		return flag
 	}
-	log.Warn("unknown whitespace behavior: %q, default to 'show-all'", whitespaceBehavior)
 	return nil
 }

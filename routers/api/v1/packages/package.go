@@ -4,15 +4,18 @@
 package packages
 
 import (
+	"errors"
 	"net/http"
 
-	"code.gitea.io/gitea/models/packages"
-	"code.gitea.io/gitea/modules/optional"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/routers/api/v1/utils"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/convert"
-	packages_service "code.gitea.io/gitea/services/packages"
+	"forgejo.org/models/packages"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/modules/optional"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	packages_service "forgejo.org/services/packages"
 )
 
 // ListPackages gets all packages of an owner
@@ -212,4 +215,123 @@ func ListPackageFiles(ctx *context.APIContext) {
 	}
 
 	ctx.JSON(http.StatusOK, apiPackageFiles)
+}
+
+// LinkPackage sets a repository link for a package
+func LinkPackage(ctx *context.APIContext) {
+	// swagger:operation POST /packages/{owner}/{type}/{name}/-/link/{repo_name} package linkPackage
+	// ---
+	// summary: Link a package to a repository
+	// parameters:
+	// - name: owner
+	//   in: path
+	//   description: owner of the package
+	//   type: string
+	//   required: true
+	// - name: type
+	//   in: path
+	//   description: type of the package
+	//   type: string
+	//   required: true
+	// - name: name
+	//   in: path
+	//   description: name of the package
+	//   type: string
+	//   required: true
+	// - name: repo_name
+	//   in: path
+	//   description: name of the repository to link.
+	//   type: string
+	//   required: true
+	// responses:
+	//   "201":
+	//     "$ref": "#/responses/empty"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	pkg, err := packages.GetPackageByName(ctx, ctx.ContextUser.ID, packages.Type(ctx.PathParamRaw("type")), ctx.PathParamRaw("name"))
+	if err != nil {
+		if errors.Is(err, util.ErrNotExist) {
+			ctx.Error(http.StatusNotFound, "GetPackageByName", err)
+		} else {
+			ctx.Error(http.StatusInternalServerError, "GetPackageByName", err)
+		}
+		return
+	}
+
+	repo, err := repo_model.GetRepositoryByName(ctx, ctx.ContextUser.ID, ctx.PathParamRaw("repo_name"))
+	if err != nil {
+		if errors.Is(err, util.ErrNotExist) {
+			ctx.Error(http.StatusNotFound, "GetRepositoryByName", err)
+		} else {
+			ctx.Error(http.StatusInternalServerError, "GetRepositoryByName", err)
+		}
+		return
+	}
+
+	err = packages_service.LinkToRepository(ctx, pkg, repo, ctx.Doer)
+	if err != nil {
+		switch {
+		case errors.Is(err, util.ErrInvalidArgument):
+			ctx.Error(http.StatusBadRequest, "LinkToRepository", err)
+		case errors.Is(err, util.ErrPermissionDenied):
+			ctx.Error(http.StatusForbidden, "LinkToRepository", err)
+		default:
+			ctx.Error(http.StatusInternalServerError, "LinkToRepository", err)
+		}
+		return
+	}
+	ctx.Status(http.StatusCreated)
+}
+
+// UnlinkPackage sets a repository link for a package
+func UnlinkPackage(ctx *context.APIContext) {
+	// swagger:operation POST /packages/{owner}/{type}/{name}/-/unlink package unlinkPackage
+	// ---
+	// summary: Unlink a package from a repository
+	// parameters:
+	// - name: owner
+	//   in: path
+	//   description: owner of the package
+	//   type: string
+	//   required: true
+	// - name: type
+	//   in: path
+	//   description: type of the package
+	//   type: string
+	//   required: true
+	// - name: name
+	//   in: path
+	//   description: name of the package
+	//   type: string
+	//   required: true
+	// responses:
+	//   "201":
+	//     "$ref": "#/responses/empty"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	pkg, err := packages.GetPackageByName(ctx, ctx.ContextUser.ID, packages.Type(ctx.PathParamRaw("type")), ctx.PathParamRaw("name"))
+	if err != nil {
+		if errors.Is(err, util.ErrNotExist) {
+			ctx.Error(http.StatusNotFound, "GetPackageByName", err)
+		} else {
+			ctx.Error(http.StatusInternalServerError, "GetPackageByName", err)
+		}
+		return
+	}
+
+	err = packages_service.UnlinkFromRepository(ctx, pkg, ctx.Doer)
+	if err != nil {
+		switch {
+		case errors.Is(err, util.ErrPermissionDenied):
+			ctx.Error(http.StatusForbidden, "UnlinkFromRepository", err)
+		case errors.Is(err, util.ErrInvalidArgument):
+			ctx.Error(http.StatusBadRequest, "UnlinkFromRepository", err)
+		default:
+			ctx.Error(http.StatusInternalServerError, "UnlinkFromRepository", err)
+		}
+		return
+	}
+	ctx.Status(http.StatusNoContent)
 }

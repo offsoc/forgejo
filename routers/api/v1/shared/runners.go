@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"strings"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	"code.gitea.io/gitea/models/db"
-	"code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/services/context"
+	actions_model "forgejo.org/models/actions"
+	"forgejo.org/models/db"
+	"forgejo.org/modules/structs"
+	"forgejo.org/modules/util"
+	"forgejo.org/services/context"
 )
 
 // RegistrationToken is a string used to register a runner with a server
@@ -34,13 +34,6 @@ func GetRegistrationToken(ctx *context.APIContext, ownerID, repoID int64) {
 	ctx.JSON(http.StatusOK, RegistrationToken{Token: token.Token})
 }
 
-// RunJobList is a list of action run jobs
-// swagger:response RunJobList
-type RunJobList struct {
-	// in:body
-	Body []*structs.ActionRunJob `json:"body"`
-}
-
 func GetActionRunJobs(ctx *context.APIContext, ownerID, repoID int64) {
 	labels := strings.Split(ctx.FormTrim("labels"), ",")
 
@@ -54,8 +47,7 @@ func GetActionRunJobs(ctx *context.APIContext, ownerID, repoID int64) {
 		return
 	}
 
-	res := new(RunJobList)
-	res.Body = fromRunJobModelToResponse(total, labels)
+	res := fromRunJobModelToResponse(total, labels)
 
 	ctx.JSON(http.StatusOK, res)
 }

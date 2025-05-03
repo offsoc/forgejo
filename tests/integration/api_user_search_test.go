@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"testing"
 
-	auth_model "code.gitea.io/gitea/models/auth"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	"code.gitea.io/gitea/modules/test"
-	"code.gitea.io/gitea/tests"
+	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -68,7 +68,7 @@ func TestAPIUserSearchNotLoggedIn(t *testing.T) {
 	for _, user := range results.Data {
 		assert.Contains(t, user.UserName, query)
 		modelUser = unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: user.ID})
-		assert.EqualValues(t, modelUser.GetPlaceholderEmail(), user.Email)
+		assert.Equal(t, modelUser.GetPlaceholderEmail(), user.Email)
 	}
 }
 
@@ -106,8 +106,8 @@ func TestAPIUserSearchSystemUsers(t *testing.T) {
 			assert.NotEmpty(t, results.Data)
 			if assert.Len(t, results.Data, 1) {
 				user := results.Data[0]
-				assert.EqualValues(t, user.UserName, systemUser.Name)
-				assert.EqualValues(t, user.ID, systemUser.ID)
+				assert.Equal(t, user.UserName, systemUser.Name)
+				assert.Equal(t, user.ID, systemUser.ID)
 			}
 		})
 	}
@@ -129,7 +129,7 @@ func TestAPIUserSearchAdminLoggedInUserHidden(t *testing.T) {
 	for _, user := range results.Data {
 		assert.Contains(t, user.UserName, query)
 		assert.NotEmpty(t, user.Email)
-		assert.EqualValues(t, "private", user.Visibility)
+		assert.Equal(t, "private", user.Visibility)
 	}
 }
 

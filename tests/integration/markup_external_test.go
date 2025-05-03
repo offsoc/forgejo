@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/tests"
+	"forgejo.org/modules/setting"
+	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,7 +27,7 @@ func TestExternalMarkupRenderer(t *testing.T) {
 	const repoURL = "user30/renderer"
 	req := NewRequest(t, "GET", repoURL+"/src/branch/master/README.html")
 	resp := MakeRequest(t, req, http.StatusOK)
-	assert.EqualValues(t, "text/html; charset=utf-8", resp.Header()["Content-Type"][0])
+	assert.Equal(t, "text/html; charset=utf-8", resp.Header()["Content-Type"][0])
 
 	bs, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
@@ -36,5 +36,5 @@ func TestExternalMarkupRenderer(t *testing.T) {
 	div := doc.Find("div.file-view")
 	data, err := div.Html()
 	require.NoError(t, err)
-	assert.EqualValues(t, "<div>\n\ttest external renderer\n</div>", strings.TrimSpace(data))
+	assert.Equal(t, "<div>\n\ttest external renderer\n</div>", strings.TrimSpace(data))
 }

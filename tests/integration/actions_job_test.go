@@ -4,7 +4,6 @@
 package integration
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -13,15 +12,15 @@ import (
 	"testing"
 	"time"
 
-	actions_model "code.gitea.io/gitea/models/actions"
-	auth_model "code.gitea.io/gitea/models/auth"
-	repo_model "code.gitea.io/gitea/models/repo"
-	"code.gitea.io/gitea/models/unittest"
-	user_model "code.gitea.io/gitea/models/user"
-	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
+	actions_model "forgejo.org/models/actions"
+	auth_model "forgejo.org/models/auth"
+	repo_model "forgejo.org/models/repo"
+	"forgejo.org/models/unittest"
+	user_model "forgejo.org/models/user"
+	"forgejo.org/modules/git"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
 
 	runnerv1 "code.gitea.io/actions-proto-go/runner/v1"
 	"github.com/stretchr/testify/assert"
@@ -416,7 +415,7 @@ jobs:
 		actionTask := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionTask{ID: task.Id})
 		actionRunJob := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRunJob{ID: actionTask.JobID})
 		actionRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: actionRunJob.RunID})
-		require.NoError(t, actionRun.LoadAttributes(context.Background()))
+		require.NoError(t, actionRun.LoadAttributes(t.Context()))
 
 		assert.Equal(t, user2.Name, gtCtx["actor"].GetStringValue())
 		assert.Equal(t, setting.AppURL+"api/v1", gtCtx["api_url"].GetStringValue())

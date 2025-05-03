@@ -17,29 +17,29 @@ import (
 	"sort"
 	"strings"
 
-	asymkey_model "code.gitea.io/gitea/models/asymkey"
-	"code.gitea.io/gitea/models/auth"
-	org_model "code.gitea.io/gitea/models/organization"
-	user_model "code.gitea.io/gitea/models/user"
-	auth_module "code.gitea.io/gitea/modules/auth"
-	"code.gitea.io/gitea/modules/base"
-	"code.gitea.io/gitea/modules/container"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/optional"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/timeutil"
-	"code.gitea.io/gitea/modules/util"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/modules/web/middleware"
-	auth_service "code.gitea.io/gitea/services/auth"
-	source_service "code.gitea.io/gitea/services/auth/source"
-	"code.gitea.io/gitea/services/auth/source/oauth2"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/externalaccount"
-	"code.gitea.io/gitea/services/forms"
-	remote_service "code.gitea.io/gitea/services/remote"
-	user_service "code.gitea.io/gitea/services/user"
+	asymkey_model "forgejo.org/models/asymkey"
+	"forgejo.org/models/auth"
+	org_model "forgejo.org/models/organization"
+	user_model "forgejo.org/models/user"
+	auth_module "forgejo.org/modules/auth"
+	"forgejo.org/modules/base"
+	"forgejo.org/modules/container"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/timeutil"
+	"forgejo.org/modules/util"
+	"forgejo.org/modules/web"
+	"forgejo.org/modules/web/middleware"
+	auth_service "forgejo.org/services/auth"
+	source_service "forgejo.org/services/auth/source"
+	"forgejo.org/services/auth/source/oauth2"
+	"forgejo.org/services/context"
+	"forgejo.org/services/externalaccount"
+	"forgejo.org/services/forms"
+	remote_service "forgejo.org/services/remote"
+	user_service "forgejo.org/services/user"
 
 	"code.forgejo.org/go-chi/binding"
 	"github.com/golang-jwt/jwt/v5"
@@ -1079,7 +1079,7 @@ func SignInOAuthCallback(ctx *context.Context) {
 
 			isAdmin, isRestricted := getUserAdminAndRestrictedFromGroupClaims(source, &gothUser)
 			u.IsAdmin = isAdmin.ValueOrDefault(false)
-			u.IsRestricted = isRestricted.ValueOrDefault(false)
+			u.IsRestricted = isRestricted.ValueOrDefault(setting.Service.DefaultUserIsRestricted)
 
 			if !createAndHandleCreatedUser(ctx, base.TplName(""), nil, u, overwriteDefault, &gothUser, setting.OAuth2Client.AccountLinking != setting.OAuth2AccountLinkingDisabled) {
 				// error already handled
@@ -1243,12 +1243,11 @@ func handleOAuth2SignIn(ctx *context.Context, source *auth.Source, u *user_model
 
 	needs2FA := false
 	if !source.Cfg.(*oauth2.Source).SkipLocalTwoFA {
-		_, err := auth.GetTwoFactorByUID(ctx, u.ID)
-		if err != nil && !auth.IsErrTwoFactorNotEnrolled(err) {
+		needs2FA, err = auth.HasTwoFactorByUID(ctx, u.ID)
+		if err != nil {
 			ctx.ServerError("UserSignIn", err)
 			return
 		}
-		needs2FA = err == nil
 	}
 
 	oauth2Source := source.Cfg.(*oauth2.Source)

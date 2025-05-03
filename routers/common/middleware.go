@@ -9,12 +9,12 @@ import (
 	"runtime/trace"
 	"strings"
 
-	"code.gitea.io/gitea/modules/cache"
-	"code.gitea.io/gitea/modules/process"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web/middleware"
-	"code.gitea.io/gitea/modules/web/routing"
-	"code.gitea.io/gitea/services/context"
+	"forgejo.org/modules/cache"
+	"forgejo.org/modules/process"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web/middleware"
+	"forgejo.org/modules/web/routing"
+	"forgejo.org/services/context"
 
 	"code.forgejo.org/go-chi/session"
 	"github.com/chi-middleware/proxy"
@@ -77,28 +77,27 @@ func ProtocolMiddlewares() (handlers []any) {
 
 func stripSlashesMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-		// First of all escape the URL RawPath to ensure that all routing is done using a correctly escaped URL
+		// Ensure that URL.RawPath is always set.
 		req.URL.RawPath = req.URL.EscapedPath()
 
-		urlPath := req.URL.RawPath
-		rctx := chi.RouteContext(req.Context())
-		if rctx != nil && rctx.RoutePath != "" {
-			urlPath = rctx.RoutePath
-		}
-
-		sanitizedPath := &strings.Builder{}
-		prevWasSlash := false
-		for _, chr := range strings.TrimRight(urlPath, "/") {
-			if chr != '/' || !prevWasSlash {
-				sanitizedPath.WriteRune(chr)
+		sanitize := func(path string) string {
+			sanitizedPath := &strings.Builder{}
+			prevWasSlash := false
+			for _, chr := range strings.TrimRight(path, "/") {
+				if chr != '/' || !prevWasSlash {
+					sanitizedPath.WriteRune(chr)
+				}
+				prevWasSlash = chr == '/'
 			}
-			prevWasSlash = chr == '/'
+			return sanitizedPath.String()
 		}
 
-		if rctx == nil {
-			req.URL.Path = sanitizedPath.String()
-		} else {
-			rctx.RoutePath = sanitizedPath.String()
+		// Sanitize the unescaped path for application logic.
+		req.URL.Path = sanitize(req.URL.Path)
+		rctx := chi.RouteContext(req.Context())
+		if rctx != nil {
+			// Sanitize the escaped path for routing.
+			rctx.RoutePath = sanitize(req.URL.RawPath)
 		}
 		next.ServeHTTP(resp, req)
 	})

@@ -4,14 +4,13 @@
 package webhook
 
 import (
-	"context"
 	"testing"
 
-	webhook_model "code.gitea.io/gitea/models/webhook"
-	"code.gitea.io/gitea/modules/json"
-	"code.gitea.io/gitea/modules/setting"
-	api "code.gitea.io/gitea/modules/structs"
-	webhook_module "code.gitea.io/gitea/modules/webhook"
+	webhook_model "forgejo.org/models/webhook"
+	"forgejo.org/modules/json"
+	"forgejo.org/modules/setting"
+	api "forgejo.org/modules/structs"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -176,7 +175,7 @@ func TestDiscordPayload(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Len(t, pl.Embeds, 1)
-		assert.Len(t, pl.Embeds[0].Description, 4096)
+		assert.Len(t, pl.Embeds[0].Description, 2000)
 	})
 
 	t.Run("IssueComment", func(t *testing.T) {
@@ -346,7 +345,7 @@ func TestDiscordJSONPayload(t *testing.T) {
 		PayloadVersion: 2,
 	}
 
-	req, reqBody, err := discordHandler{}.NewRequest(context.Background(), hook, task)
+	req, reqBody, err := discordHandler{}.NewRequest(t.Context(), hook, task)
 	require.NotNil(t, req)
 	require.NotNil(t, reqBody)
 	require.NoError(t, err)

@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"strings"
 
-	"code.gitea.io/gitea/modules/forgefed"
-	"code.gitea.io/gitea/modules/log"
-	"code.gitea.io/gitea/modules/setting"
-	"code.gitea.io/gitea/modules/web"
-	"code.gitea.io/gitea/services/context"
-	"code.gitea.io/gitea/services/federation"
+	"forgejo.org/modules/forgefed"
+	"forgejo.org/modules/log"
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/web"
+	"forgejo.org/services/context"
+	"forgejo.org/services/federation"
 
 	ap "github.com/go-ap/activitypub"
 )
@@ -70,8 +70,8 @@ func RepositoryInbox(ctx *context.APIContext) {
 
 	repository := ctx.Repo.Repository
 	log.Info("RepositoryInbox: repo: %v", repository)
-
 	form := web.GetForm(ctx)
+	// TODO: Decide between like/undo{like} activity
 	httpStatus, title, err := federation.ProcessLikeActivity(ctx, form, repository.ID)
 	if err != nil {
 		ctx.Error(httpStatus, title, err)

@@ -30,7 +30,6 @@ const sfc = {
       intervalID: null,
       currentJobStepsStates: [],
       artifacts: [],
-      onHoverRerunIndex: -1,
       menuVisible: false,
       isFullScreen: false,
       timeVisible: {
@@ -209,8 +208,7 @@ const sfc = {
           el.append(logLine);
 
           const list = document.createElement('div');
-          list.classList.add('job-log-list');
-          list.classList.add('hidden');
+          list.classList.add('job-log-list', 'hidden');
           list.setAttribute('data-group', group.index);
           groupStack.push(list);
           el.append(list);
@@ -263,7 +261,7 @@ const sfc = {
 
       try {
         this.loading = true;
-        // Since no async operations occured since fetching myLoadingLogCursors, we can be sure that we have the most
+        // Since no async operations occurred since fetching myLoadingLogCursors, we can be sure that we have the most
         // recent needed log cursors, so we can reset needLoadingWithLogCursors -- it could be stale if exceptions
         // occurred in previous load attempts.
         this.needLoadingWithLogCursors = null;
@@ -420,7 +418,7 @@ export function initRepositoryActionView() {
 }
 </script>
 <template>
-  <div class="ui container action-view-container">
+  <div class="ui container fluid padded action-view-container">
     <div class="action-view-header">
       <div class="action-info-summary">
         <div class="action-info-summary-title">
@@ -457,13 +455,13 @@ export function initRepositoryActionView() {
       <div class="action-view-left">
         <div class="job-group-section">
           <div class="job-brief-list">
-            <a class="job-brief-item" :href="run.link+'/jobs/'+index" :class="parseInt(jobIndex) === index ? 'selected' : ''" v-for="(job, index) in run.jobs" :key="job.id" @mouseenter="onHoverRerunIndex = job.id" @mouseleave="onHoverRerunIndex = -1">
+            <a class="job-brief-item" :href="run.link+'/jobs/'+index" :class="parseInt(jobIndex) === index ? 'selected' : ''" v-for="(job, index) in run.jobs" :key="job.id">
               <div class="job-brief-item-left">
                 <ActionRunStatus :locale-status="locale.status[job.status]" :status="job.status"/>
                 <span class="job-brief-name tw-mx-2 gt-ellipsis">{{ job.name }}</span>
               </div>
               <span class="job-brief-item-right">
-                <SvgIcon name="octicon-sync" role="button" :data-tooltip-content="locale.rerun" class="job-brief-rerun tw-mx-2 link-action" :data-url="`${run.link}/jobs/${index}/rerun`" v-if="job.canRerun && onHoverRerunIndex === job.id"/>
+                <SvgIcon name="octicon-sync" role="button" :data-tooltip-content="locale.rerun" class="job-brief-rerun tw-mx-3 link-action" :data-url="`${run.link}/jobs/${index}/rerun`" v-if="job.canRerun"/>
                 <span class="step-summary-duration">{{ job.duration }}</span>
               </span>
             </a>
