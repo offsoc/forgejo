@@ -123,6 +123,10 @@ func DeleteComment(ctx context.Context, doer *user_model.User, comment *issues_m
 
 		deleteComment := issues_model.DeleteComment(ctx, comment)
 
+		if deleteComment != nil {
+			return deleteComment
+		}
+
 		if comment.Review != nil {
 			reviewType := comment.Review.Type
 			if reviewType == issues_model.ReviewTypePending {
