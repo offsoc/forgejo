@@ -4,7 +4,6 @@
 package templates
 
 import (
-	"path/filepath"
 	"testing"
 
 	activities_model "forgejo.org/models/activities"
@@ -15,7 +14,6 @@ import (
 	"forgejo.org/modules/git"
 	"forgejo.org/modules/json"
 	"forgejo.org/modules/repository"
-	"forgejo.org/modules/setting"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -93,13 +91,7 @@ fs9cMpZVM9BfIKNUSO8QY=
 }
 
 func TestActionContent2Commits_VerificationState(t *testing.T) {
-	defer unittest.OverrideFixtures(
-		unittest.FixturesOptions{
-			Dir:  filepath.Join(setting.AppWorkPath, "models/fixtures/"),
-			Base: setting.AppWorkPath,
-			Dirs: []string{"models/fixtures/TestParseCommitWithSSHSignature/"},
-		},
-	)()
+	defer unittest.OverrideFixtures("models/fixtures/TestParseCommitWithSSHSignature/")()
 	require.NoError(t, unittest.PrepareTestDatabase())
 	user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 2, OwnerID: user2.ID})
