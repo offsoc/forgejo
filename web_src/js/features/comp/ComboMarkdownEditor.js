@@ -137,6 +137,7 @@ class ComboMarkdownEditor {
             this.container.getAttribute('data-focus-tip').replace('{{key}}', e.shiftKey ? 'Shift+Tab' : 'Tab'),
             {gravity: 'bottom'},
           );
+          this.ignoredTabToast.toastElement.role = 'alert';
         }
       } else if (e.key === 'Enter' && noModifiers) {
         if (!this.breakLine()) return; // Nothing changed, let the default handler work.
