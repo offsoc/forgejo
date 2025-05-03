@@ -15,5 +15,14 @@
     "alert.asset_load_failed": "无法从 {path} 加载资源文件。请确保资源文件可被访问。",
     "install.invalid_lfs_path": "无法在指定路径创建 LFS 根目录：%[1]s",
     "alert.range_error": " 必须是一个介于 %[1]s 和 %[2]s 之间的数字。",
-    "meta.last_line": "感谢各位对Forgejo翻译的支持和帮助！不需要翻译这个。"
+    "meta.last_line": "感谢各位对Forgejo翻译的支持和帮助！不需要翻译这个。",
+    "mail.actions.successful_run_after_failure_subject": "仓库 %[2]s 中的工作流 %[1]s 已恢复",
+    "mail.actions.not_successful_run_subject": "仓库 %[2]s 中的工作流 %[1]s 已失败",
+    "mail.actions.successful_run_after_failure": "仓库 %[2]s 中的工作流 %[1]s 已恢复",
+    "mail.actions.run_info_previous_status": "上次运行的状态：%[1]s",
+    "mail.actions.run_info_ref": "分支：%[1]s（%[2]s）",
+    "mail.actions.run_info_cur_status": "此次运行的状态：%[1]s（从 %[2]s 更新）",
+    "mail.actions.run_info_trigger": "由 %[2]s %[1]s 触发",
+    "mail.actions.not_successful_run": "仓库 %[2]s 中的工作流 %[1]s 已失败",
+    "discussion.locked": "讨论已被锁定。仅贡献者能够发表评论。"
 }

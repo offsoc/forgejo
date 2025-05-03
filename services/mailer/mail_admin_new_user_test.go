@@ -4,7 +4,6 @@
 package mailer
 
 import (
-	"context"
 	"strconv"
 	"testing"
 
@@ -17,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func getTestUsers(t *testing.T) []*user_model.User {
+func getAdminNewUserTestUsers(t *testing.T) []*user_model.User {
 	t.Helper()
 	admin := new(user_model.User)
 	admin.Name = "testadmin"
@@ -38,16 +37,10 @@ func getTestUsers(t *testing.T) []*user_model.User {
 	return []*user_model.User{admin, newUser}
 }
 
-func cleanUpUsers(ctx context.Context, users []*user_model.User) {
-	for _, u := range users {
-		db.DeleteByID[user_model.User](ctx, u.ID)
-	}
-}
-
 func TestAdminNotificationMail_test(t *testing.T) {
 	ctx := t.Context()
 
-	users := getTestUsers(t)
+	users := getAdminNewUserTestUsers(t)
 
 	t.Run("SendNotificationEmailOnNewUser_true", func(t *testing.T) {
 		defer test.MockVariableValue(&setting.Admin.SendNotificationEmailOnNewUser, true)()
@@ -75,5 +68,5 @@ func TestAdminNotificationMail_test(t *testing.T) {
 		MailNewUser(ctx, users[1])
 	})
 
-	cleanUpUsers(ctx, users)
+	CleanUpUsers(ctx, users)
 }

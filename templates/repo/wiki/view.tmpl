@@ -45,7 +45,7 @@
 		<div class="ui dividing header">
 			<div class="ui stackable grid">
 				<div class="eight wide column">
-					<a class="file-revisions-btn ui basic button" title="{{ctx.Locale.Tr "repo.wiki.file_revision"}}" href="{{.RepoLink}}/wiki/{{.PageURL}}?action=_revision" ><span>{{.CommitCount}}</span> {{svg "octicon-history"}}</a>
+					<a class="file-revisions-btn ui basic button" title="{{ctx.Locale.Tr "repo.wiki.file_revision"}}" href="{{.RepoLink}}/wiki/{{.PageURL}}?action=_revision" >{{if .CommitCount}}<span>{{.CommitCount}}</span> {{end}}{{svg "octicon-history"}}</a>
 					{{$title}}
 					<div class="ui sub header">
 						{{$timeSince := DateUtils.TimeSince .Author.When}}

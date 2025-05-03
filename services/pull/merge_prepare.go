@@ -236,10 +236,72 @@ func getDiffTree(ctx context.Context, repoPath, baseBranch, headBranch string, o
 // rebaseTrackingOnToBase checks out the tracking branch as staging and rebases it on to the base branch
 // if there is a conflict it will return a models.ErrRebaseConflicts
 func rebaseTrackingOnToBase(ctx *mergeContext, mergeStyle repo_model.MergeStyle) error {
-	// Checkout head branch
-	if err := git.NewCommand(ctx, "checkout", "-b").AddDynamicArguments(stagingBranch, trackingBranch).
+	// Create staging branch
+	if err := git.NewCommand(ctx, "branch").AddDynamicArguments(stagingBranch, trackingBranch).
 		Run(ctx.RunOpts()); err != nil {
-		return fmt.Errorf("unable to git checkout tracking as staging in temp repo for %v: %w\n%s\n%s", ctx.pr, err, ctx.outbuf.String(), ctx.errbuf.String())
+		return fmt.Errorf(
+			"unable to git branch tracking as staging in temp repo for %v: %w\n%s\n%s",
+			ctx.pr, err,
+			ctx.outbuf.String(),
+			ctx.errbuf.String(),
+		)
+	}
+	ctx.outbuf.Reset()
+	ctx.errbuf.Reset()
+
+	// Check git version for availability of git-replay. If it is available, we use
+	// it for performance and to preserve unknown commit headers like the
+	// "change-id" header used by Jujutsu and GitButler to track changes across
+	// rebase, amend etc.
+	if err := git.CheckGitVersionAtLeast("2.44"); err == nil {
+		// Use git-replay for performance and to preserve unknown headers,
+		// like the "change-id" header used by Jujutsu and GitButler.
+		if err := git.NewCommand(ctx, "replay", "--onto").AddDynamicArguments(baseBranch).
+			AddDynamicArguments(fmt.Sprintf("%s..%s", baseBranch, stagingBranch)).
+			Run(ctx.RunOpts()); err != nil {
+			// git-replay doesn't tell us which commit first created a merge conflict.
+			// In order to preserve the quality of our error messages, fall back to
+			// regular git-rebase.
+			goto regular_rebase
+		}
+		// git-replay worked, stdout contains the instructions for update-ref
+		updateRefInstructions := ctx.outbuf.String()
+		opts := ctx.RunOpts()
+		opts.Stdin = strings.NewReader(updateRefInstructions)
+		if err := git.NewCommand(ctx, "update-ref", "--stdin").Run(opts); err != nil {
+			return fmt.Errorf(
+				"Failed to update ref for %v: %w\n%s\n%s",
+				ctx.pr,
+				err,
+				ctx.outbuf.String(),
+				ctx.errbuf.String(),
+			)
+		}
+		// Checkout staging branch
+		if err := git.NewCommand(ctx, "checkout").AddDynamicArguments(stagingBranch).
+			Run(ctx.RunOpts()); err != nil {
+			return fmt.Errorf(
+				"unable to git checkout staging in temp repo for %v: %w\n%s\n%s",
+				ctx.pr,
+				err,
+				ctx.outbuf.String(),
+				ctx.errbuf.String(),
+			)
+		}
+		ctx.outbuf.Reset()
+		ctx.errbuf.Reset()
+		return nil
+	}
+
+	// The available git version is too old to support git-replay, or git-replay
+	// failed and we want to determine the first commit that produced a
+	// merge-conflict. Fall back to regular rebase.
+regular_rebase:
+
+	// Checkout head branch
+	if err := git.NewCommand(ctx, "checkout").AddDynamicArguments(stagingBranch).
+		Run(ctx.RunOpts()); err != nil {
+		return fmt.Errorf("unable to git checkout staging in temp repo for %v: %w\n%s\n%s", ctx.pr, err, ctx.outbuf.String(), ctx.errbuf.String())
 	}
 	ctx.outbuf.Reset()
 	ctx.errbuf.Reset()

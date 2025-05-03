@@ -685,19 +685,14 @@ func SendRemovedSecurityKey(ctx context.Context, u *user_model.User, securityKey
 	}
 	locale := translation.NewLocale(u.Language)
 
-	hasWebAuthn, err := auth_model.HasWebAuthnRegistrationsByUID(ctx, u.ID)
-	if err != nil {
-		return err
-	}
-	hasTOTP, err := auth_model.HasTwoFactorByUID(ctx, u.ID)
+	hasTwoFactor, err := auth_model.HasTwoFactorByUID(ctx, u.ID)
 	if err != nil {
 		return err
 	}
 
 	data := map[string]any{
 		"locale":          locale,
-		"HasWebAuthn":     hasWebAuthn,
-		"HasTOTP":         hasTOTP,
+		"HasTwoFactor":    hasTwoFactor,
 		"SecurityKeyName": securityKeyName,
 		"DisplayName":     u.DisplayName(),
 		"Username":        u.Name,

@@ -12767,7 +12767,7 @@
         "tags": [
           "repository"
         ],
-        "summary": "List a repo's pull requests",
+        "summary": "List a repo's pull requests. If a pull request is selected but fails to be retrieved for any reason, it will be a null value in the list of results.",
         "operationId": "repoListPullRequests",
         "parameters": [
           {
@@ -22082,7 +22082,18 @@
           "items": {
             "type": "string"
           },
-          "x-go-name": "Scopes"
+          "x-go-name": "Scopes",
+          "example": [
+            "all",
+            "read:activitypub",
+            "read:issue",
+            "write:misc",
+            "read:notification",
+            "read:organization",
+            "read:package",
+            "read:repository",
+            "read:user"
+          ]
         }
       },
       "x-go-package": "forgejo.org/modules/structs"
