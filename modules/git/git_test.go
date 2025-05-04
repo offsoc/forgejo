@@ -86,10 +86,7 @@ func TestGitConfig(t *testing.T) {
 }
 
 func TestSyncConfig(t *testing.T) {
-	oldGitConfig := setting.GitConfig
-	defer func() {
-		setting.GitConfig = oldGitConfig
-	}()
+	defer test.MockProtect(&setting.GitConfig)()
 
 	setting.GitConfig.Options["sync-test.cfg-key-a"] = "CfgValA"
 	require.NoError(t, syncGitConfig())

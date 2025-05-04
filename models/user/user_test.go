@@ -616,11 +616,8 @@ func TestGetAllAdmins(t *testing.T) {
 }
 
 func Test_ValidateUser(t *testing.T) {
-	oldSetting := setting.Service.AllowedUserVisibilityModesSlice
-	defer func() {
-		setting.Service.AllowedUserVisibilityModesSlice = oldSetting
-	}()
-	setting.Service.AllowedUserVisibilityModesSlice = []bool{true, false, true}
+	defer test.MockVariableValue(&setting.Service.AllowedUserVisibilityModesSlice, []bool{true, false, true})()
+
 	kases := map[*user_model.User]bool{
 		{ID: 1, Visibility: structs.VisibleTypePublic}:  true,
 		{ID: 2, Visibility: structs.VisibleTypeLimited}: false,
@@ -632,11 +629,8 @@ func Test_ValidateUser(t *testing.T) {
 }
 
 func Test_NormalizeUserFromEmail(t *testing.T) {
-	oldSetting := setting.Service.AllowDotsInUsernames
-	defer func() {
-		setting.Service.AllowDotsInUsernames = oldSetting
-	}()
-	setting.Service.AllowDotsInUsernames = true
+	defer test.MockVariableValue(&setting.Service.AllowDotsInUsernames, true)()
+
 	testCases := []struct {
 		Input             string
 		Expected          string
@@ -702,12 +696,7 @@ func TestDisabledUserFeatures(t *testing.T) {
 	testValues := container.SetOf(setting.UserFeatureDeletion,
 		setting.UserFeatureManageSSHKeys,
 		setting.UserFeatureManageGPGKeys)
-
-	oldSetting := setting.Admin.ExternalUserDisableFeatures
-	defer func() {
-		setting.Admin.ExternalUserDisableFeatures = oldSetting
-	}()
-	setting.Admin.ExternalUserDisableFeatures = testValues
+	defer test.MockVariableValue(&setting.Admin.ExternalUserDisableFeatures, testValues)()
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 
