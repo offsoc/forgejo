@@ -12,5 +12,7 @@
     "error.not_found.title": "Sivua ei löytynyt",
     "themes.names.forgejo-light": "Forgejo, vaalea",
     "themes.names.forgejo-dark": "Forgejo, tumma",
-    "alert.range_error": " täytyy olla numero välillä %[1]s ja %[2]s."
+    "alert.range_error": " täytyy olla numero välillä %[1]s ja %[2]s.",
+    "alert.asset_load_failed": "Staattisen tiedoston lataus kohteesta {path} epäonnistui. Varmista, että staattisiin tiedostoihin pääsee käsiksi.",
+    "install.invalid_lfs_path": "LFS juurta ei voitu luoda polkuun: %[1]s"
 }

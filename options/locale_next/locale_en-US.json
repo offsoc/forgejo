@@ -4,6 +4,40 @@
     "home.explore_repos": "Explore repositories",
     "home.explore_users": "Explore users",
     "home.explore_orgs": "Explore organizations",
+    "relativetime.now": "now",
+    "relativetime.future": "in future",
+    "relativetime.mins": {
+        "one": "%d minute ago",
+        "other": "%d minutes ago"
+    },
+    "relativetime.hours": {
+        "one": "%d hour ago",
+        "other": "%d hours ago"
+    },
+    "relativetime.days": {
+        "one": "%d day ago",
+        "other": "%d days ago"
+    },
+    "relativetime.weeks": {
+        "one": "%d week ago",
+        "other": "%d weeks ago"
+    },
+    "relativetime.months": {
+        "one": "%d month ago",
+        "other": "%d months ago"
+    },
+    "relativetime.years": {
+        "one": "%d year ago",
+        "other": "%d years ago"
+    },
+    "relativetime.1day": "yesterday",
+    "relativetime.2days": "two days ago",
+    "relativetime.1week": "last week",
+    "relativetime.2weeks": "two weeks ago",
+    "relativetime.1month": "last month",
+    "relativetime.2months": "two months ago",
+    "relativetime.1year": "last year",
+    "relativetime.2years": "two years ago",
     "repo.pulls.merged_title_desc": {
         "one": "merged %[1]d commit from <code>%[2]s</code> into <code>%[3]s</code> %[4]s",
         "other": "merged %[1]d commits from <code>%[2]s</code> into <code>%[3]s</code> %[4]s"
@@ -29,5 +63,6 @@
     "mail.actions.run_info_previous_status": "Previous Run's Status: %[1]s",
     "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Triggered because: %[1]s by: %[2]s",
+    "discussion.locked": "This discussion has been locked. Commenting is limited to contributors.",
     "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it."
 }

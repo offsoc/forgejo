@@ -17,13 +17,13 @@ require (
 	code.gitea.io/sdk/gitea v0.21.0
 	codeberg.org/gusted/mcaptcha v0.0.0-20220723083913-4f3072e1d570
 	connectrpc.com/connect v1.17.0
-	github.com/42wim/httpsig v1.2.2
-	github.com/42wim/sshsig v0.0.0-20211121163825-841cf5bbc121
+	github.com/42wim/httpsig v1.2.3
+	github.com/42wim/sshsig v0.0.0-20250502153856-5100632e8920
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358
 	github.com/ProtonMail/go-crypto v1.1.6
 	github.com/PuerkitoBio/goquery v1.10.3
 	github.com/SaveTheRbtz/zstd-seekable-format-go/pkg v0.7.2
-	github.com/alecthomas/chroma/v2 v2.17.0
+	github.com/alecthomas/chroma/v2 v2.17.2
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/blevesearch/bleve/v2 v2.5.0
 	github.com/buildkite/terminal-to-html/v3 v3.16.8
@@ -84,7 +84,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.21.1
-	github.com/redis/go-redis/v9 v9.7.3
+	github.com/redis/go-redis/v9 v9.8.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1
 	github.com/sassoftware/go-rpmutils v0.4.0

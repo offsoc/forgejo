@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '@daily'
 
+env:
+  RNA_VERSION: v1.2.5 # renovate: datasource=gitea-releases depName=forgejo/release-notes-assistant registryUrl=https://code.forgejo.org
+
 jobs:
   release-notes:
     if: vars.ROLE == 'forgejo-coding'
@@ -29,5 +32,5 @@ jobs:
           set -x
           curl -sS $GITHUB_SERVER_URL/api/v1/repos/$GITHUB_REPOSITORY/milestones?state=open | jq -r '.[] | .title' | while read forgejo version ; do
             milestone="$forgejo $version"
-            go run code.forgejo.org/forgejo/release-notes-assistant@v1.1.1 --config .release-notes-assistant.yaml --storage milestone --storage-location "$milestone"  --forgejo-url $GITHUB_SERVER_URL --repository $GITHUB_REPOSITORY --token ${{ secrets.RELEASE_NOTES_ASSISTANT_TOKEN }} release $version
+            go run code.forgejo.org/forgejo/release-notes-assistant@$RNA_VERSION --config .release-notes-assistant.yaml --storage milestone --storage-location "$milestone"  --forgejo-url $GITHUB_SERVER_URL --repository $GITHUB_REPOSITORY --token ${{ secrets.RELEASE_NOTES_ASSISTANT_TOKEN }} release $version
           done
