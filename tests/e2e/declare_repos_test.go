@@ -55,19 +55,19 @@ func DeclareGitRepos(t *testing.T) func() {
 				CommitMsg: "Another commit which mentions @user1 in the title\nand @user2 in the text",
 			},
 		}),
-		newRepo(t, 2, "pr-def-merge-style-merge", []FileChanges{
-			{
-				Filename:  "readme.md",
-				Versions:  []string{""},
-				CommitMsg: "Initial commit",
-			},
-			{
-				Filename:  "license.md",
-				Versions:  []string{""},
-				CommitMsg: "Add license",
-				NewBranch: "add-license",
-			},
-		}),
+		//newRepo(t, 2, "pr-def-merge-style-merge", []FileChanges{
+		//	{
+		//		Filename:  "readme.md",
+		//		Versions:  []string{""},
+		//		CommitMsg: "Initial commit",
+		//	},
+		//	{
+		//		Filename:  "license.md",
+		//		Versions:  []string{""},
+		//		CommitMsg: "Add license",
+		//		NewBranch: "add-license",
+		//	},
+		//}),
 		//[]FileChanges{
 		// {
 		// 	Filename:  "readme.md",
@@ -126,13 +126,7 @@ func newRepo(t *testing.T, userID int64, repoName string, fileChanges []FileChan
 
 			// default to branch `main`
 			oldBranch := file.OldBranch
-			if oldBranch == "" {
-				oldBranch = "main"
-			}
 			newBranch := file.NewBranch
-			if newBranch == "" {
-				newBranch = "main"
-			}
 
 			resp, err := files_service.ChangeRepoFiles(git.DefaultContext, somerepo, user, &files_service.ChangeRepoFilesOptions{
 				Files: []*files_service.ChangeRepoFile{{
