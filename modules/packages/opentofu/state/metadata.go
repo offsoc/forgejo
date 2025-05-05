@@ -1,4 +1,4 @@
-package opentofu
+package state
 
 const (
 	// See https://opentofu.org/docs/language/state/

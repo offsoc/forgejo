@@ -26,7 +26,7 @@ import (
 	"forgejo.org/modules/packages/maven"
 	"forgejo.org/modules/packages/npm"
 	"forgejo.org/modules/packages/nuget"
-	"forgejo.org/modules/packages/opentofu"
+	opentofu_state "forgejo.org/modules/packages/opentofu/state"
 	"forgejo.org/modules/packages/pub"
 	"forgejo.org/modules/packages/pypi"
 	"forgejo.org/modules/packages/rpm"
@@ -185,8 +185,8 @@ func GetPackageDescriptor(ctx context.Context, pv *PackageVersion) (*PackageDesc
 		metadata = &nuget.Metadata{}
 	case TypeNpm:
 		metadata = &npm.Metadata{}
-	case TypeOpenTofu:
-		metadata = &opentofu.Metadata{}
+	case TypeOpenTofuState:
+		metadata = &opentofu_state.Metadata{}
 	case TypePub:
 		metadata = &pub.Metadata{}
 	case TypePyPI:

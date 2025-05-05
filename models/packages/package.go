@@ -32,30 +32,30 @@ type Type string
 
 // List of supported packages
 const (
-	TypeAlpine    Type = "alpine"
-	TypeArch      Type = "arch"
-	TypeCargo     Type = "cargo"
-	TypeChef      Type = "chef"
-	TypeComposer  Type = "composer"
-	TypeConan     Type = "conan"
-	TypeConda     Type = "conda"
-	TypeContainer Type = "container"
-	TypeCran      Type = "cran"
-	TypeDebian    Type = "debian"
-	TypeGeneric   Type = "generic"
-	TypeGo        Type = "go"
-	TypeHelm      Type = "helm"
-	TypeMaven     Type = "maven"
-	TypeNpm       Type = "npm"
-	TypeNuGet     Type = "nuget"
-	TypeOpenTofu  Type = "opentofu"
-	TypePub       Type = "pub"
-	TypePyPI      Type = "pypi"
-	TypeRpm       Type = "rpm"
-	TypeAlt       Type = "alt"
-	TypeRubyGems  Type = "rubygems"
-	TypeSwift     Type = "swift"
-	TypeVagrant   Type = "vagrant"
+	TypeAlpine        Type = "alpine"
+	TypeArch          Type = "arch"
+	TypeCargo         Type = "cargo"
+	TypeChef          Type = "chef"
+	TypeComposer      Type = "composer"
+	TypeConan         Type = "conan"
+	TypeConda         Type = "conda"
+	TypeContainer     Type = "container"
+	TypeCran          Type = "cran"
+	TypeDebian        Type = "debian"
+	TypeGeneric       Type = "generic"
+	TypeGo            Type = "go"
+	TypeHelm          Type = "helm"
+	TypeMaven         Type = "maven"
+	TypeNpm           Type = "npm"
+	TypeNuGet         Type = "nuget"
+	TypeOpenTofuState Type = "opentofu-state"
+	TypePub           Type = "pub"
+	TypePyPI          Type = "pypi"
+	TypeRpm           Type = "rpm"
+	TypeAlt           Type = "alt"
+	TypeRubyGems      Type = "rubygems"
+	TypeSwift         Type = "swift"
+	TypeVagrant       Type = "vagrant"
 )
 
 var TypeList = []Type{
@@ -75,7 +75,7 @@ var TypeList = []Type{
 	TypeMaven,
 	TypeNpm,
 	TypeNuGet,
-	TypeOpenTofu,
+	TypeOpenTofuState,
 	TypePub,
 	TypePyPI,
 	TypeRpm,
@@ -120,8 +120,8 @@ func (pt Type) Name() string {
 		return "npm"
 	case TypeNuGet:
 		return "NuGet"
-	case TypeOpenTofu:
-		return "OpenTofu/Terraform"
+	case TypeOpenTofuState:
+		return "OpenTofu/Terraform HTTP Backend"
 	case TypePub:
 		return "Pub"
 	case TypePyPI:
@@ -175,7 +175,7 @@ func (pt Type) SVGName() string {
 		return "gitea-npm"
 	case TypeNuGet:
 		return "gitea-nuget"
-	case TypeOpenTofu:
+	case TypeOpenTofuState:
 		return "opentofu"
 	case TypePub:
 		return "gitea-pub"
