@@ -25,7 +25,7 @@ import (
 	f3_tests "code.forgejo.org/f3/gof3/v3/tree/tests/f3"
 	f3_tests_forge "code.forgejo.org/f3/gof3/v3/tree/tests/f3/forge"
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func runApp(ctx context.Context, args ...string) (string, error) {

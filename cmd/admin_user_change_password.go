@@ -13,7 +13,7 @@ import (
 	"forgejo.org/modules/setting"
 	user_service "forgejo.org/services/user"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var microcmdUserChangePassword = &cli.Command{

@@ -11,7 +11,7 @@ import (
 	"forgejo.org/modules/generate"
 
 	"github.com/mattn/go-isatty"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (

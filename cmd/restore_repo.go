@@ -9,7 +9,7 @@ import (
 	"forgejo.org/modules/private"
 	"forgejo.org/modules/setting"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CmdRestoreRepository represents the available restore a repository sub-command.

@@ -19,7 +19,7 @@ import (
 	"forgejo.org/modules/setting"
 	"forgejo.org/services/doctor"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CmdDoctor represents the available doctor sub-command.

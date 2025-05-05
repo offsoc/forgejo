@@ -11,7 +11,7 @@ import (
 	auth_model "forgejo.org/models/auth"
 	"forgejo.org/services/auth/source/oauth2"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (

@@ -22,7 +22,7 @@ import (
 
 	"code.forgejo.org/go-chi/session"
 	"github.com/mholt/archiver/v3"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func addReader(w archiver.Writer, r io.ReadCloser, info os.FileInfo, customName string, verbose bool) error {

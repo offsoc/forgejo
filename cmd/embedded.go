@@ -19,7 +19,7 @@ import (
 	"forgejo.org/modules/util"
 
 	"github.com/gobwas/glob"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CmdEmbedded represents the available extract sub-command.

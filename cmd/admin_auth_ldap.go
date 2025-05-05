@@ -11,7 +11,7 @@ import (
 	"forgejo.org/models/auth"
 	"forgejo.org/services/auth/source/ldap"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type (

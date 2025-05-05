@@ -11,7 +11,7 @@ import (
 	"forgejo.org/modules/util"
 	"forgejo.org/services/auth/source/smtp"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (

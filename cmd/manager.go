@@ -9,7 +9,7 @@ import (
 
 	"forgejo.org/modules/private"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (

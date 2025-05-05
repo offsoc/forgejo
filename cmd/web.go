@@ -26,7 +26,7 @@ import (
 	"forgejo.org/routers/install"
 
 	"github.com/felixge/fgprof"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // PIDFile could be set from build tag

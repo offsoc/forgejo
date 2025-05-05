@@ -21,7 +21,7 @@ import (
 	_ "forgejo.org/modules/markup/markdown"
 	_ "forgejo.org/modules/markup/orgmode"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // these flags will be set by the build flags

@@ -19,7 +19,7 @@ import (
 	"forgejo.org/services/convert"
 	"forgejo.org/services/migrations"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CmdDumpRepository represents the available dump repository sub-command.

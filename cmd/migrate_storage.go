@@ -22,7 +22,7 @@ import (
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/storage"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"xorm.io/xorm"
 )
 

@@ -8,7 +8,7 @@ import (
 	"forgejo.org/modules/graceful"
 	repo_service "forgejo.org/services/repository"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (

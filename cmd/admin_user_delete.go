@@ -12,7 +12,7 @@ import (
 	"forgejo.org/modules/storage"
 	user_service "forgejo.org/services/user"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var microcmdUserDelete = &cli.Command{

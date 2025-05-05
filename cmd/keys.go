@@ -11,7 +11,7 @@ import (
 	"forgejo.org/modules/log"
 	"forgejo.org/modules/private"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // CmdKeys represents the available keys sub-command

@@ -16,7 +16,7 @@ import (
 	"forgejo.org/modules/setting"
 	private_routers "forgejo.org/routers/private"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func CmdActions(ctx context.Context) *cli.Command {

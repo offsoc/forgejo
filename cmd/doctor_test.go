@@ -11,7 +11,7 @@ import (
 	"forgejo.org/services/doctor"
 
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func TestDoctorRun(t *testing.T) {

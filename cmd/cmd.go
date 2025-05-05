@@ -20,7 +20,7 @@ import (
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/util"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // argsSet checks that all the required arguments are set. args is a list of

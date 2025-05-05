@@ -20,7 +20,7 @@ import (
 	f3_cmd "code.forgejo.org/f3/gof3/v3/cmd"
 	f3_logger "code.forgejo.org/f3/gof3/v3/logger"
 	f3_util "code.forgejo.org/f3/gof3/v3/util"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func CmdF3(ctx context.Context) *cli.Command {

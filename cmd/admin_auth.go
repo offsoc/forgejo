@@ -13,7 +13,7 @@ import (
 	"forgejo.org/models/db"
 	auth_service "forgejo.org/services/auth"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (
