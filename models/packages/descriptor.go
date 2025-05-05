@@ -179,12 +179,12 @@ func GetPackageDescriptor(ctx context.Context, pv *PackageVersion) (*PackageDesc
 		// go packages have no metadata
 	case TypeHelm:
 		metadata = &helm.Metadata{}
+	case TypeMaven:
+		metadata = &maven.Metadata{}
 	case TypeNuGet:
 		metadata = &nuget.Metadata{}
 	case TypeNpm:
 		metadata = &npm.Metadata{}
-	case TypeMaven:
-		metadata = &maven.Metadata{}
 	case TypeOpenTofu:
 		metadata = &opentofu.Metadata{}
 	case TypePub:
