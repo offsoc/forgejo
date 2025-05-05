@@ -55,6 +55,15 @@ func TestWebfinger(t *testing.T) {
 	assert.Equal(t, "acct:user2@"+appURL.Host, jrd.Subject)
 	assert.ElementsMatch(t, []string{user.HTMLURL(), appURL.String() + "api/v1/activitypub/user-id/" + fmt.Sprint(user.ID)}, jrd.Aliases)
 
+	instanceReq := NewRequest(t, "GET", fmt.Sprintf("/.well-known/webfinger?resource=acct:ghost@%s", appURL.Host))
+	instanceResp := MakeRequest(t, instanceReq, http.StatusOK)
+	assert.Equal(t, "application/jrd+json", instanceResp.Header().Get("Content-Type"))
+
+	var instanceActor webfingerJRD
+	DecodeJSON(t, instanceResp, &instanceActor)
+	assert.Equal(t, "acct:ghost@"+appURL.Host, instanceActor.Subject)
+	assert.ElementsMatch(t, []string{appURL.String() + "api/v1/activitypub/actor"}, instanceActor.Aliases)
+
 	req = NewRequest(t, "GET", fmt.Sprintf("/.well-known/webfinger?resource=acct:%s@%s", user.LowerName, "unknown.host"))
 	MakeRequest(t, req, http.StatusBadRequest)
 
