@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forgejo.org/modules/validation"
+
 	ap "github.com/go-ap/activitypub"
 )
 

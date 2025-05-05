@@ -81,6 +81,7 @@ func (id PersonID) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
 	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea", "mastodon", "gotosocial"}, "Source")...)
 	if id.Source == "forgejo" {
+		result = append(result, validation.ValidateNotEmpty(id.Path, "path")...)
 		if strings.ToLower(id.Path) != personIDapiPathV1 && strings.ToLower(id.Path) != personIDapiPathV1Latest {
 			result = append(result, fmt.Sprintf("path: %q has to be a person specific api path", id.Path))
 		}

@@ -43,6 +43,7 @@ func (id RepositoryID) Validate() []string {
 	result = append(result, validation.ValidateNotEmpty(id.Source, "source")...)
 	result = append(result, validation.ValidateOneOf(id.Source, []any{"forgejo", "gitea"}, "Source")...)
 	if id.Source == "forgejo" {
+		result = append(result, validation.ValidateNotEmpty(id.Path, "path")...)
 		if strings.ToLower(id.Path) != repositoryIDapiPathV1 && strings.ToLower(id.Path) != repositoryIDapiPathV1Latest {
 			result = append(result, fmt.Sprintf("path: %q has to be a repo specific api path", id.Path))
 		}

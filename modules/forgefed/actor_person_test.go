@@ -11,6 +11,8 @@ import (
 	"forgejo.org/modules/validation"
 
 	ap "github.com/go-ap/activitypub"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewPersonIdFromModel(t *testing.T) {
@@ -25,13 +27,14 @@ func TestNewPersonIdFromModel(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 
 	sut, _ := NewPersonIDFromModel("an.other.host", "https", 443, "forgejo", "1")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	assert.Equal(t, expected, sut)
 }
 
 func TestNewPersonId(t *testing.T) {
-	expected := PersonID{}
+	var sut, expected PersonID
+	var err error
+
+	expected = PersonID{}
 	expected.ID = "1"
 	expected.Source = "forgejo"
 	expected.HostSchema = "https"
@@ -41,10 +44,9 @@ func TestNewPersonId(t *testing.T) {
 	expected.IsPortSupplemented = true
 	expected.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1"
 
-	sut, _ := NewPersonID("https://an.other.host/api/v1/activitypub/user-id/1", "forgejo")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	sut, err = NewPersonID("https://an.other.host/api/v1/activitypub/user-id/1", "forgejo")
+	require.NoError(t, err)
+	assert.Equal(t, expected, sut)
 
 	expected = PersonID{}
 	expected.ID = "1"
@@ -57,9 +59,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 
 	sut, _ = NewPersonID("https://an.other.host:443/api/v1/activitypub/user-id/1", "forgejo")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	assert.Equal(t, expected, sut)
 
 	expected = PersonID{}
 	expected.ID = "1"
@@ -72,9 +72,7 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "http://an.other.host:80/api/v1/activitypub/user-id/1"
 
 	sut, _ = NewPersonID("http://an.other.host:80/api/v1/activitypub/user-id/1", "forgejo")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	assert.Equal(t, expected, sut)
 
 	expected = PersonID{}
 	expected.ID = "1"
@@ -87,13 +85,53 @@ func TestNewPersonId(t *testing.T) {
 	expected.UnvalidatedInput = "https://an.other.host:443/api/v1/activitypub/user-id/1"
 
 	sut, _ = NewPersonID("HTTPS://an.other.host:443/api/v1/activitypub/user-id/1", "forgejo")
-	if sut != expected {
-		t.Errorf("expected: %v\n but was: %v\n", expected, sut)
-	}
+	assert.Equal(t, expected, sut)
+
+	expected = PersonID{}
+	expected.ID = "@me"
+	expected.Source = "gotosocial"
+	expected.HostSchema = "https"
+	expected.Path = ""
+	expected.Host = "an.other.host"
+	expected.HostPort = 443
+	expected.IsPortSupplemented = true
+	expected.UnvalidatedInput = "https://an.other.host/@me"
+
+	sut, err = NewPersonID("https://an.other.host/@me", "gotosocial")
+	require.NoError(t, err)
+	assert.Equal(t, expected, sut)
 }
 
 func TestPersonIdValidation(t *testing.T) {
 	sut := PersonID{}
+	sut.ID = "1"
+	sut.Source = "forgejo"
+	sut.HostSchema = "https"
+	sut.Path = ""
+	sut.Host = "an.other.host"
+	sut.HostPort = 443
+	sut.IsPortSupplemented = true
+	sut.UnvalidatedInput = "https://an.other.host/1"
+
+	result, err := validation.IsValid(sut)
+	assert.False(t, result)
+	require.EqualError(t, err, "Validation Error: forgefed.PersonID: path should not be empty\npath: \"\" has to be a person specific api path")
+
+	sut = PersonID{}
+	sut.ID = "1"
+	sut.Source = "mastodon"
+	sut.HostSchema = "https"
+	sut.Path = ""
+	sut.Host = "an.other.host"
+	sut.HostPort = 443
+	sut.IsPortSupplemented = true
+	sut.UnvalidatedInput = "https://an.other.host/1"
+
+	result, err = validation.IsValid(sut)
+	assert.True(t, result)
+	require.NoError(t, err)
+
+	sut = PersonID{}
 	sut.ID = "1"
 	sut.Source = "forgejo"
 	sut.HostSchema = "https"
@@ -103,10 +141,9 @@ func TestPersonIdValidation(t *testing.T) {
 	sut.IsPortSupplemented = true
 	sut.UnvalidatedInput = "https://an.other.host/path/1"
 
-	_, err := validation.IsValid(sut)
-	if validation.IsErrNotValid(err) && strings.Contains(err.Error(), "path: \"path\" has to be a person specific api path\n") {
-		t.Errorf("validation error expected but was: %v\n", err)
-	}
+	result, err = validation.IsValid(sut)
+	assert.False(t, result)
+	require.EqualError(t, err, "Validation Error: forgefed.PersonID: path: \"path\" has to be a person specific api path")
 
 	sut = PersonID{}
 	sut.ID = "1"
@@ -117,21 +154,15 @@ func TestPersonIdValidation(t *testing.T) {
 	sut.HostPort = 443
 	sut.IsPortSupplemented = true
 	sut.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1"
-	if sut.Validate()[0] != "Field Source does contain value forgejox, which is not in allowed subset [forgejo gitea mastodon gotosocial]" {
-		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
-	}
+
+	result, err = validation.IsValid(sut)
+	assert.False(t, result)
+	require.EqualError(t, err, "Validation Error: forgefed.PersonID: Field Source does contain value forgejox, which is not in allowed subset [forgejo gitea mastodon gotosocial]")
 }
 
 func TestWebfingerId(t *testing.T) {
 	sut, _ := NewPersonID("https://codeberg.org/api/v1/activitypub/user-id/12345", "forgejo")
-	if sut.AsWebfinger() != "@12345@codeberg.org" {
-		t.Errorf("wrong webfinger: %v", sut.AsWebfinger())
-	}
-
-	sut, _ = NewPersonID("https://Codeberg.org/api/v1/activitypub/user-id/12345", "forgejo")
-	if sut.AsWebfinger() != "@12345@codeberg.org" {
-		t.Errorf("wrong webfinger: %v", sut.AsWebfinger())
-	}
+	assert.Equal(t, "@12345@codeberg.org", sut.AsWebfinger())
 }
 
 func TestShouldThrowErrorOnInvalidInput(t *testing.T) {
@@ -176,9 +207,7 @@ func Test_PersonMarshalJSON(t *testing.T) {
 	sut.PreferredUsername = ap.NaturalLanguageValuesNew()
 	sut.PreferredUsername.Set("en", ap.Content("MaxMuster"))
 	result, _ := sut.MarshalJSON()
-	if string(result) != "{\"type\":\"Person\",\"preferredUsername\":\"MaxMuster\"}" {
-		t.Errorf("MarshalJSON() was = %q", result)
-	}
+	assert.JSONEq(t, `{"type":"Person","preferredUsername":"MaxMuster"}`, string(result), "Expected string is not equal")
 }
 
 func Test_PersonUnmarshalJSON(t *testing.T) {
@@ -219,9 +248,7 @@ func Test_PersonUnmarshalJSON(t *testing.T) {
 		t.Errorf("UnmarshalJSON() unexpected error: %v", err)
 	}
 	result, _ := sut.MarshalJSON()
-	if expectedStr != string(result) {
-		t.Errorf("UnmarshalJSON() expected: %q got: %q", expectedStr, result)
-	}
+	assert.JSONEq(t, expectedStr, string(result), "Expected string is not equal")
 }
 
 func TestForgePersonValidation(t *testing.T) {

@@ -110,10 +110,14 @@ func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 		return nil, err
 	}
 
+	log.Trace("xxx: %v", actorID)
+	log.Trace("xxx: %v", actorID.AsWellKnownNodeInfoURI())
+
 	body, err := client.GetBody(actorID.AsWellKnownNodeInfoURI())
 	if err != nil {
 		return nil, err
 	}
+	log.Trace("xxx: %v", body)
 
 	nodeInfoWellKnown, err := forgefed.NewNodeInfoWellKnown(body)
 	if err != nil {
