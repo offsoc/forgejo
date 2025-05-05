@@ -39,12 +39,18 @@ func NewActorID(uri string) (ActorID, error) {
 }
 
 func (id ActorID) AsURI() string {
-	var result string
+	var result, path string
+
+	if id.Path == "" {
+		path = id.ID
+	} else {
+		path = fmt.Sprintf("%s/%s", id.Path, id.ID)
+	}
 
 	if id.IsPortSupplemented {
-		result = fmt.Sprintf("%s://%s/%s/%s", id.HostSchema, id.Host, id.Path, id.ID)
+		result = fmt.Sprintf("%s://%s/%s", id.HostSchema, id.Host, path)
 	} else {
-		result = fmt.Sprintf("%s://%s:%d/%s/%s", id.HostSchema, id.Host, id.HostPort, id.Path, id.ID)
+		result = fmt.Sprintf("%s://%s:%d/%s", id.HostSchema, id.Host, id.HostPort, path)
 	}
 
 	return result
@@ -53,7 +59,6 @@ func (id ActorID) AsURI() string {
 func (id ActorID) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(id.ID, "ID")...)
-	result = append(result, validation.ValidateNotEmpty(id.Path, "path")...)
 	result = append(result, validation.ValidateNotEmpty(id.Host, "host")...)
 	result = append(result, validation.ValidateNotEmpty(id.HostPort, "hostPort")...)
 	result = append(result, validation.ValidateNotEmpty(id.HostSchema, "hostSchema")...)
