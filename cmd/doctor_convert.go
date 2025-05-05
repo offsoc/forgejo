@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"forgejo.org/models/db"
@@ -21,11 +22,11 @@ var cmdDoctorConvert = &cli.Command{
 	Action:      runDoctorConvert,
 }
 
-func runDoctorConvert(ctx *cli.Context) error {
-	stdCtx, cancel := installSignals()
+func runDoctorConvert(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
-	if err := initDB(stdCtx); err != nil {
+	if err := initDB(ctx); err != nil {
 		return err
 	}
 

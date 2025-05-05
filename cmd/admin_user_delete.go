@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -41,12 +42,12 @@ var microcmdUserDelete = &cli.Command{
 	Action: runDeleteUser,
 }
 
-func runDeleteUser(c *cli.Context) error {
+func runDeleteUser(ctx context.Context, c *cli.Command) error {
 	if !c.IsSet("id") && !c.IsSet("username") && !c.IsSet("email") {
 		return errors.New("You must provide the id, username or email of a user to delete")
 	}
 
-	ctx, cancel := installSignals()
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if err := initDB(ctx); err != nil {

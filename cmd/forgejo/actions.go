@@ -19,105 +19,91 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func CmdActions(ctx context.Context) *cli.Command {
-	return &cli.Command{
-		Name:  "actions",
-		Usage: "Commands for managing Forgejo Actions",
-		Subcommands: []*cli.Command{
-			SubcmdActionsGenerateRunnerToken(ctx),
-			SubcmdActionsGenerateRunnerSecret(ctx),
-			SubcmdActionsRegister(ctx),
-		},
-	}
-}
-
-func SubcmdActionsGenerateRunnerToken(ctx context.Context) *cli.Command {
-	return &cli.Command{
-		Name:   "generate-runner-token",
-		Usage:  "Generate a new token for a runner to use to register with the server",
-		Before: prepareWorkPathAndCustomConf(ctx),
-		Action: func(cliCtx *cli.Context) error { return RunGenerateActionsRunnerToken(ctx, cliCtx) },
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "scope",
-				Aliases: []string{"s"},
-				Value:   "",
-				Usage:   "{owner}[/{repo}] - leave empty for a global runner",
+var CmdActions = &cli.Command{
+	Name:  "actions",
+	Usage: "Commands for managing Forgejo Actions",
+	Commands: []*cli.Command{
+		{
+			Name:   "generate-runner-token",
+			Usage:  "Generate a new token for a runner to use to register with the server",
+			Before: prepareWorkPathAndCustomConf,
+			Action: RunGenerateActionsRunnerToken,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "scope",
+					Aliases: []string{"s"},
+					Value:   "",
+					Usage:   "{owner}[/{repo}] - leave empty for a global runner",
+				},
 			},
 		},
-	}
-}
-
-func SubcmdActionsGenerateRunnerSecret(ctx context.Context) *cli.Command {
-	return &cli.Command{
-		Name:   "generate-secret",
-		Usage:  "Generate a secret suitable for input to the register subcommand",
-		Action: func(cliCtx *cli.Context) error { return RunGenerateSecret(ctx, cliCtx) },
-	}
-}
-
-func SubcmdActionsRegister(ctx context.Context) *cli.Command {
-	return &cli.Command{
-		Name:   "register",
-		Usage:  "Idempotent registration of a runner using a shared secret",
-		Before: prepareWorkPathAndCustomConf(ctx),
-		Action: func(cliCtx *cli.Context) error { return RunRegister(ctx, cliCtx) },
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "secret",
-				Usage: "the secret the runner will use to connect as a 40 character hexadecimal string",
-			},
-			&cli.StringFlag{
-				Name:  "secret-stdin",
-				Usage: "the secret the runner will use to connect as a 40 character hexadecimal string, read from stdin",
-			},
-			&cli.StringFlag{
-				Name:  "secret-file",
-				Usage: "path to the file containing the secret the runner will use to connect as a 40 character hexadecimal string",
-			},
-			&cli.StringFlag{
-				Name:    "scope",
-				Aliases: []string{"s"},
-				Value:   "",
-				Usage:   "{owner}[/{repo}] - leave empty for a global runner",
-			},
-			&cli.StringFlag{
-				Name:  "labels",
-				Value: "",
-				Usage: "comma separated list of labels supported by the runner (e.g. docker,ubuntu-latest,self-hosted)  (not required since v1.21)",
-			},
-			&cli.BoolFlag{
-				Name:  "keep-labels",
-				Value: false,
-				Usage: "do not affect the labels when updating an existing runner",
-			},
-			&cli.StringFlag{
-				Name:  "name",
-				Value: "runner",
-				Usage: "name of the runner (default runner)",
-			},
-			&cli.StringFlag{
-				Name:  "version",
-				Value: "",
-				Usage: "version of the runner (not required since v1.21)",
+		{
+			Name:   "generate-secret",
+			Usage:  "Generate a secret suitable for input to the register subcommand",
+			Action: RunGenerateSecret,
+		},
+		{
+			Name:   "register",
+			Usage:  "Idempotent registration of a runner using a shared secret",
+			Before: prepareWorkPathAndCustomConf,
+			Action: RunRegister,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "secret",
+					Usage: "the secret the runner will use to connect as a 40 character hexadecimal string",
+				},
+				&cli.StringFlag{
+					Name:  "secret-stdin",
+					Usage: "the secret the runner will use to connect as a 40 character hexadecimal string, read from stdin",
+				},
+				&cli.StringFlag{
+					Name:  "secret-file",
+					Usage: "path to the file containing the secret the runner will use to connect as a 40 character hexadecimal string",
+				},
+				&cli.StringFlag{
+					Name:    "scope",
+					Aliases: []string{"s"},
+					Value:   "",
+					Usage:   "{owner}[/{repo}] - leave empty for a global runner",
+				},
+				&cli.StringFlag{
+					Name:  "labels",
+					Value: "",
+					Usage: "comma separated list of labels supported by the runner (e.g. docker,ubuntu-latest,self-hosted)  (not required since v1.21)",
+				},
+				&cli.BoolFlag{
+					Name:  "keep-labels",
+					Value: false,
+					Usage: "do not affect the labels when updating an existing runner",
+				},
+				&cli.StringFlag{
+					Name:  "name",
+					Value: "runner",
+					Usage: "name of the runner (default runner)",
+				},
+				&cli.StringFlag{
+					Name:  "version",
+					Value: "",
+					Usage: "version of the runner (not required since v1.21)",
+				},
 			},
 		},
-	}
+	},
 }
 
-func readSecret(ctx context.Context, cliCtx *cli.Context) (string, error) {
-	if cliCtx.IsSet("secret") {
-		return cliCtx.String("secret"), nil
+func readSecret(ctx context.Context, c *cli.Command) (string, error) {
+	if c.IsSet("secret") {
+		return c.String("secret"), nil
 	}
-	if cliCtx.IsSet("secret-stdin") {
+	if c.IsSet("secret-stdin") {
 		buf, err := io.ReadAll(ContextGetStdin(ctx))
 		if err != nil {
 			return "", err
 		}
 		return string(buf), nil
 	}
-	if cliCtx.IsSet("secret-file") {
-		path := cliCtx.String("secret-file")
+	if c.IsSet("secret-file") {
+		path := c.String("secret-file")
 		buf, err := os.ReadFile(path)
 		if err != nil {
 			return "", err
@@ -138,18 +124,18 @@ func validateSecret(secret string) error {
 	return nil
 }
 
-func getLabels(cliCtx *cli.Context) (*[]string, error) {
-	if !cliCtx.Bool("keep-labels") {
-		lblValue := strings.Split(cliCtx.String("labels"), ",")
+func getLabels(c *cli.Command) (*[]string, error) {
+	if !c.Bool("keep-labels") {
+		lblValue := strings.Split(c.String("labels"), ",")
 		return &lblValue, nil
 	}
-	if cliCtx.String("labels") != "" {
+	if c.String("labels") != "" {
 		return nil, fmt.Errorf("--labels and --keep-labels should not be used together")
 	}
 	return nil, nil
 }
 
-func RunRegister(ctx context.Context, cliCtx *cli.Context) error {
+func RunRegister(ctx context.Context, c *cli.Command) error {
 	var cancel context.CancelFunc
 	if !ContextGetNoInit(ctx) {
 		ctx, cancel = installSignals(ctx)
@@ -161,17 +147,17 @@ func RunRegister(ctx context.Context, cliCtx *cli.Context) error {
 	}
 	setting.MustInstalled()
 
-	secret, err := readSecret(ctx, cliCtx)
+	secret, err := readSecret(ctx, c)
 	if err != nil {
 		return err
 	}
 	if err := validateSecret(secret); err != nil {
 		return err
 	}
-	scope := cliCtx.String("scope")
-	name := cliCtx.String("name")
-	version := cliCtx.String("version")
-	labels, err := getLabels(cliCtx)
+	scope := c.String("scope")
+	name := c.String("name")
+	version := c.String("version")
+	labels, err := getLabels(c)
 	if err != nil {
 		return err
 	}
@@ -209,7 +195,7 @@ func RunRegister(ctx context.Context, cliCtx *cli.Context) error {
 	return nil
 }
 
-func RunGenerateSecret(ctx context.Context, cliCtx *cli.Context) error {
+func RunGenerateSecret(ctx context.Context, c *cli.Command) error {
 	runner := actions_model.ActionRunner{}
 	if err := runner.GenerateToken(); err != nil {
 		return err
@@ -220,7 +206,7 @@ func RunGenerateSecret(ctx context.Context, cliCtx *cli.Context) error {
 	return nil
 }
 
-func RunGenerateActionsRunnerToken(ctx context.Context, cliCtx *cli.Context) error {
+func RunGenerateActionsRunnerToken(ctx context.Context, c *cli.Command) error {
 	if !ContextGetNoInit(ctx) {
 		var cancel context.CancelFunc
 		ctx, cancel = installSignals(ctx)
@@ -229,7 +215,7 @@ func RunGenerateActionsRunnerToken(ctx context.Context, cliCtx *cli.Context) err
 
 	setting.MustInstalled()
 
-	scope := cliCtx.String("scope")
+	scope := c.String("scope")
 
 	respText, extra := private.GenerateActionsRunnerToken(ctx, scope)
 	if extra.HasError() {

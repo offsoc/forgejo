@@ -35,7 +35,7 @@ var (
 		Usage:       "(internal) Should only be called by Git",
 		Description: "Delegate commands to corresponding Git hooks",
 		Before:      PrepareConsoleLoggerLevel(log.FATAL),
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			subcmdHookPreReceive,
 			subcmdHookUpdate,
 			subcmdHookPostReceive,
@@ -161,11 +161,11 @@ func (n *nilWriter) WriteString(s string) (int, error) {
 	return len(s), nil
 }
 
-func runHookPreReceive(c *cli.Context) error {
+func runHookPreReceive(ctx context.Context, c *cli.Command) error {
 	if isInternal, _ := strconv.ParseBool(os.Getenv(repo_module.EnvIsInternal)); isInternal {
 		return nil
 	}
-	ctx, cancel := installSignals()
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setup(ctx, c.Bool("debug"), true)
@@ -291,13 +291,13 @@ Forgejo or set your environment appropriately.`, "")
 }
 
 // runHookUpdate process the update hook: https://git-scm.com/docs/githooks#update
-func runHookUpdate(c *cli.Context) error {
+func runHookUpdate(ctx context.Context, c *cli.Command) error {
 	// Now if we're an internal don't do anything else
 	if isInternal, _ := strconv.ParseBool(os.Getenv(repo_module.EnvIsInternal)); isInternal {
 		return nil
 	}
 
-	ctx, cancel := installSignals()
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if c.NArg() != 3 {
@@ -323,8 +323,8 @@ func runHookUpdate(c *cli.Context) error {
 	return fail(ctx, fmt.Sprintf("The modification of %s is skipped as it's an internal reference.", refFullName), "")
 }
 
-func runHookPostReceive(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runHookPostReceive(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setup(ctx, c.Bool("debug"), true)
@@ -487,8 +487,8 @@ func hookPrintResults(results []private.HookPostReceiveBranchResult) {
 	}
 }
 
-func runHookProcReceive(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runHookProcReceive(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setup(ctx, c.Bool("debug"), true)

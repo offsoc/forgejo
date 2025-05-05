@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"os"
 	"time"
 
@@ -18,7 +19,7 @@ var (
 		Name:        "manager",
 		Usage:       "Manage the running forgejo process",
 		Description: "This is a command for managing the running forgejo process",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			subcmdShutdown,
 			subcmdRestart,
 			subcmdReloadTemplates,
@@ -108,8 +109,8 @@ var (
 	}
 )
 
-func runShutdown(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runShutdown(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setup(ctx, c.Bool("debug"), false)
@@ -117,8 +118,8 @@ func runShutdown(c *cli.Context) error {
 	return handleCliResponseExtra(extra)
 }
 
-func runRestart(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runRestart(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setup(ctx, c.Bool("debug"), false)
@@ -126,8 +127,8 @@ func runRestart(c *cli.Context) error {
 	return handleCliResponseExtra(extra)
 }
 
-func runReloadTemplates(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runReloadTemplates(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setup(ctx, c.Bool("debug"), false)
@@ -135,8 +136,8 @@ func runReloadTemplates(c *cli.Context) error {
 	return handleCliResponseExtra(extra)
 }
 
-func runFlushQueues(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runFlushQueues(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setup(ctx, c.Bool("debug"), false)
@@ -144,8 +145,8 @@ func runFlushQueues(c *cli.Context) error {
 	return handleCliResponseExtra(extra)
 }
 
-func runProcesses(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runProcesses(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setup(ctx, c.Bool("debug"), false)

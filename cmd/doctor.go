@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	golog "log"
 	"os"
@@ -28,7 +29,7 @@ var CmdDoctor = &cli.Command{
 	Usage:       "Diagnose and optionally fix problems, convert or re-create database tables",
 	Description: "A command to diagnose problems with the current Forgejo instance according to the given configuration. Some problems can optionally be fixed by modifying the database or data storage.",
 
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		cmdDoctorCheck,
 		cmdRecreateTable,
 		cmdDoctorConvert,
@@ -91,8 +92,8 @@ You should back-up your database before doing this and ensure that your database
 	Action: runRecreateTable,
 }
 
-func runRecreateTable(ctx *cli.Context) error {
-	stdCtx, cancel := installSignals()
+func runRecreateTable(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	// Redirect the default golog to here
@@ -100,7 +101,7 @@ func runRecreateTable(ctx *cli.Context) error {
 	golog.SetPrefix("")
 	golog.SetOutput(log.LoggerToWriter(log.GetLogger(log.DEFAULT).Info))
 
-	debug := ctx.Bool("debug")
+	debug := c.Bool("debug")
 	setting.MustInstalled()
 	setting.LoadDBSetting()
 
@@ -111,15 +112,15 @@ func runRecreateTable(ctx *cli.Context) error {
 	}
 
 	setting.Database.LogSQL = debug
-	if err := db.InitEngine(stdCtx); err != nil {
+	if err := db.InitEngine(ctx); err != nil {
 		fmt.Println(err)
 		fmt.Println("Check if you are using the right config file. You can use a --config directive to specify one.")
 		return nil
 	}
 
-	args := ctx.Args()
-	names := make([]string, 0, ctx.NArg())
-	for i := range ctx.NArg() {
+	args := c.Args()
+	names := make([]string, 0, c.NArg())
+	for i := range c.NArg() {
 		names = append(names, args.Get(i))
 	}
 
@@ -129,7 +130,7 @@ func runRecreateTable(ctx *cli.Context) error {
 	}
 	recreateTables := migrate_base.RecreateTables(beans...)
 
-	return db.InitEngineWithMigration(stdCtx, func(x db.Engine) error {
+	return db.InitEngineWithMigration(ctx, func(x db.Engine) error {
 		engine, err := db.GetMasterEngine(x)
 		if err != nil {
 			return err
@@ -143,7 +144,7 @@ func runRecreateTable(ctx *cli.Context) error {
 	})
 }
 
-func setupDoctorDefaultLogger(ctx *cli.Context, colorize bool) {
+func setupDoctorDefaultLogger(ctx *cli.Command, colorize bool) {
 	// Silence the default loggers
 	setupConsoleLogger(log.FATAL, log.CanColorStderr, os.Stderr)
 
@@ -165,23 +166,23 @@ func setupDoctorDefaultLogger(ctx *cli.Context, colorize bool) {
 	}
 }
 
-func runDoctorCheck(ctx *cli.Context) error {
-	stdCtx, cancel := installSignals()
+func runDoctorCheck(ctx context.Context, c *cli.Command) error {
+	stdCtx, cancel := installSignals(ctx)
 	defer cancel()
 
 	colorize := log.CanColorStdout
-	if ctx.IsSet("color") {
-		colorize = ctx.Bool("color")
+	if c.IsSet("color") {
+		colorize = c.Bool("color")
 	}
 
-	setupDoctorDefaultLogger(ctx, colorize)
+	setupDoctorDefaultLogger(c, colorize)
 
 	// Finally redirect the default golang's log to here
 	golog.SetFlags(0)
 	golog.SetPrefix("")
 	golog.SetOutput(log.LoggerToWriter(log.GetLogger(log.DEFAULT).Info))
 
-	if ctx.IsSet("list") {
+	if c.IsSet("list") {
 		w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
 		_, _ = w.Write([]byte("Default\tName\tTitle\n"))
 		doctor.SortChecks(doctor.Checks)
@@ -199,12 +200,12 @@ func runDoctorCheck(ctx *cli.Context) error {
 	}
 
 	var checks []*doctor.Check
-	if ctx.Bool("all") {
+	if c.Bool("all") {
 		checks = make([]*doctor.Check, len(doctor.Checks))
 		copy(checks, doctor.Checks)
-	} else if ctx.IsSet("run") {
-		addDefault := ctx.Bool("default")
-		runNamesSet := container.SetOf(ctx.StringSlice("run")...)
+	} else if c.IsSet("run") {
+		addDefault := c.Bool("default")
+		runNamesSet := container.SetOf(c.StringSlice("run")...)
 		for _, check := range doctor.Checks {
 			if (addDefault && check.IsDefault) || runNamesSet.Contains(check.Name) {
 				checks = append(checks, check)
@@ -221,5 +222,5 @@ func runDoctorCheck(ctx *cli.Context) error {
 			}
 		}
 	}
-	return doctor.RunChecks(stdCtx, colorize, ctx.Bool("fix"), checks)
+	return doctor.RunChecks(stdCtx, colorize, c.Bool("fix"), checks)
 }

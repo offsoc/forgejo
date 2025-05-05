@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"text/tabwriter"
@@ -25,8 +26,8 @@ var microcmdUserList = &cli.Command{
 	},
 }
 
-func runListUsers(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runListUsers(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if err := initDB(ctx); err != nil {

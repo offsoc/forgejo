@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -23,10 +24,6 @@ var microcmdUserCreate = &cli.Command{
 	Usage:  "Create a new user in database",
 	Action: runCreateUser,
 	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:  "name",
-			Usage: "Username. DEPRECATED: use username instead",
-		},
 		&cli.StringFlag{
 			Name:  "username",
 			Usage: "Username",
@@ -48,10 +45,10 @@ var microcmdUserCreate = &cli.Command{
 			Usage: "Generate a random password for the user",
 		},
 		&cli.BoolFlag{
-			Name:               "must-change-password",
-			Usage:              "Set this option to false to prevent forcing the user to change their password after initial login",
-			Value:              true,
-			DisableDefaultText: true,
+			Name:        "must-change-password",
+			Usage:       "Set this option to false to prevent forcing the user to change their password after initial login",
+			Value:       true,
+			HideDefault: true,
 		},
 		&cli.IntFlag{
 			Name:  "random-password-length",
@@ -83,7 +80,7 @@ var microcmdUserCreate = &cli.Command{
 	},
 }
 
-func runCreateUser(c *cli.Context) error {
+func runCreateUser(ctx context.Context, c *cli.Command) error {
 	// this command highly depends on the many setting options (create org, visibility, etc.), so it must have a full setting load first
 	// duplicate setting loading should be safe at the moment, but it should be refactored & improved in the future.
 	setting.LoadSettings()
@@ -108,10 +105,10 @@ func runCreateUser(c *cli.Context) error {
 		username = c.String("username")
 	} else {
 		username = c.String("name")
-		_, _ = fmt.Fprintf(c.App.ErrWriter, "--name flag is deprecated. Use --username instead.\n")
+		_, _ = fmt.Fprintf(c.ErrWriter, "--name flag is deprecated. Use --username instead.\n")
 	}
 
-	ctx, cancel := installSignals()
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if err := initDB(ctx); err != nil {

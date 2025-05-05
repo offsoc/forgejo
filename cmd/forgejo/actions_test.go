@@ -4,10 +4,9 @@
 package forgejo
 
 import (
+	"context"
 	"fmt"
 	"testing"
-
-	"forgejo.org/services/context"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -54,21 +53,22 @@ func TestActions_getLabels(t *testing.T) {
 		},
 	}
 
-	flags := SubcmdActionsRegister(context.Context{}).Flags
+	flags := CmdActions.Commands[2].Flags
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("args: %v", c.args), func(t *testing.T) {
 			// Create a copy of command to test
 			var result *resultType
-			app := cli.NewApp()
-			app.Flags = flags
-			app.Action = func(ctx *cli.Context) error {
-				labels, err := getLabels(ctx)
-				result = &resultType{labels, err}
-				return nil
+			app := &cli.Command{
+				Flags: flags,
+				Action: func(ctx context.Context, c *cli.Command) error {
+					labels, err := getLabels(c)
+					result = &resultType{labels, err}
+					return nil
+				},
 			}
 
 			// Run it
-			_ = app.Run(c.args)
+			_ = app.Run(t.Context(), c.args)
 
 			// Test the results
 			require.NotNil(t, result)

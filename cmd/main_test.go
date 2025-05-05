@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -27,7 +28,7 @@ func makePathOutput(workPath, customPath, customConf string) string {
 	return fmt.Sprintf("WorkPath=%s\nCustomPath=%s\nCustomConf=%s", workPath, customPath, customConf)
 }
 
-func newTestApp(testCmdAction func(ctx *cli.Context) error) *cli.App {
+func newTestApp(testCmdAction func(context.Context, *cli.Command) error) *cli.Command {
 	app := NewMainApp("version", "version-extra")
 	testCmd := &cli.Command{Name: "test-cmd", Action: testCmdAction}
 	prepareSubcommandWithConfig(testCmd, appGlobalFlags())
@@ -42,7 +43,7 @@ type runResult struct {
 	ExitCode int
 }
 
-func runTestApp(app *cli.App, args ...string) (runResult, error) {
+func runTestApp(app *cli.Command, args ...string) (runResult, error) {
 	outBuf := new(strings.Builder)
 	errBuf := new(strings.Builder)
 	app.Writer = outBuf
@@ -55,7 +56,9 @@ func runTestApp(app *cli.App, args ...string) (runResult, error) {
 			app.Writer, app.ErrWriter, cli.ErrWriter = io.Discard, io.Discard, io.Discard
 		}
 	})()
-	err := RunMainApp(app, args...)
+	app.Command("test-cmd").Writer = outBuf
+	app.Command("help").Writer = outBuf
+	err := RunMainApp(app, args)
 	return runResult{outBuf.String(), errBuf.String(), exitCode}, err
 }
 
@@ -65,7 +68,7 @@ func TestCliCmd(t *testing.T) {
 	defaultCustomConf := filepath.Join(defaultCustomPath, "conf/app.ini")
 
 	cli.CommandHelpTemplate = "(command help template)"
-	cli.AppHelpTemplate = "(app help template)"
+	cli.RootCommandHelpTemplate = "(app help template)"
 	cli.SubcommandHelpTemplate = "(subcommand help template)"
 
 	cases := []struct {
@@ -109,17 +112,20 @@ func TestCliCmd(t *testing.T) {
 		},
 	}
 
-	app := newTestApp(func(ctx *cli.Context) error {
-		_, _ = fmt.Fprint(ctx.App.Writer, makePathOutput(setting.AppWorkPath, setting.CustomPath, setting.CustomConf))
-		return nil
-	})
+	app := func() *cli.Command {
+		return newTestApp(func(ctx context.Context, c *cli.Command) error {
+			_, _ = fmt.Fprint(c.Writer, makePathOutput(setting.AppWorkPath, setting.CustomPath, setting.CustomConf))
+			return nil
+		})
+	}
+
 	for _, c := range cases {
 		t.Run(c.cmd, func(t *testing.T) {
 			for k, v := range c.env {
 				t.Setenv(k, v)
 			}
 			args := strings.Split(c.cmd, " ") // for test only, "split" is good enough
-			r, err := runTestApp(app, args...)
+			r, err := runTestApp(app(), args...)
 			require.NoError(t, err, c.cmd)
 			assert.NotEmpty(t, c.exp, c.cmd)
 			assert.Contains(t, r.Stdout, c.exp, c.cmd)
@@ -128,28 +134,28 @@ func TestCliCmd(t *testing.T) {
 }
 
 func TestCliCmdError(t *testing.T) {
-	app := newTestApp(func(ctx *cli.Context) error { return fmt.Errorf("normal error") })
+	app := newTestApp(func(ctx context.Context, c *cli.Command) error { return fmt.Errorf("normal error") })
 	r, err := runTestApp(app, "./gitea", "test-cmd")
 	require.Error(t, err)
 	assert.Equal(t, 1, r.ExitCode)
 	assert.Empty(t, r.Stdout)
 	assert.Equal(t, "Command error: normal error\n", r.Stderr)
 
-	app = newTestApp(func(ctx *cli.Context) error { return cli.Exit("exit error", 2) })
+	app = newTestApp(func(ctx context.Context, c *cli.Command) error { return cli.Exit("exit error", 2) })
 	r, err = runTestApp(app, "./gitea", "test-cmd")
 	require.Error(t, err)
 	assert.Equal(t, 2, r.ExitCode)
 	assert.Empty(t, r.Stdout)
 	assert.Equal(t, "exit error\n", r.Stderr)
 
-	app = newTestApp(func(ctx *cli.Context) error { return nil })
+	app = newTestApp(func(ctx context.Context, c *cli.Command) error { return nil })
 	r, err = runTestApp(app, "./gitea", "test-cmd", "--no-such")
 	require.Error(t, err)
 	assert.Equal(t, 1, r.ExitCode)
-	assert.Equal(t, "Incorrect Usage: flag provided but not defined: -no-such\n\n", r.Stdout)
-	assert.Empty(t, r.Stderr) // the cli package's strange behavior, the error message is not in stderr ....
+	assert.Equal(t, "Incorrect Usage: flag provided but not defined: -no-such\n\n", r.Stderr)
+	assert.Empty(t, r.Stdout)
 
-	app = newTestApp(func(ctx *cli.Context) error { return nil })
+	app = newTestApp(func(ctx context.Context, c *cli.Command) error { return nil })
 	r, err = runTestApp(app, "./gitea", "test-cmd")
 	require.NoError(t, err)
 	assert.Equal(t, -1, r.ExitCode) // the cli.OsExiter is not called

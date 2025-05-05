@@ -226,12 +226,13 @@ func TestAddLdapBindDn(t *testing.T) {
 		}
 
 		// Create a copy of command to test
-		app := cli.NewApp()
-		app.Flags = microcmdAuthAddLdapBindDn.Flags
-		app.Action = service.addLdapBindDn
+		app := &cli.Command{
+			Flags:  microcmdAuthAddLdapBindDn.Flags,
+			Action: service.addLdapBindDn,
+		}
 
 		// Run it
-		err := app.Run(c.args)
+		err := app.Run(t.Context(), c.args)
 		if c.errMsg != "" {
 			assert.EqualError(t, err, c.errMsg, "case %d: error should match", n)
 		} else {
@@ -457,12 +458,13 @@ func TestAddLdapSimpleAuth(t *testing.T) {
 		}
 
 		// Create a copy of command to test
-		app := cli.NewApp()
-		app.Flags = microcmdAuthAddLdapSimpleAuth.Flags
-		app.Action = service.addLdapSimpleAuth
+		app := &cli.Command{
+			Flags:  microcmdAuthAddLdapSimpleAuth.Flags,
+			Action: service.addLdapSimpleAuth,
+		}
 
 		// Run it
-		err := app.Run(c.args)
+		err := app.Run(t.Context(), c.args)
 		if c.errMsg != "" {
 			assert.EqualError(t, err, c.errMsg, "case %d: error should match", n)
 		} else {
@@ -920,12 +922,13 @@ func TestUpdateLdapBindDn(t *testing.T) {
 		}
 
 		// Create a copy of command to test
-		app := cli.NewApp()
-		app.Flags = microcmdAuthUpdateLdapBindDn.Flags
-		app.Action = service.updateLdapBindDn
+		app := &cli.Command{
+			Flags:  microcmdAuthUpdateLdapBindDn.Flags,
+			Action: service.updateLdapBindDn,
+		}
 
 		// Run it
-		err := app.Run(c.args)
+		err := app.Run(t.Context(), c.args)
 		if c.errMsg != "" {
 			assert.EqualError(t, err, c.errMsg, "case %d: error should match", n)
 		} else {
@@ -1310,12 +1313,13 @@ func TestUpdateLdapSimpleAuth(t *testing.T) {
 		}
 
 		// Create a copy of command to test
-		app := cli.NewApp()
-		app.Flags = microcmdAuthUpdateLdapSimpleAuth.Flags
-		app.Action = service.updateLdapSimpleAuth
+		app := &cli.Command{
+			Flags:  microcmdAuthUpdateLdapSimpleAuth.Flags,
+			Action: service.updateLdapSimpleAuth,
+		}
 
 		// Run it
-		err := app.Run(c.args)
+		err := app.Run(t.Context(), c.args)
 		if c.errMsg != "" {
 			assert.EqualError(t, err, c.errMsg, "case %d: error should match", n)
 		} else {

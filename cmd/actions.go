@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"forgejo.org/modules/private"
@@ -17,7 +18,7 @@ var (
 	CmdActions = &cli.Command{
 		Name:  "actions",
 		Usage: "Manage Forgejo Actions",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			subcmdActionsGenRunnerToken,
 		},
 	}
@@ -38,8 +39,8 @@ var (
 	}
 )
 
-func runGenerateActionsRunnerToken(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runGenerateActionsRunnerToken(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setting.MustInstalled()

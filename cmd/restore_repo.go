@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"strings"
 
 	"forgejo.org/modules/private"
@@ -48,8 +49,8 @@ wiki, issues, labels, releases, release_assets, milestones, pull_requests, comme
 	},
 }
 
-func runRestoreRepository(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runRestoreRepository(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setting.MustInstalled()

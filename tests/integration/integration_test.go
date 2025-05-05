@@ -123,7 +123,7 @@ func TestMain(m *testing.M) {
 		},
 			os.Args[1:]..., // skip the executable name
 		)
-		if err := cmd.RunMainApp(app, args...); err != nil {
+		if err := cmd.RunMainApp(app, args); err != nil {
 			panic(err) // should never happen since RunMainApp exits on error
 		}
 		return

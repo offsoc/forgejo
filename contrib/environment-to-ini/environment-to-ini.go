@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"forgejo.org/modules/log"
@@ -13,10 +14,10 @@ import (
 )
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "environment-to-ini"
-	app.Usage = "Use provided environment to update configuration ini"
-	app.Description = `As a helper to allow docker users to update the forgejo configuration
+	app := cli.Command{
+		Name:  "environment-to-ini",
+		Usage: "Use provided environment to update configuration ini",
+		Description: `As a helper to allow docker users to update the forgejo configuration
 	through the environment, this command allows environment variables to
 	be mapped to values in the ini.
 
@@ -44,41 +45,42 @@ func main() {
 
 	You would set the environment variables: "FORGEJO__LOG_0x2E_CONSOLE__COLORIZE=false"
 	and "FORGEJO__LOG_0x2E_CONSOLE__STDERR=false". Other examples can be found
-	on the configuration cheat sheet.`
-	app.Flags = []cli.Flag{
-		&cli.StringFlag{
-			Name:    "custom-path",
-			Aliases: []string{"C"},
-			Value:   setting.CustomPath,
-			Usage:   "Custom path file path",
+	on the configuration cheat sheet.`,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "custom-path",
+				Aliases: []string{"C"},
+				Value:   setting.CustomPath,
+				Usage:   "Custom path file path",
+			},
+			&cli.StringFlag{
+				Name:    "config",
+				Aliases: []string{"c"},
+				Value:   setting.CustomConf,
+				Usage:   "Custom configuration file path",
+			},
+			&cli.StringFlag{
+				Name:    "work-path",
+				Aliases: []string{"w"},
+				Value:   setting.AppWorkPath,
+				Usage:   "Set the forgejo working path",
+			},
+			&cli.StringFlag{
+				Name:    "out",
+				Aliases: []string{"o"},
+				Value:   "",
+				Usage:   "Destination file to write to",
+			},
 		},
-		&cli.StringFlag{
-			Name:    "config",
-			Aliases: []string{"c"},
-			Value:   setting.CustomConf,
-			Usage:   "Custom configuration file path",
-		},
-		&cli.StringFlag{
-			Name:    "work-path",
-			Aliases: []string{"w"},
-			Value:   setting.AppWorkPath,
-			Usage:   "Set the forgejo working path",
-		},
-		&cli.StringFlag{
-			Name:    "out",
-			Aliases: []string{"o"},
-			Value:   "",
-			Usage:   "Destination file to write to",
-		},
+		Action: runEnvironmentToIni,
 	}
-	app.Action = runEnvironmentToIni
-	err := app.Run(os.Args)
+	err := app.Run(context.Background(), os.Args)
 	if err != nil {
 		log.Fatal("Failed to run app with %s: %v", os.Args, err)
 	}
 }
 
-func runEnvironmentToIni(c *cli.Context) error {
+func runEnvironmentToIni(ctx context.Context, c *cli.Command) error {
 	// the config system may change the environment variables, so get a copy first, to be used later
 	env := append([]string{}, os.Environ()...)
 	setting.InitWorkPathAndCfgProvider(os.Getenv, setting.ArgWorkPathAndCustomConf{

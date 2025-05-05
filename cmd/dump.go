@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -81,6 +82,10 @@ func (o *outputType) Set(value string) error {
 	}
 
 	return fmt.Errorf("allowed values are %s", o.Join())
+}
+
+func (o outputType) Get() any {
+	return o.String()
 }
 
 func (o outputType) String() string {
@@ -176,10 +181,10 @@ func fatal(format string, args ...any) {
 	log.Fatal(format, args...)
 }
 
-func runDump(ctx *cli.Context) error {
+func runDump(ctx context.Context, c *cli.Command) error {
 	var file *os.File
-	fileName := ctx.String("file")
-	outType := ctx.String("type")
+	fileName := c.String("file")
+	outType := c.String("type")
 	if fileName == "-" {
 		file = os.Stdout
 		setupConsoleLogger(log.FATAL, log.CanColorStderr, os.Stderr)
@@ -204,7 +209,7 @@ func runDump(ctx *cli.Context) error {
 	}
 
 	// Set loglevel to Warn if quiet-mode is requested
-	if ctx.Bool("quiet") {
+	if c.Bool("quiet") {
 		if _, err := setting.CfgProvider.Section("log.console").NewKey("LEVEL", "Warn"); err != nil {
 			fatal("Setting console log-level failed: %v", err)
 		}
@@ -216,12 +221,12 @@ func runDump(ctx *cli.Context) error {
 	}
 	setting.LoadSettings() // cannot access session settings otherwise
 
-	verbose := ctx.Bool("verbose")
-	if verbose && ctx.Bool("quiet") {
+	verbose := c.Bool("verbose")
+	if verbose && c.Bool("quiet") {
 		return fmt.Errorf("--quiet and --verbose cannot both be set")
 	}
 
-	stdCtx, cancel := installSignals()
+	stdCtx, cancel := installSignals(ctx)
 	defer cancel()
 
 	err := db.InitEngine(stdCtx)
@@ -262,7 +267,7 @@ func runDump(ctx *cli.Context) error {
 	}
 	defer w.Close()
 
-	if ctx.IsSet("skip-repository") && ctx.Bool("skip-repository") {
+	if c.IsSet("skip-repository") && c.Bool("skip-repository") {
 		log.Info("Skipping local repositories")
 	} else {
 		log.Info("Dumping local repositories... %s", setting.RepoRootPath)
@@ -270,7 +275,7 @@ func runDump(ctx *cli.Context) error {
 			fatal("Failed to include repositories: %v", err)
 		}
 
-		if ctx.IsSet("skip-lfs-data") && ctx.Bool("skip-lfs-data") {
+		if c.IsSet("skip-lfs-data") && c.Bool("skip-lfs-data") {
 			log.Info("Skipping LFS data")
 		} else if !setting.LFS.StartServer {
 			log.Info("LFS not enabled - skipping")
@@ -286,7 +291,7 @@ func runDump(ctx *cli.Context) error {
 		}
 	}
 
-	tmpDir := ctx.String("tempdir")
+	tmpDir := c.String("tempdir")
 	if tmpDir == "" {
 		tmpDir, err = os.MkdirTemp("", "forgejo-dump-*")
 		if err != nil {
@@ -315,7 +320,7 @@ func runDump(ctx *cli.Context) error {
 		}
 	}()
 
-	targetDBType := ctx.String("database")
+	targetDBType := c.String("database")
 	if len(targetDBType) > 0 && targetDBType != setting.Database.Type.String() {
 		log.Info("Dumping database %s => %s...", setting.Database.Type, targetDBType)
 	} else {
@@ -337,7 +342,7 @@ func runDump(ctx *cli.Context) error {
 		}
 	}
 
-	if ctx.IsSet("skip-custom-dir") && ctx.Bool("skip-custom-dir") {
+	if c.IsSet("skip-custom-dir") && c.Bool("skip-custom-dir") {
 		log.Info("Skipping custom directory")
 	} else {
 		customDir, err := os.Stat(setting.CustomPath)
@@ -370,13 +375,13 @@ func runDump(ctx *cli.Context) error {
 			excludes = append(excludes, opts.ProviderConfig)
 		}
 
-		if ctx.IsSet("skip-index") && ctx.Bool("skip-index") {
+		if c.IsSet("skip-index") && c.Bool("skip-index") {
 			log.Info("Skipping bleve index data")
 			excludes = append(excludes, setting.Indexer.RepoPath)
 			excludes = append(excludes, setting.Indexer.IssuePath)
 		}
 
-		if ctx.IsSet("skip-repo-archives") && ctx.Bool("skip-repo-archives") {
+		if c.IsSet("skip-repo-archives") && c.Bool("skip-repo-archives") {
 			log.Info("Skipping repository archives data")
 			excludes = append(excludes, setting.RepoArchive.Storage.Path)
 		}
@@ -392,7 +397,7 @@ func runDump(ctx *cli.Context) error {
 		}
 	}
 
-	if ctx.IsSet("skip-attachment-data") && ctx.Bool("skip-attachment-data") {
+	if c.IsSet("skip-attachment-data") && c.Bool("skip-attachment-data") {
 		log.Info("Skipping attachment data")
 	} else if err := storage.Attachments.IterateObjects("", func(objPath string, object storage.Object) error {
 		info, err := object.Stat()
@@ -405,7 +410,7 @@ func runDump(ctx *cli.Context) error {
 		fatal("Failed to dump attachments: %v", err)
 	}
 
-	if ctx.IsSet("skip-package-data") && ctx.Bool("skip-package-data") {
+	if c.IsSet("skip-package-data") && c.Bool("skip-package-data") {
 		log.Info("Skipping package data")
 	} else if !setting.Packages.Enabled {
 		log.Info("Package registry not enabled - skipping")
@@ -423,7 +428,7 @@ func runDump(ctx *cli.Context) error {
 	// Doesn't check if LogRootPath exists before processing --skip-log intentionally,
 	// ensuring that it's clear the dump is skipped whether the directory's initialized
 	// yet or not.
-	if ctx.IsSet("skip-log") && ctx.Bool("skip-log") {
+	if c.IsSet("skip-log") && c.Bool("skip-log") {
 		log.Info("Skipping log files")
 	} else {
 		isExist, err := util.IsExist(setting.Log.RootPath)

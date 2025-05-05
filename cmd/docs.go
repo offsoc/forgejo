@@ -4,10 +4,11 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"strings"
 
+	docs "github.com/urfave/cli-docs/v3"
 	"github.com/urfave/cli/v3"
 )
 
@@ -30,29 +31,18 @@ var CmdDocs = &cli.Command{
 	},
 }
 
-func runDocs(ctx *cli.Context) error {
-	docs, err := ctx.App.ToMarkdown()
-	if ctx.Bool("man") {
-		docs, err = ctx.App.ToMan()
+func runDocs(ctx context.Context, c *cli.Command) error {
+	docOutput, err := docs.ToMarkdown(c)
+	if c.Bool("man") {
+		docOutput, err = docs.ToMan(c)
 	}
 	if err != nil {
 		return err
 	}
 
-	if !ctx.Bool("man") {
-		// Clean up markdown. The following bug was fixed in v2, but is present in v1.
-		// It affects markdown output (even though the issue is referring to man pages)
-		// https://github.com/urfave/cli/issues/1040
-		firstHashtagIndex := strings.Index(docs, "#")
-
-		if firstHashtagIndex > 0 {
-			docs = docs[firstHashtagIndex:]
-		}
-	}
-
 	out := os.Stdout
-	if ctx.String("output") != "" {
-		fi, err := os.Create(ctx.String("output"))
+	if c.String("output") != "" {
+		fi, err := os.Create(c.String("output"))
 		if err != nil {
 			return err
 		}
@@ -60,6 +50,6 @@ func runDocs(ctx *cli.Context) error {
 		out = fi
 	}
 
-	_, err = fmt.Fprintln(out, docs)
+	_, err = fmt.Fprintln(out, docOutput)
 	return err
 }

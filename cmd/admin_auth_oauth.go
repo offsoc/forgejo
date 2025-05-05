@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -136,7 +137,7 @@ var (
 	}
 )
 
-func parseOAuth2Config(c *cli.Context) *oauth2.Source {
+func parseOAuth2Config(c *cli.Command) *oauth2.Source {
 	var customURLMapping *oauth2.CustomURLMapping
 	if c.IsSet("use-custom-urls") {
 		customURLMapping = &oauth2.CustomURLMapping{
@@ -168,8 +169,8 @@ func parseOAuth2Config(c *cli.Context) *oauth2.Source {
 	}
 }
 
-func runAddOauth(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runAddOauth(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if err := initDB(ctx); err != nil {
@@ -192,12 +193,12 @@ func runAddOauth(c *cli.Context) error {
 	})
 }
 
-func runUpdateOauth(c *cli.Context) error {
+func runUpdateOauth(ctx context.Context, c *cli.Command) error {
 	if !c.IsSet("id") {
 		return errors.New("--id flag is missing")
 	}
 
-	ctx, cancel := installSignals()
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if err := initDB(ctx); err != nil {

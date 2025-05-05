@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -19,7 +20,7 @@ var (
 	CmdGenerate = &cli.Command{
 		Name:  "generate",
 		Usage: "Generate Gitea's secrets/keys/tokens",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			subcmdSecret,
 		},
 	}
@@ -27,7 +28,7 @@ var (
 	subcmdSecret = &cli.Command{
 		Name:  "secret",
 		Usage: "Generate a secret token",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			microcmdGenerateInternalToken,
 			microcmdGenerateLfsJwtSecret,
 			microcmdGenerateSecretKey,
@@ -54,7 +55,7 @@ var (
 	}
 )
 
-func runGenerateInternalToken(c *cli.Context) error {
+func runGenerateInternalToken(ctx context.Context, c *cli.Command) error {
 	internalToken, err := generate.NewInternalToken()
 	if err != nil {
 		return err
@@ -69,7 +70,7 @@ func runGenerateInternalToken(c *cli.Context) error {
 	return nil
 }
 
-func runGenerateLfsJwtSecret(c *cli.Context) error {
+func runGenerateLfsJwtSecret(ctx context.Context, c *cli.Command) error {
 	_, jwtSecretBase64 := generate.NewJwtSecret()
 
 	fmt.Printf("%s", jwtSecretBase64)
@@ -81,7 +82,7 @@ func runGenerateLfsJwtSecret(c *cli.Context) error {
 	return nil
 }
 
-func runGenerateSecretKey(c *cli.Context) error {
+func runGenerateSecretKey(ctx context.Context, c *cli.Command) error {
 	secretKey, err := generate.NewSecretKey()
 	if err != nil {
 		return err

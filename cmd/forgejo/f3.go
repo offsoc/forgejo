@@ -23,26 +23,26 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func CmdF3(ctx context.Context) *cli.Command {
-	ctx = f3_logger.ContextSetLogger(ctx, util.NewF3Logger(nil, log.GetLogger(log.DEFAULT)))
-	return &cli.Command{
-		Name:  "f3",
-		Usage: "F3",
-		Subcommands: []*cli.Command{
-			SubcmdF3Mirror(ctx),
-		},
-	}
+var CmdF3 = &cli.Command{
+	Name:  "f3",
+	Usage: "F3",
+	Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
+		return f3_logger.ContextSetLogger(ctx, util.NewF3Logger(nil, log.GetLogger(log.DEFAULT))), nil
+	},
+	Commands: []*cli.Command{
+		SubcmdF3Mirror(),
+	},
 }
 
-func SubcmdF3Mirror(ctx context.Context) *cli.Command {
-	mirrorCmd := f3_cmd.CreateCmdMirror(ctx)
-	mirrorCmd.Before = prepareWorkPathAndCustomConf(ctx)
+func SubcmdF3Mirror() *cli.Command {
+	mirrorCmd := f3_cmd.CreateCmdMirror()
+	mirrorCmd.Before = prepareWorkPathAndCustomConf
 	f3Action := mirrorCmd.Action
-	mirrorCmd.Action = func(c *cli.Context) error { return runMirror(ctx, c, f3Action) }
+	mirrorCmd.Action = func(ctx context.Context, c *cli.Command) error { return runMirror(ctx, c, f3Action) }
 	return mirrorCmd
 }
 
-func runMirror(ctx context.Context, c *cli.Context, action cli.ActionFunc) error {
+func runMirror(ctx context.Context, c *cli.Command, action cli.ActionFunc) error {
 	setting.LoadF3Setting()
 	if !setting.F3.Enabled {
 		return errors.New("F3 is disabled, it is not ready to be used and is only present for development purposes")
@@ -69,7 +69,7 @@ func runMirror(ctx context.Context, c *cli.Context, action cli.ActionFunc) error
 		}
 	}
 
-	err := action(c)
+	err := action(ctx, c)
 	if panicError, ok := err.(f3_util.PanicError); ok {
 		log.Debug("F3 Stack trace\n%s", panicError.Stack())
 	}

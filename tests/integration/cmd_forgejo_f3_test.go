@@ -33,10 +33,13 @@ func runApp(ctx context.Context, args ...string) (string, error) {
 	ctx = f3_logger.ContextSetLogger(ctx, l)
 	ctx = forgejo.ContextSetNoInit(ctx, true)
 
-	app := cli.NewApp()
-
-	app.Writer = l.GetBuffer()
-	app.ErrWriter = l.GetBuffer()
+	app := &cli.Command{
+		Writer:    l.GetBuffer(),
+		ErrWriter: l.GetBuffer(),
+		Commands: []*cli.Command{
+			forgejo.SubcmdF3Mirror(),
+		},
+	}
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -45,10 +48,7 @@ func runApp(ctx context.Context, args ...string) (string, error) {
 		}
 	}()
 
-	app.Commands = []*cli.Command{
-		forgejo.SubcmdF3Mirror(ctx),
-	}
-	err := app.Run(args)
+	err := app.Run(ctx, args)
 
 	fmt.Println(l.String())
 

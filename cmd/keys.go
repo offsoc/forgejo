@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -49,7 +50,7 @@ var CmdKeys = &cli.Command{
 	},
 }
 
-func runKeys(c *cli.Context) error {
+func runKeys(ctx context.Context, c *cli.Command) error {
 	if !c.IsSet("username") {
 		return errors.New("No username provided")
 	}
@@ -68,7 +69,7 @@ func runKeys(c *cli.Context) error {
 		return errors.New("No key type and content provided")
 	}
 
-	ctx, cancel := installSignals()
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	setup(ctx, c.Bool("debug"), true)
@@ -78,6 +79,6 @@ func runKeys(c *cli.Context) error {
 	if extra.Error != nil {
 		return extra.Error
 	}
-	_, _ = fmt.Fprintln(c.App.Writer, strings.TrimSpace(authorizedString.Text))
+	_, _ = fmt.Fprintln(c.Writer, strings.TrimSpace(authorizedString.Text))
 	return nil
 }

@@ -23,7 +23,7 @@ var (
 	CmdAdmin = &cli.Command{
 		Name:  "admin",
 		Usage: "Perform common administrative operations",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			subcmdUser,
 			subcmdRepoSyncReleases,
 			subcmdRegenerate,
@@ -41,7 +41,7 @@ var (
 	subcmdRegenerate = &cli.Command{
 		Name:  "regenerate",
 		Usage: "Regenerate specific files",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			microcmdRegenHooks,
 			microcmdRegenKeys,
 		},
@@ -50,7 +50,7 @@ var (
 	subcmdAuth = &cli.Command{
 		Name:  "auth",
 		Usage: "Modify external auth providers",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			microcmdAuthAddOauth,
 			microcmdAuthUpdateOauth,
 			microcmdAuthAddLdapBindDn,
@@ -93,8 +93,8 @@ var (
 	}
 )
 
-func runRepoSyncReleases(_ *cli.Context) error {
-	ctx, cancel := installSignals()
+func runRepoSyncReleases(ctx context.Context, _ *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if err := initDB(ctx); err != nil {

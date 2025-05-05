@@ -128,7 +128,7 @@ func showWebStartupMessage(msg string) {
 	}
 }
 
-func serveInstall(ctx *cli.Context) error {
+func serveInstall(ctx *cli.Command) error {
 	showWebStartupMessage("Prepare to run install page")
 
 	routers.InitWebInstallPage(graceful.GetManager().HammerContext())
@@ -161,7 +161,7 @@ func serveInstall(ctx *cli.Context) error {
 	return nil
 }
 
-func serveInstalled(ctx *cli.Context) error {
+func serveInstalled(ctx *cli.Command) error {
 	setting.InitCfgProvider(setting.CustomConf)
 	setting.LoadCommonSettings()
 	setting.MustInstalled()
@@ -233,7 +233,7 @@ func servePprof() {
 	finished()
 }
 
-func runWeb(ctx *cli.Context) error {
+func runWeb(ctx context.Context, c *cli.Command) error {
 	defer func() {
 		if panicked := recover(); panicked != nil {
 			log.Fatal("PANIC: %v\n%s", panicked, log.Stack(2))
@@ -251,12 +251,12 @@ func runWeb(ctx *cli.Context) error {
 	}
 
 	// Set pid file setting
-	if ctx.IsSet("pid") {
-		createPIDFile(ctx.String("pid"))
+	if c.IsSet("pid") {
+		createPIDFile(c.String("pid"))
 	}
 
 	if !setting.InstallLock {
-		if err := serveInstall(ctx); err != nil {
+		if err := serveInstall(c); err != nil {
 			return err
 		}
 	} else {
@@ -267,7 +267,7 @@ func runWeb(ctx *cli.Context) error {
 		go servePprof()
 	}
 
-	return serveInstalled(ctx)
+	return serveInstalled(c)
 }
 
 func setPort(port string) error {

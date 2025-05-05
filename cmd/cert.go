@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -89,7 +90,7 @@ func pemBlockForKey(priv any) *pem.Block {
 	}
 }
 
-func runCert(c *cli.Context) error {
+func runCert(ctx context.Context, c *cli.Command) error {
 	if err := argsSet(c, "host"); err != nil {
 		return err
 	}

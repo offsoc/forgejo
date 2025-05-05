@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -34,8 +35,8 @@ var microcmdUserMustChangePassword = &cli.Command{
 	},
 }
 
-func runMustChangePassword(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runMustChangePassword(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if c.NArg() == 0 && !c.IsSet("all") {

@@ -22,11 +22,11 @@ var CmdMigrate = &cli.Command{
 	Action:      runMigrate,
 }
 
-func runMigrate(ctx *cli.Context) error {
-	stdCtx, cancel := installSignals()
+func runMigrate(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
-	if err := initDB(stdCtx); err != nil {
+	if err := initDB(ctx); err != nil {
 		return err
 	}
 
@@ -36,7 +36,7 @@ func runMigrate(ctx *cli.Context) error {
 	log.Info("Log path: %s", setting.Log.RootPath)
 	log.Info("Configuration file: %s", setting.CustomConf)
 
-	if err := db.InitEngineWithMigration(context.Background(), func(dbEngine db.Engine) error {
+	if err := db.InitEngineWithMigration(ctx, func(dbEngine db.Engine) error {
 		masterEngine, err := db.GetMasterEngine(dbEngine)
 		if err != nil {
 			return err

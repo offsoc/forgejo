@@ -131,8 +131,8 @@ func handleCliResponseExtra(extra private.ResponseExtra) error {
 	return nil
 }
 
-func runServ(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runServ(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	// FIXME: This needs to internationalised

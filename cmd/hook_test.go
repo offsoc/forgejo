@@ -134,14 +134,15 @@ func TestDelayWriter(t *testing.T) {
 	defer ts.Close()
 	defer test.MockVariableValue(&setting.LocalURL, ts.URL+"/")()
 
-	app := cli.NewApp()
-	app.Commands = []*cli.Command{subcmdHookPreReceive}
+	app := &cli.Command{
+		Commands: []*cli.Command{subcmdHookPreReceive},
+	}
 
 	t.Run("Should delay", func(t *testing.T) {
 		defer test.MockVariableValue(&setting.Git.VerbosePushDelay, time.Millisecond*500)()
 		finish := captureOutput(t, os.Stdout)
 
-		err = app.Run([]string{"./forgejo", "pre-receive"})
+		err = app.Run(t.Context(), []string{"./forgejo", "pre-receive"})
 		require.NoError(t, err)
 		out := finish()
 
@@ -153,7 +154,7 @@ func TestDelayWriter(t *testing.T) {
 		defer test.MockVariableValue(&setting.Git.VerbosePushDelay, time.Second*5)()
 		finish := captureOutput(t, os.Stdout)
 
-		err = app.Run([]string{"./forgejo", "pre-receive"})
+		err = app.Run(t.Context(), []string{"./forgejo", "pre-receive"})
 		require.NoError(t, err)
 		out := finish()
 
@@ -163,15 +164,16 @@ func TestDelayWriter(t *testing.T) {
 }
 
 func TestRunHookUpdate(t *testing.T) {
-	app := cli.NewApp()
-	app.Commands = []*cli.Command{subcmdHookUpdate}
+	app := &cli.Command{
+		Commands: []*cli.Command{subcmdHookUpdate},
+	}
 
 	t.Run("Removal of internal reference", func(t *testing.T) {
 		defer test.MockVariableValue(&cli.OsExiter, func(code int) {})()
 		defer test.MockVariableValue(&setting.IsProd, false)()
 		finish := captureOutput(t, os.Stderr)
 
-		err := app.Run([]string{"./forgejo", "update", "refs/pull/1/head", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000000"})
+		err := app.Run(t.Context(), []string{"./forgejo", "update", "refs/pull/1/head", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000000"})
 		out := finish()
 		require.Error(t, err)
 
@@ -183,7 +185,7 @@ func TestRunHookUpdate(t *testing.T) {
 		defer test.MockVariableValue(&setting.IsProd, false)()
 		finish := captureOutput(t, os.Stderr)
 
-		err := app.Run([]string{"./forgejo", "update", "refs/pull/1/head", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000001"})
+		err := app.Run(t.Context(), []string{"./forgejo", "update", "refs/pull/1/head", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000001"})
 		out := finish()
 		require.Error(t, err)
 
@@ -191,12 +193,12 @@ func TestRunHookUpdate(t *testing.T) {
 	})
 
 	t.Run("Removal of branch", func(t *testing.T) {
-		err := app.Run([]string{"./forgejo", "update", "refs/head/main", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000000"})
+		err := app.Run(t.Context(), []string{"./forgejo", "update", "refs/head/main", "0a51ae26bc73c47e2f754560c40904cf14ed51a9", "0000000000000000000000000000000000000000"})
 		require.NoError(t, err)
 	})
 
 	t.Run("Not enough arguments", func(t *testing.T) {
-		err := app.Run([]string{"./forgejo", "update"})
+		err := app.Run(t.Context(), []string{"./forgejo", "update"})
 		require.NoError(t, err)
 	})
 }

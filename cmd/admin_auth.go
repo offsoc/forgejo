@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -56,8 +57,8 @@ var (
 	}
 )
 
-func runListAuth(c *cli.Context) error {
-	ctx, cancel := installSignals()
+func runListAuth(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if err := initDB(ctx); err != nil {
@@ -90,12 +91,12 @@ func runListAuth(c *cli.Context) error {
 	return nil
 }
 
-func runDeleteAuth(c *cli.Context) error {
+func runDeleteAuth(ctx context.Context, c *cli.Command) error {
 	if !c.IsSet("id") {
 		return errors.New("--id flag is missing")
 	}
 
-	ctx, cancel := installSignals()
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if err := initDB(ctx); err != nil {

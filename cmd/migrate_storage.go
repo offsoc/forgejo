@@ -182,11 +182,11 @@ func migrateActionsArtifacts(ctx context.Context, dstStorage storage.ObjectStora
 	})
 }
 
-func runMigrateStorage(ctx *cli.Context) error {
-	stdCtx, cancel := installSignals()
+func runMigrateStorage(ctx context.Context, c *cli.Command) error {
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
-	if err := initDB(stdCtx); err != nil {
+	if err := initDB(ctx); err != nil {
 		return err
 	}
 
@@ -196,7 +196,7 @@ func runMigrateStorage(ctx *cli.Context) error {
 	log.Info("Log path: %s", setting.Log.RootPath)
 	log.Info("Configuration file: %s", setting.CustomConf)
 
-	if err := db.InitEngineWithMigration(context.Background(), func(e db.Engine) error {
+	if err := db.InitEngineWithMigration(ctx, func(e db.Engine) error {
 		return migrations.Migrate(e.(*xorm.Engine))
 	}); err != nil {
 		log.Fatal("Failed to initialize ORM engine: %v", err)
@@ -209,38 +209,38 @@ func runMigrateStorage(ctx *cli.Context) error {
 
 	var dstStorage storage.ObjectStorage
 	var err error
-	switch strings.ToLower(ctx.String("storage")) {
+	switch strings.ToLower(c.String("storage")) {
 	case "":
 		fallthrough
 	case string(setting.LocalStorageType):
-		p := ctx.String("path")
+		p := c.String("path")
 		if p == "" {
 			log.Fatal("Path must be given when storage is local")
 			return nil
 		}
 		dstStorage, err = storage.NewLocalStorage(
-			stdCtx,
+			ctx,
 			&setting.Storage{
 				Path: p,
 			})
 	case string(setting.MinioStorageType):
 		dstStorage, err = storage.NewMinioStorage(
-			stdCtx,
+			ctx,
 			&setting.Storage{
 				MinioConfig: setting.MinioStorageConfig{
-					Endpoint:           ctx.String("minio-endpoint"),
-					AccessKeyID:        ctx.String("minio-access-key-id"),
-					SecretAccessKey:    ctx.String("minio-secret-access-key"),
-					Bucket:             ctx.String("minio-bucket"),
-					Location:           ctx.String("minio-location"),
-					BasePath:           ctx.String("minio-base-path"),
-					UseSSL:             ctx.Bool("minio-use-ssl"),
-					InsecureSkipVerify: ctx.Bool("minio-insecure-skip-verify"),
-					ChecksumAlgorithm:  ctx.String("minio-checksum-algorithm"),
+					Endpoint:           c.String("minio-endpoint"),
+					AccessKeyID:        c.String("minio-access-key-id"),
+					SecretAccessKey:    c.String("minio-secret-access-key"),
+					Bucket:             c.String("minio-bucket"),
+					Location:           c.String("minio-location"),
+					BasePath:           c.String("minio-base-path"),
+					UseSSL:             c.Bool("minio-use-ssl"),
+					InsecureSkipVerify: c.Bool("minio-insecure-skip-verify"),
+					ChecksumAlgorithm:  c.String("minio-checksum-algorithm"),
 				},
 			})
 	default:
-		return fmt.Errorf("unsupported storage type: %s", ctx.String("storage"))
+		return fmt.Errorf("unsupported storage type: %s", c.String("storage"))
 	}
 	if err != nil {
 		return err
@@ -257,14 +257,14 @@ func runMigrateStorage(ctx *cli.Context) error {
 		"actions-artifacts": migrateActionsArtifacts,
 	}
 
-	tp := strings.ToLower(ctx.String("type"))
+	tp := strings.ToLower(c.String("type"))
 	if m, ok := migratedMethods[tp]; ok {
-		if err := m(stdCtx, dstStorage); err != nil {
+		if err := m(ctx, dstStorage); err != nil {
 			return err
 		}
 		log.Info("%s files have successfully been copied to the new storage.", tp)
 		return nil
 	}
 
-	return fmt.Errorf("unsupported storage: %s", ctx.String("type"))
+	return fmt.Errorf("unsupported storage: %s", c.String("type"))
 }
