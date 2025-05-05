@@ -26,7 +26,6 @@
   cursor: pointer;
   display: inline-block;
   min-height: 1em;
-  outline: none;
   border: none;
   vertical-align: baseline;
   background: #E0E1E2 none;
@@ -2320,7 +2319,6 @@
   cursor: pointer;
   position: relative;
   display: inline-block;
-  outline: none;
   text-align: left;
   transition: box-shadow 0.1s ease, width 0.1s ease;
   -webkit-user-select: none;
@@ -2341,7 +2339,6 @@
   cursor: auto;
   position: absolute;
   display: none;
-  outline: none;
   top: 100%;
   min-width: -moz-max-content;
   min-width: max-content;
@@ -2691,7 +2688,6 @@ select.ui.dropdown {
   word-wrap: break-word;
   line-height: 1em;
   white-space: normal;
-  outline: 0;
   transform: rotateZ(0deg);
   min-width: 14em;
   min-height: 2.71428571em;
@@ -2742,7 +2738,6 @@ select.ui.dropdown {
   -webkit-overflow-scrolling: touch;
   border-top-width: 0 !important;
   width: auto;
-  outline: none;
   margin: 0 -1px;
   min-width: calc(100% + 2px);
   width: calc(100% + 2px);
@@ -3003,7 +2998,6 @@ select.ui.dropdown {
   top: 0;
   left: 1px;
   width: 100%;
-  outline: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   padding: inherit;
 }
@@ -4357,7 +4351,6 @@ select.ui.dropdown {
 .ui.form input[type="url"] {
   font-family: var(--fonts-regular);
   margin: 0;
-  outline: none;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   line-height: 1.21428571em;
@@ -4381,7 +4374,6 @@ select.ui.dropdown {
   padding: 0.78571429em 1em;
   background: #FFFFFF;
   border: 1px solid rgba(34, 36, 38, 0.15);
-  outline: none;
   color: rgba(0, 0, 0, 0.87);
   border-radius: 0.28571429rem;
   box-shadow: 0 0 0 0 transparent inset;
@@ -8742,7 +8734,6 @@ Floated Menu / Item
 
 .ui.search > .prompt {
   margin: 0;
-  outline: none;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   text-shadow: none;

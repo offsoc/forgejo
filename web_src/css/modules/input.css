@@ -11,7 +11,6 @@
   margin: 0;
   max-width: 100%;
   flex: 1 0 auto;
-  outline: none;
   font-family: var(--fonts-regular);
   padding: 0.67857143em 1em;
   border: 1px solid var(--color-input-border);

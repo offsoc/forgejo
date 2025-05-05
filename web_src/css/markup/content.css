@@ -33,10 +33,6 @@
   vertical-align: middle;
 }
 
-.markup .anchor:focus {
-  outline: none;
-}
-
 .markup h1 .anchor {
   margin-top: -2px; /* re-align to center */
 }
