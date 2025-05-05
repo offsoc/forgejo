@@ -41,8 +41,6 @@ func Actor(ctx *context.APIContext) {
 	actor.URL = ap.IRI(setting.AppURL)
 
 	actor.Inbox = ap.IRI(link + "/inbox")
-	actor.Outbox = ap.IRI(link + "/outbox")
-
 	actor.PublicKey.ID = ap.IRI(link + "#main-key")
 	actor.PublicKey.Owner = ap.IRI(link)
 
