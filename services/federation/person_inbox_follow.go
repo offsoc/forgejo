@@ -62,7 +62,7 @@ func processPersonFollow(ctx *context_service.APIContext, activity *ap.Activity)
 	}
 
 	accept := ap.AcceptNew(ap.IRI(fmt.Sprintf(
-		"%s/follows/%d", ctx.ContextUser.APActorID(), follower.ID,
+		"%s#accepts/follow/%d", ctx.ContextUser.APActorID(), follower.ID,
 	)), follow)
 	accept.Actor = ap.IRI(ctx.ContextUser.APActorID())
 	payload, err := jsonld.WithContext(jsonld.IRI(ap.ActivityBaseURI)).Marshal(accept)
