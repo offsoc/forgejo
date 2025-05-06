@@ -31,6 +31,7 @@ import (
 	"forgejo.org/routers/api/packages/maven"
 	"forgejo.org/routers/api/packages/npm"
 	"forgejo.org/routers/api/packages/nuget"
+	opentofu_backend_http "forgejo.org/routers/api/packages/opentofu/backend/http"
 	"forgejo.org/routers/api/packages/pub"
 	"forgejo.org/routers/api/packages/pypi"
 	"forgejo.org/routers/api/packages/rpm"
@@ -530,6 +531,25 @@ func CommonRoutes() *web.Route {
 			})
 			r.Group("/-/v1/search", func() {
 				r.Get("", npm.PackageSearch)
+			})
+		}, reqPackageAccess(perm.AccessModeRead))
+		// OpenTofu/Terraform HTTP backend
+		r.Group("/opentofu/http/state", func() {
+			// The package name
+			r.Group("/{packagename}", func() {
+				// Fetch the current state
+				r.Get("", reqPackageAccess(perm.AccessModeRead), opentofu_backend_http.GetState)
+				// Update the state
+				r.Post("", reqPackageAccess(perm.AccessModeWrite), opentofu_backend_http.UpdateState)
+				// Delete the state
+				r.Delete("", reqPackageAccess(perm.AccessModeWrite), opentofu_backend_http.DeleteState)
+				// Lock and unlock operations
+				r.Group("/lock", func() {
+					// Lock the state
+					r.Post("", reqPackageAccess(perm.AccessModeWrite), opentofu_backend_http.LockState)
+					// Unlock the state
+					r.Delete("", reqPackageAccess(perm.AccessModeWrite), opentofu_backend_http.DeleteState)
+				})
 			})
 		}, reqPackageAccess(perm.AccessModeRead))
 		r.Group("/pub", func() {
