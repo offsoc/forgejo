@@ -44,3 +44,4 @@ The agreement for this license [was documented in June 2023](https://codeberg.or
 ## Get involved
 
 If you are interested in making Forgejo better, either by reporting a bug or by changing the governance, please [take a look at the contribution guide](CONTRIBUTING.md).
+ 
