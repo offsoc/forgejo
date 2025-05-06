@@ -990,6 +990,9 @@ fomantic:
 	cd $(FOMANTIC_WORK_DIR) && npx gulp -f node_modules/fomantic-ui/gulpfile.js build
 	# fomantic uses "touchstart" as click event for some browsers, it's not ideal, so we force fomantic to always use "click" as click event
 	$(SED_INPLACE) -e 's/clickEvent[ \t]*=/clickEvent = "click", unstableClickEvent =/g' $(FOMANTIC_WORK_DIR)/build/semantic.js
+	# fomantic removes focus outlines by default, this reverts that.
+	# related fomantic issue: https://github.com/fomantic/Fomantic-UI/issues/2799
+	$(SED_INPLACE) -e 's/outline: [none|0]*;//g' $(FOMANTIC_WORK_DIR)/build/semantic.css
 	$(SED_INPLACE) -e 's/\r//g' $(FOMANTIC_WORK_DIR)/build/semantic.css $(FOMANTIC_WORK_DIR)/build/semantic.js
 	rm -f $(FOMANTIC_WORK_DIR)/build/*.min.*
 
