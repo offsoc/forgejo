@@ -10,7 +10,6 @@ import (
 	"forgejo.org/modules/activitypub"
 	"forgejo.org/modules/forgefed"
 	"forgejo.org/modules/log"
-	api "forgejo.org/modules/structs"
 	"forgejo.org/modules/web"
 	"forgejo.org/routers/api/v1/utils"
 	"forgejo.org/services/context"
@@ -98,7 +97,7 @@ func PersonFeed(ctx *context.APIContext) {
 
 	listOptions := utils.GetListOptions(ctx)
 	opts := activities.GetFollowingFeedsOptions{
-		Actor:       ctx.Doer,
+		Actor:       ctx.ContextUser,
 		ListOptions: listOptions,
 	}
 	items, count, err := activities.GetFollowingFeeds(ctx, opts)
@@ -108,12 +107,26 @@ func PersonFeed(ctx *context.APIContext) {
 	}
 	ctx.SetTotalCountHeader(count)
 
-	feed := make([]api.APPersonFollowItem, len(items))
-	for i, item := range items {
-		feed[i] = convert.ToActivityPubPersonFeedItem(item)
+	feed := ap.OrderedCollectionNew(ap.IRI(ctx.ContextUser.APActorID() + "/feed"))
+	feed.AttributedTo = ap.IRI(ctx.ContextUser.APActorID())
+	for _, item := range items {
+		if err := feed.OrderedItems.Append(convert.ToActivityPubPersonFeedItem(item)); err != nil {
+			ctx.Error(http.StatusInternalServerError, "OrderedItems.Append", err)
+			return
+		}
 	}
 
-	ctx.JSON(http.StatusOK, feed)
+	binary, err := jsonld.WithContext(jsonld.IRI(ap.ActivityBaseURI), jsonld.IRI(ap.SecurityContextURI)).Marshal(feed)
+	if err != nil {
+		ctx.ServerError("MarshalJSON", err)
+		return
+	}
+
+	ctx.Resp.Header().Add("Content-Type", activitypub.ActivityStreamsContentType)
+	ctx.Resp.WriteHeader(http.StatusOK)
+	if _, err = ctx.Resp.Write(binary); err != nil {
+		log.Error("write to resp err: %v", err)
+	}
 }
 
 func getActivity(ctx *context.APIContext, id int64) (*forgefed.ForgeUserActivity, error) {

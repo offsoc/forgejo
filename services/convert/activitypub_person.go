@@ -9,17 +9,16 @@ import (
 	"forgejo.org/models/activities"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/activitypub"
-	api "forgejo.org/modules/structs"
 
 	ap "github.com/go-ap/activitypub"
 )
 
-func ToActivityPubPersonFeedItem(item *activities.FederatedUserActivity) api.APPersonFollowItem {
-	return api.APPersonFollowItem{
-		ActorID:      item.ActorID,
-		Note:         item.NoteContent,
-		OriginalURL:  item.NoteURL,
-		OriginalItem: item.OriginalNote,
+func ToActivityPubPersonFeedItem(item *activities.FederatedUserActivity) ap.Note {
+	return ap.Note{
+		AttributedTo: ap.IRI(item.ActorID),
+		Content:      ap.NaturalLanguageValues{{Value: ap.Content(item.NoteContent), Ref: ap.NilLangRef}},
+		ID:           ap.IRI(item.NoteURL),
+		URL:          ap.IRI(item.OriginalNote),
 	}
 }
 
@@ -48,7 +47,7 @@ func ToActivityPubPerson(ctx context.Context, user *user_model.User) (*ap.Person
 	}
 
 	person.Inbox = ap.IRI(link + "/inbox")
-	person.Outbox = ap.IRI(link + "/outbox")
+	person.Outbox = ap.IRI(link + "/feed")
 
 	person.PublicKey.ID = ap.IRI(link + "#main-key")
 	person.PublicKey.Owner = ap.IRI(link)
