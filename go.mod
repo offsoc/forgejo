@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.2
 
 require (
-	code.forgejo.org/f3/gof3/v3 v3.10.6
+	code.forgejo.org/f3/gof3/v3 v3.10.8
 	code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251
 	code.forgejo.org/forgejo/levelqueue v1.0.0
 	code.forgejo.org/forgejo/reply v1.0.2
@@ -98,7 +98,7 @@ require (
 	github.com/yohcop/openid-go v1.0.1
 	github.com/yuin/goldmark v1.7.11
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
-	gitlab.com/gitlab-org/api/client-go v0.126.0
+	gitlab.com/gitlab-org/api/client-go v0.128.0
 	go.uber.org/mock v0.5.1
 	golang.org/x/crypto v0.38.0
 	golang.org/x/image v0.27.0
@@ -227,6 +227,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/skeema/knownhosts v1.3.0 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
+	github.com/urfave/cli/v3 v3.3.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
