@@ -13,6 +13,7 @@ import (
 
 func Test_NewForgeFollowValidation(t *testing.T) {
 	sut := ForgeFollow{}
+	sut.ID = "anId"
 	sut.Type = "Follow"
 	sut.Actor = ap.IRI("example.org/alice")
 	sut.Object = ap.IRI("example.org/bob")
