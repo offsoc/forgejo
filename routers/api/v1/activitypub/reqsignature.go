@@ -28,9 +28,9 @@ func verifyHTTPUserOrInstanceSignature(ctx *gitea_context.APIContext) (authentic
 	}
 
 	signatureAlgorithm := httpsig.Algorithm(setting.Federation.SignatureAlgorithms[0])
-	pubKey, err := federation.FindOrCreateFederatedUserKey(ctx.Base, v.KeyId())
+	pubKey, err := federation.FindOrCreateFederatedUserKey(ctx, v.KeyId())
 	if err != nil || pubKey == nil {
-		pubKey, err = federation.FindOrCreateFederationHostKey(ctx.Base, v.KeyId())
+		pubKey, err = federation.FindOrCreateFederationHostKey(ctx, v.KeyId())
 		if err != nil {
 			return false, err
 		}
@@ -57,7 +57,7 @@ func verifyHTTPUserSignature(ctx *gitea_context.APIContext) (authenticated bool,
 	}
 
 	signatureAlgorithm := httpsig.Algorithm(setting.Federation.SignatureAlgorithms[0])
-	pubKey, err := federation.FindOrCreateFederatedUserKey(ctx.Base, v.KeyId())
+	pubKey, err := federation.FindOrCreateFederatedUserKey(ctx, v.KeyId())
 	if err != nil {
 		return false, err
 	}
