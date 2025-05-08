@@ -121,10 +121,9 @@ func DeleteComment(ctx context.Context, doer *user_model.User, comment *issues_m
 	err := db.WithTx(ctx, func(ctx context.Context) error {
 		reviewID := comment.ReviewID
 
-		deleteComment := issues_model.DeleteComment(ctx, comment)
-
-		if deleteComment != nil {
-			return deleteComment
+		err := issues_model.DeleteComment(ctx, comment)
+		if err != nil {
+			return err
 		}
 
 		if comment.Review != nil {
@@ -141,7 +140,7 @@ func DeleteComment(ctx context.Context, doer *user_model.User, comment *issues_m
 				}
 			}
 		}
-		return deleteComment
+		return nil
 	})
 	if err != nil {
 		return err
