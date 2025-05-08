@@ -21,5 +21,48 @@
     "alert.asset_load_failed": "Kunne ikke indlæse aktivfiler fra {path}. Sørg for, at aktivfilerne er tilgængelige.",
     "install.invalid_lfs_path": "Kan ikke oprette LFS-roden på den angivne sti: %[1]s",
     "alert.range_error": " skal være et tal mellem %[1]s og %[2]s.",
-    "meta.last_line": "Livet er det dejligste eventyr. - (H.C. Andersen)"
+    "meta.last_line": "Livet er det dejligste eventyr. - (H.C. Andersen)",
+    "mail.actions.not_successful_run_subject": "Arbejdsgangen %[1]s mislykkedes i depotet %[2]s",
+    "mail.actions.successful_run_after_failure_subject": "Arbejdsgang %[1]s gendannet i depotet %[2]s",
+    "mail.actions.successful_run_after_failure": "Arbejdsgang %[1]s gendannet i depotet %[2]s",
+    "mail.actions.not_successful_run": "Arbejdsgangen %[1]s mislykkedes i depotet %[2]s",
+    "mail.actions.run_info_cur_status": "Status for denne kørsel: %[1]s (lige opdateret fra %[2]s)",
+    "mail.actions.run_info_previous_status": "Status for forrige kørsel: %[1]s",
+    "mail.actions.run_info_ref": "Gren: %[1]s (%[2]s)",
+    "mail.actions.run_info_trigger": "Udløst fordi: %[1]s af: %[2]s",
+    "discussion.locked": "Denne diskussion er blevet låst. Kommentarer er begrænset til bidragydere.",
+    "relativetime.now": "nu",
+    "relativetime.future": "i fremtiden",
+    "relativetime.mins": {
+        "one": "%d minut siden",
+        "other": "%d minutter siden"
+    },
+    "relativetime.hours": {
+        "one": "%d time siden",
+        "other": "%d timer siden"
+    },
+    "relativetime.days": {
+        "one": "%d dag siden",
+        "other": "%d dage siden"
+    },
+    "relativetime.months": {
+        "one": "%d måned siden",
+        "other": "%d måneder siden"
+    },
+    "relativetime.1day": "i går",
+    "relativetime.1week": "sidste uge",
+    "relativetime.2weeks": "2 uger siden",
+    "relativetime.2months": "2 måneder siden",
+    "relativetime.1year": "sidste år",
+    "relativetime.weeks": {
+        "one": "%d uge siden",
+        "other": "%d uger siden"
+    },
+    "relativetime.2years": "2 år siden",
+    "relativetime.years": {
+        "one": "%d år siden",
+        "other": "%d år siden"
+    },
+    "relativetime.2days": "2 dage siden",
+    "relativetime.1month": "sidste måned"
 }

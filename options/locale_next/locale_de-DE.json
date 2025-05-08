@@ -30,5 +30,39 @@
     "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Ausgelöst, weil: %[1]s durch: %[2]s",
     "mail.actions.run_info_cur_status": "Status dieses Runs: %[1]s (gerade eben von %[2]s aktualisiert)",
-    "discussion.locked": "Diese Diskussion wurde gesperrt. Nur Mitwirkende können kommentieren."
+    "discussion.locked": "Diese Diskussion wurde gesperrt. Nur Mitwirkende können kommentieren.",
+    "relativetime.now": "jetzt",
+    "relativetime.hours": {
+        "one": "vor %d Stunde",
+        "other": "vor %d Stunden"
+    },
+    "relativetime.days": {
+        "one": "vor %d Tag",
+        "other": "vor %d Tagen"
+    },
+    "relativetime.months": {
+        "one": "vor %d Monat",
+        "other": "vor %d Monaten"
+    },
+    "relativetime.years": {
+        "one": "vor %d Jahr",
+        "other": "vor %d Jahren"
+    },
+    "relativetime.1week": "letzte Woche",
+    "relativetime.1month": "letzten Monat",
+    "relativetime.2months": "vor zwei Monaten",
+    "relativetime.1year": "letztes Jahr",
+    "relativetime.2years": "vor zwei Jahren",
+    "relativetime.1day": "gestern",
+    "relativetime.weeks": {
+        "one": "vor %d Woche",
+        "other": "vor %d Wochen"
+    },
+    "relativetime.2weeks": "vor zwei Wochen",
+    "relativetime.mins": {
+        "one": "vor %d Minute",
+        "other": "vor %d Minuten"
+    },
+    "relativetime.2days": "vorgestern",
+    "relativetime.future": "in der Zukunft"
 }

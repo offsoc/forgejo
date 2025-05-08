@@ -24,5 +24,21 @@
     "mail.actions.run_info_cur_status": "此次运行的状态：%[1]s（从 %[2]s 更新）",
     "mail.actions.run_info_trigger": "由 %[2]s %[1]s 触发",
     "mail.actions.not_successful_run": "仓库 %[2]s 中的工作流 %[1]s 已失败",
-    "discussion.locked": "讨论已被锁定。仅贡献者能够发表评论。"
+    "discussion.locked": "讨论已被锁定。仅贡献者能够发表评论。",
+    "relativetime.future": "未来",
+    "relativetime.mins": "%d 分钟前",
+    "relativetime.hours": "%d 小时前",
+    "relativetime.weeks": "%d 周前",
+    "relativetime.months": "%d 个月前",
+    "relativetime.years": "%d 年前",
+    "relativetime.1day": "昨天",
+    "relativetime.2days": "两天前",
+    "relativetime.1week": "上周",
+    "relativetime.1month": "上个月",
+    "relativetime.2months": "两个月前",
+    "relativetime.1year": "去年",
+    "relativetime.2years": "两年前",
+    "relativetime.now": "现在",
+    "relativetime.2weeks": "两周前",
+    "relativetime.days": "%d 天前"
 }
