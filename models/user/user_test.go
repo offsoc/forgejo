@@ -645,6 +645,7 @@ func Test_NormalizeUserFromEmail(t *testing.T) {
 		{"test", "test", true},
 		{"Sinéad.O'Connor", "Sinead.OConnor", true},
 		{"Æsir", "AEsir", true},
+		{"Flußpferd", "Flusspferd", true},
 		// \u00e9\u0065\u0301
 		{"éé", "ee", true},
 		{"Awareness Hub", "Awareness-Hub", true},

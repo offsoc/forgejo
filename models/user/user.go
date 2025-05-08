@@ -562,7 +562,7 @@ func GetUserSalt() string {
 // Note: The set of characters here can safely expand without a breaking change,
 // but characters removed from this set can cause user account linking to break
 var (
-	customCharsReplacement    = strings.NewReplacer("Æ", "AE")
+	customCharsReplacement    = strings.NewReplacer("Æ", "AE", "ß", "ss")
 	removeCharsRE             = regexp.MustCompile(`['´\x60]`)
 	removeDiacriticsTransform = transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
 	replaceCharsHyphenRE      = regexp.MustCompile(`[\s~+]`)
