@@ -1272,8 +1272,8 @@ td .commit-summary {
   background-color: var(--color-light) !important;
 }
 
-.sha.label {
-  border: 1px solid var(--color-light-border) !important;
+.ui.ui .sha.label {
+  border: 1px solid var(--color-light-border);
 }
 
 .primary.sha.label {
