@@ -840,26 +840,26 @@ func Routes() *web.Route {
 			m.Get("/nodeinfo", misc.NodeInfo)
 			m.Group("/activitypub", func() {
 				m.Group("/user-id/{user-id}", func() {
-					m.Get("", activitypub.ReqHTTPSignature(), activitypub.Person)
+					m.Get("", activitypub.ReqHTTPUserOrInstanceSignature(), activitypub.Person)
 					m.Post("/inbox",
-						activitypub.ReqHTTPSignature(),
+						activitypub.ReqHTTPUserSignature(),
 						bind(ap.Activity{}),
 						activitypub.PersonInbox)
 					m.Group("/activities/{activity-id}", func() {
 						m.Get("", activitypub.PersonActivityNote)
 						m.Get("/activity", activitypub.PersonActivity)
 					})
-					m.Get("/feed", activitypub.ReqHTTPSignature(), activitypub.PersonFeed)
+					m.Get("/feed", activitypub.ReqHTTPUserSignature(), activitypub.PersonFeed)
 				}, context.UserIDAssignmentAPI(), checkTokenPublicOnly())
 				m.Group("/actor", func() {
 					m.Get("", activitypub.Actor)
-					m.Post("/inbox", activitypub.ReqHTTPSignature(), activitypub.ActorInbox)
+					m.Post("/inbox", activitypub.ReqHTTPUserOrInstanceSignature(), activitypub.ActorInbox)
 				})
 				m.Group("/repository-id/{repository-id}", func() {
-					m.Get("", activitypub.ReqHTTPSignature(), activitypub.Repository)
+					m.Get("", activitypub.ReqHTTPUserSignature(), activitypub.Repository)
 					m.Post("/inbox",
 						bind(forgefed.ForgeLike{}),
-						activitypub.ReqHTTPSignature(),
+						activitypub.ReqHTTPUserSignature(),
 						activitypub.RepositoryInbox)
 				}, context.RepositoryIDAssignmentAPI())
 			}, tokenRequiresScopes(auth_model.AccessTokenScopeCategoryActivityPub))

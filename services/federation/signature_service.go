@@ -18,35 +18,40 @@ import (
 	ap "github.com/go-ap/activitypub"
 )
 
-func FindOrCreateKey(ctx *context_service.Base, keyID string) (pubKey any, err error) {
-	keyURL, err := url.Parse(keyID)
+func FindOrCreateFederatedUserKey(ctx *context_service.Base, keyID string) (pubKey any, err error) {
+	var federatedUser *user.FederatedUser
+	var federationHost *forgefed.FederationHost
+	var keyURL *url.URL
+
+	keyURL, err = url.Parse(keyID)
+	if err != nil {
+		return nil, err
+	}
+	rawActorID, err := fm.NewActorIDFromKeyId(keyID)
 	if err != nil {
 		return nil, err
 	}
 
-	// 2. Fetch the public key of the other actor
 	// Try if the signing actor is an already known federated user
-	_, federatedUser, err := user.FindFederatedUserByKeyID(ctx, keyURL.String())
+	_, federatedUser, err = user.FindFederatedUserByKeyID(ctx, keyURL.String())
 	if err != nil {
 		return nil, err
 	}
 
-	if federatedUser != nil && federatedUser.PublicKey.Valid {
-		pubKey, err := x509.ParsePKIXPublicKey(federatedUser.PublicKey.V)
+	if federatedUser == nil {
+		_, federatedUser, federationHost, err = FindOrCreateFederatedUser(ctx, rawActorID.AsURI())
 		if err != nil {
 			return nil, err
 		}
-		return pubKey, nil
+	} else {
+		federationHost, err = forgefed.GetFederationHost(ctx, federatedUser.FederationHostID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	// Try if the signing actor is an already known federation host
-	federationHost, err := forgefed.FindFederationHostByKeyID(ctx, keyURL.String())
-	if err != nil {
-		return nil, err
-	}
-
-	if federationHost != nil && federationHost.PublicKey.Valid {
-		pubKey, err := x509.ParsePKIXPublicKey(federationHost.PublicKey.V)
+	if federatedUser.PublicKey.Valid {
+		pubKey, err := x509.ParsePKIXPublicKey(federatedUser.PublicKey.V)
 		if err != nil {
 			return nil, err
 		}
@@ -58,18 +63,72 @@ func FindOrCreateKey(ctx *context_service.Base, keyID string) (pubKey any, err e
 	if err != nil {
 		return nil, err
 	}
-	if apPerson.Type == ap.ActivityVocabularyType("Application") {
-		rawActorID, err := fm.NewActorID(apPerson.ID.String())
+	if apPerson.Type == ap.ActivityVocabularyType("Person") {
+		// Check federatedUser.id = person.id
+		if federatedUser.ExternalID != apPerson.ID.String() {
+			return nil, fmt.Errorf("federated user fetched (%v) does not match the stored one %v", apPerson, federatedUser)
+		}
+		// update federated user
+		federatedUser.KeyID = sql.NullString{
+			String: apPerson.PublicKey.ID.String(),
+			Valid:  true,
+		}
+		federatedUser.PublicKey = sql.Null[sql.RawBytes]{
+			V:     pubKeyBytes,
+			Valid: true,
+		}
+		err = user.UpdateFederatedUser(ctx, federatedUser)
 		if err != nil {
 			return nil, err
 		}
+		return pubKey, nil
+	}
+	return nil, nil
+}
 
+func FindOrCreateFederationHostKey(ctx *context_service.Base, keyID string) (pubKey any, err error) {
+	keyURL, err := url.Parse(keyID)
+	if err != nil {
+		return nil, err
+	}
+	rawActorID, err := fm.NewActorIDFromKeyId(keyID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Is there an already known federation host?
+	federationHost, err := forgefed.FindFederationHostByKeyID(ctx, keyURL.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if federationHost == nil {
+		federationHost, err = FindOrCreateFederationHost(ctx, rawActorID.AsURI())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Is there an already an key?
+	if federationHost.PublicKey.Valid {
+		pubKey, err := x509.ParsePKIXPublicKey(federationHost.PublicKey.V)
+		if err != nil {
+			return nil, err
+		}
+		return pubKey, nil
+	}
+
+	// If not, fetch missing public key
+	pubKey, pubKeyBytes, apPerson, err := fetchKeyFromAp(ctx, *keyURL, federationHost)
+	if err != nil {
+		return nil, err
+	}
+	if apPerson.Type == ap.ActivityVocabularyType("Application") {
 		// Check federationhost.id = person.id
 		if federationHost.HostPort != rawActorID.HostPort || federationHost.HostFqdn != rawActorID.Host ||
 			federationHost.HostSchema != rawActorID.HostSchema {
 			return nil, fmt.Errorf("federation host fetched (%v) does not match the stored one %v", apPerson, federationHost)
 		}
-
 		// update federation host
 		federationHost.KeyID = sql.NullString{
 			String: apPerson.PublicKey.ID.String(),
@@ -83,29 +142,9 @@ func FindOrCreateKey(ctx *context_service.Base, keyID string) (pubKey any, err e
 		if err != nil {
 			return nil, err
 		}
-	} else if apPerson.Type == ap.ActivityVocabularyType("Person") {
-		rawPersonID, err := fm.NewPersonID(apPerson.ID.String(), string(federationHost.NodeInfo.SoftwareName))
-		if err != nil {
-			return nil, err
-		}
-		// Check federatedUser.id = person.id
-		if federatedUser.ExternalID != rawPersonID.ID {
-			return nil, fmt.Errorf("federated user fetched (%v) does not match the stored one %v", apPerson, federatedUser)
-		}
-
-		// update federated user
-		federatedUser.KeyID = sql.NullString{
-			String: apPerson.PublicKey.ID.String(),
-			Valid:  true,
-		}
-		federatedUser.PublicKey = sql.Null[sql.RawBytes]{
-			V:     pubKeyBytes,
-			Valid: true,
-		}
-		user.UpdateFederatedUser(ctx, federatedUser)
+		return pubKey, nil
 	}
-
-	return pubKey, err
+	return nil, nil
 }
 
 func fetchKeyFromAp(ctx *context_service.Base, keyURL url.URL, federationHost *forgefed.FederationHost) (pubKey any, pubKeyBytes []byte, apPerson *ap.Person, err error) {
@@ -133,7 +172,7 @@ func fetchKeyFromAp(ctx *context_service.Base, keyURL url.URL, federationHost *f
 
 	pubKeyFromAp := person.PublicKey
 	if pubKeyFromAp.ID.String() != keyURL.String() {
-		return nil, nil, nil, fmt.Errorf("cannot find publicKey with id: %v in %v", keyURL, string(b))
+		return nil, nil, nil, fmt.Errorf("cannot find publicKey with id: %v in %", keyURL, string(b))
 	}
 
 	pubKeyBytes, err = decodePublicKeyPem(pubKeyFromAp.PublicKeyPem)
