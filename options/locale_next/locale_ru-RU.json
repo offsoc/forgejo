@@ -23,5 +23,54 @@
     "alert.asset_load_failed": "Не удалось получить ресурсы из {path}. Убедитесь, что файлы ресурсов доступны.",
     "install.invalid_lfs_path": "Не удалось расположить корень LFS по указанному пути: %[1]s",
     "alert.range_error": " - число должно быть в диапазоне от %[1]s-%[2]s.",
-    "meta.last_line": "Спасибо Forgejo за такую возможность :3. Интересный факт: мне не удавалось вставить свой вклад в перевод Forgejo и это первый раз, когда у меня это вышло. ❤️."
+    "meta.last_line": "Skip-CI это круто, но мне нужно запустить тесты для слияния переводов с основной веткой.",
+    "mail.actions.not_successful_run_subject": "Провал раб. потока %[1]s в репозитории %[2]s",
+    "mail.actions.successful_run_after_failure_subject": "Возобновление раб. потока %[1]s в репозитории %[2]s",
+    "mail.actions.run_info_ref": "Ветвь: %[1]s (%[2]s)",
+    "mail.actions.run_info_trigger": "Причина срабатывания: %[1]s by: %[2]s",
+    "mail.actions.successful_run_after_failure": "Рабочий поток %[1]s в репозитории %[2]s был возобновлён после провала",
+    "mail.actions.run_info_cur_status": "Текущее состояние: %[1]s (обновлено после %[2]s)",
+    "mail.actions.run_info_previous_status": "Предыдущее состояние: %[1]s",
+    "discussion.locked": "Обсуждение ограничено. Комментировать могут только соавторы.",
+    "mail.actions.not_successful_run": "Рабочий поток %[1]s в репозитории %[2]s провалился",
+    "relativetime.now": "только что",
+    "relativetime.future": "из будущего",
+    "relativetime.mins": {
+        "one": "%d минуту назад",
+        "few": "%d минуты назад",
+        "many": "%d минут назад"
+    },
+    "relativetime.hours": {
+        "one": "%d час назад",
+        "few": "%d часа назад",
+        "many": "%d часов назад"
+    },
+    "relativetime.days": {
+        "one": "%d день назад",
+        "few": "%d дня назад",
+        "many": "%d дней назад"
+    },
+    "relativetime.weeks": {
+        "one": "%d неделю назад",
+        "few": "%d недели назад",
+        "many": "%d недель назад"
+    },
+    "relativetime.years": {
+        "one": "%d год назад",
+        "few": "%d года назад",
+        "many": "%d лет назад"
+    },
+    "relativetime.1day": "вчера",
+    "relativetime.2weeks": "две недели назад",
+    "relativetime.2months": "два месяца назад",
+    "relativetime.1month": "в прошлом месяце",
+    "relativetime.1week": "на прошлой неделе",
+    "relativetime.2days": "позавчера",
+    "relativetime.2years": "два года назад",
+    "relativetime.months": {
+        "one": "%d месяц назад",
+        "few": "%d месяца назад",
+        "many": "%d месяцев назад"
+    },
+    "relativetime.1year": "в прошлом году"
 }

@@ -23,5 +23,54 @@
     "alert.asset_load_failed": "Falha ao carregar ficheiros de recurso de {path}. Certifique-se de que os ficheiros de recurso podem ser acedidos.",
     "install.invalid_lfs_path": "Não foi possível criar a raiz LFS no caminho especificado: %[1]s",
     "alert.range_error": " deve ser um número entre %[1]s e %[2]s.",
-    "meta.last_line": "Se programarem em Python, por favor usem o uv e Ruff (e estejam atentos ao Red Knot no repositório do Ruff). E vejam também mise-en-place (https://mise.jdx.dev)."
+    "meta.last_line": "Se programarem em Python, por favor usem o uv e Ruff (e estejam atentos ao Red Knot no repositório do Ruff). E vejam também mise-en-place (https://mise.jdx.dev).",
+    "mail.actions.successful_run_after_failure_subject": "Sequência de trabalho %[1]s foi recuperada no repositório %[2]s",
+    "mail.actions.not_successful_run_subject": "Sequência de trabalho %[1]s falhou no repositório %[2]s",
+    "mail.actions.not_successful_run": "Sequência de trabalho %[1]s falhou no repositório %[2]s",
+    "mail.actions.run_info_ref": "Ramo: %[1]s (%[2]s)",
+    "mail.actions.successful_run_after_failure": "Sequência de trabalho %[1]s foi recuperada no repositório %[2]s",
+    "discussion.locked": "Esta discussão foi fechada. Apenas contribuidores podem publicar comentários.",
+    "mail.actions.run_info_cur_status": "Estado desta execução: %[1]s (atualizado recentemente de %[2]s)",
+    "mail.actions.run_info_previous_status": "Estado da execução anterior: %[1]s",
+    "mail.actions.run_info_trigger": "Ativado porque: %[1]s por: %[2]s",
+    "relativetime.now": "agora",
+    "relativetime.future": "no futuro",
+    "relativetime.mins": {
+        "one": "%d minuto atrás",
+        "many": "%d minutos atrás",
+        "other": "%d minutos atrás"
+    },
+    "relativetime.weeks": {
+        "one": "%d semana atrás",
+        "many": "%d semanas atrás",
+        "other": "%d semanas atrás"
+    },
+    "relativetime.months": {
+        "one": "%d mês atrás",
+        "many": "%d meses atrás",
+        "other": "%d meses atrás"
+    },
+    "relativetime.years": {
+        "one": "%d ano atrás",
+        "many": "%d anos atrás",
+        "other": "%d anos atrás"
+    },
+    "relativetime.2days": "dois dias atrás",
+    "relativetime.2weeks": "duas semanas atrás",
+    "relativetime.1month": "mês passado",
+    "relativetime.2months": "dois meses atrás",
+    "relativetime.1year": "ano passado",
+    "relativetime.2years": "dois anos atrás",
+    "relativetime.days": {
+        "one": "%d dia atrás",
+        "many": "%d dias atrás",
+        "other": "%d dias atrás"
+    },
+    "relativetime.hours": {
+        "one": "%d hora atrás",
+        "many": "%d horas atrás",
+        "other": "%d horas atrás"
+    },
+    "relativetime.1week": "semana passada",
+    "relativetime.1day": "ontem"
 }

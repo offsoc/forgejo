@@ -23,5 +23,54 @@
     "alert.asset_load_failed": "Neizdevās ielādēt līdzekļu datnes no {path}. Lūgums pārliecināties, ka līdzekļu datnēm var piekļūt.",
     "install.invalid_lfs_path": "Nav iespējams izveidot LFS pamatmapi norādītajā ceļā: %[1]s",
     "alert.range_error": " jābūt skaitlin starp %[1]s un %[2]s.",
-    "meta.last_line": "Šis žagaru saišķis nav mans žagaru saišķis."
+    "meta.last_line": "Šis žagaru saišķis nav mans žagaru saišķis.",
+    "mail.actions.successful_run_after_failure_subject": "Darbplūsma %[1]s atkopta glabātavā %[2]s",
+    "mail.actions.not_successful_run_subject": "Darbplūsmas %[1]s atteice glabātavā %[2]s",
+    "mail.actions.successful_run_after_failure": "Darbplūsma %[1]s atkopta glabātavā %[2]s",
+    "mail.actions.not_successful_run": "Darbplūsmas %[1] atteice glabātavā %[2]s",
+    "mail.actions.run_info_cur_status": "Šī izpildījuma stāvoklis: %[1]s (tikko atjaunināts no %[2]s)",
+    "mail.actions.run_info_previous_status": "Iepriekšējā izpildījuma stāvoklis: %[1]s",
+    "mail.actions.run_info_ref": "Zars: %[1]s (%[2]s)",
+    "mail.actions.run_info_trigger": "Izraisīšanas iemesls: %[2]s no: %[2]s",
+    "discussion.locked": "Šī apspriede tika slēgta. Piebilžu pievienošana ir ļauta tikai līdzdalībniekiem.",
+    "relativetime.future": "nākotnē",
+    "relativetime.hours": {
+        "zero": "pirms %d stundām",
+        "one": "pirms %d stundas",
+        "other": "pirms %d stundām"
+    },
+    "relativetime.days": {
+        "zero": "pirms %d dienām",
+        "one": "pirms %d dienas",
+        "other": "pirms %d dienām"
+    },
+    "relativetime.months": {
+        "zero": "pirms %d mēnešiem",
+        "one": "pirms %d mēneša",
+        "other": "pirms %d mēnešiem"
+    },
+    "relativetime.1day": "vakar",
+    "relativetime.2days": "pirms divām dienām",
+    "relativetime.1week": "iepriekšējā nedēļā",
+    "relativetime.2weeks": "pirms divām nedēļām",
+    "relativetime.2months": "pirms diviem mēnešiem",
+    "relativetime.1year": "iepriekšējā gadā",
+    "relativetime.2years": "pirms diviem gadiem",
+    "relativetime.years": {
+        "zero": "pirms %d gadiem",
+        "one": "pirms %d gada",
+        "other": "pirms %d gadiem"
+    },
+    "relativetime.mins": {
+        "zero": "pirms %d minūtēm",
+        "one": "pirms %d minūtes",
+        "other": "pirms %d minūtēm"
+    },
+    "relativetime.now": "tagad",
+    "relativetime.weeks": {
+        "zero": "pirms %d nedēļām",
+        "one": "pirms %d nedēļas",
+        "other": "pirms %d nedēļām"
+    },
+    "relativetime.1month": "iepriekšējā mēnesī"
 }
