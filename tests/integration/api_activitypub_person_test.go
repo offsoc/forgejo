@@ -27,28 +27,37 @@ func TestActivityPubPerson(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
-	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		userID := 2
-		username := "user2"
-		userURL := fmt.Sprintf("%sapi/v1/activitypub/user-id/%d", u, userID)
 
-		user1 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
+	mock := test.NewFederationServerMock()
+	federatedSrv := mock.DistantServer(t)
+	defer federatedSrv.Close()
 
-		clientFactory, err := activitypub.GetClientFactory(db.DefaultContext)
+	onGiteaRun(t, func(t *testing.T, localUrl *url.URL) {
+		defer test.MockVariableValue(&setting.AppURL, localUrl.String())()
+
+		localUserID := 2
+		localUserName := "user2"
+		localUserURL := fmt.Sprintf("%sapi/v1/activitypub/user-id/%d", localUrl, localUserID)
+
+		// distantURL := federatedSrv.URL
+		// distantUser15URL := fmt.Sprintf("%s/api/v1/activitypub/user-id/15", distantURL)
+
+		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
 
-		apClient, err := clientFactory.WithKeys(db.DefaultContext, user1, user1.APActorKeyID())
+		c, err := cf.WithKeysDirect(db.DefaultContext, mock.Persons[0].PrivKey,
+			mock.Persons[0].PersonKeyID(federatedSrv.URL))
 		require.NoError(t, err)
 
 		// Unsigned request
 		t.Run("UnsignedRequest", func(t *testing.T) {
-			req := NewRequest(t, "GET", userURL)
+			req := NewRequest(t, "GET", localUserURL)
 			MakeRequest(t, req, http.StatusBadRequest)
 		})
 
 		t.Run("SignedRequestValidation", func(t *testing.T) {
 			// Signed request
-			resp, err := apClient.GetBody(userURL)
+			resp, err := c.GetBody(localUserURL)
 			require.NoError(t, err)
 
 			var person ap.Person
@@ -56,12 +65,12 @@ func TestActivityPubPerson(t *testing.T) {
 			require.NoError(t, err)
 
 			assert.Equal(t, ap.PersonType, person.Type)
-			assert.Equal(t, username, person.PreferredUsername.String())
-			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d$", userID), person.GetID())
-			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/inbox$", userID), person.Inbox.GetID().String())
+			assert.Equal(t, localUserName, person.PreferredUsername.String())
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d$", localUserID), person.GetID())
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/inbox$", localUserID), person.Inbox.GetID().String())
 
 			assert.NotNil(t, person.PublicKey)
-			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d#main-key$", userID), person.PublicKey.ID)
+			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d#main-key$", localUserID), person.PublicKey.ID)
 
 			assert.NotNil(t, person.PublicKey.PublicKeyPem)
 			assert.Regexp(t, "^-----BEGIN PUBLIC KEY-----", person.PublicKey.PublicKeyPem)

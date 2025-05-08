@@ -172,7 +172,7 @@ func fetchKeyFromAp(ctx *context_service.Base, keyURL url.URL, federationHost *f
 
 	pubKeyFromAp := person.PublicKey
 	if pubKeyFromAp.ID.String() != keyURL.String() {
-		return nil, nil, nil, fmt.Errorf("cannot find publicKey with id: %v in %", keyURL, string(b))
+		return nil, nil, nil, fmt.Errorf("cannot find publicKey with id: %v in %v", keyURL, string(b))
 	}
 
 	pubKeyBytes, err = decodePublicKeyPem(pubKeyFromAp.PublicKeyPem)
