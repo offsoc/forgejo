@@ -6,7 +6,6 @@ package federation
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"net/url"
 	"strings"
 
@@ -52,7 +51,7 @@ func FindOrCreateFederationHost(ctx *context_service.Base, actorURI string) (*fo
 	return federationHost, nil
 }
 
-func FindOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
+func FindOrCreateFederatedUser(ctx *context_service.Base, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
 	user, federatedUser, federationHost, err := findFederatedUser(ctx, actorURI)
 	if err != nil {
 		return nil, nil, nil, err
@@ -65,9 +64,8 @@ func FindOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	if user != nil {
 		log.Trace("Found local federatedUser: %#v", user)
 	} else {
-		user, federatedUser, err = createUserFromAP(ctx.Base, personID, federationHost.ID)
+		user, federatedUser, err = createUserFromAP(ctx, personID, federationHost.ID)
 		if err != nil {
-			ctx.Error(http.StatusInternalServerError, "Error creating federatedUser", err)
 			return nil, nil, nil, err
 		}
 		log.Trace("Created federatedUser from ap: %#v", user)
@@ -77,21 +75,18 @@ func FindOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	return user, federatedUser, federationHost, nil
 }
 
-func findFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
-	federationHost, err := FindOrCreateFederationHost(ctx.Base, actorURI)
+func findFederatedUser(ctx *context_service.Base, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
+	federationHost, err := FindOrCreateFederationHost(ctx, actorURI)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "Wrong FederationHost", err)
 		return nil, nil, nil, err
 	}
 	actorID, err := fm.NewPersonID(actorURI, string(federationHost.NodeInfo.SoftwareName))
 	if err != nil {
-		ctx.Error(http.StatusNotAcceptable, "Invalid PersonID", err)
 		return nil, nil, nil, err
 	}
 
 	user, federatedUser, err := user.FindFederatedUser(ctx, actorID.ID, federationHost.ID)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "Searching for user failed", err)
 		return nil, nil, nil, err
 	}
 

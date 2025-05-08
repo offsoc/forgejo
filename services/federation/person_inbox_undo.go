@@ -21,7 +21,7 @@ func processPersonInboxUndo(ctx *context_service.APIContext, activity *ap.Activi
 	}
 
 	actorURI := activity.Actor.GetLink().String()
-	_, federatedUser, _, err := findFederatedUser(ctx, actorURI)
+	_, federatedUser, _, err := findFederatedUser(ctx.Base, actorURI)
 	if err != nil {
 		return
 	}
