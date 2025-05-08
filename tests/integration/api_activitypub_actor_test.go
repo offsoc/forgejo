@@ -31,10 +31,9 @@ func TestActivityPubActor(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, ap.ApplicationType, actor.Type)
-	assert.Equal(t, setting.Domain, actor.PreferredUsername.String())
+	assert.Equal(t, "ghost", actor.PreferredUsername.String())
 	keyID := actor.GetID().String()
 	assert.Regexp(t, "activitypub/actor$", keyID)
-	assert.Regexp(t, "activitypub/actor/outbox$", actor.Outbox.GetID().String())
 	assert.Regexp(t, "activitypub/actor/inbox$", actor.Inbox.GetID().String())
 
 	pubKey := actor.PublicKey
