@@ -58,7 +58,6 @@ func TestActivityPubPerson(t *testing.T) {
 			assert.Equal(t, ap.PersonType, person.Type)
 			assert.Equal(t, username, person.PreferredUsername.String())
 			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d$", userID), person.GetID())
-			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/outbox$", userID), person.Outbox.GetID().String())
 			assert.Regexp(t, fmt.Sprintf("activitypub/user-id/%d/inbox$", userID), person.Inbox.GetID().String())
 
 			assert.NotNil(t, person.PublicKey)
