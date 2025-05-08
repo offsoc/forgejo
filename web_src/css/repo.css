@@ -1280,12 +1280,6 @@ td .commit-summary {
   border: none !important;
 }
 
-#activity-feed .sha.label .ui.signature.avatar {
-  height: 13px;
-  margin-bottom: 0;
-  width: 13px;
-}
-
 .sha.label .ui.signature.avatar {
   height: 16px;
   margin-bottom: 0;
