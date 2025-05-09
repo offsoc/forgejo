@@ -8,7 +8,6 @@ package validation
 import (
 	"fmt"
 	"net/mail"
-	"regexp"
 	"strings"
 
 	"forgejo.org/modules/setting"
@@ -55,8 +54,6 @@ func (err ErrEmailInvalid) Unwrap() error {
 	return util.ErrInvalidArgument
 }
 
-var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-
 // check if email is a valid address with allowed domain
 func ValidateEmail(email string) error {
 	if err := validateEmailBasic(email); err != nil {
@@ -74,14 +71,6 @@ func ValidateEmailForAdmin(email string) error {
 // validateEmailBasic checks whether the email complies with the rules
 func validateEmailBasic(email string) error {
 	if len(email) == 0 {
-		return ErrEmailInvalid{email}
-	}
-
-	if !emailRegexp.MatchString(email) {
-		return ErrEmailCharIsNotSupported{email}
-	}
-
-	if email[0] == '-' {
 		return ErrEmailInvalid{email}
 	}
 
