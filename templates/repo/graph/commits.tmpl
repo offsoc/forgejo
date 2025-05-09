@@ -6,27 +6,12 @@
 					<span></span>
 				{{else}}
 					<span class="sha" id="{{$commit.ShortRev}}">
-						{{$class := "ui sha label"}}
-						{{if $commit.Commit.Signature}}
-							{{$class = (print $class " isSigned")}}
-							{{if $commit.Verification.Verified}}
-								{{if eq $commit.Verification.TrustStatus "trusted"}}
-									{{$class = (print $class " isVerified")}}
-								{{else if eq $commit.Verification.TrustStatus "untrusted"}}
-									{{$class = (print $class " isVerifiedUntrusted")}}
-								{{else}}
-									{{$class = (print $class " isVerifiedUnmatched")}}
-								{{end}}
-							{{else if $commit.Verification.Warning}}
-								{{$class = (print $class " isWarning")}}
-							{{end}}
-						{{end}}
-						<a href="{{$.RepoLink}}/commit/{{$commit.Rev|PathEscape}}" rel="nofollow" class="{{$class}}">
-							<span class="shortsha">{{ShortSha $commit.Commit.ID.String}}</span>
-							{{- if $commit.Commit.Signature -}}
-								{{template "repo/shabox_badge" dict "root" $ "verification" $commit.Verification}}
-							{{- end -}}
-						</a>
+						{{template "repo/shabox" (dict
+							"sha1" $commit.Commit.ID.String
+							"commitLink" (printf "%s/commit/%s" $.RepoLink ($commit.Rev|PathEscape))
+							"signature" $commit.Commit.Signature
+							"verification" $commit.Verification
+						)}}
 					</span>
 					<span class="message tw-inline-block gt-ellipsis tw-mr-2">
 						<span>{{RenderCommitMessage $.Context $commit.Subject ($.Repository.ComposeMetas ctx)}}</span>

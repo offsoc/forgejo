@@ -47,7 +47,7 @@ import (
 func ListPullRequests(ctx *context.APIContext) {
 	// swagger:operation GET /repos/{owner}/{repo}/pulls repository repoListPullRequests
 	// ---
-	// summary: List a repo's pull requests
+	// summary: List a repo's pull requests. If a pull request is selected but fails to be retrieved for any reason, it will be a null value in the list of results.
 	// produces:
 	// - application/json
 	// parameters:
@@ -1628,7 +1628,7 @@ func GetPullRequestFiles(ctx *context.APIContext) {
 	maxLines := setting.Git.MaxGitDiffLines
 
 	// FIXME: If there are too many files in the repo, may cause some unpredictable issues.
-	diff, err := gitdiff.GetDiff(ctx, baseGitRepo,
+	diff, _, err := gitdiff.GetDiffSimple(ctx, baseGitRepo,
 		&gitdiff.DiffOptions{
 			BeforeCommitID:     startCommitID,
 			AfterCommitID:      endCommitID,

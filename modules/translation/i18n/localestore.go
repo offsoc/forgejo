@@ -24,6 +24,7 @@ type locale struct {
 
 	newStyleMessages map[string]string
 	pluralRule       PluralFormRule
+	usedPluralForms  []PluralFormIndex
 }
 
 var _ Locale = (*locale)(nil)
@@ -56,7 +57,7 @@ const (
 // the correct plural form for a given count and language.
 
 // AddLocaleByIni adds locale by ini into the store
-func (store *localeStore) AddLocaleByIni(langName, langDesc string, pluralRule PluralFormRule, source, moreSource []byte) error {
+func (store *localeStore) AddLocaleByIni(langName, langDesc string, pluralRule PluralFormRule, usedPluralForms []PluralFormIndex, source, moreSource []byte) error {
 	if _, ok := store.localeMap[langName]; ok {
 		return ErrLocaleAlreadyExist
 	}
@@ -64,7 +65,7 @@ func (store *localeStore) AddLocaleByIni(langName, langDesc string, pluralRule P
 	store.langNames = append(store.langNames, langName)
 	store.langDescs = append(store.langDescs, langDesc)
 
-	l := &locale{store: store, langName: langName, idxToMsgMap: make(map[int]string), pluralRule: pluralRule, newStyleMessages: make(map[string]string)}
+	l := &locale{store: store, langName: langName, idxToMsgMap: make(map[int]string), pluralRule: pluralRule, usedPluralForms: usedPluralForms, newStyleMessages: make(map[string]string)}
 	store.localeMap[l.langName] = l
 
 	iniFile, err := setting.NewConfigProviderForLocale(source, moreSource)
@@ -118,7 +119,7 @@ func (l *locale) LookupNewStyleMessage(trKey string) string {
 	return ""
 }
 
-func (l *locale) LookupPlural(trKey string, count any) string {
+func (l *locale) LookupPluralByCount(trKey string, count any) string {
 	n, err := util.ToInt64(count)
 	if err != nil {
 		log.Error("Invalid plural count '%s'", count)
@@ -126,6 +127,10 @@ func (l *locale) LookupPlural(trKey string, count any) string {
 	}
 
 	pluralForm := l.pluralRule(n)
+	return l.LookupPluralByForm(trKey, pluralForm)
+}
+
+func (l *locale) LookupPluralByForm(trKey string, pluralForm PluralFormIndex) string {
 	suffix := ""
 	switch pluralForm {
 	case PluralFormZero:
@@ -141,7 +146,7 @@ func (l *locale) LookupPlural(trKey string, count any) string {
 	case PluralFormOther:
 		// No suffix for the "other" string.
 	default:
-		log.Error("Invalid plural form index %d for count %d", pluralForm, count)
+		log.Error("Invalid plural form index %d", pluralForm)
 		return ""
 	}
 
@@ -149,7 +154,7 @@ func (l *locale) LookupPlural(trKey string, count any) string {
 		return result
 	}
 
-	log.Error("Missing translation for plural form index %d for count %d", pluralForm, count)
+	log.Error("Missing translation for plural form %s", suffix)
 	return ""
 }
 
@@ -165,6 +170,10 @@ func (store *localeStore) ListLangNameDesc() (names, desc []string) {
 // SetDefaultLang sets default language as a fallback
 func (store *localeStore) SetDefaultLang(lang string) {
 	store.defaultLang = lang
+}
+
+func (store *localeStore) GetDefaultLang() string {
+	return store.defaultLang
 }
 
 // Locale returns the locale for the lang or the default language
@@ -183,6 +192,10 @@ func (store *localeStore) Locale(lang string) (Locale, bool) {
 
 func (store *localeStore) Close() error {
 	return nil
+}
+
+func (l *locale) Language() string {
+	return l.langName
 }
 
 func (l *locale) TrString(trKey string, trArgs ...any) string {
@@ -251,11 +264,11 @@ func (l *locale) TrHTML(trKey string, trArgs ...any) template.HTML {
 }
 
 func (l *locale) TrPluralString(count any, trKey string, trArgs ...any) template.HTML {
-	message := l.LookupPlural(trKey, count)
+	message := l.LookupPluralByCount(trKey, count)
 
 	if message == "" {
 		if defaultLang, ok := l.store.localeMap[l.store.defaultLang]; ok {
-			message = defaultLang.LookupPlural(trKey, count)
+			message = defaultLang.LookupPluralByCount(trKey, count)
 		}
 		if message == "" {
 			message = trKey
@@ -267,6 +280,36 @@ func (l *locale) TrPluralString(count any, trKey string, trArgs ...any) template
 		log.Error("Error whilst formatting %q in %s: %v", trKey, l.langName, err)
 	}
 	return template.HTML(message)
+}
+
+func (l *locale) TrPluralStringAllForms(trKey string) ([]string, []string) {
+	defaultLang, hasDefaultLang := l.store.localeMap[l.store.defaultLang]
+
+	var fallback []string
+	fallback = nil
+
+	result := make([]string, len(l.usedPluralForms))
+	allPresent := true
+
+	for i, form := range l.usedPluralForms {
+		result[i] = l.LookupPluralByForm(trKey, form)
+		if result[i] == "" {
+			allPresent = false
+		}
+	}
+
+	if !allPresent {
+		if hasDefaultLang {
+			fallback = make([]string, len(defaultLang.usedPluralForms))
+			for i, form := range defaultLang.usedPluralForms {
+				fallback[i] = defaultLang.LookupPluralByForm(trKey, form)
+			}
+		} else {
+			log.Error("Plural set for '%s' is incomplete and no fallback language is set.", trKey)
+		}
+	}
+
+	return result, fallback
 }
 
 // HasKey returns whether a key is present in this locale or not

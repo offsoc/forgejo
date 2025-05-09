@@ -76,6 +76,10 @@ var microcmdUserCreate = &cli.Command{
 			Name:  "restricted",
 			Usage: "Make a restricted user account",
 		},
+		&cli.StringFlag{
+			Name:  "fullname",
+			Usage: `The full, human-readable name of the user`,
+		},
 	},
 }
 
@@ -161,6 +165,7 @@ func runCreateUser(c *cli.Context) error {
 		IsAdmin:            isAdmin,
 		MustChangePassword: mustChangePassword,
 		Visibility:         visibility,
+		FullName:           c.String("fullname"),
 	}
 
 	overwriteDefault := &user_model.CreateUserOverwriteOptions{

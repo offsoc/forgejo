@@ -6,7 +6,7 @@
 <body>
 	<p>{{.locale.Tr "mail.hi_user_x" (.DisplayName|DotEscape)}}</p><br>
 	<p>{{.locale.Tr "mail.removed_security_key.text_1" .SecurityKeyName}}</p><br>
-	{{if and (not .HasWebAuthn) (not .HasTOTP)}}<p>{{.locale.Tr "mail.removed_security_key.no_2fa"}}</p><br>{{end}}
+	{{if (not .HasTwoFactor)}}<p>{{.locale.Tr "mail.removed_security_key.no_2fa"}}</p><br>{{end}}
 	<p>{{.locale.Tr "mail.account_security_caution.text_1"}}</p><br>
 	<p>{{.locale.Tr "mail.account_security_caution.text_2"}}</p><br>
 

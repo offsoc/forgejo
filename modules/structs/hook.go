@@ -53,7 +53,8 @@ type CreateHookOption struct {
 	BranchFilter        string                 `json:"branch_filter" binding:"GlobPattern"`
 	AuthorizationHeader string                 `json:"authorization_header"`
 	// default: false
-	Active bool `json:"active"`
+	Active          bool `json:"active"`
+	IsSystemWebhook bool `json:"is_system_webhook"`
 }
 
 // EditHookOption options when modify one hook

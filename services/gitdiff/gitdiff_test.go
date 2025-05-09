@@ -635,7 +635,7 @@ func TestGetDiffRangeWithWhitespaceBehavior(t *testing.T) {
 
 	defer gitRepo.Close()
 	for _, behavior := range []git.TrustedCmdArgs{{"-w"}, {"--ignore-space-at-eol"}, {"-b"}, nil} {
-		diffs, err := GetDiff(db.DefaultContext, gitRepo,
+		diffs, _, err := GetDiffSimple(db.DefaultContext, gitRepo,
 			&DiffOptions{
 				AfterCommitID:      "bd7063cc7c04689c4d082183d32a604ed27a24f9",
 				BeforeCommitID:     "559c156f8e0178b71cb44355428f24001b08fc68",
@@ -649,6 +649,70 @@ func TestGetDiffRangeWithWhitespaceBehavior(t *testing.T) {
 			assert.NotEmpty(t, f.Sections, "%s should have sections", f.Name)
 		}
 	}
+}
+
+func TestGetDiffFull(t *testing.T) {
+	gitRepo, err := git.OpenRepository(git.DefaultContext, "./../../modules/git/tests/repos/language_stats_repo")
+	require.NoError(t, err)
+
+	defer gitRepo.Close()
+
+	t.Run("Initial commit", func(t *testing.T) {
+		diff, err := GetDiffFull(db.DefaultContext, gitRepo,
+			&DiffOptions{
+				AfterCommitID:     "8fee858da5796dfb37704761701bb8e800ad9ef3",
+				MaxLines:          setting.Git.MaxGitDiffLines,
+				MaxLineCharacters: setting.Git.MaxGitDiffLineCharacters,
+				MaxFiles:          setting.Git.MaxGitDiffFiles,
+			})
+		require.NoError(t, err)
+
+		assert.Empty(t, diff.Start)
+		assert.Empty(t, diff.End)
+		assert.False(t, diff.IsIncomplete)
+		assert.Equal(t, 5, diff.NumFiles)
+		assert.Equal(t, 23, diff.TotalAddition)
+		assert.Len(t, diff.Files, 5)
+
+		assert.True(t, diff.Files[0].IsVendored)
+		assert.Equal(t, ".gitattributes", diff.Files[0].Name)
+		assert.Equal(t, "24139dae656713ba861751fb2c2ac38839349a7a", diff.Files[0].NameHash)
+
+		assert.Equal(t, "Python", diff.Files[1].Language)
+		assert.Equal(t, "i-am-a-python.p", diff.Files[1].Name)
+		assert.Equal(t, "32154957b043de62cbcdbe254a53ec4c3e00c5a0", diff.Files[1].NameHash)
+
+		assert.Equal(t, "java-hello/main.java", diff.Files[2].Name)
+		assert.Equal(t, "ef9f6a406a4cde7bb5480ba7b027bdc8cd6fa11d", diff.Files[2].NameHash)
+
+		assert.Equal(t, "main.vendor.java", diff.Files[3].Name)
+		assert.Equal(t, "c94fd7272f109d4d21d6df2b637c864a5ab63f46", diff.Files[3].NameHash)
+
+		assert.Equal(t, "python-hello/hello.py", diff.Files[4].Name)
+		assert.Equal(t, "021705ba8b98778dc4e277d3a6ea1b8c6122a7f9", diff.Files[4].NameHash)
+	})
+
+	t.Run("Normal diff", func(t *testing.T) {
+		diff, err := GetDiffFull(db.DefaultContext, gitRepo,
+			&DiffOptions{
+				AfterCommitID:     "341fca5b5ea3de596dc483e54c2db28633cd2f97",
+				BeforeCommitID:    "8fee858da5796dfb37704761701bb8e800ad9ef3",
+				MaxLines:          setting.Git.MaxGitDiffLines,
+				MaxLineCharacters: setting.Git.MaxGitDiffLineCharacters,
+				MaxFiles:          setting.Git.MaxGitDiffFiles,
+			})
+		require.NoError(t, err)
+
+		assert.Empty(t, diff.Start)
+		assert.Empty(t, diff.End)
+		assert.False(t, diff.IsIncomplete)
+		assert.Equal(t, 1, diff.NumFiles)
+		assert.Equal(t, 1, diff.TotalAddition)
+		assert.Len(t, diff.Files, 1)
+
+		assert.Equal(t, ".gitattributes", diff.Files[0].Name)
+		assert.Equal(t, "24139dae656713ba861751fb2c2ac38839349a7a", diff.Files[0].NameHash)
+	})
 }
 
 func TestNoCrashes(t *testing.T) {

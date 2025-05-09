@@ -88,7 +88,7 @@ func CancelAbandonedJobs(ctx context.Context) error {
 		job.Status = actions_model.StatusCancelled
 		job.Stopped = now
 		if err := db.WithTx(ctx, func(ctx context.Context) error {
-			_, err := actions_model.UpdateRunJob(ctx, job, nil, "status", "stopped")
+			_, err := UpdateRunJob(ctx, job, nil, "status", "stopped")
 			return err
 		}); err != nil {
 			log.Warn("cancel abandoned job %v: %v", job.ID, err)

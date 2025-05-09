@@ -121,6 +121,18 @@ func NewWebContext(base *Base, render Render, session session.Store) *Context {
 	return ctx
 }
 
+func (ctx *Context) AddPluralStringsToPageData(keys []string) {
+	for _, key := range keys {
+		array, fallback := ctx.Locale.TrPluralStringAllForms(key)
+
+		ctx.PageData["PLURALSTRINGS_LANG"].(map[string][]string)[key] = array
+
+		if fallback != nil {
+			ctx.PageData["PLURALSTRINGS_FALLBACK"].(map[string][]string)[key] = fallback
+		}
+	}
+}
+
 // Contexter initializes a classic context for a request.
 func Contexter() func(next http.Handler) http.Handler {
 	rnd := templates.HTMLRenderer()
@@ -207,6 +219,25 @@ func Contexter() func(next http.Handler) http.Handler {
 			ctx.Data["UnitActionsGlobalDisabled"] = unit.TypeActions.UnitGlobalDisabled()
 
 			ctx.Data["AllLangs"] = translation.AllLangs()
+
+			ctx.PageData["PLURAL_RULE_LANG"] = translation.GetPluralRule(ctx.Locale)
+			ctx.PageData["PLURAL_RULE_FALLBACK"] = translation.GetDefaultPluralRule()
+			ctx.PageData["PLURALSTRINGS_LANG"] = map[string][]string{}
+			ctx.PageData["PLURALSTRINGS_FALLBACK"] = map[string][]string{}
+
+			ctx.AddPluralStringsToPageData([]string{"relativetime.mins", "relativetime.hours", "relativetime.days", "relativetime.weeks", "relativetime.months", "relativetime.years"})
+
+			ctx.PageData["DATETIMESTRINGS"] = map[string]string{
+				"FUTURE": ctx.Locale.TrString("relativetime.future"),
+				"NOW":    ctx.Locale.TrString("relativetime.now"),
+			}
+			for _, key := range []string{"relativetime.1day", "relativetime.1week", "relativetime.1month", "relativetime.1year", "relativetime.2days", "relativetime.2weeks", "relativetime.2months", "relativetime.2years"} {
+				// These keys are used for special-casing some time words. We only add keys that are actually translated, so that we
+				// can fall back to the generic pluralized time word in the correct language if the special case is untranslated.
+				if ctx.Locale.HasKey(key) {
+					ctx.PageData["DATETIMESTRINGS"].(map[string]string)[key] = ctx.Locale.TrString(key)
+				}
+			}
 
 			next.ServeHTTP(ctx.Resp, ctx.Req)
 		})

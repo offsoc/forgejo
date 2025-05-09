@@ -371,30 +371,6 @@
   font-size: 1.14285714rem;
 }
 
-.ui.big.buttons .dropdown,
-.ui.big.buttons .dropdown .menu > .item,
-.ui.big.buttons .button,
-.ui.big.buttons .or,
-.ui.ui.ui.ui.big.button {
-  font-size: 1.28571429rem;
-}
-
-.ui.huge.buttons .dropdown,
-.ui.huge.buttons .dropdown .menu > .item,
-.ui.huge.buttons .button,
-.ui.huge.buttons .or,
-.ui.ui.ui.ui.huge.button {
-  font-size: 1.42857143rem;
-}
-
-.ui.massive.buttons .dropdown,
-.ui.massive.buttons .dropdown .menu > .item,
-.ui.massive.buttons .button,
-.ui.massive.buttons .or,
-.ui.ui.ui.ui.massive.button {
-  font-size: 1.71428571rem;
-}
-
 /*--------------
     Icon Only
 ---------------*/
@@ -4208,21 +4184,6 @@ select.ui.dropdown {
   font-size: 1.14285714rem;
 }
 
-.ui.big.dropdown,
-.ui.big.dropdown .menu > .item {
-  font-size: 1.28571429rem;
-}
-
-.ui.huge.dropdown,
-.ui.huge.dropdown .menu > .item {
-  font-size: 1.42857143rem;
-}
-
-.ui.massive.dropdown,
-.ui.massive.dropdown .menu > .item {
-  font-size: 1.71428571rem;
-}
-
 /*******************************
          Theme Overrides
 *******************************/
@@ -6093,24 +6054,6 @@ select.ui.dropdown {
 .ui.large.form .field .dropdown,
 .ui.large.form .field .dropdown .menu > .item {
   font-size: 1.14285714rem;
-}
-
-.ui.big.form,
-.ui.big.form .field .dropdown,
-.ui.big.form .field .dropdown .menu > .item {
-  font-size: 1.28571429rem;
-}
-
-.ui.huge.form,
-.ui.huge.form .field .dropdown,
-.ui.huge.form .field .dropdown .menu > .item {
-  font-size: 1.42857143rem;
-}
-
-.ui.massive.form,
-.ui.massive.form .field .dropdown,
-.ui.massive.form .field .dropdown .menu > .item {
-  font-size: 1.71428571rem;
 }
 
 /*******************************
@@ -8059,36 +8002,6 @@ Floated Menu / Item
   width: 18rem;
 }
 
-.ui.big.menu,
-.ui.big.menu .dropdown,
-.ui.big.menu .dropdown .menu > .item {
-  font-size: 1.14285714rem;
-}
-
-.ui.big.vertical.menu:not(.icon) {
-  width: 20rem;
-}
-
-.ui.huge.menu,
-.ui.huge.menu .dropdown,
-.ui.huge.menu .dropdown .menu > .item {
-  font-size: 1.21428571rem;
-}
-
-.ui.huge.vertical.menu:not(.icon) {
-  width: 22rem;
-}
-
-.ui.massive.menu,
-.ui.massive.menu .dropdown,
-.ui.massive.menu .dropdown .menu > .item {
-  font-size: 1.28571429rem;
-}
-
-.ui.massive.vertical.menu:not(.icon) {
-  width: 25rem;
-}
-
 /*-------------------
   Inverted dropdowns
 --------------------*/
@@ -8802,123 +8715,6 @@ Floated Menu / Item
   }
 }
 
-.ui.big.modal > .header:not(.ui) {
-  font-size: 1.6em;
-}
-
-@media only screen and (max-width: 767.98px) {
-  .ui.big.modal {
-    width: 95%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  .ui.big.modal {
-    width: 88%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 992px) {
-  .ui.big.modal {
-    width: 1190px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1200px) {
-  .ui.big.modal {
-    width: 1260px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1920px) {
-  .ui.big.modal {
-    width: 1330px;
-    margin: 0 0 0 0;
-  }
-}
-
-.ui.huge.modal > .header:not(.ui) {
-  font-size: 1.6em;
-}
-
-@media only screen and (max-width: 767.98px) {
-  .ui.huge.modal {
-    width: 95%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  .ui.huge.modal {
-    width: 88%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 992px) {
-  .ui.huge.modal {
-    width: 1360px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1200px) {
-  .ui.huge.modal {
-    width: 1440px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1920px) {
-  .ui.huge.modal {
-    width: 1520px;
-    margin: 0 0 0 0;
-  }
-}
-
-.ui.massive.modal > .header:not(.ui) {
-  font-size: 1.8em;
-}
-
-@media only screen and (max-width: 767.98px) {
-  .ui.massive.modal {
-    width: 95%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  .ui.massive.modal {
-    width: 88%;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 992px) {
-  .ui.massive.modal {
-    width: 1530px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1200px) {
-  .ui.massive.modal {
-    width: 1620px;
-    margin: 0 0 0 0;
-  }
-}
-
-@media only screen and (min-width: 1920px) {
-  .ui.massive.modal {
-    width: 1710px;
-    margin: 0 0 0 0;
-  }
-}
-
 /*******************************
          Theme Overrides
 *******************************/
@@ -9463,18 +9259,6 @@ Floated Menu / Item
 
 .ui.large.search {
   font-size: 1.14285714em;
-}
-
-.ui.big.search {
-  font-size: 1.28571429em;
-}
-
-.ui.huge.search {
-  font-size: 1.42857143em;
-}
-
-.ui.massive.search {
-  font-size: 1.71428571em;
 }
 
 /*--------------

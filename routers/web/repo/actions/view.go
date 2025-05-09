@@ -383,7 +383,7 @@ func Rerun(ctx *context_module.Context) {
 		run.PreviousDuration = run.Duration()
 		run.Started = 0
 		run.Stopped = 0
-		if err := actions_model.UpdateRun(ctx, run, "started", "stopped", "previous_duration"); err != nil {
+		if err := actions_service.UpdateRun(ctx, run, "started", "stopped", "previous_duration"); err != nil {
 			ctx.Error(http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -436,7 +436,7 @@ func rerunJob(ctx *context_module.Context, job *actions_model.ActionRunJob, shou
 	job.Stopped = 0
 
 	if err := db.WithTx(ctx, func(ctx context.Context) error {
-		_, err := actions_model.UpdateRunJob(ctx, job, builder.Eq{"status": status}, "task_id", "status", "started", "stopped")
+		_, err := actions_service.UpdateRunJob(ctx, job, builder.Eq{"status": status}, "task_id", "status", "started", "stopped")
 		return err
 	}); err != nil {
 		return err
@@ -512,7 +512,7 @@ func Cancel(ctx *context_module.Context) {
 			if job.TaskID == 0 {
 				job.Status = actions_model.StatusCancelled
 				job.Stopped = timeutil.TimeStampNow()
-				n, err := actions_model.UpdateRunJob(ctx, job, builder.Eq{"task_id": 0}, "status", "stopped")
+				n, err := actions_service.UpdateRunJob(ctx, job, builder.Eq{"task_id": 0}, "status", "stopped")
 				if err != nil {
 					return err
 				}
@@ -549,13 +549,13 @@ func Approve(ctx *context_module.Context) {
 	if err := db.WithTx(ctx, func(ctx context.Context) error {
 		run.NeedApproval = false
 		run.ApprovedBy = doer.ID
-		if err := actions_model.UpdateRun(ctx, run, "need_approval", "approved_by"); err != nil {
+		if err := actions_service.UpdateRun(ctx, run, "need_approval", "approved_by"); err != nil {
 			return err
 		}
 		for _, job := range jobs {
 			if len(job.Needs) == 0 && job.Status.IsBlocked() {
 				job.Status = actions_model.StatusWaiting
-				_, err := actions_model.UpdateRunJob(ctx, job, nil, "status")
+				_, err := actions_service.UpdateRunJob(ctx, job, nil, "status")
 				if err != nil {
 					return err
 				}

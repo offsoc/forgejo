@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package activities
@@ -245,6 +246,12 @@ func (a *Action) GetActDisplayNameTitle(ctx context.Context) string {
 		return a.ShortActUserName(ctx)
 	}
 	return a.GetActFullName(ctx)
+}
+
+// GetRepo returns the repository of the action.
+func (a *Action) GetRepo(ctx context.Context) *repo_model.Repository {
+	a.loadRepo(ctx)
+	return a.Repo
 }
 
 // GetRepoUserName returns the name of the action repository owner.

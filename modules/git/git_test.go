@@ -123,7 +123,7 @@ func TestSyncConfigGPGFormat(t *testing.T) {
 		t.Run("Old version", func(t *testing.T) {
 			oldVersion, err := version.NewVersion("2.33.0")
 			require.NoError(t, err)
-			defer test.MockVariableValue(&gitVersion, oldVersion)()
+			defer test.MockVariableValue(&GitVersion, oldVersion)()
 			require.ErrorContains(t, syncGitConfig(), "ssh signing requires Git >= 2.34.0")
 		})
 

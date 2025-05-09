@@ -180,6 +180,70 @@ func testCRUD(t *testing.T, u *url.URL, signingFormat string, objectFormat git.O
 			}))
 	})
 
+	t.Run("AlwaysSign-Pubkey", func(t *testing.T) {
+		setting.Repository.Signing.InitialCommit = []string{"pubkey"}
+
+		t.Run("Has publickey", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			testCtx := NewAPITestContext(t, username, "initial-pubkey"+suffix, auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteUser)
+			t.Run("CreateRepository", doAPICreateRepository(testCtx, false, objectFormat))
+			t.Run("CheckMasterBranchSigned", doAPIGetBranch(testCtx, "master", func(t *testing.T, branch api.Branch) {
+				require.NotNil(t, branch.Commit)
+				require.NotNil(t, branch.Commit.Verification)
+				assert.True(t, branch.Commit.Verification.Verified)
+				assert.Equal(t, "fox@example.com", branch.Commit.Verification.Signer.Email)
+			}))
+		})
+
+		t.Run("No publickey", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			testCtx := NewAPITestContext(t, "user4", "initial-no-pubkey"+suffix, auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteUser)
+			t.Run("CreateRepository", doAPICreateRepository(testCtx, false, objectFormat))
+			t.Run("CheckMasterBranchSigned", doAPIGetBranch(testCtx, "master", func(t *testing.T, branch api.Branch) {
+				require.NotNil(t, branch.Commit)
+				require.NotNil(t, branch.Commit.Verification)
+				assert.False(t, branch.Commit.Verification.Verified)
+			}))
+		})
+	})
+
+	t.Run("AlwaysSign-Twofa", func(t *testing.T) {
+		setting.Repository.Signing.InitialCommit = []string{"twofa"}
+
+		t.Run("Has 2fa", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			t.Cleanup(func() {
+				unittest.AssertSuccessfulDelete(t, &auth_model.WebAuthnCredential{UserID: user.ID})
+			})
+
+			testCtx := NewAPITestContext(t, username, "initial-2fa"+suffix, auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteUser)
+			unittest.AssertSuccessfulInsert(t, &auth_model.WebAuthnCredential{UserID: user.ID})
+
+			t.Run("CreateRepository", doAPICreateRepository(testCtx, false, objectFormat))
+			t.Run("CheckMasterBranchSigned", doAPIGetBranch(testCtx, "master", func(t *testing.T, branch api.Branch) {
+				require.NotNil(t, branch.Commit)
+				require.NotNil(t, branch.Commit.Verification)
+				assert.True(t, branch.Commit.Verification.Verified)
+				assert.Equal(t, "fox@example.com", branch.Commit.Verification.Signer.Email)
+			}))
+		})
+
+		t.Run("No publickey", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			testCtx := NewAPITestContext(t, "user4", "initial-no-2fa"+suffix, auth_model.AccessTokenScopeWriteRepository, auth_model.AccessTokenScopeWriteUser)
+			t.Run("CreateRepository", doAPICreateRepository(testCtx, false, objectFormat))
+			t.Run("CheckMasterBranchSigned", doAPIGetBranch(testCtx, "master", func(t *testing.T, branch api.Branch) {
+				require.NotNil(t, branch.Commit)
+				require.NotNil(t, branch.Commit.Verification)
+				assert.False(t, branch.Commit.Verification.Verified)
+			}))
+		})
+	})
+
 	t.Run("AlwaysSign-Initial", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 		setting.Repository.Signing.InitialCommit = []string{"always"}

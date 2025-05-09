@@ -1165,7 +1165,6 @@ PostRecentBranchCheck:
 		if syncForkInfo.Allowed {
 			ctx.Data["CanSyncFork"] = true
 			ctx.Data["ForkCommitsBehind"] = syncForkInfo.CommitsBehind
-			ctx.Data["SyncForkLink"] = fmt.Sprintf("%s/sync_fork/%s", ctx.Repo.RepoLink, util.PathEscapeSegments(ctx.Repo.BranchName))
 			ctx.Data["BaseBranchLink"] = fmt.Sprintf("%s/src/branch/%s", ctx.Repo.Repository.BaseRepo.HTMLURL(), util.PathEscapeSegments(ctx.Repo.BranchName))
 		}
 	}

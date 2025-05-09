@@ -208,8 +208,7 @@ const sfc = {
           el.append(logLine);
 
           const list = document.createElement('div');
-          list.classList.add('job-log-list');
-          list.classList.add('hidden');
+          list.classList.add('job-log-list', 'hidden');
           list.setAttribute('data-group', group.index);
           groupStack.push(list);
           el.append(list);
@@ -419,7 +418,7 @@ export function initRepositoryActionView() {
 }
 </script>
 <template>
-  <div class="ui container action-view-container">
+  <div class="ui container fluid padded action-view-container">
     <div class="action-view-header">
       <div class="action-info-summary">
         <div class="action-info-summary-title">
