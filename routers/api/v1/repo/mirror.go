@@ -382,6 +382,8 @@ func CreatePushMirror(ctx *context.APIContext, mirrorOption *api.CreatePushMirro
 		return
 	}
 
+	branchFilter := mirrorOption.BranchFilter
+
 	pushMirror := &repo_model.PushMirror{
 		RepoID:        repo.ID,
 		Repo:          repo,
@@ -389,6 +391,7 @@ func CreatePushMirror(ctx *context.APIContext, mirrorOption *api.CreatePushMirro
 		Interval:      interval,
 		SyncOnCommit:  mirrorOption.SyncOnCommit,
 		RemoteAddress: remoteAddress,
+		BranchFilter:  branchFilter,
 	}
 
 	var plainPrivateKey []byte
