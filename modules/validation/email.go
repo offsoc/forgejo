@@ -19,21 +19,6 @@ import (
 // ErrEmailNotActivated e-mail address has not been activated error
 var ErrEmailNotActivated = util.NewInvalidArgumentErrorf("e-mail address has not been activated")
 
-// ErrEmailCharIsNotSupported e-mail address contains unsupported character
-type ErrEmailCharIsNotSupported struct {
-	Email string
-}
-
-// IsErrEmailCharIsNotSupported checks if an error is an ErrEmailCharIsNotSupported
-func IsErrEmailCharIsNotSupported(err error) bool {
-	_, ok := err.(ErrEmailCharIsNotSupported)
-	return ok
-}
-
-func (err ErrEmailCharIsNotSupported) Error() string {
-	return fmt.Sprintf("e-mail address contains unsupported character [email: %s]", err.Email)
-}
-
 // ErrEmailInvalid represents an error where the email address does not comply with RFC 5322
 // or has a leading '-' character
 type ErrEmailInvalid struct {

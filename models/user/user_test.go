@@ -324,7 +324,7 @@ func TestCreateUserInvalidEmail(t *testing.T) {
 
 	err := user_model.CreateUser(db.DefaultContext, user)
 	require.Error(t, err)
-	assert.True(t, validation.IsErrEmailCharIsNotSupported(err))
+	assert.True(t, validation.IsErrEmailInvalid(err))
 }
 
 func TestCreateUserEmailAlreadyUsed(t *testing.T) {
