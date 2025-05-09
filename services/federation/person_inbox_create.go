@@ -33,7 +33,7 @@ func processPersonInboxCreate(ctx *context_service.APIContext, activity *ap.Acti
 	federatedUserActivity, err := activities.NewFederatedUserActivity(
 		ctx.ContextUser.ID,
 		user.ID,
-		activity.ID.String(),
+		activity.Actor.GetLink().String(),
 		createAct.Note.Content.String(),
 		createAct.Note.URL.GetID().String(),
 		*activity,
