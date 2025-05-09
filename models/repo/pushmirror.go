@@ -19,6 +19,8 @@ import (
 	"forgejo.org/modules/timeutil"
 	"forgejo.org/modules/util"
 
+	"github.com/gobwas/glob"
+
 	"xorm.io/builder"
 )
 
@@ -32,6 +34,8 @@ type PushMirror struct {
 	Repo          *Repository `xorm:"-"`
 	RemoteName    string
 	RemoteAddress string `xorm:"VARCHAR(2048)"`
+
+	BranchFilter  glob.Glob  `xorm:"-"`
 
 	// A keypair formatted in OpenSSH format.
 	PublicKey  string `xorm:"VARCHAR(100)"`
