@@ -47,6 +47,8 @@
         "other": "wants to merge %[1]d commits from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>"
     },
     "search.milestone_kind": "Search milestones…",
+    "settings.push_mirror.branch_filter.label": "Branch filter (optional)",
+    "settings.push_mirror.branch_filter.description": "Branches to be mirrored. Leave blank to push all branches. See the documentation for pattern syntax. Examples: main, release/**",
     "incorrect_root_url": "This Forgejo instance is configured to be served on \"%s\". You are currently viewing Forgejo through a different URL, which may cause parts of the application to break. The canonical URL is controlled by Forgejo admins via the ROOT_URL setting in the app.ini.",
     "themes.names.forgejo-auto": "Forgejo (follow system theme)",
     "themes.names.forgejo-light": "Forgejo light",
