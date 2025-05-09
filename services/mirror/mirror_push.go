@@ -201,18 +201,41 @@ func runPushSync(ctx context.Context, m *repo_model.PushMirror) error {
 
 			privateKeyPath = f.Name()
 		}
-		if err := git.Push(ctx, path, git.PushOptions{
-			Remote:         m.RemoteName,
-			Force:          true,
-			Mirror:         true,
-			Timeout:        timeout,
-			PrivateKeyPath: privateKeyPath,
-		}); err != nil {
-			log.Error("Error pushing %s mirror[%d] remote %s: %v", path, m.ID, m.RemoteName, err)
+		if m.BranchFilter.Match("") {// is empty
+			if err := git.Push(ctx, path, git.PushOptions{
+				Remote:         m.RemoteName,
+				Force:          true,
+				Mirror:         true,
+				Timeout:        timeout,
+				PrivateKeyPath: privateKeyPath,
+			}); err != nil {
+				log.Error("Error pushing %s mirror[%d] remote %s: %v", path, m.ID, m.RemoteName, err)
 
-			return util.SanitizeErrorCredentialURLs(err)
+				return util.SanitizeErrorCredentialURLs(err)
+			}
+		} else {
+			branches, _, err := gitrepo.GetBranchesByPath(ctx, repo, 0, 0)
+			if err != nil {
+				return util.SanitizeErrorCredentialURLs(err)
+			}
+			for _, branch := range branches {
+				if !m.BranchFilter.Match(branch.Name) {
+					continue
+				}
+				if err := git.Push(ctx, path, git.PushOptions{
+					Remote:         m.RemoteName,
+					Force:          true,
+					Mirror:         true,
+					Timeout:        timeout,
+					PrivateKeyPath: privateKeyPath,
+					Branch:         fmt.Sprintf("%s:%s", branch.Name, branch.Name),
+				}); err != nil {
+					log.Error("Error pushing %s mirror[%d] remote %s: %v", path, m.ID, m.RemoteName, err)
+
+					return util.SanitizeErrorCredentialURLs(err)
+				}
+			}
 		}
-
 		return nil
 	}
 
