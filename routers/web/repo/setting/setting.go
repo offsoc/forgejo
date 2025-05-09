@@ -310,6 +310,7 @@ func SettingsPost(ctx *context.Context) {
 	ctx.Data["DisableNewPushMirrors"] = setting.Mirror.DisableNewPush
 	ctx.Data["DefaultMirrorInterval"] = setting.Mirror.DefaultInterval
 	ctx.Data["MinimumMirrorInterval"] = setting.Mirror.MinInterval
+	ctx.Data["MirrorBranchFitler"] = setting.Mirror.BranchFilter
 
 	signing, _ := asymkey_service.SigningKey(ctx, ctx.Repo.Repository.RepoPath())
 	ctx.Data["SigningKeyAvailable"] = len(signing) > 0
