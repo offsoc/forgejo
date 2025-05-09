@@ -16,12 +16,14 @@ var Mirror = struct {
 	DisableNewPush  bool
 	DefaultInterval time.Duration
 	MinInterval     time.Duration
+	BranchFilter    string
 }{
 	Enabled:         true,
 	DisableNewPull:  false,
 	DisableNewPush:  false,
 	MinInterval:     10 * time.Minute,
 	DefaultInterval: 8 * time.Hour,
+	BranchFilter:    "",
 }
 
 func loadMirrorFrom(rootCfg ConfigProvider) {
