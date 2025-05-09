@@ -331,6 +331,10 @@ func (s *sendmailSender) Send(from string, to []string, msg io.WriterTo) error {
 
 	args := []string{"-f", envelopeFrom, "-i"}
 	args = append(args, setting.MailService.SendmailArgs...)
+	if args[len(args)-1] != "--" {
+		args = append(args, "--")
+	}
+
 	args = append(args, to...)
 	log.Trace("Sending with: %s %v", setting.MailService.SendmailPath, args)
 
