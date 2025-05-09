@@ -3,15 +3,15 @@
 		<div class="ap-feed-item">
 			{{if not (eq .Actor.ID 0)}}
 				<p>
-					<a href="{{.ExternalID}}">{{.Actor.Name}}</a>
-					{{if .OriginalURL}}
-						<a href="{{.OriginalURL}}">wrote</a>
+					<a href="{{.ActorURI}}">{{.Actor.Name}}</a>
+					{{if .NoteURL}}
+						<a href="{{.NoteURL}}">wrote</a>
 					{{else}}
 						wrote
 					{{end}}:
 				</p>
 			{{end}}
-			{{.Note | SanitizeHTML}}
+			{{.NoteContent | SanitizeHTML}}
 		</div>
 		<hr>
 	{{end}}
