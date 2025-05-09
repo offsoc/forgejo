@@ -13,6 +13,7 @@ type CreatePushMirrorOption struct {
 	Interval       string `json:"interval"`
 	SyncOnCommit   bool   `json:"sync_on_commit"`
 	UseSSH         bool   `json:"use_ssh"`
+	BranchFilter   string `json:"branch_filter"`
 }
 
 // PushMirror represents information of a push mirror
@@ -29,4 +30,6 @@ type PushMirror struct {
 	Interval       string     `json:"interval"`
 	SyncOnCommit   bool       `json:"sync_on_commit"`
 	PublicKey      string     `json:"public_key"`
+
+	BranchFilter string `json:"branch_filter"`
 }
