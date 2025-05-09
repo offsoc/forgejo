@@ -23,5 +23,6 @@ func ToPushMirror(ctx context.Context, pm *repo_model.PushMirror) (*api.PushMirr
 		Interval:       pm.Interval.String(),
 		SyncOnCommit:   pm.SyncOnCommit,
 		PublicKey:      pm.GetPublicKey(),
+		BranchFilter:   pm.BranchFilter,
 	}, nil
 }
