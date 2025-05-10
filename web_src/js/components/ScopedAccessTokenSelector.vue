@@ -3,6 +3,11 @@ import {createApp} from 'vue';
 import {hideElem, showElem} from '../utils/dom.js';
 
 const sfc = {
+  data() {
+    return {
+      scopeRequested: false,
+    };
+  },
   props: {
     isAdmin: {
       type: Boolean,
@@ -44,6 +49,7 @@ const sfc = {
 
   mounted() {
     document.getElementById('scoped-access-submit').addEventListener('click', this.onClickSubmit);
+    this.setTokenName();
   },
 
   unmounted() {
@@ -68,6 +74,31 @@ const sfc = {
       }
       // no scopes selected, show validation error
       showElem(warningEl);
+    },
+    requestedTokenScope(category, mode) {
+      const urlQueryParams = new URLSearchParams(window.location.search);
+      const scoped = urlQueryParams.has(category, mode);
+      if (scoped && !this.scopeRequested) {
+        this.scopeRequested = true;
+        this.openDetails();
+      }
+      return scoped;
+    },
+    setTokenName() {
+      const urlQueryParams = new URLSearchParams(window.location.search);
+      if (urlQueryParams.has('token_name')) {
+        const tokenEl = document.getElementById('name');
+        tokenEl.value = urlQueryParams.get('token_name');
+      }
+    },
+    openDetails() {
+      if (this.scopeRequested) {
+        const scopeDetailsEl = document.getElementById('scope_details');
+        scopeDetailsEl.open = true;
+
+        const warningEl = document.getElementById('preset_token_scope_warning');
+        warningEl.hidden = false;
+      }
     },
   },
 };
@@ -103,10 +134,10 @@ export function initScopedAccessTokenCategories() {
         <option value="">
           {{ noAccessLabel }}
         </option>
-        <option :value="'read:' + category">
+        <option :value="'read:' + category" :selected="requestedTokenScope(category, 'read')">
           {{ readLabel }}
         </option>
-        <option :value="'write:' + category">
+        <option :value="'write:' + category" :selected="requestedTokenScope(category, 'write')">
           {{ writeLabel }}
         </option>
       </select>

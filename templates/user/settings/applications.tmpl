@@ -74,13 +74,14 @@
 						{{ctx.Locale.Tr "settings.permissions_access_all"}}
 					</label>
 				</div>
-				<details class="ui optional field">
+				<details class="ui optional field" id="scope_details">
 					<summary class="tw-pb-4 tw-pl-1">
 						{{ctx.Locale.Tr "settings.select_permissions"}}
 					</summary>
 					<p class="activity meta">
 						<p>{{ctx.Locale.Tr "settings.access_token_desc" (printf "%s/api/swagger" AppSubUrl) "https://forgejo.org/docs/latest/user/token-scope/"}}</p>
 					</p>
+					<h4 class="ui top attached error header" id="preset_token_scope_warning" hidden>{{ctx.Locale.Tr "settings.preset_token_scope_warning"}}</h4>
 					<div class="scoped-access-token"
 						data-is-admin="{{if .IsAdmin}}true{{else}}false{{end}}"
 						data-no-access-label="{{ctx.Locale.Tr "settings.permission_no_access"}}"
