@@ -1303,7 +1303,7 @@ td .commit-summary {
 .sha.label .badge {
   color: var(--color-text);
   background: var(--color-light);
-  padding: 0.25rem;
+  padding: 0.25rem 0.33rem;
   border-left: 1px solid var(--color-light-border);
 }
 
