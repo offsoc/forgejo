@@ -10,6 +10,7 @@ import (
 	"forgejo.org/models/db"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
 	"forgejo.org/modules/timeutil"
 	"forgejo.org/modules/validation"
 	ap "github.com/go-ap/activitypub"
@@ -18,7 +19,8 @@ import (
 type FederatedUserActivity struct {
 	ID           int64 `xorm:"pk autoincr"`
 	UserID       int64 `xorm:"NOT NULL"`
-	ActorID      string
+	ActorID      int64
+	ActorURI     string
 	Actor        *user_model.User `xorm:"-"` // transient
 	NoteContent  string
 	NoteURL      string
@@ -30,7 +32,7 @@ func init() {
 	db.RegisterModel(new(FederatedUserActivity))
 }
 
-func NewFederatedUserActivity(userID int64, actorID, noteContent, noteURL string, originalNote ap.Activity) (FederatedUserActivity, error) {
+func NewFederatedUserActivity(userID, actorID int64, actorURI, noteContent, noteURL string, originalNote ap.Activity) (FederatedUserActivity, error) {
 	jsonString, err := json.Marshal(originalNote)
 	if err != nil {
 		return FederatedUserActivity{}, err
@@ -38,6 +40,7 @@ func NewFederatedUserActivity(userID int64, actorID, noteContent, noteURL string
 	result := FederatedUserActivity{
 		UserID:       userID,
 		ActorID:      actorID,
+		ActorURI:     actorURI,
 		NoteContent:  noteContent,
 		NoteURL:      noteURL,
 		OriginalNote: string(jsonString),
@@ -52,6 +55,7 @@ func (federatedUser FederatedUserActivity) Validate() []string {
 	var result []string
 	result = append(result, validation.ValidateNotEmpty(federatedUser.UserID, "UserID")...)
 	result = append(result, validation.ValidateNotEmpty(federatedUser.ActorID, "ActorID")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUser.ActorURI, "ActorURI")...)
 	result = append(result, validation.ValidateNotEmpty(federatedUser.NoteContent, "NoteContent")...)
 	result = append(result, validation.ValidateNotEmpty(federatedUser.NoteURL, "NoteURL")...)
 	result = append(result, validation.ValidateNotEmpty(federatedUser.OriginalNote, "OriginalNote")...)
@@ -72,6 +76,7 @@ type GetFollowingFeedsOptions struct {
 }
 
 func GetFollowingFeeds(ctx context.Context, opts GetFollowingFeedsOptions) ([]*FederatedUserActivity, int64, error) {
+	log.Debug("user_id = %s", opts.Actor.ID)
 	sess := db.GetEngine(ctx).Where("user_id = ?", opts.Actor.ID)
 	opts.SetDefaultValues()
 	sess = db.SetSessionPagination(sess, &opts)
@@ -89,12 +94,13 @@ func GetFollowingFeeds(ctx context.Context, opts GetFollowingFeedsOptions) ([]*F
 	return actions, count, err
 }
 
-func (federatedUser *FederatedUserActivity) loadActor(ctx context.Context) error {
-	actorUser, _, err := user_model.GetFederatedUserByUserID(ctx, federatedUser.UserID)
+func (federatedUserActivity *FederatedUserActivity) loadActor(ctx context.Context) error {
+	log.Debug("for activity %s", federatedUserActivity)
+	actorUser, _, err := user_model.GetFederatedUserByUserID(ctx, federatedUserActivity.ActorID)
 	if err != nil {
 		return err
 	}
-	federatedUser.Actor = actorUser
+	federatedUserActivity.Actor = actorUser
 
 	return nil
 }

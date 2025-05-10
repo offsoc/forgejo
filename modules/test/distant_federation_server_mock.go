@@ -15,9 +15,10 @@ import (
 )
 
 type FederationServerMockPerson struct {
-	ID     int64
-	Name   string
-	PubKey string
+	ID      int64
+	Name    string
+	PubKey  string
+	PrivKey string
 }
 type FederationServerMockRepository struct {
 	ID int64
@@ -34,15 +35,17 @@ type FederationServerMock struct {
 }
 
 func NewFederationServerMockPerson(id int64, name string) FederationServerMockPerson {
+	priv, pub, _ := util.GenerateKeyPair(3072)
 	return FederationServerMockPerson{
-		ID:   id,
-		Name: name,
-		PubKey: `"-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA18H5s7N6ItZUAh9tneII\nIuZdTTa3cZlLa/9ejWAHTkcp3WLW+/zbsumlMrWYfBy2/yTm56qasWt38iY4D6ul\n` +
-			`CPiwhAqX3REvVq8tM79a2CEqZn9ka6vuXoDgBg/sBf/BUWqf7orkjUXwk/U0Egjf\nk5jcurF4vqf1u+rlAHH37dvSBaDjNj6Qnj4OP12bjfaY/yvs7+jue/eNXFHjzN4E\n` +
-			`T2H4B/yeKTJ4UuAwTlLaNbZJul2baLlHelJPAsxiYaziVuV5P+IGWckY6RSerRaZ\nAkc4mmGGtjAyfN9aewe+lNVfwS7ElFx546PlLgdQgjmeSwLX8FWxbPE5A/PmaXCs\n` +
-			`nx+nou+3dD7NluULLtdd7K+2x02trObKXCAzmi5/Dc+yKTzpFqEz+hLNCz7TImP/\ncK//NV9Q+X67J9O27baH9R9ZF4zMw8rv2Pg0WLSw1z7lLXwlgIsDapeMCsrxkVO4\n` +
-			`LXX5AQ1xQNtlssnVoUBqBrvZsX2jUUKUocvZqMGuE4hfAgMBAAE=\n-----END PUBLIC KEY-----\n"`,
+		ID:      id,
+		Name:    name,
+		PubKey:  pub,
+		PrivKey: priv,
 	}
+}
+
+func (p *FederationServerMockPerson) PersonKeyID(host string) string {
+	return fmt.Sprintf("%[1]v/api/v1/activitypub/user-id/%[2]v#main-key", host, p.ID)
 }
 
 func NewFederationServerMockRepository(id int64) FederationServerMockRepository {
@@ -52,7 +55,7 @@ func NewFederationServerMockRepository(id int64) FederationServerMockRepository 
 }
 
 func NewApActorMock() ApActorMock {
-	priv, pub, _ := util.GenerateKeyPair(3072)
+	priv, pub, _ := util.GenerateKeyPair(1024)
 	return ApActorMock{
 		PrivKey: priv,
 		PubKey:  pub,
@@ -74,7 +77,7 @@ func (p FederationServerMockPerson) marshal(host string) string {
 		`"preferredUsername":"%[3]v",`+
 		`"publicKey":{"id":"http://%[1]v/api/v1/activitypub/user-id/%[2]v#main-key",`+
 		`"owner":"http://%[1]v/api/v1/activitypub/user-id/%[2]v",`+
-		`"publicKeyPem":%[4]v}}`, host, p.ID, p.Name, p.PubKey)
+		`"publicKeyPem":%[4]q}}`, host, p.ID, p.Name, p.PubKey)
 }
 
 func NewFederationServerMock() *FederationServerMock {

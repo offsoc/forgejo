@@ -5,8 +5,8 @@ package federation
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
-	"net/http"
 	"net/url"
 	"strings"
 
@@ -52,7 +52,7 @@ func FindOrCreateFederationHost(ctx *context_service.Base, actorURI string) (*fo
 	return federationHost, nil
 }
 
-func FindOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
+func FindOrCreateFederatedUser(ctx *context_service.Base, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
 	user, federatedUser, federationHost, err := findFederatedUser(ctx, actorURI)
 	if err != nil {
 		return nil, nil, nil, err
@@ -65,9 +65,8 @@ func FindOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	if user != nil {
 		log.Trace("Found local federatedUser: %#v", user)
 	} else {
-		user, federatedUser, err = createUserFromAP(ctx.Base, personID, federationHost.ID)
+		user, federatedUser, err = createUserFromAP(ctx, personID, federationHost.ID)
 		if err != nil {
-			ctx.Error(http.StatusInternalServerError, "Error creating federatedUser", err)
 			return nil, nil, nil, err
 		}
 		log.Trace("Created federatedUser from ap: %#v", user)
@@ -77,21 +76,18 @@ func FindOrCreateFederatedUser(ctx *context_service.APIContext, actorURI string)
 	return user, federatedUser, federationHost, nil
 }
 
-func findFederatedUser(ctx *context_service.APIContext, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
-	federationHost, err := FindOrCreateFederationHost(ctx.Base, actorURI)
+func findFederatedUser(ctx *context_service.Base, actorURI string) (*user.User, *user.FederatedUser, *forgefed.FederationHost, error) {
+	federationHost, err := FindOrCreateFederationHost(ctx, actorURI)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "Wrong FederationHost", err)
 		return nil, nil, nil, err
 	}
 	actorID, err := fm.NewPersonID(actorURI, string(federationHost.NodeInfo.SoftwareName))
 	if err != nil {
-		ctx.Error(http.StatusNotAcceptable, "Invalid PersonID", err)
 		return nil, nil, nil, err
 	}
 
 	user, federatedUser, err := user.FindFederatedUser(ctx, actorID.ID, federationHost.ID)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "Searching for user failed", err)
 		return nil, nil, nil, err
 	}
 
@@ -195,6 +191,16 @@ func fetchUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID
 		return nil, nil, err
 	}
 
+	inbox, err := url.ParseRequestURI(person.Inbox.GetLink().String())
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pubKeyBytes, err := decodePublicKeyPem(person.PublicKey.PublicKeyPem)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	newUser := user.User{
 		LowerName:                    strings.ToLower(name),
 		Name:                         name,
@@ -208,16 +214,19 @@ func fetchUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID
 		IsAdmin:                      false,
 	}
 
-	inbox, err := url.ParseRequestURI(person.Inbox.GetLink().String())
-	if err != nil {
-		return nil, nil, err
-	}
-
 	federatedUser := user.FederatedUser{
 		ExternalID:            personID.ID,
 		FederationHostID:      federationHostID,
 		InboxPath:             inbox.Path,
 		NormalizedOriginalURL: personID.AsURI(),
+		KeyID: sql.NullString{
+			String: person.PublicKey.ID.String(),
+			Valid:  true,
+		},
+		PublicKey: sql.Null[sql.RawBytes]{
+			V:     pubKeyBytes,
+			Valid: true,
+		},
 	}
 
 	log.Info("Fetch federatedUser:%q", federatedUser)

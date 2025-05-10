@@ -39,8 +39,9 @@ func ProcessPersonInbox(ctx *context_service.APIContext, form any) {
 }
 
 func FollowRemoteActor(ctx *context_service.APIContext, localUser *user.User, actorURI string) error {
-	_, federatedUser, federationHost, err := FindOrCreateFederatedUser(ctx, actorURI)
+	_, federatedUser, federationHost, err := FindOrCreateFederatedUser(ctx.Base, actorURI)
 	if err != nil {
+		ctx.Error(http.StatusNotAcceptable, "Federated user not found", err)
 		return err
 	}
 

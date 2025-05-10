@@ -15,7 +15,7 @@ import (
 
 func ToActivityPubPersonFeedItem(item *activities.FederatedUserActivity) ap.Note {
 	return ap.Note{
-		AttributedTo: ap.IRI(item.ActorID),
+		AttributedTo: ap.IRI(item.ActorURI),
 		Content:      ap.NaturalLanguageValues{{Value: ap.Content(item.NoteContent), Ref: ap.NilLangRef}},
 		ID:           ap.IRI(item.NoteURL),
 		URL:          ap.IRI(item.OriginalNote),

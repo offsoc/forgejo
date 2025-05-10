@@ -153,6 +153,14 @@ func FindFederatedUserByKeyID(ctx context.Context, keyID string) (*User, *Federa
 	return user, federatedUser, nil
 }
 
+func UpdateFederatedUser(ctx context.Context, fedearatedUser *FederatedUser) error {
+	if res, err := validation.IsValid(fedearatedUser); !res {
+		return err
+	}
+	_, err := db.GetEngine(ctx).ID(fedearatedUser.ID).Update(fedearatedUser)
+	return err
+}
+
 func DeleteFederatedUser(ctx context.Context, userID int64) error {
 	_, err := db.GetEngine(ctx).Delete(&FederatedUser{UserID: userID})
 	return err
