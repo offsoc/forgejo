@@ -1316,8 +1316,9 @@ td .commit-summary {
   margin-right: 0;
 }
 
-.sha.label .detail.icon .svg {
-  margin: 0 0.25em 0 0;
+.sha.label .status-author {
+  display: flex;
+  gap: 0.25rem;
 }
 
 .sha.label .detail.icon > div {
