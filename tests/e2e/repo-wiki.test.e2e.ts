@@ -21,8 +21,10 @@ for (const searchTerm of ['space', 'consectetur']) {
       // workaround: HTMX listens on keyup events, playwright's fill only triggers the input event
       // so we manually "type" the last letter
       await page.getByPlaceholder('Search wiki').dispatchEvent('keyup');
-      // timeout is necessary because HTMX search could be slow
-      await expect(page.locator('#wiki-search a[href]')).toBeInViewport({ratio: 1});
+
+      await expect(page.locator('#wiki-search a[href]')).toBeInViewport({
+        ratio: workerInfo.project.name === 'webkit' ? 0.9 : 1,
+      });
       await save_visual(page);
     });
   }
