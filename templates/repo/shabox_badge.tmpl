@@ -1,4 +1,4 @@
-<div class="detail icon button">
+<div class="badge">
 	{{if .verification.Verified}}
 		<span class="status-author" title="{{if eq .verification.TrustStatus "trusted"}}{{else if eq .verification.TrustStatus "untrusted"}}{{ctx.Locale.Tr "repo.commits.signed_by_untrusted_user"}}: {{else}}{{ctx.Locale.Tr "repo.commits.signed_by_untrusted_user_unmatched"}}: {{end}}{{.verification.Reason}}">
 			{{if ne .verification.SigningUser.ID 0}}

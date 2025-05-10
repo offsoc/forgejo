@@ -1299,7 +1299,7 @@ td .commit-summary {
   width: 16px;
 }
 
-.sha.label .detail.icon {
+.sha.label .badge {
   color: var(--color-text);
   background: var(--color-light);
   margin: -6px -10px -4px 0;
@@ -1312,7 +1312,7 @@ td .commit-summary {
   border-bottom-left-radius: 0;
 }
 
-.sha.label .detail.icon img {
+.sha.label .badge img {
   margin-right: 0;
 }
 
@@ -1321,7 +1321,7 @@ td .commit-summary {
   gap: 0.25rem;
 }
 
-.sha.label .detail.icon > div {
+.sha.label .badge > div {
   display: flex;
   align-items: center;
 }
@@ -1331,7 +1331,7 @@ td .commit-summary {
   background: var(--color-red-badge-bg);
 }
 
-.sha.label.isSigned.isWarning .detail.icon {
+.sha.label.isSigned.isWarning .badge {
   border-left: 1px solid var(--color-red-badge);
   color: var(--color-red-badge);
 }
@@ -1345,7 +1345,7 @@ td .commit-summary {
   background: var(--color-green-badge-bg);
 }
 
-.sha.label.isSigned.isVerified .detail.icon {
+.sha.label.isSigned.isVerified .badge {
   border-left: 1px solid var(--color-green-badge);
   color: var(--color-green-badge);
 }
@@ -1359,7 +1359,7 @@ td .commit-summary {
   background: var(--color-yellow-badge-bg);
 }
 
-.sha.label.isSigned.isVerifiedUntrusted .detail.icon {
+.sha.label.isSigned.isVerifiedUntrusted .badge {
   border-left: 1px solid var(--color-yellow-badge);
   color: var(--color-yellow-badge);
 }
@@ -1373,7 +1373,7 @@ td .commit-summary {
   background: var(--color-orange-badge-bg);
 }
 
-.sha.label.isSigned.isVerifiedUnmatched .detail.icon {
+.sha.label.isSigned.isVerifiedUnmatched .badge {
   border-left: 1px solid var(--color-orange-badge);
   color: var(--color-orange-badge);
 }
