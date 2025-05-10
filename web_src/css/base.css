@@ -821,19 +821,6 @@ img.ui.avatar,
   margin-left: 25px;
 }
 
-.ui .sha.label {
-  font-family: var(--fonts-monospace);
-  font-size: 13px;
-  font-weight: var(--font-weight-normal);
-  margin: 0 6px;
-  padding: 5px 10px;
-  flex-shrink: 0;
-}
-
-.ui .sha.label .shortsha {
-  display: inline-block; /* not sure whether it is still needed */
-}
-
 .ui .button.truncate {
   display: inline-block;
   max-width: 100%;
