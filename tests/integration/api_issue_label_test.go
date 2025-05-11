@@ -10,7 +10,9 @@ import (
 	"testing"
 	"time"
 
+	actions_model "forgejo.org/models/actions"
 	auth_model "forgejo.org/models/auth"
+	"forgejo.org/models/db"
 	issues_model "forgejo.org/models/issues"
 	repo_model "forgejo.org/models/repo"
 	"forgejo.org/models/unittest"
@@ -146,6 +148,38 @@ func TestAPIAddIssueLabelsWithLabelNames(t *testing.T) {
 
 	// delete labels
 	req = NewRequest(t, "DELETE", urlStr).AddTokenAuth(token)
+	MakeRequest(t, req, http.StatusNoContent)
+}
+
+func TestAPIRemoveIssueLabel(t *testing.T) {
+	require.NoError(t, unittest.LoadFixtures())
+
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 3})
+	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 6, RepoID: repo.ID})
+	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+	repoLabel := unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: 10, RepoID: repo.ID})
+
+	user1Session := loginUser(t, "user1")
+	token := getTokenForLoggedInUser(t, user1Session, auth_model.AccessTokenScopeWriteIssue)
+
+	urlStr := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/labels", owner.Name, repo.Name, issue.Index)
+	req := NewRequestWithJSON(t, "POST", urlStr, &api.IssueLabelsOption{
+		Labels: []any{repoLabel.Name},
+	}).AddTokenAuth(token)
+	resp := MakeRequest(t, req, http.StatusOK)
+	var apiLabels []*api.Label
+	DecodeJSON(t, resp, &apiLabels)
+	assert.Len(t, apiLabels, unittest.GetCount(t, &issues_model.IssueLabel{IssueID: issue.ID}))
+
+	task := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionTask{ID: 47})
+	task.RepoID = repo.ID
+	task.OwnerID = repo.OwnerID
+	assert.NoError(t, task.GenerateToken())
+	actions_model.UpdateTask(db.DefaultContext, task)
+
+	deleteUrl := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/labels/%d", owner.Name, repo.Name, issue.Index, repoLabel.ID)
+	req = NewRequest(t, "DELETE", deleteUrl).
+		AddTokenAuth(task.Token)
 	MakeRequest(t, req, http.StatusNoContent)
 }
 
