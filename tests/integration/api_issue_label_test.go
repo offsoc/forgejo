@@ -174,11 +174,11 @@ func TestAPIRemoveIssueLabel(t *testing.T) {
 	task := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionTask{ID: 47})
 	task.RepoID = repo.ID
 	task.OwnerID = repo.OwnerID
-	assert.NoError(t, task.GenerateToken())
+	require.NoError(t, task.GenerateToken())
 	actions_model.UpdateTask(db.DefaultContext, task)
 
-	deleteUrl := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/labels/%d", owner.Name, repo.Name, issue.Index, repoLabel.ID)
-	req = NewRequest(t, "DELETE", deleteUrl).
+	deleteURL := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/labels/%d", owner.Name, repo.Name, issue.Index, repoLabel.ID)
+	req = NewRequest(t, "DELETE", deleteURL).
 		AddTokenAuth(task.Token)
 	MakeRequest(t, req, http.StatusNoContent)
 }
