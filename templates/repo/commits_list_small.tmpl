@@ -21,29 +21,14 @@
 			<button class="ui button ellipsis-button show-panel toggle" data-panel="[data-singular-commit-body-for='{{$tag}}']">...</button>
 		{{end}}
 
-		<span class="shabox tw-flex tw-items-center">
+		<span class="shabox tw-flex tw-items-center tw-gap-2">
 			{{template "repo/commit_statuses" dict "Status" .Status "Statuses" .Statuses}}
-			{{$class := "ui sha label"}}
-			{{if .Signature}}
-				{{$class = (print $class " isSigned")}}
-				{{if .Verification.Verified}}
-					{{if eq .Verification.TrustStatus "trusted"}}
-						{{$class = (print $class " isVerified")}}
-					{{else if eq .Verification.TrustStatus "untrusted"}}
-						{{$class = (print $class " isVerifiedUntrusted")}}
-					{{else}}
-						{{$class = (print $class " isVerifiedUnmatched")}}
-					{{end}}
-				{{else if .Verification.Warning}}
-					{{$class = (print $class " isWarning")}}
-				{{end}}
-			{{end}}
-			<a href="{{$commitLink}}" rel="nofollow" class="tw-ml-2 {{$class}}">
-				<span class="shortsha">{{ShortSha .ID.String}}</span>
-				{{if .Signature}}
-					{{template "repo/shabox_badge" dict "root" $.root "verification" .Verification}}
-				{{end}}
-			</a>
+			{{template "repo/shabox" (dict
+				"sha1" .ID.String
+				"commitLink" $commitLink
+				"signature" .Signature
+				"verification" .Verification
+			)}}
 		</span>
 	</div>
 	{{if IsMultilineCommitMessage .Message}}

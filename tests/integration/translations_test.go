@@ -24,7 +24,7 @@ func TestMissingTranslationHandling(t *testing.T) {
 	// Currently new languages can only be added to localestore via AddLocaleByIni
 	// so this line is here to make the other one work. When INI locales are removed,
 	// it will not be needed by this test.
-	i18n.DefaultLocales.AddLocaleByIni("fun", "Funlang", nil, []byte(""), nil)
+	i18n.DefaultLocales.AddLocaleByIni("fun", "Funlang", nil, nil, []byte(""), nil)
 
 	// Add a testing locale to the store
 	i18n.DefaultLocales.AddToLocaleFromJSON("fun", []byte(`{

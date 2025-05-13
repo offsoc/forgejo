@@ -1,4 +1,5 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repository
@@ -131,6 +132,50 @@ func TestPushCommits_AvatarLink(t *testing.T) {
 	assert.Equal(t,
 		"/assets/img/avatar_default.png",
 		pushCommits.AvatarLink(db.DefaultContext, "nonexistent@example.com"))
+}
+
+func TestPushCommitToCommit(t *testing.T) {
+	now := time.Now()
+	sig := &git.Signature{
+		Email: "example@example.com",
+		Name:  "John Doe",
+		When:  now,
+	}
+	const hexString = "0123456789abcdef0123456789abcdef01234567"
+	sha1, err := git.NewIDFromString(hexString)
+	require.NoError(t, err)
+	commit, err := PushCommitToCommit(&PushCommit{
+		Sha1:           sha1.String(),
+		Message:        "Commit Message",
+		AuthorEmail:    "example@example.com",
+		AuthorName:     "John Doe",
+		CommitterEmail: "example@example.com",
+		CommitterName:  "John Doe",
+		Signature:      nil,
+		Timestamp:      now,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, sha1, commit.ID)
+	assert.Equal(t, "Commit Message", commit.CommitMessage)
+	assert.Equal(t, sig, commit.Author)
+	assert.Equal(t, sig, commit.Committer)
+	assert.Nil(t, commit.Signature)
+}
+
+func TestPushCommitToCommitInvalidSha(t *testing.T) {
+	now := time.Now()
+	const hexString = "012"
+	_, err := PushCommitToCommit(&PushCommit{
+		Sha1:           hexString,
+		Message:        "Commit Message",
+		AuthorEmail:    "example@example.com",
+		AuthorName:     "John Doe",
+		CommitterEmail: "example@example.com",
+		CommitterName:  "John Doe",
+		Signature:      nil,
+		Timestamp:      now,
+	})
+	require.Error(t, err)
 }
 
 func TestCommitToPushCommit(t *testing.T) {

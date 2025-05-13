@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2018 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repo
@@ -249,7 +250,7 @@ func addVerifyTagToContext(ctx *context.Context) {
 		if verification == nil {
 			return false
 		}
-		return verification.Reason != "gpg.error.not_signed_commit"
+		return verification.Reason != asymkey.NotSigned
 	}
 }
 
