@@ -163,7 +163,7 @@ func TestActivityPubRepositoryInboxInvalid(t *testing.T) {
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
 
-		c, err := cf.WithKeys(db.DefaultContext, apServerActor, apServerActor.APActorKeyID())
+		c, err := cf.WithKeys(db.DefaultContext, apServerActor, apServerActor.KeyID())
 		require.NoError(t, err)
 
 		repoInboxURL := u.JoinPath(fmt.Sprintf("/api/v1/activitypub/repository-id/%d/inbox", repositoryID)).String()

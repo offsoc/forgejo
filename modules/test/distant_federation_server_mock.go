@@ -44,11 +44,7 @@ func NewFederationServerMockPerson(id int64, name string) FederationServerMockPe
 	}
 }
 
-func (u *FederationServerMockPerson) KeyID(host string) string {
-	return fmt.Sprintf("%[1]v/api/v1/activitypub/user-id/%[2]v#main-key", host, u.ID)
-}
-
-func (p *FederationServerMockPerson) PersonKeyID(host string) string {
+func (p *FederationServerMockPerson) KeyID(host string) string {
 	return fmt.Sprintf("%[1]v/api/v1/activitypub/user-id/%[2]v#main-key", host, p.ID)
 }
 
@@ -66,7 +62,7 @@ func NewApActorMock() ApActorMock {
 	}
 }
 
-func (u *ApActorMock) APActorKeyID(host string) string {
+func (u *ApActorMock) KeyID(host string) string {
 	return fmt.Sprintf("%[1]v/api/v1/activitypub/actor#main-key", host)
 }
 

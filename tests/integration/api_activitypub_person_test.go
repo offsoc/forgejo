@@ -46,7 +46,7 @@ func TestActivityPubPerson(t *testing.T) {
 		require.NoError(t, err)
 
 		c, err := cf.WithKeysDirect(db.DefaultContext, mock.Persons[0].PrivKey,
-			mock.Persons[0].PersonKeyID(federatedSrv.URL))
+			mock.Persons[0].KeyID(federatedSrv.URL))
 		require.NoError(t, err)
 
 		// Unsigned request

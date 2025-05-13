@@ -11,7 +11,7 @@ import (
 )
 
 func TestActorNewFromKeyId(t *testing.T) {
-	sut, err := NewActorIDFromKeyId("https://an.other.forgejo.host/api/v1/activitypub/user-id/5#main-key")
+	sut, err := NewActorIDFromKeyID("https://an.other.forgejo.host/api/v1/activitypub/user-id/5#main-key")
 	require.NoError(t, err)
 	assert.Equal(t, ActorID{
 		ID:                 "5",

@@ -35,7 +35,7 @@ func TestFederationHttpSigValidation(t *testing.T) {
 		clientFactory, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
 
-		apClient, err := clientFactory.WithKeys(db.DefaultContext, user1, user1.APActorKeyID())
+		apClient, err := clientFactory.WithKeys(db.DefaultContext, user1, user1.KeyID())
 		require.NoError(t, err)
 
 		// Unsigned request

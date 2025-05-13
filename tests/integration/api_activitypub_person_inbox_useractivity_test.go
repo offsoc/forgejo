@@ -73,7 +73,7 @@ func TestActivityPubPersonInboxNoteFromDistant(t *testing.T) {
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
 		c, err := cf.WithKeysDirect(db.DefaultContext, mock.ApActor.PrivKey,
-			mock.ApActor.APActorKeyID(federatedSrv.URL))
+			mock.ApActor.KeyID(federatedSrv.URL))
 		require.NoError(t, err)
 		resp, err := c.Post(userActivity, localUser2Inbox)
 		require.NoError(t, err)
@@ -121,7 +121,7 @@ func TestActivityPubPersonInboxNoteToDistant(t *testing.T) {
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
 		c, err := cf.WithKeysDirect(db.DefaultContext, mock.ApActor.PrivKey,
-			mock.ApActor.APActorKeyID(federatedSrv.URL))
+			mock.ApActor.KeyID(federatedSrv.URL))
 		require.NoError(t, err)
 		resp, err := c.Post(followActivity, localUser2Inbox)
 		require.NoError(t, err)
