@@ -26,18 +26,22 @@ import (
 )
 
 func TestActivityPubRepository(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
+
+	mock := test.NewFederationServerMock()
+	federatedSrv := mock.DistantServer(t)
+	defer federatedSrv.Close()
 
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		repositoryID := 2
 
-		apServerActor := user.NewAPServerActor()
-
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
 
-		c, err := cf.WithKeys(db.DefaultContext, apServerActor, apServerActor.APActorKeyID())
+		c, err := cf.WithKeysDirect(db.DefaultContext, mock.Persons[0].PrivKey,
+			mock.Persons[0].KeyID(federatedSrv.URL))
 		require.NoError(t, err)
 
 		resp, err := c.GetBody(fmt.Sprintf("%sapi/v1/activitypub/repository-id/%d", u, repositoryID))
@@ -53,9 +57,10 @@ func TestActivityPubRepository(t *testing.T) {
 }
 
 func TestActivityPubMissingRepository(t *testing.T) {
-	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
-	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 	defer tests.PrepareTestEnv(t)()
+	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
+	defer test.MockVariableValue(&setting.Federation.SignatureEnforced, false)()
+	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 
 	repositoryID := 9999999
 	req := NewRequest(t, "GET", fmt.Sprintf("/api/v1/activitypub/repository-id/%d", repositoryID))
@@ -72,14 +77,14 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 	defer federatedSrv.Close()
 
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
-		apServerActor := user.NewAPServerActor()
 		repositoryID := 2
 		timeNow := time.Now().UTC()
 
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
 
-		c, err := cf.WithKeys(db.DefaultContext, apServerActor, apServerActor.APActorKeyID())
+		c, err := cf.WithKeysDirect(db.DefaultContext, mock.Persons[0].PrivKey,
+			mock.Persons[0].KeyID(federatedSrv.URL))
 		require.NoError(t, err)
 
 		repoInboxURL := u.JoinPath(fmt.Sprintf("/api/v1/activitypub/repository-id/%d/inbox", repositoryID)).String()
@@ -148,6 +153,7 @@ func TestActivityPubRepositoryInboxValid(t *testing.T) {
 
 func TestActivityPubRepositoryInboxInvalid(t *testing.T) {
 	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
+	defer test.MockVariableValue(&setting.Federation.SignatureEnforced, false)()
 	defer test.MockVariableValue(&testWebRoutes, routers.NormalRoutes())()
 
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
