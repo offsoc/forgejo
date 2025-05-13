@@ -106,14 +106,10 @@ func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 		return nil, err
 	}
 
-	log.Trace("xxx: %v", actorID)
-	log.Trace("xxx: %v", actorID.AsWellKnownNodeInfoURI())
-
 	body, err := client.GetBody(actorID.AsWellKnownNodeInfoURI())
 	if err != nil {
 		return nil, err
 	}
-	log.Trace("xxx: %v", body)
 
 	nodeInfoWellKnown, err := forgefed.NewNodeInfoWellKnown(body)
 	if err != nil {
@@ -130,6 +126,7 @@ func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 		return nil, err
 	}
 
+	// TODO: we should get key material here also to have it immediately
 	result, err := forgefed.NewFederationHost(actorID.Host, nodeInfo, actorID.HostPort, actorID.HostSchema)
 	if err != nil {
 		return nil, err
@@ -196,6 +193,7 @@ func fetchUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID
 		return nil, nil, err
 	}
 
+	// TODO: in case of gts we will need an extra request here ?
 	pubKeyBytes, err := decodePublicKeyPem(person.PublicKey.PublicKeyPem)
 	if err != nil {
 		return nil, nil, err
