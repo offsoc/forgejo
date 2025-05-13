@@ -54,7 +54,7 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 		cf, err := activitypub.GetClientFactory(db.DefaultContext)
 		require.NoError(t, err)
 		c, err := cf.WithKeysDirect(db.DefaultContext, mock.ApActor.PrivKey,
-			mock.ApActor.APActorKeyID(federatedSrv.URL))
+			mock.ApActor.KeyID(federatedSrv.URL))
 		require.NoError(t, err)
 		resp, err := c.Post(followActivity, localUser2Inbox)
 		require.NoError(t, err)
@@ -84,7 +84,7 @@ func TestActivityPubPersonInboxFollow(t *testing.T) {
 			localUser2URL,
 		))
 		c, err = cf.WithKeysDirect(db.DefaultContext, mock.ApActor.PrivKey,
-			mock.ApActor.APActorKeyID(federatedSrv.URL))
+			mock.ApActor.KeyID(federatedSrv.URL))
 		require.NoError(t, err)
 		resp, err = c.Post(undoFollowActivity, localUser2Inbox)
 		require.NoError(t, err)

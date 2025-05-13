@@ -51,14 +51,14 @@ func NewFederatedUserActivity(userID, actorID int64, actorURI, noteContent, note
 	return result, nil
 }
 
-func (federatedUser FederatedUserActivity) Validate() []string {
+func (federatedUserActivity FederatedUserActivity) Validate() []string {
 	var result []string
-	result = append(result, validation.ValidateNotEmpty(federatedUser.UserID, "UserID")...)
-	result = append(result, validation.ValidateNotEmpty(federatedUser.ActorID, "ActorID")...)
-	result = append(result, validation.ValidateNotEmpty(federatedUser.ActorURI, "ActorURI")...)
-	result = append(result, validation.ValidateNotEmpty(federatedUser.NoteContent, "NoteContent")...)
-	result = append(result, validation.ValidateNotEmpty(federatedUser.NoteURL, "NoteURL")...)
-	result = append(result, validation.ValidateNotEmpty(federatedUser.OriginalNote, "OriginalNote")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUserActivity.UserID, "UserID")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUserActivity.ActorID, "ActorID")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUserActivity.ActorURI, "ActorURI")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUserActivity.NoteContent, "NoteContent")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUserActivity.NoteURL, "NoteURL")...)
+	result = append(result, validation.ValidateNotEmpty(federatedUserActivity.OriginalNote, "OriginalNote")...)
 	return result
 }
 
@@ -72,12 +72,11 @@ func CreateUserActivity(ctx context.Context, federatedUserActivity *FederatedUse
 
 type GetFollowingFeedsOptions struct {
 	db.ListOptions
-	Actor *user_model.User
 }
 
-func GetFollowingFeeds(ctx context.Context, opts GetFollowingFeedsOptions) ([]*FederatedUserActivity, int64, error) {
-	log.Debug("user_id = %s", opts.Actor.ID)
-	sess := db.GetEngine(ctx).Where("user_id = ?", opts.Actor.ID)
+func GetFollowingFeeds(ctx context.Context, actorID int64, opts GetFollowingFeedsOptions) ([]*FederatedUserActivity, int64, error) {
+	log.Debug("user_id = %s", actorID)
+	sess := db.GetEngine(ctx).Where("user_id = ?", actorID)
 	opts.SetDefaultValues()
 	sess = db.SetSessionPagination(sess, &opts)
 

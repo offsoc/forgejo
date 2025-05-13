@@ -20,14 +20,13 @@ import (
 
 func FindOrCreateFederatedUserKey(ctx *context_service.Base, keyID string) (pubKey any, err error) {
 	var federatedUser *user.FederatedUser
-	var federationHost *forgefed.FederationHost
 	var keyURL *url.URL
 
 	keyURL, err = url.Parse(keyID)
 	if err != nil {
 		return nil, err
 	}
-	rawActorID, err := fm.NewActorIDFromKeyId(keyID)
+	rawActorID, err := fm.NewActorIDFromKeyID(keyID)
 	if err != nil {
 		return nil, err
 	}
@@ -39,12 +38,12 @@ func FindOrCreateFederatedUserKey(ctx *context_service.Base, keyID string) (pubK
 	}
 
 	if federatedUser == nil {
-		_, federatedUser, federationHost, err = FindOrCreateFederatedUser(ctx, rawActorID.AsURI())
+		_, federatedUser, _, err = FindOrCreateFederatedUser(ctx, rawActorID.AsURI())
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		federationHost, err = forgefed.GetFederationHost(ctx, federatedUser.FederationHostID)
+		_, err = forgefed.GetFederationHost(ctx, federatedUser.FederationHostID)
 		if err != nil {
 			return nil, err
 		}
@@ -59,7 +58,7 @@ func FindOrCreateFederatedUserKey(ctx *context_service.Base, keyID string) (pubK
 	}
 
 	// Fetch missing public key
-	pubKey, pubKeyBytes, apPerson, err := fetchKeyFromAp(ctx, *keyURL, federationHost)
+	pubKey, pubKeyBytes, apPerson, err := fetchKeyFromAp(ctx, *keyURL)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +90,7 @@ func FindOrCreateFederationHostKey(ctx *context_service.Base, keyID string) (pub
 	if err != nil {
 		return nil, err
 	}
-	rawActorID, err := fm.NewActorIDFromKeyId(keyID)
+	rawActorID, err := fm.NewActorIDFromKeyID(keyID)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +118,7 @@ func FindOrCreateFederationHostKey(ctx *context_service.Base, keyID string) (pub
 	}
 
 	// If not, fetch missing public key
-	pubKey, pubKeyBytes, apPerson, err := fetchKeyFromAp(ctx, *keyURL, federationHost)
+	pubKey, pubKeyBytes, apPerson, err := fetchKeyFromAp(ctx, *keyURL)
 	if err != nil {
 		return nil, err
 	}
@@ -147,14 +146,14 @@ func FindOrCreateFederationHostKey(ctx *context_service.Base, keyID string) (pub
 	return nil, nil
 }
 
-func fetchKeyFromAp(ctx *context_service.Base, keyURL url.URL, federationHost *forgefed.FederationHost) (pubKey any, pubKeyBytes []byte, apPerson *ap.Person, err error) {
+func fetchKeyFromAp(ctx *context_service.Base, keyURL url.URL) (pubKey any, pubKeyBytes []byte, apPerson *ap.Person, err error) {
 	actionsUser := user.NewAPServerActor()
 	clientFactory, err := activitypub.GetClientFactory(ctx)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	apClient, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.APActorKeyID())
+	apClient, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.KeyID())
 	if err != nil {
 		return nil, nil, nil, err
 	}

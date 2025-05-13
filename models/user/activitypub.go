@@ -19,7 +19,7 @@ func (u *User) APActorID() string {
 	return fmt.Sprintf("%sapi/v1/activitypub/user-id/%s", setting.AppURL, url.PathEscape(fmt.Sprintf("%d", u.ID)))
 }
 
-// APActorKeyID returns the ID of the user's public key
-func (u *User) APActorKeyID() string {
+// KeyID returns the ID of the user's public key
+func (u *User) KeyID() string {
 	return u.APActorID() + "#main-key"
 }

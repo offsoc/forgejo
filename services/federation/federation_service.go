@@ -101,7 +101,7 @@ func createFederationHostFromAP(ctx context.Context, actorID fm.ActorID) (*forge
 		return nil, err
 	}
 
-	client, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.APActorKeyID())
+	client, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.KeyID())
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func fetchUserFromAP(ctx context.Context, personID fm.PersonID, federationHostID
 		return nil, nil, err
 	}
 
-	apClient, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.APActorKeyID())
+	apClient, err := clientFactory.WithKeys(ctx, actionsUser, actionsUser.KeyID())
 	if err != nil {
 		return nil, nil, err
 	}
