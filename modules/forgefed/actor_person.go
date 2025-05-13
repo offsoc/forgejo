@@ -75,7 +75,6 @@ func (id PersonID) HostSuffix() string {
 	var result string
 	if !id.IsPortSupplemented {
 		result = fmt.Sprintf("-%s-%d", strings.ToLower(id.Host), id.HostPort)
-		return result
 	} else {
 		result = fmt.Sprintf("-%s", strings.ToLower(id.Host))
 	}
