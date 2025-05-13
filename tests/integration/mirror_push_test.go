@@ -1,6 +1,7 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
 // Copyright 2024 The Forgejo Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2025 Informatyka Boguslawski sp. z o.o. sp.k. <https://www.ib.pl>
+// SPDX-License-Identifier: MIT AND GPL-3.0-or-later
 
 package integration
 
@@ -301,10 +302,10 @@ func TestSSHPushMirror(t *testing.T) {
 
 				assert.Eventually(t, func() bool {
 					req = NewRequest(t, "GET", fmt.Sprintf("/%s", pushToRepo.FullName()))
-					resp = sess.MakeRequest(t, req, http.StatusOK)
+					resp = sess.MakeRequest(t, req, NoExpectedStatus)
 					htmlDoc = NewHTMLParser(t, resp.Body)
 
-					return htmlDoc.Find(".shortsha").Text() == shortSHA
+					return resp.Code == http.StatusOK && htmlDoc.Find(".shortsha").Text() == shortSHA
 				}, time.Second*30, time.Second)
 			})
 
