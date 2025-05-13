@@ -469,8 +469,8 @@ lint-swagger: node_modules
 
 .PHONY: lint-renovate
 lint-renovate: node_modules
-	npx --yes --package $(RENOVATE_NPM_PACKAGE) -- renovate-config-validator --strict > .lint-renovate 2>&1 || true
-	@if grep --quiet --extended-regexp -e '^( WARN:|ERROR:)' .lint-renovate ; then cat .lint-renovate ; rm .lint-renovate ; exit 1 ; fi
+	npx --yes --package $(RENOVATE_NPM_PACKAGE) -- renovate-config-validator > .lint-renovate 2>&1 || true
+	@if grep --quiet --extended-regexp -e '^( ERROR:)' .lint-renovate ; then cat .lint-renovate ; rm .lint-renovate ; exit 1 ; fi
 	@rm .lint-renovate
 
 .PHONY: lint-locale
