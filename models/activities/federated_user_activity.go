@@ -72,12 +72,11 @@ func CreateUserActivity(ctx context.Context, federatedUserActivity *FederatedUse
 
 type GetFollowingFeedsOptions struct {
 	db.ListOptions
-	Actor *user_model.User
 }
 
-func GetFollowingFeeds(ctx context.Context, opts GetFollowingFeedsOptions) ([]*FederatedUserActivity, int64, error) {
-	log.Debug("user_id = %s", opts.Actor.ID)
-	sess := db.GetEngine(ctx).Where("user_id = ?", opts.Actor.ID)
+func GetFollowingFeeds(ctx context.Context, actorID int64, opts GetFollowingFeedsOptions) ([]*FederatedUserActivity, int64, error) {
+	log.Debug("user_id = %s", actorID)
+	sess := db.GetEngine(ctx).Where("user_id = ?", actorID)
 	opts.SetDefaultValues()
 	sess = db.SetSessionPagination(sess, &opts)
 

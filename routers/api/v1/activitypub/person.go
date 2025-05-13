@@ -97,10 +97,9 @@ func PersonFeed(ctx *context.APIContext) {
 
 	listOptions := utils.GetListOptions(ctx)
 	opts := activities.GetFollowingFeedsOptions{
-		Actor:       ctx.ContextUser,
 		ListOptions: listOptions,
 	}
-	items, count, err := activities.GetFollowingFeeds(ctx, opts)
+	items, count, err := activities.GetFollowingFeeds(ctx, ctx.ContextUser.ID, opts)
 	if err != nil {
 		ctx.Error(http.StatusInternalServerError, "GetFollowingFeeds", err)
 		return

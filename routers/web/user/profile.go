@@ -176,16 +176,21 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 		ctx.Data["CardsTitle"] = ctx.TrN(total, "user.following.title.one", "user.following.title.few")
 	case "feed":
 		pagingNum = setting.UI.FeedPagingNum
-		items, count, err := activities.GetFollowingFeeds(ctx, activities.GetFollowingFeedsOptions{
-			Actor: ctx.Doer,
-			ListOptions: db.ListOptions{
-				PageSize: pagingNum,
-				Page:     page,
-			},
-		})
-		if err != nil {
-			ctx.ServerError("GetFollowingFeeds", err)
-			return
+		items := make([]*activities.FederatedUserActivity, 0)
+		var count int64
+		if ctx.Doer != nil {
+			items, count, err = activities.GetFollowingFeeds(ctx,
+				ctx.Doer.ID,
+				activities.GetFollowingFeedsOptions{
+					ListOptions: db.ListOptions{
+						PageSize: pagingNum,
+						Page:     page,
+					},
+				})
+			if err != nil {
+				ctx.ServerError("GetFollowingFeeds", err)
+				return
+			}
 		}
 		ctx.Data["FollowingFeeds"] = items
 		total = int(count)
