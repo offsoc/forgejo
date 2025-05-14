@@ -81,7 +81,7 @@ func InitLocales(ctx context.Context) {
 
 	refreshLocales := func() {
 		i18n.ResetDefaultLocales()
-		localeNames, err := options.AssetFS().ListFiles("locale", true)
+		localeNames, err := options.AssetFS().ListFiles("locale_legacy", true)
 		if err != nil {
 			log.Fatal("Failed to list locale files: %v", err)
 		}

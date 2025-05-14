@@ -1,8 +1,8 @@
 # Forgejo translations
 
-All translations are stored in directories `locale` and `locale_next`.
+All translations are stored in directories `locale_legacy` and `locale_next`.
 
-`locale` is a historical directory that contains translations in INI format. Forgejo inherited it from Gitea, and Gitea inherited it from Gogs.
+`locale_legacy` is a historical directory that contains translations in INI format. Forgejo inherited it from Gitea, and Gitea inherited it from Gogs.
 
 Because the INI format had many issues and prevented good translatability, in early 2025 Forgejo started switching to a new format - `go-i18n`+`json`.
 

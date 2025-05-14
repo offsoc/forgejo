@@ -131,7 +131,7 @@ func main() {
 	initBlueMondayPolicy()
 	initRemoveTags()
 
-	localeDir := filepath.Join("options", "locale")
+	localeDir := filepath.Join("options", "locale_legacy")
 	localeFiles, err := os.ReadDir(localeDir)
 	if err != nil {
 		panic(err)

@@ -27,7 +27,7 @@ indent_style = space
 [*.svg]
 insert_final_newline = false
 
-[options/locale/locale_*.ini]
+[options/{locale,locale_legacy}/locale_*.ini]
 insert_final_newline = false
 
 # Weblate JSON output defaults to four spaces

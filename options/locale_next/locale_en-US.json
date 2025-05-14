@@ -1,4 +1,5 @@
 {
+    "infected": "Just messing with <script>locales</script> to see if linter still works",
     "home.welcome.no_activity": "No activity",
     "home.welcome.activity_hint": "There is nothing in your feed yet. Your actions and activity from repositories that you watch will show up here.",
     "home.explore_repos": "Explore repositories",

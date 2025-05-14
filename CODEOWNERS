@@ -35,6 +35,7 @@ routers/.* @gusted
 
 # Let locale changes be checked by the translation team.
 options/locale/.* @0ko
+options/locale_legacy/.* @0ko
 options/locale_next/.* @0ko
 
 # Personal interest

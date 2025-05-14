@@ -30,7 +30,7 @@ func main() {
 	}
 	collectInis := func(ref string) map[string]setting.ConfigProvider {
 		inis := map[string]setting.ConfigProvider{}
-		err := filepath.WalkDir("options/locale", func(path string, d os.DirEntry, err error) error {
+		err := filepath.WalkDir("options/locale_legacy", func(path string, d os.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
@@ -58,7 +58,7 @@ func main() {
 	inisOld := collectInis(os.Args[1])
 
 	// use old en-US as the base, and copy the new translations to the old locales
-	enUsOld := inisOld["options/locale/locale_en-US.ini"]
+	enUsOld := inisOld["options/locale_legacy/locale_en-US.ini"]
 	brokenWarned := make(container.Set[string])
 	for path, iniOld := range inisOld {
 		if iniOld == enUsOld {

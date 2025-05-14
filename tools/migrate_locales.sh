@@ -3,6 +3,9 @@
 # Copyright 2024 The Forgejo Authors. All rights reserved.
 # SPDX-License-Identifier: MIT
 
+# Warn: this script's JSON output is likely inconsistent with what Forgejo
+# currently uses. Reach out to devs/translation team if need help with migration
+
 if [ -z "$1" ] || [ -z "$2" ]
 then
 	echo "USAGE: $0 section key [key1 [keyN]]"
@@ -30,7 +33,7 @@ then
 	keyN="$4"
 fi
 
-cd ../options/locale
+cd ../options/locale_legacy
 
 # Migrate the string in one file.
 function process() {

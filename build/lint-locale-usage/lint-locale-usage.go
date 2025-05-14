@@ -301,7 +301,7 @@ func main() {
 
 	msgids := make(container.Set[string])
 
-	localeFile := filepath.Join(filepath.Join("options", "locale"), "locale_en-US.ini")
+	localeFile := filepath.Join(filepath.Join("options", "locale_legacy"), "locale_en-US.ini")
 	localeContent, err := os.ReadFile(localeFile)
 	if err != nil {
 		fmt.Printf("%s:\tERROR: %s\n", localeFile, err.Error())

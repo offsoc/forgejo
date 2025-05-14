@@ -18,7 +18,7 @@ func AssetFS() *assetfs.LayeredFS {
 
 // Locale reads the content of a specific locale from static/bindata or custom path.
 func Locale(name string) ([]byte, error) {
-	return AssetFS().ReadFile("locale", name)
+	return AssetFS().ReadFile("locale_legacy", name)
 }
 
 // Readme reads the content of a specific readme from static/bindata or custom path.
