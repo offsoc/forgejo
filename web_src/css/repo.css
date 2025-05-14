@@ -904,15 +904,18 @@ td .commit-summary {
   background: var(--color-orange-badge-hover-bg) !important;
 }
 
-.repository.view.issue .comment-list .timeline-item .comparebox {
-  line-height: 32px;
-  vertical-align: middle;
+@media (min-width: 768px) {
+  .repository.view.issue .comment-list .timeline-item .forced-push {
+    display: grid;
+    grid-auto-flow: column;
+    column-gap: 1rem;
+  }
 }
 
-.repository.view.issue .comment-list .timeline-item .comparebox .compare.label {
+.repository.view.issue .comment-list .timeline-item .compare.label {
   font-size: 1rem;
-  margin: 0;
   border: 1px solid var(--color-light-border);
+  height: fit-content;
 }
 
 @media (max-width: 767.98px) {
