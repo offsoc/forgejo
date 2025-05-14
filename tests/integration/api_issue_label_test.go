@@ -12,7 +12,6 @@ import (
 
 	actions_model "forgejo.org/models/actions"
 	auth_model "forgejo.org/models/auth"
-	"forgejo.org/models/db"
 	issues_model "forgejo.org/models/issues"
 	repo_model "forgejo.org/models/repo"
 	"forgejo.org/models/unittest"
@@ -152,35 +151,26 @@ func TestAPIAddIssueLabelsWithLabelNames(t *testing.T) {
 }
 
 func TestAPIRemoveIssueLabel(t *testing.T) {
-	require.NoError(t, unittest.LoadFixtures())
+	defer tests.PrepareTestEnv(t)()
 
 	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 3})
-	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 6, RepoID: repo.ID})
-	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
 	repoLabel := unittest.AssertExistsAndLoadBean(t, &issues_model.Label{ID: 10, RepoID: repo.ID})
-
-	user1Session := loginUser(t, "user1")
-	token := getTokenForLoggedInUser(t, user1Session, auth_model.AccessTokenScopeWriteIssue)
-
-	urlStr := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/labels", owner.Name, repo.Name, issue.Index)
-	req := NewRequestWithJSON(t, "POST", urlStr, &api.IssueLabelsOption{
-		Labels: []any{repoLabel.Name},
-	}).AddTokenAuth(token)
-	resp := MakeRequest(t, req, http.StatusOK)
-	var apiLabels []*api.Label
-	DecodeJSON(t, resp, &apiLabels)
-	assert.Len(t, apiLabels, unittest.GetCount(t, &issues_model.IssueLabel{IssueID: issue.ID}))
+	issueBefore := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: 6, RepoID: repo.ID, Labels: []*issues_model.Label{repoLabel}})
+	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
 
 	task := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionTask{ID: 47})
 	task.RepoID = repo.ID
 	task.OwnerID = repo.OwnerID
 	require.NoError(t, task.GenerateToken())
-	actions_model.UpdateTask(db.DefaultContext, task)
+	actions_model.UpdateTask(t.Context(), task)
 
-	deleteURL := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/labels/%d", owner.Name, repo.Name, issue.Index, repoLabel.ID)
-	req = NewRequest(t, "DELETE", deleteURL).
+	deleteURL := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/labels/%d", owner.Name, repo.Name, issueBefore.Index, repoLabel.ID)
+	req := NewRequest(t, "DELETE", deleteURL).
 		AddTokenAuth(task.Token)
 	MakeRequest(t, req, http.StatusNoContent)
+
+	issueAfter := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{ID: issueBefore.ID})
+	assert.Empty(t, issueAfter.Labels)
 }
 
 func TestAPIAddIssueLabelsAutoDate(t *testing.T) {
