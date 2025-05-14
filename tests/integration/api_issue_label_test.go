@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	actions_model "forgejo.org/models/actions"
 	auth_model "forgejo.org/models/auth"
 	issues_model "forgejo.org/models/issues"
 	repo_model "forgejo.org/models/repo"
@@ -147,6 +148,28 @@ func TestAPIAddIssueLabelsWithLabelNames(t *testing.T) {
 	// delete labels
 	req = NewRequest(t, "DELETE", urlStr).AddTokenAuth(token)
 	MakeRequest(t, req, http.StatusNoContent)
+}
+
+func TestAPIRemoveIssueLabel(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+	issue := unittest.AssertExistsAndLoadBean(t, &issues_model.Issue{RepoID: repo.ID})
+	owner := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: repo.OwnerID})
+	issueLabel := unittest.AssertExistsAndLoadBean(t, &issues_model.IssueLabel{IssueID: issue.ID})
+
+	task := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionTask{ID: 47})
+	task.RepoID = repo.ID
+	task.OwnerID = repo.OwnerID
+	require.NoError(t, task.GenerateToken())
+	actions_model.UpdateTask(t.Context(), task)
+
+	deleteURL := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d/labels/%d", owner.Name, repo.Name, issue.Index, issueLabel.LabelID)
+	req := NewRequest(t, "DELETE", deleteURL).
+		AddTokenAuth(task.Token)
+	MakeRequest(t, req, http.StatusNoContent)
+
+	unittest.AssertCount(t, &issues_model.IssueLabel{IssueID: issue.ID, LabelID: issueLabel.LabelID}, 0)
 }
 
 func TestAPIAddIssueLabelsAutoDate(t *testing.T) {

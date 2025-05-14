@@ -8,7 +8,6 @@ import (
 
 	"forgejo.org/models/db"
 	issues_model "forgejo.org/models/issues"
-	access_model "forgejo.org/models/perm/access"
 	user_model "forgejo.org/models/user"
 	notify_service "forgejo.org/services/notify"
 )
@@ -54,17 +53,6 @@ func RemoveLabel(ctx context.Context, issue *issues_model.Issue, doer *user_mode
 
 	if err := issue.LoadRepo(dbCtx); err != nil {
 		return err
-	}
-
-	perm, err := access_model.GetUserRepoPermission(dbCtx, issue.Repo, doer)
-	if err != nil {
-		return err
-	}
-	if !perm.CanWriteIssuesOrPulls(issue.IsPull) {
-		if label.OrgID > 0 {
-			return issues_model.ErrOrgLabelNotExist{}
-		}
-		return issues_model.ErrRepoLabelNotExist{}
 	}
 
 	if err := issues_model.DeleteIssueLabel(dbCtx, issue, label, doer); err != nil {
