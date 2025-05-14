@@ -25,6 +25,17 @@ import (
 	user_service "forgejo.org/services/user"
 )
 
+// toPublicFacingOrganization converts an organization to its public-facing representation for API responses.
+// email are hidden when the user is not logged in.
+func toPublicFacingOrganization(ctx *context.APIContext, org *organization.Organization) *api.Organization {
+	o := convert.ToOrganization(ctx, org)
+	// Don't show Mail, when User is not logged in
+	if ctx.Doer == nil {
+		o.Email = ""
+	}
+	return o
+}
+
 func listUserOrgs(ctx *context.APIContext, u *user_model.User) {
 	listOptions := utils.GetListOptions(ctx)
 	showPrivate := ctx.IsSigned && (ctx.Doer.IsAdmin || ctx.Doer.ID == u.ID)
@@ -219,7 +230,7 @@ func GetAll(ctx *context.APIContext) {
 	}
 	orgs := make([]*api.Organization, len(publicOrgs))
 	for i := range publicOrgs {
-		orgs[i] = convert.ToOrganization(ctx, organization.OrgFromUser(publicOrgs[i]))
+		orgs[i] = toPublicFacingOrganization(ctx, organization.OrgFromUser(publicOrgs[i]))
 	}
 
 	ctx.SetLinkHeader(int(maxResults), listOptions.PageSize)
@@ -310,12 +321,7 @@ func Get(ctx *context.APIContext) {
 		return
 	}
 
-	org := convert.ToOrganization(ctx, ctx.Org.Organization)
-
-	// Don't show Mail, when User is not logged in
-	if ctx.Doer == nil {
-		org.Email = ""
-	}
+	org := toPublicFacingOrganization(ctx, ctx.Org.Organization)
 
 	ctx.JSON(http.StatusOK, org)
 }

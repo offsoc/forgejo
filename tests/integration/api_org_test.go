@@ -184,7 +184,7 @@ func TestAPIOrgDeny(t *testing.T) {
 func TestAPIGetAll(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 
-	token := getUserToken(t, "user1", auth_model.AccessTokenScopeReadOrganization)
+	token := getUserToken(t, "user1", auth_model.AccessTokenScopeReadPackage)
 
 	// accessing with a token will return all orgs
 	req := NewRequest(t, "GET", "/api/v1/orgs").
@@ -294,4 +294,52 @@ func TestAPIOrgChangeEmail(t *testing.T) {
 
 		assert.Empty(t, org.Email)
 	})
+}
+
+func TestPublicOrganizationsAccess(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	tokens := map[string]string{
+		"user1":     getTokenForLoggedInUser(t, loginUser(t, "user1"), auth_model.AccessTokenScopeReadPackage),
+		"user2":     getTokenForLoggedInUser(t, loginUser(t, "user2"), auth_model.AccessTokenScopeReadPackage),
+		"user5":     getTokenForLoggedInUser(t, loginUser(t, "user5"), auth_model.AccessTokenScopeReadPackage),
+		"anonymous": "",
+	}
+
+	tests := []struct {
+		tokenName string
+		orga      string
+		status    int
+	}{
+		{"user2", "", http.StatusOK},
+		{"user5", "", http.StatusOK},
+		{"anonymous", "", http.StatusOK},
+		{"user2", "privated_org", http.StatusNotFound},
+		{"user5", "privated_org", http.StatusOK},
+		{"anonymous", "privated_org", http.StatusNotFound},
+		{"user1", "private_org35", http.StatusOK},
+		{"user5", "private_org35", http.StatusNotFound},
+		{"anonymous", "private_org35", http.StatusNotFound},
+	}
+
+	for _, tt := range tests {
+		url := strings.TrimSuffix(fmt.Sprintf("/api/v1/orgs/%s", tt.orga), "/")
+		name := fmt.Sprintf("%s, %s %s", url, tt.tokenName, func() string {
+			if tt.status == http.StatusOK {
+				return "should see the orga"
+			}
+
+			return "should not see orga"
+		}())
+
+		t.Run(name, func(t *testing.T) {
+			req := NewRequest(t, "GET", url)
+
+			if token, ok := tokens[tt.tokenName]; ok && token != "" {
+				req.AddTokenAuth(token)
+			}
+
+			MakeRequest(t, req, tt.status)
+		})
+	}
 }
