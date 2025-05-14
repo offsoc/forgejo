@@ -214,16 +214,12 @@ help:
 	@echo " - deps-frontend                    install frontend dependencies"
 	@echo " - deps-backend                     install backend dependencies"
 	@echo " - deps-tools                       install tool dependencies"
-	@echo " - deps-py                          install python dependencies"
 	@echo " - lint                             lint everything"
 	@echo " - lint-fix                         lint everything and fix issues"
 	@echo " - lint-frontend                    lint frontend files"
 	@echo " - lint-frontend-fix                lint frontend files and fix issues"
 	@echo " - lint-backend                     lint backend files"
 	@echo " - lint-backend-fix                 lint backend files and fix issues"
-	@echo " - lint-codespell                   lint typos"
-	@echo " - lint-codespell-fix               lint typos and fix them automatically"
-	@echo " - lint-codespell-fix-i             lint typos and fix them interactively"
 	@echo " - lint-go                          lint go files"
 	@echo " - lint-go-fix                      lint go files and fix issues"
 	@echo " - lint-go-vet                      lint go files with vet"
@@ -234,11 +230,7 @@ help:
 	@echo " - lint-css-fix                     lint css files and fix issues"
 	@echo " - lint-md                          lint markdown files"
 	@echo " - lint-swagger                     lint swagger files"
-	@echo " - lint-templates                   lint template files"
 	@echo " - lint-renovate                    lint renovate files"
-	@echo " - lint-yaml                        lint yaml files"
-	@echo " - lint-spell                       lint spelling"
-	@echo " - lint-spell-fix                   lint spelling and fix issues"
 	@echo " - checks                           run various consistency checks"
 	@echo " - checks-frontend                  check frontend files"
 	@echo " - checks-backend                   check backend files"
@@ -418,10 +410,10 @@ checks-frontend: lockfile-check svg-check
 checks-backend: tidy-check swagger-check fmt-check swagger-validate security-check
 
 .PHONY: lint
-lint: lint-frontend lint-backend lint-spell
+lint: lint-frontend lint-backend
 
 .PHONY: lint-fix
-lint-fix: lint-frontend-fix lint-backend-fix lint-spell-fix
+lint-fix: lint-frontend-fix lint-backend-fix
 
 .PHONY: lint-frontend
 lint-frontend: lint-js lint-css
@@ -434,18 +426,6 @@ lint-backend: lint-go lint-go-vet lint-editorconfig lint-renovate lint-locale li
 
 .PHONY: lint-backend-fix
 lint-backend-fix: lint-go-fix lint-go-vet lint-editorconfig lint-disposable-emails-fix
-
-.PHONY: lint-codespell
-lint-codespell: deps-py
-	@poetry run codespell
-
-.PHONY: lint-codespell-fix
-lint-codespell-fix: deps-py
-	@poetry run codespell -w
-
-.PHONY: lint-codespell-fix-i
-lint-codespell-fix-i: deps-py
-	@poetry run codespell -w -i 3 -C 2
 
 .PHONY: lint-js
 lint-js: node_modules
@@ -485,14 +465,6 @@ lint-locale-usage:
 lint-md: node_modules
 	npx markdownlint docs *.md
 
-.PHONY: lint-spell
-lint-spell: lint-codespell
-	@go run $(MISSPELL_PACKAGE) -error $(SPELLCHECK_FILES)
-
-.PHONY: lint-spell-fix
-lint-spell-fix: lint-codespell-fix
-	@go run $(MISSPELL_PACKAGE) -w $(SPELLCHECK_FILES)
-
 RUN_DEADCODE = $(GO) run $(DEADCODE_PACKAGE) -generated=false -f='{{println .Path}}{{range .Funcs}}{{printf "\t%s\n" .Name}}{{end}}{{println}}' -test forgejo.org
 
 .PHONY: lint-go
@@ -528,15 +500,6 @@ lint-disposable-emails:
 .PHONY: lint-disposable-emails-fix
 lint-disposable-emails-fix:
 	$(GO) run build/generate-disposable-email.go -r $(DISPOSABLE_EMAILS_SHA)
-
-.PHONY: lint-templates
-lint-templates: .venv node_modules
-	@node tools/lint-templates-svg.js
-	@poetry run djlint $(shell find templates -type f -iname '*.tmpl')
-
-.PHONY: lint-yaml
-lint-yaml: .venv
-	@poetry run yamllint -s .
 
 .PHONY: security-check
 security-check:
@@ -945,10 +908,7 @@ reproduce-build\#%:
 ###
 
 .PHONY: deps
-deps: deps-frontend deps-backend deps-tools deps-py
-
-.PHONY: deps-py
-deps-py: .venv
+deps: deps-frontend deps-backend deps-tools
 
 .PHONY: deps-frontend
 deps-frontend: node_modules
