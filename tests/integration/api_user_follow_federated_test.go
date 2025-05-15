@@ -17,6 +17,7 @@ import (
 	"forgejo.org/modules/test"
 	"forgejo.org/routers"
 	"forgejo.org/tests"
+
 	"github.com/stretchr/testify/assert"
 )
 

@@ -7,9 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"forgejo.org/modules/log"
-
 	"forgejo.org/models/db"
+	"forgejo.org/modules/log"
 	"forgejo.org/modules/optional"
 	"forgejo.org/modules/validation"
 )
