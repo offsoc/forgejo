@@ -5,7 +5,9 @@ package moderation
 
 import (
 	"errors"
+	"time"
 
+	"forgejo.org/models/db"
 	"forgejo.org/models/issues"
 	"forgejo.org/models/moderation"
 	"forgejo.org/models/perm"
@@ -126,4 +128,24 @@ func CanReport(ctx context.Context, doer *user.User, contentType moderation.Repo
 	}
 
 	return hasAccess, nil
+}
+
+// RemoveResolvedReports removes resolved reports
+func RemoveResolvedReports(ctx context.Context, timeout time.Duration) error {
+	log.Trace("Doing: RemoveResolvedReports")
+
+	status := moderation.ReportStatusTypeHandled
+	resolvedReports, err := db.GetEngine(ctx).Table("abuse_report").Where("status = ?", status).Exist()
+	if err != nil {
+		return err
+	} else if resolvedReports {
+		_, err := db.GetEngine(ctx).Table("abuse_report").Where("status = ?", status).Delete()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	log.Trace("Finished: RemoveResolvedReports")
+	return nil
 }
