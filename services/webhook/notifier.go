@@ -893,6 +893,23 @@ func (m *webhookNotifier) ActionRunNowDone(ctx context.Context, run *actions_mod
 		Repository: run.Repo,
 		Owner:      run.TriggerUser,
 	}
+	// TODO: is this the correct user to get the permissions from
+	doer := run.TriggerUser
+
+	lastStatus := ""
+	if lastRun != nil {
+		lastStatus = lastRun.Status.String()
+	}
+
+	permission, _ := access_model.GetUserRepoPermission(ctx, run.Repo, doer)
+	var payload = &api.ActionPayload{
+		Repo:          convert.ToRepo(ctx, run.Repo, permission),
+		TriggerUser:   convert.ToUser(ctx, run.TriggerUser, doer),
+		RunTitle:      run.Title,
+		CurrentStatus: run.Status.String(),
+		PriorStatus:   priorStatus.String(),
+		LastStatus:    lastStatus,
+	}
 
 	if run.Status.IsSuccess() {
 		// only care about recovered runs
@@ -900,11 +917,11 @@ func (m *webhookNotifier) ActionRunNowDone(ctx context.Context, run *actions_mod
 			return
 		}
 
-		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunRecover, &api.PackagePayload{}); err != nil {
+		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunRecover, payload); err != nil {
 			log.Error("PrepareWebhooks: %v", err)
 		}
 	} else {
-		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunFailure, &api.PackagePayload{}); err != nil {
+		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunFailure, payload); err != nil {
 			log.Error("PrepareWebhooks: %v", err)
 		}
 	}

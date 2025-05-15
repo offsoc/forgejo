@@ -29,7 +29,7 @@ type HookEvents struct {
 	Action                   bool `json:"action"`
 }
 
-// HookEvent represents events that will delivery hook.
+// HookEvent represents events that will deliver a hook.
 type HookEvent struct {
 	PushOnly       bool   `json:"push_only"`
 	SendEverything bool   `json:"send_everything"`

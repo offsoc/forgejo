@@ -119,6 +119,7 @@ var (
 	_ Payloader = &RepositoryPayload{}
 	_ Payloader = &ReleasePayload{}
 	_ Payloader = &PackagePayload{}
+	_ Payloader = &ActionPayload{}
 )
 
 // _________                        __
@@ -491,11 +492,23 @@ func (p *PackagePayload) JSONPayload() ([]byte, error) {
 //  / ___ \ (__| |_| | (_) | | | |
 // /_/   \_\___|\__|_|\___/|_| |_|
 
-// TODO: put sensible stuff in here
 // ActionPayload payload for repository webhooks
 type ActionPayload struct {
-	Action       HookRepoAction `json:"action"`
-	Repository   *Repository    `json:"repository"`
-	Organization *User          `json:"organization"`
-	Sender       *User          `json:"sender"`
+	Repo        *Repository `json:"repository"`
+	TriggerUser *User       `json:"trigger_user"`
+	RunTitle    string      `json:"run_title"`
+	// the status of the just completed run
+	// this must be a done status
+	CurrentStatus string `json:"current_status"`
+	// the status of this run before it completed
+	// this must be a not done status
+	PriorStatus string `json:"prior_status"`
+	// the final status of the last run for the same workflow
+	// could be empty when Run is the first for it's workflow
+	LastStatus string `json:"last_status"`
+}
+
+// JSONPayload return payload information
+func (p *ActionPayload) JSONPayload() ([]byte, error) {
+	return json.MarshalIndent(p, "", "  ")
 }
