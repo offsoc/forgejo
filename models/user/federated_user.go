@@ -11,7 +11,7 @@ import (
 
 type FederatedUser struct {
 	ID                    int64                  `xorm:"pk autoincr"`
-	UserID                int64                  `xorm:"NOT NULL"`
+	UserID                int64                  `xorm:"NOT NULL INDEX user_id"`
 	ExternalID            string                 `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
 	FederationHostID      int64                  `xorm:"UNIQUE(federation_user_mapping) NOT NULL"`
 	KeyID                 sql.NullString         `xorm:"key_id UNIQUE"`

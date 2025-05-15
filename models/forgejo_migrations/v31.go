@@ -15,12 +15,20 @@ import (
 func AddFederatedUserActivityTables(x *xorm.Engine) error {
 	type FederatedUserActivity struct {
 		ID           int64 `xorm:"pk autoincr"`
-		UserID       int64 `xorm:"NOT NULL"`
+		UserID       int64 `xorm:"NOT NULL INDEX user_id"`
 		ActorID      string
+		ActorURI     string
 		NoteContent  string
 		NoteURL      string
 		OriginalNote string
 		Created      timeutil.TimeStamp `xorm:"created"`
+	}
+
+	// drop unique index on HostFqdn & add unique index on HostFqdn+HostPort
+	type FederationHost struct {
+		ID       int64  `xorm:"pk autoincr"`
+		HostFqdn string `xorm:"host_fqdn UNIQUE(federation_host) INDEX VARCHAR(255) NOT NULL"`
+		HostPort uint16 `xorm:" UNIQUE(federation_host) INDEX NOT NULL DEFAULT 443"`
 	}
 
 	type FederatedUserFollower struct {
@@ -30,14 +38,43 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 		FollowingUserID int64 `xorm:"NOT NULL unique(fuf_rel)"`
 	}
 
-	// Add InboxPath to FederatedUser
+	// Add InboxPath to FederatedUser & add index fo UserID
 	type FederatedUser struct {
 		ID        int64 `xorm:"pk autoincr"`
-		UserID    int64 `xorm:"NOT NULL"`
+		UserID    int64 `xorm:"NOT NULL INDEX user_id"`
 		InboxPath string
 	}
 
-	err := x.Sync(&FederatedUserActivity{})
+	federationHostTable, err := x.TableInfo(FederationHost{})
+	if err != nil {
+		return err
+	}
+	for _, index := range federationHostTable.Indexes {
+		if index.Name == "host_fqdn" {
+			sessMigration := x.NewSession()
+			defer sessMigration.Close()
+
+			if err := sessMigration.Begin(); err != nil {
+				return err
+			}
+			sql := x.Dialect().DropIndexSQL(federationHostTable.Name, index)
+			_, err := sessMigration.Exec(sql)
+			if err != nil {
+				log.Warn("Tried to execute %q but was not sucessful due to: %v", sql, err)
+			}
+			err = sessMigration.Commit()
+			if err != nil {
+				log.Warn("Tried to commit %q but was not sucessful due to: %v", sql, err)
+			}
+		}
+	}
+
+	err = x.Sync(&FederationHost{})
+	if err != nil {
+		return err
+	}
+
+	err = x.Sync(&FederatedUserActivity{})
 	if err != nil {
 		return err
 	}
