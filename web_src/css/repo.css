@@ -1294,6 +1294,10 @@ td .commit-summary {
   border: none !important;
 }
 
+.sha.label .shortsha {
+  padding: 0 0.25rem;
+}
+
 .sha.label .ui.signature.avatar {
   height: 16px;
   margin-bottom: 0;
@@ -1305,10 +1309,6 @@ td .commit-summary {
   background: var(--color-light);
   padding: 0.25rem 0.33rem 0.25rem 0.25rem;
   border-left: 1px solid var(--color-light-border);
-}
-
-.sha.label .shortsha {
-  padding: 0 0.25rem;
 }
 
 .sha.label .status-author {
