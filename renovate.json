@@ -1,6 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>forgejo/renovate-config"],
+  "extends": [
+    "local>forgejo/renovate-config"
+  ],
   "ignorePresets": [
     ":semanticPrefixFixDepsChoreOthers",
     "docker:pinDigests",
@@ -11,16 +13,28 @@
     "/^v7\\.\\d+/forgejo$/",
     "/^v11\\.\\d+/forgejo$/"
   ],
-  "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
+  "postUpdateOptions": [
+    "gomodTidy",
+    "gomodUpdateImportPaths",
+    "npmDedupe"
+  ],
   "prConcurrentLimit": 10,
   "osvVulnerabilityAlerts": true,
   "automergeStrategy": "squash",
-  "labels": ["dependency-upgrade","test/not-needed"],
+  "labels": [
+    "dependency-upgrade",
+    "test/not-needed"
+  ],
   "packageRules": [
     {
       "description": "Require approval for python minor version",
-      "matchPackageNames": ["containerbase/python-prebuild", "python"],
-      "matchUpdateTypes": ["minor"],
+      "matchPackageNames": [
+        "containerbase/python-prebuild",
+        "python"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
       "dependencyDashboardApproval": true
     },
     {
@@ -40,17 +54,25 @@
         "github.com/google/pprof",
         "github.com/golangci/misspell/cmd/misspell"
       ],
-      "extends": ["schedule:quarterly"]
+      "extends": [
+        "schedule:quarterly"
+      ]
     },
     {
       "description": "elasticsearch CI images are published about once a month and do not use semantic versioning or short tags",
-      "matchPackageNames": ["elasticsearch"],
-      "extends": ["schedule:quarterly"]
+      "matchPackageNames": [
+        "elasticsearch"
+      ],
+      "extends": [
+        "schedule:quarterly"
+      ]
     },
     {
       "description": "devcontainer is an optional tool used by some Forgejo contributors when working on the codebase",
       "groupName": "devcontainer packages",
-      "extends": ["schedule:quarterly"],
+      "extends": [
+        "schedule:quarterly"
+      ],
       "automerge": true,
       "matchPackageNames": [
         "ghcr.io/devcontainers/features/**",
@@ -59,21 +81,38 @@
     },
     {
       "description": "x/tools/* are used in the CI only and upgraded together",
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
       "automerge": true,
       "groupName": "x/tools",
-      "matchPackageNames": ["golang.org/x/tools{/,}**"]
+      "matchPackageNames": [
+        "golang.org/x/tools{/,}**"
+      ]
     },
     {
       "description": "Group postcss minor and patch updates",
-      "extends": ["packages:postcss"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "extends": [
+        "packages:postcss"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupName": "postcss"
     },
     {
       "description": "Group Forgejo go-chi packages",
-      "matchUpdateTypes": ["minor", "patch", "digest"],
-      "matchPackageNames": ["code.forgejo.org/go-chi/**"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
+      "matchPackageNames": [
+        "code.forgejo.org/go-chi/**"
+      ],
       "groupName": "forgejo go-chi packages"
     },
     {
@@ -94,19 +133,31 @@
         "github.com/urfave/cli/**",
         "swagger-ui-dist"
       ],
-      "matchUpdateTypes": ["patch"],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "automerge": true
     },
     {
       "description": "Add reviewer and additional labels to renovate PRs",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["data.forgejo.org/renovate/renovate"],
-      "reviewers": ["viceice"],
-      "addLabels": ["forgejo/ci"]
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "data.forgejo.org/renovate/renovate"
+      ],
+      "reviewers": [
+        "viceice"
+      ],
+      "addLabels": [
+        "forgejo/ci"
+      ]
     },
     {
       "description": "Disable renovate self-updates for release branches",
-      "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
+      "matchBaseBranches": [
+        "/^v\\d+\\.\\d+\\/forgejo$/"
+      ],
       "matchPackageNames": [
         "code.forgejo.org/forgejo-contrib/renovate",
         "data.forgejo.org/renovate/renovate",
@@ -116,7 +167,11 @@
     },
     {
       "description": "Automerge some packages when CI succeeds",
-      "extends": ["packages:linters", "packages:test", "schedule:monthly"],
+      "extends": [
+        "packages:linters",
+        "packages:test",
+        "schedule:monthly"
+      ],
       "matchPackageNames": [
         "@axe-core/playwright",
         "@eslint-community/**",
@@ -142,21 +197,29 @@
     },
     {
       "description": "Hold back on some package updates for a few days",
-      "matchPackageNames": ["monaco-editor"],
+      "matchPackageNames": [
+        "monaco-editor"
+      ],
       "minimumReleaseAge": "30 days"
     },
     {
       "description": "Require approval for stable branches (must be last rule to override all others)",
-      "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
+      "matchBaseBranches": [
+        "/^v\\d+\\.\\d+\\/forgejo$/"
+      ],
       "dependencyDashboardApproval": true,
-      "schedule": ["at any time"]
+      "schedule": [
+        "at any time"
+      ]
     }
   ],
   "customManagers": [
     {
       "description": "Update deps inside Makefile",
       "customType": "regex",
-      "fileMatch": ["^Makefile$"],
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
       "matchStrings": [
         " \\?= (?<depName>.+?)@(?<currentValue>.+?) # renovate: datasource=(?<datasource>.+?)(?: packageName=(?<packageName>.+?))?( versioning=(?<versioning>.+?))?\\s"
       ]
