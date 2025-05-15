@@ -99,7 +99,7 @@ var migrations = []*Migration{
 	// v29 -> v30
 	NewMigration("Migrate `User.NormalizedFederatedURI` column to extract port & schema into FederatedHost", MigrateNormalizedFederatedURI),
 	// v30 -> v31
-	NewMigration("Add federated user activity tables & update the `federated_user` table", AddFederatedUserActivityTables),
+	NewMigration("Add federated user activity tables, update the `federated_user` table & add indexes", AddFederatedUserActivityTables),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.
