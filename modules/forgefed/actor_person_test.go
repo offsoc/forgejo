@@ -258,3 +258,11 @@ func TestForgePersonValidation(t *testing.T) {
 		t.Errorf("sut expected to be valid: %v\n", sut.Validate())
 	}
 }
+
+func TestAsloginName(t *testing.T) {
+	sut, _ := NewPersonID("https://codeberg.org/api/v1/activitypub/user-id/12345", "forgejo")
+	assert.Equal(t, "12345-codeberg.org", sut.AsLoginName())
+
+	sut, _ = NewPersonID("https://codeberg.org:443/api/v1/activitypub/user-id/12345", "forgejo")
+	assert.Equal(t, "12345-codeberg.org-443", sut.AsLoginName())
+}
