@@ -1,4 +1,5 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package files
@@ -38,7 +39,7 @@ func GetPayloadCommitVerification(ctx context.Context, commit *git.Commit) *stru
 	verification.Verified = commitVerification.Verified
 	verification.Reason = commitVerification.Reason
 	if verification.Reason == "" && !verification.Verified {
-		verification.Reason = "gpg.error.not_signed_commit"
+		verification.Reason = asymkey_model.NotSigned
 	}
 	return verification
 }

@@ -1,4 +1,5 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package integration
@@ -10,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"forgejo.org/models/asymkey"
 	repo_model "forgejo.org/models/repo"
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
@@ -101,7 +103,7 @@ func getExpectedFileResponseForRepofilesDelete() *api.FileResponse {
 		},
 		Verification: &api.PayloadCommitVerification{
 			Verified:  false,
-			Reason:    "gpg.error.not_signed_commit",
+			Reason:    asymkey.NotSigned,
 			Signature: "",
 			Payload:   "",
 		},
@@ -171,7 +173,7 @@ func getExpectedFileResponseForRepofilesCreate(commitID, lastCommitSHA string, l
 		},
 		Verification: &api.PayloadCommitVerification{
 			Verified:  false,
-			Reason:    "gpg.error.not_signed_commit",
+			Reason:    asymkey.NotSigned,
 			Signature: "",
 			Payload:   "",
 		},
@@ -240,7 +242,7 @@ func getExpectedFileResponseForRepofilesUpdate(commitID, filename, lastCommitSHA
 		},
 		Verification: &api.PayloadCommitVerification{
 			Verified:  false,
-			Reason:    "gpg.error.not_signed_commit",
+			Reason:    asymkey.NotSigned,
 			Signature: "",
 			Payload:   "",
 		},

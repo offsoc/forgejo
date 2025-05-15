@@ -32,6 +32,11 @@ var MockPluralRuleEnglish PluralFormRule = func(n int64) PluralFormIndex {
 	return PluralFormOther
 }
 
+var (
+	UsedPluralFormsEnglish = []PluralFormIndex{PluralFormOne, PluralFormOther}
+	UsedPluralFormsMock    = []PluralFormIndex{PluralFormZero, PluralFormOne, PluralFormFew, PluralFormOther}
+)
+
 func TestLocaleStore(t *testing.T) {
 	testData1 := []byte(`
 .dot.name = Dot Name
@@ -85,8 +90,8 @@ commits = fallback value for commits
 `)
 
 	ls := NewLocaleStore()
-	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", MockPluralRuleEnglish, testData1, nil))
-	require.NoError(t, ls.AddLocaleByIni("lang2", "Lang2", MockPluralRule, testData2, nil))
+	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", MockPluralRuleEnglish, UsedPluralFormsEnglish, testData1, nil))
+	require.NoError(t, ls.AddLocaleByIni("lang2", "Lang2", MockPluralRule, UsedPluralFormsMock, testData2, nil))
 	require.NoError(t, ls.AddToLocaleFromJSON("lang1", testDataJSON1))
 	require.NoError(t, ls.AddToLocaleFromJSON("lang2", testDataJSON2))
 	ls.SetDefaultLang("lang1")
@@ -182,7 +187,7 @@ c=22
 `)
 
 	ls := NewLocaleStore()
-	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", MockPluralRule, testData1, testData2))
+	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", MockPluralRule, UsedPluralFormsMock, testData1, testData2))
 	lang1, _ := ls.Locale("lang1")
 	assert.Equal(t, "11", lang1.TrString("a"))
 	assert.Equal(t, "21", lang1.TrString("b"))
@@ -223,7 +228,7 @@ func (e *errorPointerReceiver) Error() string {
 
 func TestLocaleWithTemplate(t *testing.T) {
 	ls := NewLocaleStore()
-	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", MockPluralRule, []byte(`key=<a>%s</a>`), nil))
+	require.NoError(t, ls.AddLocaleByIni("lang1", "Lang1", MockPluralRule, UsedPluralFormsMock, []byte(`key=<a>%s</a>`), nil))
 	lang1, _ := ls.Locale("lang1")
 
 	tmpl := template.New("test").Funcs(template.FuncMap{"tr": lang1.TrHTML})
@@ -286,7 +291,7 @@ func TestLocaleStoreQuirks(t *testing.T) {
 
 	for _, testData := range testDataList {
 		ls := NewLocaleStore()
-		err := ls.AddLocaleByIni("lang1", "Lang1", nil, []byte("a="+testData.in), nil)
+		err := ls.AddLocaleByIni("lang1", "Lang1", nil, nil, []byte("a="+testData.in), nil)
 		lang1, _ := ls.Locale("lang1")
 		require.NoError(t, err, testData.hint)
 		assert.Equal(t, testData.out, lang1.TrString("a"), testData.hint)

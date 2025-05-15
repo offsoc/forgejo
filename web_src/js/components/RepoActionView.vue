@@ -208,8 +208,7 @@ const sfc = {
           el.append(logLine);
 
           const list = document.createElement('div');
-          list.classList.add('job-log-list');
-          list.classList.add('hidden');
+          list.classList.add('job-log-list', 'hidden');
           list.setAttribute('data-group', group.index);
           groupStack.push(list);
           el.append(list);

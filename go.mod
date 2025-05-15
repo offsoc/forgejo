@@ -17,13 +17,13 @@ require (
 	code.gitea.io/sdk/gitea v0.21.0
 	codeberg.org/gusted/mcaptcha v0.0.0-20220723083913-4f3072e1d570
 	connectrpc.com/connect v1.17.0
-	github.com/42wim/httpsig v1.2.2
-	github.com/42wim/sshsig v0.0.0-20211121163825-841cf5bbc121
+	github.com/42wim/httpsig v1.2.3
+	github.com/42wim/sshsig v0.0.0-20250502153856-5100632e8920
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358
 	github.com/ProtonMail/go-crypto v1.1.6
 	github.com/PuerkitoBio/goquery v1.10.3
 	github.com/SaveTheRbtz/zstd-seekable-format-go/pkg v0.7.2
-	github.com/alecthomas/chroma/v2 v2.17.0
+	github.com/alecthomas/chroma/v2 v2.17.2
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/blevesearch/bleve/v2 v2.5.0
 	github.com/buildkite/terminal-to-html/v3 v3.16.8
@@ -48,7 +48,7 @@ require (
 	github.com/go-ldap/ldap/v3 v3.4.6
 	github.com/go-openapi/spec v0.20.14
 	github.com/go-sql-driver/mysql v1.9.1
-	github.com/go-webauthn/webauthn v0.12.3
+	github.com/go-webauthn/webauthn v0.13.0
 	github.com/gobwas/glob v0.2.3
 	github.com/gogs/chardet v0.0.0-20211120154057-b7413eaefb8f
 	github.com/gogs/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
@@ -76,9 +76,9 @@ require (
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/minio/minio-go/v7 v7.0.91
-	github.com/msteinert/pam/v2 v2.0.0
+	github.com/msteinert/pam/v2 v2.1.0
 	github.com/nektos/act v0.2.52
-	github.com/niklasfasching/go-org v1.7.0
+	github.com/niklasfasching/go-org v1.8.0
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.1
@@ -100,13 +100,13 @@ require (
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	gitlab.com/gitlab-org/api/client-go v0.126.0
 	go.uber.org/mock v0.5.1
-	golang.org/x/crypto v0.37.0
-	golang.org/x/image v0.26.0
-	golang.org/x/net v0.39.0
-	golang.org/x/oauth2 v0.29.0
-	golang.org/x/sync v0.13.0
-	golang.org/x/sys v0.32.0
-	golang.org/x/text v0.24.0
+	golang.org/x/crypto v0.38.0
+	golang.org/x/image v0.27.0
+	golang.org/x/net v0.40.0
+	golang.org/x/oauth2 v0.30.0
+	golang.org/x/sync v0.14.0
+	golang.org/x/sys v0.33.0
+	golang.org/x/text v0.25.0
 	google.golang.org/protobuf v1.36.4
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/ini.v1 v1.67.0
@@ -173,9 +173,9 @@ require (
 	github.com/go-openapi/jsonpointer v0.20.2 // indirect
 	github.com/go-openapi/jsonreference v0.20.4 // indirect
 	github.com/go-openapi/swag v0.22.7 // indirect
-	github.com/go-webauthn/x v0.1.20 // indirect
+	github.com/go-webauthn/x v0.1.21 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/geo v0.0.0-20230421003525-6adc56603217 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -183,7 +183,7 @@ require (
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/google/go-tpm v0.9.3 // indirect
+	github.com/google/go-tpm v0.9.5 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
@@ -249,7 +249,7 @@ replace github.com/hashicorp/go-version => github.com/6543/go-version v1.3.1
 
 replace github.com/shurcooL/vfsgen => github.com/lunny/vfsgen v0.0.0-20220105142115-2c99e1ffdfa0
 
-replace github.com/nektos/act => code.forgejo.org/forgejo/act v1.25.1
+replace github.com/nektos/act => code.forgejo.org/forgejo/act v1.26.0
 
 replace github.com/mholt/archiver/v3 => code.forgejo.org/forgejo/archiver/v3 v3.5.1
 
