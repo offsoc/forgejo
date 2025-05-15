@@ -312,6 +312,12 @@ func (s slackConvertor) Repository(p *api.RepositoryPayload) (SlackPayload, erro
 	return s.createPayload(text, nil), nil
 }
 
+func (s slackConvertor) Action(p *api.ActionPayload) (SlackPayload, error) {
+	text, _ := getActionPayloadInfo(p, SlackLinkFormatter)
+
+	return s.createPayload(text, nil), nil
+}
+
 func (s slackConvertor) createPayload(text string, attachments []SlackAttachment) SlackPayload {
 	return SlackPayload{
 		Channel:     s.Channel,

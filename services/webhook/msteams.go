@@ -326,6 +326,22 @@ func (m msteamsConvertor) Package(p *api.PackagePayload) (MSTeamsPayload, error)
 	), nil
 }
 
+func (m msteamsConvertor) Action(p *api.ActionPayload) (MSTeamsPayload, error) {
+	title, color := getActionPayloadInfo(p, noneLinkFormatter)
+
+	// TODO: is TriggerUser correct here?
+	return createMSTeamsPayload(
+		p.Repo,
+		p.TriggerUser,
+		title,
+		"",
+		p.RunHTMLURL,
+		color,
+		// TODO: does this make any sense?
+		&MSTeamsFact{"Action:", p.RunTitle},
+	), nil
+}
+
 func createMSTeamsPayload(r *api.Repository, s *api.User, title, text, actionTarget string, color int, fact *MSTeamsFact) MSTeamsPayload {
 	facts := make([]MSTeamsFact, 0, 2)
 	if r != nil {

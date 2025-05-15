@@ -325,6 +325,13 @@ func (d discordConvertor) Package(p *api.PackagePayload) (DiscordPayload, error)
 	return d.createPayload(p.Sender, text, "", p.Package.HTMLURL, color), nil
 }
 
+func (d discordConvertor) Action(p *api.ActionPayload) (DiscordPayload, error) {
+	text, color := getActionPayloadInfo(p, noneLinkFormatter)
+
+	// TODO: is TriggerUser correct here?
+	return d.createPayload(p.TriggerUser, text, "", p.RunHTMLURL, color), nil
+}
+
 var _ shared.PayloadConvertor[DiscordPayload] = discordConvertor{}
 
 func (discordHandler) NewRequest(ctx context.Context, w *webhook_model.Webhook, t *webhook_model.HookTask) (*http.Request, []byte, error) {

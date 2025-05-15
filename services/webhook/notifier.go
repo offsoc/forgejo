@@ -906,6 +906,8 @@ func (m *webhookNotifier) ActionRunNowDone(ctx context.Context, run *actions_mod
 		Repo:          convert.ToRepo(ctx, run.Repo, permission),
 		TriggerUser:   convert.ToUser(ctx, run.TriggerUser, doer),
 		RunTitle:      run.Title,
+		RunHTMLURL:    run.HTMLURL(),
+		RunBranch:     run.PrettyRef(),
 		CurrentStatus: run.Status.String(),
 		PriorStatus:   priorStatus.String(),
 		LastStatus:    lastStatus,
@@ -916,11 +918,12 @@ func (m *webhookNotifier) ActionRunNowDone(ctx context.Context, run *actions_mod
 		if lastRun.Status.IsSuccess() {
 			return
 		}
-
+		payload.Action = api.ActionRecovered
 		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunRecover, payload); err != nil {
 			log.Error("PrepareWebhooks: %v", err)
 		}
 	} else {
+		payload.Action = api.ActionFailed
 		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunFailure, payload); err != nil {
 			log.Error("PrepareWebhooks: %v", err)
 		}

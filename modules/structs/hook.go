@@ -492,11 +492,23 @@ func (p *PackagePayload) JSONPayload() ([]byte, error) {
 //  / ___ \ (__| |_| | (_) | | | |
 // /_/   \_\___|\__|_|\___/|_| |_|
 
-// ActionPayload payload for repository webhooks
+// this name is ridiculous, yes
+// it's the sub-type of hook that has something to do with Forgejo Actions
+type HookActionAction string
+
+const (
+	ActionFailed    HookActionAction = "created"
+	ActionRecovered HookActionAction = "deleted"
+)
+
+// ActionPayload payload for action webhooks
 type ActionPayload struct {
-	Repo        *Repository `json:"repository"`
-	TriggerUser *User       `json:"trigger_user"`
-	RunTitle    string      `json:"run_title"`
+	Action      HookActionAction `json:"action"`
+	Repo        *Repository      `json:"repository"`
+	TriggerUser *User            `json:"trigger_user"`
+	RunTitle    string           `json:"run_title"`
+	RunHTMLURL  string           `json:"run_html_url"`
+	RunBranch   string           `json:"branch"`
 	// the status of the just completed run
 	// this must be a done status
 	CurrentStatus string `json:"current_status"`
