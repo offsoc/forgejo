@@ -46,22 +46,15 @@ func NewPullRequest(ctx context.Context, repo *repo_model.Repository, issue *iss
 		return user_model.ErrBlockedByUser
 	}
 
-	prCtx, cancel, err := createTemporaryRepoForPR(ctx, pr)
+	testPatchCtx, err := testPatch(ctx, pr)
+	defer testPatchCtx.close()
 	if err != nil {
-		if !git_model.IsErrBranchNotExist(err) {
-			log.Error("CreateTemporaryRepoForPR %-v: %v", pr, err)
-		}
-		return err
-	}
-	defer cancel()
-
-	if err := testPatch(ctx, prCtx, pr); err != nil {
-		return err
+		return fmt.Errorf("testPatch: %w", err)
 	}
 
-	divergence, err := git.GetDivergingCommits(ctx, prCtx.tmpBasePath, baseBranch, trackingBranch)
+	divergence, err := git.GetDivergingCommits(ctx, testPatchCtx.gitRepo.Path, testPatchCtx.baseRev, testPatchCtx.headRev, testPatchCtx.env)
 	if err != nil {
-		return err
+		return fmt.Errorf("GetDivergingCommits: %w", err)
 	}
 	pr.CommitsAhead = divergence.Ahead
 	pr.CommitsBehind = divergence.Behind

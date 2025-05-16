@@ -33,21 +33,21 @@ func TestRepoIsEmpty(t *testing.T) {
 
 func TestRepoGetDivergingCommits(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
-	do, err := GetDivergingCommits(t.Context(), bareRepo1Path, "master", "branch2")
+	do, err := GetDivergingCommits(t.Context(), bareRepo1Path, "master", "branch2", nil)
 	require.NoError(t, err)
 	assert.Equal(t, DivergeObject{
 		Ahead:  1,
 		Behind: 5,
 	}, do)
 
-	do, err = GetDivergingCommits(t.Context(), bareRepo1Path, "master", "master")
+	do, err = GetDivergingCommits(t.Context(), bareRepo1Path, "master", "master", nil)
 	require.NoError(t, err)
 	assert.Equal(t, DivergeObject{
 		Ahead:  0,
 		Behind: 0,
 	}, do)
 
-	do, err = GetDivergingCommits(t.Context(), bareRepo1Path, "master", "test")
+	do, err = GetDivergingCommits(t.Context(), bareRepo1Path, "master", "test", nil)
 	require.NoError(t, err)
 	assert.Equal(t, DivergeObject{
 		Ahead:  0,
