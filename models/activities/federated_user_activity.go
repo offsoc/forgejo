@@ -23,9 +23,9 @@ type FederatedUserActivity struct {
 	ActorID      int64
 	ActorURI     string
 	Actor        *user_model.User `xorm:"-"` // transient
-	NoteContent  string
+	NoteContent  string           `xorm:"VARCHAR"`
 	NoteURL      string
-	OriginalNote string
+	OriginalNote string             `xorm:"VARCHAR"`
 	Created      timeutil.TimeStamp `xorm:"created"`
 }
 
