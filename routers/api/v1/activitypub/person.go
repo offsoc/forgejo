@@ -78,7 +78,7 @@ func PersonInbox(ctx *context.APIContext) {
 
 // PersonFeed returns the recorded activities in the user's feed
 func PersonFeed(ctx *context.APIContext) {
-	// swagger:operation GET /activitypub/user-id/{user-id}/feed activitypub activitypubPersonFeed
+	// swagger:operation GET /activitypub/user-id/{user-id}/outbox activitypub activitypubPersonFeed
 	// ---
 	// summary: List the user's recorded activity
 	// produces:
@@ -106,7 +106,7 @@ func PersonFeed(ctx *context.APIContext) {
 	}
 	ctx.SetTotalCountHeader(count)
 
-	feed := ap.OrderedCollectionNew(ap.IRI(ctx.ContextUser.APActorID() + "/feed"))
+	feed := ap.OrderedCollectionNew(ap.IRI(ctx.ContextUser.APActorID() + "/outbox"))
 	feed.AttributedTo = ap.IRI(ctx.ContextUser.APActorID())
 	for _, item := range items {
 		if err := feed.OrderedItems.Append(convert.ToActivityPubPersonFeedItem(item)); err != nil {
