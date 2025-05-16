@@ -16,7 +16,7 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 	type FederatedUserActivity struct {
 		ID           int64 `xorm:"pk autoincr"`
 		UserID       int64 `xorm:"NOT NULL INDEX user_id"`
-		ActorID      string
+		ActorID      int64
 		ActorURI     string
 		NoteContent  string
 		NoteURL      string
@@ -28,7 +28,7 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 	type FederationHost struct {
 		ID       int64  `xorm:"pk autoincr"`
 		HostFqdn string `xorm:"host_fqdn UNIQUE(federation_host) INDEX VARCHAR(255) NOT NULL"`
-		HostPort uint16 `xorm:" UNIQUE(federation_host) INDEX NOT NULL DEFAULT 443"`
+		HostPort uint16 `xorm:"UNIQUE(federation_host) INDEX NOT NULL DEFAULT 443"`
 	}
 
 	type FederatedUserFollower struct {
@@ -45,6 +45,8 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 		InboxPath string
 	}
 
+	var err error
+
 	federationHostTable, err := x.TableInfo(FederationHost{})
 	if err != nil {
 		return err
@@ -60,11 +62,11 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 			sql := x.Dialect().DropIndexSQL(federationHostTable.Name, index)
 			_, err := sessMigration.Exec(sql)
 			if err != nil {
-				log.Warn("Tried to execute %q but was not sucessful due to: %v", sql, err)
+				log.Warn("Tried to execute %q but was not successful due to: %v", sql, err)
 			}
 			err = sessMigration.Commit()
 			if err != nil {
-				log.Warn("Tried to commit %q but was not sucessful due to: %v", sql, err)
+				log.Warn("Tried to commit %q but was not successful due to: %v", sql, err)
 			}
 		}
 	}
