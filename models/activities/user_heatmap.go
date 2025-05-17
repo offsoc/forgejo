@@ -62,7 +62,7 @@ func getUserHeatmapData(ctx context.Context, user *user_model.User, team *organi
 		Select(groupBy+" AS timestamp, count(user_id) as contributions").
 		Table("action").
 		Where(cond).
-		And("created_unix > ?", timeutil.TimeStampNow()-32054400).
+		And("created_unix > ?", timeutil.TimeStampNow()-32054400). // 371 days to cover the entire heatmap
 		GroupBy("timestamp").
 		OrderBy("timestamp").
 		Find(&hdata)
