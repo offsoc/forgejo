@@ -595,47 +595,6 @@ It needs some tricks to tweak the left/right borders with active state */
   border-color: var(--color-purple-dark-2);
 }
 
-/* pink */
-
-.ui.pink.labels .label,
-.ui.ui.ui.pink.label,
-.ui.pink.button,
-.ui.pink.buttons .button,
-.ui.pink.button:focus,
-.ui.pink.buttons .button:focus {
-  background: var(--color-pink);
-}
-
-.ui.pink.button:hover,
-.ui.pink.buttons .button:hover {
-  background: var(--color-pink-dark-1);
-}
-
-.ui.pink.button:active,
-.ui.pink.buttons .button:active {
-  background: var(--color-pink-dark-2);
-}
-
-.ui.basic.pink.buttons .button,
-.ui.basic.pink.button,
-.ui.basic.pink.buttons .button:focus,
-.ui.basic.pink.button:focus {
-  color: var(--color-pink);
-  border-color: var(--color-pink);
-}
-
-.ui.basic.pink.buttons .button:hover,
-.ui.basic.pink.button:hover {
-  color: var(--color-pink-dark-1);
-  border-color: var(--color-pink-dark-1);
-}
-
-.ui.basic.pink.buttons .button:active,
-.ui.basic.pink.button:active {
-  color: var(--color-pink-dark-2);
-  border-color: var(--color-pink-dark-2);
-}
-
 /* brown */
 
 .ui.brown.labels .label,

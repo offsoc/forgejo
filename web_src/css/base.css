@@ -700,10 +700,6 @@ img.ui.avatar,
   color: var(--color-purple) !important;
 }
 
-.text.pink {
-  color: var(--color-pink) !important;
-}
-
 .text.brown {
   color: var(--color-brown) !important;
 }

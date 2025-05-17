@@ -96,7 +96,6 @@
   --color-blue: #2563eb;
   --color-violet: #7c3aed;
   --color-purple: #9333ea;
-  --color-pink: #db2777;
   --color-brown: #a47252;
   --color-grey: var(--steel-500);
   --color-black: #111827;
@@ -110,7 +109,6 @@
   --color-blue-light: #3b82f6;
   --color-violet-light: #8b5cf6;
   --color-purple-light: #a855f7;
-  --color-pink-light: #ec4899;
   --color-brown-light: #94674a;
   --color-grey-light: var(--steel-300);
   --color-black-light: #1f2937;
@@ -124,7 +122,6 @@
   --color-blue-dark-1: #1554e0;
   --color-violet-dark-1: #6a1feb;
   --color-purple-dark-1: #8519e7;
-  --color-pink-dark-1: #c7216b;
   --color-brown-dark-1: #94674a;
   --color-black-dark-1: #0f1623;
   /* dark 2 variants produced via Sass scale-color(color, $lightness: -20%) */
@@ -137,7 +134,6 @@
   --color-blue-dark-2: #2563eb;
   --color-violet-dark-2: #5c14d8;
   --color-purple-dark-2: #7c3aed;
-  --color-pink-dark-2: #b11d5f;
   --color-brown-dark-2: #a47252;
   --color-black-dark-2: #111827;
   /* ansi colors used for actions console and console files */
