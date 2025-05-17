@@ -349,47 +349,6 @@ It needs some tricks to tweak the left/right borders with active state */
   border-color: var(--color-yellow-dark-2);
 }
 
-/* olive */
-
-.ui.olive.labels .label,
-.ui.ui.ui.olive.label,
-.ui.olive.button,
-.ui.olive.buttons .button,
-.ui.olive.button:focus,
-.ui.olive.buttons .button:focus {
-  background: var(--color-olive);
-}
-
-.ui.olive.button:hover,
-.ui.olive.buttons .button:hover {
-  background: var(--color-olive-dark-1);
-}
-
-.ui.olive.button:active,
-.ui.olive.buttons .button:active {
-  background: var(--color-olive-dark-2);
-}
-
-.ui.basic.olive.buttons .button,
-.ui.basic.olive.button,
-.ui.basic.olive.buttons .button:focus,
-.ui.basic.olive.button:focus {
-  color: var(--color-olive);
-  border-color: var(--color-olive);
-}
-
-.ui.basic.olive.buttons .button:hover,
-.ui.basic.olive.button:hover {
-  color: var(--color-olive-dark-1);
-  border-color: var(--color-olive-dark-1);
-}
-
-.ui.basic.olive.buttons .button:active,
-.ui.basic.olive.button:active {
-  color: var(--color-olive-dark-2);
-  border-color: var(--color-olive-dark-2);
-}
-
 /* green */
 
 .ui.green.labels .label,
