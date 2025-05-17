@@ -38,7 +38,8 @@
 }
 
 .user.profile .ui.card .extra.content > ul > li.follow .ui.button,
-.user.profile .ui.card .extra.content > ul > li.block .ui.button {
+.user.profile .ui.card .extra.content > ul > li.block .ui.button,
+.user.profile .ui.card .extra.content > ul > li.report .ui.button {
   align-items: center;
   display: flex;
   justify-content: center;
