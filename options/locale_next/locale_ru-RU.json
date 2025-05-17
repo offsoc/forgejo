@@ -23,7 +23,7 @@
     "alert.asset_load_failed": "Не удалось получить ресурсы из {path}. Убедитесь, что файлы ресурсов доступны.",
     "install.invalid_lfs_path": "Не удалось расположить корень LFS по указанному пути: %[1]s",
     "alert.range_error": " - число должно быть в диапазоне от %[1]s-%[2]s.",
-    "meta.last_line": "Skip-CI это круто, но мне нужно запустить тесты для слияния переводов с основной веткой.",
+    "meta.last_line": "Triggering CI skip again.",
     "mail.actions.not_successful_run_subject": "Провал раб. потока %[1]s в репозитории %[2]s",
     "mail.actions.successful_run_after_failure_subject": "Возобновление раб. потока %[1]s в репозитории %[2]s",
     "mail.actions.run_info_ref": "Ветвь: %[1]s (%[2]s)",
