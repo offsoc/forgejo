@@ -1,7 +1,8 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
 // Copyright 2025 The Forgejo Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2025 Informatyka Boguslawski sp. z o.o. sp.k. <https://www.ib.pl>
+// SPDX-License-Identifier: MIT AND GPL-3.0-or-later
 
 package activities
 
@@ -143,7 +144,7 @@ func (at ActionType) InActions(actions ...string) bool {
 // used in template render.
 type Action struct {
 	ID          int64 `xorm:"pk autoincr"`
-	UserID      int64 `xorm:"INDEX"` // Receiver user id.
+	UserID      int64 `xorm:"index(user_id_is_deleted)"` // Receiver user id.
 	OpType      ActionType
 	ActUserID   int64            // Action user id.
 	ActUser     *user_model.User `xorm:"-"`
@@ -152,7 +153,7 @@ type Action struct {
 	CommentID   int64                  `xorm:"INDEX"`
 	Comment     *issues_model.Comment  `xorm:"-"`
 	Issue       *issues_model.Issue    `xorm:"-"` // get the issue id from content
-	IsDeleted   bool                   `xorm:"NOT NULL DEFAULT false"`
+	IsDeleted   bool                   `xorm:"NOT NULL DEFAULT false index(user_id_is_deleted)"`
 	RefName     string
 	IsPrivate   bool               `xorm:"NOT NULL DEFAULT false"`
 	Content     string             `xorm:"TEXT"`
