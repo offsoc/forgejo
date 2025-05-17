@@ -472,47 +472,6 @@ It needs some tricks to tweak the left/right borders with active state */
   border-color: var(--color-blue-dark-2);
 }
 
-/* violet */
-
-.ui.violet.labels .label,
-.ui.ui.ui.violet.label,
-.ui.violet.button,
-.ui.violet.buttons .button,
-.ui.violet.button:focus,
-.ui.violet.buttons .button:focus {
-  background: var(--color-violet);
-}
-
-.ui.violet.button:hover,
-.ui.violet.buttons .button:hover {
-  background: var(--color-violet-dark-1);
-}
-
-.ui.violet.button:active,
-.ui.violet.buttons .button:active {
-  background: var(--color-violet-dark-2);
-}
-
-.ui.basic.violet.buttons .button,
-.ui.basic.violet.button,
-.ui.basic.violet.buttons .button:focus,
-.ui.basic.violet.button:focus {
-  color: var(--color-violet);
-  border-color: var(--color-violet);
-}
-
-.ui.basic.violet.buttons .button:hover,
-.ui.basic.violet.button:hover {
-  color: var(--color-violet-dark-1);
-  border-color: var(--color-violet-dark-1);
-}
-
-.ui.basic.violet.buttons .button:active,
-.ui.basic.violet.button:active {
-  color: var(--color-violet-dark-2);
-  border-color: var(--color-violet-dark-2);
-}
-
 /* purple */
 
 .ui.purple.labels .label,

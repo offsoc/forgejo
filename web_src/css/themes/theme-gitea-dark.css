@@ -77,7 +77,6 @@
   --color-green: #87ab63;
   --color-teal: #00918a;
   --color-blue: #3a8ac6;
-  --color-violet: #906ae1;
   --color-purple: #b259d0;
   --color-brown: #a47252;
   --color-black: #1d2328;
@@ -88,7 +87,6 @@
   --color-green-light: #93b373;
   --color-teal-light: #00b6ad;
   --color-blue-light: #4e96cc;
-  --color-violet-light: #9b79e4;
   --color-purple-light: #ba6ad5;
   --color-brown-light: #b08061;
   --color-black-light: #424851;
@@ -99,7 +97,6 @@
   --color-green-dark-1: #7a9e55;
   --color-teal-dark-1: #00837c;
   --color-blue-dark-1: #347cb3;
-  --color-violet-dark-1: #7b4edb;
   --color-purple-dark-1: #a742c9;
   --color-brown-dark-1: #94674a;
   --color-black-dark-1: #292e38;
@@ -110,7 +107,6 @@
   --color-green-dark-2: #6c8c4c;
   --color-teal-dark-2: #00746e;
   --color-blue-dark-2: #2e6e9f;
-  --color-violet-dark-2: #6733d6;
   --color-purple-dark-2: #9834b9;
   --color-brown-dark-2: #835b42;
   --color-black-dark-2: #272930;
@@ -131,6 +127,8 @@
   --color-ansi-bright-magenta: #d74397;
   --color-ansi-bright-cyan: #00b6ad;
   --color-ansi-bright-white: var(--color-console-fg);
+  /* legacy variables used by attention banner */
+  --color-violet-dark-1: #7b4edb;
   /* other colors */
   --color-grey: #384147;
   --color-grey-light: #828f99;

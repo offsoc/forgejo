@@ -688,10 +688,6 @@ img.ui.avatar,
   color: var(--color-blue) !important;
 }
 
-.text.violet {
-  color: var(--color-violet) !important;
-}
-
 .text.purple {
   color: var(--color-purple) !important;
 }
