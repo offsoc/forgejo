@@ -9,5 +9,61 @@
         "many": "souhaite fusionner %[1]d révision(s) depuis <code>%[2]s</code> vers <code id=\"%[4]s\">%[3]s</code>",
         "other": ""
     },
-    "search.milestone_kind": "Recherche dans les jalons..."
+    "search.milestone_kind": "Recherche dans les jalons…",
+    "mail.actions.run_info_ref": "Branche : %[1]s (%[2]s)",
+    "discussion.locked": "Cette discussion a été bloqué. Les commentaires sont limités aux contributeurs.",
+    "relativetime.now": "maintenant",
+    "relativetime.future": "dans le future",
+    "relativetime.mins": {
+        "one": "il y a %d minute",
+        "many": "il y a %d minutes",
+        "other": "il y a %d minutes"
+    },
+    "relativetime.hours": {
+        "one": "il y a %d heure",
+        "many": "il y a %d heures",
+        "other": "il y a %d heures"
+    },
+    "relativetime.days": {
+        "one": "il y a %d jour",
+        "many": "il y a %d jours",
+        "other": "il y a %d jours"
+    },
+    "relativetime.months": {
+        "one": "il y a %d mois",
+        "many": "il y a %d mois",
+        "other": "il y a %d mois"
+    },
+    "relativetime.years": {
+        "one": "il y a %d an",
+        "many": "il y a %d ans",
+        "other": "il y a %d ans"
+    },
+    "relativetime.1day": "hier",
+    "relativetime.2days": "il y a 2 jours",
+    "relativetime.1week": "la semaine dernière",
+    "relativetime.2weeks": "il y a 2 semaines",
+    "relativetime.2months": "il y a 2 mois",
+    "relativetime.1year": "l'année dernière",
+    "relativetime.2years": "il y a 2 ans",
+    "themes.names.forgejo-light": "Forgejo clair",
+    "themes.names.forgejo-dark": "Forgejo sombre",
+    "themes.names.forgejo-auto": "Forgejo (suivre le thème du système)",
+    "alert.asset_load_failed": "Échec du chargement des fichiers d'asset de {path}. Faites en sorte que les fichiers d'asset puissent être accessibles.",
+    "install.invalid_lfs_path": "Impossible de créer le root LFS au chemin spécifié : %[1]s",
+    "alert.range_error": " doit être un nombre entre %[1]s et %[2]s.",
+    "home.welcome.no_activity": "Pas d'activité",
+    "home.welcome.activity_hint": "Il n'y a rien dans votre fil d'actualité. Vos actions et activités de vos dépôts que vous suivez s'afficheront ici.",
+    "home.explore_repos": "Explorer les dépôts",
+    "home.explore_users": "Explorer les utilisateurs",
+    "home.explore_orgs": "Explorer les organisations",
+    "relativetime.weeks": {
+        "one": "il y a %d semaine",
+        "many": "il y a %d semaines",
+        "other": "il y a %d semaines"
+    },
+    "error.not_found.title": "Page non trouvée",
+    "relativetime.1month": "le mois dernier",
+    "incorrect_root_url": "Cette instance Forgejo est configuré pour être servi sur \"%s\". Vous êtes actuellement en train de regarder Forgejo avec une URL différente, ce qui pourrait casser certaines parties de cette application. L'URL canonique est controllée par les administrateurs Forgejo grâce au paramètre ROOT_URL dans le app.ini.",
+    "meta.last_line": "Merci de traduire Forgejo ! Cette ligne n'est pas vue par les utilisateurs mais sert à d'autres fins dans la gestion de la traduction. Vous pouvez mettre une fun fact dans la traduction au lieu de la traduire. Miaou."
 }
