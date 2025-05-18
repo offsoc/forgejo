@@ -21,29 +21,90 @@
 }
 
 .user.profile .ui.card .extra.content > ul > li {
-  padding: 10px;
+  padding: 0.75rem;
   display: flex;
   list-style: none;
   align-items: center;
-  gap: 0.25em;
+  gap: 0.25rem;
 }
 
 .user.profile .ui.card .extra.content > ul > li:not(:last-child) {
   border-bottom: 1px solid var(--color-secondary);
 }
 
-.user.profile .ui.card .extra.content > ul > li .svg {
-  margin-left: 1px;
-  margin-right: 5px;
+.user.profile .ui.card .extra.content > ul > li.extra-info {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.user.profile .ui.card .extra.content > ul > li.follow .ui.button,
-.user.profile .ui.card .extra.content > ul > li.block .ui.button,
-.user.profile .ui.card .extra.content > ul > li.report .ui.button {
+.user.profile .ui.card .actions {
+  padding: 0.75rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user.profile .ui.card .primary-action .ui.button {
   align-items: center;
   display: flex;
   justify-content: center;
   width: 100%;
+}
+
+details.fjdd > summary {
+  user-select: none;
+  list-style-type: none;
+}
+
+/* Virtual fullscreen area. Clicking anywhere causes dropdown to close */
+details.fjdd[open] > summary::before {
+  z-index: 1;
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  inset: 0;
+  background: 0 0;
+  content: "";
+  cursor: default;
+}
+
+details.fjdd > summary + ul {
+  z-index: 99;
+  position: absolute;
+  min-width: max-content;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  list-style-type: none;
+  border-radius: var(--border-radius);
+  background: var(--color-body);
+  box-shadow: 0 6px 18px var(--color-shadow);
+}
+
+details.fjdd > summary + ul > li {
+  width: 100%;
+}
+
+details.fjdd > summary + ul > li {
+  padding: 0.5rem 1rem;
+  background: none;
+}
+details.fjdd > summary + ul > li .entry {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  color: var(--color-text);
+}
+
+details.fjdd > summary + ul > li:hover {
+  background: var(--color-hover)
+}
+
+/* Cancel default styling */
+details.fjdd > summary + ul > li button {
+  padding: 0;
+  background: none;
 }
 
 .user.profile .ui.card #profile-avatar {

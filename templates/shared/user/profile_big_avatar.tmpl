@@ -23,15 +23,62 @@
 				{{end}}</span>
 		<div class="tw-mt-2">
 			<a class="muted" href="{{.ContextUser.HomeLink}}?tab=followers">{{svg "octicon-people" 18 "tw-mr-1"}}{{ctx.Locale.TrN .NumFollowers "user.followers_one" "user.followers_few" .NumFollowers}}</a> · <a class="muted" href="{{.ContextUser.HomeLink}}?tab=following">{{ctx.Locale.TrN .NumFollowing "user.following_one" "user.following_few" .NumFollowing}}</a>
-			{{if and .EnableFeed (or .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate))}}
-				<a href="{{.ContextUser.HomeLink}}.rss"><i class="ui text grey tw-ml-2" data-tooltip-content="{{ctx.Locale.Tr "rss_feed"}}">{{svg "octicon-rss" 18}}</i></a>
-			{{end}}
 		</div>
 	</div>
+	{{if and .IsSigned (ne .SignedUserID .ContextUser.ID)}}
+		<div class="actions">
+			<div class="primary-action" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
+				{{if $.IsFollowing}}
+					<button hx-post="{{.ContextUser.HomeLink}}?action=unfollow" class="ui basic red button tw-flex tw-gap-1">
+						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unfollow"}}
+					</button>
+				{{else}}
+					<button hx-post="{{.ContextUser.HomeLink}}?action=follow" class="ui basic primary button tw-flex tw-gap-1">
+						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.follow"}}
+					</button>
+				{{end}}
+			</div>
+			<details class="fjdd">
+				<summary>{{svg "octicon-kebab-horizontal"}}</summary>
+				<ul>
+					{{if and .EnableFeed (or .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate))}}
+						<li>
+							<a href="{{.ContextUser.HomeLink}}.rss" class="entry">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "rss_feed"}}</span></a>
+						</li>
+						<li>
+							<a href="{{.ContextUser.HomeLink}}.atom" class="entry">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "feed.atom.link"}}</span></a>
+						</li>
+					{{end}}
+					<li>
+						<a href="{{.ContextUser.HomeLink}}.keys" class="entry">{{svg "octicon-key"}}<span>SSH keys</span></a>
+					</li>
+					<li>
+						<a href="{{.ContextUser.HomeLink}}.gpg" class="entry">{{svg "octicon-key"}}<span>Signing keys</span></a>
+					</li>
+					<li hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
+						{{if $.IsBlocked}}
+							<button class="entry orange text" hx-post="{{.ContextUser.HomeLink}}?action=unblock">
+								{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unblock"}}
+							</button>
+						{{else}}
+							<button class="entry orange text" type="submit" data-modal-id="block-user" hx-post="{{.ContextUser.HomeLink}}?action=block" hx-confirm="-">
+								{{svg "octicon-blocked"}} {{ctx.Locale.Tr "user.block"}}
+							</button>
+						{{end}}
+					</li>
+					{{if or .IsModerationEnabled true}}
+						<li>
+							<a href="{{AppSubUrl}}/report_abuse?type=user&id={{.ContextUser.ID}}" class="entry orange text">{{svg "octicon-stop"}}{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
+						</li>
+					{{end}}
+				</ul>
+			</details>
+		</div>
+	{{end}}
 	<div class="extra content tw-break-anywhere">
 		<ul>
 			{{if .ContextUser.Location}}
-				<li>
+				<li class="extra-info">
 					{{svg "octicon-location"}}
 					<span class="tw-flex-1">{{.ContextUser.Location}}</span>
 					{{if .ContextUserLocationMapURL}}
@@ -42,20 +89,20 @@
 				</li>
 			{{end}}
 			{{if .ShowUserEmail}}
-					<li>
-						{{svg "octicon-mail"}}
-						<a class="tw-flex-1" href="mailto:{{.ContextUser.Email}}" rel="nofollow">{{.ContextUser.Email}}</a>
-						{{if (eq .SignedUserID .ContextUser.ID)}}
-							<a href="{{AppSubUrl}}/user/settings#privacy-user-settings">
-								<i data-tooltip-content="{{ctx.Locale.Tr "user.email_visibility.limited"}}">
-									{{svg "octicon-unlock"}}
-								</i>
-							</a>
-						{{end}}
-					</li>
+				<li class="extra-info">
+					{{svg "octicon-mail"}}
+					<a class="tw-flex-1" href="mailto:{{.ContextUser.Email}}" rel="nofollow">{{.ContextUser.Email}}</a>
+					{{if (eq .SignedUserID .ContextUser.ID)}}
+						<a href="{{AppSubUrl}}/user/settings#privacy-user-settings">
+							<i data-tooltip-content="{{ctx.Locale.Tr "user.email_visibility.limited"}}">
+								{{svg "octicon-unlock"}}
+							</i>
+						</a>
+					{{end}}
+				</li>
 			{{end}}
 			{{if .ContextUser.Website}}
-				<li>
+				<li class="extra-info">
 					{{svg "octicon-link"}}
 					<a target="_blank" rel="noopener noreferrer me" href="{{.ContextUser.Website}}">{{.ContextUser.Website}}</a>
 				</li>
@@ -73,7 +120,10 @@
 					</li>
 				{{end}}
 			{{end}}
-			<li>{{svg "octicon-calendar"}} <span>{{ctx.Locale.Tr "user.joined_on" (DateUtils.AbsoluteShort .ContextUser.CreatedUnix)}}</span></li>
+			<li class="extra-info">
+				{{svg "octicon-calendar"}}
+				<span>{{ctx.Locale.Tr "user.joined_on" (DateUtils.AbsoluteShort .ContextUser.CreatedUnix)}}</span>
+			</li>
 			{{if and .Orgs .HasOrgsVisible}}
 			<li>
 				<ul class="user-orgs">
@@ -99,35 +149,6 @@
 				{{end}}
 				</ul>
 			</li>
-			{{end}}
-			{{if and .IsSigned (ne .SignedUserID .ContextUser.ID)}}
-			<li class="follow" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
-				{{if $.IsFollowing}}
-					<button hx-post="{{.ContextUser.HomeLink}}?action=unfollow" class="ui basic red button">
-						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unfollow"}}
-					</button>
-				{{else}}
-					<button hx-post="{{.ContextUser.HomeLink}}?action=follow" class="ui basic primary button">
-						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.follow"}}
-					</button>
-				{{end}}
-			</li>
-			<li class="block" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
-				{{if $.IsBlocked}}
-					<button class="ui basic red button" hx-post="{{.ContextUser.HomeLink}}?action=unblock">
-						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unblock"}}
-					</button>
-				{{else}}
-					<button type="submit" class="ui basic orange button" data-modal-id="block-user" hx-post="{{.ContextUser.HomeLink}}?action=block" hx-confirm="-">
-						{{svg "octicon-blocked"}} {{ctx.Locale.Tr "user.block"}}
-					</button>
-				{{end}}
-			</li>
-			{{if .IsModerationEnabled}}
-			<li class="report">
-				<a class="ui basic orange button" href="{{AppSubUrl}}/report_abuse?type=user&id={{.ContextUser.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
-			</li>
-			{{end}}
 			{{end}}
 		</ul>
 	</div>
