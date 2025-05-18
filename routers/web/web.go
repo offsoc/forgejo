@@ -785,6 +785,7 @@ func registerRoutes(m *web.Route) {
 		if setting.Moderation.Enabled {
 			m.Group("/moderation/reports", func() {
 				m.Get("", admin.AbuseReports)
+				m.Get("/type/{type:1|2|3|4}/id/{id}", admin.AbuseReportDetails)
 			})
 		}
 	}, adminReq, ctxDataSet("EnableOAuth2", setting.OAuth2.Enabled, "EnablePackages", setting.Packages.Enabled, "EnableModeration", setting.Moderation.Enabled))

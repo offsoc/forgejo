@@ -1,0 +1,67 @@
+{{template "admin/layout_head" (dict "ctxData" . "pageClass" "admin")}}
+<div class="admin-setting-content">
+	<h4 class="ui top attached header">
+		{{ctx.Locale.Tr "admin.moderation.reports"}}
+	</h4>
+	<div class="ui attached segment">
+		<div class="flex-item tw-items-center">
+			<div class="flex-item-leading">
+				{{svg .ContentTypeIconName 24}}
+			</div>
+			<div class="flex-item-main">
+				<div class="flex-item-title">
+					<a href="{{.ContentURL}}">{{.ContentReference}}</a>
+					{{if .Poster}}
+						<span> — {{.Poster}}</span>
+					{{end}}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="ui attached segment">
+		{{if .Reports}}
+		<div class="flex-list">
+			{{range .Reports}}
+			<div class="flex-item">
+				<div class="flex-item-main">
+					<div class="flex-items-inline">
+						<span class="item tw-mr-2">
+							{{svg "octicon-calendar"}}
+							{{DateUtils.AbsoluteShort .CreatedUnix}}
+						</span>
+						<span class="item tw-mr-2">
+							{{svg "octicon-report"}}
+							{{if .ReporterName}}<a href="/{{.ReporterName}}">{{.ReporterName}}</a>{{else}}{{$.GhostUserName}}{{end}}
+						</span>
+						<span class="item ui label">
+							{{svg "octicon-tag" 12}}
+							{{ctx.Locale.Tr (index $.AbuseCategories .Category)}}
+						</span>
+					</div>
+
+					<pre>{{.Remarks}}</pre>
+
+					{{if .ShadowCopyID.Valid}}
+						<details><summary>{{DateUtils.FullTime .ShadowCopyDate}} shadow copy</summary>
+						{{if not .ShadowCopyMap}}
+						<table class="ui very basic striped table unstackable">
+							{{range $scField := (call $.GetShadowCopyMap $.Context .)}}
+							<tr>
+								<td>{{$scField.Key}}</td>
+								<td>{{$scField.Value}}</td>
+							</tr>
+							{{end}}
+						</table>
+						{{end}}
+						</details>
+					{{end}}
+				</div>
+			</div>
+			{{end}}
+		</div>
+		{{else}}
+		<p class="tw-text-center">{{ctx.Locale.Tr "admin.moderation.no_open_reports"}}</p>
+		{{end}}
+	</div>
+</div>
+{{template "admin/layout_footer" .}}

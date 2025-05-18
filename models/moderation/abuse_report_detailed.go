@@ -8,6 +8,7 @@ import (
 
 	"forgejo.org/models/db"
 	"forgejo.org/modules/timeutil"
+	"xorm.io/builder"
 )
 
 type AbuseReportDetailed struct {
@@ -78,5 +79,29 @@ func GetOpenReports(ctx context.Context) ([]*AbuseReportDetailed, error) {
 	if err != nil {
 		return nil, err
 	}
+	return reports, nil
+}
+
+func GetOpenReportsByTypeAndContentID(ctx context.Context, contentType ReportedContentType, contentID int64) ([]*AbuseReportDetailed, error) {
+	var reports []*AbuseReportDetailed
+	err := db.GetEngine(ctx).
+		Select("AR.*, U.`name` AS 'reporter_name', SC.created_unix AS 'shadow_copy_date', SC.raw_value AS 'shadow_copy_raw_value'").
+		Table("abuse_report").Alias("AR").
+		Join("LEFT", []string{"user", "U"}, "U.id = AR.reporter_id").
+		Join("LEFT", []string{"abuse_report_shadow_copy", "SC"}, "SC.id = AR.shadow_copy_id").
+		Where(builder.Eq{
+			"content_type": contentType,
+			"content_id":   contentID,
+			"status":       ReportStatusTypeOpen,
+		}).
+		Asc("AR.`created_unix`").
+		Find(&reports)
+
+	// TODO: Limit to first n or use pagination?!
+
+	if err != nil {
+		return nil, err
+	}
+
 	return reports, nil
 }
