@@ -1,37 +1,50 @@
 /* fjdropdown is an implementation of a dropdown menu based on details HTML tag.
- * It is heavily inspired by https://picocss.com/docs/dropdown and works without JS.
- * Class name it relies on is `fjdropdown` is to avoid interference from Fomantic. */
+ * It is heavily inspired by https://picocss.com/docs/dropdown.
+ *
+ * It supports two modes:
+ * - no JS: closure on unfocus by pointer is simulted with a fullscreen ::before
+ * - (planned) JS enhanced
+ *
+ * The main purpose `name="fjdropdown"` serves is to prevent multiple dropdowns
+ * from being open simultaneously. It is not possible to do with a pointer but is
+ * with keyboard navigation. If multiple dropdowns are open, they can only be
+ * closed in backwards order, one by one, which is a really janky behavior.
+*/
 
-/* ToDo: it can't be closed by Escape yet, should be optional JS */
-
-:root details.fjdropdown {
+:root details[name="fjdropdown"] {
   --fjdropdown-box-shadow: 0 6px 18px var(--color-shadow);
-  --fjdropdown-entry-padding: 0.5rem 1rem;
+  --fjdropdown-item-padding: 0.5rem 1rem;
 }
 
 @media (pointer: coarse) {
-  :root details.fjdropdown {
-    --fjdropdown-entry-padding: 0.75rem 1rem;
+  :root details[name="fjdropdown"] {
+    --fjdropdown-item-padding: 0.75rem 1rem;
   }
 }
 
-details.fjdropdown > summary {
+details[name="fjdropdown"] > summary {
+  /* Optional flex+gap in case summary contains multiple elements */
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  /* Cancel some of default styling */
   user-select: none;
   list-style-type: none;
+  /* Main visual properties */
   border-radius: var(--border-radius);
   padding: 0.5rem;
 }
 
-details.fjdropdown > summary:hover {
+details[name="fjdropdown"] > summary:hover {
   background: var(--color-hover);
 }
 
-details.fjdropdown[open] > summary {
+details[name="fjdropdown"][open] > summary {
   background: var(--color-active);
 }
 
 /* Virtual fullscreen area. Clicking anywhere causes dropdown to close */
-details.fjdropdown[open] > summary::before {
+details[name="fjdropdown"][open] > summary::before {
   z-index: 1;
   position: fixed;
   width: 100vw;
@@ -42,7 +55,7 @@ details.fjdropdown[open] > summary::before {
   cursor: default;
 }
 
-details.fjdropdown > summary + ul {
+details[name="fjdropdown"] > summary + ul {
   z-index: 99;
   position: absolute;
   min-width: max-content;
@@ -55,19 +68,28 @@ details.fjdropdown > summary + ul {
   border-radius: var(--border-radius);
   background: var(--color-body);
   box-shadow: var(--fjdropdown-box-shadow);
+  border: 1px solid var(--color-secondary);
 }
 
-details.fjdropdown > summary + ul > li {
+details[name="fjdropdown"] > summary + ul > li {
   width: 100%;
-  padding: var(--fjdropdown-entry-padding);
+  padding: var(--fjdropdown-item-padding);
   background: none;
 }
 
-details.fjdropdown > summary + ul > li:hover {
+details[name="fjdropdown"] > summary + ul > li:first-child {
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+details[name="fjdropdown"] > summary + ul > li:last-child {
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+details[name="fjdropdown"] > summary + ul > li:hover {
   background: var(--color-hover)
 }
 
-details.fjdropdown > summary + ul > li .entry {
+details[name="fjdropdown"] > summary + ul > li > .item {
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -75,7 +97,7 @@ details.fjdropdown > summary + ul > li .entry {
 }
 
 /* Cancel default styling of button elements */
-details.fjdropdown > summary + ul > li button {
+details[name="fjdropdown"] > summary + ul > li button {
   padding: 0;
   background: none;
 }

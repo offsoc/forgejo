@@ -1,33 +1,33 @@
-<details class="fjdropdown">
+<details name="fjdropdown">
 	<summary data-tooltip-content="{{ctx.Locale.Tr "profile.actions.tooltip"}}">{{svg "octicon-kebab-horizontal"}}</summary>
 	<ul>
 		{{if eq .SignedUserID .ContextUser.ID}}
 			<li>
-				<a href="{{AppSubUrl}}/user/settings" class="entry">{{svg "octicon-pencil"}}<span>{{ctx.Locale.Tr "profile.edit.link"}}</span></a>
+				<a href="{{AppSubUrl}}/user/settings" class="item">{{svg "octicon-pencil"}}<span>{{ctx.Locale.Tr "profile.edit.link"}}</span></a>
 			</li>
 		{{end}}
 		{{if and .EnableFeed (or .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate))}}
 			<li>
-				<a href="{{.ContextUser.HomeLink}}.rss" class="entry">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "rss_feed"}}</span></a>
+				<a href="{{.ContextUser.HomeLink}}.rss" class="item">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "rss_feed"}}</span></a>
 			</li>
 			<li>
-				<a href="{{.ContextUser.HomeLink}}.atom" class="entry">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "feed.atom.link"}}</span></a>
+				<a href="{{.ContextUser.HomeLink}}.atom" class="item">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "feed.atom.link"}}</span></a>
 			</li>
 		{{end}}
 		<li>
-			<a href="{{.ContextUser.HomeLink}}.keys" class="entry">{{svg "octicon-key"}}<span>{{ctx.Locale.Tr "keys.ssh.link"}}</span></a>
+			<a href="{{.ContextUser.HomeLink}}.keys" class="item">{{svg "octicon-key"}}<span>{{ctx.Locale.Tr "keys.ssh.link"}}</span></a>
 		</li>
 		<li>
-			<a href="{{.ContextUser.HomeLink}}.gpg" class="entry">{{svg "octicon-key"}}<span>{{ctx.Locale.Tr "keys.gpg.link"}}</span></a>
+			<a href="{{.ContextUser.HomeLink}}.gpg" class="item">{{svg "octicon-key"}}<span>{{ctx.Locale.Tr "keys.gpg.link"}}</span></a>
 		</li>
 		{{if and .IsSigned (ne .SignedUserID .ContextUser.ID)}}
 			<li hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
 				{{if .IsBlocked}}
-					<button class="entry orange text" hx-post="{{.ContextUser.HomeLink}}?action=unblock">
+					<button class="item orange text" hx-post="{{.ContextUser.HomeLink}}?action=unblock">
 						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unblock"}}
 					</button>
 				{{else}}
-					<button class="entry orange text" type="submit" data-modal-id="block-user" hx-post="{{.ContextUser.HomeLink}}?action=block" hx-confirm="-">
+					<button class="item orange text" type="submit" data-modal-id="block-user" hx-post="{{.ContextUser.HomeLink}}?action=block" hx-confirm="-">
 						{{svg "octicon-blocked"}} {{ctx.Locale.Tr "user.block"}}
 					</button>
 				{{end}}
@@ -35,7 +35,7 @@
 		{{end}}
 		{{if and .IsModerationEnabled .IsSigned (ne .SignedUserID .ContextUser.ID)}}
 			<li>
-				<a href="{{AppSubUrl}}/report_abuse?type=user&id={{.ContextUser.ID}}" class="entry orange text">{{svg "octicon-stop"}}{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
+				<a href="{{AppSubUrl}}/report_abuse?type=user&id={{.ContextUser.ID}}" class="item orange text">{{svg "octicon-stop"}}{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
 			</li>
 		{{end}}
 	</ul>
