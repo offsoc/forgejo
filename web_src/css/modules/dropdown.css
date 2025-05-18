@@ -89,6 +89,8 @@ details.dropdown > summary + ul > li > .item {
   gap: 0.75rem;
   align-items: center;
   color: var(--color-text);
+  /* Suppress underline - hover changs background color */
+  text-decoration: none;
 }
 
 /* Cancel default styling of button elements */
