@@ -16,11 +16,16 @@
 	</div>
 	<div class="content tw-break-anywhere profile-avatar-name">
 		{{if .ContextUser.FullName}}<span class="header text center">{{.ContextUser.FullName}}</span>{{end}}
-		<span class="username text center">{{.ContextUser.Name}} {{if .ContextUser.GetPronouns .IsSigned}} · {{.ContextUser.GetPronouns .IsSigned}}{{end}} {{if .IsAdmin}}
-					<a class="muted" href="{{AppSubUrl}}/admin/users/{{.ContextUser.ID}}" data-tooltip-content="{{ctx.Locale.Tr "admin.users.details"}}">
-						{{svg "octicon-gear" 18}}
-					</a>
-				{{end}}</span>
+		<span class="username-row">{{.ContextUser.Name}} {{if .ContextUser.GetPronouns .IsSigned}} · {{.ContextUser.GetPronouns .IsSigned}}{{end}}
+			{{if .IsAdmin}}
+				<a class="muted" href="{{AppSubUrl}}/admin/users/{{.ContextUser.ID}}" data-tooltip-content="{{ctx.Locale.Tr "admin.users.details"}}">
+					{{svg "octicon-gear" 18}}
+				</a>
+			{{end}}
+			{{if or (not .IsSigned) (eq .SignedUserID .ContextUser.ID)}}
+				{{template "shared/user/actions_menu" .}}
+			{{end}}
+		</span>
 		<div class="tw-mt-2">
 			<a class="muted" href="{{.ContextUser.HomeLink}}?tab=followers">{{svg "octicon-people" 18 "tw-mr-1"}}{{ctx.Locale.TrN .NumFollowers "user.followers_one" "user.followers_few" .NumFollowers}}</a> · <a class="muted" href="{{.ContextUser.HomeLink}}?tab=following">{{ctx.Locale.TrN .NumFollowing "user.following_one" "user.following_few" .NumFollowing}}</a>
 		</div>
@@ -28,7 +33,7 @@
 	{{if and .IsSigned (ne .SignedUserID .ContextUser.ID)}}
 		<div class="actions">
 			<div class="primary-action" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
-				{{if $.IsFollowing}}
+				{{if .IsFollowing}}
 					<button hx-post="{{.ContextUser.HomeLink}}?action=unfollow" class="ui basic red button tw-flex tw-gap-1">
 						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unfollow"}}
 					</button>
@@ -38,41 +43,7 @@
 					</button>
 				{{end}}
 			</div>
-			<details class="fjdd">
-				<summary>{{svg "octicon-kebab-horizontal"}}</summary>
-				<ul>
-					{{if and .EnableFeed (or .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate))}}
-						<li>
-							<a href="{{.ContextUser.HomeLink}}.rss" class="entry">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "rss_feed"}}</span></a>
-						</li>
-						<li>
-							<a href="{{.ContextUser.HomeLink}}.atom" class="entry">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "feed.atom.link"}}</span></a>
-						</li>
-					{{end}}
-					<li>
-						<a href="{{.ContextUser.HomeLink}}.keys" class="entry">{{svg "octicon-key"}}<span>SSH keys</span></a>
-					</li>
-					<li>
-						<a href="{{.ContextUser.HomeLink}}.gpg" class="entry">{{svg "octicon-key"}}<span>Signing keys</span></a>
-					</li>
-					<li hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
-						{{if $.IsBlocked}}
-							<button class="entry orange text" hx-post="{{.ContextUser.HomeLink}}?action=unblock">
-								{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unblock"}}
-							</button>
-						{{else}}
-							<button class="entry orange text" type="submit" data-modal-id="block-user" hx-post="{{.ContextUser.HomeLink}}?action=block" hx-confirm="-">
-								{{svg "octicon-blocked"}} {{ctx.Locale.Tr "user.block"}}
-							</button>
-						{{end}}
-					</li>
-					{{if or .IsModerationEnabled true}}
-						<li>
-							<a href="{{AppSubUrl}}/report_abuse?type=user&id={{.ContextUser.ID}}" class="entry orange text">{{svg "octicon-stop"}}{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
-						</li>
-					{{end}}
-				</ul>
-			</details>
+			{{template "shared/user/actions_menu" .}}
 		</div>
 	{{end}}
 	<div class="extra content tw-break-anywhere">

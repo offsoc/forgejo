@@ -1,0 +1,78 @@
+/* fjdropdown is an implementation of a dropdown menu based on details HTML tag.
+ * It is heavily inspired by https://picocss.com/docs/dropdown and works without JS. */
+
+:root details.fjdropdown {
+  --fjdropdown-box-shadow: 0 6px 18px var(--color-shadow);
+  --fjdropdown-entry-padding: 0.5rem 1rem;
+}
+
+@media (pointer: coarse) {
+  :root details.fjdropdown {
+    --fjdropdown-entry-padding: 0.75rem 1rem;
+  }
+}
+
+details.fjdropdown > summary {
+  user-select: none;
+  list-style-type: none;
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
+}
+
+details.fjdropdown > summary:hover {
+  background: var(--color-hover);
+}
+
+details.fjdropdown[open] > summary {
+  background: var(--color-active);
+}
+
+/* Virtual fullscreen area. Clicking anywhere causes dropdown to close */
+details.fjdropdown[open] > summary::before {
+  z-index: 1;
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  inset: 0;
+  background: 0 0;
+  content: "";
+  cursor: default;
+}
+
+details.fjdropdown > summary + ul {
+  z-index: 99;
+  position: absolute;
+  min-width: max-content;
+  margin: 0;
+  margin-top: 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  list-style-type: none;
+  border-radius: var(--border-radius);
+  background: var(--color-body);
+  box-shadow: var(--fjdropdown-box-shadow);
+}
+
+details.fjdropdown > summary + ul > li {
+  width: 100%;
+  padding: var(--fjdropdown-entry-padding);
+  background: none;
+}
+
+details.fjdropdown > summary + ul > li:hover {
+  background: var(--color-hover)
+}
+
+details.fjdropdown > summary + ul > li .entry {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  color: var(--color-text);
+}
+
+/* Cancel default styling of button elements */
+details.fjdropdown > summary + ul > li button {
+  padding: 0;
+  background: none;
+}

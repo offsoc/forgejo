@@ -19,6 +19,7 @@
 @import "./modules/dimmer.css";
 
 @import "./modules/switch.css";
+@import "./modules/dropdown.css";
 @import "./modules/select.css";
 @import "./modules/tippy.css";
 @import "./modules/breadcrumb.css";

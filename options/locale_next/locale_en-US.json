@@ -64,6 +64,8 @@
     "alert.range_error": " must be a number between %[1]s and %[2]s.",
     "install.invalid_lfs_path": "Unable to create the LFS root at the specified path: %[1]s",
     "feed.atom.link": "Atom feed",
+    "keys.ssh.link": "SSH keys",
+    "keys.gpg.link": "GPG keys",
     "admin.config.moderation_config": "Moderation configuration",
     "moderation.report_abuse": "Report abuse",
     "moderation.report_content": "Report content",
