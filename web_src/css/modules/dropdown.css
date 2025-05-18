@@ -1,5 +1,8 @@
 /* fjdropdown is an implementation of a dropdown menu based on details HTML tag.
- * It is heavily inspired by https://picocss.com/docs/dropdown and works without JS. */
+ * It is heavily inspired by https://picocss.com/docs/dropdown and works without JS.
+ * Class name it relies on is `fjdropdown` is to avoid interference from Fomantic. */
+
+/* ToDo: it can't be closed by Escape yet, should be optional JS */
 
 :root details.fjdropdown {
   --fjdropdown-box-shadow: 0 6px 18px var(--color-shadow);

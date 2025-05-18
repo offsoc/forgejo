@@ -63,6 +63,8 @@
     "alert.asset_load_failed": "Failed to load asset files from {path}. Please make sure the asset files can be accessed.",
     "alert.range_error": " must be a number between %[1]s and %[2]s.",
     "install.invalid_lfs_path": "Unable to create the LFS root at the specified path: %[1]s",
+    "profile.actions.tooltip": "More actions",
+    "profile.edit.link": "Edit profile",
     "feed.atom.link": "Atom feed",
     "keys.ssh.link": "SSH keys",
     "keys.gpg.link": "GPG keys",

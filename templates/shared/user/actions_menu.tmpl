@@ -1,6 +1,11 @@
 <details class="fjdropdown">
-	<summary>{{svg "octicon-kebab-horizontal"}}</summary>
+	<summary data-tooltip-content="{{ctx.Locale.Tr "profile.actions.tooltip"}}">{{svg "octicon-kebab-horizontal"}}</summary>
 	<ul>
+		{{if eq .SignedUserID .ContextUser.ID}}
+			<li>
+				<a href="{{AppSubUrl}}/user/settings" class="entry">{{svg "octicon-pencil"}}<span>{{ctx.Locale.Tr "profile.edit.link"}}</span></a>
+			</li>
+		{{end}}
 		{{if and .EnableFeed (or .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate))}}
 			<li>
 				<a href="{{.ContextUser.HomeLink}}.rss" class="entry">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "rss_feed"}}</span></a>
