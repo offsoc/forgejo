@@ -1,24 +1,29 @@
-<details name="fjdropdown">
+<details class="dropdown">
 	<summary data-tooltip-content="{{ctx.Locale.Tr "profile.actions.tooltip"}}">{{svg "octicon-kebab-horizontal"}}</summary>
 	<ul>
+		{{if .IsAdmin}}
+			<li>
+				<a href="{{AppSubUrl}}/admin/users/{{.ContextUser.ID}}" class="item">{{svg "octicon-gear"}}{{ctx.Locale.Tr "admin.users.details"}}</a>
+			</li>
+		{{end}}
 		{{if eq .SignedUserID .ContextUser.ID}}
 			<li>
-				<a href="{{AppSubUrl}}/user/settings" class="item">{{svg "octicon-pencil"}}<span>{{ctx.Locale.Tr "profile.edit.link"}}</span></a>
+				<a href="{{AppSubUrl}}/user/settings" class="item">{{svg "octicon-pencil"}}{{ctx.Locale.Tr "profile.edit.link"}}</a>
 			</li>
 		{{end}}
 		{{if and .EnableFeed (or .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate))}}
 			<li>
-				<a href="{{.ContextUser.HomeLink}}.rss" class="item">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "rss_feed"}}</span></a>
+				<a href="{{.ContextUser.HomeLink}}.rss" class="item">{{svg "octicon-rss"}}{{ctx.Locale.Tr "rss_feed"}}</a>
 			</li>
 			<li>
-				<a href="{{.ContextUser.HomeLink}}.atom" class="item">{{svg "octicon-rss"}}<span>{{ctx.Locale.Tr "feed.atom.link"}}</span></a>
+				<a href="{{.ContextUser.HomeLink}}.atom" class="item">{{svg "octicon-rss"}}{{ctx.Locale.Tr "feed.atom.link"}}</a>
 			</li>
 		{{end}}
 		<li>
-			<a href="{{.ContextUser.HomeLink}}.keys" class="item">{{svg "octicon-key"}}<span>{{ctx.Locale.Tr "keys.ssh.link"}}</span></a>
+			<a href="{{.ContextUser.HomeLink}}.keys" class="item">{{svg "octicon-key"}}{{ctx.Locale.Tr "keys.ssh.link"}}</a>
 		</li>
 		<li>
-			<a href="{{.ContextUser.HomeLink}}.gpg" class="item">{{svg "octicon-key"}}<span>{{ctx.Locale.Tr "keys.gpg.link"}}</span></a>
+			<a href="{{.ContextUser.HomeLink}}.gpg" class="item">{{svg "octicon-key"}}{{ctx.Locale.Tr "keys.gpg.link"}}</a>
 		</li>
 		{{if and .IsSigned (ne .SignedUserID .ContextUser.ID)}}
 			<li hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">

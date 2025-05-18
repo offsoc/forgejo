@@ -10,6 +10,7 @@
 
 # Javascript and CSS code.
 web_src/.* @beowulf @gusted
+web_src/css/.* @0ko
 
 # HTML templates used by the backend.
 templates/.* @beowulf @gusted
