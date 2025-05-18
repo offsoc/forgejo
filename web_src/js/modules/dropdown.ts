@@ -16,14 +16,12 @@ function markDropdowns() {
 export function initDropdowns() {
   document.addEventListener('click', (event) => {
     const dropdown = document.querySelector<HTMLDetailsElement>('details.dropdown[open]');
-    if (dropdown == null)
-      // No open dropdowns on page, nothing to do.
-      return;
+    // No open dropdowns on page, nothing to do.
+    if (dropdown === null) return;
 
     const target = event.target as HTMLElement;
-    if (dropdown.contains(target))
-      // User clicked something in the open dropdown, don't interfere.
-      return;
+    // User clicked something in the open dropdown, don't interfere.
+    if (dropdown.contains(target)) return;
 
     // User clicked something that isn't the open dropdown, so close it.
     dropdown.removeAttribute('open');
@@ -31,14 +29,12 @@ export function initDropdowns() {
 
   // Close open dropdowns on Escape press
   document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape')
-      // This press wasn't escape, nothing to do.
-      return;
+    // This press wasn't escape, nothing to do.
+    if (event.key !== 'Escape') return;
 
     const dropdown = document.querySelector<HTMLDetailsElement>('details.dropdown[open]');
-    if (dropdown == null)
-      // No open dropdowns on page, nothing to do.
-      return;
+    // No open dropdowns on page, nothing to do.
+    if (dropdown === null) return;
 
     // User pressed Escape while having an open dropdown, probably wants it be closed.
     dropdown.removeAttribute('open');
