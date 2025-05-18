@@ -364,7 +364,7 @@ the click will succeed,
 but the depending interaction won't,
 although playwright repeatedly tries to find the content.
 
-You can [group statements using toPass]()https://playwright.dev/docs/test-assertions#expecttopass).
+You can [group statements using toPass](https://playwright.dev/docs/test-assertions#expecttopass).
 This code retries the dropdown click until the second item is found.
 
 ~~~js
