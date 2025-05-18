@@ -7,9 +7,10 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"regexp"
 	"runtime/pprof"
 	"time"
+
+	"github.com/dlclark/regexp2"
 )
 
 // EventWriterBase is the base interface for most event writers
@@ -60,10 +61,10 @@ func (b *EventWriterBaseImpl) GetLevel() Level {
 func (b *EventWriterBaseImpl) Run(ctx context.Context) {
 	defer b.OutputWriteCloser.Close()
 
-	var exprRegexp *regexp.Regexp
+	var exprRegexp *regexp2.Regexp
 	if b.Mode.Expression != "" {
 		var err error
-		if exprRegexp, err = regexp.Compile(b.Mode.Expression); err != nil {
+		if exprRegexp, err = regexp2.Compile(b.Mode.Expression, regexp2.RE2); err != nil {
 			FallbackErrorf("unable to compile expression %q for writer %q: %v", b.Mode.Expression, b.Name, err)
 		}
 	}
@@ -90,9 +91,12 @@ func (b *EventWriterBaseImpl) Run(ctx context.Context) {
 
 			if exprRegexp != nil {
 				fileLineCaller := fmt.Sprintf("%s:%d:%s", event.Origin.Filename, event.Origin.Line, event.Origin.Caller)
-				matched := exprRegexp.MatchString(fileLineCaller) || exprRegexp.MatchString(event.Origin.MsgSimpleText)
+				matched, _ := exprRegexp.MatchString(fileLineCaller)
 				if !matched {
-					continue
+					matched, _ = exprRegexp.MatchString(event.Origin.MsgSimpleText)
+					if !matched {
+						continue
+					}
 				}
 			}
 
