@@ -39,7 +39,7 @@ details.dropdown[open] > summary {
 }
 
 /* NoJS mode. Creates a virtual fullscreen area. Clicking it closes the dropdown. */
-details.dropdown[open]::not(.js-enhanced) > summary::before {
+details.dropdown[open]:not(.js-enhanced) > summary::before {
   z-index: 1;
   position: fixed;
   width: 100vw;
