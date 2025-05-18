@@ -781,7 +781,13 @@ func registerRoutes(m *web.Route) {
 			addSettingsRunnersRoutes()
 			addSettingsVariablesRoutes()
 		})
-	}, adminReq, ctxDataSet("EnableOAuth2", setting.OAuth2.Enabled, "EnablePackages", setting.Packages.Enabled))
+
+		if setting.Moderation.Enabled {
+			m.Group("/moderation/reports", func() {
+				m.Get("", admin.AbuseReports)
+			})
+		}
+	}, adminReq, ctxDataSet("EnableOAuth2", setting.OAuth2.Enabled, "EnablePackages", setting.Packages.Enabled, "EnableModeration", setting.Moderation.Enabled))
 	// ***** END: Admin *****
 
 	m.Group("", func() {

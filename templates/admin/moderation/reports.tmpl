@@ -1,0 +1,62 @@
+{{template "admin/layout_head" (dict "ctxData" . "pageClass" "admin")}}
+<div class="admin-setting-content">
+	<h4 class="ui top attached header">
+		{{ctx.Locale.Tr "admin.moderation.reports"}}
+	</h4>
+
+	<div class="ui attached segment">
+		{{if .Reports}}
+		<div class="flex-list">
+			<div class="flex-item tw-items-center">
+				<div class="flex-item-leading">
+					<span class="inline">Type</span>
+				</div>
+				<div class="flex-item-main">
+					<span class="inline">Summary</span>
+				</div>
+				<div class="flex-item-trailing">
+					<span>{{ctx.Locale.Tr "admin.moderation.reports"}}</span>
+				</div>
+			</div>
+			{{range .Reports}}
+			<div class="flex-item">
+				<div class="flex-item-leading">
+					{{svg .ContentTypeIconName 24}}
+				</div>
+				<div class="flex-item-main">
+					<div class="flex-item-title">
+						<a href="TODO://content.url">{{.ContentReference}}</a>
+					</div>
+					<div class="flex-items-inline">
+						<span class="item tw-mr-2">
+							{{svg "octicon-calendar"}}
+							{{DateUtils.TimeSince .CreatedUnix}}
+						</span>
+						<span class="item tw-mr-2">
+							{{svg "octicon-report"}}
+							{{if .ReporterName}}<a href="{{AppSubUrl}}/{{.ReporterName}}">{{.ReporterName}}</a>{{else}}{{$.GhostUserName}}{{end}}
+						</span>
+						<span class="item ui label">
+							{{svg "octicon-tag" 12}}
+							{{ctx.Locale.Tr (index $.AbuseCategories .Category)}}
+						</span>
+					</div>
+
+					<div class="flex-item-body">
+						<span class="text truncate">{{ctx.Locale.Tr "moderation.report_remarks"}}: <em>{{.Remarks}}</em></span>
+					</div>
+				</div>
+				<a href="{{AppSubUrl}}/admin/moderation/reports/type/{{.ContentType}}/id/{{.ContentID}}">
+				<div class="flex-item-trailing">
+						<span class="tw-text-16 tw-font-semibold">{{.ReportedTimes}}</span>{{svg "octicon-report" "tw-ml-2"}}
+				</div>
+				</a>
+			</div>
+			{{end}}
+		</div>
+		{{else}}
+			<p class="tw-text-center">{{ctx.Locale.Tr "admin.moderation.no_open_reports"}}</p>
+		{{end}}
+	</div>
+</div>
+{{template "admin/layout_footer" .}}

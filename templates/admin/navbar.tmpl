@@ -108,5 +108,15 @@
 				</a>
 			</div>
 		</details>
+		{{if .EnableModeration}}
+		<details class="item toggleable-item" {{if .PageIsAdminModerationReports}}open{{end}}>
+			<summary>{{ctx.Locale.Tr "admin.moderation"}}</summary>
+			<div class="menu">
+				<a class="{{if .PageIsAdminModerationReports}}active {{end}}item" href="{{AppSubUrl}}/admin/moderation/reports">
+					{{ctx.Locale.Tr "admin.moderation.reports"}}
+				</a>
+			</div>
+		</details>
+		{{end}}
 	</div>
 </div>
