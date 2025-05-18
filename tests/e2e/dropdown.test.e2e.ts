@@ -25,19 +25,19 @@ test('JS enhanced', async ({page}) => {
   await expect(dropdownContent).toBeHidden();
 
   // Open and close with keypressing
-  await dropdown.press(`Enter`)
+  await dropdown.press(`Enter`);
   await expect(dropdownContent).toBeVisible();
-  await dropdown.press(`Space`)
+  await dropdown.press(`Space`);
   await expect(dropdownContent).toBeHidden();
 
-  await dropdown.press(`Space`)
+  await dropdown.press(`Space`);
   await expect(dropdownContent).toBeVisible();
-  await dropdown.press(`Enter`)
+  await dropdown.press(`Enter`);
   await expect(dropdownContent).toBeHidden();
 
-  await dropdown.press(`Enter`)
+  await dropdown.press(`Enter`);
   await expect(dropdownContent).toBeVisible();
-  await dropdown.press(`Escape`)
+  await dropdown.press(`Escape`);
   await expect(dropdownContent).toBeHidden();
 
   // Open and close by opening a different dropdown
@@ -51,7 +51,7 @@ test('JS enhanced', async ({page}) => {
 });
 
 test('No JS', async ({browser}) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+  const context = await browser.newContext({javaScriptEnabled: false});
   const nojsPage = await context.newPage();
   await nojsPage.goto('/user1');
 
@@ -68,19 +68,19 @@ test('No JS', async ({browser}) => {
   await expect(dropdownContent).toBeHidden();
 
   // Open and close with keypressing
-  await dropdown.press(`Enter`)
+  await dropdown.press(`Enter`);
   await expect(dropdownContent).toBeVisible();
-  await dropdown.press(`Space`)
+  await dropdown.press(`Space`);
   await expect(dropdownContent).toBeHidden();
 
-  await dropdown.press(`Space`)
+  await dropdown.press(`Space`);
   await expect(dropdownContent).toBeVisible();
-  await dropdown.press(`Enter`)
+  await dropdown.press(`Enter`);
   await expect(dropdownContent).toBeHidden();
 
   // Escape is not usable w/o JS enhancements
-  await dropdown.press(`Enter`)
+  await dropdown.press(`Enter`);
   await expect(dropdownContent).toBeVisible();
-  await dropdown.press(`Escape`)
+  await dropdown.press(`Escape`);
   await expect(dropdownContent).toBeVisible();
 });

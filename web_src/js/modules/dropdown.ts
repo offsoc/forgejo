@@ -7,10 +7,10 @@
 // click iteration with anything on the page and pressing Escape.
 
 function markDropdowns() {
-  const dropdowns = document.querySelectorAll<HTMLDetailsElement>('details.dropdown')
-  dropdowns.forEach((dropdown) => {
-    dropdown.classList.add("js-enhanced");
-  });
+  const dropdowns = document.querySelectorAll<HTMLDetailsElement>('details.dropdown');
+  for (const dropdown of dropdowns) {
+    dropdown.classList.add('js-enhanced');
+  }
 }
 
 export function initDropdowns() {
