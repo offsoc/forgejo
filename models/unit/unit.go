@@ -101,6 +101,16 @@ var (
 		TypePullRequests,
 	}
 
+	// DefaultMirrorRepoUnits contains the default unit types for mirrors
+	DefaultMirrorRepoUnits = []Type{
+		TypeCode,
+		TypeIssues,
+		TypeReleases,
+		TypeWiki,
+		TypeProjects,
+		TypePackages,
+	}
+
 	// NotAllowedDefaultRepoUnits contains units that can't be default
 	NotAllowedDefaultRepoUnits = []Type{
 		TypeExternalWiki,
@@ -172,6 +182,8 @@ func LoadUnitConfig() error {
 	if len(DefaultRepoUnits) == 0 {
 		return errors.New("no default repository units found")
 	}
+
+	// Default fork repo units
 	setDefaultForkRepoUnits, invalidKeys := FindUnitTypes(setting.Repository.DefaultForkRepoUnits...)
 	if len(invalidKeys) > 0 {
 		log.Warn("Invalid keys in default fork repo units: %s", strings.Join(invalidKeys, ", "))
@@ -179,6 +191,16 @@ func LoadUnitConfig() error {
 	DefaultForkRepoUnits = validateDefaultRepoUnits(DefaultForkRepoUnits, setDefaultForkRepoUnits)
 	if len(DefaultForkRepoUnits) == 0 {
 		return errors.New("no default fork repository units found")
+	}
+
+	// Default mirror repo units
+	setDefaultMirrorRepoUnits, invalidKeys := FindUnitTypes(setting.Repository.DefaultMirrorRepoUnits...)
+	if len(invalidKeys) > 0 {
+		log.Warn("Invalid keys in default mirror repo units: %s", strings.Join(invalidKeys, ", "))
+	}
+	DefaultMirrorRepoUnits = validateDefaultRepoUnits(DefaultMirrorRepoUnits, setDefaultMirrorRepoUnits)
+	if len(DefaultMirrorRepoUnits) == 0 {
+		return errors.New("no default mirror repository units found")
 	}
 
 	// Collect the allowed repo unit groups. Mutually exclusive units are

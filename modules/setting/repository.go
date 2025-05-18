@@ -52,6 +52,7 @@ var (
 		DisabledRepoUnits                       []string
 		DefaultRepoUnits                        []string
 		DefaultForkRepoUnits                    []string
+		DefaultMirrorRepoUnits                  []string
 		PrefixArchiveFiles                      bool
 		DisableMigrations                       bool
 		DisableStars                            bool
@@ -175,6 +176,7 @@ var (
 		DisabledRepoUnits:                       []string{},
 		DefaultRepoUnits:                        []string{},
 		DefaultForkRepoUnits:                    []string{},
+		DefaultMirrorRepoUnits:                  []string{},
 		PrefixArchiveFiles:                      true,
 		DisableMigrations:                       false,
 		DisableStars:                            false,
