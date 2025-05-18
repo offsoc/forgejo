@@ -1,4 +1,5 @@
 // Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package unit
@@ -69,7 +70,7 @@ func (u Type) LogString() string {
 }
 
 var (
-	// AllRepoUnitTypes contains all the unit types
+	// AllRepoUnitTypes contains all units
 	AllRepoUnitTypes = []Type{
 		TypeCode,
 		TypeIssues,
@@ -83,7 +84,7 @@ var (
 		TypeActions,
 	}
 
-	// DefaultRepoUnits contains the default unit types
+	// DefaultRepoUnits contains default units for regular repos
 	DefaultRepoUnits = []Type{
 		TypeCode,
 		TypeIssues,
@@ -95,13 +96,13 @@ var (
 		TypeActions,
 	}
 
-	// ForkRepoUnits contains the default unit types for forks
+	// ForkRepoUnits contains default units for forks
 	DefaultForkRepoUnits = []Type{
 		TypeCode,
 		TypePullRequests,
 	}
 
-	// DefaultMirrorRepoUnits contains the default unit types for mirrors
+	// DefaultMirrorRepoUnits contains default units for mirrors
 	DefaultMirrorRepoUnits = []Type{
 		TypeCode,
 		TypeIssues,
