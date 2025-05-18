@@ -37,6 +37,26 @@ type UserData struct { //revive:disable-line:exported
 	AvatarEmail string
 }
 
+// Implements GetValueMap() from ShadowCopyData interface, returning a list of <key, value> pairs
+// to be used when rendering the shadow copy for admins reviewing the corresponding abuse report(s).
+func (ud UserData) GetValueMap() []moderation.ShadowCopyField {
+	return []moderation.ShadowCopyField{
+		{Key: "Name", Value: ud.Name},
+		{Key: "FullName", Value: ud.FullName},
+		{Key: "Email", Value: ud.Email},
+		{Key: "LoginName", Value: ud.LoginName},
+		{Key: "Location", Value: ud.Location},
+		{Key: "Website", Value: ud.Website},
+		{Key: "Pronouns", Value: ud.Pronouns},
+		{Key: "Description", Value: ud.Description},
+		{Key: "CreatedUnix", Value: ud.CreatedUnix.AsLocalTime().String()},
+		{Key: "UpdatedUnix", Value: ud.UpdatedUnix.AsLocalTime().String()},
+		{Key: "LastLogin", Value: ud.LastLogin.AsLocalTime().String()},
+		{Key: "Avatar", Value: ud.Avatar},
+		{Key: "AvatarEmail", Value: ud.AvatarEmail},
+	}
+}
+
 // newUserData creates a trimmed down user to be used just to create a JSON structure
 // (keeping only the fields relevant for moderation purposes)
 func newUserData(user *User) UserData {

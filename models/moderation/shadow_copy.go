@@ -17,13 +17,29 @@ import (
 
 type AbuseReportShadowCopy struct {
 	ID          int64              `xorm:"pk autoincr"`
-	RawValue    string             `xorm:"NOT NULL"`
+	RawValue    string             `xorm:"NOT NULL"` // A JSON with relevant fields from user, repository, issue or comment table.
 	CreatedUnix timeutil.TimeStamp `xorm:"created NOT NULL"`
 }
 
 // Returns the ID encapsulated in a sql.NullInt64 struct.
 func (sc AbuseReportShadowCopy) NullableID() sql.NullInt64 {
 	return sql.NullInt64{Int64: sc.ID, Valid: sc.ID > 0}
+}
+
+// ShadowCopyField defines a pair of a value stored within the shadow copy
+// (of some content reported as abusive) and a corresponding key (caption).
+// A list of such pairs is used when rendering shadow copies for admins reviewing abuse reports.
+type ShadowCopyField struct {
+	Key   string
+	Value string
+}
+
+// ShadowCopyData interface should be implemented by the type structs used for marshaling/unmarshaling the fields
+// preserved as shadow copies for abusive content reports (i.e. UserData, RepositoryData, IssueData, CommentData).
+type ShadowCopyData interface {
+	// GetValueMap returns a list of <key, value> pairs with the fields stored within shadow copies
+	// of content reported as abusive, to be used when rendering a shadow copy in the admin UI.
+	GetValueMap() []ShadowCopyField
 }
 
 func init() {

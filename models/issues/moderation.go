@@ -5,6 +5,7 @@ package issues
 
 import (
 	"context"
+	"strconv"
 
 	"forgejo.org/models/moderation"
 	"forgejo.org/modules/json"
@@ -48,6 +49,19 @@ type CommentData struct {
 	ContentVersion int
 	CreatedUnix    timeutil.TimeStamp
 	UpdatedUnix    timeutil.TimeStamp
+}
+
+// Implements GetValueMap() from ShadowCopyData interface, returning a list of <key, value> pairs
+// to be used when rendering the shadow copy for admins reviewing the corresponding abuse report(s).
+func (cd CommentData) GetValueMap() []moderation.ShadowCopyField {
+	return []moderation.ShadowCopyField{
+		{Key: "PosterID", Value: strconv.FormatInt(cd.PosterID, 10)},
+		{Key: "IssueID", Value: strconv.FormatInt(cd.IssueID, 10)},
+		{Key: "Name", Value: cd.Content},
+		{Key: "ContentVersion", Value: strconv.Itoa(cd.ContentVersion)},
+		{Key: "CreatedUnix", Value: cd.CreatedUnix.FormatDate()},
+		{Key: "UpdatedUnix", Value: cd.UpdatedUnix.AsLocalTime().String()},
+	}
 }
 
 // newCommentData creates a trimmed down comment to be used just to create a JSON structure
