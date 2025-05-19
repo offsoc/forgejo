@@ -12,12 +12,13 @@ test.use({user: 'user2'});
 test('Dimmed modal', async ({page}) => {
   await page.goto('/user1');
 
-  await expect(page.locator('.block')).toContainText('Block');
+  await expect(page.locator('#action-block')).toContainText('Block');
 
   // Ensure the modal is hidden
   await expect(page.locator('#block-user')).toBeHidden();
 
-  await page.locator('.block').click();
+  await page.locator('.actions .dropdown').click();
+  await page.locator('#action-block').click();
 
   // Modal and dimmer should be visible.
   await expect(page.locator('#block-user')).toBeVisible();
@@ -31,7 +32,8 @@ test('Dimmed modal', async ({page}) => {
   await save_visual(page);
 
   // Open the block modal and make the dimmer visible again.
-  await page.locator('.block').click();
+  await page.locator('.actions .dropdown').click();
+  await page.locator('#action-block').click();
   await expect(page.locator('#block-user')).toBeVisible();
   await expect(page.locator('.ui.dimmer')).toBeVisible();
   await expect(page.locator('.ui.dimmer')).toHaveCount(1);

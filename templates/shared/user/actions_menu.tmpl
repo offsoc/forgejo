@@ -26,7 +26,7 @@
 			<a href="{{.ContextUser.HomeLink}}.gpg" class="item">{{svg "octicon-key"}}{{ctx.Locale.Tr "keys.gpg.link"}}</a>
 		</li>
 		{{if and .IsSigned (ne .SignedUserID .ContextUser.ID)}}
-			<li hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
+			<li hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card" id="action-block">
 				{{if .IsBlocked}}
 					<button class="item orange text" hx-post="{{.ContextUser.HomeLink}}?action=unblock">
 						{{svg "octicon-person"}} {{ctx.Locale.Tr "user.unblock"}}

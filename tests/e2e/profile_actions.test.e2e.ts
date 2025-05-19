@@ -23,7 +23,7 @@ test('Follow and block actions', async ({page}) => {
 
   // Simple block interaction.
   const actionsDropdownBtn = page.locator('.actions .dropdown summary');
-  const blockButton = page.locator('.actions .dropdown button');
+  const blockButton = page.locator('#action-block');
   await expect(blockButton).toBeHidden();
 
   await actionsDropdownBtn.click();
