@@ -32,5 +32,45 @@
     "mail.actions.run_info_trigger": "Spuštěno z důvodu: %[1]s od: %[2]s",
     "mail.actions.successful_run_after_failure_subject": "Workflow %[1]s obnoven v repozitáři %[2]s",
     "mail.actions.successful_run_after_failure": "Workflow %[1]s obnoven v repozitáři %[2]s",
-    "discussion.locked": "Tato diskuze byla uzamčena. Komentování je omezené na přispěvatele."
+    "discussion.locked": "Tato diskuze byla uzamčena. Komentování je omezené na přispěvatele.",
+    "relativetime.future": "v budoucnu",
+    "relativetime.years": {
+        "one": "Před %d rokem",
+        "few": "Před %d lety",
+        "other": "Před %d lety"
+    },
+    "relativetime.1day": "včera",
+    "relativetime.2days": "před dvěma dny",
+    "relativetime.1week": "minulý týden",
+    "relativetime.2weeks": "před dvěma týdny",
+    "relativetime.1month": "minulý měsíc",
+    "relativetime.2months": "před dvěma měsíci",
+    "relativetime.1year": "minulý rok",
+    "relativetime.2years": "před dvěma lety",
+    "relativetime.weeks": {
+        "one": "Před %d týdnem",
+        "few": "Před %d týdny",
+        "other": "Před %d týdny"
+    },
+    "relativetime.days": {
+        "one": "Před %d dnem",
+        "few": "Před %d dny",
+        "other": "Před %d dny"
+    },
+    "relativetime.mins": {
+        "one": "Před %d minutou",
+        "few": "Před %d minutami",
+        "other": "Před %d minutami"
+    },
+    "relativetime.hours": {
+        "one": "Před %d hodinou",
+        "few": "Před %d hodinami",
+        "other": "Před %d hodinami"
+    },
+    "relativetime.now": "nyní",
+    "relativetime.months": {
+        "one": "Před %d měsícem",
+        "few": "Před %d měsíci",
+        "other": "Před %d měsíci"
+    }
 }

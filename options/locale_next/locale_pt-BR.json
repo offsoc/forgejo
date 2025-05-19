@@ -23,5 +23,54 @@
     "alert.asset_load_failed": "Não foi possível carregar arquivos de assets de {path}. Por favor, certifique-se que os arquivos podem ser acessados.",
     "install.invalid_lfs_path": "Não foi possível criar um root LFS no caminho especificado: %[1]s",
     "alert.range_error": " deve ser um número entre %[1]s e %[2]s.",
-    "meta.last_line": "real hot girl shit"
+    "meta.last_line": "real hot girl shit",
+    "mail.actions.run_info_cur_status": "Status desta execução: %[1]s (atualizado recentemente de %[2]s)",
+    "mail.actions.run_info_previous_status": "Status da execução anterior: %[1]s",
+    "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
+    "mail.actions.successful_run_after_failure_subject": "Workflow %[1]s recuperado no repositório %[2]s",
+    "mail.actions.not_successful_run_subject": "Workflow %[1]s falhou no repositório %[2]s",
+    "mail.actions.successful_run_after_failure": "Workflow %[1]s recuperado no repositório %[2]s",
+    "mail.actions.not_successful_run": "Workflow %[1]s falhou no repositório %[2]s",
+    "mail.actions.run_info_trigger": "Acionado devido a: %[1]s por: %[2]s",
+    "discussion.locked": "Esta discussão foi trancada. Apenas contribuidores podem adicionar comentários.",
+    "relativetime.future": "futuramente",
+    "relativetime.mins": {
+        "one": "%d minuto atrás",
+        "many": "%d minutos atrás",
+        "other": "%d minutos atrás"
+    },
+    "relativetime.days": {
+        "one": "%d dia atrás",
+        "many": "%d dias atrás",
+        "other": "%d dias atrás"
+    },
+    "relativetime.weeks": {
+        "one": "%d semana atrás",
+        "many": "%d semanas atrás",
+        "other": "%d semanas atrás"
+    },
+    "relativetime.months": {
+        "one": "%d mês atrás",
+        "many": "%d meses atrás",
+        "other": "%d meses atrás"
+    },
+    "relativetime.years": {
+        "one": "%d ano atrás",
+        "many": "%d anos atrás",
+        "other": "%d anos atrás"
+    },
+    "relativetime.1day": "ontem",
+    "relativetime.2days": "dois dias atrás",
+    "relativetime.1week": "semana passada",
+    "relativetime.1month": "mês passado",
+    "relativetime.2months": "dois meses atrás",
+    "relativetime.1year": "ano passado",
+    "relativetime.2years": "dois anos atrás",
+    "relativetime.hours": {
+        "one": "%d hora atrás",
+        "many": "%d horas atrás",
+        "other": "%d horas atrás"
+    },
+    "relativetime.2weeks": "duas semanas atrás",
+    "relativetime.now": "agora"
 }

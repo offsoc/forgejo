@@ -32,6 +32,7 @@ import (
 	"forgejo.org/routers/web/feed"
 	"forgejo.org/routers/web/healthcheck"
 	"forgejo.org/routers/web/misc"
+	"forgejo.org/routers/web/moderation"
 	"forgejo.org/routers/web/org"
 	org_setting "forgejo.org/routers/web/org/setting"
 	"forgejo.org/routers/web/repo"
@@ -473,6 +474,11 @@ func registerRoutes(m *web.Route) {
 		m.Get("", user.Issues)
 		m.Get("/search", repo.SearchIssues)
 	}, reqSignIn)
+
+	if setting.Moderation.Enabled {
+		m.Get("/report_abuse", reqSignIn, moderation.NewReport)
+		m.Post("/report_abuse", reqSignIn, web.Bind(forms.ReportAbuseForm{}), moderation.CreatePost)
+	}
 
 	m.Get("/pulls", reqSignIn, user.Pulls)
 	m.Get("/milestones", reqSignIn, reqMilestonesDashboardPageEnabled, user.Milestones)
