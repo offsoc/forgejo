@@ -17,6 +17,10 @@
   }
 }
 
+details.dropdown {
+  position: relative;
+}
+
 details.dropdown > summary {
   /* Optional flex+gap in case summary contains multiple elements */
   display: flex;
@@ -82,6 +86,17 @@ details.dropdown > summary + ul > li:last-child {
 
 details.dropdown > summary + ul > li:hover {
   background: var(--color-hover)
+}
+
+/* ToDo: make it not .test but easily usable */
+details.dropdown.test > summary + ul {
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+  direction: rtl;
+}
+
+details.dropdown.test > summary + ul > li {
+  direction: ltr;
 }
 
 details.dropdown > summary + ul > li > .item {
