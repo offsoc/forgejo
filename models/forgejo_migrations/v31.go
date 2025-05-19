@@ -18,9 +18,9 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 		UserID       int64 `xorm:"NOT NULL INDEX user_id"`
 		ActorID      int64
 		ActorURI     string
-		NoteContent  string `xorm:"VARCHAR"`
-		NoteURL      string
-		OriginalNote string             `xorm:"VARCHAR"`
+		NoteContent  string             `xorm:"TEXT"`
+		NoteURL      string             `xorm:"VARCHAR(255)"`
+		OriginalNote string             `xorm:"TEXT"`
 		Created      timeutil.TimeStamp `xorm:"created"`
 	}
 

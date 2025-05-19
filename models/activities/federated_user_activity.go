@@ -22,10 +22,10 @@ type FederatedUserActivity struct {
 	UserID       int64 `xorm:"NOT NULL"`
 	ActorID      int64
 	ActorURI     string
-	Actor        *user_model.User `xorm:"-"` // transient
-	NoteContent  string           `xorm:"VARCHAR"`
-	NoteURL      string
-	OriginalNote string             `xorm:"VARCHAR"`
+	Actor        *user_model.User   `xorm:"-"` // transient
+	NoteContent  string             `xorm:"TEXT"`
+	NoteURL      string             `xorm:"VARCHAR(255)"`
+	OriginalNote string             `xorm:"TEXT"`
 	Created      timeutil.TimeStamp `xorm:"created"`
 }
 
