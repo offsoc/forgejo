@@ -849,7 +849,7 @@ func Routes() *web.Route {
 						m.Get("", activitypub.PersonActivityNote)
 						m.Get("/activity", activitypub.PersonActivity)
 					})
-					m.Get("/feed", activitypub.ReqHTTPUserSignature(), activitypub.PersonFeed)
+					m.Get("/outbox", activitypub.ReqHTTPUserSignature(), activitypub.PersonFeed)
 				}, context.UserIDAssignmentAPI(), checkTokenPublicOnly())
 				m.Group("/actor", func() {
 					m.Get("", activitypub.Actor)
