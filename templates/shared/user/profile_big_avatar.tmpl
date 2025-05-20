@@ -1,6 +1,9 @@
 {{if .IsHTMX}}
 	{{template "base/alert" .}}
 {{end}}
+
+{{$showFollow := and .IsSigned (ne .SignedUserID .ContextUser.ID)}}
+
 <div id="profile-avatar-card" class="ui card" hx-swap="morph">
 	<div id="profile-avatar" class="content tw-flex">
 	{{if eq .SignedUserID .ContextUser.ID}}
@@ -16,8 +19,8 @@
 	</div>
 	<div class="content tw-break-anywhere profile-avatar-name">
 		{{if .ContextUser.FullName}}<span class="header text center">{{.ContextUser.FullName}}</span>{{end}}
-		<span class="{{if or (not .IsSigned) (eq .SignedUserID .ContextUser.ID)}}username-row{{end}}">{{.ContextUser.Name}} {{if .ContextUser.GetPronouns .IsSigned}} · {{.ContextUser.GetPronouns .IsSigned}}{{end}}
-			{{if or (not .IsSigned) (eq .SignedUserID .ContextUser.ID)}}
+		<span class="{{if not $showFollow}}username-row{{end}}">{{.ContextUser.Name}} {{if .ContextUser.GetPronouns .IsSigned}} · {{.ContextUser.GetPronouns .IsSigned}}{{end}}
+			{{if not $showFollow}}
 				{{template "shared/user/actions_menu" .}}
 			{{end}}
 		</span>
@@ -25,7 +28,7 @@
 			<a class="muted" href="{{.ContextUser.HomeLink}}?tab=followers">{{svg "octicon-people" 18 "tw-mr-1"}}{{ctx.Locale.TrN .NumFollowers "user.followers_one" "user.followers_few" .NumFollowers}}</a> · <a class="muted" href="{{.ContextUser.HomeLink}}?tab=following">{{ctx.Locale.TrN .NumFollowing "user.following_one" "user.following_few" .NumFollowing}}</a>
 		</div>
 	</div>
-	{{if and .IsSigned (ne .SignedUserID .ContextUser.ID)}}
+	{{if $showFollow}}
 		<div class="actions">
 			<div class="primary-action" hx-target="#profile-avatar-card" hx-indicator="#profile-avatar-card">
 				{{if .IsFollowing}}
