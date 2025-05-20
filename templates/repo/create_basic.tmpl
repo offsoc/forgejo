@@ -2,17 +2,27 @@
 	{{ctx.Locale.Tr "repo.owner"}}
 	<div class="ui selection required dropdown" aria-labelledby="repo_owner_label">
 		{{/* uid id is used by the repo-template code */}}
-		<input type="hidden" id="uid" name="uid" value="{{.ContextUser.ID}}" required>
-		<span class="text truncated-item-container" title="{{.ContextUser.Name}}">
-			{{ctx.AvatarUtils.Avatar .ContextUser 28 "mini"}}
-			<span class="truncated-item-name">{{.ContextUser.ShortName 40}}</span>
-		</span>
+		{{if .CanCreateRepo}}
+			<input type="hidden" id="uid" name="uid" value="{{.ContextUser.ID}}" required>
+			<span class="text truncated-item-container" title="{{.ContextUser.Name}}">
+				{{ctx.AvatarUtils.Avatar .ContextUser 28 "mini"}}
+				<span class="truncated-item-name">{{.ContextUser.ShortName 40}}</span>
+			</span>
+		{{else if .Orgs}}
+			<input type="hidden" id="uid" name="uid" value="{{(index .Orgs 0).ID}}" required>
+			<span class="text truncated-item-container" title="{{(index .Orgs 0).Name}}">
+				{{ctx.AvatarUtils.Avatar (index .Orgs 0) 28 "mini"}}
+				<span class="truncated-item-name">{{(index .Orgs 0).ShortName 40}}</span>
+			</span>
+		{{end}}
 		{{svg "octicon-triangle-down" 14 "dropdown icon"}}
 		<div class="menu">
-			<div class="item truncated-item-container" data-value="{{.SignedUser.ID}}" title="{{.SignedUser.Name}}">
-				{{ctx.AvatarUtils.Avatar .SignedUser 28 "mini"}}
-				<span class="truncated-item-name">{{.SignedUser.ShortName 40}}</span>
-			</div>
+			{{if .CanCreateRepo}}
+				<div class="item truncated-item-container" data-value="{{.SignedUser.ID}}" title="{{.SignedUser.Name}}">
+					{{ctx.AvatarUtils.Avatar .SignedUser 28 "mini"}}
+					<span class="truncated-item-name">{{.SignedUser.ShortName 40}}</span>
+				</div>
+			{{end}}
 			{{range .Orgs}}
 				<div class="item truncated-item-container" data-value="{{.ID}}" title="{{.Name}}">
 					{{ctx.AvatarUtils.Avatar . 28 "mini"}}
