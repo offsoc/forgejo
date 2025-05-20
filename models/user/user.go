@@ -153,6 +153,9 @@ type User struct {
 	KeepActivityPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	KeepPronounsPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	EnableRepoUnitHints bool   `xorm:"NOT NULL DEFAULT true"`
+
+	// If you add new fields that might be used to store abusive content (mainly string fields),
+	// please also add them in the UserData struct and the corresponding constructor.
 }
 
 func init() {
@@ -610,6 +613,7 @@ var (
 		"pulls",
 		"milestones",
 		"notifications",
+		"report_abuse",
 
 		"favicon.ico",
 		"manifest.json", // web app manifests
@@ -916,6 +920,12 @@ func (u User) Validate() []string {
 // UpdateUserCols update user according special columns
 func UpdateUserCols(ctx context.Context, u *User, cols ...string) error {
 	if err := ValidateUser(u, cols...); err != nil {
+		return err
+	}
+
+	// If the user was reported as abusive and any of the columns being updated is relevant
+	// for moderation purposes a shadow copy should be created before first update.
+	if err := IfNeededCreateShadowCopyForUser(ctx, u, cols...); err != nil {
 		return err
 	}
 
