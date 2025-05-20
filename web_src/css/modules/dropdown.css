@@ -88,16 +88,21 @@ details.dropdown > summary + ul > li:hover {
   background: var(--color-hover)
 }
 
-/* ToDo: make it not .test but easily usable */
-details.dropdown.test > summary + ul {
-  inset-inline-start: 0;
-  inset-inline-end: auto;
-  direction: rtl;
+/* Switch the direction at a width point where most of layout changes occur. */
+/* There's no easy way to check with CSS if LTR dropdown will fit on screen. */
+@media (max-width: 767.98px) {
+  details.dropdown.dir-auto > summary + ul {
+    inset-inline-start: 0; /* ill fix lint.. soon D */
+    inset-inline-end: auto;
+    direction: rtl;
+  }
+  details.dropdown.dir-auto > summary + ul > li {
+    direction: ltr;
+  }
 }
-
-details.dropdown.test > summary + ul > li {
-  direction: ltr;
-}
+/* Note: dropdown.dir-rtl can be implemented when needed */
+/* Note: https://css-tricks.com/css-anchor-positioning-guide/
+ * looks like a great thing but FF still doesn't support it. */
 
 details.dropdown > summary + ul > li > .item {
   display: flex;
