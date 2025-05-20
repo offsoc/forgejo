@@ -46,6 +46,7 @@
         "one": "wants to merge %[1]d commit from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>",
         "other": "wants to merge %[1]d commits from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>"
     },
+    "repo.form.cannot_create": "All spaces in which you can create repositories have reached the limit of repositories.",
     "search.milestone_kind": "Search milestones…",
     "incorrect_root_url": "This Forgejo instance is configured to be served on \"%s\". You are currently viewing Forgejo through a different URL, which may cause parts of the application to break. The canonical URL is controlled by Forgejo admins via the ROOT_URL setting in the app.ini.",
     "themes.names.forgejo-auto": "Forgejo (follow system theme)",
@@ -82,6 +83,5 @@
     "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Triggered because: %[1]s by: %[2]s",
     "discussion.locked": "This discussion has been locked. Commenting is limited to contributors.",
-    "repo.form.cannot_create": "The owner has already reached the repository limit. If you can create repositories in organizations, those organizations have also reached their limits.",
     "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it."
 }
