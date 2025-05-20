@@ -146,20 +146,18 @@
       "minimumReleaseAge": "30 days"
     },
     {
+      "description": "Disable indirect major for stable branches",
+      "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["major"],
+      "matchDepTypes": ["indirect"],
+      "enabled": false
+    },
+    {
       "description": "Require approval for stable branches (must be last rule to override all others)",
       "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
       "dependencyDashboardApproval": true,
       "schedule": ["at any time"]
-    }
-  ],
-  "customManagers": [
-    {
-      "description": "Update deps inside Makefile",
-      "customType": "regex",
-      "managerFilePatterns": ["Makefile"],
-      "matchStrings": [
-        " \\?= (?<depName>.+?)@(?<currentValue>.+?) # renovate: datasource=(?<datasource>.+?)(?: packageName=(?<packageName>.+?))?( versioning=(?<versioning>.+?))?\\s"
-      ]
     }
   ]
 }
