@@ -216,7 +216,7 @@ func loadMailerFrom(rootCfg ConfigProvider) {
 			log.Error("Failed to parse Sendmail args: '%s' with error %v", sec.Key("SENDMAIL_ARGS").String(), err)
 		}
 
-		if MailService.SendmailArgs[len(MailService.SendmailArgs)-1] != "--" {
+		if len(MailService.SendmailArgs) == 0 || MailService.SendmailArgs[len(MailService.SendmailArgs)-1] != "--" {
 			log.Warn("SENDMAIL_ARGS setting does not end in \"--\", appending it to prevent argument injection")
 			MailService.SendmailArgs = append(MailService.SendmailArgs, "--")
 		}
