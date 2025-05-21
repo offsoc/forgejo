@@ -295,7 +295,7 @@
   avatar: ""
   avatar_email: user8@example.com
   use_custom_avatar: true
-  num_followers: 1
+  num_followers: 3
   num_following: 1
   num_stars: 0
   num_repos: 0
