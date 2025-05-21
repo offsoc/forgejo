@@ -271,11 +271,8 @@ func TestProtectedBranch(t *testing.T) {
 }
 
 func TestRepoFollowing(t *testing.T) {
-	setting.Federation.Enabled = true
 	defer tests.PrepareTestEnv(t)()
-	defer func() {
-		setting.Federation.Enabled = false
-	}()
+	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 
 	mock := test.NewFederationServerMock()
 	federatedSrv := mock.DistantServer(t)

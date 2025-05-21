@@ -123,7 +123,6 @@ func TestViewIssuesKeyword(t *testing.T) {
 		Index:  1,
 	})
 	issues.UpdateIssueIndexer(t.Context(), issue.ID)
-	time.Sleep(time.Second * 1)
 
 	const keyword = "first"
 	req := NewRequestf(t, "GET", "%s/issues?q=%s", repo.Link(), keyword)

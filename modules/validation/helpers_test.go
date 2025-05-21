@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -47,7 +48,7 @@ func Test_IsValidURL(t *testing.T) {
 }
 
 func Test_IsValidExternalURL(t *testing.T) {
-	setting.AppURL = "https://try.gitea.io/"
+	defer test.MockVariableValue(&setting.AppURL, "https://code.forgejo.org/")()
 
 	cases := []struct {
 		description string
@@ -56,7 +57,7 @@ func Test_IsValidExternalURL(t *testing.T) {
 	}{
 		{
 			description: "Current instance URL",
-			url:         "https://try.gitea.io/test",
+			url:         "https://code.forgejo.org/test",
 			valid:       true,
 		},
 		{
@@ -66,7 +67,7 @@ func Test_IsValidExternalURL(t *testing.T) {
 		},
 		{
 			description: "Current instance API URL",
-			url:         "https://try.gitea.io/api/v1/user/follow",
+			url:         "https://code.forgejo.org/api/v1/user/follow",
 			valid:       false,
 		},
 		{
@@ -89,7 +90,7 @@ func Test_IsValidExternalURL(t *testing.T) {
 }
 
 func Test_IsValidExternalTrackerURLFormat(t *testing.T) {
-	setting.AppURL = "https://try.gitea.io/"
+	defer test.MockVariableValue(&setting.AppURL, "https://code.forgejo.org/")()
 
 	cases := []struct {
 		description string
@@ -156,7 +157,8 @@ func Test_IsValidExternalTrackerURLFormat(t *testing.T) {
 }
 
 func TestIsValidUsernameAllowDots(t *testing.T) {
-	setting.Service.AllowDotsInUsernames = true
+	defer test.MockVariableValue(&setting.Service.AllowDotsInUsernames, true)()
+
 	tests := []struct {
 		arg  string
 		want bool
@@ -188,10 +190,7 @@ func TestIsValidUsernameAllowDots(t *testing.T) {
 }
 
 func TestIsValidUsernameBanDots(t *testing.T) {
-	setting.Service.AllowDotsInUsernames = false
-	defer func() {
-		setting.Service.AllowDotsInUsernames = true
-	}()
+	defer test.MockVariableValue(&setting.Service.AllowDotsInUsernames, false)()
 
 	tests := []struct {
 		arg  string
