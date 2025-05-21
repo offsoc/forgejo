@@ -9,11 +9,21 @@ import (
 )
 
 func SetTopicsAsEmptySlice(x *xorm.Engine) error {
+	var err error
 	if x.Dialect().URI().DBType == schemas.POSTGRES {
-		_, err := x.Exec("UPDATE `repository` SET topics = '[]' WHERE topics IS NULL OR topics::text = 'null'")
+		_, err = x.Exec("UPDATE `repository` SET topics = '[]' WHERE topics IS NULL OR topics::text = 'null'")
+	} else {
+		_, err = x.Exec("UPDATE `repository` SET topics = '[]' WHERE topics IS NULL")
+	}
+
+	if err != nil {
 		return err
 	}
 
-	_, err := x.Exec("UPDATE `repository` SET topics = '[]' WHERE topics IS NULL")
-	return err
+	type Repository struct {
+		ID     int64    `xorm:"pk autoincr"`
+		Topics []string `xorm:"TEXT JSON NOT NULL"`
+	}
+
+	return x.Sync(new(Repository))
 }

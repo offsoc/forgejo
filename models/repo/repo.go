@@ -182,7 +182,7 @@ type Repository struct {
 	StatsIndexerStatus              *RepoIndexerStatus `xorm:"-"`
 	IsFsckEnabled                   bool               `xorm:"NOT NULL DEFAULT true"`
 	CloseIssuesViaCommitInAnyBranch bool               `xorm:"NOT NULL DEFAULT false"`
-	Topics                          []string           `xorm:"TEXT JSON"`
+	Topics                          []string           `xorm:"TEXT JSON NOT NULL"`
 	ObjectFormatName                string             `xorm:"VARCHAR(6) NOT NULL DEFAULT 'sha1'"`
 
 	TrustModel TrustModelType
