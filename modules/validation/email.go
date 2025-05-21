@@ -59,7 +59,12 @@ func validateEmailBasic(email string) error {
 		return ErrEmailInvalid{email}
 	}
 
-	if _, err := mail.ParseAddress(email); err != nil {
+	parsedAddress, err := mail.ParseAddress(email)
+	if err != nil {
+		return ErrEmailInvalid{email}
+	}
+
+	if parsedAddress.Name != "" {
 		return ErrEmailInvalid{email}
 	}
 

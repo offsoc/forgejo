@@ -57,7 +57,7 @@ func TestEmailAddressValidate(t *testing.T) {
 		"}233@qq.com":                    nil,
 		"~233@qq.com":                    nil,
 		"\"~@ \"@famfo.xyz":              nil,
-		"Foo <foo@bar.com>":              nil,
+		"Foo <foo@bar.com>":              ErrEmailInvalid{"Foo <foo@bar.com>"},
 		";233@qq.com":                    ErrEmailInvalid{";233@qq.com"},
 		string([]byte{0xE2, 0x84, 0xAA}): ErrEmailInvalid{string([]byte{0xE2, 0x84, 0xAA})},
 	}
