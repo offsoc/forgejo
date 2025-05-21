@@ -9,11 +9,12 @@
 import {expect} from '@playwright/test';
 import {test} from './utils_e2e.ts';
 
-test('Usercards - grid', async ({page}) => {
+test('Usercards width', async ({page}) => {
   await page.goto('/user8?tab=followers');
 
-  // Verify that the cards are ~same width. Testdata has users with long website
-  // links that could push squash neighbor cards
+  // Regardless of whether cards in a grid or flex mode, they should be ~same
+  // width. Verifying this relies on fixtures with users that have long website
+  // link or other content that could push the card width.
   const widths = [];
   const amount = 3;
 
@@ -22,7 +23,7 @@ test('Usercards - grid', async ({page}) => {
     widths.push(Math.round(card.width));
   }
 
-  widths.forEach(width => {
+  for (const width of widths) {
     expect(width).toBe(widths[0]);
-  });
+  }
 });
