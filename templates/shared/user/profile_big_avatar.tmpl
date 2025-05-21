@@ -48,7 +48,7 @@
 	<div class="extra content tw-break-anywhere">
 		<ul>
 			{{if .ContextUser.Location}}
-				<li class="extra-info">
+				<li>
 					{{svg "octicon-location"}}
 					<span class="tw-flex-1">{{.ContextUser.Location}}</span>
 					{{if .ContextUserLocationMapURL}}
@@ -59,7 +59,7 @@
 				</li>
 			{{end}}
 			{{if .ShowUserEmail}}
-				<li class="extra-info">
+				<li>
 					{{svg "octicon-mail"}}
 					<a class="tw-flex-1" href="mailto:{{.ContextUser.Email}}" rel="nofollow">{{.ContextUser.Email}}</a>
 					{{if (eq .SignedUserID .ContextUser.ID)}}
@@ -72,7 +72,7 @@
 				</li>
 			{{end}}
 			{{if .ContextUser.Website}}
-				<li class="extra-info">
+				<li>
 					{{svg "octicon-link"}}
 					<a target="_blank" rel="noopener noreferrer me" href="{{.ContextUser.Website}}">{{.ContextUser.Website}}</a>
 				</li>
@@ -90,7 +90,7 @@
 					</li>
 				{{end}}
 			{{end}}
-			<li class="extra-info">
+			<li>
 				{{svg "octicon-calendar"}}
 				<span>{{ctx.Locale.Tr "user.joined_on" (DateUtils.AbsoluteShort .ContextUser.CreatedUnix)}}</span>
 			</li>
