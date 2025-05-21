@@ -9,8 +9,6 @@
 import {expect} from '@playwright/test';
 import {test} from './utils_e2e.ts';
 
-test.use({user: 'user2'});
-
 test('Usercards - grid', async ({page}) => {
   await page.goto('/user8?tab=followers');
 
