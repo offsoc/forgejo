@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 	packages_model "forgejo.org/models/packages"
 	"forgejo.org/modules/log"
+	"forgejo.org/modules/optional"
 	packages_module "forgejo.org/modules/packages"
 	opentofu_state_module "forgejo.org/modules/packages/opentofu/state"
 	"forgejo.org/modules/setting"
@@ -38,8 +40,66 @@ func GetLockId(ctx *context.Context) (string, error) {
 	panic("Not yet implemented")
 }
 
+// GetState returns the latest version of the state file if any.
 func GetState(ctx *context.Context) {
-	panic("Not yet implemented")
+	// Get the package name from the request.
+	packageName := ctx.Params("packagename")
+	log.Debug("Processing OpenTofu/Terraform HTTP backend package fetch request: %s", packageName)
+
+	// Search for the latest versions of the package/state file.
+	pvs, _, err := packages_model.SearchLatestVersions(ctx, &packages_model.PackageSearchOptions{
+		OwnerID:         ctx.Package.Owner.ID,
+		Type:            packages_model.TypeOpenTofuState,
+		Name:            packages_model.SearchValue{ExactMatch: true, Value: packageName},
+		HasFileWithName: opentofu_state_module.OpenTofuStateFilename,
+		IsInternal:      optional.Some(false),
+		Sort:            packages_model.SortCreatedDesc,
+	})
+	if err != nil {
+		apiError(ctx, http.StatusInternalServerError, fmt.Errorf("Failed to search for the latest versions of the state file: %w", err))
+		return
+	}
+
+	// If the package/state file does not exist.
+	if len(pvs) == 0 {
+		apiError(ctx, http.StatusNoContent, "No state file available to download.")
+		return
+	}
+
+	// Get the latest version of the package/state file now that we know its version
+	// number.
+	s, _, pf, err := packages_service.GetFileStreamByPackageNameAndVersion(
+		ctx,
+		&packages_service.PackageInfo{
+			Owner:       ctx.Package.Owner,
+			PackageType: packages_model.TypeOpenTofuState,
+			Name:        packageName,
+			Version:     pvs[0].Version,
+		},
+		&packages_service.PackageFileInfo{
+			Filename: opentofu_state_module.OpenTofuStateFilename,
+		},
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, packages_model.ErrPackageNotExist):
+			apiError(ctx, http.StatusNotFound, "The package cannot be found.")
+		case errors.Is(err, packages_model.ErrPackageFileNotExist):
+			apiError(ctx, http.StatusNotFound, "The state file cannot be found in the package.")
+		default:
+			apiError(ctx, http.StatusInternalServerError, fmt.Errorf("Failed to find the package and its state file: %w", err))
+		}
+
+		return
+	}
+	defer s.Close()
+
+	// Return the state file.
+	helper.ServePackageFile(ctx, s, nil, pf, &context.ServeHeaderOptions{
+		ContentType:  "application/json",
+		Filename:     pf.Name,
+		LastModified: pf.CreatedUnix.AsLocalTime(),
+	})
 }
 
 // UpdateState processes the REST API requests received to create/update an

@@ -27,27 +27,26 @@ func TestPackageOpenTofuHttpBackend(t *testing.T) {
 
 	rootUrl := fmt.Sprintf("/api/packages/%s/opentofu/http/state", user.Name)
 
+	unencryptedVersion4StateFile := `{
+		"version": 4,
+		"terraform_version": "1.9.0",
+		"serial": 1,
+		"lineage": "fcf2c3a0-3a0f-703f-c611-0ca7776c06b8",
+		"outputs": {},
+		"resources": [],
+		"check_results": null
+	}`
+	encryptedVersion4StateFile := `{
+		"serial": 1,
+		"lineage": "2ce64317-825a-f8cd-b35e-84fa110b561f",
+		"meta": {
+			"key_provider.pbkdf2.local": "eyJzYWx0IjoiNW9WSGpZM3BGaHRaNncwUE1hSDkrcnc2UzR1cjE4Q05adUR4RXNWM1dmcz0iLCJpdGVyYXRpb25zIjo2MDAwMDAsImhhc2hfZnVuY3Rpb24iOiJzaGE1MTIiLCJrZXlfbGVuZ3RoIjozMn0="
+		},
+		"encrypted_data": "e9oQmRWzPOcELCgmi1uJd5vfKMSnO7oQe/Mpyo8pKEXyNwChoPs0HpDeFhf2h32diyUORX28rWQ+D+wotHseJ+9c6EeE/G3TNr+ilmvdy0nKqZ4ABw/YoD6Zwn+DKF4qviUK2pnXN3HOQqgHUMmiuzL/AqIz1gDBncDyKJLdzuAXjXI1NyFRtCNJmVJpJkyq0ZhQG/i1KxbxAQtCAySH8T3KPE/njy4X7E08vy29rHtGxF0=",
+		"encryption_version": "v0"
+	}`
+
 	t.Run("Upload", func(t *testing.T) {
-		unencryptedVersion4StateFile := `{
-			"version": 4,
-			"terraform_version": "1.9.0",
-			"serial": 1,
-			"lineage": "fcf2c3a0-3a0f-703f-c611-0ca7776c06b8",
-			"outputs": {},
-			"resources": [],
-			"check_results": null
-		}`
-
-		encryptedVersion4StateFile := `{
-			"serial": 1,
-			"lineage": "2ce64317-825a-f8cd-b35e-84fa110b561f",
-			"meta": {
-				"key_provider.pbkdf2.local": "eyJzYWx0IjoiNW9WSGpZM3BGaHRaNncwUE1hSDkrcnc2UzR1cjE4Q05adUR4RXNWM1dmcz0iLCJpdGVyYXRpb25zIjo2MDAwMDAsImhhc2hfZnVuY3Rpb24iOiJzaGE1MTIiLCJrZXlfbGVuZ3RoIjozMn0="
-			},
-			"encrypted_data": "e9oQmRWzPOcELCgmi1uJd5vfKMSnO7oQe/Mpyo8pKEXyNwChoPs0HpDeFhf2h32diyUORX28rWQ+D+wotHseJ+9c6EeE/G3TNr+ilmvdy0nKqZ4ABw/YoD6Zwn+DKF4qviUK2pnXN3HOQqgHUMmiuzL/AqIz1gDBncDyKJLdzuAXjXI1NyFRtCNJmVJpJkyq0ZhQG/i1KxbxAQtCAySH8T3KPE/njy4X7E08vy29rHtGxF0=",
-			"encryption_version": "v0"
-		}`
-
 		// Sends a state upload request without being authenticated.
 		t.Run("UnauthenticatedUploadRequest", func(t *testing.T) {
 			defer tests.PrintCurrentTest(t)()
@@ -166,6 +165,31 @@ func TestPackageOpenTofuHttpBackend(t *testing.T) {
 
 			req = NewRequestWithBody(t, "POST", rootUrl+"/"+packageName, strings.NewReader(encryptedVersion4StateFile)).SetHeader("Content-Type", "application/json").SetHeader("Content-MD5", md5Base64).AddBasicAuth(user.Name)
 			MakeRequest(t, req, http.StatusConflict)
+		})
+	})
+
+	t.Run("Fetch", func(t *testing.T) {
+		// Sends a fetch request for a non-existing package.
+		t.Run("NoStateFile", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			req := NewRequest(t, "GET", rootUrl+"/non-existing")
+			MakeRequest(t, req, http.StatusNoContent)
+		})
+
+		// Sends a fetch request to download the previously uploaded 'v4-unencrypted'
+		// package.
+		t.Run("FetchUnencryptedVersion4Package", func(t *testing.T) {
+			defer tests.PrintCurrentTest(t)()
+
+			req := NewRequest(t, "GET", rootUrl+"/v4-unencrypted")
+			resp := MakeRequest(t, req, http.StatusOK)
+			assert.Contains(t, resp.Header().Get("Content-Type"), "application/json")
+
+			bodyBytes, err := io.ReadAll(resp.Body)
+			require.NoError(t, err)
+			require.NotEmpty(t, bodyBytes)
+			assert.Equal(t, unencryptedVersion4StateFile, string(bodyBytes))
 		})
 	})
 }
