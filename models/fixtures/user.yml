@@ -144,7 +144,7 @@
   avatar_email: user4@example.com
   use_custom_avatar: true
   num_followers: 0
-  num_following: 1
+  num_following: 2
   num_stars: 0
   num_repos: 0
   num_teams: 0
@@ -182,7 +182,7 @@
   avatar_email: user5@example.com
   use_custom_avatar: true
   num_followers: 0
-  num_following: 0
+  num_following: 1
   num_stars: 0
   num_repos: 1
   num_teams: 0
