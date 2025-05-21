@@ -98,6 +98,8 @@ var migrations = []*Migration{
 	NewMigration("Add public key information to `FederatedUser` and `FederationHost`", AddPublicKeyInformationForFederation),
 	// v29 -> v30
 	NewMigration("Migrate `User.NormalizedFederatedURI` column to extract port & schema into FederatedHost", MigrateNormalizedFederatedURI),
+	// v30 -> v31
+	NewMigration("Normalize repository.topics to empty slice instead of null", SetTopicsAsEmptySlice),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.

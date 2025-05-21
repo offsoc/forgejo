@@ -195,6 +195,13 @@ type Repository struct {
 	ArchivedUnix timeutil.TimeStamp `xorm:"DEFAULT 0"`
 }
 
+// BeforeInsert will be invoked by XORM before updating a record
+func (repo *Repository) BeforeInsert() {
+	if repo.Topics == nil {
+		repo.Topics = []string{}
+	}
+}
+
 func init() {
 	db.RegisterModel(new(Repository))
 }
