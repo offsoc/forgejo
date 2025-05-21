@@ -92,8 +92,7 @@ details.dropdown > summary + ul > li:hover {
 /* There's no easy way to check with CSS if LTR dropdown will fit on screen. */
 @media (max-width: 767.98px) {
   details.dropdown.dir-auto > summary + ul {
-    inset-inline-start: 0; /* ill fix lint.. soon D */
-    inset-inline-end: auto;
+    inset-inline: 0 auto;
     direction: rtl;
   }
   details.dropdown.dir-auto > summary + ul > li {
