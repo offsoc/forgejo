@@ -214,6 +214,8 @@ func BuildLoadBalancePolicy(settings *DatabaseSettings, slaveEngines []*xorm.Eng
 		policy = xorm.RoundRobinPolicy()
 	case "LeastConn":
 		policy = xorm.LeastConnPolicy()
+	case "Random":
+		policy = xorm.RandomPolicy()
 	default:
 		policy = xorm.RandomPolicy()
 	}
