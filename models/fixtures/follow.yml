@@ -15,8 +15,8 @@
 
 -
   id: 4
-  user_id: 4
-  follow_id: 8
+  user_id: 31
+  follow_id: 33
 
 -
   id: 5
@@ -25,5 +25,5 @@
 
 -
   id: 6
-  user_id: 31
-  follow_id: 33
+  user_id: 4
+  follow_id: 8
