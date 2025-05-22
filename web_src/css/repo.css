@@ -1298,7 +1298,7 @@ td .commit-summary {
   padding: 0 0.25rem;
 }
 
-.sha.label .badge {
+.sha.label .signature {
   color: var(--color-text);
   background: var(--color-light);
   padding: 0.25rem 0.33rem;
@@ -1321,7 +1321,7 @@ td .commit-summary {
   background: var(--color-red-badge-bg);
 }
 
-.sha.label.isSigned.isWarning .badge {
+.sha.label.isSigned.isWarning .signature {
   border-left: 1px solid var(--color-red-badge);
   color: var(--color-red-badge);
 }
@@ -1335,7 +1335,7 @@ td .commit-summary {
   background: var(--color-green-badge-bg);
 }
 
-.sha.label.isSigned.isVerified .badge {
+.sha.label.isSigned.isVerified .signature {
   border-left: 1px solid var(--color-green-badge);
   color: var(--color-green-badge);
 }
@@ -1349,7 +1349,7 @@ td .commit-summary {
   background: var(--color-yellow-badge-bg);
 }
 
-.sha.label.isSigned.isVerifiedUntrusted .badge {
+.sha.label.isSigned.isVerifiedUntrusted .signature {
   border-left: 1px solid var(--color-yellow-badge);
   color: var(--color-yellow-badge);
 }
@@ -1363,7 +1363,7 @@ td .commit-summary {
   background: var(--color-orange-badge-bg);
 }
 
-.sha.label.isSigned.isVerifiedUnmatched .badge {
+.sha.label.isSigned.isVerifiedUnmatched .signature {
   border-left: 1px solid var(--color-orange-badge);
   color: var(--color-orange-badge);
 }
