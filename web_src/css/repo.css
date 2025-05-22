@@ -1298,12 +1298,6 @@ td .commit-summary {
   padding: 0 0.25rem;
 }
 
-.sha.label .ui.signature.avatar {
-  height: 16px;
-  margin-bottom: 0;
-  width: 16px;
-}
-
 .sha.label .badge {
   color: var(--color-text);
   background: var(--color-light);
@@ -1314,6 +1308,12 @@ td .commit-summary {
 .sha.label .status-author {
   display: flex;
   gap: 0.25rem;
+}
+
+.sha.label .status-author .avatar {
+  height: 16px;
+  margin-bottom: 0;
+  width: 16px;
 }
 
 .sha.label.isSigned.isWarning {
