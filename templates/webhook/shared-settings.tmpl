@@ -168,6 +168,12 @@
 					{{ctx.Locale.Tr "repo.settings.event_action_recover"}}
 					<span class="help">{{ctx.Locale.Tr "repo.settings.event_action_recover_desc"}}</span>
 				</label>
+				<!-- Action Success -->
+				<label>
+					<input name="action_success" type="checkbox" {{if .Webhook.ActionSuccess}}checked{{end}}>
+					{{ctx.Locale.Tr "repo.settings.event_action_success"}}
+					<span class="help">{{ctx.Locale.Tr "repo.settings.event_action_success_desc"}}</span>
+				</label>
 			</fieldset>
 		</fieldset>
 	</fieldset>

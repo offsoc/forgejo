@@ -279,6 +279,7 @@ type WebhookCoreForm struct {
 	Package                  bool
 	ActionFailure            bool
 	ActionRecover            bool
+	ActionSuccess            bool
 	Active                   bool
 	BranchFilter             string `binding:"GlobPattern"`
 	AuthorizationHeader      string

@@ -499,6 +499,7 @@ type HookActionAction string
 const (
 	ActionFailed    HookActionAction = "failed"
 	ActionRecovered HookActionAction = "recovered"
+	ActionSuccess   HookActionAction = "success"
 )
 
 // ActionPayload payload for action webhooks

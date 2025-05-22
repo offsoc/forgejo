@@ -33,8 +33,9 @@ const (
 	HookEventPackage                   HookEventType = "package"
 	HookEventSchedule                  HookEventType = "schedule"
 	HookEventWorkflowDispatch          HookEventType = "workflow_dispatch"
-	HookEventActionRunRecover          HookEventType = "action_run_success_after_failur"
 	HookEventActionRunFailure          HookEventType = "action_run_hook_event_failure"
+	HookEventActionRunRecover          HookEventType = "action_run_success_after_failure"
+	HookEventActionRunSuccess          HookEventType = "action_run_hook_event_success"
 )
 
 // Event returns the HookEventType as an event string
@@ -67,10 +68,12 @@ func (h HookEventType) Event() string {
 		return "repository"
 	case HookEventRelease:
 		return "release"
+	case HookEventActionRunFailure:
+		return "action_run_failure"
 	case HookEventActionRunRecover:
 		return "action_run_recover"
-	case HookEventActionRunFailure:
-		return "action_run_hook_event_failure"
+	case HookEventActionRunSuccess:
+		return "action_run_success"
 	}
 	return ""
 }

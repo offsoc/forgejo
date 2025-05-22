@@ -904,19 +904,16 @@ func (m *webhookNotifier) ActionRunNowDone(ctx context.Context, run *actions_mod
 	}
 
 	if run.Status.IsSuccess() {
-		// only care about recovered runs
 		if lastRun.Status.IsSuccess() {
-			return
-		}
-		payload.Action = api.ActionRecovered
-		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunRecover, payload); err != nil {
-			log.Error("PrepareWebhooks: %v", err)
+			payload.Action = api.ActionSuccess
+		} else {
+			payload.Action = api.ActionRecovered
 		}
 	} else {
 		payload.Action = api.ActionFailed
-		if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunFailure, payload); err != nil {
-			log.Error("PrepareWebhooks: %v", err)
-		}
+	}
+	if err := PrepareWebhooks(ctx, source, webhook_module.HookEventActionRunRecover, payload); err != nil {
+		log.Error("PrepareWebhooks: %v", err)
 	}
 }
 

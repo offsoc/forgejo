@@ -311,6 +311,12 @@ func (w *Webhook) HasActionRunRecoverEvent() bool {
 		(w.ChooseEvents && w.ActionRecover)
 }
 
+// HasActionRunSuccessEvent returns if hook enabled action recover event.
+func (w *Webhook) HasActionRunSuccessEvent() bool {
+	return w.SendEverything ||
+		(w.ChooseEvents && w.ActionSuccess)
+}
+
 // HasPullRequestReviewRequestEvent returns true if hook enabled pull request review request event.
 func (w *Webhook) HasPullRequestReviewRequestEvent() bool {
 	return w.SendEverything ||
@@ -351,6 +357,7 @@ func (w *Webhook) EventCheckers() []struct {
 		{w.HasPullRequestReviewRequestEvent, webhook_module.HookEventPullRequestReviewRequest},
 		{w.HasActionRunFailureEvent, webhook_module.HookEventActionRunFailure},
 		{w.HasActionRunRecoverEvent, webhook_module.HookEventActionRunRecover},
+		{w.HasActionRunSuccessEvent, webhook_module.HookEventActionRunSuccess},
 	}
 }
 
