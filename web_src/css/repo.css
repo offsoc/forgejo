@@ -865,43 +865,6 @@ td .commit-summary {
 
 .singular-commit .shabox .sha.label {
   margin: 0;
-  border: 1px solid var(--color-light-border);
-}
-
-.singular-commit .shabox .sha.label.isSigned.isWarning {
-  border: 1px solid var(--color-red-badge);
-  background: var(--color-red-badge-bg);
-}
-
-.singular-commit .shabox .sha.label.isSigned.isWarning:hover {
-  background: var(--color-red-badge-hover-bg) !important;
-}
-
-.singular-commit .shabox .sha.label.isSigned.isVerified {
-  border: 1px solid var(--color-green-badge);
-  background: var(--color-green-badge-bg);
-}
-
-.singular-commit .shabox .sha.label.isSigned.isVerified:hover {
-  background: var(--color-green-badge-hover-bg) !important;
-}
-
-.singular-commit .shabox .sha.label.isSigned.isVerifiedUntrusted {
-  border: 1px solid var(--color-yellow-badge);
-  background: var(--color-yellow-badge-bg);
-}
-
-.singular-commit .shabox .sha.label.isSigned.isVerifiedUntrusted:hover {
-  background: var(--color-yellow-badge-hover-bg) !important;
-}
-
-.singular-commit .shabox .sha.label.isSigned.isVerifiedUnmatched {
-  border: 1px solid var(--color-orange-badge);
-  background: var(--color-orange-badge-bg);
-}
-
-.singular-commit .shabox .sha.label.isSigned.isVerifiedUnmatched:hover {
-  background: var(--color-orange-badge-hover-bg) !important;
 }
 
 @media (min-width: 768px) {
