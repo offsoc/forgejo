@@ -228,7 +228,7 @@ func InsertRun(ctx context.Context, run *ActionRun, jobs []*jobparser.SingleWork
 		name := run.Title
 		runsOn := []string{}
 		if job != nil {
-			needs := job.Needs()
+			needs = job.Needs()
 			if err := v.SetJob(id, job.EraseNeeds()); err != nil {
 				return err
 			}
