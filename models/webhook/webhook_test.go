@@ -74,7 +74,8 @@ func TestWebhook_EventsArray(t *testing.T) {
 		"pull_request", "pull_request_assign", "pull_request_label", "pull_request_milestone",
 		"pull_request_comment", "pull_request_review_approved", "pull_request_review_rejected",
 		"pull_request_review_comment", "pull_request_sync", "wiki", "repository", "release",
-		"package", "pull_request_review_request",
+		"package", "pull_request_review_request", "action_run_hook_event_failure",
+		"action_run_success_after_failure", "action_run_hook_event_success",
 	},
 		(&Webhook{
 			HookEvent: &webhook_module.HookEvent{SendEverything: true},
