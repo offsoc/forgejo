@@ -1305,12 +1305,12 @@ td .commit-summary {
   border-left: 1px solid var(--color-light-border);
 }
 
-.sha.label .status-author {
+.sha.label .signature-author {
   display: flex;
   gap: 0.25rem;
 }
 
-.sha.label .status-author .avatar {
+.sha.label .signature-author .avatar {
   height: 16px;
   margin-bottom: 0;
   width: 16px;
