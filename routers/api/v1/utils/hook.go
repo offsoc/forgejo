@@ -16,7 +16,7 @@ import (
 	"forgejo.org/modules/setting"
 	api "forgejo.org/modules/structs"
 	"forgejo.org/modules/util"
-	"code.gitea.io/gitea/modules/validation"
+	"forgejo.org/modules/validation"
 	webhook_module "forgejo.org/modules/webhook"
 	"forgejo.org/services/context"
 	webhook_service "forgejo.org/services/webhook"
@@ -95,7 +95,7 @@ func checkCreateHookOption(ctx *context.APIContext, form *api.CreateHookOption) 
 		return false
 	}
 	if !validation.IsValidURL(form.Config["url"]) {
-		ctx.APIError(http.StatusUnprocessableEntity, "Invalid url")
+		ctx.Error(http.StatusUnprocessableEntity, "", "Invalid url")
 		return false
 	}
 	return true
@@ -328,7 +328,7 @@ func editHook(ctx *context.APIContext, form *api.EditHookOption, w *webhook.Webh
 	if form.Config != nil {
 		if url, ok := form.Config["url"]; ok {
 			if !validation.IsValidURL(url) {
-				ctx.APIError(http.StatusUnprocessableEntity, "Invalid url")
+				ctx.Error(http.StatusUnprocessableEntity, "", "Invalid url")
 				return false
 			}
 			w.URL = url
