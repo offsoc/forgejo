@@ -205,7 +205,7 @@ func (t telegramConvertor) Package(p *api.PackagePayload) (TelegramPayload, erro
 	return createTelegramPayload(text), nil
 }
 
-func (_ telegramConvertor) Action(p *api.ActionPayload) (TelegramPayload, error) {
+func (telegramConvertor) Action(p *api.ActionPayload) (TelegramPayload, error) {
 	text, _ := getActionPayloadInfo(p, htmlLinkFormatter)
 
 	return createTelegramPayload(text), nil
