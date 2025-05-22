@@ -215,6 +215,11 @@ func loadMailerFrom(rootCfg ConfigProvider) {
 		if err != nil {
 			log.Error("Failed to parse Sendmail args: '%s' with error %v", sec.Key("SENDMAIL_ARGS").String(), err)
 		}
+
+		if len(MailService.SendmailArgs) == 0 || MailService.SendmailArgs[len(MailService.SendmailArgs)-1] != "--" {
+			log.Warn("SENDMAIL_ARGS setting does not end in \"--\", appending it to prevent argument injection")
+			MailService.SendmailArgs = append(MailService.SendmailArgs, "--")
+		}
 	case "smtp", "smtps", "smtp+starttls", "smtp+unix":
 		ips := tryResolveAddr(MailService.SMTPAddr)
 		if MailService.Protocol == "smtp" {
