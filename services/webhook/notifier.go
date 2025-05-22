@@ -897,7 +897,7 @@ func (m *webhookNotifier) ActionRunNowDone(ctx context.Context, run *actions_mod
 	doer := run.TriggerUser
 
 	permission, _ := access_model.GetUserRepoPermission(ctx, run.Repo, doer)
-	var payload = &api.ActionPayload{
+	payload := &api.ActionPayload{
 		Run:         convert.ToActionRun(ctx, run, doer, permission),
 		LastRun:     convert.ToActionRun(ctx, lastRun, doer, permission),
 		PriorStatus: priorStatus.String(),
