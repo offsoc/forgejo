@@ -210,7 +210,7 @@ func (dc dingtalkConvertor) Package(p *api.PackagePayload) (DingtalkPayload, err
 func (dc dingtalkConvertor) Action(p *api.ActionPayload) (DingtalkPayload, error) {
 	text, _ := getActionPayloadInfo(p, noneLinkFormatter)
 
-	return createDingtalkPayload(text, text, "view action", p.RunHTMLURL), nil
+	return createDingtalkPayload(text, text, "view action", p.Run.HTMLURL), nil
 }
 
 func createDingtalkPayload(title, text, singleTitle, singleURL string) DingtalkPayload {

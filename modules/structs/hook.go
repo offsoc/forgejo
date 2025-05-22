@@ -503,21 +503,14 @@ const (
 
 // ActionPayload payload for action webhooks
 type ActionPayload struct {
-	Action      HookActionAction `json:"action"`
-	Repo        *Repository      `json:"repository"`
-	TriggerUser *User            `json:"trigger_user"`
-	RunTitle    string           `json:"run_title"`
-	RunHTMLURL  string           `json:"run_html_url"`
-	RunBranch   string           `json:"branch"`
-	// the status of the just completed run
-	// this must be a done status
-	CurrentStatus string `json:"current_status"`
+	Action HookActionAction `json:"action"`
+	Run    *ActionRun       `json:"run"`
 	// the status of this run before it completed
 	// this must be a not done status
 	PriorStatus string `json:"prior_status"`
-	// the final status of the last run for the same workflow
-	// could be empty when Run is the first for it's workflow
-	LastStatus string `json:"last_status"`
+	// the last run for the same workflow
+	// could be nil when Run is the first for it's workflow
+	LastRun *ActionRun `json:"last_run,omitempty"`
 }
 
 // JSONPayload return payload information

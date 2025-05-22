@@ -896,21 +896,11 @@ func (m *webhookNotifier) ActionRunNowDone(ctx context.Context, run *actions_mod
 	// TODO: is this the correct user to get the permissions from
 	doer := run.TriggerUser
 
-	lastStatus := ""
-	if lastRun != nil {
-		lastStatus = lastRun.Status.String()
-	}
-
 	permission, _ := access_model.GetUserRepoPermission(ctx, run.Repo, doer)
 	var payload = &api.ActionPayload{
-		Repo:          convert.ToRepo(ctx, run.Repo, permission),
-		TriggerUser:   convert.ToUser(ctx, run.TriggerUser, doer),
-		RunTitle:      run.Title,
-		RunHTMLURL:    run.HTMLURL(),
-		RunBranch:     run.PrettyRef(),
-		CurrentStatus: run.Status.String(),
-		PriorStatus:   priorStatus.String(),
-		LastStatus:    lastStatus,
+		Run:         convert.ToActionRun(ctx, run, doer, permission),
+		LastRun:     convert.ToActionRun(ctx, lastRun, doer, permission),
+		PriorStatus: priorStatus.String(),
 	}
 
 	if run.Status.IsSuccess() {

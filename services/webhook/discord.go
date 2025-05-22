@@ -329,7 +329,7 @@ func (d discordConvertor) Action(p *api.ActionPayload) (DiscordPayload, error) {
 	text, color := getActionPayloadInfo(p, noneLinkFormatter)
 
 	// TODO: is TriggerUser correct here?
-	return d.createPayload(p.TriggerUser, text, "", p.RunHTMLURL, color), nil
+	return d.createPayload(p.Run.TriggerUser, text, "", p.Run.HTMLURL, color), nil
 }
 
 var _ shared.PayloadConvertor[DiscordPayload] = discordConvertor{}

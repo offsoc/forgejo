@@ -331,14 +331,14 @@ func (m msteamsConvertor) Action(p *api.ActionPayload) (MSTeamsPayload, error) {
 
 	// TODO: is TriggerUser correct here?
 	return createMSTeamsPayload(
-		p.Repo,
-		p.TriggerUser,
+		p.Run.Repo,
+		p.Run.TriggerUser,
 		title,
 		"",
-		p.RunHTMLURL,
+		p.Run.HTMLURL,
 		color,
 		// TODO: does this make any sense?
-		&MSTeamsFact{"Action:", p.RunTitle},
+		&MSTeamsFact{"Action:", p.Run.Title},
 	), nil
 }
 
