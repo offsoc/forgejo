@@ -1,5 +1,9 @@
+// Copyright 2025 The Forgejo Authors. All rights reserved.
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // @watch start
-// web_src/css/markup/**
+// web_src/css/repo/file-view.css
+// web_src/js/features/repo-unicode-escape.js
 // @watch end
 
 import {expect} from '@playwright/test';
