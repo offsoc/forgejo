@@ -131,6 +131,7 @@ func assertActionEqual(t *testing.T, expectedRun *actions_model.ActionRun, actua
 	assert.Equal(t, expectedRun.Status.String(), actualRun.Status)
 	assert.Equal(t, expectedRun.Index, actualRun.Index)
 	assert.Equal(t, expectedRun.RepoID, actualRun.Repo.ID)
+	// convert to unix because of time zones
 	assert.Equal(t, expectedRun.Stopped.AsTime().Unix(), actualRun.Stopped.Unix())
 	assert.Equal(t, expectedRun.Title, actualRun.Title)
 	assert.Equal(t, expectedRun.WorkflowID, actualRun.WorkflowID)
