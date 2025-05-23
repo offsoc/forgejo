@@ -18,7 +18,6 @@ import (
 	"forgejo.org/modules/repository"
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/structs"
-	api "forgejo.org/modules/structs"
 	"forgejo.org/modules/test"
 	webhook_module "forgejo.org/modules/webhook"
 
@@ -124,17 +123,17 @@ func TestPushCommits(t *testing.T) {
 	})
 }
 
-func assertActionEqual(t *testing.T, expected_run *actions_model.ActionRun, actual_run *api.ActionRun) {
-	assert.NotNil(t, expected_run)
-	assert.NotNil(t, actual_run)
+func assertActionEqual(t *testing.T, expectedRun *actions_model.ActionRun, actualRun *structs.ActionRun) {
+	assert.NotNil(t, expectedRun)
+	assert.NotNil(t, actualRun)
 	// only test a few things
-	assert.Equal(t, expected_run.ID, actual_run.ID)
-	assert.Equal(t, expected_run.Status.String(), actual_run.Status)
-	assert.Equal(t, expected_run.Index, actual_run.Index)
-	assert.Equal(t, expected_run.RepoID, actual_run.Repo.ID)
-	assert.Equal(t, expected_run.Stopped.AsTime(), actual_run.Stopped)
-	assert.Equal(t, expected_run.Title, actual_run.Title)
-	assert.Equal(t, expected_run.WorkflowID, actual_run.WorkflowID)
+	assert.Equal(t, expectedRun.ID, actualRun.ID)
+	assert.Equal(t, expectedRun.Status.String(), actualRun.Status)
+	assert.Equal(t, expectedRun.Index, actualRun.Index)
+	assert.Equal(t, expectedRun.RepoID, actualRun.Repo.ID)
+	assert.Equal(t, expectedRun.Stopped.AsTime(), actualRun.Stopped)
+	assert.Equal(t, expectedRun.Title, actualRun.Title)
+	assert.Equal(t, expectedRun.WorkflowID, actualRun.WorkflowID)
 }
 
 func TestAction(t *testing.T) {
@@ -208,7 +207,7 @@ func TestAction(t *testing.T) {
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, api.ActionSuccess, payloadContent.Action)
+		assert.Equal(t, structs.ActionSuccess, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newSuccessRun, payloadContent.Run)
 		assert.Nil(t, payloadContent.LastRun)
@@ -225,7 +224,7 @@ func TestAction(t *testing.T) {
 
 			var payloadContent structs.ActionPayload
 			require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-			assert.Equal(t, api.ActionSuccess, payloadContent.Action)
+			assert.Equal(t, structs.ActionSuccess, payloadContent.Action)
 			assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 			assertActionEqual(t, newSuccessRun, payloadContent.Run)
 			assertActionEqual(t, oldFailureRun, payloadContent.LastRun)
@@ -238,7 +237,7 @@ func TestAction(t *testing.T) {
 			log.Error("something: %s", hookTask.PayloadContent)
 			var payloadContent structs.ActionPayload
 			require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-			assert.Equal(t, api.ActionRecovered, payloadContent.Action)
+			assert.Equal(t, structs.ActionRecovered, payloadContent.Action)
 			assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 			assertActionEqual(t, newSuccessRun, payloadContent.Run)
 			assertActionEqual(t, oldFailureRun, payloadContent.LastRun)
@@ -255,7 +254,7 @@ func TestAction(t *testing.T) {
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, api.ActionSuccess, payloadContent.Action)
+		assert.Equal(t, structs.ActionSuccess, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newSuccessRun, payloadContent.Run)
 		assertActionEqual(t, oldSuccessRun, payloadContent.LastRun)
@@ -272,7 +271,7 @@ func TestAction(t *testing.T) {
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, api.ActionFailed, payloadContent.Action)
+		assert.Equal(t, structs.ActionFailed, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newFailureRun, payloadContent.Run)
 		assert.Nil(t, payloadContent.LastRun)
@@ -288,7 +287,7 @@ func TestAction(t *testing.T) {
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, api.ActionFailed, payloadContent.Action)
+		assert.Equal(t, structs.ActionFailed, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newFailureRun, payloadContent.Run)
 		assertActionEqual(t, oldFailureRun, payloadContent.LastRun)
@@ -304,7 +303,7 @@ func TestAction(t *testing.T) {
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, api.ActionFailed, payloadContent.Action)
+		assert.Equal(t, structs.ActionFailed, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newFailureRun, payloadContent.Run)
 		assertActionEqual(t, oldSuccessRun, payloadContent.LastRun)
