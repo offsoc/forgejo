@@ -12,7 +12,6 @@ import (
 	api "forgejo.org/modules/structs"
 )
 
-// TODO: test this
 // ToUser convert actions_model.User to api.ActionRun
 // if doer is set, private information is added if the doer has the permission to see it
 func ToActionRun(ctx context.Context, run *actions_model.ActionRun, doer *user_model.User, permissionInRepo access.Permission) *api.ActionRun {
