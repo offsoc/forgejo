@@ -1810,9 +1810,6 @@ details.repo-search-result summary::marker {
   white-space: nowrap;
 }
 
-.file-view.markup {
-  padding: 2em;
-}
 .repository .activity-header {
   display: flex;
   justify-content: space-between;
