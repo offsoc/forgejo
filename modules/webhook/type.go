@@ -33,9 +33,9 @@ const (
 	HookEventPackage                   HookEventType = "package"
 	HookEventSchedule                  HookEventType = "schedule"
 	HookEventWorkflowDispatch          HookEventType = "workflow_dispatch"
-	HookEventActionRunFailure          HookEventType = "action_run_hook_event_failure"
+	HookEventActionRunFailure          HookEventType = "action_run_failure"
 	HookEventActionRunRecover          HookEventType = "action_run_success_after_failure"
-	HookEventActionRunSuccess          HookEventType = "action_run_hook_event_success"
+	HookEventActionRunSuccess          HookEventType = "action_run_success"
 )
 
 // Event returns the HookEventType as an event string
