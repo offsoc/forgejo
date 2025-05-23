@@ -14,11 +14,13 @@ import (
 	webhook_model "forgejo.org/models/webhook"
 	"forgejo.org/modules/git"
 	"forgejo.org/modules/json"
+	"forgejo.org/modules/log"
 	"forgejo.org/modules/repository"
 	"forgejo.org/modules/setting"
 	"forgejo.org/modules/structs"
 	api "forgejo.org/modules/structs"
 	"forgejo.org/modules/test"
+	webhook_module "forgejo.org/modules/webhook"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -201,7 +203,8 @@ func TestAction(t *testing.T) {
 		NewNotifier().ActionRunNowDone(db.DefaultContext, newSuccessRun, actions_model.StatusWaiting, nil)
 
 		// there's only one of these at the time
-		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_hook_event_success' AND payload_content LIKE '%newSuccessRun%success%'"))
+		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_success' AND payload_content LIKE '%success%newSuccessRun%'"))
+		assert.Equal(t, webhook_module.HookEventActionRunSuccess, hookTask.EventType)
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
@@ -217,7 +220,8 @@ func TestAction(t *testing.T) {
 		NewNotifier().ActionRunNowDone(db.DefaultContext, newSuccessRun, actions_model.StatusWaiting, oldFailureRun)
 
 		{
-			hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_hook_event_success' AND payload_content LIKE '%newSuccessRun%success%oldFailureRun%'"))
+			hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_success' AND payload_content LIKE '%success%newSuccessRun%oldFailureRun%'"))
+			assert.Equal(t, webhook_module.HookEventActionRunSuccess, hookTask.EventType)
 
 			var payloadContent structs.ActionPayload
 			require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
@@ -227,8 +231,11 @@ func TestAction(t *testing.T) {
 			assertActionEqual(t, oldFailureRun, payloadContent.LastRun)
 		}
 		{
-			hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_hook_event_recover' AND payload_content LIKE '%newSuccessRun%recovered%oldFailureRun%'"))
+			// hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_hook_event_recover' AND payload_content LIKE '%recovered%newSuccessRun%oldFailureRun%'"))
+			hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_success_after_failure' AND payload_content LIKE '%recovered%newSuccessRun%oldFailureRun%'"))
+			assert.Equal(t, webhook_module.HookEventActionRunRecover, hookTask.EventType)
 
+			log.Error("something: %s", hookTask.PayloadContent)
 			var payloadContent structs.ActionPayload
 			require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
 			assert.Equal(t, api.ActionRecovered, payloadContent.Action)
@@ -243,14 +250,15 @@ func TestAction(t *testing.T) {
 
 		NewNotifier().ActionRunNowDone(db.DefaultContext, newSuccessRun, actions_model.StatusWaiting, oldSuccessRun)
 
-		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_hook_event_success' AND payload_content LIKE '%newSuccessRun%success%oldSuccessRun%'"))
+		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_success' AND payload_content LIKE '%success%newSuccessRun%oldSuccessRun%'"))
+		assert.Equal(t, webhook_module.HookEventActionRunSuccess, hookTask.EventType)
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
 		assert.Equal(t, api.ActionSuccess, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newSuccessRun, payloadContent.Run)
-		assertActionEqual(t, oldFailureRun, payloadContent.LastRun)
+		assertActionEqual(t, oldSuccessRun, payloadContent.LastRun)
 	})
 
 	t.Run("Failed Run after Nothing", func(t *testing.T) {
@@ -259,7 +267,8 @@ func TestAction(t *testing.T) {
 		NewNotifier().ActionRunNowDone(db.DefaultContext, newFailureRun, actions_model.StatusWaiting, nil)
 
 		// there should only be this one at the time
-		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_hook_event_failure' AND payload_content LIKE '%newFailureRun%failed%'"))
+		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_failure' AND payload_content LIKE '%failed%newFailureRun%'"))
+		assert.Equal(t, webhook_module.HookEventActionRunFailure, hookTask.EventType)
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
@@ -274,7 +283,8 @@ func TestAction(t *testing.T) {
 
 		NewNotifier().ActionRunNowDone(db.DefaultContext, newFailureRun, actions_model.StatusWaiting, oldFailureRun)
 
-		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_hook_event_failure' AND payload_content LIKE '%newFailureRun%failed%oldFailureRun%'"))
+		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_failure' AND payload_content LIKE '%failed%newFailureRun%oldFailureRun%'"))
+		assert.Equal(t, webhook_module.HookEventActionRunFailure, hookTask.EventType)
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
@@ -289,7 +299,8 @@ func TestAction(t *testing.T) {
 
 		NewNotifier().ActionRunNowDone(db.DefaultContext, newFailureRun, actions_model.StatusWaiting, oldSuccessRun)
 
-		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_hook_event_failure' AND payload_content LIKE '%newFailureRun%failed%oldSuccessRun%'"))
+		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_failure' AND payload_content LIKE '%failed%newFailureRun%oldSuccessRun%'"))
+		assert.Equal(t, webhook_module.HookEventActionRunFailure, hookTask.EventType)
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
