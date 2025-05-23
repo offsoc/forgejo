@@ -25,6 +25,10 @@
   position: relative;
 }
 
+.file-view tr.active .interact-bg:hover {
+  background: var(--color-primary-alpha-50) !important;
+}
+
 .file-view tr.active .lines-num::before {
   content: "";
   position: absolute;
