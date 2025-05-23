@@ -17,16 +17,16 @@ test('Unicod escape highlight', async ({page}) => {
   expect(response?.status()).toBe(200);
 
   await expect(page.locator('.unicode-escape-prompt')).toBeVisible();
-  await expect(await page.locator('.lines-num').evaluate(el => getComputedStyle(el).backgroundColor)).toBe(unselectedBg);
-  await expect(await page.locator('.lines-escape').evaluate(el => getComputedStyle(el).backgroundColor)).toBe(unselectedBg);
-  await expect(await page.locator('.lines-code').evaluate(el => getComputedStyle(el).backgroundColor)).toBe(unselectedBg);
+  expect(await page.locator('.lines-num').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(unselectedBg);
+  expect(await page.locator('.lines-escape').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(unselectedBg);
+  expect(await page.locator('.lines-code').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(unselectedBg);
 
-  await page.locator('#L1').click()
-  await expect(await page.locator('.lines-num').evaluate(el => getComputedStyle(el).backgroundColor)).toBe(selectedBg);
-  await expect(await page.locator('.lines-escape').evaluate(el => getComputedStyle(el).backgroundColor)).toBe(selectedBg);
-  await expect(await page.locator('.lines-code').evaluate(el => getComputedStyle(el).backgroundColor)).toBe(selectedBg);
+  await page.locator('#L1').click();
+  expect(await page.locator('.lines-num').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(selectedBg);
+  expect(await page.locator('.lines-escape').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(selectedBg);
+  expect(await page.locator('.lines-code').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(selectedBg);
 
   await page.locator('.code-line-button').click();
-  await expect(await page.locator('.tippy-box .view_git_blame[href$="/a-file#L1"]')).toBeVisible();
-  await expect(await page.locator('.tippy-box .copy-line-permalink[data-url$="/a-file#L1"]')).toBeVisible();
+  await expect(page.locator('.tippy-box .view_git_blame[href$="/a-file#L1"]')).toBeVisible();
+  await expect(page.locator('.tippy-box .copy-line-permalink[data-url$="/a-file#L1"]')).toBeVisible();
 });
