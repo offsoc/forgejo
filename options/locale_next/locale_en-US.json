@@ -4,6 +4,8 @@
     "home.explore_repos": "Explore repositories",
     "home.explore_users": "Explore users",
     "home.explore_orgs": "Explore organizations",
+    "stars.list.none": "No one starred this repo.",
+    "watch.list.none": "No one is watching this repo.",
     "followers.incoming.list.self.none": "No one is following your profile.",
     "followers.incoming.list.none": "No one is following this user.",
     "followers.outgoing.list.self.none": "You are not following anyone.",
