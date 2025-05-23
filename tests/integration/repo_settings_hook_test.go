@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"forgejo.org/models/db"
+	"forgejo.org/models/webhook"
 	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -16,6 +18,8 @@ import (
 
 func TestRepoSettingsHookHistory(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
+	_, err := db.GetEngine(t.Context()).ID(2).Cols("is_delivered").Update(&webhook.HookTask{IsDelivered: false})
+	require.NoError(t, err)
 
 	session := loginUser(t, "user2")
 
@@ -26,6 +30,8 @@ func TestRepoSettingsHookHistory(t *testing.T) {
 	doc := NewHTMLParser(t, resp.Body)
 
 	t.Run("1/delivered", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
 		html, err := doc.doc.Find(".webhook div[data-tab='request-1']").Html()
 		require.NoError(t, err)
 		assert.Contains(t, html, "<strong>Request URL:</strong> /matrix-delivered\n")
@@ -39,6 +45,8 @@ func TestRepoSettingsHookHistory(t *testing.T) {
 	})
 
 	t.Run("2/undelivered", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
 		html, err := doc.doc.Find(".webhook div[data-tab='request-2']").Html()
 		require.NoError(t, err)
 		assert.Equal(t, "-", strings.TrimSpace(html))
@@ -49,6 +57,8 @@ func TestRepoSettingsHookHistory(t *testing.T) {
 	})
 
 	t.Run("3/success", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
 		html, err := doc.doc.Find(".webhook div[data-tab='request-3']").Html()
 		require.NoError(t, err)
 		assert.Contains(t, html, "<strong>Request URL:</strong> /matrix-success\n")

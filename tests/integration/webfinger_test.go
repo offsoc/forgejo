@@ -12,6 +12,7 @@ import (
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -19,11 +20,7 @@ import (
 
 func TestWebfinger(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-
-	setting.Federation.Enabled = true
-	defer func() {
-		setting.Federation.Enabled = false
-	}()
+	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2})
 

@@ -23,7 +23,7 @@ func (s *testDiscoveredInfo) OpLocalID() string {
 }
 
 func TestTimedDiscoveryCache(t *testing.T) {
-	dc := newTimedDiscoveryCache(1 * time.Second)
+	dc := newTimedDiscoveryCache(100 * time.Millisecond)
 
 	// Put some initial values
 	dc.Put("foo", &testDiscoveredInfo{}) // openid.opEndpoint: "a", openid.opLocalID: "b", openid.claimedID: "c"})
@@ -41,7 +41,7 @@ func TestTimedDiscoveryCache(t *testing.T) {
 	}
 
 	// Sleep one second and try retrieve again
-	time.Sleep(1 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 
 	if di := dc.Get("foo"); di != nil {
 		t.Errorf("Expected a nil, got a result")
