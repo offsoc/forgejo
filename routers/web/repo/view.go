@@ -1,5 +1,6 @@
-// Copyright 2017 The Gitea Authors. All rights reserved.
 // Copyright 2014 The Gogs Authors. All rights reserved.
+// Copyright 2017 The Gitea Authors. All rights reserved.
+// Copyright 2023 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repo
@@ -1240,6 +1241,7 @@ func RenderUserCards(ctx *context.Context, total int, getter func(opts db.ListOp
 func Watchers(ctx *context.Context) {
 	ctx.Data["Title"] = ctx.Tr("repo.watchers")
 	ctx.Data["CardsTitle"] = ctx.Tr("repo.watchers")
+	ctx.Data["CardsNoneMsg"] = ctx.Tr("watch.list.none")
 	ctx.Data["PageIsWatchers"] = true
 
 	RenderUserCards(ctx, ctx.Repo.Repository.NumWatches, func(opts db.ListOptions) ([]*user_model.User, error) {
@@ -1251,6 +1253,7 @@ func Watchers(ctx *context.Context) {
 func Stars(ctx *context.Context) {
 	ctx.Data["Title"] = ctx.Tr("repo.stargazers")
 	ctx.Data["CardsTitle"] = ctx.Tr("repo.stargazers")
+	ctx.Data["CardsNoneMsg"] = ctx.Tr("stars.list.none")
 	ctx.Data["PageIsStargazers"] = true
 	RenderUserCards(ctx, ctx.Repo.Repository.NumStars, func(opts db.ListOptions) ([]*user_model.User, error) {
 		return repo_model.GetStargazers(ctx, ctx.Repo.Repository, opts)

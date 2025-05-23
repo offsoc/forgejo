@@ -1,5 +1,6 @@
 // Copyright 2015 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2023 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package user
@@ -170,10 +171,20 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 		ctx.Data["Cards"] = followers
 		total = int(numFollowers)
 		ctx.Data["CardsTitle"] = ctx.TrN(total, "user.followers.title.one", "user.followers.title.few")
+		if ctx.IsSigned && ctx.ContextUser.ID == ctx.Doer.ID {
+			ctx.Data["CardsNoneMsg"] = ctx.Tr("followers.incoming.list.self.none")
+		} else {
+			ctx.Data["CardsNoneMsg"] = ctx.Tr("followers.incoming.list.none")
+		}
 	case "following":
 		ctx.Data["Cards"] = following
 		total = int(numFollowing)
 		ctx.Data["CardsTitle"] = ctx.TrN(total, "user.following.title.one", "user.following.title.few")
+		if ctx.IsSigned && ctx.ContextUser.ID == ctx.Doer.ID {
+			ctx.Data["CardsNoneMsg"] = ctx.Tr("followers.outgoing.list.self.none")
+		} else {
+			ctx.Data["CardsNoneMsg"] = ctx.Tr("followers.outgoing.list.none", ctx.ContextUser.Name)
+		}
 	case "activity":
 		date := ctx.FormString("date")
 		pagingNum = setting.UI.FeedPagingNum
