@@ -2,7 +2,6 @@
   overflow: hidden;
   font-size: 16px;
   line-height: 1.5 !important;
-  overflow-wrap: anywhere;
 }
 
 .markup > *:first-child {
@@ -162,7 +161,7 @@
 }
 
 .markup .task-list-item input[type="checkbox"] {
-  margin: 0 .3em .25em -1.4em;
+  margin: 0 0.3em 0.25em -1.4em;
   vertical-align: middle;
   padding: 0;
 }
@@ -379,8 +378,7 @@
   text-align: center;
 }
 
-.markup span.align-center span img
-.markup span.align-center span video {
+.markup span.align-center span img .markup span.align-center span video {
   margin: 0 auto;
   text-align: center;
 }
