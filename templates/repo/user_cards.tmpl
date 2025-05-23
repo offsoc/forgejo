@@ -28,6 +28,8 @@
 				</li>
 			{{end}}
 		</ul>
+	{{else if .CardsNoneMsg}}
+		<div>{{.CardsNoneMsg}}</div>
 	{{end}}
 
 	{{template "base/paginate" .}}
