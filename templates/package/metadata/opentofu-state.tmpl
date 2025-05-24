@@ -1,0 +1,7 @@
+{{if eq .PackageDescriptor.Package.Type "opentofu-state"}}
+	{{if .PackageDescriptor.Metadata.Encrypted}}
+	<div class="item" title="{{ctx.Locale.Tr "packages.opentofu_state.details.encryption"}}">{{svg "octicon-lock" 16 "tw-mr-2"}} {{ctx.Locale.Tr "packages.opentofu_state.details.encrypted"}}</div>
+	{{else}}
+	<div class="item" title="{{ctx.Locale.Tr "packages.opentofu_state.details.encryption"}}">{{svg "octicon-unlock" 16 "tw-mr-2"}} {{ctx.Locale.Tr "packages.opentofu_state.details.unencrypted"}}</div>
+	{{end}}
+{{end}}

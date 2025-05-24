@@ -1,0 +1,30 @@
+{{if eq .PackageDescriptor.Package.Type "opentofu-state"}}
+	<h4 class="ui top attached header">{{ctx.Locale.Tr "packages.installation"}}</h4>
+	<div class="ui attached segment">
+		<div class="ui form">
+			<div class="field">
+				<label>{{ctx.Locale.Tr "packages.opentofu_state.installation.http_backend"}}</label>
+				<div class="markup">
+					<pre class="code-block"><code>terraform {
+  backend "http" {
+    address  = "{{AppUrl}}api/packages/{{.PackageDescriptor.Owner.Name}}/opentofu/http/state/{{.PackageDescriptor.Package.Name}}"
+  }
+}</code></pre>
+				</div>
+			</div>
+			<div class="field">
+				<label>{{ctx.Locale.Tr "packages.opentofu_state.installation.credentials"}}</label>
+				<div class="markup">
+					<pre class="code-block"><code>$ export TF_HTTP_USERNAME={{.PackageDescriptor.Owner.Name}}
+$ export TF_HTTP_PASSWORD=&lt;{{ctx.Locale.Tr "access_token"}}&gt;</code></pre>
+				</div>
+			</div>
+			<div class="field">
+				<label>{{ctx.Locale.Tr "packages.opentofu_state.installation.access_restrictions"}}</label>
+			</div>
+			<div class="field">
+				<label>{{ctx.Locale.Tr "packages.registry.documentation" "OpenTofu/Terraform state" "https://forgejo.org/docs/latest/user/packages/opentofu-state/"}}</label>
+			</div>
+		</div>
+	</div>
+{{end}}
