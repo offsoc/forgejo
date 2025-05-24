@@ -4,6 +4,7 @@
 // @watch start
 // templates/repo/view_file.tmpl
 // web_src/css/repo/file-view.css
+// web_src/js/features/repo-code.js
 // web_src/js/features/repo-unicode-escape.js
 // @watch end
 
