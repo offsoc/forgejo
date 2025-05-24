@@ -26,11 +26,15 @@
 								{{if .ParentHashes}}
 									{{ctx.Locale.Tr "repo.diff.parent"}}
 									{{range .ParentHashes}}
-										<a class="ui primary sha label" href="{{$.RepoLink}}/commit/{{.String}}">{{ShortSha .String}}</a>
+										<a class="ui primary sha label" href="{{$.RepoLink}}/commit/{{.String}}">
+											<span class="shortsha">{{ShortSha .String}}</span>
+										</a>
 									{{end}}
 								{{end}}
 								{{ctx.Locale.Tr "repo.diff.commit"}}
-								<a class="ui primary sha label" href="{{$.RepoLink}}/commit/{{.SHA}}">{{ShortSha .SHA}}</a>
+								<a class="ui primary sha label" href="{{$.RepoLink}}/commit/{{.SHA}}">
+									<span class="shortsha">{{ShortSha .SHA}}</span>
+								</a>
 							</td>
 							<td>{{DateUtils.TimeSince .When}}</td>
 						</tr>
