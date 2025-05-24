@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // @watch start
+// templates/repo/view_file.tmpl
 // web_src/css/repo/file-view.css
 // web_src/js/features/repo-unicode-escape.js
 // @watch end
@@ -12,7 +13,7 @@ import {test} from './utils_e2e.ts';
 const unselectedBg = 'rgba(0, 0, 0, 0)';
 const selectedBg = 'rgb(255, 237, 213)';
 
-test('Unicod escape highlight', async ({page}) => {
+test('Unicode escape highlight', async ({page}) => {
   const response = await page.goto('/user2/unicode-escaping/src/branch/main/a-file');
   expect(response?.status()).toBe(200);
 
