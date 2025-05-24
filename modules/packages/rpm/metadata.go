@@ -11,7 +11,7 @@ import (
 	"forgejo.org/modules/timeutil"
 	"forgejo.org/modules/validation"
 
-	"github.com/sassoftware/go-rpmutils"
+	"code.forgejo.org/forgejo/go-rpmutils"
 )
 
 const (
