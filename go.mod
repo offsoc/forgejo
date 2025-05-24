@@ -86,7 +86,7 @@ require (
 	github.com/prometheus/client_golang v1.21.1
 	github.com/redis/go-redis/v9 v9.8.0
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/santhosh-tekuri/jsonschema/v6 v6.0.1
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 	github.com/sassoftware/go-rpmutils v0.4.0
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3
 	github.com/shurcooL/vfsgen v0.0.0-20230704071429-0000e147ea92
