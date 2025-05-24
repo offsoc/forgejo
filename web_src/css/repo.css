@@ -1250,8 +1250,9 @@ td .commit-summary {
   border: 1px solid var(--color-light-border);
 }
 
-.primary.sha.label {
+.ui.primary.sha.label {
   border: none !important;
+  background: var(--color-primary) !important;
 }
 
 .sha.label .shortsha {
