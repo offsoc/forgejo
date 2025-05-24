@@ -93,7 +93,7 @@
   login_name: org3
   type: 1
   salt: ZogKvWdyEx
-  max_repo_creation: -1
+  max_repo_creation: 1000
   is_active: false
   is_admin: false
   is_restricted: false

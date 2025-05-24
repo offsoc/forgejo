@@ -140,7 +140,6 @@ func CreateUser(ctx *context.APIContext) {
 			user_model.IsErrEmailAlreadyUsed(err) ||
 			db.IsErrNameReserved(err) ||
 			db.IsErrNameCharsNotAllowed(err) ||
-			validation.IsErrEmailCharIsNotSupported(err) ||
 			validation.IsErrEmailInvalid(err) ||
 			db.IsErrNamePatternNotAllowed(err) {
 			ctx.Error(http.StatusUnprocessableEntity, "", err)
@@ -226,7 +225,7 @@ func EditUser(ctx *context.APIContext) {
 	if form.Email != nil {
 		if err := user_service.AdminAddOrSetPrimaryEmailAddress(ctx, ctx.ContextUser, *form.Email); err != nil {
 			switch {
-			case validation.IsErrEmailCharIsNotSupported(err), validation.IsErrEmailInvalid(err):
+			case validation.IsErrEmailInvalid(err):
 				ctx.Error(http.StatusBadRequest, "EmailInvalid", err)
 			case user_model.IsErrEmailAlreadyUsed(err):
 				ctx.Error(http.StatusBadRequest, "EmailUsed", err)

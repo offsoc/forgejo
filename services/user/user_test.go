@@ -205,13 +205,13 @@ func TestRenameUser(t *testing.T) {
 		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "user_rename"})
 
 		// The granularity of created_unix is a second.
-		time.Sleep(time.Second)
+		test.SleepTillNextSecond()
 		require.NoError(t, RenameUser(db.DefaultContext, user, "redirect-2"))
 		unittest.AssertExistsIf(t, false, &user_model.Redirect{LowerName: "user_rename"})
 		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "redirect-1"})
 
 		setting.Service.MaxUserRedirects = 2
-		time.Sleep(time.Second)
+		test.SleepTillNextSecond()
 		require.NoError(t, RenameUser(db.DefaultContext, user, "redirect-3"))
 		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "redirect-1"})
 		unittest.AssertExistsIf(t, true, &user_model.Redirect{LowerName: "redirect-2"})

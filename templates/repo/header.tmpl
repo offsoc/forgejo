@@ -67,6 +67,14 @@
 					{{if not $.DisableForks}}
 					{{template "repo/header_fork" $}}
 					{{end}}
+					{{if and $.IsModerationEnabled $.IsSigned (not $.IsRepositoryAdmin)}}
+					<button class="ui small compact jump dropdown icon button" data-tooltip-content="{{ctx.Locale.Tr "repo.more_operations"}}" aria-label="{{ctx.Locale.Tr "toggle_menu"}}">
+						{{svg "octicon-kebab-horizontal"}}
+						<div class="menu top left">
+							<a class="item context" href="{{AppSubUrl}}/report_abuse?type=repo&id={{$.Repository.ID}}">{{ctx.Locale.Tr "moderation.report_content"}}</a>
+						</div>
+					</button>
+					{{end}}
 				</div>
 			{{end}}
 		</div>

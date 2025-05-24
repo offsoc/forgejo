@@ -122,6 +122,14 @@ func DetectWorkflows(
 		events, err := GetEventsFromContent(content)
 		if err != nil {
 			log.Warn("ignore invalid workflow %q: %v", entry.Name(), err)
+			dwf := &DetectedWorkflow{
+				EntryName: entry.Name(),
+				TriggerEvent: &jobparser.Event{
+					Name: triggedEvent.Event(),
+				},
+				Content: content,
+			}
+			workflows = append(workflows, dwf)
 			continue
 		}
 		for _, evt := range events {

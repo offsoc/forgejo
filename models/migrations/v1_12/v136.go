@@ -90,7 +90,7 @@ func AddCommitDivergenceToPulls(x *xorm.Engine) error {
 
 			gitRefName := fmt.Sprintf("refs/pull/%d/head", pr.Index)
 
-			divergence, err := git.GetDivergingCommits(graceful.GetManager().HammerContext(), repoPath, pr.BaseBranch, gitRefName)
+			divergence, err := git.GetDivergingCommits(graceful.GetManager().HammerContext(), repoPath, pr.BaseBranch, gitRefName, nil)
 			if err != nil {
 				log.Warn("Could not recalculate Divergence for pull: %d", pr.ID)
 				pr.CommitsAhead = 0
