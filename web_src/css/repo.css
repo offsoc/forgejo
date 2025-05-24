@@ -1245,7 +1245,6 @@ td .commit-summary {
   flex-shrink: 0;
 }
 
-
 .ui.ui .sha.label {
   border: 1px solid var(--color-light-border);
 }
