@@ -136,8 +136,8 @@ class ComboMarkdownEditor {
           this.ignoredTabAction = true;
           this.ignoredTabToast?.hideToast();
           this.ignoredTabToast = showHintToast(
-            this.container.getAttribute('data-focus-tip').replace('{{key}}', e.shiftKey ? 'Shift+Tab' : 'Tab'),
-            {gravity: 'bottom'},
+            this.container.dataset[e.shiftKey ? 'shiftTabHint' : 'tabHint'],
+            {gravity: 'bottom', useHtmlBody: true},
           );
           this.ignoredTabToast.toastElement.role = 'alert';
         }
