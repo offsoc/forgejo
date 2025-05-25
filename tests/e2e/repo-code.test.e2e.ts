@@ -16,7 +16,7 @@ async function assertSelectedLines(page: Page, nums: string[]) {
       .toStrictEqual(nums);
 
     // the first line selected has an action button
-    if (nums.length > 0) await expect(page.locator(`#L${nums[0]} .code-line-button`)).toBeVisible();
+    if (nums.length > 0) await expect(page.locator(`.lines-num:has(#L${nums[0]}) .code-line-button`)).toBeVisible();
   };
 
   await pageAssertions();
