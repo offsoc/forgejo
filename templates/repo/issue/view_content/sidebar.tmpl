@@ -14,8 +14,10 @@
 	{{template "repo/issue/view_content/sidebar/milestones" .}}
 	<div class="divider"></div>
 
-	{{template "repo/issue/view_content/sidebar/projects" .}}
-	<div class="divider"></div>
+	{{if or .HasOrganizationProjects .IsProjectsEnabled }}
+		{{template "repo/issue/view_content/sidebar/projects" .}}
+		<div class="divider"></div>
+	{{end}}
 
 	{{template "repo/issue/view_content/sidebar/assignees" dict "isExistingIssue" true "." .}}
 	<div class="divider"></div>

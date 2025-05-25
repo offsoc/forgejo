@@ -79,7 +79,7 @@
 			</div>
 		</div>
 
-		{{if .IsProjectsEnabled}}
+		{{if or .HasOrganizationProjects .IsProjectsEnabled }}
 		<div class="divider"></div>
 
 		<input id="project_id" name="project_id" type="hidden" value="{{.project_id}}">

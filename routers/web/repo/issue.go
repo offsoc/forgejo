@@ -626,6 +626,8 @@ func retrieveProjects(ctx *context.Context, repo *repo_model.Repository) {
 		return
 	}
 
+	ctx.Data["HasProjects"] = len(projects) > 0
+	ctx.Data["HasOrganizationProjects"] = len(projects2) > 0
 	ctx.Data["OpenProjects"] = append(projects, projects2...)
 
 	projects, err = db.Find[project_model.Project](ctx, project_model.SearchOptions{
@@ -1249,6 +1251,11 @@ func NewIssuePost(ctx *context.Context) {
 		}
 	}
 
+	if err := repo.LoadOwner(ctx); err != nil {
+		ctx.ServerError("NewIssuePost", err)
+		return
+	}
+
 	issue := &issues_model.Issue{
 		RepoID:      repo.ID,
 		Repo:        repo,
@@ -1277,7 +1284,14 @@ func NewIssuePost(ctx *context.Context) {
 	}
 
 	if projectID > 0 {
-		if !ctx.Repo.CanRead(unit.TypeProjects) {
+		if repo.Owner.IsOrganization() {
+			var err error
+			if ctx.Org.Organization, err = organization.GetOrgByName(ctx, repo.OwnerName); err != nil {
+				ctx.ServerError("NewIssue", err)
+				return
+			}
+		}
+		if !ctx.Repo.CanRead(unit.TypeProjects) && !ctx.Org.CanReadUnit(ctx, unit.TypeProjects) {
 			// User must also be able to see the project.
 			ctx.Error(http.StatusBadRequest, "user hasn't permissions to read projects")
 			return
