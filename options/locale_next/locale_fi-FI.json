@@ -20,7 +20,7 @@
     "themes.names.forgejo-dark": "Forgejo, tumma",
     "alert.range_error": " täytyy olla numero välillä %[1]s ja %[2]s.",
     "alert.asset_load_failed": "Staattisen tiedoston lataus kohteesta {path} epäonnistui. Varmista, että staattisiin tiedostoihin pääsee käsiksi.",
-    "install.invalid_lfs_path": "LFS juurta ei voitu luoda polkuun: %[1]s",
+    "install.invalid_lfs_path": "LFS-juurta ei voitu luoda polkuun: %[1]s",
     "mail.actions.not_successful_run_subject": "Työnkulku %[1]s epäonnistui tietovarastossa %[2]s",
     "mail.actions.not_successful_run": "Työnkulku %[1]s epäonnistui tietovarastossa %[2]s",
     "discussion.locked": "Tämä keskustelu on lukittu. Kommentointi on rajoitettu avustajille.",
@@ -57,7 +57,7 @@
         "one": "%d viikko sitten",
         "other": "%d viikkoa sitten"
     },
-    "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it. Päivitä tämä käännös, jos luet tämän viestin.",
+    "meta.last_line": "Thank you for translating Forgejo! Päivitä tämä käännös, jos luet tämän viestin.",
     "relativetime.2months": "kaksi kuukautta sitten",
     "mail.actions.successful_run_after_failure_subject": "Työnkulku %[1]s palautettu tietovarastoon %[2]s",
     "mail.actions.successful_run_after_failure": "Työnkulku %[1]s palautettu tietovarastoon %[2]s",
