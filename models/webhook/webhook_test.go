@@ -153,6 +153,7 @@ func TestCreateWebhook(t *testing.T) {
 			string(webhook_module.HookEventRelease),
 			string(webhook_module.HookEventPackage),
 			string(webhook_module.HookEventPullRequestReviewRequest),
+			// these aren't webhook event types
 			// string(webhook_module.HookEventSchedule),
 			// string(webhook_module.HookEventWorkflowDispatch),
 			string(webhook_module.HookEventActionRunFailure),
