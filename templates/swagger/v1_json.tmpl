@@ -22573,6 +22573,10 @@
           },
           "x-go-name": "Events"
         },
+        "is_system_webhook": {
+          "type": "boolean",
+          "x-go-name": "IsSystemWebhook"
+        },
         "type": {
           "type": "string",
           "enum": [
@@ -29915,12 +29919,6 @@
     }
   },
   "securityDefinitions": {
-    "AccessToken": {
-      "description": "This authentication option is deprecated for removal in Gitea 1.23. Please use AuthorizationHeaderToken instead.",
-      "type": "apiKey",
-      "name": "access_token",
-      "in": "query"
-    },
     "AuthorizationHeaderToken": {
       "description": "API tokens must be prepended with \"token\" followed by a space.",
       "type": "apiKey",
@@ -29947,23 +29945,11 @@
       "type": "apiKey",
       "name": "X-FORGEJO-OTP",
       "in": "header"
-    },
-    "Token": {
-      "description": "This authentication option is deprecated for removal in Gitea 1.23. Please use AuthorizationHeaderToken instead.",
-      "type": "apiKey",
-      "name": "token",
-      "in": "query"
     }
   },
   "security": [
     {
       "BasicAuth": []
-    },
-    {
-      "Token": []
-    },
-    {
-      "AccessToken": []
     },
     {
       "AuthorizationHeaderToken": []

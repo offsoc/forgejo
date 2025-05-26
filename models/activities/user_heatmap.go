@@ -13,6 +13,12 @@ import (
 	"forgejo.org/modules/timeutil"
 )
 
+const (
+	// contributionsMaxAgeSeconds How old data to retrieve for the heatmap.
+	// 371 days to cover the entire heatmap (53 *full* weeks)
+	contributionsMaxAgeSeconds = 32054400
+)
+
 // UserHeatmapData represents the data needed to create a heatmap
 type UserHeatmapData struct {
 	Timestamp     timeutil.TimeStamp `json:"timestamp"`
@@ -62,7 +68,7 @@ func getUserHeatmapData(ctx context.Context, user *user_model.User, team *organi
 		Select(groupBy+" AS timestamp, count(user_id) as contributions").
 		Table("action").
 		Where(cond).
-		And("created_unix > ?", timeutil.TimeStampNow()-31536000).
+		And("created_unix >= ?", timeutil.TimeStampNow()-contributionsMaxAgeSeconds).
 		GroupBy("timestamp").
 		OrderBy("timestamp").
 		Find(&hdata)

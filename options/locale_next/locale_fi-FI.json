@@ -1,12 +1,18 @@
 {
-    "repo.pulls.merged_title_desc": "yhdistetty %[1]d committia lähteestä <code>%[2]s</code> kohteeseen <code>%[3]s</code> %[4]s",
-    "repo.pulls.title_desc": "haluaa yhdistää %[1]d committia lähteestä <code>%[2]s</code> kohteeseen <code id=\"%[4]s\">%[3]s</code>",
+    "repo.pulls.merged_title_desc": {
+        "one": "yhdistetty %[1]d sitoumus <code>%[2]s</code>:sta kohteeseen <code>%[3]s</code> %[4]s",
+        "other": "yhdistetty %[1]d sitoumusta <code>%[2]s</code>:sta kohteeseen <code>%[3]s</code> %[4]s"
+    },
+    "repo.pulls.title_desc": {
+        "one": "haluaa yhdistää %[1]d sitoumus <code>%[2]s</code>:sta kohteeseen <code id=\"%[4]s\">%[3]s</code>",
+        "other": "haluaa yhdistää %[1]d sitoumusta <code>%[2]s</code>:sta kohteeseen <code id=\"%[4]s\">%[3]s</code>"
+    },
     "search.milestone_kind": "Etsi merkkipaaluja…",
     "home.welcome.no_activity": "Ei toimintaa",
     "incorrect_root_url": "Tämä Forgejo-instanssi on määritetty toimimaan osoitteessa \"%s\". Tarkastelet tällä hetkellä Forgejoa eri URL-osoitteen kautta, mikä saattaa aiheuttaa sovelluksen osien toimimattomuutta. Virallinen URL-osoite on Forgejo-ylläpitäjien hallinnoima ROOT_URL-asetus app.ini -tiedostossa.",
     "themes.names.forgejo-auto": "Forgejo (käyttöjärjestelmän määrittelemä teema)",
-    "home.welcome.activity_hint": "Syötteelläsi ei ole vielä mitään. Toimintasi ja toiminta repositorioissa joita seuraat ilmaantuu tälle sivulle.",
-    "home.explore_repos": "Tutki repositorioita",
+    "home.welcome.activity_hint": "Syötteelläsi ei ole vielä mitään. Toimenpiteesi ja toimintasi tietovarastoissa, joita seuraat ilmaantuvat tälle sivulle.",
+    "home.explore_repos": "Tutustu tietovarastoihin",
     "home.explore_users": "Tutki käyttäjiä",
     "home.explore_orgs": "Tutki organisaatioita",
     "error.not_found.title": "Sivua ei löytynyt",
@@ -14,5 +20,49 @@
     "themes.names.forgejo-dark": "Forgejo, tumma",
     "alert.range_error": " täytyy olla numero välillä %[1]s ja %[2]s.",
     "alert.asset_load_failed": "Staattisen tiedoston lataus kohteesta {path} epäonnistui. Varmista, että staattisiin tiedostoihin pääsee käsiksi.",
-    "install.invalid_lfs_path": "LFS juurta ei voitu luoda polkuun: %[1]s"
+    "install.invalid_lfs_path": "LFS-juurta ei voitu luoda polkuun: %[1]s",
+    "mail.actions.not_successful_run_subject": "Työnkulku %[1]s epäonnistui tietovarastossa %[2]s",
+    "mail.actions.not_successful_run": "Työnkulku %[1]s epäonnistui tietovarastossa %[2]s",
+    "discussion.locked": "Tämä keskustelu on lukittu. Kommentointi on rajoitettu avustajille.",
+    "relativetime.future": "tulevaisuudessa",
+    "relativetime.days": {
+        "one": "%d päivä sitten",
+        "other": "%d päivää sitten"
+    },
+    "relativetime.months": {
+        "one": "%d kuukausi sitten",
+        "other": "%d kuukautta sitten"
+    },
+    "relativetime.years": {
+        "one": "%d vuosi sitten",
+        "other": "%d vuotta sitten"
+    },
+    "relativetime.1day": "eilen",
+    "relativetime.2days": "kaksi päivää sitten",
+    "relativetime.1week": "viime viikolla",
+    "relativetime.2weeks": "kaksi viikkoa sitten",
+    "relativetime.1year": "viime vuonna",
+    "relativetime.2years": "kaksi vuotta sitten",
+    "relativetime.hours": {
+        "one": "%d tunti sitten",
+        "other": "%d tuntia sitten"
+    },
+    "relativetime.mins": {
+        "one": "%d minuutti sitten",
+        "other": "%d minuuttia sitten"
+    },
+    "relativetime.1month": "viime kuussa",
+    "relativetime.now": "nyt",
+    "relativetime.weeks": {
+        "one": "%d viikko sitten",
+        "other": "%d viikkoa sitten"
+    },
+    "meta.last_line": "Thank you for translating Forgejo! Päivitä tämä käännös, jos luet tämän viestin.",
+    "relativetime.2months": "kaksi kuukautta sitten",
+    "mail.actions.successful_run_after_failure_subject": "Työnkulku %[1]s palautettu tietovarastoon %[2]s",
+    "mail.actions.successful_run_after_failure": "Työnkulku %[1]s palautettu tietovarastoon %[2]s",
+    "mail.actions.run_info_cur_status": "Tämän juoksun tila: %[1]s (juuri päivitetty %[2]s:sta)",
+    "mail.actions.run_info_previous_status": "Edellisen ajon tila: %[1]s",
+    "mail.actions.run_info_ref": "Haara: %[1]s (%[2]s)",
+    "mail.actions.run_info_trigger": "Laukaistui, koska: %[1]s, tekijänä: %[2]s"
 }

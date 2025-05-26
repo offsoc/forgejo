@@ -175,6 +175,6 @@ func GetDiverging(ctx context.Context, pr *issues_model.PullRequest) (*git.Diver
 	}
 	defer cancel()
 
-	diff, err := git.GetDivergingCommits(ctx, prCtx.tmpBasePath, baseBranch, trackingBranch)
+	diff, err := git.GetDivergingCommits(ctx, prCtx.tmpBasePath, baseBranch, trackingBranch, nil)
 	return &diff, err
 }

@@ -745,9 +745,6 @@ func doAutoPRMerge(baseCtx *APITestContext, dstPath string) func(t *testing.T) {
 		// Call API to add Success status for commit
 		t.Run("CreateStatus", addCommitStatus(api.CommitStatusSuccess))
 
-		// wait to let gitea merge stuff
-		time.Sleep(time.Second)
-
 		// test pr status
 		pr, err = doAPIGetPullRequest(ctx, baseCtx.Username, baseCtx.Reponame, pr.Index)(t)
 		require.NoError(t, err)

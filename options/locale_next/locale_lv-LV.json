@@ -23,5 +23,80 @@
     "alert.asset_load_failed": "Neizdevās ielādēt līdzekļu datnes no {path}. Lūgums pārliecināties, ka līdzekļu datnēm var piekļūt.",
     "install.invalid_lfs_path": "Nav iespējams izveidot LFS pamatmapi norādītajā ceļā: %[1]s",
     "alert.range_error": " jābūt skaitlin starp %[1]s un %[2]s.",
-    "meta.last_line": "Šis žagaru saišķis nav mans žagaru saišķis."
+    "meta.last_line": "Šis žagaru saišķis nav mans žagaru saišķis.",
+    "mail.actions.successful_run_after_failure_subject": "Darbplūsma %[1]s atkopta glabātavā %[2]s",
+    "mail.actions.not_successful_run_subject": "Darbplūsmas %[1]s atteice glabātavā %[2]s",
+    "mail.actions.successful_run_after_failure": "Darbplūsma %[1]s atkopta glabātavā %[2]s",
+    "mail.actions.not_successful_run": "Darbplūsmas %[1] atteice glabātavā %[2]s",
+    "mail.actions.run_info_cur_status": "Šī izpildījuma stāvoklis: %[1]s (tikko atjaunināts no %[2]s)",
+    "mail.actions.run_info_previous_status": "Iepriekšējā izpildījuma stāvoklis: %[1]s",
+    "mail.actions.run_info_ref": "Zars: %[1]s (%[2]s)",
+    "mail.actions.run_info_trigger": "Izraisīšanas iemesls: %[2]s no: %[2]s",
+    "discussion.locked": "Šī apspriede tika slēgta. Piebilžu pievienošana ir ļauta tikai līdzdalībniekiem.",
+    "relativetime.future": "nākotnē",
+    "relativetime.hours": {
+        "zero": "pirms %d stundām",
+        "one": "pirms %d stundas",
+        "other": "pirms %d stundām"
+    },
+    "relativetime.days": {
+        "zero": "pirms %d dienām",
+        "one": "pirms %d dienas",
+        "other": "pirms %d dienām"
+    },
+    "relativetime.months": {
+        "zero": "pirms %d mēnešiem",
+        "one": "pirms %d mēneša",
+        "other": "pirms %d mēnešiem"
+    },
+    "relativetime.1day": "vakar",
+    "relativetime.2days": "pirms divām dienām",
+    "relativetime.1week": "iepriekšējā nedēļā",
+    "relativetime.2weeks": "pirms divām nedēļām",
+    "relativetime.2months": "pirms diviem mēnešiem",
+    "relativetime.1year": "iepriekšējā gadā",
+    "relativetime.2years": "pirms diviem gadiem",
+    "relativetime.years": {
+        "zero": "pirms %d gadiem",
+        "one": "pirms %d gada",
+        "other": "pirms %d gadiem"
+    },
+    "relativetime.mins": {
+        "zero": "pirms %d minūtēm",
+        "one": "pirms %d minūtes",
+        "other": "pirms %d minūtēm"
+    },
+    "relativetime.now": "tagad",
+    "relativetime.weeks": {
+        "zero": "pirms %d nedēļām",
+        "one": "pirms %d nedēļas",
+        "other": "pirms %d nedēļām"
+    },
+    "relativetime.1month": "iepriekšējā mēnesī",
+    "moderation.abuse_category.other_violations": "Citi noteikumu pārkāpumi",
+    "moderation.reported_thank_you": "Paldies par ziņojumu! Pārvaldītājiem ir darīts zināms par to.",
+    "admin.config.moderation_config": "Satura pārraudzības konfigurācija",
+    "moderation.report_abuse": "Ziņot par pārkāpumu",
+    "moderation.report_content": "Ziņot par saturu",
+    "moderation.report_abuse_form.header": "Ziņot pārvaldītājam par pārkāpumu",
+    "moderation.report_abuse_form.details": "Šī veidlapa ir izmantojama, lai ziņotu par lietotājiem, kuri izveido mēstuļošanas profilus, glabātavas, pieteikumus un piebildes vai uzvedas nepienācīgi.",
+    "moderation.report_abuse_form.invalid": "Nederīgi argumenti",
+    "moderation.report_abuse_form.already_reported": "Tu jau ziņoji par šo saturu",
+    "moderation.abuse_category": "Kategorija",
+    "moderation.abuse_category.placeholder": "Atlasīt kategoriju",
+    "moderation.abuse_category.spam": "Mēstuļošana",
+    "moderation.abuse_category.malware": "Ļaunatūra",
+    "moderation.abuse_category.illegal_content": "Nelikumīgs saturs",
+    "moderation.report_remarks": "Piezīmes",
+    "moderation.report_remarks.placeholder": "Lūgums sniegt informāciju par pārkāpumu, par ko ziņo.",
+    "moderation.submit_report": "Iesniegt ziņojumu",
+    "moderation.reporting_failed": "Nevar iesniegt jauno ziņojumu par pārkāpumu: %v",
+    "repo.form.cannot_create": "Visas vietas, kurās vari izveidot glabātavas, ir sasniegušas glabātavu skaita ierobežojumu.",
+    "repo.issue_indexer.title": "Pieteikumu indeksētājs",
+    "watch.list.none": "Neviens nevēro šo glabātavu.",
+    "followers.incoming.list.none": "Neviens neseko šim lietotājam.",
+    "followers.outgoing.list.self.none": "Tu nevienam neseko.",
+    "followers.outgoing.list.none": "%s nevienam neseko.",
+    "stars.list.none": "Neviens šo glabātavu nav atzīmējis ar zvaigzni.",
+    "followers.incoming.list.self.none": "Neviens neseko Tavam profilam."
 }

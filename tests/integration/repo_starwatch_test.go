@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testRepoStarringOrWatching(t *testing.T, action, listURI string) {
+func testRepoStarringOrWatching(t *testing.T, action, listURI string, expectEmpty bool) {
 	t.Helper()
 
 	defer tests.PrepareTestEnv(t)()
@@ -50,6 +50,12 @@ func testRepoStarringOrWatching(t *testing.T, action, listURI string) {
 	htmlDoc = NewHTMLParser(t, resp.Body)
 	htmlDoc.AssertElement(t, ".user-cards .list .card > a[href='/user5']", true)
 
+	if expectEmpty {
+		// Verify which user-cards elements are present
+		htmlDoc.AssertElement(t, ".user-cards > .list", true)
+		htmlDoc.AssertElement(t, ".user-cards > div", false)
+	}
+
 	// Unstar/unwatch the repo as user5
 	req = NewRequestWithValues(t, "POST", fmt.Sprintf("/user2/repo1/action/%s", oppositeAction), map[string]string{
 		"_csrf": GetCSRF(t, session, "/user2/repo1"),
@@ -73,15 +79,22 @@ func testRepoStarringOrWatching(t *testing.T, action, listURI string) {
 
 	// Verify that "user5" is not among the stargazers/watchers
 	htmlDoc = NewHTMLParser(t, resp.Body)
-	htmlDoc.AssertElement(t, ".user-cards .list .item.ui.segment > a[href='/user5']", false)
+	htmlDoc.AssertElement(t, ".user-cards .list .item.ui.segment > a[href='/user2']", false)
+
+	if expectEmpty {
+		// Verify which user-cards elements are present
+		htmlDoc.AssertElement(t, ".user-cards > .list", false)
+		htmlDoc.AssertElement(t, ".user-cards > div", true)
+	}
 }
 
 func TestRepoStarUnstarUI(t *testing.T) {
-	testRepoStarringOrWatching(t, "star", "stars")
+	testRepoStarringOrWatching(t, "star", "stars", true)
 }
 
 func TestRepoWatchUnwatchUI(t *testing.T) {
-	testRepoStarringOrWatching(t, "watch", "watchers")
+	testRepoStarringOrWatching(t, "watch", "watchers", false)
+	// Empty list state is not checked because repo is watched by many users
 }
 
 func TestDisabledStars(t *testing.T) {

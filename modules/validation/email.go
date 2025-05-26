@@ -8,7 +8,6 @@ package validation
 import (
 	"fmt"
 	"net/mail"
-	"regexp"
 	"strings"
 
 	"forgejo.org/modules/setting"
@@ -19,21 +18,6 @@ import (
 
 // ErrEmailNotActivated e-mail address has not been activated error
 var ErrEmailNotActivated = util.NewInvalidArgumentErrorf("e-mail address has not been activated")
-
-// ErrEmailCharIsNotSupported e-mail address contains unsupported character
-type ErrEmailCharIsNotSupported struct {
-	Email string
-}
-
-// IsErrEmailCharIsNotSupported checks if an error is an ErrEmailCharIsNotSupported
-func IsErrEmailCharIsNotSupported(err error) bool {
-	_, ok := err.(ErrEmailCharIsNotSupported)
-	return ok
-}
-
-func (err ErrEmailCharIsNotSupported) Error() string {
-	return fmt.Sprintf("e-mail address contains unsupported character [email: %s]", err.Email)
-}
 
 // ErrEmailInvalid represents an error where the email address does not comply with RFC 5322
 // or has a leading '-' character
@@ -55,8 +39,6 @@ func (err ErrEmailInvalid) Unwrap() error {
 	return util.ErrInvalidArgument
 }
 
-var emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-
 // check if email is a valid address with allowed domain
 func ValidateEmail(email string) error {
 	if err := validateEmailBasic(email); err != nil {
@@ -77,15 +59,12 @@ func validateEmailBasic(email string) error {
 		return ErrEmailInvalid{email}
 	}
 
-	if !emailRegexp.MatchString(email) {
-		return ErrEmailCharIsNotSupported{email}
-	}
-
-	if email[0] == '-' {
+	parsedAddress, err := mail.ParseAddress(email)
+	if err != nil {
 		return ErrEmailInvalid{email}
 	}
 
-	if _, err := mail.ParseAddress(email); err != nil {
+	if parsedAddress.Name != "" {
 		return ErrEmailInvalid{email}
 	}
 

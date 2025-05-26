@@ -141,4 +141,10 @@ function UpdateAllRelativeTimes() {
   for (const object of document.querySelectorAll('relative-time')) UpdateRelativeTime(object);
 }
 
-document.addEventListener('DOMContentLoaded', UpdateAllRelativeTimes);
+document.addEventListener('DOMContentLoaded', () => {
+  UpdateAllRelativeTimes();
+  // Also update relative-time DOM elements after htmx swap events.
+  document.body.addEventListener('htmx:afterSwap', () => {
+    for (const object of document.querySelectorAll('relative-time')) DoUpdateRelativeTime(object);
+  });
+});

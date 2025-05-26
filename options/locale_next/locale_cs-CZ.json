@@ -32,5 +32,71 @@
     "mail.actions.run_info_trigger": "Spuštěno z důvodu: %[1]s od: %[2]s",
     "mail.actions.successful_run_after_failure_subject": "Workflow %[1]s obnoven v repozitáři %[2]s",
     "mail.actions.successful_run_after_failure": "Workflow %[1]s obnoven v repozitáři %[2]s",
-    "discussion.locked": "Tato diskuze byla uzamčena. Komentování je omezené na přispěvatele."
+    "discussion.locked": "Tato diskuze byla uzamčena. Komentování je omezené na přispěvatele.",
+    "relativetime.future": "v budoucnu",
+    "relativetime.years": {
+        "one": "Před %d rokem",
+        "few": "Před %d lety",
+        "other": "Před %d lety"
+    },
+    "relativetime.1day": "včera",
+    "relativetime.2days": "před dvěma dny",
+    "relativetime.1week": "minulý týden",
+    "relativetime.2weeks": "před dvěma týdny",
+    "relativetime.1month": "minulý měsíc",
+    "relativetime.2months": "před dvěma měsíci",
+    "relativetime.1year": "minulý rok",
+    "relativetime.2years": "před dvěma lety",
+    "relativetime.weeks": {
+        "one": "Před %d týdnem",
+        "few": "Před %d týdny",
+        "other": "Před %d týdny"
+    },
+    "relativetime.days": {
+        "one": "Před %d dnem",
+        "few": "Před %d dny",
+        "other": "Před %d dny"
+    },
+    "relativetime.mins": {
+        "one": "Před %d minutou",
+        "few": "Před %d minutami",
+        "other": "Před %d minutami"
+    },
+    "relativetime.hours": {
+        "one": "Před %d hodinou",
+        "few": "Před %d hodinami",
+        "other": "Před %d hodinami"
+    },
+    "relativetime.now": "nyní",
+    "relativetime.months": {
+        "one": "Před %d měsícem",
+        "few": "Před %d měsíci",
+        "other": "Před %d měsíci"
+    },
+    "moderation.report_content": "Nahlásit obsah",
+    "moderation.report_abuse_form.details": "Tento formulář je určen k nahlašování uživatelů, kteří si vytvářejí spamové profily, repozitáře, problémy, komentáře nebo se chovají nevhodně.",
+    "admin.config.moderation_config": "Nastavení moderování",
+    "moderation.report_abuse": "Nahlásit zneužití",
+    "moderation.report_abuse_form.header": "Nahlásit zneužití administrátorovi",
+    "moderation.report_abuse_form.invalid": "Neplatné argumenty",
+    "moderation.report_abuse_form.already_reported": "Tento obsah jste již nahlásili",
+    "moderation.abuse_category": "Kategorie",
+    "moderation.submit_report": "Odeslat hlášení",
+    "moderation.reporting_failed": "Nepodařilo se odeslat nové hlášení zneužití: %v",
+    "moderation.report_remarks.placeholder": "Zadejte prosím podrobnosti o zneužití, které nahlašujete.",
+    "moderation.reported_thank_you": "Děkujeme za vaše hlášení. Správa platformy na ni byla upozorněna.",
+    "moderation.report_remarks": "Informace",
+    "moderation.abuse_category.placeholder": "Vyberte kategorii",
+    "moderation.abuse_category.spam": "Spam",
+    "moderation.abuse_category.malware": "Malware",
+    "moderation.abuse_category.illegal_content": "Nezákonný obsah",
+    "moderation.abuse_category.other_violations": "Jiné porušení pravidel platformy",
+    "repo.form.cannot_create": "Všechny prostory, ve kterých můžete vytvářet repozitáře, dosáhly svého limitu.",
+    "repo.issue_indexer.title": "Indexování problémů",
+    "watch.list.none": "Tento repozitář nikdo nesleduje.",
+    "followers.incoming.list.self.none": "Váš profil nikdo nesleduje.",
+    "followers.incoming.list.none": "Tohoto uživatele nikdo nesleduje.",
+    "followers.outgoing.list.none": "%s nikoho nesleduje.",
+    "stars.list.none": "Tento repozitář si nikdo nepřidal do oblíbených.",
+    "followers.outgoing.list.self.none": "Nikoho nesledujete."
 }

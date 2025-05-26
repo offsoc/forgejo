@@ -29,8 +29,76 @@
     "mail.actions.successful_run_after_failure_subject": "Робочий потік %[1]s відновлено в репозиторії %[2]s",
     "mail.actions.run_info_previous_status": "Стан попереднього запуску: %[1]s",
     "mail.actions.run_info_cur_status": "Стан цього запуску: %[1]s (щойно оновлено з %[2]s)",
-    "mail.actions.run_info_trigger": "Запущено %[2]s, оскільки: %[1]s",
+    "mail.actions.run_info_trigger": "Причина: %[1]s від: %[2]s",
     "mail.actions.not_successful_run_subject": "Помилка робочого потоку %[1]s в репозиторії %[2]s",
     "mail.actions.not_successful_run": "Помилка робочого потоку %[1]s в репозиторії %[2]s",
-    "discussion.locked": "Це обговорення було закрито. Коментувати можуть лише учасники."
+    "discussion.locked": "Це обговорення було закрито. Коментувати можуть лише учасники.",
+    "relativetime.mins": {
+        "one": "%d хвилину тому",
+        "few": "%d хвилини тому",
+        "many": "%d хвилин тому"
+    },
+    "relativetime.days": {
+        "one": "%d день тому",
+        "few": "%d дні тому",
+        "many": "%d днів тому"
+    },
+    "relativetime.1day": "учора",
+    "relativetime.1week": "минулого тижня",
+    "relativetime.2weeks": "два тижні тому",
+    "relativetime.1month": "минулого місяця",
+    "relativetime.1year": "минулого року",
+    "relativetime.2years": "два роки тому",
+    "relativetime.2months": "два місяці тому",
+    "relativetime.now": "щойно",
+    "relativetime.2days": "два дні тому",
+    "relativetime.future": "у майбутньому",
+    "relativetime.weeks": {
+        "one": "%d тиждень тому",
+        "few": "%d тижні тому",
+        "many": "%d тижнів тому"
+    },
+    "relativetime.months": {
+        "one": "%d місяць тому",
+        "few": "%d місяці тому",
+        "many": "%d місяців тому"
+    },
+    "relativetime.hours": {
+        "one": "%d годину тому",
+        "few": "%d години тому",
+        "many": "%d годин тому"
+    },
+    "relativetime.years": {
+        "one": "%d рік тому",
+        "few": "%d роки тому",
+        "many": "%d років тому"
+    },
+    "admin.config.moderation_config": "Конфігурація модерування",
+    "moderation.abuse_category.placeholder": "Виберіть категорію",
+    "moderation.report_abuse_form.invalid": "Недійсні аргументи",
+    "moderation.report_abuse_form.already_reported": "Ви вже скаржилися на цей вміст",
+    "moderation.report_abuse": "Повідомити про порушення",
+    "moderation.report_content": "Поскаржитися на вміст",
+    "moderation.abuse_category.spam": "Спам",
+    "moderation.report_remarks.placeholder": "Будь ласка, докладно опишіть порушення, про яке ви повідомляєте.",
+    "moderation.submit_report": "Надіслати скаргу",
+    "moderation.abuse_category.malware": "Шкідливе ПЗ",
+    "moderation.abuse_category.illegal_content": "Нелегальний вміст",
+    "moderation.report_abuse_form.header": "Повідомити адміністраторам про порушення",
+    "moderation.report_abuse_form.details": "Використовуйте цю форму, щоб повідомити про користувачів, які створюють спам-профілі, репозиторії, задачі, коментарі або поводяться неналежним чином.",
+    "moderation.abuse_category": "Категорія",
+    "moderation.abuse_category.other_violations": "Інші порушення правил платформи",
+    "moderation.reporting_failed": "Не вдалося надіслати нове повідомлення про порушення: %v",
+    "moderation.report_remarks": "Подробиці",
+    "moderation.reported_thank_you": "Дякуємо за ваше повідомлення. Адміністрацію поінформовано про нього.",
+    "repo.form.cannot_create": "Усі простори, в яких ви можете створювати репозиторії, досягли максимальної кількості репозиторіїв.",
+    "repo.issue_indexer.title": "Індексатор задач",
+    "followers.incoming.list.self.none": "Ніхто не стежить за вашим профілем.",
+    "followers.incoming.list.none": "Ніхто не стежить за цим користувачем.",
+    "followers.outgoing.list.self.none": "Ви ні за ким не стежите.",
+    "followers.outgoing.list.none": "%s ні за ким не стежить.",
+    "stars.list.none": "Ніхто не додав цей репозиторій в обрані.",
+    "watch.list.none": "Ніхто не спостерігає за цим репозиторієм.",
+    "editor.textarea.tab_hint": "У рядку вже є відступ. Натисніть <kbd>Tab</kbd> ще раз або <kbd>Esc</kbd>, щоб вийти з редактора.",
+    "editor.textarea.shift_tab_hint": "У цьому рядку немає відступів. Натисніть <kbd>Shift</kbd> + <kbd>Tab</kbd> ще раз або <kbd>Esc</kbd>, щоб вийти з редактора."
 }

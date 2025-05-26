@@ -23,5 +23,80 @@
     "alert.asset_load_failed": "Não foi possível carregar arquivos de assets de {path}. Por favor, certifique-se que os arquivos podem ser acessados.",
     "install.invalid_lfs_path": "Não foi possível criar um root LFS no caminho especificado: %[1]s",
     "alert.range_error": " deve ser um número entre %[1]s e %[2]s.",
-    "meta.last_line": "real hot girl shit"
+    "meta.last_line": "real hot girl shit",
+    "mail.actions.run_info_cur_status": "Status desta execução: %[1]s (atualizado recentemente de %[2]s)",
+    "mail.actions.run_info_previous_status": "Status da execução anterior: %[1]s",
+    "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
+    "mail.actions.successful_run_after_failure_subject": "Workflow %[1]s recuperado no repositório %[2]s",
+    "mail.actions.not_successful_run_subject": "Workflow %[1]s falhou no repositório %[2]s",
+    "mail.actions.successful_run_after_failure": "Workflow %[1]s recuperado no repositório %[2]s",
+    "mail.actions.not_successful_run": "Workflow %[1]s falhou no repositório %[2]s",
+    "mail.actions.run_info_trigger": "Acionado devido a: %[1]s por: %[2]s",
+    "discussion.locked": "Esta discussão foi trancada. Apenas contribuidores podem adicionar comentários.",
+    "relativetime.future": "futuramente",
+    "relativetime.mins": {
+        "one": "%d minuto atrás",
+        "many": "%d minutos atrás",
+        "other": "%d minutos atrás"
+    },
+    "relativetime.days": {
+        "one": "%d dia atrás",
+        "many": "%d dias atrás",
+        "other": "%d dias atrás"
+    },
+    "relativetime.weeks": {
+        "one": "%d semana atrás",
+        "many": "%d semanas atrás",
+        "other": "%d semanas atrás"
+    },
+    "relativetime.months": {
+        "one": "%d mês atrás",
+        "many": "%d meses atrás",
+        "other": "%d meses atrás"
+    },
+    "relativetime.years": {
+        "one": "%d ano atrás",
+        "many": "%d anos atrás",
+        "other": "%d anos atrás"
+    },
+    "relativetime.1day": "ontem",
+    "relativetime.2days": "dois dias atrás",
+    "relativetime.1week": "semana passada",
+    "relativetime.1month": "mês passado",
+    "relativetime.2months": "dois meses atrás",
+    "relativetime.1year": "ano passado",
+    "relativetime.2years": "dois anos atrás",
+    "relativetime.hours": {
+        "one": "%d hora atrás",
+        "many": "%d horas atrás",
+        "other": "%d horas atrás"
+    },
+    "relativetime.2weeks": "duas semanas atrás",
+    "relativetime.now": "agora",
+    "moderation.reported_thank_you": "Agradecemos pela sua denúncia. A administração foi notificada.",
+    "moderation.report_content": "Denunciar conteúdo",
+    "admin.config.moderation_config": "Configuração de moderação",
+    "moderation.report_abuse": "Denunciar abuso",
+    "moderation.report_abuse_form.header": "Denunciar abuso à administração",
+    "moderation.report_abuse_form.invalid": "Argumentos inválidos",
+    "moderation.report_abuse_form.already_reported": "Você já denunciou este conteúdo",
+    "moderation.abuse_category": "Categoria",
+    "moderation.abuse_category.placeholder": "Selecione uma categoria",
+    "moderation.abuse_category.spam": "Spam",
+    "moderation.abuse_category.malware": "Malware",
+    "moderation.abuse_category.illegal_content": "Conteúdo ilegal",
+    "moderation.abuse_category.other_violations": "Outras violações de regras da plataforma",
+    "moderation.report_remarks": "Observações",
+    "moderation.report_remarks.placeholder": "Por favor, forneça detalhes sobre o abuso que você está denunciando.",
+    "moderation.submit_report": "Enviar denúncia",
+    "moderation.reporting_failed": "Não foi possível enviar a denúncia: %v",
+    "moderation.report_abuse_form.details": "Este formulário deve ser utilizado para denunciar contas com perfis, repositórios, issues e comentários com spam ou que se comportam inapropriadamente.",
+    "repo.form.cannot_create": "Todos os espaços onde você pode criar repositórios atingiram o limite de repositórios.",
+    "repo.issue_indexer.title": "Indexador de Issues",
+    "watch.list.none": "Ninguém está observando este repositório.",
+    "followers.incoming.list.self.none": "Ninguém está seguindo seu perfil.",
+    "followers.incoming.list.none": "Ninguém está seguindo este perfil.",
+    "followers.outgoing.list.none": "%s não está seguindo ninguém.",
+    "stars.list.none": "Ninguém favoritou este repositório.",
+    "followers.outgoing.list.self.none": "Você não está seguindo ninguém."
 }

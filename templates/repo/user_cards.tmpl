@@ -4,29 +4,33 @@
 			{{.CardsTitle}}
 		</h2>
 	{{end}}
-	<ul class="list">
-		{{range .Cards}}
-			<li class="card">
-				<a href="{{.HomeLink}}">
-					{{ctx.AvatarUtils.Avatar .}}
-				</a>
-				<div>
-					<h3 class="name">
-						<a href="{{.HomeLink}}">{{.DisplayName}}</a>
-					</h3>
-					<div class="meta">
-						{{if .Website}}
-							{{svg "octicon-link"}} <a href="{{.Website}}" target="_blank" rel="noopener noreferrer">{{.Website}}</a>
-						{{else if .Location}}
-							{{svg "octicon-location"}} {{.Location}}
-						{{else}}
-							{{svg "octicon-calendar"}} {{ctx.Locale.Tr "user.joined_on" (DateUtils.AbsoluteShort .CreatedUnix)}}
-						{{end}}
+	{{if .Cards}}
+		<ul class="list">
+			{{range .Cards}}
+				<li class="card">
+					<a href="{{.HomeLink}}">
+						{{ctx.AvatarUtils.Avatar .}}
+					</a>
+					<div class="content">
+						<h3 class="name">
+							<a href="{{.HomeLink}}">{{.DisplayName}}</a>
+						</h3>
+						<div class="meta">
+							{{if .Website}}
+								{{svg "octicon-link"}} <a href="{{.Website}}" target="_blank" rel="noopener noreferrer">{{.Website}}</a>
+							{{else if .Location}}
+								{{svg "octicon-location"}} {{.Location}}
+							{{else}}
+								{{svg "octicon-calendar"}} {{ctx.Locale.Tr "user.joined_on" (DateUtils.AbsoluteShort .CreatedUnix)}}
+							{{end}}
+						</div>
 					</div>
-				</div>
-			</li>
-		{{end}}
-	</ul>
+				</li>
+			{{end}}
+		</ul>
+	{{else if .CardsNoneMsg}}
+		<div>{{.CardsNoneMsg}}</div>
+	{{end}}
 
 	{{template "base/paginate" .}}
 </div>
