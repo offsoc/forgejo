@@ -7,6 +7,7 @@ package webhook
 type HookEventType string
 
 // Types of hook events
+// update TestCreateWebhook in models/webhook/webhook_test.go when adding or changing values here
 const (
 	HookEventCreate                    HookEventType = "create"
 	HookEventDelete                    HookEventType = "delete"
