@@ -26,9 +26,9 @@ type HookEvents struct {
 	Repository               bool `json:"repository"`
 	Release                  bool `json:"release"`
 	Package                  bool `json:"package"`
-	ActionFailure            bool `json:"action_failure"`
-	ActionRecover            bool `json:"action_recover"`
-	ActionSuccess            bool `json:"action_success"`
+	ActionRunFailure         bool `json:"action_run_failure"`
+	ActionRunRecover         bool `json:"action_run_recover"`
+	ActionRunSuccess         bool `json:"action_run_success"`
 }
 
 // HookEvent represents events that will deliver a hook.

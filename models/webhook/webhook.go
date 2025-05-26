@@ -302,19 +302,19 @@ func (w *Webhook) HasPackageEvent() bool {
 // HasActionRunFailureEvent returns if hook enabled action failure event.
 func (w *Webhook) HasActionRunFailureEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.ActionFailure)
+		(w.ChooseEvents && w.ActionRunFailure)
 }
 
 // HasActionRunRecoverEvent returns if hook enabled action recover event.
 func (w *Webhook) HasActionRunRecoverEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.ActionRecover)
+		(w.ChooseEvents && w.ActionRunRecover)
 }
 
 // HasActionRunSuccessEvent returns if hook enabled action recover event.
 func (w *Webhook) HasActionRunSuccessEvent() bool {
 	return w.SendEverything ||
-		(w.ChooseEvents && w.ActionSuccess)
+		(w.ChooseEvents && w.ActionRunSuccess)
 }
 
 // HasPullRequestReviewRequestEvent returns true if hook enabled pull request review request event.
