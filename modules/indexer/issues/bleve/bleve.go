@@ -5,11 +5,12 @@ package bleve
 
 import (
 	"context"
+	"regexp"
+	"strconv"
 
 	indexer_internal "forgejo.org/modules/indexer/internal"
 	inner_bleve "forgejo.org/modules/indexer/internal/bleve"
 	"forgejo.org/modules/indexer/issues/internal"
-
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
@@ -69,6 +70,7 @@ func generateIssueIndexMapping() (mapping.IndexMapping, error) {
 
 	docMapping.AddFieldMappingsAt("is_public", boolFieldMapping)
 
+	docMapping.AddFieldMappingsAt("index", numberFieldMapping)
 	docMapping.AddFieldMappingsAt("title", textFieldMapping)
 	docMapping.AddFieldMappingsAt("content", textFieldMapping)
 	docMapping.AddFieldMappingsAt("comments", textFieldMapping)
@@ -150,6 +152,9 @@ func (b *Indexer) Delete(_ context.Context, ids ...int64) error {
 	return batch.Flush()
 }
 
+// Match for issue IDs in search query
+var issueIndexPattern = regexp.MustCompile(`^#?([0-9]{1,10})$`)
+
 // Search searches for issues by given conditions.
 // Returns the matching issue IDs
 func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (*internal.SearchResult, error) {
@@ -166,6 +171,12 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 				inner_bleve.MatchPhraseQuery(token.Term, "title", issueIndexerAnalyzer, token.Fuzzy),
 				inner_bleve.MatchPhraseQuery(token.Term, "content", issueIndexerAnalyzer, token.Fuzzy),
 				inner_bleve.MatchPhraseQuery(token.Term, "comments", issueIndexerAnalyzer, token.Fuzzy))
+
+			indexMatch := issueIndexPattern.FindSubmatch([]byte(token.Term))
+			if indexMatch != nil {
+				issueID, _ := strconv.ParseInt(string(indexMatch[1]), 10, 64)
+				innerQ.AddQuery(inner_bleve.NumericEqualityQuery(issueID, "index"))
+			}
 
 			switch token.Kind {
 			case internal.BoolOptMust:
