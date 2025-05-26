@@ -7,17 +7,24 @@ import (
 	"context"
 
 	actions_model "forgejo.org/models/actions"
-	"forgejo.org/models/perm/access"
-	user_model "forgejo.org/models/user"
+	access_model "forgejo.org/models/perm/access"
 	api "forgejo.org/modules/structs"
 )
 
 // ToUser convert actions_model.User to api.ActionRun
-// if doer is set, private information is added if the doer has the permission to see it
-func ToActionRun(ctx context.Context, run *actions_model.ActionRun, doer *user_model.User, permissionInRepo access.Permission) *api.ActionRun {
+// the run needs all attributes loaded
+func ToActionRun(ctx context.Context, run *actions_model.ActionRun) *api.ActionRun {
 	if run == nil {
 		return nil
 	}
+
+	// The doer is the one whose perspective is used to view this ActionRun.
+	// In the best case we use the user that created the webhook.
+	// Unfortunately we don't know who that was.
+	// So instead we use the repo owner, who is able to create webhooks and allow others to do so by making them repo admins.
+	// This is pretty close to perfect.
+	doer := run.Repo.Owner
+	permissionInRepo, _ := access_model.GetUserRepoPermission(ctx, run.Repo, doer)
 
 	return &api.ActionRun{
 		ID:                run.ID,

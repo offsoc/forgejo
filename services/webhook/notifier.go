@@ -893,13 +893,10 @@ func (m *webhookNotifier) ActionRunNowDone(ctx context.Context, run *actions_mod
 		Repository: run.Repo,
 		Owner:      run.TriggerUser,
 	}
-	// TODO: is this the correct user to get the permissions from
-	doer := run.Repo.Owner
 
-	permission, _ := access_model.GetUserRepoPermission(ctx, run.Repo, doer)
 	payload := &api.ActionPayload{
-		Run:         convert.ToActionRun(ctx, run, doer, permission),
-		LastRun:     convert.ToActionRun(ctx, lastRun, doer, permission),
+		Run:         convert.ToActionRun(ctx, run),
+		LastRun:     convert.ToActionRun(ctx, lastRun),
 		PriorStatus: priorStatus.String(),
 	}
 
