@@ -309,13 +309,13 @@ func getActionPayloadInfo(p *api.ActionPayload, linkFormatter linkFormatter) (te
 	repoLink := linkFormatter(p.Run.Repo.HTMLURL, p.Run.Repo.FullName)
 
 	switch p.Action {
-	case api.ActionFailed:
+	case api.HookActionFailure:
 		text = fmt.Sprintf("%s Action Failed in %s %s", runLink, repoLink, p.Run.PrettyRef)
 		color = redColor
-	case api.ActionRecovered:
+	case api.HookActionRecover:
 		text = fmt.Sprintf("%s Action Recovered in %s %s", runLink, repoLink, p.Run.PrettyRef)
 		color = greenColor
-	case api.ActionSuccess:
+	case api.HookActionSuccess:
 		text = fmt.Sprintf("%s Action Success in %s %s", runLink, repoLink, p.Run.PrettyRef)
 		color = greenColor
 	}

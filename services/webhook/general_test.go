@@ -701,17 +701,17 @@ func TestGetActionPayloadInfo(t *testing.T) {
 		color  int
 	}{
 		{
-			api.ActionFailed,
+			api.HookActionFailure,
 			"Build release Action Failed in test/repo main",
 			redColor,
 		},
 		{
-			api.ActionSuccess,
+			api.HookActionSuccess,
 			"Build release Action Success in test/repo main",
 			greenColor,
 		},
 		{
-			api.ActionRecovered,
+			api.HookActionRecover,
 			"Build release Action Recovered in test/repo main",
 			greenColor,
 		},

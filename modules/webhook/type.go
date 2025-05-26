@@ -34,7 +34,7 @@ const (
 	HookEventSchedule                  HookEventType = "schedule"
 	HookEventWorkflowDispatch          HookEventType = "workflow_dispatch"
 	HookEventActionRunFailure          HookEventType = "action_run_failure"
-	HookEventActionRunRecover          HookEventType = "action_run_success_after_failure"
+	HookEventActionRunRecover          HookEventType = "action_run_recover"
 	HookEventActionRunSuccess          HookEventType = "action_run_success"
 )
 

@@ -208,7 +208,7 @@ func TestAction(t *testing.T) {
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, structs.ActionSuccess, payloadContent.Action)
+		assert.Equal(t, structs.HookActionSuccess, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newSuccessRun, payloadContent.Run)
 		assert.Nil(t, payloadContent.LastRun)
@@ -225,20 +225,19 @@ func TestAction(t *testing.T) {
 
 			var payloadContent structs.ActionPayload
 			require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-			assert.Equal(t, structs.ActionSuccess, payloadContent.Action)
+			assert.Equal(t, structs.HookActionSuccess, payloadContent.Action)
 			assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 			assertActionEqual(t, newSuccessRun, payloadContent.Run)
 			assertActionEqual(t, oldFailureRun, payloadContent.LastRun)
 		}
 		{
-			// hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_hook_event_recover' AND payload_content LIKE '%recovered%newSuccessRun%oldFailureRun%'"))
-			hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_success_after_failure' AND payload_content LIKE '%recovered%newSuccessRun%oldFailureRun%'"))
+			hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_recover' AND payload_content LIKE '%recover%newSuccessRun%oldFailureRun%'"))
 			assert.Equal(t, webhook_module.HookEventActionRunRecover, hookTask.EventType)
 
 			log.Error("something: %s", hookTask.PayloadContent)
 			var payloadContent structs.ActionPayload
 			require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-			assert.Equal(t, structs.ActionRecovered, payloadContent.Action)
+			assert.Equal(t, structs.HookActionRecover, payloadContent.Action)
 			assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 			assertActionEqual(t, newSuccessRun, payloadContent.Run)
 			assertActionEqual(t, oldFailureRun, payloadContent.LastRun)
@@ -255,7 +254,7 @@ func TestAction(t *testing.T) {
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, structs.ActionSuccess, payloadContent.Action)
+		assert.Equal(t, structs.HookActionSuccess, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newSuccessRun, payloadContent.Run)
 		assertActionEqual(t, oldSuccessRun, payloadContent.LastRun)
@@ -267,12 +266,12 @@ func TestAction(t *testing.T) {
 		NewNotifier().ActionRunNowDone(db.DefaultContext, newFailureRun, actions_model.StatusWaiting, nil)
 
 		// there should only be this one at the time
-		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_failure' AND payload_content LIKE '%failed%newFailureRun%'"))
+		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_failure' AND payload_content LIKE '%failure%newFailureRun%'"))
 		assert.Equal(t, webhook_module.HookEventActionRunFailure, hookTask.EventType)
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, structs.ActionFailed, payloadContent.Action)
+		assert.Equal(t, structs.HookActionFailure, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newFailureRun, payloadContent.Run)
 		assert.Nil(t, payloadContent.LastRun)
@@ -283,12 +282,12 @@ func TestAction(t *testing.T) {
 
 		NewNotifier().ActionRunNowDone(db.DefaultContext, newFailureRun, actions_model.StatusWaiting, oldFailureRun)
 
-		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_failure' AND payload_content LIKE '%failed%newFailureRun%oldFailureRun%'"))
+		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_failure' AND payload_content LIKE '%failure%newFailureRun%oldFailureRun%'"))
 		assert.Equal(t, webhook_module.HookEventActionRunFailure, hookTask.EventType)
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, structs.ActionFailed, payloadContent.Action)
+		assert.Equal(t, structs.HookActionFailure, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newFailureRun, payloadContent.Run)
 		assertActionEqual(t, oldFailureRun, payloadContent.LastRun)
@@ -299,12 +298,12 @@ func TestAction(t *testing.T) {
 
 		NewNotifier().ActionRunNowDone(db.DefaultContext, newFailureRun, actions_model.StatusWaiting, oldSuccessRun)
 
-		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_failure' AND payload_content LIKE '%failed%newFailureRun%oldSuccessRun%'"))
+		hookTask := unittest.AssertExistsAndLoadBean(t, &webhook_model.HookTask{}, unittest.Cond("event_type == 'action_run_failure' AND payload_content LIKE '%failure%newFailureRun%oldSuccessRun%'"))
 		assert.Equal(t, webhook_module.HookEventActionRunFailure, hookTask.EventType)
 
 		var payloadContent structs.ActionPayload
 		require.NoError(t, json.Unmarshal([]byte(hookTask.PayloadContent), &payloadContent))
-		assert.Equal(t, structs.ActionFailed, payloadContent.Action)
+		assert.Equal(t, structs.HookActionFailure, payloadContent.Action)
 		assert.Equal(t, actions_model.StatusWaiting.String(), payloadContent.PriorStatus)
 		assertActionEqual(t, newFailureRun, payloadContent.Run)
 		assertActionEqual(t, oldSuccessRun, payloadContent.LastRun)

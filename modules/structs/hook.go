@@ -497,9 +497,9 @@ func (p *PackagePayload) JSONPayload() ([]byte, error) {
 type HookActionAction string
 
 const (
-	ActionFailed    HookActionAction = "failed"
-	ActionRecovered HookActionAction = "recovered"
-	ActionSuccess   HookActionAction = "success"
+	HookActionFailure HookActionAction = "failure"
+	HookActionRecover HookActionAction = "recover"
+	HookActionSuccess HookActionAction = "success"
 )
 
 // ActionPayload payload for action webhooks
