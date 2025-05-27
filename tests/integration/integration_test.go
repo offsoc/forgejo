@@ -694,3 +694,42 @@ func GetHTMLTitle(t testing.TB, session *TestSession, urlStr string) string {
 	doc := NewHTMLParser(t, resp.Body)
 	return doc.Find("head title").Text()
 }
+
+func (s *TestSession) GetRawCookie(name string) *http.Cookie {
+	baseURL, err := url.Parse(setting.AppURL)
+	if err != nil {
+		return nil
+	}
+	for _, c := range s.jar.Cookies(baseURL) {
+		if c.Name == name {
+			return c
+		}
+	}
+	return nil
+}
+
+func (s *TestSession) GetSiteCookie(name string) string {
+	c := s.GetRawCookie(name)
+	if c != nil {
+		v, _ := url.QueryUnescape(c.Value)
+		return v
+	}
+	return ""
+}
+
+// GetUserCSRFToken returns CSRF token for current user
+func GetUserCSRFToken(t testing.TB, session *TestSession) string {
+	t.Helper()
+	cookie := session.GetSiteCookie("_csrf")
+	require.NotEmpty(t, cookie)
+	return cookie
+}
+
+// GetUserCSRFToken returns CSRF token for anonymous user (not logged in)
+func GetAnonymousCSRFToken(t testing.TB, session *TestSession) string {
+	t.Helper()
+	resp := session.MakeRequest(t, NewRequest(t, "GET", "/user/login"), http.StatusOK)
+	csrfToken := NewHTMLParser(t, resp.Body).GetCSRF()
+	require.NotEmpty(t, csrfToken)
+	return csrfToken
+}
