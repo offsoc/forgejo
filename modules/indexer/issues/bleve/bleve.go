@@ -11,6 +11,7 @@ import (
 	indexer_internal "forgejo.org/modules/indexer/internal"
 	inner_bleve "forgejo.org/modules/indexer/internal/bleve"
 	"forgejo.org/modules/indexer/issues/internal"
+
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
