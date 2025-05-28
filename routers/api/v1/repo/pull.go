@@ -1194,10 +1194,17 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 		return nil, nil, nil, "", ""
 	}
 
+	baseBranchRef := baseBranch
+	if baseIsBranch {
+		baseBranchRef = git.BranchPrefix + baseBranch
+	} else if baseIsTag {
+		baseBranchRef = git.TagPrefix + baseBranch
+	}
+
 	// Check if head branch is valid.
-	headIsCommit := headGitRepo.IsBranchExist(headBranch)
-	headIsBranch := headGitRepo.IsTagExist(headBranch)
-	headIsTag := headGitRepo.IsCommitExist(baseBranch)
+	headIsCommit := ctx.Repo.GitRepo.IsCommitExist(headBranch)
+	headIsBranch := ctx.Repo.GitRepo.IsBranchExist(headBranch)
+	headIsTag := ctx.Repo.GitRepo.IsTagExist(headBranch)
 	if !headIsCommit && !headIsBranch && !headIsTag {
 		// Check if headBranch is short sha commit hash
 		if headCommit, _ := headGitRepo.GetCommit(headBranch); headCommit != nil {
@@ -1209,18 +1216,7 @@ func parseCompareInfo(ctx *context.APIContext, form api.CreatePullRequestOption)
 		}
 	}
 
-	baseBranchRef := baseBranch
-	if baseIsBranch {
-		baseBranchRef = git.BranchPrefix + baseBranch
-	} else if baseIsTag {
-		baseBranchRef = git.TagPrefix + baseBranch
-	}
 	headBranchRef := headBranch
-	if headIsBranch {
-		headBranchRef = headBranch
-	} else if headIsTag {
-		headBranchRef = headBranch
-	}
 
 	compareInfo, err := headGitRepo.GetCompareInfo(repo_model.RepoPath(baseRepo.Owner.Name, baseRepo.Name), baseBranchRef, headBranchRef, false, false)
 	if err != nil {
