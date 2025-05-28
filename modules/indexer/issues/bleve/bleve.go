@@ -153,7 +153,7 @@ func (b *Indexer) Delete(_ context.Context, ids ...int64) error {
 }
 
 // Match for issue IDs in search query
-var issueIndexPattern = regexp.MustCompile(`^#?([0-9]{1,10})$`)
+var issueIndexPattern = regexp.MustCompile(`^[#!]?([0-9]{1,10})$`)
 
 // Search searches for issues by given conditions.
 // Returns the matching issue IDs
