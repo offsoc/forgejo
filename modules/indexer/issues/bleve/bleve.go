@@ -10,7 +10,6 @@ import (
 	indexer_internal "forgejo.org/modules/indexer/internal"
 	inner_bleve "forgejo.org/modules/indexer/internal/bleve"
 	"forgejo.org/modules/indexer/issues/internal"
-
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
@@ -165,12 +164,9 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 		q := bleve.NewBooleanQuery()
 		for _, token := range tokens {
 			innerQ := bleve.NewDisjunctionQuery(
-				inner_bleve.MatchPhraseQuery(token.Term, "content", issueIndexerAnalyzer, token.Fuzzy),
-				inner_bleve.MatchPhraseQuery(token.Term, "comments", issueIndexerAnalyzer, token.Fuzzy))
-
-			titleQuery := inner_bleve.MatchPhraseQuery(token.Term, "title", issueIndexerAnalyzer, token.Fuzzy)
-			titleQuery.SetBoost(2.0)
-			innerQ.AddQuery(titleQuery)
+				inner_bleve.MatchPhraseQuery(token.Term, "title", issueIndexerAnalyzer, token.Fuzzy, 2.0),
+				inner_bleve.MatchPhraseQuery(token.Term, "content", issueIndexerAnalyzer, token.Fuzzy, 1.0),
+				inner_bleve.MatchPhraseQuery(token.Term, "comments", issueIndexerAnalyzer, token.Fuzzy, 1.0))
 
 			term := token.Term
 			if term[0] == '#' || term[0] == '!' {
