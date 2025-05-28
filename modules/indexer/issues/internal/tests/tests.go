@@ -550,6 +550,40 @@ var cases = []*testIndexerCase{
 		},
 	},
 	{
+		Name: "Index",
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "13",
+			SortBy:  internal.SortByScore,
+			RepoIDs: []int64{5},
+		},
+		ExpectedIDs:   []int64{93}, // 93 = #13 in repo 5
+		ExpectedTotal: 1,
+	},
+	{
+		Name: "Index with prefix",
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "#13",
+			SortBy:  internal.SortByScore,
+			RepoIDs: []int64{5},
+		},
+		ExpectedIDs:   []int64{93},
+		ExpectedTotal: 1,
+	},
+	{
+		Name: "Index and title boost",
+		ExtraData: []*internal.IndexerData{
+			{ID: 1001, Title: "re #13", RepoID: 5},
+			{ID: 1002, Title: "re #1001", Content: "leave 13 alone. - 13", RepoID: 5},
+		},
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "!13",
+			SortBy:  internal.SortByScore,
+			RepoIDs: []int64{5},
+		},
+		ExpectedIDs:   []int64{93, 1001, 1002},
+		ExpectedTotal: 3,
+	},
+	{
 		Name: "SortByCreatedDesc",
 		SearchOptions: &internal.SearchOptions{
 			Paginator: &db.ListOptionsAll,
