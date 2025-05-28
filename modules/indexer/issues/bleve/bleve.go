@@ -168,14 +168,19 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 		q := bleve.NewBooleanQuery()
 		for _, token := range tokens {
 			innerQ := bleve.NewDisjunctionQuery(
-				inner_bleve.MatchPhraseQuery(token.Term, "title", issueIndexerAnalyzer, token.Fuzzy),
 				inner_bleve.MatchPhraseQuery(token.Term, "content", issueIndexerAnalyzer, token.Fuzzy),
 				inner_bleve.MatchPhraseQuery(token.Term, "comments", issueIndexerAnalyzer, token.Fuzzy))
+
+			titleQuery := inner_bleve.MatchPhraseQuery(token.Term, "title", issueIndexerAnalyzer, token.Fuzzy)
+			titleQuery.SetBoost(2.0)
+			innerQ.AddQuery(titleQuery)
 
 			indexMatch := issueIndexPattern.FindSubmatch([]byte(token.Term))
 			if indexMatch != nil {
 				issueID, _ := strconv.ParseInt(string(indexMatch[1]), 10, 64)
-				innerQ.AddQuery(inner_bleve.NumericEqualityQuery(issueID, "index"))
+				idQuery := inner_bleve.NumericEqualityQuery(issueID, "index")
+				idQuery.SetBoost(5.0)
+				innerQ.AddQuery(idQuery)
 			}
 
 			switch token.Kind {
