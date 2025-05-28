@@ -5,7 +5,6 @@ package bleve
 
 import (
 	"context"
-	"regexp"
 	"strconv"
 
 	indexer_internal "forgejo.org/modules/indexer/internal"
@@ -153,9 +152,6 @@ func (b *Indexer) Delete(_ context.Context, ids ...int64) error {
 	return batch.Flush()
 }
 
-// Match for issue IDs in search query
-var issueIndexPattern = regexp.MustCompile(`^[#!]?([0-9]{1,10})$`)
-
 // Search searches for issues by given conditions.
 // Returns the matching issue IDs
 func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (*internal.SearchResult, error) {
@@ -176,9 +172,11 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 			titleQuery.SetBoost(2.0)
 			innerQ.AddQuery(titleQuery)
 
-			indexMatch := issueIndexPattern.FindSubmatch([]byte(token.Term))
-			if indexMatch != nil {
-				issueID, _ := strconv.ParseInt(string(indexMatch[1]), 10, 64)
+			term := token.Term
+			if term[0] == '#' || term[0] == '!' {
+				term = term[1:]
+			}
+			if issueID, err := strconv.ParseInt(term, 10, 64); err == nil {
 				idQuery := inner_bleve.NumericEqualityQuery(issueID, "index")
 				idQuery.SetBoost(5.0)
 				innerQ.AddQuery(idQuery)
