@@ -775,6 +775,7 @@ func generateDefaultIndexerData() []*internal.IndexerData {
 
 			data = append(data, &internal.IndexerData{
 				ID:                 id,
+				Index:              issueIndex,
 				RepoID:             repoID,
 				IsPublic:           repoID%2 == 0,
 				Title:              fmt.Sprintf("issue%d of repo%d", issueIndex, repoID),
