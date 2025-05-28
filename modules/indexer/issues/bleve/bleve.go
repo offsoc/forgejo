@@ -5,11 +5,11 @@ package bleve
 
 import (
 	"context"
-	"strconv"
 
 	indexer_internal "forgejo.org/modules/indexer/internal"
 	inner_bleve "forgejo.org/modules/indexer/internal/bleve"
 	"forgejo.org/modules/indexer/issues/internal"
+
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
@@ -168,11 +168,7 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 				inner_bleve.MatchPhraseQuery(token.Term, "content", issueIndexerAnalyzer, token.Fuzzy, 1.0),
 				inner_bleve.MatchPhraseQuery(token.Term, "comments", issueIndexerAnalyzer, token.Fuzzy, 1.0))
 
-			term := token.Term
-			if term[0] == '#' || term[0] == '!' {
-				term = term[1:]
-			}
-			if issueID, err := strconv.ParseInt(term, 10, 64); err == nil {
+			if issueID, err := token.ParseIssueReference(); err == nil {
 				idQuery := inner_bleve.NumericEqualityQuery(issueID, "index")
 				idQuery.SetBoost(5.0)
 				innerQ.AddQuery(idQuery)
