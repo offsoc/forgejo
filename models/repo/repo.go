@@ -6,6 +6,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"html/template"
 	"net"
@@ -827,7 +828,7 @@ func GetRepositoryByURL(ctx context.Context, repoURL string) (*Repository, error
 	pathSegments := getRepositoryURLPathSegments(repoURL)
 
 	if len(pathSegments) != 2 {
-		return nil, fmt.Errorf("unknown or malformed repository URL")
+		return nil, errors.New("unknown or malformed repository URL")
 	}
 
 	ownerName := pathSegments[0]
