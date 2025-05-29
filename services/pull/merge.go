@@ -6,6 +6,7 @@ package pull
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -518,13 +519,13 @@ func MergedManually(ctx context.Context, pr *issues_model.PullRequest, doer *use
 
 		objectFormat := git.ObjectFormatFromName(pr.BaseRepo.ObjectFormatName)
 		if len(commitID) != objectFormat.FullLength() {
-			return fmt.Errorf("Wrong commit ID")
+			return errors.New("Wrong commit ID")
 		}
 
 		commit, err := baseGitRepo.GetCommit(commitID)
 		if err != nil {
 			if git.IsErrNotExist(err) {
-				return fmt.Errorf("Wrong commit ID")
+				return errors.New("Wrong commit ID")
 			}
 			return err
 		}
@@ -535,7 +536,7 @@ func MergedManually(ctx context.Context, pr *issues_model.PullRequest, doer *use
 			return err
 		}
 		if !ok {
-			return fmt.Errorf("Wrong commit ID")
+			return errors.New("Wrong commit ID")
 		}
 
 		pr.MergedCommitID = commitID
@@ -548,7 +549,7 @@ func MergedManually(ctx context.Context, pr *issues_model.PullRequest, doer *use
 		if merged, err = pr.SetMerged(ctx); err != nil {
 			return err
 		} else if !merged {
-			return fmt.Errorf("SetMerged failed")
+			return errors.New("SetMerged failed")
 		}
 		return nil
 	}); err != nil {

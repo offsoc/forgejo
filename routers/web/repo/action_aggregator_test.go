@@ -179,7 +179,7 @@ func (kase *testCase) doTest(t *testing.T) {
 
 	if len(after) != len(issue.Comments) {
 		t.Logf("Expected %v comments, got %v", len(after), len(issue.Comments))
-		t.Logf("Comments got after combination:")
+		t.Log("Comments got after combination:")
 		for c := 0; c < len(issue.Comments); c++ {
 			cmt := issue.Comments[c]
 			t.Logf("%v %v %v\n", cmt.Type, cmt.CreatedUnix, cmt.Content)
