@@ -190,6 +190,15 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 		queries = append(queries, bleve.NewDisjunctionQuery(repoQueries...))
 	}
 
+	if options.PriorityRepoID.Has() {
+		eq := inner_bleve.NumericEqualityQuery(options.PriorityRepoID.Value(), "repo_id")
+		eq.SetBoost(10.0)
+		meh := bleve.NewMatchAllQuery()
+		meh.SetBoost(0)
+		should := bleve.NewDisjunctionQuery(eq, meh)
+		queries = append(queries, should)
+	}
+
 	if options.IsPull.Has() {
 		queries = append(queries, inner_bleve.BoolFieldQuery(options.IsPull.Value(), "is_pull"))
 	}

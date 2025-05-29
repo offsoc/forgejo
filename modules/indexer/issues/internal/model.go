@@ -74,8 +74,9 @@ type SearchResult struct {
 type SearchOptions struct {
 	Keyword string // keyword to search
 
-	RepoIDs   []int64 // repository IDs which the issues belong to
-	AllPublic bool    // if include all public repositories
+	RepoIDs        []int64                // repository IDs which the issues belong to
+	AllPublic      bool                   // if include all public repositories
+	PriorityRepoID optional.Option[int64] // issues from this repository will be prioritized when SortByScore
 
 	IsPull   optional.Option[bool] // if the issues is a pull request
 	IsClosed optional.Option[bool] // if the issues is closed
