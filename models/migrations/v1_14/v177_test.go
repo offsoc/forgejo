@@ -4,7 +4,6 @@
 package v1_14 //nolint
 
 import (
-	"errors"
 	"testing"
 
 	migration_tests "forgejo.org/models/migrations/test"
@@ -74,12 +73,12 @@ func Test_DeleteOrphanedIssueLabels(t *testing.T) {
 
 	// Now test what is left
 	if _, ok := postMigration[2]; ok {
-		errors.New("Orphaned Label[2] survived the migration")
+		t.Error("Orphaned Label[2] survived the migration")
 		return
 	}
 
 	if _, ok := postMigration[5]; ok {
-		errors.New("Orphaned Label[5] survived the migration")
+		t.Error("Orphaned Label[5] survived the migration")
 		return
 	}
 

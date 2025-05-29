@@ -74,7 +74,7 @@ func Test_NewNodeInfoWellKnown(t *testing.T) {
 
 	_, err := NewNodeInfoWellKnown([]byte(`invalid`))
 	if err == nil {
-		errors.New("error was expected here")
+		t.Error("error was expected here")
 	}
 }
 
@@ -87,6 +87,6 @@ func Test_NewNodeInfo(t *testing.T) {
 
 	_, err := NewNodeInfo([]byte(`invalid`))
 	if err == nil {
-		errors.New("error was expected here")
+		t.Error("error was expected here")
 	}
 }
