@@ -183,7 +183,7 @@ type Repository struct {
 	StatsIndexerStatus              *RepoIndexerStatus `xorm:"-"`
 	IsFsckEnabled                   bool               `xorm:"NOT NULL DEFAULT true"`
 	CloseIssuesViaCommitInAnyBranch bool               `xorm:"NOT NULL DEFAULT false"`
-	Topics                          []string           `xorm:"TEXT JSON"`
+	Topics                          []string           `xorm:"TEXT JSON NOT NULL"`
 	ObjectFormatName                string             `xorm:"VARCHAR(6) NOT NULL DEFAULT 'sha1'"`
 
 	TrustModel TrustModelType
@@ -194,6 +194,13 @@ type Repository struct {
 	CreatedUnix  timeutil.TimeStamp `xorm:"INDEX created"`
 	UpdatedUnix  timeutil.TimeStamp `xorm:"INDEX updated"`
 	ArchivedUnix timeutil.TimeStamp `xorm:"DEFAULT 0"`
+}
+
+// BeforeInsert will be invoked by XORM before updating a record
+func (repo *Repository) BeforeInsert() {
+	if repo.Topics == nil {
+		repo.Topics = []string{}
+	}
 }
 
 func init() {
