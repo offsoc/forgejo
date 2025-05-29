@@ -192,7 +192,20 @@
 				{{template "shared/user/avatarlink" dict "user" .Poster}}
 				<span class="text grey muted-links">
 					{{template "shared/user/authorlink" .Poster}}
-					{{if gt .OldMilestoneID 0}}{{if gt .MilestoneID 0}}{{ctx.Locale.Tr "repo.issues.change_milestone_at" .OldMilestone.Name .Milestone.Name $createdStr}}{{else}}{{ctx.Locale.Tr "repo.issues.remove_milestone_at" .OldMilestone.Name $createdStr}}{{end}}{{else if gt .MilestoneID 0}}{{ctx.Locale.Tr "repo.issues.add_milestone_at" .Milestone.Name $createdStr}}{{end}}
+					{{$newMilestoneDisplayHtml := "Unknown Project"}}
+					{{if gt .MilestoneID 0}}
+						{{$newMilestoneDisplayHtml = HTMLFormat `<a href='%s/milestones/%d' rel='nofollow'>%s%s</a>` $.RepoLink .MilestoneID (svg "octicon-milestone" 16 "tw-ml-1 tw-mr-2") .Milestone.Name}}
+					{{end}}
+					{{if gt .OldMilestoneID 0}}
+						{{$oldMilestoneDisplayHtml := HTMLFormat `<a href='%s/milestones/%d' rel='nofollow'>%s%s</a>` $.RepoLink .OldMilestoneID (svg "octicon-milestone" 16 "tw-ml-1 tw-mr-2") .OldMilestone.Name}}
+						{{if gt .MilestoneID 0}}
+							{{ctx.Locale.Tr "repo.issues.change_milestone_at" $oldMilestoneDisplayHtml $newMilestoneDisplayHtml $createdStr}}
+						{{else}}
+							{{ctx.Locale.Tr "repo.issues.remove_milestone_at" $oldMilestoneDisplayHtml $createdStr}}
+						{{end}}
+					{{else if gt .MilestoneID 0}}
+						{{ctx.Locale.Tr "repo.issues.add_milestone_at" $newMilestoneDisplayHtml $createdStr}}
+					{{end}}
 				</span>
 			</div>
 		{{else if and (eq .Type 9) (gt .AssigneeID 0)}}
@@ -581,7 +594,7 @@
 						{{if not .OldProject.IsGhost}}
 							{{$tooltip = ctx.Locale.Tr (printf "projects.type-%d.display_name" .OldProject.Type)}}
 						{{end}}
-						{{$oldProjectDisplayHtml = HTMLFormat `<span data-tooltip-content="%s">%s</span>` $tooltip .OldProject.Title}}
+						{{$oldProjectDisplayHtml = HTMLFormat `<a href="%s/projects/%d" rel="nofollow"><span data-tooltip-content="%s">%s%s</span></a>` $.RepoLink .OldProjectID $tooltip (svg .OldProject.IconName 16 "tw-ml-1 tw-mr-2") .OldProject.Title}}
 					{{end}}
 					{{$newProjectDisplayHtml := "Unknown Project"}}
 					{{if .Project}}
@@ -589,7 +602,7 @@
 						{{if not .Project.IsGhost}}
 							{{$tooltip = ctx.Locale.Tr (printf "projects.type-%d.display_name" .Project.Type)}}
 						{{end}}
-						{{$newProjectDisplayHtml = HTMLFormat `<span data-tooltip-content="%s">%s</span>` $tooltip .Project.Title}}
+						{{$newProjectDisplayHtml = HTMLFormat `<a href="%s/projects/%d" rel="nofollow"><span data-tooltip-content="%s">%s%s</span></a>` $.RepoLink .ProjectID $tooltip (svg .Project.IconName 16 "tw-ml-1 tw-mr-2") .Project.Title}}
 					{{end}}
 					{{if and (gt .OldProjectID 0) (gt .ProjectID 0)}}
 						{{ctx.Locale.Tr "repo.issues.change_project_at" $oldProjectDisplayHtml $newProjectDisplayHtml $createdStr}}
