@@ -142,7 +142,7 @@ export function initRepoIssueSidebarList() {
           for (const [_, issue] of Object.entries(response)) {
             // Don't list current issue in the dependency list.
             if (issue.id === currIssueId) {
-              return;
+              continue;
             }
             filteredResponse.results.push({
               name: `#${issue.number} ${issueTitleHTML(htmlEscape(issue.title))
