@@ -1,5 +1,5 @@
-// Copyright 2024 The Forgejo Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// Copyright 2025 The Forgejo Authors.
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 package forgejo_migrations //nolint:revive
 
