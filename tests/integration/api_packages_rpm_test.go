@@ -24,8 +24,8 @@ import (
 	"forgejo.org/modules/util"
 	"forgejo.org/tests"
 
+	"code.forgejo.org/forgejo/go-rpmutils"
 	"github.com/ProtonMail/go-crypto/openpgp"
-	"github.com/sassoftware/go-rpmutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

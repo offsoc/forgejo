@@ -247,7 +247,7 @@ Forgejo or set your environment appropriately.`, "")
 			newCommitIDs[count] = newCommitID
 			refFullNames[count] = refFullName
 			count++
-			fmt.Fprintf(out, "*")
+			fmt.Fprint(out, "*")
 
 			if count >= hookBatchSize {
 				fmt.Fprintf(out, " Checking %d references\n", count)
@@ -263,10 +263,10 @@ Forgejo or set your environment appropriately.`, "")
 				lastline = 0
 			}
 		} else {
-			fmt.Fprintf(out, ".")
+			fmt.Fprint(out, ".")
 		}
 		if lastline >= hookBatchSize {
-			fmt.Fprintf(out, "\n")
+			fmt.Fprint(out, "\n")
 			lastline = 0
 		}
 	}
@@ -283,7 +283,7 @@ Forgejo or set your environment appropriately.`, "")
 			return fail(ctx, extra.UserMsg, "HookPreReceive(last) failed: %v", extra.Error)
 		}
 	} else if lastline > 0 {
-		fmt.Fprintf(out, "\n")
+		fmt.Fprint(out, "\n")
 	}
 
 	fmt.Fprintf(out, "Checked %d references in total\n", total)
@@ -399,7 +399,7 @@ Forgejo or set your environment appropriately.`, "")
 			continue
 		}
 
-		fmt.Fprintf(out, ".")
+		fmt.Fprint(out, ".")
 		oldCommitIDs[count] = string(fields[0])
 		newCommitIDs[count] = string(fields[1])
 		refFullNames[count] = git.RefName(fields[2])

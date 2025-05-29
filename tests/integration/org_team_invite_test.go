@@ -233,13 +233,7 @@ func TestOrgTeamEmailInviteRedirectsNewUserWithActivation(t *testing.T) {
 		t.Skip()
 		return
 	}
-
-	// enable email confirmation temporarily
-	defer func(prevVal bool) {
-		setting.Service.RegisterEmailConfirm = prevVal
-	}(setting.Service.RegisterEmailConfirm)
-	setting.Service.RegisterEmailConfirm = true
-
+	defer test.MockVariableValue(&setting.Service.RegisterEmailConfirm, true)()
 	defer tests.PrepareTestEnv(t)()
 
 	org := unittest.AssertExistsAndLoadBean(t, &organization.Organization{ID: 3})

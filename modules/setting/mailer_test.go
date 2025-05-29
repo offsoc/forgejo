@@ -51,4 +51,28 @@ func Test_loadMailerFrom(t *testing.T) {
 		assert.Equal(t, "jane.doe@example.com", MailService.User)
 		assert.Equal(t, "y0u'll n3v3r gUess th1S!!1", MailService.Passwd)
 	})
+
+	t.Run("sendmail argument sanitization", func(t *testing.T) {
+		cfg, _ := NewConfigProviderFromData("")
+		sec := cfg.Section("mailer")
+		sec.NewKey("ENABLED", "true")
+		sec.NewKey("PROTOCOL", "sendmail")
+		sec.NewKey("SENDMAIL_ARGS", "-B 8BITMIME")
+
+		loadMailerFrom(cfg)
+
+		assert.Equal(t, []string{"-B", "8BITMIME", "--"}, MailService.SendmailArgs)
+	})
+
+	t.Run("empty sendmail args", func(t *testing.T) {
+		cfg, _ := NewConfigProviderFromData("")
+		sec := cfg.Section("mailer")
+		sec.NewKey("ENABLED", "true")
+		sec.NewKey("PROTOCOL", "sendmail")
+		sec.NewKey("SENDMAIL_ARGS", "")
+
+		loadMailerFrom(cfg)
+
+		assert.Equal(t, []string{"--"}, MailService.SendmailArgs)
+	})
 }

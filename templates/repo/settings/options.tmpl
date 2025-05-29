@@ -422,6 +422,14 @@
 						</div>
 					</div>
 				{{end}}
+
+				<h4 class="ui header">{{ctx.Locale.Tr "repo.issue_indexer.title"}}</h4>
+				<div class="inline fields">
+					<div class="field">
+						<button class="ui primary button" name="request_reindex_type" value="issues">{{ctx.Locale.Tr "repo.settings.reindex_button"}}</button>
+					</div>
+				</div>
+
 				<h4 class="ui header">{{ctx.Locale.Tr "repo.settings.admin_stats_indexer"}}</h4>
 				<div class="inline fields">
 					{{if and .StatsIndexerStatus .StatsIndexerStatus.CommitSha}}

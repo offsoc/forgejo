@@ -350,6 +350,87 @@ jobs:
 	})
 }
 
+func TestPullRequestWithInvalidWorkflow(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2}) // owner of the base repo
+		session := loginUser(t, "user2")
+
+		// prepare the repository
+		baseRepo, _, f := tests.CreateDeclarativeRepo(t, user2, "repo-pull-request",
+			[]unit_model.Type{unit_model.TypeActions}, nil, []*files_service.ChangeRepoFile{
+				{
+					Operation: "create",
+					TreePath:  ".forgejo/workflows/broken.yml",
+					ContentReader: strings.NewReader(`name: broken
+on:
+pull_request:
+types:
+	- opened
+jobs:
+test:
+runs-on: docker
+	- run: true
+`),
+				},
+			})
+		defer f()
+		baseGitRepo, err := gitrepo.OpenRepository(t.Context(), baseRepo)
+		require.NoError(t, err)
+		defer func() {
+			baseGitRepo.Close()
+		}()
+
+		// create the pull request
+		testEditFileToNewBranch(t, session, "user2", "repo-pull-request", "main", "wip-something", "README.md", "Hello, world 1")
+		testPullCreate(t, session, "user2", "repo-pull-request", true, "main", "wip-something", "Commit status PR")
+		pr := unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{BaseRepoID: baseRepo.ID})
+		require.NoError(t, pr.LoadIssue(t.Context()))
+
+		// check that one of the status associated with the commit sha matches both
+		// context & state
+		checkCommitStatus := func(sha, context string, state api.CommitStatusState) bool {
+			commitStatuses, _, err := git_model.GetLatestCommitStatus(t.Context(), pr.BaseRepoID, sha, db.ListOptionsAll)
+			require.NoError(t, err)
+			for _, commitStatus := range commitStatuses {
+				if state == commitStatus.State && context == commitStatus.Context {
+					return true
+				}
+			}
+			return false
+		}
+
+		var actionRuns []*actions_model.ActionRun
+
+		// wait for ActionRun(s) to be created
+		require.Eventually(t, func() bool {
+			actionRuns = make([]*actions_model.ActionRun, 0)
+			require.NoError(t, db.GetEngine(t.Context()).Where("event=? AND status=? AND repo_id=?", "pull_request", actions_model.StatusFailure, baseRepo.ID).Find(&actionRuns))
+			return len(actionRuns) == 1
+		}, 30*time.Second, 1*time.Second)
+
+		// verify the expected  ActionRuns were created
+		sha, err := baseGitRepo.GetRefCommitID(pr.GetGitRefName())
+		require.NoError(t, err)
+
+		// verify the commit status changes to CommitStatusFailure
+		require.Eventually(t, func() bool {
+			return checkCommitStatus(sha, "broken.yml / Update README.md (pull_request)", api.CommitStatusFailure)
+		}, 30*time.Second, 1*time.Second)
+
+		require.Len(t, actionRuns, 1)
+		actionRun := actionRuns[0]
+		// verify the expected  ActionRunJob was created and is StatusFailure
+		job := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRunJob{RunID: actionRun.ID, CommitSHA: sha})
+		assert.Equal(t, actions_model.StatusFailure, job.Status)
+		assert.Equal(t, "broken.yml", actionRun.WorkflowID)
+		assert.Equal(t, sha, actionRun.CommitSHA)
+		assert.Equal(t, actions_module.GithubEventPullRequest, actionRun.TriggerEvent)
+		event, err := actionRun.GetPullRequestEventPayload()
+		require.NoError(t, err)
+		assert.Equal(t, api.HookIssueOpened, event.Action)
+	})
+}
+
 func TestPullRequestTargetEvent(t *testing.T) {
 	onGiteaRun(t, func(t *testing.T, u *url.URL) {
 		user2 := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 2}) // owner of the base repo

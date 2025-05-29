@@ -16,6 +16,6 @@
 <a {{if .commitLink}}href="{{.commitLink}}"{{end}} rel="nofollow" class="{{$class}}">
 	<span class="shortsha">{{ShortSha .sha1}}</span>
 	{{- if .signature -}}
-		{{template "repo/shabox_badge" dict "verification" .verification "svgSize" .svgSize}}
+		{{template "repo/shabox_badge" dict "verification" .verification}}
 	{{- end -}}
 </a>
