@@ -89,3 +89,29 @@ test('External Release Attachments', async ({page, isMobile}) => {
   await page.click('.button.ok');
   await expect(page).toHaveURL('/user2/repo2/releases');
 });
+
+test('Release name equals tag name if created from tag', async ({page}) => {
+  await page.goto('/user2/repo2/releases/new?tag=v1.1');
+
+  await expect(page.locator('input[name=title]')).toHaveValue('v1.1');
+});
+
+test('Release name equals release name if edit', async ({page, isMobile}) => {
+  test.skip(isMobile);
+
+  await page.goto('/user2/repo2/releases/new');
+
+  await page.locator('input[name=title]').pressSequentially('v1.2');
+  await page.locator('input[name=tag_name]').pressSequentially('1.2');
+  await page.click('.button.small.primary');
+
+  await page.goto('/user2/repo2/releases/edit/1.2');
+
+  await expect(page.locator('input[name=title]')).toHaveValue('v1.2');
+
+  // Delete release
+  await expect(page).toHaveURL('/user2/repo2/releases/edit/1.2');
+  await page.click('.delete-button');
+  await page.click('.button.ok');
+  await expect(page).toHaveURL('/user2/repo2/releases');
+});
