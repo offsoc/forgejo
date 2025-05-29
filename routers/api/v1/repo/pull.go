@@ -1050,11 +1050,11 @@ func MergePullRequest(ctx *context.APIContext) {
 		if err := repo_service.DeleteBranchAfterMerge(ctx, ctx.Doer, pr, headRepo); err != nil {
 			switch {
 			case errors.Is(err, repo_service.ErrBranchIsDefault):
-				ctx.Error(http.StatusForbidden, "DefaultBranch", fmt.Errorf("the head branch is the default branch"))
+				ctx.Error(http.StatusForbidden, "DefaultBranch", errors.New("the head branch is the default branch"))
 			case errors.Is(err, git_model.ErrBranchIsProtected):
-				ctx.Error(http.StatusForbidden, "IsProtectedBranch", fmt.Errorf("the head branch is protected"))
+				ctx.Error(http.StatusForbidden, "IsProtectedBranch", errors.New("the head branch is protected"))
 			case errors.Is(err, util.ErrPermissionDenied):
-				ctx.Error(http.StatusForbidden, "HeadBranch", fmt.Errorf("insufficient permission to delete head branch"))
+				ctx.Error(http.StatusForbidden, "HeadBranch", errors.New("insufficient permission to delete head branch"))
 			default:
 				ctx.Error(http.StatusInternalServerError, "DeleteBranchAfterMerge", err)
 			}
