@@ -4,6 +4,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -128,7 +129,7 @@ func TestCliCmd(t *testing.T) {
 }
 
 func TestCliCmdError(t *testing.T) {
-	app := newTestApp(func(ctx *cli.Context) error { return fmt.Errorf("normal error") })
+	app := newTestApp(func(ctx *cli.Context) error { return errors.New("normal error") })
 	r, err := runTestApp(app, "./gitea", "test-cmd")
 	require.Error(t, err)
 	assert.Equal(t, 1, r.ExitCode)

@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -212,13 +213,13 @@ func runDump(ctx *cli.Context) error {
 
 	if !setting.InstallLock {
 		log.Error("Is '%s' really the right config path?\n", setting.CustomConf)
-		return fmt.Errorf("forgejo is not initialized")
+		return errors.New("forgejo is not initialized")
 	}
 	setting.LoadSettings() // cannot access session settings otherwise
 
 	verbose := ctx.Bool("verbose")
 	if verbose && ctx.Bool("quiet") {
-		return fmt.Errorf("--quiet and --verbose cannot both be set")
+		return errors.New("--quiet and --verbose cannot both be set")
 	}
 
 	stdCtx, cancel := installSignals()
