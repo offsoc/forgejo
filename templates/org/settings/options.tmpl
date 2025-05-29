@@ -94,6 +94,7 @@
 						<div class="inline field">
 							<label for="avatar">{{ctx.Locale.Tr "settings.choose_new_avatar"}}</label>
 							<input name="avatar" type="file" accept="image/png,image/jpeg,image/gif,image/webp">
+							<br/><span class=help>{{ctx.Locale.Tr "avatar.constraints_hint" (ctx.Locale.TrSize .MaxAvatarFileSize) .MaxAvatarWidth .MaxAvatarHeight}}</span>
 						</div>
 
 						<div class="field">
