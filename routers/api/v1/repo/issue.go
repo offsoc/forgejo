@@ -121,6 +121,12 @@ func SearchIssues(ctx *context.APIContext) {
 	//   description: Number of items per page
 	//   type: integer
 	//   minimum: 0
+	// - name: sort
+	//   in: query
+	//   description: Type of sort
+	//   type: string
+	//   enum: [relevance, latest, oldest, recentupdate, leastupdate, mostcomment, leastcomment, nearduedate, farduedate]
+	//   default: latest
 	// responses:
 	//   "200":
 	//     "$ref": "#/responses/IssueList"
@@ -276,7 +282,7 @@ func SearchIssues(ctx *context.APIContext) {
 		IsClosed:            isClosed,
 		IncludedAnyLabelIDs: includedAnyLabels,
 		MilestoneIDs:        includedMilestones,
-		SortBy:              issue_indexer.SortByCreatedDesc,
+		SortBy:              issue_indexer.ParseSortBy(ctx.FormString("sort"), issue_indexer.SortByCreatedDesc),
 	}
 
 	if since != 0 {

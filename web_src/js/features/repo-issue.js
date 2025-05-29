@@ -127,9 +127,9 @@ export function initRepoIssueSidebarList() {
   const repoId = $('#repoId').val();
   const crossRepoSearch = $('#crossRepoSearch').val();
   const tp = $('#type').val();
-  let issueSearchUrl = `${appSubUrl}/${repolink}/issues/search?q={query}&type=${tp}`;
+  let issueSearchUrl = `${appSubUrl}/${repolink}/issues/search?q={query}&type=${tp}&sort=relevance`;
   if (crossRepoSearch === 'true') {
-    issueSearchUrl = `${appSubUrl}/issues/search?q={query}&priority_repo_id=${repoId}&type=${tp}`;
+    issueSearchUrl = `${appSubUrl}/issues/search?q={query}&priority_repo_id=${repoId}&type=${tp}&sort=relevance`;
   }
   $('#new-dependency-drop-list')
     .dropdown({
