@@ -194,7 +194,7 @@ func runServ(c *cli.Context) error {
 		if git.CheckGitVersionAtLeast("2.29") == nil {
 			// for AGit Flow
 			if cmd == "ssh_info" {
-				fmt.Print(`{"type":"gitea","version":1}`)
+				fmt.Print(`{"type":"agit","version":1}`)
 				return nil
 			}
 		}
