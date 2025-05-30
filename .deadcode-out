@@ -188,6 +188,7 @@ forgejo.org/modules/translation
 	MockLocale.Tr
 	MockLocale.TrN
 	MockLocale.TrPluralString
+	MockLocale.TrPluralStringAllForms
 	MockLocale.TrSize
 	MockLocale.HasKey
 	MockLocale.PrettyNumber

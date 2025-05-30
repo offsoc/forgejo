@@ -75,12 +75,9 @@ func AddEmail(ctx *context.APIContext) {
 	if err := user_service.AddEmailAddresses(ctx, ctx.Doer, form.Emails); err != nil {
 		if user_model.IsErrEmailAlreadyUsed(err) {
 			ctx.Error(http.StatusUnprocessableEntity, "", "Email address has been used: "+err.(user_model.ErrEmailAlreadyUsed).Email)
-		} else if validation.IsErrEmailCharIsNotSupported(err) || validation.IsErrEmailInvalid(err) {
+		} else if validation.IsErrEmailInvalid(err) {
 			email := ""
 			if typedError, ok := err.(validation.ErrEmailInvalid); ok {
-				email = typedError.Email
-			}
-			if typedError, ok := err.(validation.ErrEmailCharIsNotSupported); ok {
 				email = typedError.Email
 			}
 

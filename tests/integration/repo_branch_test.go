@@ -204,3 +204,28 @@ func TestDatabaseMissingABranch(t *testing.T) {
 		assert.Equal(t, firstBranchCount-1, secondBranchCount)
 	})
 }
+
+func TestCreateBranchButtonVisibility(t *testing.T) {
+	onGiteaRun(t, func(t *testing.T, u *url.URL) {
+		session := loginUser(t, "user1")
+
+		t.Run("Check create branch button", func(t *testing.T) {
+			t.Run("Normal repository", func(t *testing.T) {
+				repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 1})
+
+				// Check that the button is present
+				resp := session.MakeRequest(t, NewRequest(t, "GET", "/"+repo1.FullName()+"/branches"), http.StatusOK)
+				htmlDoc := NewHTMLParser(t, resp.Body)
+				assert.Positive(t, htmlDoc.doc.Find(".show-create-branch-modal").Length())
+			})
+			t.Run("Mirrored repository", func(t *testing.T) {
+				repo5 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{ID: 5})
+
+				// Check that the button is NOT present
+				resp := session.MakeRequest(t, NewRequest(t, "GET", "/"+repo5.FullName()+"/branches"), http.StatusOK)
+				htmlDoc := NewHTMLParser(t, resp.Body)
+				assert.Equal(t, 0, htmlDoc.doc.Find(".show-create-branch-modal").Length())
+			})
+		})
+	})
+}

@@ -35,7 +35,7 @@ func TestEmailAddressValidate(t *testing.T) {
 		`first|last@iana.org`:            nil,
 		`first}last@iana.org`:            nil,
 		`first~last@iana.org`:            nil,
-		`first;last@iana.org`:            ErrEmailCharIsNotSupported{`first;last@iana.org`},
+		`first;last@iana.org`:            ErrEmailInvalid{`first;last@iana.org`},
 		".233@qq.com":                    ErrEmailInvalid{".233@qq.com"},
 		"!233@qq.com":                    nil,
 		"#233@qq.com":                    nil,
@@ -45,7 +45,7 @@ func TestEmailAddressValidate(t *testing.T) {
 		"'233@qq.com":                    nil,
 		"*233@qq.com":                    nil,
 		"+233@qq.com":                    nil,
-		"-233@qq.com":                    ErrEmailInvalid{"-233@qq.com"},
+		"-233@qq.com":                    nil,
 		"/233@qq.com":                    nil,
 		"=233@qq.com":                    nil,
 		"?233@qq.com":                    nil,
@@ -56,9 +56,10 @@ func TestEmailAddressValidate(t *testing.T) {
 		"|233@qq.com":                    nil,
 		"}233@qq.com":                    nil,
 		"~233@qq.com":                    nil,
-		";233@qq.com":                    ErrEmailCharIsNotSupported{";233@qq.com"},
-		"Foo <foo@bar.com>":              ErrEmailCharIsNotSupported{"Foo <foo@bar.com>"},
-		string([]byte{0xE2, 0x84, 0xAA}): ErrEmailCharIsNotSupported{string([]byte{0xE2, 0x84, 0xAA})},
+		"\"~@ \"@famfo.xyz":              nil,
+		"Foo <foo@bar.com>":              ErrEmailInvalid{"Foo <foo@bar.com>"},
+		";233@qq.com":                    ErrEmailInvalid{";233@qq.com"},
+		string([]byte{0xE2, 0x84, 0xAA}): ErrEmailInvalid{string([]byte{0xE2, 0x84, 0xAA})},
 	}
 	for kase, err := range kases {
 		t.Run(kase, func(t *testing.T) {

@@ -251,3 +251,34 @@ var PluralRules = []i18n.PluralFormRule{
 		return i18n.PluralFormOther
 	},
 }
+
+var UsedPluralForms = [][]i18n.PluralFormIndex{
+	// [ 0] Common 2-form, e.g. English, German
+	{i18n.PluralFormOne, i18n.PluralFormOther},
+	// [ 1] Bengali
+	{i18n.PluralFormOne, i18n.PluralFormOther},
+	// [ 2] Icelandic
+	{i18n.PluralFormOne, i18n.PluralFormOther},
+	// [ 3] Filipino
+	{i18n.PluralFormOne, i18n.PluralFormOther},
+	// [ 4] OneForm
+	{i18n.PluralFormOther},
+	// [ 5] Czech
+	{i18n.PluralFormOne, i18n.PluralFormFew, i18n.PluralFormOther},
+	// [ 6] Russian
+	{i18n.PluralFormOne, i18n.PluralFormFew, i18n.PluralFormMany},
+	// [ 7] Polish
+	{i18n.PluralFormOne, i18n.PluralFormFew, i18n.PluralFormOther},
+	// [ 8] Latvian
+	{i18n.PluralFormZero, i18n.PluralFormOne, i18n.PluralFormOther},
+	// [ 9] Lithuanian
+	{i18n.PluralFormOne, i18n.PluralFormFew, i18n.PluralFormMany},
+	// [10] French
+	{i18n.PluralFormOne, i18n.PluralFormMany, i18n.PluralFormOther},
+	// [11] Catalan
+	{i18n.PluralFormOne, i18n.PluralFormMany, i18n.PluralFormOther},
+	// [12] Slovenian
+	{i18n.PluralFormOne, i18n.PluralFormTwo, i18n.PluralFormFew, i18n.PluralFormOther},
+	// [13] Arabic
+	{i18n.PluralFormZero, i18n.PluralFormOne, i18n.PluralFormTwo, i18n.PluralFormFew, i18n.PluralFormMany, i18n.PluralFormOther},
+}

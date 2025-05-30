@@ -30,5 +30,39 @@
     "mail.actions.run_info_previous_status": "Tostand vun de vörig Utföhren: %[1]s",
     "mail.actions.run_info_ref": "Twieg: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Utlööst um: %[1]s vun: %[2]s",
-    "discussion.locked": "Deeser Snack is tosloten worden. Blots Bidragers könen kommenteren."
+    "discussion.locked": "Deeser Snack is tosloten worden. Blots Bidragers könen kommenteren.",
+    "relativetime.future": "in Tokunft",
+    "relativetime.mins": {
+        "one": "vör %d Menüüt",
+        "other": "vör %d Menüten"
+    },
+    "relativetime.hours": {
+        "one": "vör %d Stünn",
+        "other": "vör %d Stünnen"
+    },
+    "relativetime.now": "nu",
+    "relativetime.months": {
+        "one": "vör %d Maant",
+        "other": "vör %d Maanten"
+    },
+    "relativetime.weeks": {
+        "one": "vör %d Week",
+        "other": "vör %d Weken"
+    },
+    "relativetime.years": {
+        "one": "vör %d Jahr",
+        "other": "vör %d Jahren"
+    },
+    "relativetime.1day": "güstern",
+    "relativetime.1week": "leste Week",
+    "relativetime.2weeks": "vörleste Week",
+    "relativetime.1month": "lesten Maant",
+    "relativetime.2months": "vörlesten Maant",
+    "relativetime.1year": "lestes Jahr",
+    "relativetime.2years": "vörlestes Jahr",
+    "relativetime.days": {
+        "one": "vör %d Dag",
+        "other": "vör %d Dagen"
+    },
+    "relativetime.2days": "vörgüstern"
 }

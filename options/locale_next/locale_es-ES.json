@@ -1,13 +1,13 @@
 {
     "repo.pulls.merged_title_desc": {
-        "one": "fusionó %[1]d commit de <code>%[2]s</code> en <code>%[3]s</code> %[4]s",
-        "many": "fusionó %[1]d commits de <code>%[2]s</code> en <code>%[3]s</code> %[4]s",
-        "other": ""
+        "one": "fusionó %[1]d confirmación de <code>%[2]s</code> en <code>%[3]s</code> %[4]s",
+        "many": "fusionó %[1]d confirmaciones de <code>%[2]s</code> en <code>%[3]s</code> %[4]s",
+        "other": "fusionó %[1]d confirmaciones de <code>%[2]s</code> en <code>%[3]s</code> %[4]s"
     },
     "repo.pulls.title_desc": {
-        "one": "quiere fusionar %[1]d commit de <code>%[2]s</code> en <code id=\"%[4]s\">%[3]s</code>",
-        "many": "quiere fusionar %[1]d commits de <code>%[2]s</code> en <code id=\"%[4]s\">%[3]s</code>",
-        "other": ""
+        "one": "quiere fusionar %[1]d confirmación de <code>%[2]s</code> en <code id=\"%[4]s\">%[3]s</code>",
+        "many": "quiere fusionar %[1]d confirmaciones de <code>%[2]s</code> en <code id=\"%[4]s\">%[3]s</code>",
+        "other": "quiere fusionar %[1]d confirmaciones de <code>%[2]s</code> en <code id=\"%[4]s\">%[3]s</code>"
     },
     "search.milestone_kind": "Buscar hitos…",
     "error.not_found.title": "Página no encontrada",
@@ -15,5 +15,20 @@
     "themes.names.forgejo-dark": "Forgejo oscuro",
     "themes.names.forgejo-light": "Forgejo claro",
     "home.welcome.no_activity": "Sin actividad",
-    "meta.last_line": "¡Gracias por traducir Forgejo! Esta línea no es vista por los usuarios pero sirve para otros propósitos en la gestión de la traducción. Puedes colocar un dato curioso en la traducción en lugar de traducirla."
+    "meta.last_line": "¡Gracias por traducir Forgejo! Esta línea no es vista por los usuarios pero sirve para otros propósitos en la gestión de la traducción. Puedes colocar un dato curioso en la traducción en lugar de traducirla.",
+    "relativetime.now": "ahora",
+    "relativetime.mins": {
+        "one": "hace %d minuto",
+        "many": "hace %d minutos",
+        "other": "hace %d minutos"
+    },
+    "relativetime.hours": {
+        "one": "hace %d hora",
+        "many": "hace %d horas",
+        "other": "hace %d horas"
+    },
+    "relativetime.future": "en el futuro",
+    "home.explore_repos": "Explorar repositorios",
+    "home.explore_users": "Explorar usuarios",
+    "home.explore_orgs": "Explorar organizaciones"
 }

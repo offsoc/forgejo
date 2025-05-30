@@ -7,19 +7,19 @@ import (
 	"testing"
 
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestInit(t *testing.T) {
-	setting.Domain = "domain"
-	setting.AppName = "AppName"
-	setting.AppURL = "https://domain/"
-	rpOrigin := []string{"https://domain"}
+	defer test.MockVariableValue(&setting.Domain, "domain")()
+	defer test.MockVariableValue(&setting.AppName, "AppName")()
+	defer test.MockVariableValue(&setting.AppURL, "https://domain/")()
 
 	Init()
 
 	assert.Equal(t, setting.Domain, WebAuthn.Config.RPID)
 	assert.Equal(t, setting.AppName, WebAuthn.Config.RPDisplayName)
-	assert.Equal(t, rpOrigin, WebAuthn.Config.RPOrigins)
+	assert.Equal(t, []string{"https://domain"}, WebAuthn.Config.RPOrigins)
 }

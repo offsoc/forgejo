@@ -1,0 +1,21 @@
+{{$class := "ui sha label"}}
+{{if .signature}}
+	{{$class = (print $class " isSigned")}}
+	{{if .verification.Verified}}
+		{{if eq .verification.TrustStatus "trusted"}}
+			{{$class = (print $class " isVerified")}}
+		{{else if eq .verification.TrustStatus "untrusted"}}
+			{{$class = (print $class " isVerifiedUntrusted")}}
+		{{else}}
+			{{$class = (print $class " isVerifiedUnmatched")}}
+		{{end}}
+	{{else if .verification.Warning}}
+		{{$class = (print $class " isWarning")}}
+	{{end}}
+{{end}}
+<a {{if .commitLink}}href="{{.commitLink}}"{{end}} rel="nofollow" class="{{$class}}">
+	<span class="shortsha">{{ShortSha .sha1}}</span>
+	{{- if .signature -}}
+		{{template "repo/shabox_badge" dict "verification" .verification}}
+	{{- end -}}
+</a>

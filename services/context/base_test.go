@@ -9,11 +9,13 @@ import (
 	"testing"
 
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRedirect(t *testing.T) {
+	defer test.MockVariableValue(&setting.AppURL, "http://localhost:3000/")()
 	req, _ := http.NewRequest("GET", "/", nil)
 
 	cases := []struct {
