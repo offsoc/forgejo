@@ -108,7 +108,7 @@ func runCreateUser(c *cli.Context) error {
 		username = c.String("username")
 	} else {
 		username = c.String("name")
-		_, _ = fmt.Fprintf(c.App.ErrWriter, "--name flag is deprecated. Use --username instead.\n")
+		_, _ = fmt.Fprint(c.App.ErrWriter, "--name flag is deprecated. Use --username instead.\n")
 	}
 
 	ctx, cancel := installSignals()

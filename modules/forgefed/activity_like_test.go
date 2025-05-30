@@ -4,7 +4,7 @@
 package forgefed
 
 import (
-	"fmt"
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
@@ -99,7 +99,7 @@ func Test_LikeUnmarshalJSON(t *testing.T) {
 		"invalid": {
 			item:    []byte(`{"type":"Invalid","actor":"https://repo.prod.meissa.de/api/activitypub/user-id/1","object":"https://codeberg.org/api/activitypub/repository-id/1"`),
 			want:    &ForgeLike{},
-			wantErr: fmt.Errorf("cannot parse JSON"),
+			wantErr: errors.New("cannot parse JSON"),
 		},
 	}
 

@@ -561,6 +561,10 @@
   border-top-right-radius: 0 !important;
 }
 
+.file-view.markup {
+  padding: 2em;
+}
+
 .file-view.markup.orgmode li.unchecked::before {
   content: "[ ] ";
 }
