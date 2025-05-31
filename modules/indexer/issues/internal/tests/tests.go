@@ -705,9 +705,9 @@ var cases = []*testIndexerCase{
 		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
 			for i, v := range result.Hits {
 				if i < 7 {
-					assert.Equal(t, data[v.ID].RepoID, int64(3))
+					assert.Equal(t, int64(3), data[v.ID].RepoID)
 				} else {
-					assert.NotEqual(t, data[v.ID].RepoID, int64(3))
+					assert.NotEqual(t, int64(3), data[v.ID].RepoID)
 				}
 			}
 		},
