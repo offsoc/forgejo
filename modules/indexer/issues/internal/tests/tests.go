@@ -584,6 +584,21 @@ var cases = []*testIndexerCase{
 		ExpectedTotal: 3,
 	},
 	{
+		Name: "Index exclude",
+		ExtraData: []*internal.IndexerData{
+			{ID: 1001, Index: 101, Title: "Brrr", RepoID: 5},
+			{ID: 1002, Index: 102, Title: "Brrr", Content: "Brrr", RepoID: 5},
+			{ID: 1003, Index: 103, Title: "Brrr", RepoID: 5},
+			{ID: 1004, Index: 104, Title: "Brrr", RepoID: 5},
+		},
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "Brrr -101 -103",
+			SortBy:  internal.SortByScore,
+		},
+		ExpectedIDs:   []int64{1002, 1004},
+		ExpectedTotal: 2,
+	},
+	{
 		Name: "SortByCreatedDesc",
 		SearchOptions: &internal.SearchOptions{
 			Paginator: &db.ListOptionsAll,
