@@ -183,6 +183,10 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 		}
 		query.Must(q)
 	}
+	if options.PriorityRepoID.Has() {
+		q := elastic.NewTermQuery("repo_id", options.PriorityRepoID.Value()).Boost(10)
+		query.Should(q)
+	}
 
 	if options.IsPull.Has() {
 		query.Must(elastic.NewTermQuery("is_pull", options.IsPull.Value()))
