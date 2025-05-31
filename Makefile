@@ -557,7 +557,7 @@ test-check:
 
 .PHONY: test\#%
 test\#%:
-	@echo "Running go test with -tags '$(TEST_TAGS)'..."
+	@echo "Running go test with $(GOTESTFLAGS) -tags '$(TEST_TAGS)'..."
 	@$(GOTEST) $(GOTESTFLAGS) -tags='$(TEST_TAGS)' -run $(subst .,/,$*) $(GO_TEST_PACKAGES)
 
 .PHONY: coverage

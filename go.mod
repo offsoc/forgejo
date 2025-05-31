@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.3
 
 require (
-	code.forgejo.org/f3/gof3/v3 v3.10.6
+	code.forgejo.org/f3/gof3/v3 v3.10.8
 	code.forgejo.org/forgejo-contrib/go-libravatar v0.0.0-20191008002943-06d1c002b251
 	code.forgejo.org/forgejo/go-rpmutils v1.0.0
 	code.forgejo.org/forgejo/levelqueue v1.0.0
@@ -94,6 +94,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/ulikunitz/xz v0.5.12
 	github.com/urfave/cli/v2 v2.27.6
+	github.com/urfave/cli/v3 v3.3.3
 	github.com/valyala/fastjson v1.6.4
 	github.com/yohcop/openid-go v1.0.1
 	github.com/yuin/goldmark v1.7.12
