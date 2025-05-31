@@ -693,6 +693,25 @@ var cases = []*testIndexerCase{
 			}
 		},
 	},
+	{
+		Name: "PriorityRepoID",
+		SearchOptions: &internal.SearchOptions{
+			IsPull:         optional.Some(false),
+			IsClosed:       optional.Some(false),
+			PriorityRepoID: optional.Some(int64(3)),
+			Paginator:      &db.ListOptionsAll,
+			SortBy:         internal.SortByScore,
+		},
+		Expected: func(t *testing.T, data map[int64]*internal.IndexerData, result *internal.SearchResult) {
+			for i, v := range result.Hits {
+				if i < 7 {
+					assert.Equal(t, data[v.ID].RepoID, int64(3))
+				} else {
+					assert.NotEqual(t, data[v.ID].RepoID, int64(3))
+				}
+			}
+		},
+	},
 }
 
 type testIndexerCase struct {
