@@ -213,7 +213,7 @@ func (g *GitlabDownloader) GetTopics() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	return gr.TagList, err
+	return gr.Topics, err
 }
 
 // GetMilestones returns milestones
