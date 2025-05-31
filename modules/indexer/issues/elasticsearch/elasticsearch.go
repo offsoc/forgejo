@@ -156,7 +156,7 @@ func (b *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 			return nil, err
 		}
 		for _, token := range tokens {
-			innerQ := elastic.NewMultiMatchQuery(token.Term, "content", "comments").FieldWithBoost("title", 2.0)
+			innerQ := elastic.NewMultiMatchQuery(token.Term, "content", "comments").FieldWithBoost("title", 2.0).TieBreaker(0.5)
 			if token.Fuzzy {
 				// If the term is not a phrase use fuzziness set to AUTO
 				innerQ = innerQ.Type(esMultiMatchTypeBestFields).Fuzziness(esFuzzyAuto)
