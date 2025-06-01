@@ -2959,7 +2959,7 @@ func ListIssues(ctx *context.Context) {
 		IsPull:    isPull,
 		IsClosed:  isClosed,
 		ProjectID: projectID,
-		SortBy:    issue_indexer.SortByCreatedDesc,
+		SortBy:    issue_indexer.ParseSortBy(ctx.FormString("sort"), issue_indexer.SortByCreatedDesc),
 	}
 	if since != 0 {
 		searchOpt.UpdatedAfterUnix = optional.Some(since)
