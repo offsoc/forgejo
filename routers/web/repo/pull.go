@@ -105,16 +105,19 @@ func getRepository(ctx *context.Context, repoID int64) *repo_model.Repository {
 		return nil
 	}
 
-	if !perm.CanRead(unit.TypeCode) {
-		log.Trace("Permission Denied: User %-v cannot read %-v of repo %-v\n"+
-			"User in repo has Permissions: %-+v",
-			ctx.Doer,
-			unit.TypeCode,
-			ctx.Repo,
-			perm)
-		ctx.NotFound("getRepository", nil)
-		return nil
+	for _, ru := range repo.Units {
+		if !perm.CanRead(ru.Type) {
+			log.Trace("Permission Denied: User %-v cannot read %-v of repo %-v\n"+
+				"User in repo has Permissions: %-+v",
+				ctx.Doer,
+				ru,
+				ctx.Repo,
+				perm)
+			ctx.NotFound("getRepository", nil)
+			return nil
+		}
 	}
+
 	return repo
 }
 
