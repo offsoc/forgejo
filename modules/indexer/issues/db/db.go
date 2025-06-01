@@ -79,7 +79,7 @@ func (i *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 		}
 		if issueID, err := strconv.ParseInt(term, 10, 64); err == nil {
 			cond = builder.Or(
-				builder.Eq{"index": issueID},
+				builder.Eq{"`index`": issueID},
 				cond,
 			)
 		}
