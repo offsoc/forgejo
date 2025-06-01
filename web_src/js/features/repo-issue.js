@@ -125,16 +125,21 @@ function excludeLabel(item) {
 export function initRepoIssueSidebarList() {
   const repolink = $('#repolink').val();
   const repoId = $('#repoId').val();
-  const crossRepoSearch = $('#crossRepoSearch').val();
+  const crossRepoSearch = $('#crossRepoSearch').val() === 'true';
   const tp = $('#type').val();
-  let issueSearchUrl = `${appSubUrl}/${repolink}/issues/search?q={query}&type=${tp}&sort=relevance`;
-  if (crossRepoSearch === 'true') {
-    issueSearchUrl = `${appSubUrl}/issues/search?q={query}&priority_repo_id=${repoId}&type=${tp}&sort=relevance`;
-  }
   $('#new-dependency-drop-list')
     .dropdown({
       apiSettings: {
-        url: issueSearchUrl,
+        beforeSend(settings) {
+          if (!settings.urlData.query.trim()) {
+            settings.url = `${appSubUrl}/${repolink}/issues/search?q={query}&type=${tp}&sort=updated`;
+          } else if (crossRepoSearch) {
+            settings.url = `${appSubUrl}/issues/search?q={query}&priority_repo_id=${repoId}&type=${tp}&sort=relevance`;
+          } else {
+            settings.url = `${appSubUrl}/${repolink}/issues/search?q={query}&type=${tp}&sort=relevance`;
+          }
+          return settings;
+        },
         onResponse(response) {
           const filteredResponse = {success: true, results: []};
           const currIssueId = $('#new-dependency-drop-list').data('issue-id');
