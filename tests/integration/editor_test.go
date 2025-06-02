@@ -407,22 +407,26 @@ func TestCommitMail(t *testing.T) {
 
 			file1UUID := uploadFile(t, "upload_file_1", "Uploaded a file!")
 			file2UUID := uploadFile(t, "upload_file_2", "Uploaded another file!")
+			file1UUIDFullpathKey := fmt.Sprintf("files_fullpath[%s]", file1UUID)
+			file2UUIDFullpathKey := fmt.Sprintf("files_fullpath[%s]", file2UUID)
 
 			assertCase(t, caseOpts{
 				fileName:       "upload_file_1",
 				link:           "user2/repo1/_upload/master",
 				skipLastCommit: true,
 				base: map[string]string{
-					"commit_choice": "direct",
-					"files":         file1UUID,
+					"commit_choice":      "direct",
+					"files":              file1UUID,
+					file1UUIDFullpathKey: "upload_file_1",
 				},
 			}, caseOpts{
 				fileName:       "upload_file_2",
 				link:           "user2/repo1/_upload/master",
 				skipLastCommit: true,
 				base: map[string]string{
-					"commit_choice": "direct",
-					"files":         file2UUID,
+					"commit_choice":      "direct",
+					"files":              file2UUID,
+					file2UUIDFullpathKey: "upload_file_2",
 				},
 			},
 			)

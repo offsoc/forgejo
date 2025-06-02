@@ -51,6 +51,7 @@ import (
 
 	_ "forgejo.org/modules/session" // to registers all internal adapters
 
+	"code.forgejo.org/go-chi/binding"
 	"code.forgejo.org/go-chi/captcha"
 	chi_middleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -1259,7 +1260,7 @@ func registerRoutes(m *web.Route) {
 					Post(web.Bind(forms.DeleteRepoFileForm{}), repo.DeleteFilePost)
 				m.Combo("/_upload/*", repo.MustBeAbleToUpload).
 					Get(repo.UploadFile).
-					Post(web.Bind(forms.UploadRepoFileForm{}), repo.UploadFilePost)
+					Post(BindUpload(forms.UploadRepoFileForm{}), repo.UploadFilePost)
 				m.Combo("/_diffpatch/*").Get(repo.NewDiffPatch).
 					Post(web.Bind(forms.EditRepoFileForm{}), repo.NewDiffPatchPost)
 				m.Combo("/_cherrypick/{sha:([a-f0-9]{4,64})}/*").Get(repo.CherryPick).
@@ -1677,4 +1678,21 @@ func registerRoutes(m *web.Route) {
 		ctx := context.GetWebContext(req)
 		ctx.NotFound("", nil)
 	})
+}
+
+func BindUpload(f forms.UploadRepoFileForm) http.HandlerFunc {
+	return func(resp http.ResponseWriter, req *http.Request) {
+		theObj := new(forms.UploadRepoFileForm) // create a new form obj for every request but not use obj directly
+		data := middleware.GetContextData(req.Context())
+		binding.Bind(req, theObj)
+		files := theObj.Files
+		var fullpaths []string
+		for _, fileID := range files {
+			fullPath := req.Form.Get("files_fullpath[" + fileID + "]")
+			fullpaths = append(fullpaths, fullPath)
+		}
+		theObj.FullPaths = fullpaths
+		data.GetData()["__form"] = theObj
+		middleware.AssignForm(theObj, data)
+	}
 }

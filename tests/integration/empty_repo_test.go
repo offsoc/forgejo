@@ -6,6 +6,7 @@ package integration
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -88,11 +89,12 @@ func TestEmptyRepoUploadFile(t *testing.T) {
 	resp = session.MakeRequest(t, req, http.StatusOK)
 	respMap := map[string]string{}
 	require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &respMap))
-
+	filesFullpathKey := fmt.Sprintf("files_fullpath[%s]", respMap["uuid"])
 	req = NewRequestWithValues(t, "POST", "/user30/empty/_upload/"+setting.Repository.DefaultBranch, map[string]string{
 		"_csrf":          GetCSRF(t, session, "/user/settings"),
 		"commit_choice":  "direct",
 		"files":          respMap["uuid"],
+		filesFullpathKey: "uploaded-file.txt",
 		"tree_path":      "",
 		"commit_mail_id": "-1",
 	})

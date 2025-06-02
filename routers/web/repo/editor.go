@@ -758,6 +758,7 @@ func UploadFilePost(ctx *context.Context) {
 		TreePath:     form.TreePath,
 		Message:      message,
 		Files:        form.Files,
+		FullPaths:    form.FullPaths,
 		Signoff:      form.Signoff,
 		Author:       gitIdentity,
 		Committer:    gitIdentity,

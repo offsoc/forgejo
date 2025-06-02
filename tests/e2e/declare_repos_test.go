@@ -53,6 +53,10 @@ func DeclareGitRepos(t *testing.T) func() {
 				CommitMsg: "Another commit which mentions @user1 in the title\nand @user2 in the text",
 			},
 		}),
+		newRepo(t, 2, "file-uploads", []FileChanges{{
+			Filename: "README.md",
+			Versions: []string{"# File upload test\nUse this repo to test various file upload features in new branches."},
+		}}),
 		newRepo(t, 2, "unicode-escaping", []FileChanges{{
 			Filename: "a-file",
 			Versions: []string{"{a}{а}"},
@@ -77,7 +81,7 @@ func newRepo(t *testing.T, userID int64, repoName string, fileChanges []FileChan
 	for _, file := range fileChanges {
 		for i, version := range file.Versions {
 			operation := "update"
-			if i == 0 {
+			if i == 0 && file.Filename != "README.md" {
 				operation = "create"
 			}
 

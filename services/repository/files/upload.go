@@ -28,6 +28,7 @@ type UploadRepoFileOptions struct {
 	Author       *IdentityOptions
 	Committer    *IdentityOptions
 	Files        []string // In UUID format.
+	FullPaths    []string
 	Signoff      bool
 }
 
@@ -56,16 +57,25 @@ func UploadRepoFiles(ctx context.Context, repo *repo_model.Repository, doer *use
 		return nil
 	}
 
-	uploads, err := repo_model.GetUploadsByUUIDs(ctx, opts.Files)
-	if err != nil {
-		return fmt.Errorf("GetUploadsByUUIDs [uuids: %v]: %w", opts.Files, err)
+	if len(opts.Files) != len(opts.FullPaths) {
+		return fmt.Errorf("the length of opts.Files and opts.FullPaths is not the same")
 	}
 
-	names := make([]string, len(uploads))
-	infos := make([]uploadInfo, len(uploads))
-	for i, upload := range uploads {
+	uploads := make([]*repo_model.Upload, len(opts.Files))
+	names := make([]string, len(opts.Files))
+	infos := make([]uploadInfo, len(opts.Files))
+	var err error
+	for i := 0; i < len(opts.Files); i++ {
+		uploads[i], err = repo_model.GetUploadByUUID(ctx, opts.Files[i])
+		if err != nil {
+			return fmt.Errorf("GetUploadByUUID [uuids: %v]: %w", opts.Files[i], err)
+		}
+		uploads[i].Name, err = SanitizePath(opts.FullPaths[i])
+		if err != nil {
+			return fmt.Errorf("SanitizePath [path: %v]: %w", opts.FullPaths[i], err)
+		}
 		// Check file is not lfs locked, will return nil if lock setting not enabled
-		filepath := path.Join(opts.TreePath, upload.Name)
+		filepath := path.Join(opts.TreePath, uploads[i].Name)
 		lfsLock, err := git_model.GetTreePathLock(ctx, repo.ID, filepath)
 		if err != nil {
 			return err
@@ -78,8 +88,8 @@ func UploadRepoFiles(ctx context.Context, repo *repo_model.Repository, doer *use
 			return git_model.ErrLFSFileLocked{RepoID: repo.ID, Path: filepath, UserName: u.Name}
 		}
 
-		names[i] = upload.Name
-		infos[i] = uploadInfo{upload: upload}
+		names[i] = uploads[i].Name
+		infos[i] = uploadInfo{upload: uploads[i]}
 	}
 
 	t, err := NewTemporaryUploadRepository(ctx, repo)

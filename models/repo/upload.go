@@ -104,17 +104,6 @@ func GetUploadByUUID(ctx context.Context, uuid string) (*Upload, error) {
 	return upload, nil
 }
 
-// GetUploadsByUUIDs returns multiple uploads by UUIDS
-func GetUploadsByUUIDs(ctx context.Context, uuids []string) ([]*Upload, error) {
-	if len(uuids) == 0 {
-		return []*Upload{}, nil
-	}
-
-	// Silently drop invalid uuids.
-	uploads := make([]*Upload, 0, len(uuids))
-	return uploads, db.GetEngine(ctx).In("uuid", uuids).Find(&uploads)
-}
-
 // DeleteUploads deletes multiple uploads
 func DeleteUploads(ctx context.Context, uploads ...*Upload) (err error) {
 	if len(uploads) == 0 {

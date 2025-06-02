@@ -229,7 +229,8 @@ export function initDropzone(el) {
       this.on('success', (file, data) => {
         file.uuid = data.uuid;
         const $input = $(`<input id="${data.uuid}" name="files" type="hidden">`).val(data.uuid);
-        $dropzone.find('.files').append($input);
+        const $inputPath = $(`<input type="hidden" name="files_fullpath[${data.uuid}]" value="${htmlEscape(file.fullPath || file.name)}">`);
+        $dropzone.find('.files').append($input).append($inputPath);
         // Create a "Copy Link" element, to conveniently copy the image
         // or file link as Markdown to the clipboard
         const copyLinkElement = document.createElement('div');
@@ -250,7 +251,12 @@ export function initDropzone(el) {
         file.previewTemplate.append(copyLinkElement);
       });
       this.on('removedfile', (file) => {
+        // Remove the hidden input for the file
         $(`#${file.uuid}`).remove();
+
+        // Remove the hidden input for files_fullpath
+        $(`input[name="files_fullpath[${file.uuid}]"]`).remove();
+
         if ($dropzone.data('remove-url')) {
           POST($dropzone.data('remove-url'), {
             data: new URLSearchParams({file: file.uuid}),
