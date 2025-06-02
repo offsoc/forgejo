@@ -5,6 +5,7 @@ package federation
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -42,7 +43,7 @@ func ProcessLikeActivity(ctx *context_service.APIContext, form any, repositoryID
 	}
 
 	if !activity.IsNewer(federationHost.LatestActivity) {
-		return http.StatusNotAcceptable, "Activity out of order.", fmt.Errorf("Activity already processed")
+		return http.StatusNotAcceptable, "Activity out of order.", errors.New("Activity already processed")
 	}
 
 	// parse objectID (repository)

@@ -23,6 +23,7 @@ import (
 	"forgejo.org/modules/base"
 	"forgejo.org/modules/git"
 	"forgejo.org/modules/indexer/code"
+	"forgejo.org/modules/indexer/issues"
 	"forgejo.org/modules/indexer/stats"
 	"forgejo.org/modules/lfs"
 	"forgejo.org/modules/log"
@@ -775,6 +776,8 @@ func SettingsPost(ctx *context.Context) {
 				return
 			}
 			code.UpdateRepoIndexer(ctx.Repo.Repository)
+		case "issues":
+			issues.UpdateRepoIndexer(ctx, ctx.Repo.Repository.ID)
 		default:
 			ctx.NotFound("", nil)
 			return

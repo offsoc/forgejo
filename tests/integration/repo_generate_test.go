@@ -126,6 +126,63 @@ func TestRepoCreateForm(t *testing.T) {
 	assertRepoCreateForm(t, htmlDoc, user, "")
 }
 
+func TestRepoCreateFormRepoLimit(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+	org := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "org3"})
+	userName := "user2"
+	session := loginUser(t, userName)
+	locale := translation.NewLocale("en-US")
+	cannotCreateTr := locale.Tr("repo.form.cannot_create")
+
+	// Test the case where a user has hit the global max creation limit, but can still create
+	// a repo in an organization. Because the limit is greater than 0 we also show an alert
+	// to tell the user they have hit the limit.
+	t.Run("Limit above zero", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		maxCreationLimit := 1
+		creationLimitTr := locale.TrN(maxCreationLimit, "repo.form.reach_limit_of_creation_1", "repo.form.reach_limit_of_creation_n", maxCreationLimit)
+		defer test.MockVariableValue(&setting.Repository.MaxCreationLimit, maxCreationLimit)()
+
+		resp := session.MakeRequest(t, NewRequest(t, "GET", "/repo/create"), http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		assertRepoCreateForm(t, htmlDoc, org, "")
+
+		alert := htmlDoc.doc.Find("div.ui.negative.message").Text()
+		assert.Contains(t, alert, creationLimitTr)
+	})
+
+	// Test the case where a user has hit the global max creation limit, but can still create
+	// a repo in an organization. Because the limit is 0 we DO NOT show the alert.
+	t.Run("Limit is zero", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		maxCreationLimit := 0
+		defer test.MockVariableValue(&setting.Repository.MaxCreationLimit, maxCreationLimit)()
+
+		resp := session.MakeRequest(t, NewRequest(t, "GET", "/repo/create"), http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+		assertRepoCreateForm(t, htmlDoc, org, "")
+
+		htmlDoc.AssertElement(t, "div.ui.negative.message", false)
+	})
+
+	// Test the case where a user has hit the global max creation limit, and also cannot create
+	// a repo in any of their orgs. The form isnt shown, and we deisplay an alert telling the user
+	// they can't create a repo.
+	t.Run("Global limit", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+		maxCreationLimit := 0
+		defer test.MockVariableValue(&setting.Repository.MaxCreationLimit, maxCreationLimit)()
+
+		session := loginUser(t, "user8")
+
+		resp := session.MakeRequest(t, NewRequest(t, "GET", "/repo/create"), http.StatusOK)
+		htmlDoc := NewHTMLParser(t, resp.Body)
+
+		alert := htmlDoc.doc.Find("div.ui.negative.message").Text()
+		assert.Contains(t, alert, cannotCreateTr)
+	})
+}
+
 func TestRepoGenerate(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	userName := "user1"

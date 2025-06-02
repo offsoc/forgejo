@@ -1,0 +1,82 @@
+{{template "base/head" .}}
+
+<div class="page-content devtest ui container">
+	<h1>Hashbox (shabox)</h1>
+
+	<h2>Unsigned</h2>
+	{{template "repo/shabox" (dict
+		"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+	)}}
+
+	<h2>Unknown signature</h2>
+	<div class="tw-flex">
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .UnknownVerif
+		)}}
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .UnknownVerifUnk
+		)}}
+	</div>
+
+	<h2>Trusted</h2>
+	<div class="tw-flex">
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .TrustedVerif
+		)}}
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .TrustedVerifUnk
+		)}}
+	</div>
+
+	<h2>Untrusted</h2>
+	<div class="tw-flex">
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .UntrustedVerif
+		)}}
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .UntrustedVerifUnk
+		)}}
+	</div>
+
+	<h2>Unmatched</h2>
+	<div class="tw-flex">
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .UnmatchedVerif
+		)}}
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .UnmatchedVerifUnk
+		)}}
+	</div>
+
+	<h2>Warning</h2>
+	<div class="tw-flex">
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .WarnVerif
+		)}}
+		{{template "repo/shabox" (dict
+			"sha1" "475e3471b4e8da8776fe7e66a3390c8a30c19f08"
+			"signature" "true"
+			"verification" .WarnVerifUnk
+		)}}
+	</div>
+</div>
+
+{{template "base/footer" .}}

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"path"
 	"testing"
-	"time"
 
 	"forgejo.org/modules/test"
 	"forgejo.org/tests"
@@ -59,9 +58,6 @@ func testViewTimetrackingControls(t *testing.T, session *TestSession, user, repo
 
 		htmlDoc.AssertElement(t, ".timetrack .issue-stop-time", true)
 		htmlDoc.AssertElement(t, ".timetrack .issue-cancel-time", true)
-
-		// Sleep for 1 second to not get wrong order for stopping timer
-		time.Sleep(time.Second)
 
 		req = NewRequestWithValues(t, "POST", path.Join(user, repo, "issues", issue, "times", "stopwatch", "toggle"), map[string]string{
 			"_csrf": htmlDoc.GetCSRF(),

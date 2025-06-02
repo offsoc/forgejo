@@ -201,6 +201,7 @@ forgejo.org/modules/util/filebuffer
 
 forgejo.org/modules/validation
 	IsErrNotValid
+	ValidateIDExists
 
 forgejo.org/modules/web
 	RouteMock

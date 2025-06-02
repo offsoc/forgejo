@@ -7,7 +7,6 @@ package integration
 import (
 	"net/http"
 	"testing"
-	"time"
 
 	"forgejo.org/models/db"
 	"forgejo.org/modules/setting"
@@ -97,7 +96,6 @@ func TestDatabaseCollation(t *testing.T) {
 
 		defer test.MockVariableValue(&setting.Database.CharsetCollation, "utf8mb4_bin")()
 		require.NoError(t, db.ConvertDatabaseTable())
-		time.Sleep(5 * time.Second)
 
 		r, err := db.CheckCollations(x)
 		require.NoError(t, err)
@@ -118,7 +116,6 @@ func TestDatabaseCollation(t *testing.T) {
 
 		defer test.MockVariableValue(&setting.Database.CharsetCollation, "utf8mb4_general_ci")()
 		require.NoError(t, db.ConvertDatabaseTable())
-		time.Sleep(5 * time.Second)
 
 		r, err := db.CheckCollations(x)
 		require.NoError(t, err)
@@ -139,7 +136,6 @@ func TestDatabaseCollation(t *testing.T) {
 
 		defer test.MockVariableValue(&setting.Database.CharsetCollation, "")()
 		require.NoError(t, db.ConvertDatabaseTable())
-		time.Sleep(5 * time.Second)
 
 		r, err := db.CheckCollations(x)
 		require.NoError(t, err)

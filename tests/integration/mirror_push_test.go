@@ -301,10 +301,10 @@ func TestSSHPushMirror(t *testing.T) {
 
 				assert.Eventually(t, func() bool {
 					req = NewRequest(t, "GET", fmt.Sprintf("/%s", pushToRepo.FullName()))
-					resp = sess.MakeRequest(t, req, http.StatusOK)
+					resp = sess.MakeRequest(t, req, NoExpectedStatus)
 					htmlDoc = NewHTMLParser(t, resp.Body)
 
-					return htmlDoc.Find(".shortsha").Text() == shortSHA
+					return resp.Code == http.StatusOK && htmlDoc.Find(".shortsha").Text() == shortSHA
 				}, time.Second*30, time.Second)
 			})
 

@@ -1,1 +1,39 @@
-{}
+{
+    "relativetime.now": "agora",
+    "relativetime.future": "máis adiante",
+    "repo.form.cannot_create": "Todos os espazos onde podes crear repositorios chegaron ao límite de repositorios creados.",
+    "followers.outgoing.list.self.none": "Non esas seguindo a ninguén.",
+    "followers.outgoing.list.none": "%s non está seguindo a ninguén.",
+    "relativetime.1day": "onte",
+    "relativetime.2days": "hai dous días",
+    "relativetime.1week": "a semana pasada",
+    "relativetime.2weeks": "hai dúas semanas",
+    "relativetime.1month": "hai un mes",
+    "relativetime.2months": "hai dous meses",
+    "relativetime.1year": "hai un ano",
+    "relativetime.2years": "hai dous anos",
+    "relativetime.mins": {
+        "one": "hai %d minuto",
+        "other": "hai %d minutos"
+    },
+    "relativetime.hours": {
+        "one": "hai %d hora",
+        "other": "hai %d horas"
+    },
+    "relativetime.days": {
+        "one": "hai %d día",
+        "other": "hai %d días"
+    },
+    "relativetime.weeks": {
+        "one": "hai %d semana",
+        "other": "hai %d semanas"
+    },
+    "relativetime.months": {
+        "one": "hai %d mes",
+        "other": "hai %d meses"
+    },
+    "relativetime.years": {
+        "one": "hai %d ano",
+        "other": "hai %d anos"
+    }
+}

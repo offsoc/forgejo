@@ -52,7 +52,7 @@ func initBlueMondayPolicy() {
 	policy.AllowAttrs("id").Matching(positionalPlaceholderRe).OnElements("code")
 
 	// Allowed elements with no attributes. Must be a recognized tagname.
-	policy.AllowElements("strong", "br", "b", "strike", "code", "i")
+	policy.AllowElements("strong", "br", "b", "strike", "code", "i", "kbd")
 
 	// TODO: Remove <c> in `actions.workflow.dispatch.trigger_found`.
 	policy.AllowNoAttrs().OnElements("c")

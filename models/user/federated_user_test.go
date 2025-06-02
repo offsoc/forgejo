@@ -26,6 +26,6 @@ func Test_FederatedUserValidation(t *testing.T) {
 		InboxPath:        "/api/v1/activitypub/user-id/12/inbox",
 	}
 	if res, _ := validation.IsValid(sut); res {
-		t.Errorf("sut should be invalid")
+		t.Error("sut should be invalid")
 	}
 }

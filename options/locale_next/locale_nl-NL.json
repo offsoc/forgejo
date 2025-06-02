@@ -30,5 +30,61 @@
     "mail.actions.run_info_previous_status": "Status vorige run: %[1]s",
     "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Getriggerd omdat: %[1]s door: %[2]s",
-    "discussion.locked": "Deze discussie is gesloten. Commentaar is beperkt tot bijdragers."
+    "discussion.locked": "Deze discussie is gesloten. Commentaar is beperkt tot bijdragers.",
+    "relativetime.now": "nu",
+    "relativetime.future": "in de toekomst",
+    "repo.form.cannot_create": "Alle spaces waarin u repositories kan maken hebben hun maximum aantal repositories bereikt.",
+    "moderation.report_content": "Meldt content",
+    "moderation.report_abuse_form.header": "Meld misbruik bij de beheerder",
+    "moderation.report_abuse_form.invalid": "Ongeldige argumenten",
+    "moderation.report_abuse_form.already_reported": "U heeft deze content reeds gerapporteerd",
+    "moderation.abuse_category": "Categorie",
+    "moderation.abuse_category.placeholder": "Selecteer een categorie",
+    "moderation.abuse_category.spam": "Spam",
+    "moderation.abuse_category.malware": "Malware",
+    "moderation.report_abuse_form.details": "Dit formulier dient gebruikt te worden om gebruikers te rapporteren die spamprofielen, -issues, -commentaren aanmaken of zich anderszins misdragen.",
+    "moderation.submit_report": "Verzend rapport",
+    "moderation.reporting_failed": "De nieuwe misbruikrapportage kan niet worden ingediend: %v",
+    "moderation.reported_thank_you": "Dank voor uw melding. Het beheer is hierover nu geïnformeerd.",
+    "moderation.report_remarks.placeholder": "Geef a.u.b. wat details betreffende het misbruik dat u meldt.",
+    "followers.outgoing.list.none": "%s volgt niemand.",
+    "relativetime.1day": "gisteren",
+    "relativetime.2days": "twee dagen geleden",
+    "relativetime.1week": "vorige week",
+    "relativetime.2weeks": "twee weken geleden",
+    "relativetime.1month": "vorige maand",
+    "relativetime.2months": "twee maanden geleden",
+    "relativetime.1year": "vorig jaar",
+    "relativetime.2years": "twee jaar geleden",
+    "moderation.abuse_category.illegal_content": "Illegale content",
+    "moderation.abuse_category.other_violations": "Andere overtreding van platformregels",
+    "moderation.report_remarks": "Opmerkingen",
+    "editor.textarea.tab_hint": "Regel springt reeds in. Type <kbd>Tab</kbd> nogmaals of <kbd>Escape</kbd> om de editor te verlaten.",
+    "editor.textarea.shift_tab_hint": "Geen inspringing op deze regel. Type <kbd>Shift</kbd> + <kbd>Tab</kbd> nogmaals of <kbd>Escape</kbd> om de editor te verlaten.",
+    "relativetime.days": {
+        "one": "%d dag geleden",
+        "other": "%d dagen geleden"
+    },
+    "relativetime.weeks": {
+        "one": "%d week geleden",
+        "other": "%d weken geleden"
+    },
+    "relativetime.months": {
+        "one": "%d maand geleden",
+        "other": "%d maanden geleden"
+    },
+    "relativetime.years": {
+        "one": "%d jaar geleden",
+        "other": "%d jaren geleden"
+    },
+    "admin.config.moderation_config": "Moderatie configuratie",
+    "moderation.report_abuse": "Meld misbruik",
+    "relativetime.mins": {
+        "one": "%d minuut geleden",
+        "other": "%d minuten geleden"
+    },
+    "relativetime.hours": {
+        "one": "%d uur geleden",
+        "other": "%d uren geleden"
+    }
 }

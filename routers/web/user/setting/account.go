@@ -57,7 +57,7 @@ func AccountPost(ctx *context.Context) {
 		return
 	}
 
-	if ctx.Doer.IsPasswordSet() && !ctx.Doer.ValidatePassword(form.OldPassword) {
+	if ctx.Doer.IsPasswordSet() && !ctx.Doer.ValidatePassword(ctx, form.OldPassword) {
 		ctx.Flash.Error(ctx.Tr("settings.password_incorrect"))
 	} else if form.Password != form.Retype {
 		ctx.Flash.Error(ctx.Tr("form.password_not_match"))
@@ -212,7 +212,7 @@ func EmailPost(ctx *context.Context) {
 			loadAccountData(ctx)
 
 			ctx.RenderWithErr(ctx.Tr("form.email_been_used"), tplSettingsAccount, &form)
-		} else if validation.IsErrEmailCharIsNotSupported(err) || validation.IsErrEmailInvalid(err) {
+		} else if validation.IsErrEmailInvalid(err) {
 			loadAccountData(ctx)
 
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tplSettingsAccount, &form)

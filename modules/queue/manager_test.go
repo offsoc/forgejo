@@ -8,17 +8,14 @@ import (
 	"testing"
 
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestManager(t *testing.T) {
-	oldAppDataPath := setting.AppDataPath
-	setting.AppDataPath = t.TempDir()
-	defer func() {
-		setting.AppDataPath = oldAppDataPath
-	}()
+	defer test.MockVariableValue(&setting.AppDataPath, t.TempDir())()
 
 	newQueueFromConfig := func(name, cfg string) (*WorkerPoolQueue[int], error) {
 		cfgProvider, err := setting.NewConfigProviderFromData(cfg)
