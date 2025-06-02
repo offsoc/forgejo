@@ -430,14 +430,19 @@ func TestPackageContainer(t *testing.T) {
 						assert.Equal(t, manifestDigest, resp.Header().Get("Docker-Content-Digest"))
 					})
 
-					t.Run("GetManifest", func(t *testing.T) {
+					t.Run("GetManifest unknown-tag", func(t *testing.T) {
 						defer tests.PrintCurrentTest(t)()
 
 						req := NewRequest(t, "GET", fmt.Sprintf("%s/manifests/unknown-tag", url)).
 							AddTokenAuth(userToken)
 						MakeRequest(t, req, http.StatusNotFound)
+					})
 
-						req = NewRequest(t, "GET", fmt.Sprintf("%s/manifests/%s", url, tag)).
+					t.Run("GetManifest serv indirect", func(t *testing.T) {
+						defer tests.PrintCurrentTest(t)()
+						defer test.MockVariableValue(&setting.Packages.Storage.MinioConfig.ServeDirect, false)()
+
+						req := NewRequest(t, "GET", fmt.Sprintf("%s/manifests/%s", url, tag)).
 							AddTokenAuth(userToken)
 						resp := MakeRequest(t, req, http.StatusOK)
 
@@ -445,6 +450,25 @@ func TestPackageContainer(t *testing.T) {
 						assert.Equal(t, oci.MediaTypeImageManifest, resp.Header().Get("Content-Type"))
 						assert.Equal(t, manifestDigest, resp.Header().Get("Docker-Content-Digest"))
 						assert.Equal(t, manifestContent, resp.Body.String())
+					})
+
+					t.Run("GetManifest serv direct", func(t *testing.T) {
+						if setting.Packages.Storage.Type != setting.MinioStorageType {
+							t.Skip("Test skipped for non-Minio-storage.")
+							return
+						}
+
+						defer tests.PrintCurrentTest(t)()
+						defer test.MockVariableValue(&setting.Packages.Storage.MinioConfig.ServeDirect, true)()
+
+						req := NewRequest(t, "GET", fmt.Sprintf("%s/manifests/%s", url, tag)).
+							AddTokenAuth(userToken)
+						resp := MakeRequest(t, req, http.StatusTemporaryRedirect)
+
+						assert.Empty(t, resp.Header().Get("Content-Length"))
+						assert.NotEmpty(t, resp.Header().Get("Location"))
+						assert.Equal(t, "text/html; charset=utf-8", resp.Header().Get("Content-Type"))
+						assert.Empty(t, resp.Header().Get("Docker-Content-Digest"))
 					})
 				})
 			}
