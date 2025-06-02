@@ -123,6 +123,11 @@
 					</button>
 				{{end}}
 			</li>
+			{{if .IsModerationEnabled}}
+			<li class="report">
+				<a class="ui basic orange button" href="{{AppSubUrl}}/report_abuse?type=user&id={{.ContextUser.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
+			</li>
+			{{end}}
 			{{end}}
 		</ul>
 	</div>

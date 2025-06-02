@@ -1,4 +1,5 @@
 // Copyright 2024 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package user
@@ -202,6 +203,11 @@ func MakeEmailAddressPrimary(ctx context.Context, u *user_model.User, newPrimary
 	sess := db.GetEngine(ctx)
 
 	oldPrimaryEmail := u.Email
+
+	// If the user was reported as abusive, a shadow copy should be created before first update (of certain columns).
+	if err = user_model.IfNeededCreateShadowCopyForUser(ctx, u, "email"); err != nil {
+		return err
+	}
 
 	// 1. Update user table
 	u.Email = newPrimaryEmail.Email

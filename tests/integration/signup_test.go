@@ -23,8 +23,7 @@ import (
 
 func TestSignup(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-
-	setting.Service.EnableCaptcha = false
+	defer test.MockVariableValue(&setting.Service.EnableCaptcha, false)()
 
 	req := NewRequestWithValues(t, "POST", "/user/sign_up", map[string]string{
 		"user_name": "exampleUser",
@@ -41,9 +40,8 @@ func TestSignup(t *testing.T) {
 
 func TestSignupAsRestricted(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-
-	setting.Service.EnableCaptcha = false
-	setting.Service.DefaultUserIsRestricted = true
+	defer test.MockVariableValue(&setting.Service.EnableCaptcha, false)()
+	defer test.MockVariableValue(&setting.Service.DefaultUserIsRestricted, true)()
 
 	req := NewRequestWithValues(t, "POST", "/user/sign_up", map[string]string{
 		"user_name": "restrictedUser",
@@ -63,8 +61,7 @@ func TestSignupAsRestricted(t *testing.T) {
 
 func TestSignupEmail(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-
-	setting.Service.EnableCaptcha = false
+	defer test.MockVariableValue(&setting.Service.EnableCaptcha, false)()
 
 	tests := []struct {
 		email      string

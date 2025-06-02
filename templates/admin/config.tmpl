@@ -248,6 +248,16 @@
 		</div>
 
 		<h4 class="ui top attached header">
+			{{ctx.Locale.Tr "admin.config.moderation_config"}}
+		</h4>
+		<div class="ui attached table segment">
+			<dl class="admin-dl-horizontal">
+				<dt>{{ctx.Locale.Tr "enabled"}}</dt>
+				<dd>{{if .Moderation.Enabled}}{{svg "octicon-check"}}{{else}}{{svg "octicon-x"}}{{end}}</dd>
+			</dl>
+		</div>
+
+		<h4 class="ui top attached header">
 			{{ctx.Locale.Tr "admin.config.cache_config"}}
 		</h4>
 		<div class="ui attached table segment">

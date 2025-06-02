@@ -30,5 +30,65 @@
     "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Ausgelöst, weil: %[1]s durch: %[2]s",
     "mail.actions.run_info_cur_status": "Status dieses Runs: %[1]s (gerade eben von %[2]s aktualisiert)",
-    "discussion.locked": "Diese Diskussion wurde gesperrt. Nur Mitwirkende können kommentieren."
+    "discussion.locked": "Diese Diskussion wurde gesperrt. Nur Mitwirkende können kommentieren.",
+    "relativetime.now": "jetzt",
+    "relativetime.hours": {
+        "one": "vor %d Stunde",
+        "other": "vor %d Stunden"
+    },
+    "relativetime.days": {
+        "one": "vor %d Tag",
+        "other": "vor %d Tagen"
+    },
+    "relativetime.months": {
+        "one": "vor %d Monat",
+        "other": "vor %d Monaten"
+    },
+    "relativetime.years": {
+        "one": "vor %d Jahr",
+        "other": "vor %d Jahren"
+    },
+    "relativetime.1week": "letzte Woche",
+    "relativetime.1month": "letzten Monat",
+    "relativetime.2months": "vor zwei Monaten",
+    "relativetime.1year": "letztes Jahr",
+    "relativetime.2years": "vor zwei Jahren",
+    "relativetime.1day": "gestern",
+    "relativetime.weeks": {
+        "one": "vor %d Woche",
+        "other": "vor %d Wochen"
+    },
+    "relativetime.2weeks": "vor zwei Wochen",
+    "relativetime.mins": {
+        "one": "vor %d Minute",
+        "other": "vor %d Minuten"
+    },
+    "relativetime.2days": "vorgestern",
+    "relativetime.future": "in der Zukunft",
+    "admin.config.moderation_config": "Moderations-Konfiguration",
+    "moderation.report_abuse": "Missbrauch melden",
+    "moderation.report_content": "Inhalt melden",
+    "moderation.report_abuse_form.header": "Dem Administrator Missbrauch melden",
+    "moderation.report_abuse_form.details": "Dieses Formular soll genutzt werden um Benutzer zu melden die Spam-Profile, -Repositorys, -Issues, und -Kommentare erstellen, oder sich unangemessen verhalten.",
+    "moderation.report_abuse_form.invalid": "Ungültige Argumente",
+    "moderation.report_abuse_form.already_reported": "Du hast diesen Inhalt bereits gemeldet",
+    "moderation.abuse_category": "Kategorie",
+    "moderation.abuse_category.placeholder": "Eine Kategorie auswählen",
+    "moderation.abuse_category.spam": "Spam",
+    "moderation.abuse_category.malware": "Malware",
+    "moderation.abuse_category.illegal_content": "Illegaler Inhalt",
+    "moderation.abuse_category.other_violations": "Andere Verstöße gegen die Plattformregeln",
+    "moderation.report_remarks": "Anmerkungen",
+    "moderation.report_remarks.placeholder": "Bitte stelle Details über den von dir gemeldeten Missbrauch bereit.",
+    "moderation.submit_report": "Meldung absenden",
+    "moderation.reporting_failed": "Kann die neue Missbrauchsmeldung nicht absenden: %v",
+    "moderation.reported_thank_you": "Danke für deine Meldung. Die Administration wurde darüber in Kenntnis gesetzt.",
+    "repo.form.cannot_create": "Alle Orte, wo du Repositorys erstellen kannst, haben die Obergrenze an Repositorys erreicht.",
+    "repo.issue_indexer.title": "Issue-Indexer",
+    "watch.list.none": "Niemand beobachtet dieses Repo.",
+    "followers.incoming.list.self.none": "Niemand folgt deinem Profil.",
+    "followers.outgoing.list.self.none": "Du folgst niemanden.",
+    "followers.outgoing.list.none": "%s folgt niemanden.",
+    "stars.list.none": "Niemand hat dieses Repo favorisiert.",
+    "followers.incoming.list.none": "Niemand folgt diesem Benutzer."
 }

@@ -1,10 +1,12 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package issue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -59,7 +61,6 @@ func NewIssue(ctx context.Context, repo *repo_model.Repository, issue *issues_mo
 // ChangeTitle changes the title of this issue, as the given user.
 func ChangeTitle(ctx context.Context, issue *issues_model.Issue, doer *user_model.User, title string) error {
 	oldTitle := issue.Title
-	issue.Title = title
 
 	if oldTitle == title {
 		return nil
@@ -73,6 +74,12 @@ func ChangeTitle(ctx context.Context, issue *issues_model.Issue, doer *user_mode
 		return user_model.ErrBlockedByUser
 	}
 
+	// If the issue was reported as abusive, a shadow copy should be created before first update.
+	if err := issues_model.IfNeededCreateShadowCopyForIssue(ctx, issue); err != nil {
+		return err
+	}
+
+	issue.Title = title
 	if err := issues_model.ChangeIssueTitle(ctx, issue, doer, oldTitle); err != nil {
 		return err
 	}
@@ -252,6 +259,12 @@ func deleteIssue(ctx context.Context, issue *issues_model.Issue) error {
 	defer committer.Close()
 
 	e := db.GetEngine(ctx)
+
+	// If the issue was reported as abusive, a shadow copy should be created before deletion.
+	if err := issues_model.IfNeededCreateShadowCopyForIssue(ctx, issue); err != nil {
+		return err
+	}
+
 	if _, err := e.ID(issue.ID).NoAutoCondition().Delete(issue); err != nil {
 		return err
 	}
@@ -333,13 +346,13 @@ func SetIssueUpdateDate(ctx context.Context, issue *issues_model.Issue, updated 
 		return err
 	}
 	if !perm.IsAdmin() && !perm.IsOwner() {
-		return fmt.Errorf("user needs to have admin or owner right")
+		return errors.New("user needs to have admin or owner right")
 	}
 
 	// A simple guard against potential inconsistent calls
 	updatedUnix := timeutil.TimeStamp(updated.Unix())
 	if updatedUnix < issue.CreatedUnix || updatedUnix > timeutil.TimeStampNow() {
-		return fmt.Errorf("unallowed update date")
+		return errors.New("unallowed update date")
 	}
 
 	issue.UpdatedUnix = updatedUnix

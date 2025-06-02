@@ -1,4 +1,5 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package templates
@@ -13,7 +14,9 @@ import (
 	"time"
 
 	activities_model "forgejo.org/models/activities"
+	asymkey_model "forgejo.org/models/asymkey"
 	repo_model "forgejo.org/models/repo"
+	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/git"
 	giturl "forgejo.org/modules/git/url"
 	"forgejo.org/modules/json"
@@ -60,6 +63,7 @@ func IsMultilineCommitMessage(msg string) bool {
 type Actioner interface {
 	GetOpType() activities_model.ActionType
 	GetActUserName(ctx context.Context) string
+	GetRepo(ctx context.Context) *repo_model.Repository
 	GetRepoUserName(ctx context.Context) string
 	GetRepoName(ctx context.Context) string
 	GetRepoPath(ctx context.Context) string
@@ -109,7 +113,7 @@ func ActionIcon(opType activities_model.ActionType) string {
 }
 
 // ActionContent2Commits converts action content to push commits
-func ActionContent2Commits(act Actioner) *repository.PushCommits {
+func ActionContent2Commits(ctx context.Context, act Actioner) *repository.PushCommits {
 	push := repository.NewPushCommits()
 
 	if act == nil || act.GetContent() == "" {
@@ -122,6 +126,23 @@ func ActionContent2Commits(act Actioner) *repository.PushCommits {
 
 	if push.Len == 0 {
 		push.Len = len(push.Commits)
+	}
+	repo := act.GetRepo(ctx)
+	for _, commit := range push.Commits {
+		gitCommit, err := repository.PushCommitToCommit(commit)
+		if err != nil {
+			// Only happens if the commit has an invalid sha
+			commit.Verification = &asymkey_model.ObjectVerification{
+				Verified: false,
+				Reason:   "git.error.invalid_commit_id",
+			}
+			continue
+		}
+		verification := asymkey_model.ParseCommitWithSignature(ctx, gitCommit)
+		_ = asymkey_model.CalculateTrustStatus(verification, repo.GetTrustModel(), func(user *user_model.User) (bool, error) {
+			return repo_model.IsOwnerMemberCollaborator(ctx, repo, user.ID)
+		}, nil)
+		commit.Verification = verification
 	}
 
 	return push

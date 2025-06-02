@@ -9,13 +9,14 @@ import (
 	"testing"
 
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGenAPILinks(t *testing.T) {
-	setting.AppURL = "http://localhost:3000/"
+	defer test.MockVariableValue(&setting.AppURL, "http://localhost:3000/")()
 	kases := map[string][]string{
 		"api/v1/repos/jerrykan/example-repo/issues?state=all": {
 			`<http://localhost:3000/api/v1/repos/jerrykan/example-repo/issues?page=2&state=all>; rel="next"`,

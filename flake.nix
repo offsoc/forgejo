@@ -25,10 +25,6 @@
             # frontend
             nodejs_20
 
-            # linting
-            python312
-            poetry
-
             # backend
             gofumpt
             sqlite

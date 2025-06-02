@@ -1,11 +1,13 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package activities
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"path"
@@ -247,6 +249,12 @@ func (a *Action) GetActDisplayNameTitle(ctx context.Context) string {
 	return a.GetActFullName(ctx)
 }
 
+// GetRepo returns the repository of the action.
+func (a *Action) GetRepo(ctx context.Context) *repo_model.Repository {
+	a.loadRepo(ctx)
+	return a.Repo
+}
+
 // GetRepoUserName returns the name of the action repository owner.
 func (a *Action) GetRepoUserName(ctx context.Context) string {
 	a.loadRepo(ctx)
@@ -451,7 +459,7 @@ type GetFeedsOptions struct {
 // GetFeeds returns actions according to the provided options
 func GetFeeds(ctx context.Context, opts GetFeedsOptions) (ActionList, int64, error) {
 	if opts.RequestedUser == nil && opts.RequestedTeam == nil && opts.RequestedRepo == nil {
-		return nil, 0, fmt.Errorf("need at least one of these filters: RequestedUser, RequestedTeam, RequestedRepo")
+		return nil, 0, errors.New("need at least one of these filters: RequestedUser, RequestedTeam, RequestedRepo")
 	}
 
 	cond, err := activityQueryCondition(ctx, opts)

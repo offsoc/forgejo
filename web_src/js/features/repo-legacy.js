@@ -685,7 +685,12 @@ function initRepoIssueCommentEdit() {
 
     // If the selection is in the comment body, then insert the quote.
     if (quote.closest(`#${event.target.getAttribute('data-target')}`)) {
+      // Chromium quirk: Temporarily store the range so it doesn't get lost, caused by appending text in another element.
+      const currentRange = quote.range;
+
       editorTextArea.value += `@${event.target.getAttribute('data-author')} wrote in ${toAbsoluteUrl(event.target.getAttribute('data-reference-url'))}:`;
+
+      quote.range = currentRange;
       quote.insert(editorTextArea);
     }
   });

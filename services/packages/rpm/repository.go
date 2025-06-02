@@ -26,10 +26,10 @@ import (
 	"forgejo.org/modules/util"
 	packages_service "forgejo.org/services/packages"
 
+	"code.forgejo.org/forgejo/go-rpmutils"
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/ProtonMail/go-crypto/openpgp/armor"
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
-	"github.com/sassoftware/go-rpmutils"
 )
 
 // GetOrCreateRepositoryVersion gets or creates the internal repository package

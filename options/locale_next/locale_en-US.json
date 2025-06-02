@@ -4,6 +4,46 @@
     "home.explore_repos": "Explore repositories",
     "home.explore_users": "Explore users",
     "home.explore_orgs": "Explore organizations",
+    "stars.list.none": "No one starred this repo.",
+    "watch.list.none": "No one is watching this repo.",
+    "followers.incoming.list.self.none": "No one is following your profile.",
+    "followers.incoming.list.none": "No one is following this user.",
+    "followers.outgoing.list.self.none": "You are not following anyone.",
+    "followers.outgoing.list.none": "%s isn't following anyone.",
+    "relativetime.now": "now",
+    "relativetime.future": "in future",
+    "relativetime.mins": {
+        "one": "%d minute ago",
+        "other": "%d minutes ago"
+    },
+    "relativetime.hours": {
+        "one": "%d hour ago",
+        "other": "%d hours ago"
+    },
+    "relativetime.days": {
+        "one": "%d day ago",
+        "other": "%d days ago"
+    },
+    "relativetime.weeks": {
+        "one": "%d week ago",
+        "other": "%d weeks ago"
+    },
+    "relativetime.months": {
+        "one": "%d month ago",
+        "other": "%d months ago"
+    },
+    "relativetime.years": {
+        "one": "%d year ago",
+        "other": "%d years ago"
+    },
+    "relativetime.1day": "yesterday",
+    "relativetime.2days": "two days ago",
+    "relativetime.1week": "last week",
+    "relativetime.2weeks": "two weeks ago",
+    "relativetime.1month": "last month",
+    "relativetime.2months": "two months ago",
+    "relativetime.1year": "last year",
+    "relativetime.2years": "two years ago",
     "repo.pulls.merged_title_desc": {
         "one": "merged %[1]d commit from <code>%[2]s</code> into <code>%[3]s</code> %[4]s",
         "other": "merged %[1]d commits from <code>%[2]s</code> into <code>%[3]s</code> %[4]s"
@@ -12,6 +52,8 @@
         "one": "wants to merge %[1]d commit from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>",
         "other": "wants to merge %[1]d commits from <code>%[2]s</code> into <code id=\"%[4]s\">%[3]s</code>"
     },
+    "repo.form.cannot_create": "All spaces in which you can create repositories have reached the limit of repositories.",
+    "repo.issue_indexer.title": "Issue Indexer",
     "search.milestone_kind": "Search milestones…",
     "incorrect_root_url": "This Forgejo instance is configured to be served on \"%s\". You are currently viewing Forgejo through a different URL, which may cause parts of the application to break. The canonical URL is controlled by Forgejo admins via the ROOT_URL setting in the app.ini.",
     "themes.names.forgejo-auto": "Forgejo (follow system theme)",
@@ -21,6 +63,24 @@
     "alert.asset_load_failed": "Failed to load asset files from {path}. Please make sure the asset files can be accessed.",
     "alert.range_error": " must be a number between %[1]s and %[2]s.",
     "install.invalid_lfs_path": "Unable to create the LFS root at the specified path: %[1]s",
+    "admin.config.moderation_config": "Moderation configuration",
+    "moderation.report_abuse": "Report abuse",
+    "moderation.report_content": "Report content",
+    "moderation.report_abuse_form.header": "Report abuse to administrator",
+    "moderation.report_abuse_form.details": "This form should be used to report users who create spam profiles, repositories, issues, comments or behave inappropriately.",
+    "moderation.report_abuse_form.invalid": "Invalid arguments",
+    "moderation.report_abuse_form.already_reported": "You've already reported this content",
+    "moderation.abuse_category": "Category",
+    "moderation.abuse_category.placeholder": "Select a category",
+    "moderation.abuse_category.spam": "Spam",
+    "moderation.abuse_category.malware": "Malware",
+    "moderation.abuse_category.illegal_content": "Illegal content",
+    "moderation.abuse_category.other_violations": "Other violations of platform rules",
+    "moderation.report_remarks": "Remarks",
+    "moderation.report_remarks.placeholder": "Please provide some details regarding the abuse you are reporting.",
+    "moderation.submit_report": "Submit report",
+    "moderation.reporting_failed": "Unable to submit the new abuse report: %v",
+    "moderation.reported_thank_you": "Thank you for your report. The administration has been made aware of it.",
     "mail.actions.successful_run_after_failure_subject": "Workflow %[1]s recovered in repository %[2]s",
     "mail.actions.not_successful_run_subject": "Workflow %[1]s failed in repository %[2]s",
     "mail.actions.successful_run_after_failure": "Workflow %[1]s recovered in repository %[2]s",
@@ -30,5 +90,7 @@
     "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Triggered because: %[1]s by: %[2]s",
     "discussion.locked": "This discussion has been locked. Commenting is limited to contributors.",
+    "editor.textarea.tab_hint": "Line already indented. Press <kbd>Tab</kbd> again or <kbd>Escape</kbd> to leave the editor.",
+    "editor.textarea.shift_tab_hint": "No indentation on this line. Press <kbd>Shift</kbd> + <kbd>Tab</kbd> again or <kbd>Escape</kbd> to leave the editor.",
     "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it."
 }

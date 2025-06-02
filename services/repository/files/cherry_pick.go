@@ -5,6 +5,7 @@ package files
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -79,21 +80,33 @@ func CherryPick(ctx context.Context, repo *repo_model.Repository, doer *user_mod
 		right, base = base, right
 	}
 
-	description := fmt.Sprintf("CherryPick %s onto %s", right, opts.OldBranch)
-	conflict, _, err := pull.AttemptThreeWayMerge(ctx,
-		t.basePath, t.gitRepo, base, opts.LastCommitID, right, description)
-	if err != nil {
-		return nil, fmt.Errorf("failed to three-way merge %s onto %s: %w", right, opts.OldBranch, err)
-	}
+	var treeHash string
+	if git.SupportGitMergeTree {
+		var conflict bool
+		treeHash, conflict, _, err = pull.MergeTree(ctx, t.gitRepo, base, opts.LastCommitID, right, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to three-way merge %s onto %s: %w", right, opts.OldBranch, err)
+		}
 
-	if conflict {
-		return nil, fmt.Errorf("failed to merge due to conflicts")
-	}
+		if conflict {
+			return nil, errors.New("failed to merge due to conflicts")
+		}
+	} else {
+		description := fmt.Sprintf("CherryPick %s onto %s", right, opts.OldBranch)
+		conflict, _, err := pull.AttemptThreeWayMerge(ctx, t.gitRepo, base, opts.LastCommitID, right, description)
+		if err != nil {
+			return nil, fmt.Errorf("failed to three-way merge %s onto %s: %w", right, opts.OldBranch, err)
+		}
 
-	treeHash, err := t.WriteTree()
-	if err != nil {
-		// likely non-sensical tree due to merge conflicts...
-		return nil, err
+		if conflict {
+			return nil, errors.New("failed to merge due to conflicts")
+		}
+
+		treeHash, err = t.WriteTree()
+		if err != nil {
+			// likely non-sensical tree due to merge conflicts...
+			return nil, err
+		}
 	}
 
 	// Now commit the tree

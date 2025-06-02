@@ -191,8 +191,29 @@ func BuildLoadBalancePolicy(settings *DatabaseSettings, slaveEngines []*xorm.Eng
 			}
 		}
 		policy = xorm.WeightRandomPolicy(weights)
+	case "WeightRoundRobin":
+		var weights []int
+		if settings.LoadBalanceWeights != "" {
+			for part := range strings.SplitSeq(settings.LoadBalanceWeights, ",") {
+				w, err := strconv.Atoi(strings.TrimSpace(part))
+				if err != nil {
+					w = 1 // use a default weight if conversion fails
+				}
+				weights = append(weights, w)
+			}
+		}
+		// If no valid weights were provided, default each slave to weight 1
+		if len(weights) == 0 {
+			weights = make([]int, len(slaveEngines))
+			for i := range weights {
+				weights[i] = 1
+			}
+		}
+		policy = xorm.WeightRoundRobinPolicy(weights)
 	case "RoundRobin":
 		policy = xorm.RoundRobinPolicy()
+	case "LeastConn":
+		policy = xorm.LeastConnPolicy()
 	default:
 		policy = xorm.RandomPolicy()
 	}

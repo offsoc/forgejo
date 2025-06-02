@@ -15,6 +15,10 @@ type KeyLocale struct{}
 
 var _ Locale = (*KeyLocale)(nil)
 
+func (k *KeyLocale) Language() string {
+	return "dummy"
+}
+
 // HasKey implements Locale.
 func (k *KeyLocale) HasKey(trKey string) bool {
 	return true
@@ -33,6 +37,11 @@ func (k *KeyLocale) TrString(trKey string, trArgs ...any) string {
 // TrPluralString implements Locale.
 func (k *KeyLocale) TrPluralString(count any, trKey string, trArgs ...any) template.HTML {
 	return template.HTML(FormatDummy(trKey, PrepareArgsForHTML(trArgs...)...))
+}
+
+// TrPluralStringAllForms implements Locale.
+func (k *KeyLocale) TrPluralStringAllForms(trKey string) ([]string, []string) {
+	return []string{trKey}, nil
 }
 
 func FormatDummy(trKey string, args ...any) string {

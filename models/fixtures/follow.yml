@@ -17,3 +17,13 @@
   id: 4
   user_id: 31
   follow_id: 33
+
+-
+  id: 5
+  user_id: 4
+  follow_id: 8
+
+-
+  id: 6
+  user_id: 5
+  follow_id: 8

@@ -101,7 +101,7 @@ func GetSyncForkInfo(ctx context.Context, repo *repo_model.Repository, branch st
 		return info, nil
 	}
 
-	diff, err := git.GetDivergingCommits(ctx, repo.BaseRepo.RepoPath(), baseBranch.CommitID, forkBranch.CommitID)
+	diff, err := git.GetDivergingCommits(ctx, repo.BaseRepo.RepoPath(), baseBranch.CommitID, forkBranch.CommitID, nil)
 	if err != nil {
 		return nil, err
 	}

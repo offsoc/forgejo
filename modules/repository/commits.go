@@ -1,4 +1,5 @@
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repository
@@ -9,6 +10,7 @@ import (
 	"net/url"
 	"time"
 
+	asymkey_model "forgejo.org/models/asymkey"
 	"forgejo.org/models/avatars"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/cache"
@@ -26,6 +28,8 @@ type PushCommit struct {
 	AuthorName     string
 	CommitterEmail string
 	CommitterName  string
+	Signature      *git.ObjectSignature
+	Verification   *asymkey_model.ObjectVerification
 	Timestamp      time.Time
 }
 
@@ -145,6 +149,32 @@ func (pc *PushCommits) AvatarLink(ctx context.Context, email string) string {
 	return v
 }
 
+// PushCommitToCommit transforms a PushCommit to a git.Commit type on a best effort basis.
+//
+// Attention: Converting a Commit to a PushCommit and converting back to a Commit will not result in an identical object!
+func PushCommitToCommit(commit *PushCommit) (*git.Commit, error) {
+	id, err := git.NewIDFromString(commit.Sha1)
+	if err != nil {
+		return nil, err
+	}
+	return &git.Commit{
+		ID: id,
+		Author: &git.Signature{
+			Name:  commit.AuthorName,
+			Email: commit.AuthorEmail,
+			When:  commit.Timestamp,
+		},
+		Committer: &git.Signature{
+			Name:  commit.CommitterName,
+			Email: commit.CommitterEmail,
+			When:  commit.Timestamp,
+		},
+		CommitMessage: commit.Message,
+		Signature:     commit.Signature,
+		Parents:       []git.ObjectID{},
+	}, nil
+}
+
 // CommitToPushCommit transforms a git.Commit to PushCommit type.
 func CommitToPushCommit(commit *git.Commit) *PushCommit {
 	return &PushCommit{
@@ -154,6 +184,7 @@ func CommitToPushCommit(commit *git.Commit) *PushCommit {
 		AuthorName:     commit.Author.Name,
 		CommitterEmail: commit.Committer.Email,
 		CommitterName:  commit.Committer.Name,
+		Signature:      commit.Signature,
 		Timestamp:      commit.Author.When,
 	}
 }

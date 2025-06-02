@@ -14,7 +14,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"forgejo.org/models"
 	activities_model "forgejo.org/models/activities"
@@ -401,6 +400,7 @@ func setMergeTarget(ctx *context.Context, pull *issues_model.PullRequest) {
 
 // GetPullDiffStats get Pull Requests diff stats
 func GetPullDiffStats(ctx *context.Context) {
+	// FIXME: this getPullInfo seems to be a duplicate call with other route handlers
 	issue, ok := getPullInfo(ctx)
 	if !ok {
 		return
@@ -408,15 +408,15 @@ func GetPullDiffStats(ctx *context.Context) {
 	pull := issue.PullRequest
 
 	mergeBaseCommitID := GetMergedBaseCommitID(ctx, issue)
-
 	if mergeBaseCommitID == "" {
 		ctx.NotFound("PullFiles", nil)
 		return
 	}
 
+	// do not report 500 server error to end users if error occurs, otherwise a PR missing ref won't be able to view.
 	headCommitID, err := ctx.Repo.GitRepo.GetRefCommitID(pull.GetGitRefName())
 	if err != nil {
-		ctx.ServerError("GetRefCommitID", err)
+		log.Error("Failed to GetRefCommitID: %v, repo: %v", err, ctx.Repo.Repository.FullName())
 		return
 	}
 
@@ -727,7 +727,7 @@ func PrepareViewPullInfo(ctx *context.Context, issue *issues_model.Issue) *git.C
 	ctx.Data["HeadBranchCommitID"] = headBranchSha
 	ctx.Data["PullHeadCommitID"] = sha
 
-	if pull.HeadRepo == nil || !headBranchExist || (!pull.Issue.IsClosed && (headBranchSha != sha)) {
+	if pull.HeadRepo == nil || !headBranchExist || (!pull.Issue.IsClosed && !pull.IsChecking() && (headBranchSha != sha)) {
 		ctx.Data["IsPullRequestBroken"] = true
 		if pull.IsSameRepo() {
 			ctx.Data["HeadTarget"] = pull.HeadBranch
@@ -1206,8 +1206,6 @@ func UpdatePullRequest(ctx *context.Context) {
 		ctx.Redirect(issue.Link())
 		return
 	}
-
-	time.Sleep(1 * time.Second)
 
 	ctx.Flash.Success(ctx.Tr("repo.pulls.update_branch_success"))
 	ctx.Redirect(issue.Link())

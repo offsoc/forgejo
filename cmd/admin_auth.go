@@ -81,7 +81,7 @@ func runListAuth(c *cli.Context) error {
 
 	// loop through each source and print
 	w := tabwriter.NewWriter(os.Stdout, c.Int("min-width"), c.Int("tab-width"), c.Int("padding"), padChar, flags)
-	fmt.Fprintf(w, "ID\tName\tType\tEnabled\n")
+	fmt.Fprint(w, "ID\tName\tType\tEnabled\n")
 	for _, source := range authSources {
 		fmt.Fprintf(w, "%d\t%s\t%s\t%t\n", source.ID, source.Name, source.Type.String(), source.IsActive)
 	}

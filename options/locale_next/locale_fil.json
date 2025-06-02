@@ -21,5 +21,67 @@
     "alert.asset_load_failed": "Nabigong i-load ang mga asset file mula sa {path}. Siguraduhin na maa-access ang mga asset file.",
     "install.invalid_lfs_path": "Nabigong gawin ang LFS root sa tinakdang path: %[1]s",
     "alert.range_error": " dapat ay numero sa pagitan ng %[1]s at %[2]s.",
-    "meta.last_line": "Sayori... I love you. — MC from Doki Doki Literature Club"
+    "meta.last_line": "Sayori... I love you. — MC from Doki Doki Literature Club",
+    "mail.actions.successful_run_after_failure": "Na-recover ang workflow na %[1]s sa repositoryong %[2]s",
+    "mail.actions.not_successful_run": "Nabigo ang workflow na %[1]s sa repositoryong %[2]s",
+    "mail.actions.run_info_previous_status": "Nakaraang Status ng Run: %[1]s",
+    "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
+    "mail.actions.run_info_trigger": "Na-trigger dahil: %[1]s ni/ng: %[2]s",
+    "mail.actions.successful_run_after_failure_subject": "Na-recover ang workflow na %[1]s sa repositoryong %[2]s",
+    "mail.actions.not_successful_run_subject": "Nabigo ang workflow na %[1]s sa repositoryong %[2]s",
+    "mail.actions.run_info_cur_status": "Status ng Run na Ito: %[1]s (na-update lang mula sa %[2]s)",
+    "relativetime.now": "ngayon",
+    "relativetime.mins": {
+        "one": "%d minuto ang nakalipas",
+        "other": "%d minuto ang nakalipas"
+    },
+    "relativetime.days": {
+        "one": "%d araw ang nakalipas",
+        "other": "%d araw ang nakalipas"
+    },
+    "relativetime.weeks": {
+        "one": "%d linggo ang nakalipas",
+        "other": "%d linggo ang nakalipas"
+    },
+    "relativetime.years": {
+        "one": "%d taon ang nakalipas",
+        "other": "%d taon ang nakalipas"
+    },
+    "relativetime.2days": "2 araw ang nakalipas",
+    "relativetime.2weeks": "2 linggo ang nakalipas",
+    "relativetime.2months": "2 buwan ang nakalipas",
+    "relativetime.1week": "nakaraang linggo",
+    "relativetime.future": "sa kinabukasan",
+    "relativetime.2years": "2 taon ang nakalipas",
+    "relativetime.1day": "kahapon",
+    "relativetime.hours": {
+        "one": "%d oras ang nakalipas",
+        "other": "%d oras ang nakalipas"
+    },
+    "relativetime.months": {
+        "one": "%d buwan ang nakalipas",
+        "other": "%d buwan ang nakalipas"
+    },
+    "discussion.locked": "Naka-kandado ang pag-uusap na ito. Nilimitahan ang pagkomento sa mga tagatulong.",
+    "relativetime.1month": "nakaraang buwan",
+    "relativetime.1year": "nakaraang taon",
+    "moderation.report_abuse_form.details": "Dapat gamitin ang form na ito upang mag-ulat ng mga user na gumagawa ng mga spam na profile, repositoryo, isyu, komento, o kumikilos nang hindi naaangkop.",
+    "admin.config.moderation_config": "Pagsasaayos ng Moderation",
+    "moderation.report_abuse": "Mag-ulat ng pang aabuso",
+    "moderation.report_content": "Iulat ng nilalaman",
+    "moderation.report_abuse_form.header": "Mag-ulat ng pang aabuso sa tagapangasiwa",
+    "moderation.report_abuse_form.invalid": "Hindi wasto ang mga argumento",
+    "moderation.report_abuse_form.already_reported": "Inulat mo na ang nilalaman na ito",
+    "moderation.abuse_category": "Kategorya",
+    "moderation.abuse_category.placeholder": "Pumili ng kategorya",
+    "moderation.abuse_category.spam": "Spam",
+    "moderation.abuse_category.malware": "Malware",
+    "moderation.abuse_category.illegal_content": "Ilegal na nilalaman",
+    "moderation.abuse_category.other_violations": "Mga ibang paglabag sa mga patakaran ng platform",
+    "moderation.report_remarks": "Mga pahayag",
+    "moderation.report_remarks.placeholder": "Mangyaring magbigay ng mga detalye tungkol sa pang aabuso na inuulat mo.",
+    "moderation.submit_report": "I-submit ang ulat",
+    "moderation.reporting_failed": "Hindi ma-submit ang bagong ulat sa pang aabuso: %v",
+    "moderation.reported_thank_you": "Salamat sa iyong ulat. Naipaalam na ito sa administrasyon.",
+    "repo.form.cannot_create": "Naabot na ng lahat ng mga espasyo kung saan ka makakagawa ng mga repositoryo ang limitasyon ng mga repositoryo."
 }

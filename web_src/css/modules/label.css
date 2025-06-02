@@ -203,11 +203,6 @@ a.ui.ui.ui.basic.yellow.label:hover {
   border-color: var(--color-yellow-dark-1);
   color: var(--color-yellow-dark-1);
 }
-.ui.ui.ui.olive.label {
-  background: var(--color-olive);
-  border-color: var(--color-olive);
-  color: var(--color-white);
-}
 
 .ui.ui.ui.green.label {
   background: var(--color-green);

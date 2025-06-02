@@ -41,7 +41,7 @@ func runListUsers(c *cli.Context) error {
 	w := tabwriter.NewWriter(os.Stdout, 5, 0, 1, ' ', 0)
 
 	if c.IsSet("admin") {
-		fmt.Fprintf(w, "ID\tUsername\tEmail\tIsActive\n")
+		fmt.Fprint(w, "ID\tUsername\tEmail\tIsActive\n")
 		for _, u := range users {
 			if u.IsAdmin {
 				fmt.Fprintf(w, "%d\t%s\t%s\t%t\n", u.ID, u.Name, u.Email, u.IsActive)
@@ -49,7 +49,7 @@ func runListUsers(c *cli.Context) error {
 		}
 	} else {
 		twofa := user_model.UserList(users).GetTwoFaStatus(ctx)
-		fmt.Fprintf(w, "ID\tUsername\tEmail\tIsActive\tIsAdmin\t2FA\n")
+		fmt.Fprint(w, "ID\tUsername\tEmail\tIsActive\tIsAdmin\t2FA\n")
 		for _, u := range users {
 			fmt.Fprintf(w, "%d\t%s\t%s\t%t\t%t\t%t\n", u.ID, u.Name, u.Email, u.IsActive, u.IsAdmin, twofa[u.ID])
 		}

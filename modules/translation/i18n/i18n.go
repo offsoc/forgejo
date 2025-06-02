@@ -25,6 +25,7 @@ const (
 var DefaultLocales = NewLocaleStore()
 
 type Locale interface {
+	Language() string
 	// TrString translates a given key and arguments for a language
 	TrString(trKey string, trArgs ...any) string
 	// TrPluralString translates a given pluralized key and arguments for a language.
@@ -34,6 +35,9 @@ type Locale interface {
 	TrHTML(trKey string, trArgs ...any) template.HTML
 	// HasKey reports if a locale has a translation for a given key
 	HasKey(trKey string) bool
+	// TrPluralStringAllForms returns all plural form variants for a given string, and also
+	// the fallbacks for the default language if the translation is incomplete.
+	TrPluralStringAllForms(trKey string) ([]string, []string)
 }
 
 // LocaleStore provides the functions common to all locale stores
@@ -42,6 +46,8 @@ type LocaleStore interface {
 
 	// SetDefaultLang sets the default language to fall back to
 	SetDefaultLang(lang string)
+	// GetDefaultLang returns the name of the default language to fall back to
+	GetDefaultLang() string
 	// ListLangNameDesc provides paired slices of language names to descriptors
 	ListLangNameDesc() (names, desc []string)
 	// Locale return the locale for the provided language or the default language if not found
@@ -49,7 +55,7 @@ type LocaleStore interface {
 	// HasLang returns whether a given language is present in the store
 	HasLang(langName string) bool
 	// AddLocaleByIni adds a new old-style language to the store
-	AddLocaleByIni(langName, langDesc string, pluralRule PluralFormRule, source, moreSource []byte) error
+	AddLocaleByIni(langName, langDesc string, pluralRule PluralFormRule, usedPluralForms []PluralFormIndex, source, moreSource []byte) error
 	// AddLocaleByJSON adds new-style content to an existing language to the store
 	AddToLocaleFromJSON(langName string, source []byte) error
 }

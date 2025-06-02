@@ -11,6 +11,7 @@ import (
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/git"
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,7 +37,7 @@ func TestForkRepository(t *testing.T) {
 	assert.False(t, repo_model.IsErrReachLimitOfRepo(err))
 
 	// change AllowForkWithoutMaximumLimit to false for the test
-	setting.Repository.AllowForkWithoutMaximumLimit = false
+	defer test.MockVariableValue(&setting.Repository.AllowForkWithoutMaximumLimit, false)()
 	// user has reached maximum limit of repositories
 	user.MaxRepoCreation = 0
 	fork2, err := ForkRepositoryAndUpdates(git.DefaultContext, user, user, ForkRepoOptions{

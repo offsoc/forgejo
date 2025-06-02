@@ -5,6 +5,7 @@ package actions
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -222,29 +223,38 @@ func InsertRun(ctx context.Context, run *ActionRun, jobs []*jobparser.SingleWork
 	var hasWaiting bool
 	for _, v := range jobs {
 		id, job := v.Job()
-		needs := job.Needs()
-		if err := v.SetJob(id, job.EraseNeeds()); err != nil {
-			return err
+		status := StatusFailure
+		payload := []byte{}
+		needs := []string{}
+		name := run.Title
+		runsOn := []string{}
+		if job != nil {
+			needs = job.Needs()
+			if err := v.SetJob(id, job.EraseNeeds()); err != nil {
+				return err
+			}
+			payload, _ = v.Marshal()
+
+			if len(needs) > 0 || run.NeedApproval {
+				status = StatusBlocked
+			} else {
+				status = StatusWaiting
+				hasWaiting = true
+			}
+			name, _ = util.SplitStringAtByteN(job.Name, 255)
+			runsOn = job.RunsOn()
 		}
-		payload, _ := v.Marshal()
-		status := StatusWaiting
-		if len(needs) > 0 || run.NeedApproval {
-			status = StatusBlocked
-		} else {
-			hasWaiting = true
-		}
-		job.Name, _ = util.SplitStringAtByteN(job.Name, 255)
 		runJobs = append(runJobs, &ActionRunJob{
 			RunID:             run.ID,
 			RepoID:            run.RepoID,
 			OwnerID:           run.OwnerID,
 			CommitSHA:         run.CommitSHA,
 			IsForkPullRequest: run.IsForkPullRequest,
-			Name:              job.Name,
+			Name:              name,
 			WorkflowPayload:   payload,
 			JobID:             id,
 			Needs:             needs,
-			RunsOn:            job.RunsOn(),
+			RunsOn:            runsOn,
 			Status:            status,
 		})
 	}
@@ -346,7 +356,7 @@ func UpdateRunWithoutNotification(ctx context.Context, run *ActionRun, cols ...s
 		return err
 	}
 	if affected == 0 {
-		return fmt.Errorf("run has changed")
+		return errors.New("run has changed")
 		// It's impossible that the run is not found, since Gitea never deletes runs.
 	}
 

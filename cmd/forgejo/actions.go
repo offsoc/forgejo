@@ -6,6 +6,7 @@ package forgejo
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -124,7 +125,7 @@ func readSecret(ctx context.Context, cliCtx *cli.Context) (string, error) {
 		}
 		return string(buf), nil
 	}
-	return "", fmt.Errorf("at least one of the --secret, --secret-stdin, --secret-file options is required")
+	return "", errors.New("at least one of the --secret, --secret-stdin, --secret-file options is required")
 }
 
 func validateSecret(secret string) error {
@@ -144,7 +145,7 @@ func getLabels(cliCtx *cli.Context) (*[]string, error) {
 		return &lblValue, nil
 	}
 	if cliCtx.String("labels") != "" {
-		return nil, fmt.Errorf("--labels and --keep-labels should not be used together")
+		return nil, errors.New("--labels and --keep-labels should not be used together")
 	}
 	return nil, nil
 }

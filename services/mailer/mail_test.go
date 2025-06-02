@@ -494,8 +494,7 @@ func Test_createReference(t *testing.T) {
 func TestFromDisplayName(t *testing.T) {
 	template, err := texttmpl.New("mailFrom").Parse("{{ .DisplayName }}")
 	require.NoError(t, err)
-	setting.MailService = &setting.Mailer{FromDisplayNameFormatTemplate: template}
-	defer func() { setting.MailService = nil }()
+	defer test.MockVariableValue(&setting.MailService, &setting.Mailer{FromDisplayNameFormatTemplate: template})()
 
 	tests := []struct {
 		userDisplayName string
@@ -525,15 +524,9 @@ func TestFromDisplayName(t *testing.T) {
 	t.Run("template with all available vars", func(t *testing.T) {
 		template, err = texttmpl.New("mailFrom").Parse("{{ .DisplayName }} (by {{ .AppName }} on [{{ .Domain }}])")
 		require.NoError(t, err)
-		setting.MailService = &setting.Mailer{FromDisplayNameFormatTemplate: template}
-		oldAppName := setting.AppName
-		setting.AppName = "Code IT"
-		oldDomain := setting.Domain
-		setting.Domain = "code.it"
-		defer func() {
-			setting.AppName = oldAppName
-			setting.Domain = oldDomain
-		}()
+		defer test.MockVariableValue(&setting.MailService, &setting.Mailer{FromDisplayNameFormatTemplate: template})()
+		defer test.MockVariableValue(&setting.AppName, "Code IT")()
+		defer test.MockVariableValue(&setting.Domain, "code.it")()
 
 		assert.Equal(t, "Mister X (by Code IT on [code.it])", fromDisplayName(&user_model.User{FullName: "Mister X", Name: "tmp"}))
 	})

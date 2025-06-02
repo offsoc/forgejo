@@ -63,7 +63,7 @@ func runGenerateInternalToken(c *cli.Context) error {
 	fmt.Printf("%s", internalToken)
 
 	if isatty.IsTerminal(os.Stdout.Fd()) {
-		fmt.Printf("\n")
+		fmt.Println()
 	}
 
 	return nil
@@ -75,7 +75,7 @@ func runGenerateLfsJwtSecret(c *cli.Context) error {
 	fmt.Printf("%s", jwtSecretBase64)
 
 	if isatty.IsTerminal(os.Stdout.Fd()) {
-		fmt.Printf("\n")
+		fmt.Print("\n")
 	}
 
 	return nil
@@ -90,7 +90,7 @@ func runGenerateSecretKey(c *cli.Context) error {
 	fmt.Printf("%s", secretKey)
 
 	if isatty.IsTerminal(os.Stdout.Fd()) {
-		fmt.Printf("\n")
+		fmt.Print("\n")
 	}
 
 	return nil

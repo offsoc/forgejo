@@ -6,17 +6,15 @@ package setting
 import (
 	"testing"
 
+	"forgejo.org/modules/test"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGitConfig(t *testing.T) {
-	oldGit := Git
-	oldGitConfig := GitConfig
-	defer func() {
-		Git = oldGit
-		GitConfig = oldGitConfig
-	}()
+	defer test.MockProtect(&Git)()
+	defer test.MockProtect(&GitConfig)()
 
 	cfg, err := NewConfigProviderFromData(`
 [git.config]
@@ -37,12 +35,8 @@ diff.algorithm = other
 }
 
 func TestGitReflog(t *testing.T) {
-	oldGit := Git
-	oldGitConfig := GitConfig
-	defer func() {
-		Git = oldGit
-		GitConfig = oldGitConfig
-	}()
+	defer test.MockProtect(&Git)()
+	defer test.MockProtect(&GitConfig)()
 
 	// default reflog config without legacy options
 	cfg, err := NewConfigProviderFromData(``)

@@ -76,6 +76,10 @@ var microcmdUserCreate = &cli.Command{
 			Name:  "restricted",
 			Usage: "Make a restricted user account",
 		},
+		&cli.StringFlag{
+			Name:  "fullname",
+			Usage: `The full, human-readable name of the user`,
+		},
 	},
 }
 
@@ -104,7 +108,7 @@ func runCreateUser(c *cli.Context) error {
 		username = c.String("username")
 	} else {
 		username = c.String("name")
-		_, _ = fmt.Fprintf(c.App.ErrWriter, "--name flag is deprecated. Use --username instead.\n")
+		_, _ = fmt.Fprint(c.App.ErrWriter, "--name flag is deprecated. Use --username instead.\n")
 	}
 
 	ctx, cancel := installSignals()
@@ -161,6 +165,7 @@ func runCreateUser(c *cli.Context) error {
 		IsAdmin:            isAdmin,
 		MustChangePassword: mustChangePassword,
 		Visibility:         visibility,
+		FullName:           c.String("fullname"),
 	}
 
 	overwriteDefault := &user_model.CreateUserOverwriteOptions{

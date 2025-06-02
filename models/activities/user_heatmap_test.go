@@ -54,6 +54,10 @@ func TestGetUserHeatmapDataByUser(t *testing.T) {
 			"multiple actions performed with two grouped together",
 			10, 10, 3, `[{"timestamp":1603009800,"contributions":1},{"timestamp":1603010700,"contributions":2}]`,
 		},
+		{
+			"test cutoff within",
+			40, 40, 1, `[{"timestamp":1577404800,"contributions":1}]`,
+		},
 	}
 	// Prepare
 	require.NoError(t, unittest.PrepareTestDatabase())

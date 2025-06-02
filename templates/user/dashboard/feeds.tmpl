@@ -84,15 +84,19 @@
 					{{DateUtils.TimeSince .GetCreate}}
 				</div>
 				{{if .GetOpType.InActions "commit_repo" "mirror_sync_push"}}
-					{{$push := ActionContent2Commits .}}
+					{{$push := ActionContent2Commits ctx .}}
 					{{$repoLink := (.GetRepoLink ctx)}}
 					{{$repo := .Repo}}
 					<div class="tw-flex tw-flex-col tw-gap-1">
 						{{range $push.Commits}}
-							{{$commitLink := printf "%s/commit/%s" $repoLink .Sha1}}
 							<div class="flex-text-block">
 								<img class="ui avatar" src="{{$push.AvatarLink $.Context .AuthorEmail}}" alt="" title="{{.AuthorName}}" width="16" height="16">
-								<a class="ui sha label" href="{{$commitLink}}">{{ShortSha .Sha1}}</a>
+								{{template "repo/shabox" (dict
+									"sha1" .Sha1
+									"commitLink" (printf "%s/commit/%s" $repoLink .Sha1)
+									"signature" .Signature
+									"verification" .Verification
+								)}}
 								<span class="text truncate">
 									{{RenderCommitMessage $.Context .Message ($repo.ComposeMetas ctx)}}
 								</span>

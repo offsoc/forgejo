@@ -17,7 +17,7 @@
 			{{else}}
 				<div class="required field {{if and (.Err_UserName) (or (not .LinkAccountMode) (and .LinkAccountMode .LinkAccountModeRegister))}}error{{end}}">
 					<label for="user_name">{{ctx.Locale.Tr "username"}}</label>
-					<input id="user_name" type="text" name="user_name" value="{{.user_name}}" autofocus required>
+					<input id="user_name" type="text" name="user_name" value="{{.user_name}}" autofocus required autocorrect="off" autocapitalize="none">
 				</div>
 				<div class="required field {{if .Err_Email}}error{{end}}">
 					<label for="email">{{ctx.Locale.Tr "email"}}</label>

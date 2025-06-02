@@ -8,7 +8,6 @@
 package tests
 
 import (
-	"context"
 	"fmt"
 	"slices"
 	"testing"
@@ -40,7 +39,7 @@ func TestIndexer(t *testing.T, indexer internal.Indexer) {
 			data[v.ID] = v
 		}
 		require.NoError(t, indexer.Index(t.Context(), d...))
-		require.NoError(t, waitData(indexer, int64(len(data))))
+		waitData(t, indexer, int64(len(data)))
 	}
 
 	defer func() {
@@ -54,13 +53,13 @@ func TestIndexer(t *testing.T, indexer internal.Indexer) {
 				for _, v := range c.ExtraData {
 					data[v.ID] = v
 				}
-				require.NoError(t, waitData(indexer, int64(len(data))))
+				waitData(t, indexer, int64(len(data)))
 				defer func() {
 					for _, v := range c.ExtraData {
 						require.NoError(t, indexer.Delete(t.Context(), v.ID))
 						delete(data, v.ID)
 					}
-					require.NoError(t, waitData(indexer, int64(len(data))))
+					waitData(t, indexer, int64(len(data)))
 				}()
 			}
 
@@ -783,22 +782,17 @@ func countIndexerData(data map[int64]*internal.IndexerData, f func(v *internal.I
 
 // waitData waits for the indexer to index all data.
 // Some engines like Elasticsearch index data asynchronously, so we need to wait for a while.
-func waitData(indexer internal.Indexer, total int64) error {
+func waitData(t testing.TB, indexer internal.Indexer, total int64) {
 	var actual int64
-	for i := 0; i < 100; i++ {
-		result, err := indexer.Search(context.Background(), &internal.SearchOptions{
+	assert.Eventually(t, func() bool {
+		result, err := indexer.Search(t.Context(), &internal.SearchOptions{
 			Paginator: &db.ListOptions{
 				PageSize: 0,
 			},
 		})
-		if err != nil {
-			return err
-		}
+		require.NoError(t, err)
+
 		actual = result.Total
-		if actual == total {
-			return nil
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
-	return fmt.Errorf("waitData: expected %d, actual %d", total, actual)
+		return actual == total
+	}, time.Second*10, time.Millisecond*100, "expected %d but got %d", total, actual)
 }

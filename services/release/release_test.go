@@ -6,7 +6,6 @@ package release
 import (
 	"strings"
 	"testing"
-	"time"
 
 	"forgejo.org/models/db"
 	repo_model "forgejo.org/models/repo"
@@ -14,6 +13,7 @@ import (
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/git"
 	"forgejo.org/modules/gitrepo"
+	"forgejo.org/modules/test"
 	"forgejo.org/services/attachment"
 
 	_ "forgejo.org/models/actions"
@@ -219,7 +219,7 @@ func TestRelease_Update(t *testing.T) {
 	release, err := repo_model.GetRelease(db.DefaultContext, repo.ID, "v1.1.1")
 	require.NoError(t, err)
 	releaseCreatedUnix := release.CreatedUnix
-	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
+	test.SleepTillNextSecond()
 	release.Note = "Changed note"
 	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{}))
 	release, err = repo_model.GetReleaseByID(db.DefaultContext, release.ID)
@@ -243,7 +243,7 @@ func TestRelease_Update(t *testing.T) {
 	release, err = repo_model.GetRelease(db.DefaultContext, repo.ID, "v1.2.1")
 	require.NoError(t, err)
 	releaseCreatedUnix = release.CreatedUnix
-	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
+	test.SleepTillNextSecond()
 	release.Title = "Changed title"
 	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{}))
 	release, err = repo_model.GetReleaseByID(db.DefaultContext, release.ID)
@@ -267,7 +267,7 @@ func TestRelease_Update(t *testing.T) {
 	release, err = repo_model.GetRelease(db.DefaultContext, repo.ID, "v1.3.1")
 	require.NoError(t, err)
 	releaseCreatedUnix = release.CreatedUnix
-	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
+	test.SleepTillNextSecond()
 	release.Title = "Changed title"
 	release.Note = "Changed note"
 	require.NoError(t, UpdateRelease(db.DefaultContext, user, gitRepo, release, false, []*AttachmentChange{}))
@@ -412,7 +412,7 @@ func TestRelease_createTag(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, release.CreatedUnix)
 	releaseCreatedUnix := release.CreatedUnix
-	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
+	test.SleepTillNextSecond()
 	release.Note = "Changed note"
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
 	require.NoError(t, err)
@@ -435,7 +435,7 @@ func TestRelease_createTag(t *testing.T) {
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
 	require.NoError(t, err)
 	releaseCreatedUnix = release.CreatedUnix
-	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
+	test.SleepTillNextSecond()
 	release.Title = "Changed title"
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
 	require.NoError(t, err)
@@ -458,7 +458,7 @@ func TestRelease_createTag(t *testing.T) {
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")
 	require.NoError(t, err)
 	releaseCreatedUnix = release.CreatedUnix
-	time.Sleep(2 * time.Second) // sleep 2 seconds to ensure a different timestamp
+	test.SleepTillNextSecond()
 	release.Title = "Changed title"
 	release.Note = "Changed note"
 	_, err = createTag(db.DefaultContext, gitRepo, release, "")

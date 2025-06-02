@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"runtime/trace"
 	"strings"
 	"time"
 	"unicode"
@@ -153,6 +154,9 @@ type User struct {
 	KeepActivityPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	KeepPronounsPrivate bool   `xorm:"NOT NULL DEFAULT false"`
 	EnableRepoUnitHints bool   `xorm:"NOT NULL DEFAULT true"`
+
+	// If you add new fields that might be used to store abusive content (mainly string fields),
+	// please also add them in the UserData struct and the corresponding constructor.
 }
 
 func init() {
@@ -394,7 +398,8 @@ func (u *User) SetPassword(passwd string) (err error) {
 }
 
 // ValidatePassword checks if the given password matches the one belonging to the user.
-func (u *User) ValidatePassword(passwd string) bool {
+func (u *User) ValidatePassword(ctx context.Context, passwd string) bool {
+	defer trace.StartRegion(ctx, "Validate user password").End()
 	return hash.Parse(u.PasswdHashAlgo).VerifyPassword(passwd, u.Passwd, u.Salt)
 }
 
@@ -562,7 +567,7 @@ func GetUserSalt() string {
 // Note: The set of characters here can safely expand without a breaking change,
 // but characters removed from this set can cause user account linking to break
 var (
-	customCharsReplacement    = strings.NewReplacer("Æ", "AE")
+	customCharsReplacement    = strings.NewReplacer("Æ", "AE", "ß", "ss")
 	removeCharsRE             = regexp.MustCompile(`['´\x60]`)
 	removeDiacriticsTransform = transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
 	replaceCharsHyphenRE      = regexp.MustCompile(`[\s~+]`)
@@ -610,6 +615,7 @@ var (
 		"pulls",
 		"milestones",
 		"notifications",
+		"report_abuse",
 
 		"favicon.ico",
 		"manifest.json", // web app manifests
@@ -916,6 +922,12 @@ func (u User) Validate() []string {
 // UpdateUserCols update user according special columns
 func UpdateUserCols(ctx context.Context, u *User, cols ...string) error {
 	if err := ValidateUser(u, cols...); err != nil {
+		return err
+	}
+
+	// If the user was reported as abusive and any of the columns being updated is relevant
+	// for moderation purposes a shadow copy should be created before first update.
+	if err := IfNeededCreateShadowCopyForUser(ctx, u, cols...); err != nil {
 		return err
 	}
 

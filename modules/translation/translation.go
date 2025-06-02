@@ -46,6 +46,8 @@ type Locale interface {
 	HasKey(trKey string) bool
 
 	PrettyNumber(v any) string
+
+	TrPluralStringAllForms(trKey string) ([]string, []string)
 }
 
 // LangType represents a lang type
@@ -108,8 +110,9 @@ func InitLocales(ctx context.Context) {
 				}
 			}
 
+			pluralRuleIndex := GetPluralRuleImpl(setting.Langs[i])
 			key := "locale_" + setting.Langs[i] + ".ini"
-			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], PluralRules[GetPluralRuleImpl(setting.Langs[i])], localeDataBase, localeData[key]); err != nil {
+			if err = i18n.DefaultLocales.AddLocaleByIni(setting.Langs[i], setting.Names[i], PluralRules[pluralRuleIndex], UsedPluralForms[pluralRuleIndex], localeDataBase, localeData[key]); err != nil {
 				log.Error("Failed to set old-style messages to %s: %v", setting.Langs[i], err)
 			}
 
@@ -322,6 +325,14 @@ func (l *locale) PrettyNumber(v any) string {
 		}
 	}
 	return l.msgPrinter.Sprintf("%v", number.Decimal(v))
+}
+
+func GetPluralRule(l Locale) int {
+	return GetPluralRuleImpl(l.Language())
+}
+
+func GetDefaultPluralRule() int {
+	return GetPluralRuleImpl(i18n.DefaultLocales.GetDefaultLang())
 }
 
 func init() {

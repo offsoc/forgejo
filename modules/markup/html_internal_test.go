@@ -469,6 +469,10 @@ func TestRegExp_anySHA1Pattern(t *testing.T) {
 	for k, v := range testCases {
 		assert.Equal(t, anyHashPattern.FindStringSubmatch(k)[1:], v)
 	}
+
+	for _, v := range []string{"https://codeberg.org/forgejo/forgejo/attachments/774421a1-b0ae-4501-8fba-983874b76811"} {
+		assert.False(t, anyHashPattern.MatchString(v))
+	}
 }
 
 func TestRegExp_shortLinkPattern(t *testing.T) {

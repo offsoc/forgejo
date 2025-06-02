@@ -9,18 +9,14 @@ import (
 
 	auth_model "forgejo.org/models/auth"
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 
 	"github.com/gobwas/glob"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterForm_IsDomainAllowed_Empty(t *testing.T) {
-	oldService := setting.Service
-	defer func() {
-		setting.Service = oldService
-	}()
-
-	setting.Service.EmailDomainAllowList = nil
+	defer test.MockVariableValue(&setting.Service.EmailDomainAllowList, nil)()
 
 	form := RegisterForm{}
 
@@ -28,12 +24,7 @@ func TestRegisterForm_IsDomainAllowed_Empty(t *testing.T) {
 }
 
 func TestRegisterForm_IsDomainAllowed_InvalidEmail(t *testing.T) {
-	oldService := setting.Service
-	defer func() {
-		setting.Service = oldService
-	}()
-
-	setting.Service.EmailDomainAllowList = []glob.Glob{glob.MustCompile("gitea.io")}
+	defer test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{glob.MustCompile("gitea.io")})()
 
 	tt := []struct {
 		email string
@@ -50,12 +41,7 @@ func TestRegisterForm_IsDomainAllowed_InvalidEmail(t *testing.T) {
 }
 
 func TestRegisterForm_IsDomainAllowed_AllowedEmail(t *testing.T) {
-	oldService := setting.Service
-	defer func() {
-		setting.Service = oldService
-	}()
-
-	setting.Service.EmailDomainAllowList = []glob.Glob{glob.MustCompile("gitea.io"), glob.MustCompile("*.allow")}
+	defer test.MockVariableValue(&setting.Service.EmailDomainAllowList, []glob.Glob{glob.MustCompile("gitea.io"), glob.MustCompile("*.allow")})()
 
 	tt := []struct {
 		email string
@@ -78,13 +64,7 @@ func TestRegisterForm_IsDomainAllowed_AllowedEmail(t *testing.T) {
 }
 
 func TestRegisterForm_IsDomainAllowed_BlockedEmail(t *testing.T) {
-	oldService := setting.Service
-	defer func() {
-		setting.Service = oldService
-	}()
-
-	setting.Service.EmailDomainAllowList = nil
-	setting.Service.EmailDomainBlockList = []glob.Glob{glob.MustCompile("gitea.io"), glob.MustCompile("*.block")}
+	defer test.MockVariableValue(&setting.Service.EmailDomainBlockList, []glob.Glob{glob.MustCompile("gitea.io"), glob.MustCompile("*.block")})()
 
 	tt := []struct {
 		email string

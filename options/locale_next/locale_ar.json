@@ -1,1 +1,7 @@
-{}
+{
+    "home.welcome.activity_hint": "لا يوجد شيء في موجزك حتى الآن. ستظهر هنا أفعالك ونشاطاتك من المستودعات التي تتابعها.",
+    "home.welcome.no_activity": "لا يوجد نشاط",
+    "home.explore_repos": "اكتشف المستودعات",
+    "home.explore_users": "اكتشف المستخدمين",
+    "home.explore_orgs": "اكتشف المنظمات"
+}

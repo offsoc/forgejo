@@ -26,6 +26,7 @@ import (
 	user_service "forgejo.org/services/user"
 	"forgejo.org/tests"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,6 +39,47 @@ func TestRepoSettingsUnits(t *testing.T) {
 
 	req := NewRequest(t, "GET", fmt.Sprintf("%s/settings/units", repo.Link()))
 	session.MakeRequest(t, req, http.StatusOK)
+}
+
+func TestRepoSettingsAdminOptions(t *testing.T) {
+	defer tests.PrepareTestEnv(t)()
+
+	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: "user2"})
+	admin := unittest.AssertExistsAndLoadBean(t, &user_model.User{IsAdmin: true})
+	repo := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{OwnerID: user.ID, Name: "repo1"})
+	link := repo.Link()
+
+	hasAdminOpts := func(t *testing.T, doer string, admin bool) {
+		session := loginUser(t, doer)
+
+		req := NewRequest(t, "GET", fmt.Sprintf("%s/settings", link))
+		resp := session.MakeRequest(t, req, http.StatusOK)
+		html := NewHTMLParser(t, resp.Body)
+
+		elems := html.doc.Find("button[name=request_reindex_type]")
+		if !admin {
+			assert.Empty(t, elems.Nodes)
+			return
+		}
+
+		values := []string{"code", "issues", "stats"}
+		if !setting.Indexer.RepoIndexerEnabled {
+			values = values[1:]
+		}
+		elems.Each(func(i int, s *goquery.Selection) {
+			attr, exists := s.Attr("value")
+			require.True(t, exists)
+			assert.Equal(t, values[i], attr)
+		})
+	}
+
+	t.Run("guest", func(t *testing.T) {
+		hasAdminOpts(t, user.Name, false)
+	})
+
+	t.Run("admin", func(t *testing.T) {
+		hasAdminOpts(t, admin.Name, true)
+	})
 }
 
 func TestRepoAddMoreUnitsHighlighting(t *testing.T) {
@@ -271,11 +313,8 @@ func TestProtectedBranch(t *testing.T) {
 }
 
 func TestRepoFollowing(t *testing.T) {
-	setting.Federation.Enabled = true
 	defer tests.PrepareTestEnv(t)()
-	defer func() {
-		setting.Federation.Enabled = false
-	}()
+	defer test.MockVariableValue(&setting.Federation.Enabled, true)()
 
 	mock := test.NewFederationServerMock()
 	federatedSrv := mock.DistantServer(t)
@@ -328,7 +367,7 @@ func TestRepoFollowing(t *testing.T) {
 		isLikeType := activityType == "Like"
 		isCorrectObject := strings.HasSuffix(object, "/api/v1/activitypub/repository-id/1")
 		if !isLikeType || !isCorrectObject {
-			t.Errorf("Activity is not a like for this repo")
+			t.Error("Activity is not a like for this repo")
 		}
 	})
 }
