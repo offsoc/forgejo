@@ -55,13 +55,14 @@ func runResetMFA(c *cli.Context) error {
 	}
 
 	tfaModes, err := auth_model.GetTwoFactorByUID(ctx, user.ID)
-	if err == nil {
+	if err == nil && tfaModes != nil {
 		if err := auth_model.DeleteTwoFactorByID(ctx, tfaModes.ID, user.ID); err != nil {
 			return err
 		}
-	}
-	if _, is := err.(auth_model.ErrTwoFactorNotEnrolled); !is {
-		return err
+	} else {
+		if _, is := err.(auth_model.ErrTwoFactorNotEnrolled); !is {
+			return err
+		}
 	}
 
 	fmt.Printf("%s's two-factor authentication settings have been removed!\n", user.Name)

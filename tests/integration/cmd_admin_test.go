@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"testing"
 
+	auth_model "forgejo.org/models/auth"
 	"forgejo.org/models/db"
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
@@ -145,5 +146,37 @@ func Test_Cmd_AdminFirstUser(t *testing.T) {
 				assert.Equal(t, testCase.isAdmin, user.IsAdmin)
 			})
 		}
+	})
+}
+
+func Test_Cmd_AdminUserResetMFA(t *testing.T) {
+	onGiteaRun(t, func(*testing.T, *url.URL) {
+		name := "testuser"
+
+		options := []string{"user", "create", "--username", name, "--password", "password", "--email", name + "@example.com"}
+		output, err := runMainApp("admin", options...)
+		require.NoError(t, err)
+		assert.Contains(t, output, "has been successfully created")
+		user := unittest.AssertExistsAndLoadBean(t, &user_model.User{Name: name})
+
+		twoFactor := &auth_model.TwoFactor{
+			UID: user.ID,
+		}
+		token := twoFactor.GenerateScratchToken()
+		require.NoError(t, auth_model.NewTwoFactor(t.Context(), twoFactor, token))
+		twoFactor, err = auth_model.GetTwoFactorByUID(t.Context(), user.ID)
+		require.NoError(t, err)
+		require.NotNil(t, twoFactor)
+
+		options = []string{"user", "reset-mfa", "--username", name}
+		output, err = runMainApp("admin", options...)
+		require.NoError(t, err)
+		assert.Contains(t, output, "two-factor authentication settings have been removed")
+
+		_, err = auth_model.GetTwoFactorByUID(t.Context(), user.ID)
+		require.ErrorContains(t, err, "user not enrolled in 2FA")
+
+		_, err = runMainApp("admin", "user", "delete", "--username", name)
+		require.NoError(t, err)
 	})
 }
