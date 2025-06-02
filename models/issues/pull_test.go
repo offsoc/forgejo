@@ -92,7 +92,7 @@ func TestPullRequests_Closed_RecentSortType(t *testing.T) {
 		{"recentclose", []int64{11, 3, 2}},
 	}
 
-	assert.NoError(t, unittest.PrepareTestDatabase())
+	require.NoError(t, unittest.PrepareTestDatabase())
 	_, err := db.Exec(db.DefaultContext, "UPDATE issue SET closed_unix = 1707270001, updated_unix = 1707270001, is_closed = true WHERE id = 2")
 	require.NoError(t, err)
 	_, err = db.Exec(db.DefaultContext, "UPDATE issue SET closed_unix = 1707271000, updated_unix = 1707279999, is_closed = true WHERE id = 3")
