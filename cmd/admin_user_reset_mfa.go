@@ -4,34 +4,37 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
 	auth_model "forgejo.org/models/auth"
 	user_model "forgejo.org/models/user"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
-var microcmdUserResetMFA = &cli.Command{
-	Name:   "reset-mfa",
-	Usage:  "Remove all two-factor authentication configurations for a user",
-	Action: runResetMFA,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:    "username",
-			Aliases: []string{"u"},
-			Value:   "",
-			Usage:   "The user to update",
+func microcmdUserResetMFA() *cli.Command {
+	return &cli.Command{
+		Name:   "reset-mfa",
+		Usage:  "Remove all two-factor authentication configurations for a user",
+		Action: runResetMFA,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "username",
+				Aliases: []string{"u"},
+				Value:   "",
+				Usage:   "The user to update",
+			},
 		},
-	},
+	}
 }
 
-func runResetMFA(c *cli.Context) error {
+func runResetMFA(ctx context.Context, c *cli.Command) error {
 	if err := argsSet(c, "username"); err != nil {
 		return err
 	}
 
-	ctx, cancel := installSignals()
+	ctx, cancel := installSignals(ctx)
 	defer cancel()
 
 	if err := initDB(ctx); err != nil {
