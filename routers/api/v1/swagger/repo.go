@@ -455,3 +455,17 @@ type swaggerSyncForkInfo struct {
 	// in:body
 	Body []api.SyncForkInfo `json:"body"`
 }
+
+// ActionRunList
+// swagger:response ActionRunList
+type swaggerRepoActionRunList struct {
+	// in:body
+	Body api.ListActionRunResponse `json:"body"`
+}
+
+// ActionRun
+// swagger:response ActionRun
+type swaggerRepoActionRun struct {
+	// in:body
+	Body api.ActionRun `json:"body"`
+}
