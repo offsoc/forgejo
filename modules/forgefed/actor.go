@@ -25,25 +25,6 @@ type ActorID struct {
 }
 
 // Factory function for ActorID. Created struct is asserted to be valid
-func NewActorIDFromKeyID(uri string) (ActorID, error) {
-	parsedURI, err := url.Parse(uri)
-	parsedURI.Fragment = ""
-	if err != nil {
-		return ActorID{}, err
-	}
-	result, err := newActorID(parsedURI.String())
-	if err != nil {
-		return ActorID{}, err
-	}
-
-	if valid, err := validation.IsValid(result); !valid {
-		return ActorID{}, err
-	}
-
-	return result, nil
-}
-
-// Factory function for ActorID. Created struct is asserted to be valid
 func NewActorID(uri string) (ActorID, error) {
 	result, err := newActorID(uri)
 	if err != nil {

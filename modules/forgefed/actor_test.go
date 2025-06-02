@@ -10,20 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestActorNewFromKeyId(t *testing.T) {
-	sut, err := NewActorIDFromKeyID("https://an.other.forgejo.host/api/v1/activitypub/user-id/5#main-key")
-	require.NoError(t, err)
-	assert.Equal(t, ActorID{
-		ID:                 "5",
-		HostSchema:         "https",
-		Path:               "api/v1/activitypub/user-id",
-		Host:               "an.other.forgejo.host",
-		HostPort:           443,
-		UnvalidatedInput:   "https://an.other.forgejo.host/api/v1/activitypub/user-id/5",
-		IsPortSupplemented: true,
-	}, sut)
-}
-
 func TestActorNew(t *testing.T) {
 	sut, err := NewActorID("https://an.other.forgejo.host/api/v1/activitypub/user-id/5")
 	require.NoError(t, err)
