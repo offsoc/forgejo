@@ -4,6 +4,7 @@
 package integration
 
 import (
+	"fmt"
 	"net/url"
 	"testing"
 
@@ -19,7 +20,7 @@ import (
 
 func Test_Cmd_AdminUser(t *testing.T) {
 	onGiteaRun(t, func(*testing.T, *url.URL) {
-		for _, testCase := range []struct {
+		for i, testCase := range []struct {
 			name               string
 			options            []string
 			mustChangePassword bool
@@ -47,7 +48,7 @@ func Test_Cmd_AdminUser(t *testing.T) {
 		} {
 			t.Run(testCase.name, func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
-				name := "testuser"
+				name := fmt.Sprintf("testuser%d", i)
 
 				options := []string{"user", "create", "--username", name, "--password", "password", "--email", name + "@example.com"}
 				options = append(options, testCase.options...)
