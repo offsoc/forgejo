@@ -72,7 +72,12 @@ func (id PersonID) AsLoginName() string {
 }
 
 func (id PersonID) HostSuffix() string {
-	result := fmt.Sprintf("-%s", strings.ToLower(id.Host))
+	var result string
+	if !id.IsPortSupplemented {
+		result = fmt.Sprintf("-%s-%d", strings.ToLower(id.Host), id.HostPort)
+	} else {
+		result = fmt.Sprintf("-%s", strings.ToLower(id.Host))
+	}
 	return result
 }
 
