@@ -311,7 +311,7 @@ func (w *Webhook) HasActionRunRecoverEvent() bool {
 		(w.ChooseEvents && w.ActionRunRecover)
 }
 
-// HasActionRunSuccessEvent returns if hook enabled action recover event.
+// HasActionRunSuccessEvent returns if hook enabled action success event.
 func (w *Webhook) HasActionRunSuccessEvent() bool {
 	return w.SendEverything ||
 		(w.ChooseEvents && w.ActionRunSuccess)
