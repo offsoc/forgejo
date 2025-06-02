@@ -53,7 +53,7 @@ func NewActorIDFromKeyId(ctx *context_service.Base, uri string) (fm.ActorID, err
 	return result, err
 }
 
-func FindOrCreateFederatedUserKey(ctx *context_service.APIContext, keyID string) (pubKey any, err error) {
+func FindOrCreateFederatedUserKey(ctx *context_service.Base, keyID string) (pubKey any, err error) {
 	var federatedUser *user.FederatedUser
 	var keyURL *url.URL
 
@@ -69,12 +69,12 @@ func FindOrCreateFederatedUserKey(ctx *context_service.APIContext, keyID string)
 	}
 
 	if federatedUser == nil {
-		rawActorID, err := NewActorIDFromKeyId(ctx.Base, keyID)
+		rawActorID, err := NewActorIDFromKeyId(ctx, keyID)
 		if err != nil {
 			return nil, err
 		}
 
-		_, federatedUser, _, err = FindOrCreateFederatedUser(ctx.Base, rawActorID.AsURI())
+		_, federatedUser, _, err = FindOrCreateFederatedUser(ctx, rawActorID.AsURI())
 		if err != nil {
 			return nil, err
 		}
@@ -94,7 +94,7 @@ func FindOrCreateFederatedUserKey(ctx *context_service.APIContext, keyID string)
 	}
 
 	// Fetch missing public key
-	pubKey, pubKeyBytes, apPerson, err := fetchKeyFromAp(ctx.Base, *keyURL)
+	pubKey, pubKeyBytes, apPerson, err := fetchKeyFromAp(ctx, *keyURL)
 	if err != nil {
 		return nil, err
 	}
@@ -121,12 +121,12 @@ func FindOrCreateFederatedUserKey(ctx *context_service.APIContext, keyID string)
 	return nil, nil
 }
 
-func FindOrCreateFederationHostKey(ctx *context_service.APIContext, keyID string) (pubKey any, err error) {
+func FindOrCreateFederationHostKey(ctx *context_service.Base, keyID string) (pubKey any, err error) {
 	keyURL, err := url.Parse(keyID)
 	if err != nil {
 		return nil, err
 	}
-	rawActorID, err := NewActorIDFromKeyId(ctx.Base, keyID)
+	rawActorID, err := NewActorIDFromKeyId(ctx, keyID)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func FindOrCreateFederationHostKey(ctx *context_service.APIContext, keyID string
 	}
 
 	if federationHost == nil {
-		federationHost, err = FindOrCreateFederationHost(ctx.Base, rawActorID.AsURI())
+		federationHost, err = FindOrCreateFederationHost(ctx, rawActorID.AsURI())
 		if err != nil {
 			return nil, err
 		}
@@ -154,7 +154,7 @@ func FindOrCreateFederationHostKey(ctx *context_service.APIContext, keyID string
 	}
 
 	// If not, fetch missing public key
-	pubKey, pubKeyBytes, apPerson, err := fetchKeyFromAp(ctx.Base, *keyURL)
+	pubKey, pubKeyBytes, apPerson, err := fetchKeyFromAp(ctx, *keyURL)
 	if err != nil {
 		return nil, err
 	}
