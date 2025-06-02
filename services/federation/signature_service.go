@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"net/url"
 
@@ -191,7 +192,7 @@ func fetchKeyFromAp(ctx *context_service.Base, keyURL url.URL) (pubKey any, pubK
 func decodePublicKeyPem(pubKeyPem string) ([]byte, error) {
 	block, _ := pem.Decode([]byte(pubKeyPem))
 	if block == nil || block.Type != "PUBLIC KEY" {
-		return nil, fmt.Errorf("could not decode publicKeyPem to PUBLIC KEY pem block type")
+		return nil, errors.New("could not decode publicKeyPem to PUBLIC KEY pem block type")
 	}
 
 	return block.Bytes, nil
