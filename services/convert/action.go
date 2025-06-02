@@ -11,7 +11,7 @@ import (
 	api "forgejo.org/modules/structs"
 )
 
-// ToUser convert actions_model.User to api.ActionRun
+// ToActionRun convert actions_model.User to api.ActionRun
 // the run needs all attributes loaded
 func ToActionRun(ctx context.Context, run *actions_model.ActionRun) *api.ActionRun {
 	if run == nil {
