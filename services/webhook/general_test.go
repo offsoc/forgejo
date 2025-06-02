@@ -707,7 +707,7 @@ func TestGetActionPayloadInfo(t *testing.T) {
 		},
 		{
 			api.HookActionSuccess,
-			"Build release Action Success in test/repo main",
+			"Build release Action Succeeded in test/repo main",
 			greenColor,
 		},
 		{

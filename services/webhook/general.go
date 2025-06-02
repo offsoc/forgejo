@@ -316,7 +316,7 @@ func getActionPayloadInfo(p *api.ActionPayload, linkFormatter linkFormatter) (te
 		text = fmt.Sprintf("%s Action Recovered in %s %s", runLink, repoLink, p.Run.PrettyRef)
 		color = greenColor
 	case api.HookActionSuccess:
-		text = fmt.Sprintf("%s Action Success in %s %s", runLink, repoLink, p.Run.PrettyRef)
+		text = fmt.Sprintf("%s Action Succeeded in %s %s", runLink, repoLink, p.Run.PrettyRef)
 		color = greenColor
 	}
 
