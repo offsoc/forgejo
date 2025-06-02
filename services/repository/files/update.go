@@ -5,6 +5,7 @@ package files
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"path"
@@ -56,6 +57,7 @@ type ChangeRepoFilesOptions struct {
 	Committer    *IdentityOptions
 	Dates        *CommitDateOptions
 	Signoff      bool
+	IsDir        bool `default:"false"`
 }
 
 type RepoFileOptions struct {
@@ -88,6 +90,75 @@ func ChangeRepoFiles(ctx context.Context, repo *repo_model.Repository, doer *use
 	// oldBranch must exist for this operation
 	if _, err := gitRepo.GetBranch(opts.OldBranch); err != nil && !repo.IsEmpty {
 		return nil, err
+	}
+
+	if opts.IsDir {
+		if len(opts.Files) != 1 {
+			return nil, errors.New("expected exactly one directory for deletion")
+		}
+
+		if opts.Files[0].Operation != "delete" {
+			return nil, errors.New("invalid operation: only delete is allowed for directory paths")
+		}
+		treePath := CleanUploadFileName(opts.Files[0].TreePath)
+
+		// if we mean the root then we need to replace it with a "."
+		if treePath == "" {
+			treePath = "."
+		}
+
+		message := strings.TrimSpace(opts.Message)
+		author, committer := GetAuthorAndCommitterUsers(opts.Author, opts.Committer, doer)
+
+		t, err := NewTemporaryUploadRepository(ctx, repo)
+		if err != nil {
+			log.Error("NewTemporaryUploadRepository failed: %v", err)
+		}
+		defer t.Close()
+
+		if err := t.Clone(opts.OldBranch, false); err != nil {
+			return nil, err
+		}
+
+		if err := t.SetDefaultIndex(); err != nil {
+			return nil, err
+		}
+
+		if err := t.RefreshIndex(); err != nil {
+			return nil, err
+		}
+
+		if err := t.RemoveDirectoryRecursively(treePath); err != nil {
+			return nil, err
+		}
+
+		treeHash, err := t.WriteTree()
+		if err != nil {
+			return nil, err
+		}
+
+		// Now commit the tree
+		var commitHash string
+		if opts.Dates != nil {
+			commitHash, err = t.CommitTreeWithDate("HEAD", author, committer, treeHash, message, opts.Signoff, opts.Dates.Author, opts.Dates.Committer)
+		} else {
+			commitHash, err = t.CommitTree("HEAD", author, committer, treeHash, message, opts.Signoff)
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		// Then push this tree to NewBranch
+		if err := t.Push(doer, commitHash, opts.NewBranch); err != nil {
+			log.Error("%T %v", err, err)
+			return nil, err
+		}
+
+		if err := t.PruneLFSFiles(); err != nil {
+			return nil, err
+		}
+
+		return nil, nil
 	}
 
 	var treePaths []string

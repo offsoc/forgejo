@@ -113,6 +113,12 @@
 						{{- end -}}
 					</span>
 				{{end}}
+
+				{{if (not .IsViewFile)}}
+					{{if and .CanDeleteFile (not .IsBlame)}}
+						<a href="{{.RepoLink}}/_delete_path/{{PathEscapeSegments .BranchName}}/{{PathEscapeSegments .TreePath}}"><span class="btn-octicon btn-octicon-danger"  data-tooltip-content="{{.DeleteFileTooltip}}">{{svg "octicon-trash"}}</span></a>
+					{{end}}
+				{{end}}
 			</div>
 			<div class="tw-flex tw-items-center">
 				<!-- Only show clone panel in repository home page -->

@@ -1255,6 +1255,8 @@ func registerRoutes(m *web.Route) {
 				m.Combo("/_new/*").Get(repo.NewFile).
 					Post(web.Bind(forms.EditRepoFileForm{}), repo.NewFilePost)
 				m.Post("/_preview/*", web.Bind(forms.EditPreviewDiffForm{}), repo.DiffPreviewPost)
+				m.Combo("/_delete_path/*").Get(repo.DeletePath).
+					Post(web.Bind(forms.DeleteRepoFileForm{}), repo.DeletePathPost)
 				m.Combo("/_delete/*").Get(repo.DeleteFile).
 					Post(web.Bind(forms.DeleteRepoFileForm{}), repo.DeleteFilePost)
 				m.Combo("/_upload/*", repo.MustBeAbleToUpload).

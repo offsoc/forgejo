@@ -381,3 +381,39 @@ func (t *TemporaryUploadRepository) GetCommit(commitID string) (*git.Commit, err
 	}
 	return t.gitRepo.GetCommit(commitID)
 }
+
+// Run LFS prune to clean up LFS objects
+func (t *TemporaryUploadRepository) PruneLFSFiles() error {
+	stdOut := new(bytes.Buffer)
+	stdErr := new(bytes.Buffer)
+	stdIn := new(bytes.Buffer)
+	if err := git.NewCommand(t.ctx, "lfs", "prune").
+		Run(&git.RunOpts{
+			Dir:    t.basePath,
+			Stdin:  stdIn,
+			Stdout: stdOut,
+			Stderr: stdErr,
+		}); err != nil {
+		log.Error("Unable to prune lfs files for temporary repo: %s (%s) Error: %v\nstdout: %s\nstderr: %s", t.repo.FullName(), t.basePath, err, stdOut.String(), stdErr.String())
+		return fmt.Errorf("Unable to prune lfs files for temporary repo: %s Error: %w\nstdout: %s\nstderr: %s", t.repo.FullName(), err, stdOut.String(), stdErr.String())
+	}
+	return nil
+}
+
+// Remove the directory recursively
+func (t *TemporaryUploadRepository) RemoveDirectoryRecursively(directory string) error {
+	stdOut := new(bytes.Buffer)
+	stdErr := new(bytes.Buffer)
+	stdIn := new(bytes.Buffer)
+	if err := git.NewCommand(t.ctx, "rm", "-r").AddDynamicArguments(directory).
+		Run(&git.RunOpts{
+			Dir:    t.basePath,
+			Stdin:  stdIn,
+			Stdout: stdOut,
+			Stderr: stdErr,
+		}); err != nil {
+		log.Error("Unable to remove directory %s recursively for temporary repo: %s (%s) Error: %v\nstdout: %s\nstderr: %s", directory, t.repo.FullName(), t.basePath, err, stdOut.String(), stdErr.String())
+		return fmt.Errorf("Unable to remove directory %s recursively for temporary repo: %s Error: %w\nstdout: %s\nstderr: %s", directory, t.repo.FullName(), err, stdOut.String(), stdErr.String())
+	}
+	return nil
+}

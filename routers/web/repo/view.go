@@ -1187,6 +1187,27 @@ PostRecentBranchCheck:
 	} else {
 		ctx.Data["CodeSearchOptions"] = git.GrepSearchOptions
 	}
+
+	lfsLock, err := git_model.GetTreePathLock(ctx, ctx.Repo.Repository.ID, ctx.Repo.TreePath)
+	if err != nil {
+		ctx.ServerError("git_model.GetTreePathLock", err)
+		return
+	}
+
+	if ctx.Repo.CanEnableEditor(ctx, ctx.Doer) {
+		if lfsLock != nil && lfsLock.OwnerID != ctx.Doer.ID {
+			ctx.Data["CanDeleteFile"] = false
+			ctx.Data["DeleteFileTooltip"] = ctx.Tr("repo.editor.this_file_locked")
+		} else {
+			ctx.Data["CanDeleteFile"] = true
+			ctx.Data["DeleteFileTooltip"] = ctx.Tr("repo.editor.delete_this_file")
+		}
+	} else if !ctx.Repo.IsViewBranch {
+		ctx.Data["DeleteFileTooltip"] = ctx.Tr("repo.editor.must_be_on_a_branch")
+	} else if !ctx.Repo.CanWriteToBranch(ctx, ctx.Doer, ctx.Repo.BranchName) {
+		ctx.Data["DeleteFileTooltip"] = ctx.Tr("repo.editor.must_have_write_access")
+	}
+
 	ctx.HTML(http.StatusOK, tplRepoHome)
 }
 

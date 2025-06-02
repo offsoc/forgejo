@@ -489,8 +489,23 @@ func DeleteFile(ctx *context.Context) {
 	ctx.HTML(http.StatusOK, tplDeleteFile)
 }
 
+// DeletePath render delete file page
+func DeletePath(ctx *context.Context) {
+	DeleteFile(ctx)
+}
+
 // DeleteFilePost response for deleting file
 func DeleteFilePost(ctx *context.Context) {
+	DeletePathOrFilePost(ctx, false)
+}
+
+// DeletePathPost response for deleting path
+func DeletePathPost(ctx *context.Context) {
+	DeletePathOrFilePost(ctx, true)
+}
+
+// DeletePathOrFilePost response for deleting path or file
+func DeletePathOrFilePost(ctx *context.Context, isdir bool) {
 	form := web.GetForm(ctx).(*forms.DeleteRepoFileForm)
 	canCommit := renderCommitRights(ctx)
 	branchName := ctx.Repo.BranchName
@@ -543,6 +558,7 @@ func DeleteFilePost(ctx *context.Context) {
 				TreePath:  ctx.Repo.TreePath,
 			},
 		},
+		IsDir:     isdir, // Add this flag to indicate directory deletion
 		Message:   message,
 		Signoff:   form.Signoff,
 		Author:    gitIdentity,
