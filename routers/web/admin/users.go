@@ -186,7 +186,7 @@ func NewUserPost(ctx *context.Context) {
 		case user_model.IsErrEmailAlreadyUsed(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_been_used"), tplUserNew, &form)
-		case validation.IsErrEmailInvalid(err), validation.IsErrEmailCharIsNotSupported(err):
+		case validation.IsErrEmailInvalid(err):
 			ctx.Data["Err_Email"] = true
 			ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tplUserNew, &form)
 		case db.IsErrNameReserved(err):
@@ -195,9 +195,6 @@ func NewUserPost(ctx *context.Context) {
 		case db.IsErrNamePatternNotAllowed(err):
 			ctx.Data["Err_UserName"] = true
 			ctx.RenderWithErr(ctx.Tr("user.form.name_pattern_not_allowed", err.(db.ErrNamePatternNotAllowed).Pattern), tplUserNew, &form)
-		case db.IsErrNameCharsNotAllowed(err):
-			ctx.Data["Err_UserName"] = true
-			ctx.RenderWithErr(ctx.Tr("user.form.name_chars_not_allowed", err.(db.ErrNameCharsNotAllowed).Name), tplUserNew, &form)
 		default:
 			ctx.ServerError("CreateUser", err)
 		}
@@ -410,7 +407,7 @@ func EditUserPost(ctx *context.Context) {
 	if form.Email != "" {
 		if err := user_service.AdminAddOrSetPrimaryEmailAddress(ctx, u, form.Email); err != nil {
 			switch {
-			case validation.IsErrEmailCharIsNotSupported(err), validation.IsErrEmailInvalid(err):
+			case validation.IsErrEmailInvalid(err):
 				ctx.Data["Err_Email"] = true
 				ctx.RenderWithErr(ctx.Tr("form.email_invalid"), tplUserEdit, &form)
 			case user_model.IsErrEmailAlreadyUsed(err):

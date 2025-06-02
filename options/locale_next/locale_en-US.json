@@ -4,6 +4,12 @@
     "home.explore_repos": "Explore repositories",
     "home.explore_users": "Explore users",
     "home.explore_orgs": "Explore organizations",
+    "stars.list.none": "No one starred this repo.",
+    "watch.list.none": "No one is watching this repo.",
+    "followers.incoming.list.self.none": "No one is following your profile.",
+    "followers.incoming.list.none": "No one is following this user.",
+    "followers.outgoing.list.self.none": "You are not following anyone.",
+    "followers.outgoing.list.none": "%s isn't following anyone.",
     "relativetime.now": "now",
     "relativetime.future": "in future",
     "relativetime.mins": {
@@ -84,5 +90,7 @@
     "mail.actions.run_info_ref": "Branch: %[1]s (%[2]s)",
     "mail.actions.run_info_trigger": "Triggered because: %[1]s by: %[2]s",
     "discussion.locked": "This discussion has been locked. Commenting is limited to contributors.",
+    "editor.textarea.tab_hint": "Line already indented. Press <kbd>Tab</kbd> again or <kbd>Escape</kbd> to leave the editor.",
+    "editor.textarea.shift_tab_hint": "No indentation on this line. Press <kbd>Shift</kbd> + <kbd>Tab</kbd> again or <kbd>Escape</kbd> to leave the editor.",
     "meta.last_line": "Thank you for translating Forgejo! This line isn't seen by the users but it serves other purposes in the translation management. You can place a fun fact in the translation instead of translating it."
 }

@@ -96,7 +96,6 @@
 									"commitLink" (printf "%s/commit/%s" $repoLink .Sha1)
 									"signature" .Signature
 									"verification" .Verification
-									"svgSize" 13
 								)}}
 								<span class="text truncate">
 									{{RenderCommitMessage $.Context .Message ($repo.ComposeMetas ctx)}}

@@ -267,7 +267,7 @@ func TestHashPasswordDeterministic(t *testing.T) {
 			r2 := u.Passwd
 
 			assert.NotEqual(t, r1, r2)
-			assert.True(t, u.ValidatePassword(pass))
+			assert.True(t, u.ValidatePassword(t.Context(), pass))
 		}
 	}
 }
@@ -324,7 +324,7 @@ func TestCreateUserInvalidEmail(t *testing.T) {
 
 	err := user_model.CreateUser(db.DefaultContext, user)
 	require.Error(t, err)
-	assert.True(t, validation.IsErrEmailCharIsNotSupported(err))
+	assert.True(t, validation.IsErrEmailInvalid(err))
 }
 
 func TestCreateUserEmailAlreadyUsed(t *testing.T) {

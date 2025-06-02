@@ -30,7 +30,6 @@ func Middlewares() (stack []any) {
 	return append(stack,
 		context.APIContexter(),
 
-		checkDeprecatedAuthMethods,
 		// Get user from session if logged in.
 		apiAuth(buildAuthGroup()),
 		verifyAuthWithOptions(&common.VerifyOptions{
@@ -124,13 +123,6 @@ func verifyAuthWithOptions(options *common.VerifyOptions) func(ctx *context.APIC
 				return
 			}
 		}
-	}
-}
-
-// check for and warn against deprecated authentication options
-func checkDeprecatedAuthMethods(ctx *context.APIContext) {
-	if ctx.FormString("token") != "" || ctx.FormString("access_token") != "" {
-		ctx.Resp.Header().Set("Warning", "token and access_token API authentication is deprecated and will be removed in gitea 1.23. Please use AuthorizationHeaderToken instead. Existing queries will continue to work but without authorization.")
 	}
 }
 

@@ -26,7 +26,9 @@
 							{{else}}
 								<span class="text red">{{svg "octicon-alert"}}</span>
 							{{end}}
-							<a class="ui primary sha label toggle button show-panel" data-panel="#info-{{.ID}}">{{.UUID}}</a>
+							<a class="ui primary sha label toggle button show-panel" data-panel="#info-{{.ID}}">
+								<span class="shortsha">{{.UUID}}</span>
+							</a>
 						</div>
 						<span class="text grey">
 							{{DateUtils.TimeSince .Delivered}}
