@@ -145,7 +145,7 @@ func TestPersonIdValidation(t *testing.T) {
 	sut.HostPort = 443
 	sut.IsPortSupplemented = true
 	sut.UnvalidatedInput = "https://an.other.host/api/v1/activitypub/user-id/1"
-	if sut.Validate()[0] != "Value forgejox is not contained in allowed values [forgejo gitea]" {
+	if sut.Validate()[0] != "Field Source contains the value forgejox, which is not in allowed subset [forgejo gitea]" {
 		t.Errorf("validation error expected but was: %v\n", sut.Validate()[0])
 	}
 }
@@ -166,31 +166,31 @@ func TestShouldThrowErrorOnInvalidInput(t *testing.T) {
 	var err any
 	_, err = NewPersonID("", "forgejo")
 	if err == nil {
-		t.Errorf("empty input should be invalid.")
+		t.Error("empty input should be invalid.")
 	}
 	_, err = NewPersonID("http://localhost:3000/api/v1/something", "forgejo")
 	if err == nil {
-		t.Errorf("localhost uris are not external")
+		t.Error("localhost uris are not external")
 	}
 	_, err = NewPersonID("./api/v1/something", "forgejo")
 	if err == nil {
-		t.Errorf("relative uris are not allowed")
+		t.Error("relative uris are not allowed")
 	}
 	_, err = NewPersonID("http://1.2.3.4/api/v1/something", "forgejo")
 	if err == nil {
-		t.Errorf("uri may not be ip-4 based")
+		t.Error("uri may not be ip-4 based")
 	}
 	_, err = NewPersonID("http:///[fe80::1ff:fe23:4567:890a%25eth0]/api/v1/something", "forgejo")
 	if err == nil {
-		t.Errorf("uri may not be ip-6 based")
+		t.Error("uri may not be ip-6 based")
 	}
 	_, err = NewPersonID("https://codeberg.org/api/v1/activitypub/../activitypub/user-id/12345", "forgejo")
 	if err == nil {
-		t.Errorf("uri may not contain relative path elements")
+		t.Error("uri may not contain relative path elements")
 	}
 	_, err = NewPersonID("https://myuser@an.other.host/api/v1/activitypub/user-id/1", "forgejo")
 	if err == nil {
-		t.Errorf("uri may not contain unparsed elements")
+		t.Error("uri may not contain unparsed elements")
 	}
 	_, err = NewPersonID("https://an.other.host/api/v1/activitypub/user-id/1", "forgejo")
 	if err != nil {
