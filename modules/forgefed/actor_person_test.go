@@ -157,7 +157,7 @@ func TestPersonIdValidation(t *testing.T) {
 
 	result, err = validation.IsValid(sut)
 	assert.False(t, result)
-	require.EqualError(t, err, "Validation Error: forgefed.PersonID: Field Source does contain value forgejox, which is not in allowed subset [forgejo gitea mastodon gotosocial]")
+	require.EqualError(t, err, "Validation Error: forgefed.PersonID: Field Source contains the value forgejox, which is not in allowed subset [forgejo gitea mastodon gotosocial]")
 }
 
 func TestWebfingerId(t *testing.T) {
