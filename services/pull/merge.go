@@ -181,17 +181,17 @@ func AddCommitMessageTrailer(message, tailerKey, tailerValue string) string {
 	if !strings.HasSuffix(message, "\n") {
 		message += "\n"
 	}
-	pos1 := strings.LastIndexByte(message[:len(message)-1], '\n')
-	pos2 := -1
-	if pos1 != -1 {
-		pos2 = strings.IndexByte(message[pos1:], ':')
-		if pos2 != -1 {
-			pos2 += pos1
+	lastNewLine := strings.LastIndexByte(message[:len(message)-1], '\n')
+	keyEnd := -1
+	if lastNewLine != -1 {
+		keyEnd = strings.IndexByte(message[lastNewLine:], ':')
+		if keyEnd != -1 {
+			keyEnd += lastNewLine
 		}
 	}
 	var lastLineKey string
-	if pos1 != -1 && pos2 != -1 {
-		lastLineKey = message[pos1+1 : pos2]
+	if lastNewLine != -1 && keyEnd != -1 {
+		lastLineKey = message[lastNewLine+1 : keyEnd]
 	}
 
 	isLikelyTrailerLine := lastLineKey != "" && unicode.IsUpper(rune(lastLineKey[0])) && strings.Contains(message, "-")
