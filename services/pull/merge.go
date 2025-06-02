@@ -170,11 +170,11 @@ func GetDefaultMergeMessage(ctx context.Context, baseGitRepo *git.Repository, pr
 	return getMergeMessage(ctx, baseGitRepo, pr, mergeStyle, nil)
 }
 
-func AddCommitMessageTailer(message, tailerKey, tailerValue string) string {
-	tailerLine := tailerKey + ": " + tailerValue
+func AddCommitMessageTrailer(message, tailerKey, tailerValue string) string {
+	trailerLine := tailerKey + ": " + tailerValue
 	message = strings.ReplaceAll(message, "\r\n", "\n")
 	message = strings.ReplaceAll(message, "\r", "\n")
-	if strings.Contains(message, "\n"+tailerLine+"\n") || strings.HasSuffix(message, "\n"+tailerLine) {
+	if strings.Contains(message, "\n"+trailerLine+"\n") || strings.HasSuffix(message, "\n"+trailerLine) {
 		return message
 	}
 
@@ -194,15 +194,15 @@ func AddCommitMessageTailer(message, tailerKey, tailerValue string) string {
 		lastLineKey = message[pos1+1 : pos2]
 	}
 
-	isLikelyTailerLine := lastLineKey != "" && unicode.IsUpper(rune(lastLineKey[0])) && strings.Contains(message, "-")
-	for i := 0; isLikelyTailerLine && i < len(lastLineKey); i++ {
+	isLikelyTrailerLine := lastLineKey != "" && unicode.IsUpper(rune(lastLineKey[0])) && strings.Contains(message, "-")
+	for i := 0; isLikelyTrailerLine && i < len(lastLineKey); i++ {
 		r := rune(lastLineKey[i])
-		isLikelyTailerLine = unicode.IsLetter(r) || unicode.IsDigit(r) || r == '-'
+		isLikelyTrailerLine = unicode.IsLetter(r) || unicode.IsDigit(r) || r == '-'
 	}
-	if !strings.HasSuffix(message, "\n\n") && !isLikelyTailerLine {
+	if !strings.HasSuffix(message, "\n\n") && !isLikelyTrailerLine {
 		message += "\n"
 	}
-	return message + tailerLine
+	return message + trailerLine
 }
 
 // Merge merges pull request to base repository.
