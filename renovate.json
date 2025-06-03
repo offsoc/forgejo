@@ -36,8 +36,7 @@
       "description": "Schedule some deps less frequently",
       "matchPackageNames": [
         "code.forgejo.org/f3/gof3/**",
-        "github.com/google/pprof",
-        "github.com/golangci/misspell/cmd/misspell"
+        "github.com/google/pprof"
       ],
       "extends": ["schedule:quarterly"]
     },
