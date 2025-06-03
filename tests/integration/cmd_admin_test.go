@@ -14,6 +14,7 @@ import (
 	user_model "forgejo.org/models/user"
 	"forgejo.org/tests"
 
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -169,6 +170,9 @@ func Test_Cmd_AdminUserResetMFA(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, twoFactor)
 
+		authn, err := auth_model.CreateCredential(t.Context(), user.ID, "test", &webauthn.Credential{})
+		require.NoError(t, err)
+
 		options = []string{"user", "reset-mfa", "--username", name}
 		output, err = runMainApp("admin", options...)
 		require.NoError(t, err)
@@ -176,6 +180,9 @@ func Test_Cmd_AdminUserResetMFA(t *testing.T) {
 
 		_, err = auth_model.GetTwoFactorByUID(t.Context(), user.ID)
 		require.ErrorContains(t, err, "user not enrolled in 2FA")
+
+		_, err = auth_model.GetWebAuthnCredentialByID(t.Context(), authn.ID)
+		require.ErrorContains(t, err, "WebAuthn credential does not exist")
 
 		_, err = runMainApp("admin", "user", "delete", "--username", name)
 		require.NoError(t, err)
