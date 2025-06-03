@@ -8,7 +8,6 @@
   ],
   "baseBranches": [
     "$default",
-    "/^v7\\.\\d+/forgejo$/",
     "/^v11\\.\\d+/forgejo$/"
   ],
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
@@ -146,10 +145,10 @@
       "minimumReleaseAge": "30 days"
     },
     {
-      "description": "Disable indirect major for stable branches",
+      "description": "Disable indirect updates for stable branches",
       "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
       "matchManagers": ["gomod"],
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
       "matchDepTypes": ["indirect"],
       "enabled": false
     },
