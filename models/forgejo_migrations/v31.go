@@ -10,14 +10,43 @@ import (
 
 func SetTopicsAsEmptySlice(x *xorm.Engine) error {
 	var err error
-	if x.Dialect().URI().DBType == schemas.POSTGRES {
+	switch x.Dialect().URI().DBType {
+	case schemas.MYSQL:
+		_, err = x.Exec("UPDATE `repository` SET topics = '[]' WHERE topics IS NULL OR topics = 'null'")
+	case schemas.SQLITE:
+		_, err = x.Exec("UPDATE `repository` SET topics = '[]' WHERE topics IS NULL OR topics = 'null'")
+	case schemas.POSTGRES:
 		_, err = x.Exec("UPDATE `repository` SET topics = '[]' WHERE topics IS NULL OR topics::text = 'null'")
-	} else {
-		_, err = x.Exec("UPDATE `repository` SET topics = '[]' WHERE topics IS NULL")
 	}
 
 	if err != nil {
 		return err
+	}
+
+	if x.Dialect().URI().DBType == schemas.SQLITE {
+		sessMigration := x.NewSession()
+		defer sessMigration.Close()
+		if err := sessMigration.Begin(); err != nil {
+			return err
+		}
+		_, err = sessMigration.Exec("ALTER TABLE `repository` RENAME COLUMN `topics` TO `topics_backup`")
+		if err != nil {
+			return err
+		}
+		_, err = sessMigration.Exec("ALTER TABLE `repository` ADD COLUMN `topics` TEXT NOT NULL DEFAULT '[]'")
+		if err != nil {
+			return err
+		}
+		_, err = sessMigration.Exec("UPDATE `repository` SET `topics` = `topics_backup`")
+		if err != nil {
+			return err
+		}
+		_, err = sessMigration.Exec("ALTER TABLE `repository` DROP COLUMN `topics_backup`")
+		if err != nil {
+			return err
+		}
+
+		return sessMigration.Commit()
 	}
 
 	type Repository struct {
