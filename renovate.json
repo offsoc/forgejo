@@ -148,7 +148,7 @@
       "description": "Disable indirect updates for stable branches",
       "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
       "matchManagers": ["gomod"],
-      "matchUpdateTypes": ["major", "minor", "patch"],
+      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
       "matchDepTypes": ["indirect"],
       "enabled": false
     },
