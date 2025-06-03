@@ -330,6 +330,7 @@ func (m msteamsConvertor) Action(p *api.ActionPayload) (MSTeamsPayload, error) {
 	title, color := getActionPayloadInfo(p, noneLinkFormatter)
 
 	// TODO: is TriggerUser correct here?
+	// if you'd like to test these proprietary services, see the discussion on: https://codeberg.org/forgejo/forgejo/pulls/7508
 	return createMSTeamsPayload(
 		p.Run.Repo,
 		p.Run.TriggerUser,
