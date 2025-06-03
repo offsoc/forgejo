@@ -129,3 +129,6 @@ prime/
 
 # Manpage
 /man
+
+# Docker Compose Overrides
+/compose*.override.y*ml

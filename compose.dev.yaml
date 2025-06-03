@@ -1,0 +1,56 @@
+#
+# Usage
+# -----
+#
+# Run from project root:
+#     docker compose --file compose.dev.yaml up --detach
+# And then `exec` into it:
+#     docker exec -it forgejo_dev bash
+#
+# Or you can run this handy one-liner:
+#     docker compose --file compose.dev.yaml up --build --detach && docker exec -it forgejo_dev bash
+#
+#
+# Customize
+# ---------
+#
+# You can create a file named `compose.dev.override.yaml` that will be ignored by git.
+# In it you can override any value of this configuration.
+# Sadly, you have to specify it explicitly in the `up` command as well, like so:
+#
+#     docker compose -f compose.dev.yaml -f compose.dev.override.yaml up -d && docker exec -it forgejo_dev bash
+#
+#
+# Override ports, volumes or networks
+# -----------------------------------
+#
+# By default, overridden arrays will be merged, yet that may not be what you want.
+# Thankfully, there's a way around that, see:
+# https://docs.docker.com/reference/compose-file/merge/#replace-value
+#
+services:
+  forgejo_dev:
+    hostname: forgejo-dev
+    container_name: forgejo_dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: dev-env
+      # See the top of the `Dockerfile.dev` file for the available args.
+      args:
+        # Timezone will default to Etc/UTC when not set.
+        TZ: Europe/Berlin
+    restart: no
+    volumes:
+      - ./:/opt/forgejo/
+    networks:
+      - forgejo_dev
+    ports:
+      - '3000:3000'  # web ports (host:container)
+      - '222:22'     # ssh ports (host:container)
+
+
+networks:
+  forgejo_dev:
+    name: forgejo_dev
+    external: false

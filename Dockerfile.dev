@@ -1,0 +1,455 @@
+
+#
+# This Dockerfile's purpose is to provide a battery-included environment in which to:
+# - run the tests via `make test` and other `test-*` targets
+# - run the other `make` targets during dev
+#
+# Important
+# ---------
+# You WILL NEED to mount a volume from the forge's source code (`./`) to the WORKING_DIR (`/opt/forgejo/`).
+# You can either do this by using the companion docker `compose.dev.yaml` file:
+#     docker compose --file compose.dev.yaml up --detach && docker exec -it forgejo_dev bash
+# Which you can override using an uncommitted file named `compose.dev.override.yaml`, but you'll have to specify it:
+#     docker compose -f compose.dev.yaml -f compose.dev.override.yaml up -d && docker exec -it forgejo_dev bash
+#
+# Or by using the `Dockerfile` directly:
+#     docker buildx build --tag 'forgejo_dev' --file Dockerfile.dev .
+#     docker run --detach --volume .:/opt/forgejo --name 'forgejo_dev' 'forgejo_dev'
+#     docker exec -it forgejo_dev bash
+#
+
+
+# This name will be injected into paths ; best not put spaces or special characters in here.
+ARG FORGE_NAME="forgejo"
+
+# Right now Forgejo needs at least `go 1.24`, as one can see in the `go.mod` file.
+# NOTE: We should extract that required Golang version from `go.mod`, but we can't without Dockerfile generation.
+#       We _really_ don't want to do dynamic and nasty Dockerfile generation, so this'll have to do for now.
+# NOTE: This version number will help fetch the docker image `golang:${GOLANG_VERSION}-alpine`, which has to exist.
+ARG GOLANG_VERSION=1.24
+
+# Right now Forgejo needs at least `node 20.0.0`, as one can see in the `package.json` file.
+# NOTE: We should extract that required NodeJs version from `package.json`, but we can't without Dockerfile generation.
+# NOTE: This version number will help fetch the docker image `node:${NODE_VERSION}-slim`, which has to exist.
+ARG NODE_VERSION=20
+
+# Where WORKDIR will be set in our various Dockerfile stages, when we don't want to work on `/`.
+ARG WORKING_DIR="/opt/${FORGE_NAME}"
+
+# Ports that the forge will EXPOSE.
+ARG WEB_PORT=3000
+ARG SSH_PORT=22
+
+# Timezone is required during the build phase by system dependencies (`tzdata`).
+ARG TZ="Etc/UTC"
+
+
+
+##############################################################################
+# The purpose of this Dockerfile stage is to fetch the appropriate Golang version from ARG.
+# This is because we cannot interpolate in COPY, see:
+# https://forums.docker.com/t/how-can-i-expand-a-variable-within-a-copy-command-in-the-dockerfile/113538/7
+FROM golang:${GOLANG_VERSION}-alpine AS golang-versioned
+
+
+
+##############################################################################
+# The purpose of this Dockerfile stage is to collect the Golang dependencies.
+FROM ubuntu:24.04 AS go-dev-deps
+
+
+#RUN echo "$(whoami) in $(pwd)"
+#> "root in /"
+# But we don't want to work directly in / ; any other empty, non-tmpfs dir will work for us.
+ARG WORKING_DIR
+WORKDIR "${WORKING_DIR}"
+
+
+# Timezone is required for the next layer (apt-get install), as `tzdata` will be installed.
+ARG TZ
+RUN ln --symbolic --no-dereference --force "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
+    echo "${TZ}" > /etc/timezone
+
+
+# Let's start by installing what we're going to need system-wise to pull the Golang packages.
+# Cache Doc: https://docs.docker.com/build/cache/optimize/#use-cache-mounts
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get --quiet update && \
+    apt-get --quiet --no-install-recommends --yes install \
+      make \
+      git \
+      ca-certificates
+
+
+# In order to install the dependencies directly in the dev-env image, so we don't have to install them in the container,
+# we need some of the source files to build the dependencies.  This is why we use another target to build deps.
+COPY \
+     # Files to COPY from the Host
+     ./go.mod \
+     ./go.sum \
+     ./Makefile \
+     # Destination directory in the Image
+     ./
+
+
+# Let's COPY what we need from another image instead of going through the crazy wget install of Golang.
+COPY --from=golang-versioned /usr/local/go/ /usr/local/go/
+ENV PATH="${PATH}:/usr/local/go/bin"
+
+
+#RUN go env
+#> AR='ar'
+#> CC='gcc'
+#> CGO_CFLAGS='-O2 -g'
+#> CGO_CPPFLAGS=''
+#> CGO_CXXFLAGS='-O2 -g'
+#> CGO_ENABLED='0'
+#> CGO_FFLAGS='-O2 -g'
+#> CGO_LDFLAGS='-O2 -g'
+#> CXX='g++'
+#> GCCGO='gccgo'
+#> GO111MODULE=''
+#> GOAMD64='v1'
+#> GOARCH='amd64'
+#> GOAUTH='netrc'
+#> GOBIN=''
+#> GOCACHE='/root/.cache/go-build'
+#> GOCACHEPROG=''
+#> GODEBUG=''
+#> GOENV='/root/.config/go/env'
+#> GOEXE=''
+#> GOEXPERIMENT=''
+#> GOFIPS140='off'
+#> GOFLAGS=''
+#> GOGCCFLAGS='-fPIC -m64  <…>  -gno-record-gcc-switches'
+#> GOHOSTARCH='amd64'
+#> GOHOSTOS='linux'
+#> GOINSECURE=''
+#> GOMOD='/opt/forgejo/go.mod'
+#> GOMODCACHE='/root/go/pkg/mod'
+#> GONOPROXY=''
+#> GONOSUMDB=''
+#> GOOS='linux'
+#> GOPATH='/root/go'
+#> GOPRIVATE=''
+#> GOPROXY='https://proxy.golang.org,direct'
+#> GOROOT='/usr/local/go'
+
+
+# Download and install Golang dependencies.
+# NOTE: We mustn't be in `/tmp` at this point, because `go` will ignore `go.mod` files in temporary filesystems.
+# NOTE: We may not use the substitution `$(go env GOCACHE)` in the `--mount` part of this command.  …  We tried.
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    make deps-backend ; make deps-tools
+    # NOTE: These `make` targets print a bunch of nonfatal warnings, whatever they say.
+    # This is due to the `%` target of the `Makefile`, and I don't know how to skip/silence them.
+    #> fatal: not a git repository (or any of the parent directories): .git
+    #> fatal: not a git repository (or any of the parent directories): .git
+    #> fatal: not a git repository (or any of the parent directories): .git
+    #> find: 'web_src/js': No such file or directory
+    #> find: 'web_src/css': No such file or directory
+    #> find: 'build': No such file or directory
+    #> find: 'cmd': No such file or directory
+    #> find: 'models': No such file or directory
+    #> find: 'modules': No such file or directory
+    #> find: 'routers': No such file or directory
+    #> find: 'services': No such file or directory
+    #> find: 'tests': No such file or directory
+    #> go: warning: "forgejo.org/models/migrations/..." matched no packages
+    #> go: warning: "forgejo.org/models/forgejo_migrations/..." matched no packages \
+
+
+
+##############################################################################
+# The purpose of this Dockerfile stage is to collect the Python dependencies.
+FROM ubuntu:24.04 AS py-dev-deps
+
+
+# We don't want to be working directly on `/` ; any empty directory will work for us.
+ARG WORKING_DIR
+WORKDIR "${WORKING_DIR}"
+
+
+# Poetry (only) uses these files to resolve our Python dependencies.
+COPY ./poetry.toml ./poetry.lock ./pyproject.toml ./
+
+
+# Timezone is required for the next layer (apt-get install), as `tzdata` will be installed.
+ARG TZ
+RUN ln --symbolic --no-dereference --force "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
+    echo "${TZ}" > /etc/timezone
+
+
+# According to `poetry.lock` we need at least Poetry `1.8.3`.
+# NOTE: Extracting the required poetry version from the `poetry.lock` file would be nice (but NO Dockerfile gen !).
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get --quiet update && \
+    apt-get --quiet --no-install-recommends --yes install \
+      python3-poetry
+
+
+# Apparently ubuntu:24.04 provides the exact Poetry version we require.
+#RUN poetry --version
+#> Poetry (version 1.8.2)
+
+
+# Run the equivalent of `make deps-py`, with extra sweet options.
+RUN poetry install --no-interaction --compile
+
+
+#RUN poetry config --list
+#> cache-dir = "/root/.cache/pypoetry"
+#> experimental.system-git-client = false
+#> installer.max-workers = null
+#> installer.modern-installation = true
+#> installer.no-binary = null
+#> installer.parallel = true
+#> keyring.enabled = true
+#> solver.lazy-wheel = true
+#> virtualenvs.create = true
+#> virtualenvs.in-project = true
+#> virtualenvs.options.always-copy = false
+#> virtualenvs.options.no-pip = true
+#> virtualenvs.options.no-setuptools = true
+#> virtualenvs.options.system-site-packages = false
+#> virtualenvs.path = "{cache-dir}/virtualenvs"  #> /root/.cache/pypoetry/virtualenvs
+#> virtualenvs.prefer-active-python = false
+#> virtualenvs.prompt = "{project_name}-py{python_version}"
+#> warnings.export = true
+
+
+
+##############################################################################
+# The purpose of this Dockerfile stage is to collect the NodeJs dependencies.
+# Forgejo requires `node >= 20.0.0`, as per `package.json`.
+# If you can figure out how to extract it and target the correct image here, do it. (but NO Dockerfile gen !)
+FROM node:${NODE_VERSION}-slim AS node-dev-deps
+
+
+# We don't want to be working directly on `/` ; any empty directory will work for us.
+ARG WORKING_DIR
+WORKDIR "${WORKING_DIR}"
+
+
+# Node uses these files to resolve our Javascript dependencies.
+COPY ./package.json ./package-lock.json ./
+
+
+# Install the NodeJs packages, just like `make deps-frontend`.
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --no-save
+
+
+
+##############################################################################
+# This Dockerfile stage is the one we want to exec into during dev, to run `make` targets.
+# We might want to move to a lighter base image at some point if we can get away with it.
+# We had some trouble with alpine and i18n in `make test-frontend`, but it might work with some more wit.
+FROM ubuntu:24.04 AS dev-env
+
+
+# We don't want to be working directly on `/` ; any empty directory will work for us.
+# Let's go straight into the directory where we're going to put our source code via a volume.
+ARG WORKING_DIR
+WORKDIR "${WORKING_DIR}"
+
+
+# We're going to need Timezone information in the `apt-get` step below because it installs `tzdata`.
+# We used to mount `/etc/timezone` and `/etc/localtime` via volumes, but we need those during build.
+ARG TZ
+RUN ln --symbolic --no-dereference --force "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
+    echo "${TZ}" > /etc/timezone
+
+
+# Install some system packages we're going to need to run the make targets of Forgejo.
+# We are optimizing cache usage as per : https://docs.docker.com/build/cache/optimize/#use-cache-mounts
+# Packages will be updated if necessary, but won't be re-downloaded if they have not changed, and won't be in the image.
+# > Apt needs exclusive access to its data, so the caches use the option sharing=locked to ensure parallel builds
+# > using the same cache mount wait for each other and not access the same cache files at the same time. — The Docs
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get --quiet update && \
+    apt-get --quiet --no-install-recommends --yes install \
+      # We want to be able to use the various `make` targets during development
+      make \
+      bash-completion \
+      # We want to be able to be a superuser in our development environment sometimes
+      sudo \
+      # Git dependencies, including the Large File System plugin (required)
+      git \
+      git-lfs \
+      # Python's Poetry, just in case we want to run it during dev (convenience)
+      python3-poetry \
+      python-is-python3 \
+      # Playwright dependencies, for End to End testing (browser automation tests)
+      libasound2t64 \
+      libatk1.0-0 \
+      libatk-bridge2.0-0 \
+      libatspi2.0-0 \
+      libcups2 \
+      libgbm1 \
+      libgtk-3-0 \
+      libnss3 \
+      libnspr4 \
+      libx11-xcb1 \
+      libxcomposite1 \
+      libxcursor1 \
+      libxdamage1 \
+      libxfixes3 \
+      libxkbcommon0 \
+      libxrandr2 \
+      # More Playwright dependencies
+      libavif16 \
+      libenchant-2-2 \
+      libevent-2.1-7t64 \
+      libflite1 \
+      libharfbuzz-icu0 \
+      libhyphen0 \
+      libmanette-0.2-0 \
+      libopus0 \
+      libgles2 \
+      libgraphene-1.0-0 \
+      libgstreamer1.0-0 \
+      libgstreamer-gl1.0-0 \
+      libgstreamer-plugins-bad1.0-0 \
+      libgstreamer-plugins-base1.0-0 \
+      libgtk-4-1 \
+      libsecret-1-0 \
+      libvulkan1 \
+      libvpx9 \
+      libx264-dev \
+      libxslt1.1 \
+      libwebpdemux2 \
+      libwebpmux3 \
+      libwoff1 \
+      # Building the forgejo binary
+      build-essential \
+      openssh-client
+
+
+# Grab the Go binary from the appropriate Dockerfile stage defined above.
+# Right now Forgejo needs at least `go 1.24`, as defined in the `go.mod` file.
+# Let's COPY from another image instead of going through the crazy wget install.
+# We will grab the required go libraries later on below, as a (usually) non-root USER.
+COPY --from=go-dev-deps /usr/local/go/ /usr/local/go/
+ENV PATH "${PATH}:/usr/local/go/bin"
+
+
+# Grab Python dependencies from the appropriate Dockerfile stage defined above.
+COPY --from=py-dev-deps /root/.cache/pypoetry /root/.cache/pypoetry
+
+
+# Grab NodeJs dependencies from the appropriate Dockerfile stage defined above.
+COPY --from=node-dev-deps /usr/local/bin/ /usr/local/bin/
+COPY --from=node-dev-deps /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
+
+
+# We're probably going to want this environment value.  We'll see.
+#ENV GITEA_CUSTOM="${WORKING_DIR}/data/gitea"
+
+
+# Forgejo won't run as root ; we need another user, and `git` ought to be fine.
+# Besides, we want SSH clone URIs of the form `git@domain.com/author/repo.git`.
+ARG GIT_USER_UID=777
+ARG GIT_USER_GID=777
+ARG GIT_USER_HOME=/home/git
+RUN addgroup \
+      --system \
+      --gid ${GIT_USER_GID} \
+      git && \
+    adduser \
+      --system \
+      --home "${GIT_USER_HOME}" \
+      --shell /usr/bin/sh \
+      --uid ${GIT_USER_UID} \
+      --ingroup git \
+      git && \
+    echo "git:*" | chpasswd -e
+
+
+# Enable some lazy way to become superuser again once in the container, via `sudo`.
+RUN echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/lazysudo
+RUN usermod --append --groups sudo ubuntu
+
+
+# It's time to become the final form that we were always meant to be.
+# Just make sure we don't have anything else to do as root below this instruction.
+# This used to be a configurable ARG, but failure to read $HOME caused trouble in the COPY operation below.
+# Since now we made sure that the ubuntu user is a `sudoer`, you can `su` manually to whomever you want.
+USER ubuntu
+
+
+#RUN go env
+#> AR='ar'
+#> CC='gcc'
+#> CGO_CFLAGS='-O2 -g'
+#> CGO_CPPFLAGS=''
+#> CGO_CXXFLAGS='-O2 -g'
+#> CGO_ENABLED='0'
+#> CGO_FFLAGS='-O2 -g'
+#> CGO_LDFLAGS='-O2 -g'
+#> CXX='g++'
+#> GCCGO='gccgo'
+#> GO111MODULE=''
+#> GOAMD64='v1'
+#> GOARCH='amd64'
+#> GOAUTH='netrc'
+#> GOBIN=''
+#> GOCACHE='/home/ubuntu/.cache/go-build'
+#> GOCACHEPROG=''
+#> GODEBUG=''
+#> GOENV='/home/ubuntu/.config/go/env'
+#> GOEXE=''
+#> GOEXPERIMENT=''
+#> GOFIPS140='off'
+#> GOFLAGS=''
+#> GOGCCFLAGS=' … long stuff … '
+#> GOHOSTARCH='amd64'
+#> GOHOSTOS='linux'
+#> GOINSECURE=''
+#> GOMOD='/dev/null'
+#> GOMODCACHE='/home/ubuntu/go/pkg/mod'
+#> GONOPROXY=''
+#> GONOSUMDB=''
+#> GOOS='linux'
+#> GOPATH='/home/ubuntu/go'
+#> GOPRIVATE=''
+#> GOPROXY='https://proxy.golang.org,direct'
+#> GOROOT='/usr/local/go'
+#> GOSUMDB='sum.golang.org'
+#> GOTELEMETRY='local'
+#> GOTELEMETRYDIR='/home/ubuntu/.config/go/telemetry'
+#> GOTMPDIR=''
+#> GOTOOLCHAIN='auto'
+#> GOTOOLDIR='/usr/local/go/pkg/tool/linux_amd64'
+#> GOVCS=''
+#> GOVERSION='go1.24.3'
+#> GOWORK=''
+#> PKG_CONFIG='pkg-config'
+
+
+# Now that we are a simple $USER and not necessarily root anymore, we can COPY the Golang mods to our GOPATH.
+# NOTE: we can't use $HOME in here as it is an ENV var and not an ARG.   We cannot use `~` either.
+COPY \
+     --from=go-dev-deps \
+     --chown=ubuntu:ubuntu \
+     /root/go/pkg/mod/ \
+     /home/ubuntu/go/pkg/mod/
+
+
+# For `make test-backend`: Binary needs to be compiled with 'CGO_ENABLED=1', go-sqlite3 requires cgo to work.
+ENV CGO_ENABLED=1
+
+
+# Let's expose the WEB port and the SSH port.
+ARG WEB_PORT
+ARG SSH_PORT
+EXPOSE ${WEB_PORT} ${SSH_PORT}
+
+
+# We just want an environment to `exec` into it and run our `make test` commands and other dev shenanigans.
+ENTRYPOINT ["/usr/bin/sh", "-c"]
+# Therefore, we're OK with slumbering like an eldritch horror.
+CMD ["sleep infinity"]
