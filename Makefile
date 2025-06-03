@@ -49,7 +49,7 @@ GOVULNCHECK_PACKAGE ?= golang.org/x/vuln/cmd/govulncheck@v1 # renovate: datasour
 DEADCODE_PACKAGE ?= golang.org/x/tools/cmd/deadcode@v0.32.0 # renovate: datasource=go
 GOMOCK_PACKAGE ?= go.uber.org/mock/mockgen@v0.5.1 # renovate: datasource=go
 GOPLS_PACKAGE ?= golang.org/x/tools/gopls@v0.18.1 # renovate: datasource=go
-RENOVATE_NPM_PACKAGE ?= renovate@40.31.0 # renovate: datasource=docker packageName=data.forgejo.org/renovate/renovate
+RENOVATE_NPM_PACKAGE ?= renovate@40.40.0 # renovate: datasource=docker packageName=data.forgejo.org/renovate/renovate
 
 # https://github.com/disposable-email-domains/disposable-email-domains/commits/main/
 DISPOSABLE_EMAILS_SHA ?= 0c27e671231d27cf66370034d7f6818037416989 # renovate: ...
