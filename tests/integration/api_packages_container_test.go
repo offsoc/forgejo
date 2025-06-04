@@ -177,6 +177,90 @@ func TestPackageContainer(t *testing.T) {
 		assert.Equal(t, "registry/2.0", resp.Header().Get("Docker-Distribution-Api-Version"))
 	})
 
+	t.Run("ORAS Artifact Upload", func(t *testing.T) {
+		defer tests.PrintCurrentTest(t)()
+
+		image := "oras-test"
+		url := fmt.Sprintf("%sv2/%s/%s", setting.AppURL, user.Name, image)
+
+		// Empty config blob (common in ORAS artifacts)
+		emptyConfigDigest := "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+		emptyConfigContent := ""
+
+		// Upload empty config blob
+		req := NewRequestWithBody(t, "POST", fmt.Sprintf("%s/blobs/uploads?digest=%s", url, emptyConfigDigest), bytes.NewReader([]byte(emptyConfigContent))).
+			AddTokenAuth(userToken)
+		resp := MakeRequest(t, req, http.StatusCreated)
+		assert.Equal(t, fmt.Sprintf("/v2/%s/%s/blobs/%s", user.Name, image, emptyConfigDigest), resp.Header().Get("Location"))
+		assert.Equal(t, emptyConfigDigest, resp.Header().Get("Docker-Content-Digest"))
+
+		// Verify empty blob exists and has correct Content-Length
+		req = NewRequest(t, "HEAD", fmt.Sprintf("%s/blobs/%s", url, emptyConfigDigest)).
+			AddTokenAuth(userToken)
+		resp = MakeRequest(t, req, http.StatusOK)
+		assert.Equal(t, "0", resp.Header().Get("Content-Length")) // This was the main fix
+		assert.Equal(t, emptyConfigDigest, resp.Header().Get("Docker-Content-Digest"))
+
+		// Upload a small data blob (e.g., artifacthub metadata)
+		artifactData := `{"name":"test-artifact","version":"1.0.0"}`
+		artifactDigest := fmt.Sprintf("sha256:%x", sha256.Sum256([]byte(artifactData)))
+
+		req = NewRequestWithBody(t, "POST", fmt.Sprintf("%s/blobs/uploads?digest=%s", url, artifactDigest), bytes.NewReader([]byte(artifactData))).
+			AddTokenAuth(userToken)
+		resp = MakeRequest(t, req, http.StatusCreated)
+		assert.Equal(t, fmt.Sprintf("/v2/%s/%s/blobs/%s", user.Name, image, artifactDigest), resp.Header().Get("Location"))
+
+		// Create OCI artifact manifest
+		artifactManifest := fmt.Sprintf(`{
+			"schemaVersion": 2,
+			"mediaType": "application/vnd.oci.image.manifest.v1+json",
+			"artifactType": "application/vnd.cncf.artifacthub.config.v1+yaml",
+			"config": {
+				"mediaType": "application/vnd.cncf.artifacthub.config.v1+yaml",
+				"digest": "%s",
+				"size": %d
+			},
+			"layers": [
+				{
+					"mediaType": "application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml",
+					"digest": "%s",
+					"size": %d
+				}
+			]
+		}`, emptyConfigDigest, len(emptyConfigContent), artifactDigest, len(artifactData))
+
+		artifactManifestDigest := fmt.Sprintf("sha256:%x", sha256.Sum256([]byte(artifactManifest)))
+
+		// Upload artifact manifest
+		req = NewRequestWithBody(t, "PUT", fmt.Sprintf("%s/manifests/artifact-test", url), bytes.NewReader([]byte(artifactManifest))).
+			AddTokenAuth(userToken).
+			SetHeader("Content-Type", "application/vnd.oci.image.manifest.v1+json")
+		resp = MakeRequest(t, req, http.StatusCreated)
+		assert.Equal(t, fmt.Sprintf("/v2/%s/%s/manifests/artifact-test", user.Name, image), resp.Header().Get("Location"))
+		assert.Equal(t, artifactManifestDigest, resp.Header().Get("Docker-Content-Digest"))
+
+		// Verify manifest can be retrieved
+		req = NewRequest(t, "GET", fmt.Sprintf("%s/manifests/artifact-test", url)).
+			AddTokenAuth(userToken).
+			SetHeader("Accept", "application/vnd.oci.image.manifest.v1+json")
+		resp = MakeRequest(t, req, http.StatusOK)
+		assert.Equal(t, "application/vnd.oci.image.manifest.v1+json", resp.Header().Get("Content-Type"))
+		assert.Equal(t, artifactManifestDigest, resp.Header().Get("Docker-Content-Digest"))
+
+		// Verify package was created with correct metadata
+		pvs, err := packages_model.GetVersionsByPackageType(db.DefaultContext, user.ID, packages_model.TypeContainer)
+		assert.NoError(t, err)
+
+		found := false
+		for _, pv := range pvs {
+			if pv.LowerVersion == "artifact-test" {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "ORAS artifact package should be created")
+	})
+
 	for _, image := range images {
 		t.Run(fmt.Sprintf("[Image:%s]", image), func(t *testing.T) {
 			url := fmt.Sprintf("%sv2/%s/%s", setting.AppURL, user.Name, image)
