@@ -748,7 +748,7 @@ func ListActionRuns(ctx *context.APIContext) {
 	//   type: string
 	// responses:
 	//   "200":
-	//     "$ref": "#/responses/ActionRunList"
+	//     "$ref": "#/responses/RepoActionRunList"
 	//   "400":
 	//     "$ref": "#/responses/error"
 	//   "403":
@@ -779,12 +779,12 @@ func ListActionRuns(ctx *context.APIContext) {
 		return
 	}
 
-	res := new(api.ListActionRunResponse)
+	res := new(api.ListRepoActionRunResponse)
 	res.TotalCount = total
 
-	res.Entries = make([]*api.ActionRun, len(runs))
+	res.Entries = make([]*api.RepoActionRun, len(runs))
 	for i, r := range runs {
-		cr, err := convert.ToActionRun(ctx, r)
+		cr, err := convert.ToRepoActionRun(ctx, r)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, "ToActionRun", err)
 			return
@@ -821,7 +821,7 @@ func GetActionRun(ctx *context.APIContext) {
 	//   required: true
 	// responses:
 	//   "200":
-	//     "$ref": "#/responses/ActionRun"
+	//     "$ref": "#/responses/RepoActionRun"
 	//   "400":
 	//     "$ref": "#/responses/error"
 	//   "403":
@@ -844,9 +844,9 @@ func GetActionRun(ctx *context.APIContext) {
 		return
 	}
 
-	res, err := convert.ToActionRun(ctx, run)
+	res, err := convert.ToRepoActionRun(ctx, run)
 	if err != nil {
-		ctx.Error(http.StatusInternalServerError, "ToActionRun", err)
+		ctx.Error(http.StatusInternalServerError, "ToRepoActionRun", err)
 		return
 	}
 

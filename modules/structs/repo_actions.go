@@ -34,7 +34,7 @@ type ActionTaskResponse struct {
 }
 
 // ActionRun represents an ActionRun
-type ActionRun struct {
+type RepoActionRun struct {
 	ID              int64  `json:"id"`
 	Name            string `json:"name"`
 	RunNumber       int64  `json:"run_number"`
@@ -48,7 +48,7 @@ type ActionRun struct {
 }
 
 // ListActionRunResponse return a list of ActionRun
-type ListActionRunResponse struct {
-	Entries    []*ActionRun `json:"workflow_runs"`
-	TotalCount int64        `json:"total_count"`
+type ListRepoActionRunResponse struct {
+	Entries    []*RepoActionRun `json:"workflow_runs"`
+	TotalCount int64            `json:"total_count"`
 }
