@@ -4,6 +4,7 @@
 package container
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -77,12 +78,21 @@ func setResponseHeaders(resp http.ResponseWriter, h *containerHeaders) {
 }
 
 func jsonResponse(ctx *context.Context, status int, obj any) {
-	setResponseHeaders(ctx.Resp, &containerHeaders{
-		Status:      status,
-		ContentType: "application/json",
-	})
-	if err := json.NewEncoder(ctx.Resp).Encode(obj); err != nil {
+	// Buffer the JSON content first to calculate correct Content-Length
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(obj); err != nil {
 		log.Error("JSON encode: %v", err)
+		return
+	}
+
+	setResponseHeaders(ctx.Resp, &containerHeaders{
+		Status:        status,
+		ContentType:   "application/json",
+		ContentLength: int64(buf.Len()),
+	})
+
+	if _, err := buf.WriteTo(ctx.Resp); err != nil {
+		log.Error("JSON write: %v", err)
 	}
 }
 
