@@ -101,6 +101,8 @@ var migrations = []*Migration{
 	NewMigration("Migrate `User.NormalizedFederatedURI` column to extract port & schema into FederatedHost", MigrateNormalizedFederatedURI),
 	// v30 -> v31
 	NewMigration("Normalize repository.topics to empty slice instead of null", SetTopicsAsEmptySlice),
+	// v31 -> v32
+	NewMigration("Migrate maven package name concatenation", ChangeMavenArtifactConcatenation),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.
