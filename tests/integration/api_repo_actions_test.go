@@ -169,7 +169,7 @@ func TestAPIGetListActionRun(t *testing.T) {
 			req.AddTokenAuth(token)
 
 			res := MakeRequest(t, req, http.StatusOK)
-			apiRuns := new(api.ListActionRunResponse)
+			apiRuns := new(api.ListRepoActionRunResponse)
 			DecodeJSON(t, res, apiRuns)
 
 			assert.Equal(t, int64(len(tt.expectedIDs)), apiRuns.TotalCount)
@@ -231,7 +231,7 @@ func TestAPIGetActionRun(t *testing.T) {
 			}
 
 			dbRun := unittest.AssertExistsAndLoadBean(t, &actions_model.ActionRun{ID: tt.runID})
-			apiRun := new(api.ActionRun)
+			apiRun := new(api.RepoActionRun)
 			DecodeJSON(t, res, apiRun)
 
 			assert.Equal(t, dbRun.Index, apiRun.RunNumber)

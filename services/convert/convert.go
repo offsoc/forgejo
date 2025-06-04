@@ -222,8 +222,8 @@ func ToActionTask(ctx context.Context, t *actions_model.ActionTask) (*api.Action
 	}, nil
 }
 
-// ToActionRun convert a actions_model.ActionRun to an api.ActionRun
-func ToActionRun(ctx context.Context, r *actions_model.ActionRun) (*api.ActionRun, error) {
+// ToRepoActionRun convert a actions_model.ActionRun to an api.RepoActionRun
+func ToRepoActionRun(ctx context.Context, r *actions_model.ActionRun) (*api.RepoActionRun, error) {
 	if err := r.LoadAttributes(ctx); err != nil {
 		return nil, err
 	}
@@ -231,7 +231,7 @@ func ToActionRun(ctx context.Context, r *actions_model.ActionRun) (*api.ActionRu
 	url := strings.TrimSuffix(setting.AppURL, "/") + r.Link()
 	actor := ToUser(ctx, r.TriggerUser, nil)
 
-	return &api.ActionRun{
+	return &api.RepoActionRun{
 		ID:              r.ID,
 		Name:            r.Title,
 		HeadBranch:      r.PrettyRef(),
