@@ -4985,7 +4985,7 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ActionRunList"
+            "$ref": "#/responses/RepoActionRunList"
           },
           "400": {
             "$ref": "#/responses/error"
@@ -5032,7 +5032,7 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ActionRun"
+            "$ref": "#/responses/RepoActionRun"
           },
           "400": {
             "$ref": "#/responses/error"
@@ -21067,54 +21067,6 @@
       },
       "x-go-package": "forgejo.org/modules/structs"
     },
-    "ActionRun": {
-      "description": "ActionRun represents an ActionRun",
-      "type": "object",
-      "properties": {
-        "event": {
-          "type": "string",
-          "x-go-name": "Event"
-        },
-        "head_branch": {
-          "type": "string",
-          "x-go-name": "HeadBranch"
-        },
-        "head_sha": {
-          "type": "string",
-          "x-go-name": "HeadSHA"
-        },
-        "id": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "ID"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "run_number": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "RunNumber"
-        },
-        "status": {
-          "type": "string",
-          "x-go-name": "Status"
-        },
-        "triggering_actor": {
-          "$ref": "#/definitions/User"
-        },
-        "url": {
-          "type": "string",
-          "x-go-name": "URL"
-        },
-        "workflow_id": {
-          "type": "string",
-          "x-go-name": "WorkflowID"
-        }
-      },
-      "x-go-package": "forgejo.org/modules/structs"
-    },
     "ActionRunJob": {
       "description": "ActionRunJob represents a job of a run",
       "type": "object",
@@ -25571,7 +25523,7 @@
       },
       "x-go-package": "forgejo.org/modules/structs"
     },
-    "ListActionRunResponse": {
+    "ListRepoActionRunResponse": {
       "description": "ListActionRunResponse return a list of ActionRun",
       "type": "object",
       "properties": {
@@ -25583,7 +25535,7 @@
         "workflow_runs": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/ActionRun"
+            "$ref": "#/definitions/RepoActionRun"
           },
           "x-go-name": "Entries"
         }
@@ -27348,6 +27300,54 @@
       },
       "x-go-package": "forgejo.org/modules/structs"
     },
+    "RepoActionRun": {
+      "description": "ActionRun represents an ActionRun",
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "x-go-name": "Event"
+        },
+        "head_branch": {
+          "type": "string",
+          "x-go-name": "HeadBranch"
+        },
+        "head_sha": {
+          "type": "string",
+          "x-go-name": "HeadSHA"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "run_number": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "RunNumber"
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status"
+        },
+        "triggering_actor": {
+          "$ref": "#/definitions/User"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        },
+        "workflow_id": {
+          "type": "string",
+          "x-go-name": "WorkflowID"
+        }
+      },
+      "x-go-package": "forgejo.org/modules/structs"
+    },
     "RepoCollaboratorPermission": {
       "description": "RepoCollaboratorPermission to get repository permission for a collaborator",
       "type": "object",
@@ -28794,18 +28794,6 @@
         }
       }
     },
-    "ActionRun": {
-      "description": "ActionRun",
-      "schema": {
-        "$ref": "#/definitions/ActionRun"
-      }
-    },
-    "ActionRunList": {
-      "description": "ActionRunList",
-      "schema": {
-        "$ref": "#/definitions/ListActionRunResponse"
-      }
-    },
     "ActionVariable": {
       "description": "ActionVariable",
       "schema": {
@@ -29564,6 +29552,18 @@
         "items": {
           "$ref": "#/definitions/Release"
         }
+      }
+    },
+    "RepoActionRun": {
+      "description": "RepoActionRun",
+      "schema": {
+        "$ref": "#/definitions/RepoActionRun"
+      }
+    },
+    "RepoActionRunList": {
+      "description": "RepoActionRunList",
+      "schema": {
+        "$ref": "#/definitions/ListRepoActionRunResponse"
       }
     },
     "RepoCollaboratorPermission": {
