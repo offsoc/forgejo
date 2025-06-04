@@ -78,6 +78,11 @@ func ToDBOptions(ctx context.Context, options *internal.SearchOptions) (*issue_m
 		User:               nil,
 	}
 
+	if options.PriorityRepoID.Has() {
+		opts.SortType = "priorityrepo"
+		opts.PriorityRepoID = options.PriorityRepoID.Value()
+	}
+
 	if len(options.MilestoneIDs) == 1 && options.MilestoneIDs[0] == 0 {
 		opts.MilestoneIDs = []int64{db.NoConditionID}
 	} else {
