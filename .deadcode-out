@@ -84,12 +84,24 @@ forgejo.org/modules/eventsource
 	Event.String
 
 forgejo.org/modules/forgefed
+	NewForgeFollowFromAp
+	NewForgeFollow
+	ForgeFollow.MarshalJSON
+	ForgeFollow.UnmarshalJSON
+	ForgeFollow.Validate
 	NewForgeUndoLike
 	ForgeUndoLike.UnmarshalJSON
 	ForgeUndoLike.Validate
+	NewForgeUserActivityFromAp
+	NewForgeUserActivity
+	ForgeUserActivity.Validate
+	NewPersonIDFromModel
 	GetItemByType
 	JSONUnmarshalerFn
 	NotEmpty
+	NewForgeUserActivityNoteFromAp
+	newNote
+	ForgeUserActivityNote.Validate
 	ToRepository
 	OnRepository
 

@@ -159,7 +159,7 @@ func NewMainApp(version, versionExtra string) *cli.Command {
 
 func innerNewMainApp(version, versionExtra string, subCmdsStandaloneArgs, subCmdWithConfigArgs []*cli.Command, globalFlagsArgs func() []cli.Flag) *cli.Command {
 	app := &cli.Command{}
-	app.Name = "Forgejo"
+	app.Name = "forgejo"
 	app.Usage = "Beyond coding. We forge."
 	app.Description = `By default, forgejo will start serving using the web-server with no argument, which can alternatively be run by running the subcommand "web".`
 	app.Version = version + versionExtra
