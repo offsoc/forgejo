@@ -67,7 +67,7 @@ func TestParseImageConfigEmptyBlob(t *testing.T) {
 		// Test empty reader (simulates empty config blob common in OCI artifacts)
 		metadata, err := ParseImageConfig(oci.MediaTypeImageManifest, strings.NewReader(""))
 		require.NoError(t, err)
-		
+
 		assert.Equal(t, TypeOCI, metadata.Type)
 		assert.Equal(t, DefaultPlatform, metadata.Platform)
 		assert.Empty(t, metadata.Description)
@@ -80,7 +80,7 @@ func TestParseImageConfigEmptyBlob(t *testing.T) {
 		// Test minimal valid JSON config
 		metadata, err := ParseImageConfig(oci.MediaTypeImageManifest, strings.NewReader("{}"))
 		require.NoError(t, err)
-		
+
 		assert.Equal(t, TypeOCI, metadata.Type)
 		assert.Equal(t, DefaultPlatform, metadata.Platform)
 		assert.Empty(t, metadata.Description)
@@ -99,7 +99,7 @@ func TestParseImageConfigEmptyBlob(t *testing.T) {
 		configOCI := `{"config": {}}`
 		metadata, err := ParseImageConfig(oci.MediaTypeImageManifest, strings.NewReader(configOCI))
 		require.NoError(t, err)
-		
+
 		assert.Equal(t, TypeOCI, metadata.Type)
 		assert.Equal(t, DefaultPlatform, metadata.Platform)
 		assert.Empty(t, metadata.Description)
