@@ -249,7 +249,7 @@ func TestPackageContainer(t *testing.T) {
 
 		// Verify package was created with correct metadata
 		pvs, err := packages_model.GetVersionsByPackageType(db.DefaultContext, user.ID, packages_model.TypeContainer)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		found := false
 		for _, pv := range pvs {
