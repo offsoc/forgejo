@@ -1,4 +1,6 @@
 import emojis from '../../../assets/emoji.json';
+import {GET} from '../modules/fetch.js';
+
 
 const maxMatches = 6;
 
@@ -40,4 +42,14 @@ export function matchMention(queryText) {
   }
 
   return sortAndReduce(results);
+}
+
+export async function matchIssue(owner, repo, issueIndexStr, query) {
+  const res = await GET(`${window.config.appSubUrl}/${owner}/${repo}/issues/suggestions?q=${encodeURIComponent(query)}`);
+
+  const issues = await res.json();
+  const issueIndex = parseInt(issueIndexStr);
+
+  // filter out issue with same id
+  return issues.filter((i) => i.id !== issueIndex);
 }

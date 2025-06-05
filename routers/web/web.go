@@ -1337,6 +1337,7 @@ func registerRoutes(m *web.Route) {
 			})
 			m.Get("/labels", reqRepoIssuesOrPullsReader, repo.RetrieveLabels, repo.Labels)
 			m.Get("/milestones", reqRepoIssuesOrPullsReader, repo.Milestones)
+			m.Get("/issues/suggestions", reqRepoIssuesOrPullsReader, repo.IssueSuggestions)
 		}, context.RepoRef())
 
 		if setting.Packages.Enabled {
