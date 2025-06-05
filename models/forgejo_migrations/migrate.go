@@ -103,6 +103,8 @@ var migrations = []*Migration{
 	NewMigration("Normalize repository.topics to empty slice instead of null", SetTopicsAsEmptySlice),
 	// v31 -> v32
 	NewMigration("Migrate maven package name concatenation", ChangeMavenArtifactConcatenation),
+	// v32 -> v33
+	NewMigration("Add federated user activity tables, update the `federated_user` table & add indexes", AddFederatedUserActivityTables),
 }
 
 // GetCurrentDBVersion returns the current Forgejo database version.

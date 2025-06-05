@@ -11,6 +11,7 @@ import (
 )
 
 // Follow represents relations of user and their followers.
+// TODO: We should unify Activity-pub-following and classical following (see models/user/user_repository.go#IsFollowingAp)
 type Follow struct {
 	ID          int64              `xorm:"pk autoincr"`
 	UserID      int64              `xorm:"UNIQUE(follow)"`

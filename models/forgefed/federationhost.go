@@ -6,6 +6,7 @@ package forgefed
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 
@@ -17,9 +18,9 @@ import (
 // swagger:model
 type FederationHost struct {
 	ID             int64                  `xorm:"pk autoincr"`
-	HostFqdn       string                 `xorm:"host_fqdn UNIQUE INDEX VARCHAR(255) NOT NULL"`
+	HostFqdn       string                 `xorm:"host_fqdn UNIQUE(federation_host) INDEX VARCHAR(255) NOT NULL"`
+	HostPort       uint16                 `xorm:" UNIQUE(federation_host) INDEX NOT NULL DEFAULT 443"`
 	NodeInfo       NodeInfo               `xorm:"extends NOT NULL"`
-	HostPort       uint16                 `xorm:"NOT NULL DEFAULT 443"`
 	HostSchema     string                 `xorm:"NOT NULL DEFAULT 'https'"`
 	LatestActivity time.Time              `xorm:"NOT NULL"`
 	KeyID          sql.NullString         `xorm:"key_id UNIQUE"`
@@ -40,6 +41,13 @@ func NewFederationHost(hostFqdn string, nodeInfo NodeInfo, port uint16, schema s
 		return FederationHost{}, err
 	}
 	return result, nil
+}
+
+func (host FederationHost) AsURL() url.URL {
+	return url.URL{
+		Scheme: host.HostSchema,
+		Host:   fmt.Sprintf("%v:%v", host.HostFqdn, host.HostPort),
+	}
 }
 
 // Validate collects error strings in a slice and returns this

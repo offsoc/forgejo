@@ -148,7 +148,7 @@ func TestAPActorID_APActorID(t *testing.T) {
 	assert.Equal(t, expected, url)
 }
 
-func TestAPActorKeyID(t *testing.T) {
+func TestKeyID(t *testing.T) {
 	user := user_model.User{ID: 1}
 	url := user.APActorKeyID()
 	expected := "https://try.gitea.io/api/v1/activitypub/user-id/1#main-key"

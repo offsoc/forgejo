@@ -197,7 +197,8 @@ func TestNotifyWatchers(t *testing.T) {
 		RepoID:    1,
 		OpType:    activities_model.ActionStarRepo,
 	}
-	require.NoError(t, activities_model.NotifyWatchers(db.DefaultContext, action))
+	_, err := activities_model.NotifyWatchers(db.DefaultContext, action)
+	require.NoError(t, err)
 
 	// One watchers are inactive, thus action is only created for user 8, 1, 4, 11
 	unittest.AssertExistsAndLoadBean(t, &activities_model.Action{

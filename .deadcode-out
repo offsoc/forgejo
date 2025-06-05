@@ -13,6 +13,13 @@ forgejo.org/models
 	IsErrSHANotFound
 	IsErrMergeDivergingFastForwardOnly
 
+forgejo.org/models/activities
+	GetActivityByID
+	NewFederatedUserActivity
+	CreateUserActivity
+	GetFollowingFeeds
+	FederatedUserActivity.loadActor
+
 forgejo.org/models/auth
 	WebAuthnCredentials
 
@@ -54,9 +61,17 @@ forgejo.org/models/user
 	IsErrExternalLoginUserAlreadyExist
 	IsErrExternalLoginUserNotExist
 	NewFederatedUser
+	NewFederatedUserFollower
 	IsErrUserSettingIsNotExist
 	GetUserAllSettings
 	DeleteUserSetting
+	GetFederatedUser
+	GetFederatedUserByUserID
+	UpdateFederatedUser
+	GetFollowersForUser
+	AddFollower
+	RemoveFollower
+	IsFollowingAp
 
 forgejo.org/modules/activitypub
 	NewContext
