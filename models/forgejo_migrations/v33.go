@@ -49,7 +49,8 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 
 	federationHostTable, err := x.TableInfo(FederationHost{})
 	if err != nil {
-		return err
+		log.Warn("There was an issue in federation table migration: %v", err)
+		return nil
 	}
 	for _, index := range federationHostTable.Indexes {
 		if index.Name == "host_fqdn" {
@@ -57,7 +58,7 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 			defer sessMigration.Close()
 
 			if err := sessMigration.Begin(); err != nil {
-				return err
+				return nil
 			}
 			sql := x.Dialect().DropIndexSQL(federationHostTable.Name, index)
 			_, err := sessMigration.Exec(sql)
@@ -73,47 +74,59 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 
 	err = x.Sync(&FederationHost{})
 	if err != nil {
-		return err
+		log.Warn("There was an issue in federation table migration: %v", err)
+		return nil
 	}
 
 	err = x.Sync(&FederatedUserActivity{})
 	if err != nil {
-		return err
+		log.Warn("There was an issue in federation table migration: %v", err)
+		return nil
 	}
 
 	err = x.Sync(&FederatedUserFollower{})
 	if err != nil {
-		return err
+		log.Warn("There was an issue in federation table migration: %v", err)
+		return nil
 	}
 
 	err = x.Sync(&FederatedUser{})
 	if err != nil {
-		return err
+		log.Warn("There was an issue in federation table migration: %v", err)
+		return nil
 	}
 
 	// Migrate
 	sessMigration := x.NewSession()
 	defer sessMigration.Close()
 	if err := sessMigration.Begin(); err != nil {
-		return err
+		log.Warn("There was an issue in federation table migration: %v", err)
+		return nil
 	}
 	federatedUsers := make([]*FederatedUser, 0)
 	err = sessMigration.OrderBy("id").Find(&federatedUsers)
 	if err != nil {
-		return err
+		log.Warn("There was an issue in federation table migration: %v", err)
+		return nil
 	}
 
 	for _, federatedUser := range federatedUsers {
 		if federatedUser.InboxPath != "" {
-			log.Trace("migration[31]: FederatedUser was already migrated %v", federatedUser)
+			log.Info("migration[31]: FederatedUser was already migrated %v", federatedUser)
 		} else {
 			// Migrate User.InboxPath
 			sql := "UPDATE `federated_user` SET `inbox_path` = ? WHERE `id` = ?"
 			if _, err := sessMigration.Exec(sql, fmt.Sprintf("/api/v1/activitypub/user-id/%v/inbox", federatedUser.UserID), federatedUser.ID); err != nil {
-				return err
+				log.Warn("There was an issue in federation table migration: %v", err)
+				return nil
 			}
 		}
 	}
 
-	return sessMigration.Commit()
+	err = sessMigration.Commit()
+	if err != nil {
+		log.Warn("There was an issue in federation table migration: %v", err)
+		return nil
+	}
+	return nil
 }
