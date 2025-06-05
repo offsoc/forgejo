@@ -2,7 +2,7 @@ module forgejo.org
 
 go 1.24
 
-toolchain go1.24.3
+toolchain go1.24.4
 
 require (
 	code.forgejo.org/f3/gof3/v3 v3.11.0
