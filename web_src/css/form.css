@@ -361,6 +361,10 @@ input:-webkit-autofill:active,
   }
 }
 
+.captcha-img {
+  width: min(30rem, 100%);
+}
+
 .user.forgot.password form,
 .user.reset.password form,
 .user.signup form {
