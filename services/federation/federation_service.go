@@ -211,6 +211,11 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 		return nil, nil, err
 	}
 
+	inbox, err := url.ParseRequestURI(person.Inbox.GetLink().String())
+	if err != nil {
+		return nil, nil, err
+	}
+
 	newUser := user.User{
 		LowerName:                    strings.ToLower(name),
 		Name:                         name,
@@ -227,6 +232,7 @@ func CreateUserFromAP(ctx context.Context, personID fm.PersonID, federationHostI
 	federatedUser := user.FederatedUser{
 		ExternalID:            personID.ID,
 		FederationHostID:      federationHostID,
+		InboxPath:             inbox.Path,
 		NormalizedOriginalURL: personID.AsURI(),
 	}
 
