@@ -53,6 +53,10 @@ func DeclareGitRepos(t *testing.T) func() {
 				CommitMsg: "Another commit which mentions @user1 in the title\nand @user2 in the text",
 			},
 		}),
+		newRepo(t, 2, "unicode-escaping", []FileChanges{{
+			Filename: "a-file",
+			Versions: []string{"{a}{а}"},
+		}}),
 		// add your repo declarations here
 	}
 
