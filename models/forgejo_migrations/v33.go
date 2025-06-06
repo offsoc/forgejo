@@ -112,7 +112,7 @@ func AddFederatedUserActivityTables(x *xorm.Engine) error {
 
 	for _, federatedUser := range federatedUsers {
 		if federatedUser.InboxPath != "" {
-			log.Info("migration[33]: There was an issue: %v", federatedUser)
+			log.Info("migration[33]: This user was already migrated: %v", federatedUser)
 		} else {
 			// Migrate User.InboxPath
 			sql := "UPDATE `federated_user` SET `inbox_path` = ? WHERE `id` = ?"
