@@ -42,5 +42,5 @@ func Test_AddFederatedUserActivityTables(t *testing.T) {
 
 	require.NoError(t, AddFederatedUserActivityTables(x))
 	logFiltered, _ := lc.Check(5 * time.Second)
-	assert.True(t, len(logFiltered) > 0)
+	assert.Positive(t, len(logFiltered))
 }
