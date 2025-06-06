@@ -66,6 +66,7 @@ func PrepareContextForProfileBigAvatar(ctx *context.Context) {
 	showPrivate := ctx.IsSigned && (ctx.Doer.IsAdmin || ctx.Doer.ID == ctx.ContextUser.ID)
 	orgs, err := db.Find[organization.Organization](ctx, organization.FindOrgOptions{
 		UserID:         ctx.ContextUser.ID,
+		IncludeLimited: ctx.IsSigned,
 		IncludePrivate: showPrivate,
 	})
 	if err != nil {
