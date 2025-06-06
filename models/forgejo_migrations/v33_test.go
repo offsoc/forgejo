@@ -5,13 +5,21 @@ package forgejo_migrations //nolint:revive
 
 import (
 	"testing"
+	"time"
 
 	migration_tests "forgejo.org/models/migrations/test"
+	"forgejo.org/modules/log"
+	ft "forgejo.org/modules/test"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_AddFederatedUserActivityTables(t *testing.T) {
+	lc, cl := ft.NewLogChecker(log.DEFAULT, log.WARN)
+	lc.Filter("migration[33]")
+	defer cl()
+
 	// intentionally conflicting definition
 	type FederatedUser struct {
 		ID     int64 `xorm:"pk autoincr"`
@@ -33,4 +41,6 @@ func Test_AddFederatedUserActivityTables(t *testing.T) {
 	}
 
 	require.NoError(t, AddFederatedUserActivityTables(x))
+	logFiltered, _ := lc.Check(5 * time.Second)
+	assert.True(t, len(logFiltered) > 0)
 }
