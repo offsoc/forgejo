@@ -44,8 +44,10 @@ export function matchMention(queryText) {
   return sortAndReduce(results);
 }
 
-export function matchIssue(queryText) {
-  const issues = window.config.issueValues ?? [];
+export function matchIssue(queryText, currentIssue = null) {
+  const issues = (window.config.issueValues ?? []).filter(
+    issue => issue.number !== currentIssue
+  );
   const query = queryText.toLowerCase().trim();
 
   if (!query) {

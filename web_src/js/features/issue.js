@@ -36,7 +36,7 @@ export function isIssueSuggestionsLoaded() {
   return !!window.config.issueValues
 }
 
-async function fetchIssueSuggestions() {
+export async function fetchIssueSuggestions() {
   const issuePathInfo = parseIssueHref(window.location.href);
   if (!issuePathInfo.ownerName) {
     const repoOwnerPathInfo = parseRepoOwnerPathInfo(window.location.pathname);

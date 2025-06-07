@@ -52,6 +52,7 @@ test('matchMention', () => {
 test('matchIssue', () => {
   expect(matchIssue('')).toEqual(window.config.issueValues.slice(0, 6));
   expect(matchIssue('1')).toEqual([window.config.issueValues[9], window.config.issueValues[0]]);
+  expect(matchIssue('1', 1)).toEqual([window.config.issueValues[0]]);
   expect(matchIssue('issue')).toEqual([
     window.config.issueValues[0],
     window.config.issueValues[1],
@@ -59,4 +60,10 @@ test('matchIssue', () => {
     window.config.issueValues[7],
     window.config.issueValues[9],
   ]);
+  expect(matchIssue('issue', 10)).toEqual([
+    window.config.issueValues[1],
+    window.config.issueValues[2],
+    window.config.issueValues[7],
+    window.config.issueValues[9],
+  ]);  
 });

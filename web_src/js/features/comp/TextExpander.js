@@ -4,11 +4,13 @@ import {getIssueIcon, getIssueColor,isIssueSuggestionsLoaded, fetchIssueSuggesti
 import {svg} from '../../svg.js'
 import {createElementFromHTML} from '../../utils/dom.js';
 import { GET } from '../../modules/fetch.js';
+import {parseIssueHref} from '../../utils.js'
 
 async function issueSuggestions(text) {
   const key = '#';
 
-  const matches = matchIssue(text);
+  const issuePathInfo = parseIssueHref(window.location.href);
+  const matches = matchIssue(text, Number(issuePathInfo.index));
   if (!matches.length) return {matched: false};
 
   const ul = document.createElement('ul');
