@@ -17,7 +17,7 @@ test('JS enhanced', async ({page}) => {
   await expect(nojsNotice).toBeHidden();
 
   // Open and close with clicking
-  const dropdown = page.locator('details.dropdown.js-enhanced');
+  const dropdown = page.locator('details.dropdown');
   const dropdownContent = page.locator('details.dropdown ul');
   await expect(dropdownContent).toBeHidden();
   await dropdown.click();

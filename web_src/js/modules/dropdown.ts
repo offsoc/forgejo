@@ -6,14 +6,6 @@
 // Event listeners in this file provide more convenient options for that:
 // click iteration with anything on the page and pressing Escape.
 
-// FixMe: HTMX makes this ineffective!
-function markDropdowns() {
-  const dropdowns = document.querySelectorAll<HTMLDetailsElement>('details.dropdown');
-  for (const dropdown of dropdowns) {
-    dropdown.classList.add('js-enhanced');
-  }
-}
-
 export function initDropdowns() {
   document.addEventListener('click', (event) => {
     const dropdown = document.querySelector<HTMLDetailsElement>('details.dropdown[open]');
@@ -40,6 +32,4 @@ export function initDropdowns() {
     // User pressed Escape while having an open dropdown, probably wants it be closed.
     dropdown.removeAttribute('open');
   });
-
-  markDropdowns();
 }
