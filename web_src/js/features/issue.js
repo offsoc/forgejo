@@ -1,23 +1,23 @@
-import { GET } from '../modules/fetch.js';
-import {parseIssueHref, parseRepoOwnerPathInfo} from '../utils.js'
+import {GET} from '../modules/fetch.js';
+import {parseIssueHref, parseRepoOwnerPathInfo} from '../utils.js';
 
 export function getIssueIcon(issue) {
-    if (issue.pull_request) {
-      if (issue.state === 'open') {
-        if (issue.pull_request.draft === true) {
-          return 'octicon-git-pull-request-draft'; // WIP PR
-        }
-        return 'octicon-git-pull-request'; // Open PR
-      } else if (issue.pull_request.merged === true) {
-        return 'octicon-git-merge'; // Merged PR
+  if (issue.pull_request) {
+    if (issue.state === 'open') {
+      if (issue.pull_request.draft === true) {
+        return 'octicon-git-pull-request-draft'; // WIP PR
       }
-      return 'octicon-git-pull-request'; // Closed PR
-    } else if (issue.state === 'open') {
-      return 'octicon-issue-opened'; // Open Issue
+      return 'octicon-git-pull-request'; // Open PR
+    } else if (issue.pull_request.merged === true) {
+      return 'octicon-git-merge'; // Merged PR
     }
-    return 'octicon-issue-closed'; // Closed Issue
+    return 'octicon-git-pull-request'; // Closed PR
+  } else if (issue.state === 'open') {
+    return 'octicon-issue-opened'; // Open Issue
   }
-  
+  return 'octicon-issue-closed'; // Closed Issue
+}
+
 export function getIssueColor(issue) {
   if (issue.pull_request) {
     if (issue.pull_request.draft === true) {
@@ -33,7 +33,7 @@ export function getIssueColor(issue) {
 }
 
 export function isIssueSuggestionsLoaded() {
-  return !!window.config.issueValues
+  return Boolean(window.config.issueValues);
 }
 
 export async function fetchIssueSuggestions() {

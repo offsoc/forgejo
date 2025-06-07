@@ -1,10 +1,9 @@
 import {matchEmoji, matchMention, matchIssue} from '../../utils/match.js';
 import {emojiString} from '../emoji.js';
-import {getIssueIcon, getIssueColor,isIssueSuggestionsLoaded, fetchIssueSuggestions} from '../issue.js'
-import {svg} from '../../svg.js'
+import {getIssueIcon, getIssueColor, isIssueSuggestionsLoaded, fetchIssueSuggestions} from '../issue.js';
+import {svg} from '../../svg.js';
 import {createElementFromHTML} from '../../utils/dom.js';
-import { GET } from '../../modules/fetch.js';
-import {parseIssueHref} from '../../utils.js'
+import {parseIssueHref} from '../../utils.js';
 
 async function issueSuggestions(text) {
   const key = '#';
@@ -19,7 +18,7 @@ async function issueSuggestions(text) {
     const li = document.createElement('li');
     li.setAttribute('role', 'option');
     li.setAttribute('data-value', `${key}${issue.number}`);
-    li.classList.add('tw-flex', 'tw-gap-2')
+    li.classList.add('tw-flex', 'tw-gap-2');
 
     const icon = svg(getIssueIcon(issue), 16, ['text', getIssueColor(issue)].join(' '));
     li.append(createElementFromHTML(icon));
@@ -40,8 +39,6 @@ async function issueSuggestions(text) {
 
 export function initTextExpander(expander) {
   if (!expander) return;
-
-  const textarea = expander.querySelector('textarea');
 
   expander?.addEventListener('text-expander-change', ({detail: {key, provide, text}}) => {
     if (key === ':') {

@@ -1,6 +1,4 @@
 import emojis from '../../../assets/emoji.json';
-import {GET} from '../modules/fetch.js';
-
 
 const maxMatches = 6;
 
@@ -46,12 +44,12 @@ export function matchMention(queryText) {
 
 export function matchIssue(queryText, currentIssue = null) {
   const issues = (window.config.issueValues ?? []).filter(
-    issue => issue.number !== currentIssue
+    (issue) => issue.number !== currentIssue,
   );
   const query = queryText.toLowerCase().trim();
 
   if (!query) {
-    return [...issues]
+    return Array.from(issues)
       .sort((a, b) => b.number - a.number)
       .slice(0, maxMatches);
   }
@@ -61,8 +59,8 @@ export function matchIssue(queryText, currentIssue = null) {
 
   if (isDigital) {
     // Find issues/prs with number starting with the query (prefix), sorted by number ascending
-    const prefixMatches = issues.filter(issue =>
-      String(issue.number).startsWith(query)
+    const prefixMatches = issues.filter((issue) =>
+      String(issue.number).startsWith(query),
     ).sort((a, b) => a.number - b.number);
 
     results.push(...prefixMatches);
@@ -71,8 +69,8 @@ export function matchIssue(queryText, currentIssue = null) {
   if (!isDigital || results.length < maxMatches) {
     // Fallback: find by title match, sorted by number descending
     const titleMatches = issues
-      .filter(issue =>
-        issue.title.toLowerCase().includes(query)
+      .filter((issue) =>
+        issue.title.toLowerCase().includes(query),
       )
       .sort((a, b) => b.number - a.number);
 

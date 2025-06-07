@@ -65,5 +65,5 @@ test('matchIssue', () => {
     window.config.issueValues[2],
     window.config.issueValues[7],
     window.config.issueValues[9],
-  ]);  
+  ]);
 });
