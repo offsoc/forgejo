@@ -627,6 +627,20 @@ func renderFile(ctx *context.Context, entry *git.TreeEntry) {
 		ctx.Data["IsVideoFile"] = true
 	case fInfo.st.IsAudio():
 		ctx.Data["IsAudioFile"] = true
+	case fInfo.st.Is3DModel():
+		ctx.Data["Is3DModelFile"] = true
+		switch {
+		case fInfo.st.IsSTL():
+			ctx.Data["IsSTLFile"] = true
+		case fInfo.st.IsGLTF():
+			ctx.Data["IsGLTFFile"] = true
+		case fInfo.st.IsGLB():
+			ctx.Data["IsGLBFile"] = true
+		case fInfo.st.IsOBJ():
+			ctx.Data["IsOBJFile"] = true
+		case fInfo.st.Is3MF():
+			ctx.Data["Is3MFFile"] = true
+		}
 	case fInfo.st.IsImage() && (setting.UI.SVG.Enabled || !fInfo.st.IsSvgImage()):
 		ctx.Data["IsImageFile"] = true
 		ctx.Data["CanCopyContent"] = true
