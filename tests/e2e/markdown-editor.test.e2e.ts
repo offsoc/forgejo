@@ -413,8 +413,14 @@ test('text expander has higher prio then prefix continuation', async ({page}) =>
   await textarea.press('Enter');
   await expect(textarea).toHaveValue(`* first\n* 😸\n* @user2 `);
 
+  // Test issue completion
   await textarea.press('Enter');
-  await expect(textarea).toHaveValue(`* first\n* 😸\n* @user2 \n* `);
+  await textarea.pressSequentially('#pull');
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`* first\n* 😸\n* @user2 \n* #5 `);
+
+  await textarea.press('Enter');
+  await expect(textarea).toHaveValue(`* first\n* 😸\n* @user2 \n* #5 \n* `);
 });
 
 test('Combo Markdown: preview mode switch', async ({page}) => {
@@ -456,3 +462,28 @@ test('Combo Markdown: preview mode switch', async ({page}) => {
   await expect(previewPanel).toBeHidden();
   await save_visual(page);
 });
+
+test('issue suggestions', async ({page}) => {
+  const response = await page.goto('/user2/repo1/issues/1');
+  expect(response?.status()).toBe(200);
+
+  const textarea = page.locator('#comment-form textarea[name=content]');
+  
+  await textarea.focus();
+  await textarea.pressSequentially('#');
+
+  const suggestionList = page.locator('#comment-form .suggestions');
+  await expect(suggestionList).toBeVisible();
+
+  const expectedSuggestions = [
+    { number: '5', label: 'pull5' },
+    { number: '4', label: 'issue5' },
+    { number: '3', label: 'issue3' },
+    { number: '2', label: 'issue2' },
+  ];
+
+    for (const suggestion of expectedSuggestions) {
+    const entry = suggestionList.locator(`li:has-text("${suggestion.number}") >> text="${suggestion.label}"`);
+    await expect(entry).toBeVisible();
+  }
+})

@@ -24,9 +24,9 @@ func IssueSuggestions(ctx *context.Context) {
 		isPull = optional.Some(false)
 	}
 
-	suggestions, err := issue_service.GetSuggestion(ctx, ctx.Repo.Repository, isPull)
+	suggestions, err := issue_service.GetSuggestions(ctx, ctx.Repo.Repository, isPull)
 	if err != nil {
-		ctx.ServerError("GetSuggestion", err)
+		ctx.ServerError("GetSuggestions", err)
 		return
 	}
 

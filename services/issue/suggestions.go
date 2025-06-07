@@ -12,7 +12,7 @@ import (
 	"forgejo.org/modules/structs"
 )
 
-func GetSuggestion(ctx context.Context, repo *repo_model.Repository, isPull optional.Option[bool]) ([]*structs.Issue, error) {
+func GetSuggestions(ctx context.Context, repo *repo_model.Repository, isPull optional.Option[bool]) ([]*structs.IssueSuggestion, error) {
 	var issues issues_model.IssueList
 	var err error
 	pageSize := 1000
@@ -26,20 +26,18 @@ func GetSuggestion(ctx context.Context, repo *repo_model.Repository, isPull opti
 		return nil, err
 	}
 
-	suggestions := make([]*structs.Issue, 0, len(issues))
+	suggestions := make([]*structs.IssueSuggestion, 0, len(issues))
 	for _, issue := range issues {
-		suggestion := &structs.Issue{
-			ID:    issue.ID,
+		suggestion := &structs.IssueSuggestion{
 			Index: issue.Index,
 			Title: issue.Title,
 			State: issue.State(),
 		}
 
 		if issue.IsPull && issue.PullRequest != nil {
-			suggestion.PullRequest = &structs.PullRequestMeta{
-				HasMerged:        issue.PullRequest.HasMerged,
-				IsWorkInProgress: issue.PullRequest.IsWorkInProgress(ctx),
-			}
+			suggestion.IsPr = true
+			suggestion.HasMerged = issue.PullRequest.HasMerged
+			suggestion.IsWorkInProgress = issue.PullRequest.IsWorkInProgress(ctx)
 		}
 		suggestions = append(suggestions, suggestion)
 	}
