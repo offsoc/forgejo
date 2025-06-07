@@ -13,6 +13,7 @@ import (
 	"forgejo.org/models/unittest"
 	user_model "forgejo.org/models/user"
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 	"forgejo.org/tests"
 
 	"github.com/stretchr/testify/assert"
@@ -98,8 +99,7 @@ func TestSettingShowUserEmailProfile(t *testing.T) {
 
 func TestSettingLandingPage(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-
-	landingPage := setting.LandingPageURL
+	defer test.MockProtect(&setting.LandingPageURL)()
 
 	setting.LandingPageURL = setting.LandingPageHome
 	req := NewRequest(t, "GET", "/")
@@ -119,8 +119,6 @@ func TestSettingLandingPage(t *testing.T) {
 	req = NewRequest(t, "GET", "/")
 	resp = MakeRequest(t, req, http.StatusSeeOther)
 	assert.Equal(t, "/user/login", resp.Header().Get("Location"))
-
-	setting.LandingPageURL = landingPage
 }
 
 func TestSettingSecurityAuthSource(t *testing.T) {

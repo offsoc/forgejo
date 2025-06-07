@@ -16,6 +16,7 @@ import (
 	"forgejo.org/modules/setting"
 	api "forgejo.org/modules/structs"
 	"forgejo.org/modules/util"
+	"forgejo.org/modules/validation"
 	webhook_module "forgejo.org/modules/webhook"
 	"forgejo.org/services/context"
 	webhook_service "forgejo.org/services/webhook"
@@ -91,6 +92,10 @@ func checkCreateHookOption(ctx *context.APIContext, form *api.CreateHookOption) 
 	}
 	if !webhook.IsValidHookContentType(form.Config["content_type"]) {
 		ctx.Error(http.StatusUnprocessableEntity, "", "Invalid content type")
+		return false
+	}
+	if !validation.IsValidURL(form.Config["url"]) {
+		ctx.Error(http.StatusUnprocessableEntity, "", "Invalid url")
 		return false
 	}
 	return true
@@ -322,6 +327,10 @@ func EditRepoHook(ctx *context.APIContext, form *api.EditHookOption, hookID int6
 func editHook(ctx *context.APIContext, form *api.EditHookOption, w *webhook.Webhook) bool {
 	if form.Config != nil {
 		if url, ok := form.Config["url"]; ok {
+			if !validation.IsValidURL(url) {
+				ctx.Error(http.StatusUnprocessableEntity, "", "Invalid url")
+				return false
+			}
 			w.URL = url
 		}
 		if ct, ok := form.Config["content_type"]; ok {

@@ -15,5 +15,20 @@
     "themes.names.forgejo-dark": "Forgejo oscuro",
     "themes.names.forgejo-light": "Forgejo claro",
     "home.welcome.no_activity": "Sin actividad",
-    "meta.last_line": "¡Gracias por traducir Forgejo! Esta línea no es vista por los usuarios pero sirve para otros propósitos en la gestión de la traducción. Puedes colocar un dato curioso en la traducción en lugar de traducirla."
+    "meta.last_line": "¡Gracias por traducir Forgejo! Esta línea no es vista por los usuarios pero sirve para otros propósitos en la gestión de la traducción. Puedes colocar un dato curioso en la traducción en lugar de traducirla.",
+    "relativetime.now": "ahora",
+    "relativetime.mins": {
+        "one": "hace %d minuto",
+        "many": "hace %d minutos",
+        "other": "hace %d minutos"
+    },
+    "relativetime.hours": {
+        "one": "hace %d hora",
+        "many": "hace %d horas",
+        "other": "hace %d horas"
+    },
+    "relativetime.future": "en el futuro",
+    "home.explore_repos": "Explorar repositorios",
+    "home.explore_users": "Explorar usuarios",
+    "home.explore_orgs": "Explorar organizaciones"
 }

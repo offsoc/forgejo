@@ -676,10 +676,6 @@ img.ui.avatar,
   color: var(--color-yellow) !important;
 }
 
-.text.olive {
-  color: var(--color-olive) !important;
-}
-
 .text.green {
   color: var(--color-green) !important;
 }
@@ -692,16 +688,8 @@ img.ui.avatar,
   color: var(--color-blue) !important;
 }
 
-.text.violet {
-  color: var(--color-violet) !important;
-}
-
 .text.purple {
   color: var(--color-purple) !important;
-}
-
-.text.pink {
-  color: var(--color-pink) !important;
 }
 
 .text.brown {
@@ -821,19 +809,6 @@ img.ui.avatar,
   margin-left: 25px;
 }
 
-.ui .sha.label {
-  font-family: var(--fonts-monospace);
-  font-size: 13px;
-  font-weight: var(--font-weight-normal);
-  margin: 0 6px;
-  padding: 5px 10px;
-  flex-shrink: 0;
-}
-
-.ui .sha.label .shortsha {
-  display: inline-block; /* not sure whether it is still needed */
-}
-
 .ui .button.truncate {
   display: inline-block;
   max-width: 100%;
@@ -851,46 +826,6 @@ img.ui.avatar,
 .ui.inline.delete-button {
   padding: 8px 15px;
   font-weight: var(--font-weight-normal);
-}
-
-.ui .background.red {
-  background-color: var(--color-red) !important;
-}
-
-.ui .background.blue {
-  background-color: var(--color-blue) !important;
-}
-
-.ui .background.black {
-  background-color: var(--color-black) !important;
-}
-
-.ui .background.grey {
-  background-color: var(--color-grey) !important;
-}
-
-.ui .background.light.grey {
-  background-color: var(--color-grey) !important;
-}
-
-.ui .background.green {
-  background-color: var(--color-green) !important;
-}
-
-.ui .background.purple {
-  background-color: var(--color-purple) !important;
-}
-
-.ui .background.yellow {
-  background-color: var(--color-yellow) !important;
-}
-
-.ui .background.orange {
-  background-color: var(--color-orange) !important;
-}
-
-.ui .background.gold {
-  background-color: var(--color-gold) !important;
 }
 
 .ui .migrate {
@@ -1182,41 +1117,6 @@ svg.text.purple,
   display: block;
   width: calc(100% - 1ch);
   padding-left: 1ch;
-}
-
-.lines-escape {
-  width: 0;
-}
-
-.lines-code {
-  padding-left: 5px;
-}
-
-.file-view tr.active {
-  color: inherit !important;
-  background: inherit !important;
-}
-
-.file-view tr.active .lines-num,
-.file-view tr.active .lines-code {
-  background: var(--color-highlight-bg) !important;
-}
-
-.file-view tr.active:last-of-type .lines-code {
-  border-bottom-right-radius: var(--border-radius);
-}
-
-.file-view tr.active .lines-num {
-  position: relative;
-}
-
-.file-view tr.active .lines-num::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  width: 2px;
-  height: 100%;
-  background: var(--color-highlight-fg);
 }
 
 .code-inner {

@@ -366,8 +366,11 @@ func handleWorkflows(
 
 		jobs, err := jobparser.Parse(dwf.Content, jobparser.WithVars(vars))
 		if err != nil {
-			log.Error("jobparser.Parse: %v", err)
-			continue
+			run.Status = actions_model.StatusFailure
+			log.Info("jobparser.Parse: invalid workflow, setting job status to failed: %v", err)
+			jobs = []*jobparser.SingleWorkflow{{
+				Name: dwf.EntryName,
+			}}
 		}
 
 		// cancel running jobs if the event is push or pull_request_sync

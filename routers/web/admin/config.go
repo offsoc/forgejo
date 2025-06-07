@@ -1,5 +1,6 @@
 // Copyright 2014 The Gogs Authors. All rights reserved.
 // Copyright 2019 The Gitea Authors. All rights reserved.
+// Copyright 2025 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package admin
@@ -145,6 +146,7 @@ func Config(ctx *context.Context) {
 	ctx.Data["Service"] = setting.Service
 	ctx.Data["DbCfg"] = setting.Database
 	ctx.Data["Webhook"] = setting.Webhook
+	ctx.Data["Moderation"] = setting.Moderation
 
 	ctx.Data["MailerEnabled"] = false
 	if setting.MailService != nil {

@@ -1477,6 +1477,7 @@ func ViewIssue(ctx *context.Context) {
 		ctx.Data["IssueType"] = "all"
 	}
 
+	ctx.Data["IsModerationEnabled"] = setting.Moderation.Enabled
 	ctx.Data["IsProjectsEnabled"] = ctx.Repo.CanRead(unit.TypeProjects)
 	ctx.Data["IsAttachmentEnabled"] = setting.Attachment.Enabled
 	upload.AddUploadContext(ctx, "comment")

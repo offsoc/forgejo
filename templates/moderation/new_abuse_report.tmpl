@@ -1,0 +1,45 @@
+{{template "base/head" .}}
+<div role="main" aria-label="{{.Title}}" class="page-content moderation new-report">
+	<div class="ui middle very relaxed page grid">
+		<div class="column">
+			<form class="ui form" action="{{.Link}}" method="post">
+				{{.CsrfTokenHtml}}
+				<h3 class="ui top attached header">
+					{{ctx.Locale.Tr "moderation.report_abuse_form.header"}}
+				</h3>
+				<div class="ui attached segment">
+					{{template "base/alert" .}}
+					<p class="ui center">{{ctx.Locale.Tr "moderation.report_abuse_form.details"}}</p>
+
+					<input type="hidden" name="content_id" value="{{.ContentID}}" />
+					<input type="hidden" name="content_type" value="{{.ContentType}}" />
+
+					<fieldset{{if not .ContentID}} disabled{{end}}>
+						<label{{if .Err_AbuseCategory}} class="field error"{{end}}>
+							{{ctx.Locale.Tr "moderation.abuse_category"}}
+							<select class="ui selection dropdown" id="abuse_category" name="abuse_category" required autofocus>
+								<option value="">{{ctx.Locale.Tr "moderation.abuse_category.placeholder"}}</option>
+								{{range $cat := .AbuseCategories}}
+								<option value="{{$cat.Value}}"{{if eq $.abuse_category $cat.Value}} selected{{end}}>{{ctx.Locale.Tr $cat.TranslationKey}}</option>
+								{{end}}
+							</select>
+						</label>
+						<label{{if .Err_Remarks}} class="field error"{{end}}>
+							{{ctx.Locale.Tr "moderation.report_remarks"}}
+							<textarea id="remarks" name="remarks" required minlength="20" maxlength="500" placeholder="{{ctx.Locale.Tr "moderation.report_remarks.placeholder"}}">{{.remarks}}</textarea>
+						</label>
+					</fieldset>
+
+					<div class="divider"></div>
+					<div class="text right actions">
+						<a class="ui cancel button" href="{{$.CancelLink}}">{{ctx.Locale.Tr "cancel"}}</a>
+						{{if .ContentID}}
+						<button class="ui primary button">{{ctx.Locale.Tr "moderation.submit_report"}}</button>
+						{{end}}
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+{{template "base/footer" .}}

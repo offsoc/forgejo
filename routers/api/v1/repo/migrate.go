@@ -123,12 +123,12 @@ func Migrate(ctx *context.APIContext) {
 	gitServiceType := convert.ToGitServiceType(form.Service)
 
 	if form.Mirror && setting.Mirror.DisableNewPull {
-		ctx.Error(http.StatusForbidden, "MirrorsGlobalDisabled", fmt.Errorf("the site administrator has disabled the creation of new pull mirrors"))
+		ctx.Error(http.StatusForbidden, "MirrorsGlobalDisabled", errors.New("the site administrator has disabled the creation of new pull mirrors"))
 		return
 	}
 
 	if setting.Repository.DisableMigrations {
-		ctx.Error(http.StatusForbidden, "MigrationsGlobalDisabled", fmt.Errorf("the site administrator has disabled migrations"))
+		ctx.Error(http.StatusForbidden, "MigrationsGlobalDisabled", errors.New("the site administrator has disabled migrations"))
 		return
 	}
 

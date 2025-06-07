@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -34,9 +33,6 @@ func TestRepoLanguages(t *testing.T) {
 			"commit_mail_id": "3",
 		})
 		session.MakeRequest(t, req, http.StatusSeeOther)
-
-		// let gitea calculate language stats
-		time.Sleep(time.Second)
 
 		// Save new file to master branch
 		req = NewRequest(t, "GET", "/api/v1/repos/user2/repo1/languages")

@@ -8,14 +8,13 @@
   ],
   "baseBranches": [
     "$default",
-    "/^v7\\.\\d+/forgejo$/",
     "/^v11\\.\\d+/forgejo$/"
   ],
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths", "npmDedupe"],
   "prConcurrentLimit": 10,
   "osvVulnerabilityAlerts": true,
   "automergeStrategy": "squash",
-  "labels": ["dependency-upgrade","test/not-needed"],
+  "labels": ["dependency-upgrade", "test/not-needed"],
   "packageRules": [
     {
       "description": "Require approval for python minor version",
@@ -37,8 +36,7 @@
       "description": "Schedule some deps less frequently",
       "matchPackageNames": [
         "code.forgejo.org/f3/gof3/**",
-        "github.com/google/pprof",
-        "github.com/golangci/misspell/cmd/misspell"
+        "github.com/google/pprof"
       ],
       "extends": ["schedule:quarterly"]
     },
@@ -146,20 +144,18 @@
       "minimumReleaseAge": "30 days"
     },
     {
+      "description": "Disable indirect updates for stable branches",
+      "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "matchDepTypes": ["indirect"],
+      "enabled": false
+    },
+    {
       "description": "Require approval for stable branches (must be last rule to override all others)",
       "matchBaseBranches": ["/^v\\d+\\.\\d+\\/forgejo$/"],
       "dependencyDashboardApproval": true,
       "schedule": ["at any time"]
-    }
-  ],
-  "customManagers": [
-    {
-      "description": "Update deps inside Makefile",
-      "customType": "regex",
-      "fileMatch": ["^Makefile$"],
-      "matchStrings": [
-        " \\?= (?<depName>.+?)@(?<currentValue>.+?) # renovate: datasource=(?<datasource>.+?)(?: packageName=(?<packageName>.+?))?( versioning=(?<versioning>.+?))?\\s"
-      ]
     }
   ]
 }

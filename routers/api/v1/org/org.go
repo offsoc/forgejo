@@ -398,7 +398,7 @@ func Edit(ctx *context.APIContext) {
 			ctx.Org.Organization.Email = ""
 		} else {
 			if err := user_service.ReplacePrimaryEmailAddress(ctx, ctx.Org.Organization.AsUser(), *form.Email); err != nil {
-				if validation.IsErrEmailInvalid(err) || validation.IsErrEmailCharIsNotSupported(err) {
+				if validation.IsErrEmailInvalid(err) {
 					ctx.Error(http.StatusUnprocessableEntity, "ReplacePrimaryEmailAddress", err)
 				} else {
 					ctx.Error(http.StatusInternalServerError, "ReplacePrimaryEmailAddress", err)

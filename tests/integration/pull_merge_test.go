@@ -585,7 +585,6 @@ func TestPullMergeIndexerNotifier(t *testing.T) {
 		createPullResp := testPullCreate(t, session, "user1", "repo1", false, "master", "master", "Indexer notifier test pull")
 
 		require.NoError(t, queue.GetManager().FlushAll(t.Context(), 0))
-		time.Sleep(time.Second)
 
 		repo1 := unittest.AssertExistsAndLoadBean(t, &repo_model.Repository{
 			OwnerName: "user2",
@@ -624,7 +623,6 @@ func TestPullMergeIndexerNotifier(t *testing.T) {
 		assert.True(t, issue.IsClosed)
 
 		require.NoError(t, queue.GetManager().FlushAll(t.Context(), 0))
-		time.Sleep(time.Second)
 
 		// search issues again
 		searchIssuesResp = session.MakeRequest(t, NewRequest(t, "GET", link.String()), http.StatusOK)
@@ -893,8 +891,6 @@ func testPullAutoMergeAfterCommitStatusSucceed(t *testing.T, ctx APITestContext,
 	})
 	require.NoError(t, err)
 
-	time.Sleep(2 * time.Second)
-
 	// approve PR if necessary
 	if approval {
 		// reload PR again
@@ -908,8 +904,6 @@ func testPullAutoMergeAfterCommitStatusSucceed(t *testing.T, ctx APITestContext,
 		resp := approveSession.MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 		testSubmitReview(t, approveSession, htmlDoc.GetCSRF(), "user2", "repo1", strconv.Itoa(int(pr.Index)), sha, "approve", http.StatusOK)
-
-		time.Sleep(2 * time.Second)
 	}
 
 	// reload PR again
@@ -1090,8 +1084,6 @@ func TestPullAutoMergeAfterCommitStatusSucceedAndApprovalForAgitFlow(t *testing.
 		})
 		require.NoError(t, err)
 
-		time.Sleep(2 * time.Second)
-
 		// reload pr again
 		pr = unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: pr.ID})
 		assert.False(t, pr.HasMerged)
@@ -1103,8 +1095,6 @@ func TestPullAutoMergeAfterCommitStatusSucceedAndApprovalForAgitFlow(t *testing.
 		resp := approveSession.MakeRequest(t, req, http.StatusOK)
 		htmlDoc := NewHTMLParser(t, resp.Body)
 		testSubmitReview(t, approveSession, htmlDoc.GetCSRF(), "user2", "repo1", strconv.Itoa(int(pr.Index)), sha, "approve", http.StatusOK)
-
-		time.Sleep(2 * time.Second)
 
 		// realod pr again
 		pr = unittest.AssertExistsAndLoadBean(t, &issues_model.PullRequest{ID: pr.ID})

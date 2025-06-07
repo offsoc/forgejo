@@ -190,6 +190,55 @@ ISO-8859-1`, commitFromReader.Signature.Payload)
 	assert.Equal(t, commitFromReader, commitFromReader2)
 }
 
+func TestCommitWithChangeIDFromReader(t *testing.T) {
+	commitString := `e66911914414b0daa85d4a428c8d607b9b249a2c commit 611
+tree efd3cbedfc360ce9f60e5f92d51221be5afb4bf0
+author Nicole Patricia Mazzuca <nicole@strega-nil.co> 1746965490 +0200
+committer Nicole Patricia Mazzuca <nicole@strega-nil.co> 1746965630 +0200
+change-id psyxzzozmuvvwrwnpqpvmtwntqsnwzpu
+gpgsig -----BEGIN PGP SIGNATURE-----
+` + " " + `
+ iHUEABYKAB0WIQT/T2ISZ7rMF2EbKVdDm0tNAL/2MgUCaCCUfgAKCRBDm0tNAL/2
+ Mmu/AQC0OWWHsSlfDKIArdALjDLgd00OQVbP+6iYVE9e+rorFwEA5qYVAXD60EHB
+ +7UVcfwZ2jKajkk3q01VyT/CDo3LLQE=
+ =yq2Y
+ -----END PGP SIGNATURE-----
+
+views: first commit!
+
+includes a basic month view, and prints a nice view of an imaginary
+January where the year starts on a Monday :)`
+
+	sha := &Sha1Hash{0xe6, 0x69, 0x11, 0x91, 0x44, 0x14, 0xb0, 0xda, 0xa8, 0x5d, 0x4a, 0x42, 0x8c, 0x8d, 0x60, 0x7b, 0x9b, 0x24, 0x9a, 0x2c}
+	gitRepo, err := openRepositoryWithDefaultContext(filepath.Join(testReposDir, "repo1_bare"))
+	require.NoError(t, err)
+	assert.NotNil(t, gitRepo)
+	defer gitRepo.Close()
+
+	commitFromReader, err := CommitFromReader(gitRepo, sha, strings.NewReader(commitString))
+	require.NoError(t, err)
+	require.NotNil(t, commitFromReader)
+	assert.EqualValues(t, sha, commitFromReader.ID)
+	assert.Equal(t, `-----BEGIN PGP SIGNATURE-----
+
+iHUEABYKAB0WIQT/T2ISZ7rMF2EbKVdDm0tNAL/2MgUCaCCUfgAKCRBDm0tNAL/2
+Mmu/AQC0OWWHsSlfDKIArdALjDLgd00OQVbP+6iYVE9e+rorFwEA5qYVAXD60EHB
++7UVcfwZ2jKajkk3q01VyT/CDo3LLQE=
+=yq2Y
+-----END PGP SIGNATURE-----
+`, commitFromReader.Signature.Signature)
+	assert.Equal(t, `tree efd3cbedfc360ce9f60e5f92d51221be5afb4bf0
+author Nicole Patricia Mazzuca <nicole@strega-nil.co> 1746965490 +0200
+committer Nicole Patricia Mazzuca <nicole@strega-nil.co> 1746965630 +0200
+change-id psyxzzozmuvvwrwnpqpvmtwntqsnwzpu
+
+views: first commit!
+
+includes a basic month view, and prints a nice view of an imaginary
+January where the year starts on a Monday :)`, commitFromReader.Signature.Payload)
+	assert.Equal(t, "Nicole Patricia Mazzuca <nicole@strega-nil.co>", commitFromReader.Author.String())
+}
+
 func TestHasPreviousCommit(t *testing.T) {
 	bareRepo1Path := filepath.Join(testReposDir, "repo1_bare")
 

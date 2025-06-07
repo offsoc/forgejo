@@ -14,6 +14,7 @@ import (
 	webhook_model "forgejo.org/models/webhook"
 	"forgejo.org/modules/setting"
 	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/test"
 	webhook_module "forgejo.org/modules/webhook"
 	"forgejo.org/services/convert"
 
@@ -104,7 +105,8 @@ func TestPrepareWebhooksBranchFilterNoMatch(t *testing.T) {
 
 func TestWebhookUserMail(t *testing.T) {
 	require.NoError(t, unittest.PrepareTestDatabase())
-	setting.Service.NoReplyAddress = "no-reply.com"
+	defer test.MockVariableValue(&setting.Service.NoReplyAddress, "no-reply.com")()
+
 	user := unittest.AssertExistsAndLoadBean(t, &user_model.User{ID: 1})
 	assert.Equal(t, user.GetPlaceholderEmail(), convert.ToUser(db.DefaultContext, user, nil).Email)
 	assert.Equal(t, user.Email, convert.ToUser(db.DefaultContext, user, user).Email)

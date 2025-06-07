@@ -12,7 +12,7 @@ Template Attributes:
 * DisableAutosize: whether to disable automatic height resizing
 * EasyMDE: whether to display button for switching to legacy editor
 */}}
-<div {{if .ContainerId}}id="{{.ContainerId}}"{{end}} class="combo-markdown-editor {{.ContainerClasses}}" data-dropzone-parent-container="{{.DropzoneParentContainer}}">
+<div {{if .ContainerId}}id="{{.ContainerId}}"{{end}} class="combo-markdown-editor {{.ContainerClasses}}" data-dropzone-parent-container="{{.DropzoneParentContainer}}" data-tab-hint="{{ctx.Locale.TrString "editor.textarea.tab_hint"}}" data-shift-tab-hint="{{ctx.Locale.TrString "editor.textarea.shift_tab_hint"}}">
 
 	<markdown-toolbar>
 		{{if .MarkdownPreviewUrl}}

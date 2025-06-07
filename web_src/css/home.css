@@ -70,7 +70,7 @@
 .page-footer .right-links > a {
   border-left: 1px solid var(--color-secondary-dark-1);
   padding-left: 8px;
-  margin-left: 5px;
+  margin-left: 8px;
 }
 
 .page-footer .ui.dropdown.language .menu {

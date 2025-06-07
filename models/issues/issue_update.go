@@ -1,10 +1,12 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package issues
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -275,6 +277,11 @@ func ChangeIssueContent(ctx context.Context, issue *Issue, doer *user_model.User
 		}
 	}
 
+	// If the issue was reported as abusive, a shadow copy should be created before first update.
+	if err := IfNeededCreateShadowCopyForIssue(ctx, issue); err != nil {
+		return err
+	}
+
 	issue.Content = content
 	issue.ContentVersion = contentVersion + 1
 
@@ -332,10 +339,10 @@ func NewIssueWithIndex(ctx context.Context, doer *user_model.User, opts NewIssue
 	}
 
 	if opts.Issue.Index <= 0 {
-		return fmt.Errorf("no issue index provided")
+		return errors.New("no issue index provided")
 	}
 	if opts.Issue.ID > 0 {
-		return fmt.Errorf("issue exist")
+		return errors.New("issue exist")
 	}
 
 	opts.Issue.Created = timeutil.TimeStampNanoNow()

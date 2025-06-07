@@ -8,7 +8,6 @@
 package tests
 
 import (
-	"context"
 	"fmt"
 	"slices"
 	"testing"
@@ -40,7 +39,7 @@ func TestIndexer(t *testing.T, indexer internal.Indexer) {
 			data[v.ID] = v
 		}
 		require.NoError(t, indexer.Index(t.Context(), d...))
-		require.NoError(t, waitData(indexer, int64(len(data))))
+		waitData(t, indexer, int64(len(data)))
 	}
 
 	defer func() {
@@ -54,13 +53,13 @@ func TestIndexer(t *testing.T, indexer internal.Indexer) {
 				for _, v := range c.ExtraData {
 					data[v.ID] = v
 				}
-				require.NoError(t, waitData(indexer, int64(len(data))))
+				waitData(t, indexer, int64(len(data)))
 				defer func() {
 					for _, v := range c.ExtraData {
 						require.NoError(t, indexer.Delete(t.Context(), v.ID))
 						delete(data, v.ID)
 					}
-					require.NoError(t, waitData(indexer, int64(len(data))))
+					waitData(t, indexer, int64(len(data)))
 				}()
 			}
 
@@ -551,6 +550,55 @@ var cases = []*testIndexerCase{
 		},
 	},
 	{
+		Name: "Index",
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "13",
+			SortBy:  internal.SortByScore,
+			RepoIDs: []int64{5},
+		},
+		ExpectedIDs:   []int64{93}, // 93 = #13 in repo 5
+		ExpectedTotal: 1,
+	},
+	{
+		Name: "Index with prefix",
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "#13",
+			SortBy:  internal.SortByScore,
+			RepoIDs: []int64{5},
+		},
+		ExpectedIDs:   []int64{93},
+		ExpectedTotal: 1,
+	},
+	{
+		Name: "Index and title boost",
+		ExtraData: []*internal.IndexerData{
+			{ID: 1001, Title: "re #13", RepoID: 5},
+			{ID: 1002, Title: "re #1001", Content: "leave 13 alone. - 13", RepoID: 5},
+		},
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "!13",
+			SortBy:  internal.SortByScore,
+			RepoIDs: []int64{5},
+		},
+		ExpectedIDs:   []int64{93, 1001, 1002},
+		ExpectedTotal: 3,
+	},
+	{
+		Name: "Index exclude",
+		ExtraData: []*internal.IndexerData{
+			{ID: 1001, Index: 101, Title: "Brrr", RepoID: 5},
+			{ID: 1002, Index: 102, Title: "Brrr", Content: "Brrr", RepoID: 5},
+			{ID: 1003, Index: 103, Title: "Brrr", RepoID: 5},
+			{ID: 1004, Index: 104, Title: "Brrr", RepoID: 5},
+		},
+		SearchOptions: &internal.SearchOptions{
+			Keyword: "Brrr -101 -103",
+			SortBy:  internal.SortByScore,
+		},
+		ExpectedIDs:   []int64{1002, 1004},
+		ExpectedTotal: 2,
+	},
+	{
 		Name: "SortByCreatedDesc",
 		SearchOptions: &internal.SearchOptions{
 			Paginator: &db.ListOptionsAll,
@@ -742,6 +790,7 @@ func generateDefaultIndexerData() []*internal.IndexerData {
 
 			data = append(data, &internal.IndexerData{
 				ID:                 id,
+				Index:              issueIndex,
 				RepoID:             repoID,
 				IsPublic:           repoID%2 == 0,
 				Title:              fmt.Sprintf("issue%d of repo%d", issueIndex, repoID),
@@ -783,22 +832,17 @@ func countIndexerData(data map[int64]*internal.IndexerData, f func(v *internal.I
 
 // waitData waits for the indexer to index all data.
 // Some engines like Elasticsearch index data asynchronously, so we need to wait for a while.
-func waitData(indexer internal.Indexer, total int64) error {
+func waitData(t testing.TB, indexer internal.Indexer, total int64) {
 	var actual int64
-	for i := 0; i < 100; i++ {
-		result, err := indexer.Search(context.Background(), &internal.SearchOptions{
+	assert.Eventually(t, func() bool {
+		result, err := indexer.Search(t.Context(), &internal.SearchOptions{
 			Paginator: &db.ListOptions{
 				PageSize: 0,
 			},
 		})
-		if err != nil {
-			return err
-		}
+		require.NoError(t, err)
+
 		actual = result.Total
-		if actual == total {
-			return nil
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
-	return fmt.Errorf("waitData: expected %d, actual %d", total, actual)
+		return actual == total
+	}, time.Second*10, time.Millisecond*100, "expected %d but got %d", total, actual)
 }

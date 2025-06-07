@@ -140,7 +140,6 @@ func CreateUser(ctx *context.APIContext) {
 			user_model.IsErrEmailAlreadyUsed(err) ||
 			db.IsErrNameReserved(err) ||
 			db.IsErrNameCharsNotAllowed(err) ||
-			validation.IsErrEmailCharIsNotSupported(err) ||
 			validation.IsErrEmailInvalid(err) ||
 			db.IsErrNamePatternNotAllowed(err) {
 			ctx.Error(http.StatusUnprocessableEntity, "", err)
@@ -197,7 +196,7 @@ func EditUser(ctx *context.APIContext) {
 	// If either LoginSource or LoginName is given, the other must be present too.
 	if form.SourceID != nil || form.LoginName != nil {
 		if form.SourceID == nil || form.LoginName == nil {
-			ctx.Error(http.StatusUnprocessableEntity, "LoginSourceAndLoginName", fmt.Errorf("source_id and login_name must be specified together"))
+			ctx.Error(http.StatusUnprocessableEntity, "LoginSourceAndLoginName", errors.New("source_id and login_name must be specified together"))
 			return
 		}
 	}
@@ -226,7 +225,7 @@ func EditUser(ctx *context.APIContext) {
 	if form.Email != nil {
 		if err := user_service.AdminAddOrSetPrimaryEmailAddress(ctx, ctx.ContextUser, *form.Email); err != nil {
 			switch {
-			case validation.IsErrEmailCharIsNotSupported(err), validation.IsErrEmailInvalid(err):
+			case validation.IsErrEmailInvalid(err):
 				ctx.Error(http.StatusBadRequest, "EmailInvalid", err)
 			case user_model.IsErrEmailAlreadyUsed(err):
 				ctx.Error(http.StatusBadRequest, "EmailUsed", err)
@@ -305,7 +304,7 @@ func DeleteUser(ctx *context.APIContext) {
 
 	// admin should not delete themself
 	if ctx.ContextUser.ID == ctx.Doer.ID {
-		ctx.Error(http.StatusUnprocessableEntity, "", fmt.Errorf("you cannot delete yourself"))
+		ctx.Error(http.StatusUnprocessableEntity, "", errors.New("you cannot delete yourself"))
 		return
 	}
 

@@ -1,4 +1,5 @@
 // Copyright 2023 The Gitea Authors. All rights reserved.
+// Copyright 2024 The Forgejo Authors. All rights reserved.
 // SPDX-License-Identifier: MIT
 
 package repository
@@ -87,6 +88,11 @@ func DeleteRepositoryDirectly(ctx context.Context, doer *user_model.User, repoID
 		if err := models.DeleteDeployKey(ctx, doer, dKey.ID); err != nil {
 			return fmt.Errorf("deleteDeployKeys: %w", err)
 		}
+	}
+
+	// If the repository was reported as abusive, a shadow copy should be created before deletion.
+	if err := repo_model.IfNeededCreateShadowCopyForRepository(ctx, repo, false); err != nil {
+		return err
 	}
 
 	if cnt, err := sess.ID(repoID).Delete(&repo_model.Repository{}); err != nil {

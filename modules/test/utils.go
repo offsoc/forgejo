@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"time"
 
 	"forgejo.org/modules/json"
 )
@@ -45,4 +46,9 @@ func MockVariableValue[T any](p *T, v T) (reset func()) {
 func MockProtect[T any](p *T) (reset func()) {
 	old := *p
 	return func() { *p = old }
+}
+
+// When this is called, sleep until the unix time was increased by one.
+func SleepTillNextSecond() {
+	time.Sleep(time.Second - time.Since(time.Now().Truncate(time.Second)))
 }

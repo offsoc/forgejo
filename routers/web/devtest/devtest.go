@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"forgejo.org/models/asymkey"
+	"forgejo.org/models/user"
 	"forgejo.org/modules/base"
 	"forgejo.org/modules/templates"
 	"forgejo.org/services/context"
@@ -64,6 +66,19 @@ func Tmpl(ctx *context.Context) {
 	ctx.Data["TimeFuture2m"] = now.Add(2 * time.Minute)
 	ctx.Data["TimePast1y"] = now.Add(-1 * 366 * 86400 * time.Second)
 	ctx.Data["TimeFuture1y"] = now.Add(1 * 366 * 86400 * time.Second)
+
+	userNonZero := &user.User{ID: 1}
+	ctx.Data["TrustedVerif"] = &asymkey.ObjectVerification{Verified: true, Reason: asymkey.NotSigned, SigningUser: userNonZero, TrustStatus: "trusted"}
+	ctx.Data["UntrustedVerif"] = &asymkey.ObjectVerification{Verified: true, Reason: asymkey.NotSigned, SigningUser: userNonZero, TrustStatus: "untrusted"}
+	ctx.Data["UnmatchedVerif"] = &asymkey.ObjectVerification{Verified: true, Reason: asymkey.NotSigned, SigningUser: userNonZero, TrustStatus: ""}
+	ctx.Data["WarnVerif"] = &asymkey.ObjectVerification{Verified: false, Warning: true, Reason: asymkey.NotSigned, SigningUser: userNonZero}
+	ctx.Data["UnknownVerif"] = &asymkey.ObjectVerification{Verified: false, Warning: false, Reason: asymkey.NotSigned, SigningUser: userNonZero}
+	userUnknown := &user.User{ID: 0}
+	ctx.Data["TrustedVerifUnk"] = &asymkey.ObjectVerification{Verified: true, Reason: asymkey.NotSigned, SigningUser: userUnknown, TrustStatus: "trusted"}
+	ctx.Data["UntrustedVerifUnk"] = &asymkey.ObjectVerification{Verified: true, Reason: asymkey.NotSigned, SigningUser: userUnknown, TrustStatus: "untrusted"}
+	ctx.Data["UnmatchedVerifUnk"] = &asymkey.ObjectVerification{Verified: true, Reason: asymkey.NotSigned, SigningUser: userUnknown, TrustStatus: ""}
+	ctx.Data["WarnVerifUnk"] = &asymkey.ObjectVerification{Verified: false, Warning: true, Reason: asymkey.NotSigned, SigningUser: userUnknown}
+	ctx.Data["UnknownVerifUnk"] = &asymkey.ObjectVerification{Verified: false, Warning: false, Reason: asymkey.NotSigned, SigningUser: userUnknown}
 
 	if ctx.Req.Method == "POST" {
 		_ = ctx.Req.ParseForm()

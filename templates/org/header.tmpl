@@ -21,6 +21,14 @@
 				{{if .IsOrganizationMember}}
 					<a class="ui basic button tw-mr-0" href="{{.OrgLink}}/dashboard">{{ctx.Locale.Tr "org.open_dashboard"}}</a>
 				{{end}}
+				{{if and .IsModerationEnabled .IsSigned (not .IsOrganizationOwner)}}
+					<button class="ui dropdown icon button" data-tooltip-content="{{ctx.Locale.Tr "repo.more_operations"}}" aria-label="{{ctx.Locale.Tr "toggle_menu"}}">
+						{{svg "octicon-kebab-horizontal" 14}}
+						<div class="menu top left">
+							<a class="item context" href="{{AppSubUrl}}/report_abuse?type=org&id={{$.Org.ID}}">{{ctx.Locale.Tr "moderation.report_abuse"}}</a>
+						</div>
+					</button>
+				{{end}}
 			</span>
 		</div>
 		{{if .RenderedDescription}}<div class="render-content markup">{{.RenderedDescription}}</div>{{end}}

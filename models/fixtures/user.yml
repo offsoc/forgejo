@@ -53,6 +53,7 @@
   login_source: 0
   login_name: user2
   type: 0
+  website: https://keyoxide.org/eb114f5e6c0dc2bcdd183550a4b61a2dc5923710
   salt: ZogKvWdyEx
   max_repo_creation: -1
   is_active: true
@@ -69,7 +70,7 @@
   num_followers: 2
   num_following: 1
   num_stars: 2
-  num_repos: 17
+  num_repos: 18
   num_teams: 0
   num_members: 0
   visibility: 0
@@ -93,7 +94,7 @@
   login_name: org3
   type: 1
   salt: ZogKvWdyEx
-  max_repo_creation: -1
+  max_repo_creation: 1000
   is_active: false
   is_admin: false
   is_restricted: false
@@ -143,7 +144,7 @@
   avatar_email: user4@example.com
   use_custom_avatar: true
   num_followers: 0
-  num_following: 1
+  num_following: 2
   num_stars: 0
   num_repos: 0
   num_teams: 0
@@ -181,7 +182,7 @@
   avatar_email: user5@example.com
   use_custom_avatar: true
   num_followers: 0
-  num_following: 0
+  num_following: 1
   num_stars: 0
   num_repos: 1
   num_teams: 0
@@ -294,7 +295,7 @@
   avatar: ""
   avatar_email: user8@example.com
   use_custom_avatar: true
-  num_followers: 1
+  num_followers: 3
   num_following: 1
   num_stars: 0
   num_repos: 0

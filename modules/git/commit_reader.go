@@ -85,6 +85,8 @@ readLoop:
 				_, _ = payloadSB.Write(line)
 			case "encoding":
 				_, _ = payloadSB.Write(line)
+			case "change-id": // jj-vcs specific header.
+				_, _ = payloadSB.Write(line)
 			case "gpgsig":
 				fallthrough
 			case "gpgsig-sha256": // FIXME: no intertop, so only 1 exists at present.

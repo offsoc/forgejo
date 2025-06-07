@@ -12,6 +12,7 @@ import (
 
 	"forgejo.org/modules/json"
 	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
 	"forgejo.org/routers"
 	"forgejo.org/tests"
 
@@ -53,16 +54,11 @@ func sessionFileExist(t *testing.T, tmpDir, sessionID string) bool {
 
 func TestSessionFileCreation(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-
-	oldSessionConfig := setting.SessionConfig.ProviderConfig
-	defer func() {
-		setting.SessionConfig.ProviderConfig = oldSessionConfig
-		testWebRoutes = routers.NormalRoutes()
-	}()
+	defer test.MockProtect(&setting.SessionConfig.ProviderConfig)()
+	defer test.MockProtect(&testWebRoutes)()
 
 	var config session.Options
-
-	err := json.Unmarshal([]byte(oldSessionConfig), &config)
+	err := json.Unmarshal([]byte(setting.SessionConfig.ProviderConfig), &config)
 	require.NoError(t, err)
 
 	config.Provider = "file"
