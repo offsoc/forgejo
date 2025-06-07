@@ -72,7 +72,6 @@ details.dropdown > summary + ul {
 
 details.dropdown > summary + ul > li {
   width: 100%;
-  padding: var(--dropdown-item-padding);
   background: none;
 }
 
@@ -104,6 +103,7 @@ details.dropdown > summary + ul > li:hover {
  * looks like a great thing but FF still doesn't support it. */
 
 details.dropdown > summary + ul > li > .item {
+  padding: var(--dropdown-item-padding);
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -114,6 +114,5 @@ details.dropdown > summary + ul > li > .item {
 
 /* Cancel default styling of button elements */
 details.dropdown > summary + ul > li button {
-  padding: 0;
   background: none;
 }
