@@ -6,6 +6,7 @@
 // Event listeners in this file provide more convenient options for that:
 // click iteration with anything on the page and pressing Escape.
 
+// FixMe: HTMX makes this ineffective!
 function markDropdowns() {
   const dropdowns = document.querySelectorAll<HTMLDetailsElement>('details.dropdown');
   for (const dropdown of dropdowns) {
