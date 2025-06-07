@@ -8,7 +8,7 @@
 
 :root details.dropdown {
   --dropdown-box-shadow: 0 6px 18px var(--color-shadow);
-  --dropdown-item-padding: 0.5rem 1rem;
+  --dropdown-item-padding: 0.5rem 0.75rem;
 }
 
 @media (pointer: coarse) {
