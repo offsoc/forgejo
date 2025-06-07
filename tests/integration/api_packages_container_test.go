@@ -56,7 +56,7 @@ func TestPackageContainer(t *testing.T) {
 		return values
 	}
 
-	images := []string{"test", "te/st"}
+	images := []string{"test", "te/st", "oras-test"}
 	tags := []string{"latest", "main"}
 	multiTag := "multi"
 
