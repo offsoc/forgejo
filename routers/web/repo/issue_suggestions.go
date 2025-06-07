@@ -14,8 +14,6 @@ import (
 
 // IssueSuggestions returns a list of issue suggestions
 func IssueSuggestions(ctx *context.Context) {
-	keyword := ctx.Req.FormValue("q")
-
 	canReadIssues := ctx.Repo.CanRead(unit.TypeIssues)
 	canReadPulls := ctx.Repo.CanRead(unit.TypePullRequests)
 
@@ -26,7 +24,7 @@ func IssueSuggestions(ctx *context.Context) {
 		isPull = optional.Some(false)
 	}
 
-	suggestions, err := issue_service.GetSuggestion(ctx, ctx.Repo.Repository, isPull, keyword)
+	suggestions, err := issue_service.GetSuggestion(ctx, ctx.Repo.Repository, isPull)
 	if err != nil {
 		ctx.ServerError("GetSuggestion", err)
 		return

@@ -44,12 +44,45 @@ export function matchMention(queryText) {
   return sortAndReduce(results);
 }
 
-export async function matchIssue(owner, repo, issueIndexStr, query) {
-  const res = await GET(`${window.config.appSubUrl}/${owner}/${repo}/issues/suggestions?q=${encodeURIComponent(query)}`);
+export function matchIssue(queryText) {
+  const issues = window.config.issueValues ?? [];
+  const query = queryText.toLowerCase().trim();
 
-  const issues = await res.json();
-  const issueIndex = parseInt(issueIndexStr);
+  if (!query) {
+    // Return latest 5 issues/prs sorted by number descending
+    return [...issues]
+      .sort((a, b) => b.number - a.number)
+      .slice(0, 5);
+  }
 
-  // filter out issue with same id
-  return issues.filter((i) => i.id !== issueIndex);
+  const isDigital = /^\d+$/.test(query);
+  const results = [];
+
+  if (isDigital) {
+    // Find issues/prs with number starting with the query (prefix), sorted by number ascending
+    const prefixMatches = issues.filter(issue =>
+      String(issue.number).startsWith(query)
+    ).sort((a, b) => a.number - b.number);
+
+    results.push(...prefixMatches);
+  }
+
+  if (!isDigital || results.length < 5) {
+    // Fallback: find by title match, sorted by number descending
+    const titleMatches = issues
+      .filter(issue =>
+        issue.title.toLowerCase().includes(query)
+      )
+      .sort((a, b) => b.number - a.number);
+
+    // Add only those not already in the result set
+    for (const match of titleMatches) {
+      if (!results.includes(match)) {
+        results.push(match);
+        if (results.length >= 5) break;
+      }
+    }
+  }
+
+  return results.slice(0, 5);
 }

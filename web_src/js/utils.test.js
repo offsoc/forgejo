@@ -76,6 +76,16 @@ test('parseIssueHref', () => {
   expect(parseIssueHref('')).toEqual({owner: undefined, repo: undefined, type: undefined, index: undefined});
 });
 
+test('parseRepoOwnerPathInfo', () => {
+  expect(parseRepoOwnerPathInfo('/owner/repo/issues/new')).toEqual({ownerName: 'owner', repoName: 'repo'});
+  expect(parseRepoOwnerPathInfo('/owner/repo/releases')).toEqual({ownerName: 'owner', repoName: 'repo'});
+  expect(parseRepoOwnerPathInfo('/other')).toEqual({});
+  window.config.appSubUrl = '/sub';
+  expect(parseRepoOwnerPathInfo('/sub/owner/repo/issues/new')).toEqual({ownerName: 'owner', repoName: 'repo'});
+  expect(parseRepoOwnerPathInfo('/sub/owner/repo/compare/feature/branch-1...fix/branch-2')).toEqual({ownerName: 'owner', repoName: 'repo'});
+  window.config.appSubUrl = '';
+});
+
 test('parseUrl', () => {
   expect(parseUrl('').pathname).toEqual('/');
   expect(parseUrl('/path').pathname).toEqual('/path');

@@ -1,30 +1,29 @@
 import {matchEmoji, matchMention, matchIssue} from '../../utils/match.js';
 import {emojiString} from '../emoji.js';
-import {getIssueIcon, getIssueColor} from '../issue.js'
-import {parseIssueHref} from '../../utils.js'
+import {getIssueIcon, getIssueColor,isIssueSuggestionsLoaded, fetchIssueSuggestions} from '../issue.js'
 import {svg} from '../../svg.js'
 import {createElementFromHTML} from '../../utils/dom.js';
-import {debounce} from 'perfect-debounce';
+import { GET } from '../../modules/fetch.js';
 
-const debouncedSuggestIssues = debounce((key, text) => new Promise(
-  async (resolve, reject) => {
-  const {owner, repo, index} = parseIssueHref(window.location.href);
-  const matches = await matchIssue(owner, repo, index, text);
-  if (!matches.length) return resolve({matched: false});
+async function issueSuggestions(text) {
+  const key = '#';
+
+  const matches = matchIssue(text);
+  if (!matches.length) return {matched: false};
 
   const ul = document.createElement('ul');
   ul.classList.add('suggestions');
   for (const issue of matches) {
     const li = document.createElement('li');
     li.setAttribute('role', 'option');
-    li.setAttribute('data-value', `${key}${issue.id}`);
+    li.setAttribute('data-value', `${key}${issue.number}`);
     li.classList.add('tw-flex', 'tw-gap-2')
 
     const icon = svg(getIssueIcon(issue), 16, ['text', getIssueColor(issue)].join(' '));
     li.append(createElementFromHTML(icon));
 
     const id = document.createElement('span');
-    id.textContent = issue.id.toString();
+    id.textContent = issue.number.toString();
     li.append(id);
 
     const nameSpan = document.createElement('span');
@@ -34,10 +33,14 @@ const debouncedSuggestIssues = debounce((key, text) => new Promise(
     ul.append(li);
   }
 
-  resolve({matched: true, fragment: ul});
-}), 100)
+  return {matched: true, fragment: ul};
+}
 
 export function initTextExpander(expander) {
+  if (!expander) return;
+
+  const textarea = expander.querySelector('textarea');
+
   expander?.addEventListener('text-expander-change', ({detail: {key, provide, text}}) => {
     if (key === ':') {
       const matches = matchEmoji(text);
@@ -86,7 +89,11 @@ export function initTextExpander(expander) {
 
       provide({matched: true, fragment: ul});
     } else if (key === '#') {
-      provide(debouncedSuggestIssues(key, text));
+      if (!isIssueSuggestionsLoaded()) {
+        provide(fetchIssueSuggestions().then(() => issueSuggestions(text)));
+      } else {
+        provide(issueSuggestions(text));
+      }
     }
   });
   expander?.addEventListener('text-expander-value', ({detail}) => {
