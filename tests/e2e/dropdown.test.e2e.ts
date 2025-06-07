@@ -12,7 +12,7 @@ import {test} from './utils_e2e.ts';
 test('JS enhanced', async ({page}) => {
   await page.goto('/user1');
 
-  await expect(await page.locator("body")).not.toContainClass("no-js");
+  await expect(page.locator('body')).not.toContainClass('no-js');
   const nojsNotice = page.locator('body .full noscript');
   await expect(nojsNotice).toBeHidden();
 
@@ -58,7 +58,7 @@ test('No JS', async ({browser}) => {
 
   const nojsNotice = nojsPage.locator('body .full noscript');
   await expect(nojsNotice).toBeVisible();
-  await expect(await nojsPage.locator("body")).toContainClass("no-js");
+  await expect(nojsPage.locator('body')).toContainClass('no-js');
 
   // Open and close
   const dropdown = nojsPage.locator('details.dropdown');
