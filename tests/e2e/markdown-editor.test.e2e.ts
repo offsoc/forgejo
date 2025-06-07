@@ -468,7 +468,7 @@ test('issue suggestions', async ({page}) => {
   expect(response?.status()).toBe(200);
 
   const textarea = page.locator('#comment-form textarea[name=content]');
-  
+
   await textarea.focus();
   await textarea.pressSequentially('#');
 
@@ -476,14 +476,18 @@ test('issue suggestions', async ({page}) => {
   await expect(suggestionList).toBeVisible();
 
   const expectedSuggestions = [
-    { number: '5', label: 'pull5' },
-    { number: '4', label: 'issue5' },
-    { number: '3', label: 'issue3' },
-    { number: '2', label: 'issue2' },
+    {number: '5', label: 'pull5', iconClass: 'octicon-git-pull-request', colorClass: 'text green'},
+    {number: '4', label: 'issue5', iconClass: 'octicon-issue-closed', colorClass: 'text red'},
+    {number: '3', label: 'issue3', iconClass: 'octicon-git-pull-request', colorClass: 'text green'},
+    {number: '2', label: 'issue2', iconClass: 'octicon-git-pull-request', colorClass: 'text purple'},
   ];
 
-    for (const suggestion of expectedSuggestions) {
-    const entry = suggestionList.locator(`li:has-text("${suggestion.number}") >> text="${suggestion.label}"`);
-    await expect(entry).toBeVisible();
+  for (const {number, label, iconClass, colorClass} of expectedSuggestions) {
+    const item = suggestionList.locator(`li:has-text("${label}")`);
+    await expect(item).toContainText(number);
+    await expect(item).toContainText(label);
+
+    const svg = item.locator(`svg.${iconClass}`);
+    await expect(svg).toHaveClass(new RegExp(`\\b${colorClass.replace(' ', '\\b.*\\b')}\\b`));
   }
-})
+});
