@@ -36,7 +36,6 @@
     "monaco-editor": "0.52.2",
     "monaco-editor-webpack-plugin": "7.1.0",
     "pdfobject": "2.3.0",
-    "perfect-debounce": "1.0.0",
     "postcss": "8.5.2",
     "postcss-loader": "8.1.1",
     "postcss-nesting": "13.0.1",
