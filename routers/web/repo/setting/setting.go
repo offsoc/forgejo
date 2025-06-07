@@ -748,6 +748,10 @@ func SettingsPost(ctx *context.Context) {
 			repo.IsFsckEnabled = form.EnableHealthCheck
 		}
 
+		if repo.IsCodeIndexerEnabled != form.EnableRepoCodeIndexer {
+			repo.IsCodeIndexerEnabled = form.EnableRepoCodeIndexer
+		}
+
 		if err := repo_service.UpdateRepository(ctx, repo, false); err != nil {
 			ctx.ServerError("UpdateRepository", err)
 			return

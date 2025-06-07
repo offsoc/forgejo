@@ -53,6 +53,10 @@ func index(ctx context.Context, indexer internal.Indexer, repoID int64) error {
 		repoTypes = []string{"sources"}
 	}
 
+	if !repo.IsCodeIndexerEnabled {
+		return nil
+	}
+
 	// skip forks from being indexed if unit is not present
 	if !slices.Contains(repoTypes, "forks") && repo.IsFork {
 		return nil
