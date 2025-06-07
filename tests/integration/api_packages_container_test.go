@@ -664,36 +664,76 @@ func TestPackageContainer(t *testing.T) {
 			t.Run("GetTagList", func(t *testing.T) {
 				defer tests.PrintCurrentTest(t)()
 
-				cases := []struct {
+				var cases []struct {
 					URL          string
 					ExpectedTags []string
 					ExpectedLink string
-				}{
-					{
-						URL:          fmt.Sprintf("%s/tags/list", url),
-						ExpectedTags: []string{"latest", "main", "multi"},
-						ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=multi>; rel="next"`, user.Name, image),
-					},
-					{
-						URL:          fmt.Sprintf("%s/tags/list?n=0", url),
-						ExpectedTags: []string{},
-						ExpectedLink: "",
-					},
-					{
-						URL:          fmt.Sprintf("%s/tags/list?n=2", url),
-						ExpectedTags: []string{"latest", "main"},
-						ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=main&n=2>; rel="next"`, user.Name, image),
-					},
-					{
-						URL:          fmt.Sprintf("%s/tags/list?last=main", url),
-						ExpectedTags: []string{"multi"},
-						ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=multi>; rel="next"`, user.Name, image),
-					},
-					{
-						URL:          fmt.Sprintf("%s/tags/list?n=1&last=latest", url),
-						ExpectedTags: []string{"main"},
-						ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=main&n=1>; rel="next"`, user.Name, image),
-					},
+				}
+
+				if image == "oras-test" {
+					cases = []struct {
+						URL          string
+						ExpectedTags []string
+						ExpectedLink string
+					}{
+						{
+							URL:          fmt.Sprintf("%s/tags/list", url),
+							ExpectedTags: []string{"artifact-test", "latest", "main", "multi"},
+							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=multi>; rel="next"`, user.Name, image),
+						},
+						{
+							URL:          fmt.Sprintf("%s/tags/list?n=0", url),
+							ExpectedTags: []string{},
+							ExpectedLink: "",
+						},
+						{
+							URL:          fmt.Sprintf("%s/tags/list?n=2", url),
+							ExpectedTags: []string{"artifact-test", "latest"},
+							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=latest&n=2>; rel="next"`, user.Name, image),
+						},
+						{
+							URL:          fmt.Sprintf("%s/tags/list?last=main", url),
+							ExpectedTags: []string{"multi"},
+							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=multi>; rel="next"`, user.Name, image),
+						},
+						{
+							URL:          fmt.Sprintf("%s/tags/list?n=1&last=latest", url),
+							ExpectedTags: []string{"main"},
+							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=main&n=1>; rel="next"`, user.Name, image),
+						},
+					}
+				} else {
+					cases = []struct {
+						URL          string
+						ExpectedTags []string
+						ExpectedLink string
+					}{
+						{
+							URL:          fmt.Sprintf("%s/tags/list", url),
+							ExpectedTags: []string{"latest", "main", "multi"},
+							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=multi>; rel="next"`, user.Name, image),
+						},
+						{
+							URL:          fmt.Sprintf("%s/tags/list?n=0", url),
+							ExpectedTags: []string{},
+							ExpectedLink: "",
+						},
+						{
+							URL:          fmt.Sprintf("%s/tags/list?n=2", url),
+							ExpectedTags: []string{"latest", "main"},
+							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=main&n=2>; rel="next"`, user.Name, image),
+						},
+						{
+							URL:          fmt.Sprintf("%s/tags/list?last=main", url),
+							ExpectedTags: []string{"multi"},
+							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=multi>; rel="next"`, user.Name, image),
+						},
+						{
+							URL:          fmt.Sprintf("%s/tags/list?n=1&last=latest", url),
+							ExpectedTags: []string{"main"},
+							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=main&n=1>; rel="next"`, user.Name, image),
+						},
+					}
 				}
 
 				for _, c := range cases {
@@ -720,7 +760,11 @@ func TestPackageContainer(t *testing.T) {
 
 				var apiPackages []*api.Package
 				DecodeJSON(t, resp, &apiPackages)
-				assert.Len(t, apiPackages, 4) // "latest", "main", "multi", "sha256:..."
+				if image == "oras-test" {
+					assert.Len(t, apiPackages, 5) // "artifact-test", "latest", "main", "multi", "sha256:..."
+				} else {
+					assert.Len(t, apiPackages, 4) // "latest", "main", "multi", "sha256:..."
+				}
 			})
 
 			t.Run("Delete", func(t *testing.T) {
