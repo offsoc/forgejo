@@ -49,10 +49,9 @@ export function matchIssue(queryText) {
   const query = queryText.toLowerCase().trim();
 
   if (!query) {
-    // Return latest 5 issues/prs sorted by number descending
     return [...issues]
       .sort((a, b) => b.number - a.number)
-      .slice(0, 5);
+      .slice(0, maxMatches);
   }
 
   const isDigital = /^\d+$/.test(query);
@@ -67,7 +66,7 @@ export function matchIssue(queryText) {
     results.push(...prefixMatches);
   }
 
-  if (!isDigital || results.length < 5) {
+  if (!isDigital || results.length < maxMatches) {
     // Fallback: find by title match, sorted by number descending
     const titleMatches = issues
       .filter(issue =>
@@ -79,10 +78,10 @@ export function matchIssue(queryText) {
     for (const match of titleMatches) {
       if (!results.includes(match)) {
         results.push(match);
-        if (results.length >= 5) break;
+        if (results.length >= maxMatches) break;
       }
     }
   }
 
-  return results.slice(0, 5);
+  return results.slice(0, maxMatches);
 }

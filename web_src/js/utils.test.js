@@ -3,6 +3,7 @@ import {
   parseUrl, translateMonth, translateDay, blobToDataURI,
   toAbsoluteUrl, encodeURLEncodedBase64, decodeURLEncodedBase64,
   isDarkTheme, getCurrentLocale, parseDom, serializeXml, sleep,
+  parseRepoOwnerPathInfo,
 } from './utils.js';
 
 afterEach(() => {
