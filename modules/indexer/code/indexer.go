@@ -54,7 +54,7 @@ func index(ctx context.Context, indexer internal.Indexer, repoID int64) error {
 	}
 
 	if !repo.IsCodeIndexerEnabled {
-		return nil
+		return indexer.Delete(ctx, repoID)
 	}
 
 	// skip forks from being indexed if unit is not present
