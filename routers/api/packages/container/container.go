@@ -63,7 +63,6 @@ func setResponseHeaders(resp http.ResponseWriter, h *containerHeaders) {
 	if h.ContentType != "" {
 		resp.Header().Set("Content-Type", h.ContentType)
 	}
-  resp.Header().Set("Content-Length", strconv.FormatInt(h.ContentLength, 10))
 	if h.UploadUUID != "" {
 		resp.Header().Set("Docker-Upload-Uuid", h.UploadUUID)
 	}
@@ -71,6 +70,7 @@ func setResponseHeaders(resp http.ResponseWriter, h *containerHeaders) {
 		resp.Header().Set("Docker-Content-Digest", h.ContentDigest)
 		resp.Header().Set("ETag", fmt.Sprintf(`"%s"`, h.ContentDigest))
 	}
+	resp.Header().Set("Content-Length", strconv.FormatInt(h.ContentLength, 10))
 	resp.Header().Set("Docker-Distribution-Api-Version", "registry/2.0")
 	resp.WriteHeader(h.Status)
 }
