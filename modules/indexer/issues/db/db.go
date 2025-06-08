@@ -53,7 +53,7 @@ func (i *Indexer) Search(ctx context.Context, options *internal.SearchOptions) (
 
 	cond := builder.NewCond()
 
-	var priorityIssueIndex int64 = 0
+	var priorityIssueIndex int64
 	if options.Keyword != "" {
 		repoCond := builder.In("repo_id", options.RepoIDs)
 		if len(options.RepoIDs) == 1 {
