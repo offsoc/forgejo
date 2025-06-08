@@ -499,6 +499,10 @@
   content: normal;
 }
 
+.markup kbd {
+  padding: 0 0.35em;
+}
+
 .markup .ui.list .list,
 .markup ol.ui.list ol,
 .markup ul.ui.list ul {
