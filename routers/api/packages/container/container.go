@@ -63,9 +63,7 @@ func setResponseHeaders(resp http.ResponseWriter, h *containerHeaders) {
 	if h.ContentType != "" {
 		resp.Header().Set("Content-Type", h.ContentType)
 	}
-	if h.ContentLength >= 0 {
-		resp.Header().Set("Content-Length", strconv.FormatInt(h.ContentLength, 10))
-	}
+  resp.Header().Set("Content-Length", strconv.FormatInt(h.ContentLength, 10))
 	if h.UploadUUID != "" {
 		resp.Header().Set("Docker-Upload-Uuid", h.UploadUUID)
 	}
