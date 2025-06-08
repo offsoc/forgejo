@@ -42,6 +42,8 @@ func GetUnindexedRepos(ctx context.Context, indexerType RepoIndexerType, maxRepo
 		"repo_indexer_status.id",
 	}).And(builder.Eq{
 		"repository.is_empty": false,
+	}).And(builder.Eq{
+		"repository.is_code_indexer_enabled": true,
 	})
 	sess := db.GetEngine(ctx).Table("repository").Join("LEFT OUTER", "repo_indexer_status", "repository.id = repo_indexer_status.repo_id AND repo_indexer_status.indexer_type = ?", indexerType)
 	if maxRepoID > 0 {
