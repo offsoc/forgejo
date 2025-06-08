@@ -65,7 +65,5 @@ func TokenizerConstructor(config map[string]any, cache *registry.Cache) (analysi
 }
 
 func init() {
-	if err := registry.RegisterTokenizer(Name, TokenizerConstructor); err != nil {
-		panic(err)
-	}
+	registry.RegisterTokenizer(Name, TokenizerConstructor)
 }
