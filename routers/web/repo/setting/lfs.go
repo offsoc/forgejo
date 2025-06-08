@@ -345,12 +345,12 @@ func LFSFileGet(ctx *context.Context) {
 	case st.Is3DModel():
 		ctx.Data["Is3DModelFile"] = true
 		switch {
+		case st.IsGLB():
+			ctx.Data["IsGLBFile"] = true
 		case st.IsSTL():
 			ctx.Data["IsSTLFile"] = true
 		case st.IsGLTF():
 			ctx.Data["IsGLTFFile"] = true
-		case st.IsGLB():
-			ctx.Data["IsGLBFile"] = true
 		case st.IsOBJ():
 			ctx.Data["IsOBJFile"] = true
 		case st.Is3MF():

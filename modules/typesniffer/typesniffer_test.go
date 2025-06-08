@@ -117,6 +117,14 @@ func TestIsAudio(t *testing.T) {
 	assert.True(t, DetectContentType([]byte("ID3Toy\n====\t* hi 🌞, ..."+"🌛"[0:2])).IsText()) // test ID3 tag with incomplete UTF8 char
 }
 
+func TestIsGLB(t *testing.T) {
+	glb, _ := hex.DecodeString("676c5446")
+	assert.True(t, DetectContentType(glb).IsGLB())
+	assert.True(t, DetectContentType(glb).Is3DModel())
+	assert.False(t, DetectContentType([]byte("plain text")).IsGLB())
+	assert.False(t, DetectContentType([]byte("plain text")).Is3DModel())
+}
+
 func TestDetectContentTypeFromReader(t *testing.T) {
 	mp3, _ := base64.StdEncoding.DecodeString("SUQzBAAAAAABAFRYWFgAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUWFhYAAAAEQAAA21pbm9yX3Zl")
 	st, err := DetectContentTypeFromReader(bytes.NewReader(mp3))
@@ -144,4 +152,16 @@ func TestDetectContentTypeAvif(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, st.IsImage())
+}
+
+func TestDetectContentTypeModelGLB(t *testing.T) {
+	glb, err := hex.DecodeString("676c5446")
+	require.NoError(t, err)
+
+	st, err := DetectContentTypeFromReader(bytes.NewReader(glb))
+	require.NoError(t, err)
+
+	// print st for debugging
+	assert.Equal(t, "model/gltf-binary", st.GetMimeType())
+	assert.True(t, st.IsGLB())
 }

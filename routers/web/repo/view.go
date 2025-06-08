@@ -630,12 +630,12 @@ func renderFile(ctx *context.Context, entry *git.TreeEntry) {
 	case fInfo.st.Is3DModel():
 		ctx.Data["Is3DModelFile"] = true
 		switch {
+		case fInfo.st.IsGLB():
+			ctx.Data["IsGLBFile"] = true
 		case fInfo.st.IsSTL():
 			ctx.Data["IsSTLFile"] = true
 		case fInfo.st.IsGLTF():
 			ctx.Data["IsGLTFFile"] = true
-		case fInfo.st.IsGLB():
-			ctx.Data["IsGLBFile"] = true
 		case fInfo.st.IsOBJ():
 			ctx.Data["IsOBJFile"] = true
 		case fInfo.st.Is3MF():

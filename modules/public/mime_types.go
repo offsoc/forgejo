@@ -23,6 +23,11 @@ var wellKnownMimeTypesLower = map[string]string{
 	".wasm": "application/wasm",
 	".webp": "image/webp",
 	".xml":  "text/xml; charset=utf-8",
+	".glb":  "model/gltf-binary",
+	".gltf": "model/gltf+json",
+	".obj":  "model/obj",
+	".stl":  "model/stl",
+	".3mf":  "model/3mf",
 
 	// well, there are some types missing from the builtin list
 	".txt": "text/plain; charset=utf-8",

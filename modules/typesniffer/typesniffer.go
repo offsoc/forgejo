@@ -175,6 +175,13 @@ func DetectContentType(data []byte) SniffedType {
 			ct = "audio/ogg" // for most cases, it is used as an audio container
 		}
 	}
+
+	// GLTF is unsupported by http.DetectContentType
+	// hexdump -n 4 -C glTF.glb
+	if bytes.HasPrefix(data, []byte("glTF")) {
+		ct = GLBMimeType
+	}
+
 	return SniffedType{ct}
 }
 
