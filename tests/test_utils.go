@@ -37,6 +37,7 @@ import (
 	repo_service "forgejo.org/services/repository"
 	files_service "forgejo.org/services/repository/files"
 	wiki_service "forgejo.org/services/wiki"
+	"xorm.io/xorm/convert"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -341,6 +342,7 @@ type DeclarativeRepoOptions struct {
 	Name          optional.Option[string]
 	EnabledUnits  optional.Option[[]unit_model.Type]
 	DisabledUnits optional.Option[[]unit_model.Type]
+	UnitConfig    optional.Option[map[unit_model.Type]convert.Conversion]
 	Files         optional.Option[[]*files_service.ChangeRepoFile]
 	WikiBranch    optional.Option[string]
 	AutoInit      optional.Option[bool]
@@ -389,9 +391,14 @@ func CreateDeclarativeRepoWithOptions(t *testing.T, owner *user_model.User, opts
 		enabledUnits = make([]repo_model.RepoUnit, len(units))
 
 		for i, unitType := range units {
+			var config convert.Conversion
+			if cfg, ok := opts.UnitConfig.Value()[unitType]; ok {
+				config = cfg
+			}
 			enabledUnits[i] = repo_model.RepoUnit{
 				RepoID: repo.ID,
 				Type:   unitType,
+				Config: config,
 			}
 		}
 	}

@@ -263,61 +263,66 @@ test('New Issue: Milestone', async ({page}, workerInfo) => {
   await save_visual(page);
 });
 
-test('Issue: Dependencies', async ({page}) => {
-  const response = await page.goto('/user2/dependency-test/issues/103');
-  expect(response?.status()).toBe(200);
+test.describe('Dependency dropdown', () => {
+  test.use({user: 'user11'});
+  test('Issue: Dependencies', async ({page}) => {
+    const response = await page.goto('/user11/dependency-test/issues/3');
+    expect(response?.status()).toBe(200);
 
-  const depsBlock = page.locator('.issue-content-right .depending');
-  await expect(depsBlock).toContainText('No dependencies set');
+    const depsBlock = page.locator('.issue-content-right .depending');
+    await expect(depsBlock).toContainText('No dependencies set');
 
-  const input = page.locator('.issue-content-right .depending .dropdown .search');
-  const current = page.locator('.issue-content-right .depending input[name="newDependency"]');
-  const menu = page.locator('.issue-content-right .depending .menu');
-  const items = page.locator('.issue-content-right .depending .menu .item');
-  await input.scrollIntoViewIfNeeded();
-  await input.click();
+    const input = page.locator('.issue-content-right .depending .dropdown .search');
+    const current = page.locator('.issue-content-right .depending input[name="newDependency"]');
+    const menu = page.locator('.issue-content-right .depending .menu');
+    const items = page.locator('.issue-content-right .depending .menu .item');
+    await input.scrollIntoViewIfNeeded();
+    await input.click();
 
-  // Without query, it should show issues in the same repo, sorted by date, except current one.
-  await expect(menu).toBeVisible();
-  await expect(items).toHaveCount(2);
-  await expect(items.first()).toContainText('second issue here');
-  await expect(items.last()).toContainText('first issue here');
-  await expect(items.last()).toHaveAttribute('data-value', '1001');
+    const first = 'first issue here';
+    const second = 'second issue here';
 
-  // With query, it should search all repos, but show current repo issues first.
-  await input.fill('seventh');
-  await expect(items).toHaveCount(2); // there is an issue in user2/repo2 containing the word "seventh"
-  await expect(items.first()).toHaveAttribute('data-value', '1002');
+    // Without query, it should show issues in the same repo, sorted by date, except current one.
+    await expect(menu).toBeVisible();
+    await expect(items).toHaveCount(2);
+    await expect(items.first()).toContainText(second);
+    await expect(items.last()).toContainText(first);
 
-  // When entering an issue number, it should always show that one first, then all text matches.
-  await input.fill('101');
-  await expect(items.first()).toHaveAttribute('data-value', '1001');
-  await expect(items.nth(1)).toHaveAttribute('data-value', '1002');
+    // With query, it should search all repos, but show current repo issues first.
+    await input.fill('seventh');
+    await expect(items).toHaveCount(2); // there is an issue in user2/repo2 containing the word "seventh"
+    await expect(items.first()).toContainText(second);
 
-  // Should behave the same with a prefix
-  await input.fill('#101');
-  await expect(items.first()).toHaveAttribute('data-value', '1001');
+    // When entering an issue number, it should always show that one first, then all text matches.
+    await input.fill('1');
+    await expect(items.first()).toContainText(first);
+    await expect(items.nth(1)).toBeVisible();
 
-  // Selecting an issue
-  await items.first().click();
-  await expect(current).toHaveValue('1001');
+    // Should behave the same with a prefix
+    await input.fill('#1');
+    await expect(items.first()).toContainText(first);
 
-  // Dropdown filters out currently selected issue. Whether that's good UX is debatable, but test for now.
-  await input.fill('#101');
-  await expect(items.first()).toBeHidden();
+    // Selecting an issue
+    await items.first().click();
+    await expect(current).toHaveValue(/\d+/);
 
-  // Add dependency
-  const link = page.locator('.issue-content-right .depending .dependency a.title');
-  await page.locator('.issue-content-right .depending button').click();
-  await expect(link).toHaveAttribute('href', '/user2/dependency-test/issues/101');
+    // Dropdown filters out currently selected issue. Whether that's good UX is debatable, but test for now.
+    await input.fill('#1');
+    await expect(items.first()).toBeHidden();
 
-  // Remove dependency
-  await page.locator('.issue-content-right .depending .delete-dependency-button').click();
+    // Add dependency
+    const link = page.locator('.issue-content-right .depending .dependency a.title');
+    await page.locator('.issue-content-right .depending button').click();
+    await expect(link).toHaveAttribute('href', '/user11/dependency-test/issues/1');
 
-  const modal = page.locator('.modal.remove-dependency');
-  await expect(modal).toBeVisible();
-  await expect(modal).toContainText('This will remove the dependency from this issue');
-  await modal.locator('button.ok').click();
+    // Remove dependency
+    await page.locator('.issue-content-right .depending .delete-dependency-button').click();
 
-  await expect(depsBlock).toContainText('No dependencies set');
+    const modal = page.locator('.modal.remove-dependency');
+    await expect(modal).toBeVisible();
+    await expect(modal).toContainText('This will remove the dependency from this issue');
+    await modal.locator('button.ok').click();
+
+    await expect(depsBlock).toContainText('No dependencies set');
+  });
 });
