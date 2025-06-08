@@ -70,7 +70,9 @@ func setResponseHeaders(resp http.ResponseWriter, h *containerHeaders) {
 		resp.Header().Set("Docker-Content-Digest", h.ContentDigest)
 		resp.Header().Set("ETag", fmt.Sprintf(`"%s"`, h.ContentDigest))
 	}
-	resp.Header().Set("Content-Length", strconv.FormatInt(h.ContentLength, 10))
+	if h.ContentLength >= 0 {
+		resp.Header().Set("Content-Length", strconv.FormatInt(h.ContentLength, 10))
+	}
 	resp.Header().Set("Docker-Distribution-Api-Version", "registry/2.0")
 	resp.WriteHeader(h.Status)
 }
