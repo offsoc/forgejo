@@ -37,11 +37,11 @@ import (
 	repo_service "forgejo.org/services/repository"
 	files_service "forgejo.org/services/repository/files"
 	wiki_service "forgejo.org/services/wiki"
-	"xorm.io/xorm/convert"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"xorm.io/xorm/convert"
 )
 
 func exitf(format string, args ...any) {

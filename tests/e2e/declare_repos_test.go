@@ -22,10 +22,10 @@ import (
 	issue_service "forgejo.org/services/issue"
 	files_service "forgejo.org/services/repository/files"
 	"forgejo.org/tests"
-	"xorm.io/xorm/convert"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"xorm.io/xorm/convert"
 )
 
 // first entry represents filename
@@ -75,7 +75,7 @@ func DeclareGitRepos(t *testing.T) func() {
 			}),
 		}, []FileChanges{}, func(user *user_model.User, repo *repo_model.Repository) {
 			now := timeutil.TimeStampNow() - 3600
-			post := func(title string, content string) {
+			post := func(title, content string) {
 				issue := &issues_model.Issue{
 					RepoID:      repo.ID,
 					PosterID:    user.ID,
