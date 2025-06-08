@@ -48,7 +48,9 @@ type IssuesOptions struct { //nolint
 	UpdatedBeforeUnix  int64
 	// prioritize issues from this repo
 	PriorityRepoID int64
-	IsArchived     optional.Option[bool]
+	// if this issue index (not ID) exists and matches the filters, *and* priorityrepo sort is used, show it first
+	PriorityIssueIndex int64
+	IsArchived         optional.Option[bool]
 
 	// If combined with AllPublic, then private as well as public issues
 	// that matches the criteria will be returned, if AllPublic is false
@@ -60,7 +62,7 @@ type IssuesOptions struct { //nolint
 
 // applySorts sort an issues-related session based on the provided
 // sortType string
-func applySorts(sess *xorm.Session, sortType string, priorityRepoID int64) {
+func applySorts(sess *xorm.Session, sortType string, priorityRepoID, priorityIssueIndex int64) {
 	switch sortType {
 	case "oldest":
 		sess.Asc("issue.created_unix").Asc("issue.id")
@@ -95,8 +97,11 @@ func applySorts(sess *xorm.Session, sortType string, priorityRepoID int64) {
 	case "priorityrepo":
 		sess.OrderBy("CASE "+
 			"WHEN issue.repo_id = ? THEN 1 "+
-			"ELSE 2 END ASC", priorityRepoID).
-			Desc("issue.created_unix").
+			"ELSE 2 END ASC", priorityRepoID)
+		if priorityIssueIndex != 0 {
+			sess.OrderBy("issue.index = ? DESC", priorityIssueIndex)
+		}
+		sess.Desc("issue.created_unix").
 			Desc("issue.id")
 	case "project-column-sorting":
 		sess.Asc("project_issue.sorting").Desc("issue.created_unix").Desc("issue.id")
@@ -468,7 +473,7 @@ func Issues(ctx context.Context, opts *IssuesOptions) (IssueList, error) {
 		Join("INNER", "repository", "`issue`.repo_id = `repository`.id")
 	applyLimit(sess, opts)
 	applyConditions(sess, opts)
-	applySorts(sess, opts.SortType, opts.PriorityRepoID)
+	applySorts(sess, opts.SortType, opts.PriorityRepoID, opts.PriorityIssueIndex)
 
 	issues := IssueList{}
 	if err := sess.Find(&issues); err != nil {
@@ -492,7 +497,7 @@ func IssueIDs(ctx context.Context, opts *IssuesOptions, otherConds ...builder.Co
 	}
 
 	applyLimit(sess, opts)
-	applySorts(sess, opts.SortType, opts.PriorityRepoID)
+	applySorts(sess, opts.SortType, opts.PriorityRepoID, opts.PriorityIssueIndex)
 
 	var res []int64
 	total, err := sess.Select("`issue`.id").Table(&Issue{}).FindAndCount(&res)
