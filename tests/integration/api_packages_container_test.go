@@ -56,7 +56,7 @@ func TestPackageContainer(t *testing.T) {
 		return values
 	}
 
-	images := []string{"test", "te/st", "oras-test"}
+	images := []string{"test", "te/st", "oras-artifact"}
 	tags := []string{"latest", "main"}
 	multiTag := "multi"
 
@@ -180,7 +180,7 @@ func TestPackageContainer(t *testing.T) {
 	t.Run("ORAS Artifact Upload", func(t *testing.T) {
 		defer tests.PrintCurrentTest(t)()
 
-		image := "oras-test"
+		image := "oras-artifact"
 		url := fmt.Sprintf("%sv2/%s/%s", setting.AppURL, user.Name, image)
 
 		// Empty config blob (common in ORAS artifacts)
@@ -232,15 +232,15 @@ func TestPackageContainer(t *testing.T) {
 		artifactManifestDigest := fmt.Sprintf("sha256:%x", sha256.Sum256([]byte(artifactManifest)))
 
 		// Upload artifact manifest
-		req = NewRequestWithBody(t, "PUT", fmt.Sprintf("%s/manifests/artifact-test", url), bytes.NewReader([]byte(artifactManifest))).
+		req = NewRequestWithBody(t, "PUT", fmt.Sprintf("%s/manifests/artifact-v1", url), bytes.NewReader([]byte(artifactManifest))).
 			AddTokenAuth(userToken).
 			SetHeader("Content-Type", "application/vnd.oci.image.manifest.v1+json")
 		resp = MakeRequest(t, req, http.StatusCreated)
-		assert.Equal(t, fmt.Sprintf("/v2/%s/%s/manifests/artifact-test", user.Name, image), resp.Header().Get("Location"))
+		assert.Equal(t, fmt.Sprintf("/v2/%s/%s/manifests/artifact-v1", user.Name, image), resp.Header().Get("Location"))
 		assert.Equal(t, artifactManifestDigest, resp.Header().Get("Docker-Content-Digest"))
 
 		// Verify manifest can be retrieved
-		req = NewRequest(t, "GET", fmt.Sprintf("%s/manifests/artifact-test", url)).
+		req = NewRequest(t, "GET", fmt.Sprintf("%s/manifests/artifact-v1", url)).
 			AddTokenAuth(userToken).
 			SetHeader("Accept", "application/vnd.oci.image.manifest.v1+json")
 		resp = MakeRequest(t, req, http.StatusOK)
@@ -253,7 +253,7 @@ func TestPackageContainer(t *testing.T) {
 
 		found := false
 		for _, pv := range pvs {
-			if pv.LowerVersion == "artifact-test" {
+			if pv.LowerVersion == "artifact-v1" {
 				found = true
 				break
 			}
@@ -670,7 +670,7 @@ func TestPackageContainer(t *testing.T) {
 					ExpectedLink string
 				}
 
-				if image == "oras-test" {
+				if image == "oras-artifact" {
 					cases = []struct {
 						URL          string
 						ExpectedTags []string
@@ -678,7 +678,7 @@ func TestPackageContainer(t *testing.T) {
 					}{
 						{
 							URL:          fmt.Sprintf("%s/tags/list", url),
-							ExpectedTags: []string{"artifact-test", "latest", "main", "multi"},
+							ExpectedTags: []string{"artifact-v1", "latest", "main", "multi"},
 							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=multi>; rel="next"`, user.Name, image),
 						},
 						{
@@ -688,7 +688,7 @@ func TestPackageContainer(t *testing.T) {
 						},
 						{
 							URL:          fmt.Sprintf("%s/tags/list?n=2", url),
-							ExpectedTags: []string{"artifact-test", "latest"},
+							ExpectedTags: []string{"artifact-v1", "latest"},
 							ExpectedLink: fmt.Sprintf(`</v2/%s/%s/tags/list?last=latest&n=2>; rel="next"`, user.Name, image),
 						},
 						{
@@ -760,8 +760,8 @@ func TestPackageContainer(t *testing.T) {
 
 				var apiPackages []*api.Package
 				DecodeJSON(t, resp, &apiPackages)
-				if image == "oras-test" {
-					assert.Len(t, apiPackages, 5) // "artifact-test", "latest", "main", "multi", "sha256:..."
+				if image == "oras-artifact" {
+					assert.Len(t, apiPackages, 5) // "artifact-v1", "latest", "main", "multi", "sha256:..."
 				} else {
 					assert.Len(t, apiPackages, 4) // "latest", "main", "multi", "sha256:..."
 				}
