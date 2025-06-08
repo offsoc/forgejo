@@ -147,6 +147,10 @@ func loadMailerFrom(rootCfg ConfigProvider) {
 	if sec.HasKey("PASSWORD") && !sec.HasKey("PASSWD") {
 		sec.Key("PASSWD").SetValue(sec.Key("PASSWORD").String())
 	}
+	if sec.HasKey("PASSWORD_URI") && !sec.HasKey("PASSWD_URI") {
+		sec.Key("PASSWD_URI").SetValue(sec.Key("PASSWORD_URI").String())
+	}
+	sec.Key("PASSWD").SetValue(loadSecret(sec, "PASSWD_URI", "PASSWD"))
 
 	// Set default values & validate
 	sec.Key("NAME").MustString(AppName)
