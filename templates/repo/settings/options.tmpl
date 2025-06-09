@@ -398,7 +398,8 @@
 				<div class="field">
 					<div class="ui checkbox">
 						<input name="enable_repo_code_indexer" type="checkbox" {{if .Repository.IsCodeIndexerEnabled}}checked{{end}}>
-						<label>{{ctx.Locale.Tr "repo.settings.admin_enable_repo_code_indexer"}}</label>
+						<label>{{ctx.Locale.Tr "repo.settings.admin_enable_repo_code_indexer"}} {{if not .CodeIndexerEnabled}}({{ctx.Locale.Tr "repo.settings.admin_code_indexer_is_globally_disabled"}}){{end}}
+                        </label>
 					</div>
 				</div>
 
