@@ -143,8 +143,23 @@ function UpdateAllRelativeTimes() {
 
 document.addEventListener('DOMContentLoaded', () => {
   UpdateAllRelativeTimes();
+
   // Also update relative-time DOM elements after htmx swap events.
-  document.body.addEventListener('htmx:afterSwap', () => {
-    for (const object of document.querySelectorAll('relative-time')) DoUpdateRelativeTime(object);
+  document.body.addEventListener('htmx:afterSwap', UpdateAllRelativeTimes);
+
+  // And also after replacing conversation holders.
+  const mutationObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'childList') {
+        for (const node of mutation.addedNodes) {
+          if (node.classList?.contains('conversation-holder')) {
+            for (const object of node.querySelectorAll('relative-time')) {
+              UpdateRelativeTime(object);
+            }
+          }
+        }
+      }
+    }
   });
+  mutationObserver.observe(document.body, {childList: true, subtree: true});
 });
