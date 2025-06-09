@@ -29,6 +29,7 @@ type RepoIndexerStatus struct { //revive:disable-line:exported
 	RepoID      int64           `xorm:"INDEX(s)"`
 	CommitSha   string          `xorm:"VARCHAR(64)"`
 	IndexerType RepoIndexerType `xorm:"INDEX(s) NOT NULL DEFAULT 0"`
+	Exists      bool            `xorm:"-"`
 }
 
 func init() {
@@ -82,7 +83,11 @@ func GetIndexerStatus(ctx context.Context, repo *Repository, indexerType RepoInd
 	} else if !has {
 		status.IndexerType = indexerType
 		status.CommitSha = ""
+		status.Exists = false
 	}
+
+	status.Exists = true
+
 	switch indexerType {
 	case RepoIndexerTypeCode:
 		repo.CodeIndexerStatus = status
@@ -99,17 +104,12 @@ func UpdateIndexerStatus(ctx context.Context, repo *Repository, indexerType Repo
 		return fmt.Errorf("UpdateIndexerStatus: Unable to getIndexerStatus for repo: %s Error: %w", repo.FullName(), err)
 	}
 
-	// XXX: We cannot tell from GetIndexerStatus whether a row exists for an
-	// empty commit hash or not
-	tmpstatus := &RepoIndexerStatus{RepoID: repo.ID}
-	exists, err := db.GetEngine(ctx).Where("`indexer_type` = ?", indexerType).Get(status)
-	tmpstatus.CommitSha = "" // XXX: tell go to not care that we are not using this var
-
-	if len(status.CommitSha) == 0 && !exists {
+	if len(status.CommitSha) == 0 && !status.Exists {
 		status.CommitSha = sha
 		if err := db.Insert(ctx, status); err != nil {
 			return fmt.Errorf("UpdateIndexerStatus: Unable to insert repoIndexerStatus for repo: %s Sha: %s Error: %w", repo.FullName(), sha, err)
 		}
+		status.Exists = true
 		return nil
 	}
 	status.CommitSha = sha
@@ -118,5 +118,6 @@ func UpdateIndexerStatus(ctx context.Context, repo *Repository, indexerType Repo
 	if err != nil {
 		return fmt.Errorf("UpdateIndexerStatus: Unable to update repoIndexerStatus for repo: %s Sha: %s Error: %w", repo.FullName(), sha, err)
 	}
+	status.Exists = true
 	return nil
 }
