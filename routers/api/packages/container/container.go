@@ -4,6 +4,7 @@
 package container
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -62,9 +63,6 @@ func setResponseHeaders(resp http.ResponseWriter, h *containerHeaders) {
 	if h.ContentType != "" {
 		resp.Header().Set("Content-Type", h.ContentType)
 	}
-	if h.ContentLength != 0 {
-		resp.Header().Set("Content-Length", strconv.FormatInt(h.ContentLength, 10))
-	}
 	if h.UploadUUID != "" {
 		resp.Header().Set("Docker-Upload-Uuid", h.UploadUUID)
 	}
@@ -72,17 +70,29 @@ func setResponseHeaders(resp http.ResponseWriter, h *containerHeaders) {
 		resp.Header().Set("Docker-Content-Digest", h.ContentDigest)
 		resp.Header().Set("ETag", fmt.Sprintf(`"%s"`, h.ContentDigest))
 	}
+	if h.ContentLength >= 0 {
+		resp.Header().Set("Content-Length", strconv.FormatInt(h.ContentLength, 10))
+	}
 	resp.Header().Set("Docker-Distribution-Api-Version", "registry/2.0")
 	resp.WriteHeader(h.Status)
 }
 
 func jsonResponse(ctx *context.Context, status int, obj any) {
-	setResponseHeaders(ctx.Resp, &containerHeaders{
-		Status:      status,
-		ContentType: "application/json",
-	})
-	if err := json.NewEncoder(ctx.Resp).Encode(obj); err != nil {
+	// Buffer the JSON content first to calculate correct Content-Length
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(obj); err != nil {
 		log.Error("JSON encode: %v", err)
+		return
+	}
+
+	setResponseHeaders(ctx.Resp, &containerHeaders{
+		Status:        status,
+		ContentType:   "application/json",
+		ContentLength: int64(buf.Len()),
+	})
+
+	if _, err := buf.WriteTo(ctx.Resp); err != nil {
+		log.Error("JSON write: %v", err)
 	}
 }
 
