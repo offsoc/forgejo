@@ -89,9 +89,11 @@ jobs:
           #
           # Create a new project with a fake forgejo and the release workflow only
           #
+          cp -r $PWD $dir
           cp -a .forgejo/testdata/build-release/* $dir
           mkdir -p $dir/.forgejo/workflows
           cp .forgejo/workflows/build-release.yml $dir/.forgejo/workflows
+          cp -r .forgejo/workflows-composite $dir/.forgejo/workflows-composite
           cp $dir/Dockerfile $dir/Dockerfile.rootless
 
           forgejo-test-helper.sh push $dir $url root forgejo

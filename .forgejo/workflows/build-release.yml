@@ -28,6 +28,33 @@ on:
       - 'v*/forgejo'
 
 jobs:
+  testing:
+    runs-on: lxc-bookworm
+    if: vars.ROLE == 'forgejo-integration' || github.repository_owner == 'root'
+    container:
+      image: 'data.forgejo.org/oci/node:22-bookworm'
+      options: --tmpfs /tmp:exec,noatime
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v4
+      - uses: ./.forgejo/workflows-composite/setup-env
+      - name: install dependencies
+        run: |
+          set -x
+          apt-get -qq install -y make
+      - name: install git 2.30.2
+        uses: ./.forgejo/workflows-composite/apt-install-from
+        with:
+          packages: git git-lfs
+          release: sid
+      - uses: ./.forgejo/workflows-composite/build-backend
+      - run: |
+          su forgejo -c 'make test-sqlite-migration test-sqlite'
+        timeout-minutes: 120
+        env:
+          TAGS: sqlite sqlite_unlock_notify
+          RACE_ENABLED: true
+          TEST_TAGS: sqlite sqlite_unlock_notify
+          USE_REPO_TEST_DIR: 1
   release:
     runs-on: lxc-bookworm
     # root is used for testing, allow it
