@@ -67,5 +67,6 @@
     "moderation.report_abuse_form.header": "向管理員回報濫用",
     "moderation.report_abuse_form.details": "這個表單是用來檢舉用戶建立垃圾帳號、儲存庫、問題、留言，或其他不當行為。",
     "moderation.report_abuse_form.invalid": "無效參數",
-    "moderation.report_abuse_form.already_reported": "您已檢舉此內容"
+    "moderation.report_abuse_form.already_reported": "您已檢舉此內容",
+    "meta.last_line": "Rubi-chan? Hai! Nani ga suki? Choko minto yori mo a･na･ta♡ Ayumu-chan? Hai! Nani ga suki? Sutoroberii fureibaa yori mo a･na･ta♡ Shiki-chan! Hai! Nani ga suki? Kukkii and kuriimu yori mo a･na･ta♡ Minna? Hai! Nani ga suki? Mochiron daisuki AiScReam."
 }

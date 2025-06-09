@@ -100,5 +100,6 @@
     "moderation.report_abuse_form.invalid": "Невалидные аргументы",
     "moderation.report_abuse_form.header": "Жалоба администрации",
     "editor.textarea.tab_hint": "Отступ уже добавлен. Нажмите <kbd>Tab</kbd> снова или <kbd>Escape</kbd>, чтобы покинуть редактор.",
-    "editor.textarea.shift_tab_hint": "В строке нет отступов. Нажмите <kbd>Shift</kbd> + <kbd>Tab</kbd> снова или <kbd>Escape</kbd>, чтобы покинуть редактор."
+    "editor.textarea.shift_tab_hint": "В строке нет отступов. Нажмите <kbd>Shift</kbd> + <kbd>Tab</kbd> снова или <kbd>Escape</kbd>, чтобы покинуть редактор.",
+    "admin.dashboard.cleanup_offline_runners": "Удалить недоступных исполнителей"
 }

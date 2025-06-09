@@ -100,5 +100,6 @@
     "stars.list.none": "Tento repozitář si nikdo nepřidal do oblíbených.",
     "followers.outgoing.list.self.none": "Nikoho nesledujete.",
     "editor.textarea.tab_hint": "Řádek je již odsazen. Pro opuštění editoru stiskněte znovu <kbd>Tab</kbd> nebo <kbd>Escape</kbd>.",
-    "editor.textarea.shift_tab_hint": "Na tomto řádku není žádné odsazení. Pro opuštění editoru stiskněte znovu <kbd>Shift</kbd> + <kbd>Tab</kbd> nebo <kbd>Escape</kbd>."
+    "editor.textarea.shift_tab_hint": "Na tomto řádku není žádné odsazení. Pro opuštění editoru stiskněte znovu <kbd>Shift</kbd> + <kbd>Tab</kbd> nebo <kbd>Escape</kbd>.",
+    "admin.dashboard.cleanup_offline_runners": "Vymazat offline runnery"
 }

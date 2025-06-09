@@ -100,5 +100,6 @@
     "stars.list.none": "Neviens šo glabātavu nav atzīmējis ar zvaigzni.",
     "followers.incoming.list.self.none": "Neviens neseko Tavam profilam.",
     "editor.textarea.tab_hint": "Rinda jau ir ar atkāpi. Spied <kbd>Tab</kbd> vēlreiz vai <kbd>Escape</kbd>, lai izietu no redaktora!",
-    "editor.textarea.shift_tab_hint": "Šajā rindā nav atkāpes. Spied <kbd>Shift</kbd> + <kbd>Tab</kbd> vēlreiz vai <kbd>Escape</kbd>, lai izietu no redaktora!"
+    "editor.textarea.shift_tab_hint": "Šajā rindā nav atkāpes. Spied <kbd>Shift</kbd> + <kbd>Tab</kbd> vēlreiz vai <kbd>Escape</kbd>, lai izietu no redaktora!",
+    "admin.dashboard.cleanup_offline_runners": "Notīrīt bezsaistes izpildītājus"
 }
