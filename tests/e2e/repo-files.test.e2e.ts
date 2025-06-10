@@ -5,7 +5,7 @@
 // templates/repo/editor/**
 // web_src/js/features/common-global.js
 // routers/web/web.go
-// services/repository/files/upload.go
+// services/repository/files/**
 // @watch end
 
 import {expect} from '@playwright/test';
@@ -37,6 +37,14 @@ async function doUpload({page}, testCase: TestCase) {
   await page.getByText('new branch').click();
 
   await page.getByRole('textbox', {name: 'Name the new branch for this'}).fill(testID);
+  // ToDo: Potential race condition: We do not currently wait for the upload to complete.
+  // See https://codeberg.org/forgejo/forgejo/pulls/6687#issuecomment-5068272 and
+  // https://codeberg.org/forgejo/forgejo/issues/5893#issuecomment-5068266 for details.
+  // Workaround is to wait (the uploads are just a few bytes and usually complete instantly)
+  //
+  // eslint-disable-next-line playwright/no-wait-for-timeout
+  await page.waitForTimeout(100);
+
   await page.getByRole('button', {name: 'Propose file change'}).click();
 }
 
