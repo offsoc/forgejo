@@ -83,10 +83,8 @@ func GetIndexerStatus(ctx context.Context, repo *Repository, indexerType RepoInd
 	} else if !has {
 		status.IndexerType = indexerType
 		status.CommitSha = ""
-		status.Exists = false
 	}
-
-	status.Exists = true
+	status.Exists = has
 
 	switch indexerType {
 	case RepoIndexerTypeCode:
