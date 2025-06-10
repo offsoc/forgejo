@@ -439,6 +439,16 @@ func TestChangeRepoFilesErrors(t *testing.T) {
 			assert.EqualError(t, err, expectedError)
 		})
 
+		t.Run("missing SHA", func(t *testing.T) {
+			opts := getUpdateRepoFilesOptions(repo)
+			opts.Files[0].SHA = ""
+			filesResponse, err := files_service.ChangeRepoFiles(git.DefaultContext, repo, doer, opts)
+			assert.Nil(t, filesResponse)
+			require.Error(t, err)
+			expectedError := "a SHA or commit ID must be provided when updating a file"
+			assert.EqualError(t, err, expectedError)
+		})
+
 		t.Run("bad last commit ID", func(t *testing.T) {
 			opts := getUpdateRepoFilesOptions(repo)
 			opts.LastCommitID = "bad"
