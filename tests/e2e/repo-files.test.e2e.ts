@@ -18,6 +18,28 @@ interface TestCase {
   files: string[];
 }
 
+async function doUpload({page}, testCase: TestCase) {
+  await page.goto(`/user2/file-uploads/_upload/main/`);
+  const testID = dynamic_id();
+  const dropzone = page.getByRole('button', {name: 'Drop files or click here to upload.'});
+
+  // create the virtual files
+  const dataTransfer = await page.evaluateHandle((testCase: TestCase) => {
+    const dt = new DataTransfer();
+    for (const filename of testCase.files) {
+      dt.items.add(new File([`File content of ${filename}`], filename, {type: 'text/plain'}));
+    }
+    return dt;
+  }, testCase);
+  // and drop them to the upload area
+  await dropzone.dispatchEvent('drop', {dataTransfer});
+
+  await page.getByText('new branch').click();
+
+  await page.getByRole('textbox', {name: 'Name the new branch for this'}).fill(testID);
+  await page.getByRole('button', {name: 'Propose file change'}).click();
+}
+
 test.describe('Drag and Drop upload', () => {
   const goodTestCases: TestCase[] = [
     {
@@ -42,25 +64,7 @@ test.describe('Drag and Drop upload', () => {
   // actual good tests based on definition above
   for (const testCase of goodTestCases) {
     test(`good: ${testCase.description}`, async ({page}) => {
-      await page.goto(`/user2/file-uploads/_upload/main/`);
-      const testID = dynamic_id();
-      const dropzone = page.getByRole('button', {name: 'Drop files or click here to upload.'});
-
-      // create the virtual files
-      const dataTransfer = await page.evaluateHandle((testCase: TestCase) => {
-        const dt = new DataTransfer();
-        for (const filename of testCase.files) {
-          dt.items.add(new File([`File content of ${filename}`], filename, {type: 'text/plain'}));
-        }
-        return dt;
-      }, testCase);
-      // and drop them to the upload area
-      await dropzone.dispatchEvent('drop', {dataTransfer});
-
-      await page.getByText('new branch').click();
-
-      await page.getByRole('textbox', {name: 'Name the new branch for this'}).fill(testID);
-      await page.getByRole('button', {name: 'Propose file change'}).click();
+      await doUpload({page}, testCase);
 
       // check that nested file structure is preserved
       for (const filename of testCase.files) {
@@ -87,26 +91,7 @@ test.describe('Drag and Drop upload', () => {
   // actual bad tests based on definition above
   for (const testCase of badTestCases) {
     test(`bad: ${testCase.description}`, async ({page}) => {
-      await page.goto(`/user2/file-uploads/_upload/main/`);
-      const testID = dynamic_id();
-      const dropzone = page.getByRole('button', {name: 'Drop files or click here to upload.'});
-
-      // create the virtual files
-      const dataTransfer = await page.evaluateHandle((testCase: TestCase) => {
-        const dt = new DataTransfer();
-        for (const filename of testCase.files) {
-          dt.items.add(new File([`File content of ${filename}`], filename, {type: 'text/plain'}));
-        }
-        return dt;
-      }, testCase);
-      // and drop them to the upload area
-      await dropzone.dispatchEvent('drop', {dataTransfer});
-
-      await page.getByText('new branch').click();
-
-      await page.getByRole('textbox', {name: 'Name the new branch for this'}).fill(testID);
-      await page.getByRole('button', {name: 'Propose file change'}).click();
-
+      await doUpload({page}, testCase);
       await expect(page.getByText('Failed to upload files to')).toBeVisible();
     });
   }
