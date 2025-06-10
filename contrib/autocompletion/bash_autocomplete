@@ -1,4 +1,3 @@
-#! /bin/bash
 # Heavily inspired by https://github.com/urfave/cli
 
 _cli_bash_autocomplete() {
