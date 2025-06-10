@@ -9,46 +9,40 @@
 // @watch end
 
 import {expect} from '@playwright/test';
-import {test, dynamic_id, save_visual} from './utils_e2e.ts';
+import {test, dynamic_id} from './utils_e2e.ts';
 
 test.use({user: 'user2'});
 
-interface TestCaseFilenames {
-  raw: string;
-  sanitized: string;
-}
-
 interface TestCase {
-    description: string;
-    files: string[];
+  description: string;
+  files: string[];
 }
 
 test.describe('Drag and Drop upload', () => {
-  const goodTestCases: TestCaseFile[] = [
+  const goodTestCases: TestCase[] = [
     {
       description: 'normal and special characters',
       files: [
         'dir1/file1.txt',
         'double/nested/file.txt',
         'special/äüöÄÜÖß.txt',
-        'special/Ʉ₦ł₵ØĐɆ.txt'
-      ]
+        'special/Ʉ₦ł₵ØĐɆ.txt',
+      ],
     },
     {
       description: 'strange paths and spaces',
       files: [
         '..dots.txt',
         '.dots.preserved.txt',
-        'special/S P  A   C   E    !.txt'
-      ]
-    }
+        'special/S P  A   C   E    !.txt',
+      ],
+    },
   ];
 
   // actual good tests based on definition above
   for (const testCase of goodTestCases) {
     test(`good: ${testCase.description}`, async ({page}) => {
-      console.log(testCase);
-      const response = await page.goto(`/user2/file-uploads/_upload/main/`);
+      await page.goto(`/user2/file-uploads/_upload/main/`);
       const testID = dynamic_id();
       const dropzone = page.getByRole('button', {name: 'Drop files or click here to upload.'});
 
@@ -61,7 +55,7 @@ test.describe('Drag and Drop upload', () => {
         return dt;
       }, testCase);
       // and drop them to the upload area
-      await dropzone.dispatchEvent('drop', {dataTransfer: dataTransfer});
+      await dropzone.dispatchEvent('drop', {dataTransfer});
 
       await page.getByText('new branch').click();
 
@@ -75,25 +69,25 @@ test.describe('Drag and Drop upload', () => {
     });
   }
 
-  const badTestCases: TestCaseFile[] = [
+  const badTestCases: TestCase[] = [
     {
       description: 'broken path slash in front',
       files: [
-        '/special/badfirstslash.txt'
-      ]
+        '/special/badfirstslash.txt',
+      ],
     },
     {
       description: 'broken path with traversal',
       files: [
-        '../baddots.txt'
-      ]
-    }
+        '../baddots.txt',
+      ],
+    },
   ];
 
   // actual bad tests based on definition above
   for (const testCase of badTestCases) {
     test(`bad: ${testCase.description}`, async ({page}) => {
-      const response = await page.goto(`/user2/file-uploads/_upload/main/`);
+      await page.goto(`/user2/file-uploads/_upload/main/`);
       const testID = dynamic_id();
       const dropzone = page.getByRole('button', {name: 'Drop files or click here to upload.'});
 
@@ -106,7 +100,7 @@ test.describe('Drag and Drop upload', () => {
         return dt;
       }, testCase);
       // and drop them to the upload area
-      await dropzone.dispatchEvent('drop', {dataTransfer: dataTransfer});
+      await dropzone.dispatchEvent('drop', {dataTransfer});
 
       await page.getByText('new branch').click();
 
