@@ -503,6 +503,7 @@ func PrepareMergedViewPullInfo(ctx *context.Context, issue *issues_model.Issue) 
 			ctx.Data["IsPullRequestBroken"] = true
 			ctx.Data["BaseTarget"] = pull.BaseBranch
 			ctx.Data["NumCommits"] = 0
+			ctx.Data["CommitIDs"] = map[string]bool{}
 			ctx.Data["NumFiles"] = 0
 			return nil
 		}
@@ -512,6 +513,12 @@ func PrepareMergedViewPullInfo(ctx *context.Context, issue *issues_model.Issue) 
 	}
 	ctx.Data["NumCommits"] = len(compareInfo.Commits)
 	ctx.Data["NumFiles"] = compareInfo.NumFiles
+
+	commitIDs := map[string]bool{}
+	for _, commit := range compareInfo.Commits {
+		commitIDs[commit.ID.String()] = true
+	}
+	ctx.Data["CommitIDs"] = commitIDs
 
 	if len(compareInfo.Commits) != 0 {
 		sha := compareInfo.Commits[0].ID.String()
@@ -602,6 +609,7 @@ func PrepareViewPullInfo(ctx *context.Context, issue *issues_model.Issue) *git.C
 				ctx.Data["IsPullRequestBroken"] = true
 				ctx.Data["BaseTarget"] = pull.BaseBranch
 				ctx.Data["NumCommits"] = 0
+				ctx.Data["CommitIDs"] = map[string]bool{}
 				ctx.Data["NumFiles"] = 0
 				return nil
 			}
@@ -612,6 +620,13 @@ func PrepareViewPullInfo(ctx *context.Context, issue *issues_model.Issue) *git.C
 
 		ctx.Data["NumCommits"] = len(compareInfo.Commits)
 		ctx.Data["NumFiles"] = compareInfo.NumFiles
+
+		commitIDs := map[string]bool{}
+		for _, commit := range compareInfo.Commits {
+			commitIDs[commit.ID.String()] = true
+		}
+		ctx.Data["CommitIDs"] = commitIDs
+
 		return compareInfo
 	}
 
@@ -670,6 +685,7 @@ func PrepareViewPullInfo(ctx *context.Context, issue *issues_model.Issue) *git.C
 			}
 			ctx.Data["BaseTarget"] = pull.BaseBranch
 			ctx.Data["NumCommits"] = 0
+			ctx.Data["CommitIDs"] = map[string]bool{}
 			ctx.Data["NumFiles"] = 0
 			return nil
 		}
@@ -750,6 +766,7 @@ func PrepareViewPullInfo(ctx *context.Context, issue *issues_model.Issue) *git.C
 			ctx.Data["IsPullRequestBroken"] = true
 			ctx.Data["BaseTarget"] = pull.BaseBranch
 			ctx.Data["NumCommits"] = 0
+			ctx.Data["CommitIDs"] = map[string]bool{}
 			ctx.Data["NumFiles"] = 0
 			return nil
 		}
@@ -774,6 +791,13 @@ func PrepareViewPullInfo(ctx *context.Context, issue *issues_model.Issue) *git.C
 
 	ctx.Data["NumCommits"] = len(compareInfo.Commits)
 	ctx.Data["NumFiles"] = compareInfo.NumFiles
+
+	commitIDs := map[string]bool{}
+	for _, commit := range compareInfo.Commits {
+		commitIDs[commit.ID.String()] = true
+	}
+	ctx.Data["CommitIDs"] = commitIDs
+
 	return compareInfo
 }
 

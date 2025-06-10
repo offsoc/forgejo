@@ -11,7 +11,14 @@
 			{{ctx.AvatarUtils.AvatarByEmail .Author.Email .Author.Name 20}}
 		{{end}}
 
-		{{$commitLink:= printf "%s/pulls/%d/commits/%s" $.comment.Issue.PullRequest.BaseRepo.Link $.comment.Issue.Index (PathEscape .ID.String)}}
+		{{$commitLink := printf "%s/commit/%s" $.comment.Issue.PullRequest.BaseRepo.Link (PathEscape .ID.String)}}
+
+		{{/* Only link those commits in the file diff view that can actually be reviewed there.
+					A force push or other rewriting of history will cause a commit to not be
+					part of the pull request anymore. */}}
+		{{if index $.root.CommitIDs .ID.String}}
+			{{$commitLink = printf "%s/pulls/%d/commits/%s" $.comment.Issue.PullRequest.BaseRepo.Link $.comment.Issue.Index (PathEscape .ID.String)}}
+		{{end}}
 
 		<span class="tw-flex-1 tw-font-mono gt-ellipsis" title="{{.Summary}}">
 			{{- RenderCommitMessageLinkSubject $.root.Context .Message $commitLink ($.comment.Issue.PullRequest.BaseRepo.ComposeMetas ctx) -}}
