@@ -635,10 +635,7 @@ func TestSignInOAuthCallbackPKCE(t *testing.T) {
 func TestWellKnownDocumentIssuerDoesNotEndWithASlash(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
 	req := NewRequest(t, "GET", "/.well-known/openid-configuration")
-	session := emptyTestSession(t)
-	_, err := url.Parse(setting.AppURL)
-	require.NoError(t, err)
-	resp := session.MakeRequest(t, req, http.StatusOK)
+	resp := MakeRequest(t, req, http.StatusOK)
 	type response struct {
 		Issuer string `json:"issuer"`
 	}
