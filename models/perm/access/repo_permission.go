@@ -209,11 +209,19 @@ func GetUserRepoPermission(ctx context.Context, repo *repo_model.Repository, use
 		return perm, err
 	}
 
+	perm.UnitsMode = make(map[unit.Type]perm_model.AccessMode)
+
+	// Collaborators on organization
+	if isCollaborator {
+		for _, u := range repo.Units {
+			perm.UnitsMode[u.Type] = perm.AccessMode
+		}
+	}
+
 	if !repo.Owner.IsOrganization() {
 		// for a public repo, different repo units may have different default
 		// permissions for non-restricted users.
 		if !repo.IsPrivate && !user.IsRestricted && len(repo.Units) > 0 {
-			perm.UnitsMode = make(map[unit.Type]perm_model.AccessMode)
 			for _, u := range repo.Units {
 				if _, ok := perm.UnitsMode[u.Type]; !ok {
 					perm.UnitsMode[u.Type] = u.DefaultPermissions.ToAccessMode(perm.AccessMode)
@@ -222,15 +230,6 @@ func GetUserRepoPermission(ctx context.Context, repo *repo_model.Repository, use
 		}
 
 		return perm, nil
-	}
-
-	perm.UnitsMode = make(map[unit.Type]perm_model.AccessMode)
-
-	// Collaborators on organization
-	if isCollaborator {
-		for _, u := range repo.Units {
-			perm.UnitsMode[u.Type] = perm.AccessMode
-		}
 	}
 
 	// get units mode from teams
