@@ -5,10 +5,10 @@ package integration
 import (
 	"testing"
 
+	"forgejo.org/services/repository/files"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"forgejo.org/services/repository/files"
 )
 
 func TestSanitizePath(t *testing.T) {
