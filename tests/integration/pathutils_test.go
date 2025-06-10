@@ -5,8 +5,10 @@ package integration
 import (
 	"testing"
 
-	"forgejo.org/services/repository/files"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"forgejo.org/services/repository/files"
 )
 
 func TestSanitizePath(t *testing.T) {
@@ -164,11 +166,11 @@ func TestSanitizePath(t *testing.T) {
 			result, err := files.SanitizePath(tt.input)
 
 			if tt.expectError {
-				assert.Error(t, err, "expected error for input %q", tt.input)
+				require.Error(t, err, "expected error for input %q", tt.input)
 				return
 			}
 
-			assert.NoError(t, err, "unexpected error for input %q", tt.input)
+			require.NoError(t, err, "unexpected error for input %q", tt.input)
 			assert.Equal(t, tt.expected, result, "SanitizePath(%q) should return expected result", tt.input)
 		})
 	}
@@ -201,7 +203,7 @@ func TestSanitizePathErrorMessages(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := files.SanitizePath(tt.input)
-			assert.Error(t, err, "expected error for input %q", tt.input)
+			require.Error(t, err, "expected error for input %q", tt.input)
 			assert.Equal(t, tt.expectedError, err.Error(), "error message for %q should match expected", tt.input)
 		})
 	}
