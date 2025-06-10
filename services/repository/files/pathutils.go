@@ -21,8 +21,20 @@ func SanitizePath(inputPath string) (string, error) {
 		return "", fmt.Errorf("path starts with / : %s", inputPath)
 	}
 
-	// Clean the path
-	s = path.Clean(s)
+	// Make path temporarily absolute to ensure proper cleaning of all components
+	temp := "/" + s
+
+	// Clean the path (this will properly handle ../.. components when absolute)
+	temp = path.Clean(temp)
+
+	// Remove the leading / to make it relative again
+	s = strings.TrimPrefix(temp, "/")
+
+	// If the cleaned path is empty or becomes root, it's invalid
+	if s == "" {
+		return "", fmt.Errorf("path resolves to root or becomes empty after cleaning")
+	}
+
 	// Split the path components
 	pathComponents := strings.Split(s, "/")
 	// Sanitize each path component
