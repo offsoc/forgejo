@@ -28,15 +28,6 @@ func SanitizePath(inputPath string) (string, error) {
 	// Sanitize each path component
 	var sanitizedComponents []string
 	for _, component := range pathComponents {
-		// There is no reason why there should be a path segment with ..
-		if component == ".." {
-			return "", fmt.Errorf("path contains directory traversal: %s", s)
-		}
-		// There is no reason why there should be a path segment with .
-		if component == "." {
-			return "", fmt.Errorf("path contains directory traversal: %s", s)
-		}
-
 		// Trim whitespace and apply regex sanitization
 		sanitizedComponent := strings.TrimSpace(fileNameComponentSanitizeRegexp.ReplaceAllString(component, "_"))
 
